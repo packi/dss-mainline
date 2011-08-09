@@ -517,6 +517,37 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
   BOOST_CHECK_EQUAL(result.length(), 0);
 } // testSetBuilderTag
 
+BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
+  Apartment apt(NULL);
+
+  apt.allocateDSMeter(dss_dsid_t(0,1));
+  apt.allocateDSMeter(dss_dsid_t(0,2));
+  apt.allocateDSMeter(dss_dsid_t(0,3));
+  apt.allocateDSMeter(dss_dsid_t(0,4));
+
+  MeterSetBuilder builder(apt);
+  std::vector<boost::shared_ptr<DSMeter> > meters;
+  meters = builder.buildSet(".meters(all)");
+  BOOST_CHECK_EQUAL(4, meters.size());
+
+  meters = builder.buildSet(".meters(1)");
+  BOOST_CHECK_EQUAL(1, meters.size());
+
+  meters = builder.buildSet(".meters(1,2)");
+  BOOST_CHECK_EQUAL(2, meters.size());
+
+  meters = builder.buildSet(".meters(1,2,3)");
+  BOOST_CHECK_EQUAL(3, meters.size());
+
+  meters = builder.buildSet(".meters(1,2,3,4)");
+  BOOST_CHECK_EQUAL(4, meters.size());
+
+  BOOST_CHECK_THROW(builder.buildSet(""), std::runtime_error);
+  BOOST_CHECK_THROW(builder.buildSet(".meters(1,)"), std::runtime_error);
+  BOOST_CHECK_THROW(builder.buildSet(".meters(,1)"), std::runtime_error);
+  BOOST_CHECK_THROW(builder.buildSet(".meters(7)"), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_CASE(testRemoval) {
   Apartment apt(NULL);
 

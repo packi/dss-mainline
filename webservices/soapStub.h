@@ -1534,8 +1534,29 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse
+#define SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse (243)
+/* dss:DSMeterGetEnergyMeterValueResponse */
+struct dss__DSMeterGetEnergyMeterValueResponse
+{
+public:
+	unsigned long result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:unsignedInt */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DSMeterGetEnergyMeterValue
+#define SOAP_TYPE_dss__DSMeterGetEnergyMeterValue (244)
+/* dss:DSMeterGetEnergyMeterValue */
+struct dss__DSMeterGetEnergyMeterValue
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+	char *_dsMeterID;	/* optional element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse
-#define SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse (243)
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse (246)
 /* dss:ApartmentGetDSMeterIDsResponse */
 struct dss__ApartmentGetDSMeterIDsResponse
 {
@@ -1545,7 +1566,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDs
-#define SOAP_TYPE_dss__ApartmentGetDSMeterIDs (244)
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDs (247)
 /* dss:ApartmentGetDSMeterIDs */
 struct dss__ApartmentGetDSMeterIDs
 {
@@ -1555,7 +1576,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DSMeterGetNameResponse
-#define SOAP_TYPE_dss__DSMeterGetNameResponse (246)
+#define SOAP_TYPE_dss__DSMeterGetNameResponse (249)
 /* dss:DSMeterGetNameResponse */
 struct dss__DSMeterGetNameResponse
 {
@@ -1565,7 +1586,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DSMeterGetName
-#define SOAP_TYPE_dss__DSMeterGetName (247)
+#define SOAP_TYPE_dss__DSMeterGetName (250)
 /* dss:DSMeterGetName */
 struct dss__DSMeterGetName
 {
@@ -1576,7 +1597,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DSMeterSetNameResponse
-#define SOAP_TYPE_dss__DSMeterSetNameResponse (249)
+#define SOAP_TYPE_dss__DSMeterSetNameResponse (252)
 /* dss:DSMeterSetNameResponse */
 struct dss__DSMeterSetNameResponse
 {
@@ -1586,7 +1607,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DSMeterSetName
-#define SOAP_TYPE_dss__DSMeterSetName (250)
+#define SOAP_TYPE_dss__DSMeterSetName (253)
 /* dss:DSMeterSetName */
 struct dss__DSMeterSetName
 {
@@ -1598,7 +1619,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateZoneResponse
-#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (252)
+#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (255)
 /* dss:ApartmentAllocateZoneResponse */
 struct dss__ApartmentAllocateZoneResponse
 {
@@ -1608,7 +1629,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateZone
-#define SOAP_TYPE_dss__ApartmentAllocateZone (253)
+#define SOAP_TYPE_dss__ApartmentAllocateZone (256)
 /* dss:ApartmentAllocateZone */
 struct dss__ApartmentAllocateZone
 {
@@ -1618,7 +1639,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDeleteZoneResponse
-#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (255)
+#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (258)
 /* dss:ApartmentDeleteZoneResponse */
 struct dss__ApartmentDeleteZoneResponse
 {
@@ -1628,7 +1649,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDeleteZone
-#define SOAP_TYPE_dss__ApartmentDeleteZone (256)
+#define SOAP_TYPE_dss__ApartmentDeleteZone (259)
 /* dss:ApartmentDeleteZone */
 struct dss__ApartmentDeleteZone
 {
@@ -1639,7 +1660,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentRemoveMeterResponse
-#define SOAP_TYPE_dss__ApartmentRemoveMeterResponse (258)
+#define SOAP_TYPE_dss__ApartmentRemoveMeterResponse (261)
 /* dss:ApartmentRemoveMeterResponse */
 struct dss__ApartmentRemoveMeterResponse
 {
@@ -1649,7 +1670,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentRemoveMeter
-#define SOAP_TYPE_dss__ApartmentRemoveMeter (259)
+#define SOAP_TYPE_dss__ApartmentRemoveMeter (262)
 /* dss:ApartmentRemoveMeter */
 struct dss__ApartmentRemoveMeter
 {
@@ -1660,7 +1681,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentRemoveInactiveMetersResponse
-#define SOAP_TYPE_dss__ApartmentRemoveInactiveMetersResponse (261)
+#define SOAP_TYPE_dss__ApartmentRemoveInactiveMetersResponse (264)
 /* dss:ApartmentRemoveInactiveMetersResponse */
 struct dss__ApartmentRemoveInactiveMetersResponse
 {
@@ -1670,7 +1691,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentRemoveInactiveMeters
-#define SOAP_TYPE_dss__ApartmentRemoveInactiveMeters (262)
+#define SOAP_TYPE_dss__ApartmentRemoveInactiveMeters (265)
 /* dss:ApartmentRemoveInactiveMeters */
 struct dss__ApartmentRemoveInactiveMeters
 {
@@ -1680,7 +1701,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetPowerConsumptionResponse
-#define SOAP_TYPE_dss__ApartmentGetPowerConsumptionResponse (264)
+#define SOAP_TYPE_dss__ApartmentGetPowerConsumptionResponse (267)
 /* dss:ApartmentGetPowerConsumptionResponse */
 struct dss__ApartmentGetPowerConsumptionResponse
 {
@@ -1690,7 +1711,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetPowerConsumption
-#define SOAP_TYPE_dss__ApartmentGetPowerConsumption (265)
+#define SOAP_TYPE_dss__ApartmentGetPowerConsumption (268)
 /* dss:ApartmentGetPowerConsumption */
 struct dss__ApartmentGetPowerConsumption
 {
@@ -1699,8 +1720,28 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse
+#define SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse (270)
+/* dss:ApartmentGetEnergyMeterValueResponse */
+struct dss__ApartmentGetEnergyMeterValueResponse
+{
+public:
+	unsigned long result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:unsignedInt */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ApartmentGetEnergyMeterValue
+#define SOAP_TYPE_dss__ApartmentGetEnergyMeterValue (271)
+/* dss:ApartmentGetEnergyMeterValue */
+struct dss__ApartmentGetEnergyMeterValue
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_dss__ZoneSetNameResponse
-#define SOAP_TYPE_dss__ZoneSetNameResponse (267)
+#define SOAP_TYPE_dss__ZoneSetNameResponse (273)
 /* dss:ZoneSetNameResponse */
 struct dss__ZoneSetNameResponse
 {
@@ -1710,7 +1751,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneSetName
-#define SOAP_TYPE_dss__ZoneSetName (268)
+#define SOAP_TYPE_dss__ZoneSetName (274)
 /* dss:ZoneSetName */
 struct dss__ZoneSetName
 {
@@ -1722,7 +1763,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneGetNameResponse
-#define SOAP_TYPE_dss__ZoneGetNameResponse (270)
+#define SOAP_TYPE_dss__ZoneGetNameResponse (276)
 /* dss:ZoneGetNameResponse */
 struct dss__ZoneGetNameResponse
 {
@@ -1732,7 +1773,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneGetName
-#define SOAP_TYPE_dss__ZoneGetName (271)
+#define SOAP_TYPE_dss__ZoneGetName (277)
 /* dss:ZoneGetName */
 struct dss__ZoneGetName
 {
@@ -1743,7 +1784,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupSetNameResponse
-#define SOAP_TYPE_dss__GroupSetNameResponse (273)
+#define SOAP_TYPE_dss__GroupSetNameResponse (279)
 /* dss:GroupSetNameResponse */
 struct dss__GroupSetNameResponse
 {
@@ -1753,7 +1794,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupSetName
-#define SOAP_TYPE_dss__GroupSetName (274)
+#define SOAP_TYPE_dss__GroupSetName (280)
 /* dss:GroupSetName */
 struct dss__GroupSetName
 {
@@ -1766,7 +1807,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupGetNameResponse
-#define SOAP_TYPE_dss__GroupGetNameResponse (276)
+#define SOAP_TYPE_dss__GroupGetNameResponse (282)
 /* dss:GroupGetNameResponse */
 struct dss__GroupGetNameResponse
 {
@@ -1776,7 +1817,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupGetName
-#define SOAP_TYPE_dss__GroupGetName (277)
+#define SOAP_TYPE_dss__GroupGetName (283)
 /* dss:GroupGetName */
 struct dss__GroupGetName
 {
@@ -1788,7 +1829,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetFunctionIDResponse
-#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (279)
+#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (285)
 /* dss:DeviceGetFunctionIDResponse */
 struct dss__DeviceGetFunctionIDResponse
 {
@@ -1798,7 +1839,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetFunctionID
-#define SOAP_TYPE_dss__DeviceGetFunctionID (280)
+#define SOAP_TYPE_dss__DeviceGetFunctionID (286)
 /* dss:DeviceGetFunctionID */
 struct dss__DeviceGetFunctionID
 {
@@ -1809,7 +1850,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event
-#define SOAP_TYPE_dss__Event (281)
+#define SOAP_TYPE_dss__Event (287)
 /* dss:Event */
 class SOAP_CMAC dss__Event
 {
@@ -1817,7 +1858,7 @@ public:
 	std::string name;	/* required element of type xsd:string */
 	std::vector<std::string >parameter;	/* optional element of type xsd:string */
 public:
-	virtual int soap_type() const { return 281; } /* = unique id SOAP_TYPE_dss__Event */
+	virtual int soap_type() const { return 287; } /* = unique id SOAP_TYPE_dss__Event */
 	virtual void soap_default(struct soap*);
 	virtual void soap_serialize(struct soap*) const;
 	virtual int soap_put(struct soap*, const char*, const char*) const;
@@ -1830,7 +1871,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventRaiseResponse
-#define SOAP_TYPE_dss__EventRaiseResponse (283)
+#define SOAP_TYPE_dss__EventRaiseResponse (289)
 /* dss:EventRaiseResponse */
 struct dss__EventRaiseResponse
 {
@@ -1840,7 +1881,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventRaise
-#define SOAP_TYPE_dss__EventRaise (284)
+#define SOAP_TYPE_dss__EventRaise (290)
 /* dss:EventRaise */
 struct dss__EventRaise
 {
@@ -1854,7 +1895,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventWaitForResponse
-#define SOAP_TYPE_dss__EventWaitForResponse (288)
+#define SOAP_TYPE_dss__EventWaitForResponse (294)
 /* dss:EventWaitForResponse */
 struct dss__EventWaitForResponse
 {
@@ -1864,7 +1905,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventWaitFor
-#define SOAP_TYPE_dss__EventWaitFor (289)
+#define SOAP_TYPE_dss__EventWaitFor (295)
 /* dss:EventWaitFor */
 struct dss__EventWaitFor
 {
@@ -1875,7 +1916,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventSubscribeToResponse
-#define SOAP_TYPE_dss__EventSubscribeToResponse (291)
+#define SOAP_TYPE_dss__EventSubscribeToResponse (297)
 /* dss:EventSubscribeToResponse */
 struct dss__EventSubscribeToResponse
 {
@@ -1885,7 +1926,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventSubscribeTo
-#define SOAP_TYPE_dss__EventSubscribeTo (292)
+#define SOAP_TYPE_dss__EventSubscribeTo (298)
 /* dss:EventSubscribeTo */
 struct dss__EventSubscribeTo
 {
@@ -1896,7 +1937,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetTypeResponse
-#define SOAP_TYPE_dss__PropertyGetTypeResponse (294)
+#define SOAP_TYPE_dss__PropertyGetTypeResponse (300)
 /* dss:PropertyGetTypeResponse */
 struct dss__PropertyGetTypeResponse
 {
@@ -1906,7 +1947,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetType
-#define SOAP_TYPE_dss__PropertyGetType (295)
+#define SOAP_TYPE_dss__PropertyGetType (301)
 /* dss:PropertyGetType */
 struct dss__PropertyGetType
 {
@@ -1917,7 +1958,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetIntResponse
-#define SOAP_TYPE_dss__PropertySetIntResponse (297)
+#define SOAP_TYPE_dss__PropertySetIntResponse (303)
 /* dss:PropertySetIntResponse */
 struct dss__PropertySetIntResponse
 {
@@ -1927,7 +1968,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetInt
-#define SOAP_TYPE_dss__PropertySetInt (298)
+#define SOAP_TYPE_dss__PropertySetInt (304)
 /* dss:PropertySetInt */
 struct dss__PropertySetInt
 {
@@ -1940,7 +1981,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetStringResponse
-#define SOAP_TYPE_dss__PropertySetStringResponse (300)
+#define SOAP_TYPE_dss__PropertySetStringResponse (306)
 /* dss:PropertySetStringResponse */
 struct dss__PropertySetStringResponse
 {
@@ -1950,7 +1991,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetString
-#define SOAP_TYPE_dss__PropertySetString (301)
+#define SOAP_TYPE_dss__PropertySetString (307)
 /* dss:PropertySetString */
 struct dss__PropertySetString
 {
@@ -1963,7 +2004,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetBoolResponse
-#define SOAP_TYPE_dss__PropertySetBoolResponse (303)
+#define SOAP_TYPE_dss__PropertySetBoolResponse (309)
 /* dss:PropertySetBoolResponse */
 struct dss__PropertySetBoolResponse
 {
@@ -1973,7 +2014,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetBool
-#define SOAP_TYPE_dss__PropertySetBool (304)
+#define SOAP_TYPE_dss__PropertySetBool (310)
 /* dss:PropertySetBool */
 struct dss__PropertySetBool
 {
@@ -1986,7 +2027,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetIntResponse
-#define SOAP_TYPE_dss__PropertyGetIntResponse (306)
+#define SOAP_TYPE_dss__PropertyGetIntResponse (312)
 /* dss:PropertyGetIntResponse */
 struct dss__PropertyGetIntResponse
 {
@@ -1996,7 +2037,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetInt
-#define SOAP_TYPE_dss__PropertyGetInt (307)
+#define SOAP_TYPE_dss__PropertyGetInt (313)
 /* dss:PropertyGetInt */
 struct dss__PropertyGetInt
 {
@@ -2007,7 +2048,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetStringResponse
-#define SOAP_TYPE_dss__PropertyGetStringResponse (309)
+#define SOAP_TYPE_dss__PropertyGetStringResponse (315)
 /* dss:PropertyGetStringResponse */
 struct dss__PropertyGetStringResponse
 {
@@ -2017,7 +2058,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetString
-#define SOAP_TYPE_dss__PropertyGetString (310)
+#define SOAP_TYPE_dss__PropertyGetString (316)
 /* dss:PropertyGetString */
 struct dss__PropertyGetString
 {
@@ -2028,7 +2069,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetBoolResponse
-#define SOAP_TYPE_dss__PropertyGetBoolResponse (312)
+#define SOAP_TYPE_dss__PropertyGetBoolResponse (318)
 /* dss:PropertyGetBoolResponse */
 struct dss__PropertyGetBoolResponse
 {
@@ -2038,7 +2079,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetBool
-#define SOAP_TYPE_dss__PropertyGetBool (313)
+#define SOAP_TYPE_dss__PropertyGetBool (319)
 /* dss:PropertyGetBool */
 struct dss__PropertyGetBool
 {
@@ -2049,7 +2090,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetChildrenResponse
-#define SOAP_TYPE_dss__PropertyGetChildrenResponse (315)
+#define SOAP_TYPE_dss__PropertyGetChildrenResponse (321)
 /* dss:PropertyGetChildrenResponse */
 struct dss__PropertyGetChildrenResponse
 {
@@ -2059,7 +2100,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetChildren
-#define SOAP_TYPE_dss__PropertyGetChildren (316)
+#define SOAP_TYPE_dss__PropertyGetChildren (322)
 /* dss:PropertyGetChildren */
 struct dss__PropertyGetChildren
 {
@@ -2070,7 +2111,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyRemoveResponse
-#define SOAP_TYPE_dss__PropertyRemoveResponse (318)
+#define SOAP_TYPE_dss__PropertyRemoveResponse (324)
 /* dss:PropertyRemoveResponse */
 struct dss__PropertyRemoveResponse
 {
@@ -2080,7 +2121,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyRemove
-#define SOAP_TYPE_dss__PropertyRemove (319)
+#define SOAP_TYPE_dss__PropertyRemove (325)
 /* dss:PropertyRemove */
 struct dss__PropertyRemove
 {
@@ -2090,8 +2131,63 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_dss__Property
+#define SOAP_TYPE_dss__Property (326)
+/* dss:Property */
+class SOAP_CMAC dss__Property
+{
+public:
+	std::string name;	/* required element of type xsd:string */
+	std::string value;	/* required element of type xsd:string */
+	std::string type;	/* required element of type xsd:string */
+public:
+	virtual int soap_type() const { return 326; } /* = unique id SOAP_TYPE_dss__Property */
+	virtual void soap_default(struct soap*);
+	virtual void soap_serialize(struct soap*) const;
+	virtual int soap_put(struct soap*, const char*, const char*) const;
+	virtual int soap_out(struct soap*, const char*, int, const char*) const;
+	virtual void *soap_get(struct soap*, const char*, const char*);
+	virtual void *soap_in(struct soap*, const char*, const char*);
+	         dss__Property()  { this->soap_default(NULL); }
+	virtual ~dss__Property() { }
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyQueryEntry
+#define SOAP_TYPE_dss__PropertyQueryEntry (327)
+/* dss:PropertyQueryEntry */
+class SOAP_CMAC dss__PropertyQueryEntry
+{
+public:
+	std::string name;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
+	std::vector<dss__Property >properties;	/* optional element of type dss:Property */
+	std::vector<dss__PropertyQueryEntry >results;	/* optional element of type dss:PropertyQueryEntry */
+public:
+	virtual int soap_type() const { return 327; } /* = unique id SOAP_TYPE_dss__PropertyQueryEntry */
+	virtual void soap_default(struct soap*);
+	virtual void soap_serialize(struct soap*) const;
+	virtual int soap_put(struct soap*, const char*, const char*) const;
+	virtual int soap_out(struct soap*, const char*, int, const char*) const;
+	virtual void *soap_get(struct soap*, const char*, const char*);
+	virtual void *soap_in(struct soap*, const char*, const char*);
+	         dss__PropertyQueryEntry()  { this->soap_default(NULL); }
+	virtual ~dss__PropertyQueryEntry() { }
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyQuery
+#define SOAP_TYPE_dss__PropertyQuery (332)
+/* dss:PropertyQuery */
+struct dss__PropertyQuery
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+	std::string _query;	/* required element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_dss__StructureAddDeviceToZoneResponse
-#define SOAP_TYPE_dss__StructureAddDeviceToZoneResponse (321)
+#define SOAP_TYPE_dss__StructureAddDeviceToZoneResponse (334)
 /* dss:StructureAddDeviceToZoneResponse */
 struct dss__StructureAddDeviceToZoneResponse
 {
@@ -2101,7 +2197,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__StructureAddDeviceToZone
-#define SOAP_TYPE_dss__StructureAddDeviceToZone (322)
+#define SOAP_TYPE_dss__StructureAddDeviceToZone (335)
 /* dss:StructureAddDeviceToZone */
 struct dss__StructureAddDeviceToZone
 {
@@ -2112,8 +2208,179 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_dss__MeteringResolutions
+#define SOAP_TYPE_dss__MeteringResolutions (336)
+/* dss:MeteringResolutions */
+class SOAP_CMAC dss__MeteringResolutions
+{
+public:
+	std::string type;	/* required element of type xsd:string */
+	std::string unit;	/* required element of type xsd:string */
+	int resolution;	/* required element of type xsd:int */
+public:
+	virtual int soap_type() const { return 336; } /* = unique id SOAP_TYPE_dss__MeteringResolutions */
+	virtual void soap_default(struct soap*);
+	virtual void soap_serialize(struct soap*) const;
+	virtual int soap_put(struct soap*, const char*, const char*) const;
+	virtual int soap_out(struct soap*, const char*, int, const char*) const;
+	virtual void *soap_get(struct soap*, const char*, const char*);
+	virtual void *soap_in(struct soap*, const char*, const char*);
+	         dss__MeteringResolutions() : resolution(0) { this->soap_default(NULL); }
+	virtual ~dss__MeteringResolutions() { }
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetResolutionsResponse
+#define SOAP_TYPE_dss__MeteringGetResolutionsResponse (340)
+/* dss:MeteringGetResolutionsResponse */
+struct dss__MeteringGetResolutionsResponse
+{
+public:
+	std::vector<dss__MeteringResolutions >result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type dss:MeteringResolutions */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetResolutions
+#define SOAP_TYPE_dss__MeteringGetResolutions (341)
+/* dss:MeteringGetResolutions */
+struct dss__MeteringGetResolutions
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringSeries
+#define SOAP_TYPE_dss__MeteringSeries (342)
+/* dss:MeteringSeries */
+class SOAP_CMAC dss__MeteringSeries
+{
+public:
+	std::string dsid;	/* required element of type xsd:string */
+	std::string type;	/* required element of type xsd:string */
+public:
+	virtual int soap_type() const { return 342; } /* = unique id SOAP_TYPE_dss__MeteringSeries */
+	virtual void soap_default(struct soap*);
+	virtual void soap_serialize(struct soap*) const;
+	virtual int soap_put(struct soap*, const char*, const char*) const;
+	virtual int soap_out(struct soap*, const char*, int, const char*) const;
+	virtual void *soap_get(struct soap*, const char*, const char*);
+	virtual void *soap_in(struct soap*, const char*, const char*);
+	         dss__MeteringSeries()  { this->soap_default(NULL); }
+	virtual ~dss__MeteringSeries() { }
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetSeriesResponse
+#define SOAP_TYPE_dss__MeteringGetSeriesResponse (346)
+/* dss:MeteringGetSeriesResponse */
+struct dss__MeteringGetSeriesResponse
+{
+public:
+	std::vector<dss__MeteringSeries >result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type dss:MeteringSeries */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetSeries
+#define SOAP_TYPE_dss__MeteringGetSeries (347)
+/* dss:MeteringGetSeries */
+struct dss__MeteringGetSeries
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringValue
+#define SOAP_TYPE_dss__MeteringValue (348)
+/* dss:MeteringValue */
+class SOAP_CMAC dss__MeteringValue
+{
+public:
+	int timestamp;	/* required element of type xsd:int */
+	int value;	/* required element of type xsd:int */
+public:
+	virtual int soap_type() const { return 348; } /* = unique id SOAP_TYPE_dss__MeteringValue */
+	virtual void soap_default(struct soap*);
+	virtual void soap_serialize(struct soap*) const;
+	virtual int soap_put(struct soap*, const char*, const char*) const;
+	virtual int soap_out(struct soap*, const char*, int, const char*) const;
+	virtual void *soap_get(struct soap*, const char*, const char*);
+	virtual void *soap_in(struct soap*, const char*, const char*);
+	         dss__MeteringValue() : timestamp(0), value(0) { this->soap_default(NULL); }
+	virtual ~dss__MeteringValue() { }
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetValuesResponse
+#define SOAP_TYPE_dss__MeteringGetValuesResponse (352)
+/* dss:MeteringGetValuesResponse */
+struct dss__MeteringGetValuesResponse
+{
+public:
+	std::vector<dss__MeteringValue >result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type dss:MeteringValue */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetValues
+#define SOAP_TYPE_dss__MeteringGetValues (353)
+/* dss:MeteringGetValues */
+struct dss__MeteringGetValues
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+	char *_dsMeterID;	/* optional element of type xsd:string */
+	std::string _type;	/* required element of type xsd:string */
+	int _resolution;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringValuePerDevice
+#define SOAP_TYPE_dss__MeteringValuePerDevice (354)
+/* dss:MeteringValuePerDevice */
+class SOAP_CMAC dss__MeteringValuePerDevice
+{
+public:
+	std::string dsid;	/* required element of type xsd:string */
+	int timestamp;	/* required element of type xsd:int */
+	int value;	/* required element of type xsd:int */
+public:
+	virtual int soap_type() const { return 354; } /* = unique id SOAP_TYPE_dss__MeteringValuePerDevice */
+	virtual void soap_default(struct soap*);
+	virtual void soap_serialize(struct soap*) const;
+	virtual int soap_put(struct soap*, const char*, const char*) const;
+	virtual int soap_out(struct soap*, const char*, int, const char*) const;
+	virtual void *soap_get(struct soap*, const char*, const char*);
+	virtual void *soap_in(struct soap*, const char*, const char*);
+	         dss__MeteringValuePerDevice() : timestamp(0), value(0) { this->soap_default(NULL); }
+	virtual ~dss__MeteringValuePerDevice() { }
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetLastestResponse
+#define SOAP_TYPE_dss__MeteringGetLastestResponse (358)
+/* dss:MeteringGetLastestResponse */
+struct dss__MeteringGetLastestResponse
+{
+public:
+	std::vector<dss__MeteringValuePerDevice >result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type dss:MeteringValuePerDevice */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__MeteringGetLastest
+#define SOAP_TYPE_dss__MeteringGetLastest (359)
+/* dss:MeteringGetLastest */
+struct dss__MeteringGetLastest
+{
+public:
+	char *_token;	/* optional element of type xsd:string */
+	std::string _from;	/* required element of type xsd:string */
+	std::string _type;	/* required element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (323)
+#define SOAP_TYPE_SOAP_ENV__Header (360)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -2125,7 +2392,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (324)
+#define SOAP_TYPE_SOAP_ENV__Code (361)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -2136,7 +2403,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (326)
+#define SOAP_TYPE_SOAP_ENV__Detail (363)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -2148,7 +2415,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (329)
+#define SOAP_TYPE_SOAP_ENV__Reason (366)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -2158,7 +2425,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (330)
+#define SOAP_TYPE_SOAP_ENV__Fault (367)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -2354,6 +2621,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTransmissionQuality(struct soap*, char *
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, char *_token, char *_dsMeterID, unsigned long &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetEnergyMeterValue(struct soap*, char *_token, char *_dsMeterID, unsigned long &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, char *_token, std::vector<std::string >&ids);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetName(struct soap*, char *_token, char *_dsMeterID, std::string &name);
@@ -2369,6 +2638,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRemoveMeter(struct soap*, char *_token, 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRemoveInactiveMeters(struct soap*, char *_token, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetPowerConsumption(struct soap*, char *_token, unsigned long &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetEnergyMeterValue(struct soap*, char *_token, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, char *_token, int _zoneID, char *_name, bool &result);
 
@@ -2404,7 +2675,17 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, char *_token, s
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyRemove(struct soap*, char *_token, std::string _propertyName, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyQuery(struct soap*, char *_token, std::string _query, dss__PropertyQueryEntry &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__StructureAddDeviceToZone(struct soap*, char *_token, char *_deviceID, int _zoneID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetResolutions(struct soap*, char *_token, std::vector<dss__MeteringResolutions >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetSeries(struct soap*, char *_token, std::vector<dss__MeteringSeries >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetValues(struct soap*, char *_token, char *_dsMeterID, std::string _type, int _resolution, std::vector<dss__MeteringValue >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetLastest(struct soap*, char *_token, std::string _from, std::string _type, std::vector<dss__MeteringValuePerDevice >&result);
 
 /******************************************************************************\
  *                                                                            *
@@ -2554,6 +2835,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetTransmissionQuality(struct so
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetPowerConsumption(struct soap*);
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetEnergyMeterValue(struct soap*);
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDSMeterIDs(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetName(struct soap*);
@@ -2569,6 +2852,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentRemoveMeter(struct soap*);
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentRemoveInactiveMeters(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetPowerConsumption(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetEnergyMeterValue(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSetName(struct soap*);
 
@@ -2604,7 +2889,17 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetChildren(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyRemove(struct soap*);
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyQuery(struct soap*);
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__StructureAddDeviceToZone(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetResolutions(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetSeries(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetValues(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetLastest(struct soap*);
 
 #endif
 

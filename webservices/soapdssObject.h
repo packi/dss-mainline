@@ -30,8 +30,8 @@ class dssService : public soap
 	{"dss", "urn:dss:1.0", NULL, NULL},
 	{NULL, NULL, NULL, NULL}
 };
-        bind_flags = SO_REUSEADDR;
-        accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
+          bind_flags = SO_REUSEADDR;
+          accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)
@@ -187,6 +187,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTransmissionQuality(struct soap*, char *
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, char *_token, char *_dsMeterID, unsigned long &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetEnergyMeterValue(struct soap*, char *_token, char *_dsMeterID, unsigned long &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, char *_token, std::vector<std::string >&ids);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetName(struct soap*, char *_token, char *_dsMeterID, std::string &name);
@@ -202,6 +204,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRemoveMeter(struct soap*, char *_token, 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRemoveInactiveMeters(struct soap*, char *_token, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetPowerConsumption(struct soap*, char *_token, unsigned long &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetEnergyMeterValue(struct soap*, char *_token, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, char *_token, int _zoneID, char *_name, bool &result);
 
@@ -237,6 +241,16 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, char *_token, s
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyRemove(struct soap*, char *_token, std::string _propertyName, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyQuery(struct soap*, char *_token, std::string _query, dss__PropertyQueryEntry &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__StructureAddDeviceToZone(struct soap*, char *_token, char *_deviceID, int _zoneID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetResolutions(struct soap*, char *_token, std::vector<dss__MeteringResolutions >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetSeries(struct soap*, char *_token, std::vector<dss__MeteringSeries >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetValues(struct soap*, char *_token, char *_dsMeterID, std::string _type, int _resolution, std::vector<dss__MeteringValue >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__MeteringGetLastest(struct soap*, char *_token, std::string _from, std::string _type, std::vector<dss__MeteringValuePerDevice >&result);
 
 #endif

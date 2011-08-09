@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2011-07-21 08:59:30 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2011-08-05 13:34:08 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -217,6 +217,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceGetTransmissionQuality(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetPowerConsumption"))
 		return soap_serve_dss__DSMeterGetPowerConsumption(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetEnergyMeterValue"))
+		return soap_serve_dss__DSMeterGetEnergyMeterValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetDSMeterIDs"))
 		return soap_serve_dss__ApartmentGetDSMeterIDs(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetName"))
@@ -233,6 +235,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentRemoveInactiveMeters(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetPowerConsumption"))
 		return soap_serve_dss__ApartmentGetPowerConsumption(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetEnergyMeterValue"))
+		return soap_serve_dss__ApartmentGetEnergyMeterValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneSetName"))
 		return soap_serve_dss__ZoneSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneGetName"))
@@ -267,8 +271,18 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__PropertyGetChildren(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:PropertyRemove"))
 		return soap_serve_dss__PropertyRemove(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertyQuery"))
+		return soap_serve_dss__PropertyQuery(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:StructureAddDeviceToZone"))
 		return soap_serve_dss__StructureAddDeviceToZone(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:MeteringGetResolutions"))
+		return soap_serve_dss__MeteringGetResolutions(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:MeteringGetSeries"))
+		return soap_serve_dss__MeteringGetSeries(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:MeteringGetValues"))
+		return soap_serve_dss__MeteringGetValues(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:MeteringGetLastest"))
+		return soap_serve_dss__MeteringGetLastest(soap);
 	return soap->error = SOAP_NO_METHOD;
 }
 #endif
@@ -3105,6 +3119,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetPowerConsumption(struct soap
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetEnergyMeterValue(struct soap *soap)
+{	struct dss__DSMeterGetEnergyMeterValue soap_tmp_dss__DSMeterGetEnergyMeterValue;
+	struct dss__DSMeterGetEnergyMeterValueResponse soap_tmp_dss__DSMeterGetEnergyMeterValueResponse;
+	soap_default_dss__DSMeterGetEnergyMeterValueResponse(soap, &soap_tmp_dss__DSMeterGetEnergyMeterValueResponse);
+	soap_default_dss__DSMeterGetEnergyMeterValue(soap, &soap_tmp_dss__DSMeterGetEnergyMeterValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DSMeterGetEnergyMeterValue(soap, &soap_tmp_dss__DSMeterGetEnergyMeterValue, "dss:DSMeterGetEnergyMeterValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DSMeterGetEnergyMeterValue(soap, soap_tmp_dss__DSMeterGetEnergyMeterValue._token, soap_tmp_dss__DSMeterGetEnergyMeterValue._dsMeterID, soap_tmp_dss__DSMeterGetEnergyMeterValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DSMeterGetEnergyMeterValueResponse(soap, &soap_tmp_dss__DSMeterGetEnergyMeterValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DSMeterGetEnergyMeterValueResponse(soap, &soap_tmp_dss__DSMeterGetEnergyMeterValueResponse, "dss:DSMeterGetEnergyMeterValueResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DSMeterGetEnergyMeterValueResponse(soap, &soap_tmp_dss__DSMeterGetEnergyMeterValueResponse, "dss:DSMeterGetEnergyMeterValueResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDSMeterIDs(struct soap *soap)
 {	struct dss__ApartmentGetDSMeterIDs soap_tmp_dss__ApartmentGetDSMeterIDs;
 	struct dss__ApartmentGetDSMeterIDsResponse soap_tmp_dss__ApartmentGetDSMeterIDsResponse;
@@ -3426,6 +3481,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetPowerConsumption(struct so
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ApartmentGetPowerConsumptionResponse(soap, &soap_tmp_dss__ApartmentGetPowerConsumptionResponse, "dss:ApartmentGetPowerConsumptionResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetEnergyMeterValue(struct soap *soap)
+{	struct dss__ApartmentGetEnergyMeterValue soap_tmp_dss__ApartmentGetEnergyMeterValue;
+	struct dss__ApartmentGetEnergyMeterValueResponse soap_tmp_dss__ApartmentGetEnergyMeterValueResponse;
+	soap_default_dss__ApartmentGetEnergyMeterValueResponse(soap, &soap_tmp_dss__ApartmentGetEnergyMeterValueResponse);
+	soap_default_dss__ApartmentGetEnergyMeterValue(soap, &soap_tmp_dss__ApartmentGetEnergyMeterValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ApartmentGetEnergyMeterValue(soap, &soap_tmp_dss__ApartmentGetEnergyMeterValue, "dss:ApartmentGetEnergyMeterValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ApartmentGetEnergyMeterValue(soap, soap_tmp_dss__ApartmentGetEnergyMeterValue._token, soap_tmp_dss__ApartmentGetEnergyMeterValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ApartmentGetEnergyMeterValueResponse(soap, &soap_tmp_dss__ApartmentGetEnergyMeterValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ApartmentGetEnergyMeterValueResponse(soap, &soap_tmp_dss__ApartmentGetEnergyMeterValueResponse, "dss:ApartmentGetEnergyMeterValueResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ApartmentGetEnergyMeterValueResponse(soap, &soap_tmp_dss__ApartmentGetEnergyMeterValueResponse, "dss:ApartmentGetEnergyMeterValueResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -4130,6 +4226,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyRemove(struct soap *soap)
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyQuery(struct soap *soap)
+{	struct dss__PropertyQuery soap_tmp_dss__PropertyQuery;
+	dss__PropertyQueryEntry result;
+	result.soap_default(soap);
+	soap_default_dss__PropertyQuery(soap, &soap_tmp_dss__PropertyQuery);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertyQuery(soap, &soap_tmp_dss__PropertyQuery, "dss:PropertyQuery", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertyQuery(soap, soap_tmp_dss__PropertyQuery._token, soap_tmp_dss__PropertyQuery._query, result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	result.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || result.soap_put(soap, "dss:PropertyQueryEntry", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || result.soap_put(soap, "dss:PropertyQueryEntry", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__StructureAddDeviceToZone(struct soap *soap)
 {	struct dss__StructureAddDeviceToZone soap_tmp_dss__StructureAddDeviceToZone;
 	struct dss__StructureAddDeviceToZoneResponse soap_tmp_dss__StructureAddDeviceToZoneResponse;
@@ -4164,6 +4301,170 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__StructureAddDeviceToZone(struct soap *
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__StructureAddDeviceToZoneResponse(soap, &soap_tmp_dss__StructureAddDeviceToZoneResponse, "dss:StructureAddDeviceToZoneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetResolutions(struct soap *soap)
+{	struct dss__MeteringGetResolutions soap_tmp_dss__MeteringGetResolutions;
+	struct dss__MeteringGetResolutionsResponse soap_tmp_dss__MeteringGetResolutionsResponse;
+	soap_default_dss__MeteringGetResolutionsResponse(soap, &soap_tmp_dss__MeteringGetResolutionsResponse);
+	soap_default_dss__MeteringGetResolutions(soap, &soap_tmp_dss__MeteringGetResolutions);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__MeteringGetResolutions(soap, &soap_tmp_dss__MeteringGetResolutions, "dss:MeteringGetResolutions", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__MeteringGetResolutions(soap, soap_tmp_dss__MeteringGetResolutions._token, soap_tmp_dss__MeteringGetResolutionsResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__MeteringGetResolutionsResponse(soap, &soap_tmp_dss__MeteringGetResolutionsResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__MeteringGetResolutionsResponse(soap, &soap_tmp_dss__MeteringGetResolutionsResponse, "dss:MeteringGetResolutionsResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__MeteringGetResolutionsResponse(soap, &soap_tmp_dss__MeteringGetResolutionsResponse, "dss:MeteringGetResolutionsResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetSeries(struct soap *soap)
+{	struct dss__MeteringGetSeries soap_tmp_dss__MeteringGetSeries;
+	struct dss__MeteringGetSeriesResponse soap_tmp_dss__MeteringGetSeriesResponse;
+	soap_default_dss__MeteringGetSeriesResponse(soap, &soap_tmp_dss__MeteringGetSeriesResponse);
+	soap_default_dss__MeteringGetSeries(soap, &soap_tmp_dss__MeteringGetSeries);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__MeteringGetSeries(soap, &soap_tmp_dss__MeteringGetSeries, "dss:MeteringGetSeries", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__MeteringGetSeries(soap, soap_tmp_dss__MeteringGetSeries._token, soap_tmp_dss__MeteringGetSeriesResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__MeteringGetSeriesResponse(soap, &soap_tmp_dss__MeteringGetSeriesResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__MeteringGetSeriesResponse(soap, &soap_tmp_dss__MeteringGetSeriesResponse, "dss:MeteringGetSeriesResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__MeteringGetSeriesResponse(soap, &soap_tmp_dss__MeteringGetSeriesResponse, "dss:MeteringGetSeriesResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetValues(struct soap *soap)
+{	struct dss__MeteringGetValues soap_tmp_dss__MeteringGetValues;
+	struct dss__MeteringGetValuesResponse soap_tmp_dss__MeteringGetValuesResponse;
+	soap_default_dss__MeteringGetValuesResponse(soap, &soap_tmp_dss__MeteringGetValuesResponse);
+	soap_default_dss__MeteringGetValues(soap, &soap_tmp_dss__MeteringGetValues);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__MeteringGetValues(soap, &soap_tmp_dss__MeteringGetValues, "dss:MeteringGetValues", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__MeteringGetValues(soap, soap_tmp_dss__MeteringGetValues._token, soap_tmp_dss__MeteringGetValues._dsMeterID, soap_tmp_dss__MeteringGetValues._type, soap_tmp_dss__MeteringGetValues._resolution, soap_tmp_dss__MeteringGetValuesResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__MeteringGetValuesResponse(soap, &soap_tmp_dss__MeteringGetValuesResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__MeteringGetValuesResponse(soap, &soap_tmp_dss__MeteringGetValuesResponse, "dss:MeteringGetValuesResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__MeteringGetValuesResponse(soap, &soap_tmp_dss__MeteringGetValuesResponse, "dss:MeteringGetValuesResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__MeteringGetLastest(struct soap *soap)
+{	struct dss__MeteringGetLastest soap_tmp_dss__MeteringGetLastest;
+	struct dss__MeteringGetLastestResponse soap_tmp_dss__MeteringGetLastestResponse;
+	soap_default_dss__MeteringGetLastestResponse(soap, &soap_tmp_dss__MeteringGetLastestResponse);
+	soap_default_dss__MeteringGetLastest(soap, &soap_tmp_dss__MeteringGetLastest);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__MeteringGetLastest(soap, &soap_tmp_dss__MeteringGetLastest, "dss:MeteringGetLastest", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__MeteringGetLastest(soap, soap_tmp_dss__MeteringGetLastest._token, soap_tmp_dss__MeteringGetLastest._from, soap_tmp_dss__MeteringGetLastest._type, soap_tmp_dss__MeteringGetLastestResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__MeteringGetLastestResponse(soap, &soap_tmp_dss__MeteringGetLastestResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__MeteringGetLastestResponse(soap, &soap_tmp_dss__MeteringGetLastestResponse, "dss:MeteringGetLastestResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__MeteringGetLastestResponse(soap, &soap_tmp_dss__MeteringGetLastestResponse, "dss:MeteringGetLastestResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

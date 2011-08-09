@@ -208,6 +208,7 @@ int dss__DeviceGetTransmissionQuality(char* _token, char* _deviceID, dss__Transm
 //==================================================== Information
 
 int dss__DSMeterGetPowerConsumption(char* _token, char* _dsMeterID, xsd__unsignedInt& result);
+int dss__DSMeterGetEnergyMeterValue(char* _token, char* _dsMeterID, xsd__unsignedInt& result);
 
 //==================================================== Organization
 
@@ -226,6 +227,7 @@ int dss__ApartmentDeleteZone(char* _token, int _zoneID, int& result);
 int dss__ApartmentRemoveMeter(char* _token, char* _dsMeterID, bool& result);
 int dss__ApartmentRemoveInactiveMeters(char* _token, bool& result);
 int dss__ApartmentGetPowerConsumption(char* _token, xsd__unsignedInt& result);
+int dss__ApartmentGetEnergyMeterValue(char* _token, xsd__unsignedInt& result);
 /** Sets the name of a zone to _name */
 int dss__ZoneSetName(char* _token, int _zoneID, char* _name, bool& result);
 /** Returns the name of a zone */
@@ -265,7 +267,47 @@ int dss__PropertyGetBool(char* _token, std::string _propertyName, bool& result);
 int dss__PropertyGetChildren(char* _token, std::string _propertyName, std::vector<std::string>& result);
 int dss__PropertyRemove(char* _token, std::string _propertyName, bool& result);
 
+class dss__Property {
+  std::string name;
+  std::string value;
+  std::string type;
+};
+
+class dss__PropertyQueryEntry {
+  std::string name;
+  std::vector<dss__Property> properties;
+  std::vector<dss__PropertyQueryEntry> results;
+};
+
+int dss__PropertyQuery(char* _token, std::string _query, dss__PropertyQueryEntry& result);
 
 //==================================================== Structure
 
 int dss__StructureAddDeviceToZone(char* _token, char* _deviceID, int _zoneID, bool& result);
+
+//==================================================== Metering
+
+class dss__MeteringResolutions {
+  std::string type;
+  std::string unit;
+  int resolution;
+};
+int dss__MeteringGetResolutions(char* _token, std::vector<dss__MeteringResolutions>& result);
+
+class dss__MeteringSeries {
+  std::string dsid;
+  std::string type;
+};
+int dss__MeteringGetSeries(char* _token, std::vector<dss__MeteringSeries>& result);
+
+class dss__MeteringValue {
+  int timestamp;
+  int value;
+};
+int dss__MeteringGetValues(char* _token, char* _dsMeterID, std::string _type, int _resolution, std::vector<dss__MeteringValue>& result);
+class dss__MeteringValuePerDevice {
+  std::string dsid;
+  int timestamp;
+  int value;
+};
+int dss__MeteringGetLastest(char* _token, std::string _from, std::string _type, std::vector<dss__MeteringValuePerDevice>& result);

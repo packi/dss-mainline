@@ -12,7 +12,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.15 2011-07-21 08:59:30 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.15 2011-08-05 13:34:08 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -188,16 +188,46 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_unsignedLONG64(soap, NULL, NULL, "xsd:unsignedLong");
 	case SOAP_TYPE_bool:
 		return soap_in_bool(soap, NULL, NULL, "xsd:boolean");
+	case SOAP_TYPE_dss__MeteringValuePerDevice:
+		return soap_in_dss__MeteringValuePerDevice(soap, NULL, NULL, "dss:MeteringValuePerDevice");
+	case SOAP_TYPE_dss__MeteringValue:
+		return soap_in_dss__MeteringValue(soap, NULL, NULL, "dss:MeteringValue");
+	case SOAP_TYPE_dss__MeteringSeries:
+		return soap_in_dss__MeteringSeries(soap, NULL, NULL, "dss:MeteringSeries");
+	case SOAP_TYPE_dss__MeteringResolutions:
+		return soap_in_dss__MeteringResolutions(soap, NULL, NULL, "dss:MeteringResolutions");
+	case SOAP_TYPE_dss__PropertyQueryEntry:
+		return soap_in_dss__PropertyQueryEntry(soap, NULL, NULL, "dss:PropertyQueryEntry");
+	case SOAP_TYPE_dss__Property:
+		return soap_in_dss__Property(soap, NULL, NULL, "dss:Property");
 	case SOAP_TYPE_dss__Event:
 		return soap_in_dss__Event(soap, NULL, NULL, "dss:Event");
 	case SOAP_TYPE_dss__TransmissionQuality:
 		return soap_in_dss__TransmissionQuality(soap, NULL, NULL, "dss:TransmissionQuality");
 	case SOAP_TYPE_std__string:
 		return soap_in_std__string(soap, NULL, NULL, "xsd:string");
+	case SOAP_TYPE_dss__MeteringGetLastest:
+		return soap_in_dss__MeteringGetLastest(soap, NULL, NULL, "dss:MeteringGetLastest");
+	case SOAP_TYPE_dss__MeteringGetLastestResponse:
+		return soap_in_dss__MeteringGetLastestResponse(soap, NULL, NULL, "dss:MeteringGetLastestResponse");
+	case SOAP_TYPE_dss__MeteringGetValues:
+		return soap_in_dss__MeteringGetValues(soap, NULL, NULL, "dss:MeteringGetValues");
+	case SOAP_TYPE_dss__MeteringGetValuesResponse:
+		return soap_in_dss__MeteringGetValuesResponse(soap, NULL, NULL, "dss:MeteringGetValuesResponse");
+	case SOAP_TYPE_dss__MeteringGetSeries:
+		return soap_in_dss__MeteringGetSeries(soap, NULL, NULL, "dss:MeteringGetSeries");
+	case SOAP_TYPE_dss__MeteringGetSeriesResponse:
+		return soap_in_dss__MeteringGetSeriesResponse(soap, NULL, NULL, "dss:MeteringGetSeriesResponse");
+	case SOAP_TYPE_dss__MeteringGetResolutions:
+		return soap_in_dss__MeteringGetResolutions(soap, NULL, NULL, "dss:MeteringGetResolutions");
+	case SOAP_TYPE_dss__MeteringGetResolutionsResponse:
+		return soap_in_dss__MeteringGetResolutionsResponse(soap, NULL, NULL, "dss:MeteringGetResolutionsResponse");
 	case SOAP_TYPE_dss__StructureAddDeviceToZone:
 		return soap_in_dss__StructureAddDeviceToZone(soap, NULL, NULL, "dss:StructureAddDeviceToZone");
 	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
 		return soap_in_dss__StructureAddDeviceToZoneResponse(soap, NULL, NULL, "dss:StructureAddDeviceToZoneResponse");
+	case SOAP_TYPE_dss__PropertyQuery:
+		return soap_in_dss__PropertyQuery(soap, NULL, NULL, "dss:PropertyQuery");
 	case SOAP_TYPE_dss__PropertyRemove:
 		return soap_in_dss__PropertyRemove(soap, NULL, NULL, "dss:PropertyRemove");
 	case SOAP_TYPE_dss__PropertyRemoveResponse:
@@ -266,6 +296,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__ZoneSetName(soap, NULL, NULL, "dss:ZoneSetName");
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		return soap_in_dss__ZoneSetNameResponse(soap, NULL, NULL, "dss:ZoneSetNameResponse");
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValue:
+		return soap_in_dss__ApartmentGetEnergyMeterValue(soap, NULL, NULL, "dss:ApartmentGetEnergyMeterValue");
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse:
+		return soap_in_dss__ApartmentGetEnergyMeterValueResponse(soap, NULL, NULL, "dss:ApartmentGetEnergyMeterValueResponse");
 	case SOAP_TYPE_dss__ApartmentGetPowerConsumption:
 		return soap_in_dss__ApartmentGetPowerConsumption(soap, NULL, NULL, "dss:ApartmentGetPowerConsumption");
 	case SOAP_TYPE_dss__ApartmentGetPowerConsumptionResponse:
@@ -298,6 +332,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__ApartmentGetDSMeterIDs(soap, NULL, NULL, "dss:ApartmentGetDSMeterIDs");
 	case SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse:
 		return soap_in_dss__ApartmentGetDSMeterIDsResponse(soap, NULL, NULL, "dss:ApartmentGetDSMeterIDsResponse");
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValue:
+		return soap_in_dss__DSMeterGetEnergyMeterValue(soap, NULL, NULL, "dss:DSMeterGetEnergyMeterValue");
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse:
+		return soap_in_dss__DSMeterGetEnergyMeterValueResponse(soap, NULL, NULL, "dss:DSMeterGetEnergyMeterValueResponse");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumption:
 		return soap_in_dss__DSMeterGetPowerConsumption(soap, NULL, NULL, "dss:DSMeterGetPowerConsumption");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
@@ -588,6 +626,30 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 	{	const char *t = soap->type;
 		if (!*t)
 			t = soap->tag;
+		if (!soap_match_tag(soap, t, "dss:MeteringValuePerDevice"))
+		{	*type = SOAP_TYPE_dss__MeteringValuePerDevice;
+			return soap_in_dss__MeteringValuePerDevice(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringValue"))
+		{	*type = SOAP_TYPE_dss__MeteringValue;
+			return soap_in_dss__MeteringValue(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringSeries"))
+		{	*type = SOAP_TYPE_dss__MeteringSeries;
+			return soap_in_dss__MeteringSeries(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringResolutions"))
+		{	*type = SOAP_TYPE_dss__MeteringResolutions;
+			return soap_in_dss__MeteringResolutions(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:PropertyQueryEntry"))
+		{	*type = SOAP_TYPE_dss__PropertyQueryEntry;
+			return soap_in_dss__PropertyQueryEntry(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Property"))
+		{	*type = SOAP_TYPE_dss__Property;
+			return soap_in_dss__Property(soap, NULL, NULL, NULL);
+		}
 		if (!soap_match_tag(soap, t, "dss:Event"))
 		{	*type = SOAP_TYPE_dss__Event;
 			return soap_in_dss__Event(soap, NULL, NULL, NULL);
@@ -652,6 +714,38 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_bool;
 			return soap_in_bool(soap, NULL, NULL, NULL);
 		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetLastest"))
+		{	*type = SOAP_TYPE_dss__MeteringGetLastest;
+			return soap_in_dss__MeteringGetLastest(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetLastestResponse"))
+		{	*type = SOAP_TYPE_dss__MeteringGetLastestResponse;
+			return soap_in_dss__MeteringGetLastestResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetValues"))
+		{	*type = SOAP_TYPE_dss__MeteringGetValues;
+			return soap_in_dss__MeteringGetValues(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetValuesResponse"))
+		{	*type = SOAP_TYPE_dss__MeteringGetValuesResponse;
+			return soap_in_dss__MeteringGetValuesResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetSeries"))
+		{	*type = SOAP_TYPE_dss__MeteringGetSeries;
+			return soap_in_dss__MeteringGetSeries(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetSeriesResponse"))
+		{	*type = SOAP_TYPE_dss__MeteringGetSeriesResponse;
+			return soap_in_dss__MeteringGetSeriesResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetResolutions"))
+		{	*type = SOAP_TYPE_dss__MeteringGetResolutions;
+			return soap_in_dss__MeteringGetResolutions(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:MeteringGetResolutionsResponse"))
+		{	*type = SOAP_TYPE_dss__MeteringGetResolutionsResponse;
+			return soap_in_dss__MeteringGetResolutionsResponse(soap, NULL, NULL, NULL);
+		}
 		if (!soap_match_tag(soap, t, "dss:StructureAddDeviceToZone"))
 		{	*type = SOAP_TYPE_dss__StructureAddDeviceToZone;
 			return soap_in_dss__StructureAddDeviceToZone(soap, NULL, NULL, NULL);
@@ -659,6 +753,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:StructureAddDeviceToZoneResponse"))
 		{	*type = SOAP_TYPE_dss__StructureAddDeviceToZoneResponse;
 			return soap_in_dss__StructureAddDeviceToZoneResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:PropertyQuery"))
+		{	*type = SOAP_TYPE_dss__PropertyQuery;
+			return soap_in_dss__PropertyQuery(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:PropertyRemove"))
 		{	*type = SOAP_TYPE_dss__PropertyRemove;
@@ -796,6 +894,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_dss__ZoneSetNameResponse;
 			return soap_in_dss__ZoneSetNameResponse(soap, NULL, NULL, NULL);
 		}
+		if (!soap_match_tag(soap, t, "dss:ApartmentGetEnergyMeterValue"))
+		{	*type = SOAP_TYPE_dss__ApartmentGetEnergyMeterValue;
+			return soap_in_dss__ApartmentGetEnergyMeterValue(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:ApartmentGetEnergyMeterValueResponse"))
+		{	*type = SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse;
+			return soap_in_dss__ApartmentGetEnergyMeterValueResponse(soap, NULL, NULL, NULL);
+		}
 		if (!soap_match_tag(soap, t, "dss:ApartmentGetPowerConsumption"))
 		{	*type = SOAP_TYPE_dss__ApartmentGetPowerConsumption;
 			return soap_in_dss__ApartmentGetPowerConsumption(soap, NULL, NULL, NULL);
@@ -859,6 +965,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:ApartmentGetDSMeterIDsResponse"))
 		{	*type = SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse;
 			return soap_in_dss__ApartmentGetDSMeterIDsResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DSMeterGetEnergyMeterValue"))
+		{	*type = SOAP_TYPE_dss__DSMeterGetEnergyMeterValue;
+			return soap_in_dss__DSMeterGetEnergyMeterValue(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DSMeterGetEnergyMeterValueResponse"))
+		{	*type = SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse;
+			return soap_in_dss__DSMeterGetEnergyMeterValueResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:DSMeterGetPowerConsumption"))
 		{	*type = SOAP_TYPE_dss__DSMeterGetPowerConsumption;
@@ -1512,16 +1626,46 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_unsignedLONG64(soap, tag, id, (const ULONG64 *)ptr, "xsd:unsignedLong");
 	case SOAP_TYPE_bool:
 		return soap_out_bool(soap, tag, id, (const bool *)ptr, "xsd:boolean");
+	case SOAP_TYPE_dss__MeteringValuePerDevice:
+		return ((dss__MeteringValuePerDevice *)ptr)->soap_out(soap, tag, id, "dss:MeteringValuePerDevice");
+	case SOAP_TYPE_dss__MeteringValue:
+		return ((dss__MeteringValue *)ptr)->soap_out(soap, tag, id, "dss:MeteringValue");
+	case SOAP_TYPE_dss__MeteringSeries:
+		return ((dss__MeteringSeries *)ptr)->soap_out(soap, tag, id, "dss:MeteringSeries");
+	case SOAP_TYPE_dss__MeteringResolutions:
+		return ((dss__MeteringResolutions *)ptr)->soap_out(soap, tag, id, "dss:MeteringResolutions");
+	case SOAP_TYPE_dss__PropertyQueryEntry:
+		return ((dss__PropertyQueryEntry *)ptr)->soap_out(soap, tag, id, "dss:PropertyQueryEntry");
+	case SOAP_TYPE_dss__Property:
+		return ((dss__Property *)ptr)->soap_out(soap, tag, id, "dss:Property");
 	case SOAP_TYPE_dss__Event:
 		return ((dss__Event *)ptr)->soap_out(soap, tag, id, "dss:Event");
 	case SOAP_TYPE_dss__TransmissionQuality:
 		return ((dss__TransmissionQuality *)ptr)->soap_out(soap, tag, id, "dss:TransmissionQuality");
 	case SOAP_TYPE_std__string:
 		return soap_out_std__string(soap, tag, id, (const std::string *)ptr, "xsd:string");
+	case SOAP_TYPE_dss__MeteringGetLastest:
+		return soap_out_dss__MeteringGetLastest(soap, tag, id, (const struct dss__MeteringGetLastest *)ptr, "dss:MeteringGetLastest");
+	case SOAP_TYPE_dss__MeteringGetLastestResponse:
+		return soap_out_dss__MeteringGetLastestResponse(soap, tag, id, (const struct dss__MeteringGetLastestResponse *)ptr, "dss:MeteringGetLastestResponse");
+	case SOAP_TYPE_dss__MeteringGetValues:
+		return soap_out_dss__MeteringGetValues(soap, tag, id, (const struct dss__MeteringGetValues *)ptr, "dss:MeteringGetValues");
+	case SOAP_TYPE_dss__MeteringGetValuesResponse:
+		return soap_out_dss__MeteringGetValuesResponse(soap, tag, id, (const struct dss__MeteringGetValuesResponse *)ptr, "dss:MeteringGetValuesResponse");
+	case SOAP_TYPE_dss__MeteringGetSeries:
+		return soap_out_dss__MeteringGetSeries(soap, tag, id, (const struct dss__MeteringGetSeries *)ptr, "dss:MeteringGetSeries");
+	case SOAP_TYPE_dss__MeteringGetSeriesResponse:
+		return soap_out_dss__MeteringGetSeriesResponse(soap, tag, id, (const struct dss__MeteringGetSeriesResponse *)ptr, "dss:MeteringGetSeriesResponse");
+	case SOAP_TYPE_dss__MeteringGetResolutions:
+		return soap_out_dss__MeteringGetResolutions(soap, tag, id, (const struct dss__MeteringGetResolutions *)ptr, "dss:MeteringGetResolutions");
+	case SOAP_TYPE_dss__MeteringGetResolutionsResponse:
+		return soap_out_dss__MeteringGetResolutionsResponse(soap, tag, id, (const struct dss__MeteringGetResolutionsResponse *)ptr, "dss:MeteringGetResolutionsResponse");
 	case SOAP_TYPE_dss__StructureAddDeviceToZone:
 		return soap_out_dss__StructureAddDeviceToZone(soap, tag, id, (const struct dss__StructureAddDeviceToZone *)ptr, "dss:StructureAddDeviceToZone");
 	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
 		return soap_out_dss__StructureAddDeviceToZoneResponse(soap, tag, id, (const struct dss__StructureAddDeviceToZoneResponse *)ptr, "dss:StructureAddDeviceToZoneResponse");
+	case SOAP_TYPE_dss__PropertyQuery:
+		return soap_out_dss__PropertyQuery(soap, tag, id, (const struct dss__PropertyQuery *)ptr, "dss:PropertyQuery");
 	case SOAP_TYPE_dss__PropertyRemove:
 		return soap_out_dss__PropertyRemove(soap, tag, id, (const struct dss__PropertyRemove *)ptr, "dss:PropertyRemove");
 	case SOAP_TYPE_dss__PropertyRemoveResponse:
@@ -1590,6 +1734,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__ZoneSetName(soap, tag, id, (const struct dss__ZoneSetName *)ptr, "dss:ZoneSetName");
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		return soap_out_dss__ZoneSetNameResponse(soap, tag, id, (const struct dss__ZoneSetNameResponse *)ptr, "dss:ZoneSetNameResponse");
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValue:
+		return soap_out_dss__ApartmentGetEnergyMeterValue(soap, tag, id, (const struct dss__ApartmentGetEnergyMeterValue *)ptr, "dss:ApartmentGetEnergyMeterValue");
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse:
+		return soap_out_dss__ApartmentGetEnergyMeterValueResponse(soap, tag, id, (const struct dss__ApartmentGetEnergyMeterValueResponse *)ptr, "dss:ApartmentGetEnergyMeterValueResponse");
 	case SOAP_TYPE_dss__ApartmentGetPowerConsumption:
 		return soap_out_dss__ApartmentGetPowerConsumption(soap, tag, id, (const struct dss__ApartmentGetPowerConsumption *)ptr, "dss:ApartmentGetPowerConsumption");
 	case SOAP_TYPE_dss__ApartmentGetPowerConsumptionResponse:
@@ -1622,6 +1770,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__ApartmentGetDSMeterIDs(soap, tag, id, (const struct dss__ApartmentGetDSMeterIDs *)ptr, "dss:ApartmentGetDSMeterIDs");
 	case SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse:
 		return soap_out_dss__ApartmentGetDSMeterIDsResponse(soap, tag, id, (const struct dss__ApartmentGetDSMeterIDsResponse *)ptr, "dss:ApartmentGetDSMeterIDsResponse");
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValue:
+		return soap_out_dss__DSMeterGetEnergyMeterValue(soap, tag, id, (const struct dss__DSMeterGetEnergyMeterValue *)ptr, "dss:DSMeterGetEnergyMeterValue");
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse:
+		return soap_out_dss__DSMeterGetEnergyMeterValueResponse(soap, tag, id, (const struct dss__DSMeterGetEnergyMeterValueResponse *)ptr, "dss:DSMeterGetEnergyMeterValueResponse");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumption:
 		return soap_out_dss__DSMeterGetPowerConsumption(soap, tag, id, (const struct dss__DSMeterGetPowerConsumption *)ptr, "dss:DSMeterGetPowerConsumption");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
@@ -1921,6 +2073,24 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	(void)soap; (void)ptr; (void)type; /* appease -Wall -Werror */
 	switch (type)
 	{
+	case SOAP_TYPE_dss__MeteringValuePerDevice:
+		((dss__MeteringValuePerDevice *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_dss__MeteringValue:
+		((dss__MeteringValue *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_dss__MeteringSeries:
+		((dss__MeteringSeries *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_dss__MeteringResolutions:
+		((dss__MeteringResolutions *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_dss__PropertyQueryEntry:
+		((dss__PropertyQueryEntry *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_dss__Property:
+		((dss__Property *)ptr)->soap_serialize(soap);
+		break;
 	case SOAP_TYPE_dss__Event:
 		((dss__Event *)ptr)->soap_serialize(soap);
 		break;
@@ -1930,11 +2100,38 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_std__string:
 		soap_serialize_std__string(soap, (const std::string *)ptr);
 		break;
+	case SOAP_TYPE_dss__MeteringGetLastest:
+		soap_serialize_dss__MeteringGetLastest(soap, (const struct dss__MeteringGetLastest *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetLastestResponse:
+		soap_serialize_dss__MeteringGetLastestResponse(soap, (const struct dss__MeteringGetLastestResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetValues:
+		soap_serialize_dss__MeteringGetValues(soap, (const struct dss__MeteringGetValues *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetValuesResponse:
+		soap_serialize_dss__MeteringGetValuesResponse(soap, (const struct dss__MeteringGetValuesResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetSeries:
+		soap_serialize_dss__MeteringGetSeries(soap, (const struct dss__MeteringGetSeries *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetSeriesResponse:
+		soap_serialize_dss__MeteringGetSeriesResponse(soap, (const struct dss__MeteringGetSeriesResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetResolutions:
+		soap_serialize_dss__MeteringGetResolutions(soap, (const struct dss__MeteringGetResolutions *)ptr);
+		break;
+	case SOAP_TYPE_dss__MeteringGetResolutionsResponse:
+		soap_serialize_dss__MeteringGetResolutionsResponse(soap, (const struct dss__MeteringGetResolutionsResponse *)ptr);
+		break;
 	case SOAP_TYPE_dss__StructureAddDeviceToZone:
 		soap_serialize_dss__StructureAddDeviceToZone(soap, (const struct dss__StructureAddDeviceToZone *)ptr);
 		break;
 	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
 		soap_serialize_dss__StructureAddDeviceToZoneResponse(soap, (const struct dss__StructureAddDeviceToZoneResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__PropertyQuery:
+		soap_serialize_dss__PropertyQuery(soap, (const struct dss__PropertyQuery *)ptr);
 		break;
 	case SOAP_TYPE_dss__PropertyRemove:
 		soap_serialize_dss__PropertyRemove(soap, (const struct dss__PropertyRemove *)ptr);
@@ -2038,6 +2235,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		soap_serialize_dss__ZoneSetNameResponse(soap, (const struct dss__ZoneSetNameResponse *)ptr);
 		break;
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValue:
+		soap_serialize_dss__ApartmentGetEnergyMeterValue(soap, (const struct dss__ApartmentGetEnergyMeterValue *)ptr);
+		break;
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse:
+		soap_serialize_dss__ApartmentGetEnergyMeterValueResponse(soap, (const struct dss__ApartmentGetEnergyMeterValueResponse *)ptr);
+		break;
 	case SOAP_TYPE_dss__ApartmentGetPowerConsumption:
 		soap_serialize_dss__ApartmentGetPowerConsumption(soap, (const struct dss__ApartmentGetPowerConsumption *)ptr);
 		break;
@@ -2085,6 +2288,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse:
 		soap_serialize_dss__ApartmentGetDSMeterIDsResponse(soap, (const struct dss__ApartmentGetDSMeterIDsResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValue:
+		soap_serialize_dss__DSMeterGetEnergyMeterValue(soap, (const struct dss__DSMeterGetEnergyMeterValue *)ptr);
+		break;
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse:
+		soap_serialize_dss__DSMeterGetEnergyMeterValueResponse(soap, (const struct dss__DSMeterGetEnergyMeterValueResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumption:
 		soap_serialize_dss__DSMeterGetPowerConsumption(soap, (const struct dss__DSMeterGetPowerConsumption *)ptr);
@@ -2796,6 +3005,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__DSMeterGetPowerConsumptionResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumption:
 		return (void*)soap_instantiate_dss__DSMeterGetPowerConsumption(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse:
+		return (void*)soap_instantiate_dss__DSMeterGetEnergyMeterValueResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValue:
+		return (void*)soap_instantiate_dss__DSMeterGetEnergyMeterValue(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse:
 		return (void*)soap_instantiate_dss__ApartmentGetDSMeterIDsResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ApartmentGetDSMeterIDs:
@@ -2828,6 +3041,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__ApartmentGetPowerConsumptionResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ApartmentGetPowerConsumption:
 		return (void*)soap_instantiate_dss__ApartmentGetPowerConsumption(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse:
+		return (void*)soap_instantiate_dss__ApartmentGetEnergyMeterValueResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValue:
+		return (void*)soap_instantiate_dss__ApartmentGetEnergyMeterValue(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		return (void*)soap_instantiate_dss__ZoneSetNameResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ZoneSetName:
@@ -2898,10 +3115,40 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__PropertyRemoveResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__PropertyRemove:
 		return (void*)soap_instantiate_dss__PropertyRemove(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Property:
+		return (void*)soap_instantiate_dss__Property(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__PropertyQueryEntry:
+		return (void*)soap_instantiate_dss__PropertyQueryEntry(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__PropertyQuery:
+		return (void*)soap_instantiate_dss__PropertyQuery(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
 		return (void*)soap_instantiate_dss__StructureAddDeviceToZoneResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__StructureAddDeviceToZone:
 		return (void*)soap_instantiate_dss__StructureAddDeviceToZone(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringResolutions:
+		return (void*)soap_instantiate_dss__MeteringResolutions(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetResolutionsResponse:
+		return (void*)soap_instantiate_dss__MeteringGetResolutionsResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetResolutions:
+		return (void*)soap_instantiate_dss__MeteringGetResolutions(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringSeries:
+		return (void*)soap_instantiate_dss__MeteringSeries(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetSeriesResponse:
+		return (void*)soap_instantiate_dss__MeteringGetSeriesResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetSeries:
+		return (void*)soap_instantiate_dss__MeteringGetSeries(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringValue:
+		return (void*)soap_instantiate_dss__MeteringValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetValuesResponse:
+		return (void*)soap_instantiate_dss__MeteringGetValuesResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetValues:
+		return (void*)soap_instantiate_dss__MeteringGetValues(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringValuePerDevice:
+		return (void*)soap_instantiate_dss__MeteringValuePerDevice(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetLastestResponse:
+		return (void*)soap_instantiate_dss__MeteringGetLastestResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__MeteringGetLastest:
+		return (void*)soap_instantiate_dss__MeteringGetLastest(soap, -1, type, arrayType, n);
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Header:
 		return (void*)soap_instantiate_SOAP_ENV__Header(soap, -1, type, arrayType, n);
@@ -2922,6 +3169,18 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 	case SOAP_TYPE_SOAP_ENV__Fault:
 		return (void*)soap_instantiate_SOAP_ENV__Fault(soap, -1, type, arrayType, n);
 #endif
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringValuePerDevice:
+		return (void*)soap_instantiate_std__vectorTemplateOfdss__MeteringValuePerDevice(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringValue:
+		return (void*)soap_instantiate_std__vectorTemplateOfdss__MeteringValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringSeries:
+		return (void*)soap_instantiate_std__vectorTemplateOfdss__MeteringSeries(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringResolutions:
+		return (void*)soap_instantiate_std__vectorTemplateOfdss__MeteringResolutions(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_std__vectorTemplateOfdss__PropertyQueryEntry:
+		return (void*)soap_instantiate_std__vectorTemplateOfdss__PropertyQueryEntry(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_std__vectorTemplateOfdss__Property:
+		return (void*)soap_instantiate_std__vectorTemplateOfdss__Property(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_std__vectorTemplateOfdss__Event:
 		return (void*)soap_instantiate_std__vectorTemplateOfdss__Event(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_std__vectorTemplateOfint:
@@ -3769,6 +4028,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 		else
 			delete[] (struct dss__DSMeterGetPowerConsumption*)p->ptr;
 		break;
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse:
+		if (p->size < 0)
+			delete (struct dss__DSMeterGetEnergyMeterValueResponse*)p->ptr;
+		else
+			delete[] (struct dss__DSMeterGetEnergyMeterValueResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DSMeterGetEnergyMeterValue:
+		if (p->size < 0)
+			delete (struct dss__DSMeterGetEnergyMeterValue*)p->ptr;
+		else
+			delete[] (struct dss__DSMeterGetEnergyMeterValue*)p->ptr;
+		break;
 	case SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse:
 		if (p->size < 0)
 			delete (struct dss__ApartmentGetDSMeterIDsResponse*)p->ptr;
@@ -3864,6 +4135,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__ApartmentGetPowerConsumption*)p->ptr;
 		else
 			delete[] (struct dss__ApartmentGetPowerConsumption*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse:
+		if (p->size < 0)
+			delete (struct dss__ApartmentGetEnergyMeterValueResponse*)p->ptr;
+		else
+			delete[] (struct dss__ApartmentGetEnergyMeterValueResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__ApartmentGetEnergyMeterValue:
+		if (p->size < 0)
+			delete (struct dss__ApartmentGetEnergyMeterValue*)p->ptr;
+		else
+			delete[] (struct dss__ApartmentGetEnergyMeterValue*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		if (p->size < 0)
@@ -4075,6 +4358,24 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 		else
 			delete[] (struct dss__PropertyRemove*)p->ptr;
 		break;
+	case SOAP_TYPE_dss__Property:
+		if (p->size < 0)
+			delete (dss__Property*)p->ptr;
+		else
+			delete[] (dss__Property*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__PropertyQueryEntry:
+		if (p->size < 0)
+			delete (dss__PropertyQueryEntry*)p->ptr;
+		else
+			delete[] (dss__PropertyQueryEntry*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__PropertyQuery:
+		if (p->size < 0)
+			delete (struct dss__PropertyQuery*)p->ptr;
+		else
+			delete[] (struct dss__PropertyQuery*)p->ptr;
+		break;
 	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
 		if (p->size < 0)
 			delete (struct dss__StructureAddDeviceToZoneResponse*)p->ptr;
@@ -4086,6 +4387,78 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__StructureAddDeviceToZone*)p->ptr;
 		else
 			delete[] (struct dss__StructureAddDeviceToZone*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringResolutions:
+		if (p->size < 0)
+			delete (dss__MeteringResolutions*)p->ptr;
+		else
+			delete[] (dss__MeteringResolutions*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetResolutionsResponse:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetResolutionsResponse*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetResolutionsResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetResolutions:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetResolutions*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetResolutions*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringSeries:
+		if (p->size < 0)
+			delete (dss__MeteringSeries*)p->ptr;
+		else
+			delete[] (dss__MeteringSeries*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetSeriesResponse:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetSeriesResponse*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetSeriesResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetSeries:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetSeries*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetSeries*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringValue:
+		if (p->size < 0)
+			delete (dss__MeteringValue*)p->ptr;
+		else
+			delete[] (dss__MeteringValue*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetValuesResponse:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetValuesResponse*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetValuesResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetValues:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetValues*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetValues*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringValuePerDevice:
+		if (p->size < 0)
+			delete (dss__MeteringValuePerDevice*)p->ptr;
+		else
+			delete[] (dss__MeteringValuePerDevice*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetLastestResponse:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetLastestResponse*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetLastestResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__MeteringGetLastest:
+		if (p->size < 0)
+			delete (struct dss__MeteringGetLastest*)p->ptr;
+		else
+			delete[] (struct dss__MeteringGetLastest*)p->ptr;
 		break;
 	case SOAP_TYPE_SOAP_ENV__Header:
 		if (p->size < 0)
@@ -4116,6 +4489,42 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct SOAP_ENV__Fault*)p->ptr;
 		else
 			delete[] (struct SOAP_ENV__Fault*)p->ptr;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringValuePerDevice:
+		if (p->size < 0)
+			delete (std::vector<dss__MeteringValuePerDevice >*)p->ptr;
+		else
+			delete[] (std::vector<dss__MeteringValuePerDevice >*)p->ptr;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringValue:
+		if (p->size < 0)
+			delete (std::vector<dss__MeteringValue >*)p->ptr;
+		else
+			delete[] (std::vector<dss__MeteringValue >*)p->ptr;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringSeries:
+		if (p->size < 0)
+			delete (std::vector<dss__MeteringSeries >*)p->ptr;
+		else
+			delete[] (std::vector<dss__MeteringSeries >*)p->ptr;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringResolutions:
+		if (p->size < 0)
+			delete (std::vector<dss__MeteringResolutions >*)p->ptr;
+		else
+			delete[] (std::vector<dss__MeteringResolutions >*)p->ptr;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__PropertyQueryEntry:
+		if (p->size < 0)
+			delete (std::vector<dss__PropertyQueryEntry >*)p->ptr;
+		else
+			delete[] (std::vector<dss__PropertyQueryEntry >*)p->ptr;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__Property:
+		if (p->size < 0)
+			delete (std::vector<dss__Property >*)p->ptr;
+		else
+			delete[] (std::vector<dss__Property >*)p->ptr;
 		break;
 	case SOAP_TYPE_std__vectorTemplateOfdss__Event:
 		if (p->size < 0)
@@ -4155,6 +4564,30 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_container_insert(struct soap *soap, int st, int 
 #endif
 {	switch (tt)
 	{
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringValuePerDevice:
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+		(*(std::vector<dss__MeteringValuePerDevice >*)p)[len] = *(dss__MeteringValuePerDevice *)q;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringValue:
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+		(*(std::vector<dss__MeteringValue >*)p)[len] = *(dss__MeteringValue *)q;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringSeries:
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+		(*(std::vector<dss__MeteringSeries >*)p)[len] = *(dss__MeteringSeries *)q;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__MeteringResolutions:
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+		(*(std::vector<dss__MeteringResolutions >*)p)[len] = *(dss__MeteringResolutions *)q;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__PropertyQueryEntry:
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+		(*(std::vector<dss__PropertyQueryEntry >*)p)[len] = *(dss__PropertyQueryEntry *)q;
+		break;
+	case SOAP_TYPE_std__vectorTemplateOfdss__Property:
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+		(*(std::vector<dss__Property >*)p)[len] = *(dss__Property *)q;
+		break;
 	case SOAP_TYPE_std__vectorTemplateOfdss__Event:
 		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
 		(*(std::vector<dss__Event >*)p)[len] = *(dss__Event *)q;
@@ -4669,6 +5102,869 @@ SOAP_FMAC3 bool * SOAP_FMAC4 soap_get_bool(struct soap *soap, bool *p, const cha
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
+}
+
+void dss__MeteringValuePerDevice::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_default_std__string(soap, &this->dss__MeteringValuePerDevice::dsid);
+	soap_default_int(soap, &this->dss__MeteringValuePerDevice::timestamp);
+	soap_default_int(soap, &this->dss__MeteringValuePerDevice::value);
+}
+
+void dss__MeteringValuePerDevice::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_serialize_std__string(soap, &this->dss__MeteringValuePerDevice::dsid);
+}
+
+int dss__MeteringValuePerDevice::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__MeteringValuePerDevice(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringValuePerDevice(struct soap *soap, const char *tag, int id, const dss__MeteringValuePerDevice *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringValuePerDevice), type))
+		return soap->error;
+	if (soap_out_std__string(soap, "dsid", -1, &(a->dss__MeteringValuePerDevice::dsid), ""))
+		return soap->error;
+	if (soap_out_int(soap, "timestamp", -1, &(a->dss__MeteringValuePerDevice::timestamp), ""))
+		return soap->error;
+	if (soap_out_int(soap, "value", -1, &(a->dss__MeteringValuePerDevice::value), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__MeteringValuePerDevice::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__MeteringValuePerDevice(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__MeteringValuePerDevice * SOAP_FMAC4 soap_in_dss__MeteringValuePerDevice(struct soap *soap, const char *tag, dss__MeteringValuePerDevice *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__MeteringValuePerDevice *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringValuePerDevice, sizeof(dss__MeteringValuePerDevice), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__MeteringValuePerDevice)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__MeteringValuePerDevice *)a->soap_in(soap, tag, type);
+		}
+	}
+	size_t soap_flag_dsid1 = 1;
+	size_t soap_flag_timestamp1 = 1;
+	size_t soap_flag_value1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_dsid1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "dsid", &(a->dss__MeteringValuePerDevice::dsid), "xsd:string"))
+				{	soap_flag_dsid1--;
+					continue;
+				}
+			if (soap_flag_timestamp1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, "timestamp", &(a->dss__MeteringValuePerDevice::timestamp), "xsd:int"))
+				{	soap_flag_timestamp1--;
+					continue;
+				}
+			if (soap_flag_value1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, "value", &(a->dss__MeteringValuePerDevice::value), "xsd:int"))
+				{	soap_flag_value1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__MeteringValuePerDevice *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringValuePerDevice, 0, sizeof(dss__MeteringValuePerDevice), 0, soap_copy_dss__MeteringValuePerDevice);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_dsid1 > 0 || soap_flag_timestamp1 > 0 || soap_flag_value1 > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+int dss__MeteringValuePerDevice::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__MeteringValuePerDevice);
+	if (this->soap_out(soap, tag?tag:"dss:MeteringValuePerDevice", id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+void *dss__MeteringValuePerDevice::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__MeteringValuePerDevice(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__MeteringValuePerDevice * SOAP_FMAC4 soap_get_dss__MeteringValuePerDevice(struct soap *soap, dss__MeteringValuePerDevice *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringValuePerDevice(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 dss__MeteringValuePerDevice * SOAP_FMAC2 soap_instantiate_dss__MeteringValuePerDevice(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringValuePerDevice(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringValuePerDevice, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (dss__MeteringValuePerDevice);
+		if (size)
+			*size = sizeof(dss__MeteringValuePerDevice);
+	}
+	else
+	{	cp->ptr = (void*)new (dss__MeteringValuePerDevice[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__MeteringValuePerDevice);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__MeteringValuePerDevice*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringValuePerDevice(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__MeteringValuePerDevice %p -> %p\n", q, p));
+	*(dss__MeteringValuePerDevice*)p = *(dss__MeteringValuePerDevice*)q;
+}
+
+void dss__MeteringValue::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_default_int(soap, &this->dss__MeteringValue::timestamp);
+	soap_default_int(soap, &this->dss__MeteringValue::value);
+}
+
+void dss__MeteringValue::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+}
+
+int dss__MeteringValue::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__MeteringValue(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringValue(struct soap *soap, const char *tag, int id, const dss__MeteringValue *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringValue), type))
+		return soap->error;
+	if (soap_out_int(soap, "timestamp", -1, &(a->dss__MeteringValue::timestamp), ""))
+		return soap->error;
+	if (soap_out_int(soap, "value", -1, &(a->dss__MeteringValue::value), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__MeteringValue::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__MeteringValue(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__MeteringValue * SOAP_FMAC4 soap_in_dss__MeteringValue(struct soap *soap, const char *tag, dss__MeteringValue *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__MeteringValue *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringValue, sizeof(dss__MeteringValue), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__MeteringValue)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__MeteringValue *)a->soap_in(soap, tag, type);
+		}
+	}
+	size_t soap_flag_timestamp1 = 1;
+	size_t soap_flag_value1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_timestamp1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, "timestamp", &(a->dss__MeteringValue::timestamp), "xsd:int"))
+				{	soap_flag_timestamp1--;
+					continue;
+				}
+			if (soap_flag_value1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, "value", &(a->dss__MeteringValue::value), "xsd:int"))
+				{	soap_flag_value1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__MeteringValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringValue, 0, sizeof(dss__MeteringValue), 0, soap_copy_dss__MeteringValue);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_timestamp1 > 0 || soap_flag_value1 > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+int dss__MeteringValue::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__MeteringValue);
+	if (this->soap_out(soap, tag?tag:"dss:MeteringValue", id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+void *dss__MeteringValue::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__MeteringValue(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__MeteringValue * SOAP_FMAC4 soap_get_dss__MeteringValue(struct soap *soap, dss__MeteringValue *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringValue(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 dss__MeteringValue * SOAP_FMAC2 soap_instantiate_dss__MeteringValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (dss__MeteringValue);
+		if (size)
+			*size = sizeof(dss__MeteringValue);
+	}
+	else
+	{	cp->ptr = (void*)new (dss__MeteringValue[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__MeteringValue);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__MeteringValue*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__MeteringValue %p -> %p\n", q, p));
+	*(dss__MeteringValue*)p = *(dss__MeteringValue*)q;
+}
+
+void dss__MeteringSeries::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_default_std__string(soap, &this->dss__MeteringSeries::dsid);
+	soap_default_std__string(soap, &this->dss__MeteringSeries::type);
+}
+
+void dss__MeteringSeries::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_serialize_std__string(soap, &this->dss__MeteringSeries::dsid);
+	soap_serialize_std__string(soap, &this->dss__MeteringSeries::type);
+}
+
+int dss__MeteringSeries::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__MeteringSeries(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringSeries(struct soap *soap, const char *tag, int id, const dss__MeteringSeries *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringSeries), type))
+		return soap->error;
+	if (soap_out_std__string(soap, "dsid", -1, &(a->dss__MeteringSeries::dsid), ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "type", -1, &(a->dss__MeteringSeries::type), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__MeteringSeries::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__MeteringSeries(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__MeteringSeries * SOAP_FMAC4 soap_in_dss__MeteringSeries(struct soap *soap, const char *tag, dss__MeteringSeries *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__MeteringSeries *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringSeries, sizeof(dss__MeteringSeries), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__MeteringSeries)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__MeteringSeries *)a->soap_in(soap, tag, type);
+		}
+	}
+	size_t soap_flag_dsid1 = 1;
+	size_t soap_flag_type1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_dsid1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "dsid", &(a->dss__MeteringSeries::dsid), "xsd:string"))
+				{	soap_flag_dsid1--;
+					continue;
+				}
+			if (soap_flag_type1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "type", &(a->dss__MeteringSeries::type), "xsd:string"))
+				{	soap_flag_type1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__MeteringSeries *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringSeries, 0, sizeof(dss__MeteringSeries), 0, soap_copy_dss__MeteringSeries);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_dsid1 > 0 || soap_flag_type1 > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+int dss__MeteringSeries::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__MeteringSeries);
+	if (this->soap_out(soap, tag?tag:"dss:MeteringSeries", id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+void *dss__MeteringSeries::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__MeteringSeries(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__MeteringSeries * SOAP_FMAC4 soap_get_dss__MeteringSeries(struct soap *soap, dss__MeteringSeries *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringSeries(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 dss__MeteringSeries * SOAP_FMAC2 soap_instantiate_dss__MeteringSeries(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringSeries(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringSeries, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (dss__MeteringSeries);
+		if (size)
+			*size = sizeof(dss__MeteringSeries);
+	}
+	else
+	{	cp->ptr = (void*)new (dss__MeteringSeries[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__MeteringSeries);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__MeteringSeries*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringSeries(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__MeteringSeries %p -> %p\n", q, p));
+	*(dss__MeteringSeries*)p = *(dss__MeteringSeries*)q;
+}
+
+void dss__MeteringResolutions::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_default_std__string(soap, &this->dss__MeteringResolutions::type);
+	soap_default_std__string(soap, &this->dss__MeteringResolutions::unit);
+	soap_default_int(soap, &this->dss__MeteringResolutions::resolution);
+}
+
+void dss__MeteringResolutions::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_serialize_std__string(soap, &this->dss__MeteringResolutions::type);
+	soap_serialize_std__string(soap, &this->dss__MeteringResolutions::unit);
+}
+
+int dss__MeteringResolutions::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__MeteringResolutions(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringResolutions(struct soap *soap, const char *tag, int id, const dss__MeteringResolutions *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringResolutions), type))
+		return soap->error;
+	if (soap_out_std__string(soap, "type", -1, &(a->dss__MeteringResolutions::type), ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "unit", -1, &(a->dss__MeteringResolutions::unit), ""))
+		return soap->error;
+	if (soap_out_int(soap, "resolution", -1, &(a->dss__MeteringResolutions::resolution), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__MeteringResolutions::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__MeteringResolutions(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__MeteringResolutions * SOAP_FMAC4 soap_in_dss__MeteringResolutions(struct soap *soap, const char *tag, dss__MeteringResolutions *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__MeteringResolutions *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringResolutions, sizeof(dss__MeteringResolutions), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__MeteringResolutions)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__MeteringResolutions *)a->soap_in(soap, tag, type);
+		}
+	}
+	size_t soap_flag_type1 = 1;
+	size_t soap_flag_unit1 = 1;
+	size_t soap_flag_resolution1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_type1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "type", &(a->dss__MeteringResolutions::type), "xsd:string"))
+				{	soap_flag_type1--;
+					continue;
+				}
+			if (soap_flag_unit1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "unit", &(a->dss__MeteringResolutions::unit), "xsd:string"))
+				{	soap_flag_unit1--;
+					continue;
+				}
+			if (soap_flag_resolution1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, "resolution", &(a->dss__MeteringResolutions::resolution), "xsd:int"))
+				{	soap_flag_resolution1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__MeteringResolutions *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringResolutions, 0, sizeof(dss__MeteringResolutions), 0, soap_copy_dss__MeteringResolutions);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_type1 > 0 || soap_flag_unit1 > 0 || soap_flag_resolution1 > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+int dss__MeteringResolutions::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__MeteringResolutions);
+	if (this->soap_out(soap, tag?tag:"dss:MeteringResolutions", id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+void *dss__MeteringResolutions::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__MeteringResolutions(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__MeteringResolutions * SOAP_FMAC4 soap_get_dss__MeteringResolutions(struct soap *soap, dss__MeteringResolutions *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringResolutions(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 dss__MeteringResolutions * SOAP_FMAC2 soap_instantiate_dss__MeteringResolutions(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringResolutions(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringResolutions, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (dss__MeteringResolutions);
+		if (size)
+			*size = sizeof(dss__MeteringResolutions);
+	}
+	else
+	{	cp->ptr = (void*)new (dss__MeteringResolutions[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__MeteringResolutions);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__MeteringResolutions*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringResolutions(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__MeteringResolutions %p -> %p\n", q, p));
+	*(dss__MeteringResolutions*)p = *(dss__MeteringResolutions*)q;
+}
+
+void dss__PropertyQueryEntry::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_default_std__string(soap, &this->dss__PropertyQueryEntry::name);
+	soap_default_std__vectorTemplateOfdss__Property(soap, &this->dss__PropertyQueryEntry::properties);
+	soap_default_std__vectorTemplateOfdss__PropertyQueryEntry(soap, &this->dss__PropertyQueryEntry::results);
+}
+
+void dss__PropertyQueryEntry::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_serialize_std__string(soap, &this->dss__PropertyQueryEntry::name);
+	soap_serialize_std__vectorTemplateOfdss__Property(soap, &this->dss__PropertyQueryEntry::properties);
+	soap_serialize_std__vectorTemplateOfdss__PropertyQueryEntry(soap, &this->dss__PropertyQueryEntry::results);
+}
+
+int dss__PropertyQueryEntry::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__PropertyQueryEntry(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__PropertyQueryEntry(struct soap *soap, const char *tag, int id, const dss__PropertyQueryEntry *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__PropertyQueryEntry), type))
+		return soap->error;
+	if (soap_out_std__string(soap, "name", -1, &(a->dss__PropertyQueryEntry::name), ""))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfdss__Property(soap, "properties", -1, &(a->dss__PropertyQueryEntry::properties), ""))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfdss__PropertyQueryEntry(soap, "results", -1, &(a->dss__PropertyQueryEntry::results), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__PropertyQueryEntry::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__PropertyQueryEntry(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__PropertyQueryEntry * SOAP_FMAC4 soap_in_dss__PropertyQueryEntry(struct soap *soap, const char *tag, dss__PropertyQueryEntry *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__PropertyQueryEntry *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__PropertyQueryEntry, sizeof(dss__PropertyQueryEntry), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__PropertyQueryEntry)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__PropertyQueryEntry *)a->soap_in(soap, tag, type);
+		}
+	}
+	size_t soap_flag_name1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_name1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "name", &(a->dss__PropertyQueryEntry::name), "xsd:string"))
+				{	soap_flag_name1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfdss__Property(soap, "properties", &(a->dss__PropertyQueryEntry::properties), "dss:Property"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfdss__PropertyQueryEntry(soap, "results", &(a->dss__PropertyQueryEntry::results), "dss:PropertyQueryEntry"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__PropertyQueryEntry *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__PropertyQueryEntry, 0, sizeof(dss__PropertyQueryEntry), 0, soap_copy_dss__PropertyQueryEntry);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_name1 > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+int dss__PropertyQueryEntry::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__PropertyQueryEntry);
+	if (this->soap_out(soap, tag?tag:"dss:PropertyQueryEntry", id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+void *dss__PropertyQueryEntry::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__PropertyQueryEntry(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__PropertyQueryEntry * SOAP_FMAC4 soap_get_dss__PropertyQueryEntry(struct soap *soap, dss__PropertyQueryEntry *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__PropertyQueryEntry(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 dss__PropertyQueryEntry * SOAP_FMAC2 soap_instantiate_dss__PropertyQueryEntry(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__PropertyQueryEntry(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__PropertyQueryEntry, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (dss__PropertyQueryEntry);
+		if (size)
+			*size = sizeof(dss__PropertyQueryEntry);
+	}
+	else
+	{	cp->ptr = (void*)new (dss__PropertyQueryEntry[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__PropertyQueryEntry);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__PropertyQueryEntry*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyQueryEntry(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__PropertyQueryEntry %p -> %p\n", q, p));
+	*(dss__PropertyQueryEntry*)p = *(dss__PropertyQueryEntry*)q;
+}
+
+void dss__Property::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_default_std__string(soap, &this->dss__Property::name);
+	soap_default_std__string(soap, &this->dss__Property::value);
+	soap_default_std__string(soap, &this->dss__Property::type);
+}
+
+void dss__Property::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_serialize_std__string(soap, &this->dss__Property::name);
+	soap_serialize_std__string(soap, &this->dss__Property::value);
+	soap_serialize_std__string(soap, &this->dss__Property::type);
+}
+
+int dss__Property::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__Property(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Property(struct soap *soap, const char *tag, int id, const dss__Property *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Property), type))
+		return soap->error;
+	if (soap_out_std__string(soap, "name", -1, &(a->dss__Property::name), ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "value", -1, &(a->dss__Property::value), ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "type", -1, &(a->dss__Property::type), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__Property::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__Property(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__Property * SOAP_FMAC4 soap_in_dss__Property(struct soap *soap, const char *tag, dss__Property *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__Property *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Property, sizeof(dss__Property), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__Property)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__Property *)a->soap_in(soap, tag, type);
+		}
+	}
+	size_t soap_flag_name1 = 1;
+	size_t soap_flag_value1 = 1;
+	size_t soap_flag_type1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_name1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "name", &(a->dss__Property::name), "xsd:string"))
+				{	soap_flag_name1--;
+					continue;
+				}
+			if (soap_flag_value1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "value", &(a->dss__Property::value), "xsd:string"))
+				{	soap_flag_value1--;
+					continue;
+				}
+			if (soap_flag_type1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, "type", &(a->dss__Property::type), "xsd:string"))
+				{	soap_flag_type1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__Property *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Property, 0, sizeof(dss__Property), 0, soap_copy_dss__Property);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_name1 > 0 || soap_flag_value1 > 0 || soap_flag_type1 > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+int dss__Property::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__Property);
+	if (this->soap_out(soap, tag?tag:"dss:Property", id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+void *dss__Property::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__Property(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__Property * SOAP_FMAC4 soap_get_dss__Property(struct soap *soap, dss__Property *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Property(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 dss__Property * SOAP_FMAC2 soap_instantiate_dss__Property(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Property(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Property, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (dss__Property);
+		if (size)
+			*size = sizeof(dss__Property);
+	}
+	else
+	{	cp->ptr = (void*)new (dss__Property[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__Property);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__Property*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Property(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__Property %p -> %p\n", q, p));
+	*(dss__Property*)p = *(dss__Property*)q;
 }
 
 void dss__Event::soap_default(struct soap *soap)
@@ -5667,6 +6963,899 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *soap, int st,
 
 #endif
 
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetLastest(struct soap *soap, struct dss__MeteringGetLastest *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+	soap_default_std__string(soap, &a->_from);
+	soap_default_std__string(soap, &a->_type);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetLastest(struct soap *soap, const struct dss__MeteringGetLastest *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+	soap_serialize_std__string(soap, &a->_from);
+	soap_serialize_std__string(soap, &a->_type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetLastest(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetLastest *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetLastest), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "from", -1, &a->_from, ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "type", -1, &a->_type, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetLastest * SOAP_FMAC4 soap_in_dss__MeteringGetLastest(struct soap *soap, const char *tag, struct dss__MeteringGetLastest *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	size_t soap_flag__from = 1;
+	size_t soap_flag__type = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetLastest *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetLastest, sizeof(struct dss__MeteringGetLastest), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetLastest(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__from && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, NULL, &a->_from, "xsd:string"))
+				{	soap_flag__from--;
+					continue;
+				}
+			if (soap_flag__type && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, NULL, &a->_type, "xsd:string"))
+				{	soap_flag__type--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetLastest *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetLastest, 0, sizeof(struct dss__MeteringGetLastest), 0, soap_copy_dss__MeteringGetLastest);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__from > 0 || soap_flag__type > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetLastest(struct soap *soap, const struct dss__MeteringGetLastest *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetLastest);
+	if (soap_out_dss__MeteringGetLastest(soap, tag?tag:"dss:MeteringGetLastest", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetLastest * SOAP_FMAC4 soap_get_dss__MeteringGetLastest(struct soap *soap, struct dss__MeteringGetLastest *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetLastest(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetLastest * SOAP_FMAC2 soap_instantiate_dss__MeteringGetLastest(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetLastest(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetLastest, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetLastest);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetLastest);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetLastest[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetLastest);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetLastest*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetLastest(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetLastest %p -> %p\n", q, p));
+	*(struct dss__MeteringGetLastest*)p = *(struct dss__MeteringGetLastest*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetLastestResponse(struct soap *soap, struct dss__MeteringGetLastestResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_std__vectorTemplateOfdss__MeteringValuePerDevice(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetLastestResponse(struct soap *soap, const struct dss__MeteringGetLastestResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_std__vectorTemplateOfdss__MeteringValuePerDevice(soap, &a->result);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetLastestResponse(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetLastestResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetLastestResponse), type))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfdss__MeteringValuePerDevice(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetLastestResponse * SOAP_FMAC4 soap_in_dss__MeteringGetLastestResponse(struct soap *soap, const char *tag, struct dss__MeteringGetLastestResponse *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetLastestResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetLastestResponse, sizeof(struct dss__MeteringGetLastestResponse), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetLastestResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfdss__MeteringValuePerDevice(soap, "result", &a->result, "dss:MeteringValuePerDevice"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetLastestResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetLastestResponse, 0, sizeof(struct dss__MeteringGetLastestResponse), 0, soap_copy_dss__MeteringGetLastestResponse);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (a->result.size() < 1))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetLastestResponse(struct soap *soap, const struct dss__MeteringGetLastestResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetLastestResponse);
+	if (soap_out_dss__MeteringGetLastestResponse(soap, tag?tag:"dss:MeteringGetLastestResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetLastestResponse * SOAP_FMAC4 soap_get_dss__MeteringGetLastestResponse(struct soap *soap, struct dss__MeteringGetLastestResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetLastestResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetLastestResponse * SOAP_FMAC2 soap_instantiate_dss__MeteringGetLastestResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetLastestResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetLastestResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetLastestResponse);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetLastestResponse);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetLastestResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetLastestResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetLastestResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetLastestResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetLastestResponse %p -> %p\n", q, p));
+	*(struct dss__MeteringGetLastestResponse*)p = *(struct dss__MeteringGetLastestResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetValues(struct soap *soap, struct dss__MeteringGetValues *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+	soap_default_string(soap, &a->_dsMeterID);
+	soap_default_std__string(soap, &a->_type);
+	soap_default_int(soap, &a->_resolution);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetValues(struct soap *soap, const struct dss__MeteringGetValues *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+	soap_serialize_string(soap, &a->_dsMeterID);
+	soap_serialize_std__string(soap, &a->_type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetValues(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetValues *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetValues), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "dsMeterID", -1, &a->_dsMeterID, ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "type", -1, &a->_type, ""))
+		return soap->error;
+	if (soap_out_int(soap, "resolution", -1, &a->_resolution, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetValues * SOAP_FMAC4 soap_in_dss__MeteringGetValues(struct soap *soap, const char *tag, struct dss__MeteringGetValues *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	size_t soap_flag__dsMeterID = 1;
+	size_t soap_flag__type = 1;
+	size_t soap_flag__resolution = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetValues *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetValues, sizeof(struct dss__MeteringGetValues), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetValues(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__dsMeterID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_dsMeterID, "xsd:string"))
+				{	soap_flag__dsMeterID--;
+					continue;
+				}
+			if (soap_flag__type && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, NULL, &a->_type, "xsd:string"))
+				{	soap_flag__type--;
+					continue;
+				}
+			if (soap_flag__resolution && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_resolution, "xsd:int"))
+				{	soap_flag__resolution--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetValues *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetValues, 0, sizeof(struct dss__MeteringGetValues), 0, soap_copy_dss__MeteringGetValues);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__type > 0 || soap_flag__resolution > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetValues(struct soap *soap, const struct dss__MeteringGetValues *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetValues);
+	if (soap_out_dss__MeteringGetValues(soap, tag?tag:"dss:MeteringGetValues", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetValues * SOAP_FMAC4 soap_get_dss__MeteringGetValues(struct soap *soap, struct dss__MeteringGetValues *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetValues(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetValues * SOAP_FMAC2 soap_instantiate_dss__MeteringGetValues(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetValues(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetValues, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetValues);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetValues);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetValues[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetValues);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetValues*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetValues(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetValues %p -> %p\n", q, p));
+	*(struct dss__MeteringGetValues*)p = *(struct dss__MeteringGetValues*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetValuesResponse(struct soap *soap, struct dss__MeteringGetValuesResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_std__vectorTemplateOfdss__MeteringValue(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetValuesResponse(struct soap *soap, const struct dss__MeteringGetValuesResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_std__vectorTemplateOfdss__MeteringValue(soap, &a->result);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetValuesResponse(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetValuesResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetValuesResponse), type))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfdss__MeteringValue(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetValuesResponse * SOAP_FMAC4 soap_in_dss__MeteringGetValuesResponse(struct soap *soap, const char *tag, struct dss__MeteringGetValuesResponse *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetValuesResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetValuesResponse, sizeof(struct dss__MeteringGetValuesResponse), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetValuesResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfdss__MeteringValue(soap, "result", &a->result, "dss:MeteringValue"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetValuesResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetValuesResponse, 0, sizeof(struct dss__MeteringGetValuesResponse), 0, soap_copy_dss__MeteringGetValuesResponse);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (a->result.size() < 1))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetValuesResponse(struct soap *soap, const struct dss__MeteringGetValuesResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetValuesResponse);
+	if (soap_out_dss__MeteringGetValuesResponse(soap, tag?tag:"dss:MeteringGetValuesResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetValuesResponse * SOAP_FMAC4 soap_get_dss__MeteringGetValuesResponse(struct soap *soap, struct dss__MeteringGetValuesResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetValuesResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetValuesResponse * SOAP_FMAC2 soap_instantiate_dss__MeteringGetValuesResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetValuesResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetValuesResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetValuesResponse);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetValuesResponse);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetValuesResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetValuesResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetValuesResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetValuesResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetValuesResponse %p -> %p\n", q, p));
+	*(struct dss__MeteringGetValuesResponse*)p = *(struct dss__MeteringGetValuesResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetSeries(struct soap *soap, struct dss__MeteringGetSeries *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetSeries(struct soap *soap, const struct dss__MeteringGetSeries *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetSeries(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetSeries *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetSeries), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetSeries * SOAP_FMAC4 soap_in_dss__MeteringGetSeries(struct soap *soap, const char *tag, struct dss__MeteringGetSeries *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetSeries *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetSeries, sizeof(struct dss__MeteringGetSeries), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetSeries(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetSeries *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetSeries, 0, sizeof(struct dss__MeteringGetSeries), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetSeries(struct soap *soap, const struct dss__MeteringGetSeries *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetSeries);
+	if (soap_out_dss__MeteringGetSeries(soap, tag?tag:"dss:MeteringGetSeries", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetSeries * SOAP_FMAC4 soap_get_dss__MeteringGetSeries(struct soap *soap, struct dss__MeteringGetSeries *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetSeries(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetSeries * SOAP_FMAC2 soap_instantiate_dss__MeteringGetSeries(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetSeries(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetSeries, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetSeries);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetSeries);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetSeries[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetSeries);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetSeries*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetSeries(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetSeries %p -> %p\n", q, p));
+	*(struct dss__MeteringGetSeries*)p = *(struct dss__MeteringGetSeries*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetSeriesResponse(struct soap *soap, struct dss__MeteringGetSeriesResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_std__vectorTemplateOfdss__MeteringSeries(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetSeriesResponse(struct soap *soap, const struct dss__MeteringGetSeriesResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_std__vectorTemplateOfdss__MeteringSeries(soap, &a->result);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetSeriesResponse(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetSeriesResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetSeriesResponse), type))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfdss__MeteringSeries(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetSeriesResponse * SOAP_FMAC4 soap_in_dss__MeteringGetSeriesResponse(struct soap *soap, const char *tag, struct dss__MeteringGetSeriesResponse *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetSeriesResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetSeriesResponse, sizeof(struct dss__MeteringGetSeriesResponse), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetSeriesResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfdss__MeteringSeries(soap, "result", &a->result, "dss:MeteringSeries"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetSeriesResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetSeriesResponse, 0, sizeof(struct dss__MeteringGetSeriesResponse), 0, soap_copy_dss__MeteringGetSeriesResponse);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (a->result.size() < 1))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetSeriesResponse(struct soap *soap, const struct dss__MeteringGetSeriesResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetSeriesResponse);
+	if (soap_out_dss__MeteringGetSeriesResponse(soap, tag?tag:"dss:MeteringGetSeriesResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetSeriesResponse * SOAP_FMAC4 soap_get_dss__MeteringGetSeriesResponse(struct soap *soap, struct dss__MeteringGetSeriesResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetSeriesResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetSeriesResponse * SOAP_FMAC2 soap_instantiate_dss__MeteringGetSeriesResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetSeriesResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetSeriesResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetSeriesResponse);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetSeriesResponse);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetSeriesResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetSeriesResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetSeriesResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetSeriesResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetSeriesResponse %p -> %p\n", q, p));
+	*(struct dss__MeteringGetSeriesResponse*)p = *(struct dss__MeteringGetSeriesResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetResolutions(struct soap *soap, struct dss__MeteringGetResolutions *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetResolutions(struct soap *soap, const struct dss__MeteringGetResolutions *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetResolutions(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetResolutions *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetResolutions), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetResolutions * SOAP_FMAC4 soap_in_dss__MeteringGetResolutions(struct soap *soap, const char *tag, struct dss__MeteringGetResolutions *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetResolutions *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetResolutions, sizeof(struct dss__MeteringGetResolutions), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetResolutions(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetResolutions *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetResolutions, 0, sizeof(struct dss__MeteringGetResolutions), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetResolutions(struct soap *soap, const struct dss__MeteringGetResolutions *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetResolutions);
+	if (soap_out_dss__MeteringGetResolutions(soap, tag?tag:"dss:MeteringGetResolutions", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetResolutions * SOAP_FMAC4 soap_get_dss__MeteringGetResolutions(struct soap *soap, struct dss__MeteringGetResolutions *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetResolutions(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetResolutions * SOAP_FMAC2 soap_instantiate_dss__MeteringGetResolutions(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetResolutions(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetResolutions, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetResolutions);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetResolutions);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetResolutions[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetResolutions);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetResolutions*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetResolutions(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetResolutions %p -> %p\n", q, p));
+	*(struct dss__MeteringGetResolutions*)p = *(struct dss__MeteringGetResolutions*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__MeteringGetResolutionsResponse(struct soap *soap, struct dss__MeteringGetResolutionsResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_std__vectorTemplateOfdss__MeteringResolutions(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__MeteringGetResolutionsResponse(struct soap *soap, const struct dss__MeteringGetResolutionsResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_std__vectorTemplateOfdss__MeteringResolutions(soap, &a->result);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__MeteringGetResolutionsResponse(struct soap *soap, const char *tag, int id, const struct dss__MeteringGetResolutionsResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__MeteringGetResolutionsResponse), type))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfdss__MeteringResolutions(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetResolutionsResponse * SOAP_FMAC4 soap_in_dss__MeteringGetResolutionsResponse(struct soap *soap, const char *tag, struct dss__MeteringGetResolutionsResponse *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__MeteringGetResolutionsResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__MeteringGetResolutionsResponse, sizeof(struct dss__MeteringGetResolutionsResponse), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__MeteringGetResolutionsResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfdss__MeteringResolutions(soap, "result", &a->result, "dss:MeteringResolutions"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__MeteringGetResolutionsResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__MeteringGetResolutionsResponse, 0, sizeof(struct dss__MeteringGetResolutionsResponse), 0, soap_copy_dss__MeteringGetResolutionsResponse);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (a->result.size() < 1))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__MeteringGetResolutionsResponse(struct soap *soap, const struct dss__MeteringGetResolutionsResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__MeteringGetResolutionsResponse);
+	if (soap_out_dss__MeteringGetResolutionsResponse(soap, tag?tag:"dss:MeteringGetResolutionsResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__MeteringGetResolutionsResponse * SOAP_FMAC4 soap_get_dss__MeteringGetResolutionsResponse(struct soap *soap, struct dss__MeteringGetResolutionsResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__MeteringGetResolutionsResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__MeteringGetResolutionsResponse * SOAP_FMAC2 soap_instantiate_dss__MeteringGetResolutionsResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__MeteringGetResolutionsResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__MeteringGetResolutionsResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__MeteringGetResolutionsResponse);
+		if (size)
+			*size = sizeof(struct dss__MeteringGetResolutionsResponse);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__MeteringGetResolutionsResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__MeteringGetResolutionsResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__MeteringGetResolutionsResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__MeteringGetResolutionsResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__MeteringGetResolutionsResponse %p -> %p\n", q, p));
+	*(struct dss__MeteringGetResolutionsResponse*)p = *(struct dss__MeteringGetResolutionsResponse*)q;
+}
+
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__StructureAddDeviceToZone(struct soap *soap, struct dss__StructureAddDeviceToZone *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
@@ -5899,6 +8088,124 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__StructureAddDeviceToZoneResponse(struc
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__StructureAddDeviceToZoneResponse %p -> %p\n", q, p));
 	*(struct dss__StructureAddDeviceToZoneResponse*)p = *(struct dss__StructureAddDeviceToZoneResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyQuery(struct soap *soap, struct dss__PropertyQuery *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+	soap_default_std__string(soap, &a->_query);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyQuery(struct soap *soap, const struct dss__PropertyQuery *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+	soap_serialize_std__string(soap, &a->_query);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__PropertyQuery(struct soap *soap, const char *tag, int id, const struct dss__PropertyQuery *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__PropertyQuery), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_std__string(soap, "query", -1, &a->_query, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__PropertyQuery * SOAP_FMAC4 soap_in_dss__PropertyQuery(struct soap *soap, const char *tag, struct dss__PropertyQuery *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	size_t soap_flag__query = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__PropertyQuery *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__PropertyQuery, sizeof(struct dss__PropertyQuery), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__PropertyQuery(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__query && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_std__string(soap, NULL, &a->_query, "xsd:string"))
+				{	soap_flag__query--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__PropertyQuery *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__PropertyQuery, 0, sizeof(struct dss__PropertyQuery), 0, soap_copy_dss__PropertyQuery);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__query > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__PropertyQuery(struct soap *soap, const struct dss__PropertyQuery *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__PropertyQuery);
+	if (soap_out_dss__PropertyQuery(soap, tag?tag:"dss:PropertyQuery", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__PropertyQuery * SOAP_FMAC4 soap_get_dss__PropertyQuery(struct soap *soap, struct dss__PropertyQuery *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__PropertyQuery(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__PropertyQuery * SOAP_FMAC2 soap_instantiate_dss__PropertyQuery(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__PropertyQuery(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__PropertyQuery, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__PropertyQuery);
+		if (size)
+			*size = sizeof(struct dss__PropertyQuery);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__PropertyQuery[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__PropertyQuery);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__PropertyQuery*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyQuery(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__PropertyQuery %p -> %p\n", q, p));
+	*(struct dss__PropertyQuery*)p = *(struct dss__PropertyQuery*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyRemove(struct soap *soap, struct dss__PropertyRemove *a)
@@ -9837,6 +12144,217 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ZoneSetNameResponse(struct soap *soap,
 	*(struct dss__ZoneSetNameResponse*)p = *(struct dss__ZoneSetNameResponse*)q;
 }
 
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetEnergyMeterValue(struct soap *soap, struct dss__ApartmentGetEnergyMeterValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetEnergyMeterValue(struct soap *soap, const struct dss__ApartmentGetEnergyMeterValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentGetEnergyMeterValue(struct soap *soap, const char *tag, int id, const struct dss__ApartmentGetEnergyMeterValue *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__ApartmentGetEnergyMeterValue), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__ApartmentGetEnergyMeterValue * SOAP_FMAC4 soap_in_dss__ApartmentGetEnergyMeterValue(struct soap *soap, const char *tag, struct dss__ApartmentGetEnergyMeterValue *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__ApartmentGetEnergyMeterValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ApartmentGetEnergyMeterValue, sizeof(struct dss__ApartmentGetEnergyMeterValue), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__ApartmentGetEnergyMeterValue(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__ApartmentGetEnergyMeterValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__ApartmentGetEnergyMeterValue, 0, sizeof(struct dss__ApartmentGetEnergyMeterValue), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentGetEnergyMeterValue(struct soap *soap, const struct dss__ApartmentGetEnergyMeterValue *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__ApartmentGetEnergyMeterValue);
+	if (soap_out_dss__ApartmentGetEnergyMeterValue(soap, tag?tag:"dss:ApartmentGetEnergyMeterValue", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__ApartmentGetEnergyMeterValue * SOAP_FMAC4 soap_get_dss__ApartmentGetEnergyMeterValue(struct soap *soap, struct dss__ApartmentGetEnergyMeterValue *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__ApartmentGetEnergyMeterValue(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__ApartmentGetEnergyMeterValue * SOAP_FMAC2 soap_instantiate_dss__ApartmentGetEnergyMeterValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__ApartmentGetEnergyMeterValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__ApartmentGetEnergyMeterValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__ApartmentGetEnergyMeterValue);
+		if (size)
+			*size = sizeof(struct dss__ApartmentGetEnergyMeterValue);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__ApartmentGetEnergyMeterValue[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__ApartmentGetEnergyMeterValue);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__ApartmentGetEnergyMeterValue*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetEnergyMeterValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__ApartmentGetEnergyMeterValue %p -> %p\n", q, p));
+	*(struct dss__ApartmentGetEnergyMeterValue*)p = *(struct dss__ApartmentGetEnergyMeterValue*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, struct dss__ApartmentGetEnergyMeterValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_xsd__unsignedInt(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, const struct dss__ApartmentGetEnergyMeterValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, const char *tag, int id, const struct dss__ApartmentGetEnergyMeterValueResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse), type))
+		return soap->error;
+	if (soap_out_xsd__unsignedInt(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__ApartmentGetEnergyMeterValueResponse * SOAP_FMAC4 soap_in_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, const char *tag, struct dss__ApartmentGetEnergyMeterValueResponse *a, const char *type)
+{
+	size_t soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__ApartmentGetEnergyMeterValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse, sizeof(struct dss__ApartmentGetEnergyMeterValueResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__ApartmentGetEnergyMeterValueResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_xsd__unsignedInt(soap, "result", &a->result, "xsd:unsignedInt"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__ApartmentGetEnergyMeterValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse, 0, sizeof(struct dss__ApartmentGetEnergyMeterValueResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, const struct dss__ApartmentGetEnergyMeterValueResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse);
+	if (soap_out_dss__ApartmentGetEnergyMeterValueResponse(soap, tag?tag:"dss:ApartmentGetEnergyMeterValueResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__ApartmentGetEnergyMeterValueResponse * SOAP_FMAC4 soap_get_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, struct dss__ApartmentGetEnergyMeterValueResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__ApartmentGetEnergyMeterValueResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__ApartmentGetEnergyMeterValueResponse * SOAP_FMAC2 soap_instantiate_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__ApartmentGetEnergyMeterValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__ApartmentGetEnergyMeterValueResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__ApartmentGetEnergyMeterValueResponse);
+		if (size)
+			*size = sizeof(struct dss__ApartmentGetEnergyMeterValueResponse);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__ApartmentGetEnergyMeterValueResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__ApartmentGetEnergyMeterValueResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__ApartmentGetEnergyMeterValueResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetEnergyMeterValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__ApartmentGetEnergyMeterValueResponse %p -> %p\n", q, p));
+	*(struct dss__ApartmentGetEnergyMeterValueResponse*)p = *(struct dss__ApartmentGetEnergyMeterValueResponse*)q;
+}
+
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetPowerConsumption(struct soap *soap, struct dss__ApartmentGetPowerConsumption *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
@@ -11575,6 +14093,227 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetDSMeterIDsResponse(struct 
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__ApartmentGetDSMeterIDsResponse %p -> %p\n", q, p));
 	*(struct dss__ApartmentGetDSMeterIDsResponse*)p = *(struct dss__ApartmentGetDSMeterIDsResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetEnergyMeterValue(struct soap *soap, struct dss__DSMeterGetEnergyMeterValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->_token);
+	soap_default_string(soap, &a->_dsMeterID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetEnergyMeterValue(struct soap *soap, const struct dss__DSMeterGetEnergyMeterValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_token);
+	soap_serialize_string(soap, &a->_dsMeterID);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DSMeterGetEnergyMeterValue(struct soap *soap, const char *tag, int id, const struct dss__DSMeterGetEnergyMeterValue *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DSMeterGetEnergyMeterValue), type))
+		return soap->error;
+	if (soap_out_string(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "dsMeterID", -1, &a->_dsMeterID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DSMeterGetEnergyMeterValue * SOAP_FMAC4 soap_in_dss__DSMeterGetEnergyMeterValue(struct soap *soap, const char *tag, struct dss__DSMeterGetEnergyMeterValue *a, const char *type)
+{
+	size_t soap_flag__token = 1;
+	size_t soap_flag__dsMeterID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DSMeterGetEnergyMeterValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DSMeterGetEnergyMeterValue, sizeof(struct dss__DSMeterGetEnergyMeterValue), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DSMeterGetEnergyMeterValue(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_token, "xsd:string"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__dsMeterID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_dsMeterID, "xsd:string"))
+				{	soap_flag__dsMeterID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DSMeterGetEnergyMeterValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DSMeterGetEnergyMeterValue, 0, sizeof(struct dss__DSMeterGetEnergyMeterValue), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DSMeterGetEnergyMeterValue(struct soap *soap, const struct dss__DSMeterGetEnergyMeterValue *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DSMeterGetEnergyMeterValue);
+	if (soap_out_dss__DSMeterGetEnergyMeterValue(soap, tag?tag:"dss:DSMeterGetEnergyMeterValue", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__DSMeterGetEnergyMeterValue * SOAP_FMAC4 soap_get_dss__DSMeterGetEnergyMeterValue(struct soap *soap, struct dss__DSMeterGetEnergyMeterValue *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DSMeterGetEnergyMeterValue(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__DSMeterGetEnergyMeterValue * SOAP_FMAC2 soap_instantiate_dss__DSMeterGetEnergyMeterValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DSMeterGetEnergyMeterValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DSMeterGetEnergyMeterValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__DSMeterGetEnergyMeterValue);
+		if (size)
+			*size = sizeof(struct dss__DSMeterGetEnergyMeterValue);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__DSMeterGetEnergyMeterValue[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DSMeterGetEnergyMeterValue);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DSMeterGetEnergyMeterValue*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetEnergyMeterValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DSMeterGetEnergyMeterValue %p -> %p\n", q, p));
+	*(struct dss__DSMeterGetEnergyMeterValue*)p = *(struct dss__DSMeterGetEnergyMeterValue*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, struct dss__DSMeterGetEnergyMeterValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_xsd__unsignedInt(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, const struct dss__DSMeterGetEnergyMeterValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, const char *tag, int id, const struct dss__DSMeterGetEnergyMeterValueResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse), type))
+		return soap->error;
+	if (soap_out_xsd__unsignedInt(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DSMeterGetEnergyMeterValueResponse * SOAP_FMAC4 soap_in_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, const char *tag, struct dss__DSMeterGetEnergyMeterValueResponse *a, const char *type)
+{
+	size_t soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DSMeterGetEnergyMeterValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse, sizeof(struct dss__DSMeterGetEnergyMeterValueResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DSMeterGetEnergyMeterValueResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_xsd__unsignedInt(soap, "result", &a->result, "xsd:unsignedInt"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DSMeterGetEnergyMeterValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse, 0, sizeof(struct dss__DSMeterGetEnergyMeterValueResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, const struct dss__DSMeterGetEnergyMeterValueResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse);
+	if (soap_out_dss__DSMeterGetEnergyMeterValueResponse(soap, tag?tag:"dss:DSMeterGetEnergyMeterValueResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct dss__DSMeterGetEnergyMeterValueResponse * SOAP_FMAC4 soap_get_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, struct dss__DSMeterGetEnergyMeterValueResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DSMeterGetEnergyMeterValueResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct dss__DSMeterGetEnergyMeterValueResponse * SOAP_FMAC2 soap_instantiate_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DSMeterGetEnergyMeterValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DSMeterGetEnergyMeterValueResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (struct dss__DSMeterGetEnergyMeterValueResponse);
+		if (size)
+			*size = sizeof(struct dss__DSMeterGetEnergyMeterValueResponse);
+	}
+	else
+	{	cp->ptr = (void*)new (struct dss__DSMeterGetEnergyMeterValueResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DSMeterGetEnergyMeterValueResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DSMeterGetEnergyMeterValueResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetEnergyMeterValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DSMeterGetEnergyMeterValueResponse %p -> %p\n", q, p));
+	*(struct dss__DSMeterGetEnergyMeterValueResponse*)p = *(struct dss__DSMeterGetEnergyMeterValueResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetPowerConsumption(struct soap *soap, struct dss__DSMeterGetPowerConsumption *a)
@@ -27387,6 +30126,516 @@ SOAP_FMAC3 char ** SOAP_FMAC4 soap_get_string(struct soap *soap, char **p, const
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__MeteringValuePerDevice(struct soap *soap, std::vector<dss__MeteringValuePerDevice >*p)
+{
+	p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__MeteringValuePerDevice(struct soap *soap, const std::vector<dss__MeteringValuePerDevice >*a)
+{
+	for (std::vector<dss__MeteringValuePerDevice >::const_iterator i = a->begin(); i != a->end(); ++i)
+		(*i).soap_serialize(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfdss__MeteringValuePerDevice(struct soap *soap, const char *tag, int id, const std::vector<dss__MeteringValuePerDevice >*a, const char *type)
+{
+	for (std::vector<dss__MeteringValuePerDevice >::const_iterator i = a->begin(); i != a->end(); ++i)
+	{
+		if ((*i).soap_out(soap, tag, id, ""))
+			return soap->error;
+	}
+	return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<dss__MeteringValuePerDevice >* SOAP_FMAC4 soap_in_std__vectorTemplateOfdss__MeteringValuePerDevice(struct soap *soap, const char *tag, std::vector<dss__MeteringValuePerDevice >*a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 1, NULL))
+		return NULL;
+	if (!a && !(a = soap_new_std__vectorTemplateOfdss__MeteringValuePerDevice(soap, -1)))
+		return NULL;
+	dss__MeteringValuePerDevice n;
+	short soap_flag = 0;
+	do
+	{	soap_revert(soap);
+		n.soap_default(soap);
+		if (*soap->id || *soap->href)
+		{	if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_dss__MeteringValuePerDevice, SOAP_TYPE_std__vectorTemplateOfdss__MeteringValuePerDevice, sizeof(dss__MeteringValuePerDevice), 0))
+				break;
+			if (!soap_in_dss__MeteringValuePerDevice(soap, tag, NULL, "dss:MeteringValuePerDevice"))
+				break;
+		}
+		else
+		{
+			if (!soap_in_dss__MeteringValuePerDevice(soap, tag, &n, "dss:MeteringValuePerDevice"))
+				break;
+		}
+		a->push_back(n);
+		soap_flag = 1;
+	}
+	while (tag && *tag != '-' && !soap_element_begin_in(soap, tag, 1, NULL));
+	if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+	{	soap->error = SOAP_OK;
+		return a;
+	}
+	return NULL;
+}
+
+SOAP_FMAC1 std::vector<dss__MeteringValuePerDevice > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfdss__MeteringValuePerDevice(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfdss__MeteringValuePerDevice(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_std__vectorTemplateOfdss__MeteringValuePerDevice, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringValuePerDevice >);
+		if (size)
+			*size = sizeof(std::vector<dss__MeteringValuePerDevice >);
+	}
+	else
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringValuePerDevice >[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(std::vector<dss__MeteringValuePerDevice >);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (std::vector<dss__MeteringValuePerDevice >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfdss__MeteringValuePerDevice(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<dss__MeteringValuePerDevice > %p -> %p\n", q, p));
+	*(std::vector<dss__MeteringValuePerDevice >*)p = *(std::vector<dss__MeteringValuePerDevice >*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__MeteringValue(struct soap *soap, std::vector<dss__MeteringValue >*p)
+{
+	p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__MeteringValue(struct soap *soap, const std::vector<dss__MeteringValue >*a)
+{
+	for (std::vector<dss__MeteringValue >::const_iterator i = a->begin(); i != a->end(); ++i)
+		(*i).soap_serialize(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfdss__MeteringValue(struct soap *soap, const char *tag, int id, const std::vector<dss__MeteringValue >*a, const char *type)
+{
+	for (std::vector<dss__MeteringValue >::const_iterator i = a->begin(); i != a->end(); ++i)
+	{
+		if ((*i).soap_out(soap, tag, id, ""))
+			return soap->error;
+	}
+	return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<dss__MeteringValue >* SOAP_FMAC4 soap_in_std__vectorTemplateOfdss__MeteringValue(struct soap *soap, const char *tag, std::vector<dss__MeteringValue >*a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 1, NULL))
+		return NULL;
+	if (!a && !(a = soap_new_std__vectorTemplateOfdss__MeteringValue(soap, -1)))
+		return NULL;
+	dss__MeteringValue n;
+	short soap_flag = 0;
+	do
+	{	soap_revert(soap);
+		n.soap_default(soap);
+		if (*soap->id || *soap->href)
+		{	if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_dss__MeteringValue, SOAP_TYPE_std__vectorTemplateOfdss__MeteringValue, sizeof(dss__MeteringValue), 0))
+				break;
+			if (!soap_in_dss__MeteringValue(soap, tag, NULL, "dss:MeteringValue"))
+				break;
+		}
+		else
+		{
+			if (!soap_in_dss__MeteringValue(soap, tag, &n, "dss:MeteringValue"))
+				break;
+		}
+		a->push_back(n);
+		soap_flag = 1;
+	}
+	while (tag && *tag != '-' && !soap_element_begin_in(soap, tag, 1, NULL));
+	if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+	{	soap->error = SOAP_OK;
+		return a;
+	}
+	return NULL;
+}
+
+SOAP_FMAC1 std::vector<dss__MeteringValue > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfdss__MeteringValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfdss__MeteringValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_std__vectorTemplateOfdss__MeteringValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringValue >);
+		if (size)
+			*size = sizeof(std::vector<dss__MeteringValue >);
+	}
+	else
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringValue >[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(std::vector<dss__MeteringValue >);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (std::vector<dss__MeteringValue >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfdss__MeteringValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<dss__MeteringValue > %p -> %p\n", q, p));
+	*(std::vector<dss__MeteringValue >*)p = *(std::vector<dss__MeteringValue >*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__MeteringSeries(struct soap *soap, std::vector<dss__MeteringSeries >*p)
+{
+	p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__MeteringSeries(struct soap *soap, const std::vector<dss__MeteringSeries >*a)
+{
+	for (std::vector<dss__MeteringSeries >::const_iterator i = a->begin(); i != a->end(); ++i)
+		(*i).soap_serialize(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfdss__MeteringSeries(struct soap *soap, const char *tag, int id, const std::vector<dss__MeteringSeries >*a, const char *type)
+{
+	for (std::vector<dss__MeteringSeries >::const_iterator i = a->begin(); i != a->end(); ++i)
+	{
+		if ((*i).soap_out(soap, tag, id, ""))
+			return soap->error;
+	}
+	return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<dss__MeteringSeries >* SOAP_FMAC4 soap_in_std__vectorTemplateOfdss__MeteringSeries(struct soap *soap, const char *tag, std::vector<dss__MeteringSeries >*a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 1, NULL))
+		return NULL;
+	if (!a && !(a = soap_new_std__vectorTemplateOfdss__MeteringSeries(soap, -1)))
+		return NULL;
+	dss__MeteringSeries n;
+	short soap_flag = 0;
+	do
+	{	soap_revert(soap);
+		n.soap_default(soap);
+		if (*soap->id || *soap->href)
+		{	if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_dss__MeteringSeries, SOAP_TYPE_std__vectorTemplateOfdss__MeteringSeries, sizeof(dss__MeteringSeries), 0))
+				break;
+			if (!soap_in_dss__MeteringSeries(soap, tag, NULL, "dss:MeteringSeries"))
+				break;
+		}
+		else
+		{
+			if (!soap_in_dss__MeteringSeries(soap, tag, &n, "dss:MeteringSeries"))
+				break;
+		}
+		a->push_back(n);
+		soap_flag = 1;
+	}
+	while (tag && *tag != '-' && !soap_element_begin_in(soap, tag, 1, NULL));
+	if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+	{	soap->error = SOAP_OK;
+		return a;
+	}
+	return NULL;
+}
+
+SOAP_FMAC1 std::vector<dss__MeteringSeries > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfdss__MeteringSeries(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfdss__MeteringSeries(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_std__vectorTemplateOfdss__MeteringSeries, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringSeries >);
+		if (size)
+			*size = sizeof(std::vector<dss__MeteringSeries >);
+	}
+	else
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringSeries >[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(std::vector<dss__MeteringSeries >);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (std::vector<dss__MeteringSeries >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfdss__MeteringSeries(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<dss__MeteringSeries > %p -> %p\n", q, p));
+	*(std::vector<dss__MeteringSeries >*)p = *(std::vector<dss__MeteringSeries >*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__MeteringResolutions(struct soap *soap, std::vector<dss__MeteringResolutions >*p)
+{
+	p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__MeteringResolutions(struct soap *soap, const std::vector<dss__MeteringResolutions >*a)
+{
+	for (std::vector<dss__MeteringResolutions >::const_iterator i = a->begin(); i != a->end(); ++i)
+		(*i).soap_serialize(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfdss__MeteringResolutions(struct soap *soap, const char *tag, int id, const std::vector<dss__MeteringResolutions >*a, const char *type)
+{
+	for (std::vector<dss__MeteringResolutions >::const_iterator i = a->begin(); i != a->end(); ++i)
+	{
+		if ((*i).soap_out(soap, tag, id, ""))
+			return soap->error;
+	}
+	return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<dss__MeteringResolutions >* SOAP_FMAC4 soap_in_std__vectorTemplateOfdss__MeteringResolutions(struct soap *soap, const char *tag, std::vector<dss__MeteringResolutions >*a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 1, NULL))
+		return NULL;
+	if (!a && !(a = soap_new_std__vectorTemplateOfdss__MeteringResolutions(soap, -1)))
+		return NULL;
+	dss__MeteringResolutions n;
+	short soap_flag = 0;
+	do
+	{	soap_revert(soap);
+		n.soap_default(soap);
+		if (*soap->id || *soap->href)
+		{	if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_dss__MeteringResolutions, SOAP_TYPE_std__vectorTemplateOfdss__MeteringResolutions, sizeof(dss__MeteringResolutions), 0))
+				break;
+			if (!soap_in_dss__MeteringResolutions(soap, tag, NULL, "dss:MeteringResolutions"))
+				break;
+		}
+		else
+		{
+			if (!soap_in_dss__MeteringResolutions(soap, tag, &n, "dss:MeteringResolutions"))
+				break;
+		}
+		a->push_back(n);
+		soap_flag = 1;
+	}
+	while (tag && *tag != '-' && !soap_element_begin_in(soap, tag, 1, NULL));
+	if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+	{	soap->error = SOAP_OK;
+		return a;
+	}
+	return NULL;
+}
+
+SOAP_FMAC1 std::vector<dss__MeteringResolutions > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfdss__MeteringResolutions(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfdss__MeteringResolutions(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_std__vectorTemplateOfdss__MeteringResolutions, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringResolutions >);
+		if (size)
+			*size = sizeof(std::vector<dss__MeteringResolutions >);
+	}
+	else
+	{	cp->ptr = (void*)new (std::vector<dss__MeteringResolutions >[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(std::vector<dss__MeteringResolutions >);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (std::vector<dss__MeteringResolutions >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfdss__MeteringResolutions(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<dss__MeteringResolutions > %p -> %p\n", q, p));
+	*(std::vector<dss__MeteringResolutions >*)p = *(std::vector<dss__MeteringResolutions >*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__PropertyQueryEntry(struct soap *soap, std::vector<dss__PropertyQueryEntry >*p)
+{
+	p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__PropertyQueryEntry(struct soap *soap, const std::vector<dss__PropertyQueryEntry >*a)
+{
+	for (std::vector<dss__PropertyQueryEntry >::const_iterator i = a->begin(); i != a->end(); ++i)
+		(*i).soap_serialize(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfdss__PropertyQueryEntry(struct soap *soap, const char *tag, int id, const std::vector<dss__PropertyQueryEntry >*a, const char *type)
+{
+	for (std::vector<dss__PropertyQueryEntry >::const_iterator i = a->begin(); i != a->end(); ++i)
+	{
+		if ((*i).soap_out(soap, tag, id, ""))
+			return soap->error;
+	}
+	return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<dss__PropertyQueryEntry >* SOAP_FMAC4 soap_in_std__vectorTemplateOfdss__PropertyQueryEntry(struct soap *soap, const char *tag, std::vector<dss__PropertyQueryEntry >*a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 1, NULL))
+		return NULL;
+	if (!a && !(a = soap_new_std__vectorTemplateOfdss__PropertyQueryEntry(soap, -1)))
+		return NULL;
+	dss__PropertyQueryEntry n;
+	short soap_flag = 0;
+	do
+	{	soap_revert(soap);
+		n.soap_default(soap);
+		if (*soap->id || *soap->href)
+		{	if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_dss__PropertyQueryEntry, SOAP_TYPE_std__vectorTemplateOfdss__PropertyQueryEntry, sizeof(dss__PropertyQueryEntry), 0))
+				break;
+			if (!soap_in_dss__PropertyQueryEntry(soap, tag, NULL, "dss:PropertyQueryEntry"))
+				break;
+		}
+		else
+		{
+			if (!soap_in_dss__PropertyQueryEntry(soap, tag, &n, "dss:PropertyQueryEntry"))
+				break;
+		}
+		a->push_back(n);
+		soap_flag = 1;
+	}
+	while (tag && *tag != '-' && !soap_element_begin_in(soap, tag, 1, NULL));
+	if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+	{	soap->error = SOAP_OK;
+		return a;
+	}
+	return NULL;
+}
+
+SOAP_FMAC1 std::vector<dss__PropertyQueryEntry > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfdss__PropertyQueryEntry(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfdss__PropertyQueryEntry(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_std__vectorTemplateOfdss__PropertyQueryEntry, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (std::vector<dss__PropertyQueryEntry >);
+		if (size)
+			*size = sizeof(std::vector<dss__PropertyQueryEntry >);
+	}
+	else
+	{	cp->ptr = (void*)new (std::vector<dss__PropertyQueryEntry >[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(std::vector<dss__PropertyQueryEntry >);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (std::vector<dss__PropertyQueryEntry >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfdss__PropertyQueryEntry(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<dss__PropertyQueryEntry > %p -> %p\n", q, p));
+	*(std::vector<dss__PropertyQueryEntry >*)p = *(std::vector<dss__PropertyQueryEntry >*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__Property(struct soap *soap, std::vector<dss__Property >*p)
+{
+	p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__Property(struct soap *soap, const std::vector<dss__Property >*a)
+{
+	for (std::vector<dss__Property >::const_iterator i = a->begin(); i != a->end(); ++i)
+		(*i).soap_serialize(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfdss__Property(struct soap *soap, const char *tag, int id, const std::vector<dss__Property >*a, const char *type)
+{
+	for (std::vector<dss__Property >::const_iterator i = a->begin(); i != a->end(); ++i)
+	{
+		if ((*i).soap_out(soap, tag, id, ""))
+			return soap->error;
+	}
+	return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<dss__Property >* SOAP_FMAC4 soap_in_std__vectorTemplateOfdss__Property(struct soap *soap, const char *tag, std::vector<dss__Property >*a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 1, NULL))
+		return NULL;
+	if (!a && !(a = soap_new_std__vectorTemplateOfdss__Property(soap, -1)))
+		return NULL;
+	dss__Property n;
+	short soap_flag = 0;
+	do
+	{	soap_revert(soap);
+		n.soap_default(soap);
+		if (*soap->id || *soap->href)
+		{	if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_dss__Property, SOAP_TYPE_std__vectorTemplateOfdss__Property, sizeof(dss__Property), 0))
+				break;
+			if (!soap_in_dss__Property(soap, tag, NULL, "dss:Property"))
+				break;
+		}
+		else
+		{
+			if (!soap_in_dss__Property(soap, tag, &n, "dss:Property"))
+				break;
+		}
+		a->push_back(n);
+		soap_flag = 1;
+	}
+	while (tag && *tag != '-' && !soap_element_begin_in(soap, tag, 1, NULL));
+	if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+	{	soap->error = SOAP_OK;
+		return a;
+	}
+	return NULL;
+}
+
+SOAP_FMAC1 std::vector<dss__Property > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfdss__Property(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfdss__Property(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_std__vectorTemplateOfdss__Property, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new (std::vector<dss__Property >);
+		if (size)
+			*size = sizeof(std::vector<dss__Property >);
+	}
+	else
+	{	cp->ptr = (void*)new (std::vector<dss__Property >[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(std::vector<dss__Property >);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (std::vector<dss__Property >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfdss__Property(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<dss__Property > %p -> %p\n", q, p));
+	*(std::vector<dss__Property >*)p = *(std::vector<dss__Property >*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__Event(struct soap *soap, std::vector<dss__Event >*p)
