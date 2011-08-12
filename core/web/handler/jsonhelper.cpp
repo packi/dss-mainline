@@ -63,8 +63,19 @@ namespace dss {
 
     result->addProperty("on", _device.getDevice()->isOn());
     result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());
-    result->addProperty("buttonID", _device.getDevice()->getButtonID());
     result->addProperty("outputMode", _device.getDevice()->getOutputMode());
+    result->addProperty("buttonID", _device.getDevice()->getButtonID());
+    result->addProperty("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
+
+    boost::shared_ptr<JSONArray<std::string> > groupsArr(new JSONArray<std::string>());
+    result->addElement("groups", groupsArr);
+    std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
+    for (int g = 1; g <= 63; g++) {
+      if (deviceGroups.test(g-1)) {
+        groupsArr->add(intToString(g));
+      }
+    }
+
     return result;
   } // toJSON(DeviceReference)
 
