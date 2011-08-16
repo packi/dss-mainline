@@ -29,17 +29,58 @@ namespace dss {
 
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;
+  const uint8_t SceneOffA1 = 0x01;
+  const uint8_t SceneOffA2 = 0x02;
+  const uint8_t SceneOffA3 = 0x03;
+  const uint8_t SceneOffA4 = 0x04;
   const uint8_t Scene1 = 0x05;
-  const uint8_t Scene2 = 0x11;
-  const uint8_t Scene3 = 0x12;
-  const uint8_t Scene4 = 0x13;
+  const uint8_t SceneA11 = 0x06;
+  const uint8_t SceneA21 = 0x07;
+  const uint8_t SceneA31 = 0x08;
+  const uint8_t SceneA41 = 0x09;
+  const uint8_t SceneDimArea = 0x0A;
   const uint8_t SceneDec = 0x0B;
   const uint8_t SceneInc = 0x0C;
   const uint8_t SceneMin = 0x0D;
   const uint8_t SceneMax = 0x0E;
   const uint8_t SceneStop = 0x0F;
+  const uint8_t Scene2 = 0x11;
+  const uint8_t Scene3 = 0x12;
+  const uint8_t Scene4 = 0x13;
+  const uint8_t Scene12 = 0x14;
+  const uint8_t Scene13 = 0x15;
+  const uint8_t Scene14 = 0x16;
+  const uint8_t Scene22 = 0x17;
+  const uint8_t Scene23 = 0x18;
+  const uint8_t Scene24 = 0x19;
+  const uint8_t Scene32 = 0x1A;
+  const uint8_t Scene33 = 0x1B;
+  const uint8_t Scene34 = 0x1C;
+  const uint8_t Scene42 = 0x1D;
+  const uint8_t Scene43 = 0x1E;
+  const uint8_t Scene44 = 0x1F;
+  const uint8_t SceneOffE1 = 0x20;
+  const uint8_t SceneOnE1 = 0x21;
+  const uint8_t SceneOffE2 = 0x22;
+  const uint8_t SceneOnE2 = 0x23;
+  const uint8_t SceneOffE3 = 0x24;
+  const uint8_t SceneOnE3 = 0x25;
+  const uint8_t SceneOffE4 = 0x26;
+  const uint8_t SceneOnE4 = 0x27;
+  const uint8_t SceneDecA1 = 0x2A;
+  const uint8_t SceneIncA1 = 0x2B;
+  const uint8_t SceneDecA2 = 0x2C;
+  const uint8_t SceneIncA2 = 0x2D;
+  const uint8_t SceneDecA3 = 0x2E;
+  const uint8_t SceneIncA3 = 0x2F;
+  const uint8_t SceneDecA4 = 0x30;
+  const uint8_t SceneIncA4 = 0x32;
   const uint8_t SceneLocalOff = 0x32;
   const uint8_t SceneLocalOn = 0x33;
+  const uint8_t SceneStopA1 = 0x34;
+  const uint8_t SceneStopA2 = 0x35;
+  const uint8_t SceneStopA3 = 0x36;
+  const uint8_t SceneStopA4 = 0x37;
 
   // Apartment Scenes
   const uint8_t SceneAutoStandBy = 0x40;
@@ -76,6 +117,16 @@ namespace dss {
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
   const uint32_t SimulationPrefix = 0xFFC00000;
+
+  const uint8_t CfgClassComm = 0x00;
+  const uint8_t CfgClassDevice = 0x01;
+  const uint8_t CfgClassPlatform = 0x02;
+  const uint8_t CfgClassFunction = 0x03;
+  const uint8_t CfgClassPrivate = 0x40;
+  const uint8_t CfgClassScene = 0x80;
+
+  const uint8_t CfgFunction_Mode = 0;
+  const uint8_t CfgFunction_ButtonMode = 1;
 
 } // namespace dss
 #endif
