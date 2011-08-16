@@ -91,6 +91,11 @@ namespace dss {
     }
   } // setValue
 
+  void SimDeviceBusInterface::addGroup(const Device& _device, const int _groupId) {
+  } // addGroup
+
+  void SimDeviceBusInterface::removeGroup(const Device& _device, const int _groupId) {
+  } // removeGroup
 
   int SimDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
     return 0;

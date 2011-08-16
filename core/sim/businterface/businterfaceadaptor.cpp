@@ -104,6 +104,22 @@ namespace dss {
       }
     }
 
+    virtual void addGroup(const Device& _device, const int _groupId) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->addGroup(_device, _groupId);
+      } else {
+        m_pInner->addGroup(_device, _groupId);
+      }
+    }
+
+    virtual void removeGroup(const Device& _device, const int _groupId) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->removeGroup(_device, _groupId);
+      } else {
+        m_pInner->removeGroup(_device, _groupId);
+      }
+    }
+
     virtual int getSensorValue(const Device& _device, const int _sensorID) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
         return m_pSimulationInterface->getSensorValue(_device, _sensorID);

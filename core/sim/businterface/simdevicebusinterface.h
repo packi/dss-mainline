@@ -47,6 +47,9 @@ namespace dss {
 
     virtual void setValue(const Device& _device, uint8_t _value);
 
+    virtual void addGroup(const Device& _device, const int _groupId);
+    virtual void removeGroup(const Device& _device, const int _groupId);
+
     virtual int getSensorValue(const Device& _device, const int _sensorID);
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
