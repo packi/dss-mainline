@@ -250,6 +250,20 @@ namespace dss {
       resultObj->addProperty("value", value);
 
       return success(resultObj);
+    } else if(_request.getMethod() == "setJokerGroup") {
+      int value = strToIntDef(_request.getParameter("groupID"), -1);
+      if((value  < 1) || (value > 7)) {
+        return failure("Invalid or missing parameter 'groupID'");
+      }
+      pDevice->setJokerGroup(value);
+      return success();
+    } else if(_request.getMethod() == "setButtonID") {
+      int value = strToIntDef(_request.getParameter("buttonID"), -1);
+      if((value  < 0) || (value > 15)) {
+        return failure("Invalid or missing parameter 'buttonID'");
+      }
+      pDevice->setDeviceButtonID(value);
+      return success();
     } else if(_request.getMethod() == "getTransmissionQuality") {
       std::pair<uint8_t, uint16_t> p = pDevice->getTransmissionQuality();
       uint8_t down = p.first;

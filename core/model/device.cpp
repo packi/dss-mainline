@@ -174,6 +174,27 @@ namespace dss {
     }
   } // setConfig
 
+  void Device::setDeviceButtonID(uint8_t _buttonId) {
+    setConfig(CfgClassFunction, CfgFunction_ButtonMode,
+        ((m_ButtonActiveGroup & 0xf) << 4) | (_buttonId & 0xf));
+  } // setButtonId
+
+  void Device::setJokerGroup(uint8_t _groupId) {
+    if((_groupId < 1) && (_groupId > 7)) {
+      throw std::runtime_error("Invalid joker group value");
+    }
+    // for standard groups force that only one group is active
+    for (int g = 1; g <= 7; g++) {
+      if (m_GroupBitmask.test(g-1)) {
+        removeFromGroup(g);
+      }
+    }
+    addToGroup(_groupId);
+    // propagate target group value to device
+    setConfig(CfgClassFunction, CfgFunction_ButtonMode,
+        ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
+  } // setJokerGroup
+
   uint8_t Device::getConfig(uint8_t _configClass, uint8_t _configIndex) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkReadAccess();

@@ -81,7 +81,10 @@ namespace dss {
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
+    /** Set device configuration values */
     void setConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value);
+    void setDeviceButtonID(uint8_t _buttonId);
+    void setJokerGroup(uint8_t _groupId);
     /** Returns device configuration value */
     uint8_t getConfig(uint8_t _configIndex, uint8_t _value);
     uint16_t getConfigWord(uint8_t _configIndex, uint8_t _value);

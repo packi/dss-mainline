@@ -212,6 +212,12 @@ namespace dss {
       .withParameter("class", "integer", true)
       .withParameter("index", "integer", true)
       .withDocumentation("Gets the value of config class at offset index");
+    clsDevice.addMethod("setButtonID")
+      .withParameter("buttonID", "integer", true)
+      .withDocumentation("Sets the button id of a device");
+    clsDevice.addMethod("setJokerGroup")
+      .withParameter("groupID", "integer", true)
+      .withDocumentation("Sets the color group of a joker device");
     clsDevice.addMethod("getTransmissionQuality")
       .withDocumentation("Request upstream and downstream quality information");
     clsDevice.addMethod("callScene")
