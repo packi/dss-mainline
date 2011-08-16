@@ -58,7 +58,11 @@ namespace dss {
     int persistSet(Set& _set, const std::string& _originalSet);
     int persistSet(Set& _set, const std::string& _originalSet, int _groupNumber);
     void unpersistSet(std::string _setDescription);
-  }; // StructureManipulator
+
+    void createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
+    void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
+    void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
+}; // StructureManipulator
 
 
 } // namespace dss

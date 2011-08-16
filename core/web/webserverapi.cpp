@@ -412,6 +412,18 @@ namespace dss {
     clsStructure.addMethod("unpersistSet")
        .withParameter("set", "string", true)
        .withDocumentation("Removes the group associated with the set");
+    clsStructure.addMethod("addGroup")
+        .withParameter("zoneID", "integer", true)
+        .withParameter("groupID", "integer", true)
+        .withDocumentation("Adds a group in the zone with the given id");
+    clsStructure.addMethod("groupAddDevice")
+        .withParameter("deviceID", "integer", true)
+        .withParameter("groupID", "integer", true)
+        .withDocumentation("Adds a device to the group");
+    clsStructure.addMethod("groupRemoveDevice")
+        .withParameter("deviceID", "integer", true)
+        .withParameter("groupID", "integer", true)
+        .withDocumentation("Removes the device from the group");
 
     RestfulClass& clsMetering = api->addClass("metering");
     clsMetering.addMethod("getResolutions")

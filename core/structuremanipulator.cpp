@@ -233,4 +233,36 @@ namespace dss {
     }
   } // unpersistSet
 
+  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+    boost::shared_ptr<Group> pGroup = _zone->getGroup(_groupNumber);
+    if (!pGroup) {
+      Logger::getInstance()->log("creating new group " + intToString(_groupNumber) +
+          " in zone " + intToString(_zone->getID()));
+      pGroup = boost::shared_ptr<Group>(
+        new Group(_groupNumber, _zone, m_Apartment));
+      // TODO: allow new groups across all zone, e.g. with ZoneID == 0
+      _zone->addGroup(pGroup);
+      m_Interface.createGroup(_zone->getID(), _groupNumber);
+    }
+  } // createGroup
+
+  void StructureManipulator::deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+    m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
+    _device->addToGroup(_group->getID());
+  } // deviceAddToGroup
+
+  void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+    m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
+    _device->removeFromGroup(_group->getID());
+  } // deviceRemoveFromGroup
+
 } // namespace dss

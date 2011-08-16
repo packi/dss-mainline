@@ -30,6 +30,7 @@
 
 #include "core/model/apartment.h"
 #include "core/model/zone.h"
+#include "core/model/group.h"
 #include "core/model/set.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
@@ -195,6 +196,109 @@ namespace dss {
     }
   } // persistSet
 
+  boost::shared_ptr<JSONObject> StructureRequestHandler::addGroup(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    int groupID = -1;
+    int zoneID = -1;
+
+    if(_request.hasParameter("zoneID")) {
+      std::string zoneIDStr = _request.getParameter("zoneID");
+      zoneID = strToIntDef(zoneIDStr, -1);
+      zone = m_Apartment.getZone(zoneID);
+    }
+    if(zoneID < 1 || !zone) {
+      return failure("Invalid value for parameter zoneID : '" + _request.getParameter("zoneID") + "'");
+    }
+
+    if(_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+      if(zone->getGroup(groupID)) {
+        return failure("Group with groupID : '" + _request.getParameter("groupID") + "' already exists");
+      }
+    }
+    if(groupID == -1) {
+      return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.createGroup(zone, groupID);
+
+    return success();
+  } // addGroup
+
+  boost::shared_ptr<JSONObject> StructureRequestHandler::groupAddDevice(const RestfulRequest& _request) {
+    boost::shared_ptr<Device> dev;
+    boost::shared_ptr<Group> gr;
+
+    if(_request.hasParameter("deviceID")) {
+      std::string deviceIDStr = _request.getParameter("deviceID");
+      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
+      dev = m_Apartment.getDeviceByDSID(deviceID);
+      if(!dev->isPresent()) {
+        return failure("Cannot modify inactive device");
+      }
+    }
+    if(!dev) {
+      return failure("Invalid value for parameter deviceID : '" + _request.getParameter("deviceID") + "'");
+    }
+
+    if(_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      int groupID = strToIntDef(groupIDStr, -1);
+      try {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(dev->getZoneID());
+        gr = zone->getGroup(groupID);
+      } catch(ItemNotFoundException& e) {
+        gr = boost::shared_ptr<Group> ();
+      }
+    }
+    if(!gr) {
+      return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.deviceAddToGroup(dev, gr);
+
+    return success();
+  } // groupAddDevice
+
+  boost::shared_ptr<JSONObject> StructureRequestHandler::groupRemoveDevice(const RestfulRequest& _request) {
+    boost::shared_ptr<Device> dev;
+    boost::shared_ptr<Group> gr;
+
+    if(_request.hasParameter("deviceID")) {
+      std::string deviceIDStr = _request.getParameter("deviceID");
+      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
+      dev = m_Apartment.getDeviceByDSID(deviceID);
+      if(!dev->isPresent()) {
+        return failure("Cannot modify inactive device");
+      }
+    }
+    if(!dev) {
+      return failure("Invalid value for parameter deviceID : '" + _request.getParameter("deviceID") + "'");
+    }
+
+    if(_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      int groupID = strToIntDef(groupIDStr, -1);
+      try {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(dev->getZoneID());
+        gr = zone->getGroup(groupID);
+      } catch(ItemNotFoundException& e) {
+        gr = boost::shared_ptr<Group> ();
+      }
+    }
+    if(!gr) {
+      return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.deviceRemoveFromGroup(dev, gr);
+
+    return success();
+  } // groupRemoveDevice
+
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
@@ -208,6 +312,12 @@ namespace dss {
       return persistSet(_request);
     } else if(_request.getMethod() == "unpersistSet") {
       return unpersistSet(_request);
+    } else if(_request.getMethod() == "addGroup") {
+      return addGroup(_request);
+    } else if(_request.getMethod() == "groupAddDevice") {
+      return groupAddDevice(_request);
+    } else if(_request.getMethod() == "groupRemoveDevice") {
+      return groupRemoveDevice(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }
