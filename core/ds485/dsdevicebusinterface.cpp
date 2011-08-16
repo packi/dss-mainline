@@ -120,11 +120,72 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setValue
 
+  void DSDeviceBusInterface::addGroup(const Device& _device, const int _groupID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
 
-  int DSDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
-    // TODO: libdsm
-    Logger::getInstance()->log("getSensorValue(): not implemented yet", lsInfo);
-    return 0;
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, dsmDSID,
+                                              _device.getShortAddress(),
+                                              _groupID);
+    if(ret == ERROR_WRONG_PARAMETER) {
+      Logger::getInstance()->log("addGroup: dsm-api returned wrong parameter", lsWarning);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
+  } // addGroup
+
+  void DSDeviceBusInterface::removeGroup(const Device& _device, const int _groupID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, dsmDSID,
+                                                 _device.getShortAddress(),
+                                                 _groupID);
+    if(ret == ERROR_WRONG_PARAMETER) {
+      Logger::getInstance()->log("addGroup: dsm-api returned wrong parameter", lsWarning);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
+  } // removeGroup
+
+  int DSDeviceBusInterface::getSensorValue(const Device& _device,
+                                           const int _sensorID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+    uint16_t retVal;
+
+    int ret = DeviceSensor_get_value_sync(m_DSMApiHandle, dsmDSID,
+        _device.getShortAddress(), _sensorID,
+        kDSM_API_TIMEOUT, &retVal);
+
+    DSBusInterface::checkResultCode(ret);
+    return retVal;
+  } // getSensorValue
+
+  int DSDeviceBusInterface::getSensorType(const Device& _device,
+                                          const int _sensorID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+    uint8_t present, type, last;
+
+    int ret = DeviceSensor_get_type_sync(m_DSMApiHandle, dsmDSID,
+        _device.getShortAddress(), _sensorID,
+        kDSM_API_TIMEOUT, &present, &type, &last);
+
+    DSBusInterface::checkResultCode(ret);
+    return type;
   } // getSensorValue
 
   void DSDeviceBusInterface::lockOrUnlockDevice(const Device& _device, const bool _lock) {
