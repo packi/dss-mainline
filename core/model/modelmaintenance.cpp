@@ -653,11 +653,12 @@ namespace dss {
                                                int _configClass, int _configIndex, int _value) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
-      if(_configClass == 3) {
-        if(_configIndex == 0) {
+      if(_configClass == CfgClassFunction) {
+        if(_configIndex == CfgFunction_Mode) {
           devRef.getDevice()->setOutputMode(_value);
-        } else if(_configIndex == 1) {
-          devRef.getDevice()->setButtonID(_value);
+        } else if(_configIndex == CfgFunction_ButtonMode) {
+          devRef.getDevice()->setButtonID(_value & 0xf);
+          devRef.getDevice()->setButtonActiveGroup((_value >> 4) & 0xf);
         }
       }
     } catch(std::runtime_error& e) {

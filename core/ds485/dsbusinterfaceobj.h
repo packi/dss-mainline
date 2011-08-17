@@ -24,6 +24,7 @@
 #define DSBUSINTERFACEOBJ_H_
 
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 #include <boost/thread/recursive_mutex.hpp>
 
 namespace dss {

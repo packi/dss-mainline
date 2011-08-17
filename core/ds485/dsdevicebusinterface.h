@@ -50,7 +50,12 @@ namespace dss {
 
     virtual void setValue(const Device& _device, uint8_t _value);
 
+    virtual void addGroup(const Device& _device, const int _groupId);
+    virtual void removeGroup(const Device& _device, const int _groupId);
+
     virtual int getSensorValue(const Device& _device, const int _sensorID);
+    virtual int getSensorType(const Device& _device, const int _sensorID);
+
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device);

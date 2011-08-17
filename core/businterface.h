@@ -82,6 +82,12 @@ namespace dss {
 
     virtual void setValue(const Device& _device, uint8_t _value) = 0;
 
+    /** add device to a user group */
+    virtual void addGroup(const Device& _device, const int _groupId) = 0;
+
+    /** remove device from a user group */
+    virtual void removeGroup(const Device& _device, const int _groupId) = 0;
+
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;

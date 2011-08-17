@@ -51,6 +51,9 @@ namespace dss {
     boost::shared_ptr<JSONObject> removeInactiveDevices(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> persistSet(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> unpersistSet(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> addGroup(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> groupAddDevice(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> groupRemoveDevice(const RestfulRequest& _request);
   }; // StructureRequestHandler
 
 } // namespace dss

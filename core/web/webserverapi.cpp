@@ -212,6 +212,12 @@ namespace dss {
       .withParameter("class", "integer", true)
       .withParameter("index", "integer", true)
       .withDocumentation("Gets the value of config class at offset index");
+    clsDevice.addMethod("setButtonID")
+      .withParameter("buttonID", "integer", true)
+      .withDocumentation("Sets the button id of a device");
+    clsDevice.addMethod("setJokerGroup")
+      .withParameter("groupID", "integer", true)
+      .withDocumentation("Sets the color group of a joker device");
     clsDevice.addMethod("getTransmissionQuality")
       .withDocumentation("Request upstream and downstream quality information");
     clsDevice.addMethod("callScene")
@@ -412,6 +418,18 @@ namespace dss {
     clsStructure.addMethod("unpersistSet")
        .withParameter("set", "string", true)
        .withDocumentation("Removes the group associated with the set");
+    clsStructure.addMethod("addGroup")
+        .withParameter("zoneID", "integer", true)
+        .withParameter("groupID", "integer", true)
+        .withDocumentation("Adds a group in the zone with the given id");
+    clsStructure.addMethod("groupAddDevice")
+        .withParameter("deviceID", "integer", true)
+        .withParameter("groupID", "integer", true)
+        .withDocumentation("Adds a device to the group");
+    clsStructure.addMethod("groupRemoveDevice")
+        .withParameter("deviceID", "integer", true)
+        .withParameter("groupID", "integer", true)
+        .withDocumentation("Removes the device from the group");
 
     RestfulClass& clsMetering = api->addClass("metering");
     clsMetering.addMethod("getResolutions")
