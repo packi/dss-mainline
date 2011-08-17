@@ -651,7 +651,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
   std::string DSS::versionString() {
     std::ostringstream ostr;
-    ostr << "DSS";
+    ostr << "dSS";
 #ifdef HAVE_CONFIG_H
     ostr << " v" << DSS_VERSION;
 #endif
