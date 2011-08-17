@@ -128,6 +128,9 @@ const char* kSavedPropsDirectory = "data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
+    m_pPropertySystem->createProperty("/system/version/version")->setStringValue(DSS_VERSION);
+    m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
+    m_pPropertySystem->createProperty("/system/version/gitRevision")->setStringValue(DSS_RCS_REVISION);
   } // ctor
 
   DSS::~DSS() {
@@ -648,7 +651,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
   std::string DSS::versionString() {
     std::ostringstream ostr;
-    ostr << "DSS";
+    ostr << "dSS";
 #ifdef HAVE_CONFIG_H
     ostr << " v" << DSS_VERSION;
 #endif
