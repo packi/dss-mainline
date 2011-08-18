@@ -134,6 +134,9 @@ namespace dss {
     } catch(std::runtime_error&) {
     }
 
+    // remove from groups
+    dev->resetGroups();
+
     // remove from old zone
     if(dev->getZoneID() != 0) {
       try {
@@ -159,7 +162,6 @@ namespace dss {
     if(dev->getName().empty()) {
       dev->setName(_spec.Name);
     }
-    dev->resetGroups();
 
     foreach(int groupID, _spec.Groups) {
       log(std::string("scanDeviceOnBus: adding device ") + intToString(_spec.ShortAddress) + " to group " + intToString(groupID));
