@@ -107,6 +107,7 @@ namespace dss {
         m_pPropertyNode->createProperty("lastCalledScene")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("scenes");
+        m_pPropertyNode->createProperty("devices");
       }
     }
   } // publishToPropertyTree

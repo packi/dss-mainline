@@ -380,6 +380,17 @@ namespace dss {
       m_GroupBitmask.set(_groupID-1);
       if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
         m_Groups.push_back(_groupID);
+        if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
+          // create alias in group list
+          std::string gPath = "zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(_groupID) + "/devices/"  +  m_DSID.toString();
+          PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
+          if (gnode) {
+            gnode->alias(m_pPropertyNode);
+          }
+          // create group-n property
+          PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(_groupID));
+          gsubnode->createProperty("id")->setIntegerValue(_groupID);
+        }
       } else {
         Logger::getInstance()->log("Device " + m_DSID.toString() + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
       }
@@ -394,6 +405,18 @@ namespace dss {
       std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
       if(it != m_Groups.end()) {
         m_Groups.erase(it);
+        if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
+          // remove alias in group list
+          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
+          std::string gPath = "zones/zone" + intToString(zid) + "/groups/group" + intToString(_groupID) + "/devices/"  +  m_DSID.toString();
+          PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
+          if (gnode) {
+            gnode->getParentNode()->removeChild(gnode);
+          }
+          // remove property in device group list
+          PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(_groupID));
+          m_pPropertyNode->removeChild(gsubnode);
+        }
       }
     } else {
       Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
@@ -402,7 +425,11 @@ namespace dss {
 
   void Device::resetGroups() {
     m_GroupBitmask.reset();
-    m_Groups.clear();
+    std::vector<int>::iterator it;
+    while (m_Groups.size() > 0) {
+      int g = m_Groups.front();
+      removeFromGroup(g);
+    }
   } // resetGroups
 
   int Device::getGroupsCount() const {

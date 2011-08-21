@@ -86,7 +86,7 @@ namespace dss {
       m_Groups.erase(it);
     }
     if(m_pPropertyNode != NULL) {
-      PropertyNodePtr groupNode = m_pPropertyNode->getProperty("groups/" + intToString(_group->getID()));
+      PropertyNodePtr groupNode = m_pPropertyNode->getProperty("groups/group" + intToString(_group->getID()));
       if(groupNode != NULL) {
         groupNode->getParentNode()->removeChild(groupNode);
       }
@@ -96,6 +96,16 @@ namespace dss {
   void Zone::removeDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);
     if(pos != m_Devices.end()) {
+      if(m_pPropertyNode != NULL) {
+        for(std::vector<boost::shared_ptr<Group> >::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
+            ipGroup != e; ++ipGroup)
+        {
+          PropertyNodePtr groupNode = m_pPropertyNode->getProperty("groups/group" + intToString((*ipGroup)->getID()) + "/devices/" + _device.getDSID().toString());
+          if(groupNode != NULL) {
+            groupNode->getParentNode()->removeChild(groupNode);
+          }
+        }
+      }
       m_Devices.erase(pos);
     }
   } // removeDevice
