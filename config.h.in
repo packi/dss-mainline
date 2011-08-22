@@ -1,7 +1,7 @@
 #ifndef DIGITAL_STROM_SERVER_CONFIG_H
 #define DIGITAL_STROM_SERVER_CONFIG_H
 
-#define DSS_VERSION "1.0.2"
+#define DSS_VERSION "1.0.5"
 
 /* SpiderMonkey API header */
 #cmakedefine HAVE_STDINT
