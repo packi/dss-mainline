@@ -246,6 +246,13 @@ namespace dss {
     return dateToISOString<std::string>(&m_DateTime);
   } // toString
 
+  std::string DateTime::toRFC2822String() const {
+    static const char* theRFC2822FormatString = "%a, %d %b %Y %T %z";
+    char buf[32];
+    strftime(buf, 32, theRFC2822FormatString, &m_DateTime);
+    return std::string(buf);
+  } // toRFC2822String
+
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
     _dt << out;
     return out;

@@ -175,6 +175,12 @@ find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 set(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
 
+# sendmail
+find_program(SENDMAIL sendmail)
+if(SENDMAIL)
+   set(HAVE_SENDMAIL 1)
+endif(SENDMAIL)
+
 # generate config.h header file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)

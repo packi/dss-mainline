@@ -20,6 +20,8 @@
 #cmakedefine WITH_SAVEDPROPSDIR "${WITH_SAVEDPROPSDIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
+#cmakedefine HAVE_SENDMAIL
+#cmakedefine SENDMAIL "${SENDMAIL}"
 #cmakedefine HAVE_BACKTRACE
 #cmakedefine HAVE_BACKTRACE_SYMBOLS
 #cmakedefine HAVE_RT
