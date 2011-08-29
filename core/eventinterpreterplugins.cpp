@@ -22,10 +22,7 @@
 
 #include "eventinterpreterplugins.h"
 
-#include <Poco/Net/MailMessage.h>
-#include <Poco/Net/SMTPClientSession.h>
-#include <Poco/Net/MailRecipient.h>
-
+#include "config.h"
 #include "base.h"
 #include "logger.h"
 #include "businterface.h"
@@ -49,6 +46,9 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/Exception.h>
+#include <Poco/Net/MailMessage.h>
+#include <Poco/Net/SMTPClientSession.h>
+#include <Poco/Net/MailRecipient.h>
 
 #include <limits.h>
 
@@ -614,7 +614,9 @@ namespace dss {
 
   EventInterpreterPluginEmail::EventInterpreterPluginEmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("send_email", _pInterpreter)
-  { } // ctor
+  {
+    Logger::getInstance()->log(std::string("Event \"send_email\" is deprecated, and should be substituted by \"sendmail\"."), lsWarning);
+  } // ctor
 
   void EventInterpreterPluginEmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
     std::string emailServer;
@@ -697,6 +699,84 @@ namespace dss {
     {
       Logger::getInstance()->log("exc.displayText()=" + exc.displayText(), lsFatal);
     }
+  } // handleEvent
+
+  //================================================== EventInterpreterPluginSendmail
+
+  EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("sendmail", _pInterpreter)
+  { } // ctor
+
+  void EventInterpreterPluginSendmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
+#ifndef HAVE_SENDMAIL
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
+        "sendmail binary not detected, plugin is disabled", lsWarning);
+    return;
+#else
+    std::string sender;
+    std::string recipient, recipient_cc, recipient_bcc;
+    std::string subject;
+    std::string body;
+
+    if(_event.hasPropertySet("from")) {
+      sender = _event.getPropertyByName("from");
+    } else if(_subscription.getOptions()->hasParameter("from")) {
+      sender = _subscription.getOptions()->getParameter("from");
+    }
+
+    if(_event.hasPropertySet("to")) {
+      recipient = _event.getPropertyByName("to");
+    } else if(_subscription.getOptions()->hasParameter("to")) {
+      recipient = _subscription.getOptions()->getParameter("to");
+    }
+
+    if(_event.hasPropertySet("cc")) {
+      recipient_cc = _event.getPropertyByName("cc");
+    } else if(_subscription.getOptions()->hasParameter("cc")) {
+      recipient_cc = _subscription.getOptions()->getParameter("cc");
+    }
+
+    if(_event.hasPropertySet("bcc")) {
+      recipient_bcc = _event.getPropertyByName("bcc");
+    } else if(_subscription.getOptions()->hasParameter("bcc")) {
+      recipient_bcc = _subscription.getOptions()->getParameter("bcc");
+    }
+
+    if(_event.hasPropertySet("subject")) {
+      subject = _event.getPropertyByName("subject");
+    } else if(_subscription.getOptions()->hasParameter("subject")) {
+      subject = _subscription.getOptions()->getParameter("subject");
+    }
+
+    if (_event.hasPropertySet("body")) {
+      body = _event.getPropertyByName("body");
+    } else if(_subscription.getOptions()->hasParameter("body")) {
+      body = _subscription.getOptions()->getParameter("body");
+    }
+
+    try {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail::handleEvent: Sendmail", lsInfo);
+      FILE* pmail = popen(SENDMAIL " -t", "w");
+      if (NULL == pmail) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: " SENDMAIL " not found", lsFatal);
+        return;
+      }
+
+      DateTime now;
+      std::ostringstream mail;
+      mail << "Date: " << now.toRFC2822String() << "\n"
+          << "To: " << recipient << "\n"
+          << "From: " << sender << "\n"
+          << "Subject: " << subject << "\n"
+          << "X-Mailer: digitalSTROM Server (v" DSS_VERSION ")" << "\n\n";
+      mail << body;
+      fputs(mail.str().c_str(), pmail);
+      pclose(pmail);
+    } catch (std::exception& e) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to send mail: " +
+          std::string(e.what()), lsFatal);
+    }
+#endif
   } // handleEvent
 
 

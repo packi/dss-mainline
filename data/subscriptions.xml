@@ -1,52 +1,13 @@
 <?xml version="1.0"?>
 <subscriptions version="1">
-  <subscription event-name="call" handler-name="raise_event">
-    <parameter>
-      <parameter name="event_name">sendBell</parameter>
-    </parameter>
-    <filter match="all">
-      <property-filter type="matches" value="0797428986" property="source" />
-    </filter>
+
+  <!-- EMail event handling --> 
+  <subscription event-name="sendmail" handler-name="sendmail">
   </subscription>
-  <subscription event-name="sendBell" handler-name="bus_handler">
-    <send type="callScene">
-      <parameter name="scene">14</parameter>
-    </send>
-    <parameter>
-      <parameter name="location">.fid(4136)</parameter>
-    </parameter>    
-  </subscription>
-  <subscription event-name="turnOn" handler-name="bus_handler">
-    <send type="turnOn" />
-  </subscription>
-  <subscription event-name="turnOff" handler-name="bus_handler">
-    <send type="turnOff" />
-  </subscription>
-  <subscription event-name="brighter" handler-name="bus_handler">
-    <send type="increaseValue" />
-  </subscription>
-  <subscription event-name="abell" handler-name="raise_event">
-    <parameter>
-      <parameter name="event_name">blink</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="blink" handler-name="raise_event">
-    <parameter>
-      <parameter name="event_name">turnOn</parameter>
-      <parameter name="location">.yellow</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="blink" handler-name="raise_event">
-    <parameter>
-      <parameter name="event_name">turnOff</parameter>
-      <parameter name="time">+10</parameter>
-      <parameter name="location">.yellow</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="darker" handler-name="bus_handler">
-    <send type="decreaseValue" />
-  </subscription>
+
+
   <!-- Standard events -->
+<!--
   <subscription event-name="callScene" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">bell</parameter>
@@ -71,4 +32,27 @@
       <property-filter type="matches" value="43" property="sceneID" />
     </filter>
   </subscription>
+-->
+
+  <!-- Examples -->
+<!--
+  <subscription event-name="call" handler-name="raise_event">
+    <parameter>
+      <parameter name="event_name">sendBell</parameter>
+    </parameter>
+    <filter match="all">
+      <property-filter type="matches" value="0123456789" property="source" />
+    </filter>
+  </subscription>
+
+  <subscription event-name="sendBell" handler-name="bus_handler">
+    <send type="callScene">
+      <parameter name="scene">14</parameter>
+    </send>
+    <parameter>
+      <parameter name="location">.fid(4136)</parameter>
+    </parameter>    
+  </subscription>
+-->
+
 </subscriptions> 

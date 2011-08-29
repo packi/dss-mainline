@@ -132,6 +132,14 @@ namespace dss {
        EventInterpreterPluginEmail(EventInterpreter* _pInterpreter);
 
      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+   } __attribute__ ((deprecated)); // EventInterpreterPluginEmail
+
+  class EventInterpreterPluginSendmail : public EventInterpreterPlugin {
+   private:
+   public:
+       EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter);
+
+     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
    }; // EventInterpreterPluginEmail
 
 } // namespace dss

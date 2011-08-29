@@ -156,6 +156,7 @@ namespace dss {
     std::ostream& operator<<(std::ostream& out) const;
     operator std::string() const;
     std::string toString() const;
+    std::string toRFC2822String() const;
 
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
