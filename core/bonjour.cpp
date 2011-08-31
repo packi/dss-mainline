@@ -75,6 +75,7 @@ namespace dss {
 static AvahiEntryGroup *group = NULL;
 static AvahiSimplePoll *simple_poll = NULL;
 static char* name;
+static int serverPort;
 
 static void create_services(AvahiClient *c);
 
@@ -145,15 +146,27 @@ static void create_services(AvahiClient *c) {
          * the service type (IPP vs. BSD LPR). Only services with the
          * same name should be put in the same entry group. */
 
-        int serverPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/subsystems/WebServer/announcedport");
-
-        /* Add the service for IPP */
-        if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_dssweb._tcp", NULL, NULL, serverPort, NULL, NULL, NULL)) < 0) {
+        /* Add the service for dssweb */
+        if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
+            (AvahiPublishFlags)0, serverName, "_dssweb._tcp", NULL, NULL, serverPort, NULL, NULL, NULL)) < 0) {
 
             if (ret == AVAHI_ERR_COLLISION)
                 goto collision;
 
-            Logger::getInstance()->log(std::string("Failed to add _dssweb._tcp service: ") + avahi_strerror(ret), lsError);
+            Logger::getInstance()->log(std::string("Failed to add _dssweb._tcp service: ") +
+                avahi_strerror(ret), lsError);
+            goto fail;
+        }
+
+        /* Add the service for http */
+        if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
+            (AvahiPublishFlags)0, serverName, "_http._tcp", NULL, NULL, serverPort, NULL, NULL, NULL)) < 0) {
+
+            if (ret == AVAHI_ERR_COLLISION)
+                goto collision;
+
+            Logger::getInstance()->log(std::string("Failed to add _http._tcp service: ") +
+                avahi_strerror(ret), lsError);
             goto fail;
         }
 
@@ -240,7 +253,12 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
   }
 
   void BonjourHandler::execute() {
-    DSS::getInstance()->getSecurity().loginAsSystemUser("Bonjour needs system rights");
+    DSS::getInstance()->getSecurity().loginAsSystemUser(
+        "Bonjour needs system rights");
+
+    serverPort = DSS::getInstance()->getPropertySystem().getIntValue(
+        "/config/subsystems/WebServer/announcedport");
+
 #ifdef USE_AVAHI
     AvahiClient *client = NULL;
     int error;
@@ -280,17 +298,29 @@ fail:
 #endif
 #ifdef USE_DNS_SD
     DNSServiceErrorType err;
-    int serverPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/subsystems/WebServer/announcedport");
-
     memset(&m_RegisterReference, '\0', sizeof(m_RegisterReference));
 
-    err =
-    DNSServiceRegister(
+    err = DNSServiceRegister(
       &m_RegisterReference,
       kDNSServiceFlagsDefault,
       0,
       NULL,
-      TheMDNSRegisterType,
+      "_dssweb._tcp",
+      NULL,
+      NULL,
+      htons(serverPort),
+      0,
+      NULL,
+      &RegisterCallback,
+      NULL
+    );
+
+    err = DNSServiceRegister(
+      &m_RegisterReference,
+      kDNSServiceFlagsDefault,
+      0,
+      NULL,
+      "_http._tcp",
       NULL,
       NULL,
       htons(serverPort),
@@ -303,6 +333,8 @@ fail:
     if(err != kDNSServiceErr_NoError) {
       throw std::runtime_error("error registering service");
     }
+
+    return;
 #endif
   } // execute
 
