@@ -103,9 +103,11 @@ namespace dss {
       boost::shared_ptr<MeteringConfigChain> _pChain,
       int _index,
       boost::shared_ptr<DSMeter> _pMeter) {
+	kValueType stype = _pChain->isConsumption() ? kAverage : kMaximum;
     boost::shared_ptr<Series<CurrentValue> > result(
       new Series<CurrentValue>(_pChain->getResolution(_index),
-                               _pChain->getNumberOfValues(_index)));
+                               _pChain->getNumberOfValues(_index),
+                               stype));
     result->setUnit(_pChain->getUnit());
     result->setComment(_pChain->getComment());
     result->setFromDSID(_pMeter->getDSID());
@@ -294,7 +296,8 @@ namespace dss {
       boost::shared_ptr<Series<CurrentValue> > pSeriesConsumption(
         new Series<CurrentValue>(
           m_ConfigConsumption->getResolution(0),
-          m_ConfigConsumption->getNumberOfValues(0)));
+          m_ConfigConsumption->getNumberOfValues(0),
+          kAverage));
       pSeriesConsumption->setUnit(m_ConfigConsumption->getUnit());
       pSeriesConsumption->setComment(m_ConfigConsumption->getComment());
       pSeriesConsumption->setFromDSID(_pMeter->getDSID());
@@ -303,7 +306,8 @@ namespace dss {
       boost::shared_ptr<Series<CurrentValue> > pSeriesEnergy(
         new Series<CurrentValue>(
           m_ConfigEnergy->getResolution(0),
-          m_ConfigEnergy->getNumberOfValues(0)));
+          m_ConfigEnergy->getNumberOfValues(0),
+          kMaximum));
       pSeriesEnergy->setUnit(m_ConfigEnergy->getUnit());
       pSeriesEnergy->setComment(m_ConfigEnergy->getComment());
       pSeriesEnergy->setFromDSID(_pMeter->getDSID());

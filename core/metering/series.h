@@ -47,6 +47,8 @@ using Poco::XML::NamedNodeMap;
 
 namespace dss {
 
+  typedef enum { kAbsolute = 1, kMaximum = 2, kAverage = 3 } kValueType;
+
   class Value {
   protected:
     double m_Value;
@@ -54,6 +56,8 @@ namespace dss {
     double m_Min;
     double m_Max;
     DateTime m_TimeStamp;
+  protected:
+    kValueType m_Type;
   public:
 #ifdef WITH_GCOV
     Value();
@@ -62,14 +66,16 @@ namespace dss {
     Value(double _value)
     : m_Value(_value),
       m_Min(_value),
-      m_Max(_value)
+      m_Max(_value),
+      m_Type(kAbsolute)
     { } // ctor
 
     Value(double _value, const DateTime& _timeStamp)
     : m_Value(_value),
       m_Min(_value),
       m_Max(_value),
-      m_TimeStamp(_timeStamp)
+      m_TimeStamp(_timeStamp),
+      m_Type(kAbsolute)
     { } // ctor
 
     virtual ~Value() {};
@@ -121,6 +127,7 @@ namespace dss {
     double getMin() const { return m_Min; }
     double getMax() const { return m_Max; }
     double getValue() const { return m_Value; }
+    void setType(const kValueType _type) { m_Type = _type; }
   }; // Value
 
   class CurrentValue : public Value {
@@ -139,7 +146,15 @@ namespace dss {
 
     virtual void mergeWith(const Value& _other) {
       Value::mergeWith(_other);
-      m_Value = std::max(_other.getValue(), m_Value);
+      switch (m_Type) {
+      case kAbsolute:
+      case kAverage:
+    	  m_Value = _other.getValue();
+    	  break;
+      case kMaximum:
+        m_Value = std::max(_other.getValue(), m_Value);
+    	  break;
+      }
     }
   };
 
@@ -174,6 +189,7 @@ namespace dss {
     unsigned int m_NumberOfValues;
     Series<T>* m_NextSeries;
     QueueType m_Values;
+    kValueType m_Type;
   private:
     std::string m_Comment;
     dss_dsid_t m_FromDSID;
@@ -183,16 +199,18 @@ namespace dss {
     Series();
 #endif
 
-    Series(const int _resolution, const unsigned int _numberOfValues)
+    Series(const int _resolution, const unsigned int _numberOfValues, kValueType _type = kAverage)
     : m_Resolution(_resolution),
       m_NumberOfValues(_numberOfValues),
-      m_NextSeries(NULL)
+      m_NextSeries(NULL),
+      m_Type(_type)
     { } // ctor
 
-    Series(const int _resolution, const unsigned int _numberOfValues, Series<T>* _nextSeries)
+    Series(const int _resolution, const unsigned int _numberOfValues, Series<T>* _nextSeries, kValueType _type = kAverage)
     : m_Resolution(_resolution),
       m_NumberOfValues(_numberOfValues),
-      m_NextSeries(_nextSeries)
+      m_NextSeries(_nextSeries),
+      m_Type(_type)
     { } // ctor
 
     void addValue(const value_type& _value) {
@@ -202,6 +220,7 @@ namespace dss {
       DateTime bucketTimeStamp(static_cast<time_t>(_value.getTimeStamp().secondsSinceEpoch() -
         (_value.getTimeStamp().secondsSinceEpoch() % m_Resolution)));
       value_type newValue = _value;
+      newValue.setType(m_Type);
       newValue.setTimeStamp(bucketTimeStamp);
       if(!m_Values.empty()) {
         Value& lastVal = m_Values.front();
@@ -252,6 +271,7 @@ namespace dss {
     void setNextSeries(Series<T>* _value) { m_NextSeries = _value; }
     int getNumberOfValues() const { return m_NumberOfValues; }
     int getResolution() const { return m_Resolution; }
+    kValueType getType() const { return m_Type; }
 
     const std::string& getComment() const { return m_Comment; }
     void setComment(const std::string& _value) { m_Comment = _value; }
