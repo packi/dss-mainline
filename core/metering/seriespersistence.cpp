@@ -106,8 +106,48 @@ namespace dss {
     Element* valuesNode = rootNode->getChildElement("values");
     int numberOfValues = strToInt(valuesNode->getAttribute("numberOfValues"));
     int resolution = strToInt(valuesNode->getAttribute("resolution"));
+    std::string comment, fromdsid, unit, valtype;
+    kValueType stype;
 
-    result = new Series<T>(resolution, numberOfValues);
+    Element* configElem = rootNode->getChildElement("config");
+    if(configElem != NULL) {
+      Element* elem = configElem->getChildElement("comment");
+      if(elem != NULL && elem->hasChildNodes()) {
+        comment = elem->firstChild()->getNodeValue();
+      }
+      elem = configElem->getChildElement("from_dsid");
+      if(elem != NULL && elem->hasChildNodes()) {
+        fromdsid = elem->firstChild()->getNodeValue();
+      }
+      elem = configElem->getChildElement("unit");
+      if(elem != NULL && elem->hasChildNodes()) {
+        unit = elem->firstChild()->getNodeValue();
+      }
+      elem = configElem->getChildElement("type");
+      if(elem != NULL && elem->hasChildNodes()) {
+        valtype = elem->firstChild()->getNodeValue();
+        if (valtype.compare("average") == 0) {
+          stype = kAverage;
+        } else if (valtype.compare("maximum") == 0) {
+          stype = kMaximum;
+        } else if (valtype.compare("absolute") == 0) {
+          stype = kAbsolute;
+        }
+      }
+      else {
+        // Backward compatibility
+        if (comment.find("Consumption", 0) != std::string::npos) {
+          stype = kAverage;
+        } else if (comment.find("Energy", 0) != std::string::npos) {
+          stype = kMaximum;
+        }
+      }
+    }
+
+    result = new Series<T>(resolution, numberOfValues, stype);
+    result->setComment(comment);
+    result->setFromDSID(dss_dsid_t::fromString(fromdsid));
+    result->setUnit(unit);
 
     Node* node = valuesNode->firstChild();
     while(node != NULL) {
@@ -123,23 +163,6 @@ namespace dss {
       node = node->nextSibling();
     }
 
-    Element* configElem = rootNode->getChildElement("config");
-    if(configElem != NULL) {
-      Element* elem = configElem->getChildElement("comment");
-      if(elem != NULL && elem->hasChildNodes()) {
-        result->setComment(elem->firstChild()->getNodeValue());
-      }
-
-      elem = configElem->getChildElement("from_dsid");
-      if(elem != NULL && elem->hasChildNodes()) {
-        result->setFromDSID(dss_dsid_t::fromString(elem->firstChild()->getNodeValue()));
-      }
-
-      elem = configElem->getChildElement("unit");
-      if(elem != NULL && elem->hasChildNodes()) {
-        result->setUnit(elem->firstChild()->getNodeValue());
-      }
-    }
     return result;
 
   }
@@ -170,6 +193,21 @@ namespace dss {
     AutoPtr<Element> pConfig = pDoc->createElement("config");
     pRoot->appendChild(pConfig);
 
+    {
+        AutoPtr<Element> elem = pDoc->createElement("type");
+        std::string stype;
+        if (_series.getType() == kAverage)
+          stype = "average";
+        else if (_series.getType() == kMaximum)
+          stype = "maximum";
+        else if (_series.getType() == kAbsolute)
+          stype = "absolute";
+        else
+          stype = "undefined";
+        AutoPtr<Text> txt = pDoc->createTextNode(stype);
+        elem->appendChild(txt);
+        pConfig->appendChild(elem);
+    }
     if(!_series.getComment().empty()) {
       AutoPtr<Element> elem = pDoc->createElement("comment");
       AutoPtr<Text> txt = pDoc->createTextNode(_series.getComment());
