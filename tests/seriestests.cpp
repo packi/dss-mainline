@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(insertions) {
   BOOST_CHECK_EQUAL( (size_t)6, secondly2.getValues().size() );
   BOOST_CHECK_EQUAL( 1.0, secondly2.getValues()[2].getMin() );
   BOOST_CHECK_EQUAL( 20.0, secondly2.getValues()[2].getMax() );
-  BOOST_CHECK_EQUAL( 20.0, secondly2.getValues()[2].getValue() );
+  BOOST_CHECK_EQUAL( 11.0, secondly2.getValues()[2].getValue() );
 } // insertions
 
 BOOST_AUTO_TEST_CASE(slidingWindow) {
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(readWrite) {
 
   BOOST_CHECK_EQUAL( (size_t)2, secondly.getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, secondly.getValues().front().getMin() );
-  BOOST_CHECK_EQUAL( 5.0, secondly.getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 4.0, secondly.getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, secondly.getValues().front().getMax() );
 
   SeriesWriter<CurrentValue> writer;
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
-  BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 4.0, series->getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
 
   series->setComment("my comment");
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
-  BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 4.0, series->getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
   BOOST_CHECK_EQUAL( std::string("my comment"), series->getComment() );
   BOOST_CHECK_EQUAL( std::string("kW"), series->getUnit() );
