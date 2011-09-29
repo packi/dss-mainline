@@ -129,19 +129,33 @@ namespace dss {
       }
     } // disable
 
-    virtual int getConsumption() {
+    virtual uint32_t getPowerConsumption() {
       if(m_pSelf != NULL) {
         try {
           ScriptLock lock(m_pContext);
           JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
-          return m_pSelf->callFunctionByName<int>("getConsumption", param);
+          return m_pSelf->callFunctionByName<uint32_t>("getConsumption", param);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getConsumption'") + e.what(), lsError);
         }
       }
       return 0;
-    } // getConsumption
+    } // getPowerConsumption
+
+    virtual uint32_t getEnergyMeterValue() {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          return m_pSelf->callFunctionByName<uint32_t>("getEnergyMeter", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getEnergyMeter'") + e.what(), lsError);
+        }
+      }
+      return 0;
+    } // getEnergyMeter
 
     virtual void setValue(uint8_t _value) {
       if(m_pSelf != NULL) {
@@ -190,7 +204,7 @@ namespace dss {
         }
       }
       return 0;
-    } // getConfig
+    } // getDeviceConfig
 
     virtual uint16_t getDeviceConfigWord(uint8_t _configClass,
                                        uint8_t _configIndex) {
@@ -208,7 +222,21 @@ namespace dss {
         }
       }
       return 0;
-    } // getConfigWord
+    } // getDeviceConfigWord
+
+    virtual void setDeviceProgMode(uint8_t _modeId) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(int(_modeId));
+          m_pSelf->callFunctionByName<void>("setDeviceProgMode", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setDeviceProgMode'") + e.what(), lsError);
+        }
+      }
+    } // setDeviceProgMode
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() {
         return std::make_pair(rand() % 255, rand() % 255);

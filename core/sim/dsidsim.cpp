@@ -44,7 +44,7 @@ namespace dss {
     m_ValuesForScene[SceneDeepOff] = 0;
   } // ctor
 
-  int DSIDSim::getConsumption() {
+  uint32_t DSIDSim::getPowerConsumption() {
 	int _simpleConsumption=0;
 	int _minConsumption=0;
 	int _maxConsumption=0;
@@ -64,7 +64,11 @@ namespace dss {
 		_jitterConsumption= (int) (rand() % strToInt(getConfigParameter("JitterConsumption")));
 	_jitterConsumption =_jitterConsumption - (_jitterConsumption/2);
 
-    return (int) _simpleConsumption + _minConsumption + _maxConsumption + _jitterConsumption; //((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
+    return (uint32_t) _simpleConsumption + _minConsumption + _maxConsumption + _jitterConsumption; //((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
+  }
+
+  uint32_t DSIDSim::getEnergyMeterValue() {
+    return 0;
   }
 
   void DSIDSim::callScene(const int _sceneNr) {
@@ -111,6 +115,9 @@ namespace dss {
                                    const uint8_t _configIndex) {
     return static_cast<uint16_t>(m_DeviceConfig[_configClass][_configIndex]);
   } // getValue
+
+  void DSIDSim::setDeviceProgMode(const uint8_t _modeId) {
+  } // setDeviceProgMode
 
   std::pair<uint8_t, uint16_t> DSIDSim::getTransmissionQuality() {
     uint8_t down = rand() % 255;

@@ -54,7 +54,8 @@ namespace dss {
     virtual void enable();
     virtual void disable();
 
-    virtual int getConsumption();
+    virtual uint32_t getPowerConsumption();
+    virtual uint32_t getEnergyMeterValue();
 
     virtual void setDeviceConfig(const uint8_t _configClass,
                                  const uint8_t _configIndex,
@@ -65,6 +66,8 @@ namespace dss {
 
     virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
                                        const uint8_t _configIndex);
+
+    virtual void setDeviceProgMode(const uint8_t _modeId);
 
     virtual void setValue(const uint8_t _value);
 

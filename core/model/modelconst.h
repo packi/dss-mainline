@@ -122,11 +122,13 @@ namespace dss {
   const uint8_t CfgClassDevice = 0x01;
   const uint8_t CfgClassPlatform = 0x02;
   const uint8_t CfgClassFunction = 0x03;
-  const uint8_t CfgClassPrivate = 0x40;
+  const uint8_t CfgClassRuntime = 0x40;
   const uint8_t CfgClassScene = 0x80;
 
   const uint8_t CfgFunction_Mode = 0;
   const uint8_t CfgFunction_ButtonMode = 1;
+  const uint8_t CfgFunction_DimTime0 = 0x06;
+  const uint8_t CfgFunction_LedConfig0 = 0x18;
 
 } // namespace dss
 #endif

@@ -924,7 +924,7 @@ int dss__DeviceGetConfig(struct soap *soap, char* _token, char* _deviceID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  result = dev.getDevice()->getConfig(_configClass, _configIndex);
+  result = dev.getDevice()->getDeviceConfig(_configClass, _configIndex);
   return SOAP_OK;
 }
 
@@ -936,7 +936,7 @@ int dss__DeviceGetConfigWord(struct soap *soap, char* _token, char* _deviceID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  result = dev.getDevice()->getConfigWord(_configClass, _configIndex);
+  result = dev.getDevice()->getDeviceConfigWord(_configClass, _configIndex);
   return SOAP_OK;
 }
 
@@ -948,7 +948,7 @@ int dss__DeviceSetConfig(struct soap *soap, char* _token, char* _deviceID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.getDevice()->setConfig(_configClass, _configIndex, _value);
+  dev.getDevice()->setDeviceConfig(_configClass, _configIndex, _value);
   result = true;
   return SOAP_OK;
 }
@@ -961,7 +961,7 @@ int dss__DeviceSetValue(struct soap *soap, char* _token, char* _deviceID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.getDevice()->setValue(_value);
+  dev.getDevice()->setDeviceValue(_value);
   result = true;
   return SOAP_OK;
 }
@@ -1104,7 +1104,7 @@ int dss__DeviceGetTransmissionQuality(struct soap *soap, char* _token, char* _de
     return getResult;
   }
 
-  std::pair<uint8_t, uint16_t> p = dev.getDevice()->getTransmissionQuality();
+  std::pair<uint8_t, uint16_t> p = dev.getDevice()->getDeviceTransmissionQuality();
   result.downstream = p.first;
   result.upstream = p.second;
   return SOAP_OK;

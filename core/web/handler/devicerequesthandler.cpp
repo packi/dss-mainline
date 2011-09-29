@@ -212,7 +212,7 @@ namespace dss {
         return failure("Invalid or missing parameter 'index'");
       }
 
-      pDevice->setConfig(configClass, configIndex, value);
+      pDevice->setDeviceConfig(configClass, configIndex, value);
       return success();
     } else if(_request.getMethod() == "getConfig") {
       int configClass = strToIntDef(_request.getParameter("class"), -1);
@@ -224,7 +224,7 @@ namespace dss {
         return failure("Invalid or missing parameter 'index'");
       }
 
-      uint8_t value = pDevice->getConfig(configClass, configIndex);
+      uint8_t value = pDevice->getDeviceConfig(configClass, configIndex);
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("class", configClass);
@@ -242,7 +242,7 @@ namespace dss {
         return failure("Invalid or missing parameter 'index'");
       }
 
-      uint16_t value = pDevice->getConfigWord(configClass, configIndex);
+      uint16_t value = pDevice->getDeviceConfigWord(configClass, configIndex);
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("class", configClass);
@@ -255,7 +255,7 @@ namespace dss {
       if((value  < 1) || (value > 7)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
-      pDevice->setJokerGroup(value);
+      pDevice->setDeviceJokerGroup(value);
       return success();
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
@@ -264,8 +264,27 @@ namespace dss {
       }
       pDevice->setDeviceButtonID(value);
       return success();
+    } else if(_request.getMethod() == "setOutputMode") {
+      int value = strToIntDef(_request.getParameter("mode"), -1);
+      if((value  < 0) || (value > 15)) {
+        return failure("Invalid or missing parameter 'modeID'");
+      }
+      pDevice->setDeviceOutputMode(value);
+      return success();
+    } else if(_request.getMethod() == "setProgMode") {
+      uint8_t modeId;
+      std::string pmode = _request.getParameter("mode");
+      if(pmode.compare("enable") == 0) {
+        modeId = 1;
+      } else if(pmode.compare("disable") == 0) {
+        modeId = 0;
+      } else {
+        return failure("Invalid or missing parameter 'mode'");
+      }
+      pDevice->setProgMode(modeId);
+      return success();
     } else if(_request.getMethod() == "getTransmissionQuality") {
-      std::pair<uint8_t, uint16_t> p = pDevice->getTransmissionQuality();
+      std::pair<uint8_t, uint16_t> p = pDevice->getDeviceTransmissionQuality();
       uint8_t down = p.first;
       uint16_t up = p.second;
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -273,6 +292,109 @@ namespace dss {
       resultObj->addProperty("downstream", down);
       return success(resultObj);
 
+    } else if(_request.getMethod() == "getOutputValue") {
+      int offset = strToIntDef(_request.getParameter("offset"), -1);
+      if((offset  < 0) || (offset > 255)) {
+        return failure("Invalid or missing parameter 'offset'");
+      }
+      int value = pDevice->getDeviceOutputValue(offset);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("offset", offset);
+      resultObj->addProperty("value", value);
+      return success(resultObj);
+    } else if(_request.getMethod() == "setOutputValue") {
+      int offset = strToIntDef(_request.getParameter("offset"), -1);
+      if((offset  < 0) || (offset > 255)) {
+        return failure("Invalid or missing parameter 'offset'");
+      }
+      int value = strToIntDef(_request.getParameter("value"), -1);
+      if((value  < 0) || (value > 65535)) {
+        return failure("Invalid or missing parameter 'value'");
+      }
+      pDevice->setDeviceOutputValue(offset, value);
+      return success();
+
+    } else if(_request.getMethod() == "getSceneMode") {
+      int id = strToIntDef(_request.getParameter("sceneID"), -1);
+      if((id  < 0) || (id > 255)) {
+        return failure("Invalid or missing parameter 'sceneID'");
+      }
+      DeviceSceneSpec_t config;
+      pDevice->getDeviceSceneMode(id, config);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("sceneID", id);
+      resultObj->addProperty("dontcare", config.dontcare);
+      resultObj->addProperty("localprio", config.localprio);
+      resultObj->addProperty("specialmode", config.specialmode);
+      resultObj->addProperty("flashmode", config.flashmode);
+      resultObj->addProperty("ledconIndex", config.ledconIndex);
+      resultObj->addProperty("dimtimeIndex", config.dimtimeIndex);
+      return success(resultObj);
+    } else if(_request.getMethod() == "setSceneMode") {
+      int id = strToIntDef(_request.getParameter("sceneID"), -1);
+      if((id  < 0) || (id > 255)) {
+        return failure("Invalid or missing parameter 'sceneID'");
+      }
+      DeviceSceneSpec_t config;
+      config.dontcare = strToIntDef(_request.getParameter("dontcare"), -1);
+      config.localprio = strToIntDef(_request.getParameter("localprio"), -1);
+      config.specialmode = strToIntDef(_request.getParameter("specialmode"), -1);
+      config.flashmode = strToIntDef(_request.getParameter("flashmode"), -1);
+      config.ledconIndex = strToIntDef(_request.getParameter("ledconIndex"), -1);
+      config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
+      pDevice->setDeviceSceneMode(id, config);
+      return success();
+
+    } else if(_request.getMethod() == "getTransitionTime") {
+      int id = strToIntDef(_request.getParameter("dimtimeindex"), -1);
+      if((id  < 0) || (id > 2)) {
+        return failure("Invalid or missing parameter 'dimtimeindex'");
+      }
+      int up, down;
+      pDevice->getDeviceTransitionTime(id, up, down);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("dimtimeindex", id);
+      resultObj->addProperty("up", up);
+      resultObj->addProperty("down", down);
+      return success(resultObj);
+    } else if(_request.getMethod() == "setTransitionTime") {
+      int id = strToIntDef(_request.getParameter("dimtimeindex"), -1);
+      if((id  < 0) || (id > 2)) {
+        return failure("Invalid or missing parameter 'dimtimeindex'");
+      }
+      int up = strToIntDef(_request.getParameter("up"), -1);
+      int down = strToIntDef(_request.getParameter("down"), -1);
+      pDevice->setDeviceTransitionTime(id, up, down);
+      return success();
+
+    } else if(_request.getMethod() == "getLedMode") {
+      int id = strToIntDef(_request.getParameter("ledconindex"), -1);
+      if((id  < 0) || (id > 2)) {
+        return failure("Invalid or missing parameter 'ledconindex'");
+      }
+      DeviceLedSpec_t config;
+      pDevice->getDeviceLedMode(id, config);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("ledconindex", id);
+      resultObj->addProperty("colorSelect", config.colorSelect);
+      resultObj->addProperty("modeSelect", config.modeSelect);
+      resultObj->addProperty("dimMode", config.dimMode);
+      resultObj->addProperty("rgbMode", config.rgbMode);
+      resultObj->addProperty("groupColorMode", config.groupColorMode);
+      return success(resultObj);
+    } else if(_request.getMethod() == "setLedMode") {
+      int id = strToIntDef(_request.getParameter("ledconindex"), -1);
+      if((id  < 0) || (id > 2)) {
+        return failure("Invalid or missing parameter 'ledconindex'");
+      }
+      DeviceLedSpec_t config;
+      config.colorSelect = strToIntDef(_request.getParameter("colorSelect"), -1);
+      config.modeSelect = strToIntDef(_request.getParameter("modeSelect"), -1);
+      config.dimMode = strToIntDef(_request.getParameter("dimMode"), -1);
+      config.rgbMode = strToIntDef(_request.getParameter("rgbMode"), -1);
+      config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), -1);
+      pDevice->setDeviceLedMode(id, config);
+      return success();
     } else {
       throw std::runtime_error("Unhandled function");
     }
