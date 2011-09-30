@@ -265,4 +265,11 @@ namespace dss {
     _device->removeFromGroup(_group->getID());
   } // deviceRemoveFromGroup
 
+  void StructureManipulator::sensorPush(boost::shared_ptr<Zone> _zone, dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+    m_Interface.sensorPush(_zone->getID(), _sourceID, _sensorType, _sensorValue);
+  } // sensorPush
+
 } // namespace dss

@@ -157,7 +157,16 @@ namespace dss {
     int ret = ZoneGroupModify_remove(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
-  
+
+  void DSStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = ZoneSensorPush(m_DSMApiHandle, m_BroadcastDSID, _sourceID.lower, _zoneID, _sensorType, _sensorValue, 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // sensorPush
+
   void DSStructureModifyingBusInterface::setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {

@@ -128,6 +128,10 @@ namespace dss {
     void setDeviceOutputValue(uint8_t _offset, uint16_t _value);
     uint16_t getDeviceOutputValue(uint8_t _offset);
 
+    /** query device sensor values */
+    uint32_t getDeviceSensorValue(const int _sensorIndex);
+    uint8_t getDeviceSensorType(const int _sensorIndex);
+
     /** query cached last known values */
     virtual unsigned long getPowerConsumption();
     virtual unsigned long getEnergymeterValue();

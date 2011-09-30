@@ -19,6 +19,13 @@ function DSID() {
     return 0;
   };
 
+  this.getEnergyMeter = function() {
+    return 0;
+  };
+
+  this.sensorPush = function(sensortype, sensorvalue) {
+  };
+
   return this;
 }
 

@@ -238,6 +238,51 @@ namespace dss {
       }
     } // setDeviceProgMode
 
+    virtual uint32_t getDeviceSensorValue(uint8_t _sensorIndex) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(_sensorIndex);
+          return m_pSelf->callFunctionByName<uint32_t>("getSensorValue", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getSensorValue'") + e.what(), lsError);
+        }
+      }
+      return 0;
+    } // getDeviceSensorValue
+
+    virtual uint8_t getDeviceSensorType(uint8_t _sensorIndex) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(_sensorIndex);
+          return m_pSelf->callFunctionByName<uint8_t>("getSensorType", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getSensorType'") + e.what(), lsError);
+        }
+      }
+      return 0;
+    } // getDeviceSensorType
+
+    virtual void sensorPush(uint8_t _sensorType, uint16_t _sensorValue ) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(_sensorType);
+          param.add(_sensorValue);
+          m_pSelf->callFunctionByName<void>("sensorPush", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'sensorPush'") + e.what(), lsError);
+        }
+      }
+    } // sensorPush
+
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() {
         return std::make_pair(rand() % 255, rand() % 255);
     } // getTransmissionQuality

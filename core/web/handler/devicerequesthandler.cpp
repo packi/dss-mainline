@@ -395,6 +395,28 @@ namespace dss {
       config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), -1);
       pDevice->setDeviceLedMode(id, config);
       return success();
+
+    } else if(_request.getMethod() == "getSensorValue") {
+      int id = strToIntDef(_request.getParameter("sensorindex"), -1);
+      if((id < 0) || (id > 255)) {
+        return failure("Invalid or missing parameter 'sensorindex'");
+      }
+      int value = pDevice->getDeviceSensorValue(id);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("sensorindex", id);
+      resultObj->addProperty("value", value);
+      return success(resultObj);
+    } else if(_request.getMethod() == "getSensorType") {
+      int id = strToIntDef(_request.getParameter("sensorindex"), -1);
+      if((id < 0) || (id > 255)) {
+        return failure("Invalid or missing parameter 'sensorindex'");
+      }
+      int value = pDevice->getDeviceSensorType(id);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("sensorindex", id);
+      resultObj->addProperty("sensortype", value);
+      return success(resultObj);
+
     } else {
       throw std::runtime_error("Unhandled function");
     }
