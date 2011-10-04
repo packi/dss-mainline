@@ -5,7 +5,6 @@
   <subscription event-name="sendmail" handler-name="sendmail">
   </subscription>
 
-
   <!-- Standard events -->
 <!--
   <subscription event-name="callScene" handler-name="raise_event">
@@ -55,4 +54,17 @@
   </subscription>
 -->
 
+  <!-- Sunrise/Sunset calculation script -->
+  <subscription event-name="running" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/solar_computer.js</parameter>
+      <parameter name="script_id">solar_computer</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="solar_computer.update" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/solar_computer.js</parameter>
+      <parameter name="script_id">solar_computer</parameter>
+    </parameter>
+  </subscription>
 </subscriptions> 
