@@ -39,6 +39,23 @@ namespace dss {
   class Group;
   class DSMeter;
 
+  typedef struct {
+    bool dontcare;
+    bool localprio;
+    bool specialmode;
+    bool flashmode;
+    uint8_t ledconIndex;
+    uint8_t dimtimeIndex;
+  } DeviceSceneSpec_t;
+
+  typedef struct {
+    uint8_t colorSelect;
+    uint8_t modeSelect;
+    bool dimMode;
+    bool rgbMode;
+    bool groupColorMode;
+  } DeviceLedSpec_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -58,6 +75,7 @@ namespace dss {
     int m_RevisionID;
     int m_LastCalledScene;
     unsigned long m_Consumption;
+    unsigned long m_Energymeter;
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
@@ -82,17 +100,39 @@ namespace dss {
     virtual bool isOn() const;
 
     /** Set device configuration values */
-    void setConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value);
+    void setDeviceConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value);
     void setDeviceButtonID(uint8_t _buttonId);
-    void setJokerGroup(uint8_t _groupId);
+    void setDeviceJokerGroup(uint8_t _groupId);
+    void setDeviceOutputMode(uint8_t _modeId);
+    void setProgMode(uint8_t _modeId);
+
+    /** Configure scene configuration */
+    void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
+    void getDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+    void setDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t _config);
+    void getDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t& _config);
+    void setDeviceTransitionTime(uint8_t _dimtimeIndex, int up, int down);
+    void getDeviceTransitionTime(uint8_t _dimtimeIndex, int& up, int& down);
+    int transitionVal2Time(uint8_t _value);
+    uint8_t transitionTimeEval(int timems);
+
     /** Returns device configuration value */
-    uint8_t getConfig(uint8_t _configIndex, uint8_t _value);
-    uint16_t getConfigWord(uint8_t _configIndex, uint8_t _value);
+    uint8_t getDeviceConfig(uint8_t _configIndex, uint8_t _value);
+    uint16_t getDeviceConfigWord(uint8_t _configIndex, uint8_t _value);
 
-    std::pair<uint8_t, uint16_t> getTransmissionQuality();
+    /** Verify communication path */
+    std::pair<uint8_t, uint16_t> getDeviceTransmissionQuality();
+
     /** Set device output value */
-    void setValue(uint8_t _value);
+    void setDeviceValue(uint8_t _value);
+    void setDeviceOutputValue(uint8_t _offset, uint16_t _value);
+    uint16_t getDeviceOutputValue(uint8_t _offset);
 
+    /** query cached last known values */
+    virtual unsigned long getPowerConsumption();
+    virtual unsigned long getEnergymeterValue();
+
+    /** convenience methods for simulated devices */
     virtual void nextScene();
     virtual void previousScene();
 
@@ -187,10 +227,6 @@ namespace dss {
     const DateTime& getFirstSeen() const { return m_FirstSeen; }
     void setFirstSeen(const DateTime& _value) { m_FirstSeen = _value; }
 
-    virtual unsigned long getPowerConsumption();
-
-    int getSensorValue(const int _sensorID);
-
     const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
 
@@ -215,8 +251,6 @@ namespace dss {
     int getButtonActiveGroup() const { return m_ButtonActiveGroup; }
     void setButtonID(const int _value) { m_ButtonID = _value; }
     int getButtonID() const { return m_ButtonID; }
-
-
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
 

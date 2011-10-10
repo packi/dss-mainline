@@ -104,6 +104,27 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setDeviceConfig
 
+  void DSDeviceBusInterface::setDeviceProgMode(const Device& _device,
+                                                     uint8_t _modeId) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    int ret;
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    if(_modeId) {
+      ret = DeviceActionRequest_action_programming_mode_on(m_DSMApiHandle,
+          dsmDSID, _device.getShortAddress());
+    } else {
+      ret = DeviceActionRequest_action_programming_mode_off(m_DSMApiHandle,
+          dsmDSID, _device.getShortAddress());
+    }
+    DSBusInterface::checkResultCode(ret);
+  } // setDeviceProgMode
+
   void DSDeviceBusInterface::setValue(const Device& _device,
                                             uint8_t _value) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

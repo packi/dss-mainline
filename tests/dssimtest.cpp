@@ -74,9 +74,14 @@ public:
     functionCalled("disable");
   }
 
-  virtual int getConsumption() {
+  virtual uint32_t getPowerConsumption() {
     functionCalled("getConsumption");
     return 77;
+  }
+
+  virtual uint32_t getEnergyMeterValue() {
+    functionCalled("getEnergyMeterValue");
+    return 42;
   }
 
   virtual void setDeviceConfig(const uint8_t _configClass,
@@ -95,6 +100,10 @@ public:
                                   const uint8_t _configIndex) {
     functionCalled("getDeviceConfigWord");
     return 16;
+  }
+
+  virtual void setDeviceProgMode(const uint8_t _modeId) {
+    functionCalled("setDeviceProgMode");
   }
 
   virtual void setValue(const uint8_t _value) {

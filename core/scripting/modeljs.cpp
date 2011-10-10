@@ -775,26 +775,6 @@ namespace dss {
     return JS_FALSE;
   } // dev_save_scene
 
-  JSBool dev_get_sensor_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        try {
-          int sensorValue = ctx->convertTo<int>(argv[0]);
-          int retValue= (intf->getDevice()->getSensorValue(sensorValue));
-          *rval = INT_TO_JSVAL(retValue);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
-        }
-        return JS_TRUE;
-      }
-    }
-    return JS_FALSE;
-  } // dev_get_last_called_scene
-
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
     {"turnOff", dev_turn_off, 0, 0, 0},
@@ -807,7 +787,6 @@ namespace dss {
     {"undoScene", dev_undo_scene, 0, 0, 0},
     {"nextScene", dev_next_scene, 0, 0, 0},
     {"previousScene", dev_previous_scene, 0, 0, 0},
-    {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
 

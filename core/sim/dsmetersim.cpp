@@ -303,17 +303,21 @@ namespace dss {
     lookupDevice(_deviceID).setValue(_value);
   } // deviceSetValue
 
-  uint32_t DSMeterSim::getEnergyMeterValue() {
-    return 0;
-  }
-
   uint32_t DSMeterSim::getPowerConsumption() {
     uint32_t val = 0;
     foreach(DSIDInterface* interface, m_SimulatedDevices) {
-      val += interface->getConsumption();
+      val += interface->getPowerConsumption();
     }
     return val;
   } // getPowerConsumption
+
+  uint32_t DSMeterSim::getEnergyMeterValue() {
+    uint32_t val = 0;
+    foreach(DSIDInterface* interface, m_SimulatedDevices) {
+      val += interface->getEnergyMeterValue();
+    }
+    return val;
+  } // getEnergyMeterValue
 
   std::vector<int> DSMeterSim::getZones() {
     std::vector<int> result;

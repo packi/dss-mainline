@@ -115,7 +115,8 @@ namespace dss {
     virtual void enable() = 0;
     virtual void disable() = 0;
 
-    virtual int getConsumption() = 0;
+    virtual uint32_t getPowerConsumption() = 0;
+    virtual uint32_t getEnergyMeterValue() = 0;
 
     virtual void setDeviceConfig(const uint8_t _configClass,
                                  const uint8_t _configIndex,
@@ -126,6 +127,8 @@ namespace dss {
 
     virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
                                          const uint8_t _configIndex) = 0;
+
+    virtual void setDeviceProgMode(const uint8_t _modeId) = 0;
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() = 0;
 

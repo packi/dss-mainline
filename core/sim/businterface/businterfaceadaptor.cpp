@@ -96,6 +96,14 @@ namespace dss {
       }
     }
 
+    virtual void setDeviceProgMode(const Device& _device, uint8_t _modeId) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->setDeviceProgMode(_device, _modeId);
+      } else {
+        m_pInner->setDeviceProgMode(_device, _modeId);
+      }
+    }
+
     virtual void setValue(const Device& _device, uint8_t _value) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
         m_pSimulationInterface->setValue(_device, _value);

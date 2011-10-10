@@ -69,6 +69,17 @@ namespace dss {
     }
   } // setDeviceConfig
 
+  void SimDeviceBusInterface::setDeviceProgMode(const Device& _device,
+                                                const uint8_t _modeId) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        pDevice->setDeviceProgMode(_modeId);
+      }
+    }
+  } // setDeviceProgMode
+
   std::pair<uint8_t, uint16_t> SimDeviceBusInterface::getTransmissionQuality(const Device& _device) {
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
     if(pMeter != NULL) {

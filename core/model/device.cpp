@@ -51,6 +51,7 @@ namespace dss {
     m_RevisionID(0),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
+    m_Energymeter(0),
     m_LastDiscovered(DateTime::NullDate),
     m_FirstSeen(DateTime::NullDate),
     m_IsLockedInDSM(false),
@@ -151,8 +152,8 @@ namespace dss {
     m_RevisionID = _value;
   } // setRevisionID
 
-  void Device::setConfig(uint8_t _configClass, uint8_t _configIndex,
-                         uint8_t _value) {
+  void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex,
+                               uint8_t _value) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -172,14 +173,14 @@ namespace dss {
         m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
       }
     }
-  } // setConfig
+  } // setDeviceConfig
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
-    setConfig(CfgClassFunction, CfgFunction_ButtonMode,
+    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
         ((m_ButtonActiveGroup & 0xf) << 4) | (_buttonId & 0xf));
-  } // setButtonId
+  } // setDeviceButtonId
 
-  void Device::setJokerGroup(uint8_t _groupId) {
+  void Device::setDeviceJokerGroup(uint8_t _groupId) {
     if((_groupId < 1) && (_groupId > 7)) {
       throw std::runtime_error("Invalid joker group value");
     }
@@ -191,11 +192,107 @@ namespace dss {
     }
     addToGroup(_groupId);
     // propagate target group value to device
-    setConfig(CfgClassFunction, CfgFunction_ButtonMode,
+    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
         ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
-  } // setJokerGroup
+  } // setDeviceJokerGroup
 
-  uint8_t Device::getConfig(uint8_t _configClass, uint8_t _configIndex) {
+  void Device::setDeviceOutputMode(uint8_t _modeId) {
+    setDeviceConfig(CfgClassFunction, CfgFunction_Mode, _modeId);
+  } // setDeviceOutputMode
+
+  void Device::setProgMode(uint8_t _modeId) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceProgMode(*this, _modeId);
+    }
+  } // setProgMode
+
+  void Device::setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config) {
+    uint8_t mode = _config.dontcare ? 1 : 0;
+    mode |= _config.localprio ? 2 : 0;
+    mode |= _config.specialmode ? 4 : 0;
+    mode |= _config.flashmode ? 8 : 0;
+    mode |= ((_config.ledconIndex & 3) << 4);
+    mode |= ((_config.dimtimeIndex & 3) << 6);
+    setDeviceConfig(CfgClassScene, 128 + _sceneId, mode);
+  } // setDeviceSceneMode
+
+  void Device::getDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t& _config) {
+    uint8_t mode = getDeviceConfig(CfgClassScene, 128 + _sceneId);
+    _config.dontcare = (mode & 1) > 0;
+    _config.localprio = (mode & 2) > 0;
+    _config.specialmode = (mode & 4) > 0;
+    _config.flashmode = (mode & 8) > 0;
+    _config.ledconIndex = (mode >> 4) & 3;
+    _config.dimtimeIndex = (mode >> 6) & 3;
+  } // getDeviceSceneMode
+
+  void Device::setDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t _config) {
+    if(_ledconIndex > 2) {
+      throw DSSException("Device::setDeviceLedMode: index out of range");
+    }
+    uint8_t mode = _config.colorSelect & 7;
+    mode |= ((_config.modeSelect & 3) << 3);
+    mode |= _config.dimMode ? 32 : 0;
+    mode |= _config.rgbMode ? 64 : 0;
+    mode |= _config.groupColorMode ? 128 : 0;
+    setDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0 + _ledconIndex, mode);
+  }  // setDeviceLedMode
+
+  void Device::getDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t& _config) {
+    if(_ledconIndex > 2) {
+      throw DSSException("Device::getDeviceLedMode: index out of range");
+    }
+    uint8_t mode = getDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0 + _ledconIndex);
+    _config.colorSelect = mode & 7;
+    _config.modeSelect = (mode >> 3) & 3;
+    _config.dimMode = (mode & 32) > 0;
+    _config.rgbMode = (mode & 64) > 0;
+    _config.groupColorMode = (mode & 128) > 0;
+  } // getDeviceLedMode
+
+  int Device::transitionVal2Time(uint8_t _value) {
+    int hval = _value / 16;
+    int lval = _value % 16;
+    return 100 * (1 << hval) - (100 * (1 << hval) / 32) * (15 - lval);
+  }
+
+  uint8_t Device::transitionTimeEval(int timems) {
+    uint8_t val;
+    int thigh, tlow;
+    for (val = 0, tlow = thigh = 0; val < 255 && thigh < timems; ) {
+      val ++;
+      tlow = thigh;
+      thigh = transitionVal2Time(val);
+    }
+    if((thigh - timems) > (timems - tlow)) val --;
+    return val;
+  }
+
+  void Device::setDeviceTransitionTime(uint8_t _dimtimeIndex, int up, int down) {
+    if(_dimtimeIndex > 2) {
+      throw DSSException("Device::setDeviceTransitionTime: index out of range");
+    }
+    uint8_t vup = transitionTimeEval(up);
+    uint8_t vdown  = transitionTimeEval(down);
+    setDeviceConfig(CfgClassFunction, CfgFunction_DimTime0 + _dimtimeIndex*2, vup);
+    setDeviceConfig(CfgClassFunction, CfgFunction_DimTime0 + _dimtimeIndex*2 + 1, vdown);
+  } // setDeviceTransitionTime
+
+  void Device::getDeviceTransitionTime(uint8_t _dimtimeIndex, int& up, int& down) {
+    if(_dimtimeIndex > 2) {
+      throw DSSException("Device::getDeviceTransitionTime: index out of range");
+    }
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_DimTime0 + _dimtimeIndex*2);
+    uint8_t vup = value & 0xff;
+    uint8_t vdown = (value >> 8) & 0xff;
+    up = transitionVal2Time(vup);
+    down = transitionVal2Time(vdown);
+  } // getDeviceTransitionTime
+
+  uint8_t Device::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkReadAccess();
     }
@@ -205,9 +302,9 @@ namespace dss {
                                                                   _configIndex);
     }
     throw std::runtime_error("Bus interface not available");
-  } // getValue
+  } // getDeviceConfig
 
-  uint16_t Device::getConfigWord(uint8_t _configClass, uint8_t _configIndex) {
+  uint16_t Device::getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkReadAccess();
     }
@@ -217,23 +314,50 @@ namespace dss {
                                                                   _configIndex);
     }
     throw std::runtime_error("Bus interface not available");
-  } // getValue
+  } // getDeviceConfigWord
 
-  std::pair<uint8_t, uint16_t> Device::getTransmissionQuality() {
+  std::pair<uint8_t, uint16_t> Device::getDeviceTransmissionQuality() {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       return m_pApartment->getDeviceBusInterface()->getTransmissionQuality(*this);
     }
     throw std::runtime_error("Bus interface not available");
-  }
+  } // getDeviceTransmissionQuality
 
-  void Device::setValue(uint8_t _value) {
+  void Device::setDeviceValue(uint8_t _value) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setValue(*this, _value);
     }
-  } // setValue
+  } // setDeviceValue (8)
+
+  void Device::setDeviceOutputValue(uint8_t _offset, uint16_t _value) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(_offset & 1) {
+      setDeviceConfig(CfgClassRuntime, _offset, _value & 0xff);
+    } else {
+      setDeviceConfig(CfgClassRuntime, _offset+1, (_value >> 8) & 0xff);
+      setDeviceConfig(CfgClassRuntime, _offset, _value & 0xff);
+    }
+  } // setDeviceOutputValue (offset)
+
+  uint16_t Device::getDeviceOutputValue(uint8_t _offset) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    return getDeviceConfigWord(CfgClassRuntime, _offset);
+  } // getDeviceOutputValue (offset)
+
+  unsigned long Device::getPowerConsumption() {
+    return m_Consumption;
+  } // getPowerConsumption
+
+  unsigned long Device::getEnergymeterValue() {
+    return m_Energymeter;
+  } // getEnergymeterValue
 
   void Device::nextScene() {
     callScene(SceneHelper::getNextScene(m_LastCalledScene), false);
@@ -460,17 +584,6 @@ namespace dss {
   Apartment& Device::getApartment() const {
     return *m_pApartment;
   } // getApartment
-
-  unsigned long Device::getPowerConsumption() {
-    return m_Consumption;
-  } // getPowerConsumption
-
-  int Device::getSensorValue(const int _sensorID) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkReadAccess();
-    }
-    return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
-  } // getSensorValue
 
   void Device::setIsLockedInDSM(const bool _value) {
     m_IsLockedInDSM = _value;
