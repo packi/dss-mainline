@@ -108,9 +108,27 @@ namespace dss {
   void SimDeviceBusInterface::removeGroup(const Device& _device, const int _groupId) {
   } // removeGroup
 
-  int SimDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
+  uint32_t SimDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorIndex) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        return pDevice->getDeviceSensorValue(_sensorIndex);
+      }
+    }
     return 0;
   } // getSensorValue
+
+  uint8_t SimDeviceBusInterface::getSensorType(const Device& _device, const int _sensorIndex) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        return pDevice->getDeviceSensorType(_sensorIndex);
+      }
+    }
+    return 255;
+  } // getSensorType
 
   void SimDeviceBusInterface::lockOrUnlockDevice(const Device& _device, const bool _lock) {
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());

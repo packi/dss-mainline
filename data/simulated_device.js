@@ -32,8 +32,13 @@ var dev = {
   },
 
   getConsumption: function() {
-    print('getConsumption');
-    return 0;
+//    print('getConsumption');
+    return 42;
+  },
+
+  getEnergyMeter: function() {
+//    print('getEnergyMeter');
+    return 1234;
   },
 
   startDim: function(direction) {
@@ -64,6 +69,21 @@ var dev = {
 
   getConfigParameter: function(name) {
     print('getConfigParameter ', name);
+  },
+  
+  getSensorType: function(sensorindex) {
+    print('getSensorType index =', sensorindex);
+    return 255;
+  },
+
+  getSensorValue: function(sensorindex) {
+    print('getSensorValue index =', sensorindex);
+    return 0;
+  },
+
+  sensorPush: function(sensortype, sensorvalue) {
+    print('sensorPush ', sensortype, '=', sensorvalue);
   }
+
 };
 dev;

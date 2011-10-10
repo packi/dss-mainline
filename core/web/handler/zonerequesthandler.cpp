@@ -199,6 +199,23 @@ namespace dss {
             }
           }
           return success(resultObj);
+        } else if(_request.getMethod() == "pushSensorValue") {
+          dss_dsid_t sourceID;
+          std::string deviceIDStr = _request.getParameter("sourceDSID");
+          if(!deviceIDStr.empty()) {
+            sourceID = dsid::fromString(deviceIDStr);
+          }
+          else {
+            return failure("Need valid parameter 'sourceDSID'");
+          }
+          int sensorType = strToIntDef(_request.getParameter("sensortype"), -1);
+          int sensorValue = strToIntDef(_request.getParameter("sensorvalue"), -1);
+          if(sensorType == -1 || sensorValue == -1) {
+            return failure("Need valid parameter 'sensortype' and 'sensorvalue'");
+          }
+          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
+          manipulator.sensorPush(pZone, sourceID, sensorType, sensorValue);
+          // TODO: raise model event and forward value
         } else {
           throw std::runtime_error("Unhandled function");
         }

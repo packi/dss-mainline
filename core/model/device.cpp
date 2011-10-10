@@ -351,6 +351,20 @@ namespace dss {
     return getDeviceConfigWord(CfgClassRuntime, _offset);
   } // getDeviceOutputValue (offset)
 
+  uint32_t Device::getDeviceSensorValue(const int _sensorIndex) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    return m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex);
+  } // getDeviceSensorValue
+
+  uint8_t Device::getDeviceSensorType(const int _sensorIndex) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    return m_pApartment->getDeviceBusInterface()->getSensorType(*this, _sensorIndex);
+  } // getDeviceSensorType
+
   unsigned long Device::getPowerConsumption() {
     return m_Consumption;
   } // getPowerConsumption

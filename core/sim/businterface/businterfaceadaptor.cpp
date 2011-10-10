@@ -128,11 +128,19 @@ namespace dss {
       }
     }
 
-    virtual int getSensorValue(const Device& _device, const int _sensorID) {
+    virtual uint32_t getSensorValue(const Device& _device, const int _sensorIndex) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
-        return m_pSimulationInterface->getSensorValue(_device, _sensorID);
+        return m_pSimulationInterface->getSensorValue(_device, _sensorIndex);
       } else {
-        return m_pInner->getSensorValue(_device, _sensorID);
+        return m_pInner->getSensorValue(_device, _sensorIndex);
+      }
+    }
+
+    virtual uint8_t getSensorType(const Device& _device, const int _sensorIndex) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        return m_pSimulationInterface->getSensorType(_device, _sensorIndex);
+      } else {
+        return m_pInner->getSensorType(_device, _sensorIndex);
       }
     }
 
@@ -324,6 +332,11 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
       m_pSimulationInterface->removeGroup(_zoneID, _groupID);
       m_pInner->removeGroup(_zoneID, _groupID);
+    }
+
+    virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+      m_pSimulationInterface->sensorPush(_zoneID, _sourceID, _sensorType, _sensorValue);
+      m_pInner->sensorPush(_zoneID, _sourceID, _sensorType, _sensorValue);
     }
 
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID,

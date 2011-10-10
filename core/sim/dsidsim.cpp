@@ -119,6 +119,14 @@ namespace dss {
   void DSIDSim::setDeviceProgMode(const uint8_t _modeId) {
   } // setDeviceProgMode
 
+  uint32_t DSIDSim::getDeviceSensorValue(const uint8_t _sensorIndex) {
+    return 0;
+  } // getDeviceSensorValue
+
+  uint8_t DSIDSim::getDeviceSensorType(const uint8_t _sensorIndex) {
+    return 255;
+  } // getDeviceSensorType
+
   std::pair<uint8_t, uint16_t> DSIDSim::getTransmissionQuality() {
     uint8_t down = rand() % 255;
     uint8_t up = rand() % 255;
@@ -130,6 +138,9 @@ namespace dss {
       m_CurrentValue = int(_value);
     }
   } // setValue
+
+  void DSIDSim::sensorPush(const uint8_t _sensorType, const uint16_t _sensorValue) {
+  } // sensorPush
 
   uint16_t DSIDSim::getFunctionID() {
     if(m_ConfigParameter.has("functionID")) {

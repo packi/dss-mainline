@@ -130,6 +130,10 @@ namespace dss {
 
     virtual void setDeviceProgMode(const uint8_t _modeId) = 0;
 
+    virtual uint32_t getDeviceSensorValue(const uint8_t _sensorIndex) = 0;
+    virtual uint8_t getDeviceSensorType(const uint8_t _sensorIndex) = 0;
+    virtual void sensorPush(const uint8_t _sensorType, uint16_t _sensorValue) = 0;
+
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() = 0;
 
     virtual void setValue(const uint8_t _value) = 0;

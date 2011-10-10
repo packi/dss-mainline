@@ -103,6 +103,16 @@ namespace dss {
       }
     }
   } // removeGroup
+
+  void SimStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+    int numMeters = m_pSimulation->getDSMeterCount();
+    for(int iMeter = 0; iMeter < numMeters; iMeter++) {
+      boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
+      if(contains<int>(pMeter->getZones(), _zoneID)) {
+        pMeter->sensorPush(_zoneID, _sourceID.lower, _sensorType, _sensorValue);
+      }
+    }
+  } // sensorPush
   
   void SimStructureModifyingBusInterface::setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
   } // setButtonSetsLocalPriority

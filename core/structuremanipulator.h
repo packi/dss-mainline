@@ -24,6 +24,7 @@
 #define STRUCTUREMANIPULATOR_H_
 
 #include <boost/shared_ptr.hpp>
+#include "core/businterface.h"
 
 namespace dss {
 
@@ -62,6 +63,8 @@ namespace dss {
     void createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
     void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
+
+    void sensorPush(boost::shared_ptr<Zone> _zone, dss_dsid_t _sourceID, int _sensorType, int _sensorValue);
 }; // StructureManipulator
 
 

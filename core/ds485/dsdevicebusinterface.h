@@ -54,8 +54,8 @@ namespace dss {
     virtual void addGroup(const Device& _device, const int _groupId);
     virtual void removeGroup(const Device& _device, const int _groupId);
 
-    virtual int getSensorValue(const Device& _device, const int _sensorID);
-    virtual int getSensorType(const Device& _device, const int _sensorID);
+    virtual uint32_t getSensorValue(const Device& _device, const int _sensorIndex);
+    virtual uint8_t getSensorType(const Device& _device, const int _sensorIndex);
 
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
 

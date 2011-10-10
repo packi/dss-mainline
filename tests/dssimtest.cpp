@@ -106,8 +106,22 @@ public:
     functionCalled("setDeviceProgMode");
   }
 
+  virtual uint32_t getDeviceSensorValue(const uint8_t _sensorIndex) {
+    functionCalled("getDeviceSensorValue");
+    return 0;
+  }
+
+  virtual uint8_t getDeviceSensorType(const uint8_t _sensorIndex) {
+    functionCalled("getDeviceSensorType");
+    return 255;
+  }
+
   virtual void setValue(const uint8_t _value) {
     functionCalled("setValue");
+  }
+
+  virtual void sensorPush(const uint8_t _sensorType, const uint16_t _sensorValue) {
+    functionCalled("sensorPush");
   }
 
   virtual uint16_t getFunctionID() {
