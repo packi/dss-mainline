@@ -531,7 +531,8 @@ namespace dss {
           self.log("Logging-in from a trusted port as '" + userName + "'");
           self.m_SessionManager->getSecurity()->impersonate(userName);
           std::string newToken = self.m_SessionManager->registerSession();
-          self.m_SessionManager->getSession(newToken)->inheritUserFromSecurity();
+          session = self.m_SessionManager->getSession(newToken);
+          session->inheritUserFromSecurity();
           injectedCookies["path"] = "/";
           injectedCookies["token"] = newToken;
         }
