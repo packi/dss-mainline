@@ -107,6 +107,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
         m_pPropertyNode->createProperty("outputMode")
           ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OutputMode, false));
+        m_pPropertyNode->createProperty("LTMode")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_LTMode, false));
         m_pPropertyNode->createProperty("button/id")
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
         m_pPropertyNode->createProperty("button/activeGroup")
@@ -199,6 +201,10 @@ namespace dss {
   void Device::setDeviceOutputMode(uint8_t _modeId) {
     setDeviceConfig(CfgClassFunction, CfgFunction_Mode, _modeId);
   } // setDeviceOutputMode
+
+  void Device::setDeviceLTMode(uint8_t _modeId) {
+    setDeviceConfig(CfgClassFunction, CfgFunction_LTMode, _modeId);
+  } // setDeviceLTMode
 
   void Device::setProgMode(uint8_t _modeId) {
     if(m_pPropertyNode) {

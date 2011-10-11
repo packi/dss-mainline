@@ -56,6 +56,7 @@ namespace dss {
     uint32_t SerialNumber;
     bool Locked;
     uint8_t OutputMode;
+    uint8_t LTMode;
     std::vector<int> Groups;
     dss_dsid_t DSID;
     uint8_t ButtonID;

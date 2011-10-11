@@ -231,7 +231,7 @@ namespace dss {
                                                 &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
                                                 &spec.Version,
                                                 &spec.ZoneID, NULL, NULL, &locked, &spec.OutputMode, groups, name,
-                                                NULL, NULL, &spec.SerialNumber);
+                                                NULL, NULL, &spec.SerialNumber, &spec.LTMode);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
@@ -269,7 +269,7 @@ namespace dss {
                                                   &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
                                                   &spec.Version,
                                                   &spec.ZoneID, NULL, NULL, &locked, &spec.OutputMode, groups, name,
-                                                  NULL, NULL, &spec.SerialNumber);
+                                                  NULL, NULL, &spec.SerialNumber, &spec.LTMode);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
@@ -301,7 +301,7 @@ namespace dss {
                                       &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
                                       &result.Version,
                                       &result.ZoneID, NULL, NULL, &locked, &result.OutputMode, groups, name,
-                                      NULL, NULL, &result.SerialNumber);
+                                      NULL, NULL, &result.SerialNumber, &result.LTMode);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);
