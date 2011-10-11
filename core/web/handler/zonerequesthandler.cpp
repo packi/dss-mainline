@@ -208,10 +208,10 @@ namespace dss {
           else {
             return failure("Need valid parameter 'sourceDSID'");
           }
-          int sensorType = strToIntDef(_request.getParameter("sensortype"), -1);
-          int sensorValue = strToIntDef(_request.getParameter("sensorvalue"), -1);
+          int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
+          int sensorValue = strToIntDef(_request.getParameter("sensorValue"), -1);
           if(sensorType == -1 || sensorValue == -1) {
-            return failure("Need valid parameter 'sensortype' and 'sensorvalue'");
+            return failure("Need valid parameter 'sensorType' and 'sensorValue'");
           }
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sensorPush(pZone, sourceID, sensorType, sensorValue);
