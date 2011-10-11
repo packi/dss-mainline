@@ -59,9 +59,30 @@ namespace dss {
                                     dss::PropertyNodePtr _node) {
     boost::shared_ptr<JSONObject> obj(new JSONObject());
     foreach(std::string subprop, _part.properties) {
-      PropertyNodePtr node = _node->getPropertyByName(subprop);
-      if(node != NULL) {
-        switch (node->getValueType()) {
+      if(subprop == "*") {
+        for(int iChild = 0; iChild < _node->getChildCount(); iChild++) {
+          PropertyNodePtr childNode = _node->getChild(iChild);
+          if(childNode != NULL) {
+            switch (childNode->getValueType()) {
+            case vTypeInteger:
+              obj->addProperty(childNode->getName(), childNode->getIntegerValue());
+              break;
+            case vTypeBoolean:
+              obj->addProperty(childNode->getName(), childNode->getBoolValue());
+              break;
+            case vTypeNone:
+              break;
+            case vTypeString:
+            default:
+              obj->addProperty(childNode->getName(), childNode->getAsString());
+              break;
+            }
+          }
+        }
+      } else {
+        PropertyNodePtr node = _node->getPropertyByName(subprop);
+        if(node != NULL) {
+          switch (node->getValueType()) {
           case vTypeInteger:
             obj->addProperty(subprop, node->getIntegerValue());
             break;
@@ -73,6 +94,7 @@ namespace dss {
           default:
             obj->addProperty(subprop, node->getAsString());
             break;
+          }
         }
       }
     }
