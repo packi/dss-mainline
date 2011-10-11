@@ -265,8 +265,8 @@ namespace dss {
       pDevice->setDeviceButtonID(value);
       return success();
     } else if(_request.getMethod() == "setOutputMode") {
-      int value = strToIntDef(_request.getParameter("mode"), -1);
-      if((value  < 0) || (value > 15)) {
+      int value = strToIntDef(_request.getParameter("modeID"), -1);
+      if((value  < 0) || (value > 255)) {
         return failure("Invalid or missing parameter 'modeID'");
       }
       pDevice->setDeviceOutputMode(value);
@@ -323,10 +323,10 @@ namespace dss {
       pDevice->getDeviceSceneMode(id, config);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("sceneID", id);
-      resultObj->addProperty("dontcare", config.dontcare);
-      resultObj->addProperty("localprio", config.localprio);
-      resultObj->addProperty("specialmode", config.specialmode);
-      resultObj->addProperty("flashmode", config.flashmode);
+      resultObj->addProperty("dontCare", config.dontcare);
+      resultObj->addProperty("localPrio", config.localprio);
+      resultObj->addProperty("specialMode", config.specialmode);
+      resultObj->addProperty("flashMode", config.flashmode);
       resultObj->addProperty("ledconIndex", config.ledconIndex);
       resultObj->addProperty("dimtimeIndex", config.dimtimeIndex);
       return success(resultObj);
@@ -336,31 +336,38 @@ namespace dss {
         return failure("Invalid or missing parameter 'sceneID'");
       }
       DeviceSceneSpec_t config;
-      config.dontcare = strToIntDef(_request.getParameter("dontcare"), -1);
-      config.localprio = strToIntDef(_request.getParameter("localprio"), -1);
-      config.specialmode = strToIntDef(_request.getParameter("specialmode"), -1);
-      config.flashmode = strToIntDef(_request.getParameter("flashmode"), -1);
-      config.ledconIndex = strToIntDef(_request.getParameter("ledconIndex"), -1);
-      config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
+      pDevice->getDeviceSceneMode(id, config);
+      if(_request.hasParameter("dontCare"))
+        config.dontcare = strToIntDef(_request.getParameter("dontCare"), config.dontcare);
+      if(_request.hasParameter("localPrio"))
+        config.localprio = strToIntDef(_request.getParameter("localPrio"), config.localprio);
+      if(_request.hasParameter("specialMode"))
+        config.specialmode = strToIntDef(_request.getParameter("specialMode"), config.specialmode);
+      if(_request.hasParameter("flashMode"))
+        config.flashmode = strToIntDef(_request.getParameter("flashMode"), config.flashmode);
+      if(_request.hasParameter("ledconIndex"))
+        config.ledconIndex = strToIntDef(_request.getParameter("ledconIndex"), config.ledconIndex);
+      if(_request.hasParameter("dimtimeIndex"))
+        config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
       pDevice->setDeviceSceneMode(id, config);
       return success();
 
     } else if(_request.getMethod() == "getTransitionTime") {
-      int id = strToIntDef(_request.getParameter("dimtimeindex"), -1);
+      int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'dimtimeindex'");
+        return failure("Invalid or missing parameter 'dimtimeIndex'");
       }
       int up, down;
       pDevice->getDeviceTransitionTime(id, up, down);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("dimtimeindex", id);
+      resultObj->addProperty("dimtimeIndex", id);
       resultObj->addProperty("up", up);
       resultObj->addProperty("down", down);
       return success(resultObj);
     } else if(_request.getMethod() == "setTransitionTime") {
-      int id = strToIntDef(_request.getParameter("dimtimeindex"), -1);
+      int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'dimtimeindex'");
+        return failure("Invalid or missing parameter 'dimtimeIndex'");
       }
       int up = strToIntDef(_request.getParameter("up"), -1);
       int down = strToIntDef(_request.getParameter("down"), -1);
@@ -368,14 +375,14 @@ namespace dss {
       return success();
 
     } else if(_request.getMethod() == "getLedMode") {
-      int id = strToIntDef(_request.getParameter("ledconindex"), -1);
+      int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'ledconindex'");
+        return failure("Invalid or missing parameter 'ledconIndex'");
       }
       DeviceLedSpec_t config;
       pDevice->getDeviceLedMode(id, config);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("ledconindex", id);
+      resultObj->addProperty("ledconIndex", id);
       resultObj->addProperty("colorSelect", config.colorSelect);
       resultObj->addProperty("modeSelect", config.modeSelect);
       resultObj->addProperty("dimMode", config.dimMode);
@@ -383,38 +390,44 @@ namespace dss {
       resultObj->addProperty("groupColorMode", config.groupColorMode);
       return success(resultObj);
     } else if(_request.getMethod() == "setLedMode") {
-      int id = strToIntDef(_request.getParameter("ledconindex"), -1);
+      int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'ledconindex'");
+        return failure("Invalid or missing parameter 'ledconIndex'");
       }
       DeviceLedSpec_t config;
-      config.colorSelect = strToIntDef(_request.getParameter("colorSelect"), -1);
-      config.modeSelect = strToIntDef(_request.getParameter("modeSelect"), -1);
-      config.dimMode = strToIntDef(_request.getParameter("dimMode"), -1);
-      config.rgbMode = strToIntDef(_request.getParameter("rgbMode"), -1);
-      config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), -1);
+      pDevice->getDeviceLedMode(id, config);
+      if(_request.hasParameter(""))
+        config.colorSelect = strToIntDef(_request.getParameter("colorSelect"), config.colorSelect);
+      if(_request.hasParameter(""))
+        config.modeSelect = strToIntDef(_request.getParameter("modeSelect"), config.modeSelect);
+      if(_request.hasParameter(""))
+        config.dimMode = strToIntDef(_request.getParameter("dimMode"), config.dimMode);
+      if(_request.hasParameter(""))
+        config.rgbMode = strToIntDef(_request.getParameter("rgbMode"), config.rgbMode);
+      if(_request.hasParameter(""))
+        config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), config.groupColorMode);
       pDevice->setDeviceLedMode(id, config);
       return success();
 
     } else if(_request.getMethod() == "getSensorValue") {
-      int id = strToIntDef(_request.getParameter("sensorindex"), -1);
+      int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
-        return failure("Invalid or missing parameter 'sensorindex'");
+        return failure("Invalid or missing parameter 'sensorIndex'");
       }
       int value = pDevice->getDeviceSensorValue(id);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("sensorindex", id);
-      resultObj->addProperty("value", value);
+      resultObj->addProperty("sensorIndex", id);
+      resultObj->addProperty("sensorValue", value);
       return success(resultObj);
     } else if(_request.getMethod() == "getSensorType") {
-      int id = strToIntDef(_request.getParameter("sensorindex"), -1);
+      int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
-        return failure("Invalid or missing parameter 'sensorindex'");
+        return failure("Invalid or missing parameter 'sensorIndex'");
       }
       int value = pDevice->getDeviceSensorType(id);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("sensorindex", id);
-      resultObj->addProperty("sensortype", value);
+      resultObj->addProperty("sensorIndex", id);
+      resultObj->addProperty("sensorType", value);
       return success(resultObj);
 
     } else {

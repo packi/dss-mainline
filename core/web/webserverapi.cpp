@@ -169,6 +169,13 @@ namespace dss {
     clsZone.addMethod("sceneGetName")
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Returns the name of the scene on the given group");
+    clsZone.addMethod("getReachableScenes")
+      .withDocumentation("Returns the list of used scenes in a zone depending on the present components");
+    clsZone.addMethod("pushSensorValues")
+      .withParameter("sourceDSID", "string", true)
+      .withParameter("sensorType", "integer", true)
+      .withParameter("sensorValue", "integer", true)
+      .withDocumentation("Send a sensor value to the components of a zone");
 
     RestfulClass& clsDevice = api->addClass("device")
         .withInstanceParameter("dsid", "dsid", false)
@@ -212,14 +219,66 @@ namespace dss {
       .withParameter("class", "integer", true)
       .withParameter("index", "integer", true)
       .withDocumentation("Gets the value of config class at offset index");
-    clsDevice.addMethod("setButtonID")
-      .withParameter("buttonID", "integer", true)
-      .withDocumentation("Sets the button id of a device");
     clsDevice.addMethod("setJokerGroup")
       .withParameter("groupID", "integer", true)
       .withDocumentation("Sets the color group of a joker device");
+    clsDevice.addMethod("setButtonID")
+      .withParameter("buttonID", "integer", true)
+      .withDocumentation("Sets the button id of a device");
+    clsDevice.addMethod("setOutputMode")
+      .withParameter("modeID", "integer", true)
+      .withDocumentation("Sets the output operation mode");
+    clsDevice.addMethod("setProgMode")
+      .withParameter("mode", "string", true)
+      .withDocumentation("Enables or disables the programming mode of a device.", "The valid mode values are: enabled or disabled.");
     clsDevice.addMethod("getTransmissionQuality")
       .withDocumentation("Request upstream and downstream quality information");
+    clsDevice.addMethod("getOutputValue")
+      .withParameter("offset", "integer", true)
+      .withDocumentation("Gets the device output value from parameter at the given offset.", "The available parameters and offsets depend on the features of the hardware components.");
+    clsDevice.addMethod("setOutputValue")
+      .withParameter("offset", "integer", true)
+      .withParameter("value", "integer", true)
+      .withDocumentation("Sets the device output value at the given offset.", "The available parameters and offsets depend on the features of the hardware components.");
+    clsDevice.addMethod("getSceneMode")
+      .withParameter("sceneID", "integer", true)
+      .withDocumentation("Gets the device configuration for a specific scene command.");
+    clsDevice.addMethod("getSceneMode")
+      .withParameter("sceneID", "integer", true)
+      .withDocumentation("Gets the device configuration for a specific scene command.");
+    clsDevice.addMethod("setSceneMode")
+      .withParameter("sceneID", "integer", true)
+      .withParameter("dontCare", "integer", false)
+      .withParameter("specialMode", "integer", false)
+      .withParameter("flashMode", "integer", false)
+      .withParameter("ledconIndex", "integer", false)
+      .withParameter("dimtimeIndex", "integer", false)
+      .withDocumentation("Sets the configuration flags for a specific scene command.");
+    clsDevice.addMethod("getTransitionTime")
+      .withParameter("dimetimeIndex", "integer", true)
+      .withDocumentation("Gets the timing configuration preset.");
+    clsDevice.addMethod("setTransitionTime")
+      .withParameter("dimetimeIndex", "integer", true)
+      .withParameter("up", "integer", true)
+      .withParameter("down", "integer", true)
+      .withDocumentation("Sets the timing configuration preset.");
+    clsDevice.addMethod("getLedMode")
+      .withParameter("ledconIndex", "integer", true)
+      .withDocumentation("Gets the led configuration flags preset.");
+    clsDevice.addMethod("setLedMode")
+      .withParameter("ledconIndex", "integer", true)
+      .withParameter("colorSelect", "integer", false)
+      .withParameter("modeSelect", "integer", false)
+      .withParameter("dimMode", "integer", false)
+      .withParameter("rgbMode", "integer", false)
+      .withParameter("groupColorMode", "integer", false)
+      .withDocumentation("Sets the led configuration flags preset.");
+    clsDevice.addMethod("getSensorValue")
+      .withParameter("sensorIndex", "integer", true)
+      .withDocumentation("Request the sensor value of a given index.");
+    clsDevice.addMethod("getSensorType")
+      .withParameter("sensorIndex", "integer", true)
+      .withDocumentation("Request the sensor type code of a given index.");
     clsDevice.addMethod("callScene")
       .withParameter("sceneNumber", "integer", true)
       .withParameter("force", "boolean", false)
