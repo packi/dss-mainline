@@ -252,7 +252,7 @@ namespace dss {
       return success(resultObj);
     } else if(_request.getMethod() == "setJokerGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -1);
-      if((value  < 1) || (value > 7)) {
+      if((value  < 1) || (value > 8)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceJokerGroup(value);
