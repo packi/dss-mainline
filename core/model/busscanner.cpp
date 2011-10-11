@@ -155,6 +155,7 @@ namespace dss {
     dev->setRevisionID(_spec.Version);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setOutputMode(_spec.OutputMode);
+    dev->setLTMode(_spec.LTMode);
     dev->setButtonActiveGroup(_spec.ActiveGroup);
     dev->setButtonGroupMembership(_spec.GroupMembership);
     dev->setButtonSetsLocalPriority(_spec.SetsLocalPriority);
