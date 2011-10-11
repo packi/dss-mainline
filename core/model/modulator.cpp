@@ -40,6 +40,10 @@ namespace dss {
     m_EnergyMeterValue(0),
     m_LastReportedEnergyMeterValue(0),
     m_ReceivedMeterValue(false),
+    m_HardwareVersion(0),
+    m_armSoftwareVersion(0),
+    m_dspSoftwareVersion(0),
+    m_ApiVersion(0),
     m_IsValid(false),
     m_pApartment(_pApartment)
   {
