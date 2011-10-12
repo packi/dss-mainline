@@ -37,7 +37,7 @@
 #include "core/model/modelconst.h"
 #include "core/metering/metering.h"
 #include "core/scripting/scriptobject.h"
-
+#include "core/scripting/propertyscriptextension.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -775,6 +775,111 @@ namespace dss {
     return JS_FALSE;
   } // dev_save_scene
 
+  JSBool dev_get_config(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 2) {
+        try {
+          int configClass = ctx->convertTo<int>(argv[0]);
+          int configIndex = ctx->convertTo<int>(argv[1]);
+          uint8_t retValue= (intf->getDevice()->getDeviceConfig(configClass, configIndex));
+          *rval = INT_TO_JSVAL(retValue);
+        } catch(const BusApiError&) {
+          *rval = JSVAL_NULL;
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_get_config
+
+  JSBool dev_get_config_word(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 2) {
+        try {
+          int configClass = ctx->convertTo<int>(argv[0]);
+          int configIndex = ctx->convertTo<int>(argv[1]);
+          uint16_t retValue= (intf->getDevice()->getDeviceConfigWord(configClass, configIndex));
+          *rval = INT_TO_JSVAL(retValue);
+        } catch(const BusApiError&) {
+          *rval = JSVAL_NULL;
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_get_config_word
+
+  JSBool dev_set_config(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 3) {
+        try {
+          int configClass = ctx->convertTo<int>(argv[0]);
+          int configIndex = ctx->convertTo<int>(argv[1]);
+          int configValue = ctx->convertTo<int>(argv[2]);
+          (intf->getDevice()->setDeviceConfig(configClass, configIndex, configValue));
+          *rval = BOOLEAN_TO_JSVAL(true);
+        } catch(const BusApiError&) {
+          *rval = JSVAL_NULL;
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_get_config
+
+  JSBool dev_get_output_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        try {
+          uint8_t offset = ctx->convertTo<int>(argv[0]);
+          uint16_t result = (intf->getDevice()->getDeviceOutputValue(offset));
+          *rval = INT_TO_JSVAL(result);
+        } catch(const BusApiError&) {
+          *rval = JSVAL_NULL;
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_get_output_value
+
+  JSBool dev_set_output_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        try {
+          uint8_t offset = ctx->convertTo<uint8_t>(argv[0]);
+          uint16_t value = ctx->convertTo<uint16_t>(argv[1]);
+          (intf->getDevice()->setDeviceOutputValue(offset, value));
+          *rval = BOOLEAN_TO_JSVAL(true);
+        } catch(const BusApiError&) {
+          *rval = JSVAL_NULL;
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_set_output_value
+
   JSBool dev_get_sensor_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -793,7 +898,34 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  } // dev_get_last_called_scene
+  } // dev_get_sensor_value
+
+  JSBool dev_get_sensor_type(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        try {
+          int sensorIndex = ctx->convertTo<int>(argv[0]);
+          int retValue= (intf->getDevice()->getDeviceSensorType(sensorIndex));
+          *rval = INT_TO_JSVAL(retValue);
+        } catch(const BusApiError&) {
+          *rval = JSVAL_NULL;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_get_sensor_type
+
+  JSBool dev_get_property_node(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
+    DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+    *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, intf->getDevice()->getPropertyNode()));
+    return JS_TRUE;
+  } // dev_get_property_node
 
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
@@ -807,7 +939,14 @@ namespace dss {
     {"undoScene", dev_undo_scene, 0, 0, 0},
     {"nextScene", dev_next_scene, 0, 0, 0},
     {"previousScene", dev_previous_scene, 0, 0, 0},
+    {"getConfig", dev_get_config, 2, 0, 0},
+    {"getConfigWord", dev_get_config_word, 2, 0, 0},
+    {"setConfig", dev_set_config, 3, 0, 0},
+    {"getOutputValue", dev_get_output_value, 1, 0, 0},
+    {"setOutputValue", dev_set_output_value, 2, 0, 0},
     {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
+    {"getSensorType", dev_get_sensor_type, 1, 0, 0},
+    {"getPropertyNode", dev_get_property_node, 0, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
 
@@ -857,7 +996,10 @@ namespace dss {
           *rval = INT_TO_JSVAL(dev->getDevice()->getLastCalledScene());
           return JS_TRUE;
         case 7:
-          *rval = INT_TO_JSVAL(dev->getDevice()->getShortAddress());
+          *rval = INT_TO_JSVAL(dev->getDevice()->getRevisionID());
+          return JS_TRUE;
+        case 8:
+          *rval = INT_TO_JSVAL(dev->getDevice()->getProductID());
           return JS_TRUE;
       }
     }
@@ -886,7 +1028,8 @@ namespace dss {
     {"circuitID", 4, 0, dev_JSGet},
     {"functionID", 5, 0, dev_JSGet},
     {"lastCalledScene", 6, 0, dev_JSGet},
-    {"shortAddress", 7, 0, dev_JSGet},
+    {"revisionID", 7, 0, dev_JSGet},
+    {"productID", 8, 0, dev_JSGet},
     {NULL, 0, 0, NULL, NULL}
   };
 
@@ -1013,11 +1156,23 @@ namespace dss {
     return JS_FALSE;
   } // dsmeter_getCachedEnergyMeterValue
 
+  JSBool dsmeter_get_property_node(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
+    if(meter != NULL) {
+      *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, meter->getPropertyNode()));
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dsmeter_get_property_node
+
   JSFunctionSpec dsmeter_methods[] = {
     {"getPowerConsumption", dsmeter_getPowerConsumption, 0, 0, 0},
     {"getEnergyMeterValue", dsmeter_getEnergyMeterValue, 0, 0, 0},
     {"getCachedPowerConsumption", dsmeter_getCachedPowerConsumption, 0, 0, 0},
     {"getCachedEnergyMeterValue", dsmeter_getCachedEnergyMeterValue, 0, 0, 0},
+    {"getPropertyNode", dsmeter_get_property_node, 0, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
 

@@ -162,7 +162,18 @@ namespace dss {
         return result;
       }
     }
-    throw ScriptException("Value is not of type double");
+    throw ScriptException("Value is not of type number");
+  }
+
+  template<>
+  uint16_t ScriptContext::convertTo(const jsval& _val) {
+    if(JSVAL_IS_NUMBER(_val)) {
+      uint16 result;
+      if(JS_ValueToUint16(m_pContext, _val, &result)) {
+        return result;
+      }
+    }
+    throw ScriptException("Value is not of type number");
   }
 
   void ScriptContext::jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
