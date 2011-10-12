@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include "core/dss.h"
+#include "core/businterface.h"
 #include "core/base.h"
 #include "core/foreach.h"
 #include "core/logger.h"
@@ -173,6 +175,17 @@ namespace dss {
     return getDevices().getPowerConsumption();
   } // getPowerConsumption
 
+  void Zone::sensorPush(dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr node = m_pPropertyNode->createProperty("SensorHistory/SensorType" +
+        intToString(_sensorType));
+      node->createProperty("value")->setIntegerValue(_sensorValue);
+      node->createProperty("dsid")->setStringValue(_sourceID.toString());
+      DateTime now;
+      node->createProperty("timestamp")->setStringValue(now.toString());
+    }
+  } // sensorPush
+
   void Zone::nextScene() {
     getGroup(GroupIDBroadcast)->nextScene();
   } // nextScene
@@ -195,6 +208,7 @@ namespace dss {
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
         m_pPropertyNode->createProperty("devices/");
+        m_pPropertyNode->createProperty("SensorHistory/");
         foreach(boost::shared_ptr<Group> pGroup, m_Groups) {
           pGroup->publishToPropertyTree();
         }

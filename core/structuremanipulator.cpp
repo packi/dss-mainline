@@ -270,6 +270,7 @@ namespace dss {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
     m_Interface.sensorPush(_zone->getID(), _sourceID, _sensorType, _sensorValue);
+    _zone->sensorPush(_sourceID, _sensorType, _sensorValue);
   } // sensorPush
 
 } // namespace dss

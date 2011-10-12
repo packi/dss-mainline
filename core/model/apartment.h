@@ -121,6 +121,7 @@ namespace dss {
     void removeInactiveMeters();
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
+    BusInterface* getBusInterface() { return m_pBusInterface; }
     ActionRequestInterface* getActionRequestInterface();
     DeviceBusInterface* getDeviceBusInterface();
     /** Returns the root-node for the apartment tree */
