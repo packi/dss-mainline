@@ -422,6 +422,32 @@ namespace dss {
     return JS_TRUE;
   } // prop_load
 
+  JSBool prop_get_name(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, node->getDisplayName().c_str()));
+    return JS_TRUE;
+  } // prop_get_name
+
+  JSBool prop_get_path(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    std::string fullName = node->getDisplayName();
+    PropertyNode* nextNode = node->getParentNode();
+    while(nextNode != NULL) {
+      if(nextNode->getParentNode() != NULL) {
+        fullName = nextNode->getDisplayName() + "/" + fullName;
+      } else {
+        fullName = "/" + fullName;
+      }
+      nextNode = nextNode->getParentNode();
+    }
+    *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, fullName.c_str()));
+    return JS_TRUE;
+  } // prop_get_path
+
   JSFunctionSpec prop_methods[] = {
     {"setValue", prop_setProperty, 1, 0, 0},
     {"getValue", prop_getProperty, 0, 0, 0},
@@ -433,6 +459,8 @@ namespace dss {
     {"getParent", prop_getParent, 0, 0, 0},
     {"setFlag", prop_setFlag, 2, 0, 0},
     {"hasFlag", prop_hasFlag, 1, 0, 0},
+    {"getName", prop_get_name, 0, 0, 0},
+    {"getPath", prop_get_path, 0, 0, 0},
     {NULL, NULL, 0, 0, 0},
   };
 

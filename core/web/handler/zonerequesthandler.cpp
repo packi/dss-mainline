@@ -215,7 +215,6 @@ namespace dss {
           }
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sensorPush(pZone, sourceID, sensorType, sensorValue);
-          // TODO: raise model event and forward value
         } else {
           throw std::runtime_error("Unhandled function");
         }

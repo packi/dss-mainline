@@ -66,8 +66,17 @@ namespace dss {
     /** @copydoc createJSDevice */
     JSObject* createJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 
-    /** Creates a JSObject that wraps a DSMeter */
+    /** Creates a JSObject that wraps a DSMeter
+     * @param _ctx Context in which to create the object
+     * @param _pMeter Reference to the \a DSMeter being wrapped
+     */
     JSObject* createJSMeter(ScriptContext& _ctx, boost::shared_ptr<DSMeter> _pMeter);
+
+    /** Creates a JSObject that wraps a Zone
+     * @param _ctx Context in which to create the object
+     * @param _pZone Reference to the \a Zone being wrapped
+     */
+    JSObject* createJSZone(ScriptContext& _ctx, boost::shared_ptr<Zone> _pZone);
 
     template<class t>
     t convertTo(ScriptContext& _context, jsval val);
