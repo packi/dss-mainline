@@ -2,6 +2,7 @@
     Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -151,8 +152,10 @@ int dss__ZoneSetValue(char* _token, int _zoneID, int _groupID, unsigned char _va
 int dss__ZoneCallScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool _force = false, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the zone/group _groupID. */
 int dss__ZoneSaveScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool& result);
-
+/** Send a generic blink command to all devices in the zone */
 int dss__ZoneBlink(char* _token, int _zoneID, int _groupID, bool& result);
+/** Send a sensoric value into the zone */
+int dss__ZonePushSensorValue(char* _token, int _zoneID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool& result);
 
 //--------------------------- Device
 
@@ -172,9 +175,16 @@ int dss__DeviceSetValue(char* _token, char* _deviceID, unsigned char _value, boo
 int dss__DeviceSetConfig(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char _value, bool& result);
 /** Returns configuration value of the given config class and config index */
 int dss__DeviceGetConfig(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char& result);
-
 /** Returns configuration value of the given config class and config index */
 int dss__DeviceGetConfigWord(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned short int& result);
+/** Sets the configuration value of the given config class and config index */
+int dss__DeviceSetOutvalue(char* _token, char* _deviceID, unsigned char _valueIndex, unsigned short int _value, bool& result);
+/** Returns configuration value of the given config class and config index */
+int dss__DeviceGetOutvalue(char* _token, char* _deviceID, unsigned char _valueIndex, unsigned short int& result);
+/** Returns sensor type code of the given sensor index */
+int dss__DeviceGetSensorType(char* _token, char* _deviceID, unsigned char _sensorIndex, unsigned char& result);
+/** Returns sensor value of the given sensor index */
+int dss__DeviceGetSensorValue(char* _token, char* _deviceID, unsigned char _sensorIndex, unsigned short int& result);
 
 /** Calls the scene _sceneNr on the device identified by _deviceID. */
 int dss__DeviceCallScene(char* _token, char* _deviceID, int _sceneNr, bool _force = false, bool& result);

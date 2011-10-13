@@ -30,8 +30,8 @@ class dssService : public soap
 	{"dss", "urn:dss:1.0", NULL, NULL},
 	{NULL, NULL, NULL, NULL}
 };
-          bind_flags = SO_REUSEADDR;
-          accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
+	bind_flags = SO_REUSEADDR;
+	accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)
@@ -141,6 +141,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSaveScene(struct soap*, char *_token, int _zo
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneBlink(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZonePushSensorValue(struct soap*, char *_token, int _zoneID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceBlink(struct soap*, char *_token, char *_deviceID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOn(struct soap*, char *_token, char *_deviceID, bool &result);
@@ -158,6 +160,14 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetConfig(struct soap*, char *_token, char 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetConfig(struct soap*, char *_token, char *_deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetConfigWord(struct soap*, char *_token, char *_deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned short &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetOutvalue(struct soap*, char *_token, char *_deviceID, unsigned char _valueIndex, unsigned short _value, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetOutvalue(struct soap*, char *_token, char *_deviceID, unsigned char _valueIndex, unsigned short &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetSensorType(struct soap*, char *_token, char *_deviceID, unsigned char _sensorIndex, unsigned char &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetSensorValue(struct soap*, char *_token, char *_deviceID, unsigned char _sensorIndex, unsigned short &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool _force, bool &result);
 

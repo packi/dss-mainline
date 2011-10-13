@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2011-08-05 13:34:08 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2011-10-13 11:34:06 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -171,6 +171,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ZoneSaveScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneBlink"))
 		return soap_serve_dss__ZoneBlink(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ZonePushSensorValue"))
+		return soap_serve_dss__ZonePushSensorValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceBlink"))
 		return soap_serve_dss__DeviceBlink(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceTurnOn"))
@@ -189,6 +191,14 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceGetConfig(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetConfigWord"))
 		return soap_serve_dss__DeviceGetConfigWord(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetOutvalue"))
+		return soap_serve_dss__DeviceSetOutvalue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetOutvalue"))
+		return soap_serve_dss__DeviceGetOutvalue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetSensorType"))
+		return soap_serve_dss__DeviceGetSensorType(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetSensorValue"))
+		return soap_serve_dss__DeviceGetSensorValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceCallScene"))
 		return soap_serve_dss__DeviceCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSaveScene"))
@@ -2173,6 +2183,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneBlink(struct soap *soap)
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZonePushSensorValue(struct soap *soap)
+{	struct dss__ZonePushSensorValue soap_tmp_dss__ZonePushSensorValue;
+	struct dss__ZonePushSensorValueResponse soap_tmp_dss__ZonePushSensorValueResponse;
+	soap_default_dss__ZonePushSensorValueResponse(soap, &soap_tmp_dss__ZonePushSensorValueResponse);
+	soap_default_dss__ZonePushSensorValue(soap, &soap_tmp_dss__ZonePushSensorValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ZonePushSensorValue(soap, &soap_tmp_dss__ZonePushSensorValue, "dss:ZonePushSensorValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ZonePushSensorValue(soap, soap_tmp_dss__ZonePushSensorValue._token, soap_tmp_dss__ZonePushSensorValue._zoneID, soap_tmp_dss__ZonePushSensorValue._sourceDeviceID, soap_tmp_dss__ZonePushSensorValue._sensorType, soap_tmp_dss__ZonePushSensorValue._sensorValue, soap_tmp_dss__ZonePushSensorValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ZonePushSensorValueResponse(soap, &soap_tmp_dss__ZonePushSensorValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ZonePushSensorValueResponse(soap, &soap_tmp_dss__ZonePushSensorValueResponse, "dss:ZonePushSensorValueResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ZonePushSensorValueResponse(soap, &soap_tmp_dss__ZonePushSensorValueResponse, "dss:ZonePushSensorValueResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceBlink(struct soap *soap)
 {	struct dss__DeviceBlink soap_tmp_dss__DeviceBlink;
 	struct dss__DeviceBlinkResponse soap_tmp_dss__DeviceBlinkResponse;
@@ -2535,6 +2586,170 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetConfigWord(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceGetConfigWordResponse(soap, &soap_tmp_dss__DeviceGetConfigWordResponse, "dss:DeviceGetConfigWordResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetOutvalue(struct soap *soap)
+{	struct dss__DeviceSetOutvalue soap_tmp_dss__DeviceSetOutvalue;
+	struct dss__DeviceSetOutvalueResponse soap_tmp_dss__DeviceSetOutvalueResponse;
+	soap_default_dss__DeviceSetOutvalueResponse(soap, &soap_tmp_dss__DeviceSetOutvalueResponse);
+	soap_default_dss__DeviceSetOutvalue(soap, &soap_tmp_dss__DeviceSetOutvalue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceSetOutvalue(soap, &soap_tmp_dss__DeviceSetOutvalue, "dss:DeviceSetOutvalue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceSetOutvalue(soap, soap_tmp_dss__DeviceSetOutvalue._token, soap_tmp_dss__DeviceSetOutvalue._deviceID, soap_tmp_dss__DeviceSetOutvalue._valueIndex, soap_tmp_dss__DeviceSetOutvalue._value, soap_tmp_dss__DeviceSetOutvalueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceSetOutvalueResponse(soap, &soap_tmp_dss__DeviceSetOutvalueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceSetOutvalueResponse(soap, &soap_tmp_dss__DeviceSetOutvalueResponse, "dss:DeviceSetOutvalueResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceSetOutvalueResponse(soap, &soap_tmp_dss__DeviceSetOutvalueResponse, "dss:DeviceSetOutvalueResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetOutvalue(struct soap *soap)
+{	struct dss__DeviceGetOutvalue soap_tmp_dss__DeviceGetOutvalue;
+	struct dss__DeviceGetOutvalueResponse soap_tmp_dss__DeviceGetOutvalueResponse;
+	soap_default_dss__DeviceGetOutvalueResponse(soap, &soap_tmp_dss__DeviceGetOutvalueResponse);
+	soap_default_dss__DeviceGetOutvalue(soap, &soap_tmp_dss__DeviceGetOutvalue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetOutvalue(soap, &soap_tmp_dss__DeviceGetOutvalue, "dss:DeviceGetOutvalue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetOutvalue(soap, soap_tmp_dss__DeviceGetOutvalue._token, soap_tmp_dss__DeviceGetOutvalue._deviceID, soap_tmp_dss__DeviceGetOutvalue._valueIndex, soap_tmp_dss__DeviceGetOutvalueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetOutvalueResponse(soap, &soap_tmp_dss__DeviceGetOutvalueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetOutvalueResponse(soap, &soap_tmp_dss__DeviceGetOutvalueResponse, "dss:DeviceGetOutvalueResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetOutvalueResponse(soap, &soap_tmp_dss__DeviceGetOutvalueResponse, "dss:DeviceGetOutvalueResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetSensorType(struct soap *soap)
+{	struct dss__DeviceGetSensorType soap_tmp_dss__DeviceGetSensorType;
+	struct dss__DeviceGetSensorTypeResponse soap_tmp_dss__DeviceGetSensorTypeResponse;
+	soap_default_dss__DeviceGetSensorTypeResponse(soap, &soap_tmp_dss__DeviceGetSensorTypeResponse);
+	soap_default_dss__DeviceGetSensorType(soap, &soap_tmp_dss__DeviceGetSensorType);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetSensorType(soap, &soap_tmp_dss__DeviceGetSensorType, "dss:DeviceGetSensorType", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetSensorType(soap, soap_tmp_dss__DeviceGetSensorType._token, soap_tmp_dss__DeviceGetSensorType._deviceID, soap_tmp_dss__DeviceGetSensorType._sensorIndex, soap_tmp_dss__DeviceGetSensorTypeResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetSensorTypeResponse(soap, &soap_tmp_dss__DeviceGetSensorTypeResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetSensorTypeResponse(soap, &soap_tmp_dss__DeviceGetSensorTypeResponse, "dss:DeviceGetSensorTypeResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetSensorTypeResponse(soap, &soap_tmp_dss__DeviceGetSensorTypeResponse, "dss:DeviceGetSensorTypeResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetSensorValue(struct soap *soap)
+{	struct dss__DeviceGetSensorValue soap_tmp_dss__DeviceGetSensorValue;
+	struct dss__DeviceGetSensorValueResponse soap_tmp_dss__DeviceGetSensorValueResponse;
+	soap_default_dss__DeviceGetSensorValueResponse(soap, &soap_tmp_dss__DeviceGetSensorValueResponse);
+	soap_default_dss__DeviceGetSensorValue(soap, &soap_tmp_dss__DeviceGetSensorValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetSensorValue(soap, &soap_tmp_dss__DeviceGetSensorValue, "dss:DeviceGetSensorValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetSensorValue(soap, soap_tmp_dss__DeviceGetSensorValue._token, soap_tmp_dss__DeviceGetSensorValue._deviceID, soap_tmp_dss__DeviceGetSensorValue._sensorIndex, soap_tmp_dss__DeviceGetSensorValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetSensorValueResponse(soap, &soap_tmp_dss__DeviceGetSensorValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetSensorValueResponse(soap, &soap_tmp_dss__DeviceGetSensorValueResponse, "dss:DeviceGetSensorValueResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetSensorValueResponse(soap, &soap_tmp_dss__DeviceGetSensorValueResponse, "dss:DeviceGetSensorValueResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
