@@ -864,6 +864,26 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="ZonePushSensorValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sourceDeviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sensorType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sensorValue" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZonePushSensorValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DeviceBlink">
    <complexType>
     <sequence>
@@ -1018,6 +1038,79 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceGetConfigWordResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceSetOutvalue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="valueIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceSetOutvalueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetOutvalue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="valueIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetOutvalueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetSensorType">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sensorIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetSensorTypeResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetSensorValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sensorIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetSensorValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
@@ -2216,6 +2309,14 @@
  <part name="parameters" element="dss:ZoneBlinkResponse"/>
 </message>
 
+<message name="ZonePushSensorValueRequest">
+ <part name="parameters" element="dss:ZonePushSensorValue"/>
+</message>
+
+<message name="ZonePushSensorValueResponse">
+ <part name="parameters" element="dss:ZonePushSensorValueResponse"/>
+</message>
+
 <message name="DeviceBlinkRequest">
  <part name="parameters" element="dss:DeviceBlink"/>
 </message>
@@ -2286,6 +2387,38 @@
 
 <message name="DeviceGetConfigWordResponse">
  <part name="parameters" element="dss:DeviceGetConfigWordResponse"/>
+</message>
+
+<message name="DeviceSetOutvalueRequest">
+ <part name="parameters" element="dss:DeviceSetOutvalue"/>
+</message>
+
+<message name="DeviceSetOutvalueResponse">
+ <part name="parameters" element="dss:DeviceSetOutvalueResponse"/>
+</message>
+
+<message name="DeviceGetOutvalueRequest">
+ <part name="parameters" element="dss:DeviceGetOutvalue"/>
+</message>
+
+<message name="DeviceGetOutvalueResponse">
+ <part name="parameters" element="dss:DeviceGetOutvalueResponse"/>
+</message>
+
+<message name="DeviceGetSensorTypeRequest">
+ <part name="parameters" element="dss:DeviceGetSensorType"/>
+</message>
+
+<message name="DeviceGetSensorTypeResponse">
+ <part name="parameters" element="dss:DeviceGetSensorTypeResponse"/>
+</message>
+
+<message name="DeviceGetSensorValueRequest">
+ <part name="parameters" element="dss:DeviceGetSensorValue"/>
+</message>
+
+<message name="DeviceGetSensorValueResponse">
+ <part name="parameters" element="dss:DeviceGetSensorValueResponse"/>
 </message>
 
 <message name="DeviceCallSceneRequest">
@@ -2895,6 +3028,11 @@
   <input message="tns:ZoneBlinkRequest"/>
   <output message="tns:ZoneBlinkResponse"/>
  </operation>
+ <operation name="ZonePushSensorValue">
+  <documentation>Service definition of function dss__ZonePushSensorValue</documentation>
+  <input message="tns:ZonePushSensorValueRequest"/>
+  <output message="tns:ZonePushSensorValueResponse"/>
+ </operation>
  <operation name="DeviceBlink">
   <documentation>Service definition of function dss__DeviceBlink</documentation>
   <input message="tns:DeviceBlinkRequest"/>
@@ -2939,6 +3077,26 @@
   <documentation>Service definition of function dss__DeviceGetConfigWord</documentation>
   <input message="tns:DeviceGetConfigWordRequest"/>
   <output message="tns:DeviceGetConfigWordResponse"/>
+ </operation>
+ <operation name="DeviceSetOutvalue">
+  <documentation>Service definition of function dss__DeviceSetOutvalue</documentation>
+  <input message="tns:DeviceSetOutvalueRequest"/>
+  <output message="tns:DeviceSetOutvalueResponse"/>
+ </operation>
+ <operation name="DeviceGetOutvalue">
+  <documentation>Service definition of function dss__DeviceGetOutvalue</documentation>
+  <input message="tns:DeviceGetOutvalueRequest"/>
+  <output message="tns:DeviceGetOutvalueResponse"/>
+ </operation>
+ <operation name="DeviceGetSensorType">
+  <documentation>Service definition of function dss__DeviceGetSensorType</documentation>
+  <input message="tns:DeviceGetSensorTypeRequest"/>
+  <output message="tns:DeviceGetSensorTypeResponse"/>
+ </operation>
+ <operation name="DeviceGetSensorValue">
+  <documentation>Service definition of function dss__DeviceGetSensorValue</documentation>
+  <input message="tns:DeviceGetSensorValueRequest"/>
+  <output message="tns:DeviceGetSensorValueResponse"/>
  </operation>
  <operation name="DeviceCallScene">
   <documentation>Service definition of function dss__DeviceCallScene</documentation>
@@ -3593,6 +3751,15 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="ZonePushSensorValue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="DeviceBlink">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3666,6 +3833,42 @@
   </output>
  </operation>
  <operation name="DeviceGetConfigWord">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceSetOutvalue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetOutvalue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetSensorType">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetSensorValue">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

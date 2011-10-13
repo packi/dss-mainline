@@ -2,6 +2,7 @@
     Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -157,6 +158,18 @@ int AuthorizeAndGetGroupOfZone(struct soap *soap, const char* _token, const int 
   return SOAP_OK;
 } // authorizeAndGetGroupOfZone
 
+int AuthorizeAndGetZone(struct soap *soap, const char* _token, const int _zoneID, boost::shared_ptr<dss::Zone>& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  try {
+    result = apt.getZone(_zoneID);
+  } catch(dss::ItemNotFoundException& _ex) {
+    return soap_receiver_fault(soap, "Zone not found", NULL);
+  }
+  return SOAP_OK;
+} // authorizeAndGetZone
 
 //==================================================== Callbacks
 
@@ -825,6 +838,28 @@ int dss__ZoneBlink(struct soap *soap, char* _token, int _zoneID, int _groupID, b
   return SOAP_OK;
 }
 
+int dss__ZonePushSensorValue(struct soap *soap, char* _token, int _zoneID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool& result) {
+  boost::shared_ptr<dss::Zone> zone;
+  dss::DSS& dssRef = *dss::DSS::getInstance();
+  dss::Apartment& aptRef = dssRef.getApartment();
+
+  int getResult = AuthorizeAndGetZone(soap, _token, _zoneID, zone);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  try {
+    dss::dss_dsid_t sourceDSID = dss::dsid::fromString(_sourceDeviceID);
+    dss::StructureManipulator manipulator(*dssRef.getBusInterface().getStructureModifyingBusInterface(),
+                                          *dssRef.getBusInterface().getStructureQueryBusInterface(),
+                                          aptRef);
+    manipulator.sensorPush(zone, sourceDSID, _sensorType, _sensorValue);
+  } catch(std::runtime_error& _ex) {
+    return soap_receiver_fault(soap, "Error handling request", NULL);
+  }
+  result = true;
+  return SOAP_OK;
+}
+
 //---------------------------------- Device
 
 
@@ -950,6 +985,47 @@ int dss__DeviceSetConfig(struct soap *soap, char* _token, char* _deviceID,
   }
   dev.getDevice()->setDeviceConfig(_configClass, _configIndex, _value);
   result = true;
+  return SOAP_OK;
+}
+
+int dss__DeviceSetOutvalue(struct soap *soap, char* _token, char* _deviceID, unsigned char _valueIndex, unsigned short int _value, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dev.getDevice()->setDeviceOutputValue(_valueIndex, _value);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__DeviceGetOutvalue(struct soap *soap, char* _token, char* _deviceID, unsigned char _valueIndex, unsigned short int& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  result = dev.getDevice()->getDeviceOutputValue(_valueIndex);
+  return SOAP_OK;
+}
+
+int dss__DeviceGetSensorType(struct soap *soap, char* _token, char* _deviceID, unsigned char _sensorIndex, unsigned char& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  result = dev.getDevice()->getDeviceSensorType(_sensorIndex);
+  return SOAP_OK;
+}
+
+int dss__DeviceGetSensorValue(struct soap *soap, char* _token, char* _deviceID, unsigned char _sensorIndex, unsigned short int& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  result = dev.getDevice()->getDeviceSensorValue(_sensorIndex);
   return SOAP_OK;
 }
 

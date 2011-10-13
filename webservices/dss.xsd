@@ -848,6 +848,26 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="ZonePushSensorValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sourceDeviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sensorType" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sensorValue" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZonePushSensorValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DeviceBlink">
    <complexType>
     <sequence>
@@ -1002,6 +1022,79 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceGetConfigWordResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceSetOutvalue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="valueIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceSetOutvalueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetOutvalue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="valueIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetOutvalueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetSensorType">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sensorIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetSensorTypeResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetSensorValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sensorIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetSensorValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
