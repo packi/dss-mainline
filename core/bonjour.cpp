@@ -268,10 +268,10 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
     DSS::getInstance()->getSecurity().loginAsSystemUser(
         "Bonjour needs system rights");
 
+#ifdef USE_AVAHI
     serverPort = DSS::getInstance()->getPropertySystem().getIntValue(
         "/config/subsystems/WebServer/announcedport");
 
-#ifdef USE_AVAHI
     AvahiClient *client = NULL;
     int error;
 
