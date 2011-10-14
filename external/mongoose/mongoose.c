@@ -180,6 +180,9 @@ typedef struct DIR {
 #if defined(__MACH__)
 #define SSL_LIB   "libssl.dylib"
 #define CRYPTO_LIB  "libcrypto.dylib"
+#elif defined(__CYGWIN__)
+#define SSL_LIB   "cygssl-0.9.8.dll"
+#define CRYPTO_LIB  "cygcrypto-0.9.8.dll"
 #else
 #define SSL_LIB   "libssl.so"
 #define CRYPTO_LIB  "libcrypto.so"
