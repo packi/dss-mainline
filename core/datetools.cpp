@@ -311,7 +311,11 @@ namespace dss {
     // be in local time
     time_t t0 = mktime(&tm);
     if(_isoStr.at(_isoStr.size()-1) == 'Z') {
+#if defined(__CYGWIN__)
+      t0 += -_timezone;
+#else
       t0 += tm.tm_gmtoff;
+#endif
     }
 
     DateTime d(t0);
