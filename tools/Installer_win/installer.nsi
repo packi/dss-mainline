@@ -16,7 +16,7 @@ Name 'dSS4win'
 
 !define MUI_WELCOMEPAGE
 !define MUI_WELCOMEPAGE_TITLE "dSS4win ${dssVersion} Setup"
-!define MUI_WELCOMEPAGE_TEXT "This Setup will install and configure dSS4win on your computer"
+!define MUI_WELCOMEPAGE_TEXT "This Setup will install and configure dSS4win on your computer.$\n$\nPlease make sure you have uninstalled any previous installation of dSS4win before continuing."
 !define MUI_STARTMENUPAGE
 !define MUI_STARTMENUPAGE_NODISABLE
 !define MUI_FINISHPAGE
