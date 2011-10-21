@@ -168,15 +168,16 @@ BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
 BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
-
   DateTime startTime = DateTime::fromISO("20080505T080000Z");
 
-  DateTime firstRecurr = sched.getNextOccurence(startTime);
-  BOOST_CHECK_EQUAL(startTime, firstRecurr);
+  DateTime currentTime;
+  DateTime nextSchedule = currentTime.addMinute(2);
+  nextSchedule.setMinute(nextSchedule.getMinute() & ~1);
+  nextSchedule.setSecond(0);
 
-  DateTime startPlusOneSec = startTime.addSeconds(1);
-  DateTime nextRecurr = sched.getNextOccurence(startPlusOneSec);
-  BOOST_CHECK_EQUAL(startTime.addMinute(2), nextRecurr);
+  DateTime firstRecurr = sched.getNextOccurence(startTime);
+  BOOST_CHECK_EQUAL(nextSchedule, firstRecurr);
+
 } // testDynamicScheduleICal
 #endif
 

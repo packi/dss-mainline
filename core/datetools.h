@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -62,6 +63,7 @@ namespace dss {
     /** Copy constuctor */
     DateTime(const DateTime& _copy);
     DateTime(const struct tm& _tm);
+    DateTime(const struct icaltimetype& _icaltime);
 
     /** Adds \a _hours hours to the time and normalizes the DateTime */
     DateTime addHour(const int _hours) const;
@@ -153,6 +155,9 @@ namespace dss {
     /** Returns the seconds since epoch */
     time_t secondsSinceEpoch() const;
 
+    /** Returns the offset in seconds from GMT */
+    long int getTimezoneOffset() const;
+
     std::ostream& operator<<(std::ostream& out) const;
     operator std::string() const;
     std::string toString() const;
@@ -194,7 +199,7 @@ namespace dss {
     StaticSchedule(const DateTime& _when) : m_When(_when) {}
     virtual ~StaticSchedule() {}
 
-    virtual DateTime getNextOccurence(const DateTime& _from) ;
+    virtual DateTime getNextOccurence(const DateTime& _from);
     virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
 
@@ -234,10 +239,13 @@ namespace dss {
   private:
     struct icalrecurrencetype m_Recurrence;
     struct icaltimetype m_StartDate;
+    struct icaltimetype m_NextSchedule;
+    icalrecur_iterator* m_ICalIterator;
   public:
     ICalSchedule(const std::string& _rrule, const std::string _startDateISO);
     virtual ~ICalSchedule();
 
+    virtual bool hasNextOccurence(const DateTime& _from);
     virtual DateTime getNextOccurence(const DateTime& _from) ;
     virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule

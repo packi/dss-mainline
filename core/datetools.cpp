@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -44,6 +45,25 @@ namespace dss {
 
   DateTime::DateTime(const struct tm& _tm) {
     m_DateTime = _tm;
+  }
+
+  DateTime::DateTime(const struct icaltimetype& _icaltime) {
+    time_t t0 = icaltime_as_timet(_icaltime);
+    if(_icaltime.is_utc) {
+      localtime_r(&t0, &m_DateTime);
+    } else {
+      //gmtime_r(&t0, &m_DateTime);
+      if(!_icaltime.is_date) {
+        m_DateTime.tm_sec = _icaltime.second;
+        m_DateTime.tm_min = _icaltime.minute;
+        m_DateTime.tm_hour = _icaltime.hour;
+      }
+      m_DateTime.tm_mday = _icaltime.day;
+      m_DateTime.tm_mon = _icaltime.month - 1;
+      m_DateTime.tm_year = _icaltime.year - 1900;
+      m_DateTime.tm_isdst = -1;
+      (void) mktime(&m_DateTime);
+    }
   }
 
   void DateTime::validate() {
@@ -232,6 +252,10 @@ namespace dss {
     return mktime(&self);
   }
 
+  long int DateTime::getTimezoneOffset() const {
+    return m_DateTime.tm_gmtoff;
+  }
+
   std::ostream& DateTime::operator<<(std::ostream& out) const {
     std::string bla = dateToISOString<std::string>(&m_DateTime);
     out << bla;
@@ -341,17 +365,33 @@ namespace dss {
     return result;
   } // getOccurencesBetween
 
-
   //================================================== ICalSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
   ICalSchedule::ICalSchedule(const std::string& _rrule, const std::string _startDateISO) {
     m_Recurrence = icalrecurrencetype_from_string(_rrule.c_str());
     m_StartDate = icaltime_from_string(_startDateISO.c_str());
+    m_ICalIterator = icalrecur_iterator_new(m_Recurrence, m_StartDate);
+    m_NextSchedule = icalrecur_iterator_next(m_ICalIterator);
+
+    // setup iterator to point it to the next occurence
+    DateTime now;
+    time_t t0 = now.secondsSinceEpoch();
+    if(!m_StartDate.is_utc) {
+      t0 += now.getTimezoneOffset();
+    }
+    struct icaltimetype istart = icaltime_from_timet(t0, 0);
+
+    while(!icaltime_is_null_time(m_NextSchedule) &&
+        icaltime_compare(m_NextSchedule, istart) < 0)
+    {
+      m_NextSchedule = icalrecur_iterator_next(m_ICalIterator);
+    }
   } // ctor
 
   ICalSchedule::~ICalSchedule() {
     icalrecurrencetype_clear(&m_Recurrence);
+    icalrecur_iterator_free(m_ICalIterator);
   } // dtor
 
   void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
@@ -373,30 +413,33 @@ namespace dss {
     }
   } // ical_to_tm
 
+  bool ICalSchedule::hasNextOccurence(const DateTime& _from) {
+    if(icaltime_is_null_time(m_NextSchedule)) {
+      return false;
+    }
+    return true;
+  } // hasNextOccurence
+
   DateTime ICalSchedule::getNextOccurence(const DateTime& _from) {
     DateTime result;
     DateTime current;
 
-    icalrecur_iterator* it = icalrecur_iterator_new(m_Recurrence, m_StartDate);
-    do {
-      struct icaltimetype icalTime = icalrecur_iterator_next(it);
-      if(icaltime_is_null_time(icalTime)) {
-        break;
-      }
+    time_t t0 = _from.secondsSinceEpoch() + _from.getTimezoneOffset();
+    struct icaltimetype ifrom = icaltime_from_timet(t0, 0);
 
-      struct tm tm;
-      ical_to_tm(icalTime, tm);
-      current = DateTime(tm);
-    } while(current.before(_from));
-    icalrecur_iterator_free(it);
-    it = NULL;
-
-    if(current.after(_from) || current == _from) {
-      result = current;
-    } else {
+    if(icaltime_is_null_time(m_NextSchedule)) {
       result = DateTime::NullDate;
     }
-
+    else if(icaltime_compare(ifrom, m_NextSchedule) < 0) {
+      result = DateTime(m_NextSchedule);
+    }
+    else if(icaltime_compare(ifrom, m_NextSchedule) >= 0) {
+      result = DateTime(m_NextSchedule);
+      m_NextSchedule = icalrecur_iterator_next(m_ICalIterator);
+    }
+    else {
+      result = DateTime::NullDate;
+    }
     return result;
   } // getNextOccurence
 
