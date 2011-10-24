@@ -875,7 +875,9 @@ public:
   }
   virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
   }
-  virtual void undoScene(AddressableModelItem *pTarget) {
+  virtual void undoScene(AddressableModelItem *pTarget, const uint16_t scene) {
+  }
+  virtual void undoSceneLast(AddressableModelItem *pTarget) {
   }
   virtual void blink(AddressableModelItem *pTarget) {
   }

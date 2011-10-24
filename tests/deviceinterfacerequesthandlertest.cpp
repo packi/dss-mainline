@@ -62,8 +62,11 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void saveScene(const int _sceneNr)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoScene()  {
-      functionCalled("undoScene");
+    virtual void undoScene(const int _sceneNr)  {
+      functionCalled("undoScene(" + intToString(_sceneNr) + ")");
+    }
+    virtual void undoSceneLast()  {
+      functionCalled("undoSceneLast");
     }
     virtual unsigned long getPowerConsumption()  {
       functionCalled("getConsumption");
@@ -164,7 +167,7 @@ BOOST_FIXTURE_TEST_CASE(testSaveScene, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUndoScene, Fixture) {
-  testFunction("undoScene");
+  testFunction("undoScene", "sceneNumber", "5");
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {

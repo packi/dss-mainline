@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2011-10-13 11:34:06 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2011-10-24 15:00:30 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -135,6 +135,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__SetCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SetSaveScene"))
 		return soap_serve_dss__SetSaveScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:SetUndoScene"))
+		return soap_serve_dss__SetUndoScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:SetUndoLastScene"))
+		return soap_serve_dss__SetUndoLastScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentTurnOn"))
 		return soap_serve_dss__ApartmentTurnOn(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentTurnOff"))
@@ -149,6 +153,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentSaveScene"))
 		return soap_serve_dss__ApartmentSaveScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentUndoScene"))
+		return soap_serve_dss__ApartmentUndoScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentUndoLastScene"))
+		return soap_serve_dss__ApartmentUndoLastScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentBlink"))
 		return soap_serve_dss__ApartmentBlink(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentRescan"))
@@ -169,6 +177,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ZoneCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneSaveScene"))
 		return soap_serve_dss__ZoneSaveScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ZoneUndoScene"))
+		return soap_serve_dss__ZoneUndoScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ZoneUndoLastScene"))
+		return soap_serve_dss__ZoneUndoLastScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneBlink"))
 		return soap_serve_dss__ZoneBlink(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZonePushSensorValue"))
@@ -203,6 +215,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSaveScene"))
 		return soap_serve_dss__DeviceSaveScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceUndoScene"))
+		return soap_serve_dss__DeviceUndoScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceUndoLastScene"))
+		return soap_serve_dss__DeviceUndoLastScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetName"))
 		return soap_serve_dss__DeviceGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetName"))
@@ -1445,6 +1461,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetSaveScene(struct soap *soap)
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetUndoScene(struct soap *soap)
+{	struct dss__SetUndoScene soap_tmp_dss__SetUndoScene;
+	struct dss__SetUndoSceneResponse soap_tmp_dss__SetUndoSceneResponse;
+	soap_default_dss__SetUndoSceneResponse(soap, &soap_tmp_dss__SetUndoSceneResponse);
+	soap_default_dss__SetUndoScene(soap, &soap_tmp_dss__SetUndoScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__SetUndoScene(soap, &soap_tmp_dss__SetUndoScene, "dss:SetUndoScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__SetUndoScene(soap, soap_tmp_dss__SetUndoScene._token, soap_tmp_dss__SetUndoScene._setSpec, soap_tmp_dss__SetUndoScene._sceneNr, soap_tmp_dss__SetUndoSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__SetUndoSceneResponse(soap, &soap_tmp_dss__SetUndoSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__SetUndoSceneResponse(soap, &soap_tmp_dss__SetUndoSceneResponse, "dss:SetUndoSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__SetUndoSceneResponse(soap, &soap_tmp_dss__SetUndoSceneResponse, "dss:SetUndoSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetUndoLastScene(struct soap *soap)
+{	struct dss__SetUndoLastScene soap_tmp_dss__SetUndoLastScene;
+	struct dss__SetUndoLastSceneResponse soap_tmp_dss__SetUndoLastSceneResponse;
+	soap_default_dss__SetUndoLastSceneResponse(soap, &soap_tmp_dss__SetUndoLastSceneResponse);
+	soap_default_dss__SetUndoLastScene(soap, &soap_tmp_dss__SetUndoLastScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__SetUndoLastScene(soap, &soap_tmp_dss__SetUndoLastScene, "dss:SetUndoLastScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__SetUndoLastScene(soap, soap_tmp_dss__SetUndoLastScene._token, soap_tmp_dss__SetUndoLastScene._setSpec, soap_tmp_dss__SetUndoLastSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__SetUndoLastSceneResponse(soap, &soap_tmp_dss__SetUndoLastSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__SetUndoLastSceneResponse(soap, &soap_tmp_dss__SetUndoLastSceneResponse, "dss:SetUndoLastSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__SetUndoLastSceneResponse(soap, &soap_tmp_dss__SetUndoLastSceneResponse, "dss:SetUndoLastSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentTurnOn(struct soap *soap)
 {	struct dss__ApartmentTurnOn soap_tmp_dss__ApartmentTurnOn;
 	struct dss__ApartmentTurnOnResponse soap_tmp_dss__ApartmentTurnOnResponse;
@@ -1725,6 +1823,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentSaveScene(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ApartmentSaveSceneResponse(soap, &soap_tmp_dss__ApartmentSaveSceneResponse, "dss:ApartmentSaveSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentUndoScene(struct soap *soap)
+{	struct dss__ApartmentUndoScene soap_tmp_dss__ApartmentUndoScene;
+	struct dss__ApartmentUndoSceneResponse soap_tmp_dss__ApartmentUndoSceneResponse;
+	soap_default_dss__ApartmentUndoSceneResponse(soap, &soap_tmp_dss__ApartmentUndoSceneResponse);
+	soap_default_dss__ApartmentUndoScene(soap, &soap_tmp_dss__ApartmentUndoScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ApartmentUndoScene(soap, &soap_tmp_dss__ApartmentUndoScene, "dss:ApartmentUndoScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ApartmentUndoScene(soap, soap_tmp_dss__ApartmentUndoScene._token, soap_tmp_dss__ApartmentUndoScene._groupID, soap_tmp_dss__ApartmentUndoScene._sceneNr, soap_tmp_dss__ApartmentUndoSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ApartmentUndoSceneResponse(soap, &soap_tmp_dss__ApartmentUndoSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ApartmentUndoSceneResponse(soap, &soap_tmp_dss__ApartmentUndoSceneResponse, "dss:ApartmentUndoSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ApartmentUndoSceneResponse(soap, &soap_tmp_dss__ApartmentUndoSceneResponse, "dss:ApartmentUndoSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentUndoLastScene(struct soap *soap)
+{	struct dss__ApartmentUndoLastScene soap_tmp_dss__ApartmentUndoLastScene;
+	struct dss__ApartmentUndoLastSceneResponse soap_tmp_dss__ApartmentUndoLastSceneResponse;
+	soap_default_dss__ApartmentUndoLastSceneResponse(soap, &soap_tmp_dss__ApartmentUndoLastSceneResponse);
+	soap_default_dss__ApartmentUndoLastScene(soap, &soap_tmp_dss__ApartmentUndoLastScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ApartmentUndoLastScene(soap, &soap_tmp_dss__ApartmentUndoLastScene, "dss:ApartmentUndoLastScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ApartmentUndoLastScene(soap, soap_tmp_dss__ApartmentUndoLastScene._token, soap_tmp_dss__ApartmentUndoLastScene._groupID, soap_tmp_dss__ApartmentUndoLastSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ApartmentUndoLastSceneResponse(soap, &soap_tmp_dss__ApartmentUndoLastSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ApartmentUndoLastSceneResponse(soap, &soap_tmp_dss__ApartmentUndoLastSceneResponse, "dss:ApartmentUndoLastSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ApartmentUndoLastSceneResponse(soap, &soap_tmp_dss__ApartmentUndoLastSceneResponse, "dss:ApartmentUndoLastSceneResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2135,6 +2315,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSaveScene(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ZoneSaveSceneResponse(soap, &soap_tmp_dss__ZoneSaveSceneResponse, "dss:ZoneSaveSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneUndoScene(struct soap *soap)
+{	struct dss__ZoneUndoScene soap_tmp_dss__ZoneUndoScene;
+	struct dss__ZoneUndoSceneResponse soap_tmp_dss__ZoneUndoSceneResponse;
+	soap_default_dss__ZoneUndoSceneResponse(soap, &soap_tmp_dss__ZoneUndoSceneResponse);
+	soap_default_dss__ZoneUndoScene(soap, &soap_tmp_dss__ZoneUndoScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ZoneUndoScene(soap, &soap_tmp_dss__ZoneUndoScene, "dss:ZoneUndoScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ZoneUndoScene(soap, soap_tmp_dss__ZoneUndoScene._token, soap_tmp_dss__ZoneUndoScene._zoneID, soap_tmp_dss__ZoneUndoScene._groupID, soap_tmp_dss__ZoneUndoScene._sceneID, soap_tmp_dss__ZoneUndoSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ZoneUndoSceneResponse(soap, &soap_tmp_dss__ZoneUndoSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ZoneUndoSceneResponse(soap, &soap_tmp_dss__ZoneUndoSceneResponse, "dss:ZoneUndoSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ZoneUndoSceneResponse(soap, &soap_tmp_dss__ZoneUndoSceneResponse, "dss:ZoneUndoSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneUndoLastScene(struct soap *soap)
+{	struct dss__ZoneUndoLastScene soap_tmp_dss__ZoneUndoLastScene;
+	struct dss__ZoneUndoLastSceneResponse soap_tmp_dss__ZoneUndoLastSceneResponse;
+	soap_default_dss__ZoneUndoLastSceneResponse(soap, &soap_tmp_dss__ZoneUndoLastSceneResponse);
+	soap_default_dss__ZoneUndoLastScene(soap, &soap_tmp_dss__ZoneUndoLastScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ZoneUndoLastScene(soap, &soap_tmp_dss__ZoneUndoLastScene, "dss:ZoneUndoLastScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ZoneUndoLastScene(soap, soap_tmp_dss__ZoneUndoLastScene._token, soap_tmp_dss__ZoneUndoLastScene._zoneID, soap_tmp_dss__ZoneUndoLastScene._groupID, soap_tmp_dss__ZoneUndoLastSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ZoneUndoLastSceneResponse(soap, &soap_tmp_dss__ZoneUndoLastSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ZoneUndoLastSceneResponse(soap, &soap_tmp_dss__ZoneUndoLastSceneResponse, "dss:ZoneUndoLastSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ZoneUndoLastSceneResponse(soap, &soap_tmp_dss__ZoneUndoLastSceneResponse, "dss:ZoneUndoLastSceneResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2832,6 +3094,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSaveScene(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceSaveSceneResponse(soap, &soap_tmp_dss__DeviceSaveSceneResponse, "dss:DeviceSaveSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceUndoScene(struct soap *soap)
+{	struct dss__DeviceUndoScene soap_tmp_dss__DeviceUndoScene;
+	struct dss__DeviceUndoSceneResponse soap_tmp_dss__DeviceUndoSceneResponse;
+	soap_default_dss__DeviceUndoSceneResponse(soap, &soap_tmp_dss__DeviceUndoSceneResponse);
+	soap_default_dss__DeviceUndoScene(soap, &soap_tmp_dss__DeviceUndoScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceUndoScene(soap, &soap_tmp_dss__DeviceUndoScene, "dss:DeviceUndoScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceUndoScene(soap, soap_tmp_dss__DeviceUndoScene._token, soap_tmp_dss__DeviceUndoScene._deviceID, soap_tmp_dss__DeviceUndoScene._sceneID, soap_tmp_dss__DeviceUndoSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceUndoSceneResponse(soap, &soap_tmp_dss__DeviceUndoSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceUndoSceneResponse(soap, &soap_tmp_dss__DeviceUndoSceneResponse, "dss:DeviceUndoSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceUndoSceneResponse(soap, &soap_tmp_dss__DeviceUndoSceneResponse, "dss:DeviceUndoSceneResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceUndoLastScene(struct soap *soap)
+{	struct dss__DeviceUndoLastScene soap_tmp_dss__DeviceUndoLastScene;
+	struct dss__DeviceUndoLastSceneResponse soap_tmp_dss__DeviceUndoLastSceneResponse;
+	soap_default_dss__DeviceUndoLastSceneResponse(soap, &soap_tmp_dss__DeviceUndoLastSceneResponse);
+	soap_default_dss__DeviceUndoLastScene(soap, &soap_tmp_dss__DeviceUndoLastScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceUndoLastScene(soap, &soap_tmp_dss__DeviceUndoLastScene, "dss:DeviceUndoLastScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceUndoLastScene(soap, soap_tmp_dss__DeviceUndoLastScene._token, soap_tmp_dss__DeviceUndoLastScene._deviceID, soap_tmp_dss__DeviceUndoLastSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceUndoLastSceneResponse(soap, &soap_tmp_dss__DeviceUndoLastSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceUndoLastSceneResponse(soap, &soap_tmp_dss__DeviceUndoLastSceneResponse, "dss:DeviceUndoLastSceneResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceUndoLastSceneResponse(soap, &soap_tmp_dss__DeviceUndoLastSceneResponse, "dss:DeviceUndoLastSceneResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

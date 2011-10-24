@@ -201,12 +201,21 @@ namespace dss {
       }
     }
 
-    virtual void undoScene(AddressableModelItem *pTarget) {
+    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t scene) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->undoScene(pTarget);
+        m_pSimulationInterface->undoScene(pTarget, scene);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->undoScene(pTarget);
+        m_pInner->undoScene(pTarget,scene);
+      }
+    }
+
+    virtual void undoSceneLast(AddressableModelItem *pTarget) {
+      if(targetIsSim(pTarget)) {
+        m_pSimulationInterface->undoSceneLast(pTarget);
+      }
+      if(targetIsInner(pTarget)) {
+        m_pInner->undoSceneLast(pTarget);
       }
     }
 

@@ -104,6 +104,10 @@ int dss__SetSetValue(char* _token, char* _setSpec, unsigned char _value, bool& r
 int dss__SetCallScene(char* _token, char* _setSpec, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the set _setID. */
 int dss__SetSaveScene(char* _token, char* _setSpec, int _sceneNr, bool& result);
+/** Restore the last scene if current is _sceneNr on all devices contained int the set _setID. */
+int dss__SetUndoScene(char* _token, char* _setSpec, int _sceneNr, bool& result);
+/** Restore the last scene on all devices contained int the set _setID. */
+int dss__SetUndoLastScene(char* _token, char* _setSpec, bool& result);
 
 //--------------------------- Apartment
 
@@ -124,6 +128,11 @@ int dss__ApartmentSetValue(char* _token, int _groupID, unsigned char _value, boo
 int dss__ApartmentCallScene(char* _token, int _groupID, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the group _groupID. */
 int dss__ApartmentSaveScene(char* _token, int _groupID, int _sceneNr, bool& result);
+/** Restore the last scene if current is _sceneNr. */
+int dss__ApartmentUndoScene(char* _token, int _groupID, int _sceneNr, bool& result);
+/** Restore the last scene. */
+int dss__ApartmentUndoLastScene(char* _token, int _groupID, bool& result);
+
 int dss__ApartmentBlink(char* _token, int _groupID, bool& result);
 
 /** Rescans the bus for new devices/circuits */
@@ -152,6 +161,10 @@ int dss__ZoneSetValue(char* _token, int _zoneID, int _groupID, unsigned char _va
 int dss__ZoneCallScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool _force = false, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the zone/group _groupID. */
 int dss__ZoneSaveScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool& result);
+/** Restore the last scene if current is _sceneNr. */
+int dss__ZoneUndoScene(char* _token, int _zoneID, int _groupID, int _sceneID, bool& result);
+/** Restore the last scene. */
+int dss__ZoneUndoLastScene(char* _token, int _zoneID, int _groupID, bool& result);
 /** Send a generic blink command to all devices in the zone */
 int dss__ZoneBlink(char* _token, int _zoneID, int _groupID, bool& result);
 /** Send a sensoric value into the zone */
@@ -190,6 +203,10 @@ int dss__DeviceGetSensorValue(char* _token, char* _deviceID, unsigned char _sens
 int dss__DeviceCallScene(char* _token, char* _deviceID, int _sceneNr, bool _force = false, bool& result);
 /** Saves the scene _sceneNr on the device identified by _devicdID. */
 int dss__DeviceSaveScene(char* _token, char* _deviceID, int _sceneNr, bool& result);
+/** Restore the last scene if current is _sceneNr. */
+int dss__DeviceUndoScene(char* _token, char* _deviceID, int _sceneID, bool& result);
+/** Restore the last scene. */
+int dss__DeviceUndoLastScene(char* _token, char* _deviceID, bool& result);
 
 /** Returns the name of a device */
 int dss__DeviceGetName(char* _token, char* _deviceID, char** result);

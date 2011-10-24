@@ -30,8 +30,10 @@ class dssService : public soap
 	{"dss", "urn:dss:1.0", NULL, NULL},
 	{NULL, NULL, NULL, NULL}
 };
+
 	bind_flags = SO_REUSEADDR;
 	accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
+
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)
@@ -105,6 +107,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__SetCallScene(struct soap*, char *_token, char *_s
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SetSaveScene(struct soap*, char *_token, char *_setSpec, int _sceneNr, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetUndoScene(struct soap*, char *_token, char *_setSpec, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetUndoLastScene(struct soap*, char *_token, char *_setSpec, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOn(struct soap*, char *_token, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOff(struct soap*, char *_token, int _groupID, bool &result);
@@ -118,6 +124,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, char *_token, int
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSaveScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentUndoScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentUndoLastScene(struct soap*, char *_token, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentBlink(struct soap*, char *_token, int _groupID, bool &result);
 
@@ -138,6 +148,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, char *_token, int _zon
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool _force, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSaveScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneUndoScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneUndoLastScene(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneBlink(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
@@ -172,6 +186,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetSensorValue(struct soap*, char *_token, 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool _force, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSaveScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceUndoScene(struct soap*, char *_token, char *_deviceID, int _sceneID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceUndoLastScene(struct soap*, char *_token, char *_deviceID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, char *_token, char *_deviceID, char **result);
 

@@ -91,9 +91,13 @@ namespace dss {
     getDevice()->saveScene(_sceneNr);
   } // saveScene
 
-  void DeviceReference::undoScene() {
-    getDevice()->undoScene();
+  void DeviceReference::undoScene(const int _sceneNr) {
+    getDevice()->undoScene(_sceneNr);
   } // undoScene
+
+  void DeviceReference::undoSceneLast() {
+    getDevice()->undoSceneLast();
+  } // undoSceneLast
 
   unsigned long DeviceReference::getPowerConsumption() {
     return getDevice()->getPowerConsumption();

@@ -41,7 +41,8 @@ namespace dss {
 
     virtual void callScene(const int _sceneNr, const bool _force = false);
     virtual void saveScene(const int _sceneNr);
-    virtual void undoScene();
+    virtual void undoScene(const int _sceneNr);
+    virtual void undoSceneLast();
 
     virtual void blink();
   protected:

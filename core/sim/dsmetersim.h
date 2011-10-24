@@ -66,8 +66,10 @@ namespace dss {
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
     void deviceSaveScene(const int _deviceID, const int _sceneID);
     void groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID);
-    void deviceUndoScene(int _deviceID);
-    void groupUndoScene(const int _zoneID, const int _groupID);
+    void deviceUndoScene(const int _deviceID, const int _sceneID);
+    void groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void deviceUndoSceneLast(int _deviceID);
+    void groupUndoSceneLast(const int _zoneID, const int _groupID);
     void deviceSetValue(const int _deviceID, const uint8_t _value);
     void groupSetValue(const int _zoneID, const int _groupID, const uint8_t _value);
   public:

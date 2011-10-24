@@ -64,12 +64,19 @@ namespace dss {
     }
   } // saveScene
 
-  void NonAddressableModelItem::undoScene() {
+  void NonAddressableModelItem::undoScene(const int _sceneNr) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->undoScene();
+      item->undoScene(_sceneNr);
     }
   } // undoScene
+
+  void NonAddressableModelItem::undoSceneLast() {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
+      item->undoSceneLast();
+    }
+  } // undoSceneLast
 
   void NonAddressableModelItem::blink() {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();

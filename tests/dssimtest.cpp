@@ -62,8 +62,12 @@ public:
     functionCalled("saveScene", _sceneNr);
   }
 
-  virtual void undoScene() {
-    functionCalled("undoScene");
+  virtual void undoScene(const int _sceneNr) {
+    functionCalled("undoScene", _sceneNr);
+  }
+
+  virtual void undoSceneLast() {
+    functionCalled("undoSceneLast");
   }
 
   virtual void enable() {
