@@ -37,7 +37,8 @@ namespace dss {
 
     virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force);
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
-    virtual void undoScene(AddressableModelItem *pTarget);
+    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t scene);
+    virtual void undoSceneLast(AddressableModelItem *pTarget);
     virtual void blink(AddressableModelItem *pTarget);
     virtual void setValue(AddressableModelItem *pTarget, const uint8_t _value);
   private:

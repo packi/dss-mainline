@@ -544,6 +544,41 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="SetUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="SetUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="SetUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="SetUndoLastSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="ApartmentTurnOn">
    <complexType>
     <sequence>
@@ -659,6 +694,41 @@
   </element>
   <!-- operation response element -->
   <element name="ApartmentSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentUndoLastSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -839,6 +909,43 @@
   </element>
   <!-- operation response element -->
   <element name="ZoneSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneUndoLastSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -1148,6 +1255,41 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sceneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceUndoLastSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -2165,6 +2307,22 @@
  <part name="parameters" element="dss:SetSaveSceneResponse"/>
 </message>
 
+<message name="SetUndoSceneRequest">
+ <part name="parameters" element="dss:SetUndoScene"/>
+</message>
+
+<message name="SetUndoSceneResponse">
+ <part name="parameters" element="dss:SetUndoSceneResponse"/>
+</message>
+
+<message name="SetUndoLastSceneRequest">
+ <part name="parameters" element="dss:SetUndoLastScene"/>
+</message>
+
+<message name="SetUndoLastSceneResponse">
+ <part name="parameters" element="dss:SetUndoLastSceneResponse"/>
+</message>
+
 <message name="ApartmentTurnOnRequest">
  <part name="parameters" element="dss:ApartmentTurnOn"/>
 </message>
@@ -2219,6 +2377,22 @@
 
 <message name="ApartmentSaveSceneResponse">
  <part name="parameters" element="dss:ApartmentSaveSceneResponse"/>
+</message>
+
+<message name="ApartmentUndoSceneRequest">
+ <part name="parameters" element="dss:ApartmentUndoScene"/>
+</message>
+
+<message name="ApartmentUndoSceneResponse">
+ <part name="parameters" element="dss:ApartmentUndoSceneResponse"/>
+</message>
+
+<message name="ApartmentUndoLastSceneRequest">
+ <part name="parameters" element="dss:ApartmentUndoLastScene"/>
+</message>
+
+<message name="ApartmentUndoLastSceneResponse">
+ <part name="parameters" element="dss:ApartmentUndoLastSceneResponse"/>
 </message>
 
 <message name="ApartmentBlinkRequest">
@@ -2299,6 +2473,22 @@
 
 <message name="ZoneSaveSceneResponse">
  <part name="parameters" element="dss:ZoneSaveSceneResponse"/>
+</message>
+
+<message name="ZoneUndoSceneRequest">
+ <part name="parameters" element="dss:ZoneUndoScene"/>
+</message>
+
+<message name="ZoneUndoSceneResponse">
+ <part name="parameters" element="dss:ZoneUndoSceneResponse"/>
+</message>
+
+<message name="ZoneUndoLastSceneRequest">
+ <part name="parameters" element="dss:ZoneUndoLastScene"/>
+</message>
+
+<message name="ZoneUndoLastSceneResponse">
+ <part name="parameters" element="dss:ZoneUndoLastSceneResponse"/>
 </message>
 
 <message name="ZoneBlinkRequest">
@@ -2435,6 +2625,22 @@
 
 <message name="DeviceSaveSceneResponse">
  <part name="parameters" element="dss:DeviceSaveSceneResponse"/>
+</message>
+
+<message name="DeviceUndoSceneRequest">
+ <part name="parameters" element="dss:DeviceUndoScene"/>
+</message>
+
+<message name="DeviceUndoSceneResponse">
+ <part name="parameters" element="dss:DeviceUndoSceneResponse"/>
+</message>
+
+<message name="DeviceUndoLastSceneRequest">
+ <part name="parameters" element="dss:DeviceUndoLastScene"/>
+</message>
+
+<message name="DeviceUndoLastSceneResponse">
+ <part name="parameters" element="dss:DeviceUndoLastSceneResponse"/>
 </message>
 
 <message name="DeviceGetNameRequest">
@@ -2938,6 +3144,16 @@
   <input message="tns:SetSaveSceneRequest"/>
   <output message="tns:SetSaveSceneResponse"/>
  </operation>
+ <operation name="SetUndoScene">
+  <documentation>Service definition of function dss__SetUndoScene</documentation>
+  <input message="tns:SetUndoSceneRequest"/>
+  <output message="tns:SetUndoSceneResponse"/>
+ </operation>
+ <operation name="SetUndoLastScene">
+  <documentation>Service definition of function dss__SetUndoLastScene</documentation>
+  <input message="tns:SetUndoLastSceneRequest"/>
+  <output message="tns:SetUndoLastSceneResponse"/>
+ </operation>
  <operation name="ApartmentTurnOn">
   <documentation>Service definition of function dss__ApartmentTurnOn</documentation>
   <input message="tns:ApartmentTurnOnRequest"/>
@@ -2972,6 +3188,16 @@
   <documentation>Service definition of function dss__ApartmentSaveScene</documentation>
   <input message="tns:ApartmentSaveSceneRequest"/>
   <output message="tns:ApartmentSaveSceneResponse"/>
+ </operation>
+ <operation name="ApartmentUndoScene">
+  <documentation>Service definition of function dss__ApartmentUndoScene</documentation>
+  <input message="tns:ApartmentUndoSceneRequest"/>
+  <output message="tns:ApartmentUndoSceneResponse"/>
+ </operation>
+ <operation name="ApartmentUndoLastScene">
+  <documentation>Service definition of function dss__ApartmentUndoLastScene</documentation>
+  <input message="tns:ApartmentUndoLastSceneRequest"/>
+  <output message="tns:ApartmentUndoLastSceneResponse"/>
  </operation>
  <operation name="ApartmentBlink">
   <documentation>Service definition of function dss__ApartmentBlink</documentation>
@@ -3022,6 +3248,16 @@
   <documentation>Service definition of function dss__ZoneSaveScene</documentation>
   <input message="tns:ZoneSaveSceneRequest"/>
   <output message="tns:ZoneSaveSceneResponse"/>
+ </operation>
+ <operation name="ZoneUndoScene">
+  <documentation>Service definition of function dss__ZoneUndoScene</documentation>
+  <input message="tns:ZoneUndoSceneRequest"/>
+  <output message="tns:ZoneUndoSceneResponse"/>
+ </operation>
+ <operation name="ZoneUndoLastScene">
+  <documentation>Service definition of function dss__ZoneUndoLastScene</documentation>
+  <input message="tns:ZoneUndoLastSceneRequest"/>
+  <output message="tns:ZoneUndoLastSceneResponse"/>
  </operation>
  <operation name="ZoneBlink">
   <documentation>Service definition of function dss__ZoneBlink</documentation>
@@ -3107,6 +3343,16 @@
   <documentation>Service definition of function dss__DeviceSaveScene</documentation>
   <input message="tns:DeviceSaveSceneRequest"/>
   <output message="tns:DeviceSaveSceneResponse"/>
+ </operation>
+ <operation name="DeviceUndoScene">
+  <documentation>Service definition of function dss__DeviceUndoScene</documentation>
+  <input message="tns:DeviceUndoSceneRequest"/>
+  <output message="tns:DeviceUndoSceneResponse"/>
+ </operation>
+ <operation name="DeviceUndoLastScene">
+  <documentation>Service definition of function dss__DeviceUndoLastScene</documentation>
+  <input message="tns:DeviceUndoLastSceneRequest"/>
+  <output message="tns:DeviceUndoLastSceneResponse"/>
  </operation>
  <operation name="DeviceGetName">
   <documentation>Service definition of function dss__DeviceGetName</documentation>
@@ -3589,6 +3835,24 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="SetUndoScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="SetUndoLastScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="ApartmentTurnOn">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3644,6 +3908,24 @@
   </output>
  </operation>
  <operation name="ApartmentSaveScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentUndoScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentUndoLastScene">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3734,6 +4016,24 @@
   </output>
  </operation>
  <operation name="ZoneSaveScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ZoneUndoScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ZoneUndoLastScene">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3887,6 +4187,24 @@
   </output>
  </operation>
  <operation name="DeviceSaveScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceUndoScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceUndoLastScene">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

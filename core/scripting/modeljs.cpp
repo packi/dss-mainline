@@ -741,8 +741,8 @@ namespace dss {
     try {
       if(self.is("set") || self.is("device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-        int sceneNr = ctx->convertTo<int>(argv[0]);
         if(argc == 1) {
+          int sceneNr = ctx->convertTo<int>(argv[0]);
           intf->callScene(sceneNr);
         }
         *rval = INT_TO_JSVAL(0);
@@ -761,7 +761,10 @@ namespace dss {
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
       if(argc == 1) {
-        intf->undoScene();
+        int sceneNr = ctx->convertTo<int>(argv[0]);
+        intf->undoScene(sceneNr);
+      } else if(argc == 0) {
+        intf->undoSceneLast();
       }
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;

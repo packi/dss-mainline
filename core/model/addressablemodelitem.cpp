@@ -72,12 +72,19 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->saveScene(this, _sceneNr);
   } // saveScene
 
-  void AddressableModelItem::undoScene() {
+  void AddressableModelItem::undoScene(const int _sceneNr) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->undoScene(this);
+    m_pApartment->getActionRequestInterface()->undoScene(this, _sceneNr);
   } // undoScene
+
+  void AddressableModelItem::undoSceneLast() {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    m_pApartment->getActionRequestInterface()->undoSceneLast(this);
+  } // undoSceneLast
 
   void AddressableModelItem::blink() {
     if(m_pPropertyNode) {

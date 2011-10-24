@@ -90,15 +90,29 @@ namespace dss {
       }
     } // saveScene
 
-    virtual void undoScene() {
+    virtual void undoScene(const int _sceneNr) {
       if(m_pSelf != NULL) {
         try {
           ScriptLock lock(m_pContext);
           JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
+          param.add(_sceneNr);
           m_pSelf->callFunctionByName<void>("undoScene", param);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DSIDJS: Error calling 'undoScene'") + e.what(), lsError);
+        }
+      }
+    } // saveScene
+
+    virtual void undoSceneLast() {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          m_pSelf->callFunctionByName<void>("undoSceneLast", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'undoSceneLast'") + e.what(), lsError);
         }
       }
     } // undoScene

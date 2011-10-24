@@ -624,13 +624,24 @@ int dss__SetSaveScene(struct soap *soap, char* _token, char* _setSpec, int _scen
   return SOAP_OK;
 }
 
-int dss__SetUndoScene(struct soap *soap, char* _token, char* _setSpec, bool& result) {
+int dss__SetUndoScene(struct soap *soap, char* _token, char* _setSpec, int _sceneID, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.undoScene();
+  set.undoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__SetUndoLastScene(struct soap *soap, char* _token, char* _setSpec, bool& result) {
+  dss::Set set;
+  int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  set.undoSceneLast();
   result = true;
   return SOAP_OK;
 }
@@ -714,13 +725,24 @@ int dss__ApartmentSaveScene(struct soap *soap, char* _token, int _groupID, int _
   return SOAP_OK;
 }
 
-int dss__ApartmentUndoScene(struct soap *soap, char* _token, int _groupID, bool& result) {
+int dss__ApartmentUndoScene(struct soap *soap, char* _token, int _groupID, int _sceneID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene();
+  group->undoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__ApartmentUndoLastScene(struct soap *soap, char* _token, int _groupID, bool& result) {
+  boost::shared_ptr<dss::Group> group;
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group->undoSceneLast();
   result = true;
   return SOAP_OK;
 }
@@ -816,13 +838,24 @@ int dss__ZoneSaveScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   return SOAP_OK;
 }
 
-int dss__ZoneUndoScene(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
+int dss__ZoneUndoScene(struct soap *soap, char* _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene();
+  group->undoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__ZoneUndoLastScene(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
+  boost::shared_ptr<dss::Group> group;
+  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group->undoSceneLast();
   result = true;
   return SOAP_OK;
 }
@@ -940,13 +973,24 @@ int dss__DeviceSaveScene(struct soap *soap, char* _token, char* _deviceID, int _
   return SOAP_OK;
 }
 
-int dss__DeviceUndoScene(struct soap *soap, char* _token, char* _deviceID, bool& result) {
+int dss__DeviceUndoScene(struct soap *soap, char* _token, char* _deviceID, int _sceneID, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.undoScene();
+  device.undoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__DeviceUndoLastScene(struct soap *soap, char* _token, char* _deviceID, bool& result) {
+  dss::DeviceReference device(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  device.undoSceneLast();
   result = true;
   return SOAP_OK;
 }

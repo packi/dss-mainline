@@ -528,6 +528,41 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="SetUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="SetUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="SetUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="SetUndoLastSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="ApartmentTurnOn">
    <complexType>
     <sequence>
@@ -643,6 +678,41 @@
   </element>
   <!-- operation response element -->
   <element name="ApartmentSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentUndoLastSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -823,6 +893,43 @@
   </element>
   <!-- operation response element -->
   <element name="ZoneSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneUndoLastSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -1132,6 +1239,41 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceUndoScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="sceneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceUndoSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceUndoLastScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceUndoLastSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>

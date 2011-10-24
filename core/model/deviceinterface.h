@@ -55,9 +55,10 @@ namespace dss {
      * The next time scene _sceneNr gets called the output will be set according to the lookup table.
      */
     virtual void saveScene(const int _sceneNr) = 0;
-    /** Restores the last set value of _sceneNr
-     */
-    virtual void undoScene() = 0;
+    /** Restores the last scene value if identical to _sceneNr */
+    virtual void undoScene(const int _sceneNr) = 0;
+    /** Restores the last scene value */
+    virtual void undoSceneLast() = 0;
 
     /** Returns the consumption in mW */
     virtual unsigned long getPowerConsumption() = 0;

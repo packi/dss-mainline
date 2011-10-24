@@ -83,7 +83,28 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::undoScene(AddressableModelItem *pTarget) {
+  void DSActionRequest::undoScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+    Group *pGroup = dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+
+    if(pGroup) {
+      ret = ZoneGroupActionRequest_action_undo_scene_number(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else if(pDevice)  {
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      ret = DeviceActionRequest_action_undo_scene_number(m_DSMApiHandle, dsid, pDevice->getShortAddress(), scene);
+      DSBusInterface::checkResultCode(ret);
+    }
+  }
+
+  void DSActionRequest::undoSceneLast(AddressableModelItem *pTarget) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
