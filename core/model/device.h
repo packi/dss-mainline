@@ -80,7 +80,9 @@ namespace dss {
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
     uint8_t m_OutputMode;
-    uint8_t m_LTMode;
+    uint8_t m_ButtonInputMode;
+    uint8_t m_ButtonInputIndex;
+    uint8_t m_ButtonInputCount;
     bool m_ButtonSetsLocalPriority;
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
@@ -105,7 +107,7 @@ namespace dss {
     void setDeviceButtonID(uint8_t _buttonId);
     void setDeviceJokerGroup(uint8_t _groupId);
     void setDeviceOutputMode(uint8_t _modeId);
-    void setDeviceLTMode(uint8_t _modeId);
+    void setDeviceButtonInputMode(uint8_t _modeId);
     void setProgMode(uint8_t _modeId);
 
     /** Configure scene configuration */
@@ -259,7 +261,12 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
-    void setLTMode(const uint8_t _value) { m_LTMode = _value; }
+    void setButtonInputMode(const uint8_t _value) { m_ButtonInputMode = _value; }
+    uint8_t getButtonInputMode() const { return m_ButtonInputMode; }
+    void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }
+    uint8_t getButtonInputIndex() const { return m_ButtonInputIndex; }
+    void setButtonInputCount(const uint8_t _value) { m_ButtonInputCount = _value; }
+    uint8_t getButtonInputCount() const { return m_ButtonInputCount; }
 
     bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);

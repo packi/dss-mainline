@@ -660,7 +660,7 @@ namespace dss {
           devRef.getDevice()->setButtonID(_value & 0xf);
           devRef.getDevice()->setButtonActiveGroup((_value >> 4) & 0xf);
         } else if(_configIndex == CfgFunction_LTMode) {
-          devRef.getDevice()->setLTMode(_value);
+          devRef.getDevice()->setButtonInputMode(_value);
         }
       }
     } catch(std::runtime_error& e) {

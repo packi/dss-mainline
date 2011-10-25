@@ -155,11 +155,36 @@ namespace dss {
     dev->setRevisionID(_spec.Version);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setOutputMode(_spec.OutputMode);
-    dev->setLTMode(_spec.LTMode);
+
     dev->setButtonActiveGroup(_spec.ActiveGroup);
     dev->setButtonGroupMembership(_spec.GroupMembership);
     dev->setButtonSetsLocalPriority(_spec.SetsLocalPriority);
     dev->setButtonID(_spec.ButtonID);
+
+    uint8_t inputCount = 0;
+    uint8_t inputIndex = 0;
+    if((_spec.FunctionID & 0xffc0) == 0x1000) {
+      switch(_spec.FunctionID & 0x7) {
+      case 0: inputCount = 1; break;
+      case 1: inputCount = 2; break;
+      case 2: inputCount = 4; break;
+      case 7: inputCount = 0; break;
+      }
+    } else if((_spec.FunctionID & 0x0fc0) == 0x0100) {
+      switch(_spec.FunctionID & 0x3) {
+      case 0: inputCount = 0; break;
+      case 1: inputCount = 1; break;
+      case 2: inputCount = 2; break;
+      case 3: inputCount = 4; break;
+      }
+    }
+    if(inputCount > 1) {
+      inputIndex = (uint8_t)(_spec.DSID.lower & 0xff) % inputCount;
+    }
+    dev->setButtonInputMode(_spec.LTMode);
+    dev->setButtonInputCount(inputCount);
+    dev->setButtonInputIndex(inputIndex);
+
     if(dev->getName().empty()) {
       dev->setName(_spec.Name);
     }

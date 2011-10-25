@@ -66,6 +66,9 @@ namespace dss {
     result->addProperty("outputMode", _device.getDevice()->getOutputMode());
     result->addProperty("buttonID", _device.getDevice()->getButtonID());
     result->addProperty("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
+    result->addProperty("buttonInputMode", _device.getDevice()->getButtonInputMode());
+    result->addProperty("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
+    result->addProperty("buttonInputCount", _device.getDevice()->getButtonInputCount());
 
     boost::shared_ptr<JSONArray<std::string> > groupsArr(new JSONArray<std::string>());
     result->addElement("groups", groupsArr);
