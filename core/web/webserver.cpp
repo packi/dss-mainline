@@ -93,15 +93,22 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
 
     std::vector<std::string> portList = splitString(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "listen"), ',', true);
-    std::string configPorts;
+    std::string configPorts, protocol;
     std::string bindIP = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "bindip");
     foreach(std::string port, portList) {
+      protocol = "s";   // defaults to https
+#ifdef WITH_HTTP
+      if(port.at(port.length() - 1) == 'h') {
+        protocol = "";  // use plain http on this port
+        port.erase(port.length() - 1);
+      }
+#endif
       if(port.find(":") == std::string::npos) {
         configPorts += bindIP + ":" + port;
       } else {
         configPorts += port;
       }
-      configPorts += "s,";
+      configPorts += protocol + ",";
     }
     configPorts.erase(configPorts.length() - 1);
     log("Webserver: Listening on " + configPorts, lsInfo);
