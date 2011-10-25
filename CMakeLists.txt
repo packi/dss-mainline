@@ -29,6 +29,8 @@ if(NOT WITH_SAVEDPROPSDIR)
   set(WITH_SAVEDPROPSDIR "${WITH_DATADIR}/savedprops" CACHE FILEPATH "Saved properties directory")
 endif(NOT WITH_SAVEDPROPSDIR)
 
+option(WITH_HTTP "Build http protocol support into the dss" OFF)
+
 set(DSS_GEN_VERSION_CMD "")
 if(WIN32)
   set(DSS_GEN_VERSION_CMD "tools/dss_gen_version_win32.bat")

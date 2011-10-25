@@ -1,7 +1,9 @@
 IF(WITH_GCOV)
   ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 ENDIF(WITH_GCOV)
-
+IF(WITH_HTTP)
+  ADD_DEFINITIONS(-DWITH_HTTP)
+ENDIF(WITH_HTTP)
 
 file(GLOB files *.cpp)
 
