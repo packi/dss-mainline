@@ -107,10 +107,14 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
         m_pPropertyNode->createProperty("outputMode")
           ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OutputMode, false));
-        m_pPropertyNode->createProperty("LTMode")
-          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_LTMode, false));
         m_pPropertyNode->createProperty("button/id")
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
+        m_pPropertyNode->createProperty("button/inputMode")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputMode, false));
+        m_pPropertyNode->createProperty("button/inputIndex")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputIndex, false));
+        m_pPropertyNode->createProperty("button/inputCount")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputCount, false));
         m_pPropertyNode->createProperty("button/activeGroup")
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
         m_pPropertyNode->createProperty("button/groupMembership")
@@ -202,9 +206,9 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_Mode, _modeId);
   } // setDeviceOutputMode
 
-  void Device::setDeviceLTMode(uint8_t _modeId) {
+  void Device::setDeviceButtonInputMode(uint8_t _modeId) {
     setDeviceConfig(CfgClassFunction, CfgFunction_LTMode, _modeId);
-  } // setDeviceLTMode
+  } // setDeviceButtonInputMode
 
   void Device::setProgMode(uint8_t _modeId) {
     if(m_pPropertyNode) {
