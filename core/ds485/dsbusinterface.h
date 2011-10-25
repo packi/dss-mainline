@@ -110,22 +110,27 @@ namespace dss {
                          uint8_t _configClass, uint8_t _configIndex, 
                          uint8_t _value);
     void handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
-                            uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID);
+                            uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID, bool _forced);
     static void handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                            dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                            uint8_t _sceneID);
-
+    static void handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                               dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                               uint8_t _sceneID);
     void handleDeviceLocalAction(dsid_t _sourceID, uint16_t _deviceID, uint8_t _state);
     static void handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,
                                         dsid_t _sourceID, dsid_t _destinationID,
                                         uint16_t _deviceID, uint16_t _zoneID,
                                         uint8_t _state);
 
-    void handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID);
+    void handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID, bool _forced);
     static void handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
                                        dsid_t _sourceID, dsid_t _destinationID,
                                        uint16_t _deviceID, uint8_t _sceneID);
-    
+    static void handleDeviceCallSceneForcedCallback(uint8_t _errorCode, void* _userData,
+                                           dsid_t _sourceID, dsid_t _destinationID,
+                                           uint16_t _deviceID, uint8_t _sceneID);
+
     void handleDeviceSetName(dsid_t _destinationID, uint16_t _deviceID, 
                              std::string _name);
     static void handleDeviceSetNameCallback(uint8_t _errorCode, void* _userData, 
