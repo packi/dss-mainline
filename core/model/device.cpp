@@ -358,7 +358,9 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkReadAccess();
     }
-    return getDeviceConfigWord(CfgClassRuntime, _offset);
+    uint16_t result = getDeviceConfigWord(CfgClassRuntime, _offset);
+    if(_offset == 0) result &= 0xff;   // fix offset 0 value which is 8-bit actually
+    return result;
   } // getDeviceOutputValue (offset)
 
   uint32_t Device::getDeviceSensorValue(const int _sensorIndex) {
