@@ -260,6 +260,10 @@ namespace dss {
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                             ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
                             (void*)handleBusCall, this);
+      ZoneGroupActionRequest_action_force_call_scene_request_callback_t handleBusCallForced = DSBusInterface::handleBusCallSceneForcedCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                            ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
+                            (void*)handleBusCallForced, this);
 
       EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
@@ -270,6 +274,10 @@ namespace dss {
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                             DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
                             (void*)deviceCallSceneCallback, this);
+      DeviceActionRequest_action_force_call_scene_request_callback_t deviceCallSceneForcedCallback = DSBusInterface::handleDeviceCallSceneCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                            DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
+                            (void*)deviceCallSceneForcedCallback, this);
 
       DeviceProperties_set_name_request_callback_t deviceSetNameCallback = DSBusInterface::handleDeviceSetNameCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
@@ -463,18 +471,27 @@ namespace dss {
 
 
   void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
-                                          uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
+                                          uint16_t _zoneID, uint8_t _groupID,
+                                          uint8_t _sceneID, bool _forced) {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _sceneID, false);
+      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _sceneID, _forced);
     }
   }
 
   void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint8_t _sceneID) {
-    static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
+    static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
+                                                                _sceneID, false);
+  }
+
+  void DSBusInterface::handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                                  uint8_t _sceneID) {
+    static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
+                                                                _sceneID, true);
   }
 
   void DSBusInterface::handleDeviceSetName(dsid_t _destinationID,
@@ -542,7 +559,8 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleDeviceLocalAction(_sourceID, _deviceID, _state);
   }
 
-  void DSBusInterface::handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID) {
+  void DSBusInterface::handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID,
+                                             uint8_t _sceneID, bool _forced) {
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_destinationID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
@@ -554,8 +572,15 @@ namespace dss {
   void DSBusInterface::handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
                                                      dsid_t _sourceID, dsid_t _destinationID,
                                                      uint16_t _deviceID, uint8_t _sceneID) {
-    static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID);
+    static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID, false);
   }
+
+  void DSBusInterface::handleDeviceCallSceneForcedCallback(uint8_t _errorCode, void* _userData,
+                                                     dsid_t _sourceID, dsid_t _destinationID,
+                                                     uint16_t _deviceID, uint8_t _sceneID) {
+    static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID, true);
+  }
+
 
   void DSBusInterface::handleCircuitEnergyData(uint8_t _errorCode,
                                                dsid_t _sourceID, dsid_t _destinationID,
