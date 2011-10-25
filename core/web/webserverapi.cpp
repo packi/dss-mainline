@@ -83,7 +83,7 @@ namespace dss {
     clsApartment.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withDocumentation("Returns the consumption of all devices in the apartment in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withDocumentation("Returns the consumption of all devices in the apartment in watt (W).", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("getStructure")
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Returns an object containing the structure of the apartment.");
@@ -137,6 +137,8 @@ namespace dss {
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withDocumentation("Disables all devices in the zone.", "Disabled devices will react only to a enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
+    clsZone.addMethod("blink")
+      .withDocumentation("Calls the blink function on the zone to locate and identify it.");
     clsZone.addMethod("setValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
@@ -161,12 +163,16 @@ namespace dss {
     clsZone.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withDocumentation("Returns the consumption of all devices in the zone in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withDocumentation("Returns the consumption of all devices in the zone in watt (W).", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("sceneSetName")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false)
       .withParameter("sceneNumber", "integer", true)
       .withParameter("newName", "string", true)
       .withDocumentation("Sets the name of the scene on the given group");
     clsZone.addMethod("sceneGetName")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false)
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Returns the name of the scene on the given group");
     clsZone.addMethod("getReachableScenes")
@@ -204,6 +210,8 @@ namespace dss {
       .withDocumentation("Enables the device.");
     clsDevice.addMethod("disable")
       .withDocumentation("Disables the device.", "A disabled device will only react to enable calls.");
+    clsDevice.addMethod("blink")
+      .withDocumentation("Calls the blink function on the device to locate and identify it.");
     clsDevice.addMethod("setConfig")
       .withParameter("value", "integer", true)
       .withParameter("class", "integer", true)
@@ -293,7 +301,7 @@ namespace dss {
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Undos saving the scene value for sceneNumber");
     clsDevice.addMethod("getConsumption")
-      .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
+      .withDocumentation("Returns the consumption of the device in watt (W).", "Note that this works only for simulated devices at the moment.");
     clsDevice.addMethod("addTag")
       .withParameter("tag", "string", true)
       .withDocumentation("Adds the tag 'tag'");
@@ -320,9 +328,9 @@ namespace dss {
     clsCircuit.addMethod("getEnergyBorder")
        .withDocumentation("Returns the energy borders (orange, red).");
     clsCircuit.addMethod("getConsumption")
-       .withDocumentation("Returns the consumption of all connected devices in mW");
+       .withDocumentation("Returns the consumption of all connected devices in watt (W)");
     clsCircuit.addMethod("getEnergyMeterValue")
-       .withDocumentation("Returns the meter-value in Wh");
+       .withDocumentation("Returns the meter-value in watt-hours (Wh)");
     clsCircuit.addMethod("rescan")
        .withDocumentation("Rescans the circuit");
 
@@ -392,6 +400,9 @@ namespace dss {
       .withParameter("user", "string", true)
       .withParameter("password", "string", true)
       .withDocumentation("Creates a new session using the credentials provided");
+    clsSystem.addMethod("loginApplication")
+      .withParameter("loginToken", "string", true)
+      .withDocumentation("Creates a new session using the registered application token");
     clsSystem.addMethod("logout")
       .withDocumentation("Destroys the session and signs out the user");
     clsSystem.addMethod("loggedInUser")
@@ -456,7 +467,7 @@ namespace dss {
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Undoes setting the value of sceneNumber.");
     clsSet.addMethod("getConsumption")
-      .withDocumentation("Returns the consumption of all devices in the set in mW.");
+      .withDocumentation("Returns the consumption of all devices in the set in watt (W).");
 
     RestfulClass& clsStructure = api->addClass("structure");
     clsStructure.addMethod("zoneAddDevice")
@@ -501,7 +512,7 @@ namespace dss {
     clsMetering.addMethod("getLatest")
       .withParameter("type", "string", true)
       .withParameter("from", "string", true)
-      .withDocumentation("Returns cached energy meter value (in Wh) or cached power consumption value (in mW). The type parameter defines what should be returned, valid types are 'energy' and 'consumption'. The from parameter follows the set-syntax, currently it supports: .meters(dsid1,dsid2,...) and .meters(all)");
+      .withDocumentation("Returns cached energy meter value in watt-hours (Wh) or cached power consumption value in watt (W). The type parameter defines what should be returned, valid types are 'energy' and 'consumption'. The from parameter follows the set-syntax, currently it supports: .meters(dsid1,dsid2,...) and .meters(all)");
 
     return api;
   } // createRestfulAPI
