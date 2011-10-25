@@ -225,6 +225,9 @@ namespace dss {
     clsDevice.addMethod("setButtonID")
       .withParameter("buttonID", "integer", true)
       .withDocumentation("Sets the button id of a device");
+    clsDevice.addMethod("setButtonInputMode")
+      .withParameter("modeID", "integer", true)
+      .withDocumentation("Sets the input mode of a device button");
     clsDevice.addMethod("setOutputMode")
       .withParameter("modeID", "integer", true)
       .withDocumentation("Sets the output operation mode");

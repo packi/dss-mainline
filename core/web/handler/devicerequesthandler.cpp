@@ -264,6 +264,13 @@ namespace dss {
       }
       pDevice->setDeviceButtonID(value);
       return success();
+    } else if(_request.getMethod() == "setButtonInputMode") {
+      int value = strToIntDef(_request.getParameter("modeID"), -1);
+      if(value  < 0) {
+        return failure("Invalid or missing parameter 'modeID'");
+      }
+      pDevice->setDeviceButtonInputMode(value);
+      return success();
     } else if(_request.getMethod() == "setOutputMode") {
       int value = strToIntDef(_request.getParameter("modeID"), -1);
       if((value  < 0) || (value > 255)) {
