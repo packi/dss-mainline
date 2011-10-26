@@ -516,7 +516,8 @@ namespace dss {
 
     // if we're coming from a trusted port, impersonate that user and start
     // a new session on his behalf
-    if((session == NULL) && (_info->local_port == self.m_TrustedPort)) {
+    if(((session == NULL) || (session->getUser() == NULL)) &&
+            (_info->local_port == self.m_TrustedPort)) {
       const char* digestCString = mg_get_header(_connection, "Authorization");
       if(digestCString > 0) {
         std::string digest = digestCString;
@@ -530,11 +531,13 @@ namespace dss {
                                                userNameEnd - userNamePos - 1);
           self.log("Logging-in from a trusted port as '" + userName + "'");
           self.m_SessionManager->getSecurity()->impersonate(userName);
-          std::string newToken = self.m_SessionManager->registerSession();
-          session = self.m_SessionManager->getSession(newToken);
+          if (session == NULL) {
+            std::string newToken = self.m_SessionManager->registerSession();
+            session = self.m_SessionManager->getSession(newToken);
+            injectedCookies["path"] = "/";
+            injectedCookies["token"] = newToken;
+          }
           session->inheritUserFromSecurity();
-          injectedCookies["path"] = "/";
-          injectedCookies["token"] = newToken;
         }
       }
     }
