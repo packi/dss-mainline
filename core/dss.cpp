@@ -551,17 +551,16 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
     addDefaultInterpreterPlugins();
 
-    if (!initSubsystems()) {
-      Logger::getInstance()->log("Failed to initialize subsystems, exiting...", lsFatal);
-      return;
-    }
-
     if (!initSecurity()) {
       Logger::getInstance()->log("Failed to initialize security, exiting...", lsFatal);
       return;
     }
-
     m_pSecurity->loginAsSystemUser("Main thread needs system privileges");
+
+    if (!initSubsystems()) {
+      Logger::getInstance()->log("Failed to initialize subsystems, exiting...", lsFatal);
+      return;
+    }
 
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
