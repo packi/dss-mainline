@@ -457,12 +457,11 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     		  pDigestFile->getStringValue() +
     		  "' for authentication.", lsInfo);
 	  checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
-	} else {
-	  Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
-	  checker.reset(new BuiltinPasswordChecker());
-	}
-	m_pSecurity->setPasswordChecker(checker);
-
+    } else {
+      Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
+      checker.reset(new BuiltinPasswordChecker());
+    }
+    m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->setFileName(getDataDirectory() + "security.xml");
     m_pSecurity->loadFromXML();
     PropertyNodePtr pSecurityNode = m_pPropertySystem->getProperty("/system/security");
