@@ -382,21 +382,25 @@ function pad(n)
 
 function update() {
     var suncalc = new SunCalc();
-    var latitude = parseFloat(
-                        Property.getProperty('/config/geodata/latitude'), 10);
-    var longitude = parseFloat(
-                        Property.getProperty('/config/geodata/longitude'), 10);
+    var latitude = parseFloat(Property.getProperty('/config/geodata/latitude'), 10);
+    var longitude = parseFloat(Property.getProperty('/config/geodata/longitude'), 10);
     longitude = -longitude;
 
-    var gmt = parseFloat(Property.getProperty('/config/geodata/offsetGMT'), 10);
     var now = new Date();
-    if ((latitude !== null) && (longitude !== null) && (gmt !== null)) {
+    var gmt = -now.getTimezoneOffset()/60;
+
+    if ((latitude !== null) && (longitude !== null)) {
         var solar = suncalc.compute_current_date(latitude,
                                                  longitude,
                                                  now.getFullYear(),
                                                  now.getMonth() + 1,
                                                  now.getDate(),
                                                  gmt);
+
+        print("Calculated solar times for location " + latitude + "/" + longitude + ":");
+        for (key in solar) {
+            print(" solar." + key + " = " + solar[key]);
+        }
 
         // special handling for possible return value from solar calculator
         if ((solar.sunrise !== "[Above]") && (solar.sunrise !== "[Below]") &&
@@ -417,6 +421,15 @@ function update() {
 };
 
 if (raisedEvent.name == "running") {
+
+    var la = Property.getProperty('/config/geodata/latitude');
+    var lo = Property.getProperty('/config/geodata/longitude');
+    if (la === null && lo === null) {
+        // set example location central europe
+        Property.setProperty('/config/geodata/latitude', "50.07");
+        Property.setProperty('/config/geodata/longitude', "8.4");
+    }
+
     update();
 
     var d = new Date();
