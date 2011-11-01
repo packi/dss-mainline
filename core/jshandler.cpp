@@ -410,8 +410,10 @@ namespace dss {
 
   void ScriptContext::stop() {
     boost::mutex::scoped_lock lock(m_AttachedObjectsMutex);
+    std::vector<ScriptContextAttachedObject*> aObjectList(m_AttachedObjects);
+    lock.unlock();
     typedef std::vector<ScriptContextAttachedObject*>::iterator AttachedObjectIterator;
-    for(AttachedObjectIterator iObject = m_AttachedObjects.begin(), e = m_AttachedObjects.end();
+    for(AttachedObjectIterator iObject = aObjectList.begin(), e = aObjectList.end();
         iObject != e; ++iObject) {
       (*iObject)->stop();
     }
