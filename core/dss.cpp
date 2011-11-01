@@ -412,16 +412,20 @@ const char* kSavedPropsDirectory = "data/savedprops/";
   }
 
   void InitializeSubsystem(Subsystem* _pSubsystem) {
+    Logger::getInstance()->log("Initialize subsystem \"" +
+        _pSubsystem->getName() + "\"", lsDebug);
     _pSubsystem->initialize();
   } // initializeSubsystem
 
   void StartSubsystem(Subsystem* _pSubsystem) {
+    Logger::getInstance()->log("Start subsystem \"" +
+        _pSubsystem->getName() + "\"", lsDebug);
     _pSubsystem->start();
   }
 
   void StopSubsystem(Subsystem* _pSubsystem) {
-    Logger::getInstance()->log("Shutting down subsystem: " +
-                               _pSubsystem->getName(), lsDebug);
+    Logger::getInstance()->log("Shutdown subsystem \"" +
+        _pSubsystem->getName() + "\"", lsDebug);
     _pSubsystem->shutdown();
   }
 
@@ -430,6 +434,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
       if(m_ShutdownFlag) {
         return false;
       }
+
       try {
         InitializeSubsystem(m_Subsystems.at(i));
       } catch(std::exception& e) {
