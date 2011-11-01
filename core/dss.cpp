@@ -412,16 +412,20 @@ const char* kSavedPropsDirectory = "data/savedprops/";
   }
 
   void InitializeSubsystem(Subsystem* _pSubsystem) {
+    Logger::getInstance()->log("Initialize subsystem \"" +
+        _pSubsystem->getName() + "\"", lsDebug);
     _pSubsystem->initialize();
   } // initializeSubsystem
 
   void StartSubsystem(Subsystem* _pSubsystem) {
+    Logger::getInstance()->log("Start subsystem \"" +
+        _pSubsystem->getName() + "\"", lsDebug);
     _pSubsystem->start();
   }
 
   void StopSubsystem(Subsystem* _pSubsystem) {
-    Logger::getInstance()->log("Shutting down subsystem: " +
-                               _pSubsystem->getName(), lsDebug);
+    Logger::getInstance()->log("Shutdown subsystem \"" +
+        _pSubsystem->getName() + "\"", lsDebug);
     _pSubsystem->shutdown();
   }
 
@@ -430,6 +434,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
       if(m_ShutdownFlag) {
         return false;
       }
+
       try {
         InitializeSubsystem(m_Subsystems.at(i));
       } catch(std::exception& e) {
@@ -452,12 +457,11 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     		  pDigestFile->getStringValue() +
     		  "' for authentication.", lsInfo);
 	  checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
-	} else {
-	  Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
-	  checker.reset(new BuiltinPasswordChecker());
-	}
-	m_pSecurity->setPasswordChecker(checker);
-
+    } else {
+      Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
+      checker.reset(new BuiltinPasswordChecker());
+    }
+    m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->setFileName(getDataDirectory() + "security.xml");
     m_pSecurity->loadFromXML();
     PropertyNodePtr pSecurityNode = m_pPropertySystem->getProperty("/system/security");
@@ -551,17 +555,16 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
     addDefaultInterpreterPlugins();
 
-    if (!initSubsystems()) {
-      Logger::getInstance()->log("Failed to initialize subsystems, exiting...", lsFatal);
-      return;
-    }
-
     if (!initSecurity()) {
       Logger::getInstance()->log("Failed to initialize security, exiting...", lsFatal);
       return;
     }
-
     m_pSecurity->loginAsSystemUser("Main thread needs system privileges");
+
+    if (!initSubsystems()) {
+      Logger::getInstance()->log("Failed to initialize subsystems, exiting...", lsFatal);
+      return;
+    }
 
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
