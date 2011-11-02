@@ -40,6 +40,7 @@
 #include "core/metering/metering.h"
 #include "core/scripting/scriptobject.h"
 #include "core/scripting/propertyscriptextension.h"
+#include "core/security/security.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -84,32 +85,47 @@ namespace dss {
   JSBool global_set_name(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL && argc >= 1) {
-      JSString* str = JS_ValueToString(cx, argv[0]);
-      if(str != NULL) {
-        std::string aptName = JS_GetStringBytes(str);
-        ext->getApartment().setName(aptName);
-
-        *rval = INT_TO_JSVAL(0);
-        return JS_TRUE;
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL && argc >= 1) {
+        JSString* str = JS_ValueToString(cx, argv[0]);
+        if(str != NULL) {
+          std::string aptName = JS_GetStringBytes(str);
+          ext->getApartment().setName(aptName);
+          *rval = INT_TO_JSVAL(0);
+          return JS_TRUE;
+        }
       }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // global_set_name
 
   JSBool global_get_devices(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL) {
-      Set devices = ext->getApartment().getDevices();
-      JSObject* obj = ext->createJSSet(*ctx, devices);
-
-      *rval = OBJECT_TO_JSVAL(obj);
-
-      return JS_TRUE;
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL) {
+        Set devices = ext->getApartment().getDevices();
+        JSObject* obj = ext->createJSSet(*ctx, devices);
+        *rval = OBJECT_TO_JSVAL(obj);
+        return JS_TRUE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // global_get_devices
 
@@ -134,28 +150,35 @@ namespace dss {
   JSBool global_get_dsmeterbydsid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL) {
-      if(argc >= 1) {
-        dss_dsid_t dsid = NullDSID;
-        try {
-          dsid =  dss_dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
-        } catch(std::invalid_argument& e) {
-          Logger::getInstance()->log(std::string("Error converting dsid string to dsid") + e.what(), lsError);
-          return JS_FALSE;
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL) {
+        if(argc >= 1) {
+          dss_dsid_t dsid = NullDSID;
+          try {
+            dsid =  dss_dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
+          } catch(std::invalid_argument& e) {
+            Logger::getInstance()->log(std::string("Error converting dsid string to dsid") + e.what(), lsError);
+            return JS_FALSE;
+          }
+          try {
+            boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByDSID(dsid);
+            JSObject* obj = ext->createJSMeter(*ctx, meter);
+            *rval = OBJECT_TO_JSVAL(obj);
+          } catch(ItemNotFoundException& e) {
+            *rval = JSVAL_NULL;
+          }
+          return JS_TRUE;
         }
-        try {
-          boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByDSID(dsid);
-          JSObject* obj = ext->createJSMeter(*ctx, meter);
-
-          *rval = OBJECT_TO_JSVAL(obj);
-        } catch(ItemNotFoundException& e) {
-          *rval = JSVAL_NULL;
-        }
-
-        return JS_TRUE;
       }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // global_get_dsmeterbydsid
   
@@ -163,99 +186,146 @@ namespace dss {
   JSBool global_getDSMeters(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    JSAutoLocalRootScope scope(cx);
-    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
-    *rval = OBJECT_TO_JSVAL(resultObj);
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      JSAutoLocalRootScope scope(cx);
+      JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+      *rval = OBJECT_TO_JSVAL(resultObj);
 
-    std::vector<boost::shared_ptr<DSMeter> > meters = ext->getApartment().getDSMeters();
-    for(std::size_t iMeter = 0; iMeter < meters.size(); iMeter++) {
-      JSObject* meterObj = ext->createJSMeter(*ctx, meters[iMeter]);
-      jsval meterJSVal = OBJECT_TO_JSVAL(meterObj);
-      JSBool res = JS_SetElement(cx, resultObj, iMeter, &meterJSVal);
-      if(!res) {
-        return JS_FALSE;
+      std::vector<boost::shared_ptr<DSMeter> > meters = ext->getApartment().getDSMeters();
+      for(std::size_t iMeter = 0; iMeter < meters.size(); iMeter++) {
+        JSObject* meterObj = ext->createJSMeter(*ctx, meters[iMeter]);
+        jsval meterJSVal = OBJECT_TO_JSVAL(meterObj);
+        JSBool res = JS_SetElement(cx, resultObj, iMeter, &meterJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
       }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_TRUE;
   } // global_getDSMeters
 
   JSBool global_getZones(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    JSAutoLocalRootScope scope(cx);
-    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
-    *rval = OBJECT_TO_JSVAL(resultObj);
 
-    std::vector<boost::shared_ptr<Zone> > zones = ext->getApartment().getZones();
-    for(std::size_t i = 0; i < zones.size(); i++) {
-      JSObject* zoneObj = ext->createJSZone(*ctx, zones[i]);
-      jsval zoneJSVal = OBJECT_TO_JSVAL(zoneObj);
-      JSBool res = JS_SetElement(cx, resultObj, i, &zoneJSVal);
-      if(!res) {
-        return JS_FALSE;
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      JSAutoLocalRootScope scope(cx);
+      JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+      *rval = OBJECT_TO_JSVAL(resultObj);
+
+      std::vector<boost::shared_ptr<Zone> > zones = ext->getApartment().getZones();
+      for(std::size_t i = 0; i < zones.size(); i++) {
+        JSObject* zoneObj = ext->createJSZone(*ctx, zones[i]);
+        jsval zoneJSVal = OBJECT_TO_JSVAL(zoneObj);
+        JSBool res = JS_SetElement(cx, resultObj, i, &zoneJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
       }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_TRUE;
   } // global_getZones
 
   JSBool global_getZoneByID(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    int zoneID;
+
     try {
-      zoneID = ctx->convertTo<int>(argv[0]);
-    } catch(std::invalid_argument& e) {
-      Logger::getInstance()->log(std::string("Error converting zoneID string to number ") + e.what(), lsError);
-      return JS_FALSE;
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      int zoneID;
+      try {
+        zoneID = ctx->convertTo<int>(argv[0]);
+      } catch(std::invalid_argument& e) {
+        Logger::getInstance()->log(std::string("Error converting zoneID string to number ") + e.what(), lsError);
+        return JS_FALSE;
+      }
+      try {
+        boost::shared_ptr<Zone> zone = ext->getApartment().getZone(zoneID);
+        JSObject* obj = ext->createJSZone(*ctx, zone);
+        *rval = OBJECT_TO_JSVAL(obj);
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {
+        Logger::getInstance()->log(std::string("Zone with ID not found  ") + e.what(), lsError);
+        *rval = JSVAL_NULL;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
-    try {
-      boost::shared_ptr<Zone> zone = ext->getApartment().getZone(zoneID);
-      JSObject* obj = ext->createJSZone(*ctx, zone);
-      *rval = OBJECT_TO_JSVAL(obj);
-      return JS_TRUE;
-    } catch(ItemNotFoundException& e) {
-      Logger::getInstance()->log(std::string("Zone with ID not found  ") + e.what(), lsError);
-      *rval = JSVAL_NULL;
-    }
+
     return JS_FALSE;
   } // global_getZoneByID
 
   JSBool global_getEnergyMeterValue(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL) {
-      uint32_t result = 0;
-      foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
-        try {
-          result += pDSMeter->getEnergyMeterValue();
-        } catch(BusApiError& e) {
-          Logger::getInstance()->log(std::string("Error requesting energy meter value from dSM: ") + e.what(), lsError);
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL) {
+        uint32_t result = 0;
+        foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
+          try {
+            result += pDSMeter->getEnergyMeterValue();
+          } catch(BusApiError& e) {
+            Logger::getInstance()->log(std::string("Error requesting energy meter value from dSM: ") + e.what(), lsError);
+          }
         }
+        *rval = INT_TO_JSVAL(result);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(result);
-      return JS_TRUE;
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // global_getEnergyMeterValue
 
   JSBool global_getConsumption(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL) {
-      uint32_t result = 0;
-      foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
-        try {
-          result += pDSMeter->getPowerConsumption();
-        } catch(BusApiError& e) {
-          Logger::getInstance()->log(std::string("Error requesting energy consumption from dSM: ") + e.what(), lsError);
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL) {
+        uint32_t result = 0;
+        foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
+          try {
+            result += pDSMeter->getPowerConsumption();
+          } catch(BusApiError& e) {
+            Logger::getInstance()->log(std::string("Error requesting energy consumption from dSM: ") + e.what(), lsError);
+          }
         }
+        *rval = INT_TO_JSVAL(result);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(result);
-      return JS_TRUE;
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // global_getConsumption
 
@@ -384,35 +454,45 @@ namespace dss {
 
   JSBool set_by_name(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL && set != NULL && argc >= 1) {
-      JSString* str = JS_ValueToString(cx, argv[0]);
-      if(str != NULL) {
-        std::string name = JS_GetStringBytes(str);
-        DeviceReference result = set->getByName(name);
-        JSObject* resultObj = ext->createJSDevice(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-        return JS_TRUE;
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL && set != NULL && argc >= 1) {
+        JSString* str = JS_ValueToString(cx, argv[0]);
+        if(str != NULL) {
+          std::string name = JS_GetStringBytes(str);
+          DeviceReference result = set->getByName(name);
+          JSObject* resultObj = ext->createJSDevice(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        }
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_name
 
   JSBool set_by_shortaddress(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL && set != NULL && argc >= 2) {
-      try {
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL && set != NULL && argc >= 2) {
         if (!JSVAL_IS_INT(argv[0])) {
             Logger::getInstance()->log("JS: set_by_shortaddress: Could not parse circuit id as integer", lsWarning);
             *rval = JSVAL_NULL;
             return JS_FALSE;
         }
-
         if (!JSVAL_IS_INT(argv[2])) {
             Logger::getInstance()->log("JS: set_by_shortaddress: Could not parse bus id as integer", lsWarning);
             *rval = JSVAL_NULL;
@@ -430,183 +510,267 @@ namespace dss {
         } catch(std::invalid_argument&) {
           Logger::getInstance()->log("JS: Could not parse dsid '" + dsmeterID + "'", lsWarning);
         }
-      } catch(ItemNotFoundException&) {
-          Logger::getInstance()->log("JS: set.byShortAddress: Device not found", lsWarning);
-      }
         *rval = JSVAL_NULL;
         return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
     return JS_FALSE;
   } // set_by_shortaddress
 
 
   JSBool set_by_dsid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL && set != NULL && argc >= 1) {
-      JSString* str = JS_ValueToString(cx, argv[0]);
-      if(str != NULL) {
-        std::string dsid = JS_GetStringBytes(str);
-        try {
-          DeviceReference result = set->getByDSID(dss_dsid_t::fromString(dsid));
-          JSObject* resultObj = ext->createJSDevice(*ctx, result);
-          *rval = OBJECT_TO_JSVAL(resultObj);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL && set != NULL && argc >= 1) {
+        JSString* str = JS_ValueToString(cx, argv[0]);
+        if(str != NULL) {
+          std::string dsid = JS_GetStringBytes(str);
+          try {
+            DeviceReference result = set->getByDSID(dss_dsid_t::fromString(dsid));
+            JSObject* resultObj = ext->createJSDevice(*ctx, result);
+            *rval = OBJECT_TO_JSVAL(resultObj);
+            return JS_TRUE;
+          } catch(std::invalid_argument&) {
+            Logger::getInstance()->log("JS: set.byDSID: Could not parse dsid: '" + dsid + "'", lsError);
+          } catch(ItemNotFoundException&) {
+            Logger::getInstance()->log("JS: set.byDSID: Device with dsid '" + dsid + "' not found", lsWarning);
+          }
+          *rval = JSVAL_NULL;
           return JS_TRUE;
-        } catch(std::invalid_argument&) {
-          Logger::getInstance()->log("JS: set.byDSID: Could not parse dsid: '" + dsid + "'", lsError);
-        } catch(ItemNotFoundException&) {
-          Logger::getInstance()->log("JS: set.byDSID: Device with dsid '" + dsid + "' not found", lsWarning);
         }
-        *rval = JSVAL_NULL;
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_dsid
 
   JSBool set_by_functionid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL && set != NULL && argc >= 1) {
-      int32_t fid = 0;
-      if(JS_ValueToInt32(cx, argv[0], &fid)) {
-        Set result = set->getByFunctionID(fid);
-        JSObject* resultObj = ext->createJSSet(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-        return JS_TRUE;
-      } else {
-        Logger::getInstance()->log("JS: set_by_functionid: Could not parse parameter1 as integer", lsWarning);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL && set != NULL && argc >= 1) {
+        int32_t fid = 0;
+        if(JS_ValueToInt32(cx, argv[0], &fid)) {
+          Set result = set->getByFunctionID(fid);
+          JSObject* resultObj = ext->createJSSet(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        } else {
+          Logger::getInstance()->log("JS: set_by_functionid: Could not parse parameter1 as integer", lsWarning);
+        }
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_functionid
 
   JSBool set_by_zone(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
-      Set result;
-      try {
-        if(JSVAL_IS_INT(argv[0])) {
-          result = set->getByZone(JSVAL_TO_INT(argv[0]));
-        } else {
-          JSString* str = JS_ValueToString(cx, argv[0]);
-          if(str != NULL) {
-            std::string zonename = JS_GetStringBytes(str);
-            result = set->getByZone(zonename);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+        Set result;
+        try {
+          if(JSVAL_IS_INT(argv[0])) {
+            result = set->getByZone(JSVAL_TO_INT(argv[0]));
+          } else {
+            JSString* str = JS_ValueToString(cx, argv[0]);
+            if(str != NULL) {
+              std::string zonename = JS_GetStringBytes(str);
+              result = set->getByZone(zonename);
+            }
           }
+        } catch(ItemNotFoundException&) {
+          // return an empty set if the zone hasn't been found
+          Logger::getInstance()->log("JS: set_by_zone: Zone not found", lsWarning);
         }
-      } catch(ItemNotFoundException&) {
-        // return an empty set if the zone hasn't been found
-        Logger::getInstance()->log("JS: set_by_zone: Zone not found", lsWarning);
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
       }
-      JSObject* resultObj = ext->createJSSet(*ctx, result);
-      *rval = OBJECT_TO_JSVAL(resultObj);
-      return JS_TRUE;
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_zone
 
   JSBool set_by_group(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
-      bool ok = false;
-      Set result;
-      try {
-        if(JSVAL_IS_INT(argv[0])) {
-          result = set->getByGroup(JSVAL_TO_INT(argv[0]));
-          ok = true;
-        } else {
-          JSString* str = JS_ValueToString(cx, argv[0]);
-          if(str != NULL) {
-            std::string groupname = JS_GetStringBytes(str);
-            result = set->getByGroup(groupname);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+        bool ok = false;
+        Set result;
+        try {
+          if(JSVAL_IS_INT(argv[0])) {
+            result = set->getByGroup(JSVAL_TO_INT(argv[0]));
             ok = true;
+          } else {
+            JSString* str = JS_ValueToString(cx, argv[0]);
+            if(str != NULL) {
+              std::string groupname = JS_GetStringBytes(str);
+              result = set->getByGroup(groupname);
+              ok = true;
+            }
           }
+        } catch(ItemNotFoundException&) {
+          ok = true; // return an empty set if the group hasn't been found
+          Logger::getInstance()->log("JS: set_by_group: Group not found", lsWarning);
         }
-      } catch(ItemNotFoundException&) {
-        ok = true; // return an empty set if the group hasn't been found
-        Logger::getInstance()->log("JS: set_by_group: Group not found", lsWarning);
+        if(ok) {
+          JSObject* resultObj = ext->createJSSet(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+        } else {
+          *rval = JSVAL_NULL;
+        }
+        return JS_TRUE;
       }
-      if(ok) {
-        JSObject* resultObj = ext->createJSSet(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-      } else {
-        *rval = JSVAL_NULL;
-      }
-      return JS_TRUE;
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_group
 
   JSBool set_by_dsmeter(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
-      try {
-        std::string dsmeterID = ctx->convertTo<std::string>(argv[0]);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if((ext != NULL) && (set != NULL) && (argc >= 1)) {
         try {
-          dss_dsid_t meterDSID = dss_dsid_t::fromString(dsmeterID);
-          Set result = set->getByDSMeter(meterDSID);
-          JSObject* resultObj = ext->createJSSet(*ctx, result);
-          *rval = OBJECT_TO_JSVAL(resultObj);
-          return JS_TRUE;
-        } catch(std::invalid_argument&) {
-          Logger::getInstance()->log("JS: Could not parse dsid '" + dsmeterID + "'", lsWarning);
+          std::string dsmeterID = ctx->convertTo<std::string>(argv[0]);
+          try {
+            dss_dsid_t meterDSID = dss_dsid_t::fromString(dsmeterID);
+            Set result = set->getByDSMeter(meterDSID);
+            JSObject* resultObj = ext->createJSSet(*ctx, result);
+            *rval = OBJECT_TO_JSVAL(resultObj);
+            return JS_TRUE;
+          } catch(std::invalid_argument&) {
+            Logger::getInstance()->log("JS: Could not parse dsid '" + dsmeterID + "'", lsWarning);
+          }
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("JS: set_by_dsmeter: ") + e.what(), lsWarning);
         }
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("JS: set_by_dsmeter: ") + e.what(), lsWarning);
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_dsmeter
 
   JSBool set_by_presence(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
-      try {
-        bool presence = ctx->convertTo<bool>(argv[0]);
-        Set result = set->getByPresence(presence);
-        JSObject* resultObj = ext->createJSSet(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-        return JS_TRUE;
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("JS: set_by_presence: ") + e.what(), lsWarning);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+        try {
+          bool presence = ctx->convertTo<bool>(argv[0]);
+          Set result = set->getByPresence(presence);
+          JSObject* resultObj = ext->createJSSet(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("JS: set_by_presence: ") + e.what(), lsWarning);
+        }
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_presence
 
   JSBool set_by_tag(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
-      try {
-        std::string tagName = ctx->convertTo<std::string>(argv[0]);
-        Set result = set->getByTag(tagName);
-        JSObject* resultObj = ext->createJSSet(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-        return JS_TRUE;
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("JS: set_by_tag: ") + e.what(), lsWarning);
+    try {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+        try {
+          std::string tagName = ctx->convertTo<std::string>(argv[0]);
+          Set result = set->getByTag(tagName);
+          JSObject* resultObj = ext->createJSSet(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("JS: set_by_tag: ") + e.what(), lsWarning);
+        }
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // set_by_tag
 
@@ -656,313 +820,525 @@ namespace dss {
   JSBool dev_turn_on(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->turnOn();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        intf->turnOn();
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   }
 
   JSBool dev_turn_off(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->turnOff();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        intf->turnOff();
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   }
 
   JSBool dev_blink(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->blink();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        intf->blink();
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   }
 
   JSBool dev_increase_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->increaseValue();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        intf->increaseValue();
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   }
 
   JSBool dev_decrease_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->decreaseValue();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        intf->decreaseValue();
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   }
 
   JSBool dev_set_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      if(argc >= 1) {
-        uint8_t value = ctx->convertTo<uint8_t>(argv[0]);
-        intf->setValue(value);
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        if(argc >= 1) {
+          uint8_t value = ctx->convertTo<uint8_t>(argv[0]);
+          intf->setValue(value);
+        }
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_set_value
 
   JSBool dev_call_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
     try {
-      if(self.is("set") || self.is("device")) {
-        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-        if(argc == 1) {
-          int sceneNr = ctx->convertTo<int>(argv[0]);
-          intf->callScene(sceneNr);
+      ScriptObject self(obj, *ctx);
+      try {
+        if(self.is("set") || self.is("device")) {
+          IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+          if(argc == 1) {
+            int sceneNr = ctx->convertTo<int>(argv[0]);
+            intf->callScene(sceneNr);
+          }
+          *rval = INT_TO_JSVAL(0);
+          return JS_TRUE;
         }
-        *rval = INT_TO_JSVAL(0);
-        return JS_TRUE;
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
       }
-    } catch(ScriptException& e) {
-      Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_call_scene
 
   JSBool dev_undo_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        int sceneNr = ctx->convertTo<int>(argv[0]);
-        intf->undoScene(sceneNr);
-      } else if(argc == 0) {
-        intf->undoSceneLast();
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          int sceneNr = ctx->convertTo<int>(argv[0]);
+          intf->undoScene(sceneNr);
+        } else if(argc == 0) {
+          intf->undoSceneLast();
+        }
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_undo_scene
 
   JSBool dev_next_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        intf->nextScene();
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          intf->nextScene();
+        }
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_next_scene
 
   JSBool dev_previous_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        intf->previousScene();
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          intf->previousScene();
+        }
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_previous_scene
 
   JSBool dev_save_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
     try {
-      if(self.is("set") || self.is("device")) {
-        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-        int sceneNr = ctx->convertTo<int>(argv[0]);
-        if(argc == 1) {
-          intf->saveScene(sceneNr);
+      ScriptObject self(obj, *ctx);
+        if(self.is("set") || self.is("device")) {
+          IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+          try {
+            int sceneNr = ctx->convertTo<int>(argv[0]);
+            if(argc == 1) {
+              intf->saveScene(sceneNr);
+            }
+          } catch(ScriptException& e) {
+            Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
+            return JS_FALSE;
+          }
+          *rval = INT_TO_JSVAL(0);
+          return JS_TRUE;
         }
-        *rval = INT_TO_JSVAL(0);
-        return JS_TRUE;
-      }
-    } catch(ScriptException& e) {
-      Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_save_scene
 
   JSBool dev_get_config(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 2) {
-        try {
-          int configClass = ctx->convertTo<int>(argv[0]);
-          int configIndex = ctx->convertTo<int>(argv[1]);
-          uint8_t retValue= (intf->getDevice()->getDeviceConfig(configClass, configIndex));
-          *rval = INT_TO_JSVAL(retValue);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
-          return JS_FALSE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 2) {
+          try {
+            int configClass = ctx->convertTo<int>(argv[0]);
+            int configIndex = ctx->convertTo<int>(argv[1]);
+            uint8_t retValue= (intf->getDevice()->getDeviceConfig(configClass, configIndex));
+            *rval = INT_TO_JSVAL(retValue);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_get_config
 
   JSBool dev_get_config_word(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 2) {
-        try {
-          int configClass = ctx->convertTo<int>(argv[0]);
-          int configIndex = ctx->convertTo<int>(argv[1]);
-          uint16_t retValue= (intf->getDevice()->getDeviceConfigWord(configClass, configIndex));
-          *rval = INT_TO_JSVAL(retValue);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
-          return JS_FALSE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 2) {
+          try {
+            int configClass = ctx->convertTo<int>(argv[0]);
+            int configIndex = ctx->convertTo<int>(argv[1]);
+            uint16_t retValue= (intf->getDevice()->getDeviceConfigWord(configClass, configIndex));
+            *rval = INT_TO_JSVAL(retValue);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_get_config_word
 
   JSBool dev_set_config(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 3) {
-        try {
-          int configClass = ctx->convertTo<int>(argv[0]);
-          int configIndex = ctx->convertTo<int>(argv[1]);
-          int configValue = ctx->convertTo<int>(argv[2]);
-          (intf->getDevice()->setDeviceConfig(configClass, configIndex, configValue));
-          *rval = BOOLEAN_TO_JSVAL(true);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
-          return JS_FALSE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 3) {
+          try {
+            int configClass = ctx->convertTo<int>(argv[0]);
+            int configIndex = ctx->convertTo<int>(argv[1]);
+            int configValue = ctx->convertTo<int>(argv[2]);
+            (intf->getDevice()->setDeviceConfig(configClass, configIndex, configValue));
+            *rval = BOOLEAN_TO_JSVAL(true);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_get_config
 
   JSBool dev_get_output_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        try {
-          uint8_t offset = ctx->convertTo<int>(argv[0]);
-          uint16_t result = (intf->getDevice()->getDeviceOutputValue(offset));
-          *rval = INT_TO_JSVAL(result);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
-          return JS_FALSE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          try {
+            uint8_t offset = ctx->convertTo<int>(argv[0]);
+            uint16_t result = (intf->getDevice()->getDeviceOutputValue(offset));
+            *rval = INT_TO_JSVAL(result);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_get_output_value
 
   JSBool dev_set_output_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        try {
-          uint8_t offset = ctx->convertTo<uint8_t>(argv[0]);
-          uint16_t value = ctx->convertTo<uint16_t>(argv[1]);
-          (intf->getDevice()->setDeviceOutputValue(offset, value));
-          *rval = BOOLEAN_TO_JSVAL(true);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
-          return JS_FALSE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          try {
+            uint8_t offset = ctx->convertTo<uint8_t>(argv[0]);
+            uint16_t value = ctx->convertTo<uint16_t>(argv[1]);
+            (intf->getDevice()->setDeviceOutputValue(offset, value));
+            *rval = BOOLEAN_TO_JSVAL(true);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_set_output_value
 
   JSBool dev_get_sensor_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        try {
-          int sensorIndex = ctx->convertTo<int>(argv[0]);
-          int retValue= (intf->getDevice()->getDeviceSensorValue(sensorIndex));
-          *rval = INT_TO_JSVAL(retValue);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          try {
+            int sensorIndex = ctx->convertTo<int>(argv[0]);
+            int retValue= (intf->getDevice()->getDeviceSensorValue(sensorIndex));
+            *rval = INT_TO_JSVAL(retValue);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_get_sensor_value
 
   JSBool dev_get_sensor_type(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        try {
-          int sensorIndex = ctx->convertTo<int>(argv[0]);
-          int retValue= (intf->getDevice()->getDeviceSensorType(sensorIndex));
-          *rval = INT_TO_JSVAL(retValue);
-        } catch(const BusApiError&) {
-          *rval = JSVAL_NULL;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      if(self.is("device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+        if(argc == 1) {
+          try {
+            int sensorIndex = ctx->convertTo<int>(argv[0]);
+            int retValue= (intf->getDevice()->getDeviceSensorType(sensorIndex));
+            *rval = INT_TO_JSVAL(retValue);
+          } catch(const BusApiError& ex) {
+            Logger::getInstance()->log(std::string("JS: scripting failure: bus exception: ") + ex.what(), lsError);
+            *rval = JSVAL_NULL;
+          }
+          return JS_TRUE;
         }
-        return JS_TRUE;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dev_get_sensor_type
 
@@ -1150,14 +1526,22 @@ namespace dss {
   JSBool dsmeter_getPowerConsumption(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
-    if(meter != NULL) {
-      try {
+    *rval = JSVAL_NULL;
+    try {
+      if(meter != NULL) {
         *rval = INT_TO_JSVAL(meter->getPowerConsumption());
         return JS_TRUE;
-      } catch (BusApiError& e) {
-        *rval = JSVAL_NULL;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dsmeter_getPowerConsumption
 
@@ -1165,28 +1549,47 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
-    if(meter != NULL) {
-      JSAutoLocalRootScope localRoot(cx);
-      ScriptObject obj(*ctx, NULL);
-      *rval = OBJECT_TO_JSVAL(obj.getJSObject());
-      obj.setProperty<std::string>("timestamp", meter->getCachedPowerConsumptionTimeStamp().toString());
-      obj.setProperty<int>("value", meter->getCachedPowerConsumption());
-      return JS_TRUE;
+    try {
+      if(meter != NULL) {
+        JSAutoLocalRootScope localRoot(cx);
+        ScriptObject obj(*ctx, NULL);
+        *rval = OBJECT_TO_JSVAL(obj.getJSObject());
+        obj.setProperty<std::string>("timestamp", meter->getCachedPowerConsumptionTimeStamp().toString());
+        obj.setProperty<int>("value", meter->getCachedPowerConsumption());
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dsmeter_getCachedPowerConsumption
 
   JSBool dsmeter_getEnergyMeterValue(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
-    if(meter != NULL) {
-      try {
+    *rval = JSVAL_NULL;
+    try {
+      if(meter != NULL) {
         *rval = INT_TO_JSVAL(meter->getEnergyMeterValue());
         return JS_TRUE;
-      } catch (BusApiError& e) {
-        *rval = JSVAL_NULL;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dsmeter_getEnergyMeterValue
 
@@ -1194,25 +1597,48 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
-    if(meter != NULL) {
-      JSAutoLocalRootScope localRoot(cx);
-      ScriptObject obj(*ctx, NULL);
-      *rval = OBJECT_TO_JSVAL(obj.getJSObject());
-      obj.setProperty<std::string>("timestamp", meter->getCachedEnergyMeterTimeStamp().toString());
-      obj.setProperty<int>("value", meter->getCachedEnergyMeterValue());
-      return JS_TRUE;
+    try {
+      if(meter != NULL) {
+        JSAutoLocalRootScope localRoot(cx);
+        ScriptObject obj(*ctx, NULL);
+        *rval = OBJECT_TO_JSVAL(obj.getJSObject());
+        obj.setProperty<std::string>("timestamp", meter->getCachedEnergyMeterTimeStamp().toString());
+        obj.setProperty<int>("value", meter->getCachedEnergyMeterValue());
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dsmeter_getCachedEnergyMeterValue
 
   JSBool dsmeter_get_property_node(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
-    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
-    if(meter != NULL) {
-      *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, meter->getPropertyNode()));
-      return JS_TRUE;
+
+    try {
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
+      boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
+      if(meter != NULL) {
+        *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, meter->getPropertyNode()));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // dsmeter_get_property_node
 
@@ -1283,48 +1709,70 @@ namespace dss {
 
   JSBool zone_getDevices(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
-    if(pZone != NULL) {
-      Set devices = pZone->getDevices();
-      JSObject* obj = ext->createJSSet(*ctx, devices);
-      *rval = OBJECT_TO_JSVAL(obj);
-      return JS_TRUE;
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
+      if(pZone != NULL) {
+        Set devices = pZone->getDevices();
+        JSObject* obj = ext->createJSSet(*ctx, devices);
+        *rval = OBJECT_TO_JSVAL(obj);
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // zone_getDevices
 
   JSBool zone_getPowerConsumption(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
-    if(pZone != NULL) {
-      try {
+
+    *rval = JSVAL_NULL;
+    try {
+      if(pZone != NULL) {
         *rval = INT_TO_JSVAL(pZone->getPowerConsumption());
         return JS_TRUE;
-      } catch (BusApiError& e) {
-        *rval = JSVAL_NULL;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // zone_getPowerConsumption
 
   JSBool zone_pushSensorValue(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
-    dss_dsid_t sourceDSID;
-    uint8_t sensorType;
-    uint16_t sensorValue;
-    if(pZone != NULL) {
-      try {
-        std::string sDSID = ctx->convertTo<std::string>(argv[0]);
-        sourceDSID = dsid::fromString(sDSID);
-        sensorType = ctx->convertTo<uint8_t>(argv[1]);
-        sensorValue = ctx->convertTo<uint16_t>(argv[2]);
-      } catch(std::invalid_argument& e) {
-        Logger::getInstance()->log(std::string("Error converting zone.pushSensorValue parameter: ") + e.what(), lsError);
-        return JS_FALSE;
-      }
-      try {
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
+      dss_dsid_t sourceDSID;
+      uint8_t sensorType;
+      uint16_t sensorValue;
+      if(pZone != NULL) {
+        try {
+          std::string sDSID = ctx->convertTo<std::string>(argv[0]);
+          sourceDSID = dsid::fromString(sDSID);
+          sensorType = ctx->convertTo<uint8_t>(argv[1]);
+          sensorValue = ctx->convertTo<uint16_t>(argv[2]);
+        } catch(std::invalid_argument& e) {
+          Logger::getInstance()->log(std::string("Error converting zone.pushSensorValue parameter: ") + e.what(), lsError);
+          return JS_FALSE;
+        }
         StructureManipulator manipulator(
             *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
             *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
@@ -1334,21 +1782,40 @@ namespace dss {
         pZone->sensorPush(sourceDSID, sensorType, sensorValue);
         *rval = BOOLEAN_TO_JSVAL(true);
         return JS_TRUE;
-      } catch (BusApiError& e) {
-        *rval = JSVAL_NULL;
       }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // zone_pushSensorValue
 
   JSBool zone_get_property_node(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
-    boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
-    if(pZone != NULL) {
-      *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pZone->getPropertyNode()));
-      return JS_TRUE;
+
+    try {
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj))->pZone;
+      if(pZone != NULL) {
+        *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pZone->getPropertyNode()));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // zone_get_property_node
 
@@ -1434,7 +1901,16 @@ namespace dss {
       return JS_TRUE;
     } catch(ScriptException& e) {
       Logger::getInstance()->log(std::string("JS: event_construct: error converting string: ") + e.what(), lsError);
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // event_construct
 
@@ -1474,7 +1950,16 @@ namespace dss {
       return JS_TRUE;
     } catch(ScriptException& e) {
       Logger::getInstance()->log(std::string("JS: event_construct: error converting string: ") + e.what(), lsError);
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // timedEvent_construct
 
@@ -1521,33 +2006,60 @@ namespace dss {
       return JS_TRUE;
     } catch(ScriptException& e) {
       Logger::getInstance()->log(std::string("JS: timedICalEvent_construct: error converting string: ") + e.what(), lsError);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // timedICalEvent_construct
 
   JSBool event_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
-    if(self.is("event")) {
-      event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
-      ext->getEventQueue().pushEvent(eventWrapper->event);
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if(self.is("event")) {
+        event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+        ext->getEventQueue().pushEvent(eventWrapper->event);
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // event_raise
 
   JSBool timedEvent_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-    EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
-    if(self.is("event")) {
-      event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
-      std::string id = ext->getEventQueue().pushTimedEvent(eventWrapper->event);
-      *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, id.c_str()));
-      return JS_TRUE;
+
+    try {
+      ScriptObject self(obj, *ctx);
+      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if(self.is("event")) {
+        event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+        std::string id = ext->getEventQueue().pushTimedEvent(eventWrapper->event);
+        *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, id.c_str()));
+        return JS_TRUE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // timedEvent_raise
 
@@ -1640,15 +2152,24 @@ namespace dss {
 
   JSBool subscription_subscribe(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
 
-    EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
-    if(self.is("subscription")) {
-      subscription_wrapper* subscriptionWrapper = static_cast<subscription_wrapper*>(JS_GetPrivate(cx, obj));
-      ext->getEventInterpreter().subscribe(subscriptionWrapper->subscription);
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    try {
+      ScriptObject self(obj, *ctx);
+      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if(self.is("subscription")) {
+        subscription_wrapper* subscriptionWrapper = static_cast<subscription_wrapper*>(JS_GetPrivate(cx, obj));
+        ext->getEventInterpreter().subscribe(subscriptionWrapper->subscription);
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // subscription_subscribe
 
@@ -1827,31 +2348,39 @@ namespace dss {
   JSBool metering_getSeries(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
-    JSAutoLocalRootScope scope(cx);
-    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
-    *rval = OBJECT_TO_JSVAL(resultObj);
+    try {
+      MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+      JSAutoLocalRootScope scope(cx);
+      JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+      *rval = OBJECT_TO_JSVAL(resultObj);
 
-    int iMeter = 0;
-    std::vector<boost::shared_ptr<DSMeter> > dsMeters = ext->getApartment().getDSMeters();
-    foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
-      ScriptObject objEnergy(*ctx, NULL);
-      objEnergy.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
-      objEnergy.setProperty<std::string>("type", "energy");
-      jsval childJSVal = OBJECT_TO_JSVAL(objEnergy.getJSObject());
-      JSBool res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
-      if(!res) {
-        return JS_FALSE;
+      int iMeter = 0;
+      std::vector<boost::shared_ptr<DSMeter> > dsMeters = ext->getApartment().getDSMeters();
+      foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
+        ScriptObject objEnergy(*ctx, NULL);
+        objEnergy.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        objEnergy.setProperty<std::string>("type", "energy");
+        jsval childJSVal = OBJECT_TO_JSVAL(objEnergy.getJSObject());
+        JSBool res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
+        iMeter++;
+        ScriptObject objConsumption(*ctx, NULL);
+        objConsumption.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        objConsumption.setProperty<std::string>("type", "consumption");
+        childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());
+        res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
       }
-      iMeter++;
-      ScriptObject objConsumption(*ctx, NULL);
-      objConsumption.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
-      objConsumption.setProperty<std::string>("type", "consumption");
-      childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());
-      res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
-      if(!res) {
-        return JS_FALSE;
-      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
 
     return JS_TRUE;
@@ -1860,29 +2389,33 @@ namespace dss {
   JSBool metering_getResolutions(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
-    JSAutoLocalRootScope scope(cx);
-    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
-    *rval = OBJECT_TO_JSVAL(resultObj);
-
-
-    std::vector<boost::shared_ptr<MeteringConfigChain> >
-      meteringConfig = ext->getMetering().getConfig();
-    int iResolution = 0;
-    foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
-      for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
-        ScriptObject resolution(*ctx, NULL);
-
-        resolution.setProperty<std::string>("type", pChain->isEnergy() ? "energy" : "consumption");
-        resolution.setProperty<std::string>("unit", pChain->getUnit());
-        resolution.setProperty<int>("resolution", pChain->getResolution(iConfig));
-        jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
-        JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
-        if(!res) {
-          return JS_FALSE;
+    try {
+      MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+      JSAutoLocalRootScope scope(cx);
+      JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+      *rval = OBJECT_TO_JSVAL(resultObj);
+      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = ext->getMetering().getConfig();
+      int iResolution = 0;
+      foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
+        for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
+          ScriptObject resolution(*ctx, NULL);
+          resolution.setProperty<std::string>("type", pChain->isEnergy() ? "energy" : "consumption");
+          resolution.setProperty<std::string>("unit", pChain->getUnit());
+          resolution.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
+          JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
+          if(!res) {
+            return JS_FALSE;
+          }
+          iResolution++;
         }
-        iResolution++;
       }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
 
     return JS_TRUE;
@@ -1891,19 +2424,16 @@ namespace dss {
   JSBool metering_getValues(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
-    MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
-    JSAutoLocalRootScope scope(cx);
-
-    if(argc < 3) {
-      Logger::getInstance()->log("JS: metering_getValues: need three parameters: (dsid, type, resolution)", lsError);
-      return JS_FALSE;
-    }
-
     try {
+      MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+      JSAutoLocalRootScope scope(cx);
+      if(argc < 3) {
+        Logger::getInstance()->log("JS: metering_getValues: need three parameters: (dsid, type, resolution)", lsError);
+        return JS_FALSE;
+      }
       std::string dsid = ctx->convertTo<std::string>(argv[0]);
       std::string type = ctx->convertTo<std::string>(argv[1]);
       int resolution = ctx->convertTo<int>(argv[2]);
-
 
       boost::shared_ptr<DSMeter> pMeter;
       try {
@@ -1920,10 +2450,10 @@ namespace dss {
       } else if(type == "energy") {
         energy = true;
       } else {
-        Logger::getInstance()->log("JS: metering_getValues: Invalid type '" +
-                                   type + "'", lsError);
+        Logger::getInstance()->log("JS: metering_getValues: Invalid type '" + type + "'", lsError);
         return JS_FALSE;
       }
+
       std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = ext->getMetering().getConfig();
       boost::shared_ptr<Series<CurrentValue> > pSeries;
       foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
@@ -1962,12 +2492,20 @@ namespace dss {
 
       } else {
         Logger::getInstance()->log("JS: metering_getValues: Could not find data for '" + type +
-                                   "' and resolution '" + intToString(resolution) + "'", lsWarning);
+            "' and resolution '" + intToString(resolution) + "'", lsWarning);
       }
       return JS_TRUE;
+
     } catch(ScriptException& e) {
       Logger::getInstance()->log(std::string("JS: metering_getValues: error converting value: ") + e.what(), lsError);
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
     }
+
     return JS_FALSE;
   } // metering_getValues
 
