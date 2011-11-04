@@ -35,7 +35,7 @@ namespace dss {
   //================================================== DSDeviceBusInterface
 
   // default timeout for synchronous calls to dsm api
-  static const int kDSM_API_TIMEOUT = 5;
+  static const int kDSM_API_TIMEOUT = 8;
 
   uint8_t DSDeviceBusInterface::getDeviceConfig(const Device& _device,
                                                 uint8_t _configClass,
