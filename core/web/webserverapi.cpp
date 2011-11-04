@@ -218,12 +218,10 @@ namespace dss {
       .withParameter("index", "integer", true)
       .withDocumentation("Sets the value of config class at offset index to value");
     clsDevice.addMethod("getConfig")
-      .withParameter("value", "integer", true)
       .withParameter("class", "integer", true)
       .withParameter("index", "integer", true)
       .withDocumentation("Gets the value of config class at offset index");
     clsDevice.addMethod("getConfigWord")
-      .withParameter("value", "integer", true)
       .withParameter("class", "integer", true)
       .withParameter("index", "integer", true)
       .withDocumentation("Gets the value of config class at offset index");
