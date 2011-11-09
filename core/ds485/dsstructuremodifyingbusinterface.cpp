@@ -163,7 +163,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneSensorPush(m_DSMApiHandle, m_BroadcastDSID, _sourceID.lower, _zoneID, _sensorType, _sensorValue, 0);
+    int ret = ZoneSensorPush(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _sourceID.lower, _sensorType, _sensorValue, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sensorPush
 
