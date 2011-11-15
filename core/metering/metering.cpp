@@ -54,6 +54,7 @@ namespace dss {
     , m_pMeteringBusInterface(NULL) {
     m_ConfigConsumption.reset(new MeteringConfigChain(1));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(           1, 400)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     15 * 60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     60 * 60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 3 * 60 * 60, 400)));
@@ -128,8 +129,8 @@ namespace dss {
       } else {
         /* create new DB */
         std::vector<std::string> lines;
-        lines.push_back("DS:power:GAUGE:86400:0:4500");
-        lines.push_back("DS:energy:DERIVE:86400:0:U");
+        lines.push_back("DS:power:GAUGE:5:0:4500");
+        lines.push_back("DS:energy:DERIVE:5:0:U");
         MeteringConfigChain *chain = _pChain.get();
         for (int i = 0; i < chain->size(); ++i) {
           std::stringstream sstream;
@@ -189,19 +190,50 @@ namespace dss {
     DateTime iCurrentTimeStamp;
     long unsigned int step = _resolution;
     long unsigned int dscount = 0;
-    time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step - step;
-    time_t start = end - (step * 400);
+    time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step;
+    time_t start = end - (step * 399);
     char **names = 0;
     rrd_value_t *data = 0;
+
+    std::vector<std::string> lines;
+    lines.push_back("xport");
+    lines.push_back("--start");
+    lines.push_back(intToString(start));
+    lines.push_back("--end");
+    lines.push_back(intToString(end));
+    lines.push_back("--step");
+    lines.push_back(intToString(step));
+    {
+      std::stringstream sstream;
+      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << (getEnergy ? "energy" : "power") << ":AVERAGE";
+      lines.push_back(sstream.str());
+    }
+#if defined(ENERGY_IN_WS)
+    if (getEnergy) {
+      std::stringstream sstream;
+      sstream << "CDEF:adj=data," << 3600 << ",*";
+      lines.push_back(sstream.str());
+      lines.push_back("XPORT:adj");
+    } else {
+#endif
+      lines.push_back("XPORT:data");
+#if defined(ENERGY_IN_WS)
+    }
+#endif
+
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    char** argString = (char**)&starts.front();
     rrd_clear_error();
-    int result = rrd_fetch_r(rrdFileName.get()->c_str(),
-                             "AVERAGE",
-                             &start,
-                             &end,
-                             &step,
-                             &dscount,
-                             &names,
-                             &data);
+    int result = rrd_xport(starts.size(),
+                           argString,
+                           0,
+                           &start,
+                           &end,
+                           &step,
+                           &dscount,
+                           &names,
+                           &data);
     if (result != 0) {
       log(rrd_get_error());
       m_ValuesMutex.unlock();
