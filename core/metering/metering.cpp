@@ -243,10 +243,10 @@ namespace dss {
       rrd_freemem(names[i]);
     }
     rrd_freemem(names);
-    int numValues = (end - start) / step;
-    for (int i = 0; i < (numValues - 1); ++i) {
-      time_t timeStamp = start + (i + 1) * step;
-      Value* val = new Value(data[i * dscount + (getEnergy ? 1 : 0)], timeStamp);
+    rrd_value_t *currentData = data;
+    for (int timeStamp = start + step; timeStamp <= end; timeStamp += step) {
+      Value* val = new Value(std::isnan(*currentData) ? 0 : *currentData, timeStamp);
+      currentData++;
       values->push_back(*val);
     }
     rrd_freemem(data);
