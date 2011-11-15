@@ -169,8 +169,9 @@ if(SENDMAIL)
 endif(SENDMAIL)
 
 # librrd
-# TODO: actually check for librrd
-set(REQUIRED_LIBS ${REQUIRED_LIBS} rrd)
+find_package(Rrd REQUIRED)
+include_directories(${RRD_INCLUDE_DIRS})
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${RRD_LIBRARIES} rrd)
 
 # generate config.h header file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
