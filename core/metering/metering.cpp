@@ -119,6 +119,8 @@ namespace dss {
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
       std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
+      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress",
+                                                  "unix:/var/run/rrdcached.sock", true, false);
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
@@ -168,11 +170,23 @@ namespace dss {
                                    DateTime _sampledAt) {
     m_ValuesMutex.lock();
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
-    std::stringstream sstream;
-    sstream << _sampledAt.secondsSinceEpoch() << ":" << _valuePower << ":" << _valueEnergy;
-    const char* argString[] = { sstream.str().c_str() };
+
+    std::vector<std::string> lines;
+    lines.push_back("update");
+    lines.push_back("--daemon");
+    lines.push_back(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress"));
+    lines.push_back(rrdFileName.get()->c_str());
+    {
+      std::stringstream sstream;
+      sstream << _sampledAt.secondsSinceEpoch() << ":" << _valuePower << ":" << _valueEnergy;
+      lines.push_back(sstream.str());
+    }
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    char** argString = (char **)&starts.front();
+
     rrd_clear_error();
-    int result = rrd_update_r(rrdFileName.get()->c_str(), 0, 1, argString);
+    int result = rrd_update(starts.size(), argString);
     if (result < 0) {
       log(rrd_get_error());
     }
@@ -195,8 +209,25 @@ namespace dss {
     char **names = 0;
     rrd_value_t *data = 0;
 
+    {
+      std::vector<std::string> lines;
+      lines.push_back("flushcached");
+      lines.push_back("--daemon");
+      lines.push_back(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress"));
+      lines.push_back(rrdFileName.get()->c_str());
+      std::vector<const char*> starts;
+      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+      char** argString = (char**)&starts.front();
+      int result = rrd_flushcached(starts.size(), argString);
+      if (result < 0) {
+        log(rrd_get_error());
+      }
+    }
+
     std::vector<std::string> lines;
     lines.push_back("xport");
+    lines.push_back("--daemon");
+    lines.push_back("unix:/tmp/rrdcached.sock");
     lines.push_back("--start");
     lines.push_back(intToString(start));
     lines.push_back("--end");
