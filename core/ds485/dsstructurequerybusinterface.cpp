@@ -120,7 +120,11 @@ namespace dss {
     uint8_t groupId;
     uint8_t groupTargetId;
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup, &groupId, &groupTargetId, NULL, NULL);
+      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup, &groupId, &groupTargetId, NULL, NULL
+#if DSM_API_VERSION >= 0x106
+          , NULL, NULL
+#endif
+          );
       DSBusInterface::checkResultCode(ret);
 
       result.push_back(groupId);
