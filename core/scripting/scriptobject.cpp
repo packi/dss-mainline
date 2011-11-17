@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -253,11 +254,11 @@ namespace dss {
   } // callFunctionByReference<std::string>
 
   void ScriptObject::addRoot() {
-    JS_AddRoot(m_Context.getJSContext(), &m_pObject);
+    JS_AddObjectRoot(m_Context.getJSContext(), &m_pObject);
   } // addRoot
 
   void ScriptObject::removeRoot() {
-    JS_RemoveRoot(m_Context.getJSContext(), &m_pObject);
+    JS_RemoveObjectRoot(m_Context.getJSContext(), &m_pObject);
   } // removeRoot
 
 

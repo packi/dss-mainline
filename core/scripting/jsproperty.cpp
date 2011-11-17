@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -20,16 +21,34 @@
 
 */
 
-#include "propertyscriptextension.h"
-
-#include "core/propertysystem.h"
 #include "core/scripting/scriptobject.h"
+#include "core/scripting/jsproperty.h"
+#include "core/propertysystem.h"
 
 namespace dss {
 
   //================================================== PropertyScriptExtension
 
   const std::string PropertyScriptExtensionName = "propertyextension";
+
+  typedef struct {
+    PropertyNodePtr pNode;
+  } prop_wrapper;
+
+  void property_finalize(JSContext *cx, JSObject *obj) {
+    prop_wrapper* wrapper = static_cast<prop_wrapper*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete wrapper;
+  } // property_finalize
+
+  static JSClass prop_class = {
+    "Property", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub, property_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
+  }; // prop_class
+
 
   PropertyScriptExtension::PropertyScriptExtension(PropertySystem& _propertySystem)
   : ScriptExtension(PropertyScriptExtensionName),
@@ -41,11 +60,11 @@ namespace dss {
     scrubVector(m_Listeners);
   } // dtor
 
-  JSBool prop_setProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_setProperty(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     int argIndex;
     if(node != NULL) {
       if(argc >= 1) {
@@ -55,7 +74,7 @@ namespace dss {
       }
     } else {
       if(argc >= 2) {
-        std::string propName = ctx->convertTo<std::string>(argv[0]);
+        std::string propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         node = ext->getProperty(ctx, propName);
         if(node == NULL) {
           node = ext->createProperty(ctx, propName);
@@ -69,88 +88,88 @@ namespace dss {
 
     if(node != NULL) {
       try {
-        if(JSVAL_IS_STRING(argv[argIndex])) {
-          node->setStringValue(ctx->convertTo<std::string>(argv[argIndex]));
-        } else if(JSVAL_IS_BOOLEAN(argv[argIndex])) {
-          node->setBooleanValue(ctx->convertTo<bool>(argv[argIndex]));
-        } else if(JSVAL_IS_INT(argv[argIndex])) {
-          node->setIntegerValue(ctx->convertTo<int>(argv[argIndex]));
+        if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[argIndex])) {
+          node->setStringValue(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[argIndex]));
+        } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[argIndex])) {
+          node->setBooleanValue(ctx->convertTo<bool>(JS_ARGV(cx, vp)[argIndex]));
+        } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[argIndex])) {
+          node->setIntegerValue(ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
         } else {
           Logger::getInstance()->log("JS: setProperty: unknown type of argument 2", lsError);
         }
-        *rval = JSVAL_TRUE;
+        JS_SET_RVAL(cx, vp, JSVAL_TRUE);
         return JS_TRUE;
       } catch(PropertyTypeMismatch&) {
         Logger::getInstance()->log("Error setting value of " + node->getDisplayName(), lsFatal);
       }
     } else {
       Logger::getInstance()->log("Coule not create property " + node->getDisplayName(), lsFatal);
-      *rval = JSVAL_FALSE;
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
       return JS_TRUE;
     }
     return JS_FALSE;
   } // prop_setProperty
 
-  JSBool prop_getProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_getProperty(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
       if(argc >= 1) {
-        std::string propName = ctx->convertTo<std::string>(argv[0]);
+        std::string propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         node = ext->getProperty(ctx, propName);
       } else {
         Logger::getInstance()->log("JS: Property.getProperty: need one argument: property-path", lsError);
       }
     }
     if(node == NULL) {
-      *rval = JSVAL_NULL;
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
     } else {
       switch(node->getValueType()) {
       case vTypeInteger:
-        *rval = INT_TO_JSVAL(node->getIntegerValue());
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(node->getIntegerValue()));
         break;
       case vTypeString: {
           std::string val = node->getStringValue();
-          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, val.c_str()));
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, val.c_str())));
         }
         break;
       case vTypeBoolean:
-        *rval = BOOLEAN_TO_JSVAL(node->getBoolValue());
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(node->getBoolValue()));
         break;
       case vTypeNone:
-        *rval = JSVAL_VOID;
+        JS_SET_RVAL(cx, vp, JSVAL_VOID);
       default:
-        *rval = JSVAL_NULL;
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
       }
     }
     return JS_TRUE;
   } // prop_getProperty
 
-  JSBool prop_setListener(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_setListener(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     jsval function;
     if(node != NULL) {
       if(argc >= 1) {
-        function = argv[0];
+        function = JS_ARGV(cx,vp)[0];
       } else {
         Logger::getInstance()->log("JS: Property(obj).setListener: need one argument callback", lsError);
         return JS_FALSE;
       }
     } else {
       if(argc >= 2) {
-        std::string nodePath = ctx->convertTo<std::string>(argv[0]);
+        std::string nodePath = ctx->convertTo<std::string>(JS_ARGV(cx,vp)[0]);
         node = ext->getProperty(ctx, nodePath);
         if(node == NULL) {
-          *rval = JSVAL_NULL;
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
           Logger::getInstance()->log("JS: Property.setListener: cannot find node '" + nodePath, lsError);
           return JS_TRUE;
         }
-        function = argv[1];
+        function = JS_ARGV(cx,vp)[1];
       } else {
         Logger::getInstance()->log("JS: Property.setListener: need two arguments: property-path &  callback", lsError);
         return JS_FALSE;
@@ -159,57 +178,58 @@ namespace dss {
 
     std::string ident = ext->produceListenerID();
     PropertyScriptListener* listener =
-        new PropertyScriptListener(ext, ctx, obj, function, ident);
+        new PropertyScriptListener(ext, ctx, JS_THIS_OBJECT(cx, vp), function, ident);
     ext->addListener(listener);
     node->addListener(listener);
 
     JSString* str = JS_NewStringCopyZ(cx, ident.c_str());
-    *rval = STRING_TO_JSVAL(str);
+    JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
     return JS_TRUE;
   } // prop_setListener
 
-  JSBool prop_removeListener(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if(argc < 1) {
-      Logger::getInstance()->log("JS: prop_removeListener: need one argument: listener-id", lsError);
-    } else {
-      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
-      std::string listenerIdent = ctx->convertTo<std::string>(argv[0]);
-      ext->removeListener(listenerIdent);
-
-      *rval = JSVAL_TRUE;
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  } // prop_removeListener
-
-  JSBool prop_setFlag(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_removeListener(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    try {
+      std::string listenerIdent = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      ext->removeListener(listenerIdent);
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
+      return JS_TRUE;
+    } catch (ScriptException& ex) {
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
+      throw ex;
+    }
+
+    return JS_FALSE;
+  } // prop_removeListener
+
+  JSBool prop_setFlag(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     std::string flagName;
     bool value;
     if(node != NULL) {
       if(argc >= 2) {
-        flagName = ctx->convertTo<std::string>(argv[0]);
-        value = ctx->convertTo<bool>(argv[1]);
+        flagName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        value = ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]);
       } else {
         Logger::getInstance()->log("JS: Property(obj).setFlag needs two parameter flagName and value", lsError);
         return JS_FALSE;
       }
     } else {
       if(argc >= 3) {
-        std::string nodePath = ctx->convertTo<std::string>(argv[0]);
+        std::string nodePath = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         node = ext->getProperty(ctx, nodePath);
         if(node == NULL) {
-          *rval = JSVAL_NULL;
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
           Logger::getInstance()->log("JS: Property.setFlag: cannot find node '" + nodePath, lsError);
           return JS_TRUE;
         }
-        flagName = ctx->convertTo<std::string>(argv[1]);
-        value = ctx->convertTo<bool>(argv[2]);
+        flagName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+        value = ctx->convertTo<bool>(JS_ARGV(cx, vp)[2]);
       } else {
         Logger::getInstance()->log("JS: Property.setFlag needs two parameter path and flagName", lsError);
         return JS_FALSE;
@@ -225,38 +245,38 @@ namespace dss {
       flag = PropertyNode::Readable;
     } else {
       Logger::getInstance()->log("JS: prop_setFlag: Invalid value for flag: " + flagName, lsError);
-      *rval = JSVAL_FALSE;
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
       return JS_TRUE;
     }
 
     node->setFlag(flag, value);
-    *rval = JSVAL_NULL;
+    JS_SET_RVAL(cx, vp, JSVAL_NULL);
     return JS_TRUE;
   } // prop_setFlag
 
-  JSBool prop_hasFlag(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_hasFlag(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     std::string flagName;
     if(node != NULL) {
       if(argc >= 1) {
-        flagName = ctx->convertTo<std::string>(argv[0]);
+        flagName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
       } else {
         Logger::getInstance()->log("JS: Property(obj).hasFlag needs at least one parameter flagName", lsError);
         return JS_FALSE;
       }
     } else {
       if(argc >= 2) {
-        std::string nodePath = ctx->convertTo<std::string>(argv[0]);
+        std::string nodePath = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         node = ext->getProperty(ctx, nodePath);
         if(node == NULL) {
-          *rval = JSVAL_NULL;
           Logger::getInstance()->log("JS: Property.hasFlag: cannot find node '" + nodePath, lsError);
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
           return JS_TRUE;
         }
-        flagName = ctx->convertTo<std::string>(argv[1]);
+        flagName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
       } else {
         Logger::getInstance()->log("JS: Property.hasFlag needs two parameter path and flagName", lsError);
         return JS_FALSE;
@@ -272,27 +292,27 @@ namespace dss {
       flag = PropertyNode::Readable;
     } else {
       Logger::getInstance()->log("JS: prop_hasFlag: Invalid value for flag: " + flagName, lsError);
-      *rval = JSVAL_NULL;
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
       return JS_TRUE;
     }
 
     if(node->hasFlag(flag)) {
-      *rval = JSVAL_TRUE;
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     } else {
-      *rval = JSVAL_FALSE;
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
     return JS_TRUE;
   } // prop_setFlag
 
-  JSBool prop_getChild(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_getChild(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     assert(node != NULL);
     std::string nodeName;
     if(argc >= 1) {
-      nodeName = ctx->convertTo<std::string>(argv[0]);
+      nodeName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
     } else {
       Logger::getInstance()->log("JS: Property(obj).getChild needs at least one parameter nodeName", lsError);
       return JS_FALSE;
@@ -300,24 +320,21 @@ namespace dss {
 
     PropertyNodePtr childNode = node->getProperty(nodeName);
     if(childNode != NULL) {
-      *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, childNode));
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, childNode)));
     } else {
-      *rval = JSVAL_NULL;
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
     }
     return JS_TRUE;
   } // prop_getChild
 
-  JSBool prop_getChildren(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_getChildren(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     assert(node != NULL);
-    std::string nodeName;
 
-    JSAutoLocalRootScope scope(cx);
     JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
-    *rval = OBJECT_TO_JSVAL(resultObj);
 
     for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
       jsval childJSVal = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, node->getChild(iChild)));
@@ -327,19 +344,20 @@ namespace dss {
       }
     }
 
+    JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
     return JS_TRUE;
   } // prop_getChildren
 
-  JSBool prop_getNode(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_getNode(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
     PropertyNodePtr pNode;
     if(argc >= 1) {
-      pNode = ext->getProperty(ctx, ctx->convertTo<std::string>(argv[0]));
+      pNode = ext->getProperty(ctx, ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
       if(pNode == NULL) {
         Logger::getInstance()->log("JS: Property.getNode: could not find node", lsWarning);
-        *rval = JSVAL_NULL;
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
       }
     } else {
@@ -347,41 +365,41 @@ namespace dss {
       return JS_FALSE;
     }
 
-    *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pNode));
+    JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pNode)));
     return JS_TRUE;
   } // prop_getNode
 
-  JSBool prop_getParent(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_getParent(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     assert(node != NULL);
 
     PropertyNode* parentNode = node->getParentNode();
     if(parentNode != NULL) {
-      *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, parentNode));
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, parentNode)));
     } else {
-      *rval = JSVAL_NULL;
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
     }
     return JS_TRUE;
   } // prop_getChild
 
-  JSBool prop_removeChild(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_removeChild(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     assert(node != NULL);
 
     PropertyNodePtr childNode;
     if(argc >= 1) {
-      if(JSVAL_IS_OBJECT(argv[0])) {
-        childNode = ext->getPropertyFromObj(ctx, JSVAL_TO_OBJECT(argv[0]));
+      if(JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[0])) {
+        childNode = ext->getPropertyFromObj(ctx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[0]));
       }
       if(childNode == NULL) {
         try {
-          childNode = node->getProperty(ctx->convertTo<std::string>(argv[0]));
+          childNode = node->getProperty(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
         } catch(ScriptException& ex) {
         }
       }
@@ -391,49 +409,49 @@ namespace dss {
 
     if(childNode != NULL) {
       node->removeChild(childNode);
-      *rval = JSVAL_TRUE;
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     } else {
-      *rval = JSVAL_FALSE;
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
     return JS_TRUE;
   } // prop_getChild
 
-  JSBool prop_store(JSContext* cx, JSObject* obj, uintN argc, jsval* argv, jsval* rval) {
+  JSBool prop_store(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
     if(ext->store(ctx)) {
-      *rval = JSVAL_TRUE;
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     } else {
-      *rval = JSVAL_FALSE;
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
     return JS_TRUE;
   } // prop_store
 
-  JSBool prop_load(JSContext* cx, JSObject* obj, uintN argc, jsval* argv, jsval* rval) {
+  JSBool prop_load(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
     if(ext->load(ctx)) {
-      *rval = JSVAL_TRUE;
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     } else {
-      *rval = JSVAL_FALSE;
+      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
     return JS_TRUE;
   } // prop_load
 
-  JSBool prop_get_name(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_get_name(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
-    *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, node->getDisplayName().c_str()));
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
+    JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, node->getDisplayName().c_str())));
     return JS_TRUE;
   } // prop_get_name
 
-  JSBool prop_get_path(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool prop_get_path(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
-    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     std::string fullName = node->getDisplayName();
     PropertyNode* nextNode = node->getParentNode();
     while(nextNode != NULL) {
@@ -444,97 +462,82 @@ namespace dss {
       }
       nextNode = nextNode->getParentNode();
     }
-    *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, fullName.c_str()));
+    JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, fullName.c_str())));
     return JS_TRUE;
   } // prop_get_path
 
   JSFunctionSpec prop_methods[] = {
-    {"setValue", prop_setProperty, 1, 0, 0},
-    {"getValue", prop_getProperty, 0, 0, 0},
-    {"setListener", prop_setListener, 1, 0, 0},
-    {"removeListener", prop_removeListener, 1, 0, 0},
-    {"getChild", prop_getChild, 1, 0, 0},
-    {"getChildren", prop_getChildren, 0, 0, 0},
-    {"removeChild", prop_removeChild, 1, 0, 0},
-    {"getParent", prop_getParent, 0, 0, 0},
-    {"setFlag", prop_setFlag, 2, 0, 0},
-    {"hasFlag", prop_hasFlag, 1, 0, 0},
-    {"getName", prop_get_name, 0, 0, 0},
-    {"getPath", prop_get_path, 0, 0, 0},
-    {NULL, NULL, 0, 0, 0},
+    JS_FS("setValue", prop_setProperty, 1, 0),
+    JS_FS("getValue", prop_getProperty, 0, 0),
+    JS_FS("setListener", prop_setListener, 1, 0),
+    JS_FS("removeListener", prop_removeListener, 1, 0),
+    JS_FS("getChild", prop_getChild, 1, 0),
+    JS_FS("getChildren", prop_getChildren, 0, 0),
+    JS_FS("removeChild", prop_removeChild, 1, 0),
+    JS_FS("getParent", prop_getParent, 0, 0),
+    JS_FS("setFlag", prop_setFlag, 2, 0),
+    JS_FS("hasFlag", prop_hasFlag, 1, 0),
+    JS_FS("getName", prop_get_name, 0, 0),
+    JS_FS("getPath", prop_get_path, 0, 0),
+    JS_FS_END
   };
 
-  typedef struct {
-    PropertyNodePtr pNode;
-  } prop_wrapper;
+  JSFunctionSpec prop_static_methods[] = {
+    JS_FS("getProperty", prop_getProperty, 1, 0),
+    JS_FS("setProperty", prop_setProperty, 1, 0),
+    JS_FS("setListener", prop_setListener, 2, 0),
+    JS_FS("removeListener", prop_removeListener, 1, 0),
+    JS_FS("setFlag", prop_setFlag, 3, 0),
+    JS_FS("hasFlag", prop_hasFlag, 2, 0),
+    JS_FS("getNode", prop_getNode, 1, 0),
+    JS_FS("store", prop_store, 0, 0),
+    JS_FS("load", prop_load, 0, 0),
+    JS_FS_END
+  };
 
-  void property_finalize(JSContext *cx, JSObject *obj) {
-    prop_wrapper* wrapper = static_cast<prop_wrapper*>(JS_GetPrivate(cx, obj));
-    JS_SetPrivate(cx, obj, NULL);
-    delete wrapper;
-  } // property_finalize
+  JSBool property_construct(JSContext *cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
-  JSBool property_construct(JSContext *cx, JSObject *obj, uintN argc,
-                            jsval *argv, jsval *rval) {
-    if(argc >= 1) {
-      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
-      std::string propName = ctx->convertTo<std::string>(argv[0]);
-      PropertyNodePtr pNode = ext->getProperty(ctx, propName);
-      if(pNode == NULL) {
-        pNode = ext->createProperty(ctx, propName);
-      }
-      if(pNode != NULL) {
-        prop_wrapper* wrapper = new prop_wrapper;
-        JS_SetPrivate(cx, obj, wrapper);
-        wrapper->pNode = pNode;
-        return JS_TRUE;
-      } else {
-        Logger::getInstance()->log("JS: Property.construct: Could not get/create node '" + propName + "'", lsFatal);
-      }
+    std::string propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+    PropertyNodePtr pNode = ext->getProperty(ctx, propName);
+    if(pNode == NULL) {
+      pNode = ext->createProperty(ctx, propName);
     }
+    if(pNode != NULL) {
+      prop_wrapper* wrapper = new prop_wrapper;
+
+      JSObject *obj = JS_NewObject(cx, &prop_class, NULL, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
+
+      JS_SetPrivate(cx, obj, wrapper);
+      wrapper->pNode = pNode;
+      return JS_TRUE;
+    }
+
+    JS_ReportError(cx, "Property.construct: could not get/create node %s", propName.c_str());
+    JS_SET_RVAL(cx, vp, JSVAL_NULL);
     return JS_FALSE;
   } // property_construct
 
-  JSFunctionSpec prop_static_methods[] = {
-    {"getProperty", prop_getProperty, 1, 0, 0},
-    {"setProperty", prop_setProperty, 1, 0, 0},
-    {"setListener", prop_setListener, 2, 0, 0},
-    {"removeListener", prop_removeListener, 1, 0, 0},
-    {"setFlag", prop_setFlag, 3, 0, 0},
-    {"hasFlag", prop_hasFlag, 2, 0, 0},
-    {"getNode", prop_getNode, 1, 0, 0},
-    {"store", prop_store, 0, 0, 0},
-    {"load", prop_load, 0, 0, 0},
-    {NULL, NULL, 0, 0, 0},
-  };
-
-  static JSClass prop_class = {
-    "Property", JSCLASS_HAS_PRIVATE,
-    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-    JS_EnumerateStandardClasses,
-    JS_ResolveStub,
-    JS_ConvertStub,  property_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
-  }; // prop_class
-
-  JSBool prop_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+  JSBool prop_JSGet(JSContext *cx, JSObject *obj, jsid id, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
     assert(node != NULL);
 
-    int opt = JSVAL_TO_INT(id);
+    int opt = JSID_TO_INT(id);
     if(opt == 0) {
       std::string propName = node->getDisplayName();
-      *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, propName.c_str()));
+      JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, propName.c_str())));
       return JS_TRUE;
     }
     return JS_FALSE;
   } // prop_JSGet
 
   static JSPropertySpec prop_properties[] = {
-    {"name", 0, 0, prop_JSGet},
+    {"name", 0, 0, prop_JSGet, NULL},
     {NULL}
   };
 
@@ -666,7 +669,7 @@ namespace dss {
     if(lock.ownsLock()) {
       req.reset(new JSContextThread(getContext()));
     }
-    JSAutoLocalRootScope rootScope(getContext()->getJSContext());
+
     createScriptObject();
     ScriptFunctionParameterList list(*getContext());
     list.add(_changedNode->getDisplayName());
@@ -675,7 +678,7 @@ namespace dss {
     } catch(ScriptException& e) {
       Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
     }
-    JS_MaybeGC(getContext()->getJSContext());
+
   } // doOnChange
 
   void PropertyScriptListener::stop()  {

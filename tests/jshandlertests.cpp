@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -27,7 +28,7 @@
 
 #include <string>
 
-#include "core/jshandler.h"
+#include "core/scripting/jshandler.h"
 #include "core/scripting/scriptobject.h"
 
 using namespace dss;
@@ -163,8 +164,10 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutGC) {
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false;\n"
-                      "var obj = { func: function() { result = true; } };"
-                      "setTimeout(function() { setTimeout(obj.func, 0); }, 10);");
+                      "var obj = { func: function() { result = true; print('timeout active'); } };"
+                      "setTimeout(function() { setTimeout(obj.func, 0); }, 3000);"
+                      "print('timeout scheduled');"
+      );
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
@@ -191,19 +194,5 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutIsStoppable) {
   } 
   BOOST_CHECK_EQUAL(ctx->getAttachedObjectsCount(), 0);
 }
-
-BOOST_AUTO_TEST_CASE(testSetTimeoutStillWorksWithSwappedParams) {
-  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-  env->initialize();
-
-  boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; });");
-  while(ctx->hasAttachedObjects()) {
-    sleepMS(1);
-  }
-  JSContextThread req(ctx);
-  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
-} // testSetTimeoutStillWorksWithSwappedParams
-
 
 BOOST_AUTO_TEST_SUITE_END()

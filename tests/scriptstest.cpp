@@ -25,7 +25,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
-#include "../core/jshandler.h"
+#include "core/scripting/jshandler.h"
+#include "core/scripting/scriptobject.h"
 
 using namespace dss;
 using namespace std;
@@ -93,12 +94,12 @@ BOOST_AUTO_TEST_CASE(testExceptionHandling) {
   boost::shared_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  try {
-    ctx->evaluate<double>("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; throw x; x = 10;");
-    BOOST_CHECK(false);
-  } catch(ScriptRuntimeException& _ex) {
-    BOOST_CHECK_EQUAL(_ex.getExceptionMessage(), string("bla"));
-  }
+
+  // verify that the local "throw x" exception is handled withing the engine itself
+  ctx->evaluate<double>("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; x = 5; throw x; x = 10;");
+
+  JSContextThread req(ctx);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("x"), 5);
 } // testExceptionHandling
 
 BOOST_AUTO_TEST_SUITE_END()

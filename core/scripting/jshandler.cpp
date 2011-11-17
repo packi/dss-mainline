@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -38,7 +39,7 @@
 #include "core/propertysystem.h"
 #include "core/security/user.h"
 #include "core/security/security.h"
-#include "session.h"
+#include "core/session.h"
 
 namespace dss {
 
@@ -55,10 +56,38 @@ namespace dss {
       JS_DestroyRuntime(m_pRuntime);
       m_pRuntime = NULL;
     }
+    JS_ShutDown();
   } // dtor
 
   void ScriptEnvironment::initialize() {
-    m_pRuntime = JS_NewRuntime(8L * 1024L * 1024L);
+    m_RuntimeSize = 8L * 1024L * 1024L;
+    m_StackSize = 8192;
+    m_cxOptionClear = m_cxOptionSet = 0;
+
+    try {
+      if (DSS::hasInstance()) {
+        PropertyNodePtr pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/runtimesize");
+        if (pPtr) {
+          m_RuntimeSize = pPtr->getIntegerValue();
+        }
+        pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/stacksize");
+        if (pPtr) {
+          m_StackSize = pPtr->getIntegerValue();
+        }
+        pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/optionset");
+        if (pPtr) {
+          m_cxOptionSet = pPtr->getIntegerValue();
+        }
+        pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/optionclear");
+        if (pPtr) {
+          m_cxOptionClear = pPtr->getIntegerValue();
+        }
+      }
+    } catch (PropertyTypeMismatch&) {
+    } catch (SecurityException&) {
+    }
+
+    m_pRuntime = JS_NewRuntime(m_RuntimeSize);
     if (m_pRuntime == NULL) {
       throw ScriptException("Error creating environment");
     }
@@ -76,7 +105,7 @@ namespace dss {
   } // addExtension
 
   ScriptContext* ScriptEnvironment::getContext() {
-    JSContext* context = JS_NewContext(m_pRuntime, 8192);
+    JSContext* context = JS_NewContext(m_pRuntime, m_StackSize);
     JSContextThread ct(context);
 
     ScriptContext* pResult = new ScriptContext(*this, context);
@@ -115,7 +144,7 @@ namespace dss {
         return result;
       }
     }
-    throw ScriptException("Value is not of type int");
+    throw ScriptException("Value is not a number");
   }
 
   template<>
@@ -123,10 +152,12 @@ namespace dss {
     JSString* result;
     result = JS_ValueToString(m_pContext, _val);
     if( result == NULL) {
-      throw ScriptException("Could not convert jsval to JSString");
+      throw ScriptException("Could not convert value to JSString");
     }
-
-    return std::string(JS_GetStringBytes(result));
+    char* s = JS_EncodeString(m_pContext, result);
+    std::string sresult(s);
+    JS_free(m_pContext, s);
+    return sresult;
   }
 
   template<>
@@ -202,12 +233,30 @@ namespace dss {
 
     while (len > 0 && (line[len-1] == '\r' || line[len-1] == '\n')){ line[len-1]='\0'; len--; }
 
-
     std::ostringstream logSStream;
-    logSStream << "JS Error: " << msg << " in file: " << er->filename << ":" << er->lineno;
-    if (line[0]){
-      logSStream << "; line: " << line << "; pointer: " << pointer;
+    logSStream << "JavaScript ";
+    if (JSREPORT_IS_WARNING(er->flags)) {
+      logSStream << "Warning";
     }
+    else if (JSREPORT_IS_EXCEPTION(er->flags)) {
+      logSStream << "Exception";
+    }
+    else if (JSREPORT_IS_STRICT(er->flags)) {
+      logSStream << "Strict-Mode";
+    }
+    else if (JSREPORT_IS_STRICT_MODE_ERROR(er->flags)) {
+      logSStream << "Strict-Error";
+    }
+    else {
+      logSStream << "Error";
+    }
+    logSStream << "[" << er->errorNumber << "]: ";
+
+    logSStream << "\"" << msg << "\" in file: " << er->filename << ":" << er->lineno;
+    if (line[0]){
+      logSStream << "\n  script: " << line << "        : " << pointer;
+    }
+
     Logger::getInstance()->log(logSStream.str(), lsError);
 
     free(pointer);
@@ -215,30 +264,45 @@ namespace dss {
   } // jsErrorHandler
 
 
-  JSBool global_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
-    JSRequest req(cx);
-    if (argc < 1){
-      /* No arguments passed in, so do nothing.
-        We still want to return JS_TRUE though, other wise an exception will be
-        thrown by the engine. */
-      *rval = INT_TO_JSVAL(0);
-    } else {
-      std::stringstream sstream;
-      sstream << "JS: ";
-      for(unsigned int i = 0; i < argc; i++) {
-        JSString *val = JS_ValueToString(cx, argv[i]);
-        char *str = JS_GetStringBytes(val);
-        size_t length = JS_GetStringLength(val);
-        std::string stdStr(str, length);
-        sstream << stdStr;
-      }
-      *rval = BOOLEAN_TO_JSVAL(true);
-      Logger::getInstance()->log(sstream.str());
+  static JSClass global_class = {
+    "global", JSCLASS_NEW_RESOLVE | JSCLASS_GLOBAL_FLAGS, /* use the new resolve hook */
+    JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,
+    JS_FinalizeStub,
+    JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+
+  JSBool global_print(JSContext *cx, uintN argc, jsval *vp) {
+    uint i;
+    char * src;
+    JSString * unicode_str;
+
+    if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, vp), "*"))
+      return JS_FALSE;
+
+    std::stringstream sstream;
+    sstream << "JS: ";
+
+    for (i = 0; i < argc; i++)
+    {
+      unicode_str = JS_ValueToString(cx, (JS_ARGV(cx, vp))[i]);
+      if (unicode_str == NULL)
+        return JS_FALSE;
+
+      src = JS_EncodeString(cx, unicode_str);
+      sstream << std::string(src);
+      JS_free(cx, src);
     }
+    Logger::getInstance()->log(sstream.str());
+
+    JS_SET_RVAL(cx, vp, JSVAL_VOID);
     return JS_TRUE;
   } // global_print
 
-  JSBool global_keepContext(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool global_keepContext(JSContext *cx, uintN argc, jsval *vp) {
     Logger::getInstance()->log("keepContext() is deprecated", lsWarning);
     return JS_TRUE;
   } // global_keepContext
@@ -258,7 +322,7 @@ namespace dss {
       delete m_pRunAsUser;
     }
 
-    void timeout(int _timeoutMS, jsval _function, JSObject* _obj, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
+    void timeout(int _timeoutMS, JSObject* _obj, jsval _function, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
       const int kSleepIntervalMS = 500;
       int toSleep = _timeoutMS;
       while(!getIsStopped() && (toSleep > 0)) {
@@ -274,19 +338,21 @@ namespace dss {
             pSecurity->signIn(m_pRunAsUser);
           }
         }
+
         ScriptLock lock(getContext());
         JSContextThread req(getContext());
-        ScriptObject obj(_obj, *getContext());
+        ScriptObject sobj(_obj, *getContext());
         ScriptFunctionParameterList params(*getContext());
+
         try {
-          obj.callFunctionByReference<void>(_function, params);
+          sobj.callFunctionByReference<void>(_function, params);
         } catch(ScriptException& e) {
-          Logger::getInstance()
-            ->log("JS: setTimeout: Error calling callback: '" +
-                  std::string(e.what()) + "'", lsError);
+          Logger::getInstance()->log("JavaScript: error calling timeout handler: '" +
+              std::string(e.what()) + "'", lsError);
         }
+
         _rooter.reset();
-        JS_MaybeGC(getContext()->getJSContext());
+
       } else {
         ScriptLock lock(getContext());
         JSContextThread req(getContext());
@@ -299,42 +365,39 @@ namespace dss {
     User* m_pRunAsUser;
   };
 
-  JSBool global_setTimeout(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool global_setTimeout(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    if(argc >= 2) {
-      int timeoutMS;
-      jsval* functionVal = &argv[0];
-      try {
-        timeoutMS = ctx->convertTo<int>(argv[1]);
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log("Parameter timeoutMS is not of type int, trying other (deprecated parameter order)", lsError);
-        // TODO: remove this temporay compatibility hack
-        try {
-          timeoutMS = ctx->convertTo<int>(argv[0]);
-          functionVal = &argv[1];
-        } catch(ScriptException& e) {
-          return JS_FALSE;
-        }
-      }
-      boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, obj, *functionVal));
-      SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
-      boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, *functionVal, obj, functionRoot));
+    int timeoutMS;
+    jsval functionVal;
+    JSObject* jsFunction;
+    jsdouble jsTimeout;
+
+    if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, vp), "oI", &jsFunction, &jsTimeout)) {
+      JS_ReportError(cx, "setTimeout(): invalid parameter");
+      return JS_FALSE;
     }
+
+    if (!JS_ObjectIsCallable(cx, jsFunction)) {
+      JS_ReportError(cx, "setTimeout(): timeout handler is not a function");
+      return JS_FALSE;
+    }
+
+    functionVal = OBJECT_TO_JSVAL(jsFunction);
+    timeoutMS = (int) jsTimeout;
+
+    JSObject* jsRoot = jsFunction;
+
+    boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, jsRoot, functionVal));
+    SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
+    boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, jsRoot, functionVal, functionRoot));
+    JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     return JS_TRUE;
   } // global_setTimeout
 
-  static JSClass global_class = {
-    "global", JSCLASS_NEW_RESOLVE | JSCLASS_GLOBAL_FLAGS, /* use the new resolve hook */
-    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-    JS_EnumerateStandardClasses,
-    JS_ResolveStub,
-    JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
-  };
-
   JSFunctionSpec global_methods[] = {
-    {"print", global_print, 1, 0, 0},
-    {"keepContext", global_keepContext, 0, 0, 0},
-    {"setTimeout", global_setTimeout, 2, 0, 0},
+    JS_FS("print", global_print, 1, 0),
+    JS_FS("keepContext", global_keepContext, 0, 0),
+    JS_FS("setTimeout", global_setTimeout, 2, 0),
     JS_FS_END
   };
 
@@ -344,14 +407,18 @@ namespace dss {
     m_Locked(false),
     m_LockedBy(0)
   {
-    JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
+    uint32 cxOptions = _env.getContextFlags((JS_GetOptions(m_pContext) |
+        (JSOPTION_VAROBJFIX | JSOPTION_STRICT | JSOPTION_JIT | JSOPTION_METHODJIT)));
+    JS_SetOptions(m_pContext, cxOptions);
+
 #ifdef JSVERSION_LATEST
     JS_SetVersion(m_pContext, JSVERSION_LATEST);
 #endif
+
     JS_SetErrorReporter(m_pContext, jsErrorHandler);
 
     /* Create the global object. */
-    m_pRootObject = JS_NewObject(m_pContext, &global_class, NULL, NULL);
+    m_pRootObject = JS_NewCompartmentAndGlobalObject(m_pContext, &global_class, NULL);
     if (m_pRootObject == NULL) {
       throw ScriptException("Could not create root-object");
     }
@@ -370,13 +437,20 @@ namespace dss {
 
   ScriptContext::~ScriptContext() {
     ScriptLock lock(this);
-    JSContextThread thread(this);
-    JS_GC(m_pContext);
+
+    // FIXME: JSContextThread thread(this);
+    // FIXME: JS_GC(m_pContext);
+    JS_SetContextThread(m_pContext);
+    JS_BeginRequest(m_pContext);
+
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
     scrubVector(m_AttachedObjects);
     JS_SetContextPrivate(m_pContext, NULL);
+
+    JS_EndRequest(m_pContext);
+    JS_ClearContextThread(m_pContext);
     JS_DestroyContext(m_pContext);
     m_pContext = NULL;
   } // dtor
@@ -426,8 +500,10 @@ namespace dss {
         JS_ClearPendingException(m_pContext);
         JSString* errstr = JS_ValueToString(m_pContext, exval);
         if(errstr != NULL) {
-          const char* errmsgBytes = JS_GetStringBytes(errstr);
-          throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errmsgBytes, std::string(errmsgBytes));
+          char* errmsgBytes = JS_EncodeString(m_pContext, errstr);
+          std::string errMsg(errmsgBytes);
+          JS_free(m_pContext, errmsgBytes);
+          throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errMsg, errMsg);
         }
       }
       throw ScriptException("Exception was pending after script execution, but couldnt get it from the vm");
@@ -450,14 +526,19 @@ namespace dss {
     JSContextThread req(this);
     jsval rval;
     std::string script = sstream.str();
-    JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
-                       _fileName.c_str(), 0, &rval);
+
+    JSBool ok = JS_FALSE;
+
+    ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
+          _fileName.c_str(), 0, &rval);
+
     if(ok) {
       return rval;
     } else {
       raisePendingExceptions();
-      throw ScriptException("Error executing script");
+      // NOTE:do not throw an exception here
     }
+    return true;
   } // doEvaluateScript
 
   template <>
@@ -497,8 +578,9 @@ namespace dss {
       return rval;
     } else {
       raisePendingExceptions();
-      throw ScriptException("Error executing script");
+      // NOTE: do not throw an exception here
     }
+    return true;
   } // doEvaluate
 
   template <>
@@ -612,17 +694,13 @@ namespace dss {
   //=============================================== ScriptFunctionRooter
 
   ScriptFunctionRooter::ScriptFunctionRooter()
-  : m_pObject(NULL),
-    m_Function(JSVAL_NULL),
+  : m_Function(JSVAL_NULL),
+    m_pObject(NULL),
     m_pContext(NULL)
   {} // ctor
 
-  ScriptFunctionRooter::ScriptFunctionRooter(ScriptContext* _pContext, JSObject* _pObject, jsval _function)
-  : m_pObject(NULL),
-    m_Function(JSVAL_NULL),
-    m_pContext(NULL)
-  {
-    rootFunction(_pContext, _pObject, _function);
+  ScriptFunctionRooter::ScriptFunctionRooter(ScriptContext* _pContext, JSObject* _object, jsval _function) {
+    rootFunction(_pContext, _object, _function);
   } // ctor
 
   ScriptFunctionRooter::~ScriptFunctionRooter() {
@@ -630,21 +708,23 @@ namespace dss {
       assert(m_pContext != NULL);
     }
     if(m_Function != JSVAL_NULL) {
-      JS_RemoveRoot(m_pContext->getJSContext(), &m_Function);
+      JS_RemoveValueRoot(m_pContext->getJSContext(), &m_Function);
     }
     if(m_pObject != NULL) {
-      JS_RemoveRoot(m_pContext->getJSContext(), &m_pObject);
+      JS_RemoveObjectRoot(m_pContext->getJSContext(), &m_pObject);
     }
   } // dtor
 
-  void ScriptFunctionRooter::rootFunction(ScriptContext* _pContext, JSObject* _pObject, jsval _function) {
-    assert(_pContext != NULL);
+  void ScriptFunctionRooter::rootFunction(ScriptContext* _pContext, JSObject* _object, jsval _function) {
     m_pContext = _pContext;
-    m_pObject = _pObject;
-    JSContext* cx = m_pContext->getJSContext();
+    m_pObject = _object;
     m_Function = _function;
-    JS_AddRoot(cx, &m_Function);
-    JS_AddRoot(cx, &m_pObject);
-  } // rootFunction
+    if(m_Function != JSVAL_NULL) {
+      JS_AddValueRoot(m_pContext->getJSContext(), &m_Function);
+    }
+    if(m_pObject != NULL) {
+      JS_AddObjectRoot(m_pContext->getJSContext(), &m_pObject);
+    }
+  }
 
 } // namespace dss

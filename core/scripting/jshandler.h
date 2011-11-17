@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -31,16 +32,7 @@
 #include <cassert>
 
 #include <boost/thread/mutex.hpp>
-
-#if defined(HAVE_JSAPI_H)
-#include <jsapi.h>
-#elif defined(HAVE_MOZJS_JSAPI_H)
-#include <mozjs/jsapi.h>
-#elif defined(HAVE_JS_JSAPI_H)
 #include <js/jsapi.h>
-#else
-#error Could not find spidermonkey
-#endif
 
 #ifndef JS_THREADSAFE
 #error Need libjs with JS_THREADSAFE
@@ -49,8 +41,8 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "base.h"
-#include "logger.h"
+#include "core/base.h"
+#include "core/logger.h"
 
 namespace dss {
 
@@ -68,6 +60,10 @@ namespace dss {
     JSRuntime* m_pRuntime;
     boost::ptr_vector<ScriptExtension> m_Extensions;
     Security* m_pSecurity;
+    size_t m_RuntimeSize;
+    size_t m_StackSize;
+    uint32 m_cxOptionSet;
+    uint32 m_cxOptionClear;
   public:
     ScriptEnvironment(Security* _pSecurity = NULL);
     virtual ~ScriptEnvironment();
@@ -84,6 +80,11 @@ namespace dss {
     /** Creates a new ScriptContext with all registered extensions present */
     ScriptContext* getContext();
     Security* getSecurity() { return m_pSecurity; }
+
+    /** Get configuration flags for JSContext */
+    uint32 getContextFlags(uint32 _originalFlags) {
+      return ((_originalFlags & ~m_cxOptionClear) | m_cxOptionSet);
+    }
 
     bool isInitialized();
   };
@@ -256,13 +257,13 @@ namespace dss {
   class ScriptFunctionRooter {
   public:
     ScriptFunctionRooter();
-    ScriptFunctionRooter(ScriptContext* _pContext, JSObject* _pObject, jsval _function);
+    ScriptFunctionRooter(ScriptContext* _pContext, JSObject* _object, jsval _function);
     ~ScriptFunctionRooter();
 
-    void rootFunction(ScriptContext* _pContext, JSObject* _pObject, jsval _function);
+    void rootFunction(ScriptContext* _pContext, JSObject* _object, jsval _function);
   private:
-    JSObject* m_pObject;
     jsval m_Function;
+    JSObject* m_pObject;
     ScriptContext* m_pContext;
   }; // ScriptFunctionRooter
 
@@ -388,37 +389,6 @@ namespace dss {
     ScriptContext* m_pContext;
     bool m_OwnsLock;
   }; // ScriptLock
-
-/*
- * Initializer macro for a JSFunctionSpec array element. This is the original
- * kind of native function specifier initializer. Use JS_FN ("fast native", see
- * JSFastNative in jspubtd.h) for all functions that do not need a stack frame
- * when activated.
- */
-#ifndef JS_FS
-#define JS_FS(name,call,nargs,flags,extra)                                    \
-    {name, call, nargs, flags, extra}
-#endif
-
-/*
- * "Fast native" initializer macro for a JSFunctionSpec array element. Use this
- * in preference to JS_FS if the native in question does not need its own stack
- * frame when activated.
- */
-#ifndef JS_FN
-#define JS_FN(name,fastcall,nargs,flags)                                      \
-    JS_FS(name, (JSNative)(fastcall), nargs,                                  \
-          (flags) | JSFUN_FAST_NATIVE | JSFUN_STUB_GSOPS, 0)
-#endif
-
-/*
- * Terminating sentinel initializer to put at the end of a JSFunctionSpec array
- * that's passed to JS_DefineFunctions or JS_InitClass.
- */
-#ifndef JS_FS_END
-#define JS_FS_END JS_FS(NULL,NULL,0,0,0)
-#endif
-
 
 } // namespace dss
 

@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -318,7 +319,7 @@ BOOST_AUTO_TEST_CASE(testSocketConnectResolveFailure) {
   env->addExtension(ext);
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("socket = new TcpSocket();\n"
+  ctx->evaluate<void>("var result = false; socket = new TcpSocket();\n"
                       "socket.connect('hurz.dev.digitalstrom.org', 1234,\n"
                       "  function(success) { result = success; }\n"
                       ");");

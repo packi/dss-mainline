@@ -121,39 +121,24 @@ endif(AVAHI_FOUND)
 # check for SpiderMonkey headers and library
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
 find_package(SpiderMonkey REQUIRED)
-include_directories(${SPIDERMONKEY_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${SPIDERMONKEY_INCLUDE_DIRS})
-check_include_files(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
-check_include_files(js/jsapi.h HAVE_JS_JSAPI_H)
-check_include_files(jsapi.h HAVE_JSAPI_H)
-set(REQUIRED_LIBS ${REQUIRED_LIBS} ${SPIDERMONKEY_LIBRARIES})
-if(DEFINED SPIDERMONKEY_LIBRARY_DIRS)
-  link_directories(${SPIDERMONKEY_LIBRARY_DIRS})
-endif()
-
-# check for pthread
-find_package(Threads REQUIRED)
-
-include(GGLCheckFunctionExists)
-set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DJS_THREADSAFE)
-set(CMAKE_REQUIRED_LIBRARIES ${SPIDERMONKEY_LIBRARIES})
-set(CMAKE_REQUIRED_LINK_DIR ${SPIDERMONKEY_LIBRARY_DIRS})
-GGL_CHECK_FUNCTION_EXISTS(JS_ClearContextThread HAVE_THREADSAFE_JS)
-if(HAVE_THREADSAFE_JS)
+include_directories(${SPIDERMONKEY_INCLUDE_DIR})
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${SPIDERMONKEY_LIBRARY})
+if(SPIDERMONKEY_THREADSAFE)
   add_definitions(-DJS_THREADSAFE)
 else()
   MESSAGE (FATAL_ERROR "Need SpiderMonkey (libjs) built with JS_THREADSAFE")
 endif()
+
+# check for pthread
+find_package(Threads REQUIRED)
 
 include(${CMAKE_ROOT}/Modules/FindOpenSSL.cmake)
 if (OPENSSL_FOUND)
   set(REQUIRED_LIBS ${REQUIRED_LIBS} ${OPENSSL_LIBRARIES})
   include_directories(${OPENSSL_INCLUDE_DIR})
 else()
-  MESSAGE (FATAL_ERROR "Cannot build without OpenSSL. Please install
-                    OpenSSL")
+  MESSAGE (FATAL_ERROR "Cannot build without OpenSSL. Please install OpenSSL")
 endif()
-add_definitions(-DJS_THREADSAFE)
 
 # check for gsoap headers and library
 find_package(GSOAP REQUIRED)
@@ -216,6 +201,18 @@ endif()
 
 set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api-v2)
 
+add_subdirectory(core)
+add_subdirectory(unix)
+add_subdirectory(webservices)
+add_subdirectory(external)
+add_subdirectory(doc)
+
+set(DSS_LIBS core security ds485 model unix simulation scripting webservices)
+add_executable(dss main.cpp namespaces.cpp)
+target_link_libraries(dss ${TEST_LIB} ${DSS_LIBS} mongoose ${REQUIRED_LIBS})
+add_dependencies(dss build_info.h)
+
+
 #include test-directory if needed
 set(TEST_LIB)
 if(WITH_TESTS)
@@ -224,39 +221,26 @@ if(WITH_TESTS)
   add_dependencies(dsstests build_info.h)
 endif(WITH_TESTS)
 
-add_subdirectory(core)
-add_subdirectory(unix)
-add_subdirectory(webservices)
-add_subdirectory(external)
-add_subdirectory(doc)
-
-add_executable(dss main.cpp namespaces.cpp)
-
-target_link_libraries(dss ${TEST_LIB} core security ds485 model unix webservices simulation core
-                          mongoose
-                          ${REQUIRED_LIBS})
-
-add_dependencies(dss build_info.h)
 
 ## -- install targets:
 install(TARGETS dss RUNTIME DESTINATION bin)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/
-		  DESTINATION ${WITH_DATADIR}
-		  PATTERN "webroot" EXCLUDE
-		  PATTERN "*.xml" EXCLUDE
-		  PATTERN "*.js"
-		  )
+  DESTINATION ${WITH_DATADIR}
+  PATTERN "webroot" EXCLUDE
+  PATTERN "*.xml" EXCLUDE
+  PATTERN "*.js"
+)
 
 
 install(FILES
-          ${CMAKE_CURRENT_SOURCE_DIR}/data/config.xml
-          ${CMAKE_CURRENT_SOURCE_DIR}/data/subscriptions.xml
-          ${CMAKE_CURRENT_SOURCE_DIR}/data/sim.xml
-	DESTINATION ${WITH_CONFIGDIR}
-       )
+  ${CMAKE_CURRENT_SOURCE_DIR}/data/config.xml
+  ${CMAKE_CURRENT_SOURCE_DIR}/data/subscriptions.xml
+  ${CMAKE_CURRENT_SOURCE_DIR}/data/sim.xml
+  DESTINATION ${WITH_CONFIGDIR}
+)
 
 
 add_custom_target(debian
-	COMMAND dpkg-buildpackage -rfakeroot
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND dpkg-buildpackage -rfakeroot
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

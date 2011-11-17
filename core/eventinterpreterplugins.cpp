@@ -29,8 +29,10 @@
 #include "setbuilder.h"
 #include "dss.h"
 #include "core/scripting/scriptobject.h"
-#include "core/scripting/modeljs.h"
-#include "core/scripting/propertyscriptextension.h"
+#include "core/scripting/jsmodel.h"
+#include "core/scripting/jsevent.h"
+#include "core/scripting/jsmetering.h"
+#include "core/scripting/jsproperty.h"
 #include "core/scripting/jssocket.h"
 #include "core/scripting/jslogger.h"
 #include "core/foreach.h"
@@ -250,10 +252,16 @@ namespace dss {
     Logger::getInstance()->log("Terminating all scripts...", lsInfo);
     typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
     tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
+    int shutdownTimeout = 0;
     while(ipScriptContextWrapper != m_WrappedContexts.end()) {
       (*ipScriptContextWrapper)->get()->stop();
       while((*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
         sleepMS(10);
+        shutdownTimeout += 10;
+        if (shutdownTimeout > 2500) {
+          Logger::getInstance()->log("Forced to shutdown pending scripts, timeout reached", lsWarning);
+          break;
+        }
       }
       ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
     }
@@ -320,7 +328,7 @@ namespace dss {
         for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
             iParam != e; ++iParam)
         {
-          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
+          Logger::getInstance()->log("JavaScript Event Handler: setting parameter " + iParam->first +
                                       " to " + iParam->second);
           param.setProperty<const std::string&>(iParam->first, iParam->second);
         }
@@ -343,16 +351,37 @@ namespace dss {
             _subscription.getOptions()->getParameter(paramName);
 
         wrapper->addFile(scriptName);
-        try {
-        Logger::getInstance()->log("EventInterpreterPluginJavascript::"
-                                   "handleEvent: running script " + scriptName);
 
-        ctx->evaluateScript<void>(scriptName);
-        } catch(ScriptException& e) {
+        try {
+
+          Logger::getInstance()->log("JavaScript Event Handler: "
+              "running script " + scriptName, lsDebug);
+
+          ctx->evaluateScript<void>(scriptName);
+
+        } catch(ScriptException& ex) {
           Logger::getInstance()->log(
-                  std::string("EventInterpreterPluginJavascript::handleEvent:"
-                              "Caught event while running/parsing script '")
-                          + scriptName + "'. Message: " + e.what(), lsError);
+              std::string("JavaScript Event Handler: "
+                  "Script error running/parsing script '")
+              + scriptName + "'. Message: " + ex.what(), lsError);
+          break;
+        } catch(DSSException& ex) {
+          Logger::getInstance()->log(
+              std::string("JavaScript Event Handler:"
+                  "dSS/Bus error running/parsing script '")
+              + scriptName + "'. Message: " + ex.what(), lsError);
+          break;
+        } catch(boost::thread_resource_error& ex) {
+          Logger::getInstance()->log(
+              std::string("JavaScript Event Handler:"
+                  "Fatal ressource error running/parsing script '")
+          + scriptName + "'. Message: " + ex.what(), lsError);
+          return;
+        } catch(std::runtime_error& ex) {
+          Logger::getInstance()->log(
+              std::string("JavaScript Event Handler:"
+                  "Fatal error running/parsing script '")
+              + scriptName + "'. Message: " + ex.what(), lsError);
           return;
         }
 
@@ -361,12 +390,11 @@ namespace dss {
 
       if(ctx->hasAttachedObjects()) {
         m_WrappedContexts.push_back(wrapper);
-        Logger::getInstance()->log("EventInterpreterPluginJavascript::"
-                                   "handleEvent: still has objects, keeping: "
-                                   + scripts + " in memory", lsInfo);
+        Logger::getInstance()->log("JavaScript Event Handler: "
+                                   "keep " + scripts + " in memory", lsDebug);
       }
     } else {
-      throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename1");
+      throw std::runtime_error("JavaScript Event Handler: missing argument filename1");
     }
   } // handleEvent
 
@@ -376,23 +404,32 @@ namespace dss {
     if(DSS::hasInstance()) {
       m_pEnvironment.reset(new ScriptEnvironment(&DSS::getInstance()->getSecurity()));
       m_pEnvironment->initialize();
-      ScriptExtension* ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
-      m_pEnvironment->addExtension(ext);
-      ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
-      m_pEnvironment->addExtension(ext);
-      ext = new WrapperAwarePropertyScriptExtension(*this, DSS::getInstance()->getPropertySystem(),
-                                                    DSS::getInstance()->getSavedPropsDirectory());
-      m_pEnvironment->addExtension(ext);
-      ext = new ModelConstantsScriptExtension();
-      m_pEnvironment->addExtension(ext);
-      ext = new SocketScriptContextExtension();
-      m_pEnvironment->addExtension(ext);
+
+      ScriptExtension* ext;
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(),
                                       DSS::getInstance()->getEventInterpreter());
       m_pEnvironment->addExtension(ext);
+
+      ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
+      m_pEnvironment->addExtension(ext);
+
+      ext = new WrapperAwarePropertyScriptExtension(*this, DSS::getInstance()->getPropertySystem(),
+                                                    DSS::getInstance()->getSavedPropsDirectory());
+      m_pEnvironment->addExtension(ext);
+
       ext = new MeteringScriptExtension(DSS::getInstance()->getApartment(),
                                         DSS::getInstance()->getMetering());
       m_pEnvironment->addExtension(ext);
+
+      ext = new SocketScriptContextExtension();
+      m_pEnvironment->addExtension(ext);
+
+      ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
+      m_pEnvironment->addExtension(ext);
+
+      ext = new ModelConstantsScriptExtension();
+      m_pEnvironment->addExtension(ext);
+
       setupCleanupEvent();
       m_pScriptRootNode = DSS::getInstance()->getPropertySystem().createProperty("/scripts");
     } else {
@@ -423,10 +460,13 @@ namespace dss {
     tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
     while(ipScriptContextWrapper != m_WrappedContexts.end()) {
       if(!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
-        Logger::getInstance()->log("cleanupTerminatedScripts: erasing script");
+        Logger::getInstance()->log("JavaScript cleanup: erasing script "
+            + (*ipScriptContextWrapper)->getIdentifier());
         ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
       } else {
-        Logger::getInstance()->log("cleanupTerminatedScripts: still has objects " + intToString((*ipScriptContextWrapper)->get()->getAttachedObjectsCount()));
+        Logger::getInstance()->log("JavaScript cleanup: script "
+            + (*ipScriptContextWrapper)->getIdentifier()
+            + " still has objects: " + intToString((*ipScriptContextWrapper)->get()->getAttachedObjectsCount()));
         ++ipScriptContextWrapper;
       }
     }

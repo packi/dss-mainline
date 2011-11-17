@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -23,7 +24,7 @@
 #ifndef PROPERTYSCRIPTEXTENSION_H_
 #define PROPERTYSCRIPTEXTENSION_H_
 
-#include "core/jshandler.h"
+#include "core/scripting/jshandler.h"
 #include "core/propertysystem.h"
 
 namespace dss {

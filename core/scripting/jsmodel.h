@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -27,7 +28,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "core/jshandler.h"
+#include "core/scripting/jshandler.h"
 #include "core/event.h"
 #include "core/propertysystem.h"
 
@@ -85,22 +86,6 @@ namespace dss {
     t convertTo(ScriptContext& _context, JSObject* _obj);
   }; // ModelScriptContextExtension
 
-  class EventScriptExtension : public ScriptExtension {
-  private:
-    EventQueue& m_Queue;
-    EventInterpreter& m_Interpreter;
-  public:
-    EventScriptExtension(EventQueue& _queue, EventInterpreter& _interpreter);
-    virtual ~EventScriptExtension() {}
-
-    virtual void extendContext(ScriptContext& _context);
-
-    EventQueue& getEventQueue() { return m_Queue; }
-    const EventQueue& getEventQueue() const { return m_Queue; }
-
-    EventInterpreter& getEventInterpreter() { return m_Interpreter; }
-    const EventInterpreter& getEventInterpreter() const { return m_Interpreter; }
-  }; // EventScriptExtension
 
   class ModelConstantsScriptExtension : public ScriptExtension {
   public:
@@ -109,20 +94,6 @@ namespace dss {
 
     virtual void extendContext(ScriptContext& _context);
   }; // ModelConstantsScriptExtension
-
-  class MeteringScriptExtension : public ScriptExtension {
-  public:
-    MeteringScriptExtension(Apartment& _apartment, Metering& _metering);
-    virtual ~MeteringScriptExtension() {}
-
-    virtual void extendContext(ScriptContext& _context);
-
-    Apartment& getApartment() { return m_Apartment; }
-    Metering& getMetering() { return m_Metering; }
-  private:
-    Apartment& m_Apartment;
-    Metering& m_Metering;
-  }; // MeteringScriptExtension
 
 }
 

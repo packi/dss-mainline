@@ -21,11 +21,11 @@
 */
 
 #include "dsid_js.h"
-#include "core/jshandler.h"
-#include "core/scripting/modeljs.h"
+#include "core/scripting/jshandler.h"
+#include "core/scripting/jsmodel.h"
 #include "core/scripting/jssocket.h"
+#include "core/scripting/jsproperty.h"
 #include "core/scripting/scriptobject.h"
-#include "core/scripting/propertyscriptextension.h"
 #include "core/dss.h"
 #include "core/thread.h"
 #include "core/foreach.h"
