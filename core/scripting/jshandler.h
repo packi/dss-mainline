@@ -34,10 +34,6 @@
 #include <boost/thread/mutex.hpp>
 #include <js/jsapi.h>
 
-#ifndef JS_THREADSAFE
-#error Need libjs with JS_THREADSAFE
-#endif
-
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
 

@@ -146,15 +146,21 @@ namespace dss {
     for(int iParam = 0; iParam < paramc; iParam++) {
       paramv[iParam] = _parameter.get(iParam);
     }
+
+    JS_BeginRequest(m_Context.getJSContext());
+
     jsval rval;
     JSBool ok = JS_CallFunctionName(m_Context.getJSContext(), m_pObject, _functionName.c_str(), paramc, paramv, &rval);
     free(paramv);
-    if(ok) {
-      return rval;
-    } else {
+
+    JS_EndRequest(m_Context.getJSContext());
+
+    if(!ok) {
       m_Context.raisePendingExceptions();
       throw ScriptException("Error running function");
     }
+
+    return rval;
   } // doCallFunctionByName
 
   template<>
@@ -212,15 +218,21 @@ namespace dss {
     for(int iParam = 0; iParam < paramc; iParam++) {
       paramv[iParam] = _parameter.get(iParam);
     }
+
+    JS_BeginRequest(m_Context.getJSContext());
+
     jsval rval;
     JSBool ok = JS_CallFunctionValue(m_Context.getJSContext(), m_pObject, _function, paramc, paramv, &rval);
     free(paramv);
-    if(ok) {
-      return rval;
-    } else {
+
+    JS_EndRequest(m_Context.getJSContext());
+
+    if(!ok) {
       m_Context.raisePendingExceptions();
       throw ScriptException("Error running function");
     }
+
+    return rval;
   } // doCallFunctionByReference
 
   template<>

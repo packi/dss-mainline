@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutZeroDelay) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(function() {  result = true; }, 0);");
   while(ctx->hasAttachedObjects()) {
-    sleepMS(1);
+    sleepMS(100);
   }
   JSContextThread thread(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
@@ -138,9 +138,8 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutNormalDelay) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(function() {  result = true; }, 10);");
   while(ctx->hasAttachedObjects()) {
-    sleepMS(1);
+    sleepMS(100);
   }
-  //boost::mutex::scoped_lock lock = ctx->getLock();
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 } // testSetTimeoutNormalDelay
@@ -152,7 +151,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutInvalidFunction) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var a = 1; var result = false; setTimeout(a, 0);");
   while(ctx->hasAttachedObjects()) {
-    sleepMS(1);
+    sleepMS(100);
   }
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), false);
@@ -169,7 +168,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutGC) {
                       "print('timeout scheduled');"
       );
   while(ctx->hasAttachedObjects()) {
-    sleepMS(1);
+    sleepMS(100);
   }
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);

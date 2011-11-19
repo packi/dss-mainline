@@ -437,20 +437,16 @@ namespace dss {
 
   ScriptContext::~ScriptContext() {
     ScriptLock lock(this);
-
-    // FIXME: JSContextThread thread(this);
-    // FIXME: JS_GC(m_pContext);
-    JS_SetContextThread(m_pContext);
-    JS_BeginRequest(m_pContext);
+    if (!JS_GetContextThread(m_pContext)) {
+      JS_SetContextThread(m_pContext);
+    }
 
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
     scrubVector(m_AttachedObjects);
-    JS_SetContextPrivate(m_pContext, NULL);
 
-    JS_EndRequest(m_pContext);
-    JS_ClearContextThread(m_pContext);
+    JS_SetContextPrivate(m_pContext, NULL);
     JS_DestroyContext(m_pContext);
     m_pContext = NULL;
   } // dtor
@@ -548,22 +544,30 @@ namespace dss {
 
   template <>
   int ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<int>(doEvaluateScript(_script));
+    jsval jval = doEvaluateScript(_script);
+    JSContextThread thread(this);
+    return convertTo<int>(jval);
   } // evaluateScript<int>
 
   template <>
   double ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<double>(doEvaluateScript(_script));
+    jsval jval = doEvaluateScript(_script);
+    JSContextThread thread(this);
+    return convertTo<double>(jval);
   } // evaluateScript<double>
 
   template <>
   std::string ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<std::string>(doEvaluateScript(_script));
+    jsval jval = doEvaluateScript(_script);
+    JSContextThread thread(this);
+    return convertTo<std::string>(jval);
   } // evaluateScript<std::string>
 
   template <>
   bool ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<bool>(doEvaluateScript(_script));
+    jsval jval = doEvaluateScript(_script);
+    JSContextThread thread(this);
+    return convertTo<bool>(jval);
   } // evaluateScript<bool>
 
   jsval ScriptContext::doEvaluate(const std::string& _script) {
@@ -590,22 +594,30 @@ namespace dss {
 
   template <>
   int ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<int>(doEvaluate(_script));
+    jsval jval = doEvaluate(_script);
+    JSContextThread thread(this);
+    return convertTo<int>(jval);
   } // evaluate<int>
 
   template <>
   double ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<double>(doEvaluate(_script));
+    jsval jval = doEvaluate(_script);
+    JSContextThread thread(this);
+    return convertTo<double>(jval);
   } // evaluate<double>
 
   template <>
   std::string ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<std::string>(doEvaluate(_script));
+    jsval jval = doEvaluate(_script);
+    JSContextThread thread(this);
+    return convertTo<std::string>(jval);
   } // evaluate<std::string>
 
   template <>
   bool ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<bool>(doEvaluate(_script));
+    jsval jval = doEvaluate(_script);
+    JSContextThread thread(this);
+    return convertTo<bool>(jval);
   } // evaluate<bool>
 
   void ScriptContext::lock() {
@@ -707,11 +719,27 @@ namespace dss {
     if((m_Function != JSVAL_NULL) || (m_pObject != NULL)) {
       assert(m_pContext != NULL);
     }
+
+    JSContext* jsc = m_pContext->getJSContext();
+    bool jsThreadSet = false;
+    if (!JS_GetContextThread(jsc)) {
+      JS_SetContextThread(jsc);
+      jsThreadSet = true;
+    }
+
+    JS_BeginRequest(jsc);
+
     if(m_Function != JSVAL_NULL) {
-      JS_RemoveValueRoot(m_pContext->getJSContext(), &m_Function);
+      JS_RemoveValueRoot(jsc, &m_Function);
     }
     if(m_pObject != NULL) {
-      JS_RemoveObjectRoot(m_pContext->getJSContext(), &m_pObject);
+      JS_RemoveObjectRoot(jsc, &m_pObject);
+    }
+
+    JS_EndRequest(jsc);
+
+    if (jsThreadSet) {
+      JS_ClearContextThread(jsc);
     }
   } // dtor
 
@@ -719,6 +747,7 @@ namespace dss {
     m_pContext = _pContext;
     m_pObject = _object;
     m_Function = _function;
+
     if(m_Function != JSVAL_NULL) {
       JS_AddValueRoot(m_pContext->getJSContext(), &m_Function);
     }

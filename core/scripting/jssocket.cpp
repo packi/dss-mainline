@@ -126,17 +126,14 @@ const std::string SocketScriptExtensionName = "socketextension";
 
     void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
       if(hasCallback()) {
-
         // copy callback data so we can clear the originals
         boost::shared_ptr<ScriptObject> pCallbackObjectCopy = m_pCallbackObject;
-        jsval callbackFunctionCopy = m_CallbackFunction;
         boost::shared_ptr<ScriptFunctionRooter> functionRoot = m_pFunctionRooter;
+        jsval callbackFunctionCopy = m_CallbackFunction;
 
         // clear callback objects before calling the callback, we might overwrite
         // data if we do that afterwards
-        m_pFunctionRooter.reset();
-        m_pCallbackObject.reset();
-        m_CallbackFunction = JSVAL_NULL;
+        releaseCallbackObjects();
 
         try {
           pCallbackObjectCopy->callFunctionByReference<void>(callbackFunctionCopy, _list);
