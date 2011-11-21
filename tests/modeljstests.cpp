@@ -643,7 +643,7 @@ BOOST_AUTO_TEST_CASE(testPropertyObjNonExistingInvalid) {
   env->addExtension(ext);
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  int res = ctx->evaluate<int>(
+  ctx->evaluate<int>(
 		  "var err = 0; \n"
 		  "try { var prop = new Property('testing'); }\n"
           "catch (txt) { print(txt); err = 1; }\n");
