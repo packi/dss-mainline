@@ -8,7 +8,7 @@ ENDIF(WITH_HTTP)
 file(GLOB files *.cpp)
 
 add_library(core ${files}
-metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
+metering/metering.cpp
 web/restful.cpp web/restfulapiwriter.cpp
 web/webserverapi.cpp web/webrequests.cpp
 web/webserver.cpp web/json.cpp

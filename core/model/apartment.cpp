@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -274,10 +275,10 @@ namespace dss {
 
     // set initial meter value from metering subsystem
     if(m_pMetering != NULL) {
-      boost::shared_ptr<Series<CurrentValue> > pSeries =
-        m_pMetering->getSeries(m_pMetering->getEnergyConfigChain(), 1, pResult);
-      if(!pSeries->getValues().empty()) {
-        pResult->initializeEnergyMeterValue(pSeries->getValues().front().getValue());
+      int resolution = 1;
+      boost::shared_ptr<std::deque<Value> > pSeries = m_pMetering->getSeries(pResult, resolution, false);
+      if(!pSeries->empty()) {
+        pResult->initializeEnergyMeterValue(pSeries->front().getValue());
       } else {
         Logger::getInstance()->log("No initial metering value found for meter " + _dsid.toString());
       }

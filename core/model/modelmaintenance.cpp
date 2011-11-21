@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010, 2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -300,8 +301,7 @@ namespace dss {
             boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
             meter->setPowerConsumption(power);
             meter->updateEnergyMeterValue(energy);
-            m_pMetering->postEnergyEvent(meter, meter->getEnergyMeterValue(), DateTime());
-            m_pMetering->postConsumptionEvent(meter, power, DateTime());
+            m_pMetering->postMeteringEvent(meter, power, energy, DateTime());
           } catch(ItemNotFoundException& _e) {
             log("Received metering data for unknown meter, discarding", lsWarning);
           }

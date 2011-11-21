@@ -168,6 +168,10 @@ if(SENDMAIL)
    set(HAVE_SENDMAIL 1)
 endif(SENDMAIL)
 
+# librrd
+# TODO: actually check for librrd
+set(REQUIRED_LIBS ${REQUIRED_LIBS} rrd)
+
 # generate config.h header file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
