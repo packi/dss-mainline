@@ -1,0 +1,10 @@
+add_library(scripting
+  jshandler.cpp
+  scriptobject.cpp
+  jsevent.cpp
+  jsproperty.cpp
+  jslogger.cpp
+  jsmetering.cpp
+  jssocket.cpp
+  jsmodel.cpp
+)

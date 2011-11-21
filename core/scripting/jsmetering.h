@@ -1,8 +1,7 @@
 /*
-    Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
-            Michael Tross, aizo GmbH <michael.tross@aizo.com>
+    Author: Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -21,32 +20,33 @@
 
 */
 
-#ifndef JSSOCKET_H_
-#define JSSOCKET_H_
+#ifndef _JSMETERING_INCLUDED
+#define _JSMETERING_INCLUDED
 
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
-
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "core/scripting/jshandler.h"
+#include "core/event.h"
+#include "core/propertysystem.h"
 
 namespace dss {
 
-  class SocketHelper;
+  class Apartment;
+  class Metering;
 
-  class SocketScriptContextExtension : public ScriptExtension {
+  class MeteringScriptExtension : public ScriptExtension {
   public:
-    SocketScriptContextExtension();
+    MeteringScriptExtension(Apartment& _apartment, Metering& _metering);
+    virtual ~MeteringScriptExtension() {}
 
     virtual void extendContext(ScriptContext& _context);
-    void removeSocketHelper(boost::shared_ptr<SocketHelper> _helper);
-    void addSocketHelper(boost::shared_ptr<SocketHelper> _helper);
+
+    Apartment& getApartment() { return m_Apartment; }
+    Metering& getMetering() { return m_Metering; }
   private:
-    Mutex m_SocketHelperMutex;
-    typedef std::vector<boost::shared_ptr<SocketHelper> > SocketHelperVector;
-    SocketHelperVector m_SocketHelper;
-  }; // SocketScriptExtension
+    Apartment& m_Apartment;
+    Metering& m_Metering;
+  }; // MeteringScriptExtension
 
-} // namespace dss
+}
 
-#endif /* JSSOCKET_H_ */
+#endif

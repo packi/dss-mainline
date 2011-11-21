@@ -29,7 +29,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "dssim.h"
-#include "core/jshandler.h"
+#include "core/scripting/jshandler.h"
 
 namespace dss {
 

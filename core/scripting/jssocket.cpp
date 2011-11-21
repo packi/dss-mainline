@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -38,17 +39,26 @@ using boost::asio::ip::tcp;
 #include "core/scripting/scriptobject.h"
 
 namespace dss {
+
+
+const std::string SocketScriptExtensionName = "socketextension";
+
   void tcpSocket_finalize(JSContext *cx, JSObject *obj);
-  JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
-                             jsval *argv, jsval *rval);
+  JSBool tcpSocket_construct(JSContext *cx, uintN argc, jsval *vp);
 
   static JSClass tcpSocket_class = {
     "TcpSocket", JSCLASS_HAS_PRIVATE,
-    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
     JS_ConvertStub,  tcpSocket_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
   }; // tcpSocket_class
+
+
+  SocketScriptContextExtension::SocketScriptContextExtension()
+  : ScriptExtension(SocketScriptExtensionName)
+  { }
+
 
 
   class SocketHelperBase {
@@ -87,7 +97,8 @@ namespace dss {
         m_IOService->stop();
       }
       m_IOServiceThread.join();
-      Logger::getInstance()->log("~SocketHelper()");
+
+      // FIXME: possible leak in m_IOService
     }
 
     void setContext(ScriptContext* _value) {
@@ -115,25 +126,24 @@ namespace dss {
 
     void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
       if(hasCallback()) {
-        JSAutoLocalRootScope rootScope(getContext().getJSContext());
         // copy callback data so we can clear the originals
         boost::shared_ptr<ScriptObject> pCallbackObjectCopy = m_pCallbackObject;
-        jsval callbackFunctionCopy = m_CallbackFunction;
         boost::shared_ptr<ScriptFunctionRooter> functionRoot = m_pFunctionRooter;
+        jsval callbackFunctionCopy = m_CallbackFunction;
+
         // clear callback objects before calling the callback, we might overwrite
         // data if we do that afterwards
-        m_pFunctionRooter.reset();
-        m_pCallbackObject.reset();
-        m_CallbackFunction = JSVAL_NULL;
+        releaseCallbackObjects();
+
         try {
           pCallbackObjectCopy->callFunctionByReference<void>(callbackFunctionCopy, _list);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(
-               std::string("SocketHelper::callCallbackWithArguments: Exception caught: ")
+               std::string("SocketHelper::callCallbackWithArguments: Exception: ")
                + e.what(), lsError);
         }
+
       }
-      JS_GC(m_pContext->getJSContext());
     }
 
     ScriptContext& getContext() const {
@@ -174,7 +184,6 @@ namespace dss {
     }
     
     void callCallback(bool _result) {
-      JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
       param.add<bool>(_result);
       callCallbackWithArguments(param);
@@ -238,12 +247,10 @@ namespace dss {
     void connectTo(const std::string& _host, int _port) {
       tcp::resolver resolver(getIOService());
       tcp::resolver::query query(_host, intToString(_port));
-      try {
-        tcp::resolver::iterator iterator = resolver.resolve(query);
-
-        tcp::endpoint endpoint = *iterator;
-        m_pSocket.reset(new tcp::socket(getIOService()));
-        m_pSocket->async_connect(
+      tcp::resolver::iterator iterator = resolver.resolve(query);
+      tcp::endpoint endpoint = *iterator;
+      m_pSocket.reset(new tcp::socket(getIOService()));
+      m_pSocket->async_connect(
           endpoint,
           boost::bind(
             &SocketHelperInstance::connectionCallback,
@@ -251,11 +258,6 @@ namespace dss {
             boost::asio::placeholders::error,
             ++iterator));
         startBlockingCall();
-      } catch(boost::system::system_error&) {
-        Logger::getInstance()
-          ->log("JS: connectTo: Could not resolve host '" + _host, lsWarning);
-        failure();
-      }
     }
 
     void send(const std::string& _data) {
@@ -360,7 +362,6 @@ namespace dss {
         failure();
       }
       req.endRequest();
-      //JS_ClearContextThread(getContext().getJSContext());
     } // connectionCallback
 
     void sendCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
@@ -431,6 +432,7 @@ namespace dss {
           pInstance->m_pSocket = m_pSocket;
           pInstance->setIOService(getIOServicePtr());
           m_pSocket.reset();
+
           ScriptFunctionParameterList list(getContext());
           list.addJSVal(OBJECT_TO_JSVAL(socketObj));
           callCallbackWithArguments(list);
@@ -448,14 +450,12 @@ namespace dss {
     }
 
     void callSizeCallback(int _result) {
-      JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
       param.add<int>(_result);
       callCallbackWithArguments(param);
     }
 
     void callDataCallback(const std::string& _result) {
-      JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
       param.add<std::string>(_result);
       callCallbackWithArguments(param);
@@ -579,11 +579,6 @@ namespace dss {
 
   //================================================== SocketScriptContextExtension
 
-  const std::string SocketScriptExtensionName = "socketextension";
-
-  SocketScriptContextExtension::SocketScriptContextExtension()
-  : ScriptExtension(SocketScriptExtensionName)
-  { }
 
   void delayedDestroy(SocketHelperInstance* _inst) {
     delete _inst;
@@ -594,68 +589,94 @@ namespace dss {
     if(pInstance != NULL) {
       JS_SetPrivate(cx, obj, NULL);
       pInstance->releaseCallbackObjects();
-      boost::thread(boost::bind(&delayedDestroy, pInstance));
+      //boost::thread(boost::bind(&delayedDestroy, pInstance));
+      delete pInstance;
     }
   } // tcpSocket_finalize
 
-  JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
-                             jsval *argv, jsval *rval) {
+  JSBool tcpSocket_construct(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketScriptContextExtension* ext =
       dynamic_cast<SocketScriptContextExtension*>(ctx->getEnvironment().getExtension(SocketScriptExtensionName));
+
+    JSObject *obj = JS_NewObject(cx, &tcpSocket_class, NULL, NULL);
+    JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
+
     SocketHelperInstance* inst = new SocketHelperInstance(*ext);
     JS_SetPrivate(cx, obj, inst);
     return JS_TRUE;
   } // tcpSocket_construct
 
-  JSBool tcpSocket_connect(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_connect(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
-    if(argc >= 2) {
-      try {
-        std::string host = ctx->convertTo<std::string>(argv[0]);
-        int port = ctx->convertTo<int>(argv[1]);
 
-        pInst->setContext(ctx);
+    try {
+      std::string host = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      int port = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
 
-        // check if we've been given a callback
-        if(argc >= 3) {
-          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
-          pInst->setCallbackObject(scriptObj);
-          pInst->setCallbackFunction(argv[2]);
-        }
+      pInst->setContext(ctx);
 
-        pInst->connectTo(host, port);
-        *rval = JSVAL_TRUE;
-        return JS_TRUE;
-      } catch(const ScriptException& e) {
-        Logger::getInstance()->log(std::string("tcpSocket_connect: Caught script exception: ") + e.what());
+      // check if we've been given a callback
+      if(argc >= 3) {
+        boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
+        pInst->setCallbackObject(scriptObj);
+        pInst->setCallbackFunction(JS_ARGV(cx, vp)[2]);
       }
+
+      jsrefcount ref = JS_SuspendRequest(cx);
+
+      try {
+        pInst->connectTo(host, port);
+      } catch (boost::thread_resource_error&) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "TcpSocket: connectTo \'%s\' failed, out of ressources", host.c_str());
+        pInst->releaseCallbackObjects();
+        JS_SET_RVAL(cx, vp, JSVAL_FALSE);
+        return JS_FALSE;
+      } catch(boost::system::system_error&) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "TcpSocket: connectTo \'%s\' failed, system error", host.c_str());
+        pInst->releaseCallbackObjects();
+        JS_SET_RVAL(cx, vp, JSVAL_FALSE);
+        return JS_FALSE;
+      }
+
+      JS_ResumeRequest(cx, ref);
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
+      return JS_TRUE;
+    } catch(const ScriptException& e) {
+      Logger::getInstance()->log(std::string("tcpSocket_connect: Caught script exception: ") + e.what());
     }
+
     return JS_FALSE;
   } // tcpSocket_connect
 
-  JSBool tcpSocket_send(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_send(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
+
     if(pInst->isConnected()) {
       if(argc >= 1) {
         try {
-          std::string data = ctx->convertTo<std::string>(argv[0]);
+          std::string data = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
 
           pInst->setContext(ctx);
 
           // check if we've been given a callback
           if(argc >= 2) {
-            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
             pInst->setCallbackObject(scriptObj);
-            pInst->setCallbackFunction(argv[1]);
+            pInst->setCallbackFunction(JS_ARGV(cx, vp)[1]);
           }
 
+          jsrefcount ref = JS_SuspendRequest(cx);
           pInst->send(data);
-          *rval = JSVAL_TRUE;
+          JS_ResumeRequest(cx, ref);
+
+          JS_SET_RVAL(cx, vp, JSVAL_TRUE);
           return JS_TRUE;
         } catch(const ScriptException& e) {
           Logger::getInstance()->log(std::string("tcpSocket_send: Caught script exception: ") + e.what());
@@ -667,27 +688,30 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_send
 
-  JSBool tcpSocket_receive(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_receive(JSContext* cx, uintN argc, jsval *vp) {
     JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
     if(pInst->isConnected()) {
       if(argc >= 1) {
         try {
-          int size = ctx->convertTo<int>(argv[0]);
+          int size = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
 
           pInst->setContext(ctx);
 
           // check if we've been given a callback
           if(argc >= 2) {
-            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
             pInst->setCallbackObject(scriptObj);
-            pInst->setCallbackFunction(argv[1]);
+            pInst->setCallbackFunction(JS_ARGV(cx, vp)[1]);
           }
 
+          jsrefcount ref = JS_SuspendRequest(cx);
           pInst->receive(size);
-          *rval = JSVAL_TRUE;
+          JS_ResumeRequest(cx, ref);
+
+          JS_SET_RVAL(cx, vp, JSVAL_TRUE);
           return JS_TRUE;
         } catch(const ScriptException& e) {
           Logger::getInstance()->log(std::string("tcpSocket_receive: Caught script exception: ") + e.what());
@@ -699,32 +723,35 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_receive
 
-  JSBool tcpSocket_receiveLine(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_receiveLine(JSContext* cx, uintN argc, jsval *vp) {
     JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
     if(pInst->isConnected()) {
       if(argc >= 1) {
         try {
-          int size = ctx->convertTo<int>(argv[0]);
+          int size = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           std::string delimiter = "\r\n";
 
           pInst->setContext(ctx);
 
           // check if we've been given a callback
           if(argc >= 2) {
-            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
             pInst->setCallbackObject(scriptObj);
-            pInst->setCallbackFunction(argv[1]);
+            pInst->setCallbackFunction(JS_ARGV(cx, vp)[1]);
           }
 
           if(argc >= 3) {
-            delimiter = ctx->convertTo<std::string>(argv[2]);
+            delimiter = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
           }
 
+          jsrefcount ref = JS_SuspendRequest(cx);
           pInst->receiveLine(size, delimiter);
-          *rval = JSVAL_TRUE;
+          JS_ResumeRequest(cx, ref);
+
+          JS_SET_RVAL(cx, vp, JSVAL_TRUE);
           return JS_TRUE;
         } catch(const ScriptException& e) {
           Logger::getInstance()->log(std::string("tcpSocket_receiveLine: Caught script exception: ") + e.what());
@@ -736,26 +763,29 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_receiveLine
 
-  JSBool tcpSocket_bind(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_bind(JSContext* cx, uintN argc, jsval *vp) {
     JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
     if(argc >= 1) {
       try {
-        int port = ctx->convertTo<int>(argv[0]);
+        int port = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
 
         pInst->setContext(ctx);
 
         // check if we've been given a callback
         if(argc >= 2) {
-          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
           pInst->setCallbackObject(scriptObj);
-          pInst->setCallbackFunction(argv[1]);
+          pInst->setCallbackFunction(JS_ARGV(cx, vp)[1]);
         }
 
+        jsrefcount ref = JS_SuspendRequest(cx);
         pInst->bind(port);
-        *rval = JSVAL_TRUE;
+        JS_ResumeRequest(cx, ref);
+
+        JS_SET_RVAL(cx, vp, JSVAL_TRUE);
         return JS_TRUE;
       } catch(const ScriptException& e) {
         Logger::getInstance()->log(std::string("tcpSocket_bind: Caught script exception: ") + e.what());
@@ -764,23 +794,26 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_bind
 
-  JSBool tcpSocket_accept(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_accept(JSContext* cx, uintN argc, jsval *vp) {
     JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
     try {
       pInst->setContext(ctx);
 
       // check if we've been given a callback
       if(argc >= 1) {
-        boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+        boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
         pInst->setCallbackObject(scriptObj);
-        pInst->setCallbackFunction(argv[0]);
+        pInst->setCallbackFunction(JS_ARGV(cx, vp)[0]);
       }
 
+      jsrefcount ref = JS_SuspendRequest(cx);
       pInst->accept();
-      *rval = JSVAL_TRUE;
+      JS_ResumeRequest(cx, ref);
+
+      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
       return JS_TRUE;
     } catch(const ScriptException& e) {
       Logger::getInstance()->log(std::string("tcpSocket_accept: Caught script exception: ") + e.what());
@@ -788,27 +821,31 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_accept
 
-  JSBool tcpSocket_close(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_close(JSContext* cx, uintN argc, jsval *vp) {
     JSRequest req(cx);
-    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
     assert(pInst != NULL);
+
+    jsrefcount ref = JS_SuspendRequest(cx);
     pInst->close();
-    *rval = JSVAL_TRUE;
+    JS_ResumeRequest(cx, ref);
+
+    JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     return JS_TRUE;
   } // tcpSocket_connect
 
   JSFunctionSpec tcpSocket_methods[] = {
-    {"send", tcpSocket_send, 2, 0, 0},
-    {"connect", tcpSocket_connect, 3, 0, 0},
-    {"receive", tcpSocket_receive, 2, 0, 0},
-    {"receiveLine", tcpSocket_receiveLine, 2, 0, 0},
-    {"bind", tcpSocket_bind, 2, 0, 0},
-    {"accept", tcpSocket_accept, 1, 0, 0},
-    {"close", tcpSocket_close, 0, 0, 0},
-    {NULL, NULL, 0, 0, 0},
+    JS_FS("send", tcpSocket_send, 2, 0),
+    JS_FS("connect", tcpSocket_connect, 3, 0),
+    JS_FS("receive", tcpSocket_receive, 2, 0),
+    JS_FS("receiveLine", tcpSocket_receiveLine, 2, 0),
+    JS_FS("bind", tcpSocket_bind, 2, 0),
+    JS_FS("accept", tcpSocket_accept, 1, 0),
+    JS_FS("close", tcpSocket_close, 0, 0),
+    JS_FS_END
   }; // tcpSockets_methods
 
-  JSBool tcpSocket_sendTo(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  JSBool tcpSocket_sendTo(JSContext* cx, uintN argc, jsval *vp) {
     JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketScriptContextExtension* ext =
@@ -817,23 +854,25 @@ namespace dss {
 
     if(argc >= 3) {
       try {
-        std::string host = ctx->convertTo<std::string>(argv[0]);
-        int port = ctx->convertTo<int>(argv[1]);
-        std::string data = ctx->convertTo<std::string>(argv[2]);
+        std::string host = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        int port = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+        std::string data = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
 
         boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext, ctx));
         ext->addSocketHelper(helper);
 
         // check if we've been given a callback
         if(argc > 3) {
-          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
           helper->setCallbackObject(scriptObj);
-          helper->setCallbackFunction(argv[3]);
+          helper->setCallbackFunction(JS_ARGV(cx, vp)[3]);
         }
 
+        jsrefcount ref = JS_SuspendRequest(cx);
         helper->sendTo(host, port, data);
+        JS_ResumeRequest(cx, ref);
 
-        *rval = JSVAL_TRUE;
+        JS_SET_RVAL(cx, vp, JSVAL_TRUE);
         return JS_TRUE;
       } catch(const ScriptException& e) {
         Logger::getInstance()->log(std::string("tcpSocket_sendTo: Caught script exception: ") + e.what());
@@ -843,16 +882,16 @@ namespace dss {
   } // tcpSocket_sendTo
 
   JSFunctionSpec tcpSocket_static_methods[] = {
-    {"sendTo", tcpSocket_sendTo, 4, 0, 0},
-    {NULL, NULL, 0, 0, 0},
+    JS_FS("sendTo", tcpSocket_sendTo, 4, 0),
+    JS_FS_END
   }; // tcpSocket_static_methods
 
-  JSBool tcpSocket_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+  JSBool tcpSocket_JSGet(JSContext *cx, JSObject *obj, jsid id, jsval *vp) {
     JSRequest req(cx);
-    int opt = JSVAL_TO_INT(id);
+    int opt = JSID_TO_INT(id);
     switch(opt) {
       case 0:
-        *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "TcpSocket"));
+        JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "TcpSocket")));
         return JS_TRUE;
     }
     return JS_FALSE;
@@ -863,6 +902,7 @@ namespace dss {
     {"className", 0, 0, tcpSocket_JSGet},
     {NULL}
   }; // tcpSocket_properties
+
 
   void SocketScriptContextExtension::extendContext(ScriptContext& _context) {
     JSRequest req(&_context);

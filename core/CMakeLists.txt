@@ -7,9 +7,7 @@ ENDIF(WITH_HTTP)
 
 file(GLOB files *.cpp)
 
-add_library(core ${files} scripting/modeljs.cpp scripting/propertyscriptextension.cpp
-scripting/jssocket.cpp scripting/scriptobject.cpp
-scripting/jslogger.cpp
+add_library(core ${files}
 metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
 web/restful.cpp web/restfulapiwriter.cpp
 web/webserverapi.cpp web/webrequests.cpp
@@ -27,3 +25,4 @@ add_subdirectory(sim)
 add_subdirectory(ds485)
 add_subdirectory(model)
 add_subdirectory(security)
+add_subdirectory(scripting)

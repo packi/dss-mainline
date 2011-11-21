@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -145,15 +146,21 @@ namespace dss {
     for(int iParam = 0; iParam < paramc; iParam++) {
       paramv[iParam] = _parameter.get(iParam);
     }
+
+    JS_BeginRequest(m_Context.getJSContext());
+
     jsval rval;
     JSBool ok = JS_CallFunctionName(m_Context.getJSContext(), m_pObject, _functionName.c_str(), paramc, paramv, &rval);
     free(paramv);
-    if(ok) {
-      return rval;
-    } else {
+
+    JS_EndRequest(m_Context.getJSContext());
+
+    if(!ok) {
       m_Context.raisePendingExceptions();
       throw ScriptException("Error running function");
     }
+
+    return rval;
   } // doCallFunctionByName
 
   template<>
@@ -211,15 +218,21 @@ namespace dss {
     for(int iParam = 0; iParam < paramc; iParam++) {
       paramv[iParam] = _parameter.get(iParam);
     }
+
+    JS_BeginRequest(m_Context.getJSContext());
+
     jsval rval;
     JSBool ok = JS_CallFunctionValue(m_Context.getJSContext(), m_pObject, _function, paramc, paramv, &rval);
     free(paramv);
-    if(ok) {
-      return rval;
-    } else {
+
+    JS_EndRequest(m_Context.getJSContext());
+
+    if(!ok) {
       m_Context.raisePendingExceptions();
       throw ScriptException("Error running function");
     }
+
+    return rval;
   } // doCallFunctionByReference
 
   template<>
@@ -253,11 +266,11 @@ namespace dss {
   } // callFunctionByReference<std::string>
 
   void ScriptObject::addRoot() {
-    JS_AddRoot(m_Context.getJSContext(), &m_pObject);
+    JS_AddObjectRoot(m_Context.getJSContext(), &m_pObject);
   } // addRoot
 
   void ScriptObject::removeRoot() {
-    JS_RemoveRoot(m_Context.getJSContext(), &m_pObject);
+    JS_RemoveObjectRoot(m_Context.getJSContext(), &m_pObject);
   } // removeRoot
 
 

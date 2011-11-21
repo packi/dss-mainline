@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -24,9 +25,11 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "core/scripting/modeljs.h"
+#include "core/scripting/jsmodel.h"
+#include "core/scripting/jsevent.h"
+#include "core/scripting/jsmetering.h"
 #include "core/scripting/scriptobject.h"
-#include "core/scripting/propertyscriptextension.h"
+#include "core/scripting/jsproperty.h"
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"
 #include "core/propertysystem.h"
@@ -309,7 +312,7 @@ BOOST_AUTO_TEST_CASE(testTimedEvents) {
   std::string id = ctx->evaluate<std::string>("var evt = new TimedEvent('test', '+1');\n"
                                               "evt.raise()\n");
   BOOST_CHECK(!id.empty());
-  BOOST_CHECK(id.find("test") != std::string::npos);
+  BOOST_CHECK(id.compare("0") == 0);
 } // testTimedEvents
 
 BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {
@@ -335,9 +338,15 @@ BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  BOOST_CHECK_THROW(ctx->evaluate<void>("var evt = new TimedEvent('test');\n"),
-                    ScriptException);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<std::string>(
+      "var evt; var err = 0; "
+      "try { evt = new TimedEvent('test'); } "
+      "catch(txt) { print('Forced Exception: ' + txt); err = 1;}\n");
+  {
+      JSContextThread thread(ctx);
+      BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("err"), 1);
+  }
 } // testTimedEventsNoTimeParam
 
 BOOST_AUTO_TEST_CASE(testTimedICalEvent) {
@@ -367,7 +376,7 @@ BOOST_AUTO_TEST_CASE(testTimedICalEvent) {
   std::string id = ctx->evaluate<std::string>("var evt = new TimedICalEvent('test', '20110227T081600Z','FREQ=MINUTELY;INTERVAL=2');\n"
                                               "evt.raise()\n");
   BOOST_CHECK(!id.empty());
-  BOOST_CHECK(id.find("test") != std::string::npos);
+  BOOST_CHECK(id.find("0") == 0);
 } // testTimedICalEvent
 
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
@@ -633,9 +642,15 @@ BOOST_AUTO_TEST_CASE(testPropertyObjNonExistingInvalid) {
   ScriptExtension* ext = new PropertyScriptExtension(propSys);
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-
-  BOOST_CHECK_THROW(ctx->evaluate<void>("var prop = new Property('testing');\n"), ScriptException);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  int res = ctx->evaluate<int>(
+		  "var err = 0; \n"
+		  "try { var prop = new Property('testing'); }\n"
+          "catch (txt) { print(txt); err = 1; }\n");
+  {
+      JSContextThread thread(ctx);
+      BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("err"), 1);
+  }
 } // testPropertyObjNonExisting
 
 BOOST_AUTO_TEST_CASE(testPropertyGetNodeExisting) {

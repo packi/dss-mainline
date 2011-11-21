@@ -28,7 +28,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include "jshandler.h"
+#include "core/scripting/jshandler.h"
 
 namespace dss {
 

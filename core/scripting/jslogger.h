@@ -1,7 +1,8 @@
 /*
-Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
 
 Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+        Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
 This file is part of digitalSTROM Server.
 
@@ -24,7 +25,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #define __JS_LOGGER_H__
 
 #include "core/mutex.h"
-#include "core/jshandler.h"
+#include "core/scripting/jshandler.h"
 
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"

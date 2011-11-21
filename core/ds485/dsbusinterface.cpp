@@ -76,14 +76,27 @@ namespace dss {
 
   void DSBusInterface::checkResultCode(const int _resultCode) {
     if(_resultCode != ERROR_OK) {
-      std::string message = "Unknown Error (" + intToString(_resultCode) + ")";
+      std::string message;
+      std::string msgprefix;
+
+      if (_resultCode >= 0) {
+        msgprefix = "DSMeter Error [" + intToString(_resultCode) + "] ";
+      } else {
+        msgprefix = "DS485d/Socket Error [" + intToString(_resultCode) + "] ";
+      }
+
       switch(_resultCode) {
-        // bus errors
+
+        default:
+          message = "unknown error";
+          break;
+
+        // libdsm errors
         case ERROR_WRONG_PARAMETER:
-          message = "Wrong parameter";
+          message = "wrong parameter";
           break;
         case ERROR_ZONE_NOT_FOUND:
-          message = "Zone not found";
+          message = "zone not found";
           break;
         case ERROR_DEVICE_NOT_FOUND:
           message = "device not found";
@@ -145,13 +158,21 @@ namespace dss {
         case ERROR_REQUEST_CAN_NOT_BE_EXECUTED:
           message = "request can't be executed";
           break;
+        case ERROR_OUT_OF_RESOURCES:
+          message = "out of resources";
+          break;
+#if DSM_API_VERSION > 0x106
+        case ERROR_PROGRAMMING_MODE_IS_DISABLED:
+          message = "programming mode disabled";
+          break;
+#endif
 
-        // libdsm errors
+        // ds485d errors
         case ERROR_RESPONSE_TIMEOUT:
-          message = "request can't be executed";
+          message = "response timeout";
           break;
         case ERROR_INVALID_HANDLE:
-          message = "invalid handl";
+          message = "invalid handle";
           break;
         case ERROR_INVALID_CONNSPEC:
           message = "invalid connection spec";
@@ -190,7 +211,7 @@ namespace dss {
           message = "invalid parameter";
           break;
       }
-      throw BusApiError(message);
+      throw BusApiError(msgprefix + message);
     }
   } // checkResultCode
 

@@ -1,8 +1,7 @@
 /*
-    Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
-            Michael Tross, aizo GmbH <michael.tross@aizo.com>
+    Author: Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -21,32 +20,33 @@
 
 */
 
-#ifndef JSSOCKET_H_
-#define JSSOCKET_H_
+#ifndef _JSEVENT_INCLUDED
+#define _JSEVENT_INCLUDED
 
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
-
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "core/scripting/jshandler.h"
+#include "core/event.h"
+#include "core/propertysystem.h"
 
 namespace dss {
 
-  class SocketHelper;
-
-  class SocketScriptContextExtension : public ScriptExtension {
+  class EventScriptExtension : public ScriptExtension {
+  private:
+    EventQueue& m_Queue;
+    EventInterpreter& m_Interpreter;
   public:
-    SocketScriptContextExtension();
+    EventScriptExtension(EventQueue& _queue, EventInterpreter& _interpreter);
+    virtual ~EventScriptExtension() {}
 
     virtual void extendContext(ScriptContext& _context);
-    void removeSocketHelper(boost::shared_ptr<SocketHelper> _helper);
-    void addSocketHelper(boost::shared_ptr<SocketHelper> _helper);
-  private:
-    Mutex m_SocketHelperMutex;
-    typedef std::vector<boost::shared_ptr<SocketHelper> > SocketHelperVector;
-    SocketHelperVector m_SocketHelper;
-  }; // SocketScriptExtension
 
-} // namespace dss
+    EventQueue& getEventQueue() { return m_Queue; }
+    const EventQueue& getEventQueue() const { return m_Queue; }
 
-#endif /* JSSOCKET_H_ */
+    EventInterpreter& getEventInterpreter() { return m_Interpreter; }
+    const EventInterpreter& getEventInterpreter() const { return m_Interpreter; }
+  }; // EventScriptExtension
+
+}
+
+#endif

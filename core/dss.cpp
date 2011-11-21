@@ -31,18 +31,23 @@
 
 #include "dss.h"
 
+#include <cassert>
+#include <string>
+#include <sstream>
 #include <vector>
+
+#ifndef WIN32
+  #include <csignal>
+#endif
 
 #include "logger.h"
 #include "propertysystem.h"
-#include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
 #include "core/ds485/dsbusinterface.h"
-
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
-
 #include "core/web/webserver.h"
+
 #ifdef WITH_BONJOUR
   #include "bonjour.h"
 #endif
@@ -63,17 +68,14 @@
 
 #include "unix/systeminfo.h"
 
-#include <cassert>
-#include <string>
-#include <sstream>
-
-#ifndef WIN32
-  #include <csignal>
-#endif
+#include "scripting/jsmodel.h"
+#include "scripting/jsevent.h"
+#include "scripting/jsmetering.h"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/finder.hpp>
+
 namespace dss {
 
   //============================================= DSS

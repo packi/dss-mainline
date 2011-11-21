@@ -2,6 +2,7 @@
 Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
 Authors: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>,
+         Michael Tross, aizo GmbH <michael.tross@aizo.com>,
          Patrick Staehlin <pstaehlin@futurelab.ch>
 
 This file is part of digitalSTROM Server.
@@ -37,8 +38,8 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 namespace dss {
 
   const std::string ScriptLoggerExtensionName = "scriptloggerextension";
-
   const std::string LoggerObjectName = "ScriptLoggerContextWrapper";
+
   class ScriptLoggerContextWrapper {
   public:
     ScriptLoggerContextWrapper(boost::shared_ptr<ScriptLogger> _logger)
@@ -50,37 +51,39 @@ namespace dss {
     boost::shared_ptr<ScriptLogger> m_ScriptLogger;
   }; // ScriptLoggerContextWrapper
 
-  JSBool ScriptLoggerExtension_log_common(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval, bool newline) {
-    JSString *str;
+  JSBool ScriptLoggerExtension_log_common(JSContext *cx, uintN argc, jsval *vp, bool newline) {
     ScriptContext *ctx = static_cast<ScriptContext *>(JS_GetContextPrivate(cx));
     JSRequest req(ctx);
     ScriptLoggerExtension *ext = dynamic_cast<ScriptLoggerExtension*>(ctx->getEnvironment().getExtension(ScriptLoggerExtensionName));
     assert(ext != NULL);
 
-    // ignore empty lines
-    if(argc >=1) {
-      try {
-        if (!JSVAL_IS_STRING(argv[0])) {
-          return JS_TRUE;
-        }
-        str = JS_ValueToString(cx, argv[0]);
-        if (!str) {
-          return JS_TRUE;
-        }
-      } catch(const ScriptException& e) {
-        Logger::getInstance()->log(std::string("ScriptLogger: Caught script exception: ") + e.what());
-      }
-    } else {
-      return JS_TRUE;
+    if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, vp), "*"))
+      return JS_FALSE;
+
+    std::stringstream sstream;
+    for (uintN i = 0; i < argc; i++)
+    {
+      JSString *unicode_str;
+      char *src;
+
+      unicode_str = JS_ValueToString(cx, (JS_ARGV(cx, vp))[i]);
+      if (unicode_str == NULL)
+        return JS_FALSE;
+
+      src = JS_EncodeString(cx, unicode_str);
+      sstream << std::string(src);
+      JS_free(cx, src);
     }
 
-    ScriptLoggerContextWrapper* wrapper = static_cast<ScriptLoggerContextWrapper*>(JS_GetPrivate(cx, obj));
+    JSObject* obj = JS_THIS_OBJECT(cx, vp);
+    ScriptLoggerContextWrapper* wrapper = static_cast<ScriptLoggerContextWrapper*> (JS_GetPrivate(cx, obj));
+
     if(wrapper != NULL) {
-      Logger::getInstance()->log(JS_GetStringBytes(str));
+      Logger::getInstance()->log(sstream.str());
       if(newline) {
-        wrapper->getLogger()->logln(JS_GetStringBytes(str));
+        wrapper->getLogger()->logln(sstream.str());
       } else {
-        wrapper->getLogger()->log(JS_GetStringBytes(str));
+        wrapper->getLogger()->log(sstream.str());
       }
     } else {
       Logger::getInstance()->log("ScriptLoggerExtension_log_common: wrapper is null!", lsFatal);
@@ -89,45 +92,63 @@ namespace dss {
     return JS_TRUE;
   }
 
-  JSBool ScriptLoggerExtension_log(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    return ScriptLoggerExtension_log_common(cx, obj, argc, argv, rval, false);
+  JSBool ScriptLoggerExtension_log(JSContext *cx, uintN argc, jsval *vp) {
+    return ScriptLoggerExtension_log_common(cx, argc, vp, false);
   }
 
-  JSBool ScriptLoggerExtension_logln(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    return ScriptLoggerExtension_log_common(cx, obj, argc, argv, rval, true);
+  JSBool ScriptLoggerExtension_logln(JSContext *cx, uintN argc, jsval *vp) {
+    return ScriptLoggerExtension_log_common(cx, argc, vp, true);
   }
 
-  JSBool ScriptLogger_construct(JSContext *cx, JSObject *obj, uintN argc,
-                                jsval *argv, jsval *rval) {
+  JSBool ScriptLogger_construct(JSContext *cx, uintN argc, jsval *vp);
+  void ScriptLogger_finalize(JSContext *cx, JSObject *obj);
+
+  static JSClass ScriptLogger_class = {
+    "Logger", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,
+    ScriptLogger_finalize,
+    JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  static JSFunctionSpec ScriptLogger_methods[] = {
+    JS_FS("log", ScriptLoggerExtension_log, 1, 0),
+    JS_FS("logln", ScriptLoggerExtension_logln, 1, 0),
+    JS_FS_END
+  };
+
+  JSBool ScriptLogger_construct(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext *ctx = static_cast<ScriptContext *>(JS_GetContextPrivate(cx));
     JSRequest req(ctx);
     ScriptLoggerExtension *ext = dynamic_cast<ScriptLoggerExtension*>(ctx->getEnvironment().getExtension(ScriptLoggerExtensionName));
     assert(ext != NULL);
 
-    if(argc >=1) {
-      std::string logFileName;
-      try {
-        logFileName = ctx->convertTo<std::string>(argv[0]);
-      } catch(std::invalid_argument& e) {
-          Logger::getInstance()->log(std::string("Expected log file name (string) as constructor parameter") + e.what(), lsError);
-          return JS_FALSE;
-      }
-      try {
-        if (!endsWith(logFileName, ".log")) {
-          Logger::getInstance()->log("Log file name must have .log extension",
-                                     lsError);
-          return JS_FALSE;
-        }
+    JSString *jsFileName = JS_ValueToString(cx, argc ? JS_ARGV(cx, vp)[0] : JSVAL_VOID);
+    if (!jsFileName)
+      return false;
 
-        boost::shared_ptr<ScriptLogger> pLogger = ext->getLogger(logFileName);
-        ScriptLoggerContextWrapper* wrapper = new ScriptLoggerContextWrapper(pLogger);
-        JS_SetPrivate(cx, obj, wrapper);
-        return JS_TRUE;
-      } catch(const ScriptException& e) {
-        Logger::getInstance()->log(std::string("ScriptLogger: Caught script exception: ") + e.what(), lsError);
+    char *filename = JS_EncodeString(cx, jsFileName);
+    std::string logFileName(filename);
+    JS_free(cx, filename);
+
+    try {
+      if (!endsWith(logFileName, ".log")) {
+        Logger::getInstance()->log("Log file name must have .log extension", lsError);
+        return JS_FALSE;
       }
-    } else {
-      Logger::getInstance()->log("Expected log file name (string) as constructor parameter", lsError);
+
+      boost::shared_ptr<ScriptLogger> pLogger = ext->getLogger(logFileName);
+      ScriptLoggerContextWrapper* wrapper = new ScriptLoggerContextWrapper(pLogger);
+
+      JSObject *obj = JS_NewObject(cx, &ScriptLogger_class, NULL, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
+      JS_SetPrivate(cx, obj, wrapper);
+
+      return JS_TRUE;
+    } catch(const ScriptException& e) {
+      Logger::getInstance()->log(std::string("ScriptLogger: Caught script exception: ") + e.what(), lsError);
     }
 
     return JS_FALSE;
@@ -141,20 +162,6 @@ namespace dss {
       delete pWrapper;
     }
   } // finalize_set
-
-  static JSClass ScriptLogger_class = {
-    "Logger", JSCLASS_HAS_PRIVATE,
-    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-    JS_EnumerateStandardClasses,
-    JS_ResolveStub,
-    JS_ConvertStub,  ScriptLogger_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
-  };
-
-  static JSFunctionSpec ScriptLogger_methods[] = {
-    {"log", ScriptLoggerExtension_log, 1, 0, 0},
-    {"logln", ScriptLoggerExtension_logln, 1, 0, 0},
-    {NULL, NULL, 0, 0, 0},
-  };
 
   ScriptLogger::ScriptLogger(const std::string& _filePath, 
                              const std::string& _filename, 
@@ -257,11 +264,15 @@ namespace dss {
   }
 
   void ScriptLoggerExtension::extendContext(ScriptContext& _context) {
-    JS_InitClass(_context.getJSContext(),
-                 _context.getRootObject().getJSObject(),
-                 NULL, &ScriptLogger_class, ScriptLogger_construct, 1, NULL,
-                 ScriptLogger_methods, NULL, NULL);
-
+    JS_InitClass(
+        _context.getJSContext(),
+        _context.getRootObject().getJSObject(),
+        NULL,
+        &ScriptLogger_class,
+        ScriptLogger_construct,
+        1, NULL,
+        ScriptLogger_methods,
+        NULL, NULL);
   } // extendContext
 
   boost::shared_ptr<ScriptLogger> ScriptLoggerExtension::getLogger(const std::string& _filename) {

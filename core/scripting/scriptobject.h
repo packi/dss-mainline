@@ -23,7 +23,7 @@
 #ifndef SCRIPTOBJECT_H_INCLUDED
 #define SCRIPTOBJECT_H_INCLUDED
 
-#include "core/jshandler.h"
+#include "core/scripting/jshandler.h"
 
 namespace dss {
 
