@@ -24,8 +24,8 @@
   #include "config.h"
 #endif
 
-#include "soapH.h"
-#include "gs-locks.h"
+#include "webservices/soapH.h"
+#include "webservices/gs-locks.h"
 
 #include <openssl/crypto.h>
 

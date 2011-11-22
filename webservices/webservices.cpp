@@ -1,8 +1,9 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
              Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+             Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -38,6 +39,11 @@
 #include "core/session.h"
 
 namespace dss {
+
+// soap_accept() timeout in seconds
+// FIXME: typical value: 200
+#define SOAP_ACCEPT_TIMEOUT 2
+
   //================================================== WebServices
 
   WebServices::WebServices(DSS* _pDSS)
@@ -63,14 +69,32 @@ namespace dss {
     std::string sslcert = getDSS().getPropertySystem().getStringValue(
                                   getConfigPropertyBasePath() + "sslcert");
 
-    if (m_Service.ssl_server_context(SOAP_SSL_DEFAULT, sslcert.c_str(),
-          NULL, sslcert.c_str(), NULL, NULL, NULL, "dss")) {
-      throw std::runtime_error("Could not set ssl server context!");
+    m_Service.accept_timeout = SOAP_ACCEPT_TIMEOUT;
+    m_Service.bind_flags = SO_REUSEADDR;
+
+    if (m_Service.ssl_server_context(
+        SOAP_SSL_NO_AUTHENTICATION | SOAP_SSL_NO_DEFAULT_CA_PATH, // SOAP_SSL_DEFAULT,
+        sslcert.c_str(),
+        NULL,
+        sslcert.c_str(),
+        NULL,
+        NULL,
+        NULL,
+        "dss")) {
+      const char** details = soap_faultdetail(&m_Service);
+      throw std::runtime_error("Could not set SOAP ssl server context"
+          ", Details: " + std::string( (details && *details) ? *details : "none"));
     }
 
-    int soapServerSocket = m_Service.bind(NULL, getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "port"), 10);
+    int soapConfigPort = getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "port");
+    int soapServerSocket = m_Service.bind(
+        NULL,
+        soapConfigPort,
+        100);
     if (soapServerSocket == SOAP_INVALID_SOCKET) {
-      throw std::runtime_error("Could not bind to SOAP port");
+      const char** details = soap_faultdetail(&m_Service);
+      throw std::runtime_error("Could not bind SOAP to port " + intToString(soapConfigPort) +
+          ", Details: " + std::string( (details && *details) ? *details : "none"));
     }
   }
 
