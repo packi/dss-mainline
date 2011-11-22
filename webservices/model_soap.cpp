@@ -1,8 +1,9 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
             Michael Tross, aizo GmbH <michael.tross@aizo.com>
+            Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -1669,8 +1670,6 @@ int dss__MeteringGetResolutions(struct soap *soap, char* _token, std::vector<dss
   foreach(boost::shared_ptr<dss::MeteringConfigChain> pChain, meteringConfig) {
     for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
       dss__MeteringResolutions resolution;
-      resolution.type = pChain->isEnergy() ? "energy" : "consumption";
-      resolution.unit = pChain->getUnit();
       resolution.resolution = pChain->getResolution(iConfig);
       result.push_back(resolution);
     }
@@ -1714,24 +1713,10 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
   }
 
   dss::Metering& metering = dss::DSS::getInstance()->getMetering();
-  std::vector<boost::shared_ptr<dss::MeteringConfigChain> > meteringConfig = metering.getConfig();
-  boost::shared_ptr<dss::Series<dss::CurrentValue> > pSeries;
-  foreach(boost::shared_ptr<dss::MeteringConfigChain> pChain, meteringConfig) {
-    if(pChain->isEnergy() != isEnergy) {
-      continue;
-    }
-    for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
-      if(pChain->getResolution(iConfig) == _resolution) {
-        pSeries = metering.getSeries(pChain, iConfig, pMeter);
-        break;
-      }
-    }
-  }
+  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, isEnergy);
   if(pSeries != NULL) {
-    boost::shared_ptr<std::deque<dss::CurrentValue> > values = pSeries->getExpandedValues();
-
-    for(std::deque<dss::CurrentValue>::iterator iValue = values->begin(),
-        e = values->end();
+    for(std::deque<dss::Value>::iterator iValue = pSeries->begin(),
+        e = pSeries->end();
         iValue != e;
         ++iValue)
     {

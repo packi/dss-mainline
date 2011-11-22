@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -27,8 +28,6 @@
 #include "core/foreach.h"
 
 #include "core/metering/metering.h"
-#include "core/metering/series.h"
-#include "core/metering/seriespersistence.h"
 
 #include "core/model/modulator.h"
 #include "core/model/apartment.h"
@@ -58,8 +57,6 @@ namespace dss {
         boost::shared_ptr<JSONObject> resolution(new JSONObject());
         resolutions->addElement("", resolution);
 
-        resolution->addProperty("type", pChain->isEnergy() ? "energy" : "consumption");
-        resolution->addProperty("unit", pChain->getUnit());
         resolution->addProperty("resolution", pChain->getResolution(iConfig));
       }
     }
@@ -118,30 +115,17 @@ namespace dss {
         return failure("Invalid type '" + typeString + "'");
       }
     }
-    std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = m_Metering.getConfig();
-    boost::shared_ptr<Series<CurrentValue> > pSeries;
-    foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
-      if(pChain->isEnergy() != energy) {
-        continue;
-      }
-      for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
-        if(pChain->getResolution(iConfig) == resolution) {
-          pSeries = m_Metering.getSeries(pChain, iConfig, pMeter);
-          break;
-        }
-      }
-    }
-    if(pSeries != NULL) {
-      boost::shared_ptr<std::deque<CurrentValue> > values = pSeries->getExpandedValues();
+    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter, resolution, energy);
 
+    if(pSeries != NULL) {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("meterID", deviceDSIDString);
       resultObj->addProperty("type", typeString);
       resultObj->addProperty("resolution", resolutionString);
       boost::shared_ptr<JSONArrayBase> valuesArray(new JSONArrayBase());
       resultObj->addElement("values", valuesArray);
-      for(std::deque<CurrentValue>::iterator iValue = values->begin(),
-          e = values->end();
+      for(std::deque<Value>::iterator iValue = pSeries->begin(),
+          e = pSeries->end();
           iValue != e;
           ++iValue)
       {

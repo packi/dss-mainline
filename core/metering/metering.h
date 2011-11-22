@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010,2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -27,10 +28,10 @@
 #include "core/subsystem.h"
 #include "core/datetools.h"
 #include "core/mutex.h"
-#include "core/metering/series.h"
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 
@@ -42,59 +43,43 @@ namespace dss {
   class MeteringValue;
   class MeteringBusInterface;
 
-  class CachedSeries {
-  public:
-    CachedSeries(boost::shared_ptr<Series<CurrentValue> > _pSeries,
-                 boost::shared_ptr<MeteringConfigChain> _pChain)
-    : m_pSeries(_pSeries),
-      m_pChain(_pChain),
-      m_Touched(false)
-    { }
-
-    DateTime& getLastStored() {
-      return m_LastStored;
-    }
-
-    void markAsStored() {
-      m_LastStored = DateTime();
-      m_Touched = false;
-    }
-
-    boost::shared_ptr<Series<CurrentValue> > getSeries() {
-      return m_pSeries;
-    }
-
-    boost::shared_ptr<MeteringConfigChain> getChain() {
-      return m_pChain;
-    }
-
-    void touch() {
-      m_Touched = true;
-    }
-
-    bool isTouched() {
-      return m_Touched;
-    }
+  class Value {
+  protected:
+    double m_Value;
   private:
-    boost::shared_ptr<Series<CurrentValue> > m_pSeries;
-    boost::shared_ptr<MeteringConfigChain> m_pChain;
-    DateTime m_LastStored;
-    bool m_Touched;
-  };
+    DateTime m_TimeStamp;
+  public:
+#ifdef WITH_GCOV
+    Value();
+#endif
+
+    Value(double _value)
+    : m_Value(_value)
+    { } // ctor
+
+    Value(double _value, const DateTime& _timeStamp)
+    : m_Value(_value),
+      m_TimeStamp(_timeStamp)
+    { } // ctor
+
+    virtual ~Value() {};
+
+    const DateTime& getTimeStamp() const { return m_TimeStamp; }
+    void setTimeStamp(const DateTime& _value) { m_TimeStamp = _value; }
+    double getValue() const { return m_Value; }
+  }; // Value
 
   class Metering : public ThreadedSubsystem {
   private:
     int m_MeterEnergyCheckIntervalSeconds;
     int m_MeterConsumptionCheckIntervalSeconds;
     std::string m_MeteringStorageLocation;
+    std::string m_RrdcachedPath;
     boost::shared_ptr<MeteringConfigChain> m_ConfigEnergy;
     boost::shared_ptr<MeteringConfigChain> m_ConfigConsumption;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
-    typedef
-    std::map<boost::shared_ptr<DSMeter>,
-      std::pair<
-        boost::shared_ptr<CachedSeries>,
-        boost::shared_ptr<CachedSeries> > > CachedSeriesMap;
+    typedef std::map<boost::shared_ptr<DSMeter>,
+                     boost::shared_ptr<std::string> > CachedSeriesMap;
     CachedSeriesMap m_CachedSeries;
     Mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
@@ -103,17 +88,8 @@ namespace dss {
 
     virtual void initialize();
     virtual void execute();
-    void writeBackValuesOf(boost::shared_ptr<MeteringConfigChain> _pChain,
-                           std::deque<CurrentValue>& _values,
-                           DateTime& _lastStored,
-                           boost::shared_ptr<DSMeter> _pMeter);
-    void writeBackValues();
-    boost::shared_ptr<CachedSeries> getOrCreateCachedSeries(
+    boost::shared_ptr<std::string> getOrCreateCachedSeries(
       boost::shared_ptr<MeteringConfigChain> _pChain,
-      boost::shared_ptr<DSMeter> _pMeter);
-    boost::shared_ptr<Series<CurrentValue> > createSeriesFromChain(
-      boost::shared_ptr<MeteringConfigChain> _pChain,
-      int _index,
       boost::shared_ptr<DSMeter> _pMeter);
   protected:
     virtual void doStart();
@@ -121,51 +97,37 @@ namespace dss {
     Metering(DSS* _pDSS);
     virtual ~Metering() {};
 
-    boost::shared_ptr<Series<CurrentValue> > getSeries(
-      boost::shared_ptr<MeteringConfigChain> _pChain,
-      int _index,
-      boost::shared_ptr<DSMeter> _pMeter);
-
     const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
-    boost::shared_ptr<MeteringConfigChain> getEnergyConfigChain() { return m_ConfigEnergy; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
-    void postConsumptionEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt);
-    void postEnergyEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt);
+    void postMeteringEvent(boost::shared_ptr<DSMeter> _meter, int _valuePower, int _valueEnergy, DateTime _sampledAt);
     void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
+    boost::shared_ptr<std::deque<Value> > getSeries(boost::shared_ptr<DSMeter> _meter,
+                                                    int &_resolution,
+                                                    bool getEnergy);
   }; // Metering
 
   class MeteringConfig {
   private:
-    std::string m_FilenameSuffix;
     int m_Resolution;
     int m_NumberOfValues;
-    bool m_Stored;
   public:
-    MeteringConfig(const std::string& _filenameSuffix, int _resolution,
-                   int _numberOfValues, bool _stored = true)
-    : m_FilenameSuffix(_filenameSuffix),
-      m_Resolution(_resolution),
-      m_NumberOfValues(_numberOfValues),
-      m_Stored(_stored)
+    MeteringConfig(int _resolution,
+                   int _numberOfValues)
+    : m_Resolution(_resolution)
+    , m_NumberOfValues(_numberOfValues)
     { } // ctor
 
-    const std::string& getFilenameSuffix() const { return m_FilenameSuffix; }
     const int getResolution() const { return m_Resolution; }
     const int getNumberOfValues() const { return m_NumberOfValues; }
-    const bool isStored() const { return m_Stored; }
   }; // MeteringConfig
 
   class MeteringConfigChain {
   private:
-    bool m_IsEnergy;
     int m_CheckIntervalSeconds;
-    std::string m_Unit;
-    std::string m_Comment;
     std::vector<boost::shared_ptr<MeteringConfig> > m_Chain;
   public:
-    MeteringConfigChain(bool _isEnergy, int _checkIntervalSeconds, const std::string& _unit)
-    : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds),
-      m_Unit(_unit)
+    MeteringConfigChain(int _checkIntervalSeconds)
+    : m_CheckIntervalSeconds(_checkIntervalSeconds)
     { }
 
     void addConfig(boost::shared_ptr<MeteringConfig> _config);
@@ -173,16 +135,10 @@ namespace dss {
     const int size() const { return m_Chain.size(); }
     boost::shared_ptr<MeteringConfig> get(int _index) { return m_Chain.at(_index); }
 
-    const std::string& getFilenameSuffix(int _index) const { return m_Chain.at(_index)->getFilenameSuffix(); }
     const int getResolution(int _index) const { return m_Chain.at(_index)->getResolution(); }
     const int getNumberOfValues(int _index) const { return m_Chain.at(_index)->getNumberOfValues(); }
 
-    bool isEnergy() const { return m_IsEnergy; }
-    bool isConsumption() const { return !m_IsEnergy; }
     int getCheckIntervalSeconds() const { return m_CheckIntervalSeconds; }
-    const std::string& getUnit() const { return m_Unit; }
-    const std::string& getComment() const { return m_Comment; }
-    void setComment(const std::string& _value) { m_Comment = _value; }
   }; // MeteringConfigChain
 
 } // namespace dss

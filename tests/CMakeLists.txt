@@ -2,7 +2,7 @@ set(files basetests.cpp  datetoolstests.cpp securitytests.cpp
         eventtests.cpp
         modeltests.cpp
         devicetests.cpp
-        propertysystemtests.cpp  scriptstest.cpp  seriestests.cpp tests.cpp
+        propertysystemtests.cpp  scriptstest.cpp tests.cpp
         deviceinterfacerequesthandlertest.cpp jsontests.cpp
         restfulapitests.cpp dssimtest.cpp
         devicerequesthandlertest.cpp circuitrequesthandlertest.cpp

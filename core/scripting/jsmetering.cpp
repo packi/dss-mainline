@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Michael Tross, aizo GmbH <michael.tross@aizo.com>
+    Authors: Michael Tross, aizo GmbH <michael.tross@aizo.com>
+             Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -127,8 +128,6 @@ namespace dss {
       foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
         for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
           ScriptObject resolution(*ctx, NULL);
-          resolution.setProperty<std::string>("type", pChain->isEnergy() ? "energy" : "consumption");
-          resolution.setProperty<std::string>("unit", pChain->getUnit());
           resolution.setProperty<int>("resolution", pChain->getResolution(iConfig));
           jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
           JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
@@ -183,27 +182,13 @@ namespace dss {
         return JS_FALSE;
       }
 
-      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = ext->getMetering().getConfig();
-      boost::shared_ptr<Series<CurrentValue> > pSeries;
-      foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
-        if(pChain->isEnergy() != energy) {
-          continue;
-        }
-        for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
-          if(pChain->getResolution(iConfig) == resolution) {
-            pSeries = ext->getMetering().getSeries(pChain, iConfig, pMeter);
-            break;
-          }
-        }
-      }
+      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter, resolution, energy);
       if(pSeries != NULL) {
-        boost::shared_ptr<std::deque<CurrentValue> > values = pSeries->getExpandedValues();
-
         int valueNumber = 0;
         JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
-        for(std::deque<CurrentValue>::iterator iValue = values->begin(),
-            e = values->end();
+        for(std::deque<Value>::iterator iValue = pSeries->begin(),
+            e = pSeries->end();
             iValue != e;
             ++iValue)
         {
