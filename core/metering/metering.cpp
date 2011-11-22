@@ -70,6 +70,9 @@ namespace dss {
                                                 false);
     m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress",
+                                                "unix:/var/run/rrdcached.sock", true, false);
+    m_RrdcachedPath = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress");
 
     if (getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "enabled")) {
       if (!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
@@ -119,8 +122,6 @@ namespace dss {
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
       std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
-      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress",
-                                                  "unix:/var/run/rrdcached.sock", true, false);
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
@@ -173,8 +174,10 @@ namespace dss {
 
     std::vector<std::string> lines;
     lines.push_back("update");
-    lines.push_back("--daemon");
-    lines.push_back(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress"));
+    if (!m_RrdcachedPath.empty()) {
+      lines.push_back("--daemon");
+      lines.push_back(m_RrdcachedPath);
+    }
     lines.push_back(rrdFileName.get()->c_str());
     {
       std::stringstream sstream;
@@ -209,11 +212,11 @@ namespace dss {
     char **names = 0;
     rrd_value_t *data = 0;
 
-    {
+    if (!m_RrdcachedPath.empty()) {
       std::vector<std::string> lines;
       lines.push_back("flushcached");
       lines.push_back("--daemon");
-      lines.push_back(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress"));
+      lines.push_back(m_RrdcachedPath);
       lines.push_back(rrdFileName.get()->c_str());
       std::vector<const char*> starts;
       std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
@@ -226,8 +229,10 @@ namespace dss {
 
     std::vector<std::string> lines;
     lines.push_back("xport");
-    lines.push_back("--daemon");
-    lines.push_back("unix:/tmp/rrdcached.sock");
+    if (!m_RrdcachedPath.empty()) {
+      lines.push_back("--daemon");
+      lines.push_back(m_RrdcachedPath);
+    }
     lines.push_back("--start");
     lines.push_back(intToString(start));
     lines.push_back("--end");
