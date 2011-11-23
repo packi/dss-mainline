@@ -199,6 +199,12 @@ else()
   MESSAGE (FATAL_ERROR "Cannot build without Boost.")
 endif()
 
+if(${Boost_VERSION} LESS 104600)
+  add_definitions(-DBOOST_VERSION_135)
+else()
+  add_definitions(-DBOOST_VERSION_146)
+endif()
+
 if(CMAKE_HAVE_PTHREAD_CREATE)
   set(REQUIRED_LIBS ${REQUIRED_LIBS} pthread)
 endif(CMAKE_HAVE_PTHREAD_CREATE)

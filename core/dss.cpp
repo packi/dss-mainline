@@ -635,8 +635,13 @@ const char* kSavedPropsDirectory = "data/savedprops/";
       {
         if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
         {
+#if defined(BOOST_VERSION_135)
           Logger::getInstance()->log("Loading config from " + itr->path().file_string(), lsInfo);
           if (getPropertySystem().loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
+#else
+          Logger::getInstance()->log("Loading config from " + itr->path().string(), lsInfo);
+          if (getPropertySystem().loadFromXML(itr->path().string(), getPropertySystem().getProperty("/config")))
+#endif
             n++;
         }
       }

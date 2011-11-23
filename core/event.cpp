@@ -238,7 +238,11 @@ namespace dss {
         {
           if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
           {
+#if defined(BOOST_VERSION_135)
             loadFromXML(itr->path().file_string());
+#else
+            loadFromXML(itr->path().string());
+#endif
           }
         }
       }

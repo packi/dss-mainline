@@ -160,10 +160,17 @@ namespace dss {
           dir_itr != end_iter;
           ++dir_itr)  {
         if(fs::is_regular(dir_itr->status())) {
+#if defined(BOOST_VERSION_135)
           std::string fileName = dir_itr->filename();
           if(endsWith(dir_itr->filename(), ".log") ||
              endsWith(dir_itr->filename(), ".LOG")) {
             std::string abspath = dir_itr->string();
+#else
+          std::string fileName = dir_itr->path().filename().string();
+          if(endsWith(dir_itr->path().filename().string(), ".log") ||
+             endsWith(dir_itr->path().filename().string(), ".LOG")) {
+            std::string abspath = dir_itr->path().string();
+#endif
             getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(fileName), abspath, true, false);
             getDSS().getPropertySystem().setStringValue("/system/js/logfiles/" + std::string(fileName), abspath, true, false);
           }
