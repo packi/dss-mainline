@@ -31,15 +31,14 @@
 dssSSLService::dssSSLService() : dssService() 
 {
   CRYPTO_setup_locks();
+  soap_ssl_init();
   soap_init(this);
-  bind_flags = SO_REUSEADDR;
-  accept_timeout = SOAP_ACCEPT_TIMEOUT;
 }
 
 dssSSLService::~dssSSLService()
 {
   soap_done(this);
-  CRYPTO_cleanup_locks(); 
+  CRYPTO_cleanup_locks();
 }
 
 int dssSSLService::dssSSLService::ssl_server_context(unsigned short param, 

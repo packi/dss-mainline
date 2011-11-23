@@ -23,8 +23,8 @@
 #ifndef __SOAP_DSS_SSL_SERVICE_H__
 #define __SOAP_DSS_SSL_SERVICE_H__
 
-#include "soapH.h"
-#include "soapdssObject.h"
+#include "webservices/soapH.h"
+#include "webservices/soapdssObject.h"
 
 // It seems that gsoap does not generate the C++ methods that are needed
 // for SSL, we fix that by subclassing the generated code and by adding these

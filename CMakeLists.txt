@@ -29,6 +29,7 @@ if(NOT WITH_SAVEDPROPSDIR)
   set(WITH_SAVEDPROPSDIR "${WITH_DATADIR}/savedprops" CACHE FILEPATH "Saved properties directory")
 endif(NOT WITH_SAVEDPROPSDIR)
 
+option(WITH_SOAP "Build SOAP support" ON)
 option(WITH_HTTP "Build http protocol support into the dss" OFF)
 
 set(DSS_GEN_VERSION_CMD "")
@@ -141,10 +142,14 @@ else()
 endif()
 
 # check for gsoap headers and library
-find_package(GSOAP REQUIRED)
-include_directories(${GSOAP_INCLUDE_DIRS})
-check_include_files(stdsoap2.h HAVE_STDSOAP2_H)
-set(REQUIRED_LIBS ${REQUIRED_LIBS} ${GSOAP_LIBRARIES})
+find_package(GSOAP)
+if (WITH_SOAP AND GSOAP_FOUND)
+  add_definitions(-DWITH_SOAP)
+  include_directories(${GSOAP_INCLUDE_DIRS})
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} ${GSOAP_LIBRARIES})
+else()
+  unset(WITH_SOAP)
+endif()
 
 # check for libical headers and library
 find_package(Libical REQUIRED)
@@ -203,20 +208,25 @@ if(LIBDSM_PREFIX)
   link_directories(${LIBDSM_PREFIX}/lib)
   include_directories(${LIBDSM_PREFIX}/include)
 endif()
-
 set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api-v2)
 
 add_subdirectory(core)
 add_subdirectory(unix)
-add_subdirectory(webservices)
+if (WITH_SOAP)
+  add_subdirectory(webservices)
+  add_dependencies(core soapgen)
+endif()
 add_subdirectory(external)
 add_subdirectory(doc)
 
-set(DSS_LIBS core security ds485 model unix simulation scripting webservices)
+set(DSS_LIBS core security ds485 model unix simulation scripting)
+if (WITH_SOAP)
+  set(DSS_LIBS ${DSS_LIBS} webservices)
+endif()
+
 add_executable(dss main.cpp namespaces.cpp)
 target_link_libraries(dss ${TEST_LIB} ${DSS_LIBS} mongoose ${REQUIRED_LIBS})
 add_dependencies(dss build_info.h)
-
 
 #include test-directory if needed
 set(TEST_LIB)

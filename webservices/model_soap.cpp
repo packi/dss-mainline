@@ -26,11 +26,11 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-#include "soapH.h"
+#include "webservices/soapH.h"
+#include "webservices/webservices.h"
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/event.h"
-#include "webservices/webservices.h"
 #include "core/sim/dssim.h"
 #include "core/propertysystem.h"
 #include "core/propertyquery.h"

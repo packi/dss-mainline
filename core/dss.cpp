@@ -277,8 +277,10 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
 
+#ifdef WITH_SOAP
     m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
     m_Subsystems.push_back(m_pWebServices.get());
+#endif
 
     m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
     m_Subsystems.push_back(m_pEventInterpreter.get());
@@ -306,7 +308,9 @@ const char* kSavedPropsDirectory = "data/savedprops/";
                          getEventInterpreter(),
                          m_pSecurity));
     m_pWebServer->setSessionManager(m_pSessionManager);
+#ifdef WITH_SOAP
     m_pWebServices->setSessionManager(m_pSessionManager);
+#endif
 
     parseProperties(_properties);
 
