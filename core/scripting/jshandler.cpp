@@ -319,7 +319,9 @@ namespace dss {
     }
 
     virtual ~SessionAttachedTimeoutObject() {
-      delete m_pRunAsUser;
+      if (m_pRunAsUser) {
+        delete m_pRunAsUser;
+      }
     }
 
     void timeout(int _timeoutMS, JSObject* _obj, jsval _function, ScriptFunctionRooter* _rooter) {
