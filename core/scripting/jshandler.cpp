@@ -385,7 +385,7 @@ namespace dss {
     functionVal = OBJECT_TO_JSVAL(jsFunction);
     timeoutMS = (int) jsTimeout;
 
-    JSObject* jsRoot = jsFunction;
+    JSObject* jsRoot = JS_NewObject(cx, NULL, NULL, NULL);
 
     ScriptFunctionRooter* functionRoot(new ScriptFunctionRooter(ctx, jsRoot, functionVal));
     SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
