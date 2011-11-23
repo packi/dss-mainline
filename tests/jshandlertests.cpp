@@ -194,4 +194,28 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutIsStoppable) {
   BOOST_CHECK_EQUAL(ctx->getAttachedObjectsCount(), 0);
 }
 
+BOOST_AUTO_TEST_CASE(testSetMultipleTimeouts) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = 0;"
+      "function cb1() { result ++; } "
+      "function cb2() { result ++; }"
+      "function cb3() { result ++; }"
+      "function cb4() { result ++; }"
+      "function cb5() { result ++; }"
+      "setTimeout(cb1, 1500);"
+      "setTimeout(cb2, 1500);"
+      "setTimeout(cb3, 1500);"
+      "setTimeout(cb4, 1500);"
+      "setTimeout(cb5, 1500);"
+  );
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(100);
+  }
+  JSContextThread req(ctx);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 5);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

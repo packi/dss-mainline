@@ -322,7 +322,7 @@ namespace dss {
       delete m_pRunAsUser;
     }
 
-    void timeout(int _timeoutMS, JSObject* _obj, jsval _function, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
+    void timeout(int _timeoutMS, JSObject* _obj, jsval _function, ScriptFunctionRooter* _rooter) {
       const int kSleepIntervalMS = 500;
       int toSleep = _timeoutMS;
       while(!getIsStopped() && (toSleep > 0)) {
@@ -340,23 +340,23 @@ namespace dss {
         }
 
         ScriptLock lock(getContext());
-        JSContextThread req(getContext());
-        ScriptObject sobj(_obj, *getContext());
-        ScriptFunctionParameterList params(*getContext());
-
-        try {
-          sobj.callFunctionByReference<void>(_function, params);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log("JavaScript: error calling timeout handler: '" +
-              std::string(e.what()) + "'", lsError);
+        {
+          JSContextThread req(getContext());
+          ScriptObject sobj(_obj, *getContext());
+          ScriptFunctionParameterList params(*getContext());
+          try {
+            sobj.callFunctionByReference<void>(_function, params);
+          } catch(ScriptException& e) {
+            Logger::getInstance()->log("JavaScript: error calling timeout handler: '" +
+                std::string(e.what()) + "'", lsError);
+          }
+          delete _rooter;
         }
-
-        _rooter.reset();
 
       } else {
         ScriptLock lock(getContext());
         JSContextThread req(getContext());
-        _rooter.reset();
+        delete _rooter;
       }
 
       delete this;
@@ -387,7 +387,7 @@ namespace dss {
 
     JSObject* jsRoot = jsFunction;
 
-    boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, jsRoot, functionVal));
+    ScriptFunctionRooter* functionRoot(new ScriptFunctionRooter(ctx, jsRoot, functionVal));
     SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
     boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, jsRoot, functionVal, functionRoot));
     JS_SET_RVAL(cx, vp, JSVAL_TRUE);
@@ -726,7 +726,6 @@ namespace dss {
       JS_SetContextThread(jsc);
       jsThreadSet = true;
     }
-
     JS_BeginRequest(jsc);
 
     if(m_Function != JSVAL_NULL) {
@@ -737,7 +736,6 @@ namespace dss {
     }
 
     JS_EndRequest(jsc);
-
     if (jsThreadSet) {
       JS_ClearContextThread(jsc);
     }
