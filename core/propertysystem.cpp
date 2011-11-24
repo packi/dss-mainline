@@ -886,6 +886,15 @@ namespace dss {
                 assert(false);
             }
           }
+          else {
+            switch(valueType) {
+              case vTypeString:
+                setStringValue("");
+                break;
+              default:
+                break;
+            }
+          }
         }
       }
       if(elem->hasAttribute("writeable")) {
