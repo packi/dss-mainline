@@ -4,6 +4,18 @@
     <property name="subsystems/DSBusInterface/connectionURI" type="string">
       <value>tcp://localhost:8442</value>
     </property>
+
+    <!-- metering configuration -->
+    <property name="subsystems/Metering/enabled" type="boolean">
+      <value>true</value>
+    </property>
+    <property name="subsystems/Metering/storageLocation" type="string">
+      <value>data/metering/</value>
+    </property>
+    <property name="subsystems/Metering/rrdDaemonAddress" type="string">
+      <value />
+    </property>
+
     <property name="subsystems/DSSim/js-devices">
       <property name="example">
         <property name="script-file" type="string">
