@@ -6,12 +6,10 @@
     </zone>
   </modulator>
   <modulator busid="70" dsid="10">
-    <device dsid="1" busid="1" type="standard.simple" />
     <zone id="1"> 
       <device dsid="4" busid="4" type="standard.simple"/>
       <device dsid="13" busid="13" type="standard.simple"/>
-<!--      <device dsid="6" busid="6" type="standard.simple" bell="true"/> -->
-
+      <!-- <device dsid="6" busid="6" type="standard.simple" bell="true"/> -->
       <group id="1">
         <device busid="4" />
         <device busid="13" />
@@ -20,30 +18,29 @@
       </group>        
     </zone>
     <zone id="4">
-      <device dsid="3" busid="3" type="standard.simple"/>
       <device dsid="5" busid="5" type="standard.simple" />
       <group id="1">
         <device busid="5" />
       </group>
     </zone>
-    <zone id="172">
-      <device dsid="7" busid="7" type="standard.simple">
-      </device>
 
-<!--
-      <device dsid="2" busid="2" type="example.vlc_remote"> 
+    <!--
+    <zone id="172">
+      <device dsid="3" busid="3" type="example.vlc_player">
         <parameter name="port">4212</parameter>
         <parameter name="host">192.168.169.232</parameter>
       </device>
-      <device dsid="2" busid="2" type="aizo.slim_slave"> 
+      <device dsid="2" busid="2" type="example.slim_player">
         <parameter name="port">9090</parameter>
         <parameter name="host">localhost</parameter>
         <parameter name="playermac">00:04:20:1e:2f:ca</parameter>
       </device>
       <group id="4">
         <device busid="2" />
+        <device busid="3" />
       </group>
--->
     </zone>
+    -->
+
   </modulator>
 </simulation>
