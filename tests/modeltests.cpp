@@ -858,6 +858,9 @@ public:
   virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
     return "";
   }
+  virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID) {
+    return DSMeterHash_t();
+  }
 }; // DummyStructureQueryBusInterface
 
 class DummyActionRequestInterface : public ActionRequestInterface {

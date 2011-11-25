@@ -344,4 +344,18 @@ namespace dss {
     return std::string(reinterpret_cast<char*>(&name));
   }
 
+  DSMeterHash_t DSStructureQueryBusInterface::getDSMeterHash(const dss_dsid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    DSMeterHash_t result;
+    dsid_t dsid;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
+    int ret = dSMConfig_get_hash(m_DSMApiHandle, dsid, &result.Hash, &result.ModificationCount);
+    DSBusInterface::checkResultCode(ret);
+
+    return result;
+  } // getDSMeterHash
+
 } // namespace dss

@@ -455,6 +455,14 @@ namespace dss {
         return m_pInner->getSceneName(_dsMeterID, _group, _sceneNumber);
       }
     } // getSceneName
+
+    virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        return m_pSimulationInterface->getDSMeterHash(_dsMeterID);
+      } else {
+        return m_pInner->getDSMeterHash(_dsMeterID);
+      }
+    }
   private:
     StructureQueryBusInterface* m_pInner;
     StructureQueryBusInterface* m_pSimulationInterface;
