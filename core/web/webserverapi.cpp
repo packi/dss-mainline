@@ -505,8 +505,13 @@ namespace dss {
     RestfulClass& clsMetering = api->addClass("metering");
     clsMetering.addMethod("getResolutions")
       .withDocumentation("Returns all resolutions stored on this dSS");
-    clsMetering.addMethod("getSeries");
-    clsMetering.addMethod("getValues");
+    clsMetering.addMethod("getSeries")
+      .withDocumentation("Returns all metering series stored on this dSS");
+    clsMetering.addMethod("getValues")
+      .withParameter("dsid", "string", true)
+      .withParameter("type", "string", true)
+      .withParameter("resolution", "integer", true)
+      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy' and 'consumption' are available");
     clsMetering.addMethod("getLatest")
       .withParameter("type", "string", true)
       .withParameter("from", "string", true)
