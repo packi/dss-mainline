@@ -170,6 +170,9 @@ namespace dss {
           } catch(ScriptException& e) {
             JS_ReportError(cx, "Error converting dsid string to dsid");
             return JS_FALSE;
+          } catch(std::invalid_argument& e) {
+            JS_ReportError(cx, "Error converting dsid string to dsid");
+            return JS_FALSE;
           }
           try {
             boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByDSID(dsid);

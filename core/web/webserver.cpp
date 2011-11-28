@@ -392,6 +392,12 @@ namespace dss {
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+      } catch(std::invalid_argument& e) {
+        emitHTTPHeader(500, _connection, "application/json");
+        JSONObject resultObj;
+        resultObj.addProperty("ok", false);
+        resultObj.addProperty("message", e.what());
+        result = resultObj.toString();
       }
     } else {
       emitHTTPHeader(404, _connection, "application/json");

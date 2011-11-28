@@ -171,6 +171,10 @@ namespace dss {
         Logger::getInstance()->log("Error getting device '" + dsid + "'", lsWarning);
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
+      } catch(std::invalid_argument& e) {
+        Logger::getInstance()->log("Error getting device '" + dsid + "'", lsWarning);
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_TRUE;
       }
       bool energy;
       if(type == "consumption") {
