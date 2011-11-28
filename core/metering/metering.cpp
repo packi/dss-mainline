@@ -280,7 +280,7 @@ namespace dss {
     }
     rrd_freemem(names);
     rrd_value_t *currentData = data;
-    for (int timeStamp = start + step; timeStamp <= end; timeStamp += step) {
+    for (int timeStamp = start + step; timeStamp <= (end - step); timeStamp += step) {
       Value* val = new Value(std::isnan(*currentData) ? 0 : *currentData, timeStamp);
       currentData++;
       values->push_back(*val);
