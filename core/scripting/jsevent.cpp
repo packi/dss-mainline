@@ -234,7 +234,7 @@ namespace dss {
       event_wrapper* evtWrapper = new event_wrapper();
       evtWrapper->event = newEvent;
 
-      JSObject *obj = JS_NewObject(cx, &event_class, NULL, NULL);
+      JSObject *obj = JS_NewObject(cx, &timedEvent_class, NULL, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
 
       JS_SetPrivate(cx, obj, evtWrapper);
@@ -286,7 +286,7 @@ namespace dss {
       boost::shared_ptr<Event> newEvent(new Event(name));
 
       if(argc >= 4) {
-        readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[2], newEvent);
+        readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[3], newEvent);
       }
 
       newEvent->setProperty(EventPropertyICalStartTime, time);
@@ -295,7 +295,7 @@ namespace dss {
       event_wrapper* evtWrapper = new event_wrapper();
       evtWrapper->event = newEvent;
 
-      JSObject *obj = JS_NewObject(cx, &event_class, NULL, NULL);
+      JSObject *obj = JS_NewObject(cx, &timedICalEvent_class, NULL, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
 
       JS_SetPrivate(cx, obj, evtWrapper);

@@ -309,10 +309,11 @@ BOOST_AUTO_TEST_CASE(testTimedEvents) {
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  std::string id = ctx->evaluate<std::string>("var evt = new TimedEvent('test', '+1');\n"
-                                              "evt.raise()\n");
+  std::string id = ctx->evaluate<std::string>(
+      "var evt = new TimedEvent('test', '+1'); evt.raise()\n");
+
   BOOST_CHECK(!id.empty());
-  BOOST_CHECK(id.compare("0") == 0);
+  BOOST_CHECK(id.find("test") != std::string::npos);
 } // testTimedEvents
 
 BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {

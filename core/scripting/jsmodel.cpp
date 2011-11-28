@@ -278,6 +278,7 @@ namespace dss {
       } catch(ItemNotFoundException& e) {
         JS_ReportError(cx, "Zone with ID not found");
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
       }
     } catch (SecurityException& ex) {
       Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
@@ -512,6 +513,9 @@ namespace dss {
 
         try {
           set->perform(act);
+          if (JS_IsExceptionPending(cx)) {
+            return JS_FALSE;
+          }
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (SecurityException& ex) {
@@ -818,6 +822,7 @@ namespace dss {
           return JS_TRUE;
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
+          return JS_FALSE;
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -849,6 +854,7 @@ namespace dss {
           return JS_TRUE;
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
+          return JS_FALSE;
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1475,22 +1481,21 @@ namespace dss {
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         if(argc == 1) {
+          int sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            int sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
             int retValue= (intf->getDevice()->getDeviceSensorValue(sensorIndex));
             JS_ResumeRequest(cx, ref);
-
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             return JS_TRUE;
           } catch (ScriptException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, ex.what());
-            return JS_FALSE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, ex.what());
-            return JS_FALSE;
           }
+          return JS_FALSE;
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1515,22 +1520,21 @@ namespace dss {
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         if(argc == 1) {
+          int sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            int sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
-            int retValue= (intf->getDevice()->getDeviceSensorType(sensorIndex));
-            JS_ResumeRequest(cx, ref);
-
+            int retValue = (intf->getDevice()->getDeviceSensorType(sensorIndex));
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
+            JS_ResumeRequest(cx, ref);
             return JS_TRUE;
-          } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
-            return JS_FALSE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, ex.what());
-            return JS_FALSE;
+          } catch (ScriptException& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, ex.what());
           }
+          return JS_FALSE;
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1737,6 +1741,7 @@ namespace dss {
           return JS_TRUE;
         } catch (BusApiError& ex) {
           JS_ReportError(cx, ex.what());
+          return JS_FALSE;
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1765,6 +1770,7 @@ namespace dss {
           obj.setProperty<int>("value", meter->getCachedPowerConsumption());
         } catch (BusApiError& ex) {
           JS_ReportError(cx, ex.what());
+          return JS_FALSE;
         }
         return JS_TRUE;
       }
@@ -1791,6 +1797,7 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(meter->getEnergyMeterValue()));
         } catch (BusApiError& ex) {
           JS_ReportError(cx, ex.what());
+          return JS_FALSE;
         }
         return JS_TRUE;
       }
@@ -1820,6 +1827,7 @@ namespace dss {
           obj.setProperty<int>("value", meter->getCachedEnergyMeterValue());
         } catch (BusApiError& ex) {
           JS_ReportError(cx, ex.what());
+          return JS_FALSE;
         }
         return JS_TRUE;
       }
