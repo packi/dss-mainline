@@ -21,9 +21,14 @@
 
 */
 
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
 #include "core/scripting/scriptobject.h"
 #include "core/scripting/jsproperty.h"
 #include "core/propertysystem.h"
+#include "core/security/user.h"
+#include "core/security/security.h"
 
 namespace dss {
 
@@ -57,7 +62,11 @@ namespace dss {
   { } // ctor
 
   PropertyScriptExtension::~PropertyScriptExtension() {
-    scrubVector(m_Listeners);
+    for(std::vector<boost::shared_ptr<PropertyScriptListener> >::iterator it = m_Listeners.begin(), e = m_Listeners.end();
+        it != e; ++it) {
+      (*it)->unsubscribe();
+      (*it)->stop();
+    }
   } // dtor
 
   JSBool prop_setProperty(JSContext* cx, uintN argc, jsval *vp) {
@@ -149,7 +158,8 @@ namespace dss {
 
   JSBool prop_setListener(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
+        ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     jsval function;
@@ -157,30 +167,38 @@ namespace dss {
       if(argc >= 1) {
         function = JS_ARGV(cx,vp)[0];
       } else {
-        Logger::getInstance()->log("JS: Property(obj).setListener: need one argument callback", lsError);
+        JS_ReportError(cx, "Property.setListener: need one argument callback", lsError);
         return JS_FALSE;
       }
     } else {
       if(argc >= 2) {
-        std::string nodePath = ctx->convertTo<std::string>(JS_ARGV(cx,vp)[0]);
+        std::string nodePath;
+        try {
+          nodePath = ctx->convertTo<std::string>(JS_ARGV(cx,vp)[0]);
+        } catch(ScriptException& ex) {
+          JS_ReportError(cx, "Property.setListener: cannot convert argument: name");
+          return JS_FALSE;
+        }
         node = ext->getProperty(ctx, nodePath);
         if(node == NULL) {
           JS_SET_RVAL(cx, vp, JSVAL_NULL);
-          Logger::getInstance()->log("JS: Property.setListener: cannot find node '" + nodePath, lsError);
+          JS_ReportWarning(cx, "Property.setListener: cannot find node %s", nodePath.c_str());
           return JS_TRUE;
         }
         function = JS_ARGV(cx,vp)[1];
       } else {
-        Logger::getInstance()->log("JS: Property.setListener: need two arguments: property-path &  callback", lsError);
+        JS_ReportError(cx, "Property.setListener: need two arguments: property-path & callback");
         return JS_FALSE;
       }
     }
 
+    JSObject* jsRoot = JS_NewObject(cx, NULL, NULL, NULL);
     std::string ident = ext->produceListenerID();
-    PropertyScriptListener* listener =
-        new PropertyScriptListener(ext, ctx, JS_THIS_OBJECT(cx, vp), function, ident);
+    boost::shared_ptr<PropertyScriptListener> listener (
+        new PropertyScriptListener(ext, ctx, jsRoot, function, ident));
+
     ext->addListener(listener);
-    node->addListener(listener);
+    node->addListener(listener.get());
 
     JSString* str = JS_NewStringCopyZ(cx, ident.c_str());
     JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
@@ -189,19 +207,21 @@ namespace dss {
 
   JSBool prop_removeListener(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
+        ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
+    std::string listenerIdent;
     try {
-      std::string listenerIdent = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-      ext->removeListener(listenerIdent);
-      JS_SET_RVAL(cx, vp, JSVAL_TRUE);
-      return JS_TRUE;
-    } catch (ScriptException& ex) {
-      JS_SET_RVAL(cx, vp, JSVAL_FALSE);
-      throw ex;
+      listenerIdent = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+    } catch(ScriptException& ex) {
+      JS_ReportError(cx, "Property.removeListener: cannot convert argument");
+      return JS_FALSE;
     }
 
-    return JS_FALSE;
+    ext->removeListener(listenerIdent);
+
+    JS_SET_RVAL(cx, vp, JSVAL_TRUE);
+    return JS_TRUE;
   } // prop_removeListener
 
   JSBool prop_setFlag(JSContext* cx, uintN argc, jsval *vp) {
@@ -576,20 +596,26 @@ namespace dss {
     return "listener_" + intToString(long(this), true) + "_" + intToString(m_NextListenerID++);
   } // produceListenerID
 
-  void PropertyScriptExtension::addListener(PropertyScriptListener* _pListener) {
+  boost::shared_ptr<PropertyScriptListener> PropertyScriptExtension::getListener(const std::string& _identifier) {
+    for(std::vector<boost::shared_ptr<PropertyScriptListener> >::iterator it = m_Listeners.begin(), e = m_Listeners.end();
+        it != e; ++it) {
+      if((*it)->getIdentifier() == _identifier) {
+        return *it;
+      }
+    }
+    return boost::shared_ptr<PropertyScriptListener> ();
+  } // removeListener
+
+  void PropertyScriptExtension::addListener(boost::shared_ptr<PropertyScriptListener> _pListener) {
     m_Listeners.push_back(_pListener);
   } // addListener
 
-  void PropertyScriptExtension::removeListener(const std::string& _identifier, bool _destroy) {
-    for(std::vector<PropertyScriptListener*>::iterator it = m_Listeners.begin(), e = m_Listeners.end();
+  void PropertyScriptExtension::removeListener(const std::string& _identifier) {
+    for(std::vector<boost::shared_ptr<PropertyScriptListener> >::iterator it = m_Listeners.begin(), e = m_Listeners.end();
         it != e; ++it) {
       if((*it)->getIdentifier() == _identifier) {
-        PropertyScriptListener* pListener = *it;
-        pListener->unsubscribe();
+        (*it)->unsubscribe();
         m_Listeners.erase(it);
-        if(_destroy) {
-          delete pListener;
-        }
         return;
       }
     }
@@ -634,21 +660,78 @@ namespace dss {
     m_pExtension(_pExtension),
     m_pFunctionObject(_functionObj),
     m_Function(_function),
-    m_Identifier(_identifier)
+    m_Identifier(_identifier),
+    m_pRunAsUser(NULL)
   {
-    m_FunctionRoot.rootFunction(getContext(), m_pFunctionObject, m_Function);
+    m_callbackRunning = false;
+    m_FunctionRoot = new ScriptFunctionRooter(getContext(), m_pFunctionObject, m_Function);
+    if(Security::getCurrentlyLoggedInUser() != NULL) {
+      m_pRunAsUser = new User(*Security::getCurrentlyLoggedInUser());
+    }
+    Logger::getInstance()->log("JavaScript: registered property-changed callback: " +
+        m_Identifier, lsDebug);
   } // ctor
 
   PropertyScriptListener::~PropertyScriptListener() {
-    m_pExtension->removeListener(m_Identifier, false);
+    if (m_callbackRunning) {
+      Logger::getInstance()->log("JavaScript: requested property listener release during callback: " +
+              m_Identifier, lsError);
+    }
+    if (m_FunctionRoot) {
+      delete m_FunctionRoot;
+    }
+    if (m_pRunAsUser) {
+      delete m_pRunAsUser;
+    }
+    m_pExtension->removeListener(m_Identifier);
+    Logger::getInstance()->log("JavaScript: released property-changed callback: " +
+        m_Identifier, lsDebug);
   }
 
-  void PropertyScriptListener::createScriptObject() {
-    if(m_pScriptObject == NULL) {
-      m_pScriptObject.reset(new ScriptObject(m_pFunctionObject, *getContext()));
+  void PropertyScriptListener::deferredCallback(PropertyNodePtr _changedNode,
+      JSObject* _obj, jsval _function, ScriptFunctionRooter* _rooter,
+      boost::shared_ptr<PropertyScriptListener> _self) {
+
+    if(getIsStopped()) {
+      return;
     }
-    assert(m_pScriptObject != NULL);
-  } // createScriptObject
+
+    if(m_pRunAsUser != NULL) {
+      Security* pSecurity = getContext()->getEnvironment().getSecurity();
+      if(pSecurity != NULL) {
+        pSecurity->signIn(m_pRunAsUser);
+      }
+    }
+
+    // make a local copy to defer object deletion
+    boost::shared_ptr<PropertyScriptListener> myself = _self;
+
+    {
+      ScriptLock lock(getContext());
+      JSContextThread req(getContext());
+      m_pScriptObject.reset(new ScriptObject(m_pFunctionObject, *getContext()));
+      ScriptFunctionParameterList list(*getContext());
+      list.add(_changedNode->getDisplayName());
+
+      Logger::getInstance()->log("JavaScript: running property-changed callback: " +
+          m_Identifier, lsDebug);
+      m_callbackRunning = true;
+
+      try {
+        m_pScriptObject->callFunctionByReference<void>(m_Function, list);
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log("JavaScript: error running property-changed callback: " +
+            std::string(e.what()), lsFatal);
+      }
+      m_pScriptObject.reset();
+      m_callbackRunning = false;
+
+      Logger::getInstance()->log("JavaScript: exit property-changed callback: " +
+          m_Identifier, lsDebug);
+    }
+
+    myself.reset();
+  }
 
   void PropertyScriptListener::propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
     doOnChange(_changedNode);
@@ -664,21 +747,8 @@ namespace dss {
     if(getIsStopped()) {
       return;
     }
-    ScriptLock lock(getContext(), true);
-    boost::shared_ptr<JSContextThread> req;
-    if(lock.ownsLock()) {
-      req.reset(new JSContextThread(getContext()));
-    }
-
-    createScriptObject();
-    ScriptFunctionParameterList list(*getContext());
-    list.add(_changedNode->getDisplayName());
-    try {
-      m_pScriptObject->callFunctionByReference<void>(m_Function, list);
-    } catch(ScriptException& e) {
-      Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
-    }
-
+    boost::thread(boost::bind(&PropertyScriptListener::deferredCallback, this, _changedNode,
+        m_pFunctionObject, m_Function, m_FunctionRoot, shared_from_this()));
   } // doOnChange
 
   void PropertyScriptListener::stop()  {
