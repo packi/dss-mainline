@@ -406,16 +406,8 @@ function update() {
         if ((solar.sunrise !== "[Above]") && (solar.sunrise !== "[Below]") &&
             (solar.sunset !== "[Above]") && (solar.sunset !== "[Below]")) {
 
-            var id = Property.getProperty('settings/listenerID');
-            if (id !== null) {
-                Property.removeListener(id);
-            }
-
             Property.setProperty('/config/geodata/sunrise', solar.sunrise);
             Property.setProperty('/config/geodata/sunset', solar.sunset);
-
-            id = Property.setListener('/config/geodata', update);
-            Property.setProperty('settings/listenerID', id);
         }
     }
 };
