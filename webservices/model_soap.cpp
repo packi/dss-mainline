@@ -889,6 +889,8 @@ int dss__ZonePushSensorValue(struct soap *soap, char* _token, int _zoneID, char 
     manipulator.sensorPush(zone, sourceDSID, _sensorType, _sensorValue);
   } catch(std::runtime_error& _ex) {
     return soap_receiver_fault(soap, "Error handling request", NULL);
+  } catch(std::invalid_argument&) {
+    return soap_sender_fault(soap, "Error parsing dsid", NULL);
   }
   result = true;
   return SOAP_OK;
@@ -1653,6 +1655,8 @@ int dss__StructureAddDeviceToZone(struct soap *soap, char* _token, char* _device
     manipulator.addDeviceToZone(dev, zone);
   } catch(std::runtime_error& _ex) {
     return soap_receiver_fault(soap, "Error handling request", NULL);
+  } catch(std::invalid_argument&) {
+    return soap_sender_fault(soap, "Error parsing dsid", NULL);
   }
   return SOAP_OK;
 } // dss__StructureAddDeviceToZone

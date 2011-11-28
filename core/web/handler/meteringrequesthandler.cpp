@@ -99,6 +99,8 @@ namespace dss {
       }
     } catch(std::runtime_error& e) {
       return failure("Could not parse dsid '" + deviceDSIDString + "'");
+    } catch(std::invalid_argument& e) {
+      return failure("Could not parse dsid '" + deviceDSIDString + "'");
     }
     resolution = strToIntDef(resolutionString, -1);
     if(resolution == -1) {
