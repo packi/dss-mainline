@@ -425,7 +425,7 @@ if (raisedEvent.name == "running") {
     update();
 
     var d = new Date();
-    d.setHours(0);
+    d.setHours(3);
     d.setMinutes(1);
     var icalST = String(d.getFullYear()) +
                  pad(d.getMonth() + 1) +
