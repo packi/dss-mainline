@@ -249,7 +249,7 @@ namespace dss {
   { } // ctor
 
   EventInterpreterPluginJavascript::~EventInterpreterPluginJavascript() {
-    Logger::getInstance()->log("Terminating all scripts...", lsInfo);
+    log("Terminating all scripts...", lsInfo);
     typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
     tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
     int shutdownTimeout = 0;
@@ -265,7 +265,7 @@ namespace dss {
       }
       ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
     }
-    Logger::getInstance()->log("All scripts Terminated");
+    log("All scripts Terminated");
   }
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {

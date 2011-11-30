@@ -157,7 +157,6 @@ namespace dss {
   void ScriptLogger_finalize(JSContext *cx, JSObject *obj) {
     ScriptLoggerContextWrapper* pWrapper = static_cast<ScriptLoggerContextWrapper*>(JS_GetPrivate(cx, obj));
     if(pWrapper != NULL) {
-      Logger::getInstance()->log("Finalizing ScriptLogger");
       JS_SetPrivate(cx, obj, NULL);
       delete pWrapper;
     }
@@ -215,7 +214,6 @@ namespace dss {
   }
 
   ScriptLogger::~ScriptLogger() {
-    Logger::getInstance()->log("Destroying logger with filename: " + m_logName);
     if(m_f) {
       fclose(m_f);
     }
