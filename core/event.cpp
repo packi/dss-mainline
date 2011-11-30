@@ -784,6 +784,14 @@ namespace dss {
         removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
+
+      if (m_MonitorNode) {
+        if (NULL == m_MonitorNode->getProperty(ipSchedEvt->getID() + "/time")) {
+          m_MonitorNode->createProperty(ipSchedEvt->getID() + "/time")->setStringValue(nextOccurence.toString());
+        }
+        m_MonitorNode->createProperty(ipSchedEvt->getID() + "/ticks")->setIntegerValue(nextOccurence.difference(now));
+      }
+
       if(nextOccurence.before(now) || (nextOccurence == now)) {
         result = true;
         if(m_EventQueue != NULL) {
