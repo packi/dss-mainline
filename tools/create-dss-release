@@ -66,7 +66,8 @@ cd -
 
 # JSON
 echo "Running the dss now to generate json_api.xml"
-./dss -w ../dss-$DSS_RELEASE_VERSION/data/webroot/ &
+DATADIR=../dss-$DSS_RELEASE_VERSION/data
+./dss -D $DATADIR -w $DATADIR/webroot/ --prop:/config/subsystems/Metering/enabled=false &
 DSS_PID=$!
 sleep 15
 kill $DSS_PID
