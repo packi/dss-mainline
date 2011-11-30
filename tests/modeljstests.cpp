@@ -449,6 +449,7 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
 
   propSys.setIntValue("/testing", 2);
+  sleep(1); // wait until listeners have run
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), true);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
@@ -457,9 +458,12 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   ctx->evaluate<void>("Property.removeListener(listener_ident);");
 
   propSys.setBoolValue("/triggered", false);
+  sleep(1); // wait until listeners have run
+
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
 
   propSys.setIntValue("/testing", 2);
+  sleep(1); // wait until listeners have run
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
@@ -468,19 +472,20 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   ctx->evaluate<void>("Property.setProperty('/triggered', false); Property.setProperty('/testing', 1); "
                       "var ident = Property.setListener('/testing', function(changedNode) { Property.setProperty('/triggered', true); Property.removeListener(ident); }); "
       );
-
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
 
   propSys.setIntValue("/testing", 2);
+  sleep(1); // wait until listeners have run
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), true);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
 
   propSys.setBoolValue("/triggered", false);
+  sleep(1); // wait until listeners have run
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
 
   propSys.setIntValue("/testing", 2);
-
+  sleep(1); // wait until listeners have run
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
 }
@@ -499,7 +504,7 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
       );
 
   propSys.setBoolValue("/testing", true);
-
+  sleep(1); // wait until listeners have run
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/itWorks"), true);
 
   ctx->evaluate<void>("Property.removeListener(other_ident); "
@@ -507,6 +512,63 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
       );
 
 } // testReentrancy
+
+BOOST_AUTO_TEST_CASE(testMultipleListeners) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>(
+      "var result = 0; Property.setProperty('/triggered', false); "
+      "var l1 = Property.setListener('/triggered', function(changedNode) { Property.setProperty('/l1', true); result ++; } ); "
+      "var l2 = Property.setListener('/triggered', function(changedNode) { Property.setProperty('/l2', true); result ++; } ); "
+      "var l3 = Property.setListener('/triggered', function(changedNode) { Property.setProperty('/l3', true); result ++; }); "
+  );
+
+  propSys.setBoolValue("/triggered", true);
+  sleep(1); // wait until listeners have run
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/l1"), true);
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/l2"), true);
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/l3"), true);
+  {
+    JSContextThread thread(ctx);
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 3);
+  }
+
+  ctx->evaluate<void>(
+      "Property.removeListener(l1); "
+      "Property.removeListener(l2); "
+      "Property.removeListener(l3); "
+  );
+
+} // testMultipleListeners
+
+BOOST_AUTO_TEST_CASE(testRemoveListener) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>(
+      "var result = 0; var listener; Property.setProperty('/triggered', false); "
+      "function cb() { Property.removeListener(listener); Property.setProperty('/l1', true); result ++; }"
+      "listener = Property.setListener('/triggered', cb); "
+  );
+
+  propSys.setBoolValue("/triggered", true);
+  sleep(1); // wait until listeners have run
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/l1"), true);
+  {
+    JSContextThread thread(ctx);
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 1);
+  }
+
+} // testRemoveListener
 
 class TestThreadingThread : public Thread {
 public:
@@ -519,6 +581,7 @@ public:
   virtual void execute() {
     while(!m_Terminated) {
       m_pNode->setIntegerValue(2);
+      sleepMS(100);
     }
     Logger::getInstance()->log("thread terminating");
   }

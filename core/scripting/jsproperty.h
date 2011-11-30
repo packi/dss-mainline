@@ -24,15 +24,20 @@
 #ifndef PROPERTYSCRIPTEXTENSION_H_
 #define PROPERTYSCRIPTEXTENSION_H_
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include "core/scripting/jshandler.h"
 #include "core/propertysystem.h"
 
 namespace dss {
 
+  class Security;
+  class User;
   class PropertyScriptExtension;
 
   class PropertyScriptListener : public PropertyListener,
-                                 public ScriptContextAttachedObject {
+                                 public ScriptContextAttachedObject,
+                                 public boost::enable_shared_from_this<PropertyScriptListener> {
   public:
     PropertyScriptListener(PropertyScriptExtension* _pExtension, ScriptContext* _pContext, JSObject* _functionObj, jsval _function, const std::string& _identifier);
     virtual ~PropertyScriptListener();
@@ -45,14 +50,18 @@ namespace dss {
     virtual void stop();
   private:
     void doOnChange(PropertyNodePtr _changedNode);
-    void createScriptObject();
+    void deferredCallback(PropertyNodePtr _changedNode, JSObject* _obj,
+        jsval _function, ScriptFunctionRooter* _rooter, boost::shared_ptr<PropertyScriptListener> _self);
   private:
+    boost::shared_ptr<PropertyScriptListener> m_pSelf;
     PropertyScriptExtension* m_pExtension;
     JSObject* m_pFunctionObject;
     jsval m_Function;
     const std::string m_Identifier;
-    boost::scoped_ptr<ScriptObject> m_pScriptObject;
-    ScriptFunctionRooter m_FunctionRoot;
+    boost::shared_ptr<ScriptObject> m_pScriptObject;
+    ScriptFunctionRooter* m_FunctionRoot;
+    User* m_pRunAsUser;
+    bool m_callbackRunning;
   }; // PropertyScriptListener
 
   class PropertyScriptExtension : public ScriptExtension {
@@ -65,8 +74,9 @@ namespace dss {
     PropertySystem& getPropertySystem() { return m_PropertySystem; }
 
     std::string produceListenerID();
-    void addListener(PropertyScriptListener* _pListener);
-    void removeListener(const std::string& _identifier, bool _destroy = true);
+    boost::shared_ptr<PropertyScriptListener> getListener(const std::string& _identifier);
+    void addListener(boost::shared_ptr<PropertyScriptListener> _pListener);
+    void removeListener(const std::string& _identifier);
 
     PropertyNodePtr getPropertyFromObj(ScriptContext* _context, JSObject* _obj);
     virtual PropertyNodePtr getProperty(ScriptContext* _context, const std::string& _path);
@@ -79,7 +89,7 @@ namespace dss {
   protected:
     PropertySystem& m_PropertySystem;
   private:
-    std::vector<PropertyScriptListener*> m_Listeners;
+    std::vector<boost::shared_ptr<PropertyScriptListener> > m_Listeners;
     int m_NextListenerID;
   }; // PropertyScriptExtension
 

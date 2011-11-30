@@ -212,7 +212,8 @@ namespace dss {
     m_EventsProcessed(0)
   {
     if(DSS::hasInstance()) {
-      getDSS().getPropertySystem().createProperty(getPropertyBasePath() + "eventsProcessed")->linkToProxy(PropertyProxyPointer<int>(&m_EventsProcessed));
+      getDSS().getPropertySystem().createProperty(getPropertyBasePath() + "eventsProcessed")
+          ->linkToProxy(PropertyProxyPointer<int>(&m_EventsProcessed));
     }
   } // ctor()
 
@@ -277,11 +278,11 @@ namespace dss {
       boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
       if(toProcess != NULL) {
 
-        log(std::string("Got event from queue: '") + toProcess->getName() + "'", lsDebug);
+        log(std::string("Interpreter: got event from queue: '") + toProcess->getName() + "'");
         for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
             iParam != e; ++iParam)
         {
-          log("Parameter '" + iParam->first + "' = '" + iParam->second + "'");
+          log("Interpreter: - parameter '" + iParam->first + "' = '" + iParam->second + "'");
         }
 
         SubscriptionVector subscriptionsCopy;
@@ -293,29 +294,23 @@ namespace dss {
             ipSubscription != e; ++ipSubscription)
         {
           if((*ipSubscription)->matches(*toProcess)) {
-            bool called = false;
-            log(std::string("Subscription '") + (*ipSubscription)->getID() + "' matches event");
-
+            log(std::string("Interpreter: subscription '") + (*ipSubscription)->getID() + "' matches event");
             EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
             if(plugin != NULL) {
-              log("Found handler '" + plugin->getName() + "' calling...");
               try {
                 plugin->handleEvent(*toProcess, **ipSubscription);
               } catch(std::runtime_error& e) {
-                log(std::string("Caught exception while handling event: ") + e.what(), lsError);
+                log(std::string("Interpreter: error while handling event: ") + e.what(), lsError);
               }
-              called = true;
-              log("called.");
             }
-            if(!called) {
-              log(std::string("Could not find handler '") + (*ipSubscription)->getHandlerName(), lsDebug);
+            else {
+              log(std::string("Interpreter: could not find handler '") + (*ipSubscription)->getHandlerName(), lsError);
             }
 
           }
         }
 
         m_EventsProcessed++;
-        log(std::string("Done processing event '") + toProcess->getName() + "'", lsDebug);
       }
     }
   } // executePendingEvent
@@ -375,7 +370,7 @@ namespace dss {
 
   void EventInterpreter::loadFromXML(const std::string& _fileName) {
     const int eventConfigVersion = 1;
-    log(std::string("Loading subscriptions from '") + _fileName + "'");
+    log(std::string("Interpreter: loading subscriptions from '") + _fileName + "'");
 
     std::ifstream inFile(_fileName.c_str());
 
@@ -396,7 +391,7 @@ namespace dss {
           }
         }
       } else {
-        log(_fileName + " must have a root-node named 'subscriptions'", lsFatal);
+        log("Interpreter: " + _fileName + " must have a root-node named 'subscriptions'", lsFatal);
       }
     } catch(Poco::XML::SAXParseException& e) {
       throw std::runtime_error("Error parsing file: " + _fileName + ": " +
@@ -549,34 +544,34 @@ namespace dss {
             when = when.addSeconds(offset);
             validDate = true;
           } else {
-            log(std::string("Queue::scheduleFromEvent: Could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
+            log(std::string("scheduleFromEvent: could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
           }
         } else {
           try {
             when = DateTime::fromISO(timeStr);
             validDate = true;
           } catch(std::exception& e) {
-            log(std::string("Queue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
+            log(std::string("scheduleFromEvent: invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
           }
         }
       }
       if(validDate) {
-        log(std::string("EQueue::scheduleFromEvent: Event has a valid time, rescheduling at ") + (std::string)when, lsDebug);
+        log(std::string("scheduleFromEvent: event has a valid time, rescheduling at ") + (std::string)when, lsDebug);
         result.reset(new StaticSchedule(when));
       } else {
-        log("Queue::scheduleFromEvent: Dropping event with invalid time", lsError);
+        log("scheduleFromEvent: dropping event with invalid time", lsError);
       }
     } else if(_event->hasPropertySet(EventPropertyICalStartTime) && _event->hasPropertySet(EventPropertyICalRRule)) {
       std::string timeStr = _event->getPropertyByName(EventPropertyICalStartTime);
       std::string rRuleStr = _event->getPropertyByName(EventPropertyICalRRule);
-      log(std::string("Queue::scheduleFromEvent: Event \"" + _event->getName() + "\" has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsDebug);
+      log(std::string("scheduleFromEvent: Event \"" + _event->getName() + "\" has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsDebug);
       result.reset(new ICalSchedule(rRuleStr, timeStr));
     }
     return result;
   } // scheduleFromEvent
 
   void EventQueue::pushEvent(boost::shared_ptr<Event> _event) {
-    log(std::string("Queue: New event '") + _event->getName() + "' in queue...", lsInfo);
+    log(std::string("Queue: new event '") + _event->getName() + "' in queue...", lsDebug);
     boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
     if(schedule != NULL) {
       ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule, m_ScheduledEventCounter++);
@@ -608,15 +603,15 @@ namespace dss {
   } // pushEvent
 
   std::string EventQueue::pushTimedEvent(boost::shared_ptr<Event> _event) {
-    log("Queue: New timed-event '" + _event->getName() + "' in queue...", lsInfo);
     boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
     if(schedule != NULL) {
       ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule, m_ScheduledEventCounter++);
       std::string result = scheduledEvent->getID();
+      log("Queue: new timed-event '" + result + "' in queue...", lsInfo);
       m_EventRunner->addEvent(scheduledEvent);
       return result;
     }
-    log("Queue: Failed to schedule timed-event '" + _event->getName(), lsError);
+    log("Queue: failed to schedule timed-event '" + _event->getName(), lsError);
     return std::string();
   } // pushTimedEvent
 
@@ -674,6 +669,9 @@ namespace dss {
 
   void EventRunner::propertyRemoved(PropertyNodePtr _parent,
                                     PropertyNodePtr _child) {
+    if (DebugEventRunner) {
+      log("Runner: property listener detected removal of \"" + _child->getName() + "\"", lsDebug);
+    }
     removeEventInternal(_child->getName());
   }
 
@@ -695,10 +693,14 @@ namespace dss {
     boost::ptr_vector<ScheduledEvent>::iterator it;
     for (it = m_ScheduledEvents.begin(); it != m_ScheduledEvents.end(); it++) {
       if (it->getID() == _eventID) {
+        if (DebugEventRunner) {
+          log("Runner: remove event \"" + it->getName() + "\" with id " + _eventID, lsDebug);
+        }
         m_ScheduledEvents.erase(it);
-        break;
+        return;
      }
     }
+    log("Runner: cannot remove event with id " + _eventID + ", not found in queue", lsWarning);
   } // removeEventInternal
 
   const ScheduledEvent& EventRunner::getEvent(const std::string& _eventID) const {
@@ -734,8 +736,8 @@ namespace dss {
             scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
           }
           addToQueue = false;
-          if(DebugEventRunner) {
-            log("Runner: Found target for unique event, not adding it to the queue");
+          if( DebugEventRunner) {
+            log("Runner: found target for unique event, not adding it to the queue");
           }
           break;
         }
@@ -774,16 +776,20 @@ namespace dss {
         ipSchedEvt != e; ++ipSchedEvt)
     {
       DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(now);
-      if(DebugEventRunner) {
-        log("Runner: Event:   " + ipSchedEvt->getID() +
-           ", nextOcc: " + nextOccurence.toString() +
-           ", diff:    " + intToString(nextOccurence.difference(now)));
-      }
+
       if(nextOccurence == DateTime::NullDate) {
-        log("Runner: Removing event " + ipSchedEvt->getID());
+        log("Runner: event " + ipSchedEvt->getID() + " removed");
         removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
+
+      if (m_MonitorNode) {
+        if (NULL == m_MonitorNode->getProperty(ipSchedEvt->getID() + "/time")) {
+          m_MonitorNode->createProperty(ipSchedEvt->getID() + "/time")->setStringValue(nextOccurence.toString());
+        }
+        m_MonitorNode->createProperty(ipSchedEvt->getID() + "/ticks")->setIntegerValue(nextOccurence.difference(now));
+      }
+
       if(nextOccurence.before(now) || (nextOccurence == now)) {
         result = true;
         if(m_EventQueue != NULL) {
@@ -797,14 +803,16 @@ namespace dss {
           if(evt->hasPropertySet(EventPropertyICalRRule)) {
             evt->unsetProperty(EventPropertyICalRRule);
           }
+
           m_EventQueue->pushEvent(evt);
 
           // check if the event will be raised again
           if(ipSchedEvt->getSchedule().getNextOccurence(nextSecond) == DateTime::NullDate) {
+            log("Runner: event " + ipSchedEvt->getID() + " has no further schedule");
             removeIDs.push_back(ipSchedEvt->getID());
           }
         } else {
-          log("Runner: Cannot push event back to queue because the Queue is NULL", lsFatal);
+          log("Runner: cannot push event back to queue because the queue is NULL", lsFatal);
         }
       }
     }
@@ -918,6 +926,9 @@ namespace dss {
     return boost::shared_ptr<SubscriptionOptions>();
   } // createOptionsFromXML
 
+  void EventInterpreterPlugin::log(const std::string& _message, aLogSeverity _severity) {
+    m_pInterpreter->log(_message, _severity);
+  }
 
   //================================================== EventPropertyFilter
 

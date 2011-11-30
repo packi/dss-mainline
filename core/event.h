@@ -240,6 +240,8 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
     virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromXML(Poco::XML::Node* _node);
+
+    void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   }; // EventInterpreterPlugin
 
 

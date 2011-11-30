@@ -252,12 +252,10 @@ namespace dss {
     clsDevice.addMethod("getSceneMode")
       .withParameter("sceneID", "integer", true)
       .withDocumentation("Gets the device configuration for a specific scene command.");
-    clsDevice.addMethod("getSceneMode")
-      .withParameter("sceneID", "integer", true)
-      .withDocumentation("Gets the device configuration for a specific scene command.");
     clsDevice.addMethod("setSceneMode")
       .withParameter("sceneID", "integer", true)
       .withParameter("dontCare", "integer", false)
+      .withParameter("localPrio", "integer", false)
       .withParameter("specialMode", "integer", false)
       .withParameter("flashMode", "integer", false)
       .withParameter("ledconIndex", "integer", false)
