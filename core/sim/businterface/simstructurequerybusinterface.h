@@ -48,6 +48,7 @@ namespace dss {
     virtual std::string getSceneName(dss_dsid_t _dsMeterID,
                                      boost::shared_ptr<Group> _group,
                                      const uint8_t _sceneNumber);
+    virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID);
   private:
     boost::shared_ptr< DSSim > m_pSimulation;
   }; // SimStructureQueryBusInterface

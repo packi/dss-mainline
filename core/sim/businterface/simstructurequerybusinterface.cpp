@@ -139,4 +139,11 @@ namespace dss {
     return "Scene" + intToString(_sceneNumber);
   }
 
+  DSMeterHash_t SimStructureQueryBusInterface::getDSMeterHash(const dss_dsid_t& _dsMeterID) {
+    DSMeterHash_t result;
+    result.Hash = 0xdeadbeef;
+    result.ModificationCount = 13;
+    return result;
+  }
+
 } // namespace dss

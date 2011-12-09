@@ -61,6 +61,8 @@ namespace dss {
     bool m_IsValid;
     PropertyNodePtr m_pPropertyNode;
     Apartment* m_pApartment;
+    unsigned int m_DatamodelHash;
+    unsigned int m_DatamoderModificationCount;
   private:
     void publishToPropertyTree();
   public:
@@ -123,6 +125,11 @@ namespace dss {
     void setApiVersion(const int _value) { m_ApiVersion = _value; }
     std::string getHardwareName() const { return m_HardwareName; }
     void setHardwareName(const std::string& _value) { m_HardwareName = _value; }
+
+    unsigned int getDatamodelHash() const { return m_DatamodelHash; }
+    void setDatamodelHash(const unsigned int hash) { m_DatamodelHash = hash; }
+    unsigned int getDatamodelModificationCount() const { return m_DatamoderModificationCount; }
+    void setDatamodelModificationcount(const unsigned int count) { m_DatamoderModificationCount = count; }
 
     /** Returns true if the dsMeter has been read-out completely. */
     bool isValid() const { return m_IsValid; }

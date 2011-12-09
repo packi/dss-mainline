@@ -48,6 +48,7 @@ namespace dss {
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
+    virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID);
   private:
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);

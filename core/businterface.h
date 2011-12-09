@@ -67,6 +67,11 @@ namespace dss {
     uint16_t ZoneID;
   } DeviceSpec_t;
 
+  typedef struct {
+    uint32_t Hash;
+    uint32_t ModificationCount;
+  } DSMeterHash_t;
+
   class DeviceBusInterface {
   public:
     //------------------------------------------------ Device manipulation
@@ -132,6 +137,9 @@ namespace dss {
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
     virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) = 0;
+
+    /** returns the hash over the dSMeter's datamodel */
+    virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {

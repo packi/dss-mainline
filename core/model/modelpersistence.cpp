@@ -200,6 +200,14 @@ namespace dss {
           if(!name.empty()) {
             newDSMeter->setName(name);
           }
+          Node* hashNode = elem->getChildElement("datamodelHash");
+          if (hashNode != NULL && hashNode->hasChildNodes()) {
+            newDSMeter->setDatamodelHash(strToInt(hashNode->firstChild()->nodeValue()));
+          }
+          Node* modificationNode = elem->getChildElement("datamodelModification");
+          if (modificationNode != NULL && modificationNode->hasChildNodes()) {
+            newDSMeter->setDatamodelModificationcount(strToInt(modificationNode->firstChild()->nodeValue()));
+          }
         }
       }
       curNode = curNode->nextSibling();
@@ -271,8 +279,7 @@ namespace dss {
         if(!associatedSet.empty()) {
           pGroup->setAssociatedSet(associatedSet);
         }
-        bool readSuccessfully = !name.empty() && scenesNode && scenesNode->hasChildNodes();
-        pGroup->setIsInitializedFromBus(readSuccessfully);
+        pGroup->setIsInitializedFromBus(true);
       }
     }
   } // loadGroup
@@ -407,6 +414,17 @@ namespace dss {
       pNameNode->appendChild(txtNode);
       pDSMeterNode->appendChild(pNameNode);
     }
+
+    AutoPtr<Element> pHashNode = _pDocument->createElement("datamodelHash");
+    AutoPtr<Text> pHashText = _pDocument->createTextNode(intToString(_pDSMeter->getDatamodelHash()));
+    pHashNode->appendChild(pHashText);
+    pDSMeterNode->appendChild(pHashNode);
+
+    AutoPtr<Element> pHashModNode = _pDocument->createElement("datamodelModification");
+    AutoPtr<Text> pHashModText = _pDocument->createTextNode(intToString(_pDSMeter->getDatamodelModificationCount()));
+    pHashModNode->appendChild(pHashModText);
+    pDSMeterNode->appendChild(pHashModNode);
+
     _parentNode->appendChild(pDSMeterNode);
   } // dsMeterToXML
 
