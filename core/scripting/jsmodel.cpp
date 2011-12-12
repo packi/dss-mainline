@@ -1625,6 +1625,9 @@ namespace dss {
         case 8:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getProductID()));
           return JS_TRUE;
+        case 9:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->isPresent()));
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -1654,6 +1657,7 @@ namespace dss {
     {"lastCalledScene", 6, 0, dev_JSGet, NULL},
     {"revisionID", 7, 0, dev_JSGet, NULL},
     {"productID", 8, 0, dev_JSGet, NULL},
+    {"isPresent", 9, 0, dev_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
