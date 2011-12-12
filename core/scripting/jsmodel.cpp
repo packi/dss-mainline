@@ -479,13 +479,12 @@ namespace dss {
         jsval rval;
         JSObject* device = m_Extension.createJSDevice(m_Context, _device);
         jsval dev = OBJECT_TO_JSVAL(device);
-        JS_CallFunctionValue(m_Context.getJSContext(),
+        return JS_CallFunctionValue(m_Context.getJSContext(),
             JS_GetGlobalObject(m_Context.getJSContext()),
             m_Function,
             1,
             &dev,
             &rval);
-        return true;
       }
   };
 
@@ -519,13 +518,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (SecurityException& ex) {
-          Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+          JS_ReportError(cx, "Access denied: %s", ex.what());
         } catch (DSSException& ex) {
-          Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+          JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
-          Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+          JS_ReportError(cx, "General failure: %s", ex.what());
         }
-
       }
     }
     return JS_FALSE;
@@ -543,7 +541,7 @@ namespace dss {
         try {
           name = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         } catch (ScriptException& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Convert arguments: %s", ex.what());
           return JS_FALSE;
         }
         DeviceReference result = set->getByName(name);
@@ -552,15 +550,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_name
 
@@ -574,43 +571,37 @@ namespace dss {
       if(ext != NULL && set != NULL && argc >= 2) {
 
         std::string dsmeterID;
-        try {
-          dsmeterID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-        } catch(ScriptException& ex) {
-          JS_ReportError(cx, ex.what());
-          return JS_FALSE;
-        }
-
         int busid;
         try {
+          dsmeterID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
           busid = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
         } catch(ScriptException& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Convert argument: %s", ex.what());
           return JS_FALSE;
         }
 
         dss_dsid_t meterDSID;
         try {
           meterDSID = dss_dsid_t::fromString(dsmeterID);
-        } catch(std::invalid_argument&) {
-          JS_ReportError(cx, "Could not parse dsid parameter");
+        } catch(std::invalid_argument& ex) {
+          JS_ReportError(cx, "Convert dsid parameter: %s", ex.what());
           return JS_FALSE;
         }
+
         DeviceReference result = set->getByBusID(busid, meterDSID);
         JSObject* resultObj = ext->createJSDevice(*ctx, result);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_shortaddress
 
@@ -640,15 +631,14 @@ namespace dss {
         return JS_FALSE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_dsid
 
@@ -673,15 +663,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_functionid
 
@@ -702,7 +691,7 @@ namespace dss {
             result = set->getByZone(zonename);
           }
         } catch(ScriptException& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Convert argument: %s", ex.what());
           return JS_FALSE;
         } catch(ItemNotFoundException&) {
           // return an empty set if the zone hasn't been found
@@ -713,15 +702,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_zone
 
@@ -745,11 +733,11 @@ namespace dss {
             ok = true;
           }
         } catch(ScriptException& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Convert argument: %s", ex.what());
           return JS_FALSE;
         } catch(ItemNotFoundException&) {
           ok = true; // return an empty set if the group hasn't been found
-          Logger::getInstance()->log("JS: set_by_group: Group not found", lsWarning);
+          JS_ReportWarning(cx, "set_by_group: Group not found");
         }
         if(ok) {
           JSObject* resultObj = ext->createJSSet(*ctx, result);
@@ -760,15 +748,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_group
 
@@ -794,15 +781,14 @@ namespace dss {
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_dsmeter
 
@@ -826,15 +812,14 @@ namespace dss {
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_presence
 
@@ -858,15 +843,14 @@ namespace dss {
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // set_by_tag
 
@@ -920,24 +904,24 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->turnOn();
+        try {
+          intf->turnOn();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   }
 
@@ -948,24 +932,24 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->turnOff();
+        try {
+          intf->turnOff();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   }
 
@@ -976,24 +960,24 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->blink();
+        try {
+          intf->blink();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   }
 
@@ -1004,24 +988,24 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->increaseValue();
+        try {
+          intf->increaseValue();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   }
 
@@ -1034,22 +1018,23 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
 
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->decreaseValue();
+        try {
+          intf->decreaseValue();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   }
 
@@ -1068,25 +1053,25 @@ namespace dss {
             JS_ReportError(cx, ex.what());
             return JS_FALSE;
           }
-
           jsrefcount ref = JS_SuspendRequest(cx);
-          intf->setValue(value);
+          try {
+            intf->setValue(value);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+            return JS_TRUE;
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General Failure: %s", ex.what());
+          }
           JS_ResumeRequest(cx, ref);
-
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-          return JS_TRUE;
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_set_value
 
@@ -1095,39 +1080,35 @@ namespace dss {
 
     try {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
-      try {
-        if(self.is("Set") || self.is("Device")) {
-          IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-          if(argc == 1) {
-            int sceneNr;
-            try {
-              sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-            } catch (ScriptException& ex) {
-              JS_ReportError(cx, ex.what());
-              return JS_FALSE;
-            }
-
-            jsrefcount ref = JS_SuspendRequest(cx);
+      if(self.is("Set") || self.is("Device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        if(argc == 1) {
+          int sceneNr;
+          try {
+            sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, "Convert parameter scene number: %s", ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
             intf->callScene(sceneNr);
             JS_ResumeRequest(cx, ref);
-
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General Failure: %s", ex.what());
           }
+          JS_ResumeRequest(cx, ref);
         }
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_call_scene
 
@@ -1138,38 +1119,37 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         int sceneNr = -1;
         if(argc > 1) {
           try {
             sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Convert parameter scene number: %s", ex.what());
             return JS_FALSE;
           }
         }
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        if (sceneNr >= 0) {
-          intf->undoScene(sceneNr);
-        } else {
-          intf->undoSceneLast();
+        try {
+          if (sceneNr >= 0) {
+            intf->undoScene(sceneNr);
+          } else {
+            intf->undoSceneLast();
+          }
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
         }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_undo_scene
 
@@ -1180,24 +1160,24 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->nextScene();
+        try {
+          intf->nextScene();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_next_scene
 
@@ -1208,24 +1188,24 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-
         jsrefcount ref = JS_SuspendRequest(cx);
-        intf->previousScene();
+        try {
+          intf->previousScene();
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+          return JS_TRUE;
+        } catch (DSSException& ex) {
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ReportError(cx, "General Failure: %s", ex.what());
+        }
         JS_ResumeRequest(cx, ref);
-
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
-        return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_previous_scene
 
@@ -1234,35 +1214,36 @@ namespace dss {
 
     try {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
-        if(self.is("Set") || self.is("Device")) {
-          IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-          int sceneNr;
-          if(argc == 1) {
-            try {
-              sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-            } catch (ScriptException& ex) {
-              JS_ReportError(cx, ex.what());
-              return JS_FALSE;
-            }
+      if(self.is("Set") || self.is("Device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        int sceneNr;
+        if(argc == 1) {
 
-            jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, "Convert parameter scene number: %s", ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
             intf->saveScene(sceneNr);
             JS_ResumeRequest(cx, ref);
-
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General Failure: %s", ex.what());
           }
+          JS_ResumeRequest(cx, ref);
         }
+      }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_save_scene
 
@@ -1274,36 +1255,38 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 2) {
+          int configClass;
+          int configIndex;
           try {
-            int configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-            int configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
-            uint8_t retValue= (intf->getDevice()->getDeviceConfig(configClass, configIndex));
-            JS_ResumeRequest(cx, ref);
-
-            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
-            return JS_TRUE;
+            configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
           } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
-            return JS_FALSE;
-          } catch(const BusApiError& ex) {
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Convert arguments: %s", ex.what());
             return JS_FALSE;
           }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            uint8_t retValue= pDev->getDeviceConfig(configClass, configIndex);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General Failure: %s", ex.what());
+          }
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_get_config
 
@@ -1315,36 +1298,38 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 2) {
+          int configClass;
+          int configIndex;
           try {
-            int configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-            int configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
-            uint16_t retValue= (intf->getDevice()->getDeviceConfigWord(configClass, configIndex));
-            JS_ResumeRequest(cx, ref);
-
-            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
-            return JS_TRUE;
+            configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
           } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
-            return JS_FALSE;
-          } catch(const BusApiError& ex) {
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Convert arguments: %s", ex.what());
             return JS_FALSE;
           }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            uint16_t retValue= pDev->getDeviceConfigWord(configClass, configIndex);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General Failure: %s", ex.what());
+          }
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_get_config_word
 
@@ -1356,38 +1341,40 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 3) {
+          int configClass;
+          int configIndex;
+          int configValue;
           try {
-            int configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-            int configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
-            int configValue = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
-            (intf->getDevice()->setDeviceConfig(configClass, configIndex, configValue));
-            JS_ResumeRequest(cx, ref);
-
-            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
-            return JS_TRUE;
+            configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+            configValue = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
           } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
-            return JS_FALSE;
-          } catch(const BusApiError& ex) {
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Convert arguments: %s", ex.what());
             return JS_FALSE;
           }
-          return JS_TRUE;
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            pDev->setDeviceConfig(configClass, configIndex, configValue);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_get_config
 
@@ -1399,35 +1386,36 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 1) {
+          uint8_t offset;
           try {
-            uint8_t offset = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
-            uint16_t result = (intf->getDevice()->getDeviceOutputValue(offset));
-            JS_ResumeRequest(cx, ref);
-
-            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(result));
-            return JS_TRUE;
+            offset = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
-            return JS_FALSE;
-          } catch(const BusApiError& ex) {
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Convert arguments: %s", ex.what());
             return JS_FALSE;
           }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            uint16_t result = pDev->getDeviceOutputValue(offset);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, INT_TO_JSVAL(result));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_get_output_value
 
@@ -1439,36 +1427,38 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 1) {
+          uint8_t offset;
+          uint16_t value;
           try {
-            uint8_t offset = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[0]);
-            uint16_t value = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[1]);
-
-            jsrefcount ref = JS_SuspendRequest(cx);
-            (intf->getDevice()->setDeviceOutputValue(offset, value));
-            JS_ResumeRequest(cx, ref);
-
-            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
-            return JS_TRUE;
+            offset = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[0]);
+            value = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[1]);
           } catch (ScriptException& ex) {
             JS_ReportError(cx, ex.what());
             return JS_FALSE;
-          } catch(const BusApiError& ex) {
-            JS_ReportError(cx, ex.what());
-            return JS_FALSE;
           }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            pDev->setDeviceOutputValue(offset, value);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_set_output_value
 
@@ -1480,34 +1470,36 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 1) {
-          int sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          int sensorIndex;
+          try {
+            sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, "Convert argument: %s", ex.what());
+            return JS_FALSE;
+          }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            int retValue= (intf->getDevice()->getDeviceSensorValue(sensorIndex));
+            int retValue= pDev->getDeviceSensorValue(sensorIndex);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             return JS_TRUE;
-          } catch (ScriptException& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, ex.what());
           } catch(const BusApiError& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          return JS_FALSE;
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_get_sensor_value
 
@@ -1519,34 +1511,36 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
         if(argc == 1) {
-          int sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          int sensorIndex;
+          try {
+            sensorIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, "Convert argument: %s", ex.what());
+            return JS_FALSE;
+          }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            int retValue = (intf->getDevice()->getDeviceSensorType(sensorIndex));
+            int retValue = pDev->getDeviceSensorType(sensorIndex);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             JS_ResumeRequest(cx, ref);
             return JS_TRUE;
           } catch(const BusApiError& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, ex.what());
-          } catch (ScriptException& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, ex.what());
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          return JS_FALSE;
+          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dev_get_sensor_type
 
@@ -1740,20 +1734,19 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(meter->getPowerConsumption()));
           return JS_TRUE;
         } catch (BusApiError& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
           return JS_FALSE;
         }
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dsmeter_getPowerConsumption
 
@@ -1769,21 +1762,20 @@ namespace dss {
           obj.setProperty<std::string>("timestamp", meter->getCachedPowerConsumptionTimeStamp().toString());
           obj.setProperty<int>("value", meter->getCachedPowerConsumption());
         } catch (BusApiError& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
           return JS_FALSE;
         }
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dsmeter_getCachedPowerConsumption
 
@@ -1796,19 +1788,19 @@ namespace dss {
         try {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(meter->getEnergyMeterValue()));
         } catch (BusApiError& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
           return JS_FALSE;
         }
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
 
     return JS_FALSE;
@@ -1826,19 +1818,19 @@ namespace dss {
           obj.setProperty<std::string>("timestamp", meter->getCachedEnergyMeterTimeStamp().toString());
           obj.setProperty<int>("value", meter->getCachedEnergyMeterValue());
         } catch (BusApiError& ex) {
-          JS_ReportError(cx, ex.what());
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
           return JS_FALSE;
         }
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
 
     return JS_FALSE;
@@ -1856,15 +1848,10 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
-    } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
-    } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     }
-
     return JS_FALSE;
   } // dsmeter_get_property_node
 
@@ -1947,15 +1934,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // zone_getDevices
 
@@ -1969,15 +1955,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // zone_getPowerConsumption
 
@@ -2015,15 +2000,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // zone_pushSensorValue
 
@@ -2039,15 +2023,14 @@ namespace dss {
         return JS_TRUE;
       }
     } catch(ItemNotFoundException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: item not found: ") + ex.what(), lsWarning);
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // zone_get_property_node
 
