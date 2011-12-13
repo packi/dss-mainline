@@ -881,9 +881,25 @@ BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
   ScriptExtension* ext = new MeteringScriptExtension(apt, metering);
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getResolutions().length");
-  BOOST_CHECK_EQUAL(num, 6);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var energyMinR = 2^31; var consumptionMinR = 2^31;"
+    "var mSeries = Metering.getResolutions();"
+    "for (var index in mSeries) {"
+      "var object = mSeries[index];"
+      "if ((object.type == 'energy') && (energyMinR > object.resolution)) {"
+        "energyMinR = object.resolution;"
+      "}"
+      "if ((object.type == 'consumption') && (consumptionMinR > object.resolution)) {"
+        "consumptionMinR = object.resolution;"
+      "}"
+    "}"
+    "print('Energy Min Resolution: ', energyMinR, ', Consumption Min Resolution: ', consumptionMinR);"
+  );
+  {
+    JSContextThread thread(ctx);
+    BOOST_CHECK_LT(ctx->getRootObject().getProperty<int>("energyMinR"), LONG_MAX);
+    BOOST_CHECK_LT(ctx->getRootObject().getProperty<int>("consumptionMinR"), LONG_MAX);
+  }
 } // testPropertyGetResolutions
 
 BOOST_AUTO_TEST_CASE(testMeteringGetValues) {

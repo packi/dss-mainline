@@ -129,8 +129,18 @@ namespace dss {
         for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
           ScriptObject resolution(*ctx, NULL);
           resolution.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          resolution.setProperty<std::string>("type", "energy");
           jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
           JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
+          if(!res) {
+            return JS_FALSE;
+          }
+          iResolution++;
+          ScriptObject objConsumption(*ctx, NULL);
+          objConsumption.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          objConsumption.setProperty<std::string>("type", "consumption");
+          childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());
+          res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
           if(!res) {
             return JS_FALSE;
           }
