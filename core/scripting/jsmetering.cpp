@@ -102,15 +102,15 @@ namespace dss {
           return JS_FALSE;
         }
       }
+      return JS_TRUE;
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
-    return JS_TRUE;
+    return JS_FALSE;
   } // metering_getSeries
 
   JSBool metering_getResolutions(JSContext* cx, uintN argc, jsval *vp) {
@@ -129,23 +129,33 @@ namespace dss {
         for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
           ScriptObject resolution(*ctx, NULL);
           resolution.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          resolution.setProperty<std::string>("type", "energy");
           jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
           JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
           if(!res) {
             return JS_FALSE;
           }
           iResolution++;
+          ScriptObject objConsumption(*ctx, NULL);
+          objConsumption.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          objConsumption.setProperty<std::string>("type", "consumption");
+          childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());
+          res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
+          if(!res) {
+            return JS_FALSE;
+          }
+          iResolution++;
         }
       }
+      return JS_TRUE;
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
-    return JS_TRUE;
+    return JS_FALSE;
   } // metering_getResolutions
 
   JSBool metering_getValues(JSContext* cx, uintN argc, jsval *vp) {
@@ -187,43 +197,39 @@ namespace dss {
       }
 
       boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter, resolution, energy);
-      if(pSeries != NULL) {
-        int valueNumber = 0;
-        JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
-        JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
-        for(std::deque<Value>::iterator iValue = pSeries->begin(),
-            e = pSeries->end();
-            iValue != e;
-            ++iValue)
-        {
-          ScriptObject valuePair(*ctx, NULL);
-          DateTime tmp_date = iValue->getTimeStamp();
-          valuePair.setProperty<std::string>("timestamp", tmp_date.toString());
-          valuePair.setProperty<int>("value", iValue->getValue());
-          jsval childJSVal = OBJECT_TO_JSVAL(valuePair.getJSObject());
-          JSBool res = JS_SetElement(cx, resultObj, valueNumber, &childJSVal);
-          if(!res) {
-            return JS_FALSE;
-          }
-          valueNumber++;
+      if(NULL == pSeries) {
+        JS_ReportWarning(cx, "could not find metering data for %s and resultion %s", type.c_str(), resolution);
+        return JS_FALSE;
+      }
+      int valueNumber = 0;
+      JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
+      for(std::deque<Value>::iterator iValue = pSeries->begin(),
+          e = pSeries->end();
+          iValue != e;
+          ++iValue)
+      {
+        ScriptObject valuePair(*ctx, NULL);
+        DateTime tmp_date = iValue->getTimeStamp();
+        valuePair.setProperty<std::string>("timestamp", tmp_date.toString());
+        valuePair.setProperty<int>("value", iValue->getValue());
+        jsval childJSVal = OBJECT_TO_JSVAL(valuePair.getJSObject());
+        JSBool res = JS_SetElement(cx, resultObj, valueNumber, &childJSVal);
+        if(!res) {
+          return JS_FALSE;
         }
-
-      } else {
-        Logger::getInstance()->log("JS: metering_getValues: Could not find data for '" + type +
-            "' and resolution '" + intToString(resolution) + "'", lsWarning);
+        valueNumber++;
       }
       return JS_TRUE;
-
     } catch(ScriptException& e) {
-      Logger::getInstance()->log(std::string("JS: metering_getValues: error converting value: ") + e.what(), lsError);
+      JS_ReportError(cx, "Scripting failure: %s", e.what());
     } catch (SecurityException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Access denied: %s", ex.what());
     } catch (DSSException& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "Failure: %s", ex.what());
     } catch (std::exception& ex) {
-      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+      JS_ReportError(cx, "General failure: %s", ex.what());
     }
-
     return JS_FALSE;
   } // metering_getValues
 

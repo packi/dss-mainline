@@ -783,10 +783,9 @@ namespace dss {
     if (m_pRunAsUser) {
       delete m_pRunAsUser;
     }
-    m_pExtension->removeListener(m_Identifier);
     Logger::getInstance()->log("JavaScript: released property-changed callback: " +
         m_Identifier, lsDebug);
-  }
+}
 
   void PropertyScriptListener::deferredCallback(PropertyNodePtr _changedNode,
       JSObject* _obj, jsval _function, ScriptFunctionRooter* _rooter,
@@ -855,7 +854,7 @@ namespace dss {
     ScriptContextAttachedObject::stop();
     ScriptLock lock(getContext());
     boost::shared_ptr<JSContextThread> req;
-    delete this;
+    m_pExtension->removeListener(m_Identifier);
   }
 
 } // namespace dss
