@@ -201,7 +201,6 @@ namespace dss {
                                                             bool getEnergy) {
     m_ValuesMutex.lock();
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
-    std::deque<Value>* values = returnVector.get();
 
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
     DateTime iCurrentTimeStamp;
@@ -281,9 +280,8 @@ namespace dss {
     rrd_freemem(names);
     rrd_value_t *currentData = data;
     for (int timeStamp = start + step; timeStamp <= (end - step); timeStamp += step) {
-      Value* val = new Value(std::isnan(*currentData) ? 0 : *currentData, timeStamp);
+      returnVector->push_back(Value(std::isnan(*currentData) ? 0 : *currentData, timeStamp));
       currentData++;
-      values->push_back(*val);
     }
     rrd_freemem(data);
     _resolution = step;
