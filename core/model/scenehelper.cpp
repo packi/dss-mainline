@@ -31,10 +31,8 @@ namespace dss {
 
   unsigned int SceneHelper::getNextScene(const unsigned int _currentScene) {
     switch(_currentScene) {
-    case ScenePanic:
-    case SceneStandBy:
-    case SceneDeepOff:
     case SceneOff:
+      return Scene1;
     case Scene1:
       return Scene2;
     case Scene2:
@@ -42,18 +40,47 @@ namespace dss {
     case Scene3:
       return Scene4;
     case Scene4:
-      return Scene1;
+      return Scene2;
+    case SceneOnE1:
+      return Scene12;
+    case Scene12:
+      return Scene13;
+    case Scene13:
+      return Scene14;
+    case Scene14:
+      return Scene12;
+    case SceneOnE2:
+      return Scene22;
+    case Scene22:
+      return Scene23;
+    case Scene23:
+      return Scene24;
+    case Scene24:
+      return Scene22;
+    case SceneOnE3:
+      return Scene32;
+    case Scene32:
+      return Scene33;
+    case Scene33:
+      return Scene34;
+    case Scene34:
+      return Scene32;
+    case SceneOnE4:
+      return Scene42;
+    case Scene42:
+      return Scene43;
+    case Scene43:
+      return Scene44;
+    case Scene44:
+      return Scene42;
+
     default:
-      return Scene1;
+      return SceneOff;
     }
   } // getNextScene
 
   unsigned int SceneHelper::getPreviousScene(const unsigned int _currentScene) {
     switch(_currentScene) {
-    case ScenePanic:
-    case SceneStandBy:
-    case SceneDeepOff:
-    case SceneOff:
     case Scene1:
       return Scene4;
     case Scene2:
@@ -62,8 +89,41 @@ namespace dss {
       return Scene2;
     case Scene4:
       return Scene3;
+    case SceneOnE1:
+      return Scene14;
+    case Scene12:
+      return SceneOnE1;
+    case Scene13:
+      return Scene12;
+    case Scene14:
+      return Scene13;
+    case SceneOnE2:
+      return Scene24;
+    case Scene22:
+      return SceneOnE2;
+    case Scene23:
+      return Scene22;
+    case Scene24:
+      return Scene23;
+    case SceneOnE3:
+      return Scene34;
+    case Scene32:
+      return SceneOnE3;
+    case Scene33:
+      return Scene32;
+    case Scene34:
+      return Scene33;
+    case SceneOnE4:
+      return Scene44;
+    case Scene42:
+      return SceneOnE4;
+    case Scene43:
+      return Scene42;
+    case Scene44:
+      return Scene43;
+
     default:
-      return Scene1;
+      return SceneOff;
     }
   } // getPreviousScene
 
@@ -105,6 +165,57 @@ namespace dss {
     }
     return false;
   } // rememberScene
+
+  bool SceneHelper::isMultiTipSequence(const unsigned int _scene) {
+    switch(_scene) {
+    case Scene1:
+    case SceneA11:
+    case SceneA21:
+    case SceneA31:
+    case SceneA41:
+    case Scene2:
+    case Scene3:
+    case Scene4:
+    case SceneOnE1:
+    case Scene12:
+    case Scene13:
+    case Scene14:
+    case SceneOnE2:
+    case Scene22:
+    case Scene23:
+    case Scene24:
+    case SceneOnE3:
+    case Scene32:
+    case Scene33:
+    case Scene34:
+    case SceneOnE4:
+    case Scene42:
+    case Scene43:
+    case Scene44:
+      return true;
+    case SceneOff:
+    case SceneOffA1:
+    case SceneOffA2:
+    case SceneOffA3:
+    case SceneOffA4:
+    case SceneOffE1:
+    case SceneOffE2:
+    case SceneOffE3:
+    case SceneOffE4:
+      return true;
+    }
+    return false;
+  } // isMultiTipSequence
+
+  bool SceneHelper::isDimSequence(const unsigned int _scene) {
+    switch(_scene) {
+    case SceneInc:
+    case SceneDec:
+    case SceneDimArea:
+      return true;
+    }
+    return false;
+  }
 
   bool SceneHelper::isInRange(const int _sceneNumber, const int _zoneNumber) {
     bool aboveZero = (_sceneNumber >= 0);
