@@ -53,6 +53,8 @@ cmake ../dss-$DSS_RELEASE_VERSION -DWITH_DATADIR=../dss-$DSS_RELEASE_VERSION/dat
 make
 
 
+# copy generared soap stuff
+cp webservices/dss.wsdl ../dss-$DSS_RELEASE_VERSION/data/webroot
 
 echo "Building documentation for dss v$DSS_RELEASE_VERSION"
 
@@ -90,7 +92,7 @@ sed -i -e "s|Go to the source code of this file.||g" \
 sed -i -e "s|dss__||g" $TARGET_DIR/dss-$DSS_RELEASE_VERSION-soap_api.html
 
 # wsdl
-cp ../../dss-$DSS_RELEASE_VERSION/webservices/dss.wsdl \
+cp ../webservices/dss.wsdl \
     $TARGET_DIR/dss-$DSS_RELEASE_VERSION.wsdl
 
 cd ../..
