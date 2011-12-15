@@ -541,7 +541,7 @@ namespace dss {
         } catch(std::runtime_error& e) {
         }
       }
-      ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneGroup, _dsMeterID);
       pEvent->addParameter(_zoneID);
       pEvent->addParameter(_groupID);
       pEvent->addParameter(_sceneID);

@@ -53,6 +53,8 @@ namespace dss {
      */
     static unsigned int getPreviousScene(const unsigned int _currentScene);
     static bool isInRange(const int _sceneNumber, const int _zoneNumber);
+    static bool isMultiTipSequence(const unsigned int _scene);
+    static bool isDimSequence(const unsigned int _scene);
     static uint64_t getReachableScenesBitmapForButtonID(const int _buttonID);
   }; // SceneHelper
 

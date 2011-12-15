@@ -36,7 +36,7 @@ namespace dss {
   class ModelEvent {
   public:
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
-                   etCallSceneDevice, /**< A device has changed the scene (only raised from the simulation at the moment). */
+                   etCallSceneDevice, /**< A device has changed the scene */
                    etNewDevice,       /**< A new device has been detected */
                    etLostDevice,       /**< A device became inactive */
                    etDeviceChanged,   /**< The device needs to be rescanned */

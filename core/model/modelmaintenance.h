@@ -38,6 +38,40 @@ namespace dss {
   class Metering;
   class StructureQueryBusInterface;
 
+  class ModelSceneEvent {
+  public:
+    static const int kModelSceneTimeout = 2;
+  private:
+    dss_dsid_t m_Source;
+    time_t m_Timestamp;
+    int m_ZoneID;
+    int m_GroupID;
+    int m_SceneID;
+    bool m_IsCalled;
+  public:
+    /** Constructs a ModelSceneEvent with timestamp */
+    ModelSceneEvent(dss_dsid_t _source, int _zoneID, int _groupID, int _sceneID) :
+      m_Source(_source), m_ZoneID(_zoneID), m_GroupID(_groupID), m_SceneID(_sceneID), m_IsCalled(false)
+    {
+      setTimestamp();
+    }
+    dss_dsid_t getSource() { return m_Source; }
+    int getSceneID() { return m_SceneID; }
+    int getGroupID() { return m_GroupID; }
+    int getZoneID() { return m_ZoneID; }
+
+    bool isOriginMyself() { return m_Source.lower == 0 && m_Source.upper == 0; }
+    bool isDue() { time_t now = time(NULL); return (now - m_Timestamp >= kModelSceneTimeout); }
+    bool isCalled() { return m_IsCalled; }
+
+    void setTimestamp() { m_Timestamp = time(NULL); }
+    void clearTimestamp() { m_Timestamp = 0; }
+    void setCalled() { m_IsCalled = true; }
+    void setScene(int _sceneID) { m_SceneID = _sceneID; setTimestamp(); }
+
+    virtual ~ModelSceneEvent() { }
+  };
+
   class ModelMaintenance : public ThreadedSubsystem {
   public:
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
@@ -54,6 +88,8 @@ namespace dss {
     virtual void execute();
 
     void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _sceneID);
+
     void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
                              const std::string& _name);
     void onDsmNameChanged(dss_dsid_t _meterID, const std::string& _name);
@@ -66,6 +102,7 @@ namespace dss {
     virtual void doStart();
   private:
     bool handleModelEvents();
+    bool handleDeferredModelEvents();
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
     void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
@@ -93,6 +130,8 @@ namespace dss {
     Metering* m_pMetering;
     const int m_EventTimeoutMS;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
+
+    std::list<boost::shared_ptr<ModelSceneEvent> > m_DeferredEvents;
 
     void checkConfigFile(boost::filesystem::path _filename);
   }; // ModelMaintenance

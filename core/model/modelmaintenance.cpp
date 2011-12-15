@@ -175,6 +175,7 @@ namespace dss {
       if(!handleModelEvents()) {
         readOutPendingMeter();
       }
+      handleDeferredModelEvents();
     }
   } // execute
 
@@ -201,6 +202,62 @@ namespace dss {
       persistence.writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
     }
   } // writeConfiguration
+
+  bool ModelMaintenance::handleDeferredModelEvents() {
+    if (m_DeferredEvents.empty()) {
+      return false;
+    }
+
+    std::list<boost::shared_ptr<ModelSceneEvent> > mDefEvents(m_DeferredEvents);
+    m_DeferredEvents.clear();
+    for(std::list<boost::shared_ptr<ModelSceneEvent> >::iterator mEvent = mDefEvents.begin();
+        mEvent != mDefEvents.end();
+        mEvent++)
+    {
+      int sceneID = (*mEvent)->getSceneID();
+      int groupID = (*mEvent)->getGroupID();
+      int zoneID = (*mEvent)->getZoneID();
+
+      try {
+        boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
+        boost::shared_ptr<Group> group = zone->getGroup(groupID);
+
+        if ((*mEvent)->isDue()) {
+          if (! ((*mEvent)->isCalled())) {
+            boost::shared_ptr<Event> pEvent;
+            pEvent.reset(new Event("callScene", group));
+            pEvent->setProperty("sceneID", intToString(sceneID));
+            pEvent->setProperty("groupID", intToString(groupID));
+            pEvent->setProperty("zoneID", intToString(zoneID));
+            raiseEvent(pEvent);
+          }
+          // finished deferred processing of this event
+        } else if (SceneHelper::isDimSequence(sceneID)) {
+          if (! ((*mEvent)->isCalled())) {
+            boost::shared_ptr<Event> pEvent;
+            pEvent.reset(new Event("callScene", group));
+            pEvent->setProperty("sceneID", intToString(sceneID));
+            pEvent->setProperty("groupID", intToString(groupID));
+            pEvent->setProperty("zoneID", intToString(zoneID));
+            raiseEvent(pEvent);
+            (*mEvent)->setCalled();
+          }
+          m_DeferredEvents.push_back(*mEvent);
+        } else {
+          m_DeferredEvents.push_back(*mEvent);
+        }
+
+      } catch(ItemNotFoundException& e) {
+        log("handleDeferredModelEvents: Could not find group/zone with id "
+            + intToString(groupID) + "/" + intToString(zoneID), lsError);
+      } catch(SecurityException& e) {
+        log("handleDeferredModelEvents: security error accessing group/zone with id "
+            + intToString(groupID) + "/" + intToString(zoneID), lsError);
+      }
+    }
+    mDefEvents.clear();
+    return true;
+  } // handleDeferredModelEvents
 
   bool ModelMaintenance::handleModelEvents() {
     if(!m_ModelEvents.empty()) {
@@ -255,6 +312,9 @@ namespace dss {
           log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
         } else {
           onGroupCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          if (pEventWithDSID) {
+            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          }
         }
         break;
       case ModelEvent::etModelDirty:
@@ -480,8 +540,10 @@ namespace dss {
           }
         }
         boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event("callScene", group));
+        pEvent.reset(new Event("callSceneBus", group));
         pEvent->setProperty("sceneID", intToString(_sceneID));
+        pEvent->setProperty("groupID", intToString(_groupID));
+        pEvent->setProperty("zoneID", intToString(_zoneID));
         raiseEvent(pEvent);
       } else {
         log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -490,6 +552,129 @@ namespace dss {
       log("OnGroupCallScene: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
     }
   } // onGroupCallScene
+
+  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _sceneID) {
+
+    // Filter Strategy:
+    // Check for Source != 0 and per Zone and Group
+    // - delayed On-Scene processing, for Scene1/Scene2/Scene3/Scene4
+    // - report only the first Inc/Dec
+
+    bool passThrough = true;
+
+    if (SceneHelper::isMultiTipSequence(_sceneID)) {
+      // do not filter calls from myself
+      if (_source.lower == 0 && _source.upper == 0) {
+        passThrough = true;
+      }
+      // do not filter calls to broadcast
+      else if (_groupID == 0) {
+        passThrough = true;
+      }
+      else {
+        passThrough = false;
+      }
+    } else if (SceneHelper::isDimSequence(_sceneID)) {
+      // filter dimming sequences to only report the first dimming event
+      passThrough = false;
+    }
+
+    if (passThrough) {
+      log("CallSceneFilter: pass through, from source " + _source.toString() +
+          ": Zone=" + intToString(_zoneID) +
+          ", Gruppe=" + intToString(_groupID) +
+          ", Scene=" + intToString(_sceneID), lsDebug);
+
+      boost::shared_ptr<ModelSceneEvent> mEvent(new ModelSceneEvent(_source, _zoneID, _groupID, _sceneID));
+      mEvent->clearTimestamp();  // force immediate event processing
+      m_DeferredEvents.push_back(mEvent);
+      return;
+    }
+
+    foreach(boost::shared_ptr<ModelSceneEvent> pEvent, m_DeferredEvents) {
+      if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
+        if (pEvent->getSource() == _source) {
+          // dimming, adjust the old event's timestamp to keep it active
+          if (SceneHelper::isDimSequence(_sceneID) && (pEvent->getSceneID() == _sceneID)) {
+            pEvent->setTimestamp();
+            return;
+          }
+          // going through SceneOff
+          if (((pEvent->getSceneID() == SceneOff) && (_sceneID == Scene2)) ||
+              ((pEvent->getSceneID() == SceneOffE1) && (_sceneID == Scene12)) ||
+              ((pEvent->getSceneID() == SceneOffE2) && (_sceneID == Scene22)) ||
+              ((pEvent->getSceneID() == SceneOffE3) && (_sceneID == Scene32)) ||
+              ((pEvent->getSceneID() == SceneOffE4) && (_sceneID == Scene42))) {
+
+            log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
+                ": Zone=" + intToString(_zoneID) +
+                ", Group=" + intToString(_groupID) +
+                ", Scene=" + intToString(_sceneID));
+
+            pEvent->setScene(_sceneID);
+            return;
+          }
+          // area-on-2-3-4 sequence
+          if (((pEvent->getSceneID() == SceneA11) || (pEvent->getSceneID() == SceneA21) ||
+               (pEvent->getSceneID() == SceneA31) || (pEvent->getSceneID() == SceneA41)) &&
+              ((_sceneID == Scene2) || (_sceneID == Scene12) || (_sceneID == Scene22) ||
+               (_sceneID == Scene32) || (_sceneID == Scene42))) {
+
+            log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
+                ": Zone=" + intToString(_zoneID) +
+                ", Group=" + intToString(_groupID) +
+                ", Scene=" + intToString(_sceneID));
+
+            pEvent->setScene(_sceneID);
+            return;
+          }
+          // area-off-2-3-4 sequence, check for triple- or 4x-click
+          if (((pEvent->getSceneID() == SceneOffA1) || (pEvent->getSceneID() == SceneOffA2) ||
+               (pEvent->getSceneID() == SceneOffA3) || (pEvent->getSceneID() == SceneOffA4)) &&
+              (_sceneID >= Scene2) && (_sceneID <= Scene44)) {
+
+            log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
+                ": Zone=" + intToString(_zoneID) +
+                ", Group=" + intToString(_groupID) +
+                ", Scene=" + intToString(_sceneID));
+
+            pEvent->setScene(_sceneID);
+            return;
+          }
+          // previous state match
+          if ((int) SceneHelper::getPreviousScene(_sceneID) == pEvent->getSceneID()) {
+
+            log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
+                ": Zone=" + intToString(_zoneID) +
+                ", Group=" + intToString(_groupID) +
+                ", Scene=" + intToString(_sceneID));
+
+            pEvent->setScene(_sceneID);
+            return;
+          }
+          // next state match
+          if ((int) SceneHelper::getNextScene((unsigned int) pEvent->getSceneID()) == _sceneID) {
+
+            log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
+                ": Zone=" + intToString(_zoneID) +
+                ", Group=" + intToString(_groupID) +
+                ", Scene=" + intToString(_sceneID));
+
+            pEvent->setScene(_sceneID);
+            return;
+          }
+        }
+      }
+    }
+
+    log("CallSceneFilter: deferred processing, from source " + _source.toString() +
+        ": Zone=" + intToString(_zoneID) +
+        ", Group=" + intToString(_groupID) +
+        ", Scene=" + intToString(_sceneID), lsDebug);
+
+    boost::shared_ptr<ModelSceneEvent> mEvent(new ModelSceneEvent(_source, _zoneID, _groupID, _sceneID));
+    m_DeferredEvents.push_back(mEvent);
+  } // onGroupCallSceneFiltered
 
   void ModelMaintenance::onDeviceNameChanged(dss_dsid_t _meterID,
                                              const devid_t _deviceID,
