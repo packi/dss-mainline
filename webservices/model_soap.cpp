@@ -1700,7 +1700,8 @@ int dss__MeteringGetSeries(struct soap *soap, char* _token, std::vector<dss__Met
 }
 
 int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
-                           std::string _type, int _resolution, std::vector<dss__MeteringValue>& result) {
+                           std::string _type, int _resolution, std::string* _unit,
+                           std::vector<dss__MeteringValue>& result) {
   boost::shared_ptr<dss::DSMeter> pMeter;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, pMeter);
   if(getResult != SOAP_OK) {
@@ -1708,8 +1709,16 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
   }
 
   bool isEnergy = false;
+  bool energyInWh = true;
   if(_type == "energy") {
     isEnergy = true;
+    if(_unit != NULL) {
+      if(*_unit == "Ws") {
+        energyInWh = false;
+      } else if (*_unit != "Wh") {
+        return soap_sender_fault(soap, "Expected 'Ws' or 'Wh' for parameter 'unit'", NULL);
+      }
+    }
   } else {
     if(_type != "consumption") {
       return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
@@ -1717,7 +1726,7 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
   }
 
   dss::Metering& metering = dss::DSS::getInstance()->getMetering();
-  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, isEnergy);
+  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, isEnergy, energyInWh);
   if(pSeries != NULL) {
     for(std::deque<dss::Value>::iterator iValue = pSeries->begin(),
         e = pSeries->end();
@@ -1736,7 +1745,7 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
   return SOAP_OK;
 }
 
-int dss__MeteringGetLastest(struct soap *soap, char* _token, std::string _from, std::string _type, std::vector<dss__MeteringValuePerDevice>& result) {
+int dss__MeteringGetLastest(struct soap *soap, char* _token, std::string _from, std::string _type, std::string* _unit, std::vector<dss__MeteringValuePerDevice>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1755,14 +1764,29 @@ int dss__MeteringGetLastest(struct soap *soap, char* _token, std::string _from, 
     return soap_sender_fault(soap, failureMessage.c_str(), NULL);
   }
 
-  bool isEnergy = (_type == "energy");
+  bool isEnergy = false;
+  int energyQuotient = 3600;
+  if(_type == "energy") {
+    isEnergy = true;
+    if(_unit != NULL) {
+      if(*_unit == "Ws") {
+        energyQuotient = 1;
+      } else if (*_unit != "Wh") {
+        return soap_sender_fault(soap, "Expected 'Ws' or 'Wh' for parameter 'unit'", NULL);
+      }
+    }
+  } else {
+    if(_type != "consumption") {
+      return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
+    }
+  }
 
   foreach(boost::shared_ptr<dss::DSMeter> dsMeter, meters) {
     dss__MeteringValuePerDevice value;
     value.dsid = dsMeter->getDSID().toString();
     dss::DateTime temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
     value.timestamp = temp_date.secondsSinceEpoch();
-    value.value = isEnergy ? dsMeter->getCachedEnergyMeterValue() : dsMeter->getCachedPowerConsumption();
+    value.value = isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption();
     result.push_back(value);
   }
   return SOAP_OK;
