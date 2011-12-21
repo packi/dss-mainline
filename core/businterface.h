@@ -212,7 +212,7 @@ namespace dss {
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
                                  const int _powerW,
-                                 const int _energyWh) = 0;
+                                 const int _energyWs) = 0;
   };
 
   /** Interface to be implemented by any bus interface provider */
