@@ -87,8 +87,10 @@ namespace dss {
     std::string deviceDSIDString = _request.getParameter("dsid");
     std::string resolutionString = _request.getParameter("resolution");
     std::string typeString = _request.getParameter("type");
+    std::string unitString = _request.getParameter("unit");
     int resolution;
     bool energy;
+    bool energyWh;
     boost::shared_ptr<DSMeter> pMeter;
     try {
       dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
@@ -111,18 +113,31 @@ namespace dss {
     } else {
       if(typeString == "consumption") {
         energy = false;
+        energyWh = true;
+        unitString = "W";
       } else if(typeString == "energy") {
         energy = true;
+        if(unitString.empty()) {
+          unitString = "Wh";
+          energyWh = true;
+        } else {
+          if(unitString == "Ws") {
+            energyWh = false;
+          } else {
+            return failure("Invalid unit '" + unitString + "'");
+          }
+        }
       } else {
         return failure("Invalid type '" + typeString + "'");
       }
     }
-    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter, resolution, energy);
+    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter, resolution, energy, energyWh);
 
     if(pSeries != NULL) {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("meterID", deviceDSIDString);
       resultObj->addProperty("type", typeString);
+      resultObj->addProperty("unit", unitString);
       resultObj->addProperty("resolution", resolutionString);
       boost::shared_ptr<JSONArrayBase> valuesArray(new JSONArrayBase());
       resultObj->addElement("values", valuesArray);
@@ -149,6 +164,7 @@ namespace dss {
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request) {
     std::string from = _request.getParameter("from");
     std::string type = _request.getParameter("type");
+    std::string unit = _request.getParameter("unit");
 
     if(type.empty() || ((type != "consumption") && (type != "energy"))) {
       return failure("Invalid or missing type parameter");
@@ -156,6 +172,15 @@ namespace dss {
 
     if(from.empty()) {
       return failure("Missing 'from' parameter");
+    }
+
+    int energyQuotient = 3600;
+    if(!unit.empty()) {
+      if(unit == "Ws") {
+        energyQuotient = 1;
+      } else if(unit != "Wh") {
+        return failure("Invalid unit parameter");
+      }
     }
 
     MeterSetBuilder builder(m_Apartment);
@@ -178,7 +203,7 @@ namespace dss {
         boost::shared_ptr<JSONObject> modulator(new JSONObject());
 
         modulator->addProperty("dsid", dsMeter->getDSID().toString());
-        modulator->addProperty("value", isEnergy ? dsMeter->getCachedEnergyMeterValue() : dsMeter->getCachedPowerConsumption());
+        modulator->addProperty("value", isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption());
 
         DateTime temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
         modulator->addProperty("date", temp_date.toString());

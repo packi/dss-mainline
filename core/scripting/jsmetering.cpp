@@ -172,6 +172,10 @@ namespace dss {
       std::string dsid = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
       std::string type = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
       int resolution = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
+      std::string unit = "Wh";
+      if (argc == 4) {
+        unit = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
+      }
 
       boost::shared_ptr<DSMeter> pMeter;
       try {
@@ -195,8 +199,17 @@ namespace dss {
         Logger::getInstance()->log("JS: metering_getValues: Invalid type '" + type + "'", lsError);
         return JS_FALSE;
       }
+      bool energyWh;
+      if (unit == "Wh") {
+        energyWh = true;
+      } else if (unit == "Ws") {
+        energyWh = false;
+      } else {
+        Logger::getInstance()->log("JS: metering_getValues: Invalid unit '" + unit + "'", lsError);
+        return JS_FALSE;
+      }
 
-      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter, resolution, energy);
+      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter, resolution, energy, energyWh);
       if(NULL == pSeries) {
         JS_ReportWarning(cx, "could not find metering data for %s and resultion %s", type.c_str(), resolution);
         return JS_FALSE;
