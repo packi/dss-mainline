@@ -51,58 +51,41 @@ namespace dss {
   bool BusScanner::scanDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
-    DSMeterHash_t hash;
 
     log("scanDSMeter: Start " + _dsMeter->getDSID().toString() , lsInfo);
     // TODO: implement energy border handling
 
     try {
-      hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
+      DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
+      _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
+      _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
+      _dsMeter->setHardwareVersion(spec.HardwareVersion);
+      _dsMeter->setApiVersion(spec.APIVersion);
+      if (_dsMeter->getName().empty()) {
+        _dsMeter->setName(spec.Name);
+      }
     } catch(BusApiError& e) {
-      log("scanDSMeter: Error getting dSMHash", lsFatal);
+      log("scanDSMeter: Error getting dSMSpecs", lsFatal);
       return false;
     }
 
-    if ((hash.Hash != _dsMeter->getDatamodelHash()) ||
-        (hash.ModificationCount != _dsMeter->getDatamodelModificationCount())) {
-
-      try {
-        DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
-        _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
-        _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
-        _dsMeter->setHardwareVersion(spec.HardwareVersion);
-        _dsMeter->setApiVersion(spec.APIVersion);
-        if (_dsMeter->getName().empty()) {
-          _dsMeter->setName(spec.Name);
-        }
-      } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting dSMSpecs", lsFatal);
-        return false;
-      }
-
-      std::vector<int> zoneIDs;
-      try {
-        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
-      } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting ZoneIDs", lsFatal);
-        return false;
-      }
-
-      foreach(int zoneID, zoneIDs) {
-        log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
-        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
-        zone->addToDSMeter(_dsMeter);
-        zone->setIsPresent(true);
-        if(!scanZone(_dsMeter, zone)) {
-          return false;
-        }
-      }
-
-      m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    std::vector<int> zoneIDs;
+    try {
+      zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+    } catch(BusApiError& e) {
+      log("scanDSMeter: Error getting ZoneIDs", lsFatal);
+      return false;
     }
 
-    _dsMeter->setDatamodelHash(hash.Hash);
-    _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
+    foreach(int zoneID, zoneIDs) {
+      log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
+      boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+      zone->addToDSMeter(_dsMeter);
+      zone->setIsPresent(true);
+      if(!scanZone(_dsMeter, zone)) {
+        return false;
+      }
+    }
     _dsMeter->setIsValid(true);
     return true;
   } // scanDSMeter
