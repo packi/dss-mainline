@@ -28,21 +28,21 @@
 
 #include <iostream>
 
-#include "core/event.h"
-#include "core/eventinterpreterplugins.h"
-#include "core/internaleventrelaytarget.h"
-#include "core/eventcollector.h"
-#include "core/setbuilder.h"
-#include "core/sim/dssim.h"
-#include "core/sim/dsmetersim.h"
-#include "core/sim/businterface/simbusinterface.h"
-#include "core/model/apartment.h"
-#include "core/model/modelmaintenance.h"
-#include "core/model/device.h"
-#include "core/model/devicereference.h"
-#include "core/model/zone.h"
-#include "core/model/group.h"
-#include "core/model/set.h"
+#include "src/event.h"
+#include "src/eventinterpreterplugins.h"
+#include "src/internaleventrelaytarget.h"
+#include "src/eventcollector.h"
+#include "src/setbuilder.h"
+#include "src/sim/dssim.h"
+#include "src/sim/dsmetersim.h"
+#include "src/sim/businterface/simbusinterface.h"
+#include "src/model/apartment.h"
+#include "src/model/modelmaintenance.h"
+#include "src/model/device.h"
+#include "src/model/devicereference.h"
+#include "src/model/zone.h"
+#include "src/model/group.h"
+#include "src/model/set.h"
 
 using namespace dss;
 

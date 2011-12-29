@@ -34,10 +34,10 @@
 
 #include <signal.h>
 
-#include "core/base.h"
-#include "core/scripting/scriptobject.h"
-#include "core/scripting/jslogger.h"
-#include "core/foreach.h"
+#include "src/base.h"
+#include "src/scripting/scriptobject.h"
+#include "src/scripting/jslogger.h"
+#include "src/foreach.h"
 
 using namespace std;
 using namespace dss;

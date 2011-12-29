@@ -25,10 +25,10 @@
   #include "config.h"
 #endif
 
-#include "core/base.h"
-#include "core/dss.h"
-#include "core/logger.h"
-#include "core/datetools.h"
+#include "src/base.h"
+#include "src/dss.h"
+#include "src/logger.h"
+#include "src/datetools.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
 #endif

@@ -28,9 +28,9 @@
 
 #include "webfixture.h"
 
-#include "core/event.h"
-#include "core/web/handler/eventrequesthandler.h"
-#include "core/eventinterpreterplugins.h"
+#include "src/event.h"
+#include "src/web/handler/eventrequesthandler.h"
+#include "src/eventinterpreterplugins.h"
 
 using namespace dss;
 

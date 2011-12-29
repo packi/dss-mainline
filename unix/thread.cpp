@@ -20,9 +20,9 @@
 
 */
 
-#include "core/thread.h"
-#include "core/logger.h"
-#include "core/base.h"
+#include "src/thread.h"
+#include "src/logger.h"
+#include "src/base.h"
 
 #include <cassert>
 

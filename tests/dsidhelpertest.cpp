@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "ds485types.h"
-#include "dsidhelper.h"
+#include "src/ds485types.h"
+#include "src/dsidhelper.h"
 
 using namespace dss;
 

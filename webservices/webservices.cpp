@@ -23,9 +23,9 @@
 */
 
 #include "webservices.h"
-#include "core/propertysystem.h"
-#include "core/sessionmanager.h"
-#include "core/eventcollector.h"
+#include "src/propertysystem.h"
+#include "src/sessionmanager.h"
+#include "src/eventcollector.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -34,9 +34,9 @@
 
 #include <openssl/ssl.h>
 
-#include "core/dss.h"
-#include "core/eventsubscriptionsession.h"
-#include "core/session.h"
+#include "src/dss.h"
+#include "src/eventsubscriptionsession.h"
+#include "src/session.h"
 
 namespace dss {
 

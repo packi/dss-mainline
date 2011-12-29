@@ -28,12 +28,12 @@
 
 #include <boost/filesystem.hpp>
 
-#include "core/sim/dssim.h"
-#include "core/model/modelmaintenance.h"
-#include "core/model/apartment.h"
-#include "core/model/set.h"
-#include "core/model/device.h"
-#include "core/sim/businterface/simbusinterface.h"
+#include "src/sim/dssim.h"
+#include "src/model/modelmaintenance.h"
+#include "src/model/apartment.h"
+#include "src/model/set.h"
+#include "src/model/device.h"
+#include "src/sim/businterface/simbusinterface.h"
 
 using namespace dss;
 

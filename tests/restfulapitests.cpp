@@ -26,9 +26,9 @@
 
 #include <boost/filesystem.hpp>
 
-#include "core/web/restful.h"
-#include "core/web/webserverapi.h"
-#include "core/web/restfulapiwriter.h"
+#include "src/web/restful.h"
+#include "src/web/webserverapi.h"
+#include "src/web/restfulapiwriter.h"
 
 using namespace dss;
 namespace fs = boost::filesystem;

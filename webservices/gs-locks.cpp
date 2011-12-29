@@ -32,7 +32,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "core/logger.h"
+#include "src/logger.h"
 
 using namespace dss;
 

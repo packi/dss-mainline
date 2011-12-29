@@ -30,9 +30,9 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
-#include "core/scripting/scriptobject.h"
-#include "core/scripting/jssocket.h"
-#include "core/foreach.h"
+#include "src/scripting/scriptobject.h"
+#include "src/scripting/jssocket.h"
+#include "src/foreach.h"
 
 using namespace std;
 using namespace dss;

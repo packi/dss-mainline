@@ -25,19 +25,19 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "core/scripting/jsmodel.h"
-#include "core/scripting/jsevent.h"
-#include "core/scripting/jsmetering.h"
-#include "core/scripting/scriptobject.h"
-#include "core/scripting/jsproperty.h"
-#include "core/event.h"
-#include "core/eventinterpreterplugins.h"
-#include "core/propertysystem.h"
-#include "core/model/apartment.h"
-#include "core/model/device.h"
-#include "core/model/modulator.h"
-#include "core/model/modelconst.h"
-#include "core/metering/metering.h"
+#include "src/scripting/jsmodel.h"
+#include "src/scripting/jsevent.h"
+#include "src/scripting/jsmetering.h"
+#include "src/scripting/scriptobject.h"
+#include "src/scripting/jsproperty.h"
+#include "src/event.h"
+#include "src/eventinterpreterplugins.h"
+#include "src/propertysystem.h"
+#include "src/model/apartment.h"
+#include "src/model/device.h"
+#include "src/model/modulator.h"
+#include "src/model/modelconst.h"
+#include "src/metering/metering.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <memory>

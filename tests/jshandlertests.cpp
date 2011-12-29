@@ -28,8 +28,8 @@
 
 #include <string>
 
-#include "core/scripting/jshandler.h"
-#include "core/scripting/scriptobject.h"
+#include "src/scripting/jshandler.h"
+#include "src/scripting/scriptobject.h"
 
 using namespace dss;
 

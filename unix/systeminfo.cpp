@@ -44,10 +44,10 @@
 
 #include <cstring>
 
-#include "core/logger.h"
-#include "core/dss.h"
-#include "core/propertysystem.h"
-#include "core/base.h"
+#include "src/logger.h"
+#include "src/dss.h"
+#include "src/propertysystem.h"
+#include "src/base.h"
 
 namespace dss {
 
