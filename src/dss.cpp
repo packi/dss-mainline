@@ -81,33 +81,33 @@ namespace dss {
   //============================================= DSS
 
 #ifdef WITH_DATADIR
-const char* DataDirectory = WITH_DATADIR;
+const char* DataDirectory = DSS_DATADIR;
 #else
-const char* DataDirectory = "data/";
+const char* DataDirectory = PACKAGE_DATADIR "/data/";
 #endif
 
 #ifdef WITH_CONFIGDIR
-const char* ConfigDirectory = WITH_CONFIGDIR;
+const char* ConfigDirectory = DSS_CONFIGDIR;
 #else
-const char* ConfigDirectory = "data/";
+const char* ConfigDirectory = PACKAGE_DATADIR "/data/";
 #endif
 
 #ifdef WITH_WEBROOTDIR
-const char* WebrootDirectory = WITH_WEBROOTDIR;
+const char* WebrootDirectory = DSS_WEBROOTDIR;
 #else
-const char* WebrootDirectory = "data/webroot/";
+const char* WebrootDirectory = PACKAGE_DATADIR "/data/webroot/";
 #endif
 
 #ifdef WITH_JSLOGDIR
-const char* JSLogDirectory = WITH_JSLOGDIR;
+const char* JSLogDirectory = DSS_JSLOGDIR;
 #else
-const char* JSLogDirectory = "data/logs/";
+const char* JSLogDirectory = PACKAGE_DATADIR "/data/logs/";
 #endif
 
 #ifdef WITH_SAVEDPROPSDIR
-const char* kSavedPropsDirectory = WITH_SAVEDPROPSDIR;
+const char* kSavedPropsDirectory = DSS_SAVEDPROPSDIR;
 #else
-const char* kSavedPropsDirectory = "data/savedprops/";
+const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
   DSS::DSS()

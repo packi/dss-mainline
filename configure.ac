@@ -13,7 +13,56 @@ if test "x${prefix}" = "xNONE"; then
     prefix="${ac_default_prefix}"
 fi
 
-AC_ARG_WITH(js-pkgconfig, 
+MT_OPTION([soap], [disable],
+          [build dSS without SOAP support],
+          [],[])
+
+AC_ARG_WITH(dss-data,
+    AC_HELP_STRING([--with-dss-data=DIR], [use DIR as dSS data directory]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_DATADIR], [1], [custom dSS data directory set])
+            AC_DEFINE_UNQUOTED([DSS_DATADIR], ["$withval"], [dSS data directory])
+        fi
+    ])
+
+AC_ARG_WITH(dss-config,
+    AC_HELP_STRING([--with-dss-config=DIR], [use DIR as dSS config directory]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_CONFIGDIR], [1], [custom dSS config directory set])
+            AC_DEFINE_UNQUOTED([DSS_CONFIGDIR], ["$withval"], [dSS data directory])
+        fi
+    ])
+
+AC_ARG_WITH(dss-webroot,
+    AC_HELP_STRING([--with-dss-webroot=DIR], [use DIR as dSS webroot directory]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_WEBROOTDIR], [1], [custom dSS webroot directory set])
+            AC_DEFINE_UNQUOTED([DSS_WEBROOTDIR], ["$withval"], [dSS webroot directory])
+        fi
+    ])
+
+AC_ARG_WITH(dss-js-logs,
+    AC_HELP_STRING([--with-dss-js-logs=DIR], [use DIR as dSS JavaScript logging directory]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_JSLOGDIR], [1], [custom dSS JavaScript logging directory set])
+            AC_DEFINE_UNQUOTED([DSS_JSLOGDIR], ["$withval"], [dSS JS log directory])
+        fi
+    ])
+
+AC_ARG_WITH(dss-saved-properties,
+    AC_HELP_STRING([--with-dss-saved-properties=DIR], [save dSS add-on script properties in DIR]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_SAVEDPROPSDIR], [1], [custom dSS savedprops directory set])
+            AC_DEFINE_UNQUOTED([DSS_SAVEDPROPSDIR], ["$withval"], [dSS savedprops directory])
+        fi
+    ])
+
+AC_ARG_WITH(js-pkgconfig,
     AC_HELP_STRING([--with-js-pkgconfig=DIR], [Search for libjs.pc or mozjs185.c in DIR]),
     [
         if test "x$withval" != "x"; then
@@ -189,46 +238,51 @@ MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
                           [dsm-api-v2], [DsmApiOpen], [-lds485-client])
 
 
-PKG_CHECK_MODULES([GSOAP], [gsoapssl++], [],
-    [
-        AC_MSG_ERROR([$GSOAP_PKG_ERRORS])
-    ])
+if test "x$SOAP_OPTION_ENABLED" = "xyes"; then
+    PKG_CHECK_MODULES([GSOAP], [gsoapssl++], [],
+        [
+            AC_MSG_ERROR([$GSOAP_PKG_ERRORS])
+        ])
 
-AC_PATH_PROG(GSOAP_SOAPCPP2, soapcpp2, no)
-if test "x$GSOAP_SOAPCPP2" = xno; then
-    AC_MSG_ERROR([soapcpp2 utility not found])
-fi
-AC_SUBST(GSOAP_SOAPCPP2)
+    AC_PATH_PROG(GSOAP_SOAPCPP2, soapcpp2, no)
+    if test "x$GSOAP_SOAPCPP2" = xno; then
+        AC_MSG_ERROR([soapcpp2 utility not found])
+    fi
+    AC_SUBST(GSOAP_SOAPCPP2)
 
-GSOAP_IMPORT_DIR=
-AC_ARG_WITH(gsoap-import, 
-    AC_HELP_STRING([--gsoap-import=DIR], [search for gSOAP import headers in DIR]),
-    [
-        if test "x$withval" != "x"; then
-            if (test -d "$withval") && (test -f "$withval/wsa.h") ; then
-                GSOAP_IMPORT_DIR="$withval"
-                AC_MSG_NOTICE([gSOAP import headers path set to $withval])
-            else
-                AC_MSG_ERROR([you specified $withval as gSOAP import header directory, but this path does not exist or does not contain valid headers!])
+    GSOAP_IMPORT_DIR=
+    AC_ARG_WITH(gsoap-import,
+        AC_HELP_STRING([--with-gsoap-import=DIR], [search for gSOAP import headers in DIR]),
+        [
+            if test "x$withval" != "x"; then
+                if (test -d "$withval") && (test -f "$withval/wsa.h") ; then
+                    GSOAP_IMPORT_DIR="$withval"
+                    AC_MSG_NOTICE([gSOAP import headers path set to $withval])
+                else
+                    AC_MSG_ERROR([you specified $withval as gSOAP import header directory, but this path does not exist or does not contain valid headers!])
+                fi
             fi
-        fi
-    ])
+        ])
 
-AC_MSG_CHECKING([for gSOAP import header directory])
-if (test -z $GSOAP_IMPORT_DIR); then
-    for GSPATH in /usr/share/gsoap/import \
-                  /usr/local/share/gsoap/import ; do
-        if (test -z $GSOAP_IMPORT_DIR) && (test -s $GSPATH/wsa.h); then
-            GSOAP_IMPORT_DIR=$GSPATH
-        fi
-    done
-fi
-if (test -z $GSOAP_IMPORT_DIR); then
-    AC_MSG_ERROR([could not find gSOAP import header directory])
+    AC_MSG_CHECKING([for gSOAP import header directory])
+    if (test -z $GSOAP_IMPORT_DIR); then
+        for GSPATH in /usr/share/gsoap/import \
+                      /usr/local/share/gsoap/import ; do
+            if (test -z $GSOAP_IMPORT_DIR) && (test -s $GSPATH/wsa.h); then
+                GSOAP_IMPORT_DIR=$GSPATH
+            fi
+        done
+    fi
+    if (test -z $GSOAP_IMPORT_DIR); then
+        AC_MSG_ERROR([could not find gSOAP import header directory])
+    fi
+
+    AC_MSG_RESULT([$GSOAP_IMPORT_DIR])
+    AC_SUBST(GSOAP_IMPORT_DIR)
+    AC_DEFINE([WITH_SOAP], [1], [ build with SOAP support ])
 fi
 
-AC_MSG_RESULT([$GSOAP_IMPORT_DIR])
-AC_SUBST(GSOAP_IMPORT_DIR)
+AM_CONDITIONAL(BUILD_SOAP, test "x$SOAP_OPTION_ENABLED" = "xyes")
 
 AC_PATH_PROG(SENDMAIL, sendmail, no)
 if test "x$SENDMAIL" = "xno"; then

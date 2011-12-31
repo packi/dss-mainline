@@ -2,7 +2,17 @@ bin_PROGRAMS = dss
 
 noinst_PROGRAMS = dsstests
 
-CLEANFILES = $(top_srcdir)/src/build_info.h \
+CLEANFILES = \
+			$(top_srcdir)/src/build_info.h
+
+BUILT_SOURCES = \
+			$(top_srcdir)/src/build_info.h
+
+noinst_LIBRARIES = libdsscore.a libmongoose.a libunix.a
+
+if BUILD_SOAP
+
+CLEANFILES += \
 			 $(top_srcdir)/webservices/soapC.cpp \
 			 $(top_srcdir)/webservices/soapH.h
 			 $(top_srcdir)/webservices/dss.nsmap \
@@ -12,8 +22,7 @@ CLEANFILES = $(top_srcdir)/src/build_info.h \
 			 $(top_srcdir)/webservices/soapStub.h \
 			 $(top_srcdir)/webservices/soapdssObject.h
 
-BUILT_SOURCES = \
-			$(top_srcdir)/src/build_info.h \
+BUILT_SOURCES += \
 			$(top_srcdir)/webservices/soapC.cpp \
 			$(top_srcdir)/webservices/soapH.h \
 			$(top_srcdir)/webservices/dss.nsmap \
@@ -23,7 +32,9 @@ BUILT_SOURCES = \
 			$(top_srcdir)/webservices/soapStub.h \
 			$(top_srcdir)/webservices/soapdssObject.h
 
-noinst_LIBRARIES = libwebservices.a libdsscore.a libmongoose.a libunix.a
+noinst_LIBRARIES += libwebservices.a
+
+endif
 
 include $(srcdir)/sources.list
 
@@ -61,8 +72,12 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
 			$(GSOAP_LIBS) \
-			libwebservices.a \
 			$(LIBRRD_LIBS) -lrrd_th
+
+if BUILD_SOAP
+
+dss_LDADD += \
+			libwebservices.a
 
 libwebservices_a_CXXFLAGS = \
 			-I$(top_srcdir)/src \
@@ -78,6 +93,8 @@ nodist_libwebservices_a_SOURCES = \
 			$(top_srcdir)/webservices/soapServer.cpp \
 			$(top_srcdir)/webservices/soapStub.h \
 			$(top_srcdir)/webservices/soapdssObject.h
+
+endif
 
 dsstests_CXXFLAGS = \
 			$(JS_CFLAGS) \
@@ -100,8 +117,13 @@ dsstests_LDADD = \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
 			$(GSOAP_LIBS) \
-			libwebservices.a \
 			$(LIBRRD_LIBS) -lrrd_th
+
+if BUILD_SOAP
+
+dsstests_LDADD += \
+			libwebservices.a
+endif
 
 dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
 
@@ -110,5 +132,9 @@ $(top_srcdir)/src/build_info.h:
 
 $(top_srcdir)/src/dss.cpp: $(top_srcdir)/src/build_info.h
 
+if BUILD_SOAP
+
 $(top_srcdir)/webservices/soapC.cpp:
 	$(GSOAP_SOAPCPP2) -I$(GSOAP_IMPORT_DIR) -I$(top_srcdir)/webservices -SLx -d$(top_srcdir)/webservices $(top_srcdir)/webservices/model_soap.h
+
+endif
