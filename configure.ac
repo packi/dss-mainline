@@ -14,8 +14,14 @@ if test "x${prefix}" = "xNONE"; then
 fi
 
 MT_OPTION([soap], [disable],
-          [build dSS without SOAP support],
+          [build dSS without SOAP support (default: enabled)],
           [],[])
+
+MT_OPTION([http], [enable],
+          [build with HTTP support (default: HTTPS only)],
+          [
+            AC_DEFINE([WITH_HTTP], [1], [ build with HTTP support ])
+          ],[])
 
 AC_ARG_WITH(dss-data,
     AC_HELP_STRING([--with-dss-data=DIR], [use DIR as dSS data directory]),
