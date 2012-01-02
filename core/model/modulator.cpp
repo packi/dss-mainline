@@ -45,6 +45,7 @@ namespace dss {
     m_dspSoftwareVersion(0),
     m_ApiVersion(0),
     m_IsValid(false),
+    m_IsInitialized(false),
     m_pApartment(_pApartment)
   {
     publishToPropertyTree();

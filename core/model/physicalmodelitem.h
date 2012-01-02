@@ -28,15 +28,19 @@ namespace dss {
   class PhysicalModelItem {
   private:
     bool m_IsPresent;
+    bool m_IsConnected;
   public:
     PhysicalModelItem()
-    : m_IsPresent(false)
+    : m_IsPresent(false), m_IsConnected(false)
     { }
 
     virtual ~PhysicalModelItem() {}; // please the compiler (virtual dtor)
 
-    bool isPresent() const { return m_IsPresent; }
+    bool isPresent() const { return m_IsPresent & m_IsConnected; }
     virtual void setIsPresent(const bool _value) { m_IsPresent = _value; }
+
+    bool isConnected() const { return m_IsConnected; }
+    virtual void setIsConnected(const bool _value) { m_IsConnected = _value; }
   };
 
 }

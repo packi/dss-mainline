@@ -136,6 +136,15 @@ namespace dss {
             name = nameElem->firstChild()->nodeValue();
           }
 
+          bool isPresent = false;
+          if(elem->hasAttribute("isPresent")) {
+            try {
+              int present = strToUInt(elem->getAttribute("isPresent"));
+              isPresent = present > 0;
+            } catch(std::invalid_argument&) {
+            }
+          }
+
           DateTime firstSeen;
           if(elem->hasAttribute("firstSeen")) {
             try {
@@ -166,6 +175,7 @@ namespace dss {
           if(!name.empty()) {
             newDevice->setName(name);
           }
+          newDevice->setIsPresent(isPresent);
           newDevice->setFirstSeen(firstSeen);
           newDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
           newDevice->setLastKnownZoneID(lastKnownZoneID);
@@ -333,6 +343,7 @@ namespace dss {
       pNameNode->appendChild(txtNode);
       pDeviceNode->appendChild(pNameNode);
     }
+    pDeviceNode->setAttribute("isPresent", _pDevice->isPresent() ? "1" : "0");
     pDeviceNode->setAttribute("firstSeen", intToString(_pDevice->getFirstSeen().secondsSinceEpoch()));
     if(_pDevice->getLastKnownDSMeterDSID() != NullDSID) {
       pDeviceNode->setAttribute("lastKnownDSMeter", _pDevice->getLastKnownDSMeterDSID().toString());
@@ -340,7 +351,6 @@ namespace dss {
     if(_pDevice->getLastKnownZoneID() != 0) {
       pDeviceNode->setAttribute("lastKnownZoneID", intToString(_pDevice->getLastKnownZoneID()));
     }
-
     if(_pDevice->getLastKnownShortAddress() != ShortAddressStaleDevice) {
       pDeviceNode->setAttribute("lastKnownShortAddress", intToString(_pDevice->getLastKnownShortAddress()));
     }
