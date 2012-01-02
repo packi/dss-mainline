@@ -173,10 +173,9 @@ namespace dss {
           new ApartmentTreeListener(this, m_pApartment));
 
     while(!m_Terminated) {
-      if(!handleModelEvents()) {
-        readOutPendingMeter();
-      }
+      handleModelEvents();
       handleDeferredModelEvents();
+      readOutPendingMeter();
     }
   } // execute
 
