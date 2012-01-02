@@ -91,6 +91,10 @@ namespace dss {
     signOff();
     if(_session != NULL) {
       if(_session->getUser() != NULL) {
+        User* u = m_LoggedInUser.release();
+        if (NULL != u) {
+          delete u;
+        }
         m_LoggedInUser.reset(new User(*_session->getUser()));
         result = true;
       }
@@ -102,6 +106,10 @@ namespace dss {
     signOff();
     PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + _user);
     if(pUserNode != NULL) {
+      User* u = m_LoggedInUser.release();
+      if (NULL != u) {
+        delete u;
+      }
       m_LoggedInUser.reset(new User(pUserNode));
       return true;
     }
@@ -116,6 +124,10 @@ namespace dss {
       if(pUserNameNode != NULL) {
         PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + pUserNameNode->getStringValue());
         if(pUserNode != NULL) {
+          User* u = m_LoggedInUser.release();
+          if (NULL != u) {
+            delete u;
+          }
           m_LoggedInUser.reset(new User(pUserNode));
           return true;
         }
@@ -125,12 +137,19 @@ namespace dss {
   } // authenticateApplication
 
   bool Security::signIn(User* _pUser) {
+    User* u = m_LoggedInUser.release();
+    if (NULL != u) {
+      delete u;
+    }
     m_LoggedInUser.reset(new User(*_pUser));
     return true;
   } // signIn
 
   void Security::signOff() {
-    m_LoggedInUser.release();
+    User* u = m_LoggedInUser.release();
+    if (NULL != u) {
+      delete u;
+    }
   } // signOff
 
   bool Security::loadFromXML() {
@@ -144,6 +163,10 @@ namespace dss {
   void Security::loginAsSystemUser(const std::string& _reason) {
     if(m_pSystemUser != NULL) {
       Logger::getInstance()->log("Logged in as system user (" + _reason + ")", lsInfo);
+      User* u = m_LoggedInUser.release();
+      if (NULL != u) {
+        delete u;
+      }
       m_LoggedInUser.reset(new User(*m_pSystemUser));
     } else {
       Logger::getInstance()->log("Failed to login as system-user (" + _reason + ")", lsFatal);
