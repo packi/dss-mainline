@@ -312,6 +312,7 @@ BOOST_FIXTURE_TEST_CASE(testLockNotPresent, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testLockPresent, Fixture) {
   HashMapConstStringString params;
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsConnected(true);
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/lock", params);
@@ -329,6 +330,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockNotPresent, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testUnlockPresent, Fixture) {
   HashMapConstStringString params;
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsConnected(true);
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/unlock", params);

@@ -59,6 +59,7 @@ namespace dss {
     int m_ApiVersion;
     std::string m_HardwareName;
     bool m_IsValid;
+    bool m_IsInitialized;
     PropertyNodePtr m_pPropertyNode;
     Apartment* m_pApartment;
     unsigned int m_DatamodelHash;
@@ -132,6 +133,9 @@ namespace dss {
     void setDatamodelModificationcount(const unsigned int count) { m_DatamoderModificationCount = count; }
 
     /** Returns true if the dsMeter has been read-out completely. */
+    bool isInitialized() const { return m_IsInitialized; }
+    void setIsInitialized(const bool _value) { m_IsInitialized = _value; }
+
     bool isValid() const { return m_IsValid; }
     void setIsValid(const bool _value) { m_IsValid = _value; }
 

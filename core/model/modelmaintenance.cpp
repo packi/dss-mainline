@@ -3,6 +3,7 @@
 
     Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
              Christian Hitz, aizo AG <christian.hitz@aizo.com>
+             Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -160,9 +161,9 @@ namespace dss {
   } // start
 
   void ModelMaintenance::execute() {
-   if(DSS::hasInstance()) {
-     DSS::getInstance()->getSecurity().loginAsSystemUser("ModelMaintenance needs system-rights");
-   }
+    if(DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser("ModelMaintenance needs system-rights");
+    }
 
     log("ModelMaintenance::execute: Enumerating model", lsInfo);
     discoverDS485Devices();
@@ -172,10 +173,9 @@ namespace dss {
           new ApartmentTreeListener(this, m_pApartment));
 
     while(!m_Terminated) {
-      if(!handleModelEvents()) {
-        readOutPendingMeter();
-      }
+      handleModelEvents();
       handleDeferredModelEvents();
+      readOutPendingMeter();
     }
   } // execute
 
@@ -185,10 +185,24 @@ namespace dss {
         std::vector<DSMeterSpec_t> meters =
           m_pStructureQueryBusInterface->getDSMeters();
         foreach (DSMeterSpec_t& spec, meters) {
-          ModelEventWithDSID* pEvent =
-            new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered,
-                                   spec.DSID);
-          addModelEvent(pEvent);
+
+          boost::shared_ptr<DSMeter> dsMeter;
+          try{
+             dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
+             log ("dSM present");
+          } catch(ItemNotFoundException& e) {
+             dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
+             log ("dSM not present");
+          }
+
+          if (!dsMeter->isConnected()) {
+            dsMeter->setIsPresent(true);
+            dsMeter->setIsConnected(true);
+            dsMeter->setIsValid(false);
+            ModelEventWithDSID* pEvent =
+                new ModelEventWithDSID(ModelEvent::etDSMeterReady, spec.DSID);
+            addModelEvent(pEvent);
+          }
         }
       } catch(BusApiError& e) {
         log("Failed to discover ds485 devices", lsError);
@@ -330,13 +344,11 @@ namespace dss {
         if(event.getParameterCount() != 0) {
           log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
         } else {
-          ModelEventWithDSID* pEventWithDSID =
-            dynamic_cast<ModelEventWithDSID*>(&event);
           assert(pEventWithDSID != NULL);
           dss_dsid_t meterID = pEventWithDSID->getDSID();
           try{
             boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(meterID);
-            mod->setIsPresent(true);
+            mod->setIsConnected(true);
             mod->setIsValid(false);
           } catch(ItemNotFoundException& e) {
             log("dSM is ready, but it is not yet known, re-discovering devices");
@@ -374,20 +386,16 @@ namespace dss {
           dss_dsid_t newDSID = pEventWithDSID->getDSID();
           log ("Discovered device with DSID: " + newDSID.toString());
           boost::shared_ptr<DSMeter> dsMeter;
-
           try{
-             log ("dSM present");
              dsMeter = m_pApartment->getDSMeterByDSID(newDSID);
+             log ("dSM present");
           } catch(ItemNotFoundException& e) {
-             log ("dSM not present");
              dsMeter = m_pApartment->allocateDSMeter(newDSID);
+             log ("dSM not present");
           }
-
           dsMeter->setIsPresent(true);
+          dsMeter->setIsConnected(true);
           dsMeter->setIsValid(false);
-          ModelEventWithDSID* pEvent =
-                   new ModelEventWithDSID(ModelEvent::etDSMeterReady, newDSID);
-          addModelEvent(pEvent);
         }
         break;
       default:
@@ -447,6 +455,10 @@ namespace dss {
     try {
       try {
         boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
+        Set devices = mod->getDevices();
+        for (int i = 0; i < devices.length(); i++) {
+          devices[i].getDevice()->setIsConnected(true);
+        }
         BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if(scanner.scanDSMeter(mod)) {
           boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
@@ -765,13 +777,14 @@ namespace dss {
   } // onRemoveDevice
 
   void ModelMaintenance::onLostDSMeter(const dss_dsid_t& _dSMeterID) {
+    log("dSM disconnected: " + _dSMeterID.toString());
     try {
       boost::shared_ptr<DSMeter> meter =
                               m_pApartment->getDSMeterByDSID(_dSMeterID);
-      meter->setIsPresent(false);
+      meter->setIsConnected(false);
       Set devices = meter->getDevices();
       for (int i = 0; i < devices.length(); i++) {
-        devices[i].getDevice()->setIsPresent(false);
+        devices[i].getDevice()->setIsConnected(false);
       }
     } catch(ItemNotFoundException& e) {
       log("Lost dSM " + _dSMeterID.toString() + " was not in our list");

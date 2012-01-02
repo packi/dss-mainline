@@ -78,6 +78,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1->setDSMeter(meter);
   dev1->addToGroup(1);
   dev1->setIsPresent(true);
+  dev1->setIsConnected(true);
   dev1->setZoneID(1);
   dev1->setName("dev1");
   dev1->setFunctionID(1);
@@ -86,6 +87,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev2->setDSMeter(meter);
   dev2->addToGroup(1);
   dev2->setIsPresent(false);
+  dev2->setIsConnected(true);
   dev2->setZoneID(2);
   dev2->setName("dev2");
   dev2->setFunctionID(1);
