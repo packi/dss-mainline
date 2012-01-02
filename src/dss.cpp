@@ -80,6 +80,10 @@ namespace dss {
 
   //============================================= DSS
 
+#ifndef PACKAGE_DATADIR
+    #define PACKAGE_DATADIR "/usr/local/share/dss"
+#endif
+
 #ifdef WITH_DATADIR
 const char* DataDirectory = DSS_DATADIR;
 #else
