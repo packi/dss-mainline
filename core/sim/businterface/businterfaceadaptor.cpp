@@ -551,11 +551,11 @@ namespace dss {
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
                                  const int _powerW,
-                                 const int _energyWh) {
+                                 const int _energyWs) {
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etMeteringValues,
                                                   _dsMeterID);
       pEvent->addParameter(_powerW);
-      pEvent->addParameter(_energyWh);
+      pEvent->addParameter(_energyWs);
       m_pModelMaintenance->addModelEvent(pEvent);
     }
 

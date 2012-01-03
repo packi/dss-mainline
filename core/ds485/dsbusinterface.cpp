@@ -312,7 +312,7 @@ namespace dss {
 
       CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
-                            CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
+                            CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_WS_GET,
                             (void*)meteringCallback, this);
 
 
@@ -605,10 +605,10 @@ namespace dss {
 
   void DSBusInterface::handleCircuitEnergyData(uint8_t _errorCode,
                                                dsid_t _sourceID, dsid_t _destinationID,
-                                               uint32_t _powerW, uint32_t _energyWh) {
+                                               uint32_t _powerW, uint32_t _energyWs) {
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_sourceID, dsMeterID);
-    m_pBusEventSink->onMeteringEvent(this, dsMeterID, _powerW, _energyWh);
+    m_pBusEventSink->onMeteringEvent(this, dsMeterID, _powerW, _energyWs);
   } // handleCircuitEnergyData
 
   void DSBusInterface::handleCircuitEnergyDataCallback(uint8_t _errorCode,
@@ -616,11 +616,11 @@ namespace dss {
                                                 dsid_t _sourceID,
                                                 dsid_t _destinationID,
                                                 uint32_t _powerW,
-                                                uint32_t _energyWh) {
+                                                uint32_t _energyWs) {
     static_cast<DSBusInterface*>(_userData)->
       handleCircuitEnergyData(_errorCode,
                               _sourceID, _destinationID,
-                              _powerW, _energyWh);
+                              _powerW, _energyWs);
   } // handleCircuitEnergyDataCallback
 
 

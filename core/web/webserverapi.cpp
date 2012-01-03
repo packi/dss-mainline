@@ -509,11 +509,13 @@ namespace dss {
       .withParameter("dsid", "string", true)
       .withParameter("type", "string", true)
       .withParameter("resolution", "integer", true)
-      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy' and 'consumption' are available");
+      .withParameter("unit", "string", false)
+      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy' and 'consumption' are available. 'energy' is available in two units: 'Wh' (default) and 'Ws'.");
     clsMetering.addMethod("getLatest")
       .withParameter("type", "string", true)
       .withParameter("from", "string", true)
-      .withDocumentation("Returns cached energy meter value in watt-hours (Wh) or cached power consumption value in watt (W). The type parameter defines what should be returned, valid types are 'energy' and 'consumption'. The from parameter follows the set-syntax, currently it supports: .meters(dsid1,dsid2,...) and .meters(all)");
+      .withParameter("unit", "string", false)
+      .withDocumentation("Returns cached energy meter value in watt-hours (Wh) or cached power consumption value in watt (W). The type parameter defines what should be returned, valid types are 'energy' and 'consumption'. 'energy' is available in two units: 'Wh' (default) and 'Ws'. The from parameter follows the set-syntax, currently it supports: .meters(dsid1,dsid2,...) and .meters(all)");
 
     return api;
   } // createRestfulAPI

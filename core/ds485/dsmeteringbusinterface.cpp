@@ -39,7 +39,7 @@ namespace dss {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
 
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, dsmDSID, &power, NULL);
+    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, dsmDSID, &power, NULL);
     DSBusInterface::checkResultCode(ret);
 
     return power;
@@ -50,7 +50,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       return;
     }
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, NULL, NULL);
+    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, m_BroadcastDSID, NULL, NULL);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // requestPowerConsumption
 
@@ -63,7 +63,7 @@ namespace dss {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
 
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, dsmDSID, NULL, &energy);
+    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, dsmDSID, NULL, &energy);
     DSBusInterface::checkResultCode(ret);
 
     return energy;

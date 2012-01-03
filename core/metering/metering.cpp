@@ -198,7 +198,8 @@ namespace dss {
 
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
                                                             int &_resolution,
-                                                            bool getEnergy) {
+                                                            bool getEnergy,
+                                                            bool energyInWh) {
     m_ValuesMutex.lock();
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
 
@@ -243,18 +244,14 @@ namespace dss {
       sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << (getEnergy ? "energy" : "power") << ":AVERAGE";
       lines.push_back(sstream.str());
     }
-#if defined(ENERGY_IN_WS)
-    if (getEnergy) {
+    if (getEnergy && energyInWh) {
       std::stringstream sstream;
-      sstream << "CDEF:adj=data," << 3600 << ",*";
+      sstream << "CDEF:adj=data," << 3600 << ",/";
       lines.push_back(sstream.str());
       lines.push_back("XPORT:adj");
     } else {
-#endif
       lines.push_back("XPORT:data");
-#if defined(ENERGY_IN_WS)
     }
-#endif
 
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));

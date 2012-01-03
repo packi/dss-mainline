@@ -153,7 +153,7 @@ namespace dss {
                                                 dsid_t _sourceId,
                                                 dsid_t _destinationId,
                                                 uint32_t _powerW,
-                                                uint32_t _energyWh);
+                                                uint32_t _energyWs);
   protected:
     virtual void doStart();
   public:
