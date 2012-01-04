@@ -13,6 +13,16 @@ if test "x${prefix}" = "xNONE"; then
     prefix="${ac_default_prefix}"
 fi
 
+MT_SET_SEARCHPATH
+
+if test -n "$MT_SEARCHPATH_PKGCONFIG"; then
+    export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$MT_SEARCHPATH_PKGCONFIG
+fi
+
+if test -n "$MT_SEARCHPATH_PROGS"; then
+    export PATH=$PATH:$MT_SEARCHPATH_PROGS
+fi
+
 MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
           [],[])
@@ -76,8 +86,6 @@ AC_ARG_WITH(js-pkgconfig,
             export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$withval
         fi
     ])
-
-MT_SET_SEARCHPATH
 
 # Checks for programs.
 AC_PROG_CXX

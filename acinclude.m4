@@ -1393,11 +1393,13 @@ AC_DEFUN([MT_SET_SEARCHPATH],
     MT_SEARCHPATH_HEADERS="${MT_SEARCHPATH}/include"
     MT_SEARCHPATH_LIBS="${MT_SEARCHPATH}/lib"
     MT_SEARCHPATH_PROGS="${MT_SEARCHPATH}/bin"
+    MT_SEARCHPATH_PKGCONFIG="${MT_SEARCHPATH}/lib/pkgconfig"
 
     AC_SUBST(MT_SEARCHPATH)
     AC_SUBST(MT_SEARCHPATH_HEADERS)
     AC_SUBST(MT_SEARCHPATH_LIBS)
     AC_SUBST(MT_SEARCHPATH_PROGS)
+    AC_SUBST(MT_SEARCHPATH_PKGCONFIG)
 ])
 
 
@@ -1551,6 +1553,11 @@ AC_DEFUN([MT_CHECK_HEADER_INTERNAL],
                     ],
                     [
                         mt_[]translit($1, `/.-', `___')_header_status=missing
+                        if test "$3" = "pass"; then
+                            AC_MSG_NOTICE([$1 headers not found in requested location $mt_$1_search_headers])
+                        else
+                            AC_MSG_ERROR([$1 headers not found in requested location $mt_$1_search_headers])
+                        fi
                     ]
                 )
             ]
