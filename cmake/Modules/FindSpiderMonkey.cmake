@@ -27,7 +27,8 @@ if(SPIDERMONKEY_ROOT)
 else()
     find_path(
         SPIDERMONKEY_INCLUDE_DIR
-        js/jsapi.h)
+        jsapi.h
+        PATH_SUFFIXES "js")
 endif()
 
 if(SPIDERMONKEY_ROOT)
@@ -78,8 +79,8 @@ if(SPIDERMONKEY_FOUND)
             PATHS "${SPIDERMONKEY_ROOT}/include/js"
             NO_DEFAULT_PATH)
     else()
-        find_path(SPIDERMONKEY_JS_CONFIG_HEADER_PATH "js-config.h")
-        find_path(SPIDERMONKEY_JS_VERSION_HEADER_PATH "jsversion.h")
+        find_path(SPIDERMONKEY_JS_CONFIG_HEADER_PATH "js-config.h" PATH_SUFFIXES "js")
+        find_path(SPIDERMONKEY_JS_VERSION_HEADER_PATH "jsversion.h" PATH_SUFFIXES "js")
     endif()
 
     check_include_file_cxx("${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/js-config.h" SPIDERMONKEY_JS_CONFIG_HEADER)
