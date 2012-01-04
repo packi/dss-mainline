@@ -55,7 +55,9 @@ dss_SOURCES = $(top_srcdir)/main.cpp $(top_srcdir)/namespaces.cpp
 
 nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
 
-dss_CXXFLAGS = $(LIBXML2_CFLAGS)
+dss_CXXFLAGS = \
+			$(LIBXML2_CFLAGS) \
+			$(GSOAP_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(BOOST_THREAD_LIBS) \
@@ -71,13 +73,13 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(LIBXML2_LIBS) \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
-			$(GSOAP_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th
 
 if BUILD_SOAP
 
 dss_LDADD += \
-			libwebservices.a
+			libwebservices.a \
+			$(GSOAP_LIBS)
 
 libwebservices_a_CXXFLAGS = \
 			-I$(top_srcdir)/src \
@@ -116,13 +118,13 @@ dsstests_LDADD = \
 			$(LIBXML2_LIBS) \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
-			$(GSOAP_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th
 
 if BUILD_SOAP
 
 dsstests_LDADD += \
-			libwebservices.a
+			libwebservices.a \
+			$(GSOAP_LIBS)
 endif
 
 dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
