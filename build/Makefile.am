@@ -79,7 +79,8 @@ if BUILD_SOAP
 
 dss_LDADD += \
 			libwebservices.a \
-			$(GSOAP_LIBS)
+			$(GSOAP_LIBS) \
+			$(OPENSSL_LIBS)
 
 libwebservices_a_CXXFLAGS = \
 			-I$(top_srcdir)/src \
@@ -124,7 +125,9 @@ if BUILD_SOAP
 
 dsstests_LDADD += \
 			libwebservices.a \
-			$(GSOAP_LIBS)
+			$(GSOAP_LIBS) \
+			$(OPENSSL_LIBS)
+
 endif
 
 dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
