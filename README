@@ -1,31 +1,5 @@
 digitalSTROM Server - dSS
 
-   This is a pre-release (aka snapshot of the subversion repos). Expect
-the program to destroy all your data.
+Please visit http://redmine.digitalstrom.org/projects/dss/wiki/
 
-Building
-========
-
-   See the INSTALL document for information on how to build the dSS.
-
-Running
-=======
-
-   Assuming you are in the build directory after building the dSS you can
-run it using
-
-   (cd ..; build/dss)
-
-Using
-=====
-
-   After starting the dSS it will open up a webserver at port 8080. So if
-you point your webserver to:
-
-   http://localhost:8080/
-
-you'll be greeted by a enumeration of the devices currently connected.
-
-   Everything is served out of dss/data/webroot. There is a JavaScript API
-located in webroot/js/model.js. The code in there should be enough 
-"documentation" for an interested developer.
+Also see the INSTALL document for information on how to build the dSS.

@@ -1,0 +1,9 @@
+dSS - digitalSTROM Server
+
+v1.4.0 05.01.2012
+	* read and save energy values in Ws instead of Wh from the dSM
+	* added unit parameter to JSON and SOAP API to request metering data in Ws
+	  or Wh
+	* reworked dSM readout, now using dSM hash again to optimize readout
+	* free user object in authentication methods
+	* added autoools support
