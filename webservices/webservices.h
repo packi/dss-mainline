@@ -24,12 +24,12 @@
 #define WEBSERVICES_H_
 
 #include "webservices/soapdssSSLObject.h"
-#include "core/thread.h"
-#include "core/datetools.h"
-#include "core/subsystem.h"
-#include "core/mutex.h"
-#include "core/syncevent.h"
-#include "core/event.h"
+#include "src/thread.h"
+#include "src/datetools.h"
+#include "src/subsystem.h"
+#include "src/mutex.h"
+#include "src/syncevent.h"
+#include "src/event.h"
 
 #include <deque>
 

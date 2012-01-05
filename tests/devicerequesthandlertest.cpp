@@ -26,11 +26,11 @@
 
 #include "webfixture.h"
 
-#include "core/model/apartment.h"
-#include "core/web/handler/devicerequesthandler.h"
-#include "core/model/device.h"
-#include "core/model/zone.h"
-#include "core/propertysystem.h"
+#include "src/model/apartment.h"
+#include "src/web/handler/devicerequesthandler.h"
+#include "src/model/device.h"
+#include "src/model/zone.h"
+#include "src/propertysystem.h"
 
 using namespace dss;
 

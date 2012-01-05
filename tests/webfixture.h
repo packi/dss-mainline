@@ -26,8 +26,8 @@
 #include <boost/pointer_cast.hpp>
 #include <boost/assert.hpp>
 
-#include "core/web/json.h"
-#include "core/web/webrequests.h"
+#include "src/web/json.h"
+#include "src/web/webrequests.h"
 
 namespace dss {
 

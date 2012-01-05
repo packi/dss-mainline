@@ -26,9 +26,9 @@
 
 #include "webfixture.h"
 
-#include "core/model/deviceinterface.h"
-#include "core/web/handler/deviceinterfacerequesthandler.h"
-#include "core/web/json.h"
+#include "src/model/deviceinterface.h"
+#include "src/web/handler/deviceinterfacerequesthandler.h"
+#include "src/web/json.h"
 
 using namespace dss;
 

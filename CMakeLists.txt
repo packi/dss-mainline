@@ -179,7 +179,7 @@ include_directories(${RRD_INCLUDE_DIRS})
 set(REQUIRED_LIBS ${REQUIRED_LIBS} ${RRD_LIBRARIES} rrd)
 
 # generate config.h header file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 add_definitions(-DHAVE_CONFIG_H)
 
@@ -216,7 +216,7 @@ if(LIBDSM_PREFIX)
 endif()
 set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api-v2)
 
-add_subdirectory(core)
+add_subdirectory(src)
 add_subdirectory(unix)
 if (WITH_SOAP)
   add_subdirectory(webservices)
@@ -224,7 +224,6 @@ if (WITH_SOAP)
 endif()
 add_subdirectory(external)
 add_subdirectory(doc)
-
 set(DSS_LIBS core security ds485 model unix simulation scripting)
 if (WITH_SOAP)
   set(DSS_LIBS ${DSS_LIBS} webservices)

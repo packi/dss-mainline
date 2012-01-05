@@ -26,7 +26,7 @@
 
 #include "soapdssSSLObject.h"
 #include "gs-locks.h"
-#include "core/logger.h"
+#include "src/logger.h"
 
 dssSSLService::dssSSLService() : dssService() 
 {

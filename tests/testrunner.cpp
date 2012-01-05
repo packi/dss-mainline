@@ -31,7 +31,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "core/datetools.h"
+#include "src/datetools.h"
 
 namespace dss {
 

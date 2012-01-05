@@ -26,10 +26,10 @@
 
 #include "webfixture.h"
 
-#include "core/model/apartment.h"
-#include "core/model/modulator.h"
-#include "core/model/modelmaintenance.h"
-#include "core/web/handler/circuitrequesthandler.h"
+#include "src/model/apartment.h"
+#include "src/model/modulator.h"
+#include "src/model/modelmaintenance.h"
+#include "src/web/handler/circuitrequesthandler.h"
 
 using namespace dss;
 

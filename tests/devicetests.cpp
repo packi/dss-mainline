@@ -26,10 +26,10 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "core/model/device.h"
-#include "core/model/group.h"
-#include "core/model/apartment.h"
-#include "core/model/modelconst.h"
+#include "src/model/device.h"
+#include "src/model/group.h"
+#include "src/model/apartment.h"
+#include "src/model/modelconst.h"
 
 using namespace dss;
 

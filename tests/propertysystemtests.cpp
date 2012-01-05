@@ -79,10 +79,10 @@ public:
   }
 };
 
-#include "core/base.h"
-#include "core/propertysystem.h"
-#include "core/web/json.h"
-#include "core/propertyquery.h"
+#include "src/base.h"
+#include "src/propertysystem.h"
+#include "src/web/json.h"
+#include "src/propertyquery.h"
 
 using namespace dss;
 

@@ -26,21 +26,21 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "core/model/device.h"
-#include "core/model/apartment.h"
-#include "core/model/modulator.h"
-#include "core/model/devicereference.h"
-#include "core/model/zone.h"
-#include "core/model/group.h"
-#include "core/model/set.h"
-#include "core/setbuilder.h"
-#include "core/dss.h"
-#include "core/model/modelconst.h"
-#include "core/model/modelmaintenance.h"
-#include "core/propertysystem.h"
-#include "core/structuremanipulator.h"
-#include "core/businterface.h"
-#include "core/model/scenehelper.h"
+#include "src/model/device.h"
+#include "src/model/apartment.h"
+#include "src/model/modulator.h"
+#include "src/model/devicereference.h"
+#include "src/model/zone.h"
+#include "src/model/group.h"
+#include "src/model/set.h"
+#include "src/setbuilder.h"
+#include "src/dss.h"
+#include "src/model/modelconst.h"
+#include "src/model/modelmaintenance.h"
+#include "src/propertysystem.h"
+#include "src/structuremanipulator.h"
+#include "src/businterface.h"
+#include "src/model/scenehelper.h"
 
 using namespace dss;
 

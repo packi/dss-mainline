@@ -25,8 +25,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
-#include "core/scripting/jshandler.h"
-#include "core/scripting/scriptobject.h"
+#include "src/scripting/jshandler.h"
+#include "src/scripting/scriptobject.h"
 
 using namespace dss;
 using namespace std;

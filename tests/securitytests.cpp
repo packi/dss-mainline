@@ -28,14 +28,14 @@
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
 
-#include "core/foreach.h"
+#include "src/foreach.h"
 
-#include "core/propertysystem.h"
-#include "core/base.h"
+#include "src/propertysystem.h"
+#include "src/base.h"
 
-#include "core/security/user.h"
-#include "core/security/privilege.h"
-#include "core/security/security.h"
+#include "src/security/user.h"
+#include "src/security/privilege.h"
+#include "src/security/security.h"
 
 using namespace dss;
 

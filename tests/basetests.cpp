@@ -26,8 +26,8 @@
 
 #include <boost/tuple/tuple.hpp>
 
-#include "core/base.h"
-#include "core/datetools.h"
+#include "src/base.h"
+#include "src/datetools.h"
 
 using namespace dss;
 

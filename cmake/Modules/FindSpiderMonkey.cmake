@@ -21,13 +21,14 @@ endif()
 if(SPIDERMONKEY_ROOT)
     find_path(
         SPIDERMONKEY_INCLUDE_DIR
-        js/jsapi.h
-        PATHS "${SPIDERMONKEY_ROOT}/include"
+        jsapi.h
+        PATHS "${SPIDERMONKEY_ROOT}/include/js"
         NO_DEFAULT_PATH)
 else()
     find_path(
         SPIDERMONKEY_INCLUDE_DIR
-        js/jsapi.h)
+        jsapi.h
+        PATH_SUFFIXES "js")
 endif()
 
 if(SPIDERMONKEY_ROOT)
@@ -48,7 +49,7 @@ set(CMAKE_REQUIRED_DEFINITIONS ${SPIDERMONKEY_DEFINITIONS})
 list(APPEND CMAKE_REQUIRED_LIBRARIES ${SPIDERMONKEY_LIBRARY})
 
 check_cxx_source_compiles(
-    "#include <js/jsapi.h>
+    "#include <jsapi.h>
      int main() {
         JSRuntime *rt = JS_NewRuntime(8L * 1024L * 1024L);
         if (!rt)
@@ -71,22 +72,22 @@ if(SPIDERMONKEY_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES ${SPIDERMONKEY_LIBRARY})
 
     if(SPIDERMONKEY_ROOT)
-        find_path(SPIDERMONKEY_JS_CONFIG_HEADER_PATH "js/js-config.h"
-            PATHS "${SPIDERMONKEY_ROOT}/include"
+        find_path(SPIDERMONKEY_JS_CONFIG_HEADER_PATH "js-config.h"
+            PATHS "${SPIDERMONKEY_ROOT}/include/js"
             NO_DEFAULT_PATH)
-        find_path(SPIDERMONKEY_JS_VERSION_HEADER_PATH "js/jsversion.h"
-            PATHS "${SPIDERMONKEY_ROOT}/include"
+        find_path(SPIDERMONKEY_JS_VERSION_HEADER_PATH "jsversion.h"
+            PATHS "${SPIDERMONKEY_ROOT}/include/js"
             NO_DEFAULT_PATH)
     else()
-        find_path(SPIDERMONKEY_JS_CONFIG_HEADER_PATH "js/js-config.h")
-        find_path(SPIDERMONKEY_JS_VERSION_HEADER_PATH "js/jsversion.h")
+        find_path(SPIDERMONKEY_JS_CONFIG_HEADER_PATH "js-config.h" PATH_SUFFIXES "js")
+        find_path(SPIDERMONKEY_JS_VERSION_HEADER_PATH "jsversion.h" PATH_SUFFIXES "js")
     endif()
 
-    check_include_file_cxx("${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/js/js-config.h" SPIDERMONKEY_JS_CONFIG_HEADER)
-    check_include_file_cxx("${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/js/jsversion.h" SPIDERMONKEY_JS_VERSION_HEADER)
+    check_include_file_cxx("${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/js-config.h" SPIDERMONKEY_JS_CONFIG_HEADER)
+    check_include_file_cxx("${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/jsversion.h" SPIDERMONKEY_JS_VERSION_HEADER)
 
     if(SPIDERMONKEY_JS_VERSION_HEADER)
-        FILE(STRINGS "${SPIDERMONKEY_JS_VERSION_HEADER_PATH}/js/jsversion.h" JSVERSION REGEX "^#define JS_VERSION [^\"]*$")
+        FILE(STRINGS "${SPIDERMONKEY_JS_VERSION_HEADER_PATH}/jsversion.h" JSVERSION REGEX "^#define JS_VERSION [^\"]*$")
         STRING(REGEX REPLACE "^.*JS_VERSION ([0-9]+)*$" "\\1" SPIDERMONKEY_VERSION_STRING "${JSVERSION}")
         STRING(REGEX REPLACE "^([0-9]).." "\\1" SPIDERMONKEY_VERSION_MAJOR  "${SPIDERMONKEY_VERSION_STRING}")
         STRING(REGEX REPLACE "^.([0-9])." "\\1" SPIDERMONKEY_VERSION_MINOR  "${SPIDERMONKEY_VERSION_STRING}")
@@ -109,7 +110,7 @@ if(SPIDERMONKEY_FOUND)
                 ${SPIDERMONKEY_DEFINITIONS} -DJS_THREADSAFE)
         endif()
     else()
-        FILE(STRINGS "${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/js/js-config.h" JS_THREADSAFE REGEX "^#define JS_THREADSAFE [^\"]*$")
+        FILE(STRINGS "${SPIDERMONKEY_JS_CONFIG_HEADER_PATH}/js-config.h" JS_THREADSAFE REGEX "^#define JS_THREADSAFE [^\"]*$")
         IF(${JS_THREADSAFE} MATCHES "1")
             SET(SPIDERMONKEY_THREADSAFE "TRUE")
         ENDIF(${JS_THREADSAFE} MATCHES "1")

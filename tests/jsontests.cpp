@@ -24,7 +24,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "core/web/json.h"
+#include "src/web/json.h"
 
 using namespace dss;
 
