@@ -122,6 +122,7 @@ namespace dss {
     void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
   private:
     bool m_IsInitializing;
+    bool m_IsDirty;
 
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;

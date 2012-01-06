@@ -104,6 +104,7 @@ namespace dss {
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
+    m_IsDirty(false),
     m_pApartment(NULL),
     m_pMetering(NULL),
     m_EventTimeoutMS(_eventTimeoutMS),
@@ -431,6 +432,11 @@ namespace dss {
       log("******** Finished loading model from dSM(s)...", lsInfo);
       m_IsInitializing = false;
 
+      if (m_IsDirty) {
+        m_IsDirty = false;
+        addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      }
+
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);
@@ -480,6 +486,7 @@ namespace dss {
   void ModelMaintenance::addModelEvent(ModelEvent* _pEvent) {
     // filter out dirty events, as this will rewrite apartment.xml
     if(m_IsInitializing && (_pEvent->getEventType() == ModelEvent::etModelDirty)) {
+      m_IsDirty = true;
       delete _pEvent;
     } else {
       m_ModelEventsMutex.lock();
