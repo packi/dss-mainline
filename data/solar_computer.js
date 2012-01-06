@@ -57,13 +57,13 @@ function SunCalc() {
     // BEGIN class sunRTS
     this.sunRTS = function() {
     };
-    this.sunRTS.prototype.jd;
-    this.sunRTS.prototype.lat;
-    this.sunRTS.prototype.lng;
-    this.sunRTS.prototype.gha;
-    this.sunRTS.prototype.rise;
-    this.sunRTS.prototype.transit;
-    this.sunRTS.prototype.set;
+    this.sunRTS.prototype.jd = undefined;
+    this.sunRTS.prototype.lat = undefined;
+    this.sunRTS.prototype.lng = undefined;
+    this.sunRTS.prototype.gha = undefined;
+    this.sunRTS.prototype.rise = undefined;
+    this.sunRTS.prototype.transit = undefined;
+    this.sunRTS.prototype.set = undefined;
     this.sunRTS.prototype.clone = function(o) {
         this.rise = o.rise;
         this.transit = o.transit;
@@ -75,15 +75,15 @@ function SunCalc() {
     // BEGIN class datim
     this.datim = function() {
     };
-    this.datim.prototype.jd;
-    this.datim.prototype.mo;
-    this.datim.prototype.da;
-    this.datim.prototype.yr;
-    this.datim.prototype.dow;
-    this.datim.prototype.hh;
-    this.datim.prototype.mm;
-    this.datim.prototype.ss;
-    this.datim.prototype.sgn;
+    this.datim.prototype.jd = undefined;
+    this.datim.prototype.mo = undefined;
+    this.datim.prototype.da = undefined;
+    this.datim.prototype.yr = undefined;
+    this.datim.prototype.dow = undefined;
+    this.datim.prototype.hh = undefined;
+    this.datim.prototype.mm = undefined;
+    this.datim.prototype.ss = undefined;
+    this.datim.prototype.sgn = undefined;
     // END class datim
 
     this.leadChar = function(v,c,lead)
@@ -97,13 +97,7 @@ function SunCalc() {
     // month 1 - 12, day 1-31 year may be 2 digit by 4 is preferred
     this.mdy_jd = function(yr,mo,da,hh,mm,ss)
     {
-        var a,b,jd,mo,da,yr,hh,mm,ss;
-        //var mo = xmo;
-        //var da = xda;
-        //var yr = xyr;
-        //var hh = xhh;
-        //var mm = xmm;
-        //var ss = xss;
+        var a,b,jd;
         if(yr < 100.0)
             yr += ((yr > 50)?1900.0:2000.0); // try to cope with date problem
         if(mo < 3.0)
@@ -121,7 +115,7 @@ function SunCalc() {
             a = Math.floor(yr/100.0);
             b = 2 - a + Math.floor(a/4.0);
         }
-        var jd = Math.floor(365.25*(yr+4716.0)) + Math.floor(30.6001*(mo+1)) + da + b - 1524.5;
+        jd = Math.floor(365.25*(yr+4716.0)) + Math.floor(30.6001*(mo+1)) + da + b - 1524.5;
         jd += (hh/24.0) + (mm/1440.0) + (ss/86400.0);
         return(jd);
     };
