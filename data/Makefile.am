@@ -15,10 +15,10 @@ dist_webroot_DATA = \
 	$(top_srcdir)/webservices/dss.xsd
 	
 install-data-local:
-	$(MKDIR_P) $(dssdatadir)/config.d
-	$(MKDIR_P) $(dssdatadir)/subscriptions.d
-	$(MKDIR_P) $(dssdatadir)/savedprops
-	$(MKDIR_P) $(dssdatadir)/metering
-	$(MKDIR_P) $(dssdatadir)/logs
+	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/config.d
+	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/subscriptions.d
+	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/savedprops
+	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/metering
+	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/logs
 
 
