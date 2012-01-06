@@ -376,11 +376,12 @@ for boost_rtopt_ in $boost_rtopt '' -d; do
     esac
     # If with_boost is empty, we'll search in /lib first, which is not quite
     # right so instead we'll try to a location based on where the headers are.
-    boost_tmp_lib=$with_boost
-    test x"$with_boost" = x && boost_tmp_lib=${boost_cv_inc_path%/include}
-    for boost_ldpath in "$boost_tmp_lib/lib" '' \
-             /opt/local/lib* /usr/local/lib* /opt/lib* /usr/lib* \
-             "$with_boost" C:/Boost/lib /lib*
+    boost_tmp_lib=$with_boost/lib
+    test x"$with_boost" = x && boost_tmp_lib="${boost_cv_inc_path%/include} \
+        /opt/local/lib* /usr/local/lib* /opt/lib* /usr/lib* \
+        "$with_boost" C:/Boost/lib /lib*"
+
+    for boost_ldpath in $boost_tmp_lib
     do
       test -e "$boost_ldpath" || continue
       boost_save_LDFLAGS=$LDFLAGS
