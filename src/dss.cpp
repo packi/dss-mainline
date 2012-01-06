@@ -84,31 +84,31 @@ namespace dss {
     #define PACKAGE_DATADIR "/usr/local/share/dss"
 #endif
 
-#ifdef WITH_DATADIR
+#ifdef DSS_DATADIR
 const char* DataDirectory = DSS_DATADIR;
 #else
 const char* DataDirectory = PACKAGE_DATADIR "/data/";
 #endif
 
-#ifdef WITH_CONFIGDIR
+#ifdef DSS_CONFIGDIR
 const char* ConfigDirectory = DSS_CONFIGDIR;
 #else
 const char* ConfigDirectory = PACKAGE_DATADIR "/data/";
 #endif
 
-#ifdef WITH_WEBROOTDIR
+#ifdef DSS_WEBROOTDIR
 const char* WebrootDirectory = DSS_WEBROOTDIR;
 #else
 const char* WebrootDirectory = PACKAGE_DATADIR "/data/webroot/";
 #endif
 
-#ifdef WITH_JSLOGDIR
+#ifdef DSS_JSLOGDIR
 const char* JSLogDirectory = DSS_JSLOGDIR;
 #else
 const char* JSLogDirectory = PACKAGE_DATADIR "/data/logs/";
 #endif
 
-#ifdef WITH_SAVEDPROPSDIR
+#ifdef DSS_SAVEDPROPSDIR
 const char* kSavedPropsDirectory = DSS_SAVEDPROPSDIR;
 #else
 const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";

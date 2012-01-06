@@ -3,7 +3,6 @@
 
 #define DSS_VERSION "1.3.3"
 
-/* SpiderMonkey API header */
 #cmakedefine HAVE_STDINT
 #cmakedefine HAVE_MOZJS_JSAPI_H
 #cmakedefine HAVE_JS_JSAPI_H
@@ -13,18 +12,19 @@
 #cmakedefine HAVE_DNS_SD
 #cmakedefine HAVE_AVAHI
 #cmakedefine WITH_TESTS
-#cmakedefine DSS_DATADIR "${WITH_DATADIR}"
-#cmakedefine DSS_CONFIGDIR "${WITH_CONFIGDIR}"
-#cmakedefine DSS_WEBROOTDIR "${WITH_WEBROOTDIR}"
-#cmakedefine DSS_JSLOGDIR "${WITH_JSLOGDIR}"
-#cmakedefine DSS_SAVEDPROPSDIR "${WITH_SAVEDPROPSDIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
 #cmakedefine HAVE_SENDMAIL
-#cmakedefine SENDMAIL "${SENDMAIL}"
+#define SENDMAIL "@SENDMAIL@"
 #cmakedefine HAVE_BACKTRACE
 #cmakedefine HAVE_BACKTRACE_SYMBOLS
 #cmakedefine HAVE_RT
+
+#define DSS_DATADIR "@WITH_DATADIR@"
+#define DSS_CONFIGDIR "@WITH_CONFIGDIR@"
+#define DSS_WEBROOTDIR "@WITH_WEBROOTDIR@"
+#define DSS_JSLOGDIR "@WITH_JSLOGDIR@"
+#define DSS_SAVEDPROPSDIR "@WITH_SAVEDPROPSDIR@"
 
 #endif /* DIGITAL_STROM_SERVER_CONFIG_H */
 
