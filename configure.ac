@@ -33,6 +33,12 @@ MT_OPTION([http], [enable],
             AC_DEFINE([WITH_HTTP], [1], [ build with HTTP support ])
           ],[])
 
+MT_OPTION([bonjour], [disable],
+          [build with bonjour support (default: enabled)],
+          [
+            AC_DEFINE([WITH_BONJOUR], [1], [ build with bonjour support ])
+          ],[])
+
 AC_ARG_WITH(dss-data,
     AC_HELP_STRING([--with-dss-data=DIR], [use DIR as dSS data directory]),
     [
@@ -238,7 +244,10 @@ PKG_CHECK_MODULES([OPENSSL], [openssl], [],
         AC_MSG_ERROR([$OPENSSL_PKG_ERRORS])
     ])
 
-PKG_CHECK_MODULES([AVAHI], [avahi-client], [],
+PKG_CHECK_MODULES([AVAHI], [avahi-client],
+    [
+        AC_DEFINE([HAVE_AVAHI], [1], [avahi support available])
+    ],
     [
         AC_MSG_ERROR([$AVAHI_PKG_ERRORS])
     ])
