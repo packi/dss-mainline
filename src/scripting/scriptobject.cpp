@@ -125,6 +125,16 @@ namespace dss {
   } // setProperty<int>
 
   template<>
+  void ScriptObject::setProperty(const std::string& _name, double _value) {
+    JSRequest req(&m_Context);
+    jsval val;
+    if(!JS_NewNumberValue(m_Context.getJSContext(), _value, &val)) {
+      throw ScriptException("could not allocate number");
+    }
+    doSetProperty(_name, val);
+  } // setProperty<double>
+
+  template<>
   void ScriptObject::setProperty(const std::string& _name, ScriptObject* _value) {
     assert(_value != NULL);
     JSRequest req(&m_Context);

@@ -225,7 +225,7 @@ namespace dss {
         ScriptObject valuePair(*ctx, NULL);
         DateTime tmp_date = iValue->getTimeStamp();
         valuePair.setProperty<std::string>("timestamp", tmp_date.toString());
-        valuePair.setProperty<int>("value", iValue->getValue());
+        valuePair.setProperty<double>("value", iValue->getValue());
         jsval childJSVal = OBJECT_TO_JSVAL(valuePair.getJSObject());
         JSBool res = JS_SetElement(cx, resultObj, valueNumber, &childJSVal);
         if(!res) {
