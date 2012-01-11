@@ -36,7 +36,7 @@ noinst_LIBRARIES += libwebservices.a
 
 endif
 
-include $(srcdir)/sources.list
+include $(top_srcdir)/build/sources.list
 
 libdsscore_a_CXXFLAGS = \
 			-I$(top_srcdir)/src \
