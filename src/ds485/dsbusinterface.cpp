@@ -617,10 +617,12 @@ namespace dss {
                                                 dsid_t _destinationID,
                                                 uint32_t _powerW,
                                                 uint32_t _energyWs) {
-    static_cast<DSBusInterface*>(_userData)->
-      handleCircuitEnergyData(_errorCode,
-                              _sourceID, _destinationID,
-                              _powerW, _energyWs);
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleCircuitEnergyData(_errorCode,
+                                _sourceID, _destinationID,
+                                _powerW, _energyWs);
+    }
   } // handleCircuitEnergyDataCallback
 
 
