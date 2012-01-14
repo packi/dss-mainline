@@ -59,6 +59,8 @@ class LogHandler;
     void registerHandler(LogHandler& _logHandler);
     void deregisterHandler(LogHandler& _logHandler);
 
+    boost::shared_ptr<LogChannel> getLogChannel() { return m_defaultLogChannel; }
+
   private:
     Logger();
     
