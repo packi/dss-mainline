@@ -545,7 +545,7 @@ namespace dss {
         Logger::getInstance()->log("Device " + m_DSID.toString() + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
       }
     } else {
-      Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
+      Logger::getInstance()->log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // addToGroup
 
@@ -569,7 +569,7 @@ namespace dss {
         }
       }
     } else {
-      Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
+      Logger::getInstance()->log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // removeFromGroup
 
@@ -600,7 +600,6 @@ namespace dss {
       result = true;
     } else if((_groupID < 0) || (_groupID > GroupIDMax)) {
       result = false;
-      Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
     } else {
       result = m_GroupBitmask.test(_groupID - 1);
     }

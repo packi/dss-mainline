@@ -92,7 +92,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
     switch (state) {
         case AVAHI_ENTRY_GROUP_ESTABLISHED :
             /* The entry group has been established successfully */
-            Logger::getInstance()->log(std::string("Service '") + serverName +
+            Logger::getInstance()->log(std::string("Bonjour Service '") + serverName +
                 "' successfully established.", lsInfo);
             break;
 
@@ -106,7 +106,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
             serverName = n;
 
             Logger::getInstance()->log(std::string("Service name collision, "
-                "renaming service to '") + serverName + "'", lsError);
+                "renaming service to '") + serverName + "'", lsWarning);
 
             /* And recreate the services */
             create_services(avahi_entry_group_get_client(g));
@@ -148,7 +148,7 @@ static void create_services(AvahiClient *c) {
      * because it was reset previously, add our entries.  */
 
     if (avahi_entry_group_is_empty(group)) {
-        Logger::getInstance()->log(std::string("Adding service '") + serverName + "'", lsInfo);
+        Logger::getInstance()->log(std::string("Bonjour adding service '") + serverName + "'", lsInfo);
 
         /* We will now add two services and one subtype to the entry
          * group. The two services have the same name, but differ in
@@ -198,7 +198,7 @@ collision:
     serverName = n;
 
     Logger::getInstance()->log(std::string("Service name collision, "
-        "renaming service to '") + serverName + "'", lsInfo);
+        "renaming service to '") + serverName + "'", lsWarning);
 
     avahi_entry_group_reset(group);
 
@@ -301,7 +301,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 fail:
 
     /* Cleanup things */
-    Logger::getInstance()->log("Stopping service \'" + std::string(serverName) + "\'", lsError);
+    Logger::getInstance()->log("Bonjour stopping service \'" + std::string(serverName) + "\'", lsInfo);
 
     if (client)
         avahi_client_free(client);
