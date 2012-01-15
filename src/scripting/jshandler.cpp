@@ -234,15 +234,18 @@ namespace dss {
     while (len > 0 && (line[len-1] == '\r' || line[len-1] == '\n')){ line[len-1]='\0'; len--; }
 
     std::ostringstream logSStream;
+    aLogSeverity logSeverity = lsError;
     logSStream << "JavaScript ";
     if (JSREPORT_IS_WARNING(er->flags)) {
       logSStream << "Warning";
+      logSeverity = lsWarning;
     }
     else if (JSREPORT_IS_EXCEPTION(er->flags)) {
       logSStream << "Exception";
     }
     else if (JSREPORT_IS_STRICT(er->flags)) {
       logSStream << "Strict-Mode";
+      logSeverity = lsWarning;
     }
     else if (JSREPORT_IS_STRICT_MODE_ERROR(er->flags)) {
       logSStream << "Strict-Error";
@@ -257,7 +260,7 @@ namespace dss {
       logSStream << "\n  script: " << line << "        : " << pointer;
     }
 
-    Logger::getInstance()->log(logSStream.str(), lsError);
+    Logger::getInstance()->log(logSStream.str(), logSeverity);
 
     free(pointer);
     free(line);
@@ -284,7 +287,7 @@ namespace dss {
       return JS_FALSE;
 
     std::stringstream sstream;
-    sstream << "JS: ";
+    sstream << "JS Print: ";
 
     for (i = 0; i < argc; i++)
     {
@@ -296,7 +299,7 @@ namespace dss {
       sstream << std::string(src);
       JS_free(cx, src);
     }
-    Logger::getInstance()->log(sstream.str());
+    Logger::getInstance()->log(sstream.str(), lsWarning);
 
     JS_SET_RVAL(cx, vp, JSVAL_VOID);
     return JS_TRUE;

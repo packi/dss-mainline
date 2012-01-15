@@ -346,6 +346,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       Logger::getInstance()->log("No logfile configured, logging to stdout",
                                  lsInfo);
     }
+    pNode = getPropertySystem().getProperty("/config/loglevel");
+    if (pNode) {
+      aLogSeverity logLevel = static_cast<aLogSeverity> (pNode->getIntegerValue());
+      Logger::getInstance()->getLogChannel()->setMinimumSeverity(logLevel);
+    }
 
     return checkDirectoriesExist();
   } // initialize

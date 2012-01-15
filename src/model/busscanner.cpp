@@ -208,6 +208,9 @@ namespace dss {
     }
 
     foreach(int groupID, _spec.Groups) {
+      if (groupID == 0) {
+        continue;
+      }
       log(std::string("scanDeviceOnBus: adding device ") + intToString(_spec.ShortAddress) + " to group " + intToString(groupID));
       dev->addToGroup(groupID);
     }
@@ -241,10 +244,7 @@ namespace dss {
 
     foreach(int groupID, groupIDs) {
       if(groupID == 0) {
-        log("scanDSMeter:    Group ID is zero, bailing out... (dsMeterID: "
-            + _dsMeter->getDSID().toString() +
-            "zoneID: " + intToString(_zone->getID()) + ")",
-            lsError);
+        // ignore broadcast group
         continue;
       }
       log("scanDSMeter:    Found group with id: " + intToString(groupID));
@@ -255,6 +255,7 @@ namespace dss {
         _zone->addGroup(groupOnZone);
       }
       groupOnZone->setIsPresent(true);
+      groupOnZone->setIsConnected(true);
       // TODO: get last called scene
       groupOnZone->setLastCalledScene(SceneOff);
       boost::shared_ptr<Group> pGroup;
