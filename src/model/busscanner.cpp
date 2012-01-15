@@ -94,6 +94,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
         zone->addToDSMeter(_dsMeter);
         zone->setIsPresent(true);
+        zone->setIsConnected(true);
         if(!scanZone(_dsMeter, zone)) {
           return false;
         }
@@ -267,6 +268,7 @@ namespace dss {
         log("scanDSMeter:     Adding new group to zone 0");
       }
       pGroup->setIsPresent(true);
+      pGroup->setIsConnected(true);
     }
     return true;
   } // scanGroupsOfZone
