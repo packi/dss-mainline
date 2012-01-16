@@ -1,5 +1,18 @@
 dSS - digitalSTROM Server
 
+v1.4.1 16.01.2012
+	* get rid of dSM API deprecated wranings, fixes #1269
+	* correctly set present flag for zones and groups, fixes #1302
+	* made system log level configurable, implements #1312
+	* ignore metering callbacks that indicate an error (prevents treating
+	  random data as valid metetring values)
+	* changed js Metering.getValues() to return double instead of
+	  int values, fixes #1317
+	* reenable bonjour support (got broken in the last release)
+	* flush dirty datamodel after initialization is complete, fixes #1270
+	* fixed solar computer warnings
+	* further improvements and fixes in the new build system
+
 v1.4.0 05.01.2012
 	* read and save energy values in Ws instead of Wh from the dSM
 	* added unit parameter to JSON and SOAP API to request metering data in Ws
