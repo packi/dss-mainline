@@ -85,7 +85,7 @@ AC_ARG_WITH(dss-saved-properties,
     ])
 
 AC_ARG_WITH(js-pkgconfig,
-    AC_HELP_STRING([--with-js-pkgconfig=DIR], [Search for libjs.pc or mozjs185.c in DIR]),
+    AC_HELP_STRING([--with-js-pkgconfig=DIR], [search for libjs.pc or mozjs185.c in DIR]),
     [
         if test "x$withval" != "x"; then
             AC_MSG_NOTICE([Will also search for packages in $withval])
