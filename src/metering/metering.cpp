@@ -153,7 +153,7 @@ namespace dss {
                                   starts.size(),
                                   argString);
         if (result < 0) {
-          log(rrd_get_error());
+          log(rrd_get_error(), lsError);
           boost::shared_ptr<std::string> pFileName(new std::string(""));
           return pFileName;
         }
@@ -208,7 +208,7 @@ namespace dss {
     long unsigned int step = _resolution;
     long unsigned int dscount = 0;
     time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step;
-    time_t start = end - (step * 399);
+    time_t start = end - (step * 400);
     char **names = 0;
     rrd_value_t *data = 0;
 
@@ -244,13 +244,16 @@ namespace dss {
       sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << (getEnergy ? "energy" : "power") << ":AVERAGE";
       lines.push_back(sstream.str());
     }
-    if (getEnergy && energyInWh) {
-      std::stringstream sstream;
-      sstream << "CDEF:adj=data," << 3600 << ",/";
-      lines.push_back(sstream.str());
-      lines.push_back("XPORT:adj");
+    lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
+    if (getEnergy) {
+      if (energyInWh) {
+        lines.push_back("CDEF:adj=noUnkn,3600,/");
+        lines.push_back("XPORT:adj");
+      } else {
+        lines.push_back("XPORT:noUnkn");
+      }
     } else {
-      lines.push_back("XPORT:data");
+      lines.push_back("XPORT:noUnkn");
     }
 
     std::vector<const char*> starts;
@@ -277,8 +280,12 @@ namespace dss {
     rrd_freemem(names);
     rrd_value_t *currentData = data;
     for (int timeStamp = start + step; timeStamp <= (end - step); timeStamp += step) {
-      returnVector->push_back(Value(std::isnan(*currentData) ? 0 : *currentData, timeStamp));
+      returnVector->push_back(Value(*currentData, DateTime(timeStamp)));
       currentData++;
+    }
+    if (returnVector->back().getValue() == 0) {
+      // delete the last value, if it is Unknown (zero)
+      returnVector->pop_back();
     }
     rrd_freemem(data);
     _resolution = step;
