@@ -105,6 +105,7 @@ namespace dss {
                                                     int &_resolution,
                                                     bool getEnergy,
                                                     bool energyInWh=true);
+    unsigned long getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter);
   }; // Metering
 
   class MeteringConfig {

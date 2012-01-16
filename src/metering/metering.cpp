@@ -196,6 +196,57 @@ namespace dss {
     m_ValuesMutex.unlock();
   } // postMeteringEvent
 
+  unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
+    m_ValuesMutex.lock();
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+
+    if (!m_RrdcachedPath.empty()) {
+      std::vector<std::string> lines;
+      lines.push_back("flushcached");
+      lines.push_back("--daemon");
+      lines.push_back(m_RrdcachedPath);
+      lines.push_back(rrdFileName.get()->c_str());
+      std::vector<const char*> starts;
+      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+      char** argString = (char**)&starts.front();
+      int result = rrd_flushcached(starts.size(), argString);
+      if (result < 0) {
+        log(rrd_get_error());
+      }
+    }
+
+    char **names = 0;
+    char **data = 0;
+    time_t lastUpdate;
+    unsigned long dscount;
+    rrd_clear_error();
+    int result = rrd_lastupdate_r(rrdFileName.get()->c_str(),
+                                  &lastUpdate,
+                                  &dscount,
+                                  &names,
+                                  &data);
+
+    if (result != 0) {
+      log(rrd_get_error());
+      m_ValuesMutex.unlock();
+      return 0;
+    }
+
+    unsigned long lastEnergyCounter = 0;
+    for (unsigned int i = 0; i < dscount; ++i) {
+      if (i == 1) {
+        lastEnergyCounter = strToUIntDef(data[i], 0);
+      }
+      rrd_freemem(names[i]);
+      rrd_freemem(data[i]);
+    }
+    rrd_freemem(names);
+    rrd_freemem(data);
+
+    m_ValuesMutex.unlock();
+    return lastEnergyCounter;
+  }
+
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
                                                             int &_resolution,
                                                             bool getEnergy,
