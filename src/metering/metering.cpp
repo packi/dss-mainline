@@ -47,18 +47,19 @@
 
 namespace dss {
 
+static const unsigned long kRRDHeaderSize = 2220;
   //================================================== Metering
 
   Metering::Metering(DSS* _pDSS)
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
     m_ConfigConsumption.reset(new MeteringConfigChain(1));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(           1, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     15 * 60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     60 * 60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 3 * 60 * 60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(24 * 60 * 60, 400)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(                1,  600)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(               60,  720)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          15 * 60, 2976)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     24 * 60 * 60,  370)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 7 * 24 * 60 * 60,  260)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(30 * 24 * 60 * 60,   60)));
     m_Config.push_back(m_ConfigConsumption);
   } // metering
 
@@ -121,15 +122,31 @@ namespace dss {
   boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
+      bool rrdPresent = false;
       std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
       if (rrdInfo != 0) {
         log("RRD DB present");
-        /* TODO: check DB contents */
+        /* check DB contents */
+        while (rrdInfo != NULL) {
+          if ((rrdInfo->type == RD_I_CNT) && (strcmp(rrdInfo->key, "header_size") == 0)) {
+            unsigned long headerSize = rrdInfo->value.u_cnt;
+            log("RRD Header Size: " + intToString(headerSize));
+            if (headerSize == kRRDHeaderSize) {
+              rrdPresent = true;
+              log("RRD Header Size matches!");
+              break;
+            }
+          }
+          rrdInfo = rrdInfo->next;
+        }
         rrd_info_free(rrdInfo);
-      } else {
+      }
+
+      if (!rrdPresent) {
+        log("Creating new RRD database.", lsWarning);
         /* create new DB */
         std::vector<std::string> lines;
         lines.push_back("DS:power:GAUGE:5:0:4500");
@@ -290,6 +307,8 @@ namespace dss {
     lines.push_back(intToString(end));
     lines.push_back("--step");
     lines.push_back(intToString(step));
+    lines.push_back("--maxrows");
+    lines.push_back("3000");
     {
       std::stringstream sstream;
       sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << ((type == etConsumption) ? "power" : "energy") << ":AVERAGE";
