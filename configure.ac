@@ -93,6 +93,18 @@ AC_ARG_WITH(js-pkgconfig,
         fi
     ])
 
+
+SENDMAIL=
+AC_ARG_WITH(sendmail-location,
+    AC_HELP_STRING([--with-sendmail-location=SENDMAIL], [hardcode location of sendmail binary, no checks will be performed (useful for cross compiling)]),
+    [
+        if test "x$withval" != "x"; then
+            AC_MSG_NOTICE([Hardcoding sendmail location to $withval])
+            SENDMAIL="$withval"
+            AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
+        fi
+    ])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -307,11 +319,13 @@ fi
 
 AM_CONDITIONAL(BUILD_SOAP, test "x$SOAP_OPTION_ENABLED" = "xyes")
 
-AC_PATH_PROG(SENDMAIL, sendmail, no)
-if test "x$SENDMAIL" = "xno"; then
-    SENDMAIL=
-else
-    AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
+if test "x$SENDMAIL" = "x"; then
+    AC_PATH_PROG(SENDMAIL, sendmail, no)
+    if test "x$SENDMAIL" = "xno"; then
+        SENDMAIL=
+    else
+        AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
+    fi
 fi
 AC_DEFINE_UNQUOTED([SENDMAIL], ["$SENDMAIL"], [location of the sendmail program])
 
