@@ -53,14 +53,14 @@ static const unsigned long kRRDHeaderSize = 2220;
   Metering::Metering(DSS* _pDSS)
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
-    m_ConfigConsumption.reset(new MeteringConfigChain(1));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(                1,  600)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(               60,  720)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          15 * 60, 2976)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     24 * 60 * 60,  370)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 7 * 24 * 60 * 60,  260)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(30 * 24 * 60 * 60,   60)));
-    m_Config.push_back(m_ConfigConsumption);
+    m_ConfigChain.reset(new MeteringConfigChain(1));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(                1,  600)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(               60,  720)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          15 * 60, 2976)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     24 * 60 * 60,  370)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 7 * 24 * 60 * 60,  260)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(30 * 24 * 60 * 60,   60)));
+    m_Config.push_back(m_ConfigChain);
   } // metering
 
   void Metering::initialize() {
@@ -187,7 +187,7 @@ static const unsigned long kRRDHeaderSize = 2220;
                                    int _valueEnergy,
                                    DateTime _sampledAt) {
     m_ValuesMutex.lock();
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
 
     std::vector<std::string> lines;
     lines.push_back("update");
@@ -215,7 +215,7 @@ static const unsigned long kRRDHeaderSize = 2220;
 
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
     m_ValuesMutex.lock();
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
 
     if (!m_RrdcachedPath.empty()) {
       std::vector<std::string> lines;
@@ -277,7 +277,7 @@ static const unsigned long kRRDHeaderSize = 2220;
     m_ValuesMutex.lock();
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
 
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
     DateTime iCurrentTimeStamp;
     long unsigned int step = _resolution;
     long unsigned int dscount = 0;

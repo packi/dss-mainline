@@ -76,8 +76,7 @@ namespace dss {
     int m_MeterConsumptionCheckIntervalSeconds;
     std::string m_MeteringStorageLocation;
     std::string m_RrdcachedPath;
-    boost::shared_ptr<MeteringConfigChain> m_ConfigEnergy;
-    boost::shared_ptr<MeteringConfigChain> m_ConfigConsumption;
+    boost::shared_ptr<MeteringConfigChain> m_ConfigChain;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
     typedef std::map<boost::shared_ptr<DSMeter>,
                      boost::shared_ptr<std::string> > CachedSeriesMap;
