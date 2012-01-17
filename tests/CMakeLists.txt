@@ -1,5 +1,5 @@
 set(files basetests.cpp  datetoolstests.cpp securitytests.cpp
-        eventtests.cpp
+        eventtests.cpp meteringtests.cpp
         modeltests.cpp
         devicetests.cpp
         propertysystemtests.cpp  scriptstest.cpp tests.cpp
