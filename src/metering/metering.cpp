@@ -186,7 +186,6 @@ static const unsigned long kRRDHeaderSize = 2220;
                                    int _valuePower,
                                    int _valueEnergy,
                                    DateTime _sampledAt) {
-    m_ValuesMutex.lock();
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
 
     std::vector<std::string> lines;
@@ -204,6 +203,8 @@ static const unsigned long kRRDHeaderSize = 2220;
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char **)&starts.front();
+
+    m_ValuesMutex.lock();
 
     rrd_clear_error();
     int result = rrd_update(starts.size(), argString);
@@ -243,9 +244,10 @@ static const unsigned long kRRDHeaderSize = 2220;
                                   &names,
                                   &data);
 
+    m_ValuesMutex.unlock();
+
     if (result != 0) {
       log(rrd_get_error());
-      m_ValuesMutex.unlock();
       return 0;
     }
 
@@ -260,7 +262,6 @@ static const unsigned long kRRDHeaderSize = 2220;
     rrd_freemem(names);
     rrd_freemem(data);
 
-    m_ValuesMutex.unlock();
     return lastEnergyCounter;
   }
 
@@ -274,9 +275,8 @@ static const unsigned long kRRDHeaderSize = 2220;
         numberOfValues = m_ConfigChain->getNumberOfValues(i);
       }
     }
-    m_ValuesMutex.lock();
-    boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
 
+    boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
     DateTime iCurrentTimeStamp;
     long unsigned int step = _resolution;
@@ -285,6 +285,8 @@ static const unsigned long kRRDHeaderSize = 2220;
     time_t start = end - (step * numberOfValues);
     char **names = 0;
     rrd_value_t *data = 0;
+
+    m_ValuesMutex.lock();
 
     if (!m_RrdcachedPath.empty()) {
       std::vector<std::string> lines;
@@ -352,9 +354,11 @@ static const unsigned long kRRDHeaderSize = 2220;
                            &dscount,
                            &names,
                            &data);
+
+    m_ValuesMutex.unlock();
+
     if (result != 0) {
       log(rrd_get_error());
-      m_ValuesMutex.unlock();
       return returnVector;
     }
     for (unsigned int i = 0; i < dscount; ++i) {
@@ -391,7 +395,6 @@ static const unsigned long kRRDHeaderSize = 2220;
     }
     rrd_freemem(data);
     _resolution = step;
-    m_ValuesMutex.unlock();
     return returnVector;
   }
 
