@@ -1705,6 +1705,7 @@ int dss__MeteringGetSeries(struct soap *soap, char* _token, std::vector<dss__Met
 
 int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
                            std::string _type, int _resolution, std::string* _unit,
+                           int* _startTime, int* _endTime, int* _valueCount,
                            std::vector<dss__MeteringValue>& result) {
   boost::shared_ptr<dss::DSMeter> pMeter;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, pMeter);
@@ -1734,8 +1735,27 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
     }
   }
 
+  dss::DateTime startTime(dss::DateTime::NullDate);
+  dss::DateTime endTime(dss::DateTime::NullDate);
+  int valueCount = 0;
+  if (_startTime != NULL) {
+    startTime = dss::DateTime(*_startTime);
+  }
+  if (_endTime != NULL) {
+    endTime = dss::DateTime(*_endTime);
+  }
+  if (_valueCount != NULL) {
+    valueCount = *_valueCount;
+  }
+
   dss::Metering& metering = dss::DSS::getInstance()->getMetering();
-  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, seriesType, energyInWh);
+  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter,
+                                                                          _resolution,
+                                                                          seriesType,
+                                                                          energyInWh,
+                                                                          startTime,
+                                                                          endTime,
+                                                                          valueCount);
   if(pSeries != NULL) {
     for(std::deque<dss::Value>::iterator iValue = pSeries->begin(),
         e = pSeries->end();

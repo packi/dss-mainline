@@ -268,7 +268,10 @@ static const unsigned long kRRDHeaderSize = 2220;
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
                                                             int &_resolution,
                                                             SeriesTypes _type,
-                                                            bool _energyInWh) {
+                                                            bool _energyInWh,
+                                                            DateTime &_startTime,
+                                                            DateTime &_endTime,
+                                                            int &_valueCount) {
     int numberOfValues = 0;
     for (int i = 0; i < m_ConfigChain->size(); ++i) {
       if (m_ConfigChain->getResolution(i) <= _resolution) {
@@ -283,6 +286,32 @@ static const unsigned long kRRDHeaderSize = 2220;
     long unsigned int step = _resolution;
     time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step;
     time_t start = end - (step * numberOfValues);
+    _valueCount = std::min(_valueCount, numberOfValues);
+
+    if ((_startTime == DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount == 0)) {
+      // now-(step*numberOfValues)..now
+    } else if ((_startTime == DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount != 0)) {
+      // now-(step*valueCount)..now
+      start = end - (step * _valueCount);
+    } else if ((_startTime == DateTime::NullDate) && (_endTime != DateTime::NullDate) && (_valueCount == 0)) {
+      // now-(step*numberOfValues)..endTime
+      end = (_endTime.secondsSinceEpoch() / step) * step;
+    } else if ((_startTime == DateTime::NullDate) && (_endTime != DateTime::NullDate) && (_valueCount != 0)) {
+      // endTime-(step*valueCount)..endTime
+      end = (_endTime.secondsSinceEpoch() / step) * step;
+      start = end - (step * _valueCount);
+    } else if ((_startTime != DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount == 0)) {
+      // startTime..now
+      start = (_startTime.secondsSinceEpoch() / step) * step;
+    } else if ((_startTime != DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount != 0)) {
+      // startTime..startTime+(step*valueCount)
+      start = (_startTime.secondsSinceEpoch() / step) * step;
+      end = start + (step * _valueCount);
+    } else if ((_startTime != DateTime::NullDate) && (_endTime != DateTime::NullDate)) {
+      // startTime..endTime
+      start = (_startTime.secondsSinceEpoch() / step) * step;
+      end = (_endTime.secondsSinceEpoch() / step) * step;
+    }
 
     m_ValuesMutex.lock();
 
@@ -398,6 +427,8 @@ static const unsigned long kRRDHeaderSize = 2220;
     }
     rrd_freemem(data);
     _resolution = step;
+    _startTime = DateTime(start);
+    _endTime = DateTime(end);
     return returnVector;
   }
 

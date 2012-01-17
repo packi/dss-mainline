@@ -109,7 +109,10 @@ namespace dss {
     boost::shared_ptr<std::deque<Value> > getSeries(boost::shared_ptr<DSMeter> _meter,
                                                     int &_resolution,
                                                     SeriesTypes _type,
-                                                    bool _energyInWh);
+                                                    bool _energyInWh,
+                                                    DateTime &_startTime,
+                                                    DateTime &_endTime,
+                                                    int &_valueCount);
     unsigned long getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter);
   }; // Metering
 

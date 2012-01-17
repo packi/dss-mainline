@@ -510,7 +510,10 @@ namespace dss {
       .withParameter("type", "string", true)
       .withParameter("resolution", "integer", true)
       .withParameter("unit", "string", false)
-      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy', 'energyDelta' and 'consumption' are available. 'energy' and 'energyDelta' are available in two units: 'Wh' (default) and 'Ws'.");
+      .withParameter("startTime", "integer", false)
+      .withParameter("endTime", "integer", false)
+      .withParameter("valueCount", "integer", false)
+      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy', 'energyDelta' and 'consumption' are available. 'energy' and 'energyDelta' are available in two units: 'Wh' (default) and 'Ws'. The optional parameters 'startTime', 'endTime' and 'valueCount' select which window and how many metering values are returned.");
     clsMetering.addMethod("getLatest")
       .withParameter("type", "string", true)
       .withParameter("from", "string", true)

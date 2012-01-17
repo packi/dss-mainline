@@ -92,6 +92,9 @@ namespace dss {
     std::string resolutionString = _request.getParameter("resolution");
     std::string typeString = _request.getParameter("type");
     std::string unitString = _request.getParameter("unit");
+    std::string startTimeString = _request.getParameter("startTime");
+    std::string endTimeString = _request.getParameter("endTime");
+    std::string valueCountString = _request.getParameter("valueCount");
     int resolution;
     Metering::SeriesTypes energy;
     bool energyWh = false;
@@ -141,7 +144,31 @@ namespace dss {
         }
       }
     }
-    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter, resolution, energy, energyWh);
+    DateTime startTime(DateTime::NullDate);
+    DateTime endTime(DateTime::NullDate);
+    int valueCount = 0;
+    if (!startTimeString.empty()) {
+      int timeStamp = strToIntDef(startTimeString, -1);
+      if (timeStamp > -1) {
+        startTime = DateTime(timeStamp);
+      }
+    }
+    if (!endTimeString.empty()) {
+      int timeStamp = strToIntDef(endTimeString, -1);
+      if (timeStamp > -1) {
+        endTime = DateTime(timeStamp);
+      }
+    }
+    if (!valueCountString.empty()) {
+      valueCount = strToIntDef(valueCountString, 0);
+    }
+    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter,
+                                                                         resolution,
+                                                                         energy,
+                                                                         energyWh,
+                                                                         startTime,
+                                                                         endTime,
+                                                                         valueCount);
 
     if(pSeries != NULL) {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

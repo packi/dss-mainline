@@ -331,7 +331,7 @@ class dss__MeteringValue {
   int timestamp;
   double value;
 };
-int dss__MeteringGetValues(char* _token, char* _dsMeterID, std::string _type, int _resolution, std::string* _unit, std::vector<dss__MeteringValue>& result);
+int dss__MeteringGetValues(char* _token, char* _dsMeterID, std::string _type, int _resolution, std::string* _unit, int* _startTime, int* _endTime, int* _valueCount, std::vector<dss__MeteringValue>& result);
 class dss__MeteringValuePerDevice {
   std::string dsid;
   int timestamp;

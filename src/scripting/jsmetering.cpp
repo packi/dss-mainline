@@ -194,6 +194,18 @@ namespace dss {
       if (argc == 4) {
         unit = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
       }
+      DateTime startTime(DateTime::NullDate);
+      DateTime endTime(DateTime::NullDate);
+      int valueCount = 0;
+      if (argc == 5) {
+        startTime = DateTime(ctx->convertTo<int>(JS_ARGV(cx, vp)[4]));
+      }
+      if (argc == 6) {
+        endTime = DateTime(ctx->convertTo<int>(JS_ARGV(cx, vp)[5]));
+      }
+      if (argc == 7) {
+        valueCount = ctx->convertTo<int>(JS_ARGV(cx, vp)[6]);
+      }
 
       boost::shared_ptr<DSMeter> pMeter;
       try {
@@ -229,7 +241,13 @@ namespace dss {
         return JS_FALSE;
       }
 
-      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter, resolution, energy, energyWh);
+      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter,
+                                                                                   resolution,
+                                                                                   energy,
+                                                                                   energyWh,
+                                                                                   startTime,
+                                                                                   endTime,
+                                                                                   valueCount);
       if(NULL == pSeries) {
         JS_ReportWarning(cx, "could not find metering data for %s and resultion %s", type.c_str(), resolution);
         return JS_FALSE;
