@@ -329,12 +329,12 @@ int dss__MeteringGetSeries(char* _token, std::vector<dss__MeteringSeries>& resul
 
 class dss__MeteringValue {
   int timestamp;
-  int value;
+  double value;
 };
 int dss__MeteringGetValues(char* _token, char* _dsMeterID, std::string _type, int _resolution, std::string* _unit, std::vector<dss__MeteringValue>& result);
 class dss__MeteringValuePerDevice {
   std::string dsid;
   int timestamp;
-  int value;
+  double value;
 };
 int dss__MeteringGetLastest(char* _token, std::string _from, std::string _type, std::string* _unit, std::vector<dss__MeteringValuePerDevice>& result);
