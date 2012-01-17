@@ -1691,6 +1691,10 @@ int dss__MeteringGetSeries(struct soap *soap, char* _token, std::vector<dss__Met
     seriesEnergy.dsid = dsMeter->getDSID().toString();
     seriesEnergy.type = "energy";
     result.push_back(seriesEnergy);
+    dss__MeteringSeries seriesEnergyDelta;
+    seriesEnergyDelta.dsid = dsMeter->getDSID().toString();
+    seriesEnergyDelta.type = "energyDelta";
+    result.push_back(seriesEnergyDelta);
     dss__MeteringSeries seriesConsumption;
     seriesConsumption.dsid = dsMeter->getDSID().toString();
     seriesConsumption.type = "consumption";
@@ -1708,10 +1712,19 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
     return getResult;
   }
 
-  bool isEnergy = false;
+  dss::Metering::SeriesTypes seriesType = dss::Metering::etConsumption;
   bool energyInWh = true;
   if(_type == "energy") {
-    isEnergy = true;
+    seriesType = dss::Metering::etEnergy;
+  } else if (_type == "energyDelta") {
+    seriesType = dss::Metering::etEnergyDelta;
+  } else {
+    if(_type != "consumption") {
+      return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
+    }
+  }
+
+  if ((seriesType == dss::Metering::etEnergy) || (seriesType == dss::Metering::etEnergyDelta)) {
     if(_unit != NULL) {
       if(*_unit == "Ws") {
         energyInWh = false;
@@ -1719,14 +1732,10 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
         return soap_sender_fault(soap, "Expected 'Ws' or 'Wh' for parameter 'unit'", NULL);
       }
     }
-  } else {
-    if(_type != "consumption") {
-      return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
-    }
   }
 
   dss::Metering& metering = dss::DSS::getInstance()->getMetering();
-  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, isEnergy, energyInWh);
+  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, seriesType, energyInWh);
   if(pSeries != NULL) {
     for(std::deque<dss::Value>::iterator iValue = pSeries->begin(),
         e = pSeries->end();

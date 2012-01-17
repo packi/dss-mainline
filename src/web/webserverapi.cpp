@@ -510,12 +510,12 @@ namespace dss {
       .withParameter("type", "string", true)
       .withParameter("resolution", "integer", true)
       .withParameter("unit", "string", false)
-      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy' and 'consumption' are available. 'energy' is available in two units: 'Wh' (default) and 'Ws'.");
+      .withDocumentation("Returns the stored values for the dSM with the given dsid. Type and Resolution can be found out by looking at the output of the 'getResolutions'-method. For now the types 'energy', 'energyDelta' and 'consumption' are available. 'energy' and 'energyDelta' are available in two units: 'Wh' (default) and 'Ws'.");
     clsMetering.addMethod("getLatest")
       .withParameter("type", "string", true)
       .withParameter("from", "string", true)
       .withParameter("unit", "string", false)
-      .withDocumentation("Returns cached energy meter value in watt-hours (Wh) or cached power consumption value in watt (W). The type parameter defines what should be returned, valid types are 'energy' and 'consumption'. 'energy' is available in two units: 'Wh' (default) and 'Ws'. The from parameter follows the set-syntax, currently it supports: .meters(dsid1,dsid2,...) and .meters(all)");
+      .withDocumentation("Returns cached energy meter value or cached power consumption value in watt (W). The type parameter defines what should be returned, valid types, 'energyDelta' are 'energy' and 'consumption'. 'energy' and 'energyDelta' are available in two units: 'Wh' (default) and 'Ws'. The from parameter follows the set-syntax, currently it supports: .meters(dsid1,dsid2,...) and .meters(all)");
 
     return api;
   } // createRestfulAPI

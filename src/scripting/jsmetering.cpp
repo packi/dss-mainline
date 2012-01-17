@@ -93,6 +93,15 @@ namespace dss {
           return JS_FALSE;
         }
         iMeter++;
+        ScriptObject objEnergyDelta(*ctx, NULL);
+        objEnergyDelta.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        objEnergyDelta.setProperty<std::string>("type", "energyDelta");
+        childJSVal = OBJECT_TO_JSVAL(objEnergyDelta.getJSObject());
+        res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
+        iMeter++;
         ScriptObject objConsumption(*ctx, NULL);
         objConsumption.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
         objConsumption.setProperty<std::string>("type", "consumption");
@@ -132,6 +141,15 @@ namespace dss {
           resolution.setProperty<std::string>("type", "energy");
           jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
           JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
+          if(!res) {
+            return JS_FALSE;
+          }
+          iResolution++;
+          ScriptObject objEnergyDelta(*ctx, NULL);
+          objEnergyDelta.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          objEnergyDelta.setProperty<std::string>("type", "energyDelta");
+          childJSVal = OBJECT_TO_JSVAL(objEnergyDelta.getJSObject());
+          res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
           if(!res) {
             return JS_FALSE;
           }
@@ -190,11 +208,13 @@ namespace dss {
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
       }
-      bool energy;
+      Metering::SeriesTypes energy;
       if(type == "consumption") {
-        energy = false;
+        energy = Metering::etConsumption;
       } else if(type == "energy") {
-        energy = true;
+        energy = Metering::etEnergy;
+      } else if(type == "energyDelta") {
+        energy = Metering::etEnergyDelta;
       } else {
         Logger::getInstance()->log("JS: metering_getValues: Invalid type '" + type + "'", lsError);
         return JS_FALSE;

@@ -75,6 +75,10 @@ namespace dss {
       series->addElement("", energyEntry);
       energyEntry->addProperty("dsid", dsMeter->getDSID().toString());
       energyEntry->addProperty("type", "energy");
+      boost::shared_ptr<JSONObject> energyDeltaEntry(new JSONObject());
+      series->addElement("", energyDeltaEntry);
+      energyDeltaEntry->addProperty("dsid", dsMeter->getDSID().toString());
+      energyDeltaEntry->addProperty("type", "energyDelta");
       boost::shared_ptr<JSONObject> consumptionEntry(new JSONObject());
       series->addElement("", consumptionEntry);
       consumptionEntry->addProperty("dsid", dsMeter->getDSID().toString());
@@ -89,8 +93,8 @@ namespace dss {
     std::string typeString = _request.getParameter("type");
     std::string unitString = _request.getParameter("unit");
     int resolution;
-    bool energy;
-    bool energyWh;
+    Metering::SeriesTypes energy;
+    bool energyWh = false;
     boost::shared_ptr<DSMeter> pMeter;
     try {
       dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
@@ -109,26 +113,32 @@ namespace dss {
       return failure("Could not parse resolution '" + resolutionString + "'");
     }
     if(typeString.empty()) {
-      return failure("Need a type, 'energy' or 'consumption'");
+      return failure("Need a type, 'energy', 'energyDelta' or 'consumption'");
     } else {
       if(typeString == "consumption") {
-        energy = false;
-        energyWh = true;
+        energy = Metering::etConsumption;
         unitString = "W";
+      } else if(typeString == "energyDelta") {
+        energy = Metering::etEnergyDelta;
       } else if(typeString == "energy") {
-        energy = true;
+        energy = Metering::etEnergy;
+      } else {
+        return failure("Invalid type '" + typeString + "'");
+      }
+
+      if ((energy == Metering::etEnergyDelta) || (energy == Metering::etEnergy)) {
         if(unitString.empty()) {
           unitString = "Wh";
           energyWh = true;
         } else {
           if(unitString == "Ws") {
             energyWh = false;
+          } else if (unitString == "Wh") {
+            energyWh = true;
           } else {
             return failure("Invalid unit '" + unitString + "'");
           }
         }
-      } else {
-        return failure("Invalid type '" + typeString + "'");
       }
     }
     boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter, resolution, energy, energyWh);

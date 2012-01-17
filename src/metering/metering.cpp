@@ -249,7 +249,7 @@ namespace dss {
 
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
                                                             int &_resolution,
-                                                            bool getEnergy,
+                                                            SeriesTypes type,
                                                             bool energyInWh) {
     m_ValuesMutex.lock();
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
@@ -292,19 +292,26 @@ namespace dss {
     lines.push_back(intToString(step));
     {
       std::stringstream sstream;
-      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << (getEnergy ? "energy" : "power") << ":AVERAGE";
+      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << ((type == etConsumption) ? "power" : "energy") << ":AVERAGE";
       lines.push_back(sstream.str());
     }
     lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
-    if (getEnergy) {
+    switch (type) {
+    case etEnergy:
+    case etEnergyDelta: {
+      lines.push_back("CDEF:ratePerStep=noUnkn," + intToString(step) + ",*");
       if (energyInWh) {
-        lines.push_back("CDEF:adj=noUnkn,3600,/");
+        lines.push_back("CDEF:adj=ratePerStep,3600,/");
         lines.push_back("XPORT:adj");
       } else {
-        lines.push_back("XPORT:noUnkn");
+        lines.push_back("XPORT:ratePerStep");
       }
-    } else {
+      break;
+    }
+    default: {
       lines.push_back("XPORT:noUnkn");
+      break;
+    }
     }
 
     std::vector<const char*> starts;
@@ -334,7 +341,26 @@ namespace dss {
       returnVector->push_back(Value(*currentData, DateTime(timeStamp)));
       currentData++;
     }
+    bool lastValueEmpty = false;
     if (returnVector->back().getValue() == 0) {
+      lastValueEmpty = true;
+    }
+
+    if (type == etEnergy) {
+      double currentCounter = _meter->getCachedEnergyMeterValue();
+      if (energyInWh) {
+        currentCounter /= 3600;
+      }
+      for (std::deque<Value>::reverse_iterator iter = returnVector->rbegin();
+           iter < returnVector->rend();
+           ++iter) {
+        double val = iter->getValue();
+        iter->setValue(currentCounter);
+        currentCounter -= val;
+      }
+    }
+
+    if (lastValueEmpty) {
       // delete the last value, if it is Unknown (zero)
       returnVector->pop_back();
     }
