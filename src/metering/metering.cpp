@@ -267,8 +267,8 @@ static const unsigned long kRRDHeaderSize = 2220;
 
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
                                                             int &_resolution,
-                                                            SeriesTypes type,
-                                                            bool energyInWh) {
+                                                            SeriesTypes _type,
+                                                            bool _energyInWh) {
     int numberOfValues = 0;
     for (int i = 0; i < m_ConfigChain->size(); ++i) {
       if (m_ConfigChain->getResolution(i) <= _resolution) {
@@ -319,15 +319,15 @@ static const unsigned long kRRDHeaderSize = 2220;
     lines.push_back("3000");
     {
       std::stringstream sstream;
-      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << ((type == etConsumption) ? "power" : "energy") << ":AVERAGE";
+      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << ((_type == etConsumption) ? "power" : "energy") << ":AVERAGE";
       lines.push_back(sstream.str());
     }
     lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
-    switch (type) {
+    switch (_type) {
     case etEnergy:
     case etEnergyDelta: {
       lines.push_back("CDEF:ratePerStep=noUnkn," + intToString(step) + ",*");
-      if (energyInWh) {
+      if (_energyInWh) {
         lines.push_back("CDEF:adj=ratePerStep,3600,/");
         lines.push_back("XPORT:adj");
       } else {
@@ -375,9 +375,9 @@ static const unsigned long kRRDHeaderSize = 2220;
       lastValueEmpty = true;
     }
 
-    if (type == etEnergy) {
+    if (_type == etEnergy) {
       double currentCounter = _meter->getCachedEnergyMeterValue();
-      if (energyInWh) {
+      if (_energyInWh) {
         currentCounter /= 3600;
       }
       for (std::deque<Value>::reverse_iterator iter = returnVector->rbegin();

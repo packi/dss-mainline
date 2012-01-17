@@ -108,8 +108,8 @@ namespace dss {
     void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
     boost::shared_ptr<std::deque<Value> > getSeries(boost::shared_ptr<DSMeter> _meter,
                                                     int &_resolution,
-                                                    SeriesTypes type,
-                                                    bool energyInWh=true);
+                                                    SeriesTypes _type,
+                                                    bool _energyInWh);
     unsigned long getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter);
   }; // Metering
 
