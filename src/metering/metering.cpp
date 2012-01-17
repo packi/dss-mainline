@@ -268,6 +268,12 @@ static const unsigned long kRRDHeaderSize = 2220;
                                                             int &_resolution,
                                                             SeriesTypes type,
                                                             bool energyInWh) {
+    int numberOfValues = 0;
+    for (int i = 0; i < m_ConfigChain->size(); ++i) {
+      if (m_ConfigChain->getResolution(i) <= _resolution) {
+        numberOfValues = m_ConfigChain->getNumberOfValues(i);
+      }
+    }
     m_ValuesMutex.lock();
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
 
@@ -276,7 +282,7 @@ static const unsigned long kRRDHeaderSize = 2220;
     long unsigned int step = _resolution;
     long unsigned int dscount = 0;
     time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step;
-    time_t start = end - (step * 400);
+    time_t start = end - (step * numberOfValues);
     char **names = 0;
     rrd_value_t *data = 0;
 
