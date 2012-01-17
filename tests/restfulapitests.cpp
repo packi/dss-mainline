@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(testDeclaring) {
 }
 
 BOOST_AUTO_TEST_CASE(testRestfulRequest) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   std::string method = "test/method";
 
   RestfulRequest req(method, params);

@@ -63,8 +63,8 @@ namespace dss {
       subscription->addElement("options", optsObj);
       boost::shared_ptr<const SubscriptionOptions> opts = pSubscription->getOptions();
       if(opts != NULL) {
-        HashMapConstStringString optsHash = opts->getParameters().getContainer();
-        foreach(HashMapConstStringString::reference option, optsHash) {
+        HashMapStringString optsHash = opts->getParameters().getContainer();
+        foreach(HashMapStringString::reference option, optsHash) {
           optsObj->addProperty(option.first, option.second);
         }
       }

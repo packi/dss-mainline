@@ -56,7 +56,7 @@ protected:
   boost::shared_ptr<Apartment> m_pApartment;
   boost::shared_ptr<ModelMaintenance> m_pMaintenance;
   boost::shared_ptr<CircuitRequestHandler> m_pHandler;
-  HashMapConstStringString m_Params;
+  HashMapStringString m_Params;
   dss_dsid_t m_ValidDSID;
   std::string m_ValidName;
   int m_BorderOrange;

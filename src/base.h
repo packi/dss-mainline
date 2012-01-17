@@ -28,29 +28,13 @@
 #include <stdint.h>
 
 #ifndef WIN32
-  #include <ext/hash_map>
+  #include <tr1/unordered_map>
 #else
-  #include <hash_map>
+  #include <unordered_map>
 #endif
 #include <stdexcept>
 
-#ifndef WIN32
-#define HASH_NAMESPACE __gnu_cxx
-#else
-#define HASH_NAMESPACE stdext
-#endif
-
-#define HASH_MAP HASH_NAMESPACE::hash_map
-
-namespace HASH_NAMESPACE
-{
-  template<>
-  struct hash<const std::string> {
-    size_t operator()(const std::string& x) const {
-      return HASH_NAMESPACE::hash<const char*>()(x.c_str());
-    }
-  };
-}
+#define HASH_MAP std::tr1::unordered_map
 
 namespace dss {
 
@@ -62,7 +46,6 @@ namespace dss {
 
   //============================================= Common types
   typedef HASH_MAP<std::string, std::string> HashMapStringString;
-  typedef HASH_MAP<const std::string, std::string> HashMapConstStringString;
 
   //============================================= Conversion helpers
 
@@ -115,7 +98,7 @@ namespace dss {
 
   class Properties {
   private:
-    HashMapConstStringString m_Container;
+    HashMapStringString m_Container;
   public:
     bool has(const std::string& _key) const;
     void set(const std::string& _key, const std::string& _value);
@@ -124,7 +107,7 @@ namespace dss {
 
     bool unset(const std::string& _key);
 
-    const HashMapConstStringString& getContainer() const { return m_Container; }
+    const HashMapStringString& getContainer() const { return m_Container; }
   };
 
   template<class t>

@@ -57,7 +57,7 @@ protected:
   boost::shared_ptr<EventInterpreter> m_pInterpreter;
   boost::shared_ptr<EventRequestHandler> m_pHandler;
   boost::shared_ptr<Session> m_pSession;
-  HashMapConstStringString m_Params;
+  HashMapStringString m_Params;
 }; // Fixture
 
 BOOST_FIXTURE_TEST_CASE(testInvalidFunction, Fixture) {

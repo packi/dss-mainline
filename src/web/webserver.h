@@ -50,23 +50,23 @@ namespace dss {
     struct mg_context* m_mgContext;
     int m_LastSessionID;
     int m_TrustedPort;
-    __gnu_cxx::hash_map<const std::string, WebServerRequestHandlerJSON*> m_Handlers;
+    HASH_MAP<std::string, WebServerRequestHandlerJSON*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
   private:
     void setupAPI();
     void instantiateHandlers();
     void publishJSLogfiles();
-    HashMapConstStringString parseCookies(const char* _cookies);
-    std::string generateCookieString(HashMapConstStringString _cookies);
+    HashMapStringString parseCookies(const char* _cookies);
+    std::string generateCookieString(HashMapStringString _cookies);
   protected:
     void *httpBrowseProperties(struct mg_connection* _connection,
                                const struct mg_request_info* _info);
     void *jsonHandler(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
-                      HashMapConstStringString _parameter,
-                      HashMapConstStringString _cookies,
-                      HashMapConstStringString _injectedCookies,
+                      HashMapStringString _parameter,
+                      HashMapStringString _cookies,
+                      HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     void *downloadHandler(struct mg_connection* _connection,
                           const struct mg_request_info* _info);

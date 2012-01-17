@@ -93,7 +93,7 @@ namespace dss {
 
   void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(boost::shared_ptr<const SubscriptionOptions> _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride) {
     if(_options != NULL) {
-      const HashMapConstStringString sourceMap = _options->getParameters().getContainer();
+      const HashMapStringString sourceMap = _options->getParameters().getContainer();
       typedef const std::pair<const std::string, std::string> tItem;
       foreach(tItem kv, sourceMap) {
         if(endsWith(kv.first, _suffix)) {
@@ -324,8 +324,8 @@ namespace dss {
 
         // add raisedEvent.parameter
         ScriptObject param(*ctx, NULL);
-        const HashMapConstStringString& props =  _event.getProperties().getContainer();
-        for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+        const HashMapStringString& props =  _event.getProperties().getContainer();
+        for(HashMapStringString::const_iterator iParam = props.begin(), e = props.end();
             iParam != e; ++iParam)
         {
           Logger::getInstance()->log("JavaScript Event Handler: setting parameter " + iParam->first +

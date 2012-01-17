@@ -80,14 +80,14 @@ protected:
 };
 
 BOOST_FIXTURE_TEST_CASE(testNoParam, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   RestfulRequest req("device/bla", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testEmptyNameParam, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["name"] = "";
   RestfulRequest req("device/bla", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -95,7 +95,7 @@ BOOST_FIXTURE_TEST_CASE(testEmptyNameParam, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testInvalidNameParam, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["name"] = m_InvalidName;
   RestfulRequest req("device/bla", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -103,7 +103,7 @@ BOOST_FIXTURE_TEST_CASE(testInvalidNameParam, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testEmptyDSIDParam, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = "";
   RestfulRequest req("device/bla", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -111,7 +111,7 @@ BOOST_FIXTURE_TEST_CASE(testEmptyDSIDParam, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testInvalidDSIDParam, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = "asdfasdf";
   RestfulRequest req("device/bla", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -119,7 +119,7 @@ BOOST_FIXTURE_TEST_CASE(testInvalidDSIDParam, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testTooLongDSIDParam, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = "3504175fe0000000ffc000113504175fe0000000ffc00011";
   RestfulRequest req("device/bla", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -127,14 +127,14 @@ BOOST_FIXTURE_TEST_CASE(testTooLongDSIDParam, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testRightDSID, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/bla", params);
   BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetSpec, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getSpec", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -145,7 +145,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetSpec, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetGroups, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getGroups", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -159,7 +159,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetGroups, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetState, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getState", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -168,7 +168,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetState, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetName, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getName", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -177,7 +177,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetName, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceSetNameMissingNewName, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/setName", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -186,7 +186,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceSetNameMissingNewName, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testDeviceSetName, Fixture) {
   const std::string& kNewName = "renamed";
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   params["newName"] = kNewName;
   RestfulRequest req("device/setName", params);
@@ -201,7 +201,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceSetName, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceAddTagMissingTag, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/addTag", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -209,7 +209,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceAddTagMissingTag, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceHasTagMissingTag, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/hasTag", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -217,7 +217,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceHasTagMissingTag, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceRemoveTagMissingTag, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/removeTag", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -226,7 +226,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceRemoveTagMissingTag, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
   const std::string& kTagName = "justATag";
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   params["tag"] = kTagName;
   RestfulRequest reqHasTag("device/hasTag", params);
@@ -259,7 +259,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getTags", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -273,7 +273,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
   const std::string& kTagName = "testing";
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   m_pApartment->getDeviceByDSID(m_ValidDSID)->addTag(kTagName);
   RestfulRequest req("device/getTags", params);
@@ -289,21 +289,21 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testEnable, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/enable", params);
   BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDisable, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/disable", params);
   BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(testLockNotPresent, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/lock", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -311,7 +311,7 @@ BOOST_FIXTURE_TEST_CASE(testLockNotPresent, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testLockPresent, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsConnected(true);
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
@@ -321,7 +321,7 @@ BOOST_FIXTURE_TEST_CASE(testLockPresent, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUnlockNotPresent, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/unlock", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -329,7 +329,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockNotPresent, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUnlockPresent, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsConnected(true);
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
@@ -339,7 +339,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockPresent, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testSetConfigNoParameters, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/setConfig", params);
@@ -348,7 +348,7 @@ BOOST_FIXTURE_TEST_CASE(testSetConfigNoParameters, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testSetConfigInvalidParameters, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["class"] = "469";
@@ -359,7 +359,7 @@ BOOST_FIXTURE_TEST_CASE(testSetConfigInvalidParameters, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testSetConfig, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["class"] = "3";
@@ -371,7 +371,7 @@ BOOST_FIXTURE_TEST_CASE(testSetConfig, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfigInvalidParameters, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["class"] = "469";
@@ -382,7 +382,7 @@ BOOST_FIXTURE_TEST_CASE(testGetConfigInvalidParameters, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfigNoParameters, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getConfig", params);
@@ -391,7 +391,7 @@ BOOST_FIXTURE_TEST_CASE(testGetConfigNoParameters, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfig, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["class"] = "3";
@@ -402,7 +402,7 @@ BOOST_FIXTURE_TEST_CASE(testGetConfig, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfigWordInvalidParameters, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["class"] = "469";
@@ -413,7 +413,7 @@ BOOST_FIXTURE_TEST_CASE(testGetConfigWordInvalidParameters, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfigWordNoParameters, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getConfigWord", params);
@@ -422,7 +422,7 @@ BOOST_FIXTURE_TEST_CASE(testGetConfigWordNoParameters, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfigWord, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["class"] = "3";
@@ -433,7 +433,7 @@ BOOST_FIXTURE_TEST_CASE(testGetConfigWord, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetTransmissionQuality, Fixture) {
-  HashMapConstStringString params;
+  HashMapStringString params;
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getTransmissionQuality", params);
