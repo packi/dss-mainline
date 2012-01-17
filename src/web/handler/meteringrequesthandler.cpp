@@ -148,7 +148,7 @@ namespace dss {
       resultObj->addProperty("meterID", deviceDSIDString);
       resultObj->addProperty("type", typeString);
       resultObj->addProperty("unit", unitString);
-      resultObj->addProperty("resolution", resolutionString);
+      resultObj->addProperty("resolution", intToString(resolution));
       boost::shared_ptr<JSONArrayBase> valuesArray(new JSONArrayBase());
       resultObj->addElement("values", valuesArray);
       for(std::deque<Value>::iterator iValue = pSeries->begin(),
