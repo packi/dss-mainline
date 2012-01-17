@@ -374,7 +374,7 @@ static const unsigned long kRRDHeaderSize = 2220;
       currentData++;
     }
     bool lastValueEmpty = false;
-    if (returnVector->back().getValue() == 0) {
+    if ((returnVector->size() > 0) && (returnVector->back().getValue() == 0)) {
       lastValueEmpty = true;
     }
 
