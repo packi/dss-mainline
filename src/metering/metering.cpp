@@ -278,13 +278,11 @@ static const unsigned long kRRDHeaderSize = 2220;
 
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
     DateTime iCurrentTimeStamp;
     long unsigned int step = _resolution;
-    long unsigned int dscount = 0;
     time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step;
     time_t start = end - (step * numberOfValues);
-    char **names = 0;
-    rrd_value_t *data = 0;
 
     m_ValuesMutex.lock();
 
@@ -344,6 +342,11 @@ static const unsigned long kRRDHeaderSize = 2220;
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char**)&starts.front();
+
+    long unsigned int dscount = 0;
+    char **names = 0;
+    rrd_value_t *data = 0;
+
     rrd_clear_error();
     int result = rrd_xport(starts.size(),
                            argString,
