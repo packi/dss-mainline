@@ -268,7 +268,7 @@ namespace dss {
       DsmApiSetBusStateCallback(m_dsmApiHandle, &callback_struct);
       callback_struct.function = (void*)DSBusInterface::busChangeCallback;
       callback_struct.arg = this;
-      DsmApiSetBusStateCallback(m_dsmApiHandle, &callback_struct);
+      DsmApiSetBusChangeCallback(m_dsmApiHandle, &callback_struct);
 
       EventDeviceAccessibility_on_event_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
       callback_struct.function = (void*)evDevAccessOn;
