@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.4.2 18.01.2012
+	* ds485 state handling and possible dSS crash:
+	  fix wrong callback registration
+
 v1.4.1 16.01.2012
 	* get rid of dSM API deprecated wranings, fixes #1269
 	* correctly set present flag for zones and groups, fixes #1302
