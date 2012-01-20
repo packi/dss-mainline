@@ -52,3 +52,8 @@ clean-local: clean-doc
 clean-doc:
 	rm -rf $(top_srcdir)/doc/inetrnal
 	rm -rf $(top_srcdir)/doc/webservices
+
+if WITH_CURL
+gencurlheader:
+	python src/scripting/curl-js-constants.py < /usr/include/curl/curl.h > src/scripting/jscurl-constants.h
+endif

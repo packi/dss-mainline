@@ -1,0 +1,100 @@
+/*
+    Copyright (c) 2012 digitalSTROM.org, Zurich, Switzerland
+
+    Author: Michael Tross, aizo GmbH <michael.tross@aizo.com>
+
+    This file is part of digitalSTROM Server.
+
+    digitalSTROM Server is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    digitalSTROM Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+#ifndef _JSCURLOPTIONS_INCLUDED
+#define _JSCURLOPTIONS_INCLUDED
+
+#define EASYSPEC(XX) {XX, #XX, JSPROP_READONLY | JSPROP_PERMANENT | JSPROP_ENUMERATE, {0,0,0}}
+
+/** easycurl_getinfo constants
+ *
+ * Using order from:
+ * http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html
+ *
+ * Items that are ifdef'ed are 'newer' and may not be available on
+ * older installs of libcurl
+ */
+
+static JSConstDoubleSpec easycurl_info[] = {
+  EASYSPEC(CURLINFO_EFFECTIVE_URL),
+  EASYSPEC(CURLINFO_RESPONSE_CODE),
+  EASYSPEC(CURLINFO_HTTP_CONNECTCODE),
+  EASYSPEC(CURLINFO_FILETIME),
+  EASYSPEC(CURLINFO_TOTAL_TIME),
+  EASYSPEC(CURLINFO_NAMELOOKUP_TIME),
+  EASYSPEC(CURLINFO_CONNECT_TIME),
+#ifdef CURLINFO_APPCONNECT_TIME
+  EASYSPEC(CURLINFO_APPCONNECT_TIME),
+#endif
+  EASYSPEC(CURLINFO_PRETRANSFER_TIME),
+  EASYSPEC(CURLINFO_STARTTRANSFER_TIME),
+  EASYSPEC(CURLINFO_REDIRECT_TIME),
+  EASYSPEC(CURLINFO_REDIRECT_COUNT),
+#ifdef CURLINFO_REDIRECT_URL
+  EASYSPEC(CURLINFO_REDIRECT_URL),
+#endif
+  EASYSPEC(CURLINFO_SIZE_UPLOAD),
+  EASYSPEC(CURLINFO_SIZE_DOWNLOAD),
+  EASYSPEC(CURLINFO_SPEED_DOWNLOAD),
+  EASYSPEC(CURLINFO_SPEED_UPLOAD),
+  EASYSPEC(CURLINFO_HEADER_SIZE),
+  EASYSPEC(CURLINFO_REQUEST_SIZE),
+  EASYSPEC(CURLINFO_SSL_VERIFYRESULT),
+  EASYSPEC(CURLINFO_SSL_ENGINES),
+  EASYSPEC(CURLINFO_CONTENT_LENGTH_DOWNLOAD),
+#ifdef CURLINFO_CONTENT_LENGTH_UPLOAD
+  EASYSPEC(CURLINFO_CONTENT_LENGTH_UPLOAD),
+#endif
+  EASYSPEC(CURLINFO_CONTENT_TYPE),
+  EASYSPEC(CURLINFO_PRIVATE),
+  EASYSPEC(CURLINFO_HTTPAUTH_AVAIL),
+  EASYSPEC(CURLINFO_PROXYAUTH_AVAIL),
+  EASYSPEC(CURLINFO_OS_ERRNO),
+  EASYSPEC(CURLINFO_NUM_CONNECTS),
+#ifdef CURLINFO_PRIMARY_IP
+  EASYSPEC(CURLINFO_PRIMARY_IP),
+#endif
+  EASYSPEC(CURLINFO_COOKIELIST),
+  EASYSPEC(CURLINFO_LASTSOCKET),
+  EASYSPEC(CURLINFO_FTP_ENTRY_PATH),
+#ifdef CURLINFO_CONDITION_UNMET
+  EASYSPSEC(CURLINFO_CONDITION_UNMET),
+#endif
+#ifdef CURLINFO_CERT_INFO
+  EASYSPEC(CURLINFO_CERT_INFO),
+#endif
+#ifdef CURLINFO_RTSP_SESSION_ID
+  EASYSPEC(CURLINFO_RTSP_SESSION_ID),
+#endif
+#ifdef CURLINFO_RTSP_CLIENT_CSEQ
+  EASYSPEC(CURLINFO_RTSP_CLIENT_CSEQ),
+#endif
+#ifdef CURLINFO_RTSP_SERVER_CSEQ
+  EASYSPEC(CURLINFO_RTSP_SERVER_CSEQ),
+#endif
+#ifdef CURLINFO_RTSP_CSEQ_RECV
+  EASYSPEC(CURLINFO_RTSP_CSEQ_RECV),
+#endif
+  {0,0,0,{0,0,0}}
+};
+
+#endif
