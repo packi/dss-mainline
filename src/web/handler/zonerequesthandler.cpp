@@ -179,12 +179,13 @@ namespace dss {
           resultObj->addProperty("name", sceneName);
           return success(resultObj);
         } else if(_request.getMethod() == "getReachableScenes") {
-          if(pGroup != NULL) {
-            return failure("Can't take group into account");
-          }
-
           uint64_t reachableScenes = 0uLL;
-          Set devicesInZone = pZone->getDevices();
+          Set devicesInZone;
+          if (pGroup) {
+            devicesInZone = pZone->getDevices().getByGroup(pGroup);
+          } else {
+            devicesInZone = pZone->getDevices();
+          }
           for(int iDevice = 0; iDevice < devicesInZone.length(); iDevice++) {
             DeviceReference& ref = devicesInZone.get(iDevice);
             int buttonID = ref.getDevice()->getButtonID();
