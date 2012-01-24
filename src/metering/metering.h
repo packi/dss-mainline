@@ -104,7 +104,7 @@ namespace dss {
 
     const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
-    void postMeteringEvent(boost::shared_ptr<DSMeter> _meter, int _valuePower, int _valueEnergy, DateTime _sampledAt);
+    void postMeteringEvent(boost::shared_ptr<DSMeter> _meter, int _valueEnergy, DateTime _sampledAt);
     void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
     boost::shared_ptr<std::deque<Value> > getSeries(boost::shared_ptr<DSMeter> _meter,
                                                     int &_resolution,
