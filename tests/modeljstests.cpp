@@ -870,7 +870,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   int num = ctx->evaluate<int>("Metering.getSeries().length");
-  BOOST_CHECK_EQUAL(num, 2);
+  BOOST_CHECK_EQUAL(num, 3);
 } // testPropertyGetSeries
 
 BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
@@ -917,9 +917,8 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   int num = ctx->evaluate<int>("Metering.getValues('13',"
                                "                   'consumption',"
-                               "                   2).length");
-  BOOST_CHECK_LE(num, 400);
-  BOOST_CHECK_GE(num, 0);
+                               "                   1).length");
+  BOOST_CHECK_EQUAL(num, 599);
 } // testPropertyGetValues
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {

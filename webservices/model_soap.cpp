@@ -1691,6 +1691,10 @@ int dss__MeteringGetSeries(struct soap *soap, char* _token, std::vector<dss__Met
     seriesEnergy.dsid = dsMeter->getDSID().toString();
     seriesEnergy.type = "energy";
     result.push_back(seriesEnergy);
+    dss__MeteringSeries seriesEnergyDelta;
+    seriesEnergyDelta.dsid = dsMeter->getDSID().toString();
+    seriesEnergyDelta.type = "energyDelta";
+    result.push_back(seriesEnergyDelta);
     dss__MeteringSeries seriesConsumption;
     seriesConsumption.dsid = dsMeter->getDSID().toString();
     seriesConsumption.type = "consumption";
@@ -1701,6 +1705,7 @@ int dss__MeteringGetSeries(struct soap *soap, char* _token, std::vector<dss__Met
 
 int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
                            std::string _type, int _resolution, std::string* _unit,
+                           int* _startTime, int* _endTime, int* _valueCount,
                            std::vector<dss__MeteringValue>& result) {
   boost::shared_ptr<dss::DSMeter> pMeter;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, pMeter);
@@ -1708,10 +1713,19 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
     return getResult;
   }
 
-  bool isEnergy = false;
+  dss::Metering::SeriesTypes seriesType = dss::Metering::etConsumption;
   bool energyInWh = true;
   if(_type == "energy") {
-    isEnergy = true;
+    seriesType = dss::Metering::etEnergy;
+  } else if (_type == "energyDelta") {
+    seriesType = dss::Metering::etEnergyDelta;
+  } else {
+    if(_type != "consumption") {
+      return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
+    }
+  }
+
+  if ((seriesType == dss::Metering::etEnergy) || (seriesType == dss::Metering::etEnergyDelta)) {
     if(_unit != NULL) {
       if(*_unit == "Ws") {
         energyInWh = false;
@@ -1719,14 +1733,29 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
         return soap_sender_fault(soap, "Expected 'Ws' or 'Wh' for parameter 'unit'", NULL);
       }
     }
-  } else {
-    if(_type != "consumption") {
-      return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
-    }
+  }
+
+  dss::DateTime startTime(dss::DateTime::NullDate);
+  dss::DateTime endTime(dss::DateTime::NullDate);
+  int valueCount = 0;
+  if (_startTime != NULL) {
+    startTime = dss::DateTime(*_startTime);
+  }
+  if (_endTime != NULL) {
+    endTime = dss::DateTime(*_endTime);
+  }
+  if (_valueCount != NULL) {
+    valueCount = *_valueCount;
   }
 
   dss::Metering& metering = dss::DSS::getInstance()->getMetering();
-  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter, _resolution, isEnergy, energyInWh);
+  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter,
+                                                                          _resolution,
+                                                                          seriesType,
+                                                                          energyInWh,
+                                                                          startTime,
+                                                                          endTime,
+                                                                          valueCount);
   if(pSeries != NULL) {
     for(std::deque<dss::Value>::iterator iValue = pSeries->begin(),
         e = pSeries->end();

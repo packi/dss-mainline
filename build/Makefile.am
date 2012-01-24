@@ -147,7 +147,7 @@ $(top_srcdir)/webservices/dss.nsmap: $(top_srcdir)/webservices/soapC.cpp
 $(top_srcdir)/webservices/dss.wsdl: $(top_srcdir)/webservices/soapC.cpp
 $(top_srcdir)/webservices/dss.xsd: $(top_srcdir)/webservices/soapC.cpp
 
-$(top_srcdir)/webservices/soapC.cpp:
+$(top_srcdir)/webservices/soapC.cpp: $(top_srcdir)/webservices/model_soap.cpp $(top_srcdir)/webservices/model_soap.h
 	$(GSOAP_SOAPCPP2) -I$(GSOAP_IMPORT_DIR) -I$(top_srcdir)/webservices -SLx -d$(top_srcdir)/webservices $(top_srcdir)/webservices/model_soap.h
 
 endif

@@ -47,19 +47,20 @@
 
 namespace dss {
 
+static const unsigned long kRRDHeaderSize = 1508;
   //================================================== Metering
 
   Metering::Metering(DSS* _pDSS)
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
-    m_ConfigConsumption.reset(new MeteringConfigChain(1));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(           1, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     15 * 60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     60 * 60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 3 * 60 * 60, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(24 * 60 * 60, 400)));
-    m_Config.push_back(m_ConfigConsumption);
+    m_ConfigChain.reset(new MeteringConfigChain(1));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(                1,  600)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(               60,  720)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          15 * 60, 2976)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     24 * 60 * 60,  370)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 7 * 24 * 60 * 60,  260)));
+    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(30 * 24 * 60 * 60,   60)));
+    m_Config.push_back(m_ConfigChain);
   } // metering
 
   void Metering::initialize() {
@@ -121,18 +122,33 @@ namespace dss {
   boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
+      bool rrdPresent = false;
       std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
       if (rrdInfo != 0) {
         log("RRD DB present");
-        /* TODO: check DB contents */
+        /* check DB contents */
+        while (rrdInfo != NULL) {
+          if ((rrdInfo->type == RD_I_CNT) && (strcmp(rrdInfo->key, "header_size") == 0)) {
+            unsigned long headerSize = rrdInfo->value.u_cnt;
+            log("RRD Header Size: " + intToString(headerSize));
+            if (headerSize == kRRDHeaderSize) {
+              rrdPresent = true;
+              log("RRD Header Size matches!");
+              break;
+            }
+          }
+          rrdInfo = rrdInfo->next;
+        }
         rrd_info_free(rrdInfo);
-      } else {
+      }
+
+      if (!rrdPresent) {
+        log("Creating new RRD database.", lsWarning);
         /* create new DB */
         std::vector<std::string> lines;
-        lines.push_back("DS:power:GAUGE:5:0:4500");
         lines.push_back("DS:energy:DERIVE:5:0:U");
         MeteringConfigChain *chain = _pChain.get();
         for (int i = 0; i < chain->size(); ++i) {
@@ -153,7 +169,7 @@ namespace dss {
                                   starts.size(),
                                   argString);
         if (result < 0) {
-          log(rrd_get_error());
+          log(rrd_get_error(), lsError);
           boost::shared_ptr<std::string> pFileName(new std::string(""));
           return pFileName;
         }
@@ -166,11 +182,9 @@ namespace dss {
   } // getOrCreateCachedSeries
 
   void Metering::postMeteringEvent(boost::shared_ptr<DSMeter> _meter,
-                                   int _valuePower,
                                    int _valueEnergy,
                                    DateTime _sampledAt) {
-    m_ValuesMutex.lock();
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
 
     std::vector<std::string> lines;
     lines.push_back("update");
@@ -181,12 +195,14 @@ namespace dss {
     lines.push_back(rrdFileName.get()->c_str());
     {
       std::stringstream sstream;
-      sstream << _sampledAt.secondsSinceEpoch() << ":" << _valuePower << ":" << _valueEnergy;
+      sstream << _sampledAt.secondsSinceEpoch() << ":" << _valueEnergy;
       lines.push_back(sstream.str());
     }
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char **)&starts.front();
+
+    m_ValuesMutex.lock();
 
     rrd_clear_error();
     int result = rrd_update(starts.size(), argString);
@@ -196,21 +212,106 @@ namespace dss {
     m_ValuesMutex.unlock();
   } // postMeteringEvent
 
+  unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
+    m_ValuesMutex.lock();
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
+    if (!m_RrdcachedPath.empty()) {
+      std::vector<std::string> lines;
+      lines.push_back("flushcached");
+      lines.push_back("--daemon");
+      lines.push_back(m_RrdcachedPath);
+      lines.push_back(rrdFileName.get()->c_str());
+      std::vector<const char*> starts;
+      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+      char** argString = (char**)&starts.front();
+      int result = rrd_flushcached(starts.size(), argString);
+      if (result < 0) {
+        log(rrd_get_error());
+      }
+    }
+
+    char **names = 0;
+    char **data = 0;
+    time_t lastUpdate;
+    unsigned long dscount;
+    rrd_clear_error();
+    int result = rrd_lastupdate_r(rrdFileName.get()->c_str(),
+                                  &lastUpdate,
+                                  &dscount,
+                                  &names,
+                                  &data);
+
+    m_ValuesMutex.unlock();
+
+    if (result != 0) {
+      log(rrd_get_error());
+      return 0;
+    }
+
+    unsigned long lastEnergyCounter = 0;
+    for (unsigned int i = 0; i < dscount; ++i) {
+      if (i == 1) {
+        lastEnergyCounter = strToUIntDef(data[i], 0);
+      }
+      rrd_freemem(names[i]);
+      rrd_freemem(data[i]);
+    }
+    rrd_freemem(names);
+    rrd_freemem(data);
+
+    return lastEnergyCounter;
+  }
+
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
                                                             int &_resolution,
-                                                            bool getEnergy,
-                                                            bool energyInWh) {
-    m_ValuesMutex.lock();
-    boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
+                                                            SeriesTypes _type,
+                                                            bool _energyInWh,
+                                                            DateTime &_startTime,
+                                                            DateTime &_endTime,
+                                                            int &_valueCount) {
+    int numberOfValues = 0;
+    for (int i = 0; i < m_ConfigChain->size(); ++i) {
+      if (m_ConfigChain->getResolution(i) <= _resolution) {
+        numberOfValues = m_ConfigChain->getNumberOfValues(i);
+      }
+    }
 
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+    boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
+    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
     DateTime iCurrentTimeStamp;
     long unsigned int step = _resolution;
-    long unsigned int dscount = 0;
     time_t end = (iCurrentTimeStamp.secondsSinceEpoch() / step) * step;
-    time_t start = end - (step * 399);
-    char **names = 0;
-    rrd_value_t *data = 0;
+    time_t start = end - (step * numberOfValues);
+    _valueCount = std::min(_valueCount, numberOfValues);
+
+    if ((_startTime == DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount == 0)) {
+      // now-(step*numberOfValues)..now
+    } else if ((_startTime == DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount != 0)) {
+      // now-(step*valueCount)..now
+      start = end - (step * _valueCount);
+    } else if ((_startTime == DateTime::NullDate) && (_endTime != DateTime::NullDate) && (_valueCount == 0)) {
+      // now-(step*numberOfValues)..endTime
+      end = (_endTime.secondsSinceEpoch() / step) * step;
+    } else if ((_startTime == DateTime::NullDate) && (_endTime != DateTime::NullDate) && (_valueCount != 0)) {
+      // endTime-(step*valueCount)..endTime
+      end = (_endTime.secondsSinceEpoch() / step) * step;
+      start = end - (step * _valueCount);
+    } else if ((_startTime != DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount == 0)) {
+      // startTime..now
+      start = (_startTime.secondsSinceEpoch() / step) * step;
+    } else if ((_startTime != DateTime::NullDate) && (_endTime == DateTime::NullDate) && (_valueCount != 0)) {
+      // startTime..startTime+(step*valueCount)
+      start = (_startTime.secondsSinceEpoch() / step) * step;
+      end = start + (step * _valueCount);
+    } else if ((_startTime != DateTime::NullDate) && (_endTime != DateTime::NullDate)) {
+      // startTime..endTime
+      start = (_startTime.secondsSinceEpoch() / step) * step;
+      end = (_endTime.secondsSinceEpoch() / step) * step;
+    }
+
+    m_ValuesMutex.lock();
 
     if (!m_RrdcachedPath.empty()) {
       std::vector<std::string> lines;
@@ -239,23 +340,40 @@ namespace dss {
     lines.push_back(intToString(end));
     lines.push_back("--step");
     lines.push_back(intToString(step));
+    lines.push_back("--maxrows");
+    lines.push_back("3000");
     {
       std::stringstream sstream;
-      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << (getEnergy ? "energy" : "power") << ":AVERAGE";
+      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":energy:AVERAGE";
       lines.push_back(sstream.str());
     }
-    if (getEnergy && energyInWh) {
-      std::stringstream sstream;
-      sstream << "CDEF:adj=data," << 3600 << ",/";
-      lines.push_back(sstream.str());
-      lines.push_back("XPORT:adj");
-    } else {
-      lines.push_back("XPORT:data");
+    lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
+    switch (_type) {
+    case etEnergy:
+    case etEnergyDelta: {
+      lines.push_back("CDEF:ratePerStep=noUnkn," + intToString(step) + ",*");
+      if (_energyInWh) {
+        lines.push_back("CDEF:adj=ratePerStep,3600,/");
+        lines.push_back("XPORT:adj");
+      } else {
+        lines.push_back("XPORT:ratePerStep");
+      }
+      break;
+    }
+    default: {
+      lines.push_back("XPORT:noUnkn");
+      break;
+    }
     }
 
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char**)&starts.front();
+
+    long unsigned int dscount = 0;
+    char **names = 0;
+    rrd_value_t *data = 0;
+
     rrd_clear_error();
     int result = rrd_xport(starts.size(),
                            argString,
@@ -266,9 +384,11 @@ namespace dss {
                            &dscount,
                            &names,
                            &data);
+
+    m_ValuesMutex.unlock();
+
     if (result != 0) {
       log(rrd_get_error());
-      m_ValuesMutex.unlock();
       return returnVector;
     }
     for (unsigned int i = 0; i < dscount; ++i) {
@@ -277,12 +397,36 @@ namespace dss {
     rrd_freemem(names);
     rrd_value_t *currentData = data;
     for (int timeStamp = start + step; timeStamp <= (end - step); timeStamp += step) {
-      returnVector->push_back(Value(std::isnan(*currentData) ? 0 : *currentData, timeStamp));
+      returnVector->push_back(Value(*currentData, DateTime(timeStamp)));
       currentData++;
+    }
+    bool lastValueEmpty = false;
+    if ((returnVector->size() > 0) && (returnVector->back().getValue() == 0)) {
+      lastValueEmpty = true;
+    }
+
+    if (_type == etEnergy) {
+      double currentCounter = _meter->getCachedEnergyMeterValue();
+      if (_energyInWh) {
+        currentCounter /= 3600;
+      }
+      for (std::deque<Value>::reverse_iterator iter = returnVector->rbegin();
+           iter < returnVector->rend();
+           ++iter) {
+        double val = iter->getValue();
+        iter->setValue(currentCounter);
+        currentCounter -= val;
+      }
+    }
+
+    if (lastValueEmpty) {
+      // delete the last value, if it is Unknown (zero)
+      returnVector->pop_back();
     }
     rrd_freemem(data);
     _resolution = step;
-    m_ValuesMutex.unlock();
+    _startTime = DateTime(start);
+    _endTime = DateTime(end);
     return returnVector;
   }
 

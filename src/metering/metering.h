@@ -67,6 +67,7 @@ namespace dss {
     const DateTime& getTimeStamp() const { return m_TimeStamp; }
     void setTimeStamp(const DateTime& _value) { m_TimeStamp = _value; }
     double getValue() const { return m_Value; }
+    void setValue(double _value) { m_Value = _value; }
   }; // Value
 
   class Metering : public ThreadedSubsystem {
@@ -75,8 +76,7 @@ namespace dss {
     int m_MeterConsumptionCheckIntervalSeconds;
     std::string m_MeteringStorageLocation;
     std::string m_RrdcachedPath;
-    boost::shared_ptr<MeteringConfigChain> m_ConfigEnergy;
-    boost::shared_ptr<MeteringConfigChain> m_ConfigConsumption;
+    boost::shared_ptr<MeteringConfigChain> m_ConfigChain;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
     typedef std::map<boost::shared_ptr<DSMeter>,
                      boost::shared_ptr<std::string> > CachedSeriesMap;
@@ -97,14 +97,23 @@ namespace dss {
     Metering(DSS* _pDSS);
     virtual ~Metering() {};
 
+    typedef enum { etConsumption,  /**< Current power consumption. */
+                   etEnergyDelta,  /**< Energy delta values. */
+                   etEnergy,       /**< Energy counter. */
+                 } SeriesTypes;
+
     const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
-    void postMeteringEvent(boost::shared_ptr<DSMeter> _meter, int _valuePower, int _valueEnergy, DateTime _sampledAt);
+    void postMeteringEvent(boost::shared_ptr<DSMeter> _meter, int _valueEnergy, DateTime _sampledAt);
     void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
     boost::shared_ptr<std::deque<Value> > getSeries(boost::shared_ptr<DSMeter> _meter,
                                                     int &_resolution,
-                                                    bool getEnergy,
-                                                    bool energyInWh=true);
+                                                    SeriesTypes _type,
+                                                    bool _energyInWh,
+                                                    DateTime &_startTime,
+                                                    DateTime &_endTime,
+                                                    int &_valueCount);
+    unsigned long getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter);
   }; // Metering
 
   class MeteringConfig {

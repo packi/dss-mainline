@@ -275,13 +275,8 @@ namespace dss {
 
     // set initial meter value from metering subsystem
     if(m_pMetering != NULL) {
-      int resolution = 1;
-      boost::shared_ptr<std::deque<Value> > pSeries = m_pMetering->getSeries(pResult, resolution, false);
-      if(!pSeries->empty()) {
-        pResult->initializeEnergyMeterValue(pSeries->front().getValue());
-      } else {
-        Logger::getInstance()->log("No initial metering value found for meter " + _dsid.toString());
-      }
+      unsigned long lastEnergyCounter = m_pMetering->getLastEnergyCounter(pResult);
+      pResult->initializeEnergyMeterValue(lastEnergyCounter);
     }
 
     return pResult;

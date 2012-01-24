@@ -93,6 +93,15 @@ namespace dss {
           return JS_FALSE;
         }
         iMeter++;
+        ScriptObject objEnergyDelta(*ctx, NULL);
+        objEnergyDelta.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        objEnergyDelta.setProperty<std::string>("type", "energyDelta");
+        childJSVal = OBJECT_TO_JSVAL(objEnergyDelta.getJSObject());
+        res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
+        iMeter++;
         ScriptObject objConsumption(*ctx, NULL);
         objConsumption.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
         objConsumption.setProperty<std::string>("type", "consumption");
@@ -132,6 +141,15 @@ namespace dss {
           resolution.setProperty<std::string>("type", "energy");
           jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
           JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
+          if(!res) {
+            return JS_FALSE;
+          }
+          iResolution++;
+          ScriptObject objEnergyDelta(*ctx, NULL);
+          objEnergyDelta.setProperty<int>("resolution", pChain->getResolution(iConfig));
+          objEnergyDelta.setProperty<std::string>("type", "energyDelta");
+          childJSVal = OBJECT_TO_JSVAL(objEnergyDelta.getJSObject());
+          res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
           if(!res) {
             return JS_FALSE;
           }
@@ -176,6 +194,18 @@ namespace dss {
       if (argc == 4) {
         unit = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
       }
+      DateTime startTime(DateTime::NullDate);
+      DateTime endTime(DateTime::NullDate);
+      int valueCount = 0;
+      if (argc == 5) {
+        startTime = DateTime(ctx->convertTo<int>(JS_ARGV(cx, vp)[4]));
+      }
+      if (argc == 6) {
+        endTime = DateTime(ctx->convertTo<int>(JS_ARGV(cx, vp)[5]));
+      }
+      if (argc == 7) {
+        valueCount = ctx->convertTo<int>(JS_ARGV(cx, vp)[6]);
+      }
 
       boost::shared_ptr<DSMeter> pMeter;
       try {
@@ -190,11 +220,13 @@ namespace dss {
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
       }
-      bool energy;
+      Metering::SeriesTypes energy;
       if(type == "consumption") {
-        energy = false;
+        energy = Metering::etConsumption;
       } else if(type == "energy") {
-        energy = true;
+        energy = Metering::etEnergy;
+      } else if(type == "energyDelta") {
+        energy = Metering::etEnergyDelta;
       } else {
         Logger::getInstance()->log("JS: metering_getValues: Invalid type '" + type + "'", lsError);
         return JS_FALSE;
@@ -209,7 +241,13 @@ namespace dss {
         return JS_FALSE;
       }
 
-      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter, resolution, energy, energyWh);
+      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter,
+                                                                                   resolution,
+                                                                                   energy,
+                                                                                   energyWh,
+                                                                                   startTime,
+                                                                                   endTime,
+                                                                                   valueCount);
       if(NULL == pSeries) {
         JS_ReportWarning(cx, "could not find metering data for %s and resultion %s", type.c_str(), resolution);
         return JS_FALSE;
