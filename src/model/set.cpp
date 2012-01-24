@@ -23,18 +23,7 @@
 #include "set.h"
 
 #include <stdexcept>
-// hash_map,map used by SetSplitter
-#include <map>
-#ifndef WIN32
-#include <ext/hash_map>
-#else
-#include <hash_map>
-#endif
-#ifndef WIN32
-using namespace __gnu_cxx;
-#else
-using namespace stdext;
-#endif
+#include "src/base.h"
 
 #include "src/logger.h"
 #include "src/foreach.h"
@@ -354,7 +343,7 @@ namespace dss {
 
   class SetSplitter {
   public:
-    typedef hash_map<boost::shared_ptr<const Zone>, std::pair< std::vector<Group*>, Set> > FittingResult;
+    typedef HASH_MAP<boost::shared_ptr<const Zone>, std::pair< std::vector<Group*>, Set> > FittingResult;
     typedef std::vector<boost::shared_ptr<AddressableModelItem> > ModelItemVector;
 
     static ModelItemVector splitUp(Set& _set) {

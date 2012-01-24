@@ -110,23 +110,23 @@ class Fixture : public WebFixture {
 public:
 
   void testFunction(const std::string& _functionName) {
-    HashMapConstStringString empty;
+    HashMapStringString empty;
     testFunction(_functionName, _functionName, empty);
   }
 
   void testFunction(const std::string& _functionName, const std::string& _paramName, const std::string& _paramValue) {
-    HashMapConstStringString params;
+    HashMapStringString params;
     params[_paramName] = _paramValue;
     testFunction(_functionName, _functionName + "(" + _paramValue + ")", params);
   }
 
   void testFunction(const std::string& _functionName, const std::string& _paramName, const std::string& _paramValue, const std::string& _resultingFunctionName) {
-    HashMapConstStringString params;
+    HashMapStringString params;
     params[_paramName] = _paramValue;
     testFunction(_functionName, _resultingFunctionName, params);
   }
 private:
-  void testFunction(const std::string& _functionName, const std::string& _functionNameWithParams, const HashMapConstStringString& _params) {
+  void testFunction(const std::string& _functionName, const std::string& _functionNameWithParams, const HashMapStringString& _params) {
     boost::shared_ptr<DeviceInterfaceDummy> dummy(new DeviceInterfaceDummy);
     RestfulRequest req("bla/" + _functionName, _params);
     WebServerResponse response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy);

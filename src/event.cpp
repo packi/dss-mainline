@@ -194,7 +194,7 @@ namespace dss {
   } // isReplacementFor
 
   void Event::applyProperties(const Properties& _others) {
-    const HashMapConstStringString sourceMap = _others.getContainer();
+    const HashMapStringString sourceMap = _others.getContainer();
     typedef const std::pair<const std::string, std::string> tItem;
     foreach(tItem kv, sourceMap) {
       setProperty(kv.first, kv.second);
@@ -279,7 +279,7 @@ namespace dss {
       if(toProcess != NULL) {
 
         log(std::string("Interpreter: got event from queue: '") + toProcess->getName() + "'");
-        for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
+        for(HashMapStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
             iParam != e; ++iParam)
         {
           log("Interpreter: - parameter '" + iParam->first + "' = '" + iParam->second + "'");

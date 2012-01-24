@@ -415,7 +415,7 @@ namespace dss {
   //================================================== Properties
 
   bool Properties::has(const std::string& _key) const {
-    HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
+    HashMapStringString::const_iterator iEntry = m_Container.find(_key);
     return iEntry != m_Container.end();
   } // has
 
@@ -428,7 +428,7 @@ namespace dss {
       throw std::runtime_error(std::string("could not find value for '") + _key + "' in properties");
     } else {
       // not using operator[] here because its non-const
-      HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
+      HashMapStringString::const_iterator iEntry = m_Container.find(_key);
       return iEntry->second;
     }
   } // get
@@ -436,7 +436,7 @@ namespace dss {
   const std::string& Properties::get(const std::string& _key, const std::string& _default) const {
     if(has(_key)) {
       // not using operator[] here because its non-const
-      HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
+      HashMapStringString::const_iterator iEntry = m_Container.find(_key);
       return iEntry->second;
     } else {
       return _default;
@@ -444,7 +444,7 @@ namespace dss {
   } // get(with default)
 
   bool Properties::unset(const std::string& _key) {
-    HashMapConstStringString::iterator iEntry = m_Container.find(_key);
+    HashMapStringString::iterator iEntry = m_Container.find(_key);
     if(iEntry != m_Container.end()) {
       m_Container.erase(iEntry);
       return true;

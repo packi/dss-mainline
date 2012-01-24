@@ -218,8 +218,8 @@ namespace dss {
     mg_write(_connection, tmp.c_str(), tmp.length());
   } // emitHTTPHeader
 
-  HashMapConstStringString parseParameter(const char* _params) {
-    HashMapConstStringString result;
+  HashMapStringString parseParameter(const char* _params) {
+    HashMapStringString result;
     if(_params != NULL) {
       std::vector<std::string> paramList = splitString(_params, '&');
       for(std::vector<std::string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
@@ -282,8 +282,8 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  HashMapConstStringString WebServer::parseCookies(const char* _cookies) {
-      HashMapConstStringString result;
+  HashMapStringString WebServer::parseCookies(const char* _cookies) {
+      HashMapStringString result;
 
       if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
         return result;
@@ -323,10 +323,10 @@ namespace dss {
       return result;
   }
 
-  std::string WebServer::generateCookieString(HashMapConstStringString _cookies) {
+  std::string WebServer::generateCookieString(HashMapStringString _cookies) {
     std::string result = "";
 
-    HashMapConstStringString::iterator i;
+    HashMapStringString::iterator i;
     std::string path;
 
     for (i = _cookies.begin(); i != _cookies.end(); i++) {
@@ -355,9 +355,9 @@ namespace dss {
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
-                               HashMapConstStringString _parameter,
-                               HashMapConstStringString _cookies,
-                               HashMapConstStringString _injectedCookies,
+                               HashMapStringString _parameter,
+                               HashMapStringString _cookies,
+                               HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
     const std::string urlid = "/json/";
 
@@ -456,7 +456,7 @@ namespace dss {
 
     const std::string urlid = "/browse";
     std::string uri = _info->uri;
-    HashMapConstStringString paramMap = parseParameter(_info->query_string);
+    HashMapStringString paramMap = parseParameter(_info->query_string);
 
     std::string path = uri.substr(uri.find(urlid) + urlid.size());
     if(path.empty()) {
@@ -524,9 +524,9 @@ namespace dss {
     WebServer& self = DSS::getInstance()->getWebServer();
     self.m_SessionManager->getSecurity()->signOff();
 
-    HashMapConstStringString paramMap = parseParameter(_info->query_string);
+    HashMapStringString paramMap = parseParameter(_info->query_string);
     const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapConstStringString cookies = self.parseCookies(cookie);
+    HashMapStringString cookies = self.parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
     std::string token = cookies["token"];
@@ -536,7 +536,7 @@ namespace dss {
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
-    HashMapConstStringString injectedCookies;
+    HashMapStringString injectedCookies;
 
     // if we're coming from a trusted port, impersonate that user and start
     // a new session on his behalf

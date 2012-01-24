@@ -243,8 +243,8 @@ namespace dss {
       boost::shared_ptr<JSONObject> evtprops(new JSONObject());
       evtObj->addElement("properties", evtprops);
 
-      const dss::HashMapConstStringString& props =  evt.getProperties().getContainer();
-      for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+      const dss::HashMapStringString& props =  evt.getProperties().getContainer();
+      for(dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         evtprops->addProperty(iParam->first, iParam->second);
       }
     }

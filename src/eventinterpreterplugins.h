@@ -123,7 +123,7 @@ namespace dss {
     void registerSubscription(EventRelayTarget* _pTarget, const std::string& _subscriptionID);
     void removeSubscription(const std::string& _subscriptionID);
   private:
-    HASH_NAMESPACE::hash_map<const std::string, EventRelayTarget*> m_IDTargetMap;
+    HASH_MAP<std::string, EventRelayTarget*> m_IDTargetMap;
   }; // EventInterpreterInternalRelay
 
   class EventInterpreterPluginEmail : public EventInterpreterPlugin {

@@ -198,13 +198,13 @@ namespace dss {
 
   class RestfulRequest {
   public:
-    RestfulRequest(const std::string& _request, const HashMapConstStringString& _parameter)
+    RestfulRequest(const std::string& _request, const HashMapStringString& _parameter)
     : m_Parameter(_parameter)
     {
       splitIntoMethodAndClass(_request);
     }
 
-    RestfulRequest(const std::string& _request, const HashMapConstStringString& _parameter, const HashMapConstStringString& _cookies)
+    RestfulRequest(const std::string& _request, const HashMapStringString& _parameter, const HashMapStringString& _cookies)
     : m_Parameter(_parameter),
       m_Cookies(_cookies)
     {
@@ -221,7 +221,7 @@ namespace dss {
 
     const std::string& getParameter(const std::string& _name) const {
       static const std::string& kEmptyString = "";
-      HashMapConstStringString::const_iterator iEntry = m_Parameter.find(_name);
+      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
       if(iEntry != m_Parameter.end()) {
         return iEntry->second;
       } else {
@@ -230,13 +230,13 @@ namespace dss {
     } // getParameter
 
     bool hasParameter(const std::string& _name) const {
-      HashMapConstStringString::const_iterator iEntry = m_Parameter.find(_name);
+      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
       return iEntry != m_Parameter.end();
     } // hasParameter
 
     const std::string& getCookieValue(const std::string& _name) const {
       static const std::string& kEmptyString = "";
-      HashMapConstStringString::const_iterator iEntry = m_Parameter.find(_name);
+      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
       if(iEntry != m_Parameter.end()) {
         return iEntry->second;
       } else {
@@ -263,8 +263,8 @@ namespace dss {
   private:
     std::string m_Class;
     std::string m_Method;
-    HashMapConstStringString m_Parameter;
-    HashMapConstStringString m_Cookies;
+    HashMapStringString m_Parameter;
+    HashMapStringString m_Cookies;
     boost::function<bool()> m_ActiveCallback;
   };
 

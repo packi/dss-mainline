@@ -1411,8 +1411,8 @@ int dss__EventWaitFor(struct soap *soap, char* _token, int _timeout, std::vector
     dss::Event origEvent = pServices->popEvent(session);
     dss__Event evt;
     evt.name = origEvent.getName();
-    const dss::HashMapConstStringString& props =  origEvent.getProperties().getContainer();
-    for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+    const dss::HashMapStringString& props =  origEvent.getProperties().getContainer();
+    for(dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end();
         iParam != e; ++iParam)
     {
       std::string paramString = iParam->first + "=" + iParam->second;

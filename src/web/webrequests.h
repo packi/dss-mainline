@@ -53,7 +53,7 @@ namespace dss {
       m_Cookies[_key] = _value;
     }
 
-    const HashMapConstStringString& getCookies() const {
+    const HashMapStringString& getCookies() const {
       return m_Cookies;
     }
 
@@ -62,7 +62,7 @@ namespace dss {
     }
   private:
     boost::shared_ptr<JSONObject> m_Response;
-    HashMapConstStringString m_Cookies;
+    HashMapStringString m_Cookies;
   }; // WebServerResponse
 
   class WebServerRequestHandlerJSON : public WebServerRequestHandler {
