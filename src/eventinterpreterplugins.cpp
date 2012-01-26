@@ -35,6 +35,9 @@
 #include "src/scripting/jsproperty.h"
 #include "src/scripting/jssocket.h"
 #include "src/scripting/jslogger.h"
+#if HAVE_CURL
+  #include "src/scripting/jscurl.h"
+#endif
 #include "src/foreach.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
@@ -423,6 +426,11 @@ namespace dss {
 
       ext = new SocketScriptContextExtension();
       m_pEnvironment->addExtension(ext);
+
+#if HAVE_CURL
+      ext = new CurlScriptContextExtension();
+      m_pEnvironment->addExtension(ext);
+#endif
 
       ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
       m_pEnvironment->addExtension(ext);

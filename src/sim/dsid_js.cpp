@@ -20,10 +20,14 @@
 
 */
 
+#include "config.h"
 #include "dsid_js.h"
 #include "src/scripting/jshandler.h"
 #include "src/scripting/jsmodel.h"
 #include "src/scripting/jssocket.h"
+#if HAVE_CURL
+  #include "src/scripting/jscurl.h"
+#endif
 #include "src/scripting/jsproperty.h"
 #include "src/scripting/scriptobject.h"
 #include "src/dss.h"
@@ -411,6 +415,9 @@ namespace dss {
     m_pScriptEnvironment->addExtension(new PropertyScriptExtension(DSS::getInstance()->getPropertySystem()));
     m_pScriptEnvironment->addExtension(new ModelConstantsScriptExtension());
     m_pScriptEnvironment->addExtension(new SocketScriptContextExtension());
+#if HAVE_CURL
+    m_pScriptEnvironment->addExtension(new CurlScriptContextExtension());
+#endif
   } // ctor
 
   DSIDInterface* DSIDJSCreator::createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSMeterSim& _dsMeter) {

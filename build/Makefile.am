@@ -49,7 +49,17 @@ libdsscore_a_CXXFLAGS = \
 			$(LIBXML2_CFLAGS) \
 			$(OPENSSL_CFLAGS) \
 			$(AVAHI_CFLAGS) \
+			$(CURL_CFLAGS) \
 			$(LIBRRD_CFLAGS)
+
+if WITH_CURL
+
+libdsscore_a_SOURCES +=  \
+	$(top_srcdir)/src/scripting/jscurl.cpp \
+	$(top_srcdir)/src/scripting/jscurl.h \
+	$(top_srcdir)/src/scripting/jscurl-constants.h
+
+endif
 
 dss_SOURCES = $(top_srcdir)/main.cpp $(top_srcdir)/namespaces.cpp
 
@@ -73,6 +83,7 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(LIBXML2_LIBS) \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
+			$(CURL_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th
 
 if BUILD_SOAP
@@ -119,6 +130,7 @@ dsstests_LDADD = \
 			$(LIBXML2_LIBS) \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
+			$(CURL_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th
 
 if BUILD_SOAP

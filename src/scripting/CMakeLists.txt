@@ -1,4 +1,4 @@
-add_library(scripting
+SET(SCRIPTING_SRCS
   jshandler.cpp
   scriptobject.cpp
   jsevent.cpp
@@ -8,3 +8,11 @@ add_library(scripting
   jssocket.cpp
   jsmodel.cpp
 )
+
+if (CURL_FOUND)
+  SET(SCRIPTING_SRCS ${SCRIPTING_SRCS}
+  jscurl.cpp
+)
+endif (CURL_FOUND)
+
+add_library(scripting ${SCRIPTING_SRCS})

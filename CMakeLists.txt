@@ -167,6 +167,13 @@ find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 set(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
 
+# check for libcurl
+find_package(CURL)
+if (CURL_FOUND)
+  include_directories(${CURL_INCLUDE_DIR})
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} ${CURL_LIBRARIES})
+endif (CURL_FOUND)
+
 # sendmail
 find_program(SENDMAIL sendmail)
 if(SENDMAIL)
