@@ -253,7 +253,7 @@ static const unsigned long kRRDHeaderSize = 2220;
 
     unsigned long lastEnergyCounter = 0;
     for (unsigned int i = 0; i < dscount; ++i) {
-      if (i == 1) {
+      if (strcmp(names[i], "energy") == 0) {
         lastEnergyCounter = strToUIntDef(data[i], 0);
       }
       rrd_freemem(names[i]);
@@ -346,7 +346,13 @@ static const unsigned long kRRDHeaderSize = 2220;
     lines.push_back("3000");
     {
       std::stringstream sstream;
-      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << ((_type == etConsumption) ? "power" : "energy") << ":AVERAGE";
+      sstream << "DEF:data=" << rrdFileName.get()->c_str();
+      if ((_type == etConsumption) && (step == 1)) {
+        sstream << ":power";
+      } else {
+        sstream << ":energy";
+      }
+      sstream << ":AVERAGE";
       lines.push_back(sstream.str());
     }
     lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
