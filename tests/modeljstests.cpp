@@ -921,6 +921,45 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   BOOST_CHECK_EQUAL(num, 599);
 } // testPropertyGetValues
 
+BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
+  Apartment apt(NULL);
+  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+  Metering metering(NULL);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new MeteringScriptExtension(apt, metering);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  int num = ctx->evaluate<int>("Metering.getValues('13',"
+                               "                   'energy',"
+                               "                   1,"
+                               "                   'Ws').length");
+  BOOST_CHECK_EQUAL(num, 599);
+} // testPropertyGetValues
+
+BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
+  Apartment apt(NULL);
+  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+  Metering metering(NULL);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new MeteringScriptExtension(apt, metering);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  int num = ctx->evaluate<int>("Metering.getValues('13',"
+                               "                   'energy',"
+                               "                   1,"
+                               "                   'Wh',"
+                               "                   0,"
+                               "                   0,"
+                               "                   10).length");
+  BOOST_CHECK_EQUAL(num, 9);
+} // testPropertyGetValues
+
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   Apartment apt(NULL);
   apt.allocateDSMeter(dss_dsid_t(0,0x13));
