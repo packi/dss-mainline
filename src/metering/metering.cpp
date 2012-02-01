@@ -47,7 +47,7 @@
 
 namespace dss {
 
-static const unsigned long kRRDHeaderSize = 1508;
+static const unsigned long kRRDHeaderSize = 2220;
   //================================================== Metering
 
   Metering::Metering(DSS* _pDSS)
@@ -149,6 +149,7 @@ static const unsigned long kRRDHeaderSize = 1508;
         log("Creating new RRD database.", lsWarning);
         /* create new DB */
         std::vector<std::string> lines;
+        lines.push_back("DS:power:GAUGE:5:0:4500");
         lines.push_back("DS:energy:DERIVE:5:0:U");
         MeteringConfigChain *chain = _pChain.get();
         for (int i = 0; i < chain->size(); ++i) {
@@ -182,6 +183,7 @@ static const unsigned long kRRDHeaderSize = 1508;
   } // getOrCreateCachedSeries
 
   void Metering::postMeteringEvent(boost::shared_ptr<DSMeter> _meter,
+                                   int _valuePower,
                                    int _valueEnergy,
                                    DateTime _sampledAt) {
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
@@ -195,7 +197,7 @@ static const unsigned long kRRDHeaderSize = 1508;
     lines.push_back(rrdFileName.get()->c_str());
     {
       std::stringstream sstream;
-      sstream << _sampledAt.secondsSinceEpoch() << ":" << _valueEnergy;
+      sstream << _sampledAt.secondsSinceEpoch() << ":" << _valuePower << ":" << _valueEnergy;
       lines.push_back(sstream.str());
     }
     std::vector<const char*> starts;
@@ -344,7 +346,7 @@ static const unsigned long kRRDHeaderSize = 1508;
     lines.push_back("3000");
     {
       std::stringstream sstream;
-      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":energy:AVERAGE";
+      sstream << "DEF:data=" << rrdFileName.get()->c_str() << ":" << ((_type == etConsumption) ? "power" : "energy") << ":AVERAGE";
       lines.push_back(sstream.str());
     }
     lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
