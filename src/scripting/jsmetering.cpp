@@ -191,19 +191,19 @@ namespace dss {
       std::string type = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
       int resolution = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
       std::string unit = "Wh";
-      if (argc == 4) {
+      if (argc >= 4) {
         unit = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
       }
       DateTime startTime(DateTime::NullDate);
       DateTime endTime(DateTime::NullDate);
       int valueCount = 0;
-      if (argc == 5) {
+      if (argc >= 5) {
         startTime = DateTime(ctx->convertTo<int>(JS_ARGV(cx, vp)[4]));
       }
-      if (argc == 6) {
+      if (argc >= 6) {
         endTime = DateTime(ctx->convertTo<int>(JS_ARGV(cx, vp)[5]));
       }
-      if (argc == 7) {
+      if (argc >= 7) {
         valueCount = ctx->convertTo<int>(JS_ARGV(cx, vp)[6]);
       }
 
