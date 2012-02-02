@@ -41,13 +41,14 @@
 
 #include <rrd.h>
 
+#include <sys/types.h>
+#include <regex.h>
+
 #ifdef LOG_TIMING
   #include <sstream>
 #endif
 
 namespace dss {
-
-static const unsigned long kRRDHeaderSize = 2220;
   //================================================== Metering
 
   Metering::Metering(DSS* _pDSS)
@@ -122,30 +123,50 @@ static const unsigned long kRRDHeaderSize = 2220;
   boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
-      bool rrdPresent = false;
+      int rrdMatchCount = 0;
       std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
       if (rrdInfo != 0) {
+        regex_t rraRowRegex;
+        int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
+        if (regCompErr != 0) {
+          int errSize = regerror(regCompErr, &rraRowRegex, 0, 0);
+          char *errString = new char(errSize);
+          regerror(regCompErr, &rraRowRegex, errString, errSize);
+          log(errString, lsError);
+          free(errString);
+        }
+        rrd_info_t *rrdInfoOrig = rrdInfo;
         log("RRD DB present");
         /* check DB contents */
         while (rrdInfo != NULL) {
-          if ((rrdInfo->type == RD_I_CNT) && (strcmp(rrdInfo->key, "header_size") == 0)) {
-            unsigned long headerSize = rrdInfo->value.u_cnt;
-            log("RRD Header Size: " + intToString(headerSize));
-            if (headerSize == kRRDHeaderSize) {
-              rrdPresent = true;
-              log("RRD Header Size matches!");
-              break;
+          if (((strcmp(rrdInfo->key, "ds[power].index") == 0) &&
+               (rrdInfo->type == RD_I_CNT) &&
+               (rrdInfo->value.u_cnt == 0)) ||
+              ((strcmp(rrdInfo->key, "ds[energy].index") == 0) &&
+               (rrdInfo->type == RD_I_CNT) &&
+               (rrdInfo->value.u_cnt == 1))) {
+            rrdMatchCount++;
+          } else {
+            regmatch_t subMatch[2];
+            if (regexec(&rraRowRegex, rrdInfo->key, 2, subMatch, 0) == 0) {
+              std::string key(rrdInfo->key);
+              int index = strToInt(key.substr(subMatch[1].rm_so, subMatch[1].rm_eo - subMatch[1].rm_so));
+              if (static_cast<int>(rrdInfo->value.u_cnt) == _pChain->getNumberOfValues(index)) {
+                rrdMatchCount++;
+              }
             }
           }
           rrdInfo = rrdInfo->next;
         }
-        rrd_info_free(rrdInfo);
+        rrd_info_free(rrdInfoOrig);
+        regfree(&rraRowRegex);
       }
+      log("RRD MatchCount: " + intToString(rrdMatchCount));
 
-      if (!rrdPresent) {
+      if (rrdMatchCount != (2 + _pChain->size())) {
         log("Creating new RRD database.", lsWarning);
         /* create new DB */
         std::vector<std::string> lines;
