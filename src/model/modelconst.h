@@ -100,6 +100,25 @@ namespace dss {
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
+  // Click type constants for devices
+  const uint8_t ClickType1T = 0x00;     // Tipp 1
+  const uint8_t ClickType2T = 0x01;     // Tipp 2
+  const uint8_t ClickType3T = 0x02;     // Tipp 3
+  const uint8_t ClickType4T = 0x03;     // Tipp 4
+  const uint8_t ClickTypeHS = 0x04;     // Hold Start
+  const uint8_t ClickTypeHR = 0x05;     // Hold Repeat
+  const uint8_t ClickTypeHE = 0x06;     // Hold End
+  const uint8_t ClickType1C = 0x07;     // Single Click
+  const uint8_t ClickType2C = 0x08;     // Double Click
+  const uint8_t ClickType3C = 0x09;     // Triple Click
+  const uint8_t ClickType1P = 0x0a;     // Short-Long Click
+  const uint8_t ClickTypeL0 = 0x0b;     // Local-On Click
+  const uint8_t ClickTypeL1 = 0x0c;     // Local-Off Click
+  const uint8_t ClickType2P = 0x0d;     // Short-Short-Long Click
+  const uint8_t ClickTypeLS = 0x0e;     // Local-Stop Click
+  const uint8_t ClickTypeRES = 0x0f;
+
+  // Group ID's
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
   const int GroupIDGray = 2;
@@ -111,6 +130,11 @@ namespace dss {
   const int GroupIDBlack = 8;
   const int GroupIDWhite = 9;
   const int GroupIDDisplay = 10;
+  const int GroupIDReserved1 = 11;
+  const int GroupIDReserved2 = 12;
+  const int GroupIDReserved3 = 13;
+  const int GroupIDReserved4 = 14;
+  const int GroupIDReserved5 = 15;
   const int GroupIDStandardMax = 15;
   const int GroupIDUserGroupStart = GroupIDStandardMax + 1;
   const int GroupIDMax = 63;
