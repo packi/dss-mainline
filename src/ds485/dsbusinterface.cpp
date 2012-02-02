@@ -310,6 +310,12 @@ namespace dss {
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_DEVICE_LOCAL_ACTION, 0, &callback_struct);
 
+      EventDeviceAction_event_callback_t deviceActionCallback = DSBusInterface::handleDeviceActionCallback;
+      callback_struct.function = (void*)deviceActionCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DEVICE_ACTION, 0, &callback_struct);
+
       DeviceActionRequest_action_call_scene_request_callback_t deviceCallSceneCallback = DSBusInterface::handleDeviceCallSceneCallback;
       callback_struct.function = (void*)deviceCallSceneCallback;
       callback_struct.arg = this;
@@ -589,9 +595,9 @@ namespace dss {
                                                               nameStr);
   } // handleDsmSetNameCallback
 
-  void DSBusInterface::handleDeviceLocalAction(dsid_t _sourceID, uint16_t _deviceID, uint8_t _state) {
+  void DSBusInterface::handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state) {
     dss_dsid_t dsmDSID;
-    dsid_helper::toDssDsid(_sourceID, dsmDSID);
+    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
     pEvent->addParameter(_deviceID);
     if(_state == 0) {
@@ -609,10 +615,28 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleDeviceLocalAction(_sourceID, _deviceID, _state);
   }
 
-  void DSBusInterface::handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID,
+  void DSBusInterface::handleDeviceAction(dsid_t _dsMeterID, uint16_t _deviceID,
+                                          uint8_t _buttonNr, uint8_t _clickType) {
+    dss_dsid_t dsmDSID;
+    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etButtonClickDevice, dsmDSID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_buttonNr);
+    pEvent->addParameter(_clickType);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
+
+  void DSBusInterface::handleDeviceActionCallback(uint8_t _errorCode, void* _userData,
+                                                       dsid_t _sourceID, dsid_t _destinationID,
+                                                       uint16_t _deviceID, uint16_t _zoneID, uint8_t _groupID,
+                                                       uint8_t _buttonNr, uint8_t _clickType) {
+    static_cast<DSBusInterface*>(_userData)->handleDeviceAction(_sourceID, _deviceID, _buttonNr, _clickType);
+  }
+
+  void DSBusInterface::handleDeviceCallScene(dsid_t _dsMeterID, uint16_t _deviceID,
                                              uint8_t _sceneID, bool _forced) {
     dss_dsid_t dsmDSID;
-    dsid_helper::toDssDsid(_destinationID, dsmDSID);
+    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_sceneID);
