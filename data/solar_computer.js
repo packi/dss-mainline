@@ -344,14 +344,14 @@ function SunCalc() {
         return rmsCheck(rms.set,rms.rise);
     };
 
-    this.compute_current_date = function(lat,lng,year,month,day,tz) {
+    this.compute_current_date = function(lat,lng,year,month,day,tz,atcr) {
         var jd = this.mdy_jd(year,month,day,0,0,0);
         var sp = new this.sunRTS();
         var rms = new this.sunRTS();
 
         sp = this.calcsun(jd,0,0,0,tz);
 
-        rms = this.rmstime(jd,lat,lng,tz,this.SUNSET,sp.lng,sp.lat);
+        rms = this.rmstime(jd,lat,lng,tz,atcr,sp.lng,sp.lat);
         var sunrise = this.dt_hms(rms.rise,false,false);
         var sunset = this.dt_hms(rms.set,false,false);
         return { "sunrise": sunrise, "sunset": sunset };
@@ -376,6 +376,10 @@ function pad(n)
 
 function update() {
     var suncalc = new SunCalc();
+    var twilights = [{"type": suncalc.SUNSET, "morning": "sunrise", "evening": "sunset"},
+                     {"type": suncalc.CIVIL, "morning": "civil_dawn", "evening": "civil_dusk"},
+                     {"type": suncalc.NAUTICAL, "morning": "nautical_dawn", "evening": "nautical_dusk"},
+                     {"type": suncalc.ASTRONOMICAL, "morning": "astronomical_dawn", "evening": "astronomical_dusk"}];
     var latitude = parseFloat(Property.getProperty('/config/geodata/latitude'), 10);
     var longitude = parseFloat(Property.getProperty('/config/geodata/longitude'), 10);
     longitude = -longitude;
@@ -384,24 +388,26 @@ function update() {
     var gmt = -now.getTimezoneOffset()/60;
 
     if ((latitude !== null) && (longitude !== null)) {
-        var solar = suncalc.compute_current_date(latitude,
-                                                 longitude,
-                                                 now.getFullYear(),
-                                                 now.getMonth() + 1,
-                                                 now.getDate(),
-                                                 gmt);
+        for (var twilightType = 0; twilightType < twilights.length; twilightType++) {
+            var solar = suncalc.compute_current_date(latitude,
+                                                     longitude,
+                                                     now.getFullYear(),
+                                                     now.getMonth() + 1,
+                                                     now.getDate(),
+                                                     gmt,
+                                                     twilights[twilightType].type);
 
-        print("Calculated solar times for location " + latitude + "/" + longitude + ":");
-        for (key in solar) {
-            print(" solar." + key + " = " + solar[key]);
-        }
+            print("Calculated solar times (" + twilights[twilightType].type + "°) for location " + latitude + "/" + longitude + ":");
+            print(twilights[twilightType].morning + ": " + solar.sunrise);
+            print(twilights[twilightType].evening + ": " + solar.sunset);
 
-        // special handling for possible return value from solar calculator
-        if ((solar.sunrise !== "[Above]") && (solar.sunrise !== "[Below]") &&
-            (solar.sunset !== "[Above]") && (solar.sunset !== "[Below]")) {
+            // special handling for possible return value from solar calculator
+            if ((solar.sunrise !== "[Above]") && (solar.sunrise !== "[Below]") &&
+                (solar.sunset !== "[Above]") && (solar.sunset !== "[Below]")) {
 
-            Property.setProperty('/config/geodata/sunrise', solar.sunrise);
-            Property.setProperty('/config/geodata/sunset', solar.sunset);
+                Property.setProperty('/config/geodata/' + twilights[twilightType].morning, solar.sunrise);
+                Property.setProperty('/config/geodata/' + twilights[twilightType].evening, solar.sunset);
+            }
         }
     }
 };
