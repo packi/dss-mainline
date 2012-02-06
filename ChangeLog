@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.5.1 06.02.2012
+    * better RRD detection on startup, avoids generation of new rrd file
+      on each startup
+    * correctly handle optional getValues() parameters
+    * store power series in RRD, use power series only for seconds intervall
+
 v1.5.0 31.01.2012
     * added js scripting interface to libcurl (#1279)
       added scripting module with a http prototype object
