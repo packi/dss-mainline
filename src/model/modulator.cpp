@@ -38,6 +38,7 @@ namespace dss {
   : m_DSID(_dsid),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
+    m_EnergyMeterValueWh(0),
     m_LastReportedEnergyMeterValue(0),
     m_ReceivedMeterValue(false),
     m_HardwareVersion(0),
@@ -62,6 +63,8 @@ namespace dss {
       m_pPropertyNode->createProperty("powerConsumptionAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("energyMeterValue")
+        ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValueWh, false));
+      m_pPropertyNode->createProperty("energyMeterValueWs")
         ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValue, false));
       m_pPropertyNode->createProperty("energyMeterAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
@@ -148,6 +151,7 @@ namespace dss {
       // Do nothing, the first value is just to set a baseline
     } else if(_value >= m_LastReportedEnergyMeterValue) {
       m_EnergyMeterValue += _value - m_LastReportedEnergyMeterValue;
+      m_EnergyMeterValueWh = m_EnergyMeterValue / 3600;
     }
     m_ReceivedMeterValue = true;
     m_LastReportedEnergyMeterValue = _value;
@@ -156,6 +160,7 @@ namespace dss {
 
   void DSMeter::initializeEnergyMeterValue(unsigned long _value) {
     m_EnergyMeterValue = _value;
+    m_EnergyMeterValueWh = _value / 3600;
   } // initializeEnergyMeterValue
 
   unsigned long DSMeter::getCachedPowerConsumption() {
