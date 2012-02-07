@@ -38,28 +38,22 @@ namespace dss {
   class Metering;
   class StructureQueryBusInterface;
 
-  class ModelSceneEvent {
+  class ModelDeferredEvent {
   public:
     static const int kModelSceneTimeout = 2;
   private:
     dss_dsid_t m_Source;
     time_t m_Timestamp;
-    int m_ZoneID;
-    int m_GroupID;
-    int m_SceneID;
     bool m_IsCalled;
   public:
-    /** Constructs a ModelSceneEvent with timestamp */
-    ModelSceneEvent(dss_dsid_t _source, int _zoneID, int _groupID, int _sceneID) :
-      m_Source(_source), m_ZoneID(_zoneID), m_GroupID(_groupID), m_SceneID(_sceneID), m_IsCalled(false)
+    /** Constructs a ModelDeferredEvent with timestamp */
+    ModelDeferredEvent(dss_dsid_t _source) : m_Source(_source), m_IsCalled(false)
     {
       setTimestamp();
     }
-    dss_dsid_t getSource() { return m_Source; }
-    int getSceneID() { return m_SceneID; }
-    int getGroupID() { return m_GroupID; }
-    int getZoneID() { return m_ZoneID; }
+    virtual ~ModelDeferredEvent() {}
 
+    dss_dsid_t getSource() { return m_Source; }
     bool isOriginMyself() { return m_Source.lower == 0 && m_Source.upper == 0; }
     bool isDue() { time_t now = time(NULL); return (now - m_Timestamp >= kModelSceneTimeout); }
     bool isCalled() { return m_IsCalled; }
@@ -67,9 +61,46 @@ namespace dss {
     void setTimestamp() { m_Timestamp = time(NULL); }
     void clearTimestamp() { m_Timestamp = 0; }
     void setCalled() { m_IsCalled = true; }
-    void setScene(int _sceneID) { m_SceneID = _sceneID; setTimestamp(); }
+  };
 
-    virtual ~ModelSceneEvent() { }
+  class ModelDeferredSceneEvent : public ModelDeferredEvent {
+  private:
+    int m_ZoneID;
+    int m_GroupID;
+    int m_SceneID;
+  public:
+    /** Constructs a ModelDeferredSceneEvent with timestamp */
+    ModelDeferredSceneEvent(dss_dsid_t _source, int _zoneID, int _groupID, int _sceneID) :
+      ModelDeferredEvent(_source), m_ZoneID(_zoneID), m_GroupID(_groupID), m_SceneID(_sceneID)
+    {}
+    virtual ~ModelDeferredSceneEvent() {}
+
+    int getSceneID() { return m_SceneID; }
+    int getGroupID() { return m_GroupID; }
+    int getZoneID() { return m_ZoneID; }
+    void setScene(int _sceneID) { m_SceneID = _sceneID; setTimestamp(); }
+  };
+
+  class ModelDeferredButtonEvent : public ModelDeferredEvent {
+  private:
+    int m_DeviceID;
+    int m_ButtonIndex;
+    int m_ClickType;
+    int m_HoldTime;
+  public:
+    /** Constructs a ModelDeferredButtonEvent with timestamp */
+    ModelDeferredButtonEvent(dss_dsid_t _source, int _deviceID, int _buttonIndex, int _clickType) :
+      ModelDeferredEvent(_source),
+      m_DeviceID(_deviceID), m_ButtonIndex(_buttonIndex), m_ClickType(_clickType), m_HoldTime(0)
+    {}
+    virtual ~ModelDeferredButtonEvent() {}
+
+    int getDeviceID() { return m_DeviceID; }
+    int getButtonIndex() { return m_ButtonIndex; }
+    int getClickType() { return m_ClickType; }
+    int getRepeatCount() { return m_HoldTime; }
+    void setClickType(int _clickType) { m_ClickType = _clickType; setTimestamp(); }
+    void incRepeatCount() { m_HoldTime ++; }
   };
 
   class ModelMaintenance : public ThreadedSubsystem {
@@ -88,7 +119,6 @@ namespace dss {
     virtual void execute();
 
     void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
-    void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _sceneID);
 
     void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
                              const std::string& _name);
@@ -114,6 +144,11 @@ namespace dss {
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
     void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID);
+    void onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType);
+
+    void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _sceneID);
+    void onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType);
+
     void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onLostDSMeter(const dss_dsid_t& _dsMeterID);
@@ -132,7 +167,7 @@ namespace dss {
     const int m_EventTimeoutMS;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
 
-    std::list<boost::shared_ptr<ModelSceneEvent> > m_DeferredEvents;
+    std::list<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents;
 
     void checkConfigFile(boost::filesystem::path _filename);
   }; // ModelMaintenance

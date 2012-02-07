@@ -223,51 +223,88 @@ namespace dss {
       return false;
     }
 
-    std::list<boost::shared_ptr<ModelSceneEvent> > mDefEvents(m_DeferredEvents);
+    std::list<boost::shared_ptr<ModelDeferredEvent> > mDefEvents(m_DeferredEvents);
     m_DeferredEvents.clear();
-    for(std::list<boost::shared_ptr<ModelSceneEvent> >::iterator mEvent = mDefEvents.begin();
-        mEvent != mDefEvents.end();
-        mEvent++)
+    for(std::list<boost::shared_ptr<ModelDeferredEvent> >::iterator evt = mDefEvents.begin();
+        evt != mDefEvents.end();
+        evt++)
     {
-      int sceneID = (*mEvent)->getSceneID();
-      int groupID = (*mEvent)->getGroupID();
-      int zoneID = (*mEvent)->getZoneID();
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (*evt);
+      if (mEvent != NULL) {
+        int sceneID = mEvent->getSceneID();
+        int groupID = mEvent->getGroupID();
+        int zoneID = mEvent->getZoneID();
 
-      try {
-        boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
-        boost::shared_ptr<Group> group = zone->getGroup(groupID);
+        try {
+          boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
+          boost::shared_ptr<Group> group = zone->getGroup(groupID);
 
-        if ((*mEvent)->isDue()) {
-          if (! ((*mEvent)->isCalled())) {
-            boost::shared_ptr<Event> pEvent;
-            pEvent.reset(new Event("callScene", group));
-            pEvent->setProperty("sceneID", intToString(sceneID));
-            pEvent->setProperty("groupID", intToString(groupID));
-            pEvent->setProperty("zoneID", intToString(zoneID));
-            raiseEvent(pEvent);
+          if (mEvent->isDue()) {
+            if (! (mEvent->isCalled())) {
+              boost::shared_ptr<Event> pEvent;
+              pEvent.reset(new Event("callScene", group));
+              pEvent->setProperty("sceneID", intToString(sceneID));
+              pEvent->setProperty("groupID", intToString(groupID));
+              pEvent->setProperty("zoneID", intToString(zoneID));
+              raiseEvent(pEvent);
+            }
+            // finished deferred processing of this event
+          } else if (SceneHelper::isDimSequence(sceneID)) {
+            if (! (mEvent->isCalled())) {
+              boost::shared_ptr<Event> pEvent;
+              pEvent.reset(new Event("callScene", group));
+              pEvent->setProperty("sceneID", intToString(sceneID));
+              pEvent->setProperty("groupID", intToString(groupID));
+              pEvent->setProperty("zoneID", intToString(zoneID));
+              raiseEvent(pEvent);
+              mEvent->setCalled();
+            }
+            m_DeferredEvents.push_back(mEvent);
+          } else {
+            m_DeferredEvents.push_back(mEvent);
           }
-          // finished deferred processing of this event
-        } else if (SceneHelper::isDimSequence(sceneID)) {
-          if (! ((*mEvent)->isCalled())) {
-            boost::shared_ptr<Event> pEvent;
-            pEvent.reset(new Event("callScene", group));
-            pEvent->setProperty("sceneID", intToString(sceneID));
-            pEvent->setProperty("groupID", intToString(groupID));
-            pEvent->setProperty("zoneID", intToString(zoneID));
-            raiseEvent(pEvent);
-            (*mEvent)->setCalled();
-          }
-          m_DeferredEvents.push_back(*mEvent);
-        } else {
-          m_DeferredEvents.push_back(*mEvent);
+
+        } catch(ItemNotFoundException& e) {
+          log("handleDeferredModelEvents: Could not find group/zone with id "
+              + intToString(groupID) + "/" + intToString(zoneID), lsError);
+        } catch(SecurityException& e) {
+          log("handleDeferredModelEvents: security error accessing group/zone with id "
+              + intToString(groupID) + "/" + intToString(zoneID), lsError);
         }
+        continue;
+      }
 
-      } catch(ItemNotFoundException& e) {
-        log("handleDeferredModelEvents: Could not find group/zone with id "
-            + intToString(groupID) + "/" + intToString(zoneID), lsError);
-      } catch(SecurityException& e) {
-        log("handleDeferredModelEvents: security error accessing group/zone with id "
-            + intToString(groupID) + "/" + intToString(zoneID), lsError);
+      boost::shared_ptr<ModelDeferredButtonEvent> bEvent = boost::dynamic_pointer_cast <ModelDeferredButtonEvent> (*evt);
+      if (bEvent != NULL) {
+        int deviceID = bEvent->getDeviceID();
+        int buttonIndex = bEvent->getButtonIndex();
+        int clickType = bEvent->getClickType();
+
+        try {
+          DeviceReference devRef = m_pApartment->getDevices().getByBusID(deviceID, bEvent->getSource());
+          boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+
+          if (bEvent->isDue() || (clickType == ClickTypeHE)) {
+            boost::shared_ptr<Event> event(new Event("buttonClick", pDevRev));
+            event->setProperty("clickType", intToString(clickType));
+            event->setProperty("buttonIndex", intToString(buttonIndex));
+            if (bEvent->getRepeatCount() > 0) {
+              event->setProperty("holdCount", intToString(bEvent->getRepeatCount()));
+            }
+            raiseEvent(event);
+            // finished deferred processing of this event
+          } else {
+            m_DeferredEvents.push_back(bEvent);
+          }
+
+        } catch(ItemNotFoundException& e) {
+          log("handleDeferredModelEvents: Could not find device with dsid "
+              + bEvent->getSource().toString(), lsError);
+        } catch(SecurityException& e) {
+          log("handleDeferredModelEvents: security error accessing device with dsid "
+              + bEvent->getSource().toString(), lsError);
+        }
+        continue;
       }
     }
     mDefEvents.clear();
@@ -320,6 +357,15 @@ namespace dss {
           log("Expected exactly 2 parameter for ModelEvent::etCallSceneDevice");
         } else {
           onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+        }
+        break;
+      case ModelEvent::etButtonClickDevice:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 3) {
+          log("Expected exactly 3 parameter for ModelEvent::etButtonClickDevice");
+        } else {
+          onDeviceActionEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          onDeviceActionFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
         }
         break;
       case ModelEvent::etCallSceneGroup:
@@ -604,13 +650,17 @@ namespace dss {
           ", Gruppe=" + intToString(_groupID) +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
-      boost::shared_ptr<ModelSceneEvent> mEvent(new ModelSceneEvent(_source, _zoneID, _groupID, _sceneID));
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _sceneID));
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
       return;
     }
 
-    foreach(boost::shared_ptr<ModelSceneEvent> pEvent, m_DeferredEvents) {
+    foreach(boost::shared_ptr<ModelDeferredEvent> evt, m_DeferredEvents) {
+      boost::shared_ptr<ModelDeferredSceneEvent> pEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
+      if (pEvent == NULL) {
+        continue;
+      }
       if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
         if (pEvent->getSource() == _source) {
           // dimming, adjust the old event's timestamp to keep it active
@@ -691,9 +741,99 @@ namespace dss {
         ", Group=" + intToString(_groupID) +
         ", Scene=" + intToString(_sceneID), lsDebug);
 
-    boost::shared_ptr<ModelSceneEvent> mEvent(new ModelSceneEvent(_source, _zoneID, _groupID, _sceneID));
+    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _sceneID));
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
+
+  void ModelMaintenance::onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType) {
+
+    // Filter Strategy:
+    // Check for Source != 0 and per DeviceID
+    // - delayed Tipp processing, for 1T..4T
+    // - generate final hold event after HE
+
+    bool passThrough = false;
+
+    // do not filter calls from myself
+    if (_source.lower == 0 && _source.upper == 0) {
+      passThrough = true;
+    }
+
+    if (passThrough) {
+      log("DeviceActionFilter: pass through, from source " + _source.toString() +
+          ": deviceID=" + intToString(_deviceID) +
+          ": buttonIndex=" + intToString(_buttonNr) +
+          ", clickType=" + intToString(_clickType), lsDebug);
+
+      boost::shared_ptr<ModelDeferredButtonEvent> mEvent(new ModelDeferredButtonEvent(_source, _deviceID, _buttonNr, _clickType));
+      mEvent->clearTimestamp();  // force immediate event processing
+      m_DeferredEvents.push_back(mEvent);
+      return;
+    }
+
+    foreach(boost::shared_ptr<ModelDeferredEvent> evt, m_DeferredEvents) {
+      boost::shared_ptr<ModelDeferredButtonEvent> pEvent = boost::dynamic_pointer_cast <ModelDeferredButtonEvent> (evt);
+      if (pEvent == NULL) {
+        continue;
+      }
+      if ((pEvent->getDeviceID() == _deviceID) && (pEvent->getButtonIndex() == _buttonNr) && (pEvent->getSource() == _source)) {
+        // holding, adjust the old event's timestamp to keep it active
+        if ((_clickType == ClickTypeHR) &&
+            ((pEvent->getClickType() == ClickTypeHS) || (pEvent->getClickType() == ClickTypeHR))) {
+
+          log("ActionDeviceFilter: hold repeat, update ClickType from " + intToString(pEvent->getClickType()) +
+              " to clickType=" + intToString(_clickType));
+
+          pEvent->setTimestamp();
+          pEvent->incRepeatCount();
+          pEvent->setClickType(_clickType);
+          return;
+        }
+        if ((_clickType == ClickTypeHE) &&
+            ((pEvent->getClickType() == ClickTypeHR) || (pEvent->getClickType() == ClickTypeHS)))  {
+
+          log("ActionDeviceFilter: hold end, update ClickType from " + intToString(pEvent->getClickType()) +
+              " to clickType=" + intToString(_clickType));
+
+          pEvent->incRepeatCount();
+          pEvent->setClickType(_clickType);
+          return;
+        }
+        // going through 1T..4T
+        if (((pEvent->getClickType() == ClickType1T) && (_clickType == ClickType2T)) ||
+            ((pEvent->getClickType() == ClickType2T) && (_clickType == ClickType3T)) ||
+            ((pEvent->getClickType() == ClickType3T) && (_clickType == ClickType4T))) {
+
+          log("ActionDeviceFilter: update ClickType from " + intToString(pEvent->getClickType()) +
+              " to clickType=" + intToString(_clickType));
+
+          pEvent->setClickType(_clickType);
+          return;
+        }
+        // going through 1C..3C/3T..4T
+        if (((pEvent->getClickType() == ClickType1C) && (_clickType == ClickType3C)) ||
+            ((pEvent->getClickType() == ClickType2C) && (_clickType == ClickType3C)) ||
+            ((pEvent->getClickType() == ClickType1C) && (_clickType == ClickType2T)) ||
+            ((pEvent->getClickType() == ClickType1C) && (_clickType == ClickType3T)) ||
+            ((pEvent->getClickType() == ClickType2C) && (_clickType == ClickType3T)) ||
+            ((pEvent->getClickType() == ClickType3C) && (_clickType == ClickType4T))) {
+
+          log("ActionDeviceFilter: update ClickType from " + intToString(pEvent->getClickType()) +
+              " to clickType=" + intToString(_clickType));
+
+          pEvent->setClickType(_clickType);
+          return;
+        }
+      }
+    }
+
+    log("DeviceActionFilter: deferred processing, from source " + _source.toString() + "/" + intToString(_deviceID) +
+        ": buttonIndex=" + intToString(_buttonNr) +
+        ", clickType=" + intToString(_clickType), lsDebug);
+
+    boost::shared_ptr<ModelDeferredButtonEvent> mEvent(new ModelDeferredButtonEvent(_source, _deviceID, _buttonNr, _clickType));
+    m_DeferredEvents.push_back(mEvent);
+  } // onDeviceActionFiltered
 
   void ModelMaintenance::onDeviceNameChanged(dss_dsid_t _meterID,
                                              const devid_t _deviceID,
@@ -748,6 +888,26 @@ namespace dss {
       log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
     }
   } // onDeviceCallScene
+
+  void ModelMaintenance::onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType) {
+    try {
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      log("onDeviceActionEvent: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) +
+          "' button: " + intToString(_buttonNr) + ", click: " + intToString(_clickType));
+      try {
+        DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
+        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+        boost::shared_ptr<Event> event(new Event("buttonClickBus", pDevRev));
+        event->setProperty("clickType", intToString(_clickType));
+        event->setProperty("buttonIndex", intToString(_buttonNr));
+        raiseEvent(event);
+      } catch(ItemNotFoundException& e) {
+        log("onDeviceActionEvent: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString(), lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onDeviceActionEvent: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
+    }
+  } // onDeviceActionEvent
 
   void ModelMaintenance::onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("New Device found");
