@@ -117,11 +117,18 @@ namespace dss {
     static void handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                uint8_t _sceneID);
-    void handleDeviceLocalAction(dsid_t _sourceID, uint16_t _deviceID, uint8_t _state);
+
+    void handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state);
     static void handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,
                                         dsid_t _sourceID, dsid_t _destinationID,
                                         uint16_t _deviceID, uint16_t _zoneID,
                                         uint8_t _state);
+
+    void handleDeviceAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _buttonNr, uint8_t _clickType);
+    static void handleDeviceActionCallback(uint8_t _errorCode, void* _userData,
+                                        dsid_t _sourceID, dsid_t _destinationID,
+                                        uint16_t _deviceID, uint16_t _zoneID, uint8_t _groupID,
+                                        uint8_t _buttonNr, uint8_t _clickType);
 
     void handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID, bool _forced);
     static void handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
