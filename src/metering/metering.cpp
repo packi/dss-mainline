@@ -123,6 +123,7 @@ namespace dss {
   boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
+      bool tunePowerMaxSetting = false;
       int rrdMatchCount = 0;
       std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
 
@@ -159,6 +160,11 @@ namespace dss {
               }
             }
           }
+          if ((strcmp(rrdInfo->key, "ds[power].max") == 0) &&
+              (rrdInfo->type == RD_I_VAL) &&
+              (rrdInfo->value.u_val == 4.5e3)) {
+            tunePowerMaxSetting = true;
+          }
           rrdInfo = rrdInfo->next;
         }
         rrd_info_free(rrdInfoOrig);
@@ -170,7 +176,7 @@ namespace dss {
         log("Creating new RRD database.", lsWarning);
         /* create new DB */
         std::vector<std::string> lines;
-        lines.push_back("DS:power:GAUGE:5:0:4500");
+        lines.push_back("DS:power:GAUGE:5:0:40000");
         lines.push_back("DS:energy:DERIVE:5:0:U");
         MeteringConfigChain *chain = _pChain.get();
         for (int i = 0; i < chain->size(); ++i) {
@@ -194,6 +200,23 @@ namespace dss {
           log(rrd_get_error(), lsError);
           boost::shared_ptr<std::string> pFileName(new std::string(""));
           return pFileName;
+        }
+      } else if (tunePowerMaxSetting) {
+        log(std::string("tuning max acceptable power value in RRD ") + fileName, lsWarning);
+        std::vector<std::string> lines;
+        lines.push_back("tune");
+        lines.push_back(fileName);
+        lines.push_back("--maximum");
+        lines.push_back("power:40000");
+
+        std::vector<const char*> starts;
+        std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+        const char** argString = &starts.front();
+        rrd_clear_error();
+        // cast-away the const, should be ok according to rrd_tune() sources
+        int result = rrd_tune(starts.size(), (char**)argString);
+        if (result < 0) {
+          log(rrd_get_error());
         }
       }
 
@@ -376,7 +399,7 @@ namespace dss {
       sstream << ":AVERAGE";
       lines.push_back(sstream.str());
     }
-    lines.push_back("CDEF:noUnkn=data,UN,0,data,IF");
+    lines.push_back("CDEF:noUnkn=data,0,40000,LIMIT,UN,0,data,IF");
     switch (_type) {
     case etEnergy:
     case etEnergyDelta: {
