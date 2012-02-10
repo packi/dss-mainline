@@ -1,7 +1,7 @@
 #ifndef DIGITAL_STROM_SERVER_CONFIG_H
 #define DIGITAL_STROM_SERVER_CONFIG_H
 
-#define DSS_VERSION "1.5.1"
+#define DSS_VERSION "1.5.2"
 
 #cmakedefine HAVE_STDINT
 #cmakedefine HAVE_MOZJS_JSAPI_H
