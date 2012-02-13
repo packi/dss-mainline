@@ -1954,8 +1954,6 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     try {
-      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
-          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       int groupID;
       int sceneID;
