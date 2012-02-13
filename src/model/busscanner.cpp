@@ -121,7 +121,7 @@ namespace dss {
       initializeDeviceFromSpec(_dsMeter, _zone, spec);
     }
 
-    return scanGroupsOfZone(_dsMeter, _zone);
+    return (scanGroupsOfZone(_dsMeter, _zone) && scanStatusOfZone(_dsMeter, _zone));
   } // scanZone
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
@@ -257,7 +257,6 @@ namespace dss {
       }
       groupOnZone->setIsPresent(true);
       groupOnZone->setIsConnected(true);
-      // TODO: get last called scene
       groupOnZone->setLastCalledScene(SceneOff);
       boost::shared_ptr<Group> pGroup;
       try {
@@ -273,6 +272,26 @@ namespace dss {
     }
     return true;
   } // scanGroupsOfZone
+
+  bool BusScanner::scanStatusOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
+    std::vector<std::pair<int, int> > sceneHistory = m_Interface.getLastCalledScenes(_dsMeter->getDSID(), _zone->getID());
+    std::vector<std::pair<int, int> >::iterator it;
+    for (it = sceneHistory.begin(); it < sceneHistory.end(); it++) {
+      log("Scene History Group: " + intToString(it->first) + " -> " + intToString(it->second));
+      if (it->first == 0) {
+        std::vector<boost::shared_ptr<Group> > pGroups = _zone->getGroups();
+        foreach(boost::shared_ptr<Group> pGroup, pGroups) {
+          pGroup->setLastCalledScene(it->second);
+        }
+      } else {
+        boost::shared_ptr<Group> pGroup = _zone->getGroup(it->first);
+        if (pGroup) {
+          pGroup->setLastCalledScene(it->second);
+        }
+      }
+    }
+    return true;
+  } // scanStatusOfZone
 
   void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
     Logger::getInstance()->log(_line, _severity);

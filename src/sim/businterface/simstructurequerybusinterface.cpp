@@ -101,9 +101,10 @@ namespace dss {
     return result;
   } // getGroups
 
-  int SimStructureQueryBusInterface::getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
-    return SceneOff; // TODO: implement if it gets implemented on the dSM11
-  } // getLastCalledScene
+  std::vector<std::pair<int, int> > SimStructureQueryBusInterface::getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    std::vector<std::pair<int, int> > result;
+    return result;
+  } // getLastCalledScenes
 
   bool SimStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     return false; // TODO: implement if it gets implemented on the dSM11

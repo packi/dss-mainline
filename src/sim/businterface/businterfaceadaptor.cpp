@@ -422,11 +422,11 @@ namespace dss {
       }
     }
 
-    virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
+    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
       if(isHandledBySimulation(_dsMeterID)) {
-        return m_pSimulationInterface->getLastCalledScene(_dsMeterID, _zoneID, _groupID);
+        return m_pSimulationInterface->getLastCalledScenes(_dsMeterID, _zoneID);
       } else {
-        return m_pInner->getLastCalledScene(_dsMeterID, _zoneID, _groupID);
+        return m_pInner->getLastCalledScenes(_dsMeterID, _zoneID);
       }
     }
 

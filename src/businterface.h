@@ -129,7 +129,7 @@ namespace dss {
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
     virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
-    virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) = 0;
+    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;
 
     /** Returns the function, product and revision id of the device. */
