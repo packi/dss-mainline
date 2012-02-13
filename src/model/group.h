@@ -41,6 +41,7 @@ namespace dss {
     int m_ZoneID;
     int m_GroupID;
     int m_LastCalledScene;
+    int m_LastButOneCalledScene;
     std::map<uint8_t, std::string> m_SceneNames;
     static boost::mutex m_SceneNameMutex;
     bool m_IsInitializedFromBus;
@@ -65,7 +66,20 @@ namespace dss {
     /** @copydoc Device::getLastCalledScene */
     int getLastCalledScene() const { return m_LastCalledScene; }
     /** @copydoc Device::setLastCalledScene */
-    void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
+    void setLastCalledScene(const int _value) {
+      m_LastButOneCalledScene = m_LastCalledScene;
+      m_LastCalledScene = _value;
+    }
+    /** @copydoc Device::setLastButOneCalledScene */
+    void setLastButOneCalledScene(const int _value) {
+      if (_value == m_LastCalledScene) {
+        m_LastCalledScene = m_LastButOneCalledScene;
+      }
+    }
+    /** @copydoc Device::setLastButOneCalledScene */
+    void setLastButOneCalledScene() {
+      m_LastCalledScene = m_LastButOneCalledScene;
+    }
 
     Group& operator=(const Group& _other);
     void setSceneName(int _sceneNumber, const std::string& _name);

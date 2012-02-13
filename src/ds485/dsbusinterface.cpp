@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2012 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -39,6 +40,7 @@
 #include "src/model/modelconst.h"
 #include "src/model/device.h"
 #include "src/model/modelmaintenance.h"
+#include "src/security/security.h"
 
 #include "dsactionrequest.h"
 #include "dsdevicebusinterface.h"
@@ -304,6 +306,19 @@ namespace dss {
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
                         &callback_struct);
 
+      ZoneGroupActionRequest_action_undo_scene_request_callback_t handleBusUndo = DSBusInterface::handleBusUndoSceneCallback;
+      callback_struct.function = (void*)handleBusUndo;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_UNDO_SCENE,
+                        &callback_struct);
+      ZoneGroupActionRequest_action_undo_scene_number_request_callback_t handleBusUndoNumber = DSBusInterface::handleBusUndoSceneNumberCallback;
+      callback_struct.function = (void*)handleBusUndoNumber;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_UNDO_SCENE_NUMBER,
+                        &callback_struct);
+
       EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
       callback_struct.function = (void*)localActionCallback;
       callback_struct.arg = this;
@@ -547,6 +562,29 @@ namespace dss {
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
+                                                                _sceneID, true);
+  }
+
+  void DSBusInterface::handleBusUndoScene(uint8_t _errorCode, dsid_t _sourceID,
+                                          uint16_t _zoneID, uint8_t _groupID,
+                                          uint8_t _sceneID, bool _explicit) {
+    if(m_pBusEventSink != NULL) {
+      dss_dsid_t dsMeterID;
+      dsid_helper::toDssDsid(_sourceID, dsMeterID);
+      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _sceneID, _explicit);
+    }
+  }
+
+  void DSBusInterface::handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID) {
+    static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
+                                                                255, false);
+  }
+
+  void DSBusInterface::handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                        dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                                        uint8_t _sceneID) {
+    static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _sceneID, true);
   }
 

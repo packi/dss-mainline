@@ -36,6 +36,7 @@ namespace dss {
   class ModelEvent {
   public:
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
+                   etUndoSceneGroup,  /**< An undo scene command for a group. */
                    etCallSceneDevice, /**< A device has changed the scene */
                    etButtonClickDevice, /** < A button click on a device not handled by the dSMeter */
                    etNewDevice,       /**< A new device has been detected */

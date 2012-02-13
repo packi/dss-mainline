@@ -378,6 +378,17 @@ namespace dss {
           }
         }
         break;
+      case ModelEvent::etUndoSceneGroup:
+        if(event.getParameterCount() < 2) {
+          log("Expected at least 2 parameter for ModelEvent::etUndoSceneGroup");
+        } else {
+          int sceneID = -1;
+          if(event.getParameterCount() >= 3) {
+            sceneID = event.getParameter(2);
+          }
+          onGroupUndoScene(event.getParameter(0), event.getParameter(1), sceneID);
+        }
+        break;
       case ModelEvent::etModelDirty:
         eraseModelEventsFromQueue(ModelEvent::etModelDirty);
         eraseEventFromList = false;
@@ -570,6 +581,26 @@ namespace dss {
     }
   };
 
+  class SetLastButOneCalledSceneAction : public IDeviceAction {
+  protected:
+    int m_SceneID;
+  public:
+    SetLastButOneCalledSceneAction(const int _sceneID)
+    : m_SceneID(_sceneID) {}
+    SetLastButOneCalledSceneAction()
+    : m_SceneID(-1) {}
+    virtual ~SetLastButOneCalledSceneAction() {}
+
+    virtual bool perform(boost::shared_ptr<Device> _device) {
+      if (m_SceneID >= 0) {
+        _device->setLastButOneCalledScene(m_SceneID);
+      } else {
+        _device->setLastButOneCalledScene();
+      }
+      return true;
+    }
+  };
+
   void ModelMaintenance::onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
@@ -617,6 +648,61 @@ namespace dss {
       log("OnGroupCallScene: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
     }
   } // onGroupCallScene
+
+  void ModelMaintenance::onGroupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
+    try {
+      if(_sceneID < -1 || _sceneID > MaxSceneNumber) {
+        log("onGroupUndoScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
+        return;
+      }
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      boost::shared_ptr<Group> group = zone->getGroup(_groupID);
+      if(group != NULL) {
+        log("OnGroupUndoScene: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "' scene: " + intToString(_sceneID));
+        Set s = zone->getDevices().getByGroup(_groupID);
+        SetLastButOneCalledSceneAction act(_sceneID);
+        s.perform(act);
+
+        std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
+        if(_zoneID == 0) {
+          zonesToUpdate = m_pApartment->getZones();
+        } else {
+          zonesToUpdate.push_back(zone);
+        }
+        foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
+          if(_groupID == 0) {
+            foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
+              if (_sceneID >= 0) {
+                pGroup->setLastButOneCalledScene(_sceneID);
+              } else {
+                pGroup->setLastButOneCalledScene();
+              }
+            }
+          } else {
+            boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+            if(pGroup != NULL) {
+              if (_sceneID >= 0) {
+                pGroup->setLastButOneCalledScene(_sceneID);
+              } else {
+                pGroup->setLastButOneCalledScene();
+              }
+            }
+          }
+        }
+
+        boost::shared_ptr<Event> pEvent;
+        pEvent.reset(new Event("undoScene", group));
+        pEvent->setProperty("sceneID", intToString(_sceneID));
+        pEvent->setProperty("groupID", intToString(_groupID));
+        pEvent->setProperty("zoneID", intToString(_zoneID));
+        raiseEvent(pEvent);
+      } else {
+        log("OnGroupUndoScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("OnGroupUndoScene: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
+    }
+  } // onGroupUndoScene
 
   void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _sceneID) {
 

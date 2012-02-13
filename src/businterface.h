@@ -209,6 +209,12 @@ namespace dss {
                                   const int _groupID,
                                   const int _sceneID,
                                   const bool _force) = 0;
+    virtual void onGroupUndoScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _zoneID,
+                                  const int _groupID,
+                                  const int _sceneID,
+                                  const bool _explicit) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
                                  const int _powerW,
