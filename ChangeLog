@@ -1,8 +1,11 @@
 dSS - digitalSTROM Server
 
-v1.5.2 10.02.2012
+v1.6.0 13.02.2012
 	* keep unit Wh for energyMeterValue in property tree, fixes #1355
 	* set the maximal allowed power value for metering
+	* introduce button clicks as system events, implements #1313
+	* set solar times properties to empty when they do not occur today
+	* also calculate civil, nautical and astronomical twilights
 
 v1.5.1 06.02.2012
     * better RRD detection on startup, avoids generation of new rrd file
