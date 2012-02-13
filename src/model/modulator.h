@@ -50,6 +50,7 @@ namespace dss {
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
     int m_EnergyMeterValue;
+    int m_EnergyMeterValueWh;
     unsigned long m_LastReportedEnergyMeterValue;
     bool m_ReceivedMeterValue;
     DateTime m_EnergyMeterValueTimeStamp;
