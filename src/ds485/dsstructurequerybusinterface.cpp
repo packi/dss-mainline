@@ -233,9 +233,8 @@ namespace dss {
       uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice,
                                                 &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
-                                                &spec.Version,
-                                                &spec.ZoneID, NULL, NULL, &locked, &spec.OutputMode, groups, name,
-                                                NULL, NULL, &spec.SerialNumber, &spec.LTMode);
+                                                &spec.Version, &spec.ZoneID, NULL, &locked, &spec.OutputMode,
+                                                &spec.LTMode, groups, name, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
@@ -271,9 +270,8 @@ namespace dss {
       uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, dsid, _zoneID, iDevice,
                                                   &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
-                                                  &spec.Version,
-                                                  &spec.ZoneID, NULL, NULL, &locked, &spec.OutputMode, groups, name,
-                                                  NULL, NULL, &spec.SerialNumber, &spec.LTMode);
+                                                  &spec.Version, &spec.ZoneID, NULL, &locked, &spec.OutputMode,
+                                                  &spec.LTMode, groups, name, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
@@ -303,9 +301,8 @@ namespace dss {
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
                                       &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
-                                      &result.Version,
-                                      &result.ZoneID, NULL, NULL, &locked, &result.OutputMode, groups, name,
-                                      NULL, NULL, &result.SerialNumber, &result.LTMode);
+                                      &result.Version, &result.ZoneID, NULL, &locked, &result.OutputMode,
+                                      &result.LTMode, groups, name, &result.SerialNumber);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);

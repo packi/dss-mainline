@@ -117,18 +117,19 @@ namespace dss {
                             uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID, bool _forced);
     static void handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                            dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
-                                           uint8_t _sceneID);
+                                           uint16_t _originDeviceId, uint8_t _sceneID);
     static void handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
-                                               uint8_t _sceneID);
+                                               uint16_t _originDeviceId, uint8_t _sceneID);
 
     void handleBusUndoScene(uint8_t _errorCode, dsid_t _sourceID,
                             uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID, bool _explicit);
     static void handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                           dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID);
+                                           dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                           uint16_t _originDeviceId);
     static void handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
-                                                 uint8_t _sceneID);
+                                                 uint16_t _originDeviceId, uint8_t _sceneID);
 
     void handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state);
     static void handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,

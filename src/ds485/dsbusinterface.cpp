@@ -573,14 +573,14 @@ namespace dss {
 
   void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
-                                                  uint8_t _sceneID) {
+                                                  uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _sceneID, false);
   }
 
   void DSBusInterface::handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
-                                                  uint8_t _sceneID) {
+                                                  uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _sceneID, true);
   }
@@ -597,14 +597,15 @@ namespace dss {
   }
 
   void DSBusInterface::handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID) {
+                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                                  uint16_t _originDeviceId) {
     static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 255, false);
   }
 
   void DSBusInterface::handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                         dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
-                                                        uint8_t _sceneID) {
+                                                        uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _sceneID, true);
   }

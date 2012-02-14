@@ -45,9 +45,9 @@ namespace dss {
 
     if(pGroup) {
       if(_force) {
-        ret = ZoneGroupActionRequest_action_force_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+        ret = ZoneGroupActionRequest_action_force_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, scene);
       } else {
-        ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+        ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, scene);
       }
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice)  {
@@ -73,7 +73,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_save_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ret = ZoneGroupActionRequest_action_save_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, scene);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       dsid_t dsid;
@@ -94,7 +94,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_undo_scene_number(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ret = ZoneGroupActionRequest_action_undo_scene_number(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, scene);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice)  {
       dsid_t dsid;
@@ -115,7 +115,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_undo_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID());
+      ret = ZoneGroupActionRequest_action_undo_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice)  {
       dsid_t dsid;
@@ -136,7 +136,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_blink(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID());
+      ret = ZoneGroupActionRequest_action_blink(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       dsid_t dsid;
@@ -157,7 +157,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_set_outval(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _value);
+      ret = ZoneGroupActionRequest_action_set_outval(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0,_value);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       dsid_t dsid;
