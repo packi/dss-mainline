@@ -277,16 +277,29 @@ namespace dss {
     std::vector<std::pair<int, int> > sceneHistory = m_Interface.getLastCalledScenes(_dsMeter->getDSID(), _zone->getID());
     std::vector<std::pair<int, int> >::iterator it;
     for (it = sceneHistory.begin(); it < sceneHistory.end(); it++) {
-      log("Scene History Group: " + intToString(it->first) + " -> " + intToString(it->second));
-      if (it->first == 0) {
+      int gid = it->first & 0x3f;
+      bool isUndo = (it->first & 0x80) > 0;
+      bool isForced = (it->first & 0x40) > 0;
+      log("Scene History in Zone " + intToString(_zone->getID()) +
+          ": group " + intToString(gid) + " - " +
+          (isUndo? "undo-scene" : (isForced ? "forced-scene" : "scene")) + " " + intToString(it->second));
+      if (gid == 0) {
         std::vector<boost::shared_ptr<Group> > pGroups = _zone->getGroups();
         foreach(boost::shared_ptr<Group> pGroup, pGroups) {
-          pGroup->setLastCalledScene(it->second);
+          if (isUndo) {
+            pGroup->setLastButOneCalledScene(it->second);
+          } else {
+            pGroup->setLastCalledScene(it->second);
+          }
         }
       } else {
-        boost::shared_ptr<Group> pGroup = _zone->getGroup(it->first);
+        boost::shared_ptr<Group> pGroup = _zone->getGroup(gid);
         if (pGroup) {
-          pGroup->setLastCalledScene(it->second);
+          if (isUndo) {
+            pGroup->setLastButOneCalledScene(it->second);
+          } else {
+            pGroup->setLastCalledScene(it->second);
+          }
         }
       }
     }

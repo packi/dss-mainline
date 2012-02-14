@@ -341,15 +341,11 @@ namespace dss {
         &groups[5], &scenes[5],
         &groups[6], &scenes[6]
         );
+    DSBusInterface::checkResultCode(ret);
 
     std::vector<std::pair<int,int> > result;
     for (int i = hsize - 1; i >= 0; i--) {
-      int gid = groups[i] & 0x3f;
-      if (groups[i] & 0x80) {
-
-      } else {
-        result.push_back(std::make_pair(gid, scenes[i]));
-      }
+      result.push_back(std::make_pair(groups[i], scenes[i]));
     }
     return result;
   } // getLastCalledScenes
