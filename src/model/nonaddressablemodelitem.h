@@ -34,17 +34,17 @@ namespace dss {
 
   class NonAddressableModelItem : public IDeviceInterface {
   public:
-    virtual void increaseValue();
-    virtual void decreaseValue();
+    virtual void increaseValue(const callOrigin_t _origin);
+    virtual void decreaseValue(const callOrigin_t _origin);
 
-    virtual void setValue(const uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const uint8_t _value);
 
-    virtual void callScene(const int _sceneNr, const bool _force = false);
-    virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
-    virtual void undoSceneLast();
+    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force = false);
+    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr);
+    virtual void undoScene(const callOrigin_t _origin, const int _sceneNr);
+    virtual void undoSceneLast(const callOrigin_t _origin);
 
-    virtual void blink();
+    virtual void blink(const callOrigin_t _origin);
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems() = 0;
   }; // NonAddressableModelItem

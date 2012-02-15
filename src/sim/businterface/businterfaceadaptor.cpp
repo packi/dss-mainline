@@ -178,62 +178,62 @@ namespace dss {
       m_pEventSink(_pEventSink)
     { }
 
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force) {
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const bool _force) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->callScene(pTarget, scene, _force);
+        m_pSimulationInterface->callScene(pTarget, _origin, scene, _force);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->callScene(pTarget, scene, _force);
+        m_pInner->callScene(pTarget, _origin, scene, _force);
       }
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupCallScene(NULL, NullDSID, pGroup->getZoneID(),
-                                       pGroup->getID(), 0, scene, _force);
+                                       pGroup->getID(), _origin, scene, _force);
       }
     }
 
-    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->saveScene(pTarget, scene);
+        m_pSimulationInterface->saveScene(pTarget, _origin, scene);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->saveScene(pTarget, scene);
+        m_pInner->saveScene(pTarget, _origin, scene);
       }
     }
 
-    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->undoScene(pTarget, scene);
+        m_pSimulationInterface->undoScene(pTarget, _origin, scene);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->undoScene(pTarget,scene);
+        m_pInner->undoScene(pTarget, _origin, scene);
       }
     }
 
-    virtual void undoSceneLast(AddressableModelItem *pTarget) {
+    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->undoSceneLast(pTarget);
+        m_pSimulationInterface->undoSceneLast(pTarget, _origin);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->undoSceneLast(pTarget);
+        m_pInner->undoSceneLast(pTarget, _origin);
       }
     }
 
-    virtual void blink(AddressableModelItem *pTarget) {
+    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->blink(pTarget);
+        m_pSimulationInterface->blink(pTarget, _origin);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->blink(pTarget);
+        m_pInner->blink(pTarget, _origin);
       }
     }
 
-    virtual void setValue(AddressableModelItem *pTarget, const uint8_t _value) {
+    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->setValue(pTarget, _value);
+        m_pSimulationInterface->setValue(pTarget, _origin, _value);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->setValue(pTarget, _value);
+        m_pInner->setValue(pTarget, _origin, _value);
       }
     }
 
@@ -538,7 +538,7 @@ namespace dss {
         try {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
           boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _sceneID, _force);
+          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _originDeviceId, _sceneID, _force);
         } catch(std::runtime_error& e) {
         }
       }
@@ -563,9 +563,9 @@ namespace dss {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
           boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
           if (_explicit) {
-            m_pSimBusInterface->getActionRequestInterface()->undoScene(pGroup.get(), _sceneID);
+            m_pSimBusInterface->getActionRequestInterface()->undoScene(pGroup.get(), _originDeviceId, _sceneID);
           } else {
-            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(pGroup.get());
+            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(pGroup.get(), _originDeviceId);
           }
         } catch(std::runtime_error& e) {
         }

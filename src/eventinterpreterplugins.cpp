@@ -558,22 +558,22 @@ namespace dss {
           std::string typeName = elem->getAttribute("type");
 
           if(typeName == "turnOn") {
-            result->setCommand(boost::bind(&Set::turnOn, _1));
+            result->setCommand(boost::bind(&Set::turnOn, _1, IDeviceInterface::coSubscription));
           } else if(typeName == "turnOff") {
-            result->setCommand(boost::bind(&Set::turnOff, _1));
+            result->setCommand(boost::bind(&Set::turnOff, _1, IDeviceInterface::coSubscription));
           } else if(typeName == "increaseValue") {
-            result->setCommand(boost::bind(&Set::increaseValue, _1));
+            result->setCommand(boost::bind(&Set::increaseValue, _1, IDeviceInterface::coSubscription));
           } else if(typeName == "decreaseValue") {
-            result->setCommand(boost::bind(&Set::decreaseValue, _1));
+            result->setCommand(boost::bind(&Set::decreaseValue, _1, IDeviceInterface::coSubscription));
           } else if(typeName == "callScene") {
             int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr, false));
+            result->setCommand(boost::bind(&Set::callScene, _1, IDeviceInterface::coSubscription, sceneNr, false));
           } else if(typeName == "saveScene") {
             int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr, false));
+            result->setCommand(boost::bind(&Set::saveScene, _1, IDeviceInterface::coSubscription, sceneNr));
           } else if(typeName == "undoScene") {
             int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr, false));
+            result->setCommand(boost::bind(&Set::undoScene, _1, IDeviceInterface::coSubscription, sceneNr));
           } else {
             Logger::getInstance()->log(std::string("unknown command: ") + typeName);
             return boost::shared_ptr<SubscriptionOptions>();

@@ -263,7 +263,7 @@ BOOST_FIXTURE_TEST_CASE(testCallSceneReachesDevice, Fixture) {
   BOOST_ASSERT(dev != NULL);
 
   const int kSceneNumber = 10;
-  m_pApartment->getDevices().callScene(kSceneNumber);
+  m_pApartment->getDevices().callScene(IDeviceInterface::coTest, kSceneNumber);
   sleepMS(2);
 
   BOOST_CHECK_EQUAL(dev->getCalledFunction(), "callScene");
@@ -298,7 +298,7 @@ BOOST_FIXTURE_TEST_CASE(testCallSceneDeviceReachesOnlyDesignatedMeter, FixtureTw
   BOOST_ASSERT(dev != NULL);
 
   const int kSceneNumber = 10;
-  m_pApartment->getDeviceByDSID(m_ValidDSID)->callScene(kSceneNumber, false);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->callScene(IDeviceInterface::coTest, kSceneNumber, false);
   sleepMS(2);
 
   BOOST_CHECK_EQUAL(dev->getCalledFunction(), "callScene");

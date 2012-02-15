@@ -32,11 +32,12 @@ namespace dss {
 
   //================================================== SimActionRequestBusInterface
 
-  void SimActionRequestBusInterface::blink(AddressableModelItem* pTarget) {
+  void SimActionRequestBusInterface::blink(AddressableModelItem* pTarget, const uint16_t _origin) {
     // TODO: the simulation can't blink
   } // blink
 
   void SimActionRequestBusInterface::callScene(AddressableModelItem *pTarget,
+                                               const uint16_t _origin,
                                                const uint16_t scene,
                                                const bool _force) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
@@ -54,6 +55,7 @@ namespace dss {
   } // callScene
 
   void SimActionRequestBusInterface::saveScene(AddressableModelItem *pTarget,
+                                               const uint16_t _origin,
                                                const uint16_t scene) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
@@ -70,6 +72,7 @@ namespace dss {
   } // saveScene
 
   void SimActionRequestBusInterface::undoScene(AddressableModelItem *pTarget,
+                                               const uint16_t _origin,
                                                const uint16_t scene) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
@@ -85,7 +88,8 @@ namespace dss {
     }
   } // undoScene
 
-  void SimActionRequestBusInterface::undoSceneLast(AddressableModelItem *pTarget) {
+  void SimActionRequestBusInterface::undoSceneLast(AddressableModelItem *pTarget,
+                                                   const uint16_t _origin) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
@@ -100,9 +104,9 @@ namespace dss {
     }
   } // undoSceneLast
 
-  void SimActionRequestBusInterface::setValue(
-                                                AddressableModelItem *pTarget,
-                                                const uint8_t _value) {
+  void SimActionRequestBusInterface::setValue(AddressableModelItem *pTarget,
+                                              const uint16_t _origin,
+                                              const uint8_t _value) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {

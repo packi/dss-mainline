@@ -41,44 +41,44 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     : m_NumberOfCalls(0)
     {
     }
-    virtual void turnOn() {
+    virtual void turnOn(const callOrigin_t _origin) {
       functionCalled("turnOn");
     }
-    virtual void turnOff() {
+    virtual void turnOff(const callOrigin_t _origin) {
       functionCalled("turnOff");
     }
-    virtual void increaseValue()  {
+    virtual void increaseValue(const callOrigin_t _origin)  {
       functionCalled("increaseValue");
     }
-    virtual void decreaseValue()  {
+    virtual void decreaseValue(const callOrigin_t _origin)  {
       functionCalled("decreaseValue");
     }
-    virtual void setValue(const uint8_t _value)  {
+    virtual void setValue(const callOrigin_t _origin, const uint8_t _value)  {
       functionCalled("setValue(" + intToString(_value) + ")");
     }
-    virtual void callScene(const int _sceneNr, const bool _force)  {
+    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void saveScene(const int _sceneNr)  {
+    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoScene(const int _sceneNr)  {
+    virtual void undoScene(const callOrigin_t _origin, const int _sceneNr)  {
       functionCalled("undoScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoSceneLast()  {
+    virtual void undoSceneLast(const callOrigin_t _origin)  {
       functionCalled("undoSceneLast");
     }
     virtual unsigned long getPowerConsumption()  {
       functionCalled("getConsumption");
       return 50;
     }
-    virtual void nextScene()  {
+    virtual void nextScene(const callOrigin_t _origin)  {
       functionCalled("nextScene");
     }
-    virtual void previousScene()  {
+    virtual void previousScene(const callOrigin_t _origin)  {
       functionCalled("previousScene");
     }
-    virtual void blink()  {
+    virtual void blink(const callOrigin_t _origin)  {
       functionCalled("blink");
     }
 

@@ -907,7 +907,7 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->turnOn();
+          intf->turnOn(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -935,7 +935,7 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->turnOff();
+          intf->turnOff(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -963,7 +963,7 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->blink();
+          intf->blink(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -991,7 +991,7 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->increaseValue();
+          intf->increaseValue(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1020,7 +1020,7 @@ namespace dss {
 
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->decreaseValue();
+          intf->decreaseValue(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1056,7 +1056,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->setValue(value);
+            intf->setValue(IDeviceInterface::coJSScripting, value);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1093,7 +1093,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->callScene(sceneNr);
+            intf->callScene(IDeviceInterface::coJSScripting, sceneNr);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1132,9 +1132,9 @@ namespace dss {
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
           if (sceneNr >= 0) {
-            intf->undoScene(sceneNr);
+            intf->undoScene(IDeviceInterface::coJSScripting, sceneNr);
           } else {
-            intf->undoSceneLast();
+            intf->undoSceneLast(IDeviceInterface::coJSScripting);
           }
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
@@ -1163,7 +1163,7 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->nextScene();
+          intf->nextScene(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1191,7 +1191,7 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->previousScene();
+          intf->previousScene(IDeviceInterface::coJSScripting);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1228,7 +1228,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->saveScene(sceneNr);
+            intf->saveScene(IDeviceInterface::coJSScripting, sceneNr);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1974,7 +1974,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        pGroup->callScene(sceneID, forcedCall);
+        pGroup->callScene(IDeviceInterface::coJSScripting, sceneID, forcedCall);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2015,7 +2015,7 @@ namespace dss {
           JS_ReportWarning(cx, "Zone.blink: group with id \"%d\" not found", groupID);
           return JS_FALSE;
         }
-        pGroup->blink();
+        pGroup->blink(IDeviceInterface::coJSScripting);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;

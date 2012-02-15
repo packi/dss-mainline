@@ -142,8 +142,8 @@ namespace dss {
     virtual unsigned long getEnergymeterValue();
 
     /** convenience methods for simulated devices */
-    virtual void nextScene();
-    virtual void previousScene();
+    virtual void nextScene(const callOrigin_t _origin);
+    virtual void previousScene(const callOrigin_t _origin);
 
     /** Returns the function ID of the device.
      * A function ID specifies a certain subset of functionality that

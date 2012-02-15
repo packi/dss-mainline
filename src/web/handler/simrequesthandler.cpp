@@ -67,31 +67,31 @@ namespace dss {
           case 9: // lower-right
             break;
           case 2: // up
-            pGroup->increaseValue();
+            pGroup->increaseValue(IDeviceInterface::coSim);
             break;
           case 8: // down
-            pGroup->decreaseValue();
+            pGroup->decreaseValue(IDeviceInterface::coSim);
             break;
           case 4: // left
-            pGroup->previousScene();
+            pGroup->previousScene(IDeviceInterface::coSim);
             break;
           case 6: // right
-            pGroup->nextScene();
+            pGroup->nextScene(IDeviceInterface::coSim);
             break;
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                m_Apartment.getGroup(0)->callScene(SceneBell, false);
+                m_Apartment.getGroup(0)->callScene(IDeviceInterface::coSim, SceneBell, false);
               } else if(groupID == GroupIDRed){
-                m_Apartment.getGroup(0)->callScene(SceneAlarm, false);
+                m_Apartment.getGroup(0)->callScene(IDeviceInterface::coSim, SceneAlarm, false);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();
                 if(lastScene == SceneOff || lastScene == SceneDeepOff ||
                   lastScene == SceneStandBy || lastScene == ScenePanic)
                 {
-                  pGroup->callScene(Scene1, false);
+                  pGroup->callScene(IDeviceInterface::coSim, Scene1, false);
                 } else {
-                  pGroup->callScene(SceneOff, false);
+                  pGroup->callScene(IDeviceInterface::coSim, SceneOff, false);
                 }
               }
             }

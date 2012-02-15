@@ -67,52 +67,52 @@ namespace dss {
     return getDevice()->getName();
   } //getName
 
-  void DeviceReference::increaseValue() {
-    getDevice()->increaseValue();
+  void DeviceReference::increaseValue(const callOrigin_t _origin) {
+    getDevice()->increaseValue(_origin);
   } // increaseValue
 
-  void DeviceReference::decreaseValue() {
-    getDevice()->decreaseValue();
+  void DeviceReference::decreaseValue(const callOrigin_t _origin) {
+    getDevice()->decreaseValue(_origin);
   } // decreaseValue
 
-  void DeviceReference::setValue(const uint8_t _value) {
-    getDevice()->setValue(_value);
+  void DeviceReference::setValue(const callOrigin_t _origin, const uint8_t _value) {
+    getDevice()->setValue(_origin, _value);
   } // setValue
 
   bool DeviceReference::isOn() const {
     return getDevice()->isOn();
   }
 
-  void DeviceReference::callScene(const int _sceneNr, const bool _force) {
-    getDevice()->callScene(_sceneNr, _force);
+  void DeviceReference::callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force) {
+    getDevice()->callScene(_origin, _sceneNr, _force);
   } // callScene
 
-  void DeviceReference::saveScene(const int _sceneNr) {
-    getDevice()->saveScene(_sceneNr);
+  void DeviceReference::saveScene(const callOrigin_t _origin, const int _sceneNr) {
+    getDevice()->saveScene(_origin, _sceneNr);
   } // saveScene
 
-  void DeviceReference::undoScene(const int _sceneNr) {
-    getDevice()->undoScene(_sceneNr);
+  void DeviceReference::undoScene(const callOrigin_t _origin, const int _sceneNr) {
+    getDevice()->undoScene(_origin, _sceneNr);
   } // undoScene
 
-  void DeviceReference::undoSceneLast() {
-    getDevice()->undoSceneLast();
+  void DeviceReference::undoSceneLast(const callOrigin_t _origin) {
+    getDevice()->undoSceneLast(_origin);
   } // undoSceneLast
 
   unsigned long DeviceReference::getPowerConsumption() {
     return getDevice()->getPowerConsumption();
   }
 
-  void DeviceReference::nextScene() {
-    getDevice()->nextScene();
+  void DeviceReference::nextScene(const callOrigin_t _origin) {
+    getDevice()->nextScene(_origin);
   }
 
-  void DeviceReference::previousScene() {
-    getDevice()->previousScene();
+  void DeviceReference::previousScene(const callOrigin_t _origin) {
+    getDevice()->previousScene(_origin);
   }
 
-  void DeviceReference::blink() {
-    getDevice()->blink();
+  void DeviceReference::blink(const callOrigin_t _origin) {
+    getDevice()->blink(_origin);
   }
 
 } // namespace dss

@@ -37,60 +37,60 @@ namespace dss {
   : m_pApartment(_pApartment)
   {} // ctor
 
-  void AddressableModelItem::increaseValue() {
+  void AddressableModelItem::increaseValue(const callOrigin_t _origin) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, SceneInc, false);
+    m_pApartment->getActionRequestInterface()->callScene(this, _origin, SceneInc, false);
   } // increaseValue
 
-  void AddressableModelItem::decreaseValue() {
+  void AddressableModelItem::decreaseValue(const callOrigin_t _origin) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, SceneDec, false);
+    m_pApartment->getActionRequestInterface()->callScene(this, _origin, SceneDec, false);
   } // decreaseValue
 
-  void AddressableModelItem::setValue(const uint8_t _value) {
+  void AddressableModelItem::setValue(const callOrigin_t _origin, const uint8_t _value) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->setValue(this, _value);
+    m_pApartment->getActionRequestInterface()->setValue(this, _origin, _value);
   } // setValue
 
-  void AddressableModelItem::callScene(const int _sceneNr, const bool _force) {
+  void AddressableModelItem::callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, _sceneNr, _force);
+    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _sceneNr, _force);
   } // callScene
 
-  void AddressableModelItem::saveScene(const int _sceneNr) {
+  void AddressableModelItem::saveScene(const callOrigin_t _origin, const int _sceneNr) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->saveScene(this, _sceneNr);
+    m_pApartment->getActionRequestInterface()->saveScene(this, _origin, _sceneNr);
   } // saveScene
 
-  void AddressableModelItem::undoScene(const int _sceneNr) {
+  void AddressableModelItem::undoScene(const callOrigin_t _origin, const int _sceneNr) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->undoScene(this, _sceneNr);
+    m_pApartment->getActionRequestInterface()->undoScene(this, _origin, _sceneNr);
   } // undoScene
 
-  void AddressableModelItem::undoSceneLast() {
+  void AddressableModelItem::undoSceneLast(const callOrigin_t _origin) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->undoSceneLast(this);
+    m_pApartment->getActionRequestInterface()->undoSceneLast(this, _origin);
   } // undoSceneLast
 
-  void AddressableModelItem::blink() {
+  void AddressableModelItem::blink(const callOrigin_t _origin) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->blink(this);
+    m_pApartment->getActionRequestInterface()->blink(this, _origin);
   } // blink
 
 } // namespace dss

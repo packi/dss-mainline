@@ -59,25 +59,25 @@ namespace dss {
     return *this;
   } // operator=
 
-  void Group::callScene(const int _sceneNr, const bool _force) {
+  void Group::callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force) {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
-    AddressableModelItem::callScene(_sceneNr, _force);
+    AddressableModelItem::callScene(_origin, _sceneNr, _force);
   } // callScene
 
   unsigned long Group::getPowerConsumption() {
     return getDevices().getPowerConsumption();
   } // getPowerConsumption
 
-  void Group::nextScene() {
-    callScene(SceneHelper::getNextScene(m_LastCalledScene), false);
+  void Group::nextScene(const callOrigin_t _origin) {
+    callScene(_origin, SceneHelper::getNextScene(m_LastCalledScene), false);
   } // nextScene
 
-  void Group::previousScene() {
-    callScene(SceneHelper::getPreviousScene(m_LastCalledScene), false);
+  void Group::previousScene(const callOrigin_t _origin) {
+    callScene(_origin, SceneHelper::getPreviousScene(m_LastCalledScene), false);
   } // previousScene
 
   void Group::setSceneName(int _sceneNumber, const std::string& _name) {

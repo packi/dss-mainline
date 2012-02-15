@@ -56,10 +56,10 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void callScene(const int _sceneNr, const bool _force);
+    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force);
 
-    virtual void nextScene();
-    virtual void previousScene();
+    virtual void nextScene(const callOrigin_t _origin);
+    virtual void previousScene(const callOrigin_t _origin);
 
     virtual unsigned long getPowerConsumption();
 

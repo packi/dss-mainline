@@ -385,12 +385,12 @@ namespace dss {
     return m_Energymeter;
   } // getEnergymeterValue
 
-  void Device::nextScene() {
-    callScene(SceneHelper::getNextScene(m_LastCalledScene), false);
+  void Device::nextScene(const callOrigin_t _origin) {
+    callScene(_origin, SceneHelper::getNextScene(m_LastCalledScene), false);
   } // nextScene
 
-  void Device::previousScene() {
-    callScene(SceneHelper::getNextScene(m_LastCalledScene), false);
+  void Device::previousScene(const callOrigin_t _origin) {
+    callScene(_origin, SceneHelper::getNextScene(m_LastCalledScene), false);
   } // previousScene
 
   const std::string& Device::getName() const {

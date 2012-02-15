@@ -158,8 +158,8 @@ namespace dss {
     /** Removes the device \a _device from the set */
     void removeDevice(boost::shared_ptr<const Device> _device);
 
-    virtual void nextScene();
-    virtual void previousScene();
+    virtual void nextScene(const callOrigin_t _origin);
+    virtual void previousScene(const callOrigin_t _origin);
 
     virtual unsigned long getPowerConsumption();
   protected:
