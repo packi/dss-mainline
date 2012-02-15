@@ -1954,8 +1954,6 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     try {
-      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
-          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       int groupID;
       int sceneID;
@@ -1992,6 +1990,47 @@ namespace dss {
     }
     return JS_FALSE;
   } // zone_callScene
+
+  JSBool zone_blink(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      int groupID = 0;
+      if(pZone != NULL) {
+        if (argc >= 1) {
+          try {
+            groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          } catch(ScriptException& e) {
+            JS_ReportError(cx, e.what());
+            return JS_FALSE;
+          } catch(std::invalid_argument& e) {
+            JS_ReportError(cx, e.what());
+            return JS_FALSE;
+          }
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        if (!pGroup) {
+          JS_ReportWarning(cx, "Zone.blink: group with id \"%d\" not found", groupID);
+          return JS_FALSE;
+        }
+        pGroup->blink();
+
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_blink
 
   JSBool zone_getPowerConsumption(JSContext* cx, uintN argc, jsval* vp) {
     boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
@@ -2085,6 +2124,7 @@ namespace dss {
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 3, 0),
+    JS_FS("blink", zone_blink, 1, 0),
     JS_FS("getPowerConsumption", zone_getPowerConsumption, 0, 0),
     JS_FS("pushSensorValue", zone_pushSensorValue, 3, 0),
     JS_FS("getPropertyNode", zone_get_property_node, 0, 0),

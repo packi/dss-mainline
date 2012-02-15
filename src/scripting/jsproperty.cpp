@@ -448,7 +448,6 @@ namespace dss {
         return JS_FALSE;
       }
       if(pNode == NULL) {
-        JS_ReportWarning(cx, "Property.getNode: could not find node");
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
       }
