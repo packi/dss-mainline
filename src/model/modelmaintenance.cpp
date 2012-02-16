@@ -776,7 +776,7 @@ namespace dss {
       if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
         if ((pEvent->getSource() == _source) && ((pEvent->getOriginDeviceID() == _originDeviceID) || (_originDeviceID == 0))) {
           // dimming, adjust the old event's timestamp to keep it active
-          if (SceneHelper::isDimSequence(_sceneID) && (pEvent->getSceneID() == _sceneID)) {
+          if (SceneHelper::isDimSequence(_sceneID) && ((pEvent->getSceneID() == _sceneID) || (_sceneID == SceneDimArea))) {
             pEvent->setTimestamp();
             return;
           }

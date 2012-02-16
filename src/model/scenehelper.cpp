@@ -212,6 +212,14 @@ namespace dss {
     case SceneInc:
     case SceneDec:
     case SceneDimArea:
+    case SceneDecA1:
+    case SceneIncA1:
+    case SceneDecA2:
+    case SceneIncA2:
+    case SceneDecA3:
+    case SceneIncA3:
+    case SceneDecA4:
+    case SceneIncA4:
       return true;
     }
     return false;
