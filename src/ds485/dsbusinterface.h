@@ -45,6 +45,7 @@ namespace dss {
   class DSMeteringBusInterface;
   class DSStructureQueryBusInterface;
   class DSStructureModifyingBusInterface;
+  class User;
 
   class DSBusInterface : public ThreadedSubsystem,
                          public BusInterface {
@@ -54,6 +55,7 @@ namespace dss {
     boost::shared_ptr<DSMeteringBusInterface> m_pMeteringBusInterface;
     boost::shared_ptr<DSStructureQueryBusInterface> m_pStructureQueryBusInterface;
     boost::shared_ptr<DSStructureModifyingBusInterface> m_pStructureModifyingBusInterface;
+    User* m_SystemUser;
 
     ModelMaintenance* m_pModelMaintenance;
 
@@ -63,6 +65,8 @@ namespace dss {
     BusEventSink* m_pBusEventSink;
 
     dsid_t m_ownDSID;
+
+    void loginFromCallback();
 
     void busReady();
     virtual void execute();
