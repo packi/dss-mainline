@@ -74,6 +74,7 @@ namespace dss {
     int m_ProductID;
     int m_RevisionID;
     int m_LastCalledScene;
+    int m_LastButOneCalledScene;
     unsigned long m_Consumption;
     unsigned long m_Energymeter;
     DateTime m_LastDiscovered;
@@ -199,11 +200,24 @@ namespace dss {
     void resetGroups();
 
     /** Returns the last called scene.
-     * At the moment this information is used to determine wheter a device is
+     * At the moment this information is used to determine whether a device is
      * turned on or not. */
     int getLastCalledScene() const { return m_LastCalledScene; }
     /** Sets the last called scene. */
-    void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
+    void setLastCalledScene(const int _value) {
+      m_LastButOneCalledScene = m_LastCalledScene;
+      m_LastCalledScene = _value;
+    }
+    /** If state hasn't changed undo the last called scene command and restore state. */
+    void setLastButOneCalledScene(const int _value) {
+      if (_value == m_LastCalledScene) {
+        m_LastCalledScene = m_LastButOneCalledScene;
+      }
+    }
+    /** Undo the last called scene command and restore state. */
+    void setLastButOneCalledScene() {
+      m_LastCalledScene = m_LastButOneCalledScene;
+    }
 
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */

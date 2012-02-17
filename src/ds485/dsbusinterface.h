@@ -45,6 +45,7 @@ namespace dss {
   class DSMeteringBusInterface;
   class DSStructureQueryBusInterface;
   class DSStructureModifyingBusInterface;
+  class User;
 
   class DSBusInterface : public ThreadedSubsystem,
                          public BusInterface {
@@ -54,6 +55,7 @@ namespace dss {
     boost::shared_ptr<DSMeteringBusInterface> m_pMeteringBusInterface;
     boost::shared_ptr<DSStructureQueryBusInterface> m_pStructureQueryBusInterface;
     boost::shared_ptr<DSStructureModifyingBusInterface> m_pStructureModifyingBusInterface;
+    User* m_SystemUser;
 
     ModelMaintenance* m_pModelMaintenance;
 
@@ -63,6 +65,8 @@ namespace dss {
     BusEventSink* m_pBusEventSink;
 
     dsid_t m_ownDSID;
+
+    void loginFromCallback();
 
     void busReady();
     virtual void execute();
@@ -117,6 +121,14 @@ namespace dss {
     static void handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                uint8_t _sceneID);
+
+    void handleBusUndoScene(uint8_t _errorCode, dsid_t _sourceID,
+                            uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID, bool _explicit);
+    static void handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                           dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID);
+    static void handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                 dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                                 uint8_t _sceneID);
 
     void handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state);
     static void handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,

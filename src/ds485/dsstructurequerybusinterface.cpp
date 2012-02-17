@@ -320,10 +320,35 @@ namespace dss {
     return result;
   } // deviceGetSpec
 
-  int DSStructureQueryBusInterface::getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
-    // TODO: libdsm-api
-    return SceneOff;
-  } // getLastCalledScene
+  std::vector<std::pair<int, int> > DSStructureQueryBusInterface::getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
+
+    uint8_t groups[7];
+    uint8_t scenes[7];
+    uint8_t hsize;
+    int ret = ZoneProperties_get_scene_history(m_DSMApiHandle, dsmDSID, (uint16_t) _zoneID, &hsize,
+        &groups[0], &scenes[0],
+        &groups[1], &scenes[1],
+        &groups[2], &scenes[2],
+        &groups[3], &scenes[3],
+        &groups[4], &scenes[4],
+        &groups[5], &scenes[5],
+        &groups[6], &scenes[6]
+        );
+    DSBusInterface::checkResultCode(ret);
+
+    std::vector<std::pair<int,int> > result;
+    for (int i = hsize - 1; i >= 0; i--) {
+      result.push_back(std::make_pair(groups[i], scenes[i]));
+    }
+    return result;
+  } // getLastCalledScenes
 
   bool DSStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     // TODO: libdsm

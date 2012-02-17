@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2012 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -39,6 +40,7 @@
 #include "src/model/modelconst.h"
 #include "src/model/device.h"
 #include "src/model/modelmaintenance.h"
+#include "src/security/security.h"
 
 #include "dsactionrequest.h"
 #include "dsdevicebusinterface.h"
@@ -235,8 +237,21 @@ namespace dss {
       return;
     }
 
+    // the callbacks from libdsm-api are running on different thread(s)
+    // so we have to login from each callback handler to ensure that
+    // DSBusInterface has sufficient rights to access the property tree...
+    getDSS().getSecurity().loginAsSystemUser("DSBusInterface needs system rights");
+    m_SystemUser = getDSS().getSecurity().getCurrentlyLoggedInUser();
+
     connectToDS485D();
   } // initialize
+
+  void DSBusInterface::loginFromCallback() {
+    User* u = getDSS().getSecurity().getCurrentlyLoggedInUser();
+    if (u == NULL) {
+      getDSS().getSecurity().signIn(m_SystemUser);
+    }
+  } // loginFromCallback
 
   void DSBusInterface::connectToDS485D() {
     if(!m_dsmApiReady) {
@@ -302,6 +317,19 @@ namespace dss {
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
+                        &callback_struct);
+
+      ZoneGroupActionRequest_action_undo_scene_request_callback_t handleBusUndo = DSBusInterface::handleBusUndoSceneCallback;
+      callback_struct.function = (void*)handleBusUndo;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_UNDO_SCENE,
+                        &callback_struct);
+      ZoneGroupActionRequest_action_undo_scene_number_request_callback_t handleBusUndoNumber = DSBusInterface::handleBusUndoSceneNumberCallback;
+      callback_struct.function = (void*)handleBusUndoNumber;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_UNDO_SCENE_NUMBER,
                         &callback_struct);
 
       EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
@@ -403,6 +431,7 @@ namespace dss {
 
   // TODO: expose the state on the property-tree
   void DSBusInterface::handleBusState(bus_state_t _state) {
+    loginFromCallback();
     switch (_state) {
       case DS485_ISOLATED:
         log("STATE: ISOLATED");
@@ -427,6 +456,7 @@ namespace dss {
   }
 
   void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
+    loginFromCallback();
     ModelEvent::EventType eventType;
 
     if (!DsmApiIsdSM(*_id)) {
@@ -455,6 +485,7 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID,
                                                    uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
@@ -474,6 +505,7 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
                                                   uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
@@ -493,6 +525,7 @@ namespace dss {
   }
 
   void DSBusInterface::eventDataModelChanged(dsid_t _dsMeterID, uint16_t _shortAddress) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
@@ -513,6 +546,7 @@ namespace dss {
   void DSBusInterface::deviceConfigSet(dsid_t _dsMeterID, uint16_t _deviceID,
                                        uint8_t _configClass, uint8_t _configIndex,
                                        uint8_t _value) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
@@ -529,6 +563,7 @@ namespace dss {
   void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
                                           uint16_t _zoneID, uint8_t _groupID,
                                           uint8_t _sceneID, bool _forced) {
+    loginFromCallback();
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
@@ -550,9 +585,34 @@ namespace dss {
                                                                 _sceneID, true);
   }
 
+  void DSBusInterface::handleBusUndoScene(uint8_t _errorCode, dsid_t _sourceID,
+                                          uint16_t _zoneID, uint8_t _groupID,
+                                          uint8_t _sceneID, bool _explicit) {
+    loginFromCallback();
+    if(m_pBusEventSink != NULL) {
+      dss_dsid_t dsMeterID;
+      dsid_helper::toDssDsid(_sourceID, dsMeterID);
+      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _sceneID, _explicit);
+    }
+  }
+
+  void DSBusInterface::handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID) {
+    static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
+                                                                255, false);
+  }
+
+  void DSBusInterface::handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                        dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                                        uint8_t _sceneID) {
+    static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
+                                                                _sceneID, true);
+  }
+
   void DSBusInterface::handleDeviceSetName(dsid_t _destinationID,
                                            uint16_t _deviceID,
                                            std::string _name) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_destinationID, dsMeterID);
     m_pModelMaintenance->onDeviceNameChanged(dsMeterID, _deviceID, _name);
@@ -576,6 +636,7 @@ namespace dss {
 
   void DSBusInterface::handleDsmSetName(dsid_t _destinationID,
                                         std::string _name) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_destinationID, dsMeterID);
     m_pModelMaintenance->onDsmNameChanged(dsMeterID, _name);
@@ -596,6 +657,7 @@ namespace dss {
   } // handleDsmSetNameCallback
 
   void DSBusInterface::handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state) {
+    loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
@@ -617,6 +679,7 @@ namespace dss {
 
   void DSBusInterface::handleDeviceAction(dsid_t _dsMeterID, uint16_t _deviceID,
                                           uint8_t _buttonNr, uint8_t _clickType) {
+    loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etButtonClickDevice, dsmDSID);
@@ -635,6 +698,7 @@ namespace dss {
 
   void DSBusInterface::handleDeviceCallScene(dsid_t _dsMeterID, uint16_t _deviceID,
                                              uint8_t _sceneID, bool _forced) {
+    loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
@@ -659,6 +723,7 @@ namespace dss {
   void DSBusInterface::handleCircuitEnergyData(uint8_t _errorCode,
                                                dsid_t _sourceID, dsid_t _destinationID,
                                                uint32_t _powerW, uint32_t _energyWs) {
+    loginFromCallback();
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_sourceID, dsMeterID);
     m_pBusEventSink->onMeteringEvent(this, dsMeterID, _powerW, _energyWs);

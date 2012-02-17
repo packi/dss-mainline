@@ -422,11 +422,11 @@ namespace dss {
       }
     }
 
-    virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
+    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
       if(isHandledBySimulation(_dsMeterID)) {
-        return m_pSimulationInterface->getLastCalledScene(_dsMeterID, _zoneID, _groupID);
+        return m_pSimulationInterface->getLastCalledScenes(_dsMeterID, _zoneID);
       } else {
-        return m_pInner->getLastCalledScene(_dsMeterID, _zoneID, _groupID);
+        return m_pInner->getLastCalledScenes(_dsMeterID, _zoneID);
       }
     }
 
@@ -547,6 +547,34 @@ namespace dss {
       pEvent->addParameter(_sceneID);
       m_pModelMaintenance->addModelEvent(pEvent);
     } // onGroupCallScene
+
+    virtual void onGroupUndoScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _zoneID,
+                                  const int _groupID,
+                                  const int _sceneID,
+                                  const bool _explicit) {
+      boost::shared_ptr<BusInterface> target;
+      if(_source == m_pInnerBusInterface.get()) {
+        try {
+          boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
+          boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+          if (_explicit) {
+            m_pSimBusInterface->getActionRequestInterface()->undoScene(pGroup.get(), _sceneID);
+          } else {
+            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(pGroup.get());
+          }
+        } catch(std::runtime_error& e) {
+        }
+      }
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etUndoSceneGroup, _dsMeterID);
+      pEvent->addParameter(_zoneID);
+      pEvent->addParameter(_groupID);
+      if (_explicit) {
+        pEvent->addParameter(_sceneID);
+      }
+      m_pModelMaintenance->addModelEvent(pEvent);
+    } // onGroupUndoScene
 
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
