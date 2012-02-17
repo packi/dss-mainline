@@ -234,10 +234,18 @@ namespace dss {
         int sceneID = mEvent->getSceneID();
         int groupID = mEvent->getGroupID();
         int zoneID = mEvent->getZoneID();
+        int originDeviceID = mEvent->getOriginDeviceID();
 
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
           boost::shared_ptr<Group> group = zone->getGroup(groupID);
+          dss_dsid_t originDSID;
+          if ((mEvent->getSource() != NullDSID) && (originDeviceID != 0)) {
+            DeviceReference devRef = m_pApartment->getDevices().getByBusID(originDeviceID, mEvent->getSource());
+            originDSID = devRef.getDSID();
+          } else {
+            originDSID.lower = originDeviceID;
+          }
 
           if (mEvent->isDue()) {
             if (! (mEvent->isCalled())) {
@@ -246,6 +254,7 @@ namespace dss {
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
+              pEvent->setProperty("originDeviceID", originDSID.toString());
               raiseEvent(pEvent);
             }
             // finished deferred processing of this event
@@ -256,6 +265,7 @@ namespace dss {
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
+              pEvent->setProperty("originDeviceID", originDSID.toString());
               raiseEvent(pEvent);
               mEvent->setCalled();
             }
@@ -369,24 +379,24 @@ namespace dss {
         }
         break;
       case ModelEvent::etCallSceneGroup:
-        if(event.getParameterCount() != 3) {
-          log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
+        if(event.getParameterCount() != 4) {
+          log("Expected exactly 4 parameter for ModelEvent::etCallSceneGroup");
         } else {
-          onGroupCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          onGroupCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
           if (pEventWithDSID) {
-            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
           }
         }
         break;
       case ModelEvent::etUndoSceneGroup:
-        if(event.getParameterCount() < 2) {
-          log("Expected at least 2 parameter for ModelEvent::etUndoSceneGroup");
+        if(event.getParameterCount() < 3) {
+          log("Expected at least 3 parameter for ModelEvent::etUndoSceneGroup");
         } else {
           int sceneID = -1;
-          if(event.getParameterCount() >= 3) {
-            sceneID = event.getParameter(2);
+          if(event.getParameterCount() >= 4) {
+            sceneID = event.getParameter(3);
           }
-          onGroupUndoScene(event.getParameter(0), event.getParameter(1), sceneID);
+          onGroupUndoScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), sceneID);
         }
         break;
       case ModelEvent::etModelDirty:
@@ -601,7 +611,7 @@ namespace dss {
     }
   };
 
-  void ModelMaintenance::onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void ModelMaintenance::onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
         log("onGroupCallScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -640,6 +650,14 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
+        dss_dsid_t originDSID;
+        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+          DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
+          originDSID = devRef.getDSID();
+        } else {
+          originDSID.lower = _originDeviceID;
+        }
+        pEvent->setProperty("originDeviceID", originDSID.toString());
         raiseEvent(pEvent);
       } else {
         log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -649,7 +667,7 @@ namespace dss {
     }
   } // onGroupCallScene
 
-  void ModelMaintenance::onGroupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void ModelMaintenance::onGroupUndoScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID) {
     try {
       if(_sceneID < -1 || _sceneID > MaxSceneNumber) {
         log("onGroupUndoScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -695,6 +713,14 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
+        dss_dsid_t originDSID;
+        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+          DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
+          originDSID = devRef.getDSID();
+        } else {
+          originDSID.lower = _originDeviceID;
+        }
+        pEvent->setProperty("originDeviceID", originDSID.toString());
         raiseEvent(pEvent);
       } else {
         log("OnGroupUndoScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -704,8 +730,7 @@ namespace dss {
     }
   } // onGroupUndoScene
 
-  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _sceneID) {
-
+  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID) {
     // Filter Strategy:
     // Check for Source != 0 and per Zone and Group
     // - delayed On-Scene processing, for Scene1/Scene2/Scene3/Scene4
@@ -734,9 +759,10 @@ namespace dss {
       log("CallSceneFilter: pass through, from source " + _source.toString() +
           ": Zone=" + intToString(_zoneID) +
           ", Gruppe=" + intToString(_groupID) +
+          ", OriginDevice=" + intToString(_originDeviceID) +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
-      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _sceneID));
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID));
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
       return;
@@ -748,7 +774,7 @@ namespace dss {
         continue;
       }
       if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
-        if (pEvent->getSource() == _source) {
+        if ((pEvent->getSource() == _source) && ((pEvent->getOriginDeviceID() == _originDeviceID) || (_originDeviceID == 0))) {
           // dimming, adjust the old event's timestamp to keep it active
           if (SceneHelper::isDimSequence(_sceneID) && (pEvent->getSceneID() == _sceneID)) {
             pEvent->setTimestamp();
@@ -764,6 +790,7 @@ namespace dss {
             log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
                 ": Zone=" + intToString(_zoneID) +
                 ", Group=" + intToString(_groupID) +
+                ", OriginDevice=" + intToString(_originDeviceID) +
                 ", Scene=" + intToString(_sceneID));
 
             pEvent->setScene(_sceneID);
@@ -778,6 +805,7 @@ namespace dss {
             log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
                 ": Zone=" + intToString(_zoneID) +
                 ", Group=" + intToString(_groupID) +
+                ", OriginDevice=" + intToString(_originDeviceID) +
                 ", Scene=" + intToString(_sceneID));
 
             pEvent->setScene(_sceneID);
@@ -791,6 +819,7 @@ namespace dss {
             log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
                 ": Zone=" + intToString(_zoneID) +
                 ", Group=" + intToString(_groupID) +
+                ", OriginDevice=" + intToString(_originDeviceID) +
                 ", Scene=" + intToString(_sceneID));
 
             pEvent->setScene(_sceneID);
@@ -802,6 +831,7 @@ namespace dss {
             log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
                 ": Zone=" + intToString(_zoneID) +
                 ", Group=" + intToString(_groupID) +
+                ", OriginDevice=" + intToString(_originDeviceID) +
                 ", Scene=" + intToString(_sceneID));
 
             pEvent->setScene(_sceneID);
@@ -813,6 +843,7 @@ namespace dss {
             log("CallSceneFilter: update sceneID from " + intToString(pEvent->getSceneID()) +
                 ": Zone=" + intToString(_zoneID) +
                 ", Group=" + intToString(_groupID) +
+                ", OriginDevice=" + intToString(_originDeviceID) +
                 ", Scene=" + intToString(_sceneID));
 
             pEvent->setScene(_sceneID);
@@ -825,9 +856,10 @@ namespace dss {
     log("CallSceneFilter: deferred processing, from source " + _source.toString() +
         ": Zone=" + intToString(_zoneID) +
         ", Group=" + intToString(_groupID) +
+        ", OriginDevice=" + intToString(_originDeviceID) +
         ", Scene=" + intToString(_sceneID), lsDebug);
 
-    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _sceneID));
+    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID));
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
 

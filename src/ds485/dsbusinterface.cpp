@@ -562,12 +562,13 @@ namespace dss {
 
   void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
                                           uint16_t _zoneID, uint8_t _groupID,
-                                          uint8_t _sceneID, bool _forced) {
+                                          uint16_t _originDeviceId, uint8_t _sceneID,
+                                          bool _forced) {
     loginFromCallback();
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _sceneID, _forced);
+      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, _sceneID, _forced);
     }
   }
 
@@ -575,24 +576,25 @@ namespace dss {
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
-                                                                _sceneID, false);
+                                                                _originDeviceId, _sceneID, false);
   }
 
   void DSBusInterface::handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
-                                                                _sceneID, true);
+                                                                _originDeviceId, _sceneID, true);
   }
 
   void DSBusInterface::handleBusUndoScene(uint8_t _errorCode, dsid_t _sourceID,
                                           uint16_t _zoneID, uint8_t _groupID,
-                                          uint8_t _sceneID, bool _explicit) {
+                                          uint16_t _originDeviceId, uint8_t _sceneID,
+                                          bool _explicit) {
     loginFromCallback();
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _sceneID, _explicit);
+      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, _sceneID, _explicit);
     }
   }
 
@@ -600,14 +602,14 @@ namespace dss {
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId) {
     static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
-                                                                255, false);
+                                                                _originDeviceId, 255, false);
   }
 
   void DSBusInterface::handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                                         dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                         uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
-                                                                _sceneID, true);
+                                                                _originDeviceId, _sceneID, true);
   }
 
   void DSBusInterface::handleDeviceSetName(dsid_t _destinationID,

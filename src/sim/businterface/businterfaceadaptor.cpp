@@ -188,7 +188,7 @@ namespace dss {
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupCallScene(NULL, NullDSID, pGroup->getZoneID(),
-                                       pGroup->getID(), scene, _force);
+                                       pGroup->getID(), 0, scene, _force);
       }
     }
 
@@ -530,6 +530,7 @@ namespace dss {
                                   const dss_dsid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
+                                  const int _originDeviceId,
                                   const int _sceneID,
                                   const bool _force) {
       boost::shared_ptr<BusInterface> target;
@@ -544,6 +545,7 @@ namespace dss {
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneGroup, _dsMeterID);
       pEvent->addParameter(_zoneID);
       pEvent->addParameter(_groupID);
+      pEvent->addParameter(_originDeviceId);
       pEvent->addParameter(_sceneID);
       m_pModelMaintenance->addModelEvent(pEvent);
     } // onGroupCallScene
@@ -552,6 +554,7 @@ namespace dss {
                                   const dss_dsid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
+                                  const int _originDeviceId,
                                   const int _sceneID,
                                   const bool _explicit) {
       boost::shared_ptr<BusInterface> target;
@@ -570,6 +573,7 @@ namespace dss {
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etUndoSceneGroup, _dsMeterID);
       pEvent->addParameter(_zoneID);
       pEvent->addParameter(_groupID);
+      pEvent->addParameter(_originDeviceId);
       if (_explicit) {
         pEvent->addParameter(_sceneID);
       }
