@@ -52,6 +52,9 @@ libdsscore_a_CXXFLAGS = \
 			$(CURL_CFLAGS) \
 			$(LIBRRD_CFLAGS)
 
+libunix_a_CXXFLAGS = \
+			$(BOOST_CPPFLAGS)
+
 if WITH_CURL
 
 libdsscore_a_SOURCES +=  \
@@ -112,6 +115,7 @@ endif
 
 dsstests_CXXFLAGS = \
 			$(JS_CFLAGS) \
+			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS)
 
 dsstests_LDADD = \

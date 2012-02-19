@@ -236,8 +236,8 @@ PKG_CHECK_MODULES([ICAL], [libical], [],
 
 CFLAGS_SAVE="$CFLAGS"
 CXXFLAGS_SAVE="$CXXFLAGS"
-CFLAGS="$CFLAGS $ical_CFLAGS"
-CXXFLAGS="$CXXFLAGS $ical_CFLAGS"
+CFLAGS="$CFLAGS $ICAL_CFLAGS"
+CXXFLAGS="$CXXFLAGS $ICAL_CFLAGS"
 
 AC_CHECK_HEADERS([libical/ical.h], [],
     [
@@ -306,7 +306,8 @@ if test "x$SOAP_OPTION_ENABLED" = "xyes"; then
     AC_MSG_CHECKING([for gSOAP import header directory])
     if (test -z $GSOAP_IMPORT_DIR); then
         for GSPATH in /usr/share/gsoap/import \
-                      /usr/local/share/gsoap/import ; do
+                      /usr/local/share/gsoap/import \
+		      /opt/local/share/gsoap/import ; do
             if (test -z $GSOAP_IMPORT_DIR) && (test -s $GSPATH/wsa.h); then
                 GSOAP_IMPORT_DIR=$GSPATH
             fi
