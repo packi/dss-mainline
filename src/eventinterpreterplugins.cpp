@@ -116,86 +116,70 @@ namespace dss {
 
   //================================================== ScriptContextWrapper
 
-  class ScriptContextWrapper {
-  public:
-    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
-                         PropertyNodePtr _pRootNode,
-                         const std::string& _identifier,
-                         bool _uniqueNode
-                        )
-    : m_pContext(_pContext),
+  ScriptContextWrapper::ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
+      PropertyNodePtr _pRootNode,
+      const std::string& _identifier,
+      bool _uniqueNode) :
+      m_pContext(_pContext),
       m_Identifier(_identifier),
-      m_UniqueNode(_uniqueNode)
-    {
-      if((_pRootNode != NULL) && !_identifier.empty()) {
-        if(_uniqueNode) {
-          m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
-        } else {
-          m_pPropertyNode = _pRootNode->createProperty(_identifier);
-        }
-        m_StopNode = m_pPropertyNode->createProperty("stopScript+");
-        m_StopNode->linkToProxy(
+      m_UniqueNode(_uniqueNode) {
+    if((_pRootNode != NULL) && !_identifier.empty()) {
+      if(_uniqueNode) {
+        m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
+      } else {
+        m_pPropertyNode = _pRootNode->createProperty(_identifier);
+      }
+      m_StopNode = m_pPropertyNode->createProperty("stopScript+");
+      m_StopNode->linkToProxy(
           PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
-        m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
-        m_StartedAtNode->linkToProxy(
+      m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
+      m_StartedAtNode->linkToProxy(
           PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
-        m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
-        m_AttachedObjectsNode->linkToProxy(
+      m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
+      m_AttachedObjectsNode->linkToProxy(
           PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
+    }
+  }
+
+  ScriptContextWrapper::~ScriptContextWrapper() {
+    if((m_pPropertyNode != NULL) && (m_pPropertyNode->getParentNode() != NULL)) {
+      if(m_UniqueNode) {
+        m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+      } else {
+        m_pPropertyNode->removeChild(m_StartedAtNode);
+        m_pPropertyNode->removeChild(m_StopNode);
+        m_pPropertyNode->removeChild(m_AttachedObjectsNode);
+        m_pPropertyNode->removeChild(m_FilesNode);
       }
     }
+  }
 
-    ~ScriptContextWrapper() {
-      if((m_pPropertyNode != NULL) && (m_pPropertyNode->getParentNode() != NULL)) {
-        if(m_UniqueNode) {
-          m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
-        } else {
-          m_pPropertyNode->removeChild(m_StartedAtNode);
-          m_pPropertyNode->removeChild(m_StopNode);
-          m_pPropertyNode->removeChild(m_AttachedObjectsNode);
-          m_pPropertyNode->removeChild(m_FilesNode);
-        }
+  boost::shared_ptr<ScriptContext> ScriptContextWrapper::get() {
+    return m_pContext;
+  }
+
+  void ScriptContextWrapper::addFile(const std::string& _name) {
+    m_LoadedFiles.push_back(_name);
+    if(m_pPropertyNode != NULL) {
+      if(m_FilesNode == NULL) {
+        m_FilesNode = m_pPropertyNode->createProperty("files+");
       }
+      m_FilesNode->createProperty("file+")->setStringValue(_name);
     }
+  }
 
-    boost::shared_ptr<ScriptContext> get() {
-      return m_pContext;
-    }
+  PropertyNodePtr ScriptContextWrapper::getPropertyNode() {
+    return m_pPropertyNode;
+  }
 
-    void addFile(const std::string& _name) {
-      m_LoadedFiles.push_back(_name);
-      if(m_pPropertyNode != NULL) {
-        if(m_FilesNode == NULL) {
-          m_FilesNode = m_pPropertyNode->createProperty("files+");
-        }
-        m_FilesNode->createProperty("file+")->setStringValue(_name);
-      }
-    }
+  const std::string& ScriptContextWrapper::getIdentifier() const {
+    return m_Identifier;
+  }
 
-    PropertyNodePtr getPropertyNode() {
-      return m_pPropertyNode;
-    }
-
-    const std::string& getIdentifier() const {
-      return m_Identifier;
-    }
-  private:
-    void stopScript(bool _value) {
-      Logger::getInstance()->log("Stop of script '" + m_pPropertyNode->getName() + "' requested.", lsInfo);
-      m_pContext->stop();
-    }
-  private:
-    boost::shared_ptr<ScriptContext> m_pContext;
-    DateTime m_StartTime;
-    std::vector<std::string> m_LoadedFiles;
-    PropertyNodePtr m_pPropertyNode;
-    PropertyNodePtr m_StopNode;
-    PropertyNodePtr m_StartedAtNode;
-    PropertyNodePtr m_FilesNode;
-    PropertyNodePtr m_AttachedObjectsNode;
-    std::string m_Identifier;
-    bool m_UniqueNode;
-  }; // ScriptContextWrapper
+  void ScriptContextWrapper::stopScript(bool _value) {
+    Logger::getInstance()->log("Stop of script '" + m_pPropertyNode->getName() + "' requested.", lsInfo);
+    m_pContext->stop();
+  }
 
   class WrapperAwarePropertyScriptExtension : public PropertyScriptExtension {
   public:
@@ -226,13 +210,21 @@ namespace dss {
       }
     }
 
-    virtual bool store(ScriptContext* _context) {
+    virtual bool store(ScriptContext* _context, PropertyNodePtr _node) {
       boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
       assert(wrapper != NULL);
+      std::string fileName(wrapper->getIdentifier());
+      PropertyNodePtr pNode;
+      if (_node) {
+        pNode = _node;
+        fileName += "_" + pNode->getDisplayName();
+      } else {
+        pNode = wrapper->getPropertyNode();
+      }
       // TODO: sanitize filename to prevent world-domination
       return m_PropertySystem.saveToXML(
-                                m_StoreDirectory + wrapper->getIdentifier() + ".xml",
-                                wrapper->getPropertyNode(), PropertyNode::Archive);
+                                m_StoreDirectory + fileName + ".xml",
+                                pNode, PropertyNode::Archive);
     }
 
     virtual bool load(ScriptContext* _context) {
@@ -291,9 +283,12 @@ namespace dss {
         uniqueNode = true;
         scriptID = _event.getName() + _subscription.getID();
       }
+
       boost::shared_ptr<ScriptContextWrapper> wrapper(
         new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
+      ctx->attachWrapper(wrapper);
       m_WrapperInAction = wrapper;
+
       {
         JSContextThread th(ctx.get());
 

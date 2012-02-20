@@ -869,31 +869,34 @@ namespace dss {
       m_Name = propName;
       if(elem->hasAttribute("type")) {
         aValueType valueType = getValueTypeFromString(elem->getAttribute("type").c_str());
+        std::string value;
         if(valueType != vTypeNone) {
+
           Element* valueNode = elem->getChildElement("value");
-          if((valueNode != NULL) && valueNode->hasChildNodes()) {
-            switch(valueType) {
-              case vTypeString:
-                setStringValue(valueNode->firstChild()->getNodeValue());
-                break;
-              case vTypeInteger:
-                setIntegerValue(strToInt(valueNode->firstChild()->getNodeValue()));
-                break;
-              case vTypeBoolean:
-                setBooleanValue(valueNode->firstChild()->getNodeValue() == "true");
-                break;
-              default:
-                assert(false);
+          if (valueNode != NULL) {
+            if (valueNode->hasChildNodes()) {
+              value = valueNode->firstChild()->getNodeValue();
+            } else {
+              valueNode->getNodeValue();
             }
+          } else if (elem->hasChildNodes()) {
+            value = elem->firstChild()->getNodeValue();
+          } else {
+            value = elem->getNodeValue();
           }
-          else {
-            switch(valueType) {
-              case vTypeString:
-                setStringValue("");
-                break;
-              default:
-                break;
-            }
+
+          switch(valueType) {
+          case vTypeString:
+            setStringValue(value);
+            break;
+          case vTypeInteger:
+            setIntegerValue(strToInt(value));
+            break;
+          case vTypeBoolean:
+            setBooleanValue(value == "true");
+            break;
+          default:
+            assert(false);
           }
         }
       }
