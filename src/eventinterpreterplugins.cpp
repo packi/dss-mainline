@@ -56,6 +56,9 @@
 #include <Poco/Net/MailRecipient.h>
 
 #include <limits.h>
+#include <fcntl.h>
+#include <spawn.h>
+#include <sys/wait.h>
 
 using Poco::XML::Element;
 using Poco::XML::Node;
@@ -756,11 +759,6 @@ namespace dss {
   { } // ctor
 
   void EventInterpreterPluginSendmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
-#ifndef HAVE_SENDMAIL
-    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
-        "sendmail binary not detected, plugin is disabled", lsWarning);
-    return;
-#else
     std::string sender;
     std::string recipient, recipient_cc, recipient_bcc;
     std::string subject;
@@ -803,10 +801,19 @@ namespace dss {
     }
 
     try {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail::handleEvent: Sendmail", lsInfo);
-      FILE* pmail = popen(SENDMAIL " -t", "w");
-      if (NULL == pmail) {
-        Logger::getInstance()->log("EventInterpreterPluginSendmail: " SENDMAIL " not found", lsFatal);
+      Logger::getInstance()->log("EventInterpreterPluginSendmail::handleEvent: Sendmail", lsDebug);
+
+      char mailText[] = "/tmp/mailXXXXXX";
+      int mailFile = mkstemp((char *) mailText);
+      if (mailFile < 0) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
+            intToString(errno) + "]", lsFatal);
+        return;
+      }
+      FILE* mailStream = fdopen(mailFile, "w");
+      if (mailStream == NULL) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: writing to temporary file failed [" +
+            intToString(errno) + "]", lsFatal);
         return;
       }
 
@@ -818,14 +825,62 @@ namespace dss {
           << "Subject: " << subject << "\n"
           << "X-Mailer: digitalSTROM Server (v" DSS_VERSION ")" << "\n\n";
       mail << body;
-      fputs(mail.str().c_str(), pmail);
-      pclose(pmail);
+      fputs(mail.str().c_str(), mailStream);
+      fclose(mailStream);
+
+      pthread_t pid;
+      pthread_attr_t attr;
+      int err;
+
+      pthread_attr_init(&attr);
+      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+      if ((err = pthread_create(&pid, &attr, EventInterpreterPluginSendmail::run, (void*) strdup(mailText))) < 0) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
+            intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+      }
+      pthread_attr_destroy(&attr);
+
     } catch (std::exception& e) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to send mail: " +
           std::string(e.what()), lsFatal);
     }
-#endif
   } // handleEvent
+
+  void* EventInterpreterPluginSendmail::run(void* arg) {
+    const char* mailText = (const char *) arg;
+
+#ifndef HAVE_SENDMAIL
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
+        "sendmail binary not found by configure, sending mail is disabled", lsWarning);
+#else
+    posix_spawn_file_actions_t action;
+    char* spawnedArgs[] = { (char *) SENDMAIL, (char *) "-t", NULL };
+    int status, err;
+    pid_t pid;
+    if ((err = posix_spawn_file_actions_init(&action)) != 0) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawn_file_actions_init error " +
+          intToString(err), lsFatal);
+    } else if ((err = posix_spawn_file_actions_addopen(&action, STDIN_FILENO, mailText, O_RDONLY, 0)) != 0) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawn_file_actions_addopen error " +
+          intToString(err), lsFatal);
+    } else if ((err = posix_spawnp(&pid, spawnedArgs[0], &action, NULL, spawnedArgs, NULL)) != 0) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawnp error " +
+          intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+    } else {
+      (void) waitpid(pid, &status, 0);
+      if ((status & 0x7f) == 127) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: abnormal exit of child process", lsFatal);
+      } else if (WIFEXITED(status) && (WEXITSTATUS(status) > 0)) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: sendmail returned error code " +
+            intToString(WEXITSTATUS(status)), lsFatal);
+      }
+    }
+#endif
+
+    unlink(mailText);
+    delete mailText;
+    return NULL;
+  } // run
 
 
 } // namespace dss
