@@ -912,11 +912,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -940,11 +941,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -968,11 +970,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -996,11 +999,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -1025,11 +1029,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -1061,11 +1066,12 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General Failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1098,11 +1104,12 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General Failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1140,11 +1147,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -1168,11 +1176,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -1196,11 +1205,12 @@ namespace dss {
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
         } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "Failure: %s", ex.what());
         } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
           JS_ReportError(cx, "General Failure: %s", ex.what());
         }
-        JS_ResumeRequest(cx, ref);
       }
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
@@ -1233,11 +1243,12 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General Failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1274,13 +1285,15 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General Failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1317,13 +1330,15 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General Failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1362,13 +1377,15 @@ namespace dss {
             JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1403,13 +1420,15 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(result));
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1446,13 +1465,15 @@ namespace dss {
             JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1487,13 +1508,15 @@ namespace dss {
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -1528,13 +1551,15 @@ namespace dss {
             JS_ResumeRequest(cx, ref);
             return JS_TRUE;
           } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Bus failure: %s", ex.what());
           } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "Failure: %s", ex.what());
           } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
             JS_ReportError(cx, "General failure: %s", ex.what());
           }
-          JS_ResumeRequest(cx, ref);
         }
       }
     } catch(ItemNotFoundException& ex) {
