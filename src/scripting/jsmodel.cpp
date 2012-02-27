@@ -1717,6 +1717,9 @@ namespace dss {
         case 2:
           JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, meter->getName().c_str())));
           return JS_TRUE;
+        case 3:
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(meter->isPresent()));
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -1726,6 +1729,7 @@ namespace dss {
     {"className", 0, 0, dsmeter_JSGet, NULL},
     {"dsid", 1, 0, dsmeter_JSGet, NULL},
     {"name", 2, 0, dsmeter_JSGet, NULL},
+    {"present", 3, 0, dsmeter_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
@@ -1913,6 +1917,9 @@ namespace dss {
         case 2:
           JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, pZone->getName().c_str())));
           return JS_TRUE;
+        case 3:
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(pZone->isPresent()));
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -1922,6 +1929,7 @@ namespace dss {
     {"className", 0, 0, zone_JSGet, NULL},
     {"id", 1, 0, zone_JSGet, NULL},
     {"name", 2, 0, zone_JSGet, NULL},
+    {"present", 3, 0, zone_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
