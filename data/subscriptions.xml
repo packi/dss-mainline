@@ -67,6 +67,12 @@
       <parameter name="script_id">solar_computer</parameter>
     </parameter>
   </subscription>
+  <subscription event-name="solar_computer.state_change" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/solar_computer.js</parameter>
+      <parameter name="script_id">solar_computer</parameter>
+    </parameter>
+  </subscription>
 
   <!-- System State Handler -->
   <subscription event-name="model_ready" handler-name="javascript">
@@ -129,4 +135,13 @@
     <property name="script_id" type="string">system_state</property>
   </state>
 
+  <state name="daynight">
+    <property name="value" type="boolean">false</property>
+    <property name="script_id" type="string">solar_computer</property>
+  </state>
+
+  <state name="twilight">
+    <property name="value" type="boolean">false</property>
+    <property name="script_id" type="string">solar_computer</property>
+  </state>
 </subscriptions>

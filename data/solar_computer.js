@@ -407,6 +407,205 @@ function update() {
     }
 };
 
+function getSolarDate(type) {
+    var now = new Date();
+    var datePart = Property.getProperty('/config/geodata/' + type).split(':');
+    var date;
+    if (datePart.length == 3) {
+        date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), datePart[0], datePart[1], datePart[2]);
+    } else {
+        date = datePart[0];
+    }
+    return date;
+}
+
+function stateChange() {
+    // delete still pending Events
+    var schedEventNode = Property.getNode('/system/EventInterpreter/ScheduledEvents');
+    var schedEvents = schedEventNode.getChildren();
+    schedEvents.map(function(event) {
+        if (event.getChild('name').getValue().search('solar_computer.state_change') >= 0) {
+            schedEventNode.removeChild(event);
+        }
+    })
+
+    var sunset = getSolarDate('sunset');
+    var dusk_end = getSolarDate('civil_dusk');
+    var dawn_start = getSolarDate('civil_dawn');
+    var sunrise = getSolarDate('sunrise');
+    var now = new Date();
+    var nextStateChange;
+    var pTwilight = Property.getNode('/usr/states/twilight');
+    var pDay = Property.getNode('/usr/states/daynight');
+
+    if ((dawn_start === "[Below]") && (dusk_end === "[Below]")) {
+        // continuous night
+        // night
+        pTwilight.setStatusValue(false);
+        pDay.setStatusValue(false);
+    } else if ((sunrise === "[Above]") && (sunset === "[Above]")) {
+        // continuous day
+        // day
+        pTwilight.setStatusValue(false);
+        pDay.setStatusValue(true);
+    } else if ((sunrise === "[Below]") && (sunset === "[Below]")) {
+        // night-twilight
+        if (now < dawn_start) {
+            // night
+            nextStateChange = dawn_start;
+            pTwilight.setStatusValue(false);
+            pDay.setStatusValue(false);
+        } else if (now < dusk_end) {
+            // twilight
+            nextStateChange = dusk_end;
+            pTwilight.setStatusValue(true);
+            pDay.setStatusValue(false);
+        } else {
+            // night
+            nextStateChange = dawn_start;
+            nextStateChange.setDate(nextStateChange.getDate() + 1);
+            pTwilight.setStatusValue(false);
+            pDay.setStatusValue(false);
+        }
+    } else if ((dawn_start === "[Above]") && (dusk_end === "[Above]")) {
+        // twilight-day
+        if (sunset === "[Above]") {
+            // last sunrise
+            if (now < sunrise) {
+                // twilight
+                nextStateChange = sunrise;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else {
+                // day
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(true);
+            }
+        } else if (sunrise === "[Above]") {
+            // first sunset
+            if (now < sunset) {
+                // day
+                nextStateChange = sunset;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(true);
+            } else {
+                // twilight
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            }
+        } else {
+            if (now < sunrise) {
+                // twilight
+                nextStateChange = sunrise;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else if ( now < sunset) {
+                // day
+                nextStateChange = sunset;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(true);
+            } else {
+                // twilight
+                nextStateChange = sunrise;
+                nextStateChange.setDate(nextStateChange.getDate() + 1);
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(false);
+            }
+        }
+    } else {
+        // night-twilight-day
+        if (dusk_end === "[Above]") {
+            // last twilight
+            if (now < dawn_start) {
+                // night
+                nextStateChange = dawn_start;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(false);
+            } else if (now < sunrise) {
+                // twilight
+                nextStateChange = sunrise;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else if (now < sunset) {
+                // day
+                nextStateChange = sunset;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(true);
+            } else {
+                // twilight
+                nextStateChange = sunrise;
+                nextStateChange.setDate(nextStateChange.getDate() + 1);
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            }
+        } else if (dawn_start === "[Above]") {
+            // first twilight
+            if (now < sunrise) {
+                // twilight
+                nextStateChange = sunrise;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else if (now < sunset) {
+                // day
+                nextStateChange = sunset;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(true);
+            } else if (now < dusk_end) {
+                // twilight
+                nextStateChange = dusk_end;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else {
+                // night
+                nextStateChange = sunrise; // should be next dawn_start but this is not available
+                nextStateChange.setDate(nextStateChange.getDate() + 1);
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(false);
+            }
+        } else {
+            if (now < dawn_start) {
+                // night
+                nextStateChange = dawn_start;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(false);
+            } else if (now < sunrise) {
+                // twilight
+                nextStateChange = sunrise;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else if (now < sunset) {
+                // day
+                nextStateChange = sunset;
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(true);
+            } else if (now < dusk_end) {
+                // twilight
+                nextStateChange = dusk_end;
+                pTwilight.setStatusValue(true);
+                pDay.setStatusValue(false);
+            } else {
+                // night
+                nextStateChange = dawn_start;
+                nextStateChange.setDate(nextStateChange.getDate() + 1);
+                pTwilight.setStatusValue(false);
+                pDay.setStatusValue(false);
+            }
+        }
+    }
+
+    if (nextStateChange !== undefined) {
+        var eventST = String(nextStateChange.getFullYear() +
+                             pad(nextStateChange.getMonth() + 1) +
+                             pad(nextStateChange.getDate()) + 'T' +
+                             pad(nextStateChange.getHours()) +
+                             pad(nextStateChange.getMinutes()) +
+                             pad(nextStateChange.getSeconds()));
+        var stateChangeEvent = new TimedEvent("solar_computer.state_change",
+                                              eventST);
+        stateChangeEvent.raise();
+    }
+}
+
 if (raisedEvent.name == "running") {
 
     var la = Property.getProperty('/config/geodata/latitude');
@@ -418,6 +617,7 @@ if (raisedEvent.name == "running") {
     }
 
     update();
+    stateChange();
 
     var d = new Date();
     d.setHours(3);
@@ -434,4 +634,7 @@ if (raisedEvent.name == "running") {
     updateEvent.raise();
 } else if (raisedEvent.name == "solar_computer.update") {
     update();
+    stateChange();
+} else if (raisedEvent.name == "solar_computer.state_change") {
+    stateChange();
 }
