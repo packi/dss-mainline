@@ -401,17 +401,8 @@ function update() {
             print(twilights[twilightType].morning + ": " + solar.sunrise);
             print(twilights[twilightType].evening + ": " + solar.sunset);
 
-            // special handling for possible return value from solar calculator
-            if ((solar.sunrise !== "[Above]") && (solar.sunrise !== "[Below]")) {
-                Property.setProperty('/config/geodata/' + twilights[twilightType].morning, solar.sunrise);
-            } else {
-                Property.setProperty('/config/geodata/' + twilights[twilightType].morning, "");
-            }
-            if ((solar.sunset !== "[Above]") && (solar.sunset !== "[Below]")) {
-                Property.setProperty('/config/geodata/' + twilights[twilightType].evening, solar.sunset);
-            } else {
-                Property.setProperty('/config/geodata/' + twilights[twilightType].evening, "");
-            }
+            Property.setProperty('/config/geodata/' + twilights[twilightType].morning, solar.sunrise);
+            Property.setProperty('/config/geodata/' + twilights[twilightType].evening, solar.sunset);
         }
     }
 };
