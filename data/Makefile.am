@@ -4,6 +4,7 @@ dist_dssdata_DATA = \
 	$(top_srcdir)/data/sim.xml \
 	$(top_srcdir)/data/subscriptions.xml \
 	$(top_srcdir)/data/solar_computer.js \
+	$(top_srcdir)/data/scripts/system_state.js \
 	$(top_srcdir)/data/handle_temperature_sensor_events.js \
 	$(top_srcdir)/data/read_temperature.js \
 	$(top_srcdir)/data/simulated_device.js
