@@ -126,21 +126,13 @@ namespace dss {
     HASH_MAP<std::string, EventRelayTarget*> m_IDTargetMap;
   }; // EventInterpreterInternalRelay
 
-  class EventInterpreterPluginEmail : public EventInterpreterPlugin {
-   private:
-   public:
-       EventInterpreterPluginEmail(EventInterpreter* _pInterpreter);
-
-     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-   } __attribute__ ((deprecated)); // EventInterpreterPluginEmail
-
   class EventInterpreterPluginSendmail : public EventInterpreterPlugin {
    private:
      static void* run(void* arg);
    public:
      EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter);
      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-   }; // EventInterpreterPluginEmail
+   }; // EventInterpreterPluginSendmail
 
 } // namespace dss
 
