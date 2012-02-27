@@ -25,6 +25,11 @@
 #define _LARGEFILE_SOURCE // Enable 64-bit file offsets
 #endif
 
+#if defined(__APPLE__)
+#define _DARWIN_C_SOURCE 1
+#include <sys/socket.h>
+#endif
+
 #ifndef _WIN32_WCE // Some ANSI #includes are not available on Windows CE
 #include <sys/types.h>
 #include <sys/stat.h>
