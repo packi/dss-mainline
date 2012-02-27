@@ -136,9 +136,9 @@ namespace dss {
 
   class EventInterpreterPluginSendmail : public EventInterpreterPlugin {
    private:
+     static void* run(void* arg);
    public:
-       EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter);
-
+     EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter);
      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
    }; // EventInterpreterPluginEmail
 
