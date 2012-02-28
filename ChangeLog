@@ -1,5 +1,17 @@
 dSS - digitalSTROM Server
 
+v1.7.0 28.02.2012
+	* removed deprecated email plugin handler
+	* added scripting method to set high level states (#1312),
+	  load state definitions from subscription xml's,
+	  added state handler scripts for call scene events and solar times
+	* replace popen/fork with posix_spawn to execute sendmail in a new detached thread (#1416)
+	* add origin Device DSID to callScene events (#1357)
+	* compile again on MacOS X (#1001)
+	* implement undo scene handling (#1311)
+	* add scripting method Zone.blink (#1389)
+	* synchronize last scenes from dSM scene history (#1312)
+
 v1.6.0 13.02.2012
 	* keep unit Wh for energyMeterValue in property tree, fixes #1355
 	* set the maximal allowed power value for metering
@@ -7,25 +19,29 @@ v1.6.0 13.02.2012
 	* set solar times properties to empty when they do not occur today
 	* also calculate civil, nautical and astronomical twilights
 
+v1.5.2 10.02.2012
+	* keep unit Wh for energyMeterValue in property tree, fixes #1355
+	* set the maximal allowed power value for metering
+
 v1.5.1 06.02.2012
-    * better RRD detection on startup, avoids generation of new rrd file
-      on each startup
-    * correctly handle optional getValues() parameters
-    * store power series in RRD, use power series only for seconds intervall
+	* better RRD detection on startup, avoids generation of new rrd file
+	  on each startup
+	* correctly handle optional getValues() parameters
+	* store power series in RRD, use power series only for seconds intervall
 
 v1.5.0 31.01.2012
-    * added js scripting interface to libcurl (#1279)
-      added scripting module with a http prototype object
-    * metering series do not store power values
-    * add possibility to select the desired range of metering values (#1330)
-    * change metering intervals (#1332)
-    * reinstate "energy" series as energy counter values (#1318)
-    * new series "energyDelta" with energy per resolution step. Optional in
-      "Ws" or "Wh" (default)
-    * keep energy counter always increasing
-    * added scripting Zone.callScene method (#842)
-    * use tr1/unordered_map instead of the GCC ext/hash_map (#1290)
-    * filter getReachableScenes by group (#1310)
+	* added js scripting interface to libcurl (#1279)
+	  added scripting module with a http prototype object
+	* metering series do not store power values
+	* add possibility to select the desired range of metering values (#1330)
+	* change metering intervals (#1332)
+	* reinstate "energy" series as energy counter values (#1318)
+	* new series "energyDelta" with energy per resolution step. Optional in
+	  "Ws" or "Wh" (default)
+	* keep energy counter always increasing
+	* added scripting Zone.callScene method (#842)
+	* use tr1/unordered_map instead of the GCC ext/hash_map (#1290)
+	* filter getReachableScenes by group (#1310)
 
 v1.4.2 18.01.2012
 	* ds485 state handling and possible dSS crash:
