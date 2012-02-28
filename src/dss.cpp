@@ -415,8 +415,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new EventInterpreterPluginEmail(m_pEventInterpreter.get());
-    m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginSendmail(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
