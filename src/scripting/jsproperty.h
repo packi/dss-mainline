@@ -84,7 +84,7 @@ namespace dss {
     JSObject* createJSProperty(ScriptContext& _ctx, PropertyNode* _node);
     JSObject* createJSProperty(ScriptContext& _ctx, PropertyNodePtr _node);
     JSObject* createJSProperty(ScriptContext& _ctx, const std::string& _path);
-    virtual bool store(ScriptContext* _ctx);
+    virtual bool store(ScriptContext* _ctx, PropertyNodePtr _node = boost::shared_ptr<PropertyNode>());
     virtual bool load(ScriptContext* _ctx);
   protected:
     PropertySystem& m_PropertySystem;

@@ -38,11 +38,14 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "src/base.h"
+#include "src/datetools.h"
 #include "src/logger.h"
+#include "src/propertysystem.h"
 
 namespace dss {
 
   class ScriptContext;
+  class ScriptContextWrapper;
   class ScriptExtension;
   class ScriptObject;
   class ScriptContextAttachedObject;
@@ -94,6 +97,7 @@ namespace dss {
     JSObject* m_pRootObject;
     boost::scoped_ptr<ScriptObject> m_RootObject;
     ScriptEnvironment& m_Environment;
+    boost::shared_ptr<ScriptContextWrapper> m_pWrapper;
     JSContext* m_pContext;
     std::vector<ScriptContextAttachedObject*> m_AttachedObjects;
     mutable boost::mutex m_AttachedObjectsMutex;
@@ -123,6 +127,11 @@ namespace dss {
     /** Returns a const reference to the ScriptEnvironment */
     const ScriptEnvironment& getEnvironment() const { return m_Environment; }
     ScriptEnvironment& getEnvironment() { return m_Environment; }
+    /** Returns a ptr to an optional wrapper class */
+    boost::shared_ptr<ScriptContextWrapper> getWrapper() { return m_pWrapper; }
+    void attachWrapper(boost::shared_ptr<ScriptContextWrapper> _wrapper) {
+      m_pWrapper = _wrapper;
+    }
     ScriptObject& getRootObject() { return *m_RootObject; }
     bool raisePendingExceptions();
 
@@ -191,6 +200,34 @@ namespace dss {
     const std::string& getName() const { return m_Name; }
   }; // ScriptExtension
 
+  /** Wrap the script context and add script_id and property node
+   * data around */
+  class ScriptContextWrapper {
+  public:
+    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
+                         PropertyNodePtr _pRootNode,
+                         const std::string& _identifier,
+                         bool _uniqueNode
+                        );
+    ~ScriptContextWrapper();
+    boost::shared_ptr<ScriptContext> get();
+    void addFile(const std::string& _name);
+    PropertyNodePtr getPropertyNode();
+    const std::string& getIdentifier() const;
+  private:
+    void stopScript(bool _value);
+  private:
+    boost::shared_ptr<ScriptContext> m_pContext;
+    DateTime m_StartTime;
+    std::vector<std::string> m_LoadedFiles;
+    PropertyNodePtr m_pPropertyNode;
+    PropertyNodePtr m_StopNode;
+    PropertyNodePtr m_StartedAtNode;
+    PropertyNodePtr m_FilesNode;
+    PropertyNodePtr m_AttachedObjectsNode;
+    std::string m_Identifier;
+    bool m_UniqueNode;
+  }; // ScriptContextWrapper
 
   class ScriptFunctionParameterList {
   public:

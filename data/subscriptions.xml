@@ -67,4 +67,66 @@
       <parameter name="script_id">solar_computer</parameter>
     </parameter>
   </subscription>
-</subscriptions> 
+
+  <!-- System State Handler -->
+  <subscription event-name="model_ready" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="callScene" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="undoScene" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+
+  <!-- State Definitions -->
+  <state name="presence">
+    <property name="value" type="string"></property>
+    <property name="persistent" type="boolean">true</property>
+    <property name="valuerange">
+        <property name="absent" type="string">absent</property>
+        <property name="present" type="string">present</property>
+    </property>
+    <property name="script_id" type="string">system_state</property>
+  </state>
+
+  <state name="panic">
+    <property name="value" type="string"></property>
+    <property name="persistent" type="boolean">true</property>
+    <property name="valuerange">
+        <property name="active" type="string">active</property>
+        <property name="inactive" type="string">inactive</property>
+    </property>
+    <property name="script_id" type="string">system_state</property>
+  </state>
+
+  <state name="alarm">
+    <property name="value" type="string"></property>
+    <property name="persistent" type="boolean">true</property>
+    <property name="valuerange">
+        <property name="active" type="string">active</property>
+        <property name="inactive" type="string">inactive</property>
+    </property>
+    <property name="script_id" type="string">system_state</property>
+  </state>
+
+  <state name="hibernation">
+    <property name="value" type="string"></property>
+    <property name="persistent" type="boolean">true</property>
+    <property name="valuerange">
+        <property name="awake" type="string">awake</property>
+        <property name="sleeping" type="string">sleeping</property>
+    </property>
+    <property name="script_id" type="string">system_state</property>
+  </state>
+
+</subscriptions>

@@ -89,7 +89,7 @@ namespace dss {
         try {
           propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         } catch(ScriptException& ex) {
-          JS_ReportError(cx, "Property.setValue: cannot convert argument: value");
+          JS_ReportError(cx, "Property.setValue: cannot convert argument: property-path");
           return JS_FALSE;
         }
         node = ext->getProperty(ctx, propName);
@@ -132,6 +132,93 @@ namespace dss {
     return JS_FALSE;
   } // prop_setProperty
 
+  JSBool prop_setStatusProperty(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
+        ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
+    if(node == NULL) {
+      JS_ReportError(cx, "Property.setStatusProperty: invalid object");
+      return JS_FALSE;
+    }
+
+    // check node -> script-id
+    PropertyNodePtr scriptId = node->getPropertyByName("script_id");
+    if (!scriptId || (scriptId->getStringValue() != ctx->getWrapper()->getIdentifier())) {
+      JS_ReportError(cx, "Property.setStatusProperty: not allowed to modify status managed by script_id \"%s\" from \"%s\"",
+          (scriptId ? scriptId->getStringValue().c_str() : "n/a"),
+          ctx->getWrapper()->getIdentifier().c_str());
+      return JS_FALSE;
+    }
+
+    // get value
+    if (argc < 1) {
+      JS_ReportError(cx, "Property.setStatusProperty: missing parameter");
+      return JS_FALSE;
+    }
+
+    jsval statusValue = JS_ARGV(cx, vp)[0];
+    char* statusP = JS_EncodeString(cx, JS_ValueToString(cx, statusValue));
+    std::string argValue(statusP);
+    JS_free(cx, statusP);
+
+    // check value range
+    PropertyNodePtr valueNode = node->getPropertyByName("value");
+    if (valueNode->getValueType() == vTypeString) {
+      PropertyNodePtr vrNode = node->getPropertyByName("valuerange");
+      if (vrNode == NULL) {
+        JS_ReportError(cx, "Property.setStatusProperty: state object without value range");
+        return JS_FALSE;
+      }
+      PropertyNodePtr vrChild;
+      for (int i = 0; i < vrNode->getChildCount(); i++) {
+        std::string vRange = vrNode->getChild(i)->getStringValue();
+        if (vRange == argValue) {
+          vrChild = vrNode->getChild(i);
+          break;
+        }
+      }
+      if (vrChild == NULL) {
+        JS_ReportError(cx, "Property.setStatusProperty: argument not within defined value range");
+        return JS_FALSE;
+      }
+    } else if ((valueNode->getValueType() == vTypeBoolean) && !JSVAL_IS_BOOLEAN(statusValue)) {
+      JS_ReportError(cx, "Property.setStatusProperty: argument is not boolean");
+      return JS_FALSE;
+    } else if ((valueNode->getValueType() == vTypeInteger) && !JSVAL_IS_INT(statusValue)) {
+      JS_ReportError(cx, "Property.setStatusProperty: argument is not numeric");
+      return JS_FALSE;
+    }
+
+    // set value
+    try {
+      if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
+        valueNode->setStringValue(ctx->convertTo<std::string>(statusValue));
+      } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[0])) {
+        valueNode->setBooleanValue(ctx->convertTo<bool>(statusValue));
+      } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
+        valueNode->setIntegerValue(ctx->convertTo<int>(statusValue));
+      } else {
+        JS_ReportWarning(cx, "Property.setStatusProperty: unknown type of argument");
+        return JS_FALSE;
+      }
+    } catch(PropertyTypeMismatch&) {
+      JS_ReportError(cx, "Property.setStatusProperty: error setting value of %s", node->getDisplayName().c_str());
+      return JS_FALSE;
+    } catch(ScriptException& ex) {
+      JS_ReportError(cx, "Property.setStatusProperty: cannot convert argument");
+      return JS_FALSE;
+    }
+
+    // save state values
+    if (node->getPropertyByName("persistent")) {
+      ext->store(ctx, node);
+    }
+
+    return JS_TRUE;
+  } // prop_setStatusProperty
+
   JSBool prop_getProperty(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
@@ -144,34 +231,34 @@ namespace dss {
         try {
           propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         } catch(ScriptException& ex) {
-          JS_ReportError(cx, "Property.getProperty: cannot convert argument: name");
+          JS_ReportError(cx, "Property.getProperty: cannot convert argument: path");
           return JS_FALSE;
         }
         node = ext->getProperty(ctx, propName);
       } else {
-        JS_ReportWarning(cx, "Property.getProperty: need one argument: property-path");
+        JS_ReportWarning(cx, "Property.getProperty: need one argument: path");
       }
     }
     if(node == NULL) {
       JS_SET_RVAL(cx, vp, JSVAL_NULL);
-    } else {
-      switch(node->getValueType()) {
-      case vTypeInteger:
-        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(node->getIntegerValue()));
-        break;
-      case vTypeString: {
-          std::string val = node->getStringValue();
-          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, val.c_str())));
-        }
-        break;
-      case vTypeBoolean:
-        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(node->getBoolValue()));
-        break;
-      case vTypeNone:
-        JS_SET_RVAL(cx, vp, JSVAL_VOID);
-      default:
-        JS_SET_RVAL(cx, vp, JSVAL_NULL);
-      }
+      return JS_TRUE;
+    }
+    switch(node->getValueType()) {
+    case vTypeInteger:
+      JS_SET_RVAL(cx, vp, INT_TO_JSVAL(node->getIntegerValue()));
+      break;
+    case vTypeString: {
+      std::string val = node->getStringValue();
+      JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, val.c_str())));
+    }
+    break;
+    case vTypeBoolean:
+      JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(node->getBoolValue()));
+      break;
+    case vTypeNone:
+      JS_SET_RVAL(cx, vp, JSVAL_VOID);
+    default:
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
     }
     return JS_TRUE;
   } // prop_getProperty
@@ -583,6 +670,7 @@ namespace dss {
   JSFunctionSpec prop_methods[] = {
     JS_FS("setValue", prop_setProperty, 1, 0),
     JS_FS("getValue", prop_getProperty, 0, 0),
+    JS_FS("setStatusValue", prop_setStatusProperty, 1, 0),
     JS_FS("setListener", prop_setListener, 1, 0),
     JS_FS("removeListener", prop_removeListener, 1, 0),
     JS_FS("getChild", prop_getChild, 1, 0),
@@ -724,7 +812,7 @@ namespace dss {
     return m_PropertySystem.getProperty(_path);
   } // getProperty
 
-  bool PropertyScriptExtension::store(ScriptContext* _ctx) {
+  bool PropertyScriptExtension::store(ScriptContext* _ctx, PropertyNodePtr _node) {
     return false;
   } // store
 

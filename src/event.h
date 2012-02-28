@@ -324,6 +324,7 @@ namespace dss {
     int m_EventsProcessed;
   private:
     void loadSubscription(Poco::XML::Node* _node);
+    void loadState(Poco::XML::Node* _node);
     void loadFilter(Poco::XML::Node* _node, EventSubscription& _subscription);
     void loadPropertyFilter(Poco::XML::Node* _pNode, EventSubscription& _subscription);
     boost::shared_ptr<EventSubscription> subscriptionByID(const std::string& _name);

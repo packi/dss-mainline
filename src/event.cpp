@@ -387,6 +387,9 @@ namespace dss {
             if(curNode->localName() == "subscription") {
 	            loadSubscription(curNode);
             }
+            if(curNode->localName() == "state") {
+              loadState(curNode);
+            }
             curNode = curNode->nextSibling();
           }
         }
@@ -518,6 +521,50 @@ namespace dss {
       subscribe(subscription);
     }
   } // loadSubsription
+
+  void EventInterpreter::loadState(Node* _node) {
+    PropertyNodePtr pNode = getDSS().getPropertySystem().createProperty("/usr/states");
+    Element* elem = dynamic_cast<Element*>(_node);
+    if (elem != NULL) {
+      std::string evtName;
+      if (elem->hasAttribute("name")) {
+        evtName = elem->getAttribute("name");
+      }
+      if (evtName.size() == 0) {
+        log("loadState: empty state name, skipping this state", lsWarning);
+        return;
+      }
+      log("loadState: name \"" + evtName + "\"", lsDebug);
+
+      if (pNode->getPropertyByName(evtName)) {
+        log("loadState: duplicate state name, skipping this state", lsWarning);
+        return;
+      }
+
+      PropertyNodePtr pState(new PropertyNode(evtName.c_str()));
+      if (pState == NULL) {
+        log("loadState: unable to create state property", lsWarning);
+        return;
+      }
+      pNode->addChild(pState);
+      pState->createProperty("name")->setStringValue(evtName);
+      pState->loadFromNode(_node);
+      pState->setFlag(PropertyNode::Writeable, false);
+      for (int i = 0; i < pState->getChildCount(); i++) {
+        pState->getChild(i)->setFlag(PropertyNode::Readable, true);
+      }
+
+      PropertyNodePtr pValue = pState->getPropertyByName("value");
+      PropertyNodePtr pScript = pState->getPropertyByName("script_id");
+      PropertyNodePtr pPersistent = pState->getPropertyByName("persistent");
+      if (pPersistent != NULL && pScript != NULL) {
+        pValue->setFlag(PropertyNode::Archive, true);
+        std::string filename = DSS::getInstance()->getSavedPropsDirectory() + "/" +
+            pScript->getStringValue() + "_" + evtName + ".xml";
+        DSS::getInstance()->getPropertySystem().loadFromXML(filename, pState);
+      }
+    }
+  } // loadState
 
 
   //================================================== EventQueue
