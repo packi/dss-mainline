@@ -132,6 +132,7 @@ namespace dss {
     void attachWrapper(boost::shared_ptr<ScriptContextWrapper> _wrapper) {
       m_pWrapper = _wrapper;
     }
+    void detachWrapper() { m_pWrapper.reset(); }
     ScriptObject& getRootObject() { return *m_RootObject; }
     bool raisePendingExceptions();
 
