@@ -393,7 +393,10 @@ namespace dss {
         m_WrappedContexts.push_back(wrapper);
         Logger::getInstance()->log("JavaScript Event Handler: "
                                    "keep " + scripts + " in memory", lsDebug);
+      } else {
+        ctx->detachWrapper();
       }
+
     } else {
       throw std::runtime_error("JavaScript Event Handler: missing argument filename1");
     }
@@ -468,6 +471,7 @@ namespace dss {
       if(!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
         Logger::getInstance()->log("JavaScript cleanup: erasing script "
             + (*ipScriptContextWrapper)->getIdentifier());
+        (*ipScriptContextWrapper)->get()->detachWrapper();
         ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
       } else {
         Logger::getInstance()->log("JavaScript cleanup: script "
