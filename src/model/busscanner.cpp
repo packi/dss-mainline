@@ -76,6 +76,15 @@ namespace dss {
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }
+        if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+          log("scanDSMeter: dSMeter is incompatible", lsWarning);
+
+          _dsMeter->setDatamodelHash(hash.Hash);
+          _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
+          _dsMeter->setIsPresent(false);
+          _dsMeter->setIsValid(true);
+          return true;
+        }
       } catch(BusApiError& e) {
         log("scanDSMeter: Error getting dSMSpecs", lsFatal);
         return false;
