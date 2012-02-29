@@ -109,7 +109,7 @@ namespace dss {
       return JS_FALSE;
 
     char* s = JS_EncodeString(cx, str);
-    slist = curl_slist_append(slist, strdup(s));
+    slist = curl_slist_append(slist, s);
     if (!slist) {
       JS_ReportOutOfMemory(cx);
       return JS_FALSE;
