@@ -194,7 +194,7 @@ namespace dss {
       if(beginsWith(_path, "/")) {
         return PropertyScriptExtension::getProperty(_context, _path);
       } else {
-        boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+        boost::shared_ptr<ScriptContextWrapper> wrapper = _context->getWrapper();
         assert(wrapper != NULL);
         return wrapper->getPropertyNode()->getProperty(_path);
       }
@@ -204,14 +204,14 @@ namespace dss {
       if(beginsWith(_name, "/")) {
         return PropertyScriptExtension::createProperty(_context, _name);
       } else {
-        boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+        boost::shared_ptr<ScriptContextWrapper> wrapper = _context->getWrapper();
         assert(wrapper != NULL);
         return wrapper->getPropertyNode()->createProperty(_name);
       }
     }
 
     virtual bool store(ScriptContext* _context, PropertyNodePtr _node) {
-      boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+      boost::shared_ptr<ScriptContextWrapper> wrapper = _context->getWrapper();
       assert(wrapper != NULL);
       std::string fileName(wrapper->getIdentifier());
       PropertyNodePtr pNode;
@@ -228,7 +228,7 @@ namespace dss {
     }
 
     virtual bool load(ScriptContext* _context) {
-      boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+      boost::shared_ptr<ScriptContextWrapper> wrapper = _context->getWrapper();
       assert(wrapper != NULL);
       // TODO: sanitize filename to prevent world-domination
       return m_PropertySystem.loadFromXML(
