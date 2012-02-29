@@ -208,6 +208,11 @@ namespace dss {
       if(targetIsInner(pTarget)) {
         m_pInner->undoScene(pTarget, _origin, scene);
       }
+      Group* pGroup = dynamic_cast<Group*>(pTarget);
+      if(pGroup != NULL) {
+        m_pEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
+                                       pGroup->getID(), _origin, scene, true);
+      }
     }
 
     virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin) {
@@ -216,6 +221,11 @@ namespace dss {
       }
       if(targetIsInner(pTarget)) {
         m_pInner->undoSceneLast(pTarget, _origin);
+      }
+      Group* pGroup = dynamic_cast<Group*>(pTarget);
+      if(pGroup != NULL) {
+        m_pEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
+                                       pGroup->getID(), _origin, -1, false);
       }
     }
 

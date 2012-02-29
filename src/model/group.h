@@ -67,8 +67,10 @@ namespace dss {
     int getLastCalledScene() const { return m_LastCalledScene; }
     /** @copydoc Device::setLastCalledScene */
     void setLastCalledScene(const int _value) {
-      m_LastButOneCalledScene = m_LastCalledScene;
-      m_LastCalledScene = _value;
+      if (_value != m_LastCalledScene) {
+        m_LastButOneCalledScene = m_LastCalledScene;
+        m_LastCalledScene = _value;
+      }
     }
     /** @copydoc Device::setLastButOneCalledScene */
     void setLastButOneCalledScene(const int _value) {
