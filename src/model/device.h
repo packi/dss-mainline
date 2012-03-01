@@ -205,8 +205,10 @@ namespace dss {
     int getLastCalledScene() const { return m_LastCalledScene; }
     /** Sets the last called scene. */
     void setLastCalledScene(const int _value) {
-      m_LastButOneCalledScene = m_LastCalledScene;
-      m_LastCalledScene = _value;
+      if (_value != m_LastCalledScene) {
+        m_LastButOneCalledScene = m_LastCalledScene;
+        m_LastCalledScene = _value;
+      }
     }
     /** If state hasn't changed undo the last called scene command and restore state. */
     void setLastButOneCalledScene(const int _value) {
