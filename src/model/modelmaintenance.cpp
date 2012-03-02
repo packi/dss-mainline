@@ -1117,9 +1117,11 @@ namespace dss {
         m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
-      // TODO: get event name from device table
-      std::string eventName;
 
+      std::string eventName = pDevRev->getSensorEventName(_eventIndex);
+      if (eventName.empty()) {
+        eventName = "event" + intToString(_eventIndex);
+      }
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("deviceSensorEvent", pDevRev));
       pEvent->setProperty("sensorEvent", eventName);

@@ -62,6 +62,8 @@ namespace dss {
      * @note This will lookup the device */
     int getFunctionID() const;
 
+    std::string getSensorEventName(const int _eventIndex);
+
     /** Compares two device references.
      * Device references are considered equal if their DSID match. */
     bool operator==(const DeviceReference& _other) const {

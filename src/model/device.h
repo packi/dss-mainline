@@ -292,6 +292,9 @@ namespace dss {
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/
     bool operator==(const Device& _other) const;
+
+    std::string getSensorEventName(const int _eventIndex) const;
+    void setSensorEventName(const int _eventIndex, std::string& _name);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

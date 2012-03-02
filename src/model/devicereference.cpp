@@ -115,4 +115,8 @@ namespace dss {
     getDevice()->blink(_origin);
   }
 
+  std::string DeviceReference::getSensorEventName(const int _eventIndex) {
+    return getDevice()->getSensorEventName(_eventIndex);
+  }
+
 } // namespace dss

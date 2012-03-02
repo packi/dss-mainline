@@ -121,6 +121,9 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
         m_pPropertyNode->createProperty("button/setsLocalPriority")
           ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
+        if (!m_pPropertyNode->getProperty("sensorEvents")) {
+          PropertyNodePtr sensorNode = m_pPropertyNode->createProperty("sensorEvents");
+        }
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
       }
@@ -664,5 +667,28 @@ namespace dss {
     }
     return result;
   } // getTags
+
+  std::string Device::getSensorEventName(const int _eventIndex) const {
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr nameNode = m_pPropertyNode->getProperty("sensorEvents/event" + intToString(_eventIndex));
+      if (nameNode) {
+        return nameNode->getStringValue();
+      }
+    }
+    return "";
+  }
+
+  void Device::setSensorEventName(const int _eventIndex, std::string& _name) {
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr nameNode = m_pPropertyNode->createProperty("sensorEvents/event" + intToString(_eventIndex));
+      if (_name.empty()) {
+        m_pPropertyNode->getProperty("sensorEvents")->removeChild(nameNode);
+      } else {
+        nameNode->setStringValue(_name);
+        nameNode->setFlag(PropertyNode::Archive, true);
+      }
+      dirty();
+    }
+  }
 
 } // namespace dss
