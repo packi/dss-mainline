@@ -35,6 +35,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/eventinterpreterplugins.h \
 	$(top_srcdir)/src/eventsubscriptionsession.cpp \
 	$(top_srcdir)/src/eventsubscriptionsession.h \
+	$(top_srcdir)/src/expatparser.cpp \
+	$(top_srcdir)/src/expatparser.h \
 	$(top_srcdir)/src/foreach.h \
 	$(top_srcdir)/src/hasher.cpp \
 	$(top_srcdir)/src/hasher.h \

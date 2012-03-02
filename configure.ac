@@ -23,6 +23,14 @@ if test -n "$MT_SEARCHPATH_PROGS"; then
     export PATH=$PATH:$MT_SEARCHPATH_PROGS
 fi
 
+MT_OPTION([debug], [enable],
+          [enable debug flags during compilation],
+          [
+            CFLAGS="-g -Wall -O0"
+            CXXFLAGS="-g -Wall -O0"
+          ],
+          [])
+
 MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
           [],[])
@@ -276,6 +284,7 @@ PKG_CHECK_MODULES([LIBRRD], [librrd], [],
 MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
                           [dsm-api-v2], [DsmApiOpen], [-lds485-client])
 
+MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
 if test "x$SOAP_OPTION_ENABLED" = "xyes"; then
     PKG_CHECK_MODULES([GSOAP], [gsoapssl++], [],

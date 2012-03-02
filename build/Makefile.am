@@ -50,7 +50,8 @@ libdsscore_a_CXXFLAGS = \
 			$(OPENSSL_CFLAGS) \
 			$(AVAHI_CFLAGS) \
 			$(CURL_CFLAGS) \
-			$(LIBRRD_CFLAGS)
+			$(LIBRRD_CFLAGS) \
+			$(EXPAT_CFLAGS)
 
 libunix_a_CXXFLAGS = \
 			$(BOOST_CPPFLAGS)
@@ -87,7 +88,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
 			$(CURL_LIBS) \
-			$(LIBRRD_LIBS) -lrrd_th
+			$(LIBRRD_LIBS) -lrrd_th \
+			$(EXPAT_LIBS)
 
 if BUILD_SOAP
 
@@ -135,7 +137,8 @@ dsstests_LDADD = \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
 			$(CURL_LIBS) \
-			$(LIBRRD_LIBS) -lrrd_th
+			$(LIBRRD_LIBS) -lrrd_th \
+			$(EXPAT_LIBS)
 
 if BUILD_SOAP
 

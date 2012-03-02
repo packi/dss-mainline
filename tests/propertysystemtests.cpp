@@ -30,6 +30,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "src/logger.h"
 
 int testGetter() {
 #ifdef VERBOSE_TESTS
@@ -459,9 +460,50 @@ BOOST_AUTO_TEST_CASE(testLoadingEmptyNodesWorks) {
     "</properties>";
   ofs.close();
 
-  propSys.loadFromXML(fileName, propSys.createProperty("/config"));
+  BOOST_CHECK_EQUAL(propSys.loadFromXML(getTempDir() + "testconfig.xml", propSys.createProperty("/config")), true);
   boost::filesystem::remove_all(fileName);
 }
+
+BOOST_AUTO_TEST_CASE(testInvalidXML) {
+  PropertySystem propSys;
+  
+  std::string fileName = getTempDir() + "/testconfig.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs <<
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "<properties version=\"1\">\n"
+    "  <property name=\"config\">\n"
+    "    <property name=\"crasher\" type=\"string\">\n"
+    "      <value\n"
+    "    </property>\n"
+    "  </property>\n"
+    "</properties>";
+  ofs.close();
+
+  BOOST_CHECK_EQUAL(propSys.loadFromXML(getTempDir() + "testconfig.xml", propSys.createProperty("/config")), false);
+  boost::filesystem::remove_all(fileName);
+}
+
+BOOST_AUTO_TEST_CASE(testExceptionWhileParsing) {
+  PropertySystem propSys;
+  
+  std::string fileName = getTempDir() + "/testconfig.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs <<
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "<properties version=\"1\">\n"
+    "  <property name=\"config\">\n"
+    "    <property name=\"crasher\" type=\"integer\">\n"
+    "      <value>UAZ is not an integer</value>\n"
+    "    </property>\n"
+    "  </property>\n"
+    "</properties>";
+  ofs.close();
+
+  BOOST_CHECK_EQUAL(propSys.loadFromXML(getTempDir() + "testconfig.xml", propSys.createProperty("/config")), false);
+  boost::filesystem::remove_all(fileName);
+}
+
 
 BOOST_AUTO_TEST_CASE(testQueryAttributes) {
   PropertySystem propSys;

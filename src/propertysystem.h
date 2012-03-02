@@ -1,8 +1,9 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010,2012 digitalSTROM.org, Zurich, Switzerland
     Copyright (c) 2008 Patrick Staehlin <me@packi.ch>
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -30,10 +31,13 @@
 
 #include <stdexcept>
 #include <vector>
+#include <stack>
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+
+#include "expatparser.h"
 
 namespace Poco {
   namespace XML {
@@ -99,6 +103,10 @@ namespace dss {
       return m_RootNode;
     }
 
+    void setRootNode(PropertyNodePtr _node) {
+      m_RootNode = _node;
+    }
+
     /** Creates a property and the path to it. */
     PropertyNodePtr createProperty(const std::string& _propPath);
 
@@ -136,6 +144,27 @@ namespace dss {
                         bool _mayCreate = true, bool _mayOverwrite = true);
   }; //  PropertySystem
 
+  class PropertyParser : public ExpatParser
+  {
+  public:
+    PropertyParser();
+    bool loadFromXML(const std::string& _fileName, PropertyNodePtr _node);
+
+  private:
+    int m_level;
+    bool m_expectValue;
+    bool m_ignore;
+    aValueType m_currentValueType;
+    std::stack<PropertyNodePtr> m_nodes;
+    PropertyNodePtr m_currentNode;
+    std::string m_temporaryValue;
+
+    void clearStack();
+  protected:
+    virtual void elementStart(const char *_name, const char **_attrs);
+    virtual void elementEnd(const char *_name);
+    virtual void characterData(const XML_Char *_s, int _len);
+  };
 
   /** Abstract base class for property proxies.
    * A property-proxy can be linked to a property node. By
