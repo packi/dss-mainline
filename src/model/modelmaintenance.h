@@ -158,6 +158,8 @@ namespace dss {
     void onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID, 
                                int _configClass, int _configIndex, int _value);
     void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
+    void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
+    void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;

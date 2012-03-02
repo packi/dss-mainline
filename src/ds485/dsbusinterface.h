@@ -175,6 +175,31 @@ namespace dss {
                                                 dsid_t _destinationId,
                                                 uint32_t _powerW,
                                                 uint32_t _energyWs);
+    void handleSensorEvent(uint8_t _errorCode,
+                           dsid_t _sourceID,
+                           dsid_t _destinationID,
+                           uint16_t _deviceID,
+                           uint8_t _eventIndex);
+    static void handleSensorEventCallback(uint8_t _errorCode,
+                                          void* _userData,
+                                          dsid_t _sourceID,
+                                          dsid_t _destinationID,
+                                          uint16_t _deviceID,
+                                          uint8_t _eventIndex);
+
+    void handleSensorValueEvent(uint8_t _errorCode,
+                                dsid_t _sourceID,
+                                dsid_t _destinationID,
+                                uint16_t _deviceID,
+                                uint8_t _sensorIndex,
+                                uint16_t _sensorValue);
+  static void handleSensorValueCallback(uint8_t _errorCode,
+                                        void* _userData,
+                                        dsid_t _sourceID,
+                                        dsid_t _destinationID,
+                                        uint16_t _deviceID,
+                                        uint8_t _sensorIndex,
+                                        uint16_t _sensorValue);
   protected:
     virtual void doStart();
   public:

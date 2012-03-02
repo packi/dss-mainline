@@ -466,6 +466,20 @@ namespace dss {
           dsMeter->setIsValid(false);
         }
         break;
+      case ModelEvent::etDeviceSensorEvent:
+        if(event.getParameterCount() < 2) {
+          log("Expected at least 2 parameter for ModelEvent::etDeviceSensorEvent");
+        } else {
+          onSensorEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+        }
+        break;
+      case ModelEvent::etDeviceSensorValue:
+        if(event.getParameterCount() < 3) {
+          log("Expected at least 3 parameter for ModelEvent::etDeviceSensorValue");
+        } else {
+          onSensorValue(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
       default:
         assert(false);
         break;
@@ -1094,6 +1108,46 @@ namespace dss {
       log(std::string("Error updating config of device: ") + e.what());
     }
   } // onDeviceConfigChanged
+
+  void ModelMaintenance::onSensorEvent(dss_dsid_t _meterID,
+                                       const devid_t _deviceID,
+                                       const int& _eventIndex) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter =
+        m_pApartment->getDSMeterByDSID(_meterID);
+      DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
+      boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+      // TODO: get event name from device table
+      std::string eventName;
+
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("deviceSensorEvent", pDevRev));
+      pEvent->setProperty("sensorEvent", eventName);
+      raiseEvent(pEvent);
+    } catch(ItemNotFoundException& e) {
+      log("onSensorEvent: Event index not found: " + std::string(e.what()));
+    }
+  } // onSensorEvent
+
+  void ModelMaintenance::onSensorValue(dss_dsid_t _meterID,
+                                       const devid_t _deviceID,
+                                       const int& _sensorIndex,
+                                       const int& _sensorValue) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter =
+        m_pApartment->getDSMeterByDSID(_meterID);
+      DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
+      boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("deviceSensorValue", pDevRev));
+      pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
+      pEvent->setProperty("sensorValue", intToString(_sensorValue));
+      raiseEvent(pEvent);
+    } catch(ItemNotFoundException& e) {
+      log("onSensorValue: Event index not found: " + std::string(e.what()));
+    }
+  } // onSensorValue
 
   void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
     BusScanner

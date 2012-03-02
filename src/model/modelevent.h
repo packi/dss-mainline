@@ -49,6 +49,8 @@ namespace dss {
                    etBusReady, /**< The bus transitioned into ready state */
                    etMeteringValues, /**< Metering values arrived */
                    etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
+                   etDeviceSensorEvent, /**< A device has sent a sensor event */
+                   etDeviceSensorValue, /**< A device has sent a new sensor value */
                  } EventType;
   private:
     EventType m_EventType;

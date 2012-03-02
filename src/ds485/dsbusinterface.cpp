@@ -378,7 +378,19 @@ namespace dss {
                         CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_WS_GET,
                         &callback_struct);
 
+      EventDeviceSensor_event_event_callback_t sensorEventCallback = DSBusInterface::handleSensorEventCallback;
+      callback_struct.function = (void*)sensorEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_EVENT,
+                        &callback_struct);
 
+      EventDeviceSensor_value_event_callback_t sensorValueCallback = DSBusInterface::handleSensorValueCallback;
+      callback_struct.function = (void*)sensorValueCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_VALUE,
+                        &callback_struct);
 
       m_dsmApiReady = true;
     }
@@ -745,6 +757,64 @@ namespace dss {
                                 _powerW, _energyWs);
     }
   } // handleCircuitEnergyDataCallback
+
+  void DSBusInterface::handleSensorEvent(uint8_t _errorCode,
+                                         dsid_t _sourceID,
+                                         dsid_t _destinationID,
+                                         uint16_t _deviceID,
+                                         uint8_t _eventIndex) {
+    loginFromCallback();
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_sourceID, dsMeterID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorEvent, dsMeterID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_eventIndex);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleSensorEvent
+
+  void DSBusInterface::handleSensorEventCallback(uint8_t _errorCode,
+                                                 void* _userData,
+                                                 dsid_t _sourceID,
+                                                 dsid_t _destinationID,
+                                                 uint16_t _deviceID,
+                                                 uint8_t _eventIndex) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleSensorEvent(_errorCode, _sourceID, _destinationID,
+                          _deviceID, _eventIndex);
+    }
+  }
+
+
+  void DSBusInterface::handleSensorValueEvent(uint8_t _errorCode,
+                                              dsid_t _sourceID,
+                                              dsid_t _destinationID,
+                                              uint16_t _deviceID,
+                                              uint8_t _sensorIndex,
+                                              uint16_t _sensorValue) {
+    loginFromCallback();
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_sourceID, dsMeterID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorValue, dsMeterID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_sensorIndex);
+    pEvent->addParameter(_sensorValue);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleSensorEvent
+
+  void DSBusInterface::handleSensorValueCallback(uint8_t _errorCode,
+                                                 void* _userData,
+                                                 dsid_t _sourceID,
+                                                 dsid_t _destinationID,
+                                                 uint16_t _deviceID,
+                                                 uint8_t _sensorIndex,
+                                                 uint16_t _sensorValue) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleSensorValueEvent(_errorCode, _sourceID, _destinationID,
+                               _deviceID, _sensorIndex, _sensorValue);
+    }
+  }
 
 
   DeviceBusInterface* DSBusInterface::getDeviceBusInterface() {
