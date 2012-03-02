@@ -56,6 +56,20 @@ namespace dss {
     bool groupColorMode;
   } DeviceLedSpec_t;
 
+  typedef struct {
+    std::string name;
+    uint8_t sensorIndex;
+    uint8_t test;
+    uint8_t action;
+    uint16_t value;
+    uint16_t hysteresis;
+    uint8_t sceneDeviceMode;
+    uint8_t validity;
+    uint8_t buttonNumber;
+    uint8_t clickType;
+    uint8_t sceneID;
+  } DeviceSensorEventSpec_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -295,6 +309,9 @@ namespace dss {
 
     std::string getSensorEventName(const int _eventIndex) const;
     void setSensorEventName(const int _eventIndex, std::string& _name);
+    void getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry);
+    void setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry);
+    bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

@@ -313,6 +313,23 @@ namespace dss {
       .withDocumentation("Tells the dSM to never forget this device even if it's not found on the bus.");
     clsDevice.addMethod("unlock")
       .withDocumentation("Tells the dSM to that it's okay forget this device.");
+    clsDevice.addMethod("getSensorEventTableEntry")
+      .withParameter("eventIndex", "integer", true)
+      .withDocumentation("Requests the sensor event table entry.");
+    clsDevice.addMethod("setSensorEventTableEntry")
+      .withParameter("eventIndex", "integer", true)
+      .withParameter("eventName", "string", true)
+      .withParameter("sensorIndex", "integer", true)
+      .withParameter("test", "integer", true)
+      .withParameter("action", "integer", true)
+      .withParameter("value", "integer", true)
+      .withParameter("hysteresis", "integer", true)
+      .withParameter("validity", "integer", true)
+      .withParameter("buttonNumber", "integer", false)
+      .withParameter("clickType", "integer", false)
+      .withParameter("sceneDeviceMode", "integer", false)
+      .withParameter("sceneID", "integer", false)
+      .withDocumentation("Configures a sensor event table entry in the device. Depending on the type of the device either ('buttonNumber'/'clickType') or ('sceneDeviceMode'/'sceneID') are required.");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);

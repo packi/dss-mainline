@@ -691,4 +691,49 @@ namespace dss {
     }
   }
 
+  void Device::getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry) {
+    if(_eventIndex > 15) {
+      throw DSSException("Device::getSensorEventEntry: index out of range");
+    }
+    _entry.name = getSensorEventName(_eventIndex);
+    uint16_t value = getDeviceConfigWord(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 0);
+    _entry.sensorIndex = (value & 0x00F0) >> 4;
+    _entry.test = (value & 0x000C) >> 2;
+    _entry.action = (value & 0x0003);
+    _entry.value = (value & 0xFF00) >> 4;
+    value = getDeviceConfigWord(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 2);
+    _entry.value |= (value & 0x00F0) >> 4;
+    _entry.hysteresis = ((value & 0x000F) << 8) | ((value & 0xFF00) >> 8);
+    value = getDeviceConfigWord(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 4);
+    _entry.sceneDeviceMode = (value & 0x000C) >> 2;
+    _entry.validity = (value & 0x0003);
+    _entry.buttonNumber = (value & 0xF000) >> 12;
+    _entry.clickType = (value & 0x0F00) >> 8;
+    _entry.sceneID = (value & 0x7F00) >> 8;
+  }
+
+  void Device::setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry) {
+    if(_eventIndex > 15) {
+      throw DSSException("Device::setSensorEventEntry: index out of range");
+    }
+    setSensorEventName(_eventIndex, _entry.name);
+    uint8_t value;
+    value = (_entry.sensorIndex << 4) | (_entry.test << 2) | (_entry.action);
+    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 0, value);
+    value = (_entry.value & 0xFF0) >> 4;
+    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 1, value);
+    value = ((_entry.value & 0x00F) << 4) | ((_entry.hysteresis & 0xF00) >> 8);
+    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 2, value);
+    value = (_entry.hysteresis & 0x0FF);
+    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 3, value);
+    value = (_entry.sceneDeviceMode << 2) | (_entry.validity);
+    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 4, value);
+    if (!isSceneDevice()) {
+      value = (_entry.buttonNumber << 4) | (_entry.clickType);
+    } else {
+      value = _entry.sceneID;
+    }
+    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 5, value);
+  }
+
 } // namespace dss

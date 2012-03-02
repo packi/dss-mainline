@@ -437,6 +437,82 @@ namespace dss {
       resultObj->addProperty("sensorType", value);
       return success(resultObj);
 
+    } else if(_request.getMethod() == "getSensorEventTableEntry") {
+      int id = strToIntDef(_request.getParameter("eventIndex"), -1);
+      if((id < 0) || (id > 15)) {
+        return failure("Invalid or missing parameter 'eventIndex'");
+      }
+      DeviceSensorEventSpec_t event;
+      pDevice->getSensorEventEntry(id, event);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("eventName", event.name);
+      resultObj->addProperty("sensorIndex", event.sensorIndex);
+      resultObj->addProperty("test", event.test);
+      resultObj->addProperty("action", event.action);
+      resultObj->addProperty("value", event.value);
+      resultObj->addProperty("hysteresis", event.hysteresis);
+      resultObj->addProperty("validity", event.validity);
+      if (!pDevice->isSceneDevice()) {
+        resultObj->addProperty("buttonNumber", event.buttonNumber);
+        resultObj->addProperty("clickType", event.clickType);
+      } else {
+        resultObj->addProperty("sceneDeviceMode", event.sceneDeviceMode);
+        resultObj->addProperty("sceneID", event.sceneID);
+      }
+      return success(resultObj);
+
+    } else if(_request.getMethod() == "setSensorEventTableEntry") {
+      int id = strToIntDef(_request.getParameter("eventIndex"), -1);
+      if((id < 0) || (id > 15)) {
+        return failure("Invalid or missing parameter 'eventIndex'");
+      }
+      DeviceSensorEventSpec_t event;
+      event.name = _request.getParameter("eventName");
+      event.sensorIndex = strToIntDef(_request.getParameter("sensorIndex"), -1);
+      if ((event.sensorIndex < 0) || (event.sensorIndex > 0xF)) {
+        return failure("Invalid or missing parameter 'sensorIndex'");
+      }
+      event.test = strToIntDef(_request.getParameter("test"), -1);
+      if ((event.test < 0) || (event.test > 0x3)) {
+        return failure("Invalid or missing parameter 'test'");
+      }
+      event.action = strToIntDef(_request.getParameter("action"), -1);
+      if ((event.action < 0) || (event.action > 0x3)) {
+        return failure("Invalid or missing parameter 'action'");
+      }
+      event.value = strToIntDef(_request.getParameter("value"), -1);
+      if ((event.value < 0) || (event.value > 0xFFF)) {
+        return failure("Invalid or missing parameter 'value'");
+      }
+      event.hysteresis = strToIntDef(_request.getParameter("hysteresis"), -1);
+      if ((event.hysteresis < 0) || (event.hysteresis > 0xFFF)) {
+        return failure("Invalid or missing parameter 'hysteresis'");
+      }
+      event.validity = strToIntDef(_request.getParameter("validity"), -1);
+      if ((event.validity < 0) || (event.validity > 0x3)) {
+        return failure("Invalid or missing parameter 'validity'");
+      }
+      if (!pDevice->isSceneDevice()) {
+        event.buttonNumber = strToIntDef(_request.getParameter("buttonNumber"), -1);
+        if ((event.buttonNumber < 0) || (event.buttonNumber > 0xF)) {
+          return failure("Invalid or missing parameter 'buttonNumber'");
+        }
+        event.clickType = strToIntDef(_request.getParameter("clickType"), -1);
+        if ((event.clickType < 0) || (event.clickType > 0xF)) {
+          return failure("Invalid or missing parameter 'clickType'");
+        }
+      } else {
+        event.sceneDeviceMode = strToIntDef(_request.getParameter("sceneDeviceMode"), -1);
+        if ((event.sceneDeviceMode < 0) || (event.sceneDeviceMode > 0x3)) {
+          return failure("Invalid or missing parameter 'sceneDeviceMode'");
+        }
+        event.sceneID = strToIntDef(_request.getParameter("sceneID"), -1);
+        if ((event.sceneID < 0) || (event.sceneID > 0x7F)) {
+          return failure("Invalid or missing parameter 'sceneID'");
+        }
+      }
+      pDevice->setSensorEventEntry(id, event);
+      return success();
     } else {
       throw std::runtime_error("Unhandled function");
     }
