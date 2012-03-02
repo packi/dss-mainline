@@ -159,5 +159,9 @@ namespace dss {
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
+  const uint16_t ProductID_KL_200 = 0x0CC8;
+  const uint16_t ProductID_KL_201 = 0x0CC9;
+  const uint16_t ProductID_KL_210 = 0x14C8;
+
 } // namespace dss
 #endif

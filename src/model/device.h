@@ -109,6 +109,8 @@ namespace dss {
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
     void dirty();
+
+    void fillSensorTable(const int _productId);
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);

@@ -151,6 +151,7 @@ namespace dss {
 
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
+    fillSensorTable(_value);
   } // setProductID
 
   int Device::getRevisionID() const {
@@ -160,6 +161,27 @@ namespace dss {
   void Device::setRevisionID(const int _value) {
     m_RevisionID = _value;
   } // setRevisionID
+
+  void Device::fillSensorTable(const int _productId) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+
+      if(m_pApartment->getDeviceBusInterface() != NULL) {
+        if (!m_pPropertyNode->getProperty("sensorTable")) {
+          if ((_productId == ProductID_KL_200) ||
+              (_productId == ProductID_KL_201) ||
+              (_productId == ProductID_KL_210)) {
+            m_pPropertyNode->createProperty("sensorTable/sensor0")->setIntegerValue(0x3d);
+            m_pPropertyNode->createProperty("sensorTable/sensor1")->setIntegerValue(0x3e);
+            m_pPropertyNode->createProperty("sensorTable/sensor2")->setIntegerValue(0x04);
+            m_pPropertyNode->createProperty("sensorTable/sensor3")->setIntegerValue(0x05);
+            m_pPropertyNode->createProperty("sensorTable/sensor4")->setIntegerValue(0x06);
+            m_pPropertyNode->createProperty("sensorTable/sensor5")->setIntegerValue(0x40);
+          }
+        }
+      }
+    }
+  }
 
   void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex,
                                uint8_t _value) {
