@@ -377,7 +377,12 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkReadAccess();
     }
-    return m_pApartment->getDeviceBusInterface()->getSensorType(*this, _sensorIndex);
+    if (getRevisionID() > 0x0321) {
+      uint16_t value = getDeviceConfigWord(CfgClassDevice, CfgDevice_SensorParameter + _sensorIndex * 2);
+      return (value & 0xFF00) >> 8;
+    } else {
+      return m_pApartment->getDeviceBusInterface()->getSensorType(*this, _sensorIndex);
+    }
   } // getDeviceSensorType
 
   unsigned long Device::getPowerConsumption() {

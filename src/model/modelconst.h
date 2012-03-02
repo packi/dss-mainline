@@ -156,6 +156,7 @@ namespace dss {
   const uint8_t CfgFunction_LedConfig0 = 0x18;
   const uint8_t CfgFunction_LTMode = 0x1E;
 
+  const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
 } // namespace dss
