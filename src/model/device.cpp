@@ -755,12 +755,14 @@ namespace dss {
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 3, value);
     value = (_entry.sceneDeviceMode << 2) | (_entry.validity);
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 4, value);
-    if (!isSceneDevice()) {
-      value = (_entry.buttonNumber << 4) | (_entry.clickType);
-    } else {
-      value = _entry.sceneID;
+    if (_entry.action == 2) {
+      if (!isSceneDevice()) {
+        value = (_entry.buttonNumber << 4) | (_entry.clickType);
+      } else {
+        value = _entry.sceneID;
+      }
+      setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 5, value);
     }
-    setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 5, value);
   }
 
 } // namespace dss

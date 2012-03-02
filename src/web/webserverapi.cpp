@@ -329,7 +329,7 @@ namespace dss {
       .withParameter("clickType", "integer", false)
       .withParameter("sceneDeviceMode", "integer", false)
       .withParameter("sceneID", "integer", false)
-      .withDocumentation("Configures a sensor event table entry in the device. Depending on the type of the device either ('buttonNumber'/'clickType') or ('sceneDeviceMode'/'sceneID') are required.");
+      .withDocumentation("Configures a sensor event table entry in the device. If 'action' == 2 and depending on the type of the device either ('buttonNumber'/'clickType') or ('sceneDeviceMode'/'sceneID') are required.");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);
