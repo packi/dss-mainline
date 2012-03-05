@@ -98,18 +98,36 @@ namespace dss {
   void XMLCALL ExpatParser::expatElStart(void *_userdata, const char *_name,
                                          const char **_attrs) {
     ExpatParser *ep = (ExpatParser *)_userdata;
-    ep->elementStart(_name, _attrs);
+    try {
+      ep->elementStart(_name, _attrs);
+    } catch (...) {
+      ep->m_forceStop = true;
+      Logger::getInstance()->log("ExpatParser::expatElStart: unhandled "
+                                 "exception");
+    }
   }
 
   void XMLCALL ExpatParser::expatElEnd(void *_userdata, const char *_name) {
     ExpatParser *ep = (ExpatParser *)_userdata;
-    ep->elementEnd(_name);
+    try {
+      ep->elementEnd(_name);
+    } catch (...) {
+      ep->m_forceStop = true;
+      Logger::getInstance()->log("ExpatParser::expatElEnd: unhandled "
+                                 "exception");
+    }
   }
 
   void XMLCALL ExpatParser::expatCharData(void *_userdata, const XML_Char *_s,
                                           int _len) {
     ExpatParser *ep = (ExpatParser *)_userdata;
-    ep->characterData(_s, _len);
+    try {
+      ep->characterData(_s, _len);
+    } catch (...) {
+      ep->m_forceStop = true;
+      Logger::getInstance()->log("ExpatParser::expatCharData: unhandled "
+                                 "exception");
+    }
   }
 };
 
