@@ -26,6 +26,9 @@
 
 #include <iosfwd>
 #include <boost/shared_ptr.hpp>
+#include <sstream>
+
+#include "expatparser.h"
 
 namespace Poco {
   namespace XML {
@@ -38,8 +41,12 @@ namespace dss {
   class Apartment;
   class Zone;
   class Group;
+  class Device;
+  class DSMeter;
+  class PropertyParserProxy;
 
-  class ModelPersistence {
+  class ModelPersistence : public ExpatParser
+  {
   public:
     ModelPersistence(Apartment& _apartment);
     virtual ~ModelPersistence();
@@ -57,6 +64,39 @@ namespace dss {
     void loadScene(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup);
   private:
     Apartment& m_Apartment;
+  protected:
+    enum parseState
+    {
+        ps_none,
+        ps_apartment,
+        ps_device,
+        ps_meter,
+        ps_zone,
+        ps_group,
+        ps_scene,
+        ps_properties
+    };
+    bool m_ignore;
+    bool m_expectString;
+    int m_level;
+    int m_state;
+    int m_tempScene;
+    std::string m_chardata;
+    boost::shared_ptr<Device> m_tempDevice;
+    boost::shared_ptr<DSMeter> m_tempMeter;
+    boost::shared_ptr<Zone> m_tempZone;
+    boost::shared_ptr<Group> m_tempGroup;
+    boost::shared_ptr<PropertyParserProxy> m_propParser;
+
+    void parseDevice(const char *_name, const char **_attrs);
+    void parseZone(const char *_name, const char **_attrs);
+    void parseGroup(const char *_name, const char **_attrs);
+    void parseMeter(const char *_name, const char **_attrs);
+    void parseScene(const char *_name, const char **_attrs);
+    const char *getSingleAttribute(const char *_name, const char **_attrs);
+    virtual void elementStart(const char *_name, const char **_attrs);
+    virtual void elementEnd(const char *_name);
+    virtual void characterData(const XML_Char *_s, int _len);
   }; // ModelPersistence
 
 } // namespace dss

@@ -64,276 +64,448 @@ using Poco::XML::Node;
 namespace dss {
 
   ModelPersistence::ModelPersistence(Apartment& _apartment)
-  : m_Apartment(_apartment)
-  { } // ctor
+  : m_Apartment(_apartment), m_ignore(false), m_expectString(false),
+                             m_level(0), m_state(ps_none), m_tempScene(-1)
+  {
+      m_chardata.clear();
+  } // ctor
 
   ModelPersistence::~ModelPersistence() {
   } // dtor
 
   const int ApartmentConfigVersion = 1;
 
-  void ModelPersistence::readConfigurationFromXML(const std::string& _fileName) {
-    m_Apartment.setName("dSS");
-    std::ifstream inFile(_fileName.c_str());
+  void ModelPersistence::parseDevice(const char *_name, const char **_attrs) {
+    const char *dsid = NULL;
+    const char *present = NULL;
+    const char *fs = NULL;
+    const char *lastmeter = NULL;
+    const char *lastzone = NULL;
+    const char *lastshort = NULL;
 
-    if (!inFile.is_open()) {
-      Logger::getInstance()->log("Failed to open " + _fileName, lsInfo);
+    if (strcmp(_name, "device") != 0) {
       return;
     }
 
-    InputSource input(inFile);
-    DOMParser parser;
-    AutoPtr<Document> pDoc;
+    for (int i = 0; _attrs[i]; i += 2)
+    {
+      if (strcmp(_attrs[i], "dsid") == 0) {
+        dsid = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "isPresent") == 0) {
+        present = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "firstSeen") == 0) {
+        fs = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "lastKnownDSMeter") == 0) {
+        lastmeter = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "lastKnownZoneID") == 0) {
+        lastzone = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "lastKnownShortAddress") == 0) {
+        lastshort = _attrs[i + 1];
+      }
+    }
+
+    m_tempDevice.reset();
+
+    if (dsid == NULL) {
+      return;
+    }
+
+    m_tempDevice = m_Apartment.allocateDevice(dss_dsid_t::fromString(dsid));
+    bool isPresent = false;
+    if (present != NULL) {
+      try {
+        int p = strToUInt(present);
+        isPresent = p > 0;
+      } catch(std::invalid_argument&) {}
+    }
+
+    DateTime firstSeen;
+    if (fs != NULL) {
+      try {
+        time_t timestamp = strToUInt(fs);
+        firstSeen = DateTime(timestamp);
+      } catch(std::invalid_argument&) {
+        firstSeen = DateTime(dateFromISOString(fs));
+      }
+    }
+
+    dss_dsid_t lastKnownDsMeter = NullDSID;
+    if (lastmeter != NULL) {
+      lastKnownDsMeter = dss_dsid_t::fromString(lastmeter);
+    }
+
+    int lastKnownZoneID = 0;
+    if (lastzone != NULL) {
+      lastKnownZoneID = strToIntDef(lastzone, 0);
+    }
+
+    devid_t lastKnownShortAddress = ShortAddressStaleDevice;
+    if (lastshort != NULL) {
+      lastKnownShortAddress = strToUIntDef(lastshort,
+                                           ShortAddressStaleDevice);
+    }
+
+    m_tempDevice->setIsPresent(isPresent);
+    m_tempDevice->setFirstSeen(firstSeen);
+    m_tempDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
+    m_tempDevice->setLastKnownZoneID(lastKnownZoneID);
+    if(lastKnownZoneID != 0) {
+      DeviceReference devRef(m_tempDevice, &m_Apartment);
+      m_Apartment.allocateZone(lastKnownZoneID)->addDevice(devRef);
+    }
+    m_tempDevice->setLastKnownShortAddress(lastKnownShortAddress);
+    return;
+  }
+
+  void ModelPersistence::parseMeter(const char *_name, const char **_attrs) {
+
+    if ((strcmp(_name, "dsMeter") != 0)  &&(strcmp(_name, "modulator") != 0)) {
+      return;
+    }
+        
+    m_tempMeter.reset();
+    const char *id = getSingleAttribute("id", _attrs);
+    if (id == NULL) {
+      return;
+    }
+
+    dss_dsid_t dsid = dss_dsid_t::fromString(id);
+    m_tempMeter = m_Apartment.allocateDSMeter(dsid);
+  }
+
+  void ModelPersistence::parseZone(const char *_name, const char **_attrs) {
+    if(strcmp(_name, "zone") != 0) {
+      return;
+    }
+
+    m_tempZone.reset();
+    const char *zid = getSingleAttribute("id", _attrs);
+    if (zid != NULL) {
+      m_tempZone = m_Apartment.allocateZone(strToInt(zid));
+    }
+  }
+
+  void ModelPersistence::parseGroup(const char *_name, const char **_attrs) {
+    if ((m_tempZone == NULL) || (strcmp(_name, "group") != 0)) {
+      return;
+    }
+
+    m_tempGroup.reset();
+    const char *gid = getSingleAttribute("id", _attrs);
+    if (gid == NULL) {
+      return;
+    }
+
+    int groupID = strToIntDef(gid, -1);
+    if (groupID == -1) {
+      return;
+    }
+
+    m_tempGroup = m_tempZone->getGroup(groupID);
+    if (m_tempGroup == NULL) {
+      m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+      m_tempZone->addGroup(m_tempGroup);
+    }
+    m_tempGroup->setIsInitializedFromBus(true);
+  }
+
+  void ModelPersistence::parseScene(const char *_name, const char **_attrs) {
+    if (m_tempGroup == NULL) {
+      return;
+    }
+
+    if (strcmp(_name, "scene") != 0) {
+      return;
+    }
+
+    m_tempScene = -1;
+
+    const char *sid = getSingleAttribute("id", _attrs);
+    if (sid == NULL) {
+      return;
+    }
+
+    int snum = strToIntDef(sid, -1);
+    m_tempScene = snum;
+  }
+
+  const char *ModelPersistence::getSingleAttribute(const char* _name, 
+                                                   const char **_attrs) {
+    const char *ret = NULL;
+    for (int i = 0; _attrs[i]; i += 2)
+    {
+      if (strcmp(_attrs[i], _name) == 0) {
+        ret = _attrs[i + 1];
+      }
+    }
+    return ret;
+  }
+
+  void ModelPersistence::elementStart(const char *_name, const char **_attrs) {
+    if (m_forceStop) {
+      return;
+    }
+
     try {
-      pDoc = parser.parse(&input);
-    } catch (Poco::XML::SAXParseException& spe) {
-      // Note that we can hit this case both if it's invalid XML and
-      // when the file doesn't exist at all
-      throw std::runtime_error("ModelPersistence::readConfigurationFromXML: "
-                               "Parse error in Model configuration: " +
-                               _fileName + ": " + spe.message());
+      m_expectString = false;
+
+      if (m_level == 0) {
+        m_state = ps_none;
+        // first node must be named "config"
+        if (strcmp(_name, "config") != 0) {
+          Logger::getInstance()->log("ModelPersistence: missing <config> node "
+                                     "in apartment configuration", lsError);
+          m_forceStop = true;
+          return;
+        }
+
+        // now check version
+        const char *version = getSingleAttribute("version", _attrs);
+        if (version == NULL) {
+          Logger::getInstance()->log("ModelPersistence: missing config "
+                                     "version attribute", lsError);
+          m_forceStop = true;
+          return;
+        }
+
+        if (strToIntDef(version, -1) != ApartmentConfigVersion) {
+          Logger::getInstance()->log("ModelPersistence: unsupported "
+              "configuration version: " + std::string(version), lsError);
+          m_forceStop = true;
+          return;
+        }
+
+        m_chardata.clear();
+
+        m_level++;
+        return;
+      }
+
+      // level 1 supports only <apartment>, <devices>, <zones>, <dsMeters>
+      if (m_level == 1) {
+        if (strcmp(_name, "apartment") == 0) {
+          m_state = ps_apartment;
+        } else if (strcmp(_name, "devices") == 0) {
+          m_state = ps_device;
+        } else if (strcmp(_name, "zones") == 0) {
+          m_state = ps_zone;
+        } else if ((strcmp(_name, "dsMeters") == 0) ||
+                   (strcmp(_name, "modulators") == 0)) {
+          m_state = ps_meter;
+        } else {
+          m_state = ps_none;
+          m_ignore = true;
+          m_level++;
+          return;
+        }
+      }
+
+      // we are parsing a path that is being ignored, so do nothing
+      if ((m_level > 1) && m_ignore)
+      {
+        m_level++;
+        return;
+      }
+
+      if (m_state == ps_properties) {
+        m_propParser->elementStartCb(_name, _attrs);
+        m_level++;
+        return;
+      }
+
+      // level 2 supprts <device>, <zone>, <dsMeter>
+      if (m_level == 2) {
+        if ((m_state == ps_apartment) && (strcmp(_name, "name") == 0)) {
+          m_expectString = true;
+        } else if (m_state == ps_device) {
+          parseDevice(_name, _attrs);
+        } else if (m_state == ps_zone) {
+          parseZone(_name, _attrs);
+        } else if (m_state == ps_meter) {
+          parseMeter(_name, _attrs);
+        }
+      // level 3 supports <name>, <properties>, <groups>, <datamodelHash>,
+      // <datamodelModification>
+      } else if (m_level == 3) {
+        if (((m_state == ps_device) || (m_state == ps_zone)) &&
+            (strcmp(_name, "name") == 0)) {
+          m_expectString = true;
+        } else if ((m_state == ps_zone) && (strcmp(_name, "groups") == 0)) {
+          m_state = ps_group;
+        } else if (m_state == ps_meter) {
+          m_expectString = true;
+        } else if ((m_state == ps_device) &&
+                   (strcmp(_name, "properties") == 0)) {
+          m_state = ps_properties;
+          if (m_tempDevice != NULL) {
+            m_propParser->reset(m_tempDevice->getPropertyNode(), true);
+            m_propParser->elementStartCb(_name, _attrs);
+          }
+        }
+      // level 4 supports <property>, <group>
+      } else if (m_level == 4) {
+        if (m_state == ps_group) {
+          parseGroup(_name, _attrs);
+        }
+      // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>
+      } else if (m_level == 5) {
+        if ((m_state == ps_group) && 
+            ((strcmp(_name, "name") == 0) || 
+             (strcmp(_name, "associatedSet") == 0))) {
+          m_expectString = true;
+        } else if ((m_state == ps_group) && (strcmp(_name, "scenes") == 0)) {
+          m_state = ps_scene;
+        }
+      // level 6 supports <property>, <value>, <scene>
+      } else if (m_level == 6) {
+        if ((m_state == ps_scene)) {
+          parseScene(_name, _attrs); 
+        }
+      // level 7 supports <property>, <value>, <name>
+      } else if (m_level == 7) {
+        if ((m_state == ps_scene) && (strcmp(_name, "name") == 0)) {
+          m_expectString = true;
+        }
+      }
+
+      m_level++;
+
+    } catch (std::runtime_error& ex) {
+      m_forceStop = true;
+      Logger::getInstance()->log(std::string("ModelPersistence::"
+              "readConfigurationFromXML: element start handler caught "
+              "exception: ") + ex.what() + " Will abort parsing!", lsError);
+    } catch (...) {
+      m_forceStop = true;
+      Logger::getInstance()->log("ModelPersistence::readConfigurationFromXML: "
+              "element start handler caught exception! Will abort parsing!",
+              lsError);
+    }
+  }
+
+  void ModelPersistence::elementEnd(const char *_name) {
+    if (m_forceStop) {
+      return;
     }
 
-    Element* rootNode = pDoc->documentElement();
+    m_expectString = false;
+    m_level--;
+    if (m_level < 0) {
+        Logger::getInstance()->log("ModelPersistence::elementEnd: "
+                                   "invalid document depth!", lsError);
+        m_forceStop = true;
+        m_level--;
+        return;
+    }
 
-    if(rootNode->localName() == "config") {
-      if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == ApartmentConfigVersion)) {
-        Node* curNode = rootNode->firstChild();
-        while(curNode != NULL) {
-          std::string nodeName = curNode->localName();
-          if(nodeName == "devices") {
-            loadDevices(curNode);
-          } else if((nodeName == "modulators") || (nodeName == "dsMeters")) {
-            loadDSMeters(curNode);
-          } else if(nodeName == "zones") {
-            loadZones(curNode);
-          } else if(nodeName == "apartment") {
-            Element* elem = dynamic_cast<Element*>(curNode);
-            if(elem != NULL) {
-              Element* nameElem = elem->getChildElement("name");
-              if(nameElem->hasChildNodes()) {
-                m_Apartment.setName(nameElem->firstChild()->nodeValue());
+    if (m_ignore) {
+      return;
+    }
+
+    if ((m_state == ps_properties) && (m_level > 2)) {
+      m_propParser->elementEndCb(_name);
+    }
+
+    switch (m_level) {
+      case 1:
+        m_state = ps_none;
+        break;
+      case 2:
+        if ((m_state == ps_apartment) && (strcmp(_name, "name") == 0)) {
+          m_Apartment.setName(m_chardata);
+        }
+        break;
+      case 3:
+        {
+          if ((m_state == ps_properties) && (strcmp(_name, "properties") == 0)){
+            m_state = ps_device;
+            break;
+          }
+          bool isName = !(strcmp(_name, "name"));
+          if (!m_chardata.empty()) {
+            if ((m_state == ps_device) && (m_tempDevice != NULL) && isName) {
+              m_tempDevice->setName(m_chardata);
+            } else if ((m_state == ps_zone) && (m_tempZone != NULL) && isName) {
+              m_tempZone->setName(m_chardata);
+            } else if ((m_state == ps_meter) && (m_tempMeter != NULL)) {
+              if (isName) {
+                m_tempMeter->setName(m_chardata);
+              } else if (strcmp(_name, "datamodelHash") == 0) {
+                m_tempMeter->setDatamodelHash(strToInt(m_chardata));
+              } else if (strcmp(_name, "datamodelModification") == 0) {
+                m_tempMeter->setDatamodelModificationcount(strToInt(m_chardata));
               }
+            } else if ((m_state == ps_group) && (strcmp(_name, "groups") == 0)){
+              m_state = ps_zone;
             }
           }
-          curNode = curNode->nextSibling();
         }
-      } else {
-        Logger::getInstance()->log("Config file has the wrong version");
-      }
+        break;
+      case 5:
+        if ((m_state == ps_group) && (m_tempGroup != NULL) &&
+            !m_chardata.empty()) {
+          if (strcmp(_name, "name") == 0) {
+            m_tempGroup->setName(m_chardata);
+          } else if (strcmp(_name, "associatedSet") == 0) {
+            m_tempGroup->setAssociatedSet(m_chardata);
+          }
+        } else if ((m_state == ps_scene) && (strcmp(_name, "scenes") == 0)) {
+          m_state = ps_group;
+        }
+        break;
+      case 7:
+        if ((m_state == ps_scene) && (strcmp(_name, "name") == 0) &&
+            (m_tempGroup != NULL) && (m_tempScene != -1) &&
+            !m_chardata.empty()) {
+          m_tempGroup->setSceneName(m_tempScene, m_chardata);
+        }
+        break;
+      default:
+        break;
+     }
+
+    m_expectString = false;
+    m_chardata.clear();
+
+  }
+
+  void ModelPersistence::characterData(const XML_Char *_s, int _len) {
+    if (m_forceStop) {
+      return;
     }
+
+    if ((m_state == ps_properties) && (m_level > 3)) {
+      m_propParser->characterDataCb(_s, _len);
+      return;
+    }
+
+    if ((!m_ignore) && (m_expectString) && (_len > 0)) {
+      m_chardata += std::string(_s, _len);
+    }
+  }
+
+  void ModelPersistence::readConfigurationFromXML(const std::string& _fileName) {
+    m_Apartment.setName("dSS");
+    m_ignore = false;
+    m_expectString = false;
+    m_level = 0;
+    m_state = ps_none;
+    m_chardata.clear();
+    m_tempDevice.reset();
+    m_tempZone.reset();
+    m_tempMeter.reset();
+    m_tempGroup.reset();
+    m_tempScene = -1;
+
+    m_propParser.reset(new PropertyParserProxy());
+
+    bool ret = parseFile(_fileName);
+    if (!ret) {
+      throw std::runtime_error("ModelPersistence::readConfigurationFromXML: "
+                               "Parse error in Model configuration");
+    }
+    return;
   } // readConfigurationFromXML
-
-  void ModelPersistence::loadDevices(Node* _node) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "device") {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        if((elem != NULL) && elem->hasAttribute("dsid")) {
-          dss_dsid_t dsid = dss_dsid_t::fromString(elem->getAttribute("dsid"));
-          std::string name;
-          Element* nameElem = elem->getChildElement("name");
-          if((nameElem != NULL) && nameElem->hasChildNodes()) {
-            name = nameElem->firstChild()->nodeValue();
-          }
-
-          bool isPresent = false;
-          if(elem->hasAttribute("isPresent")) {
-            try {
-              int present = strToUInt(elem->getAttribute("isPresent"));
-              isPresent = present > 0;
-            } catch(std::invalid_argument&) {
-            }
-          }
-
-          DateTime firstSeen;
-          if(elem->hasAttribute("firstSeen")) {
-            try {
-              time_t timestamp = strToUInt(elem->getAttribute("firstSeen"));
-              firstSeen = DateTime(timestamp);
-            } catch(std::invalid_argument&) {
-              firstSeen = DateTime(dateFromISOString(elem->getAttribute("firstSeen").c_str()));
-            }
-          }
-
-          dss_dsid_t lastKnownDsMeter = NullDSID;
-          if(elem->hasAttribute("lastKnownDSMeter")) {
-            lastKnownDsMeter = dss_dsid_t::fromString(elem->getAttribute("lastKnownDSMeter"));
-          }
-
-          int lastKnownZoneID = 0;
-          if(elem->hasAttribute("lastKnownZoneID")) {
-            lastKnownZoneID = strToIntDef(elem->getAttribute("lastKnownZoneID"), 0);
-          }
-
-          devid_t lastKnownShortAddress = ShortAddressStaleDevice;
-          if(elem->hasAttribute("lastKnownShortAddress")) {
-            lastKnownShortAddress = strToUIntDef(elem->getAttribute("lastKnownShortAddress"),
-                                                 ShortAddressStaleDevice);
-          }
-
-          boost::shared_ptr<Device> newDevice = m_Apartment.allocateDevice(dsid);
-          if(!name.empty()) {
-            newDevice->setName(name);
-          }
-          newDevice->setIsPresent(isPresent);
-          newDevice->setFirstSeen(firstSeen);
-          newDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
-          newDevice->setLastKnownZoneID(lastKnownZoneID);
-          if(lastKnownZoneID != 0) {
-            DeviceReference devRef(newDevice, &m_Apartment);
-            m_Apartment.allocateZone(lastKnownZoneID)->addDevice(devRef);
-          }
-          newDevice->setLastKnownShortAddress(lastKnownShortAddress);
-          Element* propertiesElem = elem->getChildElement("properties");
-          if(propertiesElem != NULL) {
-            newDevice->getPropertyNode()->loadChildrenFromNode(propertiesElem);
-          }
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
-  } // loadDevices
-
-  void ModelPersistence::loadDSMeters(Node* _node) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if((curNode->localName() == "modulator") || (curNode->localName() == "dsMeter")) {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        if((elem != NULL) && elem->hasAttribute("id")) {
-          dss_dsid_t id = dss_dsid_t::fromString(elem->getAttribute("id"));
-          std::string name;
-          Element* nameElem = elem->getChildElement("name");
-          if((nameElem != NULL) && nameElem->hasChildNodes()) {
-            name = nameElem->firstChild()->nodeValue();
-          }
-          boost::shared_ptr<DSMeter> newDSMeter = m_Apartment.allocateDSMeter(id);
-          if(!name.empty()) {
-            newDSMeter->setName(name);
-          }
-          Node* hashNode = elem->getChildElement("datamodelHash");
-          if (hashNode != NULL && hashNode->hasChildNodes()) {
-            newDSMeter->setDatamodelHash(strToInt(hashNode->firstChild()->nodeValue()));
-          }
-          Node* modificationNode = elem->getChildElement("datamodelModification");
-          if (modificationNode != NULL && modificationNode->hasChildNodes()) {
-            newDSMeter->setDatamodelModificationcount(strToInt(modificationNode->firstChild()->nodeValue()));
-          }
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
-  } // loadDSMeters
-
-  void ModelPersistence::loadZone(Poco::XML::Node* _node) {
-    Element* elem = dynamic_cast<Element*>(_node);
-    if((elem != NULL) && elem->hasAttribute("id")) {
-      int id = strToInt(elem->getAttribute("id"));
-      std::string name;
-      Element* nameElem = elem->getChildElement("name");
-      if((nameElem != NULL) && nameElem->hasChildNodes()) {
-        name = nameElem->firstChild()->nodeValue();
-      }
-      boost::shared_ptr<Zone> newZone = m_Apartment.allocateZone(id);
-      if(!name.empty()) {
-        newZone->setName(name);
-      }
-      Node* groupsNode = elem->getChildElement("groups");
-      if(groupsNode != NULL) {
-        loadGroups(groupsNode, newZone);
-      }
-    }
-  } // loadZone
-
-  void ModelPersistence::loadGroups(Node* _node, boost::shared_ptr<Zone> _pZone) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "group") {
-        loadGroup(curNode, _pZone);
-      }
-      curNode = curNode->nextSibling();
-    }
-  } // loadGroups
-
-  void ModelPersistence::loadGroup(Poco::XML::Node* _node, boost::shared_ptr<Zone> _pZone) {
-    Element* elem = dynamic_cast<Element*>(_node);
-    if(elem != NULL && elem->hasAttribute("id")) {
-      int groupID = strToIntDef(elem->getAttribute("id"), -1);
-      Node* curNode = _node->firstChild();
-      Node* scenesNode = NULL;
-      std::string name;
-      std::string associatedSet;
-      while(curNode != NULL) {
-        if(curNode->hasChildNodes()) {
-          if(curNode->localName() == "name") {
-            name = curNode->firstChild()->nodeValue();
-          } else if(curNode->localName() == "scenes") {
-            scenesNode = curNode;
-          } else if(curNode->localName() == "associatedSet") {
-            associatedSet = curNode->firstChild()->nodeValue();
-          }
-        }
-        curNode = curNode->nextSibling();
-      }
-      if(groupID != -1) {
-        boost::shared_ptr<Group> pGroup = _pZone->getGroup(groupID);
-        if(pGroup == NULL) {
-          pGroup.reset(new Group(groupID, _pZone, m_Apartment));
-          _pZone->addGroup(pGroup);
-        }
-        if(!name.empty()) {
-          pGroup->setName(name);
-        }
-        if(scenesNode != NULL) {
-          loadScenes(scenesNode, pGroup);
-        }
-        if(!associatedSet.empty()) {
-          pGroup->setAssociatedSet(associatedSet);
-        }
-        pGroup->setIsInitializedFromBus(true);
-      }
-    }
-  } // loadGroup
-
-  void ModelPersistence::loadScenes(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "scene") {
-        loadScene(curNode, _pGroup);
-      }
-      curNode = curNode->nextSibling();
-    }
-  } // loadScenes
-
-  void ModelPersistence::loadScene(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup) {
-    Element* elem = dynamic_cast<Element*>(_node);
-    if(elem != NULL && elem->hasAttribute("id")) {
-      std::string name;
-      int sceneNumber = strToIntDef(elem->getAttribute("id"), -1);
-      Node* curNode = _node->firstChild();
-      while(curNode != NULL) {
-        if(curNode->hasChildNodes()) {
-          if(curNode->localName() == "name") {
-            name = curNode->firstChild()->nodeValue();
-          }
-        }
-        curNode = curNode->nextSibling();
-      }
-      if((sceneNumber != -1) && !name.empty()) {
-        _pGroup->setSceneName(sceneNumber, name);
-      }
-    }
-  } // loadScene
-
-  void ModelPersistence::loadZones(Node* _node) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "zone") {
-        loadZone(curNode);
-      }
-      curNode = curNode->nextSibling();
-    }
-  } // loadZones
 
   void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<device dsid=\"" << _pDevice->getDSID().toString() << "\"" <<
@@ -467,5 +639,4 @@ namespace dss {
       Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }
   } // writeConfigurationToXML
-
 }

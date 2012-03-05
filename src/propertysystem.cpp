@@ -974,6 +974,7 @@ namespace dss {
 
   //=============================================== PropertyParser
   PropertyParser::PropertyParser() : ExpatParser(), m_level(0),
+                                     m_ignoreVersion(false),
                                      m_expectValue(false),
                                      m_ignore(false),
                                      m_currentValueType(vTypeNone)
@@ -1002,29 +1003,31 @@ namespace dss {
           return;
         }
 
-        // now check version
-        bool versionFound = false;
-        for (int i = 0; _attrs[i]; i += 2)
-        {
-          if (strcmp(_attrs[i], "version") == 0) {
-            std::string version = _attrs[i + 1];
-            if (strToIntDef(version, -1) != PROPERTY_FORMAT_VERSION) {
-              Logger::getInstance()->log(std::string("PropertySystem::"
-                  "loadFromXML: Version mismatch, expected ") +
-                  intToString(PROPERTY_FORMAT_VERSION) + " got " + version,
-                  lsError);
-              m_forceStop = true;
-              return;
-            } else {
-              versionFound = true;
+        if (!m_ignoreVersion) {
+          // now check version
+          bool versionFound = false;
+          for (int i = 0; _attrs[i]; i += 2)
+          {
+            if (strcmp(_attrs[i], "version") == 0) {
+              std::string version = _attrs[i + 1];
+              if (strToIntDef(version, -1) != PROPERTY_FORMAT_VERSION) {
+                Logger::getInstance()->log(std::string("PropertySystem::"
+                    "loadFromXML: Version mismatch, expected ") +
+                    intToString(PROPERTY_FORMAT_VERSION) + " got " + version,
+                    lsError);
+                m_forceStop = true;
+                return;
+              } else {
+                versionFound = true;
+              }
             }
           }
-        }
-        if (!versionFound) {
-          Logger::getInstance()->log("PropertySystem::loadFromXML: missing "
-                                     "version attribute", lsError);
-          m_forceStop = true;
-          return;
+          if (!versionFound) {
+            Logger::getInstance()->log("PropertySystem::loadFromXML: missing "
+                                       "version attribute", lsError);
+            m_forceStop = true;
+            return;
+          }
         }
 
         m_level++;
@@ -1213,8 +1216,7 @@ namespace dss {
 
     // if we got into an "unsupported" branch, i.e. level 1 was not a <property>
     // then we simply ignore it
-    if (m_ignore)
-    {
+    if (m_ignore) {
       return;
     }
 
@@ -1297,15 +1299,12 @@ namespace dss {
     }
   }
 
-  bool PropertyParser::loadFromXML(const std::string& _fileName,
-                                   PropertyNodePtr _node) {
-    if (_node == NULL) {
-        return false;
-    }
-
+  void PropertyParser::reinitMembers(PropertyNodePtr _node,
+                                     bool _ignoreVersion) {
     // the propety parser class instance can be reused, so we will reset
     // the internals on each call of the loadFromXML function
     m_level = 0;
+    m_ignoreVersion = _ignoreVersion;
     m_expectValue = false;
     m_ignore = false;
     m_currentValueType = vTypeNone;
@@ -1315,6 +1314,15 @@ namespace dss {
 
     m_nodes.push(_node);
     m_currentNode = _node;
+  }
+
+  bool PropertyParser::loadFromXML(const std::string& _fileName,
+                                   PropertyNodePtr _node, bool _ignoreVersion) {
+    if (_node == NULL) {
+        return false;
+    }
+
+    reinitMembers(_node, _ignoreVersion);
 
     bool ret = parseFile(_fileName);
     clearStack();
@@ -1322,6 +1330,25 @@ namespace dss {
   } // loadFromXML
 
 
+  PropertyParserProxy::PropertyParserProxy() : PropertyParser() {}
+  
+  void PropertyParserProxy::elementStartCb(const char *_name,
+                                           const char **_attrs) {
+    elementStart(_name, _attrs);
+  }
+  
+  void PropertyParserProxy::elementEndCb(const char *_name) {
+    elementEnd(_name);
+  }
+ 
+  void PropertyParserProxy::characterDataCb(const XML_Char *_s, int _len) {
+    characterData(_s, _len);
+  }
+
+  void PropertyParserProxy::reset(PropertyNodePtr _node, bool _ignoreVersion) {
+    reinitMembers(_node, _ignoreVersion);
+  }
+  
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
