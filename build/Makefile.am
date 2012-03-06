@@ -116,6 +116,7 @@ nodist_libwebservices_a_SOURCES = \
 endif
 
 dsstests_CXXFLAGS = \
+			-I$(top_srcdir)/src \
 			$(JS_CFLAGS) \
 			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS)
