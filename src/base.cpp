@@ -411,6 +411,45 @@ namespace dss {
     return false;
   } // syncFile
 
+  std::string doIndent(const int _indent) {
+    if (_indent <= 0) {
+      return "";
+    } else {
+      return "    " + doIndent(_indent - 1);
+    }
+  }
+
+  /* Escape reserved characters in XML
+   * inspired by http://mediatomb.svn.sourceforge.net/viewvc/mediatomb/trunk/mediatomb/src/mxml/node.cc
+   * and http://pugixml.googlecode.com/svn/tags/latest/src/pugixml.cpp
+   */
+  std::string XMLStringEscape(const std::string& str) {
+    std::stringstream sstream;
+    signed char *ptr = (signed char *)str.c_str();
+    while (ptr && *ptr)
+    {
+        switch (*ptr)
+        {
+            case '<' : sstream << "&lt;"; break;
+            case '>' : sstream << "&gt;"; break;
+            case '&' : sstream << "&amp;"; break;
+            case '"' : sstream << "&quot;"; break;
+            case '\'' : sstream << "&apos;"; break;
+                       // handle control codes
+            default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) &&
+                            (*ptr != 0x09) && (*ptr != 0x0d) &&
+                            (*ptr != 0x0a)) || (*ptr == 0x7f)) {
+                         unsigned int ch = static_cast<unsigned int>(*ptr++);
+                         sstream << "&#" << static_cast<char>((ch / 10) + '0') << static_cast<char>((ch % 10) + '0') << ';';
+                       } else {
+                         sstream << *ptr;
+                       }
+                       break;
+        }
+        ptr++;
+    }
+    return sstream.str();
+  }
 
   //================================================== Properties
 

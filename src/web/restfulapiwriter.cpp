@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2012 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -26,137 +27,96 @@
 
 #include <fstream>
 
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/ProcessingInstruction.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/XML/XMLWriter.h>
-
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::ProcessingInstruction;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
-using Poco::XML::XMLWriter;
-
 namespace dss {
 
   void RestfulAPIWriter::writeToXML(const RestfulAPI& api, const std::string& _location) {
-    AutoPtr<Document> pDoc = new Document;
+    int indent = 0;
+    std::string document = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    document += "<?xml-stylesheet type=\"text/xml\" href=\"json_api.xslt\"?>\n";
 
-    AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
-    pDoc->appendChild(pXMLHeader);
-    AutoPtr<ProcessingInstruction> pXMLStylesheet = pDoc->createProcessingInstruction("xml-stylesheet", "type='text/xml' href='json_api.xslt'");
-    pDoc->appendChild(pXMLStylesheet);
-
-    AutoPtr<Element> pRoot = pDoc->createElement("api");
-    pDoc->appendChild(pRoot);
-    AutoPtr<Element> pClasses = pDoc->createElement("classes");
-    pRoot->appendChild(pClasses);
+    document += doIndent(indent) + "<api>\n";
+    document += doIndent(++indent) + "<classes>\n";
 
     foreach(const RestfulClass& cls, api.getClasses()) {
-      AutoPtr<Element> pClass = pDoc->createElement("class");
-      AutoPtr<Element> pClassNameNode = pDoc->createElement("name");
-      pClass->appendChild(pClassNameNode);
-      AutoPtr<Text> pClassNameTextNode = pDoc->createTextNode(cls.getName());
-      pClassNameNode->appendChild(pClassNameTextNode);
+      document += doIndent(++indent) + "<class>\n";
+      document += doIndent(++indent) + "<name>" + XMLStringEscape(cls.getName()) + "</name>\n";
 
-      AutoPtr<Element> pInstanceParamNode = pDoc->createElement("instanceParameter");
-      pClass->appendChild(pInstanceParamNode);
-      foreach(const RestfulParameter& instanceParam, cls.getInstanceParameter()) {
-        AutoPtr<Element> pParameter = writeToXML(instanceParam, pDoc);
-        pInstanceParamNode->appendChild(pParameter);
+      if (cls.getInstanceParameter().empty()) {
+        document += doIndent(indent) + "<instanceParameter/>\n";
+      } else {
+        document += doIndent(indent) + "<instanceParameter>\n";
+        foreach(const RestfulParameter& instanceParam, cls.getInstanceParameter()) {
+          writeToXML(instanceParam, document, indent + 1);
+        }
+        document += doIndent(indent) + "</instanceParameter>\n";
       }
-
 
       if((!cls.getDocumentationShort().empty()) || (!cls.getDocumentationLong().empty())) {
-        AutoPtr<Element> pDocumentation = pDoc->createElement("documentation");
+        document += doIndent(indent) + "<documentation>\n";
         if(!cls.getDocumentationShort().empty()) {
-          AutoPtr<Element> pShortNode = pDoc->createElement("short");
-          AutoPtr<Text> pShortText = pDoc->createTextNode(cls.getDocumentationShort());
-          pShortNode->appendChild(pShortText);
-          pDocumentation->appendChild(pShortNode);
+          document += doIndent(indent + 1) + "<short>" + XMLStringEscape(cls.getDocumentationShort()) + "</short>\n";
         }
         if(!cls.getDocumentationLong().empty()) {
-          AutoPtr<Element> pLongNode = pDoc->createElement("long");
-          AutoPtr<Text> pLongText = pDoc->createTextNode(cls.getDocumentationLong());
-          pLongNode->appendChild(pLongText);
-          pDocumentation->appendChild(pLongNode);
+          document += doIndent(indent + 1) + "<long>" + XMLStringEscape(cls.getDocumentationLong()) + "</long>\n";
         }
-        pClass->appendChild(pDocumentation);
+        document += doIndent(indent) + "</documentation>\n";
       }
 
+      if (cls.getMethods().empty()) {
+        document += doIndent(indent) + "<methods/>\n";
+      } else {
+        document += doIndent(indent) + "<methods>\n";
+        foreach(const RestfulMethod& method, cls.getMethods()) {
+          document += doIndent(++indent) + "<method>\n";
+          document += doIndent(++indent) + "<name>" + XMLStringEscape(method.getName()) + "</name>\n";
 
-      AutoPtr<Element> pMethods = pDoc->createElement("methods");
-      foreach(const RestfulMethod& method, cls.getMethods()) {
-        AutoPtr<Element> pMethod = pDoc->createElement("method");
-        AutoPtr<Element> pMethodNameNode = pDoc->createElement("name");
-        pMethod->appendChild(pMethodNameNode);
-        AutoPtr<Text> pMethodNameTextNode = pDoc->createTextNode(method.getName());
-        pMethodNameNode->appendChild(pMethodNameTextNode);
-
-        if((!method.getDocumentationShort().empty()) || (!method.getDocumentationLong().empty())) {
-          AutoPtr<Element> pDocumentation = pDoc->createElement("documentation");
-          if(!method.getDocumentationShort().empty()) {
-            AutoPtr<Element> pShortNode = pDoc->createElement("short");
-            AutoPtr<Text> pShortText = pDoc->createTextNode(method.getDocumentationShort());
-            pShortNode->appendChild(pShortText);
-            pDocumentation->appendChild(pShortNode);
+          if((!method.getDocumentationShort().empty()) || (!method.getDocumentationLong().empty())) {
+            document += doIndent(indent) + "<documentation>\n";
+            if(!method.getDocumentationShort().empty()) {
+              document += doIndent(indent + 1) + "<short>" + XMLStringEscape(method.getDocumentationShort()) + "</short>\n";
+            }
+            if(!method.getDocumentationLong().empty()) {
+              document += doIndent(indent + 1) + "<long>" + XMLStringEscape(method.getDocumentationLong()) + "</long>\n";
+            }
+            document += doIndent(indent) + "</documentation>\n";
           }
-          if(!method.getDocumentationLong().empty()) {
-            AutoPtr<Element> pLongNode = pDoc->createElement("long");
-            AutoPtr<Text> pLongText = pDoc->createTextNode(method.getDocumentationLong());
-            pLongNode->appendChild(pLongText);
-            pDocumentation->appendChild(pLongNode);
+
+          if (method.getParameter().empty()) {
+            document += doIndent(indent) + "<parameter/>\n";
+          } else {
+            document += doIndent(indent) + "<parameter>\n";
+            foreach(const RestfulParameter& parameter, method.getParameter()) {
+              writeToXML(parameter, document, indent + 1);
+            }
+            document += doIndent(indent) + "</parameter>\n";
           }
-          pMethod->appendChild(pDocumentation);
-        }
 
-        AutoPtr<Element> pParams = pDoc->createElement("parameter");
-        foreach(const RestfulParameter& parameter, method.getParameter()) {
-          AutoPtr<Element> pParameter = writeToXML(parameter, pDoc);
-          pParams->appendChild(pParameter);
+          document += doIndent(--indent) + "</method>\n";
+          --indent;
         }
-        pMethod->appendChild(pParams);
-
-        pMethods->appendChild(pMethod);
+        document += doIndent(indent) + "</methods>\n";
       }
-      pClass->appendChild(pMethods);
 
-      pClasses->appendChild(pClass);
+      document += doIndent(--indent) + "</class>\n";
+      --indent;
     }
+
+    document += doIndent(indent) + "</classes>\n";
+    document += doIndent(--indent) + "</api>\n";
 
     std::ofstream ofs(_location.c_str());
     if(ofs) {
-      DOMWriter writer;
-      writer.setNewLine("\n");
-      writer.setOptions(XMLWriter::PRETTY_PRINT);
-      writer.writeNode(ofs, pDoc);
+      ofs << document;
       ofs.close();
     }
   } // writeToXML
 
-  Poco::XML::AutoPtr<Poco::XML::Element> RestfulAPIWriter::writeToXML(const RestfulParameter& _parameter, Poco::XML::AutoPtr<Poco::XML::Document>& _document) {
-    AutoPtr<Element>  pParameter = _document->createElement("parameter");
-
-    AutoPtr<Element> pParameterNameNode = _document->createElement("name");
-    pParameter->appendChild(pParameterNameNode);
-    AutoPtr<Text> pParameterNameTextNode = _document->createTextNode(_parameter.getName());
-    pParameterNameNode->appendChild(pParameterNameTextNode);
-
-    AutoPtr<Element> pParameterTypeNode = _document->createElement("type");
-    pParameter->appendChild(pParameterTypeNode);
-    AutoPtr<Text> pParameterTypeTextNode = _document->createTextNode(_parameter.getTypeName());
-    pParameterTypeNode->appendChild(pParameterTypeTextNode);
-
-    AutoPtr<Element> pParameterRequiredNode = _document->createElement("required");
-    pParameter->appendChild(pParameterRequiredNode);
-    AutoPtr<Text> pParameterRequiredTextNode = _document->createTextNode(_parameter.isRequired() ? "true" : "false");
-    pParameterRequiredNode->appendChild(pParameterRequiredTextNode);
-
-    return pParameter;
+  void RestfulAPIWriter::writeToXML(const RestfulParameter& _parameter, std::string& _document, const int _indent) {
+    _document += doIndent(_indent) + "<parameter>\n";
+    _document += doIndent(_indent + 1) + "<name>" + XMLStringEscape(_parameter.getName()) + "</name>\n";
+    _document += doIndent(_indent + 1) + "<type>" + XMLStringEscape(_parameter.getTypeName()) + "</type>\n";
+    _document += doIndent(_indent + 1) + "<required>" + (_parameter.isRequired() ? "true" : "false") + "</required>\n";
+    _document += doIndent(_indent) + "</parameter>\n";
   } // writeToXML
 
 

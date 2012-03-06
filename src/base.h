@@ -125,6 +125,8 @@ namespace dss {
   std::string addTrailingBackslash(const std::string& _path);
   std::string getTempDir();
   bool syncFile(const std::string& _path);
+  std::string doIndent(const int _indent);
+  std::string XMLStringEscape(const std::string& str);
 
   //============================================= Exception
 

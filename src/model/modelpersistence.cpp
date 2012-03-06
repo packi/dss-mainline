@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2012 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -334,158 +335,127 @@ namespace dss {
     }
   } // loadZones
 
-  void deviceToXML(boost::shared_ptr<const Device> _pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
-    AutoPtr<Element> pDeviceNode = _pDocument->createElement("device");
-    pDeviceNode->setAttribute("dsid", _pDevice->getDSID().toString());
-    if(!_pDevice->getName().empty()) {
-      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDevice->getName());
-      pNameNode->appendChild(txtNode);
-      pDeviceNode->appendChild(pNameNode);
-    }
-    pDeviceNode->setAttribute("isPresent", _pDevice->isPresent() ? "1" : "0");
-    pDeviceNode->setAttribute("firstSeen", intToString(_pDevice->getFirstSeen().secondsSinceEpoch()));
+  void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
+    _ofs << doIndent(_indent) << "<device dsid=\"" << _pDevice->getDSID().toString() << "\"" <<
+                                        " isPresent=\"" << (_pDevice->isPresent() ? "1" : "0") << "\"" <<
+                                        " firstSeen=\"" << intToString(_pDevice->getFirstSeen().secondsSinceEpoch()) << "\"";
     if(_pDevice->getLastKnownDSMeterDSID() != NullDSID) {
-      pDeviceNode->setAttribute("lastKnownDSMeter", _pDevice->getLastKnownDSMeterDSID().toString());
+      _ofs <<  " lastKnownDSMeter=\"" << _pDevice->getLastKnownDSMeterDSID().toString() << "\"";
     }
     if(_pDevice->getLastKnownZoneID() != 0) {
-      pDeviceNode->setAttribute("lastKnownZoneID", intToString(_pDevice->getLastKnownZoneID()));
+      _ofs << " lastKnownZoneID=\"" << intToString(_pDevice->getLastKnownZoneID()) << "\"";
     }
     if(_pDevice->getLastKnownShortAddress() != ShortAddressStaleDevice) {
-      pDeviceNode->setAttribute("lastKnownShortAddress", intToString(_pDevice->getLastKnownShortAddress()));
+      _ofs << " lastKnownShortAddress=\"" << intToString(_pDevice->getLastKnownShortAddress()) << "\"";
     }
+    _ofs << ">" << std::endl;
 
+    if(!_pDevice->getName().empty()) {
+      _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pDevice->getName()) << "</name>" << std::endl;
+    }
     if(_pDevice->getPropertyNode() != NULL) {
-      AutoPtr<Element> pPropertiesNode = _pDocument->createElement("properties");
-      pDeviceNode->appendChild(pPropertiesNode);
-      _pDevice->getPropertyNode()->saveChildrenAsXML(_pDocument, pPropertiesNode, PropertyNode::Archive);
+      _ofs << doIndent(_indent + 1) << "<properties>" << std::endl;
+      _pDevice->getPropertyNode()->saveChildrenAsXML(_ofs, _indent + 2, PropertyNode::Archive);
+      _ofs << doIndent(_indent + 1) << "</properties>" << std::endl;
     }
 
-    _parentNode->appendChild(pDeviceNode);
+    _ofs << doIndent(_indent) + "</device>" << std::endl;
   } // deviceToXML
 
-  void groupToXML(boost::shared_ptr<Group> _pGroup, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
-    AutoPtr<Element> pGroupNode = _pDocument->createElement("group");
-    pGroupNode->setAttribute("id", intToString(_pGroup->getID()));
+  void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
+    _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
     if(!_pGroup->getName().empty()) {
-      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pGroup->getName());
-      pNameNode->appendChild(txtNode);
-      pGroupNode->appendChild(pNameNode);
+      _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pGroup->getName()) << "</name>" << std::endl;
     }
     if(!_pGroup->getAssociatedSet().empty()) {
-      AutoPtr<Element> pNameNode = _pDocument->createElement("associatedSet");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pGroup->getAssociatedSet());
-      pNameNode->appendChild(txtNode);
-      pGroupNode->appendChild(pNameNode);
+      _ofs << doIndent(_indent + 1) << "<associatedSet>" << _pGroup->getAssociatedSet() << "</associatedSet>" << std::endl;
     }
     if(_pGroup->isInitializedFromBus()) {
-      AutoPtr<Element> pScenesNode = _pDocument->createElement("scenes");
+      _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
       for(int iScene = 0; iScene < MaxSceneNumber; iScene++) {
         std::string name = _pGroup->getSceneName(iScene);
         if(!name.empty()) {
-          AutoPtr<Element> pSceneNode = _pDocument->createElement("scene");
-          pSceneNode->setAttribute("id", intToString(iScene));
-          AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-          AutoPtr<Text> txtNode = _pDocument->createTextNode(name);
-          pNameNode->appendChild(txtNode);
-          pSceneNode->appendChild(pNameNode);
-          pScenesNode->appendChild(pSceneNode);
+          _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
+          _ofs << doIndent(_indent + 3) << "<name>" << XMLStringEscape(name) << "</name>" << std::endl;
+          _ofs << doIndent(_indent + 2) << "</scene>" << std::endl;
         }
       }
-      pGroupNode->appendChild(pScenesNode);
+      _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
     }
-    _parentNode->appendChild(pGroupNode);
+    _ofs << doIndent(_indent) << "</group>" << std::endl;
   } // groupToXML
 
-  void zoneToXML(boost::shared_ptr<Zone> _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
-    AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
-    pZoneNode->setAttribute("id", intToString(_pZone->getID()));
+  void zoneToXML(boost::shared_ptr<Zone> _pZone, std::ofstream& _ofs, const int _indent) {
+    _ofs << doIndent(_indent) << "<zone id=\"" << intToString(_pZone->getID()) << "\">" << std::endl;
     if(!_pZone->getName().empty()) {
-      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pZone->getName());
-      pNameNode->appendChild(txtNode);
-      pZoneNode->appendChild(pNameNode);
+      _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pZone->getName()) << "</name>" << std::endl;
     }
-    AutoPtr<Element> pGroupsNode = _pDocument->createElement("groups");
-    pZoneNode->appendChild(pGroupsNode);
+    _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
     foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-      groupToXML(pGroup, pGroupsNode, _pDocument);
+      groupToXML(pGroup, _ofs, _indent + 2);
     }
-    _parentNode->appendChild(pZoneNode);
+    _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
+    _ofs << doIndent(_indent) << "</zone>" << std::endl;
   } // zoneToXML
 
- void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
-    AutoPtr<Element> pDSMeterNode = _pDocument->createElement("dsMeter");
-    pDSMeterNode->setAttribute("id", _pDSMeter->getDSID().toString());
+ void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, std::ofstream& _ofs, const int _indent) {
+   _ofs <<  doIndent(_indent) << "<dsMeter id=\"" + _pDSMeter->getDSID().toString() << "\">" << std::endl;
     if(!_pDSMeter->getName().empty()) {
-      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDSMeter->getName());
-      pNameNode->appendChild(txtNode);
-      pDSMeterNode->appendChild(pNameNode);
+      _ofs << doIndent(_indent + 1) << "<name>" + XMLStringEscape(_pDSMeter->getName()) << "</name>" << std::endl;
     }
 
-    AutoPtr<Element> pHashNode = _pDocument->createElement("datamodelHash");
-    AutoPtr<Text> pHashText = _pDocument->createTextNode(intToString(_pDSMeter->getDatamodelHash()));
-    pHashNode->appendChild(pHashText);
-    pDSMeterNode->appendChild(pHashNode);
+    _ofs << doIndent(_indent + 1) << "<datamodelHash>" <<
+                                        intToString(_pDSMeter->getDatamodelHash()) <<
+                                     "</datamodelHash>" << std::endl;
 
-    AutoPtr<Element> pHashModNode = _pDocument->createElement("datamodelModification");
-    AutoPtr<Text> pHashModText = _pDocument->createTextNode(intToString(_pDSMeter->getDatamodelModificationCount()));
-    pHashModNode->appendChild(pHashModText);
-    pDSMeterNode->appendChild(pHashModNode);
+    _ofs << doIndent(_indent + 1) << "<datamodelModification>" <<
+                                        intToString(_pDSMeter->getDatamodelModificationCount()) <<
+                                     "</datamodelModification>" << std::endl;
 
-    _parentNode->appendChild(pDSMeterNode);
+    _ofs << doIndent(_indent) << "</dsMeter>" << std::endl;
   } // dsMeterToXML
 
   void ModelPersistence::writeConfigurationToXML(const std::string& _fileName) {
     Logger::getInstance()->log("Writing apartment config to '" + _fileName + "'", lsInfo);
-    AutoPtr<Document> pDoc = new Document;
-
-    AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
-    pDoc->appendChild(pXMLHeader);
-
-    AutoPtr<Element> pRoot = pDoc->createElement("config");
-    pRoot->setAttribute("version", intToString(ApartmentConfigVersion));
-    pDoc->appendChild(pRoot);
-
-    // apartment
-    AutoPtr<Element> pApartment = pDoc->createElement("apartment");
-    pRoot->appendChild(pApartment);
-    AutoPtr<Element> pApartmentName = pDoc->createElement("name");
-    AutoPtr<Text> pApartmentNameText = pDoc->createTextNode(m_Apartment.getName());
-    pApartmentName->appendChild(pApartmentNameText);
-    pApartment->appendChild(pApartmentName);
-
-    // devices
-    AutoPtr<Element> pDevices = pDoc->createElement("devices");
-    pRoot->appendChild(pDevices);
-    foreach(boost::shared_ptr<Device> pDevice, m_Apartment.getDevicesVector()) {
-      deviceToXML(pDevice, pDevices, pDoc);
-    }
-
-    // zones
-    AutoPtr<Element> pZones = pDoc->createElement("zones");
-    pRoot->appendChild(pZones);
-    foreach(boost::shared_ptr<Zone> pZone, m_Apartment.getZones()) {
-      zoneToXML(pZone, pZones, pDoc);
-    }
-
-    // dsMeters
-    AutoPtr<Element> pDSMeters = pDoc->createElement("dsMeters");
-    pRoot->appendChild(pDSMeters);
-    foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMeters()) {
-      dsMeterToXML(pDSMeter, pDSMeters, pDoc);
-    }
 
     std::string tmpOut = _fileName + ".tmp";
     std::ofstream ofs(tmpOut.c_str());
 
     if(ofs) {
-      DOMWriter writer;
-      writer.setNewLine("\n");
-      writer.setOptions(XMLWriter::PRETTY_PRINT);
-      writer.writeNode(ofs, pDoc);
+      ofs << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
+      int indent = 0;
+
+      ofs << doIndent(indent) << "<config version=\"1\">" << std::endl;
+      indent++;
+
+      // apartment
+      ofs << doIndent(indent) << "<apartment>" << std::endl;
+      ofs << doIndent(indent + 1) << "<name>" + XMLStringEscape(m_Apartment.getName()) << "</name>" << std::endl;
+      ofs << doIndent(indent) << "</apartment>" << std::endl;
+
+      // devices
+      ofs << doIndent(indent) << "<devices>" << std::endl;
+      foreach(boost::shared_ptr<Device> pDevice, m_Apartment.getDevicesVector()) {
+        deviceToXML(pDevice, ofs, indent + 1);
+      }
+      ofs << doIndent(indent) << "</devices>" << std::endl;
+
+      // zones
+      ofs << doIndent(indent) << "<zones>" << std::endl;
+      foreach(boost::shared_ptr<Zone> pZone, m_Apartment.getZones()) {
+        zoneToXML(pZone, ofs, indent + 1);
+      }
+      ofs << doIndent(indent) << "</zones>" << std::endl;
+
+      // dsMeters
+      ofs << doIndent(indent) << "<dsMeters>" << std::endl;
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMeters()) {
+        dsMeterToXML(pDSMeter, ofs, indent + 1);
+      }
+      ofs << doIndent(indent) << "</dsMeters>" << std::endl;
+
+      indent--;
+      ofs << doIndent(indent) << "</config>" << std::endl;
 
       ofs.close();
 

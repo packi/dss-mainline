@@ -1,8 +1,9 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010,2012 digitalSTROM.org, Zurich, Switzerland
     Copyright (c) 2008 Patrick Staehlin <me@packi.ch>
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Christian Hitz, aizo AG <christian.hitz@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -127,31 +128,20 @@ namespace dss {
   } // loadFromXML
 
   bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask) const {
-    AutoPtr<Document> pDoc = new Document;
-
-    AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
-    pDoc->appendChild(pXMLHeader);
-
-    AutoPtr<Element> pRoot = pDoc->createElement("properties");
-    pRoot->setAttribute("version", intToString(PROPERTY_FORMAT_VERSION));
-    pDoc->appendChild(pRoot);
-
-    PropertyNodePtr root = _rootNode;
-    if(root == NULL) {
-      root = m_RootNode;
-    }
-    root->saveAsXML(pDoc, pRoot, _flagsMask);
-
-    // TODO: factor those line into a function as it's a copy of
-    //       model.cpp/seriespersistance.cpp/metering.cpp
     std::string tmpOut = _fileName + ".tmp";
     std::ofstream ofs(tmpOut.c_str());
 
     if(ofs) {
-      DOMWriter writer;
-      writer.setNewLine("\n");
-      writer.setOptions(XMLWriter::PRETTY_PRINT);
-      writer.writeNode(ofs, pDoc);
+      int indent = 0;
+
+      ofs << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
+      ofs << "<properties version=\"1\">" << std::endl;
+      PropertyNodePtr root = _rootNode;
+      if(root == NULL) {
+        root = m_RootNode;
+      }
+      root->saveAsXML(ofs, indent + 1, _flagsMask);
+      ofs << "</properties>" << std::endl;
 
       ofs.close();
 
@@ -804,38 +794,46 @@ namespace dss {
     }
   } // createProperty
 
-  bool PropertyNode::saveAsXML(AutoPtr<Document>& _doc, AutoPtr<Element>& _parent, const int _flagsMask) {
+  bool PropertyNode::saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
     checkReadAccess();
-    AutoPtr<Element> elem = _doc->createElement("property");
-    _parent->appendChild(elem);
 
-    elem->setAttribute("type",getValueTypeAsString(getValueType()));
-    elem->setAttribute("name", getDisplayName());
+    _ofs << doIndent(_indent) << "<property type=\"" << getValueTypeAsString(getValueType()) << "\"" <<
+                                          " name= \"" << XMLStringEscape(getDisplayName()) << "\"";
 
-    if(getValueType() != vTypeNone) {
-      AutoPtr<Element> valueElem = _doc->createElement("value");
-      AutoPtr<Text> textElem = _doc->createTextNode(getAsString());
-      valueElem->appendChild(textElem);
-      elem->appendChild(valueElem);
-    }
     if(hasFlag(Archive)) {
-      elem->setAttribute("archive", "true");
+      _ofs << " archive=\"true\"";
     }
     if(hasFlag(Readable)) {
-      elem->setAttribute("readable", "true");
+      _ofs << " readable=\"true\"";
     }
     if(hasFlag(Writeable)) {
-      elem->setAttribute("writeable", "true");
+      _ofs << " writeable=\"true\"";
+    }
+    if (m_ChildNodes.empty() && (getValueType() == vTypeNone)) {
+      _ofs << "/>" << std::endl;
+      return true;
     }
 
-    return saveChildrenAsXML(_doc, elem, _flagsMask);
+    _ofs << ">" << std::endl;
+
+    if(getValueType() != vTypeNone) {
+      _ofs << doIndent(_indent + 1) << "<value>" << XMLStringEscape(getAsString()) << "</value>" << std::endl;
+    }
+
+    bool result = true;
+    if (!m_ChildNodes.empty()) {
+      result = saveChildrenAsXML(_ofs, _indent + 1, _flagsMask);
+    }
+    _ofs << doIndent(_indent) << "</property>" << std::endl;
+
+    return result;
   } // saveAsXML
 
-  bool PropertyNode::saveChildrenAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask) {
+  bool PropertyNode::saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
     checkReadAccess();
     foreach(PropertyNodePtr pChild, m_ChildNodes) {
       if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
-        if(!pChild->saveAsXML(_doc, _parent, _flagsMask)) {
+        if(!pChild->saveAsXML(_ofs, _indent, _flagsMask)) {
           return false;
         }
       }
