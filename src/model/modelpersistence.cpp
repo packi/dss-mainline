@@ -1,8 +1,9 @@
 /*
     Copyright (c) 2010,2012 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
-            Christian Hitz, aizo AG <christian.hitz@aizo.com>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Christian Hitz, aizo AG <christian.hitz@aizo.com>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -25,19 +26,6 @@
 
 #include <stdexcept>
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/ProcessingInstruction.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/XML/XMLWriter.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/SAX/SAXException.h>
-
 #include "src/foreach.h"
 #include "src/base.h"
 #include "src/propertysystem.h"
@@ -48,18 +36,6 @@
 #include "src/model/modulator.h"
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
-
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::ProcessingInstruction;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
-using Poco::XML::DOMParser;
-using Poco::XML::XMLWriter;
-using Poco::XML::InputSource;
-using Poco::XML::Node;
 
 namespace dss {
 

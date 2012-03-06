@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2012 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -30,12 +31,6 @@
 
 #include "expatparser.h"
 
-namespace Poco {
-  namespace XML {
-    class Node;
-  }
-}
-
 namespace dss {
 
   class Apartment;
@@ -53,15 +48,6 @@ namespace dss {
 
     void readConfigurationFromXML(const std::string& _fileName);
     void writeConfigurationToXML(const std::string& _fileName);
-  private:
-    void loadDevices(Poco::XML::Node* _node);
-    void loadDSMeters(Poco::XML::Node* _node);
-    void loadZones(Poco::XML::Node* _node);
-    void loadZone(Poco::XML::Node* _node);
-    void loadGroups(Poco::XML::Node* _node, boost::shared_ptr<Zone> _pZone);
-    void loadGroup(Poco::XML::Node* _node, boost::shared_ptr<Zone> _pZone);
-    void loadScenes(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup);
-    void loadScene(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup);
   private:
     Apartment& m_Apartment;
   protected:
