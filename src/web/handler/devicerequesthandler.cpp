@@ -445,6 +445,7 @@ namespace dss {
       DeviceSensorEventSpec_t event;
       pDevice->getSensorEventEntry(id, event);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("eventIndex", id);
       resultObj->addProperty("eventName", event.name);
       resultObj->addProperty("isSceneDevice", pDevice->isSceneDevice());
       resultObj->addProperty("sensorIndex", event.sensorIndex);
