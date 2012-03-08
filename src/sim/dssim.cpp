@@ -39,26 +39,6 @@
 #include "src/propertysystem.h"
 #include "dsid_js.h"
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/SAX/SAXException.h>
-
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::ProcessingInstruction;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMParser;
-using Poco::XML::InputSource;
-using Poco::XML::Node;
-
 namespace dss {
 
   //================================================== DSIDSimCreator
@@ -138,42 +118,12 @@ namespace dss {
   }
 
   void DSSim::loadFromFile(const std::string& _fileName) {
-    const int theConfigFileVersion = 1;
-    std::ifstream inFile(_fileName.c_str());
 
-    // file does not exist, this is allowed, ignore silently
-    if (!inFile.is_open()) {
-      return;
-    }
+    log("DSSim: Support for simulated devices within the dSS is deprecated "
+        "and sim.xml devices currently non-functional. The simulation will "
+        "be completely removed from the dSS in a future version and replaced "
+        "with an external simulation tool.", lsFatal);
 
-    try {
-      InputSource input(inFile);
-      DOMParser parser;
-      AutoPtr<Document> pDoc = parser.parse(&input);
-      Element* rootNode = pDoc->documentElement();
-
-      if(rootNode->localName() == "simulation") {
-        if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == theConfigFileVersion)) {
-          Node* curNode = rootNode->firstChild();
-          while(curNode != NULL) {
-            if(curNode->localName() == "modulator") {
-              boost::shared_ptr<DSMeterSim> dsMeter;
-
-              dsMeter.reset(new DSMeterSim(this));
-              dsMeter->initializeFromNode(curNode);
-              m_DSMeters.push_back(dsMeter);
-            }
-            curNode = curNode->nextSibling();
-          }
-        }
-      } else {
-        throw std::runtime_error(_fileName +
-                " must have a root-node named 'simulation'");
-      }
-    } catch(Poco::XML::SAXParseException& e) {
-      throw std::runtime_error("Error parsing file: " + _fileName + ": " +
-                               e.message());
-    }
   } // loadFromConfig
 
   bool DSSim::isReady() {

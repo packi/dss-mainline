@@ -49,20 +49,10 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/Exception.h>
-#include <Poco/Net/MailMessage.h>
-#include <Poco/Net/SMTPClientSession.h>
-#include <Poco/Net/MailRecipient.h>
-
 #include <limits.h>
 #include <fcntl.h>
 #include <spawn.h>
 #include <sys/wait.h>
-
-using Poco::XML::Element;
-using Poco::XML::Node;
 
 namespace dss {
 

@@ -45,26 +45,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/thread/locks.hpp>
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/SAX/SAXException.h>
-
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::ProcessingInstruction;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMParser;
-using Poco::XML::InputSource;
-using Poco::XML::Node;
-
 using std::set;
 
 namespace dss {

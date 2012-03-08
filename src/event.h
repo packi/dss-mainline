@@ -39,12 +39,6 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
 
-namespace Poco {
-  namespace XML {
-    class Node;
-  }
-}
-
 namespace dss {
 
   //================================================== Forward declarations

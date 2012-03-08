@@ -33,30 +33,6 @@
 #include <cstring>
 #include <fstream>
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/ProcessingInstruction.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/XML/XMLWriter.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/SAX/SAXException.h>
-
-using Poco::XML::Document;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::ProcessingInstruction;
-using Poco::XML::DOMWriter;
-using Poco::XML::DOMParser;
-using Poco::XML::XMLWriter;
-using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::AutoPtr;
-using Poco::XML::InputSource;
-
 #include "src/base.h"
 #include "src/foreach.h"
 #include "src/logger.h"
@@ -813,81 +789,6 @@ namespace dss {
     }
     return true;
   } // searchForFlag
-
-  bool PropertyNode::loadFromNode(Node* _pNode) {
-    checkWriteAccess();
-    Element* elem = dynamic_cast<Element*>(_pNode);
-
-    if(elem->hasAttribute("name")) {
-      std::string propName = elem->getAttribute("name");
-      propName = dss::getProperty(propName);
-      getAndRemoveIndexFromPropertyName(propName);
-      if(m_Name.length() > 0) {
-        assert(m_Name == propName);
-      }
-      m_Name = propName;
-      if(elem->hasAttribute("type")) {
-        aValueType valueType = getValueTypeFromString(elem->getAttribute("type").c_str());
-        std::string value;
-        if(valueType != vTypeNone) {
-
-          Element* valueNode = elem->getChildElement("value");
-          if (valueNode != NULL) {
-            if (valueNode->hasChildNodes()) {
-              value = valueNode->firstChild()->getNodeValue();
-            } else {
-              valueNode->getNodeValue();
-            }
-          } else if (elem->hasChildNodes()) {
-            value = elem->firstChild()->getNodeValue();
-          } else {
-            value = elem->getNodeValue();
-          }
-
-          switch(valueType) {
-          case vTypeString:
-            setStringValue(value);
-            break;
-          case vTypeInteger:
-            setIntegerValue(strToInt(value));
-            break;
-          case vTypeBoolean:
-            setBooleanValue(value == "true");
-            break;
-          default:
-            assert(false);
-          }
-        }
-      }
-      if(elem->hasAttribute("writeable")) {
-        setFlag(Writeable, elem->getAttribute("writeable") == "true");
-      }
-      if(elem->hasAttribute("readable")) {
-        setFlag(Readable, elem->getAttribute("readable") == "true");
-      }
-      if(elem->hasAttribute("archive")) {
-        setFlag(Archive, elem->getAttribute("archive") == "true");
-      }
-      return loadChildrenFromNode(_pNode);
-    }
-    return false;
-  } // loadFromNode
-
-  bool PropertyNode::loadChildrenFromNode(Poco::XML::Node* _node) {
-    checkWriteAccess();
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "property") {
-        Element* curElem = dynamic_cast<Element*>(curNode);
-        if((curElem != NULL) && curElem->hasAttribute("name")) {
-          PropertyNodePtr candidate = createProperty(curElem->getAttribute("name"));
-          candidate->loadFromNode(curNode);
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
-    return true;
-  } // loadChildrenFromNode
 
   void PropertyNode::propertyChanged() {
     notifyListeners(&PropertyListener::propertyChanged, shared_from_this());
