@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010,2012 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Michael Troß, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -70,22 +71,6 @@ namespace dss {
 
     boost::shared_ptr<ScriptContextWrapper> getContextWrapperForContext(ScriptContext* _pContext);
   }; // EventInterpreterPluginJavascript
-
-  class BusInterface;
-
-  class EventInterpreterPluginDS485 : public EventInterpreterPlugin {
-  private:
-    BusInterface* m_pInterface;
-    Apartment& m_Apartment;
-    std::string getParameter(Poco::XML::Node* _node, const std::string& _parameterName);
-  public:
-    EventInterpreterPluginDS485(Apartment& _apartment, BusInterface* _pInterface, EventInterpreter* _pInterpreter);
-
-    virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromXML(Poco::XML::Node* _node);
-
-    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-  }; // EventInterpreterPluginDS485
-
 
   //-------------------------------------------------- Event Relay
 

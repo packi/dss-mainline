@@ -409,8 +409,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   void DSS::addDefaultInterpreterPlugins() {
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new EventInterpreterPluginDS485(getApartment(), m_pBusInterface.get(), m_pEventInterpreter.get());
-    m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginJavascript(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterInternalRelay(m_pEventInterpreter.get());

@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010,2012 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Michael Troß, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -507,107 +508,6 @@ namespace dss {
     }
     return result;
   } // getContextWrapperForContext
-
-
-  //================================================== EventInterpreterPluginDS485
-
-  EventInterpreterPluginDS485::EventInterpreterPluginDS485(Apartment& _apartment, BusInterface* _pInterface, EventInterpreter* _pInterpreter)
-  : EventInterpreterPlugin("bus_handler", _pInterpreter),
-    m_pInterface(_pInterface),
-    m_Apartment(_apartment)
-  { } // ctor
-
-  class SubscriptionOptionsDS485 : public SubscriptionOptions {
-  private:
-    typedef boost::function<void(Set&)> Command;
-    Command m_Command;
-  public:
-    void execute(Set& _set) const {
-      assert(m_Command);
-      m_Command(_set);
-    }
-
-    void setCommand(Command _command) {
-      m_Command = _command;
-    }
-  };
-
-  std::string EventInterpreterPluginDS485::getParameter(Node* _node, const std::string& _parameterName) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "parameter") {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        if(elem->getAttribute("name") == _parameterName) {
-          if(elem->hasChildNodes()) {
-            return elem->firstChild()->getNodeValue();
-          }
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
-    Logger::getInstance()->log(std::string("bus_handler: Needed parameter '") + _parameterName + "' not found", lsError);
-    return "";
-  } // getParameter
-
-  boost::shared_ptr<SubscriptionOptions> EventInterpreterPluginDS485::createOptionsFromXML(Node* _node) {
-    boost::shared_ptr<SubscriptionOptionsDS485> result(new SubscriptionOptionsDS485());
-
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "send") {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        if(elem != NULL) {
-          std::string typeName = elem->getAttribute("type");
-
-          if(typeName == "turnOn") {
-            result->setCommand(boost::bind(&Set::turnOn, _1, IDeviceInterface::coSubscription));
-          } else if(typeName == "turnOff") {
-            result->setCommand(boost::bind(&Set::turnOff, _1, IDeviceInterface::coSubscription));
-          } else if(typeName == "increaseValue") {
-            result->setCommand(boost::bind(&Set::increaseValue, _1, IDeviceInterface::coSubscription));
-          } else if(typeName == "decreaseValue") {
-            result->setCommand(boost::bind(&Set::decreaseValue, _1, IDeviceInterface::coSubscription));
-          } else if(typeName == "callScene") {
-            int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, IDeviceInterface::coSubscription, sceneNr, false));
-          } else if(typeName == "saveScene") {
-            int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::saveScene, _1, IDeviceInterface::coSubscription, sceneNr));
-          } else if(typeName == "undoScene") {
-            int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::undoScene, _1, IDeviceInterface::coSubscription, sceneNr));
-          } else {
-            Logger::getInstance()->log(std::string("unknown command: ") + typeName);
-            return boost::shared_ptr<SubscriptionOptions>();
-          }
-
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
-
-    return result;
-  }
-
-  void EventInterpreterPluginDS485::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    boost::shared_ptr<const SubscriptionOptionsDS485> options = boost::dynamic_pointer_cast<const SubscriptionOptionsDS485>(_subscription.getOptions());
-    if(options != NULL) {
-      SetBuilder builder(m_Apartment);
-      Set to;
-      if(_event.hasPropertySet(EventPropertyLocation)) {
-        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), _event.getRaisedAtGroup(m_Apartment));
-      } else {
-        if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
-          to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), boost::shared_ptr<Group>());
-        } else {
-          to = _event.getRaisedAtGroup(m_Apartment)->getDevices();
-        }
-      }
-      options->execute(to);
-    } else {
-      Logger::getInstance()->log("EventInterpreterPluginDS485::handleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
-    }
-  } // handleEvent
 
 
   //================================================== EventRelayTarget
