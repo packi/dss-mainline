@@ -29,9 +29,11 @@
 #include <iostream>
 
 #include "src/event.h"
+#include "src/subscription.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/internaleventrelaytarget.h"
 #include "src/eventcollector.h"
+#include "src/propertysystem.h"
 #include "src/setbuilder.h"
 #include "src/sim/dssim.h"
 #include "src/sim/dsmetersim.h"
@@ -54,6 +56,7 @@ public:
     m_pEventInterpreter.reset(new EventInterpreter(NULL));
     m_pQueue.reset(new EventQueue(m_pEventInterpreter.get(), 2));
     m_pRunner.reset(new EventRunner(m_pEventInterpreter.get()));
+    m_propSys.reset(new PropertySystem());
     m_pEventInterpreter->setEventQueue(m_pQueue.get());
     m_pEventInterpreter->setEventRunner(m_pRunner.get());
     m_pQueue->setEventRunner(m_pRunner.get());
@@ -65,6 +68,7 @@ protected:
   boost::shared_ptr<EventQueue> m_pQueue;
   boost::shared_ptr<EventRunner> m_pRunner;
   boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
+  boost::shared_ptr<PropertySystem> m_propSys;
 };
 
 BOOST_FIXTURE_TEST_CASE(testSimpleEvent, NonRunningFixture) {
@@ -122,7 +126,12 @@ BOOST_FIXTURE_TEST_CASE(testEmptySubscriptionXML, NonRunningFixture) {
   ofs << "<?xml version=\"1.0\"?>\n<subscriptions version=\"1\">\n</subscriptions>";
   ofs.close();
 
-  m_pEventInterpreter->loadFromXML(fileName);
+  boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+      m_propSys->createProperty("/temp"),
+      PropertyNodePtr() ));
+
+  subParser->loadFromXML(fileName);
+  m_pEventInterpreter->loadSubscriptionsFromProperty(m_propSys->getProperty("/temp"));
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
   boost::filesystem::remove_all(fileName);
@@ -131,10 +140,15 @@ BOOST_FIXTURE_TEST_CASE(testEmptySubscriptionXML, NonRunningFixture) {
 BOOST_FIXTURE_TEST_CASE(testNonExistingXML, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 
+  boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+      m_propSys->createProperty("/temp"),
+      PropertyNodePtr() ));
+
   try {
-    m_pEventInterpreter->loadFromXML("data/iwillnever_be_a_subscription.xml");
+    subParser->loadFromXML("data/iwillnever_be_a_subscription.xml");
   } catch(std::runtime_error& e) {
   }
+  m_pEventInterpreter->loadSubscriptionsFromProperty(m_propSys->getProperty("/temp"));
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 } // testNonExistingXML
@@ -154,6 +168,9 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
          "      <parameter name=\"event_name\">event2</parameter>\n"
          "      <parameter name=\"time\">+1</parameter>\n"
          "    </parameter>\n"
+         "    <filter match=\"all\">\n"
+         "      <property-filter type=\"exists\" property=\"local\" />\n"
+         "    </filter>\n"
          "  </subscription>\n"
          "  <subscription event-name=\"event2\" handler-name=\"nonexisting\">\n"
          "    <filter match=\"all\">\n"
@@ -163,87 +180,46 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
          "</subscriptions>\n";
   ofs.close();
 
-  m_pEventInterpreter->loadFromXML(fileName);
+  boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+      m_propSys->createProperty("/usr/subs"),
+      PropertyNodePtr()));
+
+  subParser->loadFromXML(fileName);
+  m_pEventInterpreter->loadSubscriptionsFromProperty(m_propSys->getProperty("/usr/subs"));
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 2);
-
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
-
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
   boost::shared_ptr<Event> evt(new Event("event1"));
+  evt->setProperty("local", "true");
   m_pQueue->pushEvent(evt);
-
   m_pEventInterpreter->executePendingEvent();
 
   sleepMS(501);
   m_pRunner->raisePendingEvents();
   sleepMS(500);
   m_pRunner->raisePendingEvents();
-
   m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
-  boost::filesystem::remove_all(fileName);
-} // testSubscriptionXML
-
-BOOST_FIXTURE_TEST_CASE(testDS485Events, NonRunningFixture) {
-  Apartment apt(NULL);
-  DSMeterSim modSim(NULL);
-  boost::shared_ptr<DSSim> pSim(new DSSim(NULL));
-  boost::shared_ptr<SimBusInterface> busInterface(new SimBusInterface(pSim));
-  apt.setBusInterface(busInterface.get());
-
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
-  dev1->setName("dev1");
-  dev1->setShortAddress(1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
-  dev2->setName("dev2");
-  dev2->setShortAddress(2);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
-  dev3->setName("dev3");
-  dev3->setShortAddress(3);
-  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dss_dsid_t(0,4));
-  dev4->setName("dev4");
-  dev4->setShortAddress(4);
-
-
-  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
-  m_pEventInterpreter->addPlugin(plugin);
-  plugin = new EventInterpreterPluginDS485(apt, busInterface.get(), m_pEventInterpreter.get());
-  m_pEventInterpreter->addPlugin(plugin);
-
-  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
-
-  std::string fileName = getTempDir() + "/testsubscriptions_DS485.xml";
-  std::ofstream ofs(fileName.c_str());
-  ofs << "<?xml version=\"1.0\"?>\n"
-         "<subscriptions version=\"1\">\n"
-         "  <subscription event-name=\"event1\" handler-name=\"raise_event\">\n"
-         "    <parameter>\n"
-         "      <parameter name=\"event_name\">event2</parameter>\n"
-         "      <parameter name=\"time\">+10</parameter>\n"
-         "    </parameter>\n"
-         "  </subscription>\n"
-         "</subscriptions>\n";
-  ofs.close();
-
-  m_pEventInterpreter->loadFromXML(fileName);
-  boost::filesystem::remove_all(fileName);
-
-  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 1);
-
-  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
-
-  boost::shared_ptr<Event> evt(new Event("brighter", apt.getZone(0)));
-  evt->setLocation("dev1");
-  m_pQueue->pushEvent(evt);
-
+  boost::shared_ptr<Event> evt2(new Event("event1"));
+  evt2->setProperty("remote", "true");
+  m_pQueue->pushEvent(evt2);
   m_pEventInterpreter->executePendingEvent();
 
-  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
-} // testDS485Events
+  sleepMS(501);
+  m_pRunner->raisePendingEvents();
+  sleepMS(500);
+  m_pRunner->raisePendingEvents();
+  m_pEventInterpreter->executePendingEvent();
+
+  // check that the filter works and event2 has not been raised
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
+
+  boost::filesystem::remove_all(fileName);
+} // testSubscriptionXML
 
 BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {
   EventInterpreter interpreter(NULL);

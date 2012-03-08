@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2012 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Michael Troß, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -25,6 +26,7 @@
 #include "logger.h"
 #include "dss.h"
 #include "propertysystem.h"
+#include "subscription.h"
 
 #include "foreach.h"
 #include "src/model/apartment.h"
@@ -227,10 +229,27 @@ namespace dss {
 
   void EventInterpreter::initialize() {
     Subsystem::initialize();
+
     if(DSS::hasInstance()) {
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
-      loadFromXML(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile"));
+
+      boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+          getDSS().getPropertySystem().createProperty("/usr/subscriptions"),
+          getDSS().getPropertySystem().createProperty("/usr/states")));
+
+      if (!subParser) {
+        log("Memory error while loading subscriptions", lsFatal);
+        return;
+      }
+
+      std::string fileName = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile");
+      bool ret = subParser->loadFromXML(fileName);
+      if (!ret) {
+        throw std::runtime_error("EventInterpreter::initialize: "
+                                 "parse error in configuration file \"" + fileName + "\"");
+      }
+
       if (boost::filesystem::is_directory((getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir")))) {
         boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
         for (boost::filesystem::directory_iterator itr(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir"));
@@ -239,14 +258,29 @@ namespace dss {
         {
           if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
           {
+            subParser->reset();
 #if defined(BOOST_VERSION_135)
-            loadFromXML(itr->path().file_string());
+            fileName = itr->path().file_string();
 #else
-            loadFromXML(itr->path().string());
+            fileName = itr->path().string();
 #endif
+            ret = subParser->loadFromXML(fileName);
+            if (!ret) {
+              log("Parse error in configuration file \"" + fileName + "\"", lsFatal);
+            }
           }
         }
       }
+
+      // clear current subscription list
+      {
+        boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
+        m_Subscriptions.clear();
+      }
+
+      // reload subscriptions
+      loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
+      loadStatesFromProperty(subParser->getStatesNode());
     }
   } // initialize
 
@@ -368,114 +402,82 @@ namespace dss {
     return result;
   } // uniqueSubscriptionID
 
-  void EventInterpreter::loadFromXML(const std::string& _fileName) {
-    const int eventConfigVersion = 1;
-    log(std::string("Interpreter: loading subscriptions from '") + _fileName + "'");
-
-    std::ifstream inFile(_fileName.c_str());
-
+  void EventInterpreter::loadSubscriptionsFromProperty(PropertyNodePtr _node) {
     try {
-      InputSource input(inFile);
-      DOMParser parser;
-      AutoPtr<Document> pDoc = parser.parse(&input);
-      Element* rootNode = pDoc->documentElement();
+      PropertyNodePtr sProp = _node;
+      for (int i = 0; sProp && i < sProp->getChildCount(); i++ ) {
+        loadSubscription(sProp->getChild(i));
+      }
+    } catch (SecurityException& e) {
+      log(std::string("Security error loading subscriptions: ") + e.what(), lsError);
+    } catch (ItemNotFoundException& e) {
+      log(std::string("Error loading subscriptions: ") + e.what(), lsError);
+    }
+  } // loadSubscriptionsFromProperty
 
-      if(rootNode->localName() == "subscriptions") {
-        if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == eventConfigVersion)) {
-          Node* curNode = rootNode->firstChild();
-          while(curNode != NULL) {
-            if(curNode->localName() == "subscription") {
-	            loadSubscription(curNode);
-            }
-            if(curNode->localName() == "state") {
-              loadState(curNode);
-            }
-            curNode = curNode->nextSibling();
+  void EventInterpreter::loadStatesFromProperty(PropertyNodePtr _node) {
+    try {
+      PropertyNodePtr eProp = _node;
+      for (int i = 0; eProp && i < eProp->getChildCount(); i++ ) {
+        loadState(eProp->getChild(i));
+      }
+    } catch (SecurityException& e) {
+      log(std::string("Security error loading states: ") + e.what(), lsError);
+    } catch (ItemNotFoundException& e) {
+      log(std::string("Error loading states: ") + e.what(), lsError);
+    }
+  } // loadStatesFromProperty
+
+  void EventInterpreter::loadFilter(PropertyNodePtr _node, EventSubscription& _subscription) {
+    if (_node) {
+      std::string matchType = _node->getStringValue();
+      if(matchType == "all") {
+        _subscription.setFilterOption(EventSubscription::foMatchAll);
+      } else if(matchType == "none") {
+        _subscription.setFilterOption(EventSubscription::foMatchNone);
+      } else if(matchType == "one") {
+        _subscription.setFilterOption(EventSubscription::foMatchOne);
+      } else {
+        log(std::string("loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
+        _subscription.setFilterOption(EventSubscription::foMatchAll);
+      }
+      for (int i = 0; i < _node->getChildCount(); i++) {
+        PropertyNodePtr fProp = _node->getChild(i);
+        EventPropertyFilter* filter = NULL;
+        std::string fType;
+        std::string fValue;
+        std::string fProperty;
+        if (fProp->getProperty("type")) {
+          fType = fProp->getProperty("type")->getStringValue();
+        }
+        if (fProp->getProperty("value")) {
+          fValue = fProp->getProperty("value")->getStringValue();
+        }
+        if (fProp->getProperty("property")) {
+          fProperty = fProp->getProperty("property")->getStringValue();
+        }
+        if (fType.length() && fProperty.length()) {
+          if (fType == "exists") {
+            filter = new EventPropertyExistsFilter(fProperty);
+          } else if (fType == "missing") {
+            filter = new EventPropertyMissingFilter(fProperty);
+          } else if (fType == "matches") {
+            filter = new EventPropertyMatchFilter(fProperty, fValue);
+          } else {
+            log("Unknown property-filter type: " + fType, lsError);
           }
         }
-      } else {
-        log("Interpreter: " + _fileName + " must have a root-node named 'subscriptions'", lsFatal);
-      }
-    } catch(Poco::XML::SAXParseException& e) {
-      throw std::runtime_error("Error parsing file: " + _fileName + ": " +
-                                e.message());
-    }
-  } // loadFromXML
-
-  void EventInterpreter::loadFilter(Node* _node, EventSubscription& _subscription) {
-    if(_node != NULL) {
-      Element* elem = dynamic_cast<Element*>(_node);
-      if(elem != NULL) {
-        std::string matchType = elem->getAttribute("match");
-        if(matchType == "all") {
-          _subscription.setFilterOption(EventSubscription::foMatchAll);
-        } else if(matchType == "none") {
-          _subscription.setFilterOption(EventSubscription::foMatchNone);
-        } else if(matchType == "one") {
-          _subscription.setFilterOption(EventSubscription::foMatchOne);
-        } else {
-          log(std::string("loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
-          _subscription.setFilterOption(EventSubscription::foMatchAll);
+        if(filter != NULL) {
+          _subscription.addPropertyFilter(filter);
         }
-      }
-
-      Node* curNode = _node->firstChild();
-      while(curNode != NULL) {
-        std::string nodeName = curNode->localName();
-        if(nodeName == "property-filter") {
-          loadPropertyFilter(curNode, _subscription);
-        }
-        curNode = curNode->nextSibling();
       }
     }
   } // loadFilter
 
-  void EventInterpreter::loadPropertyFilter(Node* _pNode, EventSubscription& _subscription) {
-    Element* elem = dynamic_cast<Element*>(_pNode);
-    if(elem != NULL) {
-      EventPropertyFilter* filter = NULL;
-      std::string filterType;
-      if(elem->hasAttribute("type")) {
-        filterType = elem->getAttribute("type");
-      }
-      std::string propertyName;
-      if(elem->hasAttribute("property")) {
-        propertyName = elem->getAttribute("property");
-      }
-      if(filterType.empty() || propertyName.empty()) {
-        log("loadProperty: Missing type and/or property-name", lsFatal);
-      } else {
-        if(filterType == "exists") {
-          filter = new EventPropertyExistsFilter(propertyName);
-        } else if(filterType == "missing") {
-          filter = new EventPropertyMissingFilter(propertyName);
-        } else if(filterType == "matches") {
-          std::string matchValue;
-          if(elem->hasAttribute("value")) {
-            matchValue = elem->getAttribute("value");
-          }
-          filter = new EventPropertyMatchFilter(propertyName, matchValue);
-        } else {
-          log("Unknown property-filter type", lsError);
-        }
-      }
-      if(filter != NULL) {
-        _subscription.addPropertyFilter(filter);
-      }
-    }
-  } // loadPropertyFilter
-
-  void EventInterpreter::loadSubscription(Node* _node) {
-    Element* elem = dynamic_cast<Element*>(_node);
-    if(elem != NULL) {
-      std::string evtName;
-      if(elem->hasAttribute("event-name")) {
-        evtName = elem->getAttribute("event-name");
-      }
-      std::string handlerName;
-      if(elem->hasAttribute("handler-name")) {
-        handlerName = elem->getAttribute("handler-name");
-      }
+  void EventInterpreter::loadSubscription(PropertyNodePtr _node) {
+    if (_node) {
+      std::string evtName = _node->getProperty("event-name")->getStringValue();
+      std::string handlerName = _node->getProperty("handler-name")->getStringValue();
 
       if(evtName.size() == 0) {
         log("loadSubscription: empty event-name, skipping this subscription", lsWarning);
@@ -495,15 +497,14 @@ namespace dss {
         log(std::string("loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
         log(       "loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
       } else {
-        opts = plugin->createOptionsFromXML(_node);
+        opts = plugin->createOptionsFromProperty(_node);
         hadOpts = true;
       }
       try {
-        Element* paramElem = elem->getChildElement("parameter");
         if(opts == NULL) {
           opts.reset(new SubscriptionOptions());
         }
-        opts->loadParameterFromXML(paramElem);
+        opts->loadParameterFromProperty(_node->getPropertyByName("parameter"));
       } catch(std::runtime_error& e) {
         // only delete options created in the try-part...
         if(!hadOpts) {
@@ -513,8 +514,7 @@ namespace dss {
 
       boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, *this, opts));
       try {
-        Element* filterElem = elem->getChildElement("filter");
-        loadFilter(filterElem, *subscription);
+        loadFilter(_node->getPropertyByName("filter"), *subscription);
       } catch(std::runtime_error& e) {
       }
 
@@ -522,46 +522,27 @@ namespace dss {
     }
   } // loadSubsription
 
-  void EventInterpreter::loadState(Node* _node) {
-    PropertyNodePtr pNode = getDSS().getPropertySystem().createProperty("/usr/states");
-    Element* elem = dynamic_cast<Element*>(_node);
-    if (elem != NULL) {
-      std::string evtName;
-      if (elem->hasAttribute("name")) {
-        evtName = elem->getAttribute("name");
-      }
+  void EventInterpreter::loadState(PropertyNodePtr _node) {
+    if (_node) {
+      std::string evtName = _node->getProperty("name")->getStringValue();
       if (evtName.size() == 0) {
         log("loadState: empty state name, skipping this state", lsWarning);
         return;
       }
-      log("loadState: name \"" + evtName + "\"", lsDebug);
 
-      if (pNode->getPropertyByName(evtName)) {
-        log("loadState: duplicate state name, skipping this state", lsWarning);
-        return;
+      _node->setFlag(PropertyNode::Writeable, false);
+      for (int i = 0; i < _node->getChildCount(); i++) {
+        _node->getChild(i)->setFlag(PropertyNode::Readable, true);
       }
 
-      PropertyNodePtr pState(new PropertyNode(evtName.c_str()));
-      if (pState == NULL) {
-        log("loadState: unable to create state property", lsWarning);
-        return;
-      }
-      pNode->addChild(pState);
-      pState->createProperty("name")->setStringValue(evtName);
-      pState->loadFromNode(_node);
-      pState->setFlag(PropertyNode::Writeable, false);
-      for (int i = 0; i < pState->getChildCount(); i++) {
-        pState->getChild(i)->setFlag(PropertyNode::Readable, true);
-      }
-
-      PropertyNodePtr pValue = pState->getPropertyByName("value");
-      PropertyNodePtr pScript = pState->getPropertyByName("script_id");
-      PropertyNodePtr pPersistent = pState->getPropertyByName("persistent");
+      PropertyNodePtr pValue = _node->getPropertyByName("value");
+      PropertyNodePtr pScript = _node->getPropertyByName("script_id");
+      PropertyNodePtr pPersistent = _node->getPropertyByName("persistent");
       if (pPersistent != NULL && pScript != NULL) {
         pValue->setFlag(PropertyNode::Archive, true);
         std::string filename = DSS::getInstance()->getSavedPropsDirectory() + "/" +
             pScript->getStringValue() + "_" + evtName + ".xml";
-        DSS::getInstance()->getPropertySystem().loadFromXML(filename, pState);
+        DSS::getInstance()->getPropertySystem().loadFromXML(filename, _node);
       }
     }
   } // loadState
@@ -937,29 +918,14 @@ namespace dss {
     m_Parameters.set(_name, _value);
   } // setParameter
 
-  void SubscriptionOptions::loadParameterFromXML(Node* _node) {
+  void SubscriptionOptions::loadParameterFromProperty(PropertyNodePtr _node) {
     if(_node !=  NULL) {
-      Node* curNode = _node->firstChild();
-      while(curNode != NULL) {
-        std::string nodeName = curNode->localName();
-        if(nodeName == "parameter") {
-          Element* elem = dynamic_cast<Element*>(curNode);
-          if(elem != NULL) {
-            std::string value;
-            std::string name;
-            if(curNode->hasChildNodes()) {
-              value = curNode->firstChild()->getNodeValue();
-            }
-            name = elem->getAttribute("name");
-            if(!name.empty()) {
-              setParameter(name, value);
-            }
-          }
-        }
-        curNode = curNode->nextSibling();
+      for (int i = 0; i < _node->getChildCount(); i++) {
+        PropertyNodePtr param = _node->getChild(i);
+        setParameter(param->getName(), param->getStringValue());
       }
     }
-  } // loadParameterFromXML
+  } // loadParameterFromProperty
 
 
   //================================================== EventInterpreterPlugin
@@ -969,7 +935,7 @@ namespace dss {
     m_pInterpreter(_interpreter)
   { } // ctor
 
-  boost::shared_ptr<SubscriptionOptions> EventInterpreterPlugin::createOptionsFromXML(Node* _node) {
+  boost::shared_ptr<SubscriptionOptions> EventInterpreterPlugin::createOptionsFromProperty(PropertyNodePtr _node) {
     return boost::shared_ptr<SubscriptionOptions>();
   } // createOptionsFromXML
 
