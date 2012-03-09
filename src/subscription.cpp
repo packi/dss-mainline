@@ -433,13 +433,6 @@ namespace dss {
       SubscriptionParser(_subs, _states) {
   }
 
-  SubscriptionParserProxy::~SubscriptionParserProxy() {
-    PropertyNodePtr pNode = getSubscriptionNode();
-    if (pNode) {
-      pNode->getParentNode()->removeChild(pNode);
-    }
-  }
-
   void SubscriptionParserProxy::elementStartCb(const char *_name,
                                                const char **_attrs) {
     elementStart(_name, _attrs);

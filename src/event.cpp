@@ -214,8 +214,9 @@ namespace dss {
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
 
+      PropertySystem subProperties;
       boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
-          getDSS().getPropertySystem().createProperty("/usr/subscriptions"),
+          subProperties.createProperty("/temp"),
           getDSS().getPropertySystem().createProperty("/usr/states")));
 
       if (!subParser) {

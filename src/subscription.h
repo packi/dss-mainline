@@ -79,7 +79,6 @@ namespace dss {
   {
   public:
     SubscriptionParserProxy(PropertyNodePtr _subs, PropertyNodePtr _states);
-    virtual ~SubscriptionParserProxy();
     void reset(bool ignoreVersion = false);
     void elementStartCb(const char *_name, const char **_attrs);
     void elementEndCb(const char *_name);
