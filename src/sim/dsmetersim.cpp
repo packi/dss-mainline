@@ -27,17 +27,6 @@
 #include "src/base.h"
 #include "src/foreach.h"
 
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-
-using Poco::XML::Element;
-using Poco::XML::Attr;
-using Poco::XML::Text;
-using Poco::XML::Node;
-
-
 namespace dss {
 
   //================================================== DSMeterSim
@@ -56,120 +45,34 @@ namespace dss {
     m_pSimulation->log(_message, _severity);
   } // log
 
-  bool DSMeterSim::initializeFromNode(Node* _node) {
-    Element* elem = dynamic_cast<Element*>(_node);
-    if(elem == NULL) {
+  bool DSMeterSim::initializeFromNode(PropertyNodePtr _node) {
+    if(_node == NULL) {
       return false;
     }
-    if(elem->hasAttribute("busid")) {
-      m_ID = strToIntDef(elem->getAttribute("busid"), 70);
+    if(_node->getProperty("busid")) {
+      m_ID = strToIntDef(_node->getProperty("busid")->getStringValue(), 70);
     }
-    if(elem->hasAttribute("dsid")) {
-      m_DSMeterDSID = DSSim::makeSimulatedDSID(dss_dsid_t::fromString(elem->getAttribute("dsid")));
+    if(_node->getProperty("dsid")) {
+      m_DSMeterDSID = DSSim::makeSimulatedDSID(dss_dsid_t::fromString(
+          _node->getProperty("dsid")->getStringValue()));
     }
-    if(elem->hasAttribute("orange")) {
-      m_EnergyLevelOrange = strToIntDef(elem->getAttribute("orange"), m_EnergyLevelOrange);
+    if(_node->getProperty("name")) {
+      m_Name = _node->getProperty("name")->getStringValue();
     }
-    if(elem->hasAttribute("red")) {
-      m_EnergyLevelRed = strToIntDef(elem->getAttribute("red"), m_EnergyLevelRed);
-    }
-    Element* nameElem = elem->getChildElement("name");
-    if(nameElem != NULL && nameElem->hasChildNodes()) {
-      m_Name = nameElem->firstChild()->nodeValue();
-    }
-
     loadDevices(_node, 0);
     loadGroups(_node, 0);
     loadZones(_node);
     return true;
   } // initializeFromNode
 
-  void DSMeterSim::loadDevices(Node* _node, const int _zoneID) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      Element* elem = dynamic_cast<Element*>(curNode);
-      if(curNode->localName() == "device" && elem != NULL) {
-        dss_dsid_t dsid = NullDSID;
-        int busid = -1;
-        if(elem->hasAttribute("dsid")) {
-          dsid = DSSim::makeSimulatedDSID(dss_dsid_t::fromString(elem->getAttribute("dsid")));
-        }
-        if(elem->hasAttribute("busid")) {
-          busid = strToInt(elem->getAttribute("busid"));
-        }
-        if((dsid == NullDSID) || (busid == -1)) {
-          log("missing dsid or busid of device");
-          continue;
-        }
-        std::string type = "standard.simple";
-        if(elem->hasAttribute("type")) {
-          type = elem->getAttribute("type");
-        }
-
-        DSIDInterface* newDSID = m_pSimulation->getDSIDFactory().createDSID(type, dsid, busid, *this);
-        Node* childNode = curNode->firstChild();
-        while(childNode != NULL) {
-          if(childNode->localName() == "parameter") {
-            Element* childElem = dynamic_cast<Element*>(childNode);
-            if(childElem != NULL) {
-              if(childElem->hasAttribute("name") && childElem->hasChildNodes()) {
-                std::string paramName = childElem->getAttribute("name");
-                std::string paramValue = childElem->firstChild()->getNodeValue();
-                log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
-                newDSID->setConfigParameter(paramName, paramValue);
-              }
-            }
-          } else if(childNode->localName() == "name" && childNode->hasChildNodes()) {
-            m_DeviceNames[busid] = childNode->firstChild()->nodeValue();
-          }
-          childNode = childNode->nextSibling();
-        }
-        if(newDSID != NULL) {
-          m_SimulatedDevices.push_back(newDSID);
-          if(_zoneID != 0) {
-            m_Zones[_zoneID].push_back(newDSID);
-          }
-          m_DeviceZoneMapping[newDSID] = _zoneID;
-          newDSID->setZoneID(_zoneID);
-          newDSID->initialize();
-          log("LoadDevices: found device");
-        } else {
-          log("LoadDevices: could not create instance for type \"" + type + "\"");
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
+  void DSMeterSim::loadDevices(PropertyNodePtr _node, const int _zoneID) {
   } // loadDevices
 
-  void DSMeterSim::loadGroups(Node* _node, const int _zoneID) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "group") {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        if(elem != NULL) {
-          if(elem->hasAttribute("id")) {
-            int groupID = strToIntDef(elem->getAttribute("id"), -1);
-            Node* childNode = curNode->firstChild();
-            while(childNode != NULL) {
-              if(childNode->localName() == "device") {
-                Element* childElem = dynamic_cast<Element*>(childNode);
-                if(childElem->hasAttribute("busid")) {
-                  unsigned long busID = strToUInt(childElem->getAttribute("busid"));
-                  DSIDInterface& dev = lookupDevice(busID);
-                  addDeviceToGroup(&dev, groupID);
-                  log("LoadGroups: Adding device " + intToString(busID) + " to group " + intToString(groupID) + " in zone " + intToString(_zoneID));
-                }
-              }
-              childNode = childNode->nextSibling();
-            }
-          } else {
-            log("LoadGroups: Could not find attribute id of group, skipping entry", lsError);
-          }
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
+  void DSMeterSim::loadGroups(PropertyNodePtr _node, const int _zoneID) {
   } // loadGroups
+
+  void DSMeterSim::loadZones(PropertyNodePtr _node) {
+  } // loadZones
 
   void DSMeterSim::addDeviceToGroup(DSIDInterface* _device, int _groupID) {
     m_DevicesOfGroupInZone[std::pair<const int, const int>(_device->getZoneID(), _groupID)].push_back(_device);
@@ -214,27 +117,6 @@ namespace dss {
       groupsVector.erase(iGroup);
     }
   } // removeDeviceFromGroup
-
-  void DSMeterSim::loadZones(Node* _node) {
-    Node* curNode = _node->firstChild();
-    while(curNode != NULL) {
-      if(curNode->localName() == "zone") {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        int zoneID = -1;
-        if(elem != NULL && elem->hasAttribute("id")) {
-          zoneID = strToIntDef(elem->getAttribute("id"), -1);
-        }
-        if(zoneID != -1) {
-          log("LoadZones: found zone (" + intToString(zoneID) + ")");
-          loadDevices(curNode, zoneID);
-          loadGroups(curNode, zoneID);
-        } else {
-          log("LoadZones: could not find/parse id for zone");
-        }
-      }
-      curNode = curNode->nextSibling();
-    }
-  } // loadZones
 
   void DSMeterSim::deviceCallScene(int _deviceID, const int _sceneID) {
     lookupDevice(_deviceID).callScene(_sceneID);

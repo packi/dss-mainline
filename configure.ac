@@ -190,27 +190,6 @@ BOOST_SYSTEM([mt-])
 BOOST_PROGRAM_OPTIONS([mt-])
 BOOST_TEST([mt-])
 
-MT_CHECK_HEADER([poco], [Poco/XML/XML])
-
-dnl unlike C, C++ library checks are not easy to do since AC_CHECK_LIB does not
-dnl support it
- 
-POCO_LIBS="-lPocoXML -lPocoFoundation -lPocoNet"
-POCO_LDFLAGS=
-AC_ARG_WITH(poco-libs, 
-    AC_HELP_STRING([--with-poco-libs=DIR], [search for poco libraries in DIR]),
-    [
-        if test "x$withval" != "x"; then
-            AC_MSG_NOTICE([Will search for poco libraries in $withval])
-            if test -d "$withval"; then
-                POCO_LDFLAGS="-L$withval"
-            fi
-        fi
-    ])
-
-AC_SUBST(POCO_LIBS)
-AC_SUBST(POCO_LDFLAGS)
-
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES([JS], [libjs >= 1.8.5], [],
     [

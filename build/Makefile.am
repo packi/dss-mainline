@@ -45,7 +45,6 @@ libdsscore_a_CXXFLAGS = \
 			$(ICAL_CFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
 			$(GSOAP_CFLAGS) \
-			$(POCO_CFLAGS) \
 			$(LIBXML2_CFLAGS) \
 			$(OPENSSL_CFLAGS) \
 			$(AVAHI_CFLAGS) \
@@ -79,11 +78,9 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(BOOST_PROGRAM_OPTIONS_LIBS) \
 			$(BOOST_FILESYSTEM_LIBS) \
 			$(LIBDSM_API_LDFLAGS) \
-			$(POCO_LDFLAGS) \
 			$(JS_LIBS) \
 			$(ICAL_LIBS) \
 			$(LIBDSM_API_LIBS) \
-			$(POCO_LIBS) \
 			$(LIBXML2_LIBS) \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
@@ -129,11 +126,9 @@ dsstests_LDADD = \
 			$(BOOST_FILESYSTEM_LIBS) \
 			$(BOOST_UNIT_TEST_FRAMEWORK_LIBS) \
 			$(LIBDSM_API_LDFLAGS) \
-			$(POCO_LDFLAGS) \
 			$(JS_LIBS) \
 			$(ICAL_LIBS) \
 			$(LIBDSM_API_LIBS) \
-			$(POCO_LIBS) \
 			$(LIBXML2_LIBS) \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \

@@ -39,16 +39,6 @@
 
 #include "expatparser.h"
 
-namespace Poco {
-  namespace XML {
-    class Document;
-    class Node;
-    class Element;
-  }
-  template<class C>
-  class AutoPtr;
-}
-
 namespace dss {
 
   class PropertyNode;
@@ -544,10 +534,6 @@ namespace dss {
     bool saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask);
     /** Saves the nodes children to XML */
     bool saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask);
-    /** Loads the node from XML */
-    bool loadFromNode(Poco::XML::Node* _node);
-    /** Loads children from XML */
-    bool loadChildrenFromNode(Poco::XML::Node* _node);
   }; // PropertyNode
 
   /** Exception that gets thrown if a incompatible assignment would take place. */

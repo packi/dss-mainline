@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Michael Troß, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -37,12 +38,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
-
-namespace Poco {
-  namespace XML {
-    class Node;
-  }
-}
 
 namespace dss {
 
@@ -127,7 +122,7 @@ namespace dss {
     void setParameter(const std::string& _name, const std::string& _value);
     bool hasParameter(const std::string& _name) const;
 
-    void loadParameterFromXML(Poco::XML::Node* _node);
+    void loadParameterFromProperty(PropertyNodePtr _node);
 
     const Properties& getParameters() const { return m_Parameters; }
   }; // SubscriptionOptions
@@ -239,7 +234,7 @@ namespace dss {
     const std::string& getName() const { return m_Name; }
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
-    virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromXML(Poco::XML::Node* _node);
+    virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromProperty(PropertyNodePtr _node);
 
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   }; // EventInterpreterPlugin
@@ -323,10 +318,9 @@ namespace dss {
     EventRunner* m_EventRunner;
     int m_EventsProcessed;
   private:
-    void loadSubscription(Poco::XML::Node* _node);
-    void loadState(Poco::XML::Node* _node);
-    void loadFilter(Poco::XML::Node* _node, EventSubscription& _subscription);
-    void loadPropertyFilter(Poco::XML::Node* _pNode, EventSubscription& _subscription);
+    void loadSubscription(PropertyNodePtr _node);
+    void loadState(PropertyNodePtr _node);
+    void loadFilter(PropertyNodePtr _node, EventSubscription& _subscription);
     boost::shared_ptr<EventSubscription> subscriptionByID(const std::string& _name);
   protected:
     virtual void doStart();
@@ -345,7 +339,9 @@ namespace dss {
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);
     void unsubscribe(const std::string& _subscriptionID);
 
-    void loadFromXML(const std::string& _fileName);
+    void loadSubscriptionsFromProperty(PropertyNodePtr _node);
+    void loadStatesFromProperty(PropertyNodePtr _node);
+
     std::string uniqueSubscriptionID(const std::string& _proposal);
 
     int getEventsProcessed() const { return m_EventsProcessed; }

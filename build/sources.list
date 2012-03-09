@@ -35,6 +35,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/eventinterpreterplugins.h \
 	$(top_srcdir)/src/eventsubscriptionsession.cpp \
 	$(top_srcdir)/src/eventsubscriptionsession.h \
+	$(top_srcdir)/src/subscription.cpp \
+	$(top_srcdir)/src/subscription.h \
 	$(top_srcdir)/src/expatparser.cpp \
 	$(top_srcdir)/src/expatparser.h \
 	$(top_srcdir)/src/foreach.h \
@@ -215,7 +217,6 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/deviceinterfacerequesthandlertest.cpp \
 	$(top_srcdir)/tests/devicerequesthandlertest.cpp \
 	$(top_srcdir)/tests/devicetests.cpp \
-	$(top_srcdir)/tests/dssimtest.cpp \
 	$(top_srcdir)/tests/eventrequesthandlertest.cpp \
 	$(top_srcdir)/tests/eventtests.cpp \
 	$(top_srcdir)/tests/jshandlertests.cpp \

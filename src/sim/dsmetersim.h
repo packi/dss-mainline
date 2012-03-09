@@ -28,12 +28,7 @@
 
 #include "src/ds485types.h"
 #include "src/logger.h"
-
-namespace Poco {
-  namespace XML {
-    class Node;
-  }
-}
+#include "src/propertysystem.h"
 
 namespace dss {
   class DSSim;
@@ -58,9 +53,9 @@ namespace dss {
     std::map< const std::pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
     std::string m_Name;
   private:
-    void loadDevices(Poco::XML::Node* _node, const int _zoneID);
-    void loadGroups(Poco::XML::Node* _node, const int _zoneID);
-    void loadZones(Poco::XML::Node* _node);
+    void loadDevices(PropertyNodePtr _node, const int _zoneID);
+    void loadGroups(PropertyNodePtr _node, const int _zoneID);
+    void loadZones(PropertyNodePtr _node);
   public:
     void deviceCallScene(const int _deviceID, const int _sceneID);
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
@@ -91,7 +86,7 @@ namespace dss {
     DSMeterSim(DSSim* _pSimulator);
     virtual ~DSMeterSim() {}
 
-    bool initializeFromNode(Poco::XML::Node* _node);
+    bool initializeFromNode(PropertyNodePtr _node);
 
     int getID() const;
     void setID(const int _value) { m_ID = _value; }
