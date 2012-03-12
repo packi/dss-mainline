@@ -1,11 +1,19 @@
 dSS - digitalSTROM Server
 
+v1.8.0 12.03.2012
+	* completely get rid of Poco, use expat for all XML parsing
+	* new JSON calls for event table configuration
+	* publish event names in property tree
+	* process SensorEvent callbacks
+	* require dSM to have at least API version 2.0
+
 v1.7.0 28.02.2012
 	* removed deprecated email plugin handler
 	* added scripting method to set high level states (#1312),
 	  load state definitions from subscription xml's,
 	  added state handler scripts for call scene events and solar times
-	* replace popen/fork with posix_spawn to execute sendmail in a new detached thread (#1416)
+	* replace popen/fork with posix_spawn to execute sendmail in a new
+	  detached thread (#1416)
 	* add origin Device DSID to callScene events (#1357)
 	* compile again on MacOS X (#1001)
 	* implement undo scene handling (#1311)
