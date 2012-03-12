@@ -5,14 +5,14 @@
   <subscription event-name="sendmail" handler-name="sendmail">
   </subscription>
 
-  <!-- Standard events -->
-<!--
+  <!-- Examples -->
+  <!--
   <subscription event-name="callScene" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">bell</parameter>
     </parameter>
     <filter match="all">
-      <property-filter type="matches" value="41" property="sceneID" />
+      <property-filter type="matches" value="73" property="sceneID" />
     </filter>
   </subscription>
   <subscription event-name="callScene" handler-name="raise_event">
@@ -20,7 +20,7 @@
       <parameter name="event_name">alarm</parameter>
     </parameter>
     <filter match="all">
-      <property-filter type="matches" value="42" property="sceneID" />
+      <property-filter type="matches" value="74" property="sceneID" />
     </filter>
   </subscription>
   <subscription event-name="callScene" handler-name="raise_event">
@@ -28,31 +28,19 @@
       <parameter name="event_name">panic</parameter>
     </parameter>
     <filter match="all">
-      <property-filter type="matches" value="43" property="sceneID" />
+      <property-filter type="matches" value="65" property="sceneID" />
     </filter>
   </subscription>
--->
-
-  <!-- Examples -->
-<!--
-  <subscription event-name="call" handler-name="raise_event">
+  <subscription event-name="phonecall" handler-name="raise_event">
     <parameter>
-      <parameter name="event_name">sendBell</parameter>
+      <parameter name="event_name">bell</parameter>
     </parameter>
     <filter match="all">
+      <property-filter type="exists" property="phonenumber" />
       <property-filter type="matches" value="0123456789" property="source" />
     </filter>
   </subscription>
-
-  <subscription event-name="sendBell" handler-name="bus_handler">
-    <send type="callScene">
-      <parameter name="scene">14</parameter>
-    </send>
-    <parameter>
-      <parameter name="location">.fid(4136)</parameter>
-    </parameter>    
-  </subscription>
--->
+  -->
 
   <!-- Sunrise/Sunset calculation script -->
   <subscription event-name="running" handler-name="javascript">
@@ -74,22 +62,37 @@
     </parameter>
   </subscription>
 
-  <!-- System State Handler -->
+  <!-- System State/Event Handler -->
   <subscription event-name="model_ready" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_events.js</parameter>
+      <parameter name="filename2">/usr/share/dss/data/system_state.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
   <subscription event-name="callScene" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_events.js</parameter>
+      <parameter name="filename2">/usr/share/dss/data/system_state.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
   <subscription event-name="undoScene" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_events.js</parameter>
+      <parameter name="filename2">/usr/share/dss/data/system_state.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="buttonClick" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_events.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="deviceSensorEvent" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">/usr/share/dss/data/system_events.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
