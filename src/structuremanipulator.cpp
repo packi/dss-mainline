@@ -49,6 +49,11 @@ namespace dss {
     m_Interface.createZone(_dsMeter->getDSID(), _zone->getID());
     _zone->addToDSMeter(_dsMeter);
     _zone->setIsPresent(true);
+    _zone->setIsConnected(true);
+    std::vector<boost::shared_ptr<Group> > groupList = _zone->getGroups();
+    foreach(boost::shared_ptr<Group> group, groupList) {
+      group->setIsConnected(true);
+    }
   } // createZone
 
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
@@ -73,6 +78,16 @@ namespace dss {
     DeviceReference ref(_device, &m_Apartment);
     _zone->addDevice(ref);
 
+    // update group presence
+    for (int g = 0; g < GroupIDStandardMax; g++ ) {
+      if (_device->isInGroup(g)) {
+        boost::shared_ptr<Group> group = _zone->getGroup(g);
+        if (group) {
+          group->setIsPresent(true);
+        }
+      }
+    }
+
     // check if we can remove the zone from the dsMeter
     if(oldZoneID != 0) {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing device from old zone " + intToString(oldZoneID), lsInfo);
@@ -84,6 +99,18 @@ namespace dss {
         Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + targetDSMeter->getDSID().toString(), lsInfo);
         removeZoneOnDSMeter(oldZone, targetDSMeter);
       }
+
+      // cleanup group presence
+      for (int g = 0; g < GroupIDStandardMax; g++ ) {
+        if (_device->isInGroup(g)) {
+          boost::shared_ptr<Group> group = oldZone->getGroup(g);
+          Set presentDevicesInGroup = oldZone->getDevices().getByGroup(group);
+          if(presentDevicesInGroup.length() == 0) {
+            group->setIsPresent(false);
+          }
+        }
+      }
+
     } else {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: No previous zone...", lsWarning);
     }
@@ -116,8 +143,8 @@ namespace dss {
     try {
       m_Interface.removeZone(_dsMeter->getDSID(), _zone->getID());
       _zone->removeFromDSMeter(_dsMeter);
-      if(_zone->isRegisteredOnAnyMeter()) {
-        _zone->setIsPresent(false);
+      if(!_zone->isRegisteredOnAnyMeter()) {
+        _zone->setIsConnected(false);
       }
     } catch(BusApiError& e) {
       Logger::getInstance()->log("Can't remove zone " +
