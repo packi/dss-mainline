@@ -411,9 +411,10 @@ namespace dss {
               } else if (strcmp(_name, "datamodelModification") == 0) {
                 m_tempMeter->setDatamodelModificationcount(strToInt(m_chardata));
               }
-            } else if ((m_state == ps_group) && (strcmp(_name, "groups") == 0)){
-              m_state = ps_zone;
             }
+          }
+          if ((m_state == ps_group) && (strcmp(_name, "groups") == 0)) {
+            m_state = ps_zone;
           }
         }
         break;
