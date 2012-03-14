@@ -86,7 +86,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(AVAHI_LIBS) \
 			$(CURL_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th \
-			$(EXPAT_LIBS)
+			$(EXPAT_LIBS) \
+			$(BACKTRACE_LDFLAGS)
 
 if BUILD_SOAP
 
