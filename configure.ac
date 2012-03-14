@@ -157,6 +157,19 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([dup2 gethostbyname gettimeofday inet_ntoa localtime_r memchr memmove memset select setlocale socket strchr strcspn strdup strerror strrchr strspn strstr strtol strtoul])
 
+# Check for execinfo.h and backtrace
+AC_CHECK_HEADERS(execinfo.h,
+    [
+        AC_CHECK_FUNCS(backtrace backtrace_symbols,
+            [
+                BACKTRACE_LDFLAGS="-rdynamic"
+                AC_SUBST(BACKTRACE_LDFLAGS)
+            ],
+            [])
+    ]
+    []
+)
+
 ASSUMED_BOOST_VER=146
 
 BOOST_REQUIRE([1.46],
