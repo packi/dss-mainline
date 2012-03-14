@@ -1,7 +1,6 @@
 dssdatadir = $(pkgdatadir)/data
 dist_dssdata_DATA = \
 	$(top_srcdir)/data/config.xml \
-	$(top_srcdir)/data/sim.xml \
 	$(top_srcdir)/data/subscriptions.xml
 
 dssjsdir = $(pkgdatadir)/data/scripts
