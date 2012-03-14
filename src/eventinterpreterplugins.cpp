@@ -562,6 +562,7 @@ namespace dss {
   void EventInterpreterPluginSendmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
     std::string sender;
     std::string recipient, recipient_cc, recipient_bcc;
+    std::string header;
     std::string subject;
     std::string body;
 
@@ -587,6 +588,12 @@ namespace dss {
       recipient_bcc = _event.getPropertyByName("bcc");
     } else if(_subscription.getOptions()->hasParameter("bcc")) {
       recipient_bcc = _subscription.getOptions()->getParameter("bcc");
+    }
+
+    if (_event.hasPropertySet("header")) {
+      header = _event.getPropertyByName("header");
+    } else if(_subscription.getOptions()->hasParameter("header")) {
+      header = _subscription.getOptions()->getParameter("header");
     }
 
     if(_event.hasPropertySet("subject")) {
@@ -624,7 +631,22 @@ namespace dss {
           << "To: " << recipient << "\n"
           << "From: " << sender << "\n"
           << "Subject: " << subject << "\n"
-          << "X-Mailer: digitalSTROM Server (v" DSS_VERSION ")" << "\n\n";
+          << "X-Mailer: digitalSTROM Server (v" DSS_VERSION ")" << "\n";
+
+      bool hasContentType = false;
+      if (!header.empty()) {
+        std::vector<std::string> slist = dss::splitString(header, '\n', true);
+        foreach(std::string line, slist) {
+          mail << line << "\n";
+          if (strncasecmp(line.c_str(), "Content-Type:", 13) == 0) {
+            hasContentType = true;
+          }
+        }
+      }
+      if (!hasContentType) {
+        mail << "Content-Type: text/plain; charset=utf-8\n";
+      }
+      mail << "\n";
       mail << body;
       fputs(mail.str().c_str(), mailStream);
       fclose(mailStream);
