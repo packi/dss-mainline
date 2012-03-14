@@ -581,7 +581,9 @@ namespace dss {
     if(DSS::hasInstance()) {
       std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
       ModelPersistence persistence(*m_pApartment);
-      persistence.readConfigurationFromXML(configFileName);
+      if (boost::filesystem::exists(configFileName)) {
+        persistence.readConfigurationFromXML(configFileName);
+      }
     }
   } // readConfiguration
 
