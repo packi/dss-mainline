@@ -2,13 +2,13 @@ dssdatadir = $(pkgdatadir)/data
 dist_dssdata_DATA = \
 	$(top_srcdir)/data/config.xml \
 	$(top_srcdir)/data/sim.xml \
-	$(top_srcdir)/data/subscriptions.xml \
-	$(top_srcdir)/data/solar_computer.js \
+	$(top_srcdir)/data/subscriptions.xml
+
+dssjsdir = $(pkgdatadir)/data/scripts
+dist_dssjs_DATA = \
+	$(top_srcdir)/data/scripts/solar_computer.js \
 	$(top_srcdir)/data/scripts/system_events.js \
-	$(top_srcdir)/data/scripts/system_state.js \
-	$(top_srcdir)/data/handle_temperature_sensor_events.js \
-	$(top_srcdir)/data/read_temperature.js \
-	$(top_srcdir)/data/simulated_device.js
+	$(top_srcdir)/data/scripts/system_state.js
 
 webrootdir = $(pkgdatadir)/data/webroot
 dist_webroot_DATA = \
