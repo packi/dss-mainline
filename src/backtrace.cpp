@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2012 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+            Michael Tross, aizo GmbH <michael.tross@aizo.com>
 
     This file is part of digitalSTROM Server.
 
@@ -25,9 +26,12 @@
 #endif
 
 #include "backtrace.h"
+#include "stdio.h"
+#include "string.h"
 
-#if (defined HAVE_BACKTRACE) && (defined HAVE_BACKTRACE_SYMBOLS)
+#ifdef HAVE_BACKTRACE
   #include <execinfo.h>
+  #include <cxxabi.h>
 #endif
 
 #include "src/base.h"
@@ -36,7 +40,7 @@
 namespace dss {
 
   void Backtrace::logBacktrace() {
-#if (defined HAVE_BACKTRACE) && (defined HAVE_BACKTRACE_SYMBOLS)
+#if defined(HAVE_BACKTRACE) && defined(HAVE_BACKTRACE_SYMBOLS)
     const int kBacktraceSize = 50;
     void* btBuffer[kBacktraceSize];
     int backtraceSize = backtrace(btBuffer, kBacktraceSize);
@@ -44,12 +48,42 @@ namespace dss {
     if(backtraceStrings == NULL) {
       Logger::getInstance()->log("Couldn't get backtrace symbols", lsFatal);
     } else {
-      for(int iString = 0; iString < backtraceSize; iString++) {
-        Logger::getInstance()->log("Backtrace[" + intToString(iString) + "]: " + backtraceStrings[iString], lsFatal);
+      char temp[4096];
+      char addr[20];
+      char offset[20];
+      char* symname;
+      char* demangled;
+      size_t size;
+      int status;
+      for (int i = 1; i < backtraceSize; i++) {
+        offset[0] = 0;
+        addr[0] = 0;
+        demangled = NULL;
+        if (3 == sscanf(backtraceStrings[i], "%*[^(](%4095[^+]+%[^)]) %s", temp, offset, addr)) {
+          symname = temp;
+          if (NULL != (demangled = abi::__cxa_demangle(temp, NULL, &size, &status))) {
+            symname = demangled;
+          }
+        } else if (3 == sscanf(backtraceStrings[i], "%*d %*s %s %s %*s %s", addr, temp, offset)) {
+          symname = temp;
+          if (NULL != (demangled = abi::__cxa_demangle(temp, NULL, &size, &status))) {
+            symname = demangled;
+          }
+        } else if (2 == sscanf(backtraceStrings[i], "%s %s", temp, addr)) {
+          symname = temp;
+        } else {
+          symname = backtraceStrings[i];
+        }
+
+        Logger::getInstance()->log("Backtrace[" + intToString(i) + "]    " +
+            symname + "    " + backtraceStrings[i], lsFatal);
+
+        if (demangled) {
+          free(demangled);
+        }
       }
     }
     free(backtraceStrings);
+  }
 #endif
-  } // logBacktrace
-
 }
