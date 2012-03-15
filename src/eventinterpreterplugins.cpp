@@ -341,8 +341,11 @@ namespace dss {
         }
         std::string scriptName =
             _subscription.getOptions()->getParameter(paramName);
+
         if (!beginsWith(scriptName, "/")) {
-          scriptName = DSS::getInstance()->getDataDirectory() + "/" + scriptName;
+          if (DSS::hasInstance()) {
+            scriptName = DSS::getInstance()->getDataDirectory() + "/" + scriptName;
+          }
         }
 
         wrapper->addFile(scriptName);
