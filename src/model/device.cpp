@@ -743,6 +743,10 @@ namespace dss {
     if(_eventIndex > 15) {
       throw DSSException("Device::setSensorEventEntry: index out of range");
     }
+    if (getRevisionID() < 0x0328) {
+      /* older devices have a bug, where the hysteresis setting leads to strange behavior */
+      _entry.hysteresis = 0;
+    }
     setSensorEventName(_eventIndex, _entry.name);
     uint8_t value;
     value = (_entry.sensorIndex << 4) | (_entry.test << 2) | (_entry.action);
