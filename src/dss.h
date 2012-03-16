@@ -104,6 +104,7 @@ namespace dss {
     void setupDirectories();
     bool initSubsystems();
     bool initSecurity();
+    std::string readDistroVersion();
   public:
     ~DSS();
     bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);

@@ -135,6 +135,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
     m_pPropertySystem->createProperty("/system/version/version")->setStringValue(DSS_VERSION);
+    m_pPropertySystem->createProperty("/system/version/distroVersion")->setStringValue(readDistroVersion());
     m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
     m_pPropertySystem->createProperty("/system/version/gitRevision")->setStringValue(DSS_RCS_REVISION);
   } // ctor
@@ -726,4 +727,25 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     }
   }
 #endif
+
+  std::string DSS::readDistroVersion() {
+    std::string version = "";
+    try {
+#ifdef DISTRO_VERSION_FILE
+      std::string filename = std::string(DISTRO_VERSION_FILE);
+#else
+      std::string filename = "/etc/issue";
+#endif
+
+      if ((filename.size() > 0) && boost::filesystem::exists(filename)) {
+        std::ifstream in(filename.c_str());
+        if (!in.is_open()) {
+          return version;
+        }
+        std::getline(in, version);
+        in.close();
+      }
+    } catch (...) {}
+    return version;
+  }
 }
