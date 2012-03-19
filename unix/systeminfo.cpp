@@ -106,6 +106,11 @@ namespace dss {
 
       std::string ip = ipToString(sa);
 
+      if(ioctl(sock, SIOCGIFHWADDR, pRequest) < 0) {
+        Logger::getInstance()->log("ioctl(SIOCGIFHWADDR)", lsError);
+        continue;
+      }
+
       char mac[32];
       for(int j=0, k=0; j<6; j++) {
           k+=snprintf(mac+k, sizeof(mac)-k-1, j ? ":%02X" : "%02X",
