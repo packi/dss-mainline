@@ -117,6 +117,17 @@ AC_ARG_WITH(sendmail-location,
         fi
     ])
 
+DISTR_VERSION_FILE=
+AC_ARG_WITH(distro-version-file,
+    AC_HELP_STRING([--with-distro-version-file=FILENAME], [read distro version information from specified file (must be a a text file, first line will be interpreted as a distro version)]),
+    [
+        if test "x$withval" != "x"; then
+            AC_MSG_NOTICE([Will read distro version information from  $withval])
+            DISTRO_VERSION_FILE="$withval"
+            AC_DEFINE_UNQUOTED([DISTRO_VERSION_FILE], ["$withval"], [read distro version from here])
+        fi
+    ])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
