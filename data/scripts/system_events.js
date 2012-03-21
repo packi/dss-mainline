@@ -117,7 +117,7 @@ function genZoneName(zone)
     if (zone.id == 0) {
         zName = 'Broadcast';
     }
-    return 'Zone ' + zName + ';' + zone.id;
+    return zName + ';' + zone.id;
 }
 
 function genGroupName(groupId)
@@ -126,38 +126,39 @@ function genGroupName(groupId)
     if (groupId < groupTable.length) {
         gName = groupTable[groupId];
     }
-    return 'Group ' + gName + ';' + groupId ;
+    return gName + ';' + groupId ;
 }
 
 function genDeviceName(originDeviceID)
 {
-    var devName = 'Device Unknown';
+    var devName = 'Unknown';
     var originDevice = parseInt(originDeviceID, 16);
     if (originDevice < 16) {
         if (originDevice == 0) {
-            devName = 'Device (unspecified)';
+            devName = '(unspecified)';
         } else if (originDevice == 1) {
-            devName = 'Server via Scripting';
+            devName = 'Scripting';
         } else if (originDevice == 2) {
-            devName = 'Server via JSON';
+            devName = 'JSON';
         } else if (originDevice == 3) {
-            devName = 'Server via SOAP';
+            devName = 'SOAP';
         } else if (originDevice == 4) {
-            devName = 'Server via Bus-Handler';
+            devName = 'Bus-Handler';
         } else if (originDevice == 5) {
-            devName = 'Server via Simulation';
+            devName = 'Simulation';
         } else if (originDevice == 6) {
-            devName = 'Server Test';
+            devName = 'Test';
         } else {
-            devName = 'Server via ' + originDevice;
+            devName = '';
         }
+        devName += ';' + originDevice;
     }
     else {
         var dev = getDevices().byDSID(originDeviceID);
         if (dev != undefined && dev != null) {
-            devName = 'Device ' + dev.name;
+            devName = dev.name;
         } else {
-            devName = 'Device Unknown';
+            devName = 'Unknown';
         }
         devName += ';' + originDeviceID;
     }
@@ -166,7 +167,7 @@ function genDeviceName(originDeviceID)
 
 function genSceneName(sceneId)
 {
-    var sceneName = 'Scene ';
+    var sceneName = '';
     if ((sceneId < 64) && (sceneId < sceneTable0.length)) {
         sceneName = sceneTable0[sceneId];
     }
@@ -182,7 +183,7 @@ function logLastScene(zone, groupId, sceneId)
     var zoneName = genZoneName(zone);
     var groupName = genGroupName(groupId);
     var sceneName = genSceneName(sceneId);
-    //l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';Last Scene;', sceneName, ';', zoneName, ';', groupName, ';;');
 }
 
@@ -192,7 +193,7 @@ function logZoneGroupScene(zone, groupId, sceneId, originDeviceId)
     var groupName = genGroupName(groupId);
     var devName = genDeviceName(originDeviceId);
     var sceneName = genSceneName(sceneId);
-    //l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';CallScene;', sceneName, ';', zoneName, ';', groupName, ';', devName);
 }
 
@@ -202,7 +203,7 @@ function logZoneGroupUndo(zone, groupId, sceneId, originDeviceId)
     var groupName = genGroupName(groupId);
     var devName = genDeviceName(originDeviceId);
     var sceneName = genSceneName(sceneId);
-    //l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';UndoScene;', sceneName, ';', zoneName, ';', groupName, ';', devName);
 }
 
@@ -210,31 +211,31 @@ function logDeviceLocalScene(sceneId, originDeviceId)
 {
     var devName = genDeviceName(originDeviceId);
     var sceneName = genSceneName(sceneId);
-    //l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';Device;', sceneName, ';;;;;', devName);
 }
 
 function logDeviceButtonClick(device, param)
 {
-    var devName = 'Device ' + device.name + ';' + device.dsid;
+    var devName = device.name + ';' + device.dsid;
     var keynum = param.buttonIndex;
     var clicknum = param.clickType;
     var holdCount = param.holdCount;
 
-    //l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     if (holdCount == undefined) {
-        l.logln(';ButtonClick', ';Type ' + clicknum, ';Index ' + keynum, ';;;;;', devName);
+        l.logln(';ButtonClick', ';Type ' + clicknum, ';' + keynum, ';;;;;', devName);
     }
     else {
-        l.logln(';ButtonClick', ';Hold ' + holdCount, ';Index ' + keynum, ';;;;;', devName);
+        l.logln(';ButtonClick', ';Hold ' + holdCount, ';' + keynum, ';;;;;', devName);
     }
 }
 
 function logDeviceSensorEvent(device, param)
 {
-    var devName = 'Device ' + device.name + ';' + device.dsid;
+    var devName = device.name + ';' + device.dsid;
     
-    //l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';EventTable;', param.sensorEvent, ';;;;;;', devName);
 }
 
@@ -257,7 +258,7 @@ if (dumpEvent > 0) {
  */
 if (raisedEvent.name == 'model_ready')
 {
-    l.logln('Time;Event;Action;Value;Zone;Zone-ID;Group;Group-ID;Device;DSID');
+    l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
 
     var zones = getZones();
     for (var z = 0; z < zones.length; z++) {
