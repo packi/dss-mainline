@@ -595,7 +595,9 @@ namespace dss {
           }
           // remove property in device group list
           PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(_groupID));
-          m_pPropertyNode->removeChild(gsubnode);
+          if (gsubnode) {
+            gsubnode->getParentNode()->removeChild(gsubnode);
+          }
         }
       }
     } else {
