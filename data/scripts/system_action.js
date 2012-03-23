@@ -339,7 +339,7 @@ function getPath(name)
     }
     for (var iIndex=0; iIndex < aBaseArray.length; iIndex++) {
         var oNameNode = aBaseArray[iIndex].getChild('id');
-        if (oNameNode.getValue() == name) {
+        if ((oNameNode != null) && (oNameNode.getValue() == name)) {
             return aBaseArray[iIndex].getPath();
         }
     }
