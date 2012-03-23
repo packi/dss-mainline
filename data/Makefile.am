@@ -10,6 +10,7 @@ dist_dssjs_DATA = \
 	$(top_srcdir)/data/scripts/system_conditions.js \
 	$(top_srcdir)/data/scripts/system_trigger.js \
 	$(top_srcdir)/data/scripts/system_register_trigger.js \
+	$(top_srcdir)/data/scripts/http.js \
 	$(top_srcdir)/data/scripts/system_events.js \
 	$(top_srcdir)/data/scripts/system_state.js
 
