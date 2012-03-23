@@ -1,5 +1,21 @@
 dSS - digitalSTROM Server
 
+v1.9.0 23.03.2012
+	* resolve relative javascript handler path's with datadir (#1367)
+	* fix parsing of apartment.xml (#1509)
+	* re-enable backtrace generation (#1510)
+	* changed subscriptions to use relative path and moved js modules into
+	  scripts directory (#1367)
+	* remove obsolete simulation files
+	* send mails with default content-type utf-8, #1195
+	* set hysteresis to 0 for devices with firmware older than 3.2.8
+	* publish distro version in property tree, #1506
+	* fix MAC address in system/host/interfaces, was just a hex representation
+	  of the IP address before
+	* changed system-event log layout (#1525)
+	* fix property tree nodes for device groups
+	* added backend scripts for common event handling
+
 v1.8.0 12.03.2012
 	* completely get rid of Poco, use expat for all XML parsing
 	* new JSON calls for event table configuration
