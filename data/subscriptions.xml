@@ -147,4 +147,53 @@
     <property name="value" type="boolean">false</property>
     <property name="script_id" type="string">solar_computer</property>
   </state>
+
+  <!-- System Trigger -->
+  <subscription event-name="highlevelevent" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_conditions.js</parameter>
+      <parameter name="filename2">scripts/system_trigger.js</parameter>
+      <parameter name="script_id">system_trigger</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="buttonClick" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_conditions.js</parameter>
+      <parameter name="filename2">scripts/system_trigger.js</parameter>
+      <parameter name="script_id">system_trigger</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="deviceSensorEvent" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_conditions.js</parameter>
+      <parameter name="filename2">scripts/system_trigger.js</parameter>
+      <parameter name="script_id">system_trigger</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="callScene" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_conditions.js</parameter>
+      <parameter name="filename2">scripts/system_trigger.js</parameter>
+      <parameter name="script_id">system_trigger</parameter>
+    </parameter>
+  </subscription>
+
+  <!-- System Actions -->
+  <subscription event-name="highlevelevent" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/http.js</parameter>
+      <parameter name="filename2">scripts/system_conditions.js</parameter>
+      <parameter name="filename3">scripts/system_action.js</parameter>
+      <parameter name="script_id">system_action</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="action_execute" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/http.js</parameter>
+      <parameter name="filename2">scripts/system_conditions.js</parameter>
+      <parameter name="filename3">scripts/system_action.js</parameter>
+      <parameter name="script_id">system_action</parameter>
+    </parameter>
+  </subscription>
+
 </subscriptions>
