@@ -292,8 +292,18 @@ namespace dss {
     if(m_Queue->waitForEvent()) {
       boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
       if(toProcess != NULL) {
+        PropertyNodePtr evtMonitor;
 
         log(std::string("Interpreter: got event from queue: '") + toProcess->getName() + "'");
+        if (DSS::hasInstance()) {
+           evtMonitor = getDSS().getPropertySystem().getProperty("/system/EventInterpreter");
+           if (evtMonitor) {
+             DateTime now;
+             evtMonitor->createProperty("running/time")->setIntegerValue(now.secondsSinceEpoch());
+             evtMonitor->createProperty("running/event")->setStringValue(toProcess->getName());
+           }
+        }
+
         for(HashMapStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
             iParam != e; ++iParam)
         {
@@ -305,6 +315,7 @@ namespace dss {
           boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
           subscriptionsCopy = m_Subscriptions;
         }
+
         for(SubscriptionVector::iterator ipSubscription = subscriptionsCopy.begin(), e = subscriptionsCopy.end();
             ipSubscription != e; ++ipSubscription)
         {
@@ -312,6 +323,9 @@ namespace dss {
             log(std::string("Interpreter: subscription '") + (*ipSubscription)->getID() + "' matches event");
             EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
             if(plugin != NULL) {
+              if (evtMonitor) {
+                evtMonitor->createProperty("running/handler")->setStringValue((*ipSubscription)->getHandlerName());
+              }
               try {
                 plugin->handleEvent(*toProcess, **ipSubscription);
               } catch(std::runtime_error& e) {
@@ -323,6 +337,10 @@ namespace dss {
             }
 
           }
+        }
+
+        if (evtMonitor) {
+          evtMonitor->removeChild(evtMonitor->getProperty("running"));
         }
 
         m_EventsProcessed++;
