@@ -1089,17 +1089,21 @@ namespace dss {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-        if(argc == 1) {
+        if(argc >= 1) {
           int sceneNr;
+          bool forceFlag = false;
           try {
             sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            if (argc >= 2) {
+              forceFlag = ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]);
+            }
           } catch (ScriptException& ex) {
-            JS_ReportError(cx, "Convert parameter scene number: %s", ex.what());
+            JS_ReportError(cx, "Device.callScene: cannot convert parameters: %s", ex.what());
             return JS_FALSE;
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->callScene(IDeviceInterface::coJSScripting, sceneNr);
+            intf->callScene(IDeviceInterface::coJSScripting, sceneNr, forceFlag);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
