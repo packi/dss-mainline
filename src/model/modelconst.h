@@ -139,6 +139,15 @@ namespace dss {
   const int GroupIDUserGroupStart = GroupIDStandardMax + 1;
   const int GroupIDMax = 63;
 
+  //Device Types
+  const int DeviceTypeKM = 0;
+  const int DeviceTypeTKM = 1;
+  const int DeviceTypeSDM = 2;
+  const int DeviceTypeKL = 3;
+  const int DeviceTypeTUP = 4;
+  const int DeviceTypeZWS = 5;
+  const int DeviceTypeSDS = 6;
+
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
   const uint32_t SimulationPrefix = 0xFFC00000;
 
@@ -149,6 +158,7 @@ namespace dss {
   const uint8_t CfgClassSensorEvent = 0x06;
   const uint8_t CfgClassRuntime = 0x40;
   const uint8_t CfgClassScene = 0x80;
+  const uint8_t CfgClassSceneExtention = 0x81;
 
   const uint8_t CfgFunction_Mode = 0;
   const uint8_t CfgFunction_ButtonMode = 1;

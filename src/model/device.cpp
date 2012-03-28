@@ -771,4 +771,45 @@ namespace dss {
     }
   }
 
+  bool Device::hasExtendendSceneTable() {
+    if ((((getFunctionID() & 0xf000) >> 12) == GroupIDGray) &&
+        (((getProductID() >> 10) & 0x3f) == DeviceTypeKL)) {
+      return true;
+    }
+    return false;
+  }
+
+  void Device::setSceneValue(const int _scene, const int _value) {
+    if (hasExtendendSceneTable()) {
+      int extValue = getDeviceConfig(CfgClassSceneExtention, _scene / 2);
+      if ((_scene % 2) == 0) {
+        extValue &= 0xF0;
+        extValue |= (_value >> 4) & 0x0F;
+      } else {
+        extValue &= 0x0F;
+        extValue |= _value & 0xF0;
+      }
+      setDeviceConfig(CfgClassScene, _scene, (_value >> 8) & 0xFF);
+      setDeviceConfig(CfgClassSceneExtention, _scene / 2, extValue);
+    } else {
+      setDeviceConfig(CfgClassScene, _scene, _value);
+    }
+  }
+
+  int Device::getSceneValue(const int _scene) {
+    int value = getDeviceConfig(CfgClassScene, _scene);
+    if (hasExtendendSceneTable()) {
+      value <<= 8;
+      int extValue = getDeviceConfig(CfgClassSceneExtention, _scene / 2);
+      if ((_scene % 2) == 0) {
+        extValue &= 0xF0;
+        value |= extValue & (extValue >> 4);
+      } else {
+        extValue &= 0x0F;
+        value |= (extValue << 4) & extValue;
+      }
+    }
+    return value;
+  }
+
 } // namespace dss

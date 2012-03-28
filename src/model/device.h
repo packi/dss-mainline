@@ -111,6 +111,7 @@ namespace dss {
     void dirty();
 
     void fillSensorTable(const int _productId);
+    bool hasExtendendSceneTable();
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
@@ -136,6 +137,8 @@ namespace dss {
     void getDeviceTransitionTime(uint8_t _dimtimeIndex, int& up, int& down);
     int transitionVal2Time(uint8_t _value);
     uint8_t transitionTimeEval(int timems);
+    void setSceneValue(const int _scene, const int _value);
+    int getSceneValue(const int _scene);
 
     /** Returns device configuration value */
     uint8_t getDeviceConfig(uint8_t _configIndex, uint8_t _value);
