@@ -519,6 +519,20 @@ namespace dss {
       }
       pDevice->setSensorEventEntry(id, event);
       return success();
+    } else if(_request.getMethod() == "addToArea") {
+      int areaScene = strToIntDef(_request.getParameter("areaScene"), -1);
+      if (areaScene < 0) {
+        return failure("Missing parameter 'areaScene'");
+      }
+      pDevice->configureAreaMembership(areaScene, true);
+      return success();
+    } else if(_request.getMethod() == "removeFromArea") {
+      int areaScene = strToIntDef(_request.getParameter("areaScene"), -1);
+      if (areaScene < 0) {
+        return failure("Missing parameter 'areaScene'");
+      }
+      pDevice->configureAreaMembership(areaScene, false);
+      return success();
     } else {
       throw std::runtime_error("Unhandled function");
     }

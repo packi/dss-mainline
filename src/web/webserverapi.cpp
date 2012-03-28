@@ -330,6 +330,12 @@ namespace dss {
       .withParameter("sceneDeviceMode", "integer", false)
       .withParameter("sceneID", "integer", false)
       .withDocumentation("Configures a sensor event table entry in the device. If 'action' == 2 and depending on the type of the device either ('buttonNumber'/'clickType') or ('sceneDeviceMode'/'sceneID') are required.");
+    clsDevice.addMethod("addToArea")
+      .withParameter("areaScene", "integer", true)
+      .withDocumentation("Add device to the specified area. 'areaScene' can be either the areaOn or areaOff scenes.");
+    clsDevice.addMethod("removeFromArea")
+      .withParameter("areaScene", "integer", true)
+      .withDocumentation("Remove a device from the specified area. 'areaScene' can be either the areaOn or areaOff scenes.");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);

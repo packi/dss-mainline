@@ -140,6 +140,8 @@ namespace dss {
     void setSceneValue(const int _scene, const int _value);
     int getSceneValue(const int _scene);
 
+    void configureAreaMembership(const int _areaScene, const bool _addToArea);
+
     /** Returns device configuration value */
     uint8_t getDeviceConfig(uint8_t _configIndex, uint8_t _value);
     uint16_t getDeviceConfigWord(uint8_t _configIndex, uint8_t _value);

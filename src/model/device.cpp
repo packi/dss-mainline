@@ -812,4 +812,27 @@ namespace dss {
     return value;
   }
 
+  void Device::configureAreaMembership(const int _areaScene, const bool _addToArea) {
+    if ((_areaScene < SceneOffA1) || (_areaScene == Scene1) || (_areaScene > SceneA41)) {
+      throw DSSException("Device::configureAreaMembership: scene number does not indicate an area");
+    }
+    DeviceSceneSpec_t sceneSpec;
+
+    int areaOnScene = (_areaScene >= SceneA11) ? _areaScene : (_areaScene - SceneOffA1 + SceneA11);
+    getDeviceSceneMode(areaOnScene, sceneSpec);
+    sceneSpec.dontcare = !_addToArea;
+    setDeviceSceneMode(areaOnScene, sceneSpec);
+    if (_addToArea) {
+      setSceneValue(areaOnScene, 0xFFFF);
+    }
+
+    int areaOffScene = areaOnScene - SceneA11 + SceneOffA1;
+    getDeviceSceneMode(areaOffScene, sceneSpec);
+    sceneSpec.dontcare = !_addToArea;
+    setDeviceSceneMode(areaOffScene, sceneSpec);
+    if (_addToArea) {
+      setSceneValue(areaOffScene, 0);
+    }
+  }
+
 } // namespace dss
