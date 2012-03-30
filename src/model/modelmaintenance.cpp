@@ -1127,6 +1127,7 @@ namespace dss {
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("deviceSensorEvent", pDevRev));
       pEvent->setProperty("sensorEvent", eventName);
+      pEvent->setProperty("sensorIndex", "event" + intToString(_eventIndex));
       raiseEvent(pEvent);
     } catch(ItemNotFoundException& e) {
       log("onSensorEvent: Event index not found: " + std::string(e.what()));
