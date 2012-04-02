@@ -43,6 +43,7 @@
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
 #include "src/security/security.h"
+#include "src/stringconverter.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -91,8 +92,9 @@ namespace dss {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       if(ext != NULL && argc >= 1) {
+        StringConverter st("UTF-8", "UTF-8");
         std::string aptName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-        ext->getApartment().setName(aptName);
+        ext->getApartment().setName(st.convert(aptName));
         JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
         return JS_TRUE;
       }

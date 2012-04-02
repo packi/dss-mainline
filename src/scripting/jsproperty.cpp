@@ -29,6 +29,7 @@
 #include "src/propertysystem.h"
 #include "src/security/user.h"
 #include "src/security/security.h"
+#include "src/stringconverter.h"
 
 namespace dss {
 
@@ -76,6 +77,7 @@ namespace dss {
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     int argIndex;
+    StringConverter st("UTF-8", "UTF-8");
     if(node != NULL) {
       if(argc >= 1) {
         argIndex = 0;
@@ -87,8 +89,11 @@ namespace dss {
       if(argc >= 2) {
         std::string propName;
         try {
-          propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          propName = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
         } catch(ScriptException& ex) {
+          JS_ReportError(cx, "Property.setValue: cannot convert argument: property-path");
+          return JS_FALSE;
+        } catch(DSSException& dex) {
           JS_ReportError(cx, "Property.setValue: cannot convert argument: property-path");
           return JS_FALSE;
         }
@@ -106,7 +111,7 @@ namespace dss {
     if(node != NULL) {
       try {
         if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[argIndex])) {
-          node->setStringValue(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[argIndex]));
+          node->setStringValue(st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[argIndex])));
         } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[argIndex])) {
           node->setBooleanValue(ctx->convertTo<bool>(JS_ARGV(cx, vp)[argIndex]));
         } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[argIndex])) {
@@ -123,6 +128,9 @@ namespace dss {
       } catch(ScriptException& ex) {
         JS_ReportError(cx, "Property.setValue: cannot convert value");
         return JS_FALSE;
+      } catch(DSSException &dex) {
+        JS_ReportError(cx, "Property.setValue: cannot convert value");
+        return JS_FALSE;
       }
     } else {
       JS_ReportError(cx, "could not create property %s", node->getDisplayName().c_str());
@@ -137,6 +145,7 @@ namespace dss {
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
 
+    StringConverter st("UTF-8", "UTF-8");
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
       JS_ReportError(cx, "Property.setStatusProperty: invalid object");
@@ -194,7 +203,7 @@ namespace dss {
     // set value
     try {
       if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
-        valueNode->setStringValue(ctx->convertTo<std::string>(statusValue));
+        valueNode->setStringValue(st.convert(ctx->convertTo<std::string>(statusValue)));
       } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[0])) {
         valueNode->setBooleanValue(ctx->convertTo<bool>(statusValue));
       } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
@@ -208,6 +217,9 @@ namespace dss {
       return JS_FALSE;
     } catch(ScriptException& ex) {
       JS_ReportError(cx, "Property.setStatusProperty: cannot convert argument");
+      return JS_FALSE;
+    } catch(DSSException& dex) {
+      JS_ReportError(cx, "Property.setStatusProperty: cannot convert argument, not in UTF-8");
       return JS_FALSE;
     }
 
@@ -701,8 +713,14 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
-
-    std::string propName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+    StringConverter st("UTF-8", "UTF-8");
+    std::string propName;
+    try {
+      propName = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+    } catch (DSSException& dex) {
+      JS_ReportError(cx, "Property.construct: could not get/create node, not in UTF-8");
+      return JS_FALSE;
+    }
     PropertyNodePtr pNode = ext->getProperty(ctx, propName);
     if(pNode == NULL) {
       pNode = ext->createProperty(ctx, propName);

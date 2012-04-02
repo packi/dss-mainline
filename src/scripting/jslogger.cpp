@@ -28,6 +28,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include "src/logger.h"
 #include "src/propertysystem.h"
 #include "src/datetools.h"
+#include "src/stringconverter.h"
 
 #include <stdio.h>
 #include <signal.h>
@@ -167,10 +168,10 @@ namespace dss {
                              ScriptLoggerExtension* _pExtension) {
     ///\todo check log name for validity, prevent attempts to switch
     /// directories, etc.
-
+    StringConverter st("UTF-8", "UTF-8");
     m_pExtension = _pExtension;
-    m_logName = _filename;
-    m_fileName = _filePath + _filename;
+    m_logName = st.convert(_filename);
+    m_fileName = st.convert(_filePath + _filename);
     m_f = fopen(m_fileName.c_str(), "a+");
     if (!m_f) {
       throw std::runtime_error("Could not open file " + m_fileName + " for writing");
