@@ -27,6 +27,7 @@
 #include "src/event.h"
 #include "src/base.h"
 #include "src/foreach.h"
+#include "src/stringconverter.h"
 
 namespace dss {
 
@@ -82,8 +83,10 @@ namespace dss {
   } // remove
 
   boost::shared_ptr<JSONObject> SubscriptionRequestHandler::add(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    std::string eventName = _request.getParameter("eventName");
-    std::string handlerName = _request.getParameter("handlerName");
+    StringConverter st("UTF-8", "UTF-8");
+
+    std::string eventName = st.convert(_request.getParameter("eventName"));
+    std::string handlerName = st.convert(_request.getParameter("handlerName"));
     std::string optionsParameter = _request.getParameter("parameter");
     if(eventName.empty()) {
       return failure("need parameter eventName");
@@ -98,7 +101,7 @@ namespace dss {
       if(keyValue.size() != 2) {
         return failure("Can't parse line: '" + optionLine + "' as key/value pair");
       } else {
-        opts->setParameter(keyValue[0], keyValue[1]);
+        opts->setParameter(st.convert(keyValue[0]), st.convert(keyValue[1]));
       }
     }
     boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, m_EventInterpreter, opts));

@@ -30,6 +30,7 @@
 #include "src/model/device.h"
 #include "src/model/group.h"
 #include "src/structuremanipulator.h"
+#include "src/stringconverter.h"
 
 #include "src/web/json.h"
 
@@ -98,6 +99,7 @@ namespace dss {
 
   WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     boost::shared_ptr<Device> pDevice;
+    StringConverter st("UTF-8", "UTF-8");
     try {
       pDevice = getDeviceFromRequest(_request);
     } catch(DeviceNotFoundException& ex) {
@@ -144,7 +146,7 @@ namespace dss {
     } else if(_request.getMethod() == "setName") {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
-        pDevice->setName(name);
+        pDevice->setName(st.convert(name));
 
         if (m_pStructureBusInterface != NULL) {
           StructureManipulator manipulator(*m_pStructureBusInterface,
@@ -161,7 +163,7 @@ namespace dss {
       if(tagName.empty()) {
         return failure("missing parameter 'tag'");
       }
-      pDevice->addTag(tagName);
+      pDevice->addTag(st.convert(tagName));
       return success();
     } else if(_request.getMethod() == "removeTag") {
       std::string tagName = _request.getParameter("tag");
@@ -471,7 +473,7 @@ namespace dss {
         return failure("Invalid or missing parameter 'eventIndex'");
       }
       DeviceSensorEventSpec_t event;
-      event.name = _request.getParameter("eventName");
+      event.name = st.convert(_request.getParameter("eventName"));
       event.sensorIndex = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if ((event.sensorIndex < 0) || (event.sensorIndex > 0xF)) {
         return failure("Invalid or missing parameter 'sensorIndex'");

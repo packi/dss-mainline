@@ -28,6 +28,7 @@
 #include "src/web/json.h"
 #include "src/model/modelmaintenance.h"
 #include "src/structuremanipulator.h"
+#include "src/stringconverter.h"
 
 namespace dss {
 
@@ -61,8 +62,9 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
         if(_request.hasParameter("newName")) {
+          StringConverter st("UTF-8", "UTF-8");
           std::string nameStr = _request.getParameter("newName");
-          dsMeter->setName(nameStr);
+          dsMeter->setName(st.convert(nameStr));
           if (m_pStructureBusInterface != NULL) {
             StructureManipulator manipulator(*m_pStructureBusInterface,
                                              *m_pStructureQueryBusInterface,

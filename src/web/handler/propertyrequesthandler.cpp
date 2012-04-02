@@ -26,6 +26,7 @@
 
 #include "src/web/json.h"
 #include "src/propertyquery.h"
+#include "src/stringconverter.h"
 
 namespace dss {
 
@@ -37,6 +38,7 @@ namespace dss {
   { }
 
   WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+    StringConverter st("UTF-8", "UTF-8");
     if(_request.getMethod() == "query") {
       std::string query = _request.getParameter("query");
       if(query.empty()) {
@@ -46,7 +48,7 @@ namespace dss {
       return success(propertyQuery.run());
     }
 
-    std::string propName = _request.getParameter("path");
+    std::string propName = st.convert(_request.getParameter("path"));
     if(propName.empty()) {
       return failure("Need parameter 'path' for property operations");
     }
@@ -101,7 +103,7 @@ namespace dss {
         return failure(std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(_request.getMethod() == "setString") {
-      std::string value = _request.getParameter("value");
+      std::string value = st.convert(_request.getParameter("value"));
       if(node == NULL) {
         node = m_PropertySystem.createProperty(propName);
       }
