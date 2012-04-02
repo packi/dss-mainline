@@ -35,8 +35,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/eventinterpreterplugins.h \
 	$(top_srcdir)/src/eventsubscriptionsession.cpp \
 	$(top_srcdir)/src/eventsubscriptionsession.h \
-	$(top_srcdir)/src/subscription.cpp \
-	$(top_srcdir)/src/subscription.h \
 	$(top_srcdir)/src/expatparser.cpp \
 	$(top_srcdir)/src/expatparser.h \
 	$(top_srcdir)/src/foreach.h \
@@ -143,8 +141,12 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/sim/dsmetersim.h \
 	$(top_srcdir)/src/sim/dssim.cpp \
 	$(top_srcdir)/src/sim/dssim.h \
+	$(top_srcdir)/src/stringconverter.cpp \
+	$(top_srcdir)/src/stringconverter.h \
 	$(top_srcdir)/src/structuremanipulator.cpp \
 	$(top_srcdir)/src/structuremanipulator.h \
+	$(top_srcdir)/src/subscription.cpp \
+	$(top_srcdir)/src/subscription.h \
 	$(top_srcdir)/src/subsystem.cpp \
 	$(top_srcdir)/src/subsystem.h \
 	$(top_srcdir)/src/syncevent.cpp \
@@ -219,6 +221,7 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/devicetests.cpp \
 	$(top_srcdir)/tests/eventrequesthandlertest.cpp \
 	$(top_srcdir)/tests/eventtests.cpp \
+	$(top_srcdir)/tests/iconvtests.cpp \
 	$(top_srcdir)/tests/jshandlertests.cpp \
 	$(top_srcdir)/tests/jsloggertests.cpp \
 	$(top_srcdir)/tests/jsontests.cpp \
