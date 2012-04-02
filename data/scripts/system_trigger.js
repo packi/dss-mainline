@@ -160,25 +160,38 @@ function checkDeviceSensor(triggerProp)
 
     var dsid = raisedEvent.source.dsid;
     var eventName = raisedEvent.parameter.sensorEvent;
+    var eventIndex = raisedEvent.parameter.sensorIndex;
 
     var triggerDSID = triggerProp.getChild('dsid');
     if (triggerDSID == null) {
         return false;
     }
-    var triggerMSG = triggerProp.getChild('evt');
-    if (triggerMSG == null) {
+    var sDSID = triggerDSID.getValue();
+    if ( ! ((sDSID == "-1") || (sDSID == dsid))) {
         return false;
     }
 
-    var sDSID = triggerDSID.getValue();
-    var iMSG = triggerMSG.getValue();
+    var triggerEventId = triggerProp.getChild('eventid');
+    var triggerName = triggerProp.getChild('evt');
 
-    if ((sDSID == "-1") || (sDSID == dsid)) {
-        if ((iMSG == eventName) || (iMSG == -1)) {
-            l.logln("*** Match: SensorEvent dSID: " + sDSID + " Event: " + iMSG);
+    if (triggerEventId == null) {
+        if (triggerName == null) {
+            return false;
+        }
+        var iName = triggerName.getValue();
+        if ((iName == eventName) || (iName == -1)) {
+            l.logln("*** Match: SensorEvent dSID: " + sDSID + " EventName: " + iName);
             return true;
         }
+        return false;
     }
+
+    var iEventId = triggerEventId.getValue();
+    if ((iEventId == eventIndex) || (iEventId == -1)) {
+        l.logln("*** Match: SensorEvent dSID: " + sDSID + " EventId: " + iEventId);
+        return true;
+    }
+
     return false;
 }
 
