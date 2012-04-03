@@ -261,7 +261,7 @@ function executeOne(oActionNode)
                 executeCustomEvent(oActionNode);
                 return lActionDurationCustomEvent;
             } else if (sActionType == 'url') {
-                executeUrl(oActionNode);
+                setTimeout(function(){executeUrl(oActionNode)}, 1);
                 return lActionDurationUrl;
             }
         } else {
