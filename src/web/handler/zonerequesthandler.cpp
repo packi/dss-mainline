@@ -31,6 +31,7 @@
 #include "src/model/scenehelper.h"
 #include "src/model/modelmaintenance.h"
 #include "src/structuremanipulator.h"
+#include "src/stringconverter.h"
 
 #include "src/web/json.h"
 
@@ -49,6 +50,7 @@ namespace dss {
 
 
   WebServerResponse ZoneRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+    StringConverter st("UTF-8", "UTF-8");
     bool ok = true;
     std::string errorMessage;
     std::string zoneName = _request.getParameter("name");
@@ -141,7 +143,7 @@ namespace dss {
           resultObj->addProperty("name", pZone->getName());
           return success(resultObj);
         } else if(_request.getMethod() == "setName") {
-          pZone->setName(_request.getParameter("newName"));
+          pZone->setName(st.convert(_request.getParameter("newName")));
           return success();
         } else if(_request.getMethod() == "sceneSetName") {
           if(pGroup == NULL) {
@@ -155,7 +157,7 @@ namespace dss {
             return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
           }
 
-          std::string name = _request.getParameter("newName");
+          std::string name = st.convert(_request.getParameter("newName"));
           pGroup->setSceneName(sceneNumber, name);
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sceneSetName(pGroup, sceneNumber, name);

@@ -34,6 +34,7 @@
 #include "src/eventcollector.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/eventsubscriptionsession.h"
+#include "src/stringconverter.h"
 
 namespace dss {
 
@@ -44,9 +45,10 @@ namespace dss {
   { }
 
   boost::shared_ptr<JSONObject> EventRequestHandler::raise(const RestfulRequest& _request) {
-    std::string name = _request.getParameter("name");
-    std::string location = _request.getParameter("location");
-    std::string context = _request.getParameter("context");
+    StringConverter st("UTF-8", "UTF-8");
+    std::string name = st.convert(_request.getParameter("name"));
+    std::string location = st.convert(_request.getParameter("location"));
+    std::string context = st.convert(_request.getParameter("context"));
     std::string parameter = _request.getParameter("parameter");
 
     if (name.empty()) {
@@ -70,7 +72,7 @@ namespace dss {
       boost::tie(key, value) = splitIntoKeyValue(keyValue);
       if(!key.empty() && !value.empty()) {
         dss::Logger::getInstance()->log("EventRequestHandler::raise: Got parameter '" + key + "'='" + value + "'");
-        evt->setProperty(key, value);
+        evt->setProperty(st.convert(key), st.convert(value));
       } else {
         return failure("Invalid parameter found: " + keyValue);
       }
@@ -82,7 +84,8 @@ namespace dss {
 
   // name=EventName&sid=EventSubscriptionID
   boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    std::string name = _request.getParameter("name");
+    StringConverter st("UTF-8", "UTF-8");
+    std::string name = st.convert(_request.getParameter("name"));
     std::string tokenStr = _request.getParameter("subscriptionID");
     int token;
 
@@ -139,7 +142,8 @@ namespace dss {
 
   // name=EventName&sid=EventSubscriptionID
   boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    std::string name = _request.getParameter("name");
+    StringConverter st("UTF-8", "UTF-8");
+    std::string name = st.convert(_request.getParameter("name"));
     std::string tokenStr = _request.getParameter("subscriptionID");
     int token;
 

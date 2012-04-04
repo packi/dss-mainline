@@ -36,6 +36,7 @@
 
 #include "src/security/user.h"
 #include "src/security/security.h"
+#include "src/stringconverter.h"
 
 #include <sstream>
 
@@ -44,6 +45,7 @@ namespace dss {
   //=========================================== SystemRequestHandler
 
   WebServerResponse SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+    StringConverter st("UTF-8", "UTF-8");
     if(_request.getMethod() == "version") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("version", DSS::getInstance()->versionString());
@@ -167,7 +169,7 @@ namespace dss {
       }
 
       // TODO: filter characters in applicationName
-      std::string applicationName = _request.getParameter("applicationName");
+      std::string applicationName = st.convert(_request.getParameter("applicationName"));
       if(applicationName.empty()) {
         return failure("Need parameter 'applicationName'");
       }

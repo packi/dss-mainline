@@ -35,6 +35,7 @@
 #include "src/model/group.h"
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
+#include "src/stringconverter.h"
 
 #include "jsonhelper.h"
 
@@ -141,7 +142,8 @@ namespace dss {
         resultObj->addProperty("name", m_Apartment.getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
-        m_Apartment.setName(_request.getParameter("newName"));
+        StringConverter st("UTF-8", "UTF-8");
+        m_Apartment.setName(st.convert(_request.getParameter("newName")));
         return success();
       } else if(_request.getMethod() == "rescan") {
         std::vector<boost::shared_ptr<DSMeter> > mods = m_Apartment.getDSMeters();
