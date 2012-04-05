@@ -156,7 +156,7 @@ namespace dss {
         }
         return success();
       } else {
-        return failure("missing parameter 'name'");
+        return failure("missing parameter 'newName'");
       }
     } else if(_request.getMethod() == "addTag") {
       std::string tagName = _request.getParameter("tag");

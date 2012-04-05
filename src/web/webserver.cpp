@@ -226,8 +226,10 @@ namespace dss {
         std::string key;
         std::string value;
         boost::tie(key, value) = splitIntoKeyValue(*iParam);
-        if(key.empty() || value.empty()) {
+        if(key.empty()) {
           result[*iParam] = "";
+        } else if(value.empty()) {
+          result[urlDecode(key)] = "";
         } else {
           result[urlDecode(key)] = urlDecode(value);
         }

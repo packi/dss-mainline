@@ -142,8 +142,12 @@ namespace dss {
         resultObj->addProperty("name", m_Apartment.getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
-        StringConverter st("UTF-8", "UTF-8");
-        m_Apartment.setName(st.convert(_request.getParameter("newName")));
+        if (_request.hasParameter("newName")) {
+          StringConverter st("UTF-8", "UTF-8");
+          m_Apartment.setName(st.convert(_request.getParameter("newName")));
+        } else {
+          return failure("missing parameter 'newName'");
+        }
         return success();
       } else if(_request.getMethod() == "rescan") {
         std::vector<boost::shared_ptr<DSMeter> > mods = m_Apartment.getDSMeters();
