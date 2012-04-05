@@ -143,7 +143,11 @@ namespace dss {
           resultObj->addProperty("name", pZone->getName());
           return success(resultObj);
         } else if(_request.getMethod() == "setName") {
-          pZone->setName(st.convert(_request.getParameter("newName")));
+          if (_request.hasParameter("newName")) {
+            pZone->setName(st.convert(_request.getParameter("newName")));
+          } else {
+            return failure("missing parameter 'newName'");
+          }
           return success();
         } else if(_request.getMethod() == "sceneSetName") {
           if(pGroup == NULL) {
@@ -157,12 +161,16 @@ namespace dss {
             return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
           }
 
-          std::string name = st.convert(_request.getParameter("newName"));
-          pGroup->setSceneName(sceneNumber, name);
-          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-          manipulator.sceneSetName(pGroup, sceneNumber, name);
-          // raise ModelDirty to force rewrite of model data to apartment.xml
-          DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+          if (_request.hasParameter("newName")) {
+            std::string name = st.convert(_request.getParameter("newName"));
+            pGroup->setSceneName(sceneNumber, name);
+            StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
+            manipulator.sceneSetName(pGroup, sceneNumber, name);
+            // raise ModelDirty to force rewrite of model data to apartment.xml
+            DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+          } else {
+            return failure("missing parameter 'newName'");
+          }
           return success();
         } else if(_request.getMethod() == "sceneGetName") {
           if(pGroup == NULL) {
