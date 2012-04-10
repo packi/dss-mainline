@@ -52,6 +52,7 @@ namespace dss {
     CURL* handle;
     JSContext* cx;
     JSObject* obj;
+    jsrefcount ref;
     void* data;
     uint32_t dataSize;
     uint32_t dataMaxSize;
@@ -154,6 +155,7 @@ namespace dss {
     JSContext* cx = cb->cx;
     JSObject* obj = cb->obj;
 
+    JS_ResumeRequest(cx, cb->ref);
     JS_BeginRequest(cx);
 
     // copy data to the final result blob up to dataMaxSize
@@ -181,6 +183,7 @@ namespace dss {
     JS_CallFunctionName(cx, obj, "write", 1, argv, &rval);
 
     JS_EndRequest(cx);
+    cb->ref = JS_SuspendRequest(cx);
 
     return len;
   }
@@ -197,11 +200,13 @@ namespace dss {
     JSContext* cx = cb->cx;
     JSObject* obj = cb->obj;
 
+    JS_ResumeRequest(cx, cb->ref);
     JS_BeginRequest(cx);
 
     JSString* s = JS_NewStringCopyN(cx, (const char*) ptr, len);
     if (!s) {
       JS_EndRequest(cx);
+      cb->ref = JS_SuspendRequest(cx);
       return -1;
     }
 
@@ -209,6 +214,7 @@ namespace dss {
     JS_CallFunctionName(cx, obj, "header", 1, argv, &rval);
 
     JS_EndRequest(cx);
+    cb->ref = JS_SuspendRequest(cx);
 
     return len;
   }
@@ -224,11 +230,13 @@ namespace dss {
     JSContext* cx = cb->cx;
     JSObject* obj = cb->obj;
 
+    JS_ResumeRequest(cx, cb->ref);
     JS_BeginRequest(cx);
 
     JSString* s = JS_NewStringCopyN(cx, buf, len);
     if (!s) {
       JS_EndRequest(cx);
+      cb->ref = JS_SuspendRequest(cx);
       return -1;
     }
 
@@ -237,6 +245,7 @@ namespace dss {
     JS_CallFunctionName(cx, obj, "debug", 2, argv, &rval);
 
     JS_EndRequest(cx);
+    cb->ref = JS_SuspendRequest(cx);
     return 0;
   }
 
@@ -471,7 +480,9 @@ namespace dss {
       return JS_FALSE;
     cb->dataIndex = 0;
 
+    cb->ref = JS_SuspendRequest(cx);
     CURLcode c = curl_easy_perform(cb->handle);
+    JS_ResumeRequest(cx, cb->ref);
 
     if(JS_IsExceptionPending(cx)) {
       JS_ReportPendingException(cx);
