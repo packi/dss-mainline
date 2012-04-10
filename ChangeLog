@@ -1,5 +1,14 @@
 dSS - digitalSTROM Server
 
+v1.10.0 10.02.2012
+	* remove the cmake build system
+	* add JSON for adding/removing devices to/from areas (#1534)
+	* add event table index to sensor events (#1570)
+	* validate incoming strings for UTF-8 compatibility (#1554)
+	* allow blanking (deletion) of apartment/zone/dSM/scene names (#603)
+	* fix POST handling in system scripts (#1587)
+	* keep rest of JS running during curl requests
+
 v1.9.2 05.04.2012
 	* run url action in own thread, set up curl connection timeout
 	  of 120 seconds (#1583)
