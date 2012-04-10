@@ -34,7 +34,9 @@ var lActionDurationUrl = 100;
 
 function executeZoneScene(oActionNode)
 {
-    l.logln('executeZoneScene ' + oActionNode.getPath() );
+    if (verbose >= 2) {
+        l.logln('executeZoneScene ' + oActionNode.getPath() );
+    }
 
     var oZoneNode = oActionNode.getChild("zone");
     var oGroupNode = oActionNode.getChild("group");
@@ -46,21 +48,21 @@ function executeZoneScene(oActionNode)
     var forceFlag = false;
 
     if (oZoneNode == null) {
-        l.logln('error: missing zone parameter');
+        l.logln('Error: missing zone parameter');
         return;
     } else {
         zoneId = parseInt(oZoneNode.getValue(), 10);
     }
 
     if (oGroupNode == null) {
-        l.logln('error: missing group parameter');
+        l.logln('Error: missing group parameter');
         return;
     } else {
         groupId = parseInt(oGroupNode.getValue(), 10);
     }
 
     if (oSceneNode == null) {
-        l.logln('error: missing scene parameter');
+        l.logln('Error: missing scene parameter');
         return;
     } else {
         sceneId = parseInt(oSceneNode.getValue(), 10);
@@ -72,7 +74,7 @@ function executeZoneScene(oActionNode)
 
     var z = getZoneByID(zoneId);
     if (z == null) {
-        l.logln('error: zone not found, id ' + zoneId);
+        l.logln('Error: zone not found, id ' + zoneId);
         return;
     }
 
@@ -81,21 +83,23 @@ function executeZoneScene(oActionNode)
 
 function executeDeviceScene(oActionNode)
 {
-    l.logln('executeDeviceScene ' + oActionNode.getPath() );
+    if (verbose >= 2) {
+        l.logln('executeDeviceScene ' + oActionNode.getPath() );
+    }
 
     var oDeviceNode = oActionNode.getChild("dsid");
     if (oDeviceNode == null) {
-        l.logln('error: missing dsid parameter');
+        l.logln('Error: missing dsid parameter');
         return;
     }
     var target = getDevices().byDSID(oDeviceNode.getValue());
     if (target == null) {
-        l.logln('error: device not found, dsid ' + oDeviceNode.getValue());
+        l.logln('Error: device not found, dsid ' + oDeviceNode.getValue());
         return;
     }
     var oSceneNode = oActionNode.getChild("scene");
     if (oSceneNode == null) {
-        l.logln('error: missing scene parameter');
+        l.logln('Error: missing scene parameter');
         return;
     }
     var iSceneID = oSceneNode.getValue();
@@ -109,21 +113,23 @@ function executeDeviceScene(oActionNode)
 
 function executeDeviceValue(oActionNode)
 {
-    l.logln('executeDeviceValue ' + oActionNode.getPath() );
+    if (verbose >= 2) {
+        l.logln('executeDeviceValue ' + oActionNode.getPath() );
+    }
 
     var oDeviceNode = oActionNode.getChild("dsid");
     if (oDeviceNode == null) {
-        l.logln('error: missing dsid parameter');
+        l.logln('Error: missing dsid parameter');
         return;
     }
     var target = getDevices().byDSID(oDeviceNode.getValue());
     if (target == null) {
-        l.logln('error: device not found, dsid ' + oDeviceNode.getValue());
+        l.logln('Error: device not found, dsid ' + oDeviceNode.getValue());
         return;
     }
     var oValueNode = oActionNode.getChild("value");
     if (oValueNode == null) {
-        l.logln('error: missing value parameter');
+        l.logln('Error: missing value parameter');
         return;
     }
     target.setValue(oValueNode.getValue());
@@ -131,7 +137,9 @@ function executeDeviceValue(oActionNode)
 
 function executeDeviceBlink(oActionNode)
 {
-    l.logln('executeDeviceBlink ' + oActionNode.getPath() );
+    if (verbose >= 2) {
+        l.logln('executeDeviceBlink ' + oActionNode.getPath() );
+    }
 
     var oDeviceNode = oActionNode.getChild("dsid");
     if (oDeviceNode == null) {
@@ -149,7 +157,9 @@ function executeDeviceBlink(oActionNode)
 
 function executeZoneBlink(oActionNode)
 {
-    l.logln('executeZoneBlink ' + oActionNode.getPath() );
+    if (verbose >= 2) {
+        l.logln('executeZoneBlink ' + oActionNode.getPath() );
+    }
 
     var oZoneNode = oActionNode.getChild("zone");
     var oGroupNode = oActionNode.getChild("group");
@@ -157,7 +167,7 @@ function executeZoneBlink(oActionNode)
     var groupId = undefined;
 
     if (oZoneNode == null) {
-        l.logln('error: missing zone parameter');
+        l.logln('Error: missing zone parameter');
         return;
     } else {
         zoneId = parseInt(oZoneNode.getValue(), 10);
@@ -171,7 +181,7 @@ function executeZoneBlink(oActionNode)
 
     var z = getZoneByID(zoneId);
     if (z == null) {
-        l.logln('error: zone not found, id ' + zoneId);
+        l.logln('Error: zone not found, id ' + zoneId);
         return;
     }
     z.blink(groupId);
@@ -179,7 +189,9 @@ function executeZoneBlink(oActionNode)
 
 function executeCustomEvent(oActionNode)
 {
-    l.logln('executeCustomEvent ' + oActionNode.getPath() );
+    if (verbose >= 2) {
+        l.logln('executeCustomEvent ' + oActionNode.getPath() );
+    }
 
     var oEventNode = oActionNode.getChild("event");
     var evt = new Event("highlevelevent", {id:oEventNode.getValue()});
@@ -188,8 +200,6 @@ function executeCustomEvent(oActionNode)
 
 function executeUrl(oActionNode)
 {
-    l.logln('executeUrl ' + oActionNode.getPath() );
-
     var oUrlNode = oActionNode.getChild("url");
     if (oUrlNode == null) {
         l.logln('Error during executeUrl: url parameter missing');
@@ -199,6 +209,8 @@ function executeUrl(oActionNode)
     var oUrl = oUrlNode.getValue();
     var oMethod = 'GET';
     var sPost = null;
+
+    l.logln('executeUrl: ' + oUrl);
 
     if (oUrl.lastIndexOf('GET ', 0) === 0) {
         oMethod = 'GET';
@@ -241,7 +253,7 @@ function executeUrl(oActionNode)
 
 function executeOne(oActionNode)
 {
-    l.logln('Execute actionnode ' + oActionNode.getPath());
+    l.logln('Execute: ' + oActionNode.getPath());
 
     var oTypeNode = oActionNode.getChild("type");
     if (oTypeNode != null) {
@@ -270,10 +282,10 @@ function executeOne(oActionNode)
                 return lActionDurationUrl;
             }
         } else {
-            l.logln('value of typenode is null');
+            l.logln('Error: value of typenode is null');
         }
     } else {
-        l.logln('No typenode in ' + oActionNode.getPath());
+        l.logln('Error: no typenode in ' + oActionNode.getPath());
     }
 
     return 0;
@@ -286,12 +298,14 @@ function executeStep(oActionArray)
     if (oActionNode != null) {
         lWaitingTime = executeOne(oActionNode);
     } else {
-        l.logln('action node is null ');
+        l.logln('Error: action node in executeStep is null ');
     }
 
     if (oActionArray.length > 1) {
+        if (verbose >= 2) {
+            l.logln('next action in ' + lWaitingTime);
+        }
         oActionArray.shift();
-        l.logln('next action in ' + lWaitingTime);
         callNextAction = function () { 
             executeStep(oActionArray);
         };
@@ -301,26 +315,28 @@ function executeStep(oActionArray)
 
 function execute(pathToDescription)
 {
-    l.logln('Execute Path ' + pathToDescription);
+    if (verbose >= 1) {
+        l.logln('Execute Path ' + pathToDescription);
+    }
 
     var oBaseActionNode = Property.getNode(pathToDescription + '/actions');
     if (oBaseActionNode == null) {
-        l.logln('no actionNodes in path ' + pathToDescription);
+        l.logln('Error: no actionNodes in path ' + pathToDescription);
         return;
     }
     var oArrayActions = oBaseActionNode.getChildren();
     if (oArrayActions == null) {
-        l.logln('no actionSubnodes in path ' + pathToDescription);
+        l.logln('Error: no actionSubnodes in path ' + pathToDescription);
         return;
     }
     if (oArrayActions.length == 0) {
-        l.logln('actionSubnode count=0 in path ' + pathToDescription);
+        l.logln('Error: actionSubnode count=0 in path ' + pathToDescription);
         return;
     }
 
     // -> system_condition.js
     if (! checkCondition(pathToDescription)) {
-        l.logln('condition check failed in path ' + pathToDescription);
+        l.logln('Info: condition check failed in path ' + pathToDescription);
         return;
     }
 
