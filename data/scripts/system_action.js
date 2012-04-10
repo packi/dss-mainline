@@ -198,6 +198,7 @@ function executeUrl(oActionNode)
 
     var oUrl = oUrlNode.getValue();
     var oMethod = 'GET';
+    var sPost = null;
 
     if (oUrl.lastIndexOf('GET ', 0) === 0) {
         oMethod = 'GET';
@@ -206,6 +207,10 @@ function executeUrl(oActionNode)
     if (oUrl.lastIndexOf('POST ', 0) === 0) {
         oMethod = 'POST';
         oUrl = oUrl.substr(oUrl.indexOf(' ') + 1);
+        if (oUrl.indexOf(' ') != -1) {
+            sPost = oUrl.substr(oUrl.indexOf(' ') + 1);
+            oUrl = oUrl.substr(0, oUrl.indexOf(' '));
+        }
     }
 
     try {
@@ -215,7 +220,7 @@ function executeUrl(oActionNode)
         if (oMethod === 'GET') {
             code = h.get(oUrl, '');
         } else if (oMethod === 'POST') {
-            code = h.post(oUrl, '');
+            code = h.post(oUrl, '', sPost);
         }
 
         if (code.status.valueOf() === 200) {
