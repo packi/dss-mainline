@@ -1,5 +1,10 @@
 dSS - digitalSTROM Server
 
+v1.9.2 05.04.2012
+	* run url action in own thread, set up curl connection timeout
+	  of 120 seconds (#1583)
+	* add sensor event table index to model events (#1570)
+
 v1.9.1 26.03.2012
 	* fix scripting Device.callScene to allow forceScene calls
 	* check for node presence before accessing value in action.js

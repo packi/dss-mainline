@@ -646,6 +646,9 @@ namespace dss {
         CURLPROTO_POP3S
         );
 
+    /* limit connect time */
+    curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 120);
+
     JS_SetPrivate(cx, newobj, (void*) cb);
     return JS_TRUE;
   }
