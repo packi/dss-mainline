@@ -31,6 +31,22 @@ MT_OPTION([debug], [enable],
           ],
           [])
 
+GCOV_REPORT=
+MT_OPTION([test-coverage], [enable],
+          [enable gcov test coverage report (implies debug build)],
+          [
+            GCOV_CFLAGS="-fprofile-arcs -ftest-coverage"
+            GCOV_LIBS="-lgcov"
+            CFLAGS="-g -Wall -O0"
+            CXXFLAGS="-g -Wall -O0"
+            GCOV_REPORT=yes
+          ],
+          [])
+
+AC_SUBST(GCOV_CFLAGS)
+AC_SUBST(GCOV_LIBS)
+AM_CONDITIONAL(BUILD_GCOV_REPORT, test "x$GCOV_CFLAGS" != "x")
+
 MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
           [],[])
@@ -367,6 +383,20 @@ fi
 
 AC_SUBST(DOXYGEN)
 AM_CONDITIONAL(HAVE_DOXYGEN, test -n "$DOXYGEN")
+
+if test "x$GCOV_REPORT" = "xyes"; then
+    AC_PATH_PROG(LCOV, lcov, no)
+    if test "x$LCOV" = xno; then
+        AC_MSG_ERROR([lcov utility not found])
+    fi
+    AC_SUBST(LCOV)
+
+    AC_PATH_PROG(GENHTML, genhtml, no)
+    if test "x$GENHTML" = xno; then
+        AC_MSG_ERROR([genhtml utility not found])
+    fi
+    AC_SUBST(GENHTML)
+fi
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"

@@ -50,10 +50,12 @@ libdsscore_a_CXXFLAGS = \
 			$(AVAHI_CFLAGS) \
 			$(CURL_CFLAGS) \
 			$(LIBRRD_CFLAGS) \
-			$(EXPAT_CFLAGS)
+			$(EXPAT_CFLAGS) \
+			$(GCOV_CFLAGS)
 
 libunix_a_CXXFLAGS = \
-			$(BOOST_CPPFLAGS)
+			$(BOOST_CPPFLAGS) \
+			$(GCOV_CFLAGS)
 
 if WITH_CURL
 
@@ -70,7 +72,8 @@ nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
 
 dss_CXXFLAGS = \
 			$(LIBXML2_CFLAGS) \
-			$(GSOAP_CFLAGS)
+			$(GSOAP_CFLAGS) \
+			$(GCOV_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(BOOST_THREAD_LIBS) \
@@ -87,7 +90,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(CURL_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th \
 			$(EXPAT_LIBS) \
-			$(BACKTRACE_LDFLAGS)
+			$(BACKTRACE_LDFLAGS) \
+			$(GCOV_LIBS)
 
 if BUILD_SOAP
 
@@ -102,7 +106,8 @@ libwebservices_a_CXXFLAGS = \
 			$(GSOAP_CFLAGS) \
 			$(LIBXML2_CFLAGS) \
 			$(OPENSSL_CFLAGS) \
-			$(AVAHI_CFLAGS)
+			$(AVAHI_CFLAGS) \
+			$(GCOV_CFLAGS)
 
 nodist_libwebservices_a_SOURCES = \
 			$(top_srcdir)/webservices/soapC.cpp \
@@ -117,7 +122,8 @@ dsstests_CXXFLAGS = \
 			-I$(top_srcdir)/src \
 			$(JS_CFLAGS) \
 			$(BOOST_CPPFLAGS) \
-			$(LIBDSM_API_CFLAGS)
+			$(LIBDSM_API_CFLAGS) \
+			$(GCOV_CFLAGS)
 
 dsstests_LDADD = \
 			libdsscore.a libunix.a libmongoose.a \
@@ -135,7 +141,8 @@ dsstests_LDADD = \
 			$(AVAHI_LIBS) \
 			$(CURL_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th \
-			$(EXPAT_LIBS)
+			$(EXPAT_LIBS) \
+			$(GCOV_LIBS)
 
 if BUILD_SOAP
 
