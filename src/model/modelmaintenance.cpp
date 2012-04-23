@@ -1072,6 +1072,10 @@ namespace dss {
 
       dsMeter->removeDevice(devRef);
       device->setIsPresent(false);
+
+      // save time when device went inactive to apartment.xml
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
     } catch(ItemNotFoundException& e) {
       log("Removed device " + _dsMeterID.toString() + " is not known to us");
     }

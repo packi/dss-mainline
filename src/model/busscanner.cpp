@@ -240,6 +240,7 @@ namespace dss {
       }
     }
 
+    m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
   } // scanDeviceOnBus
 
