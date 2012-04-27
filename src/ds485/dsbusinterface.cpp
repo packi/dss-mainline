@@ -445,20 +445,23 @@ namespace dss {
   void DSBusInterface::handleBusState(bus_state_t _state) {
     loginFromCallback();
     switch (_state) {
-      case DS485_ISOLATED:
+      case DS485_STATE_ISOLATED:
         log("STATE: ISOLATED");
         break;
-      case DS485_CONNECTED:
+      case DS485_STATE_CONNECTED:
         log("STATE: CONNECTED");
         break;
-      case DS485_ACTIVE:
+      case DS485_STATE_ACTIVE:
         log("STATE: ACTIVE");
         break;
-      case DS485_JOIN:
+      case DS485_STATE_JOIN:
         log("STATE: JOIN");
         break;
+      case DS485_STATE_DISCONNECTED:
+        log("STATE: DISCONNECTED");
+        break;
       default:
-        log("STATE: *UNKNOWN*");
+        log("STATE: UNKNOWN: " + intToString(_state));
         break;
     }
   }
