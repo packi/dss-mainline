@@ -61,6 +61,9 @@ namespace dss {
     tmp_date = _device.getDevice()->getFirstSeen();
     result->addProperty("firstSeen", tmp_date);
 
+    tmp_date = _device.getDevice()->getInactiveSince();
+    result->addProperty("inactiveSince", tmp_date);
+
     result->addProperty("on", _device.getDevice()->isOn());
     result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());
     result->addProperty("outputMode", _device.getDevice()->getOutputMode());

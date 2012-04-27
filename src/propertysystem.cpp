@@ -735,7 +735,7 @@ namespace dss {
     checkReadAccess();
 
     _ofs << doIndent(_indent) << "<property type=\"" << getValueTypeAsString(getValueType()) << "\"" <<
-                                          " name= \"" << XMLStringEscape(getDisplayName()) << "\"";
+                                          " name=\"" << XMLStringEscape(getDisplayName()) << "\"";
 
     if(hasFlag(Archive)) {
       _ofs << " archive=\"true\"";

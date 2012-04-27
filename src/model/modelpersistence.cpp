@@ -58,6 +58,7 @@ namespace dss {
     const char *lastmeter = NULL;
     const char *lastzone = NULL;
     const char *lastshort = NULL;
+    const char *is = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -77,6 +78,8 @@ namespace dss {
         lastzone = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "lastKnownShortAddress") == 0) {
         lastshort = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "inactiveSince") == 0) {
+        is = _attrs[i + 1];
       }
     }
 
@@ -95,13 +98,23 @@ namespace dss {
       } catch(std::invalid_argument&) {}
     }
 
-    DateTime firstSeen;
+    DateTime firstSeen = DateTime::NullDate;
     if (fs != NULL) {
       try {
         time_t timestamp = strToUInt(fs);
         firstSeen = DateTime(timestamp);
       } catch(std::invalid_argument&) {
         firstSeen = DateTime(dateFromISOString(fs));
+      }
+    }
+
+    DateTime inactiveSince = DateTime::NullDate;
+    if (is != NULL) {
+      try {
+        time_t timestamp = strToUInt(is);
+        inactiveSince = DateTime(timestamp);
+      } catch(std::invalid_argument&) {
+        inactiveSince = DateTime(dateFromISOString(is));
       }
     }
 
@@ -122,6 +135,9 @@ namespace dss {
     }
 
     m_tempDevice->setIsPresent(isPresent);
+    if (isPresent == false) {
+      m_tempDevice->setInactiveSince(inactiveSince);
+    }
     m_tempDevice->setFirstSeen(firstSeen);
     m_tempDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
     m_tempDevice->setLastKnownZoneID(lastKnownZoneID);
@@ -485,9 +501,14 @@ namespace dss {
   } // readConfigurationFromXML
 
   void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
-    _ofs << doIndent(_indent) << "<device dsid=\"" << _pDevice->getDSID().toString() << "\"" <<
-                                        " isPresent=\"" << (_pDevice->isPresent() ? "1" : "0") << "\"" <<
-                                        " firstSeen=\"" << intToString(_pDevice->getFirstSeen().secondsSinceEpoch()) << "\"";
+    _ofs << doIndent(_indent) << "<device dsid=\""
+         << _pDevice->getDSID().toString() << "\""
+         << " isPresent=\"" << (_pDevice->isPresent() ? "1" : "0") << "\""
+         << " firstSeen=\""
+         << intToString(_pDevice->getFirstSeen().secondsSinceEpoch()) << "\""
+         << " inactiveSince=\""
+         << _pDevice->getInactiveSince().toString() << "\"";
+
     if(_pDevice->getLastKnownDSMeterDSID() != NullDSID) {
       _ofs <<  " lastKnownDSMeter=\"" << _pDevice->getLastKnownDSMeterDSID().toString() << "\"";
     }

@@ -103,6 +103,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_FirstSeen, &DateTime::toString));
         m_pPropertyNode->createProperty("lastDiscovered")
           ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
+        m_pPropertyNode->createProperty("inactiveSince")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getInactiveSinceStr));
         m_pPropertyNode->createProperty("locked")
           ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
         m_pPropertyNode->createProperty("outputMode")
