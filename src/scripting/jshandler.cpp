@@ -63,6 +63,8 @@ namespace dss {
     m_RuntimeSize = 8L * 1024L * 1024L;
     m_StackSize = 8192;
     m_cxOptionClear = m_cxOptionSet = 0;
+    m_CacheEnabled = false;
+    m_TimingEnabled = false;
 
     try {
       if (DSS::hasInstance()) {
@@ -82,6 +84,22 @@ namespace dss {
         if (pPtr) {
           m_cxOptionClear = pPtr->getIntegerValue();
         }
+        pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/cache");
+        if (pPtr && (pPtr->getValueType() == vTypeBoolean)) {
+          m_CacheEnabled = pPtr->getBoolValue();
+        }
+        pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/timing");
+        if (pPtr && (pPtr->getValueType() == vTypeBoolean)) {
+          m_TimingEnabled = pPtr->getBoolValue();
+        }
+
+        m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty("/system/js/");
+        m_pPropertyNode->createProperty("timings");
+        m_pPropertyNode->createProperty("features");
+        m_pPropertyNode->createProperty("features/cache")
+            ->linkToProxy(PropertyProxyReference<bool>(m_CacheEnabled));
+        m_pPropertyNode->createProperty("features/timing")
+            ->linkToProxy(PropertyProxyReference<bool>(m_TimingEnabled));
       }
     } catch (PropertyTypeMismatch&) {
     } catch (SecurityException&) {
@@ -90,9 +108,6 @@ namespace dss {
     m_pRuntime = JS_NewRuntime(m_RuntimeSize);
     if (m_pRuntime == NULL) {
       throw ScriptException("Error creating environment");
-    }
-    if(DSS::hasInstance()) {
-      DSS::getInstance()->getPropertySystem().createProperty("/system/js/features/");
     }
   } // initialize
 

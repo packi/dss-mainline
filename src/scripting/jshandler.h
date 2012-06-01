@@ -59,10 +59,16 @@ namespace dss {
     JSRuntime* m_pRuntime;
     boost::ptr_vector<ScriptExtension> m_Extensions;
     Security* m_pSecurity;
+    PropertyNodePtr m_pPropertyNode;
     size_t m_RuntimeSize;
     size_t m_StackSize;
     uint32 m_cxOptionSet;
     uint32 m_cxOptionClear;
+    bool m_CacheEnabled;
+    bool m_TimingEnabled;
+  public:
+    ScriptContext* m_pContext;
+
   public:
     ScriptEnvironment(Security* _pSecurity = NULL);
     virtual ~ScriptEnvironment();
@@ -86,6 +92,8 @@ namespace dss {
     }
 
     bool isInitialized();
+    bool isCacheEnabled() { return m_CacheEnabled; }
+    bool isTimingEnabled() { return m_TimingEnabled; }
   };
 
   /** ScriptContext is a wrapper for a scripts execution context.
@@ -213,6 +221,7 @@ namespace dss {
     ~ScriptContextWrapper();
     boost::shared_ptr<ScriptContext> get();
     void addFile(const std::string& _name);
+    void addRuntimeInfos(const std::string& _name, unsigned long _timingNS);
     PropertyNodePtr getPropertyNode();
     const std::string& getIdentifier() const;
   private:

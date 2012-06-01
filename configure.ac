@@ -198,6 +198,11 @@ AC_CHECK_HEADERS(execinfo.h,
     []
 )
 
+AC_CHECK_FUNCS([clock_gettime])
+if test $ac_cv_func_clock_gettime = no; then
+    AC_CHECK_LIB(rt, clock_gettime, [LIBS="-lrt $LIBS"])
+fi
+
 ASSUMED_BOOST_VER=146
 
 BOOST_REQUIRE([1.46],
