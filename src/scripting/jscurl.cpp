@@ -657,8 +657,15 @@ namespace dss {
         CURLPROTO_POP3S
         );
 
+    /* avoid generating SIGALRM's */
+    curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1);
     /* limit connect time */
-    curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 120);
+    curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 60);
+    /* bail-out if there was silence for too long */
+    curl_easy_setopt(handle, CURLOPT_LOW_SPEED_LIMIT, 1);
+    curl_easy_setopt(handle, CURLOPT_LOW_SPEED_TIME, 30);
+    /* limit the total duration of an operation */
+    curl_easy_setopt(handle, CURLOPT_TIMEOUT, 600);
 
     JS_SetPrivate(cx, newobj, (void*) cb);
     return JS_TRUE;
