@@ -69,19 +69,19 @@ namespace dss {
     try {
       if (DSS::hasInstance()) {
         PropertyNodePtr pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/runtimesize");
-        if (pPtr) {
+        if (pPtr && (pPtr->getValueType() == vTypeInteger)) {
           m_RuntimeSize = pPtr->getIntegerValue();
         }
         pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/stacksize");
-        if (pPtr) {
+        if (pPtr && (pPtr->getValueType() == vTypeInteger)) {
           m_StackSize = pPtr->getIntegerValue();
         }
         pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/optionset");
-        if (pPtr) {
+        if (pPtr && (pPtr->getValueType() == vTypeInteger)) {
           m_cxOptionSet = pPtr->getIntegerValue();
         }
         pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/optionclear");
-        if (pPtr) {
+        if (pPtr && (pPtr->getValueType() == vTypeInteger)) {
           m_cxOptionClear = pPtr->getIntegerValue();
         }
         pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/cache");
