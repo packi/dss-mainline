@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.11.0 04.06.2012
+	* synchronize with ds485-core bus state name changes
+	* remember when the device became inactive (#887)
+	* added gcov support to build system (#1555)
+	* disconnect curl sessions if there was more than 30s of non activity
+
 v1.10.0 10.02.2012
 	* remove the cmake build system
 	* add JSON for adding/removing devices to/from areas (#1534)
