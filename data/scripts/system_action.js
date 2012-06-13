@@ -334,16 +334,94 @@ function execute(pathToDescription)
         return;
     }
 
+    var oDelay = [0];
+    for (var iIndex = 0; iIndex < oArrayActions.length; iIndex++)
+    {
+        if (oArrayActions[iIndex].getChild("delay") != null) {
+            var iDelayNode = parseInt(oArrayActions[iIndex].getChild("delay").getValue(), 10);
+            if (oDelay.indexOf(iDelayNode) == -1) {
+                oDelay.push(iDelayNode);
+                if (verbose >= 2) {
+                    l.logln('Debug: found delay value: ' + iDelayNode);
+                }
+            }
+        } else {
+            if (verbose >= 2) {
+                l.logln('Debug: no delay value found');
+            }
+        }
+    }
+
+    if (oDelay.length > 1) {
+        if (verbose > 1) {
+            l.logln('Debug: delay parameter present, execution will be fragmented');
+        }
+        for (var iIndex = 0; iIndex < oDelay.length; iIndex++) {
+            if (verbose > 1) {
+                l.logln('Debug: delaying event for ' + pathToDescription +
+                    ' with value ' + oDelay[iIndex]);
+            }
+            var evt = new TimedEvent("action_execute", '+' + oDelay[iIndex],
+                                {path:pathToDescription, delay:oDelay[iIndex]});
+            evt.raise();
+        }
+    } else {
+        // -> system_condition.js
+        if (! checkCondition(pathToDescription)) {
+            l.logln('Info: condition check failed in path ' + pathToDescription);
+            return;
+        }
+
+        executeStep(oArrayActions);
+
+        var iValue = new Date().getTime();
+        Property.setProperty(pathToDescription + '/lastExecuted', '' + iValue)
+    }
+}
+
+function filterActionsWithDelay(oArrayActions,delayValue) {
+    var oResultArray = [];
+    for (var iIndex = 0; iIndex < oArrayActions.length; iIndex++) {
+        var iDelayNode = 0;
+        if (oArrayActions[iIndex].getChild("delay") != null) {
+            iDelayNode = parseInt(oArrayActions[iIndex].getChild("delay").getValue(),10);
+        }
+        if (iDelayNode == delayValue) {
+            oResultArray.push(oArrayActions[iIndex]);
+        }
+    }
+    return oResultArray;
+}
+
+function executeWithDelay(pathToDescription, delayValue) {
+    if (verbose >= 1) {
+        l.logln('Execute Path ' + pathToDescription + ' with delay value ' + delayValue);
+    }
+    var oBaseActionNode = Property.getNode(pathToDescription + '/actions');
+    if (oBaseActionNode == null) {
+        l.logln('Error: no actionNodes in path ' + pathToDescription);
+        return;
+    }
+    var oArrayActions = oBaseActionNode.getChildren();
+    if (oArrayActions == null) {
+        l.logln('Error: no actionSubnodes in path ' + pathToDescription);
+        return;
+    }
+    if (oArrayActions.length == 0) {
+        l.logln('Error: actionSubnode count=0 in path ' + pathToDescription);
+        return;
+    }
+
     // -> system_condition.js
     if (! checkCondition(pathToDescription)) {
         l.logln('Info: condition check failed in path ' + pathToDescription);
         return;
     }
 
-    var iValue = new Date().getTime();
-    Property.setProperty(pathToDescription + '/lastExecuted', '' + iValue)
-
-    executeStep(oArrayActions);
+    var delayedActions = filterActionsWithDelay(oArrayActions, delayValue);
+    if (delayedActions.length > 0) {
+        executeStep(delayedActions);
+    }
 }
 
 function getPath(name)
@@ -370,7 +448,11 @@ function getPath(name)
 if (raisedEvent.name == 'action_execute')
 {
     if (raisedEvent.parameter.path != null) {
-        execute(raisedEvent.parameter.path);
+        if (raisedEvent.parameter.delay != null) {
+            executeWithDelay(raisedEvent.parameter.path, raisedEvent.parameter.delay);
+        } else {
+            execute(raisedEvent.parameter.path);
+        }
     }
 }
 
