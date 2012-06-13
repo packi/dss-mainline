@@ -85,6 +85,8 @@ namespace dss {
 
   std::string truncateUTF8String(const std::string& _in, int _maxBytes);
 
+  bool deviceIs2WaySlave(uint8_t buttonInputMode);
+  bool deviceIs2WayMaster(uint8_t buttonInputMode);
   //============================================= Encoding helpers
 
   uint16_t crc16(unsigned const char* _data, const int _size);

@@ -32,6 +32,15 @@
 
 #include "foreach.h"
 
+#define BUTTONINPUT_2WAY_DW_WITH_INPUT1 5
+#define BUTTONINPUT_2WAY_DW_WITH_INPUT2 6
+#define BUTTONINPUT_2WAY_DW_WITH_INPUT3 7
+#define BUTTONINPUT_2WAY_DW_WITH_INPUT4 8
+#define BUTTONINPUT_2WAY_UP_WITH_INPUT1 9
+#define BUTTONINPUT_2WAY_UP_WITH_INPUT2 10
+#define BUTTONINPUT_2WAY_UP_WITH_INPUT3 11
+#define BUTTONINPUT_2WAY_UP_WITH_INPUT4 12
+
 namespace dss {
 
   //============================================= std::string parsing/formatting/conversion
@@ -491,5 +500,18 @@ namespace dss {
     return false;
   } // unset
 
+  bool deviceIs2WayMaster(uint8_t buttonInputMode) {
+    return ((buttonInputMode == BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+            (buttonInputMode == BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
+            (buttonInputMode == BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
+            (buttonInputMode == BUTTONINPUT_2WAY_UP_WITH_INPUT4));
+  }
+
+  bool deviceIs2WaySlave(uint8_t buttonInputMode) {
+    return ((buttonInputMode == BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
+            (buttonInputMode == BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
+            (buttonInputMode == BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
+            (buttonInputMode == BUTTONINPUT_2WAY_UP_WITH_INPUT3));
+  }
 
 }
