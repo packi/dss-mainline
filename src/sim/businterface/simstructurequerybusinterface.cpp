@@ -72,6 +72,7 @@ namespace dss {
         spec.ProductID = pDevice->getProductID();
         spec.Version = pDevice->getProductRevision();
         spec.ShortAddress = pDevice->getShortAddress();
+        spec.ActiveState = 1;
         spec.Locked = pDevice->isLocked();
         spec.OutputMode = 0;
         spec.DSID = pDevice->getDSID();
@@ -119,6 +120,7 @@ namespace dss {
       result.ProductID = device.getProductID();
       result.Version = device.getProductRevision();
       result.ShortAddress = device.getShortAddress();
+      result.ActiveState = 1;
       result.Locked = device.isLocked();
       result.OutputMode = 0;
       result.DSID = device.getDSID();

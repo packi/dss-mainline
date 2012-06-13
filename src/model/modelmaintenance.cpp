@@ -1044,7 +1044,11 @@ namespace dss {
   } // onDeviceActionEvent
 
   void ModelMaintenance::onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
-    log("New Device found");
+    log("Device discovered:");
+    try {
+      DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
+      log("  DSID   : " +  devRef.getDSID().toString());
+    } catch(ItemNotFoundException& e) {}
     log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
@@ -1053,7 +1057,11 @@ namespace dss {
   } // onAddDevice
 
   void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
-    log("Device disappeared");
+    log("Device disappeared:");
+    try {
+      DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
+      log("  DSID   : " +  devRef.getDSID().toString());
+    } catch(ItemNotFoundException& e) {}
     log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));

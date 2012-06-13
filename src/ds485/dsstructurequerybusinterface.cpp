@@ -187,7 +187,7 @@ namespace dss {
     uint16_t numberOfDevices;
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = ZoneDeviceCount_only_active(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
+    int ret = ZoneDeviceCount_all(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
     DSBusInterface::checkResultCode(ret);
 
     return numberOfDevices;
@@ -231,10 +231,10 @@ namespace dss {
       uint8_t locked;
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
-      int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice,
-                                                &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
-                                                &spec.Version, &spec.ZoneID, NULL, &locked, &spec.OutputMode,
-                                                &spec.LTMode, groups, name, &spec.SerialNumber);
+      int ret = DeviceInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iDevice,
+          &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
+          &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
+          &spec.LTMode, groups, name, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
@@ -269,9 +269,9 @@ namespace dss {
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, dsid, _zoneID, iDevice,
-                                                  &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
-                                                  &spec.Version, &spec.ZoneID, NULL, &locked, &spec.OutputMode,
-                                                  &spec.LTMode, groups, name, &spec.SerialNumber);
+          &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
+          &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
+          &spec.LTMode, groups, name, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
@@ -300,9 +300,9 @@ namespace dss {
     uint8_t name[NAME_LEN];
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
-                                      &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
-                                      &result.Version, &result.ZoneID, NULL, &locked, &result.OutputMode,
-                                      &result.LTMode, groups, name, &result.SerialNumber);
+        &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
+        &result.Version, &result.ZoneID, &result.ActiveState, &locked, &result.OutputMode,
+        &result.LTMode, groups, name, &result.SerialNumber);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);

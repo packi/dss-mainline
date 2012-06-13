@@ -145,14 +145,26 @@ namespace dss {
   } // scanDeviceOnBus
 
   bool BusScanner::initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {
-    log("scanDeviceOnBus:    Found device with address: " + intToString(_spec.ShortAddress));
-    log("scanDeviceOnBus:    DSID:        " + _spec.DSID.toString());
-    log("scanDeviceOnBus:    Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
+    log("InitializeDevice: DSID:        " + _spec.DSID.toString());
+    log("InitializeDevice: DSM-DSID:    " + _dsMeter->getDSID().toString());
+    log("InitializeDevice: Address:     " + intToString(_spec.ShortAddress) +
+        ", Active: " + intToString(_spec.ActiveState));
+    log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
         ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version)
         );
 
-    boost::shared_ptr<Device> dev = m_Apartment.allocateDevice(_spec.DSID);
+    boost::shared_ptr<Device> dev;
+    try {
+      dev = m_Apartment.getDeviceByDSID(_spec.DSID);
+      if ((_spec.ActiveState == 0) && dev->isPresent()) {
+        // ignore this device if there is already an active one with this dSID
+        return false;
+      }
+    } catch(ItemNotFoundException&) {
+      dev = m_Apartment.allocateDevice(_spec.DSID);
+    }
+
     DeviceReference devRef(dev, &m_Apartment);
 
     // remove from old dsMeter
@@ -221,14 +233,13 @@ namespace dss {
       if (groupID == 0) {
         continue;
       }
-      log(std::string("scanDeviceOnBus: adding device ") + intToString(_spec.ShortAddress) + " to group " + intToString(groupID));
       dev->addToGroup(groupID);
     }
 
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
     _dsMeter->addDevice(devRef);
-    dev->setIsPresent(true);
+    dev->setIsPresent(_spec.ActiveState == 1);
     dev->setIsConnected(true);
 
     {

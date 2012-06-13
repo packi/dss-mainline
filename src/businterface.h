@@ -55,6 +55,7 @@ namespace dss {
     uint16_t Version;
     uint32_t SerialNumber;
     bool Locked;
+    uint8_t ActiveState;
     uint8_t OutputMode;
     uint8_t LTMode;
     std::vector<int> Groups;
