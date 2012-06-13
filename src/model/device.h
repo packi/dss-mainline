@@ -102,6 +102,8 @@ namespace dss {
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
+    bool m_2WayMaster;
+    bool m_2WaySlave;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
@@ -127,6 +129,10 @@ namespace dss {
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);
     void setProgMode(uint8_t _modeId);
+    void set2WayMaster(bool _flag) { m_2WayMaster = _flag; }
+    bool is2WayMaster() const { return m_2WayMaster; }
+    void set2WaySlave(bool _flag) { m_2WaySlave = _flag; }
+    bool is2WaySlave() const { return m_2WaySlave; }
 
     /** Configure scene configuration */
     void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);

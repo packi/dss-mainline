@@ -59,7 +59,9 @@ namespace dss {
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
-    m_ButtonID(0)
+    m_ButtonID(0),
+    m_2WayMaster(false),
+    m_2WaySlave(false)
   { } // ctor
 
   Device::~Device() {
