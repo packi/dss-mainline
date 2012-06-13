@@ -155,7 +155,7 @@ function undoscene()
 if (raisedEvent.name == 'model_ready') {
     startup();
 }
-else if (raisedEvent.name == 'callScene') {
+else if (raisedEvent.name == 'callScene' && raisedEvent.parameter.isGroup) {
     callscene();
 }
 else if (raisedEvent.name == 'undoScene') {
