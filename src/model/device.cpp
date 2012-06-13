@@ -59,10 +59,8 @@ namespace dss {
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
-    m_ButtonID(0),
-    m_2WayMaster(false),
-    m_2WaySlave(false)
-  { } // ctor
+    m_ButtonID(0)
+    { } // ctor
 
   Device::~Device() {
     if(m_pPropertyNode != NULL) {
@@ -839,4 +837,134 @@ namespace dss {
     }
   }
 
+  bool Device::is2WayMaster() const {
+    return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4));
+  }
+
+  bool Device::is2WaySlave() const {
+    return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3));
+  }
+
+  bool Device::hasMultibuttons() const {
+    int subclass = (m_FunctionID & 0xfc0) >> 6;
+    int funcmodule = (m_FunctionID & 0x3f);
+
+    if ((subclass == 0x04) && ((funcmodule & 0x3) > 1)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  DeviceTypes_t Device::getDeviceType() const {
+    if (m_ProductID == 0) {
+      return DEVICE_TYPE_INVALID;
+    }
+    int t = (m_ProductID >> 10) & 0x3f;
+    switch (t) {
+      case 0:
+        return DEVICE_TYPE_KM;
+      case 1:
+        return DEVICE_TYPE_TKM;
+      case 2:
+        return DEVICE_TYPE_SDM;
+      case 3:
+        return DEVICE_TYPE_KL;
+      case 4:
+        return DEVICE_TYPE_TUP;
+      case 5:
+        return DEVICE_TYPE_ZWS;
+      case 6:
+        return DEVICE_TYPE_SDS;
+      default:
+        return DEVICE_TYPE_INVALID;
+    }
+  }
+
+  int Device::getDeviceNumber() const {
+    return m_ProductID & 0x3ff;
+  }
+
+  DeviceClasses_t Device::getDeviceClass() const {
+    if (m_FunctionID == 0) {
+      return DEVICE_CLASS_INVALID;
+    }
+
+    int c = (m_FunctionID & 0xf000) >> 12;
+    switch (c) {
+      case 1:
+        return DEVICE_CLASS_GE;
+      case 2:
+        return DEVICE_CLASS_GR;
+      case 3:
+        return DEVICE_CLASS_BL;
+      case 4:
+        return DEVICE_CLASS_TK;
+      case 5:
+        return DEVICE_CLASS_MG;
+      case 6:
+        return DEVICE_CLASS_RT;
+      case 7:
+        return DEVICE_CLASS_GN;
+      case 8:
+        return DEVICE_CLASS_SW;
+      case 9:
+        return DEVICE_CLASS_WE;
+      default:
+        return DEVICE_CLASS_INVALID;
+    }
+  }
+
+  const DeviceFeatures_t Device::getFeatures() const {
+    DeviceFeatures_t features;
+    features.pairing = false;
+
+    if ((m_ProductID == 0) || (m_FunctionID == 0)) {
+        return features;
+    }
+
+    DeviceTypes_t devType = this->getDeviceType();
+    int devNumber = this->getDeviceNumber();
+    DeviceClasses_t devCls = this->getDeviceClass();
+
+    if ((devCls == DEVICE_CLASS_SW) && (devType == DEVICE_TYPE_TKM) &&
+       ((devNumber == 200) || (devNumber == 210)) &&
+       this->hasMultibuttons() &&
+       ((m_ButtonInputIndex == 0) || (m_ButtonInputIndex == 2))) {
+      features.pairing = true;
+    }
+
+    return features;
+  }
+
+  int Device::getJokerGroup() const {
+    bool joker = false;
+
+    DeviceClasses_t devCls = this->getDeviceClass();
+    if (devCls != DEVICE_CLASS_SW) {
+      return -1;
+    }
+
+    for (int g = 1; g <= 63; g++) {
+      if (m_GroupBitmask.test(g-1)) {
+        if (g != (int)DEVICE_CLASS_SW) {
+          return g;
+        } else {
+          joker = true;
+        }
+      }
+    }
+
+    if (joker == true) {
+      return (int)DEVICE_CLASS_SW;
+    }
+
+    return -1;
+  }
 } // namespace dss

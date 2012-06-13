@@ -33,6 +33,11 @@
 #include "src/stringconverter.h"
 
 #include "src/web/json.h"
+#include "jsonhelper.h"
+
+#define BUTTONINPUT_1WAY       "1way"
+#define BUTTONINPUT_2WAY_DOWN  "2way_down"
+#define BUTTONINPUT_2WAY_UP    "2way_up"
 
 namespace dss {
 
@@ -267,12 +272,139 @@ namespace dss {
       pDevice->setDeviceButtonID(value);
       return success();
     } else if(_request.getMethod() == "setButtonInputMode") {
-      int value = strToIntDef(_request.getParameter("modeID"), -1);
-      if(value  < 0) {
-        return failure("Invalid or missing parameter 'modeID'");
+      if (_request.hasParameter("modeID")) {
+        return failure("API has changed, parameter mode ID is no longer \
+                        valid, please update your code");
       }
-      pDevice->setDeviceButtonInputMode(value);
-      return success();
+      std::string value = _request.getParameter("mode");
+      if (value.empty()) {
+        return failure("Invalid or missing parameter 'mode'");
+      }
+
+
+      DeviceFeatures_t features = pDevice->getFeatures();
+      if (features.pairing == false) {
+        return failure("This device does not support button pairing");
+      }
+
+
+      dss_dsid_t next = pDevice->getDSID();
+      next.lower++;
+      boost::shared_ptr<Device> pPartnerDevice;
+
+      try {
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+      } catch(std::runtime_error& e) {
+        throw DeviceNotFoundException("Could not find partner device with dsid '" + next.toString() + "'");
+      }
+
+      bool wasSlave = pPartnerDevice->is2WaySlave();
+
+      if (value == BUTTONINPUT_2WAY_DOWN) {
+        if (pDevice->getButtonInputIndex() == 0) {
+          if (m_pStructureBusInterface != NULL) {
+            pDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2);
+            pPartnerDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1);
+          }
+          pDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2);
+          pPartnerDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1);
+        } else {
+          if (m_pStructureBusInterface != NULL) {
+            pDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4);
+            pPartnerDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3);
+          }
+          pDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4);
+          pPartnerDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3);
+        }
+      } else if (value == BUTTONINPUT_2WAY_UP) {
+        if (pDevice->getButtonInputIndex() == 0) {
+          if (m_pStructureBusInterface != NULL) {
+            pDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2);
+            pPartnerDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1);
+          }
+          pDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2);
+          pPartnerDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1);
+        } else {
+          if (m_pStructureBusInterface != NULL) {
+            pDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4);
+            pPartnerDevice->setDeviceButtonInputMode(
+                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3);
+          }
+          pDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4);
+          pPartnerDevice->setButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3);
+        }
+      } else if (value == BUTTONINPUT_1WAY) {
+        if (m_pStructureBusInterface != NULL) {
+          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+          pPartnerDevice->setDeviceButtonInputMode(
+                  DEV_PARAM_BUTTONINPUT_STANDARD);
+        }
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+        pPartnerDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+      } else {
+        return failure("Invalid mode specified");
+      }
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      std::string action = "none";
+      if ((wasSlave == true) && (pPartnerDevice->is2WaySlave() == false)) {
+        action = "add";
+      } else if ((wasSlave == false) &&
+                 (pPartnerDevice->is2WaySlave() == true)) {
+        action = "remove";
+      }
+      resultObj->addProperty("action", action);
+      DeviceReference dr(pPartnerDevice, &m_Apartment);
+      resultObj->addElement("device", toJSON(dr));
+
+      boost::shared_ptr<JSONObject> master(new JSONObject());
+      master->addProperty("dsid", pDevice->getDSID().toString());
+      master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
+      resultObj->addElement("update", master);
+
+      if (value == BUTTONINPUT_1WAY) {
+        return success(resultObj);
+      }
+
+      if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
+        if (m_pStructureBusInterface != NULL) {
+          StructureManipulator manipulator(*m_pStructureBusInterface,
+                                           *m_pStructureQueryBusInterface,
+                                           m_Apartment);
+          boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                        pDevice->getZoneID());
+          manipulator.addDeviceToZone(pPartnerDevice, zone);
+        }
+      }
+
+      if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
+        if (m_pStructureBusInterface != NULL) {
+          pPartnerDevice->setDeviceButtonID(pDevice->getButtonID());
+        }
+        pPartnerDevice->setButtonID(pDevice->getButtonID());
+      }
+
+      if (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup()) {
+        if (m_pStructureBusInterface != NULL) {
+          pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+        }
+      }
+      return success(resultObj);
     } else if(_request.getMethod() == "setOutputMode") {
       int value = strToIntDef(_request.getParameter("modeID"), -1);
       if((value  < 0) || (value > 255)) {

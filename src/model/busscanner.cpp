@@ -229,9 +229,6 @@ namespace dss {
       dev->setName(_spec.Name);
     }
 
-    dev->set2WayMaster(deviceIs2WayMaster(_spec.LTMode));
-    dev->set2WaySlave(deviceIs2WaySlave(_spec.LTMode));
-
     foreach(int groupID, _spec.Groups) {
       if (groupID == 0) {
         continue;

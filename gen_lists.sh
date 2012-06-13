@@ -54,7 +54,7 @@ echo >> $FILE
 echo >> $FILE
 
 echo -n "dsstests_SOURCES =" >> $FILE
-for f in `find tests | egrep '\.(cpp?|h)$' | egrep -v 'dsidhelpertest.cpp'| sort`
+for f in `find tests | egrep '\.(cpp?|h)$' | egrep -v '(dsidhelpertest.cpp|dssimtest.cpp)'| sort`
 do
     if (test -f $f); then
         echo " \\" >> $FILE
