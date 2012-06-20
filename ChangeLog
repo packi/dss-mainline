@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.12.0 20.06.2012
+	* split system actions to support delayed execution (#1547)
+	* query inactive devices from dSMeters (#1273)
+
 v1.11.0 04.06.2012
 	* synchronize with ds485-core bus state name changes
 	* remember when the device became inactive (#887)
