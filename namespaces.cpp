@@ -26,7 +26,6 @@
 #include "webservices/soapH.h"
 #undef WITH_NONAMESPACES
 
-
 extern "C" {
   struct Namespace namespaces[] =
   {

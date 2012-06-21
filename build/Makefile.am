@@ -66,7 +66,7 @@ libdsscore_a_SOURCES +=  \
 
 endif
 
-dss_SOURCES = $(top_srcdir)/main.cpp $(top_srcdir)/namespaces.cpp
+dss_SOURCES = $(top_srcdir)/main.cpp
 
 nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
 
@@ -94,6 +94,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(GCOV_LIBS)
 
 if BUILD_SOAP
+
+dss_SOURCES += $(top_srcdir)/namespaces.cpp
 
 dss_LDADD += \
 			libwebservices.a \
@@ -151,9 +153,10 @@ dsstests_LDADD += \
 			$(GSOAP_LIBS) \
 			$(OPENSSL_LIBS)
 
+dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
+
 endif
 
-dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
 
 $(top_srcdir)/src/build_info.h:
 	$(top_srcdir)/tools/dss_gen_version_unix.sh $(top_srcdir) $(top_srcdir)

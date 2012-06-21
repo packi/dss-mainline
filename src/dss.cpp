@@ -55,7 +55,9 @@
 #include "sim/dssim.h"
 #include "sim/businterface/simbusinterface.h"
 #include "sim/businterface/businterfaceadaptor.h"
-#include "webservices/webservices.h"
+#ifdef WITH_SOAP
+  #include "webservices/webservices.h"
+#endif
 #include "event.h"
 #include "metering/metering.h"
 #include "foreach.h"
