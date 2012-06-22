@@ -34,6 +34,16 @@
 #include "src/datetools.h"
 #include "addressablemodelitem.h"
 
+#define DEV_PARAM_BUTTONINPUT_STANDARD              0
+#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
+#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2   6
+#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3   7
+#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4   8
+#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1   9
+#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2   10
+#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3   11
+#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4   12
+
 namespace dss {
 
   class Group;
@@ -69,6 +79,34 @@ namespace dss {
     uint8_t clickType;
     uint8_t sceneID;
   } DeviceSensorEventSpec_t;
+
+  typedef struct {
+    bool pairing;
+  } DeviceFeatures_t;
+
+  typedef enum {
+    DEVICE_TYPE_INVALID = -1,
+    DEVICE_TYPE_KM      = 0,
+    DEVICE_TYPE_TKM     = 1,
+    DEVICE_TYPE_SDM     = 2,
+    DEVICE_TYPE_KL      = 3,
+    DEVICE_TYPE_TUP     = 4,
+    DEVICE_TYPE_ZWS     = 5,
+    DEVICE_TYPE_SDS     = 6
+  } DeviceTypes_t;
+
+  typedef enum {
+    DEVICE_CLASS_INVALID    = -1,
+    DEVICE_CLASS_GE         = 1,
+    DEVICE_CLASS_GR         = 2,
+    DEVICE_CLASS_BL         = 3,
+    DEVICE_CLASS_TK         = 4,
+    DEVICE_CLASS_MG         = 5,
+    DEVICE_CLASS_RT         = 6,
+    DEVICE_CLASS_GN         = 7,
+    DEVICE_CLASS_SW         = 8,
+    DEVICE_CLASS_WE         = 9
+  } DeviceClasses_t;
 
   /** Represents a dsID */
   class Device : public AddressableModelItem,
@@ -127,6 +165,13 @@ namespace dss {
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);
     void setProgMode(uint8_t _modeId);
+    bool is2WayMaster() const;
+    bool is2WaySlave() const;
+    bool hasMultibuttons() const;
+    DeviceTypes_t getDeviceType() const;
+    int getDeviceNumber() const;
+    DeviceClasses_t getDeviceClass() const;
+    const DeviceFeatures_t getFeatures() const;
 
     /** Configure scene configuration */
     void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
@@ -215,6 +260,10 @@ namespace dss {
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
 
+    /** Retuturns group to which the joker is configured or -1 if device is not
+        a joker */
+    int getJokerGroup() const;
+
     /** Removes the device from all group.
      * The device will remain in the broadcastgroup though.
      */
@@ -278,6 +327,8 @@ namespace dss {
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
+    /** Removes the device from the propertytree. */
+    void removeFromPropertyTree();
 
     /** Returns wheter the dSM has been told to never forget
         this device (cached value) */
@@ -298,7 +349,7 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
-    void setButtonInputMode(const uint8_t _value) { m_ButtonInputMode = _value; }
+    void setButtonInputMode(const uint8_t _value);
     uint8_t getButtonInputMode() const { return m_ButtonInputMode; }
     void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }
     uint8_t getButtonInputIndex() const { return m_ButtonInputIndex; }

@@ -90,6 +90,10 @@ namespace dss {
 
     for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
       const DeviceReference& d = _set.get(iDevice);
+      if (d.getDevice()->is2WaySlave() == true) {
+        // do not render "slave" devices
+        continue;
+      }
       result->addElement("", toJSON(d));
     }
     return result;
@@ -105,6 +109,10 @@ namespace dss {
     result->addElement("devices", devicesArr);
     Set devices = _group->getDevices();
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
+      if (devices[iDevice].getDevice()->is2WaySlave()) {
+        // do not render "slave" devices
+        continue;
+      }
       devicesArr->add(devices[iDevice].getDSID().toString());
     }
     return result;

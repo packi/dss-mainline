@@ -490,6 +490,4 @@ namespace dss {
     }
     return false;
   } // unset
-
-
 }
