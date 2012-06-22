@@ -327,6 +327,8 @@ namespace dss {
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
+    /** Removes the device from the propertytree. */
+    void removeFromPropertyTree();
 
     /** Returns wheter the dSM has been told to never forget
         this device (cached value) */
@@ -347,7 +349,7 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
-    void setButtonInputMode(const uint8_t _value) { m_ButtonInputMode = _value; }
+    void setButtonInputMode(const uint8_t _value);
     uint8_t getButtonInputMode() const { return m_ButtonInputMode; }
     void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }
     uint8_t getButtonInputIndex() const { return m_ButtonInputIndex; }

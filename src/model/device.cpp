@@ -63,13 +63,52 @@ namespace dss {
     { } // ctor
 
   Device::~Device() {
+    removeFromPropertyTree();
+  }
+
+  void Device::removeFromPropertyTree() {
     if(m_pPropertyNode != NULL) {
+      if ((m_DSMeterDSID != NullDSID) && (m_DSID != NullDSID)) {
+        std::string devicePath = "devices/" + m_DSID.toString();
+        PropertyNodePtr dev = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
+        dev->alias(PropertyNodePtr());
+        dev->getParentNode()->removeChild(dev);
+      }
+
+      if (m_pApartment->getPropertyNode() != NULL) {
+        for (int g = 1; g <= 63; g++) {
+          if (m_GroupBitmask.test(g-1)) {
+            int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
+            std::string gPath = "zones/zone" + intToString(zid) +
+                "/groups/group" + intToString(g) + "/devices/" +
+                m_DSID.toString();
+            PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
+            if (gnode != NULL) {
+              gnode->alias(PropertyNodePtr());
+              gnode->getParentNode()->removeChild(gnode);
+            }
+            PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(g));
+            if (gsubnode != NULL) {
+              gsubnode->getParentNode()->removeChild(gsubnode);
+            }
+          }
+        }
+      }
+
       m_pPropertyNode->unlinkProxy(true);
-      m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+      PropertyNode *parent = m_pPropertyNode->getParentNode();
+      if (parent != NULL) {
+        parent->removeChild(m_pPropertyNode);
+      }
+      m_pPropertyNode.reset();
     }
     if(m_pAliasNode != NULL) {
       m_pAliasNode->alias(PropertyNodePtr());
-      m_pAliasNode->getParentNode()->removeChild(m_pAliasNode);
+      PropertyNode *parent = m_pAliasNode->getParentNode();
+      if (parent != NULL) {
+        parent->removeChild(m_pAliasNode);
+      }
+      m_pAliasNode.reset();
     }
   }
 
@@ -128,6 +167,41 @@ namespace dss {
         }
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
+
+        if (m_ZoneID != 0) {
+          std::string basePath = "zones/zone" + intToString(m_ZoneID) +
+                                 "/devices";
+          if(m_pAliasNode == NULL) {
+            PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + m_DSID.toString());
+            if ((node == NULL) || ((node != NULL) && (node->size() == 0))) {
+              m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + m_DSID.toString());
+              m_pAliasNode->alias(m_pPropertyNode);
+            }
+          } else {
+            PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);
+            if (base != NULL) {
+              base->addChild(m_pAliasNode);
+            }
+          }
+        }
+
+        for (int g = 1; g <= 63; g++) {
+          if (m_GroupBitmask.test(g-1)) {
+            std::string gPath = "zones/zone" + intToString(m_ZoneID) +
+                                "/groups/group" + intToString(g) + "/devices/" +
+                                m_DSID.toString();
+            PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
+            if (gnode) {
+              gnode->alias(m_pPropertyNode);
+            }
+            PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
+            gsubnode->createProperty("id")->setIntegerValue(g);
+          }
+        }
+
+        if (m_DSMeterDSID != NullDSID) {
+          setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
+        }
       }
     }
   } // publishToPropertyTree
@@ -834,6 +908,17 @@ namespace dss {
     setDeviceSceneMode(areaOffScene, sceneSpec);
     if (_addToArea) {
       setSceneValue(areaOffScene, 0);
+    }
+  }
+
+  void Device::setButtonInputMode(const uint8_t _value) {
+    bool wasSlave = is2WaySlave();
+
+    m_ButtonInputMode = _value;
+    if (is2WaySlave() && !wasSlave) {
+      removeFromPropertyTree();
+    } else if (wasSlave && !is2WaySlave()) {
+      publishToPropertyTree();
     }
   }
 
