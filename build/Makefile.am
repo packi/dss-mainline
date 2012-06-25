@@ -91,7 +91,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(LIBRRD_LIBS) -lrrd_th \
 			$(EXPAT_LIBS) \
 			$(BACKTRACE_LDFLAGS) \
-			$(GCOV_LIBS)
+			$(GCOV_LIBS) \
+			$(LIBTCMALLOC_LIBS)
 
 if BUILD_SOAP
 
@@ -144,7 +145,8 @@ dsstests_LDADD = \
 			$(CURL_LIBS) \
 			$(LIBRRD_LIBS) -lrrd_th \
 			$(EXPAT_LIBS) \
-			$(GCOV_LIBS)
+			$(GCOV_LIBS) \
+			$(LIBTCMALLOC_LIBS)
 
 if BUILD_SOAP
 
