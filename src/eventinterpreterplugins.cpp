@@ -345,6 +345,7 @@ namespace dss {
       m_WrapperInAction = wrapper;
 
       {
+        ScriptLock lock(ctx);
         JSContextThread th(ctx.get());
 
         ScriptObject raisedEvent(*ctx, NULL);
