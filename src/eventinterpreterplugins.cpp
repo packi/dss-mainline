@@ -122,15 +122,6 @@ namespace dss {
       } else {
         m_pPropertyNode = _pRootNode->createProperty(_identifier);
       }
-      m_StopNode = m_pPropertyNode->createProperty("stopScript+");
-      m_StopNode->linkToProxy(
-          PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
-      m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
-      m_StartedAtNode->linkToProxy(
-          PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
-      m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
-      m_AttachedObjectsNode->linkToProxy(
-          PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
     }
   }
 
@@ -144,6 +135,30 @@ namespace dss {
         m_pPropertyNode->removeChild(m_AttachedObjectsNode);
         m_pPropertyNode->removeChild(m_FilesNode);
       }
+    }
+  }
+
+  void ScriptContextWrapper::init() {
+    if (m_pPropertyNode) {
+      m_StopNode = m_pPropertyNode->createProperty("stopScript+");
+      m_StopNode->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
+      m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
+      m_StartedAtNode->linkToProxy(
+          PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
+      m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
+      m_AttachedObjectsNode->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
+    }
+  }
+
+  void ScriptContextWrapper::destroy() {
+    m_LoadedFiles.clear();
+    if (m_pPropertyNode) {
+      m_pPropertyNode->removeChild(m_StartedAtNode);
+      m_pPropertyNode->removeChild(m_StopNode);
+      m_pPropertyNode->removeChild(m_AttachedObjectsNode);
+      m_pPropertyNode->removeChild(m_FilesNode);
     }
   }
 
@@ -277,6 +292,7 @@ namespace dss {
       }
       ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
     }
+    m_ContextMap.clear();
     log("All scripts Terminated");
   }
 
@@ -295,7 +311,6 @@ namespace dss {
         timingEnabled = true;
       }
 
-      boost::shared_ptr<ScriptContext> ctx(m_pEnvironment->getContext());
       std::string scriptID;
       if(_subscription.getOptions()->hasParameter("script_id")) {
         scriptID = _subscription.getOptions()->getParameter("script_id");
@@ -306,9 +321,27 @@ namespace dss {
         scriptID = _event.getName() + _subscription.getID();
       }
 
-      boost::shared_ptr<ScriptContextWrapper> wrapper(
-        new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
+      boost::shared_ptr<ScriptContext> ctx;
+
+      HASH_MAP<std::string, boost::shared_ptr<ScriptContext> >::const_iterator item;
+      item = m_ContextMap.find(scriptID);
+      if (item != m_ContextMap.end()) {
+        ctx = boost::shared_ptr<ScriptContext> (item->second);
+        if (ctx->hasAttachedObjects()) {
+          Logger::getInstance()->log("JavaScript Event Handler: wrapper " + scriptID + " has objects!", lsWarning);
+        }
+      } else {
+        ctx = boost::shared_ptr<ScriptContext> (m_pEnvironment->getContext());
+        m_ContextMap[scriptID] = ctx;
+        Logger::getInstance()->log("JavaScript Event Handler: persistent context for " + scriptID);
+      }
+
+      boost::shared_ptr<ScriptContextWrapper> wrapper
+        (new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
       ctx->attachWrapper(wrapper);
+      ctx->setCacheEnabled(m_pEnvironment->isCacheEnabled());
+
+      wrapper->init();
       m_WrapperInAction = wrapper;
 
       {
@@ -473,6 +506,7 @@ namespace dss {
                                    "keep " + scripts + " in memory", lsDebug);
       } else {
         ctx->detachWrapper();
+        wrapper->destroy();
       }
 
     } else {
@@ -549,6 +583,7 @@ namespace dss {
       if(!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
         Logger::getInstance()->log("JavaScript cleanup: erasing script "
             + (*ipScriptContextWrapper)->getIdentifier());
+        (*ipScriptContextWrapper)->destroy();
         (*ipScriptContextWrapper)->get()->detachWrapper();
         ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
       } else {

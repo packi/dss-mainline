@@ -219,6 +219,8 @@ namespace dss {
                          bool _uniqueNode
                         );
     ~ScriptContextWrapper();
+    void init();
+    void destroy();
     boost::shared_ptr<ScriptContext> get();
     void addFile(const std::string& _name);
     void addRuntimeInfos(const std::string& _name, unsigned long _timingNS);

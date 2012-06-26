@@ -53,11 +53,13 @@ namespace dss {
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
     boost::shared_ptr<ScriptEnvironment> m_pEnvironment;
-    boost::weak_ptr<ScriptContextWrapper> m_WrapperInAction;
-    std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     static const std::string kCleanupScriptsEventName;
     PropertyNodePtr m_pScriptRootNode;
+
+    boost::weak_ptr<ScriptContextWrapper> m_WrapperInAction;
+    std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
+    HASH_MAP<std::string, boost::shared_ptr<ScriptContext> > m_ContextMap;
   private:
     void initializeEnvironment();
     void setupCleanupEvent();
