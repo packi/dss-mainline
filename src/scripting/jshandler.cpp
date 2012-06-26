@@ -63,7 +63,7 @@ namespace dss {
     m_RuntimeSize = 8L * 1024L * 1024L;
     m_StackSize = 8192;
     m_cxOptionClear = m_cxOptionSet = 0;
-    m_CacheEnabled = false;
+    m_CacheEnabled = true;
     m_TimingEnabled = false;
 
     try {
@@ -534,24 +534,47 @@ namespace dss {
 
   jsval ScriptContext::doEvaluateScript(const std::string& _fileName) {
     ScriptLock lock(this);
-
-    std::ifstream in(_fileName.c_str());
-    if(!in.is_open()) {
-      throw ScriptException("Could not open script-file: '" + _fileName + "'");
-    }
-    std::string line;
-    std::stringstream sstream;
-    while(std::getline(in,line)) {
-      sstream << line << "\n";
-    }
-    JSContextThread req(this);
-    jsval rval;
-    std::string script = sstream.str();
-
     JSBool ok = JS_FALSE;
+    jsval rval;
 
-    ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
+    if (!m_CacheEnabled) {
+      std::ifstream in(_fileName.c_str());
+      if(!in.is_open()) {
+        throw ScriptException("Could not open script-file: '" + _fileName + "'");
+      }
+      std::string line;
+      std::stringstream sstream;
+      while(std::getline(in,line)) {
+        sstream << line << "\n";
+      }
+      JSContextThread req(this);
+      std::string script = sstream.str();
+
+      ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
           _fileName.c_str(), 0, &rval);
+
+    } else {
+      JSContextThread req(m_pContext);
+      JSObject* scriptObj;
+      HASH_MAP<std::string, JSObject**>::const_iterator item;
+      item = m_ScriptMap.find(_fileName);
+
+      if (item != m_ScriptMap.end()) {
+        scriptObj = *(item->second);
+      } else {
+        scriptObj = JS_CompileFile(m_pContext, m_pRootObject, _fileName.c_str());
+        if (!scriptObj) {
+          throw ScriptException("Error compiling script");
+        }
+        JSObject** jso = (JSObject **) JS_malloc(m_pContext, sizeof(JSObject *));
+        *jso = scriptObj;
+        m_ScriptMap[_fileName] = jso;
+        JS_AddNamedObjectRoot(m_pContext, jso, _fileName.c_str());
+      }
+
+      ok = JS_ExecuteScript(m_pContext, m_pRootObject, scriptObj, &rval);
+      JS_MaybeGC(m_pContext);
+    }
 
     if(ok) {
       return rval;

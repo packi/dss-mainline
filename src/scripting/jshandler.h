@@ -114,6 +114,8 @@ namespace dss {
     mutable boost::mutex m_LockDataMutex;
     bool m_Locked;
     pthread_t m_LockedBy;
+    HASH_MAP<std::string, JSObject**> m_ScriptMap;
+    bool m_CacheEnabled;
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -129,18 +131,22 @@ namespace dss {
     t evaluateScript(const std::string& _fileName);
     // FIXME: Workaround a compiler issue that interprets typeof jsval == typeof int
     jsval doEvaluateScript(const std::string& _fileName);
+    /** Enables or disables pre-compilation of scripts */
+    void setCacheEnabled(bool _value) { m_CacheEnabled = _value; }
 
     /** Returns a pointer to the JSContext */
     JSContext* getJSContext() { return m_pContext; }
     /** Returns a const reference to the ScriptEnvironment */
     const ScriptEnvironment& getEnvironment() const { return m_Environment; }
     ScriptEnvironment& getEnvironment() { return m_Environment; }
+
     /** Returns a ptr to an optional wrapper class */
     boost::shared_ptr<ScriptContextWrapper> getWrapper() { return m_pWrapper; }
     void attachWrapper(boost::shared_ptr<ScriptContextWrapper> _wrapper) {
       m_pWrapper = _wrapper;
     }
     void detachWrapper() { m_pWrapper.reset(); }
+
     ScriptObject& getRootObject() { return *m_RootObject; }
     bool raisePendingExceptions();
 
