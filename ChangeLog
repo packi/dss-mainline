@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.13.0 27.06.2012
+	* fix build with --disable-soap configure parameter, #1696
+	* handle multibuttons internally (API change), #1273
+
 v1.12.0 20.06.2012
 	* split system actions to support delayed execution (#1547)
 	* query inactive devices from dSMeters (#1273)
