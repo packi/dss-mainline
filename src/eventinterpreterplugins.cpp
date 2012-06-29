@@ -611,22 +611,22 @@ namespace dss {
       body = _subscription.getOptions()->getParameter("body");
     }
 
+    char mailText[] = "/tmp/mailXXXXXX";
+    int mailFile = mkstemp((char *) mailText);
+    if (mailFile < 0) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
+          intToString(errno) + "]", lsFatal);
+      return;
+    }
+    FILE* mailStream = fdopen(mailFile, "w");
+    if (mailStream == NULL) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: writing to temporary file failed [" +
+          intToString(errno) + "]", lsFatal);
+      return;
+    }
+
     try {
       Logger::getInstance()->log("EventInterpreterPluginSendmail::handleEvent: Sendmail", lsDebug);
-
-      char mailText[] = "/tmp/mailXXXXXX";
-      int mailFile = mkstemp((char *) mailText);
-      if (mailFile < 0) {
-        Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
-            intToString(errno) + "]", lsFatal);
-        return;
-      }
-      FILE* mailStream = fdopen(mailFile, "w");
-      if (mailStream == NULL) {
-        Logger::getInstance()->log("EventInterpreterPluginSendmail: writing to temporary file failed [" +
-            intToString(errno) + "]", lsFatal);
-        return;
-      }
 
       DateTime now;
       std::ostringstream mail;
@@ -654,22 +654,21 @@ namespace dss {
       fputs(mail.str().c_str(), mailStream);
       fclose(mailStream);
 
-      pthread_t pid;
-      pthread_attr_t attr;
-      int err;
-
-      pthread_attr_init(&attr);
-      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-      if ((err = pthread_create(&pid, &attr, EventInterpreterPluginSendmail::run, (void*) strdup(mailText))) < 0) {
-        Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
-            intToString(err) + "[" + intToString(errno) + "]", lsFatal);
-      }
-      pthread_attr_destroy(&attr);
-
     } catch (std::exception& e) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to send mail: " +
           std::string(e.what()), lsFatal);
     }
+
+    pthread_t pid;
+    pthread_attr_t attr;
+    int err;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if ((err = pthread_create(&pid, &attr, EventInterpreterPluginSendmail::run, (void*) strdup(mailText))) < 0) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
+          intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+    }
+    pthread_attr_destroy(&attr);
   } // handleEvent
 
   void* EventInterpreterPluginSendmail::run(void* arg) {
