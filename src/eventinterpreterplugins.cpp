@@ -322,18 +322,23 @@ namespace dss {
       }
 
       boost::shared_ptr<ScriptContext> ctx;
-
-      HASH_MAP<std::string, boost::shared_ptr<ScriptContext> >::const_iterator item;
-      item = m_ContextMap.find(scriptID);
-      if (item != m_ContextMap.end()) {
-        ctx = boost::shared_ptr<ScriptContext> (item->second);
-        if (ctx->hasAttachedObjects()) {
-          Logger::getInstance()->log("JavaScript Event Handler: wrapper " + scriptID + " has objects!", lsWarning);
+      if (m_pEnvironment->isCacheEnabled()) {
+        HASH_MAP<std::string, boost::shared_ptr<ScriptContext> >::const_iterator item;
+        item = m_ContextMap.find(scriptID);
+        if (item != m_ContextMap.end()) {
+          ctx = boost::shared_ptr<ScriptContext> (item->second);
+          if (ctx->hasAttachedObjects()) {
+            Logger::getInstance()->log("JavaScript Event Handler: context for " + scriptID +
+                " still has objects!", lsWarning);
+          }
         }
-      } else {
+      }
+      if (ctx == NULL) {
         ctx = boost::shared_ptr<ScriptContext> (m_pEnvironment->getContext());
-        m_ContextMap[scriptID] = ctx;
-        Logger::getInstance()->log("JavaScript Event Handler: persistent context for " + scriptID);
+        if (m_pEnvironment->isCacheEnabled()) {
+          m_ContextMap[scriptID] = ctx;
+          Logger::getInstance()->log("JavaScript Event Handler: persistent context for " + scriptID);
+        }
       }
 
       boost::shared_ptr<ScriptContextWrapper> wrapper
