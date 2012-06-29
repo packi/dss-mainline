@@ -60,6 +60,11 @@ namespace dss {
   } // ctor
 
   Apartment::~Apartment() {
+    m_pPropertyNode.reset();
+    m_pBusInterface = NULL;
+    m_pModelMaintenance = NULL;
+    m_pPropertySystem = NULL;
+    m_pMetering = NULL;
   } // dtor
 
   void Apartment::addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone) {
