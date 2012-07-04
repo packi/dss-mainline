@@ -43,6 +43,9 @@
 #define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2   10
 #define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3   11
 #define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4   12
+#define DEV_PARAM_BUTTONINPUT_2WAY                  13
+#define DEV_PARAM_BUTTONINPUT_1WAY                  14
+#define DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2       0xff
 
 namespace dss {
 
@@ -81,7 +84,7 @@ namespace dss {
   } DeviceSensorEventSpec_t;
 
   typedef struct {
-    bool pairing;
+    bool pairing;       // device supports pairing
   } DeviceFeatures_t;
 
   typedef enum {
