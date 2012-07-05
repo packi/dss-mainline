@@ -53,6 +53,7 @@ namespace dss {
       result->addProperty("meterDSID", _device.getDevice()->getLastKnownDSMeterDSID().toString());
       result->addProperty("busID", _device.getDevice()->getLastKnownShortAddress());
     }
+    result->addProperty("zoneID", _device.getDevice()->getZoneID());
     result->addProperty("isPresent", _device.getDevice()->isPresent());
 
     tmp_date = _device.getDevice()->getLastDiscovered();
