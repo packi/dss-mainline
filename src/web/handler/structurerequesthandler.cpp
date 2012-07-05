@@ -75,6 +75,18 @@ namespace dss {
           try {
             boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
             manipulator.addDeviceToZone(dev, zone);
+            if (dev->is2WayMaster()) {
+              dss_dsid_t next = dev->getDSID();
+              next.lower++;
+              try {
+                boost::shared_ptr<Device> pPartnerDevice;
+
+                pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+                manipulator.addDeviceToZone(pPartnerDevice, zone);
+              } catch(std::runtime_error& e) {
+                return failure("Could not find partner device with dsid '" + next.toString() + "'");
+              }
+            }
           } catch(ItemNotFoundException&) {
             return failure("Could not find zone");
           }

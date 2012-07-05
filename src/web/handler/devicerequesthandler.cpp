@@ -265,6 +265,17 @@ namespace dss {
         return failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceJokerGroup(value);
+      if (pDevice->is2WayMaster()) {
+        dss_dsid_t next = pDevice->getDSID();
+        next.lower++;
+        try {
+          boost::shared_ptr<Device> pPartnerDevice;
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+          pPartnerDevice->setDeviceJokerGroup(value);
+        } catch(std::runtime_error& e) {
+          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        }
+      }
       return success();
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
@@ -272,6 +283,18 @@ namespace dss {
         return failure("Invalid or missing parameter 'buttonID'");
       }
       pDevice->setDeviceButtonID(value);
+
+      if (pDevice->is2WayMaster()) {
+        dss_dsid_t next = pDevice->getDSID();
+        next.lower++;
+        try {
+          boost::shared_ptr<Device> pPartnerDevice;
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+          pPartnerDevice->setDeviceButtonID(value);
+        } catch(std::runtime_error& e) {
+          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        }
+      }
       return success();
     } else if(_request.getMethod() == "setButtonInputMode") {
       if (_request.hasParameter("modeID")) {
