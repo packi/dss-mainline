@@ -43,11 +43,15 @@ namespace dss {
     bool isPresent() const { return m_IsPresent & m_IsConnected; }
 
     virtual void setIsPresent(const bool _value) {
+      bool wasPresent = m_IsPresent;
+
       m_IsPresent = _value;
       if (m_IsPresent) {
         m_InactiveSince = DateTime::NullDate;
       } else {
-        m_InactiveSince = DateTime();
+        if (wasPresent || (m_InactiveSince == DateTime::NullDate)) {
+          m_InactiveSince = DateTime();
+        }
       }
     }
 
