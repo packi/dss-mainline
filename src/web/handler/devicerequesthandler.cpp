@@ -159,7 +159,27 @@ namespace dss {
           StructureManipulator manipulator(*m_pStructureBusInterface,
                                            *m_pStructureQueryBusInterface,
                                            m_Apartment);
-          manipulator.deviceSetName(pDevice, name);
+          manipulator.deviceSetName(pDevice, st.convert(name));
+        }
+
+        if (pDevice->is2WayMaster()) {
+          dss_dsid_t next = pDevice->getDSID();
+          next.lower++;
+          try {
+            boost::shared_ptr<Device> pPartnerDevice;
+            pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+            if (pPartnerDevice->getName().empty()) {
+              pPartnerDevice->setName(st.convert(name));;
+              if (m_pStructureBusInterface != NULL) {
+                StructureManipulator manipulator(*m_pStructureBusInterface,
+                                                 *m_pStructureQueryBusInterface,
+                                                 m_Apartment);
+                manipulator.deviceSetName(pPartnerDevice, st.convert(name));
+              }
+            }
+          } catch(std::runtime_error& e) {
+            return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          }
         }
         return success();
       } else {
