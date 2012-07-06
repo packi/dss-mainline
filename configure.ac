@@ -55,6 +55,10 @@ MT_OPTION([curl], [disable],
           [build dSS without curl support (default: enabled)],
           [],[])
 
+MT_OPTION([libtcmalloc], [disable],
+          [build dSS without libtcmalloc support (default: enabled)],
+          [],[])
+
 MT_OPTION([http], [enable],
           [build with HTTP support (default: HTTPS only)],
           [
@@ -370,6 +374,19 @@ if test "x$CURL_OPTION_ENABLED" = "xyes"; then
     AC_SUBST(HAVE_CURL)
 fi
 AM_CONDITIONAL(WITH_CURL, test "x$WITH_CURL" = "xyes")
+
+if test "x$LIBTCMALLOC_OPTION_ENABLED" = "xyes"; then
+    PKG_CHECK_MODULES([LIBTCMALLOC], [libtcmalloc],
+        [
+            AC_DEFINE([HAVE_LIBTCMALLOC], [1], [libtcmalloc support available])
+            WITH_LIBTCMALLOC=yes
+        ],
+        [
+            AC_MSG_NOTICE([libtcmalloc not available: $LIBTCMALLOC_PKG_ERRORS])
+        ])
+    AC_SUBST(HAVE_LIBTCMALLOC)
+fi
+AM_CONDITIONAL(WITH_LIBTCMALLOC, test "x$WITH_LIBTCMALLOC" = "xyes")
 
 if test "x$SENDMAIL" = "x"; then
     AC_PATH_PROG(SENDMAIL, sendmail, no)
