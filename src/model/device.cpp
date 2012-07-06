@@ -926,14 +926,19 @@ namespace dss {
     return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4));
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
+            (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
+              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
+            ((m_DSID.lower % 2) == false))); // even dSID
   }
 
   bool Device::is2WaySlave() const {
     return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3));
+            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
+            ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
+            ((m_DSID.lower % 2) == true))); // odd dSID
   }
 
   bool Device::hasMultibuttons() const {
@@ -1009,6 +1014,7 @@ namespace dss {
   const DeviceFeatures_t Device::getFeatures() const {
     DeviceFeatures_t features;
     features.pairing = false;
+    features.syncButtonID = false;
 
     if ((m_ProductID == 0) || (m_FunctionID == 0)) {
         return features;
@@ -1022,6 +1028,12 @@ namespace dss {
        ((devNumber == 200) || (devNumber == 210)) &&
        this->hasMultibuttons() &&
        ((m_ButtonInputIndex == 0) || (m_ButtonInputIndex == 2))) {
+      features.pairing = true;
+      features.syncButtonID = true;
+    } else if ((devCls == DEVICE_CLASS_GE) && // GE SDS-200
+               (devType == DEVICE_TYPE_SDS) &&
+               (devNumber == 200) && this->hasMultibuttons() &&
+               (m_ButtonInputIndex == 0)) {
       features.pairing = true;
     }
 

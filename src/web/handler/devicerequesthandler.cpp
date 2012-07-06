@@ -35,9 +35,11 @@
 #include "src/web/json.h"
 #include "jsonhelper.h"
 
-#define BUTTONINPUT_1WAY       "1way"
-#define BUTTONINPUT_2WAY_DOWN  "2way_down"
-#define BUTTONINPUT_2WAY_UP    "2way_up"
+#define BUTTONINPUT_1WAY            "1way"
+#define BUTTONINPUT_2WAY_DOWN       "2way_down"
+#define BUTTONINPUT_2WAY_UP         "2way_up"
+#define BUTTONINPUT_2WAY            "2way"
+#define BUTTONINPUT_1WAY_COMBINED   "1way_combined"
 
 namespace dss {
 
@@ -263,6 +265,17 @@ namespace dss {
         return failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceJokerGroup(value);
+      if (pDevice->is2WayMaster()) {
+        dss_dsid_t next = pDevice->getDSID();
+        next.lower++;
+        try {
+          boost::shared_ptr<Device> pPartnerDevice;
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+          pPartnerDevice->setDeviceJokerGroup(value);
+        } catch(std::runtime_error& e) {
+          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        }
+      }
       return success();
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
@@ -270,6 +283,23 @@ namespace dss {
         return failure("Invalid or missing parameter 'buttonID'");
       }
       pDevice->setDeviceButtonID(value);
+
+      if (pDevice->is2WayMaster()) {
+        DeviceFeatures_t features = pDevice->getFeatures();
+        if (!features.syncButtonID) {
+          return success();
+        }
+
+        dss_dsid_t next = pDevice->getDSID();
+        next.lower++;
+        try {
+          boost::shared_ptr<Device> pPartnerDevice;
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+          pPartnerDevice->setDeviceButtonID(value);
+        } catch(std::runtime_error& e) {
+          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        }
+      }
       return success();
     } else if(_request.getMethod() == "setButtonInputMode") {
       if (_request.hasParameter("modeID")) {
@@ -286,7 +316,6 @@ namespace dss {
       if (features.pairing == false) {
         return failure("This device does not support button pairing");
       }
-
 
       dss_dsid_t next = pDevice->getDSID();
       next.lower++;
@@ -352,10 +381,28 @@ namespace dss {
         if (m_pStructureBusInterface != NULL) {
           pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
           pPartnerDevice->setDeviceButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_STANDARD);
+                                            DEV_PARAM_BUTTONINPUT_STANDARD);
         }
         pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
         pPartnerDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+      } else if (value == BUTTONINPUT_2WAY) {
+        if (m_pStructureBusInterface != NULL) {
+          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_2WAY);
+          pPartnerDevice->setDeviceButtonInputMode(
+                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+        }
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_2WAY);
+        pPartnerDevice->setButtonInputMode(
+                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+      } else if (value == BUTTONINPUT_1WAY_COMBINED) {
+        if (m_pStructureBusInterface != NULL) {
+          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_1WAY);
+          pPartnerDevice->setDeviceButtonInputMode(
+                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+        }
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_1WAY);
+        pPartnerDevice->setButtonInputMode(
+                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
       } else {
         return failure("Invalid mode specified");
       }
