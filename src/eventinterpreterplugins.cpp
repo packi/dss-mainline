@@ -49,10 +49,12 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+#include <time.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <spawn.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 
 namespace dss {
 
@@ -120,15 +122,6 @@ namespace dss {
       } else {
         m_pPropertyNode = _pRootNode->createProperty(_identifier);
       }
-      m_StopNode = m_pPropertyNode->createProperty("stopScript+");
-      m_StopNode->linkToProxy(
-          PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
-      m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
-      m_StartedAtNode->linkToProxy(
-          PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
-      m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
-      m_AttachedObjectsNode->linkToProxy(
-          PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
     }
   }
 
@@ -145,6 +138,30 @@ namespace dss {
     }
   }
 
+  void ScriptContextWrapper::init() {
+    if (m_pPropertyNode) {
+      m_StopNode = m_pPropertyNode->createProperty("stopScript+");
+      m_StopNode->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
+      m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
+      m_StartedAtNode->linkToProxy(
+          PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
+      m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
+      m_AttachedObjectsNode->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
+    }
+  }
+
+  void ScriptContextWrapper::destroy() {
+    m_LoadedFiles.clear();
+    if (m_pPropertyNode) {
+      m_pPropertyNode->removeChild(m_StartedAtNode);
+      m_pPropertyNode->removeChild(m_StopNode);
+      m_pPropertyNode->removeChild(m_AttachedObjectsNode);
+      m_pPropertyNode->removeChild(m_FilesNode);
+    }
+  }
+
   boost::shared_ptr<ScriptContext> ScriptContextWrapper::get() {
     return m_pContext;
   }
@@ -156,6 +173,27 @@ namespace dss {
         m_FilesNode = m_pPropertyNode->createProperty("files+");
       }
       m_FilesNode->createProperty("file+")->setStringValue(_name);
+    }
+  }
+
+  void ScriptContextWrapper::addRuntimeInfos(const std::string& _name, unsigned long _timingNS) {
+    if (DSS::hasInstance()) {
+      std::string propertyName = _name;
+      dss::replaceAll(propertyName, "/", "_");
+      PropertyNodePtr pPtr = DSS::getInstance()->getPropertySystem().createProperty("/system/js/timings/" + propertyName);
+
+      PropertyNodePtr pScriptCount = pPtr->getProperty("count");
+      if (!pScriptCount) {
+        pScriptCount = pPtr->createProperty("count");
+        pScriptCount->setIntegerValue(0);
+      }
+      PropertyNodePtr pScriptTime = pPtr->getProperty("time");
+      if (!pScriptTime) {
+        pScriptTime = pPtr->createProperty("time");
+        pScriptTime->setIntegerValue(0);
+      }
+      pScriptCount->setIntegerValue(pScriptCount->getIntegerValue() + 1);
+      pScriptTime->setIntegerValue(pScriptTime->getIntegerValue() + _timingNS);
     }
   }
 
@@ -254,6 +292,7 @@ namespace dss {
       }
       ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
     }
+    m_ContextMap.clear();
     log("All scripts Terminated");
   }
 
@@ -264,7 +303,14 @@ namespace dss {
         initializeEnvironment();
       }
 
-      boost::shared_ptr<ScriptContext> ctx(m_pEnvironment->getContext());
+      struct timespec tSubscriptionPre = { 0, 0 };
+      struct timespec tSubscriptionPost = { 0, 0 };
+      bool timingEnabled = false;
+      if (m_pEnvironment->isTimingEnabled()) {
+        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPre);
+        timingEnabled = true;
+      }
+
       std::string scriptID;
       if(_subscription.getOptions()->hasParameter("script_id")) {
         scriptID = _subscription.getOptions()->getParameter("script_id");
@@ -275,12 +321,36 @@ namespace dss {
         scriptID = _event.getName() + _subscription.getID();
       }
 
-      boost::shared_ptr<ScriptContextWrapper> wrapper(
-        new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
+      boost::shared_ptr<ScriptContext> ctx;
+      if (m_pEnvironment->isCacheEnabled()) {
+        HASH_MAP<std::string, boost::shared_ptr<ScriptContext> >::const_iterator item;
+        item = m_ContextMap.find(scriptID);
+        if (item != m_ContextMap.end()) {
+          ctx = boost::shared_ptr<ScriptContext> (item->second);
+          if (ctx->hasAttachedObjects()) {
+            Logger::getInstance()->log("JavaScript Event Handler: context for " + scriptID +
+                " still has objects!", lsWarning);
+          }
+        }
+      }
+      if (ctx == NULL) {
+        ctx = boost::shared_ptr<ScriptContext> (m_pEnvironment->getContext());
+        if (m_pEnvironment->isCacheEnabled()) {
+          m_ContextMap[scriptID] = ctx;
+          Logger::getInstance()->log("JavaScript Event Handler: persistent context for " + scriptID);
+        }
+      }
+
+      boost::shared_ptr<ScriptContextWrapper> wrapper
+        (new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
       ctx->attachWrapper(wrapper);
+      ctx->setCacheEnabled(m_pEnvironment->isCacheEnabled());
+
+      wrapper->init();
       m_WrapperInAction = wrapper;
 
       {
+        ScriptLock lock(ctx);
         JSContextThread th(ctx.get());
 
         ScriptObject raisedEvent(*ctx, NULL);
@@ -350,6 +420,12 @@ namespace dss {
 
         wrapper->addFile(scriptName);
 
+        struct timespec tpre = { 0, 0 };
+        struct timespec tpost = { 0, 0 };
+        if (timingEnabled) {
+          clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpre);
+        }
+
         try {
 
           Logger::getInstance()->log("JavaScript Event Handler: "
@@ -383,7 +459,51 @@ namespace dss {
           return;
         }
 
+        try {
+          if (timingEnabled) {
+            clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpost);
+
+            #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
+            unsigned long tns =
+                (SEC_TO_NSEC(tpost.tv_sec) + tpost.tv_nsec) -
+                (SEC_TO_NSEC(tpre.tv_sec) + tpre.tv_nsec);
+            wrapper->addRuntimeInfos(scriptName, tns);
+          }
+        } catch(PropertyTypeMismatch& ex) {
+          Logger::getInstance()->log(
+              std::string("JavaScript Event Handler:"
+                  "Datatype error storing timing for script '")
+                  + scriptName + "'. Message: " + ex.what(), lsError);
+        } catch(std::runtime_error& ex) {
+          Logger::getInstance()->log(
+              std::string("JavaScript Event Handler:"
+                  "Cannot store timing for script '")
+                  + scriptName + "'. Message: " + ex.what(), lsError);
+        }
+
         scripts = scripts + scriptName + " ";
+      }
+
+      try {
+        if (timingEnabled) {
+          clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPost);
+
+          #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
+          unsigned long tns =
+              (SEC_TO_NSEC(tSubscriptionPost.tv_sec) + tSubscriptionPost.tv_nsec) -
+              (SEC_TO_NSEC(tSubscriptionPre.tv_sec) + tSubscriptionPre.tv_nsec);
+          wrapper->addRuntimeInfos(wrapper->getIdentifier(), tns);
+        }
+      } catch(PropertyTypeMismatch& ex) {
+        Logger::getInstance()->log(
+            std::string("JavaScript Event Handler:"
+                "Datatype error storing timing for subscription '")
+                + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
+      } catch(std::runtime_error& ex) {
+        Logger::getInstance()->log(
+            std::string("JavaScript Event Handler:"
+                "Cannot store timing for subscription '")
+                + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
       }
 
       if(ctx->hasAttachedObjects()) {
@@ -392,6 +512,7 @@ namespace dss {
                                    "keep " + scripts + " in memory", lsDebug);
       } else {
         ctx->detachWrapper();
+        wrapper->destroy();
       }
 
     } else {
@@ -468,6 +589,7 @@ namespace dss {
       if(!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
         Logger::getInstance()->log("JavaScript cleanup: erasing script "
             + (*ipScriptContextWrapper)->getIdentifier());
+        (*ipScriptContextWrapper)->destroy();
         (*ipScriptContextWrapper)->get()->detachWrapper();
         ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
       } else {
