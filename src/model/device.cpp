@@ -1014,6 +1014,7 @@ namespace dss {
   const DeviceFeatures_t Device::getFeatures() const {
     DeviceFeatures_t features;
     features.pairing = false;
+    features.syncButtonID = false;
 
     if ((m_ProductID == 0) || (m_FunctionID == 0)) {
         return features;
@@ -1028,6 +1029,7 @@ namespace dss {
        this->hasMultibuttons() &&
        ((m_ButtonInputIndex == 0) || (m_ButtonInputIndex == 2))) {
       features.pairing = true;
+      features.syncButtonID = true;
     } else if ((devCls == DEVICE_CLASS_GE) && // GE SDS-200
                (devType == DEVICE_TYPE_SDS) &&
                (devNumber == 200) && this->hasMultibuttons() &&

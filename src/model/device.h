@@ -85,6 +85,7 @@ namespace dss {
 
   typedef struct {
     bool pairing;       // device supports pairing
+    bool syncButtonID;  // sync button ID setting of slave with master
   } DeviceFeatures_t;
 
   typedef enum {

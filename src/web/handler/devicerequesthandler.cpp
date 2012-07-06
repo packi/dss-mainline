@@ -285,6 +285,11 @@ namespace dss {
       pDevice->setDeviceButtonID(value);
 
       if (pDevice->is2WayMaster()) {
+        DeviceFeatures_t features = pDevice->getFeatures();
+        if (!features.syncButtonID) {
+          return success();
+        }
+
         dss_dsid_t next = pDevice->getDSID();
         next.lower++;
         try {
