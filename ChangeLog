@@ -1,5 +1,17 @@
 dSS - digitalSTROM Server
 
+v1.14.0 06.07.2012
+	* link with tcmalloc if available
+	* store script execution count and processing time in the property tree
+	* keep js scripting context alive if caching is enabled, #1542
+	* compile js scripts only once to reduce overall script execution
+	  time, #1542
+	* added support for GE SDS-200 klemme configuration, #1625
+	* fix "inactive since" timestamp for devices, #1702
+	* fix update of system states
+	* sync slave device settings with master devices, #1273
+	* sync name of slave devices if it is empty, #1741
+
 v1.13.0 27.06.2012
 	* fix build with --disable-soap configure parameter, #1696
 	* handle multibuttons internally (API change), #1273
