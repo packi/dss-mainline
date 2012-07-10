@@ -459,11 +459,13 @@ namespace dss {
         }
       }
 
-      if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
-        if (m_pStructureBusInterface != NULL) {
-          pPartnerDevice->setDeviceButtonID(pDevice->getButtonID());
+      if (features.syncButtonID == true) {
+        if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
+          if (m_pStructureBusInterface != NULL) {
+            pPartnerDevice->setDeviceButtonID(pDevice->getButtonID());
+          }
+          pPartnerDevice->setButtonID(pDevice->getButtonID());
         }
-        pPartnerDevice->setButtonID(pDevice->getButtonID());
       }
 
       if (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup()) {
