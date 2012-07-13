@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.14.1 13.07.2012
+	* fix button ID configuration for GE SDS-200
+
 v1.14.0 06.07.2012
 	* link with tcmalloc if available
 	* store script execution count and processing time in the property tree
