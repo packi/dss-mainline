@@ -174,6 +174,11 @@ namespace dss {
       throw std::runtime_error("Not enough data to delete device on dSM");
     }
 
+    DeviceSpec_t spec = m_QueryInterface.deviceGetSpec(shortAddr, dsmDsid);
+    if (spec.DSID != _device->getDSID()) {
+      throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
+    }
+
     m_Interface.removeDeviceFromDSMeter(dsmDsid, shortAddr);
   } // removeDevice
 

@@ -155,7 +155,7 @@ namespace dss {
       try {
         manipulator.removeDeviceFromDSMeter(dev);
       } catch (std::runtime_error& e) {
-        Logger::getInstance()->log(std::string("Could not remove device from"
+        Logger::getInstance()->log(std::string("Could not remove device from "
                                    "dSM: ") + e.what(), lsError);
       }
       m_Apartment.removeDevice(deviceID);
