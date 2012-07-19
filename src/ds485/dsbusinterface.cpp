@@ -677,13 +677,19 @@ namespace dss {
   void DSBusInterface::handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state) {
     loginFromCallback();
     dss_dsid_t dsmDSID;
+    if (_state > 2) {
+      // invalid device local action value
+      return;
+    }
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDeviceLocal, dsmDSID);
     pEvent->addParameter(_deviceID);
-    if(_state == 0) {
+    if (_state == 0) {
       pEvent->addParameter(SceneLocalOff);
-    } else {
+    } else if (_state == 1) {
       pEvent->addParameter(SceneLocalOn);
+    } else if (_state == 2) {
+      pEvent->addParameter(SceneStop);
     }
     m_pModelMaintenance->addModelEvent(pEvent);
   }
