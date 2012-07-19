@@ -1558,7 +1558,7 @@ struct mg_connection *mg_connect(struct mg_connection *conn,
     cry(conn, "%s: SSL is not initialized", __func__);
   } else if ((he = gethostbyname(host)) == NULL) {
     cry(conn, "%s: gethostbyname(%s): %s", __func__, host, strerror(ERRNO));
-  } else if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+  } else if ((sock = socket(PF_INET, SOCK_CLOEXEC | SOCK_STREAM, 0)) == INVALID_SOCKET) {
     cry(conn, "%s: socket: %s", __func__, strerror(ERRNO));
   } else {
     sin.sin_family = AF_INET;
@@ -3332,7 +3332,7 @@ static int set_ports_option(struct mg_context *ctx) {
     } else if (so.is_ssl && ctx->ssl_ctx == NULL) {
       cry(fc(ctx), "Cannot add SSL socket, is -ssl_cert option set?");
       success = 0;
-    } else if ((sock = socket(PF_INET, SOCK_STREAM, 6)) == INVALID_SOCKET ||
+    } else if ((sock = socket(PF_INET, SOCK_CLOEXEC | SOCK_STREAM, 6)) == INVALID_SOCKET ||
 #if !defined(_WIN32)
                // On Windows, SO_REUSEADDR is recommended only for
                // broadcast UDP sockets
