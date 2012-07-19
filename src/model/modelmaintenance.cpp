@@ -791,6 +791,14 @@ namespace dss {
           ", OriginDevice=" + intToString(_originDeviceID) +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
+      // flush all pending events from same origin
+      foreach(boost::shared_ptr<ModelDeferredEvent> evt, m_DeferredEvents) {
+        boost::shared_ptr<ModelDeferredSceneEvent> pEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
+        if ((pEvent != NULL) && (pEvent->getSource() == _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
+          pEvent->clearTimestamp();
+        }
+      }
+
       boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced));
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
