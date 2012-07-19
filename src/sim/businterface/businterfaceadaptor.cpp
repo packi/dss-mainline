@@ -574,6 +574,7 @@ namespace dss {
       pEvent->addParameter(_groupID);
       pEvent->addParameter(_originDeviceId);
       pEvent->addParameter(_sceneID);
+      pEvent->addParameter(_force);
       m_pModelMaintenance->addModelEvent(pEvent);
     } // onGroupCallScene
 

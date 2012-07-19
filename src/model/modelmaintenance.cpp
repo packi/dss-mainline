@@ -255,6 +255,9 @@ namespace dss {
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
               pEvent->setProperty("originDeviceID", originDSID.toString());
+              if (mEvent->getForcedFlag()) {
+                pEvent->setProperty("forced", "yes");
+              }
               raiseEvent(pEvent);
             }
             // finished deferred processing of this event
@@ -266,6 +269,9 @@ namespace dss {
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
               pEvent->setProperty("originDeviceID", originDSID.toString());
+              if (mEvent->getForcedFlag()) {
+                pEvent->setProperty("forced", "yes");
+              }
               raiseEvent(pEvent);
               mEvent->setCalled();
             }
@@ -687,6 +693,9 @@ namespace dss {
           originDSID.lower = _originDeviceID;
         }
         pEvent->setProperty("originDeviceID", originDSID.toString());
+        if (_forced) {
+          pEvent->setProperty("forced", "true");
+        }
         raiseEvent(pEvent);
       } else {
         log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -1036,6 +1045,9 @@ namespace dss {
         boost::shared_ptr<Event> event(new Event("callScene", pDevRev));
         event->setProperty("sceneID", intToString(_sceneID));
         event->setProperty("originDeviceID", intToString(_originDeviceID));
+        if (_forced) {
+          event->setProperty("forced", "yes");
+        }
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
         log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString() + "' scene:" + intToString(_sceneID), lsError);
