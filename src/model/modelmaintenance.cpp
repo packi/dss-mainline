@@ -363,10 +363,18 @@ namespace dss {
         break;
       case ModelEvent::etCallSceneDevice:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 2) {
-          log("Expected exactly 2 parameter for ModelEvent::etCallSceneDevice");
+        if(event.getParameterCount() == 4) {
+          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
         } else {
-          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+          log("Unexpected parameter count for ModelEvent::etCallSceneDevice");
+        }
+        break;
+      case ModelEvent::etCallSceneDeviceLocal:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() == 2) {
+          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), 0, event.getParameter(1), false);
+        } else {
+          log("Unexpected parameter count for ModelEvent::etCallSceneDeviceLocal");
         }
         break;
       case ModelEvent::etButtonClickDevice:
@@ -379,13 +387,18 @@ namespace dss {
         }
         break;
       case ModelEvent::etCallSceneGroup:
-        if(event.getParameterCount() != 4) {
-          log("Expected exactly 4 parameter for ModelEvent::etCallSceneGroup");
-        } else {
-          onGroupCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
-          if (pEventWithDSID) {
-            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
+        assert(pEventWithDSID != NULL);
+        if (event.getParameterCount() >= 4) {
+          bool forceFlag = false;
+          if (event.getParameterCount() >= 5) {
+            forceFlag = event.getParameter(4);
           }
+          onGroupCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), forceFlag);
+          if (pEventWithDSID) {
+            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), forceFlag);
+          }
+        } else {
+          log("Expected minimal 4 parameter for ModelEvent::etCallSceneGroup");
         }
         break;
       case ModelEvent::etUndoSceneGroup:
@@ -627,7 +640,7 @@ namespace dss {
     }
   };
 
-  void ModelMaintenance::onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID) {
+  void ModelMaintenance::onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
         log("onGroupCallScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -746,7 +759,7 @@ namespace dss {
     }
   } // onGroupUndoScene
 
-  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID) {
+  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced) {
     // Filter Strategy:
     // Check for Source != 0 and per Zone and Group
     // - delayed On-Scene processing, for Scene1/Scene2/Scene3/Scene4
@@ -778,7 +791,7 @@ namespace dss {
           ", OriginDevice=" + intToString(_originDeviceID) +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
-      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID));
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced));
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
       return;
@@ -875,7 +888,7 @@ namespace dss {
         ", OriginDevice=" + intToString(_originDeviceID) +
         ", Scene=" + intToString(_sceneID), lsDebug);
 
-    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID));
+    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced));
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
 
@@ -998,7 +1011,7 @@ namespace dss {
       }
   }
 
-  void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID) {
+  void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const bool _forced) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
         log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
@@ -1014,6 +1027,7 @@ namespace dss {
         boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
         boost::shared_ptr<Event> event(new Event("callScene", pDevRev));
         event->setProperty("sceneID", intToString(_sceneID));
+        event->setProperty("originDeviceID", intToString(_originDeviceID));
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
         log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString() + "' scene:" + intToString(_sceneID), lsError);

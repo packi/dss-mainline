@@ -350,7 +350,7 @@ namespace dss {
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
                         &callback_struct);
-      DeviceActionRequest_action_force_call_scene_request_callback_t deviceCallSceneForcedCallback = DSBusInterface::handleDeviceCallSceneCallback;
+      DeviceActionRequest_action_force_call_scene_request_callback_t deviceCallSceneForcedCallback = DSBusInterface::handleDeviceCallSceneForcedCallback;
       callback_struct.function = (void*)deviceCallSceneForcedCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
@@ -719,10 +719,7 @@ namespace dss {
     loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
-    pEvent->addParameter(_deviceID);
-    pEvent->addParameter(_sceneID);
-    m_pModelMaintenance->addModelEvent(pEvent);
+    m_pBusEventSink->onDeviceCallScene(this, dsmDSID, _deviceID, 0, _sceneID, _forced);
   }
 
   void DSBusInterface::handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,

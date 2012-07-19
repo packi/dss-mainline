@@ -218,10 +218,23 @@ namespace dss {
                                   const int _originDeviceId,
                                   const int _sceneID,
                                   const bool _explicit) = 0;
+    virtual void onDeviceCallScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _deviceID,
+                                  const int _originDeviceId,
+                                  const int _sceneID,
+                                  const bool _force) = 0;
+    virtual void onDeviceUndoScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _deviceID,
+                                  const int _originDeviceId,
+                                  const int _sceneID,
+                                  const bool _explicit) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
                                  const int _powerW,
                                  const int _energyWs) = 0;
+    virtual ~BusEventSink() {};
   };
 
   /** Interface to be implemented by any bus interface provider */

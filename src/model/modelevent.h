@@ -36,21 +36,23 @@ namespace dss {
   class ModelEvent {
   public:
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
-                   etUndoSceneGroup,  /**< An undo scene command for a group. */
-                   etCallSceneDevice, /**< A device has changed the scene */
-                   etButtonClickDevice, /** < A button click on a device not handled by the dSMeter */
-                   etNewDevice,       /**< A new device has been detected */
-                   etLostDevice,       /**< A device became inactive */
-                   etDeviceChanged,   /**< The device needs to be rescanned */
-                   etDeviceConfigChanged, /**< The devices config got changed */
-                   etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
-                   etLostDSMeter, /**< We've lost a dsMeter on the bus */
-                   etDSMeterReady, /**< A dsMeter has completed its scanning cycle and is now ready */
-                   etBusReady, /**< The bus transitioned into ready state */
-                   etMeteringValues, /**< Metering values arrived */
-                   etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
-                   etDeviceSensorEvent, /**< A device has sent a sensor event */
-                   etDeviceSensorValue, /**< A device has sent a new sensor value */
+                    etUndoSceneGroup,  /**< An undo scene command for a group. */
+                    etCallSceneDevice, /**< A device has changed the scene */
+                    etUndoSceneDevice, /**< A device undo scene command */
+                    etCallSceneDeviceLocal, /**< A device has changed the status locally */
+                    etButtonClickDevice, /** < A button click on a device not handled by the dSMeter */
+                    etNewDevice,       /**< A new device has been detected */
+                    etLostDevice,       /**< A device became inactive */
+                    etDeviceChanged,   /**< The device needs to be rescanned */
+                    etDeviceConfigChanged, /**< The devices config got changed */
+                    etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
+                    etLostDSMeter, /**< We've lost a dsMeter on the bus */
+                    etDSMeterReady, /**< A dsMeter has completed its scanning cycle and is now ready */
+                    etBusReady, /**< The bus transitioned into ready state */
+                    etMeteringValues, /**< Metering values arrived */
+                    etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
+                    etDeviceSensorEvent, /**< A device has sent a sensor event */
+                    etDeviceSensorValue, /**< A device has sent a new sensor value */
                  } EventType;
   private:
     EventType m_EventType;

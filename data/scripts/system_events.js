@@ -187,14 +187,20 @@ function logLastScene(zone, groupId, sceneId)
     l.logln(';Last Scene;', sceneName, ';', zoneName, ';', groupName, ';;');
 }
 
-function logZoneGroupScene(zone, groupId, sceneId, originDeviceId)
+function logZoneGroupScene(zone, groupId, sceneId, isForced, originDeviceId)
 {
     var zoneName = genZoneName(zone);
     var groupName = genGroupName(groupId);
     var devName = genDeviceName(originDeviceId);
     var sceneName = genSceneName(sceneId);
-    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
-    l.logln(';CallScene;', sceneName, ';', zoneName, ';', groupName, ';', devName);
+    if (isForced == 'yes') {
+        //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
+        l.logln(';CallSceneForced;', sceneName, ';', zoneName, ';', groupName, ';', devName);
+    }
+    else {
+        //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
+        l.logln(';CallScene;', sceneName, ';', zoneName, ';', groupName, ';', devName);
+    }
 }
 
 function logZoneGroupUndo(zone, groupId, sceneId, originDeviceId)
@@ -205,6 +211,22 @@ function logZoneGroupUndo(zone, groupId, sceneId, originDeviceId)
     var sceneName = genSceneName(sceneId);
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';UndoScene;', sceneName, ';', zoneName, ';', groupName, ';', devName);
+}
+
+function logDeviceScene(device, zone, sceneId, isForced, originDeviceId)
+{
+    var zoneName = genZoneName(zone);
+    var devName = device.name + ';' + device.dsid;
+    var origName = genDeviceName(originDeviceId);
+    var sceneName = genSceneName(sceneId);
+    if (isForced == 'yes') {
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID');
+      l.logln(';DeviceSceneForced;', sceneName, ';', zoneName, ';', devName, ';', origName);
+    }
+    else {
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID');
+      l.logln(';DeviceScene;', sceneName, ';', zoneName, ';', devName, ';', origName);
+    }
 }
 
 function logDeviceLocalScene(sceneId, originDeviceId)
@@ -291,14 +313,25 @@ if (raisedEvent.name == 'model_ready')
 else if (raisedEvent.name == 'callScene')
 {
     var sceneId = raisedEvent.parameter.sceneID;
+    var isForced = raisedEvent.parameter.forced;
     var zoneId = raisedEvent.source.zoneID;
     if (raisedEvent.source.isGroup) {
+        // ZoneGroup Action Request
         var groupId = raisedEvent.source.groupID;
         var originDeviceId = raisedEvent.parameter.originDeviceID;
-        logZoneGroupScene(getZoneByID(zoneId), groupId, sceneId, originDeviceId);
+        logZoneGroupScene(getZoneByID(zoneId), groupId, sceneId, isForced, originDeviceId);
     }
     if (raisedEvent.source.isDevice) {
-        logDeviceLocalScene(sceneId, raisedEvent.source.dsid);
+        var originDeviceId = raisedEvent.parameter.originDeviceID;
+        if (originDeviceId == 0) {
+            // DeviceLocal Action Event
+            logDeviceLocalScene(sceneId, raisedEvent.source.dsid);
+        }
+        else {
+            // Device Action Request
+            var device = getDevices().byDSID(raisedEvent.source.dsid);
+            logDeviceScene(device, getZoneByID(zoneId), sceneId, isForced, originDeviceId);
+        }
     }
 }
 

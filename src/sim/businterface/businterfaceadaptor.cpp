@@ -24,6 +24,8 @@
 
 #include "src/model/device.h"
 #include "src/model/group.h"
+#include "src/model/modulator.h"
+#include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
@@ -190,6 +192,11 @@ namespace dss {
         m_pEventSink->onGroupCallScene(NULL, NullDSID, pGroup->getZoneID(),
                                        pGroup->getID(), _origin, scene, _force);
       }
+      Device* pDevice = dynamic_cast<Device*>(pTarget);
+      if(pDevice != NULL) {
+        m_pEventSink->onDeviceCallScene(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
+                                       _origin, scene, _force);
+      }
     }
 
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene) {
@@ -213,6 +220,11 @@ namespace dss {
         m_pEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
                                        pGroup->getID(), _origin, scene, true);
       }
+      Device* pDevice = dynamic_cast<Device*>(pTarget);
+      if(pDevice != NULL) {
+        m_pEventSink->onDeviceUndoScene(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
+                                       _origin, scene, true);
+      }
     }
 
     virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin) {
@@ -226,6 +238,11 @@ namespace dss {
       if(pGroup != NULL) {
         m_pEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
                                        pGroup->getID(), _origin, -1, false);
+      }
+      Device* pDevice = dynamic_cast<Device*>(pTarget);
+      if(pDevice != NULL) {
+        m_pEventSink->onDeviceUndoScene(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
+                                        _origin, -1, false);
       }
     }
 
@@ -589,6 +606,54 @@ namespace dss {
       }
       m_pModelMaintenance->addModelEvent(pEvent);
     } // onGroupUndoScene
+
+    virtual void onDeviceCallScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _deviceID,
+                                  const int _originDeviceId,
+                                  const int _sceneID,
+                                  const bool _force) {
+      boost::shared_ptr<BusInterface> target;
+      if(_source == m_pInnerBusInterface.get()) {
+        try {
+          DeviceReference devRef =  m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_deviceID, _dsMeterID);
+          m_pSimBusInterface->getActionRequestInterface()->callScene(devRef.getDevice().get(), _originDeviceId, _sceneID, _force);
+        } catch(std::runtime_error& e) {
+        }
+      }
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, _dsMeterID);
+      pEvent->addParameter(_deviceID);
+      pEvent->addParameter(_originDeviceId);
+      pEvent->addParameter(_sceneID);
+      pEvent->addParameter(_force);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    } // onDeviceCallScene
+
+    virtual void onDeviceUndoScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _deviceID,
+                                  const int _originDeviceId,
+                                  const int _sceneID,
+                                  const bool _explicit) {
+      boost::shared_ptr<BusInterface> target;
+      if(_source == m_pInnerBusInterface.get()) {
+        try {
+          DeviceReference devRef =  m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_deviceID, _dsMeterID);
+          if (_explicit) {
+            m_pSimBusInterface->getActionRequestInterface()->undoScene(devRef.getDevice().get(), _originDeviceId, _sceneID);
+          } else {
+            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(devRef.getDevice().get(), _originDeviceId);
+          }
+        } catch(std::runtime_error& e) {
+        }
+      }
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etUndoSceneDevice, _dsMeterID);
+      pEvent->addParameter(_deviceID);
+      pEvent->addParameter(_sceneID);
+      pEvent->addParameter(_explicit);
+      pEvent->addParameter(_originDeviceId);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    } // onDeviceUndoScene
 
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,

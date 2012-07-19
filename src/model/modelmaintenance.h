@@ -69,10 +69,12 @@ namespace dss {
     int m_GroupID;
     int m_OriginDeviceID;
     int m_SceneID;
+    bool m_forcedFlag;
   public:
     /** Constructs a ModelDeferredSceneEvent with timestamp */
-    ModelDeferredSceneEvent(dss_dsid_t _source, int _zoneID, int _groupID, int _originDeviceID, int _sceneID) :
-      ModelDeferredEvent(_source), m_ZoneID(_zoneID), m_GroupID(_groupID), m_OriginDeviceID(_originDeviceID), m_SceneID(_sceneID)
+    ModelDeferredSceneEvent(dss_dsid_t _source, int _zoneID, int _groupID, int _originDeviceID, int _sceneID, bool _forced) :
+      ModelDeferredEvent(_source), m_ZoneID(_zoneID), m_GroupID(_groupID), m_OriginDeviceID(_originDeviceID),
+      m_SceneID(_sceneID), m_forcedFlag(_forced)
     {}
     virtual ~ModelDeferredSceneEvent() {}
 
@@ -80,6 +82,7 @@ namespace dss {
     int getGroupID() { return m_GroupID; }
     int getZoneID() { return m_ZoneID; }
     int getOriginDeviceID() { return m_OriginDeviceID; }
+    bool getForcedFlag() { return m_forcedFlag; }
     void setScene(int _sceneID) { m_SceneID = _sceneID; setTimestamp(); }
   };
 
@@ -120,7 +123,7 @@ namespace dss {
     /** Starts the event-processing */
     virtual void execute();
 
-    void onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID);
+    void onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced);
     void onGroupUndoScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID);
 
     void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
@@ -146,10 +149,10 @@ namespace dss {
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
-    void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID);
+    void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const bool _forced);
     void onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType);
 
-    void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID);
+    void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced);
     void onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType);
 
     void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
