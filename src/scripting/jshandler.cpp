@@ -466,9 +466,12 @@ namespace dss {
     }
     scrubVector(m_AttachedObjects);
 
-    HASH_MAP<std::string, JSObject**>::const_iterator item;
-    for (item = m_ScriptMap.begin(); item != m_ScriptMap.end(); item++) {
-      JS_RemoveObjectRoot(m_pContext, item->second);
+    {
+      JSRequest req(m_pContext);
+      HASH_MAP<std::string, JSObject**>::const_iterator item;
+      for (item = m_ScriptMap.begin(); item != m_ScriptMap.end(); item++) {
+        JS_RemoveObjectRoot(m_pContext, item->second);
+      }
     }
 
     JS_SetContextPrivate(m_pContext, NULL);
