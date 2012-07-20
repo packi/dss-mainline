@@ -1095,6 +1095,7 @@ namespace dss {
       boost::shared_ptr<DSMeter> meter =
                               m_pApartment->getDSMeterByDSID(_dSMeterID);
       meter->setIsConnected(false);
+      meter->setPowerConsumption(0);
       Set devices = meter->getDevices();
       for (int i = 0; i < devices.length(); i++) {
         devices[i].getDevice()->setIsConnected(false);
