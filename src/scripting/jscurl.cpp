@@ -123,8 +123,7 @@ namespace dss {
 
   // just makes an empty slist
   static JSBool easycurl_slist_ctor(JSContext *cx, uintN argc, jsval *vp) {
-    JSObject* newobj = JS_NewObject(cx, easycurl_slist_class,
-        easycurl_slist_proto, NULL);
+    JSObject* newobj = JS_NewObject(cx, easycurl_slist_class, NULL, NULL);
     JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(newobj));
     JS_SetPrivate(cx, newobj, (void*) 0);
     return JS_TRUE;
@@ -617,7 +616,7 @@ namespace dss {
       JS_ReportError(cx, "Unable to initialize libcurl!");
       return JS_FALSE;
     }
-    newobj = JS_NewObject(cx, easycurl_class, easycurl_proto, NULL);
+    newobj = JS_NewObject(cx, easycurl_class, NULL, NULL);
     if (!newobj)
       return JS_FALSE;
     JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(newobj));
