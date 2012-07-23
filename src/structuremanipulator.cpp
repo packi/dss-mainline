@@ -174,6 +174,18 @@ namespace dss {
       throw std::runtime_error("Not enough data to delete device on dSM");
     }
 
+    // if the dSM is not connected, then there is no point in trying to remove
+    // the device from it, this would only cause a timeout and thus introduce
+    // an unnecessary delay in the UI/for the JSON API users
+    boost::shared_ptr<DSMeter> dsm = m_Apartment.getDSMeterByDSID(_device->getDSMeterDSID());
+    if (dsm->isConnected() == false) {
+      Logger::getInstance()->log("StructureManipulator::"
+        "removeDevicefromDSMeter: not removing device " +
+        _device->getDSID().toString() + " from dSM " + dsmDsid.toString() +
+        ": this dSM is not connected", lsWarning);
+      return;
+    }
+
     DeviceSpec_t spec = m_QueryInterface.deviceGetSpec(shortAddr, dsmDsid);
     if (spec.DSID != _device->getDSID()) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
