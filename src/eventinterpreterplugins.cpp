@@ -779,12 +779,14 @@ namespace dss {
       pthread_t pid;
       pthread_attr_t attr;
       int err;
+      char* mailTextString = strdup(mailText);
 
       pthread_attr_init(&attr);
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-      if ((err = pthread_create(&pid, &attr, EventInterpreterPluginSendmail::run, (void*) strdup(mailText))) < 0) {
+      if ((err = pthread_create(&pid, &attr, EventInterpreterPluginSendmail::run, mailTextString)) < 0) {
         Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
             intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+        free(mailTextString);
       }
       pthread_attr_destroy(&attr);
 
@@ -826,7 +828,7 @@ namespace dss {
 #endif
 
     unlink(mailText);
-    delete mailText;
+    free((char *) mailText);
     return NULL;
   } // run
 
