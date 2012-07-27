@@ -687,46 +687,40 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
 #ifndef WIN32
-  void DSS::handleSignal(int _signum) {
-    static bool terminating = false;
-    if(terminating) {
-      return;
-    }
-    switch (_signum) {
-      case SIGUSR1: {
-        Logger::getInstance()->reopenLogTarget();
-        break;
-      }
-      case SIGTERM:
-      case SIGINT:
-        terminating = true;
-        if (DSS::hasInstance()) {
-            DSS::getInstance()->initiateShutdown();
-        }
-      break;
-      case SIGSEGV:
-        terminating = true;
-        Logger::getInstance()->log("Caught SIGSEGV", lsFatal);
-        Backtrace::logBacktrace();
-        exit(EXIT_FAILURE);
-      case SIGABRT:
-        terminating = true;
-        Logger::getInstance()->log("Caught SIGABRT", lsFatal);
-        Backtrace::logBacktrace();
-        exit(EXIT_FAILURE);
-      default: {
-        std::ostringstream ostr;
-        ostr << "DSS::handleSignal(): unhandled signal " << _signum << std::endl;
-        Logger::getInstance()->log(ostr.str(), lsWarning);
-        break;
-      }
-    }
+  void* DSS::handleSignal(void* arg) {
+    sigset_t signal_set;
+    int sig;
 
-    if (DSS::hasInstance()) {
-      boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
-      pEvent->setProperty("signum", intToString(_signum));
-      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    pthread_detach(pthread_self());
+
+    /* wait for any and all signals */
+    sigfillset(&signal_set);
+
+    for (;;) {
+      sigwait(&signal_set, &sig);
+      switch (sig) {
+        case SIGUSR1: {
+          Logger::getInstance()->reopenLogTarget();
+          break;
+        }
+        case SIGTERM:
+          if (DSS::hasInstance()) {
+              DSS::getInstance()->initiateShutdown();
+          }
+          break;
+        default: {
+          Logger::getInstance()->log("System signal unhandled: " +
+              intToString(sig), lsDebug);
+          break;
+        }
+      }
+      if (DSS::hasInstance()) {
+        boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
+        pEvent->setProperty("signum", intToString(sig));
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
     }
+    return (void*)0;
   }
 #endif
 
