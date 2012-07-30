@@ -185,14 +185,6 @@ int main (int argc, char* argv[]) {
                          vm["savedpropsdir"].as<string>());
   }
 
-  string snifferDev;
-  bool startSniffer = false;
-
-  if(vm.count("sniff")) {
-    startSniffer = true;
-    snifferDev = vm["sniff"].as<string>();
-  }
-
 #ifndef __APPLE__
   bool daemonize = vm.count("daemonize") != 0;
 #endif
