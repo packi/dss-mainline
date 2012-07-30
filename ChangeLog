@@ -1,5 +1,15 @@
 dSS - digitalSTROM Server
 
+v1.14.2	30.07.2012
+	* check model consistency before removing device, #1715
+	* set close on exec flag for sockets and file handles, #1502
+	* various scripting related bugfixes
+	* reset cached power consumption on dSM disconnect, #1734
+	* generate scripting events for device call scene requests, #1705
+	* generate device callScene events for Local-Stop messages, 1655
+	* add forced flag to callScene model events, #1539
+	* handle system signals in a seperate pthread, #1717
+
 v1.14.1 13.07.2012
 	* fix button ID configuration for GE SDS-200
 
