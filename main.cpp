@@ -29,6 +29,7 @@
 #include "src/dss.h"
 #include "src/logger.h"
 #include "src/datetools.h"
+#include "src/backtrace.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
 #endif
@@ -57,16 +58,42 @@ pair<string, string> parse_prop(const string& s) {
     }
 } // parse_prop
 
+void dssHandleSignal(int _sig) {
+  switch (_sig) {
+  case SIGSEGV:
+    fprintf(stderr, "\nSystem signal SIGSEGV\n");
+    dss::Backtrace::logBacktrace();
+    exit(EXIT_FAILURE);
+  case SIGABRT:
+    fprintf(stderr, "\nSystem signal SIGABRT\n");
+    dss::Backtrace::logBacktrace();
+    exit(EXIT_FAILURE);
+  case SIGINT:
+    fprintf(stderr, "\nSystem signal SIGINT\n");
+    break;
+  }
+}
+
 void platformSpecificStartup() {
 #ifndef WIN32
   srand((getpid() << 16) ^ getuid() ^ time(0));
-  // disable broken pipe signal
-  signal(SIGPIPE, SIG_IGN);
-  signal(SIGUSR1, dss::DSS::handleSignal);
-  signal(SIGTERM, dss::DSS::handleSignal);
-  signal(SIGINT, dss::DSS::handleSignal);
-  signal(SIGSEGV, dss::DSS::handleSignal);
-  signal(SIGABRT, dss::DSS::handleSignal);
+  sigset_t signal_set;
+  pthread_t sig_thread;
+
+  /* block all signals, enable and handle only a few selected signals globally */
+  sigfillset(&signal_set);
+  sigdelset(&signal_set, SIGINT);
+  sigdelset(&signal_set, SIGQUIT);
+  sigdelset(&signal_set, SIGSEGV);
+  sigdelset(&signal_set, SIGABRT);
+  pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+
+  /* direct handling of critical errors */
+  signal(SIGSEGV, dssHandleSignal);
+  signal(SIGABRT, dssHandleSignal);
+
+  /* create the signal handling thread */
+  pthread_create(&sig_thread, NULL, dss::DSS::handleSignal, NULL);
 #else
   srand( (int)time( (time_t)NULL ) );
   WSAData dat;
@@ -156,14 +183,6 @@ int main (int argc, char* argv[]) {
   if(vm.count("savedpropsdir")) {
     properties.push_back("/config/savedpropsdirectory=" +
                          vm["savedpropsdir"].as<string>());
-  }
-
-  string snifferDev;
-  bool startSniffer = false;
-
-  if(vm.count("sniff")) {
-    startSniffer = true;
-    snifferDev = vm["sniff"].as<string>();
   }
 
 #ifndef __APPLE__

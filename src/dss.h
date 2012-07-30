@@ -120,7 +120,7 @@ namespace dss {
     static std::string versionString();
 
 #ifndef WIN32
-    static void handleSignal(int signum);
+    static void* handleSignal(void* arg);
 #endif
 
     aDSSState getState() const { return m_State; }
