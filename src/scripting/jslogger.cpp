@@ -32,6 +32,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <boost/bind.hpp>
 
 #define LOG_OBJECT_IDENTIFIER   "logfile"
@@ -172,7 +173,14 @@ namespace dss {
     m_pExtension = _pExtension;
     m_logName = st.convert(_filename);
     m_fileName = st.convert(_filePath + _filename);
+#ifdef __USE_GNU
+    m_f = fopen(m_fileName.c_str(), "a+e");
+#else
     m_f = fopen(m_fileName.c_str(), "a+");
+    if (m_f) {
+      fcntl(fileno(m_f), F_SETFD, FD_CLOEXEC);
+    }
+#endif
     if (!m_f) {
       throw std::runtime_error("Could not open file " + m_fileName + " for writing");
     }
@@ -205,7 +213,14 @@ namespace dss {
     if (m_f) {
       m_LogWriteMutex.lock();
       fclose(m_f);
+#ifdef __USE_GNU
+      m_f = fopen(m_fileName.c_str(), "a+e");
+#else
       m_f = fopen(m_fileName.c_str(), "a+");
+      if (m_f) {
+        fcntl(fileno(m_f), F_SETFD, FD_CLOEXEC);
+      }
+#endif
       if (!m_f) {
         m_LogWriteMutex.unlock();
         throw std::runtime_error("Could not open file " + m_fileName + " for writing");
