@@ -78,7 +78,6 @@ namespace dss {
         }
         if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
           log("scanDSMeter: dSMeter is incompatible", lsWarning);
-
           _dsMeter->setDatamodelHash(hash.Hash);
           _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
           _dsMeter->setIsPresent(false);
@@ -121,24 +120,35 @@ namespace dss {
   bool BusScanner::scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     std::vector<DeviceSpec_t> devices;
     try {
-      devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID());
+      if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+        log("scanZone: dSMeter " + _dsMeter->getDSID().toString() + " is incompatible", lsWarning);
+      } else {
+        devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID());
+        foreach(DeviceSpec_t& spec, devices) {
+          initializeDeviceFromSpec(_dsMeter, _zone, spec);
+        }
+      }
     } catch(BusApiError& e) {
-      log("scanDSMeter: Error getting getDevicesInZone", lsFatal);
-      return false;
-    }
-    foreach(DeviceSpec_t& spec, devices) {
-      initializeDeviceFromSpec(_dsMeter, _zone, spec);
+      log("scanZone: Error getDevicesInZone: " + std::string(e.what()), lsFatal);
     }
 
     return (scanGroupsOfZone(_dsMeter, _zone) && scanStatusOfZone(_dsMeter, _zone));
   } // scanZone
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
+    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+      log("scanDeviceOnBus: dSMeter " + _dsMeter->getDSID().toString() + " is incompatible", lsWarning);
+      return false;
+    }
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
     return initializeDeviceFromSpec(_dsMeter, _zone, spec);
   } // scanDeviceOnBus
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
+    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+      log("scanDeviceOnBus: dSMeter " + _dsMeter->getDSID().toString() + " is incompatible", lsWarning);
+      return false;
+    }
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
     boost::shared_ptr<Zone> pZone = m_Apartment.allocateZone(spec.ZoneID);
     return initializeDeviceFromSpec(_dsMeter, pZone, spec);
