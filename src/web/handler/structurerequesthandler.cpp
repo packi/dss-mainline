@@ -151,14 +151,31 @@ namespace dss {
         return failure("Cannot remove present device");
       }
 
+      boost::shared_ptr<Device> pPartnerDevice;
+      if (dev->is2WayMaster()) {
+        dss_dsid_t next = dev->getDSID();
+        next.lower++;
+        try {
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+        } catch(std::runtime_error& e) {
+          Logger::getInstance()->log("Could not find partner device with dsid '" + next.toString() + "'");
+        }
+      }
       StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
       try {
         manipulator.removeDeviceFromDSMeter(dev);
+        if (pPartnerDevice != NULL) {
+         manipulator.removeDeviceFromDSMeter(pPartnerDevice);
+        }
       } catch (std::runtime_error& e) {
         Logger::getInstance()->log(std::string("Could not remove device from "
                                    "dSM: ") + e.what(), lsError);
       }
       m_Apartment.removeDevice(deviceID);
+      if (pPartnerDevice != NULL) {
+        Logger::getInstance()->log("Also removing partner device " + pPartnerDevice->getDSID().toString() + "'");
+        m_Apartment.removeDevice(pPartnerDevice->getDSID());
+      }
       m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       return success();
     }
