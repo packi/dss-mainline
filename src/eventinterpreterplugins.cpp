@@ -666,7 +666,24 @@ namespace dss {
 
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sendmail", _pInterpreter)
-  { } // ctor
+  {
+    pthread_t pid;
+    int err;
+
+#ifndef HAVE_SENDMAIL
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
+        "sendmail binary not found by configure, sending mail is disabled", lsWarning);
+    return;
+#endif
+
+    pthread_mutex_init(&m_Mutex, NULL);
+    pthread_cond_init(&m_Condition, NULL);
+    if ((err = pthread_create(&pid, NULL, EventInterpreterPluginSendmail::run, this)) < 0) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
+          intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+    }
+
+  } // ctor
 
   void EventInterpreterPluginSendmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
     std::string sender;
@@ -765,28 +782,19 @@ namespace dss {
           std::string(e.what()), lsFatal);
     }
 
-    pthread_t pid;
-    pthread_attr_t attr;
-    int err;
-    char* mailTextString = strdup(mailText);
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: new file " +
+        std::string(mailText), lsFatal);
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if ((err = pthread_create(&pid, &attr, EventInterpreterPluginSendmail::run, mailTextString)) < 0) {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
-          intToString(err) + "[" + intToString(errno) + "]", lsFatal);
-      free(mailTextString);
-    }
-    pthread_attr_destroy(&attr);
+    pthread_mutex_lock(&m_Mutex);
+    m_MailFiles.push_back(mailText);
+    pthread_cond_signal(&m_Condition);
+    pthread_mutex_unlock(&m_Mutex);
   } // handleEvent
 
   void* EventInterpreterPluginSendmail::run(void* arg) {
-    const char* mailText = (const char *) arg;
+    EventInterpreterPluginSendmail* me = static_cast<EventInterpreterPluginSendmail *> (arg);
 
-#ifndef HAVE_SENDMAIL
-    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
-        "sendmail binary not found by configure, sending mail is disabled", lsWarning);
-#else
+    std::string mailFile;
     posix_spawn_file_actions_t action;
     posix_spawnattr_t attr;
     sigset_t sigmask;
@@ -794,33 +802,45 @@ namespace dss {
     int status, err;
     pid_t pid;
 
-    posix_spawnattr_init(&attr);
-    sigemptyset(&sigmask);
-    posix_spawnattr_setsigmask(&attr, &sigmask);
-    if ((err = posix_spawn_file_actions_init(&action)) != 0) {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawn_file_actions_init error " +
-          intToString(err), lsFatal);
-    } else if ((err = posix_spawn_file_actions_addopen(&action, STDIN_FILENO, mailText, O_RDONLY, 0)) != 0) {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawn_file_actions_addopen error " +
-          intToString(err), lsFatal);
-    } else if ((err = posix_spawnp(&pid, spawnedArgs[0], &action, &attr, spawnedArgs, NULL)) != 0) {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawnp error " +
-          intToString(err) + "[" + intToString(errno) + "]", lsFatal);
-    } else {
-      (void) waitpid(pid, &status, 0);
-      if ((status & 0x7f) == 127) {
-        Logger::getInstance()->log("EventInterpreterPluginSendmail: abnormal exit of child process", lsFatal);
-      } else if (WIFEXITED(status) && (WEXITSTATUS(status) > 0)) {
-        Logger::getInstance()->log("EventInterpreterPluginSendmail: sendmail returned error code " +
-            intToString(WEXITSTATUS(status)), lsFatal);
-      }
-    }
-    posix_spawnattr_destroy(&attr);
-    posix_spawn_file_actions_destroy(&action);
-#endif
+    while (1) {
 
-    unlink(mailText);
-    free((char *) mailText);
+      pthread_mutex_lock(&me->m_Mutex);
+      while (me->m_MailFiles.size() == 0) {
+        pthread_cond_wait(&me->m_Condition, &me->m_Mutex);
+      }
+      mailFile = me->m_MailFiles.front();
+      me->m_MailFiles.pop_front();
+      pthread_mutex_unlock(&me->m_Mutex);
+
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: send file " +
+          mailFile, lsFatal);
+
+      posix_spawnattr_init(&attr);
+      sigemptyset(&sigmask);
+      posix_spawnattr_setsigmask(&attr, &sigmask);
+      if ((err = posix_spawn_file_actions_init(&action)) != 0) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawn_file_actions_init error " +
+            intToString(err), lsFatal);
+      } else if ((err = posix_spawn_file_actions_addopen(&action, STDIN_FILENO, mailFile.c_str(), O_RDONLY, 0)) != 0) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawn_file_actions_addopen error " +
+            intToString(err), lsFatal);
+      } else if ((err = posix_spawnp(&pid, spawnedArgs[0], &action, &attr, spawnedArgs, NULL)) != 0) {
+        Logger::getInstance()->log("EventInterpreterPluginSendmail: posix_spawnp error " +
+            intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+      } else {
+        (void) waitpid(pid, &status, 0);
+        if ((status & 0x7f) == 127) {
+          Logger::getInstance()->log("EventInterpreterPluginSendmail: abnormal exit of child process", lsFatal);
+        } else if (WIFEXITED(status) && (WEXITSTATUS(status) > 0)) {
+          Logger::getInstance()->log("EventInterpreterPluginSendmail: sendmail returned error code " +
+              intToString(WEXITSTATUS(status)), lsFatal);
+        }
+      }
+      posix_spawnattr_destroy(&attr);
+      posix_spawn_file_actions_destroy(&action);
+
+      unlink(mailFile.c_str());
+    }
     return NULL;
   } // run
 
