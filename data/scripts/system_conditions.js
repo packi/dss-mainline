@@ -63,9 +63,9 @@ function checkCondition(pathToDescription)
             var fMatch = false;
             var oStateArrayActual = oZoneNode.getChildren();
             for (var iIndex = 0; i < oStateArrayActual.length; iIndex ++) {
-                var testZoneId = oStateArrayActual[iIndex].getChild('zone');
-                var testGroupId = oStateArrayActual[iIndex].getChild('group');
-                var testSceneId = oStateArrayActual[iIndex].getChild('scene');
+                var testZoneId = oStateArrayActual[iIndex].getChild('zone').getValue();
+                var testGroupId = oStateArrayActual[iIndex].getChild('group').getValue();
+                var testSceneId = oStateArrayActual[iIndex].getChild('scene').getValue();
 
                 var groupNode = Property.getNode('/apartment/zones/zone' +
                                     testZoneId + '/groups/group' + testGroupId);
