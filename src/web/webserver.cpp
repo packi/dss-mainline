@@ -374,6 +374,9 @@ namespace dss {
     std::string result;
     if(m_Handlers[request.getClass()] != NULL) {
       try {
+        if ((_session == NULL) && (request.getClass() != kHandlerSystem)) {
+          throw SecurityException("not logged in");
+        }
         WebServerResponse response =
           m_Handlers[request.getClass()]->jsonHandleRequest(request, _session);
         if(response.getResponse() != NULL) {
