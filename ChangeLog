@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.14.3 13.07.2012
+	* check authentication of all JSON requests (except /system), #1794
+	* check dSM-api revision before reading device infos, #1820
+	* remove slave device too, if master device is removed, #1814
+	* fix condition script to query property values
+
 v1.14.2	30.07.2012
 	* check model consistency before removing device, #1715
 	* set close on exec flag for sockets and file handles, #1502
