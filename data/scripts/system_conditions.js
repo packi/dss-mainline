@@ -62,7 +62,7 @@ function checkCondition(pathToDescription)
         if (oZoneNode != null) {
             var fMatch = false;
             var oStateArrayActual = oZoneNode.getChildren();
-            for (var iIndex = 0; i < oStateArrayActual.length; iIndex ++) {
+            for (var iIndex = 0; iIndex < oStateArrayActual.length; iIndex ++) {
                 var testZoneId = oStateArrayActual[iIndex].getChild('zone').getValue();
                 var testGroupId = oStateArrayActual[iIndex].getChild('group').getValue();
                 var testSceneId = oStateArrayActual[iIndex].getChild('scene').getValue();
@@ -105,7 +105,7 @@ function checkCondition(pathToDescription)
             if (oTimeTemp.length == 3) {
                 var secondsSinceMidnightCondition = (parseInt(oTimeTemp[0]) * 3600) + (parseInt(oTimeTemp[1]) * 60) +  parseInt(oTimeTemp[0]);
                 var oNow = new Date();
-                var secondsSinceMidnightNow = (oNow.getHours() * 3600) + (oNow.getMinutes() * 3600) + (oNow.getSecounds());
+                var secondsSinceMidnightNow = (oNow.getHours() * 3600) + (oNow.getMinutes() * 3600) + (oNow.getSeconds());
                 if (! (secondsSinceMidnightCondition <= secondsSinceMidnightNow)) {
                     return false;
                 }
