@@ -96,9 +96,21 @@ namespace dss {
       return;
     }
 
-    int ret = CircuitRemoveDevice(m_DSMApiHandle, meterDSID, _deviceID);
+    int ret = CircuitRemoveDevice_by_id(m_DSMApiHandle, meterDSID, _deviceID);
     DSBusInterface::checkResultCode(ret);
   } // removeDeviceFromDSMeter
+
+  void DSStructureModifyingBusInterface::removeDeviceFromDSMeters(const dss_dsid_t& _deviceDSID)
+  {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    dsid_t broadcastDSID;
+    SetBroadcastId(broadcastDSID);
+    int ret = CircuitRemoveDevice_by_dsid(m_DSMApiHandle, broadcastDSID, _deviceDSID.lower);
+    DSBusInterface::checkResultCode(ret);
+  } // removeDeviceFromDSMeters
 
   void DSStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

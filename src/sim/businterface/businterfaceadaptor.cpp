@@ -345,6 +345,11 @@ namespace dss {
       }
     }
 
+    virtual void removeDeviceFromDSMeters(const dss_dsid_t& _deviceDSID) {
+      m_pSimulationInterface->removeDeviceFromDSMeters(_deviceDSID);
+      m_pInner->removeDeviceFromDSMeters(_deviceDSID);
+    }
+
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
       m_pSimulationInterface->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
       m_pInner->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);

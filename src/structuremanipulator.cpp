@@ -161,6 +161,7 @@ namespace dss {
     }
 
     dss_dsid_t dsmDsid = _device->getDSMeterDSID();
+    dss_dsid_t devDsid = _device->getDSID();
     devid_t shortAddr = _device->getShortAddress();
 
     if (dsmDsid == NullDSID) {
@@ -191,7 +192,7 @@ namespace dss {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
 
-    m_Interface.removeDeviceFromDSMeter(dsmDsid, shortAddr);
+    m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group,
