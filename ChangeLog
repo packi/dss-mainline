@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.15.0 28.08.2012
+	* fix typos in system_condition script
+	* remove devices from all connected dSMeters, #1780
+
 v1.14.3 13.07.2012
 	* check authentication of all JSON requests (except /system), #1794
 	* check dSM-api revision before reading device infos, #1820
