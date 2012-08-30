@@ -148,8 +148,11 @@ namespace dss {
     return sstream.str();
   } // intToString
 
-  std::string uintToString(unsigned long int _int) {
+  std::string uintToString(unsigned long int _int, bool _hex) {
     std::stringstream sstream;
+    if(_hex) {
+      sstream << std::hex << "0x";
+    }
     sstream << _int;
     return sstream.str();
   } // uintToString

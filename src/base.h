@@ -58,7 +58,7 @@ namespace dss {
   unsigned long long strToULongLongDef(const std::string& _strValue, const unsigned int _default);
 
   std::string intToString(const int _int, const bool _hex = false);
-  std::string uintToString(unsigned long int _int);
+  std::string uintToString(unsigned long int _int, bool _hex = false);
 
   double strToDouble(const std::string& _strValue);
   double strToDouble(const std::string& _strValue, const double _default);
