@@ -39,6 +39,7 @@ endif
 include $(top_srcdir)/build/sources.list
 
 libdsscore_a_CXXFLAGS = \
+			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
 			-I$(top_srcdir)/external \
 			$(JS_CFLAGS) \
@@ -54,6 +55,7 @@ libdsscore_a_CXXFLAGS = \
 			$(GCOV_CFLAGS)
 
 libunix_a_CXXFLAGS = \
+			-I$(top_srcdir) \
 			$(BOOST_CPPFLAGS) \
 			$(GCOV_CFLAGS)
 
@@ -122,6 +124,7 @@ nodist_libwebservices_a_SOURCES = \
 endif
 
 dsstests_CXXFLAGS = \
+			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
 			$(JS_CFLAGS) \
 			$(BOOST_CPPFLAGS) \
