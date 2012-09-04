@@ -3,10 +3,10 @@ bin_PROGRAMS = dss
 noinst_PROGRAMS = dsstests
 
 CLEANFILES = \
-			$(top_srcdir)/src/build_info.h
+			build_info.h
 
 BUILT_SOURCES = \
-			$(top_srcdir)/src/build_info.h
+			build_info.h
 
 noinst_LIBRARIES = libdsscore.a libmongoose.a libunix.a
 
@@ -163,10 +163,10 @@ dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
 endif
 
 
-$(top_srcdir)/src/build_info.h:
-	$(top_srcdir)/tools/dss_gen_version_unix.sh $(top_srcdir) $(top_srcdir)
+build_info.h:
+	$(top_srcdir)/tools/dss_gen_version_unix.sh $(top_srcdir) .
 
-$(top_srcdir)/src/dss.cpp: $(top_srcdir)/src/build_info.h
+$(top_srcdir)/src/dss.cpp: build_info.h
 
 if BUILD_SOAP
 

@@ -18,10 +18,10 @@ fi
 rcs_rev="-"
 rcs_root="-"
 if [ -d $BASEDIR/.git ]; then
-  rcs_rev="git:$(git rev-parse HEAD)"
-  rcs_root=$(git branch|grep ^*|sed -e 's|^\*\s*||')
+  rcs_rev="git:$(git --git-dir=$BASEDIR/.git rev-parse HEAD)"
+  rcs_root=$(git --git-dir=$BASEDIR/.git branch|grep ^*|sed -e 's|^\*\s*||')
   
-  rcs_st=$(git status $BASEDIR|grep modified:)
+  rcs_st=$(cd $BASEDIR; git status | grep modified:)
   if [ -n "$rcs_st" ]; then
     rcs_rev="$rcs_rev-dirty"
   fi
