@@ -33,6 +33,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/event.h \
 	$(top_srcdir)/src/eventinterpreterplugins.cpp \
 	$(top_srcdir)/src/eventinterpreterplugins.h \
+	$(top_srcdir)/src/eventinterpretersystemplugins.cpp \
+	$(top_srcdir)/src/eventinterpretersystemplugins.h \
 	$(top_srcdir)/src/eventsubscriptionsession.cpp \
 	$(top_srcdir)/src/eventsubscriptionsession.h \
 	$(top_srcdir)/src/expatparser.cpp \
@@ -151,7 +153,11 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/subsystem.h \
 	$(top_srcdir)/src/syncevent.cpp \
 	$(top_srcdir)/src/syncevent.h \
+	$(top_srcdir)/src/systemcondition.cpp \
+	$(top_srcdir)/src/systemcondition.h \
 	$(top_srcdir)/src/thread.h \
+	$(top_srcdir)/src/url.cpp \
+	$(top_srcdir)/src/url.h \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.cpp \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.h \
 	$(top_srcdir)/src/web/handler/circuitrequesthandler.cpp \

@@ -149,6 +149,7 @@
   </state>
 
   <!-- System Trigger -->
+  <!--
   <subscription event-name="highlevelevent" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/system_conditions.js</parameter>
@@ -177,8 +178,9 @@
       <parameter name="script_id">system_trigger</parameter>
     </parameter>
   </subscription>
-
+  -->
   <!-- System Actions -->
+  <!--
   <subscription event-name="highlevelevent" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/http.js</parameter>
@@ -195,5 +197,24 @@
       <parameter name="script_id">system_action</parameter>
     </parameter>
   </subscription>
+  -->
+
+  <subscription event-name="highlevelevent" handler-name="highlevelevent">
+  </subscription>
+
+  <subscription event-name="buttonClick" handler-name="system_trigger">
+  </subscription>
+
+  <subscription event-name="deviceSensorEvent" handler-name="system_trigger">
+  </subscription>
+
+  <subscription event-name="callScene" handler-name="system_trigger">
+  </subscription>
+
+  <subscription event-name="action_execute" handler-name="action_execute">
+  </subscription>
+
+
+
 
 </subscriptions>

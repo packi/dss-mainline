@@ -43,6 +43,7 @@
 #include "logger.h"
 #include "propertysystem.h"
 #include "eventinterpreterplugins.h"
+#include "eventinterpretersystemplugins.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
@@ -417,6 +418,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     plugin = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginSendmail(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginActionExecute(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginHighlevelEvent(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginSystemTrigger(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
