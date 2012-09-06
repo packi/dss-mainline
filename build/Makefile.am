@@ -13,24 +13,24 @@ noinst_LIBRARIES = libdsscore.a libmongoose.a libunix.a
 if BUILD_SOAP
 
 CLEANFILES += \
-			 $(top_srcdir)/webservices/soapC.cpp \
-			 $(top_srcdir)/webservices/soapH.h
-			 $(top_srcdir)/webservices/dss.nsmap \
-			 $(top_srcdir)/webservices/dss.wsdl \
-			 $(top_srcdir)/webservices/dss.xsd \
-			 $(top_srcdir)/webservices/soapServer.cpp \
-			 $(top_srcdir)/webservices/soapStub.h \
-			 $(top_srcdir)/webservices/soapdssObject.h
+			 webservices/soapC.cpp \
+			 webservices/soapH.h
+			 webservices/dss.nsmap \
+			 webservices/dss.wsdl \
+			 webservices/dss.xsd \
+			 webservices/soapServer.cpp \
+			 webservices/soapStub.h \
+			 webservices/soapdssObject.h
 
 BUILT_SOURCES += \
-			$(top_srcdir)/webservices/soapC.cpp \
-			$(top_srcdir)/webservices/soapH.h \
-			$(top_srcdir)/webservices/dss.nsmap \
-			$(top_srcdir)/webservices/dss.wsdl \
-			$(top_srcdir)/webservices/dss.xsd \
-			$(top_srcdir)/webservices/soapServer.cpp \
-			$(top_srcdir)/webservices/soapStub.h \
-			$(top_srcdir)/webservices/soapdssObject.h
+			webservices/soapC.cpp \
+			webservices/soapH.h \
+			webservices/dss.nsmap \
+			webservices/dss.wsdl \
+			webservices/dss.xsd \
+			webservices/soapServer.cpp \
+			webservices/soapStub.h \
+			webservices/soapdssObject.h
 
 noinst_LIBRARIES += libwebservices.a
 
@@ -106,6 +106,7 @@ dss_LDADD += \
 			$(OPENSSL_LIBS)
 
 libwebservices_a_CXXFLAGS = \
+			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
 			$(JS_CFLAGS) \
 			$(GSOAP_CFLAGS) \
@@ -115,11 +116,11 @@ libwebservices_a_CXXFLAGS = \
 			$(GCOV_CFLAGS)
 
 nodist_libwebservices_a_SOURCES = \
-			$(top_srcdir)/webservices/soapC.cpp \
-			$(top_srcdir)/webservices/soapH.h \
-			$(top_srcdir)/webservices/soapServer.cpp \
-			$(top_srcdir)/webservices/soapStub.h \
-			$(top_srcdir)/webservices/soapdssObject.h
+			webservices/soapC.cpp \
+			webservices/soapH.h \
+			webservices/soapServer.cpp \
+			webservices/soapStub.h \
+			webservices/soapdssObject.h
 
 endif
 
@@ -170,15 +171,16 @@ $(top_srcdir)/src/dss.cpp: build_info.h
 
 if BUILD_SOAP
 
-$(top_srcdir)/webservices/soapH.h: $(top_srcdir)/webservices/soapC.cpp
-$(top_srcdir)/webservices/soapServer.cpp: $(top_srcdir)/webservices/soapC.cpp
-$(top_srcdir)/webservices/soapStub.h: $(top_srcdir)/webservices/soapC.cpp
-$(top_srcdir)/webservices/soapdssObject.h: $(top_srcdir)/webservices/soapC.cpp
-$(top_srcdir)/webservices/dss.nsmap: $(top_srcdir)/webservices/soapC.cpp
-$(top_srcdir)/webservices/dss.wsdl: $(top_srcdir)/webservices/soapC.cpp
-$(top_srcdir)/webservices/dss.xsd: $(top_srcdir)/webservices/soapC.cpp
+webservices/soapH.h: webservices/soapC.cpp
+webservices/soapServer.cpp: webservices/soapC.cpp
+webservices/soapStub.h: webservices/soapC.cpp
+webservices/soapdssObject.h: webservices/soapC.cpp
+webservices/dss.nsmap: webservices/soapC.cpp
+webservices/dss.wsdl: webservices/soapC.cpp
+webservices/dss.xsd: webservices/soapC.cpp
 
-$(top_srcdir)/webservices/soapC.cpp: $(top_srcdir)/webservices/model_soap.cpp $(top_srcdir)/webservices/model_soap.h
-	$(GSOAP_SOAPCPP2) -I$(GSOAP_IMPORT_DIR) -I$(top_srcdir)/webservices -SLx -d$(top_srcdir)/webservices $(top_srcdir)/webservices/model_soap.h
+webservices/soapC.cpp: $(top_srcdir)/webservices/model_soap.cpp $(top_srcdir)/webservices/model_soap.h
+	$(MKDIR_P) webservices
+	$(GSOAP_SOAPCPP2) -I$(GSOAP_IMPORT_DIR) -SLx -dwebservices $(top_srcdir)/webservices/model_soap.h
 
 endif

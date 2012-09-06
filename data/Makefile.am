@@ -16,9 +16,9 @@ dist_dssjs_DATA = \
 
 webrootdir = $(pkgdatadir)/data/webroot
 dist_webroot_DATA = \
-	$(top_srcdir)/webservices/dss.wsdl \
-	$(top_srcdir)/webservices/dss.nsmap \
-	$(top_srcdir)/webservices/dss.xsd
+	$(top_builddir)/build/webservices/dss.wsdl \
+	$(top_builddir)/build/webservices/dss.nsmap \
+	$(top_builddir)/build/webservices/dss.xsd
 	
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/config.d
