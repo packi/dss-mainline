@@ -56,6 +56,7 @@ namespace dss {
     m_FirstSeen(DateTime::NullDate),
     m_IsLockedInDSM(false),
     m_OutputMode(0),
+    m_ButtonInputMode(0),
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
