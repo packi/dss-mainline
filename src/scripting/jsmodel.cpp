@@ -1454,7 +1454,7 @@ namespace dss {
       if(self.is("Device")) {
         DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         boost::shared_ptr<Device> pDev(intf->getDevice());
-        if(argc == 1) {
+        if (argc == 2) {
           uint8_t offset;
           uint16_t value;
           try {
