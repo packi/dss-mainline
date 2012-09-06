@@ -750,6 +750,7 @@ namespace dss {
 
     dss_dsid_t dsid = m_evtSrcDSID;
     std::string clickType = m_properties.get("clickType");
+    std::string buttonIndex = m_properties.get("buttonIndex");
 
     if (dsid == NullDSID) {
       return false;
@@ -769,14 +770,23 @@ namespace dss {
       return false;
     }
 
+    std::string iButtonIndexID = "-1";
+
+    PropertyNodePtr triggerIndex = _triggerProp->getPropertyByName("buttonIndex");
+    if (triggerIndex != NULL) {
+      iButtonIndexID = triggerIndex->getAsString();
+    }
+
     std::string sDSID = triggerDSID->getAsString();
     std::string iMSG = triggerMSG->getAsString();
     if ((sDSID == "-1") || (sDSID == dsid.toString())) {
       if ((iMSG == clickType) || (iMSG == "-1")) {
-        Logger::getInstance()->log("SystemTrigger::"
-                "checkDevice:: Match: ButtonClick dSID:" + sDSID + ", Klick: " +
-                iMSG);
-        return true;
+        if ((buttonIndex == iButtonIndexID) || (iButtonIndexID == "-1")) {
+          Logger::getInstance()->log("SystemTrigger::"
+                  "checkDevice:: Match: ButtonClick dSID: " + sDSID +
+                  ", Klick: " + iMSG + ", ButtonIndex: " + iButtonIndexID);
+          return true;
+        }
       }
     }
 
