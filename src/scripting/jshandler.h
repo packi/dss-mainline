@@ -64,7 +64,6 @@ namespace dss {
     size_t m_StackSize;
     uint32 m_cxOptionSet;
     uint32 m_cxOptionClear;
-    bool m_CacheEnabled;
     bool m_TimingEnabled;
   public:
     ScriptContext* m_pContext;
@@ -92,7 +91,6 @@ namespace dss {
     }
 
     bool isInitialized();
-    bool isCacheEnabled() { return m_CacheEnabled; }
     bool isTimingEnabled() { return m_TimingEnabled; }
   };
 
@@ -114,8 +112,6 @@ namespace dss {
     mutable boost::mutex m_LockDataMutex;
     bool m_Locked;
     pthread_t m_LockedBy;
-    HASH_MAP<std::string, JSObject**> m_ScriptMap;
-    bool m_CacheEnabled;
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -131,8 +127,6 @@ namespace dss {
     t evaluateScript(const std::string& _fileName);
     // FIXME: Workaround a compiler issue that interprets typeof jsval == typeof int
     jsval doEvaluateScript(const std::string& _fileName);
-    /** Enables or disables pre-compilation of scripts */
-    void setCacheEnabled(bool _value) { m_CacheEnabled = _value; }
 
     /** Returns a pointer to the JSContext */
     JSContext* getJSContext() { return m_pContext; }
