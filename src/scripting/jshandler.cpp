@@ -63,7 +63,6 @@ namespace dss {
     m_RuntimeSize = 8L * 1024L * 1024L;
     m_StackSize = 8192;
     m_cxOptionClear = m_cxOptionSet = 0;
-    m_CacheEnabled = true;
     m_TimingEnabled = false;
 
     try {
@@ -84,10 +83,6 @@ namespace dss {
         if (pPtr && (pPtr->getValueType() == vTypeInteger)) {
           m_cxOptionClear = pPtr->getIntegerValue();
         }
-        pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/cache");
-        if (pPtr && (pPtr->getValueType() == vTypeBoolean)) {
-          m_CacheEnabled = pPtr->getBoolValue();
-        }
         pPtr = DSS::getInstance()->getPropertySystem().getProperty("/config/spidermonkey/timing");
         if (pPtr && (pPtr->getValueType() == vTypeBoolean)) {
           m_TimingEnabled = pPtr->getBoolValue();
@@ -96,8 +91,6 @@ namespace dss {
         m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty("/system/js/");
         m_pPropertyNode->createProperty("timings");
         m_pPropertyNode->createProperty("features");
-        m_pPropertyNode->createProperty("features/cache")
-            ->linkToProxy(PropertyProxyReference<bool>(m_CacheEnabled));
         m_pPropertyNode->createProperty("features/timing")
             ->linkToProxy(PropertyProxyReference<bool>(m_TimingEnabled));
       }
@@ -466,14 +459,6 @@ namespace dss {
     }
     scrubVector(m_AttachedObjects);
 
-    {
-      JSRequest req(m_pContext);
-      HASH_MAP<std::string, JSObject**>::const_iterator item;
-      for (item = m_ScriptMap.begin(); item != m_ScriptMap.end(); item++) {
-        JS_RemoveObjectRoot(m_pContext, item->second);
-      }
-    }
-
     JS_SetContextPrivate(m_pContext, NULL);
     JS_DestroyContext(m_pContext);
     m_pContext = NULL;
@@ -539,46 +524,14 @@ namespace dss {
     ScriptLock lock(this);
     JSBool ok = JS_FALSE;
     jsval rval;
-
-    if (!m_CacheEnabled) {
-      std::ifstream in(_fileName.c_str());
-      if(!in.is_open()) {
-        throw ScriptException("Could not open script-file: '" + _fileName + "'");
-      }
-      std::string line;
-      std::stringstream sstream;
-      while(std::getline(in,line)) {
-        sstream << line << "\n";
-      }
-      JSContextThread req(this);
-      std::string script = sstream.str();
-
-      ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
-          _fileName.c_str(), 0, &rval);
-
-    } else {
-      JSContextThread req(m_pContext);
-      JSObject* scriptObj;
-      HASH_MAP<std::string, JSObject**>::const_iterator item;
-      item = m_ScriptMap.find(_fileName);
-
-      if (item != m_ScriptMap.end()) {
-        scriptObj = *(item->second);
-      } else {
-        scriptObj = JS_CompileFile(m_pContext, m_pRootObject, _fileName.c_str());
-        if (!scriptObj) {
-          throw ScriptException("Error compiling script");
-        }
-        JSObject** jso = (JSObject **) JS_malloc(m_pContext, sizeof(JSObject *));
-        *jso = scriptObj;
-        m_ScriptMap[_fileName] = jso;
-        JS_AddNamedObjectRoot(m_pContext, jso, _fileName.c_str());
-      }
-
-      ok = JS_ExecuteScript(m_pContext, m_pRootObject, scriptObj, &rval);
-      JS_MaybeGC(m_pContext);
+    JSContextThread req(m_pContext);
+    // multiple hanging scriptObj's may exist per context which
+    // are all freed with the context destruction
+    JSObject* scriptObj = JS_CompileFile(m_pContext, m_pRootObject, _fileName.c_str());
+    if (!scriptObj) {
+      throw ScriptException("Error compiling script: " + _fileName);
     }
-
+    ok = JS_ExecuteScript(m_pContext, m_pRootObject, scriptObj, &rval);
     if(ok) {
       return rval;
     } else {

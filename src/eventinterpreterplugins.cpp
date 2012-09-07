@@ -277,13 +277,6 @@ namespace dss {
 
   EventInterpreterPluginJavascript::~EventInterpreterPluginJavascript() {
     log("Terminating all scripts...", lsInfo);
-
-    HASH_MAP<std::string, boost::shared_ptr<ScriptContext> >::iterator item;
-    for (item = m_ContextMap.begin(); item != m_ContextMap.end(); item++) {
-      (item->second).reset();
-    }
-    m_ContextMap.clear();
-
     typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
     tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
     int shutdownTimeout = 0;
@@ -329,28 +322,7 @@ namespace dss {
         scriptID = _event.getName() + _subscription.getID();
       }
 
-      boost::shared_ptr<ScriptContext> ctx;
-      if (m_pEnvironment->isCacheEnabled()) {
-        HASH_MAP<std::string, boost::shared_ptr<ScriptContext> >::const_iterator item;
-        item = m_ContextMap.find(scriptID);
-        if (item != m_ContextMap.end()) {
-          ctx = boost::shared_ptr<ScriptContext> (item->second);
-          Logger::getInstance()->log("JavaScript Event Handler: re-use context for " + scriptID);
-          if (ctx->hasAttachedObjects()) {
-            Logger::getInstance()->log("JavaScript Event Handler: context for " + scriptID +
-                " still has active objects!", lsWarning);
-          }
-        }
-      }
-      if (ctx == NULL) {
-        ctx = boost::shared_ptr<ScriptContext> (m_pEnvironment->getContext());
-        if (m_pEnvironment->isCacheEnabled()) {
-          m_ContextMap[scriptID] = ctx;
-          ctx->setCacheEnabled(true);
-        }
-        Logger::getInstance()->log("JavaScript Event Handler: new context for " + scriptID);
-      }
-
+      boost::shared_ptr<ScriptContext> ctx(m_pEnvironment->getContext());
       boost::shared_ptr<ScriptContextWrapper> wrapper
         (new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
       ctx->attachWrapper(wrapper);
@@ -595,22 +567,9 @@ namespace dss {
     typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
     tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
     while (ipScriptContextWrapper != m_WrappedContexts.end()) {
-      // if a single instance of the wrapper is left then the wrapper is no longer
-      // linked to any context; context link got overwritten by new wrapper of a
-      // subsequent script execution
-      if (m_pEnvironment->isCacheEnabled()) {
-        if ((*ipScriptContextWrapper).use_count() <= 1) {
-          Logger::getInstance()->log("JavaScript cleanup: destroy orphaned wrapper for "
-              + (*ipScriptContextWrapper)->getIdentifier());
-          (*ipScriptContextWrapper)->destroy();
-          ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
-          continue;
-        }
-      }
       // if the context of the wrapper does not have active objects anymore we
       // can clean it up; in the non-caching mode the wrapper has the last
-      // reference to the context shared-ptr; in the caching mode the context ptr
-      // is referenced a second time in the interpreter context hash map
+      // reference to the context shared-ptr
       if (!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
         Logger::getInstance()->log("JavaScript cleanup: erasing script "
             + (*ipScriptContextWrapper)->getIdentifier());
