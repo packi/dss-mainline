@@ -923,6 +923,16 @@ namespace dss {
       passThrough = true;
     }
 
+    try {
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_source);
+      boost::shared_ptr<Device> dev = mod->getDevices().getByBusID(_deviceID, _source).getDevice();
+      // ButtonInputMode Turbo (1) or Switched (2) do not generate multi-tip-sequences
+      if (dev->getButtonInputMode() == 1 || dev->getButtonInputMode() == 2) {
+        passThrough = true;
+      }
+    } catch (ItemNotFoundException& ex) {
+    }
+
     if (passThrough) {
       log("DeviceActionFilter: pass through, from source " + _source.toString() +
           ": deviceID=" + intToString(_deviceID) +
