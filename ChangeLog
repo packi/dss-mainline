@@ -1,5 +1,14 @@
 dSS - digitalSTROM Server
 
+v1.16.0 10.09.2012
+	* implemented system action / system trigger script functionality in the
+	  dSS, #1838
+	* added on/off switch events as app-trigger, #1720
+	* fixed out of tree compilation
+	* do not delay button inputs for turbo or switch modes, #1838, #1720
+	* fixed Device.setOutputValue() scripting method
+	* removed JS caching code, feature turned out to be unusable for us
+
 v1.15.0 28.08.2012
 	* fix typos in system_condition script
 	* remove devices from all connected dSMeters, #1780
