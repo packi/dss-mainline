@@ -567,9 +567,12 @@ namespace dss {
         if(timeStr[0] == '+') {
           std::string timeOffset = timeStr.substr(1, std::string::npos);
           int offset = strToIntDef(timeOffset, -1);
-          if(offset >= 0) {
+          if(offset > 0) {
             when = when.addSeconds(offset);
             validDate = true;
+          } else if(offset == 0) {
+            log(std::string("scheduleFromEvent: offset == 0, schedule event directly"), lsInfo);
+            return result;
           } else {
             log(std::string("scheduleFromEvent: could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
           }
