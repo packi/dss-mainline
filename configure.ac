@@ -305,10 +305,7 @@ PKG_CHECK_MODULES([AVAHI], [avahi-client],
         AC_MSG_ERROR([$AVAHI_PKG_ERRORS])
     ])
 
-PKG_CHECK_MODULES([LIBRRD], [librrd], [],
-    [
-        AC_MSG_ERROR([$LIBRRD_PKG_ERRORS])
-    ])
+MT_CHECK_REQUIRED_PACKAGE([librrd], [rrd], [rrd], [rrd_create_r], [-lrrd_th])
 
 MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
                           [dsm-api-v2], [DsmApiOpen], [-lds485-client])

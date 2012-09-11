@@ -90,7 +90,7 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
 			$(CURL_LIBS) \
-			$(LIBRRD_LIBS) -lrrd_th \
+			$(LIBRRD_LIBS) \
 			$(EXPAT_LIBS) \
 			$(BACKTRACE_LDFLAGS) \
 			$(GCOV_LIBS) \
@@ -147,7 +147,7 @@ dsstests_LDADD = \
 			$(OPENSSL_LIBS) \
 			$(AVAHI_LIBS) \
 			$(CURL_LIBS) \
-			$(LIBRRD_LIBS) -lrrd_th \
+			$(LIBRRD_LIBS) \
 			$(EXPAT_LIBS) \
 			$(GCOV_LIBS) \
 			$(LIBTCMALLOC_LIBS)
