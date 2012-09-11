@@ -408,7 +408,7 @@ namespace dss {
         evt->setProperty("delay", intToString(oDelay.at(s)));
         evt->setProperty(EventPropertyTime, "+" + intToString(oDelay.at(s)));
         if (DSS::hasInstance()) {
-          DSS::getInstance()->getEventQueue().pushTimedEvent(evt);
+          DSS::getInstance()->getEventQueue().pushEvent(evt);
         } else {
           return;
         }
