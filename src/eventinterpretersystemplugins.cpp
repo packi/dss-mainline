@@ -93,7 +93,7 @@ namespace dss {
       }
 
       PropertyNodePtr oForceNode = _actionNode->getPropertyByName("force");
-      if (oForceNode == NULL) {
+      if (oForceNode != NULL) {
         forceFlag = oForceNode->getBoolValue();
       }
     
@@ -152,7 +152,7 @@ namespace dss {
       }
 
       PropertyNodePtr oForceNode = _actionNode->getPropertyByName("force");
-      if (oForceNode == NULL) {
+      if (oForceNode != NULL) {
         forceFlag = oForceNode->getBoolValue();
       }
   
