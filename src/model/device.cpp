@@ -924,13 +924,14 @@ namespace dss {
   }
 
   bool Device::is2WayMaster() const {
-    return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
-            (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
-              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
-            ((m_DSID.lower % 2) == false))); // even dSID
+    return (getFeatures().pairing &&
+             ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
+              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
+              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
+              (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
+                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
+               ((m_DSID.lower % 2) == false)))); // even dSID
   }
 
   bool Device::is2WaySlave() const {
