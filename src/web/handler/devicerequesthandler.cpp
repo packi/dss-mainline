@@ -468,7 +468,9 @@ namespace dss {
         }
       }
 
-      if (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup()) {
+      if ((pDevice->getJokerGroup() > 0) &&
+          (pPartnerDevice->getJokerGroup() > 0) &&
+          (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
         if (m_pStructureBusInterface != NULL) {
           pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
         }
