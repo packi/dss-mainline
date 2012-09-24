@@ -1,5 +1,12 @@
 dSS - digitalSTROM Server
 
+v1.16.1	24.09.2012
+	* no need to set group when not both devices are Jocker devices, #1953
+	* check if device supports pairing when evaluation master/slave, #1941
+	* fix force scene calls in system action handler
+	* fix timed events handling, do not lose time+0 events anymore
+	* fix out of tree compilation when SOAP is disabled
+
 v1.16.0 10.09.2012
 	* implemented system action / system trigger script functionality in the
 	  dSS, #1838
