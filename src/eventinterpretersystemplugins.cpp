@@ -384,18 +384,23 @@ namespace dss {
       return;
     }
 
+    std::vector<int> oDelay;
     std::vector<int> temp;
     temp.push_back(0);
     for (int i = 0; i < oBaseActionNode->getChildCount(); i++) {
-      PropertyNodePtr cn = oBaseActionNode->getChild(i);
-      if ((cn == NULL) || (cn->getName() != "delay")) {
+      PropertyNodePtr cn = oBaseActionNode->getChild(i)->getPropertyByName("delay");
+      if (cn == NULL) {
         continue;
       }
-
-      temp.push_back(cn->getIntegerValue());
+      try {
+        temp.push_back(cn->getIntegerValue());
+      } catch (PropertyTypeMismatch& e) {
+        Logger::getInstance()->log("EventInterpreterPluginActionExecute: wrong "
+                      "parameter type for delay, path " + _path, lsError);
+      }
     }
-    std::set<int> unique(temp.begin(), temp.end());
-    std::vector<int> oDelay(unique.begin(), unique.end());
+    sort(temp.begin(), temp.end());
+    temp.erase(unique(temp.begin(), temp.end()), temp.end());
     oDelay.swap(temp);
 
     if (oDelay.size() > 1) {
@@ -435,15 +440,16 @@ namespace dss {
   std::vector<PropertyNodePtr> SystemEventActionExecute::filterActionsWithDelay(PropertyNodePtr _actionNode, int _delayValue) {
     std::vector<PropertyNodePtr> oResultArray;
     for (int i = 0; i < _actionNode->getChildCount(); i++) {
-      int delayNodeValue = 0;
       PropertyNodePtr delayParent = _actionNode->getChild(i);
       if (delayParent != NULL) {
         PropertyNodePtr delayNode = delayParent->getPropertyByName("delay");
-        if (delayNode == NULL) {
-          delayNodeValue = delayNode->getIntegerValue();
-        }
-        if (delayNodeValue == _delayValue) {
-          oResultArray.push_back(delayParent);
+        if (delayNode != NULL) {
+          try {
+            int delayNodeValue = delayNode->getIntegerValue();
+            if (delayNodeValue == _delayValue) {
+              oResultArray.push_back(delayParent);
+            }
+          } catch (PropertyTypeMismatch& e) {}
         }
       }
     }
