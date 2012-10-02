@@ -138,6 +138,12 @@ namespace dss {
     return sstream.str();
   }
 
+  std::string unsignedLongIntToString(const unsigned long long _value) {
+    std::stringstream sstream;
+    sstream << _value;
+    return sstream.str();
+  }
+
   const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
 
   template <>

@@ -62,6 +62,7 @@ namespace dss {
   double strToDouble(const std::string& _strValue, const double _default);
 
   std::string unsignedLongIntToHexString(const unsigned long long _value);
+  std::string unsignedLongIntToString(const unsigned long long _value);
 
   std::string doubleToString(const double _value);
 
