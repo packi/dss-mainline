@@ -135,6 +135,15 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
         m_pPropertyNode->createProperty("productID")
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("OEM");
+        oemNode->createProperty("State")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOEMStateAsString));
+        oemNode->createProperty("EAN")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemEanAsString));
+        oemNode->createProperty("SerialNumber")
+          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_OemSerialNumber, false));
+        oemNode->createProperty("PartNumber")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OemPartNumber, false));
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
         m_pPropertyNode->createProperty("shortAddress")
@@ -1089,4 +1098,19 @@ namespace dss {
       dirty();
     }
   }
+
+  std::string Device::getOEMStateAsString() const
+  {
+    switch (m_OemState) {
+    case DEVICE_OEM_UNKOWN:
+      return "Unknown";
+    case DEVICE_OEM_NONE:
+      return "None";
+    case DEVICE_OEM_LOADING:
+      return "Loading";
+    case DEVICE_OEM_VALID:
+      return "Valid";
+    }
+  }
+
 } // namespace dss
