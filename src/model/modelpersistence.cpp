@@ -59,6 +59,10 @@ namespace dss {
     const char *lastzone = NULL;
     const char *lastshort = NULL;
     const char *is = NULL;
+    const char *oemState = NULL;
+    const char *oemEan = NULL;
+    const char *oemSerial = NULL;
+    const char *oemPar = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -80,6 +84,14 @@ namespace dss {
         lastshort = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "inactiveSince") == 0) {
         is = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemState") == 0) {
+        oemState = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemEanNumber") == 0) {
+        oemEan = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemSerialNumber") == 0) {
+        oemSerial = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemPartNumber") == 0) {
+        oemPar = _attrs[i + 1];
       }
     }
 
@@ -133,6 +145,29 @@ namespace dss {
       lastKnownShortAddress = strToUIntDef(lastshort,
                                            ShortAddressStaleDevice);
     }
+
+    DeviceOEMState_t oemEanState = DEVICE_OEM_UNKOWN;
+    if (oemState != NULL) {
+      oemEanState = m_tempDevice->getOemStateFromString(oemState);
+    }
+
+    unsigned long long oemEanNumber = 0;
+    int oemSerialNumber = 0;
+    int oemPartNumber = 0;
+    if (oemEanState == DEVICE_OEM_VALID) {
+      if (oemEan != NULL) {
+        oemEanNumber = strToULongLongDef(oemEan, 0);
+      }
+      if (oemSerial != NULL) {
+        oemSerialNumber = strToUIntDef(oemSerial, 0);
+      }
+      if (oemPar != NULL) {
+        oemPartNumber = strToUIntDef(oemPar, 0);
+      }
+
+      m_tempDevice->setOemInfo(oemEanNumber, oemSerialNumber, oemPartNumber);
+    }
+    m_tempDevice->setOemInfoState(oemEanState);
 
     m_tempDevice->setIsPresent(isPresent);
     if (isPresent == false) {
@@ -517,6 +552,14 @@ namespace dss {
     }
     if(_pDevice->getLastKnownShortAddress() != ShortAddressStaleDevice) {
       _ofs << " lastKnownShortAddress=\"" << intToString(_pDevice->getLastKnownShortAddress()) << "\"";
+    }
+    if(_pDevice->getOemInfoState() == DEVICE_OEM_NONE) {
+      _ofs << " oemState=\"" << _pDevice->getOEMStateAsString() << "\"";
+    } else if(_pDevice->getOemInfoState() == DEVICE_OEM_VALID) {
+      _ofs << " oemState=\"" << _pDevice->getOEMStateAsString() << "\"";
+      _ofs << " oemEanNumber=\"" << _pDevice->getOemEanAsString() << "\"";
+      _ofs << " oemSerialNumber=\"" << intToString(_pDevice->getOemSerialNumber()) << "\"";
+      _ofs << " oemPartNumber=\"" << intToString(_pDevice->getOemPartNumber()) << "\"";
     }
     _ofs << ">" << std::endl;
 

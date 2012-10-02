@@ -393,6 +393,10 @@ namespace dss {
     std::string getOemEanAsString() const { return unsignedLongIntToString(m_OemEanNumber); }
     DeviceOEMState_t getOemInfoState() const { return m_OemState; }
     std::string getOEMStateAsString() const;
+    uint16_t getOemSerialNumber() const { return m_OemSerialNumber; }
+    uint8_t getOemPartNumber() const { return m_OemPartNumber; }
+
+    DeviceOEMState_t getOemStateFromString(const char* _string) const;
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

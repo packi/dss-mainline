@@ -1113,4 +1113,15 @@ namespace dss {
     }
   }
 
+  DeviceOEMState_t Device::getOemStateFromString(const char* _string) const
+  {
+    if (strcmp(_string, "None") == 0) {
+      return DEVICE_OEM_NONE;
+    } else if (strcmp(_string, "Valid") == 0) {
+      return DEVICE_OEM_VALID;
+    } else {
+      return DEVICE_OEM_UNKOWN;
+    }
+  }
+
 } // namespace dss
