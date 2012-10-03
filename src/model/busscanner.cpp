@@ -270,12 +270,16 @@ namespace dss {
 
   void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
-      log("scheduleOEMReadout: schedule EAN readout for: " + _pDevice->getDSID().toString());
-      boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
-      task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader());
-      task->setup(_pDevice);
-      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
-      pTP->addEvent(task);
+      if (_pDevice->getRevisionID() >= 0x0350) {
+        log("scheduleOEMReadout: schedule EAN readout for: " + _pDevice->getDSID().toString());
+        boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
+        task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader());
+        task->setup(_pDevice);
+        boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+        pTP->addEvent(task);
+      } else {
+        _pDevice->setOemInfoState(DEVICE_OEM_NONE);
+      }
     }
   }
 
