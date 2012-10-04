@@ -277,6 +277,7 @@ namespace dss {
         task->setup(_pDevice);
         boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
         pTP->addEvent(task);
+        _pDevice->setOemInfoState(DEVICE_OEM_LOADING);
       } else {
         _pDevice->setOemInfoState(DEVICE_OEM_NONE);
       }
