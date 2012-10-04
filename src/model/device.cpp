@@ -64,7 +64,8 @@ namespace dss {
     m_OemEanNumber(0),
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
-    m_OemState(DEVICE_OEM_UNKOWN)
+    m_OemState(DEVICE_OEM_UNKOWN),
+    m_HWInfo()
     { } // ctor
 
   Device::~Device() {
@@ -135,6 +136,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
         m_pPropertyNode->createProperty("productID")
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+        m_pPropertyNode->createProperty("HWInfo")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
         PropertyNodePtr oemNode = m_pPropertyNode->createProperty("OEM");
         oemNode->createProperty("State")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOEMStateAsString));
@@ -233,6 +236,9 @@ namespace dss {
 
   void Device::setFunctionID(const int _value) {
     m_FunctionID = _value;
+    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+      calculateHWInfo();
+    }
   } // setFunctionID
 
   int Device::getProductID() const {
@@ -242,6 +248,9 @@ namespace dss {
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
     fillSensorTable(_value);
+    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+      calculateHWInfo();
+    }
   } // setProductID
 
   int Device::getRevisionID() const {
@@ -992,6 +1001,27 @@ namespace dss {
     }
   }
 
+  const std::string Device::getDeviceTypeString(const DeviceTypes_t _type) {
+    switch (_type) {
+      case DEVICE_TYPE_KM:
+        return "KM";
+      case DEVICE_TYPE_TKM:
+        return "TKM";
+      case DEVICE_TYPE_SDM:
+        return "SDM";
+      case DEVICE_TYPE_KL:
+        return "KL";
+      case DEVICE_TYPE_TUP:
+        return "TUP";
+      case DEVICE_TYPE_ZWS:
+        return "ZWS";
+      case DEVICE_TYPE_SDS:
+        return "SDS";
+      default:
+        return "";
+    }
+  }
+
   int Device::getDeviceNumber() const {
     return m_ProductID & 0x3ff;
   }
@@ -1023,6 +1053,48 @@ namespace dss {
         return DEVICE_CLASS_WE;
       default:
         return DEVICE_CLASS_INVALID;
+    }
+  }
+
+  void Device::calculateHWInfo()
+  {
+    if (!m_HWInfo.empty()) {
+      m_HWInfo.clear();
+    }
+
+    DeviceClasses_t deviceClass = getDeviceClass();
+    m_HWInfo += getDeviceClassString(deviceClass);
+    m_HWInfo += "-";
+
+    DeviceTypes_t deviceType = getDeviceType();
+    m_HWInfo += getDeviceTypeString(deviceType);
+
+    int deviceNumber = getDeviceNumber();
+    m_HWInfo += intToString(deviceNumber);
+  }
+
+  const std::string Device::getDeviceClassString(const DeviceClasses_t _class) {
+    switch (_class) {
+      case DEVICE_CLASS_GE:
+        return "GE";
+      case DEVICE_CLASS_GR:
+        return "GR";
+      case DEVICE_CLASS_BL:
+        return "BL";
+      case DEVICE_CLASS_TK:
+        return "TK";
+      case DEVICE_CLASS_MG:
+        return "MG";
+      case DEVICE_CLASS_RT:
+        return "RT";
+      case DEVICE_CLASS_GN:
+        return "GN";
+      case DEVICE_CLASS_SW:
+        return "SW";
+      case DEVICE_CLASS_WE:
+        return "WE";
+      default:
+        return "";
     }
   }
 

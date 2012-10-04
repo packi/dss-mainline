@@ -158,6 +158,7 @@ namespace dss {
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
+    std::string m_HWInfo;
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -165,6 +166,7 @@ namespace dss {
 
     void fillSensorTable(const int _productId);
     bool hasExtendendSceneTable();
+    void calculateHWInfo();
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
@@ -255,6 +257,8 @@ namespace dss {
      * \c apartment.xml
      */
     void setName(const std::string& _name);
+
+    const std::string& getHWInfo() const { return m_HWInfo; }
 
     /** Returns the group bitmask (1 based) of the device */
     std::bitset<63>& getGroupBitmask();
@@ -397,6 +401,10 @@ namespace dss {
     uint8_t getOemPartNumber() const { return m_OemPartNumber; }
 
     DeviceOEMState_t getOemStateFromString(const char* _string) const;
+
+    static const std::string getDeviceTypeString(const DeviceTypes_t _type);
+    static const std::string getDeviceClassString(const DeviceClasses_t _class);
+
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
