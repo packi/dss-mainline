@@ -65,7 +65,8 @@ namespace dss {
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
     m_OemState(DEVICE_OEM_UNKOWN),
-    m_HWInfo()
+    m_HWInfo(),
+    m_iconPath()
     { } // ctor
 
   Device::~Device() {
@@ -239,6 +240,7 @@ namespace dss {
     if ((m_FunctionID != 0) && (m_ProductID != 0)) {
       calculateHWInfo();
     }
+    updateIconPath();
   } // setFunctionID
 
   int Device::getProductID() const {
@@ -251,6 +253,7 @@ namespace dss {
     if ((m_FunctionID != 0) && (m_ProductID != 0)) {
       calculateHWInfo();
     }
+    updateIconPath();
   } // setProductID
 
   int Device::getRevisionID() const {
@@ -324,6 +327,8 @@ namespace dss {
     // propagate target group value to device
     setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
         ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
+
+    updateIconPath();
   } // setDeviceJokerGroup
 
   void Device::setDeviceOutputMode(uint8_t _modeId) {
@@ -657,6 +662,7 @@ namespace dss {
   void Device::addToGroup(const int _groupID) {
     if((_groupID > 0) && (_groupID <= GroupIDMax)) {
       m_GroupBitmask.set(_groupID-1);
+      updateIconPath();
       if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
         m_Groups.push_back(_groupID);
         if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
@@ -681,6 +687,7 @@ namespace dss {
   void Device::removeFromGroup(const int _groupID) {
     if((_groupID > 0) && (_groupID <= GroupIDMax)) {
       m_GroupBitmask.reset(_groupID-1);
+      updateIconPath();
       std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
       if(it != m_Groups.end()) {
         m_Groups.erase(it);
@@ -1071,6 +1078,58 @@ namespace dss {
 
     int deviceNumber = getDeviceNumber();
     m_HWInfo += intToString(deviceNumber);
+  }
+
+  void Device::updateIconPath() {
+    if (!m_iconPath.empty()) {
+      m_iconPath.clear();
+    }
+
+    DeviceClasses_t deviceClass = getDeviceClass();
+    DeviceTypes_t deviceType = getDeviceType();
+    if ((deviceType == DEVICE_TYPE_INVALID) || (deviceClass == DEVICE_CLASS_INVALID)) {
+      return;
+    }
+
+    m_iconPath = "/images/";
+
+    std::string type = getDeviceTypeString(deviceType);
+    std::transform(type.begin(), type.end(), type.begin(), ::tolower);
+    m_iconPath += type;
+
+    m_iconPath += "_" + getColorString(deviceClass);
+
+    int jockerGroup = getJokerGroup();
+    if (jockerGroup > 0) {
+      m_iconPath += "_" + getColorString(jockerGroup);
+    }
+
+    m_iconPath += ".png";
+  }
+
+  const std::string Device::getColorString(const int _class) {
+    switch (_class) {
+      case DEVICE_CLASS_GE:
+        return "yellow";
+      case DEVICE_CLASS_GR:
+        return "grey";
+      case DEVICE_CLASS_BL:
+        return "blue";
+      case DEVICE_CLASS_TK:
+        return "cyan";
+      case DEVICE_CLASS_MG:
+        return "magenta";
+      case DEVICE_CLASS_RT:
+        return "red";
+      case DEVICE_CLASS_GN:
+        return "green";
+      case DEVICE_CLASS_SW:
+        return "black";
+      case DEVICE_CLASS_WE:
+        return "white";
+      default:
+        return "";
+    }
   }
 
   const std::string Device::getDeviceClassString(const DeviceClasses_t _class) {
