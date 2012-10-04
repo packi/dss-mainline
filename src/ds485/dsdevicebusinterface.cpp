@@ -277,7 +277,7 @@ namespace dss {
                                            _device,
                                            _configClass,
                                            _configIndex,
-                                           kDSM_API_TIMEOUT,
+                                           30,
                                            &retVal);
     DSBusInterface::checkResultCode(ret);
 
@@ -299,7 +299,7 @@ namespace dss {
                                       _device,
                                       _configClass,
                                       _configIndex,
-                                      kDSM_API_TIMEOUT,
+                                      30,
                                       &retVal);
     DSBusInterface::checkResultCode(ret);
 
