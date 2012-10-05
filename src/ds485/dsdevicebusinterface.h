@@ -41,7 +41,7 @@ namespace dss {
   public:
     class OEMDataReader : public Task {
     public:
-      OEMDataReader();
+      OEMDataReader(const std::string& _busConnection);
       virtual ~OEMDataReader();
       virtual void run();
       virtual void setup(boost::shared_ptr<Device> _device);
@@ -54,20 +54,16 @@ namespace dss {
                                 dev_t _device,
                                 uint8_t _configClass,
                                 uint8_t _configIndex) const;
-      static void setBusConnection(const std::string& _connection)
-          { m_busConnection = _connection; }
     private:
-      static std::string m_busConnection;
+      std::string m_busConnection;
       DsmApiHandle_t m_dsmApiHandle;
       devid_t m_deviceAdress;
       dss_dsid_t m_dsmId;
     };
 
-    DSDeviceBusInterface(const std::string& _busConnection)
+    DSDeviceBusInterface()
     : DSBusInterfaceObj()
-    {
-      DSDeviceBusInterface::OEMDataReader::setBusConnection(_busConnection);
-    }
+    { }
 
     virtual uint8_t getDeviceConfig(const Device& _device,
                                     uint8_t _configClass,

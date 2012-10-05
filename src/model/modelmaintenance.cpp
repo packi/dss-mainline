@@ -110,7 +110,7 @@ namespace dss {
     m_pMetering(NULL),
     m_EventTimeoutMS(_eventTimeoutMS),
     m_pStructureQueryBusInterface(NULL),
-    m_taskProcessor()
+    m_taskProcessor(boost::shared_ptr<TaskProcessor>(new TaskProcessor()))
   { }
 
   void ModelMaintenance::checkConfigFile(boost::filesystem::path _filename) {

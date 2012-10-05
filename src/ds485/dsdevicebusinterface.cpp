@@ -244,10 +244,9 @@ namespace dss {
     return std::make_pair(downstream, upstream);
   }
 
-  std::string DSDeviceBusInterface::OEMDataReader::m_busConnection = "";
-
-  DSDeviceBusInterface::OEMDataReader::OEMDataReader()
-    : m_dsmApiHandle(NULL)
+  DSDeviceBusInterface::OEMDataReader::OEMDataReader(const std::string& _busConnection)
+    : m_busConnection(_busConnection)
+    , m_dsmApiHandle(NULL)
     , m_deviceAdress(0)
     , m_dsmId()
   {

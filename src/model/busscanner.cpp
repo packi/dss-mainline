@@ -273,7 +273,8 @@ namespace dss {
       if (_pDevice->getRevisionID() >= 0x0350) {
         log("scheduleOEMReadout: schedule EAN readout for: " + _pDevice->getDSID().toString());
         boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
-        task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader());
+        std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
+        task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader(connURI));
         task->setup(_pDevice);
         boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
         pTP->addEvent(task);

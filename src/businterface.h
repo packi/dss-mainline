@@ -251,6 +251,7 @@ namespace dss {
     virtual ActionRequestInterface* getActionRequestInterface() = 0;
 
     virtual void setBusEventSink(BusEventSink* _eventSink) = 0;
+    virtual const std::string getConnectionURI() { return ""; }
   };
 
   class BusApiError : public DSSException {
