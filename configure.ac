@@ -417,6 +417,9 @@ if test "x$GCOV_REPORT" = "xyes"; then
     AC_SUBST(GENHTML)
 fi
 
+MT_CHECK_REQUIRED_PACKAGE([jsonc], [json/json], [json],
+                          [json_object_new_object])
+
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [data directory])

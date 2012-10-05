@@ -26,6 +26,7 @@
 #include "modelmaintenance.h"
 
 #include <unistd.h>
+#include <json/json.h>
 
 #include "src/foreach.h"
 #include "src/base.h"
@@ -48,6 +49,7 @@
 #include "busscanner.h"
 #include "scenehelper.h"
 #include "src/ds485/dsdevicebusinterface.h"
+#include "url.h"
 
 namespace dss {
   //=============================================== ApartmentTreeListener
@@ -1235,12 +1237,31 @@ namespace dss {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       if (_state == DEVICE_OEM_VALID) {
         devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
+        // query Webservice
+        getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(devRef.getDevice())));
       }
       devRef.getDevice()->setOemInfoState(_state);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what());
     }
-  } // onSensorValue
+  } // onEANReady
+
+  void ModelMaintenance::onOEMDataReady(dss_dsid_t _dsMeterID,
+                                             const devid_t _deviceID,
+                                             const DeviceOEMState_t& _state,
+                                             const std::string& _productName,
+                                             const std::string& _iconPath,
+                                             const std::string& _productURL) {
+    try {
+      DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
+      if (_state == DEVICE_OEM_VALID) {
+        devRef.getDevice()->setOemProductInfo(_productName, _iconPath, _productURL);
+      }
+      devRef.getDevice()->setOemProductInfoState(_state);
+    } catch(std::runtime_error& e) {
+      log(std::string("Error updating OEM data of device: ") + e.what());
+    }
+  } // onEANReady
 
   void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
     BusScanner
@@ -1270,5 +1291,66 @@ namespace dss {
   void ModelMaintenance::setStructureQueryBusInterface(StructureQueryBusInterface* _value) {
     m_pStructureQueryBusInterface = _value;
   } // setStructureQueryBusInterface
+
+
+  ModelMaintenance::OEMWebQuery::OEMWebQuery(boost::shared_ptr<Device> _device)
+    : Task()
+  {
+    m_deviceAdress = _device->getShortAddress();
+    m_EAN = _device->getOemEanAsString();
+    m_partNumber = _device->getOemPartNumber();
+  }
+
+  void ModelMaintenance::OEMWebQuery::run()
+  {
+    URL url;
+    URL::URLResult result;
+    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+
+    Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + std::string("http://localhost:8124/product/") + m_EAN);
+    long res = url.request(oemWebservice + std::string("product/") + m_EAN + "/" + intToString(m_partNumber), false, &result);
+    if (res == 200) {
+      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + std::string(result.memory));
+      struct json_tokener* tok;
+
+      tok = json_tokener_new();
+      json_object* json_request = json_tokener_parse_ex(tok, result.memory, -1);
+
+      std::string productName;
+      std::string iconPath;
+      std::string productURL;
+      if (tok->err == json_tokener_success) {
+          json_object* obj = json_object_object_get(json_request, "ProductName");
+          if (obj != NULL) {
+            productName = json_object_get_string(obj);
+          }
+
+          obj = json_object_object_get(json_request, "IconPath");
+          if (obj != NULL) {
+            iconPath = json_object_get_string(obj);
+          }
+
+          obj = json_object_object_get(json_request, "URL");
+          if (obj != NULL) {
+            productURL = json_object_get_string(obj);
+          }
+      }
+      json_object_put(json_request);
+      json_tokener_free(tok);
+
+      if (!iconPath.empty()) {
+        std::string iconURL = std::string("http://localhost:8124/") + iconPath;
+        std::string iconFile = std::string("/www/pages/images/") + iconPath.substr(iconPath.rfind('/') + 1);
+        res = url.downloadFile(iconURL, iconFile);
+        if (res == 200) {
+        } else {
+          Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + intToString(res));
+        }
+      }
+    }
+    if (result.size) {
+      free(result.memory);
+    }
+  }
 
 } // namespace dss

@@ -52,7 +52,8 @@ libdsscore_a_CXXFLAGS = \
 			$(CURL_CFLAGS) \
 			$(LIBRRD_CFLAGS) \
 			$(EXPAT_CFLAGS) \
-			$(GCOV_CFLAGS)
+			$(GCOV_CFLAGS) \
+			$(JSONC_CFLAGS)
 
 libunix_a_CXXFLAGS = \
 			-I$(top_srcdir) \
@@ -94,7 +95,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(EXPAT_LIBS) \
 			$(BACKTRACE_LDFLAGS) \
 			$(GCOV_LIBS) \
-			$(LIBTCMALLOC_LIBS)
+			$(LIBTCMALLOC_LIBS) \
+			$(JSONC_LIBS)
 
 if BUILD_SOAP
 
@@ -150,7 +152,8 @@ dsstests_LDADD = \
 			$(LIBRRD_LIBS) \
 			$(EXPAT_LIBS) \
 			$(GCOV_LIBS) \
-			$(LIBTCMALLOC_LIBS)
+			$(LIBTCMALLOC_LIBS) \
+			$(JSONC_LIBS)
 
 if BUILD_SOAP
 

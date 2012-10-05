@@ -171,6 +171,9 @@ namespace dss {
     void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t& _state, const unsigned long long& _eanNumber,
                       const int& _serialNumber, const int& _partNumber);
+    void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
+                           const DeviceOEMState_t _state, const std::string& _productName,
+                           const std::string& _iconPath, const std::string& _productURL);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;
@@ -188,6 +191,17 @@ namespace dss {
     void checkConfigFile(boost::filesystem::path _filename);
 
     boost::shared_ptr<TaskProcessor> m_taskProcessor;
+
+    class OEMWebQuery : public Task {
+    public:
+      OEMWebQuery(boost::shared_ptr<Device> _device);
+      virtual ~OEMWebQuery() {}
+      virtual void run();
+    private:
+      std::string m_EAN;
+      uint16_t m_partNumber;
+      devid_t m_deviceAdress;
+    };
   }; // ModelMaintenance
 
 }
