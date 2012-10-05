@@ -30,6 +30,7 @@ namespace dss {
     public:
         URL();
         long request(std::string url, bool HTTP_POST = false);
+        long downloadFile(std::string url, std::string filename);
   };
 };
 

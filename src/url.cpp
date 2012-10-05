@@ -60,6 +60,40 @@ long URL::request(std::string url, bool HTTP_POST) {
   return http_code;
 }
 
+long URL::downloadFile(std::string url, std::string filename) {
+  CURLcode res;
+  char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+  long http_code = -1;
+  FILE *data;
+
+  CURL *curl_handle = curl_easy_init();
+  curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+
+  data = fopen(filename.c_str(), "w");
+  if (data == NULL) {
+    curl_easy_cleanup(curl_handle);
+    return http_code;
+  }
+
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, data);
+
+  res = curl_easy_perform(curl_handle);
+  if (res != CURLE_OK) {
+    Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
+    fclose(data);
+    curl_easy_cleanup(curl_handle);
+    return http_code;
+  }
+
+  curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+  fclose(data);
+  curl_easy_cleanup(curl_handle);
+  return http_code;
+}
+
 }
 
 #endif//HAVE_CURL
