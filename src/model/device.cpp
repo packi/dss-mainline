@@ -1081,15 +1081,19 @@ namespace dss {
       m_HWInfo.clear();
     }
 
-    DeviceClasses_t deviceClass = getDeviceClass();
-    m_HWInfo += getDeviceClassString(deviceClass);
-    m_HWInfo += "-";
+    if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
+      m_HWInfo = m_OemProductName;
+    } else {
+      DeviceClasses_t deviceClass = getDeviceClass();
+      m_HWInfo += getDeviceClassString(deviceClass);
+      m_HWInfo += "-";
 
-    DeviceTypes_t deviceType = getDeviceType();
-    m_HWInfo += getDeviceTypeString(deviceType);
+      DeviceTypes_t deviceType = getDeviceType();
+      m_HWInfo += getDeviceTypeString(deviceType);
 
-    int deviceNumber = getDeviceNumber();
-    m_HWInfo += intToString(deviceNumber);
+      int deviceNumber = getDeviceNumber();
+      m_HWInfo += intToString(deviceNumber);
+    }
   }
 
   void Device::updateIconPath() {
@@ -1097,26 +1101,29 @@ namespace dss {
       m_iconPath.clear();
     }
 
-    DeviceClasses_t deviceClass = getDeviceClass();
-    DeviceTypes_t deviceType = getDeviceType();
-    if ((deviceType == DEVICE_TYPE_INVALID) || (deviceClass == DEVICE_CLASS_INVALID)) {
-      return;
+    if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductIcon.empty()) {
+      m_iconPath = "/images/" + m_OemProductIcon;
+    } else {
+      DeviceClasses_t deviceClass = getDeviceClass();
+      DeviceTypes_t deviceType = getDeviceType();
+      if ((deviceType == DEVICE_TYPE_INVALID) || (deviceClass == DEVICE_CLASS_INVALID)) {
+        return;
+      }
+      m_iconPath = "/images/";
+
+      std::string type = getDeviceTypeString(deviceType);
+      std::transform(type.begin(), type.end(), type.begin(), ::tolower);
+      m_iconPath += type;
+
+      m_iconPath += "_" + getColorString(deviceClass);
+
+      int jockerGroup = getJokerGroup();
+      if (jockerGroup > 0) {
+        m_iconPath += "_" + getColorString(jockerGroup);
+      }
+
+      m_iconPath += ".png";
     }
-
-    m_iconPath = "/images/";
-
-    std::string type = getDeviceTypeString(deviceType);
-    std::transform(type.begin(), type.end(), type.begin(), ::tolower);
-    m_iconPath += type;
-
-    m_iconPath += "_" + getColorString(deviceClass);
-
-    int jockerGroup = getJokerGroup();
-    if (jockerGroup > 0) {
-      m_iconPath += "_" + getColorString(jockerGroup);
-    }
-
-    m_iconPath += ".png";
   }
 
   const std::string Device::getColorString(const int _class) {
