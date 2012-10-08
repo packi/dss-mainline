@@ -152,6 +152,15 @@ namespace dss {
               DSS::getInstance()->getPropertySystem().getStringValue(
                                    getConfigPropertyBasePath() + "configfile"));
 
+      DSS::getInstance()->getPropertySystem().setStringValue(
+          getConfigPropertyBasePath() + "oemWebservice",
+          "http://developer.digitalstrom.org:8124/", true, false);
+
+      DSS::getInstance()->getPropertySystem().setStringValue(
+          getConfigPropertyBasePath() + "iconBasePath",
+          DSS::getInstance()->getPropertySystem().getStringValue(
+              "/config/webrootdirectory") + "images/", true, false);
+
       checkConfigFile(filename);
 
       m_pStructureQueryBusInterface = DSS::getInstance()->getBusInterface().getStructureQueryBusInterface();
@@ -1323,11 +1332,22 @@ namespace dss {
 
   void ModelMaintenance::OEMWebQuery::run()
   {
+    std::string oemWebservice;
+    std::string iconBasePath;
+    if(DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
+      oemWebservice = DSS::getInstance()->getPropertySystem().getStringValue(
+              "/config/subsystems/Apartment/oemWebservice");
+      iconBasePath = DSS::getInstance()->getPropertySystem().getStringValue(
+              "/config/subsystems/Apartment/iconBasePath");
+    } else {
+      return;
+    }
     URL url;
     URL::URLResult result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
 
-    Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + std::string("http://localhost:8124/product/") + m_EAN);
+    Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + oemWebservice + std::string("product/") + m_EAN + "/" + intToString(m_partNumber));
     long res = url.request(oemWebservice + std::string("product/") + m_EAN + "/" + intToString(m_partNumber), false, &result);
     if (res == 200) {
       Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + std::string(result.memory));
@@ -1360,8 +1380,8 @@ namespace dss {
 
       std::string iconFile = iconPath.substr(iconPath.rfind('/') + 1);
       if (!iconPath.empty()) {
-        std::string iconURL = std::string("http://localhost:8124/") + iconPath;
-        res = url.downloadFile(iconURL, std::string("/www/pages/images/") + iconFile);
+        std::string iconURL = oemWebservice + iconPath;
+        res = url.downloadFile(iconURL, iconBasePath + iconFile);
         if (res == 200) {
           state = DEVICE_OEM_VALID;
         } else {
