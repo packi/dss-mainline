@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.16.2 08.10.2012
+	* fix action handler "delay" node evaluation, #1959
+
 v1.16.1	24.09.2012
 	* no need to set group when not both devices are Jocker devices, #1953
 	* check if device supports pairing when evaluation master/slave, #1941
