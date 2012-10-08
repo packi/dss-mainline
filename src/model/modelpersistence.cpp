@@ -63,6 +63,10 @@ namespace dss {
     const char *oemEan = NULL;
     const char *oemSerial = NULL;
     const char *oemPar = NULL;
+    const char *oemProdState = NULL;
+    const char *oemProdName = NULL;
+    const char *oemProdIcon = NULL;
+    const char *oemProdURL = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -92,6 +96,14 @@ namespace dss {
         oemSerial = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "oemPartNumber") == 0) {
         oemPar = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemProductState") == 0) {
+        oemProdState = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemProductName") == 0) {
+        oemProdName = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemProductIcon") == 0) {
+        oemProdIcon = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemProductURL") == 0) {
+        oemProdURL = _attrs[i + 1];
       }
     }
 
@@ -166,6 +178,18 @@ namespace dss {
       }
 
       m_tempDevice->setOemInfo(oemEanNumber, oemSerialNumber, oemPartNumber);
+
+      DeviceOEMState_t productInfoState = DEVICE_OEM_UNKOWN;
+      if (oemProdState != NULL) {
+        productInfoState = m_tempDevice->getOemStateFromString(oemProdState);
+      }
+
+      if (productInfoState == DEVICE_OEM_VALID) {
+        if (oemProdName != NULL && oemProdIcon != NULL && oemProdURL != NULL) {
+          m_tempDevice->setOemProductInfo(oemProdName, oemProdIcon, oemProdURL);
+        }
+        m_tempDevice->setOemProductInfoState(productInfoState);
+      }
     }
     m_tempDevice->setOemInfoState(oemEanState);
 
@@ -560,6 +584,12 @@ namespace dss {
       _ofs << " oemEanNumber=\"" << _pDevice->getOemEanAsString() << "\"";
       _ofs << " oemSerialNumber=\"" << intToString(_pDevice->getOemSerialNumber()) << "\"";
       _ofs << " oemPartNumber=\"" << intToString(_pDevice->getOemPartNumber()) << "\"";
+      if(_pDevice->getOemProductInfoState() == DEVICE_OEM_VALID) {
+        _ofs << " oemProductState=\"" << _pDevice->getOemProductInfoStateAsString() << "\"";
+        _ofs << " oemProductName=\"" << _pDevice->getOemProductName() << "\"";
+        _ofs << " oemProductIcon=\"" << _pDevice->getOemProductIcon() << "\"";
+        _ofs << " oemProductURL=\"" << _pDevice->getOemProductURL() << "\"";
+      }
     }
     _ofs << ">" << std::endl;
 
