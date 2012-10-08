@@ -492,6 +492,7 @@ namespace dss {
         }
         break;
       case ModelEvent::etDeviceSensorEvent:
+        assert(pEventWithDSID != NULL);
         if(event.getParameterCount() < 2) {
           log("Expected at least 2 parameter for ModelEvent::etDeviceSensorEvent");
         } else {
@@ -499,6 +500,7 @@ namespace dss {
         }
         break;
       case ModelEvent::etDeviceSensorValue:
+        assert(pEventWithDSID != NULL);
         if(event.getParameterCount() < 3) {
           log("Expected at least 3 parameter for ModelEvent::etDeviceSensorValue");
         } else {
@@ -506,6 +508,7 @@ namespace dss {
         }
         break;
       case ModelEvent::etDeviceEANReady:
+        assert(pEventWithDSID != NULL);
         if(event.getParameterCount() != 6) {
           log("Expected 5 parameters for ModelEvent::etDeviceEANReady");
         } else {
