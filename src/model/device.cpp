@@ -145,7 +145,7 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
         PropertyNodePtr oemNode = m_pPropertyNode->createProperty("OEM");
         oemNode->createProperty("State")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOEMStateAsString));
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemStateAsString));
         oemNode->createProperty("EAN")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemEanAsString));
         oemNode->createProperty("SerialNumber")
@@ -1234,9 +1234,9 @@ namespace dss {
     }
   }
 
-  std::string Device::getOEMStateAsString() const
+  std::string Device::oemStateToString(const DeviceOEMState_t _state)
   {
-    switch (m_OemState) {
+    switch (_state) {
     case DEVICE_OEM_UNKOWN:
       return "Unknown";
     case DEVICE_OEM_NONE:

@@ -554,9 +554,9 @@ namespace dss {
       _ofs << " lastKnownShortAddress=\"" << intToString(_pDevice->getLastKnownShortAddress()) << "\"";
     }
     if(_pDevice->getOemInfoState() == DEVICE_OEM_NONE) {
-      _ofs << " oemState=\"" << _pDevice->getOEMStateAsString() << "\"";
+      _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
     } else if(_pDevice->getOemInfoState() == DEVICE_OEM_VALID) {
-      _ofs << " oemState=\"" << _pDevice->getOEMStateAsString() << "\"";
+      _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
       _ofs << " oemEanNumber=\"" << _pDevice->getOemEanAsString() << "\"";
       _ofs << " oemSerialNumber=\"" << intToString(_pDevice->getOemSerialNumber()) << "\"";
       _ofs << " oemPartNumber=\"" << intToString(_pDevice->getOemPartNumber()) << "\"";
