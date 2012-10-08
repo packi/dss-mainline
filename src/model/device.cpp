@@ -66,7 +66,11 @@ namespace dss {
     m_OemPartNumber(0),
     m_OemState(DEVICE_OEM_UNKOWN),
     m_HWInfo(),
-    m_iconPath()
+    m_iconPath(),
+    m_OemProductInfoState(DEVICE_OEM_UNKOWN),
+    m_OemProductName(),
+    m_OemProductIcon(),
+    m_OemProductURL()
     { } // ctor
 
   Device::~Device() {
@@ -1252,6 +1256,25 @@ namespace dss {
       return DEVICE_OEM_VALID;
     } else {
       return DEVICE_OEM_UNKOWN;
+    }
+  }
+
+  void Device::setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL)
+  {
+    m_OemProductName = _productName;
+    m_OemProductIcon = _iconPath;
+    m_OemProductURL = _productURL;
+  }
+
+  void Device::setOemProductInfoState(const DeviceOEMState_t _state)
+  {
+    m_OemProductInfoState = _state;
+
+    calculateHWInfo();
+    updateIconPath();
+
+    if ((m_OemProductInfoState == DEVICE_OEM_NONE) || (m_OemProductInfoState == DEVICE_OEM_VALID)) {
+      dirty();
     }
   }
 

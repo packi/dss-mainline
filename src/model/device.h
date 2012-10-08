@@ -160,6 +160,10 @@ namespace dss {
     PropertyNodePtr m_TagsNode;
     std::string m_HWInfo;
     std::string m_iconPath;
+    DeviceOEMState_t m_OemProductInfoState;
+    std::string m_OemProductName;
+    std::string m_OemProductIcon;
+    std::string m_OemProductURL;
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -408,6 +412,14 @@ namespace dss {
     static const std::string getDeviceTypeString(const DeviceTypes_t _type);
     static const std::string getDeviceClassString(const DeviceClasses_t _class);
     static const std::string getColorString(const int _class);
+
+    void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL);
+    void setOemProductInfoState(const DeviceOEMState_t _state);
+    std::string getOemProductInfoStateAsString() const { return oemStateToString(m_OemProductInfoState); }
+    const DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
+    const std::string& getOemProductName() const { return m_OemProductName; }
+    const std::string& getOemProductIcon() const { return m_OemProductIcon; }
+    const std::string& getOemProductURL() const { return m_OemProductURL; }
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
