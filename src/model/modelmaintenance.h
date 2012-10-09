@@ -31,6 +31,7 @@
 #include "src/thread.h"
 #include "src/syncevent.h"
 #include "src/model/modelevent.h"
+#include "src/taskprocessor.h"
 
 namespace dss {
   class Apartment;
@@ -134,6 +135,9 @@ namespace dss {
     void setApartment(Apartment* _value);
     void setMetering(Metering* _value);
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
+
+    boost::shared_ptr<TaskProcessor> getTaskProcessor() const
+        { return m_taskProcessor; }
   protected:
     virtual void doStart();
   private:
@@ -178,6 +182,8 @@ namespace dss {
     std::list<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents;
 
     void checkConfigFile(boost::filesystem::path _filename);
+
+    boost::shared_ptr<TaskProcessor> m_taskProcessor;
   }; // ModelMaintenance
 
 }
