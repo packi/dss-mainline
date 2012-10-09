@@ -401,6 +401,7 @@ namespace dss {
         const uint16_t _serialNumber, const uint8_t _partNumber);
     void setOemInfoState(const DeviceOEMState_t _state);
 
+    unsigned long long getOemEan() const { return m_OemEanNumber; }
     std::string getOemEanAsString() const { return unsignedLongIntToString(m_OemEanNumber); }
     DeviceOEMState_t getOemInfoState() const { return m_OemState; }
     std::string getOemStateAsString() const { return oemStateToString(m_OemState); }
