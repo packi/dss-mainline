@@ -112,6 +112,18 @@ namespace dss {
 
   class ModelMaintenance : public ThreadedSubsystem {
   public:
+    class OEMWebQuery : public Task {
+    public:
+      OEMWebQuery(boost::shared_ptr<Device> _device);
+      virtual ~OEMWebQuery() {}
+      virtual void run();
+    private:
+      std::string m_EAN;
+	  uint16_t m_partNumber;
+      dss_dsid_t m_dsmId;
+      devid_t m_deviceAdress;
+    };
+
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
 
@@ -191,18 +203,6 @@ namespace dss {
     void checkConfigFile(boost::filesystem::path _filename);
 
     boost::shared_ptr<TaskProcessor> m_taskProcessor;
-
-    class OEMWebQuery : public Task {
-    public:
-      OEMWebQuery(boost::shared_ptr<Device> _device);
-      virtual ~OEMWebQuery() {}
-      virtual void run();
-    private:
-      std::string m_EAN;
-	  dss_dsid_t m_dsmId;
-      uint16_t m_partNumber;
-      devid_t m_deviceAdress;
-    };
   }; // ModelMaintenance
 
 }

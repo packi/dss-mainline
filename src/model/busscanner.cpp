@@ -282,6 +282,14 @@ namespace dss {
       } else {
         _pDevice->setOemInfoState(DEVICE_OEM_NONE);
       }
+    } else if (_pDevice->isPresent() &&
+                (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
+                ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&
+                 (_pDevice->getOemProductInfoState() != DEVICE_OEM_LOADING))) {
+      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task(new ModelMaintenance::OEMWebQuery(_pDevice));
+      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+      pTP->addEvent(task);
+      _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);
     }
   }
 
