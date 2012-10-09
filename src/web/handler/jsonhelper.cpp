@@ -47,6 +47,10 @@ namespace dss {
     result->addProperty("productRevision", _device.getDevice()->getRevisionID());
     result->addProperty("productID", _device.getDevice()->getProductID());
     result->addProperty("hwInfo", _device.getDevice()->getHWInfo());
+    result->addProperty("OemEanNumber", _device.getDevice()->getOemEanAsString());
+    result->addProperty("OemSerialNumber", _device.getDevice()->getOemSerialNumber());
+    result->addProperty("OemPartNumber", _device.getDevice()->getOemPartNumber());
+    result->addProperty("OemProductURL", _device.getDevice()->getOemProductURL());
     if(_device.getDevice()->isPresent()) {
       result->addProperty("meterDSID", _device.getDevice()->getDSMeterDSID().toString());
       result->addProperty("busID", _device.getDevice()->getShortAddress());
