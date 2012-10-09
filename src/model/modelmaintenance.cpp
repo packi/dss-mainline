@@ -47,6 +47,7 @@
 #include "modelpersistence.h"
 #include "busscanner.h"
 #include "scenehelper.h"
+#include "src/ds485/dsdevicebusinterface.h"
 
 namespace dss {
   //=============================================== ApartmentTreeListener
@@ -498,6 +499,18 @@ namespace dss {
           log("Expected at least 3 parameter for ModelEvent::etDeviceSensorValue");
         } else {
           onSensorValue(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
+      case ModelEvent::etDeviceEANReady:
+        if(event.getParameterCount() != 6) {
+          log("Expected 5 parameters for ModelEvent::etDeviceEANReady");
+        } else {
+          onEANReady(pEventWithDSID->getDSID(),
+                     event.getParameter(0),
+                     (const DeviceOEMState_t)event.getParameter(1),
+                     ((unsigned long long)event.getParameter(2)) << 32 | (unsigned long long)event.getParameter(3),
+                     event.getParameter(4),
+                     event.getParameter(5));
         }
         break;
       default:
@@ -1209,6 +1222,23 @@ namespace dss {
       raiseEvent(pEvent);
     } catch(ItemNotFoundException& e) {
       log("onSensorValue: Event index not found: " + std::string(e.what()));
+    }
+  } // onSensorValue
+
+  void ModelMaintenance::onEANReady(dss_dsid_t _dsMeterID,
+                                        const devid_t _deviceID,
+                                        const DeviceOEMState_t& _state,
+                                        const unsigned long long& _eanNumber,
+                                        const int& _serialNumber,
+                                        const int& _partNumber) {
+    try {
+      DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
+      if (_state == DEVICE_OEM_VALID) {
+        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
+      }
+      devRef.getDevice()->setOemInfoState(_state);
+    } catch(std::runtime_error& e) {
+      log(std::string("Error updating OEM data of device: ") + e.what());
     }
   } // onSensorValue
 

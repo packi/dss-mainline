@@ -112,6 +112,13 @@ namespace dss {
     DEVICE_CLASS_WE         = 9
   } DeviceClasses_t;
 
+  typedef enum {
+    DEVICE_OEM_UNKOWN,
+    DEVICE_OEM_NONE,
+    DEVICE_OEM_LOADING,
+    DEVICE_OEM_VALID,
+  } DeviceOEMState_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -144,6 +151,10 @@ namespace dss {
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
+    unsigned long long m_OemEanNumber;
+    uint16_t m_OemSerialNumber;
+    uint8_t m_OemPartNumber;
+    DeviceOEMState_t m_OemState;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
@@ -374,6 +385,11 @@ namespace dss {
     void getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry);
     void setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry);
     bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
+
+    void setOemInfo(const unsigned long long _eanNumber,
+        const uint16_t _serialNumber, const uint8_t _partNumber);
+    void setOemInfoState(const DeviceOEMState_t _state);
+    DeviceOEMState_t getOemInfoState() const { return m_OemState; }
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

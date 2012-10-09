@@ -32,6 +32,7 @@
 #include "src/syncevent.h"
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
+#include "device.h"
 
 namespace dss {
   class Apartment;
@@ -167,6 +168,9 @@ namespace dss {
     void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
     void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
     void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
+    void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
+                      const DeviceOEMState_t& _state, const unsigned long long& _eanNumber,
+                      const int& _serialNumber, const int& _partNumber);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;

@@ -60,7 +60,11 @@ namespace dss {
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
-    m_ButtonID(0)
+    m_ButtonID(0),
+    m_OemEanNumber(0),
+    m_OemSerialNumber(0),
+    m_OemPartNumber(0),
+    m_OemState(DEVICE_OEM_UNKOWN)
     { } // ctor
 
   Device::~Device() {
@@ -1065,5 +1069,24 @@ namespace dss {
     }
 
     return -1;
+  }
+
+  void Device::setOemInfo(const unsigned long long _eanNumber,
+          const uint16_t _serialNumber, const uint8_t _partNumber)
+  {
+    m_OemEanNumber = _eanNumber;
+    m_OemSerialNumber = _serialNumber;
+    m_OemPartNumber = _partNumber;
+
+    dirty();
+  }
+
+  void Device::setOemInfoState(const DeviceOEMState_t _state)
+  {
+    m_OemState = _state;
+
+    if ((m_OemState == DEVICE_OEM_NONE) || (m_OemState == DEVICE_OEM_VALID)) {
+      dirty();
+    }
   }
 } // namespace dss
