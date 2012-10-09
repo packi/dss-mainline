@@ -199,6 +199,7 @@ namespace dss {
       virtual void run();
     private:
       std::string m_EAN;
+	  dss_dsid_t m_dsmId;
       uint16_t m_partNumber;
       devid_t m_deviceAdress;
     };

@@ -337,6 +337,8 @@ namespace dss {
       ModelEvent& event = m_ModelEvents.front();
       ModelEventWithDSID* pEventWithDSID =
         dynamic_cast<ModelEventWithDSID*>(&event);
+      ModelEventWithStrings* pEventWithStrings =
+        dynamic_cast<ModelEventWithStrings*>(&event);
       switch(event.getEventType()) {
       case ModelEvent::etNewDevice:
         assert(pEventWithDSID != NULL);
@@ -513,6 +515,19 @@ namespace dss {
                      ((unsigned long long)event.getParameter(2)) << 32 | (unsigned long long)event.getParameter(3),
                      event.getParameter(4),
                      event.getParameter(5));
+        }
+        break;
+      case ModelEvent::etDeviceOEMDataReady:
+        assert(pEventWithStrings != NULL);
+        if((event.getParameterCount() != 2) && (pEventWithStrings->getStringParameterCount() != 3)) {
+          log("Expected 5 parameters for ModelEvent::etDeviceOEMDataReady");
+        } else {
+          onOEMDataReady(pEventWithDSID->getDSID(),
+                         event.getParameter(0),
+                         (DeviceOEMState_t)event.getParameter(1),
+                         pEventWithStrings->getStringParameter(0),
+                         pEventWithStrings->getStringParameter(1),
+                         pEventWithStrings->getStringParameter(2));
         }
         break;
       default:
@@ -1239,6 +1254,7 @@ namespace dss {
         devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
         // query Webservice
         getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(devRef.getDevice())));
+        devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
       devRef.getDevice()->setOemInfoState(_state);
     } catch(std::runtime_error& e) {
@@ -1248,7 +1264,7 @@ namespace dss {
 
   void ModelMaintenance::onOEMDataReady(dss_dsid_t _dsMeterID,
                                              const devid_t _deviceID,
-                                             const DeviceOEMState_t& _state,
+                                             const DeviceOEMState_t _state,
                                              const std::string& _productName,
                                              const std::string& _iconPath,
                                              const std::string& _productURL) {
@@ -1297,6 +1313,7 @@ namespace dss {
     : Task()
   {
     m_deviceAdress = _device->getShortAddress();
+    m_dsmId = _device->getDSMeterDSID();
     m_EAN = _device->getOemEanAsString();
     m_partNumber = _device->getOemPartNumber();
   }
@@ -1338,13 +1355,26 @@ namespace dss {
       json_object_put(json_request);
       json_tokener_free(tok);
 
+      std::string iconFile = iconPath.substr(iconPath.rfind('/') + 1);
       if (!iconPath.empty()) {
         std::string iconURL = std::string("http://localhost:8124/") + iconPath;
-        std::string iconFile = std::string("/www/pages/images/") + iconPath.substr(iconPath.rfind('/') + 1);
-        res = url.downloadFile(iconURL, iconFile);
+        res = url.downloadFile(iconURL, std::string("/www/pages/images/") + iconFile);
         if (res == 200) {
+          state = DEVICE_OEM_VALID;
         } else {
           Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + intToString(res));
+        }
+      }
+
+      if (state == DEVICE_OEM_VALID) {
+        ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);
+        pEvent->addParameter(m_deviceAdress);
+        pEvent->addParameter(state);
+        pEvent->addStringParameter(productName);
+        pEvent->addStringParameter(iconFile);
+        pEvent->addStringParameter(productURL);
+        if(DSS::hasInstance()) {
+          DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
         }
       }
     }
