@@ -50,6 +50,7 @@
 #include "scenehelper.h"
 #include "src/ds485/dsdevicebusinterface.h"
 #include "url.h"
+#include "boost/filesystem.hpp"
 
 namespace dss {
   //=============================================== ApartmentTreeListener
@@ -1333,7 +1334,7 @@ namespace dss {
   void ModelMaintenance::OEMWebQuery::run()
   {
     std::string oemWebservice;
-    std::string iconBasePath;
+    boost::filesystem::path iconBasePath;
     if(DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
       oemWebservice = DSS::getInstance()->getPropertySystem().getStringValue(
@@ -1357,7 +1358,7 @@ namespace dss {
       json_object* json_request = json_tokener_parse_ex(tok, result.memory, -1);
 
       std::string productName;
-      std::string iconPath;
+      boost::filesystem::path remoteIconPath;
       std::string productURL;
       if (tok->err == json_tokener_success) {
           json_object* obj = json_object_object_get(json_request, "ProductName");
@@ -1367,7 +1368,7 @@ namespace dss {
 
           obj = json_object_object_get(json_request, "IconPath");
           if (obj != NULL) {
-            iconPath = json_object_get_string(obj);
+            remoteIconPath = json_object_get_string(obj);
           }
 
           obj = json_object_object_get(json_request, "URL");
@@ -1378,15 +1379,20 @@ namespace dss {
       json_object_put(json_request);
       json_tokener_free(tok);
 
-      std::string iconFile = iconPath.substr(iconPath.rfind('/') + 1);
-      if (!iconPath.empty()) {
-        std::string iconURL = oemWebservice + iconPath;
-        res = url.downloadFile(iconURL, iconBasePath + iconFile);
-        if (res == 200) {
-          state = DEVICE_OEM_VALID;
-        } else {
+
+      boost::filesystem::path iconFile = remoteIconPath.filename();
+      if (!remoteIconPath.empty()) {
+        std::string iconURL = oemWebservice + remoteIconPath.string();
+        boost::filesystem::path iconPath = iconBasePath / iconFile;
+        res = url.downloadFile(iconURL, iconPath.string());
+        if (res != 200) {
           Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + intToString(res));
+          iconFile.clear();
+          if (boost::filesystem::exists(iconPath)) {
+            boost::filesystem::remove(iconPath);
+          }
         }
+        state = DEVICE_OEM_VALID;
       }
 
       if (state == DEVICE_OEM_VALID) {
@@ -1394,7 +1400,7 @@ namespace dss {
         pEvent->addParameter(m_deviceAdress);
         pEvent->addParameter(state);
         pEvent->addStringParameter(productName);
-        pEvent->addStringParameter(iconFile);
+        pEvent->addStringParameter(iconFile.string());
         pEvent->addStringParameter(productURL);
         if(DSS::hasInstance()) {
           DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
