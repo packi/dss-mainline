@@ -1102,18 +1102,17 @@ namespace dss {
     }
 
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductIcon.empty()) {
-      m_iconPath = "/images/" + m_OemProductIcon;
+      m_iconPath = m_OemProductIcon;
     } else {
       DeviceClasses_t deviceClass = getDeviceClass();
       DeviceTypes_t deviceType = getDeviceType();
       if ((deviceType == DEVICE_TYPE_INVALID) || (deviceClass == DEVICE_CLASS_INVALID)) {
         return;
       }
-      m_iconPath = "/images/";
 
       std::string type = getDeviceTypeString(deviceType);
       std::transform(type.begin(), type.end(), type.begin(), ::tolower);
-      m_iconPath += type;
+      m_iconPath = type;
 
       m_iconPath += "_" + getColorString(deviceClass);
 
