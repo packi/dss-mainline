@@ -29,6 +29,9 @@
 #include "src/logger.h"
 
 #include "src/model/device.h"
+#include "src/model/modelevent.h"
+#include "src/model/modelmaintenance.h"
+#include "dss.h"
 
 namespace dss {
 
@@ -240,4 +243,131 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     return std::make_pair(downstream, upstream);
   }
+
+  std::string DSDeviceBusInterface::OEMDataReader::m_busConnection = "";
+
+  DSDeviceBusInterface::OEMDataReader::OEMDataReader()
+    : m_dsmApiHandle(NULL)
+    , m_deviceAdress(0)
+    , m_dsmId()
+  {
+  }
+
+  DSDeviceBusInterface::OEMDataReader::~OEMDataReader()
+  {
+    if (m_dsmApiHandle != NULL) {
+      DsmApiClose(m_dsmApiHandle);
+      DsmApiCleanup(m_dsmApiHandle);
+      m_dsmApiHandle = NULL;
+    }
+  }
+
+  uint16_t DSDeviceBusInterface::OEMDataReader::getDeviceConfigWord(const dsid_t& _dsm,
+                                                                            dev_t _device,
+                                                                            uint8_t _configClass,
+                                                                            uint8_t _configIndex) const
+  {
+    if (m_dsmApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    uint16_t retVal;
+
+    int ret = DeviceConfig_get_sync_16(m_dsmApiHandle, _dsm,
+                                           _device,
+                                           _configClass,
+                                           _configIndex,
+                                           kDSM_API_TIMEOUT,
+                                           &retVal);
+    DSBusInterface::checkResultCode(ret);
+
+    return retVal;
+  }
+
+  uint8_t DSDeviceBusInterface::OEMDataReader::getDeviceConfig(const dsid_t& _dsm,
+                                                                      dev_t _device,
+                                                                      uint8_t _configClass,
+                                                                      uint8_t _configIndex) const
+  {
+    if (m_dsmApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    uint8_t retVal;
+
+    int ret = DeviceConfig_get_sync_8(m_dsmApiHandle, _dsm,
+                                      _device,
+                                      _configClass,
+                                      _configIndex,
+                                      kDSM_API_TIMEOUT,
+                                      &retVal);
+    DSBusInterface::checkResultCode(ret);
+
+    return retVal;
+  }
+
+  void DSDeviceBusInterface::OEMDataReader::run()
+  {
+    uint64_t ean = 0;
+    uint16_t serialNumber = 0;
+    uint8_t partNumber = 0;
+    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    dsid_t dsmId;
+    dsid_helper::toDsmapiDsid(m_dsmId, dsmId);
+
+    m_dsmApiHandle = DsmApiInitialize();
+
+    int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
+    if (result < 0) {
+      throw std::runtime_error(std::string("OEMDataReader: Unable to open connection to: ") + m_busConnection);
+    }
+
+    try {
+      // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
+      uint16_t result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2e);
+
+      if ((result == 0x0000) || (result == 0xFFFF)) {
+        // no EAN programmed
+        state = DEVICE_OEM_NONE;
+      } else {
+        // EAN programmed
+        ean |= ((long long unsigned int)result << 32);
+
+        result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2a);
+        ean |= result;
+
+        result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2c);
+        ean |= ((long long unsigned int)result << 16);
+
+        serialNumber = getDeviceConfigWord(dsmId, m_deviceAdress, 1, 0x1c);
+
+        partNumber = getDeviceConfig(dsmId, m_deviceAdress, 1, 0x1e);
+
+        state = DEVICE_OEM_VALID;
+      }
+    } catch (BusApiError& er) {
+      // Bus error
+      Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what(), lsWarning);
+      return;
+    }
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceEANReady,
+                                                m_dsmId);
+    pEvent->addParameter(m_deviceAdress);
+    pEvent->addParameter(state);
+    pEvent->addParameter(ean >> 32);
+    pEvent->addParameter(ean & 0xFFFFFFFF);
+    pEvent->addParameter(serialNumber);
+    pEvent->addParameter(partNumber);
+    if(DSS::hasInstance()) {
+      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    }
+  }
+
+  void DSDeviceBusInterface::OEMDataReader::setup(boost::shared_ptr<Device> _device)
+  {
+    m_deviceAdress = _device->getShortAddress();
+    m_dsmId = _device->getDSMeterDSID();
+  }
+
 } // namespace dss

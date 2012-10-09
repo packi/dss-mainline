@@ -27,15 +27,47 @@
 #include "src/businterface.h"
 
 #include "dsbusinterfaceobj.h"
+#include <boost/shared_ptr.hpp>
+#include "taskprocessor.h"
+#include "dsidhelper.h"
+
+using boost::shared_ptr;
 
 namespace dss {
+  class Device;
 
   class DSDeviceBusInterface : public DSBusInterfaceObj,
                                public DeviceBusInterface {
   public:
-    DSDeviceBusInterface()
+    class OEMDataReader : public Task {
+    public:
+      OEMDataReader();
+      virtual ~OEMDataReader();
+      virtual void run();
+      virtual void setup(boost::shared_ptr<Device> _device);
+
+      uint16_t getDeviceConfigWord(const dsid_t& _dsm,
+                                      dev_t _device,
+                                      uint8_t _configClass,
+                                      uint8_t _configIndex) const;
+      uint8_t getDeviceConfig(const dsid_t& _dsm,
+                                dev_t _device,
+                                uint8_t _configClass,
+                                uint8_t _configIndex) const;
+      static void setBusConnection(const std::string& _connection)
+          { m_busConnection = _connection; }
+    private:
+      static std::string m_busConnection;
+      DsmApiHandle_t m_dsmApiHandle;
+      devid_t m_deviceAdress;
+      dss_dsid_t m_dsmId;
+    };
+
+    DSDeviceBusInterface(const std::string& _busConnection)
     : DSBusInterfaceObj()
-    { }
+    {
+      DSDeviceBusInterface::OEMDataReader::setBusConnection(_busConnection);
+    }
 
     virtual uint8_t getDeviceConfig(const Device& _device,
                                     uint8_t _configClass,

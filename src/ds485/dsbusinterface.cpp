@@ -70,7 +70,7 @@ namespace dss {
             ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
     }
     m_pActionRequestInterface.reset(new DSActionRequest());
-    m_pDeviceBusInterface.reset(new DSDeviceBusInterface());
+    m_pDeviceBusInterface.reset(new DSDeviceBusInterface(m_connectionURI));
     m_pMeteringBusInterface.reset(new DSMeteringBusInterface());
     m_pStructureQueryBusInterface.reset(new DSStructureQueryBusInterface());
     m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface());
