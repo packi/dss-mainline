@@ -658,6 +658,10 @@ namespace dss {
     if (m_properties.has("originDeviceID")) {
       originDevice = dss_dsid_t::fromString(m_properties.get("originDeviceID"));
     }
+    std::string forced;
+    if (m_properties.has("forced")) {
+      forced = m_properties.get("forced");
+    }
 
     if (zone.empty() && group.empty() && scene.empty()) {
       return false;
@@ -699,6 +703,14 @@ namespace dss {
       iDevice = triggerDSID->getAsString();
       if (!iDevice.empty() && (iDevice != "-1") &&
          (iDevice != originDevice.toString())) {
+        return false;
+      }
+    }
+
+    PropertyNodePtr forcedFlag = _triggerProp->getPropertyByName("forced");
+    if (forcedFlag) {
+      std::string iForced = forcedFlag->getAsString();
+      if (!forced.empty() && (forced.compare(iForced) != 0)) {
         return false;
       }
     }
