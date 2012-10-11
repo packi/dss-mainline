@@ -185,7 +185,8 @@ namespace dss {
                       const int& _serialNumber, const int& _partNumber);
     void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
-                           const std::string& _iconPath, const std::string& _productURL);
+                           const std::string& _iconPath, const std::string& _productURL,
+                           const std::string& _defaultName);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;

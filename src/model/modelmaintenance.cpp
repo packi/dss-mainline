@@ -532,7 +532,7 @@ namespace dss {
         break;
       case ModelEvent::etDeviceOEMDataReady:
         assert(pEventWithStrings != NULL);
-        if((event.getParameterCount() != 2) && (pEventWithStrings->getStringParameterCount() != 3)) {
+        if((event.getParameterCount() != 2) && (pEventWithStrings->getStringParameterCount() != 4)) {
           log("Expected 5 parameters for ModelEvent::etDeviceOEMDataReady");
         } else {
           onOEMDataReady(pEventWithDSID->getDSID(),
@@ -540,7 +540,8 @@ namespace dss {
                          (DeviceOEMState_t)event.getParameter(1),
                          pEventWithStrings->getStringParameter(0),
                          pEventWithStrings->getStringParameter(1),
-                         pEventWithStrings->getStringParameter(2));
+                         pEventWithStrings->getStringParameter(2),
+                         pEventWithStrings->getStringParameter(3));
         }
         break;
       default:
@@ -1280,11 +1281,15 @@ namespace dss {
                                              const DeviceOEMState_t _state,
                                              const std::string& _productName,
                                              const std::string& _iconPath,
-                                             const std::string& _productURL) {
+                                             const std::string& _productURL,
+                                             const std::string& _defaultName) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       if (_state == DEVICE_OEM_VALID) {
         devRef.getDevice()->setOemProductInfo(_productName, _iconPath, _productURL);
+        if (devRef.getDevice()->getName().empty()) {
+          devRef.getDevice()->setName(_defaultName);
+        }
       }
       devRef.getDevice()->setOemProductInfoState(_state);
     } catch(std::runtime_error& e) {
@@ -1360,6 +1365,7 @@ namespace dss {
       std::string productName;
       boost::filesystem::path remoteIconPath;
       std::string productURL;
+      std::string defaultName;
       if (tok->err == json_tokener_success) {
           json_object* obj = json_object_object_get(json_request, "ProductName");
           if (obj != NULL) {
@@ -1374,6 +1380,11 @@ namespace dss {
           obj = json_object_object_get(json_request, "URL");
           if (obj != NULL) {
             productURL = json_object_get_string(obj);
+          }
+
+          obj = json_object_object_get(json_request, "Name");
+          if (obj != NULL) {
+            defaultName = json_object_get_string(obj);
           }
       }
       json_object_put(json_request);
@@ -1402,6 +1413,7 @@ namespace dss {
         pEvent->addStringParameter(productName);
         pEvent->addStringParameter(iconFile.string());
         pEvent->addStringParameter(productURL);
+        pEvent->addStringParameter(defaultName);
         if(DSS::hasInstance()) {
           DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
         }
