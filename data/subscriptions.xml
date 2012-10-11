@@ -5,6 +5,9 @@
   <subscription event-name="sendmail" handler-name="sendmail">
   </subscription>
 
+  <subscription event-name="undoScene" handler-name="system_trigger">
+  </subscription>
+
   <!-- Examples -->
   <!--
   <subscription event-name="callScene" handler-name="raise_event">

@@ -57,6 +57,7 @@ namespace dss {
       dss_dsid_t m_evtSrcDSID;
 
       bool checkSceneZone(PropertyNodePtr _triggerProp);
+      bool checkUndoSceneZone(PropertyNodePtr _triggerProp);
       bool checkDeviceScene(PropertyNodePtr _triggerProp);
       bool checkDeviceSensor(PropertyNodePtr _triggerProp);
       bool checkDevice(PropertyNodePtr _tiggerProp);
@@ -78,6 +79,7 @@ namespace dss {
       static void *staticThreadProc(void *arg);
       boost::shared_ptr<Device> getDeviceFromNode(PropertyNodePtr _actionNode);
       void executeZoneScene(PropertyNodePtr _actionNode);
+      void executeZoneUndoScene(PropertyNodePtr _actionNode);
       void executeDeviceScene(PropertyNodePtr _actionNode);
       void executeDeviceValue(PropertyNodePtr _actionNode);
       void executeDeviceBlink(PropertyNodePtr _actionNode);

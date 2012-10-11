@@ -43,6 +43,7 @@
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500
+#define ACTION_DURATION_ZONE_UNDO_SCENE 1000
 #define ACTION_DURATION_DEVICE_SCENE    1000
 #define ACTION_DURATION_DEVICE_VALUE    1000
 #define ACTION_DURATION_DEVICE_BLINK    1000
@@ -106,6 +107,52 @@ namespace dss {
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeZoneScene: could not call scene on zone " +
+              std::string(e.what()));
+    }
+  }
+
+  void SystemEventActionExecute::executeZoneUndoScene(PropertyNodePtr _actionNode) {
+    try {
+      int zoneId;
+      int groupId;
+      int sceneId;
+
+      PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
+      if (oZoneNode == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute:: "
+                "executeZoneUndoScene - missing zone parameter", lsError);
+        return;
+      } else {
+        zoneId = oZoneNode->getIntegerValue();
+      }
+
+      PropertyNodePtr oGroupNode = _actionNode->getPropertyByName("group");
+      if (oGroupNode == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute:: "
+                "executeZoneUndoScene - missing group parameter", lsError);
+        return;
+      } else {
+        groupId = oGroupNode->getIntegerValue();
+      }
+
+      PropertyNodePtr oSceneNode = _actionNode->getPropertyByName("scene");
+      if (oSceneNode == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                "executeZoneUndoScene: missing scene parameter", lsError);
+        return;
+      } else {
+        sceneId = oSceneNode->getIntegerValue();
+      }
+
+      boost::shared_ptr<Zone> zone;
+      if (DSS::hasInstance()) {
+        zone = DSS::getInstance()->getApartment().getZone(zoneId);
+        boost::shared_ptr<Group> group = zone->getGroup(groupId);
+        group->undoScene(IDeviceInterface::coEvent, sceneId);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeZoneUndoScene: could not undo scene on zone " +
               std::string(e.what()));
     }
   }
@@ -317,6 +364,9 @@ namespace dss {
         if (sActionType == "zone-scene") {
           executeZoneScene(_actionNode);
           return ACTION_DURATION_ZONE_SCENE;
+        } else if (sActionType == "undo-zone-scene") {
+          executeZoneUndoScene(_actionNode);
+          return ACTION_DURATION_ZONE_UNDO_SCENE;
         } else if (sActionType == "device-scene") {
           executeDeviceScene(_actionNode);
           return ACTION_DURATION_DEVICE_SCENE;
@@ -661,6 +711,75 @@ namespace dss {
     return true;
   }
 
+  bool SystemTrigger::checkUndoSceneZone(PropertyNodePtr _triggerProp) {
+    if (m_evtName != "undoScene") {
+      return false;
+    }
+
+    if (!m_evtSrcIsGroup) {
+      return false;
+    }
+
+    std::string zone = intToString(m_evtSrcZone);
+    std::string group = intToString(m_evtSrcGroup);
+    std::string scene = m_properties.get("sceneID");
+    dss_dsid_t originDevice;
+    if (m_properties.has("originDeviceID")) {
+      originDevice = dss_dsid_t::fromString(m_properties.get("originDeviceID"));
+    }
+
+    if (zone.empty() && group.empty() && scene.empty()) {
+      return false;
+    }
+
+    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName("zone");
+    if (triggerZone == NULL) {
+      return false;
+    }
+
+    std::string iZone = triggerZone->getAsString();
+    if ((strToIntDef(iZone, -1) >= 0) && (iZone != zone)) {
+      return false;
+    }
+
+    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName("group");
+    if (triggerGroup == NULL) {
+      return false;
+    }
+
+    std::string iGroup = triggerGroup->getAsString();
+    if ((strToIntDef(iGroup, -1) >= 0) && (iGroup != group)) {
+      return false;
+    }
+
+    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName("scene");
+    if (triggerScene == NULL) {
+      return false;
+    }
+
+    std::string iScene = triggerScene->getAsString();
+    if ((strToIntDef(iScene, -1) >= 0) && (iScene != scene)) {
+        return false;
+    }
+
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
+    std::string iDevice;
+    if (triggerDSID != NULL) {
+      iDevice = triggerDSID->getAsString();
+      if (!iDevice.empty() && (iDevice != "-1") &&
+         (iDevice != originDevice.toString())) {
+        return false;
+      }
+    }
+
+    Logger::getInstance()->log("SystemTrigger::"
+            "checkUndoSceneZone: *** Match: UndoScene Zone: " + iZone +
+            ", Group: " + iGroup + ", Scene: " +
+            iScene + ", Origin: " + iDevice);
+
+    return true;
+  }
+
   bool SystemTrigger::checkDeviceScene(PropertyNodePtr _triggerProp) {
     if (m_evtName != "callScene") {
       return false;
@@ -857,6 +976,10 @@ namespace dss {
       std::string triggerValue = triggerType->getAsString();
       if (triggerValue == "zone-scene") {
         if (checkSceneZone(triggerProp)) {
+          return true;
+        }
+      } else if (triggerValue == "undo-zone-scene") {
+        if (checkUndoSceneZone(triggerProp)) {
           return true;
         }
       } else if (triggerValue == "device-scene") {
