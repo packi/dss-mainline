@@ -48,8 +48,6 @@ long URL::request(std::string url, bool HTTP_POST) {
 
   curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
-  curl_easy_setopt(curl_handle, CURLOPT_NOBODY, 1);
-
   res = curl_easy_perform(curl_handle);
   if (res != CURLE_OK) {
     Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
