@@ -1106,13 +1106,15 @@ namespace dss {
     } else {
       DeviceClasses_t deviceClass = getDeviceClass();
       DeviceTypes_t deviceType = getDeviceType();
-      if ((deviceType == DEVICE_TYPE_INVALID) || (deviceClass == DEVICE_CLASS_INVALID)) {
+      if (deviceClass == DEVICE_CLASS_INVALID) {
         return;
       }
 
-      std::string type = getDeviceTypeString(deviceType);
-      std::transform(type.begin(), type.end(), type.begin(), ::tolower);
-      m_iconPath = type;
+      m_iconPath = getDeviceTypeString(deviceType);
+      std::transform(m_iconPath.begin(), m_iconPath.end(), m_iconPath.begin(), ::tolower);
+      if (m_iconPath.empty()) {
+        m_iconPath = "star";
+      }
 
       m_iconPath += "_" + getColorString(deviceClass);
 
