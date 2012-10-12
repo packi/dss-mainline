@@ -1399,8 +1399,13 @@ namespace dss {
         if (res != 200) {
           Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + intToString(res));
           iconFile.clear();
-          if (boost::filesystem::exists(iconPath)) {
-            boost::filesystem::remove(iconPath);
+          try {
+            if (boost::filesystem::exists(iconPath)) {
+              boost::filesystem::remove(iconPath);
+            }
+          } catch (boost::filesystem::filesystem_error& e) {
+            Logger::getInstance()->log("OEMWebQuery::run: cannot delete "
+                "(incomplete) icon: " + std::string(e.what()), lsWarning);
           }
         }
         state = DEVICE_OEM_VALID;
