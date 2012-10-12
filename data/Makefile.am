@@ -3,6 +3,9 @@ dist_dssdata_DATA = \
 	$(top_srcdir)/data/config.xml \
 	$(top_srcdir)/data/subscriptions.xml
 
+dssdataimagesdir = $(pkgdatadir)/data/images
+include $(top_srcdir)/data/images.list
+
 dssjsdir = $(pkgdatadir)/data/scripts
 dist_dssjs_DATA = \
 	$(top_srcdir)/data/scripts/solar_computer.js \

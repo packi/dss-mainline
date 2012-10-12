@@ -160,7 +160,7 @@ namespace dss {
       DSS::getInstance()->getPropertySystem().setStringValue(
           getConfigPropertyBasePath() + "iconBasePath",
           DSS::getInstance()->getPropertySystem().getStringValue(
-              "/config/webrootdirectory") + "images/", true, false);
+              "/config/datadirectory") + "images/", true, false);
 
       checkConfigFile(filename);
 
