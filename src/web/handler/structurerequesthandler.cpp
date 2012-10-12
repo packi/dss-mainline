@@ -95,19 +95,21 @@ namespace dss {
                 return failure("Could not find partner device with dsid '" + next.toString() + "'");
               }
             } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
-              unsigned long long ean = dev->getOemEan();
               uint16_t serialNr = dev->getOemSerialNumber();
-              dss_dsid_t dsmId = dev->getDSMeterDSID();
-              std::vector<boost::shared_ptr<Device> > devices = DSS::getInstance()->getApartment().getDevicesVector();
-              foreach (const boost::shared_ptr<Device>& device, devices) {
-                if ((device->getDSID() != deviceID) &&
-                    device->isPresent() &&
-                    (device->getDSMeterDSID() == dsmId) &&
-                    (device->getOemInfoState() == DEVICE_OEM_VALID) &&
-                    (device->getOemEan() == ean) &&
-                    (device->getOemSerialNumber() == serialNr)) {
-                  manipulator.addDeviceToZone(device, zone);
-                  movedDevices.push_back(device);
+              if (serialNr > 0) {
+                unsigned long long ean = dev->getOemEan();
+                dss_dsid_t dsmId = dev->getDSMeterDSID();
+                std::vector<boost::shared_ptr<Device> > devices = DSS::getInstance()->getApartment().getDevicesVector();
+                foreach (const boost::shared_ptr<Device>& device, devices) {
+                  if ((device->getDSID() != deviceID) &&
+                      device->isPresent() &&
+                      (device->getDSMeterDSID() == dsmId) &&
+                      (device->getOemInfoState() == DEVICE_OEM_VALID) &&
+                      (device->getOemEan() == ean) &&
+                      (device->getOemSerialNumber() == serialNr)) {
+                    manipulator.addDeviceToZone(device, zone);
+                    movedDevices.push_back(device);
+                  }
                 }
               }
             }
