@@ -1271,6 +1271,7 @@ namespace dss {
         devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
       devRef.getDevice()->setOemInfoState(_state);
+      devRef.getDevice()->setOemProductInfoState(_state);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what());
     }
