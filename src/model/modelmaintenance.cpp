@@ -1353,6 +1353,10 @@ namespace dss {
     URL url;
     URL::URLResult result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    std::string productName;
+    boost::filesystem::path iconFile;
+    std::string productURL;
+    std::string defaultName;
 
     std::string eanURL = oemWebservice + std::string("product/") + m_EAN +
                          "/" + intToString(m_partNumber);
@@ -1365,10 +1369,7 @@ namespace dss {
       tok = json_tokener_new();
       json_object* json_request = json_tokener_parse_ex(tok, result.memory, -1);
 
-      std::string productName;
       boost::filesystem::path remoteIconPath;
-      std::string productURL;
-      std::string defaultName;
       if (tok->err == json_tokener_success) {
           json_object* obj = json_object_object_get(json_request, "ProductName");
           if (obj != NULL) {
@@ -1394,7 +1395,7 @@ namespace dss {
       json_tokener_free(tok);
 
 
-      boost::filesystem::path iconFile = remoteIconPath.filename();
+      iconFile = remoteIconPath.filename();
       if (!remoteIconPath.empty()) {
         std::string iconURL = oemWebservice + remoteIconPath.string();
         boost::filesystem::path iconPath = iconBasePath / iconFile;
@@ -1411,20 +1412,8 @@ namespace dss {
             Logger::getInstance()->log("OEMWebQuery::run: cannot delete "
                 "(incomplete) icon: " + std::string(e.what()), lsWarning);
           }
-        }
-        state = DEVICE_OEM_VALID;
-      }
-
-      if (state == DEVICE_OEM_VALID) {
-        ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);
-        pEvent->addParameter(m_deviceAdress);
-        pEvent->addParameter(state);
-        pEvent->addStringParameter(productName);
-        pEvent->addStringParameter(iconFile.string());
-        pEvent->addStringParameter(productURL);
-        pEvent->addStringParameter(defaultName);
-        if(DSS::hasInstance()) {
-          DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+        } else {
+          state = DEVICE_OEM_VALID;
         }
       }
     } else {
@@ -1433,6 +1422,17 @@ namespace dss {
     }
     if (result.size) {
       free(result.memory);
+    }
+
+    ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);
+    pEvent->addParameter(m_deviceAdress);
+    pEvent->addParameter(state);
+    pEvent->addStringParameter(productName);
+    pEvent->addStringParameter(iconFile.string());
+    pEvent->addStringParameter(productURL);
+    pEvent->addStringParameter(defaultName);
+    if(DSS::hasInstance()) {
+      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }
   }
 
