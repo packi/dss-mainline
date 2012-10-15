@@ -910,6 +910,11 @@ namespace dss {
     if (_addToArea) {
       setSceneValue(areaOffScene, 0);
     }
+
+    int areaStopScene = areaOnScene - SceneA11 + SceneStopA1;
+    getDeviceSceneMode(areaStopScene, sceneSpec);
+    sceneSpec.dontcare = !_addToArea;
+    setDeviceSceneMode(areaStopScene, sceneSpec);
   }
 
   void Device::setButtonInputMode(const uint8_t _value) {
