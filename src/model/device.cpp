@@ -1203,7 +1203,8 @@ namespace dss {
       features.syncButtonID = true;
     } else if ((devCls == DEVICE_CLASS_GE) && // GE SDS-200
                (devType == DEVICE_TYPE_SDS) &&
-               (devNumber == 200) && this->hasMultibuttons() &&
+               ((devNumber == 200) || (devNumber == 220)) &&
+               this->hasMultibuttons() &&
                (m_ButtonInputIndex == 0)) {
       features.pairing = true;
     }
