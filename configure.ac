@@ -71,6 +71,52 @@ MT_OPTION([bonjour], [disable],
             AC_DEFINE([WITH_BONJOUR], [1], [ build with bonjour support ])
           ],[])
 
+MT_OPTION([sendmail], [disable],
+          [build dSS without sendmail support (default: enabled)],
+          [], [])
+
+MT_OPTION([mail-spool], [enable],
+          [build dSS with mail spool directory support (default: disabled)],
+          [
+            AC_DEFINE([HAVE_MAILSPOOL], [1], [ build with mail spool support ])
+          ], [])
+
+if (test "x$SENDMAIL_OPTION_ENABLED" = "xyes") &&
+   (test "x$SENDMAIL_OPTION_REQUESTED" = "xyes") &&
+   (test "x$MAIL_SPOOL_OPTION_ENABLED" = "xyes") &&
+   (test "x$MAIL_SPOOL_OPTION_REQUESTED" = "xyes"); then
+    AC_MSG_ERROR([You enabled the sendmail client option and also the mail spool directory option, please select one of the two!])
+fi
+
+if (test "x$MAIL_SPOOL_OPTION_ENABLED" = "xyes"); then
+    SENDMAIL_OPTION_ENABLED=no
+    AC_MSG_NOTICE([Disabling sendmail because mail-spool feature was requested])
+fi
+
+SENDMAIL=
+AC_ARG_WITH(sendmail-location,
+    AC_HELP_STRING([--with-sendmail-location=SENDMAIL], [hardcode location of sendmail binary, no checks will be performed (useful for cross compiling)]),
+    [
+        if test "x$SENDMAIL_OPTION_ENABLED" = "xyes"; then
+            if test "x$withval" != "x"; then
+                AC_MSG_NOTICE([Hardcoding sendmail location to $withval])
+                SENDMAIL="$withval"
+                AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
+            fi
+        fi
+    ])
+
+MAILDIR=
+AC_ARG_WITH(mail-dir,
+    AC_HELP_STRING([--with-mail-dir=MAILDIR], [location of mail directory)]),
+    [
+        if test "x$withval" != "x"; then
+            AC_MSG_NOTICE([Setting mail directory to $withval])
+            MAILDIR="$withval"
+        fi
+    ])
+AC_DEFINE_UNQUOTED([MAILDIR], ["$MAILDIR"], [mail queue directory])
+
 AC_ARG_WITH(dss-data,
     AC_HELP_STRING([--with-dss-data=DIR], [use DIR as dSS data directory]),
     [
@@ -122,18 +168,6 @@ AC_ARG_WITH(js-pkgconfig,
         if test "x$withval" != "x"; then
             AC_MSG_NOTICE([Will also search for packages in $withval])
             export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$withval
-        fi
-    ])
-
-
-SENDMAIL=
-AC_ARG_WITH(sendmail-location,
-    AC_HELP_STRING([--with-sendmail-location=SENDMAIL], [hardcode location of sendmail binary, no checks will be performed (useful for cross compiling)]),
-    [
-        if test "x$withval" != "x"; then
-            AC_MSG_NOTICE([Hardcoding sendmail location to $withval])
-            SENDMAIL="$withval"
-            AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
         fi
     ])
 
@@ -385,15 +419,6 @@ if test "x$LIBTCMALLOC_OPTION_ENABLED" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_LIBTCMALLOC, test "x$WITH_LIBTCMALLOC" = "xyes")
 
-if test "x$SENDMAIL" = "x"; then
-    AC_PATH_PROG(SENDMAIL, sendmail, no)
-    if test "x$SENDMAIL" = "xno"; then
-        SENDMAIL=
-    else
-        AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
-    fi
-fi
-AC_DEFINE_UNQUOTED([SENDMAIL], ["$SENDMAIL"], [location of the sendmail program])
 
 AC_PATH_PROG(DOXYGEN, doxygen, no)
 if test "x$DOXYGEN" = "xno"; then
@@ -416,6 +441,18 @@ if test "x$GCOV_REPORT" = "xyes"; then
     fi
     AC_SUBST(GENHTML)
 fi
+
+
+if (test "x$SENDMAIL_OPTION_ENABLED" = "xyes") && (test "x$SENDMAIL" = "x"); then
+    AC_PATH_PROG(SENDMAIL, sendmail, no)
+    if test "x$SENDMAIL" = "xno"; then
+        SENDMAIL=
+    else
+        AC_DEFINE([HAVE_SENDMAIL], [1], [sendmail program is available])
+    fi
+fi
+AC_DEFINE_UNQUOTED([SENDMAIL], ["$SENDMAIL"], [location of the sendmail program])
+
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
