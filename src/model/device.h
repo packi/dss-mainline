@@ -112,6 +112,13 @@ namespace dss {
     DEVICE_CLASS_WE         = 9
   } DeviceClasses_t;
 
+  typedef enum {
+    DEVICE_OEM_UNKOWN,
+    DEVICE_OEM_NONE,
+    DEVICE_OEM_LOADING,
+    DEVICE_OEM_VALID,
+  } DeviceOEMState_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -144,9 +151,19 @@ namespace dss {
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
+    unsigned long long m_OemEanNumber;
+    uint16_t m_OemSerialNumber;
+    uint8_t m_OemPartNumber;
+    DeviceOEMState_t m_OemState;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
+    std::string m_HWInfo;
+    std::string m_iconPath;
+    DeviceOEMState_t m_OemProductInfoState;
+    std::string m_OemProductName;
+    std::string m_OemProductIcon;
+    std::string m_OemProductURL;
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -154,6 +171,8 @@ namespace dss {
 
     void fillSensorTable(const int _productId);
     bool hasExtendendSceneTable();
+    void calculateHWInfo();
+    void updateIconPath();
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
@@ -244,6 +263,9 @@ namespace dss {
      * \c apartment.xml
      */
     void setName(const std::string& _name);
+
+    const std::string& getHWInfo() const { return m_HWInfo; }
+    const std::string& getIconPath() const { return m_iconPath; }
 
     /** Returns the group bitmask (1 based) of the device */
     std::bitset<63>& getGroupBitmask();
@@ -374,6 +396,32 @@ namespace dss {
     void getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry);
     void setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry);
     bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
+
+    void setOemInfo(const unsigned long long _eanNumber,
+        const uint16_t _serialNumber, const uint8_t _partNumber);
+    void setOemInfoState(const DeviceOEMState_t _state);
+
+    unsigned long long getOemEan() const { return m_OemEanNumber; }
+    std::string getOemEanAsString() const { return unsignedLongIntToString(m_OemEanNumber); }
+    DeviceOEMState_t getOemInfoState() const { return m_OemState; }
+    std::string getOemStateAsString() const { return oemStateToString(m_OemState); }
+    static std::string oemStateToString(const DeviceOEMState_t _state);
+    uint16_t getOemSerialNumber() const { return m_OemSerialNumber; }
+    uint8_t getOemPartNumber() const { return m_OemPartNumber; }
+
+    DeviceOEMState_t getOemStateFromString(const char* _string) const;
+
+    static const std::string getDeviceTypeString(const DeviceTypes_t _type);
+    static const std::string getDeviceClassString(const DeviceClasses_t _class);
+    static const std::string getColorString(const int _class);
+
+    void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL);
+    void setOemProductInfoState(const DeviceOEMState_t _state);
+    std::string getOemProductInfoStateAsString() const { return oemStateToString(m_OemProductInfoState); }
+    const DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
+    const std::string& getOemProductName() const { return m_OemProductName; }
+    const std::string& getOemProductIcon() const { return m_OemProductIcon; }
+    const std::string& getOemProductURL() const { return m_OemProductURL; }
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

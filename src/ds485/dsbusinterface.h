@@ -221,6 +221,8 @@ namespace dss {
     static void checkBroadcastResultCode(const int _resultCode);
 
     virtual void initialize();
+
+    virtual const std::string getConnectionURI() { return m_connectionURI; }
   }; // DSBusInterface
 
 } // namespace dss

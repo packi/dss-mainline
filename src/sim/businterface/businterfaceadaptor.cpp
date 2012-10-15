@@ -795,5 +795,8 @@ namespace dss {
     return m_pImplementation->getActionRequestInterface();
   } // getActionRequestInterface
 
+  const std::string BusInterfaceAdaptor::getConnectionURI() {
+    return m_pInnerBusInterface->getConnectionURI();
+  }
 
 } // namespace dss

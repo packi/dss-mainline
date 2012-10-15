@@ -89,6 +89,28 @@ namespace dss {
     return _default;
   } // strToUIntDef
 
+  unsigned long long strToULongLong(const std::string& _strValue) {
+    if(!_strValue.empty()) {
+      char* endp;
+      unsigned long long result = strtoull(_strValue.c_str(), &endp, 0);
+      if(*endp == '\0') {
+        return result;
+      }
+    }
+    throw std::invalid_argument(std::string("strToUInt: Could not parse value: '") + _strValue + "'");
+  } // strToULongLong
+
+  unsigned long long strToULongLongDef(const std::string& _strValue, const unsigned int _default) {
+    if(!_strValue.empty()) {
+      char* endp;
+      unsigned long long result = strtoull(_strValue.c_str(), &endp, 0);
+      if(*endp == '\0') {
+        return result;
+      }
+    }
+    return _default;
+  } // strToULongLongDef
+
   double strToDouble(const std::string& _strValue) {
     if(!_strValue.empty()) {
       char* endp;
@@ -135,6 +157,12 @@ namespace dss {
   std::string unsignedLongIntToHexString(const unsigned long long _value) {
     std::stringstream sstream;
     sstream << std::hex << _value;
+    return sstream.str();
+  }
+
+  std::string unsignedLongIntToString(const unsigned long long _value) {
+    std::stringstream sstream;
+    sstream << _value;
     return sstream.str();
   }
 

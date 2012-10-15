@@ -53,6 +53,8 @@ namespace dss {
                     etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
                     etDeviceSensorEvent, /**< A device has sent a sensor event */
                     etDeviceSensorValue, /**< A device has sent a new sensor value */
+                    etDeviceEANReady, /** OEM data has finished reading out from device */
+                    etDeviceOEMDataReady, /** OEM data has been retrieved from webservice */
                  } EventType;
   private:
     EventType m_EventType;
@@ -88,6 +90,19 @@ namespace dss {
   private:
     dss_dsid_t m_DSID;
   }; // ModelEventWithDSID
+
+  class ModelEventWithStrings : public ModelEventWithDSID {
+  public:
+    ModelEventWithStrings(EventType _type, const dss_dsid_t& _dsid)
+      : ModelEventWithDSID(_type, _dsid)
+    { }
+
+    void addStringParameter(const std::string& _param) { m_StringParameter.push_back(_param); }
+    const std::string& getStringParameter(const int _index) const { return m_StringParameter.at(_index); }
+    int getStringParameterCount() const { return m_StringParameter.size(); }
+  private:
+    std::vector<std::string> m_StringParameter;
+  };
 
 } // namespace dss
 

@@ -24,6 +24,7 @@
 #define __EVENTINTERPRETERSYSTEMPLUGINS_H__
 
 #include "eventinterpreterplugins.h"
+#include "taskprocessor.h"
 
 #include <pthread.h>
 #include "src/ds485types.h"
@@ -31,7 +32,7 @@
 namespace dss {
   class Device;
 
-  class SystemEvent {
+  class SystemEvent : public Task {
     public:
       SystemEvent();
       virtual ~SystemEvent();
@@ -103,29 +104,7 @@ namespace dss {
       virtual bool setup(Event& _event);
   };
 
-  class SystemEventProcessor {
-    public:
-      SystemEventProcessor();
-      ~SystemEventProcessor();
-      void addEvent(boost::shared_ptr<SystemEvent> event);
-    private:
-      std::list<boost::shared_ptr<SystemEvent> > m_eventList;
-      mutable pthread_mutex_t m_eventListMutex;
-      pthread_cond_t m_eventWakeupCondition;
-      pthread_t m_eventProcessorThread;
-      bool m_shutdownFlag;
-
-      void eventProcessorThread();
-      static void *staticThreadProc(void *arg);
-
-      void lockList();
-      void unlockList();
-    protected:
-      bool startThread();
-  };
-
-
-  class EventInterpreterPluginActionExecute : public SystemEventProcessor,
+  class EventInterpreterPluginActionExecute : public TaskProcessor,
                                               public EventInterpreterPlugin {
     public:
       EventInterpreterPluginActionExecute(EventInterpreter* _pInterpreter);
@@ -133,7 +112,7 @@ namespace dss {
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
-  class EventInterpreterPluginHighlevelEvent : public SystemEventProcessor,
+  class EventInterpreterPluginHighlevelEvent : public TaskProcessor,
                                                public EventInterpreterPlugin {
     public:
       EventInterpreterPluginHighlevelEvent(EventInterpreter* _pInterpreter);
@@ -142,7 +121,7 @@ namespace dss {
   };
 
   class EventInterpreterPluginSystemTrigger : 
-                                            public SystemEventProcessor,
+                                            public TaskProcessor,
                                             public EventInterpreterPlugin {
     public:
       EventInterpreterPluginSystemTrigger(EventInterpreter* _pInterpreter);

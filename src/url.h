@@ -28,8 +28,16 @@
 namespace dss {
   class URL {
     public:
-        URL();
-        long request(std::string url, bool HTTP_POST = false);
+      struct URLResult {
+        char* memory;
+        size_t size;
+        URLResult() : memory(NULL), size(0) {}
+      };
+      URL();
+      long request(std::string url, bool HTTP_POST = false, struct URLResult* result = NULL);
+      long downloadFile(std::string url, std::string filename);
+    private:
+      static size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp);
   };
 };
 

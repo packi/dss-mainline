@@ -33,8 +33,12 @@
 #include "src/model/group.h"
 #include "src/model/set.h"
 #include "src/model/device.h"
+#include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/modelmaintenance.h"
+
+#include "foreach.h"
+#include "jsonhelper.h"
 
 namespace dss {
 
@@ -62,6 +66,8 @@ namespace dss {
       }
 
       std::string zoneIDStr = _request.getParameter("zone");
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+
       if(!zoneIDStr.empty()) {
         try {
           int zoneID = strToInt(zoneIDStr);
@@ -73,8 +79,10 @@ namespace dss {
             return failure("Device is already in zone " + zoneIDStr);
           }
           try {
+            std::vector<boost::shared_ptr<Device> > movedDevices;
             boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
             manipulator.addDeviceToZone(dev, zone);
+            movedDevices.push_back(dev);
             if (dev->is2WayMaster()) {
               dss_dsid_t next = dev->getDSID();
               next.lower++;
@@ -86,7 +94,32 @@ namespace dss {
               } catch(std::runtime_error& e) {
                 return failure("Could not find partner device with dsid '" + next.toString() + "'");
               }
+            } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
+              uint16_t serialNr = dev->getOemSerialNumber();
+              if (serialNr > 0) {
+                unsigned long long ean = dev->getOemEan();
+                dss_dsid_t dsmId = dev->getDSMeterDSID();
+                std::vector<boost::shared_ptr<Device> > devices = DSS::getInstance()->getApartment().getDevicesVector();
+                foreach (const boost::shared_ptr<Device>& device, devices) {
+                  if ((device->getDSID() != deviceID) &&
+                      device->isPresent() &&
+                      (device->getDSMeterDSID() == dsmId) &&
+                      (device->getOemInfoState() == DEVICE_OEM_VALID) &&
+                      (device->getOemEan() == ean) &&
+                      (device->getOemSerialNumber() == serialNr)) {
+                    manipulator.addDeviceToZone(device, zone);
+                    movedDevices.push_back(device);
+                  }
+                }
+              }
             }
+
+            boost::shared_ptr<JSONArrayBase> moved(new JSONArrayBase());
+            foreach (const boost::shared_ptr<Device>& device, movedDevices) {
+              const DeviceReference d(device, &m_Apartment);
+              moved->addElement("", toJSON(d));
+            }
+            resultObj->addElement("movedDevices", moved);
           } catch(ItemNotFoundException&) {
             return failure("Could not find zone");
           }
@@ -96,7 +129,7 @@ namespace dss {
       } else {
         return failure("Need parameter 'zone'");
       }
-      return success();
+      return success(resultObj);
     }
 
     return failure("Need parameter deviceID");

@@ -570,7 +570,7 @@ namespace dss {
     return false;
   }
 
-  SystemEvent::SystemEvent() {
+  SystemEvent::SystemEvent() : Task() {
   }
   SystemEvent::~SystemEvent() {
   }
@@ -1127,119 +1127,6 @@ namespace dss {
     }
 
     return true;
-  }
-
-  SystemEventProcessor::SystemEventProcessor() : m_shutdownFlag(false) {
-    m_eventProcessorThread = 0;
-
-    int ret = pthread_mutex_init(&m_eventListMutex, NULL);
-    if (ret != 0) {
-      throw std::runtime_error("failed to initialize event list mutex: " +
-                       std::string(strerror(errno)));
-    }
-
-    ret = pthread_cond_init(&m_eventWakeupCondition, NULL);
-    if (ret != 0) {
-      pthread_mutex_destroy(&m_eventListMutex);
-      throw std::runtime_error("failed to initialize event wakeup condition: " +
-              std::string(strerror(errno)));
-    }
-
-    ret = pthread_create(&m_eventProcessorThread, NULL,
-                            SystemEventProcessor::staticThreadProc, this);
-    if (ret != 0) {
-      pthread_mutex_destroy(&m_eventListMutex);
-      pthread_cond_destroy(&m_eventWakeupCondition);
-      m_eventProcessorThread = 0;
-      throw std::runtime_error("failed to start event processor thread" +
-              std::string(strerror(errno)));
-    }
-  }
-
-  SystemEventProcessor::~SystemEventProcessor() {
-    m_shutdownFlag = true;
-    lockList();
-    pthread_cond_signal(&m_eventWakeupCondition);
-    unlockList();
-    if (m_eventProcessorThread) {
-      pthread_join(m_eventProcessorThread, NULL);
-      m_eventProcessorThread = 0;
-    }
-
-    pthread_cond_destroy(&m_eventWakeupCondition);
-    pthread_mutex_destroy(&m_eventListMutex);
-  }
-
-  void SystemEventProcessor::lockList() {
-    int ret = pthread_mutex_lock(&m_eventListMutex);
-    if (ret != 0) {
-      throw std::runtime_error("failed to lock event list mutex: " +
-              std::string(strerror(errno)));
-    }
-  }
-
-  void SystemEventProcessor::unlockList() {
-    int ret = pthread_mutex_unlock(&m_eventListMutex);
-    if (ret != 0) {
-      throw std::runtime_error("failed to unlock event list mutex: " +
-              std::string(strerror(errno)));
-    }
-  }
-
-  void *SystemEventProcessor::staticThreadProc(void *arg) {
-    SystemEventProcessor *instance = (SystemEventProcessor *)arg;
-    instance->eventProcessorThread();
-    pthread_exit(NULL);
-    return NULL;
-  }
-
-  void SystemEventProcessor::eventProcessorThread() {
-    boost::shared_ptr<SystemEvent> event;
-
-    lockList();
-    while (!m_shutdownFlag) {
-      if (m_eventList.empty()) {
-        pthread_cond_wait(&m_eventWakeupCondition, &m_eventListMutex);
-        continue;
-      }
-
-      event = m_eventList.back();
-      m_eventList.pop_back();
-
-      unlockList();
-
-      try {
-        if (event != NULL) {
-          event->run();
-        }
-      } catch (std::runtime_error& ex) {
-        Logger::getInstance()->log("SystemEventProcessor::eventProcessorThread "
-            "caught exception: " + std::string(ex.what()), lsError);
-      } catch (...) {
-        Logger::getInstance()->log("SystemEventProcessor::eventProcessorThread "
-            "caught exception", lsError);
-      }
-
-      event.reset();
-
-      if (!m_shutdownFlag) {
-        lockList();
-      }
-    }
-    unlockList();
-  }
-
-  void SystemEventProcessor::addEvent(boost::shared_ptr<SystemEvent> event) {
-    if (event == NULL) {
-        Logger::getInstance()->log("SystemEventProcessor::addEvent: "
-                "will not add invalid NULL event!");
-        return;
-    }
-
-    lockList();
-    m_eventList.push_front(event);
-    pthread_cond_signal(&m_eventWakeupCondition);
-    unlockList();
   }
 
   EventInterpreterPluginActionExecute::EventInterpreterPluginActionExecute(EventInterpreter* _pInterpreter)

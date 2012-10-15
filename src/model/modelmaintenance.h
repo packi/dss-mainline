@@ -31,6 +31,8 @@
 #include "src/thread.h"
 #include "src/syncevent.h"
 #include "src/model/modelevent.h"
+#include "src/taskprocessor.h"
+#include "device.h"
 
 namespace dss {
   class Apartment;
@@ -110,6 +112,18 @@ namespace dss {
 
   class ModelMaintenance : public ThreadedSubsystem {
   public:
+    class OEMWebQuery : public Task {
+    public:
+      OEMWebQuery(boost::shared_ptr<Device> _device);
+      virtual ~OEMWebQuery() {}
+      virtual void run();
+    private:
+      std::string m_EAN;
+	  uint16_t m_partNumber;
+      dss_dsid_t m_dsmId;
+      devid_t m_deviceAdress;
+    };
+
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
 
@@ -134,6 +148,9 @@ namespace dss {
     void setApartment(Apartment* _value);
     void setMetering(Metering* _value);
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
+
+    boost::shared_ptr<TaskProcessor> getTaskProcessor() const
+        { return m_taskProcessor; }
   protected:
     virtual void doStart();
   private:
@@ -163,6 +180,13 @@ namespace dss {
     void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
     void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
     void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
+    void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
+                      const DeviceOEMState_t& _state, const unsigned long long& _eanNumber,
+                      const int& _serialNumber, const int& _partNumber);
+    void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
+                           const DeviceOEMState_t _state, const std::string& _productName,
+                           const std::string& _iconPath, const std::string& _productURL,
+                           const std::string& _defaultName);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;
@@ -178,6 +202,8 @@ namespace dss {
     std::list<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents;
 
     void checkConfigFile(boost::filesystem::path _filename);
+
+    boost::shared_ptr<TaskProcessor> m_taskProcessor;
   }; // ModelMaintenance
 
 }

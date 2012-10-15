@@ -67,6 +67,9 @@
 #include "webserverapi.h"
 #include "json.h"
 
+#include "src/model/device.h"
+#include "src/model/apartment.h"
+
 namespace fs = boost::filesystem;
 
 namespace dss {
@@ -455,6 +458,97 @@ namespace dss {
     return _connection;
   } // downloadHandler
 
+  void *WebServer::iconHandler(struct mg_connection* _connection,
+                               const struct mg_request_info* _info,
+                               HashMapStringString _parameter,
+                               HashMapStringString _cookies,
+                               HashMapStringString _injectedCookies,
+                               boost::shared_ptr<Session> _session) {
+    const std::string urlid = "/icons/";
+
+    std::string uri = _info->uri;
+    std::string method = uri.substr(uri.find(urlid) + urlid.size());
+
+    RestfulRequest request(method, _parameter, _cookies);
+
+    log("Processing call to " + method);
+
+    std::string result;
+    try {
+      if (_session == NULL) {
+        throw SecurityException("not logged in");
+      }
+
+      if (method != "getDeviceIcon") {
+        throw std::runtime_error("unhandled function");
+      }
+
+      std::string dsidStr = request.getParameter("dsid");
+      if (dsidStr.empty()) {
+        throw std::invalid_argument("missing device dsid parameter");
+      }
+
+      dss_dsid_t deviceDSID = dss_dsid_t::fromString(dsidStr);
+      boost::shared_ptr<Device> result;
+      result = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+      if (result == NULL) {
+        throw std::runtime_error("device with id " + dsidStr + " not found");
+      }
+
+      std::string icon = result->getIconPath();
+      if (icon.empty()) {
+        throw std::runtime_error("icon for device " + dsidStr + " not found");
+      }
+
+      std::string iconBasePath =
+          DSS::getInstance()->getPropertySystem().getStringValue(
+                            "/config/subsystems/Apartment/iconBasePath");
+      if (!endsWith(iconBasePath, "/")) {
+        iconBasePath += "/";
+      }
+
+      icon = iconBasePath + icon;
+      log("Using icon file: " + icon);
+      if (boost::filesystem::exists(icon)) {
+        FILE *fp = fopen(icon.c_str(), "r");
+        if (fp != NULL) {
+          emitHTTPHeader(200, _connection, "image/png");
+          mg_send_file(_connection, fp, fs::file_size(icon));
+          fclose(fp);
+        } else {
+          throw std::runtime_error("icon file " + icon + " for device " +
+                                   dsidStr + " not found");
+        }
+      } else {
+        throw std::runtime_error("icon file " + icon + " for device " +
+                                 dsidStr + " not found");
+      }
+    } catch(SecurityException& e) {
+      emitHTTPHeader(500, _connection, "application/json");
+      JSONObject resultObj;
+      resultObj.addProperty("ok", false);
+      resultObj.addProperty("message", e.what());
+      result = resultObj.toString();
+      mg_write(_connection, result.c_str(), result.length());
+    } catch(std::runtime_error& e) {
+      emitHTTPHeader(500, _connection, "application/json");
+      JSONObject resultObj;
+      resultObj.addProperty("ok", false);
+      resultObj.addProperty("message", e.what());
+      result = resultObj.toString();
+      mg_write(_connection, result.c_str(), result.length());
+    } catch(std::invalid_argument& e) {
+      emitHTTPHeader(500, _connection, "application/json");
+      JSONObject resultObj;
+      resultObj.addProperty("ok", false);
+      resultObj.addProperty("message", e.what());
+      result = resultObj.toString();
+      mg_write(_connection, result.c_str(), result.length());
+    }
+
+    return _connection;
+  } // iconHandler
+
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
     emitHTTPHeader(200, _connection);
@@ -580,6 +674,9 @@ namespace dss {
       return self.httpBrowseProperties(_connection, _info);
     } else if (uri.find("/json/") == 0) {
       return self.jsonHandler(_connection, _info, paramMap, cookies,
+                              injectedCookies, session);
+    } else if (uri.find("/icons/") == 0) {
+      return self.iconHandler(_connection, _info, paramMap, cookies,
                               injectedCookies, session);
     } else if (uri.find("/download/") == 0) {
       return self.downloadHandler(_connection, _info);

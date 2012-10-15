@@ -60,7 +60,17 @@ namespace dss {
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
-    m_ButtonID(0)
+    m_ButtonID(0),
+    m_OemEanNumber(0),
+    m_OemSerialNumber(0),
+    m_OemPartNumber(0),
+    m_OemState(DEVICE_OEM_UNKOWN),
+    m_HWInfo(),
+    m_iconPath(),
+    m_OemProductInfoState(DEVICE_OEM_UNKOWN),
+    m_OemProductName(),
+    m_OemProductIcon(),
+    m_OemProductURL()
     { } // ctor
 
   Device::~Device() {
@@ -131,6 +141,25 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
         m_pPropertyNode->createProperty("productID")
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+        m_pPropertyNode->createProperty("HWInfo")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
+        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("OEM");
+        oemNode->createProperty("ProductState")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
+        oemNode->createProperty("ProductName")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductName, false));
+        oemNode->createProperty("ProductIcon")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductIcon, false));
+        oemNode->createProperty("ProductURL")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductURL, false));
+        oemNode->createProperty("State")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemStateAsString));
+        oemNode->createProperty("EAN")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemEanAsString));
+        oemNode->createProperty("SerialNumber")
+          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_OemSerialNumber, false));
+        oemNode->createProperty("PartNumber")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OemPartNumber, false));
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
         m_pPropertyNode->createProperty("shortAddress")
@@ -220,6 +249,10 @@ namespace dss {
 
   void Device::setFunctionID(const int _value) {
     m_FunctionID = _value;
+    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+      calculateHWInfo();
+    }
+    updateIconPath();
   } // setFunctionID
 
   int Device::getProductID() const {
@@ -229,6 +262,10 @@ namespace dss {
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
     fillSensorTable(_value);
+    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+      calculateHWInfo();
+    }
+    updateIconPath();
   } // setProductID
 
   int Device::getRevisionID() const {
@@ -302,6 +339,8 @@ namespace dss {
     // propagate target group value to device
     setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
         ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
+
+    updateIconPath();
   } // setDeviceJokerGroup
 
   void Device::setDeviceOutputMode(uint8_t _modeId) {
@@ -635,6 +674,7 @@ namespace dss {
   void Device::addToGroup(const int _groupID) {
     if((_groupID > 0) && (_groupID <= GroupIDMax)) {
       m_GroupBitmask.set(_groupID-1);
+      updateIconPath();
       if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
         m_Groups.push_back(_groupID);
         if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
@@ -659,6 +699,7 @@ namespace dss {
   void Device::removeFromGroup(const int _groupID) {
     if((_groupID > 0) && (_groupID <= GroupIDMax)) {
       m_GroupBitmask.reset(_groupID-1);
+      updateIconPath();
       std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
       if(it != m_Groups.end()) {
         m_Groups.erase(it);
@@ -984,6 +1025,27 @@ namespace dss {
     }
   }
 
+  const std::string Device::getDeviceTypeString(const DeviceTypes_t _type) {
+    switch (_type) {
+      case DEVICE_TYPE_KM:
+        return "KM";
+      case DEVICE_TYPE_TKM:
+        return "TKM";
+      case DEVICE_TYPE_SDM:
+        return "SDM";
+      case DEVICE_TYPE_KL:
+        return "KL";
+      case DEVICE_TYPE_TUP:
+        return "TUP";
+      case DEVICE_TYPE_ZWS:
+        return "ZWS";
+      case DEVICE_TYPE_SDS:
+        return "SDS";
+      default:
+        return "";
+    }
+  }
+
   int Device::getDeviceNumber() const {
     return m_ProductID & 0x3ff;
   }
@@ -1015,6 +1077,108 @@ namespace dss {
         return DEVICE_CLASS_WE;
       default:
         return DEVICE_CLASS_INVALID;
+    }
+  }
+
+  void Device::calculateHWInfo()
+  {
+    if (!m_HWInfo.empty()) {
+      m_HWInfo.clear();
+    }
+
+    if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
+      m_HWInfo = m_OemProductName;
+    } else {
+      DeviceClasses_t deviceClass = getDeviceClass();
+      m_HWInfo += getDeviceClassString(deviceClass);
+      m_HWInfo += "-";
+
+      DeviceTypes_t deviceType = getDeviceType();
+      m_HWInfo += getDeviceTypeString(deviceType);
+
+      int deviceNumber = getDeviceNumber();
+      m_HWInfo += intToString(deviceNumber);
+    }
+  }
+
+  void Device::updateIconPath() {
+    if (!m_iconPath.empty()) {
+      m_iconPath.clear();
+    }
+
+    if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductIcon.empty()) {
+      m_iconPath = m_OemProductIcon;
+    } else {
+      DeviceClasses_t deviceClass = getDeviceClass();
+      DeviceTypes_t deviceType = getDeviceType();
+      if (deviceClass == DEVICE_CLASS_INVALID) {
+        return;
+      }
+
+      m_iconPath = getDeviceTypeString(deviceType);
+      std::transform(m_iconPath.begin(), m_iconPath.end(), m_iconPath.begin(), ::tolower);
+      if (m_iconPath.empty()) {
+        m_iconPath = "star";
+      }
+
+      m_iconPath += "_" + getColorString(deviceClass);
+
+      int jockerGroup = getJokerGroup();
+      if (jockerGroup > 0) {
+        m_iconPath += "_" + getColorString(jockerGroup);
+      }
+
+      m_iconPath += ".png";
+    }
+  }
+
+  const std::string Device::getColorString(const int _class) {
+    switch (_class) {
+      case DEVICE_CLASS_GE:
+        return "yellow";
+      case DEVICE_CLASS_GR:
+        return "grey";
+      case DEVICE_CLASS_BL:
+        return "blue";
+      case DEVICE_CLASS_TK:
+        return "cyan";
+      case DEVICE_CLASS_MG:
+        return "magenta";
+      case DEVICE_CLASS_RT:
+        return "red";
+      case DEVICE_CLASS_GN:
+        return "green";
+      case DEVICE_CLASS_SW:
+        return "black";
+      case DEVICE_CLASS_WE:
+        return "white";
+      default:
+        return "";
+    }
+  }
+
+  const std::string Device::getDeviceClassString(const DeviceClasses_t _class) {
+    switch (_class) {
+      case DEVICE_CLASS_GE:
+        return "GE";
+      case DEVICE_CLASS_GR:
+        return "GR";
+      case DEVICE_CLASS_BL:
+        return "BL";
+      case DEVICE_CLASS_TK:
+        return "TK";
+      case DEVICE_CLASS_MG:
+        return "MG";
+      case DEVICE_CLASS_RT:
+        return "RT";
+      case DEVICE_CLASS_GN:
+        return "GN";
+      case DEVICE_CLASS_SW:
+        return "SW";
+      case DEVICE_CLASS_WE:
+        return "WE";
+      default:
+        return "";
     }
   }
 
@@ -1071,4 +1235,68 @@ namespace dss {
 
     return -1;
   }
+
+  void Device::setOemInfo(const unsigned long long _eanNumber,
+          const uint16_t _serialNumber, const uint8_t _partNumber)
+  {
+    m_OemEanNumber = _eanNumber;
+    m_OemSerialNumber = _serialNumber;
+    m_OemPartNumber = _partNumber;
+
+    dirty();
+  }
+
+  void Device::setOemInfoState(const DeviceOEMState_t _state)
+  {
+    m_OemState = _state;
+
+    if ((m_OemState == DEVICE_OEM_NONE) || (m_OemState == DEVICE_OEM_VALID)) {
+      dirty();
+    }
+  }
+
+  std::string Device::oemStateToString(const DeviceOEMState_t _state)
+  {
+    switch (_state) {
+    case DEVICE_OEM_UNKOWN:
+      return "Unknown";
+    case DEVICE_OEM_NONE:
+      return "None";
+    case DEVICE_OEM_LOADING:
+      return "Loading";
+    case DEVICE_OEM_VALID:
+      return "Valid";
+    }
+  }
+
+  DeviceOEMState_t Device::getOemStateFromString(const char* _string) const
+  {
+    if (strcmp(_string, "None") == 0) {
+      return DEVICE_OEM_NONE;
+    } else if (strcmp(_string, "Valid") == 0) {
+      return DEVICE_OEM_VALID;
+    } else {
+      return DEVICE_OEM_UNKOWN;
+    }
+  }
+
+  void Device::setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL)
+  {
+    m_OemProductName = _productName;
+    m_OemProductIcon = _iconPath;
+    m_OemProductURL = _productURL;
+  }
+
+  void Device::setOemProductInfoState(const DeviceOEMState_t _state)
+  {
+    m_OemProductInfoState = _state;
+
+    calculateHWInfo();
+    updateIconPath();
+
+    if ((m_OemProductInfoState == DEVICE_OEM_NONE) || (m_OemProductInfoState == DEVICE_OEM_VALID)) {
+      dirty();
+    }
+  }
+
 } // namespace dss

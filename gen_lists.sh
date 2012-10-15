@@ -66,4 +66,19 @@ done
 echo >> $FILE
 echo >> $FILE
 
+IMAGES_FILE=data/images.list
+
+echo -n "dist_dssdataimages_DATA = " > $IMAGES_FILE
+for f in `find data/images | egrep '\.(png)$' | sort`
+do
+    if (test -f $f); then
+        echo " \\" >> $IMAGES_FILE
+        echo -n '   $(top_srcdir)/' >>$IMAGES_FILE
+        echo -n $f >> $IMAGES_FILE
+    fi
+done
+
+echo >> $IMAGES_FILE
+echo >> $IMAGES_FILE
+
 

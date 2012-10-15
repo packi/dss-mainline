@@ -25,6 +25,8 @@
 #ifdef HAVE_CURL
 
 #include <curl/curl.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "logger.h"
 #include "url.h"
@@ -33,7 +35,26 @@ namespace dss {
 
 URL::URL() {}
 
-long URL::request(std::string url, bool HTTP_POST) {
+size_t URL::writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp)
+{
+  size_t realsize = size * nmemb;
+  struct URLResult *mem = (struct URLResult *)userp;
+
+  mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
+  if (mem->memory == NULL) {
+    /* out of memory! */
+    Logger::getInstance()->log(std::string("URL::writeMemoryCallback: not enough memory (realloc returned NULL)\n"));
+    return -1;
+  }
+
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->memory[mem->size] = 0;
+
+  return realsize;
+}
+
+long URL::request(std::string url, bool HTTP_POST, struct URLResult* result) {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   long http_code = -1;
@@ -46,8 +67,13 @@ long URL::request(std::string url, bool HTTP_POST) {
     curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
   }
 
-  curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+  if (result != NULL) {
+    /* send all data to this function  */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::writeMemoryCallback);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)result);
+  }
 
+  curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
   res = curl_easy_perform(curl_handle);
   if (res != CURLE_OK) {
     Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
@@ -56,6 +82,40 @@ long URL::request(std::string url, bool HTTP_POST) {
   }
 
   curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+  curl_easy_cleanup(curl_handle);
+  return http_code;
+}
+
+long URL::downloadFile(std::string url, std::string filename) {
+  CURLcode res;
+  char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+  long http_code = -1;
+  FILE *data;
+
+  CURL *curl_handle = curl_easy_init();
+  curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+
+  data = fopen(filename.c_str(), "w");
+  if (data == NULL) {
+    curl_easy_cleanup(curl_handle);
+    return http_code;
+  }
+
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, data);
+
+  res = curl_easy_perform(curl_handle);
+  if (res != CURLE_OK) {
+    Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
+    fclose(data);
+    curl_easy_cleanup(curl_handle);
+    return http_code;
+  }
+
+  curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+  fclose(data);
   curl_easy_cleanup(curl_handle);
   return http_code;
 }

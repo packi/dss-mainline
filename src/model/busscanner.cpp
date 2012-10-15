@@ -37,6 +37,7 @@
 #include "apartment.h"
 #include "zone.h"
 #include "modelmaintenance.h"
+#include "src/ds485/dsdevicebusinterface.h"
 
 
 namespace dss {
@@ -261,9 +262,36 @@ namespace dss {
       }
     }
 
+    scheduleOEMReadout(dev);
+
     m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
   } // scanDeviceOnBus
+
+  void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
+    if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
+      if (_pDevice->getRevisionID() >= 0x0350) {
+        log("scheduleOEMReadout: schedule EAN readout for: " + _pDevice->getDSID().toString());
+        boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
+        std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
+        task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader(connURI));
+        task->setup(_pDevice);
+        boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+        pTP->addEvent(task);
+        _pDevice->setOemInfoState(DEVICE_OEM_LOADING);
+      } else {
+        _pDevice->setOemInfoState(DEVICE_OEM_NONE);
+      }
+    } else if (_pDevice->isPresent() &&
+                (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
+                ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&
+                 (_pDevice->getOemProductInfoState() != DEVICE_OEM_LOADING))) {
+      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task(new ModelMaintenance::OEMWebQuery(_pDevice));
+      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+      pTP->addEvent(task);
+      _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);
+    }
+  }
 
   bool BusScanner::scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     std::vector<int> groupIDs;

@@ -155,6 +155,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/syncevent.h \
 	$(top_srcdir)/src/systemcondition.cpp \
 	$(top_srcdir)/src/systemcondition.h \
+	$(top_srcdir)/src/taskprocessor.cpp \
+	$(top_srcdir)/src/taskprocessor.h \
 	$(top_srcdir)/src/thread.h \
 	$(top_srcdir)/src/url.cpp \
 	$(top_srcdir)/src/url.h \

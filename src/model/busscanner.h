@@ -47,6 +47,7 @@ namespace dss {
     bool scanStatusOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     void log(const std::string& _line, aLogSeverity _severity = lsDebug);
     bool initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec);
+    void scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice);
   private:
     Apartment& m_Apartment;
     StructureQueryBusInterface& m_Interface;
