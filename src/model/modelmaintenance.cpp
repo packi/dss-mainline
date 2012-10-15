@@ -1354,8 +1354,10 @@ namespace dss {
     URL::URLResult result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
 
-    Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + oemWebservice + std::string("product/") + m_EAN + "/" + intToString(m_partNumber));
-    long res = url.request(oemWebservice + std::string("product/") + m_EAN + "/" + intToString(m_partNumber), false, &result);
+    std::string eanURL = oemWebservice + std::string("product/") + m_EAN +
+                         "/" + intToString(m_partNumber);
+    Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
+    long res = url.request(eanURL, false, &result);
     if (res == 200) {
       Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + std::string(result.memory));
       struct json_tokener* tok;
@@ -1398,7 +1400,8 @@ namespace dss {
         boost::filesystem::path iconPath = iconBasePath / iconFile;
         res = url.downloadFile(iconURL, iconPath.string());
         if (res != 200) {
-          Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + intToString(res));
+          Logger::getInstance()->log("OEMWebQuery::run: could not download OEM "
+              "icon from: " + iconURL + std::string("; error: ") + intToString(res), lsWarning);
           iconFile.clear();
           try {
             if (boost::filesystem::exists(iconPath)) {
@@ -1424,6 +1427,9 @@ namespace dss {
           DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
         }
       }
+    } else {
+      Logger::getInstance()->log("OEMWebQuery::run: could not download OEM "
+          "data from: " + eanURL, lsWarning);
     }
     if (result.size) {
       free(result.memory);
