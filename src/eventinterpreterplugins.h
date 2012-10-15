@@ -118,6 +118,7 @@ namespace dss {
      pthread_mutex_t m_Mutex;
      pthread_cond_t m_Condition;
      std::deque<std::string> m_MailFiles;
+     std::string m_mailq_dir;
    public:
      EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter);
      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);

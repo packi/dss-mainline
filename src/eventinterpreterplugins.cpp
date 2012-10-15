@@ -48,6 +48,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <time.h>
 #include <limits.h>
@@ -667,25 +669,50 @@ namespace dss {
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sendmail", _pInterpreter)
   {
+    if (DSS::hasInstance()) {
+      m_mailq_dir = DSS::getInstance()->getDataDirectory() + "/mail/";
+    }
+#ifdef MAILDIR
+    std::string mdircfg(MAILDIR);
+    if (!mdircfg.empty()) {
+      m_mailq_dir = mdircfg;
+    }
+#endif
+    boost::filesystem::path p(m_mailq_dir);
+    try {
+      if (!boost::filesystem::is_directory(p)) {
+        boost::filesystem::create_directory(p);
+      }
+    } catch (boost::filesystem::filesystem_error& e) {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: cannot create mail "
+          "queue folder: " + std::string(e.what()), lsFatal);
+    }
+
+#ifdef HAVE_SENDMAIL
     pthread_t pid;
     int err;
-
-#ifndef HAVE_SENDMAIL
-    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
-        "sendmail binary not found by configure, sending mail is disabled", lsWarning);
-    return;
-#endif
-
     pthread_mutex_init(&m_Mutex, NULL);
     pthread_cond_init(&m_Condition, NULL);
     if ((err = pthread_create(&pid, NULL, EventInterpreterPluginSendmail::run, this)) < 0) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
           intToString(err) + "[" + intToString(errno) + "]", lsFatal);
+    } else {
+      Logger::getInstance()->log("EventInterpreterPluginSendmail: "
+          "sending e-mail using system sendmail \"" + std::string(SENDMAIL) + "\"", lsInfo);
     }
-
+#elif HAVE_MAILSPOOL
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
+        "writing e-mail to spool directory \"" + m_mailq_dir + "\"", lsInfo);
+#else
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: "
+        "disabled by configuration, not sending any e-mail", lsWarning);
+#endif
   } // ctor
 
   void EventInterpreterPluginSendmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
+#if !defined(HAVE_SENDMAIL) && !defined(HAVE_MAILSPOOL)
+    return;
+#endif
     std::string sender;
     std::string recipient, recipient_cc, recipient_bcc;
     std::string header;
@@ -734,7 +761,10 @@ namespace dss {
       body = _subscription.getOptions()->getParameter("body");
     }
 
-    char mailText[] = "/tmp/mailXXXXXX";
+    char mailText[PATH_MAX];
+    strcpy(mailText, m_mailq_dir.c_str());
+    strcat(mailText, "/mailXXXXXX");
+
     int mailFile = mkstemp((char *) mailText);
     if (mailFile < 0) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
@@ -782,13 +812,15 @@ namespace dss {
           std::string(e.what()), lsFatal);
     }
 
-    Logger::getInstance()->log("EventInterpreterPluginSendmail: new file " +
-        std::string(mailText), lsFatal);
+    Logger::getInstance()->log("EventInterpreterPluginSendmail: new mail in " +
+        std::string(mailText), lsDebug);
 
+#ifdef HAVE_SENDMAIL
     pthread_mutex_lock(&m_Mutex);
     m_MailFiles.push_back(mailText);
     pthread_cond_signal(&m_Condition);
     pthread_mutex_unlock(&m_Mutex);
+#endif
   } // handleEvent
 
   void* EventInterpreterPluginSendmail::run(void* arg) {
