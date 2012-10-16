@@ -409,7 +409,7 @@ namespace dss {
         }
       // level 6 supports <property>, <value>, <scene>
       } else if (m_level == 6) {
-        if ((m_state == ps_scene)) {
+        if (m_state == ps_scene) {
           parseScene(_name, _attrs); 
         }
       // level 7 supports <property>, <value>, <name>
