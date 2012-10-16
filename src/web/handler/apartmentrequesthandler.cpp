@@ -48,6 +48,48 @@ namespace dss {
   : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance)
   { }
 
+  boost::shared_ptr<JSONObject> ApartmentRequestHandler::getReachableGroups(const RestfulRequest& _request) {
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    boost::shared_ptr<JSONArrayBase> resultZones(new JSONArrayBase());
+    resultObj->addElement("zones", resultZones);
+
+    std::vector<boost::shared_ptr<Zone> > zones =
+                                DSS::getInstance()->getApartment().getZones();
+    for (size_t i = 0; i < zones.size(); i++) {
+      boost::shared_ptr<Zone> zone = zones.at(i);
+      if ((zone == NULL) || (zone->getID() == 0)) {
+        continue;
+      }
+
+      boost::shared_ptr<JSONObject> resultZone(new JSONObject());
+      resultZones->addElement("", resultZone);
+      resultZone->addProperty("zoneID", zone->getID());
+      resultZone->addProperty("name", zone->getName());
+      boost::shared_ptr<JSONArray<int> > resultGroups(new JSONArray<int>());
+      resultZone->addElement("groups", resultGroups);
+
+      std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
+
+      for (size_t g = 0; g < groups.size(); g++) {
+        boost::shared_ptr<Group> group = groups.at(g);
+        if ((group->getID() == 0) || (group->getID() == 8)) {
+          continue;
+        }
+
+        Set devices = group->getDevices();
+        for (int d = 0; d < devices.length(); d++) {
+          boost::shared_ptr<Device> device = devices.get(d).getDevice();
+          if ((device->isPresent() == true) && (device->getOutputMode() != 0)) {
+            resultGroups->add(group->getID());
+            break;
+          }
+        } // devices loop
+      } // groups loop
+    } // zones loop
+
+    return success(resultObj);
+  }
+
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeMeter(const RestfulRequest& _request) {
     std::string dsidStr = _request.getParameter("dsid");
     if(dsidStr.empty()) {
@@ -160,6 +202,8 @@ namespace dss {
       } else if(_request.getMethod() == "removeInactiveMeters") {
         m_Apartment.removeInactiveMeters();
         return success();
+      } else if(_request.getMethod() == "getReachableGroups") {
+        return getReachableGroups(_request);
       } else {
         throw std::runtime_error("Unhandled function");
       }
