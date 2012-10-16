@@ -8,6 +8,7 @@ AC_CONFIG_SRCDIR([src/dss.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.10 -Wall])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 if test "x${prefix}" = "xNONE"; then
     prefix="${ac_default_prefix}"
