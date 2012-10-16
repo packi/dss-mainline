@@ -63,6 +63,7 @@ const std::string SocketScriptExtensionName = "socketextension";
 
   class SocketHelperBase {
   public:
+    virtual ~SocketHelperBase() {}
     virtual void stop() = 0;
   };
 
@@ -91,7 +92,7 @@ const std::string SocketScriptExtensionName = "socketextension";
       m_CallbackFunction(JSVAL_NULL)
     { }
 
-    ~SocketHelper() {
+    virtual ~SocketHelper() {
       m_pASIOWork.reset();
       if(m_IOService != NULL) {
         m_IOService->stop();
