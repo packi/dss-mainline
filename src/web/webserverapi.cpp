@@ -104,6 +104,9 @@ namespace dss {
     clsApartment.addMethod("removeInactiveMeters")
       .withDocumentation("Removes all non present dSMs from the dSS.");
 
+    clsApartment.addMethod("getReachableGroups")
+      .withDocumentation("Retrieves all reachable groups in each zone. A group is considered reachable when it contains present devices with output mode not equal to zero.");
+
     RestfulClass& clsZone = api->addClass("zone")
         .withInstanceParameter("id", "integer", false)
         .withInstanceParameter("name", "string", false)
