@@ -170,13 +170,34 @@ namespace dss {
           DateTime oNow = DateTime();
           int secondsSinceMidnightNow =
               (oNow.getHour() * 3600) +
-              (oNow.getMinute() * 3600) +
+              (oNow.getMinute() * 60) +
               (oNow.getSecond());
-          if (!(secondsSinceMidnightNow <= secondsSinceMidnightCondition)) {
+          if (secondsSinceMidnightNow < secondsSinceMidnightCondition) {
             return false;
           }
         } // oTimeTemp.size() == 3
       } // oTimeStartNode != NULL
+
+      PropertyNodePtr oTimeEndNode =
+          oBaseConditionNode->getPropertyByName("time-end");
+      if (oTimeEndNode != NULL) {
+        std::string sTime = oTimeEndNode->getAsString();
+        std::vector<std::string> oTimeTemp = splitString(sTime, ':');
+        if (oTimeTemp.size() == 3) {
+          int secondsSinceMidnightCondition =
+              (strToInt(oTimeTemp.at(0)) * 3600) +
+              (strToInt(oTimeTemp.at(1)) * 60) +
+              strToInt(oTimeTemp.at(2));
+          DateTime oNow = DateTime();
+          int secondsSinceMidnightNow =
+              (oNow.getHour() * 3600) +
+              (oNow.getMinute() * 60) +
+              (oNow.getSecond());
+          if (secondsSinceMidnightCondition < secondsSinceMidnightNow) {
+            return false;
+          }
+        } // oTimeTemp.size() == 3
+      } // oTimeEndNode != NULL
     }
     return true;
   } // checkSystemCondition
