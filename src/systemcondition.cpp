@@ -59,7 +59,7 @@ namespace dss {
         for (int j = 0; j < oStateNode->getChildCount(); j++) {
           bool fFound = false;
           std::string sName = oStateNode->getChild(j)->getName();
-          std::string sValue = oStateNode->getChild(j)->getStringValue();
+          std::string sValue = oStateNode->getChild(j)->getAsString();
           for (int i = 0; i < oSystemStates->getChildCount(); i++) {
             PropertyNodePtr nameNode =
                 oSystemStates->getChild(i)->getPropertyByName("name");
@@ -71,10 +71,10 @@ namespace dss {
               continue;
             }
             // search for a requested state
-            if (sName == nameNode->getStringValue()) {
+            if (sName == nameNode->getAsString()) {
               fFound = true;
               // state found ...
-              if (sValue != valueNode->getStringValue()) {
+              if (sValue != valueNode->getAsString()) {
                 Logger::getInstance()->log("checkSystemCondition: " +
                     sName + " failed: value is " + sValue +
                     ", requested is " + sValue, lsDebug);
@@ -115,15 +115,15 @@ namespace dss {
             PropertyNodePtr groupNode =
                 DSS::getInstance()->getPropertySystem().getProperty(
                       "/apartment/zones/zone" +
-                      testZoneIdNode->getStringValue() + "/groups/group" +
-                      testGroupIdNode->getStringValue());
+                      testZoneIdNode->getAsString() + "/groups/group" +
+                      testGroupIdNode->getAsString());
 
             if (groupNode != NULL) {
               PropertyNodePtr lastCalledScene =
                 groupNode->getPropertyByName("lastCalledScene");
               if (lastCalledScene != NULL) {
-                if (lastCalledScene->getStringValue() ==
-                        testSceneIdNode->getStringValue()) {
+                if (lastCalledScene->getAsString() ==
+                        testSceneIdNode->getAsString()) {
                     fMatch = true;
                     break;
                 }
@@ -139,7 +139,7 @@ namespace dss {
       PropertyNodePtr oWeekdayNode =
           oBaseConditionNode->getPropertyByName("weekdays");
       if (oWeekdayNode != NULL) {
-        std::string sWeekdayString = oWeekdayNode->getStringValue();
+        std::string sWeekdayString = oWeekdayNode->getAsString();
         if (!sWeekdayString.empty()) {
           DateTime oNow = DateTime();
           std::vector<std::string> oWeekDayArray =
@@ -160,7 +160,7 @@ namespace dss {
       PropertyNodePtr oTimeStartNode =
           oBaseConditionNode->getPropertyByName("time-start");
       if (oTimeStartNode != NULL) {
-        std::string sTime = oTimeStartNode->getStringValue();
+        std::string sTime = oTimeStartNode->getAsString();
         std::vector<std::string> oTimeTemp = splitString(sTime, ':');
         if (oTimeTemp.size() == 3) {
           int secondsSinceMidnightCondition =
