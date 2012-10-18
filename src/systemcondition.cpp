@@ -146,7 +146,7 @@ namespace dss {
               splitString(sWeekdayString, ',');
           bool fFound = false;
           for (size_t i = 0; i < oWeekDayArray.size(); i++) {
-            if (strToInt(oWeekDayArray.at(i)) == oNow.getDay()) {
+            if (strToInt(oWeekDayArray.at(i)) == oNow.getWeekday()) {
               fFound = true;
               break;
             }
