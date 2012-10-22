@@ -1,5 +1,19 @@
 dSS - digitalSTROM Server
 
+v1.17.0 22.10.2012
+	* fixed time-start condition, added time-end check
+	* fix system condition weekday processing
+	* add /json/apartment/getReachableGroups call, #1824
+	* fix compile warnings, #1926
+	* add SW/GE-SDS220 support, #1993
+	* add mail handling for mail-file-generation-only mode, #1591
+	* also set/clear the "don't care" flag on the area STOP scene, #1991
+	* support OEM specific information (EAN, etc.), #1914
+	* added check for forced scene calls in system trigger, #1539
+	* add undo event to system action and trigger handlers, #1611
+	* fix URL calls that did not work from system add-ons, #1967
+	* use a single sendmail thread for each mail action, #1502
+
 v1.16.2 08.10.2012
 	* fix action handler "delay" node evaluation, #1959
 
