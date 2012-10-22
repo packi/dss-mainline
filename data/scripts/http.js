@@ -40,7 +40,7 @@
  *
  */
 
-HTTP = function HTTP(options, extraHeaders)
+var HTTP = function HTTP(options, extraHeaders)
 {
   this._easy = new easycurl();
   var headerName;
