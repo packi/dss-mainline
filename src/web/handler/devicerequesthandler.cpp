@@ -721,6 +721,11 @@ namespace dss {
             return failure("Invalid or missing parameter 'sceneID'");
           }
         }
+      } else {
+        event.buttonNumber = 0;
+        event.clickType = 0;
+        event.sceneDeviceMode = 0;
+        event.sceneID = 0;
       }
       pDevice->setSensorEventEntry(id, event);
       return success();

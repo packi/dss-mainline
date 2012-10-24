@@ -877,7 +877,7 @@ namespace dss {
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 2, value);
     value = (_entry.hysteresis & 0x0FF);
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 3, value);
-    value = (_entry.sceneDeviceMode << 2) | (_entry.validity);
+    value = ((_entry.sceneDeviceMode & 0x03) << 2) | (_entry.validity & 0x03);
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 4, value);
     if (_entry.action == 2) {
       if (!isSceneDevice()) {
