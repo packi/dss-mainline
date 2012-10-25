@@ -594,12 +594,12 @@ function stateChange() {
     }
 
     if (nextStateChange !== undefined) {
-        var eventST = String(nextStateChange.getFullYear() +
-                             pad(nextStateChange.getMonth() + 1) +
-                             pad(nextStateChange.getDate()) + 'T' +
-                             pad(nextStateChange.getHours()) +
-                             pad(nextStateChange.getMinutes()) +
-                             pad(nextStateChange.getSeconds()));
+        var eventST = String(nextStateChange.getFullYear()) +
+                      String(pad(nextStateChange.getMonth() + 1)) +
+                      String(pad(nextStateChange.getDate())) + 'T' +
+                      String(pad(nextStateChange.getHours())) +
+                      String(pad(nextStateChange.getMinutes())) +
+                      String(pad(nextStateChange.getSeconds()));
         var stateChangeEvent = new TimedEvent("solar_computer.state_change",
                                               eventST);
         stateChangeEvent.raise();
