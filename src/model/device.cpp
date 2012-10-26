@@ -66,7 +66,7 @@ namespace dss {
     m_OemPartNumber(0),
     m_OemState(DEVICE_OEM_UNKOWN),
     m_HWInfo(),
-    m_iconPath(),
+    m_iconPath("unknown.png"),
     m_OemProductInfoState(DEVICE_OEM_UNKOWN),
     m_OemProductName(),
     m_OemProductIcon(),
@@ -1112,6 +1112,7 @@ namespace dss {
       DeviceClasses_t deviceClass = getDeviceClass();
       DeviceTypes_t deviceType = getDeviceType();
       if (deviceClass == DEVICE_CLASS_INVALID) {
+        m_iconPath = "unknown.png";
         return;
       }
 
