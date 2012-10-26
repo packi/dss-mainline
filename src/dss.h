@@ -29,6 +29,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
+#include "bonjour.h"
 
 #include <vector>
 
@@ -81,6 +82,7 @@ namespace dss {
     boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
     boost::shared_ptr<SessionManager> m_pSessionManager;
     boost::shared_ptr<Security> m_pSecurity;
+    boost::shared_ptr<BonjourHandler> m_pBonjour;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -138,6 +140,7 @@ namespace dss {
     ModelMaintenance& getModelMaintenance() { return *m_pModelMaintenance; }
     SessionManager& getSessionManager() { return *m_pSessionManager; }
     Security& getSecurity() { return *m_pSecurity; }
+    BonjourHandler& getBonjourHandler() { return *m_pBonjour; }
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }

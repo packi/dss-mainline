@@ -114,6 +114,7 @@ bool Thread::terminate() {
 #endif
   }
   m_ThreadHandle = 0;
+  m_Running = false;
   return true;
 } // terminate
 
