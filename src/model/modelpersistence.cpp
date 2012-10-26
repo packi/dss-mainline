@@ -537,7 +537,6 @@ namespace dss {
   }
 
   void ModelPersistence::readConfigurationFromXML(const std::string& _fileName) {
-    m_Apartment.setName("dSS");
     m_ignore = false;
     m_expectString = false;
     m_level = 0;
@@ -555,6 +554,9 @@ namespace dss {
     if (!ret) {
       throw std::runtime_error("ModelPersistence::readConfigurationFromXML: "
                                "Parse error in Model configuration");
+    }
+    if (m_Apartment.getName().empty()) {
+      m_Apartment.setName("dSS");
     }
     return;
   } // readConfigurationFromXML
