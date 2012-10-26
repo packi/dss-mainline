@@ -469,8 +469,8 @@ namespace dss {
         } else {
           assert(pEventWithDSID != NULL);
           dss_dsid_t meterID = pEventWithDSID->getDSID();
-          int power = event.getParameter(0);
-          int energy = event.getParameter(1);
+          unsigned int power = event.getParameter(0);
+          unsigned int energy = event.getParameter(1);
           try {
             boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
             meter->setPowerConsumption(power);
