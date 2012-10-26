@@ -264,7 +264,16 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 #endif
   }
 
+  void BonjourHandler::restart() {
+    quit();
+    terminate();
+    run();
+  }
+
   void BonjourHandler::execute() {
+    group = NULL;
+    simple_poll = NULL;
+
     DSS::getInstance()->getSecurity().loginAsSystemUser(
         "Bonjour needs system rights");
 

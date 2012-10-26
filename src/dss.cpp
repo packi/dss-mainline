@@ -591,8 +591,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
 
 #ifdef WITH_BONJOUR
-    BonjourHandler bonjour;
-    bonjour.run();
+    m_pBonjour = boost::shared_ptr<BonjourHandler>(new BonjourHandler());
+    m_pBonjour->run();
 #endif
 
     if (!m_ShutdownFlag) {
@@ -612,8 +612,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     // shutdown all subsystems and services
 #ifdef WITH_BONJOUR
-    bonjour.quit();
-    bonjour.terminate();
+    m_pBonjour->quit();
+    m_pBonjour->terminate();
 #endif
 
 

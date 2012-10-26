@@ -75,6 +75,7 @@ namespace dss {
 
       virtual void execute();
       void quit();
+      void restart();
 
   }; //  Bonjour
 

@@ -187,6 +187,7 @@ namespace dss {
         if (_request.hasParameter("newName")) {
           StringConverter st("UTF-8", "UTF-8");
           m_Apartment.setName(st.convert(_request.getParameter("newName")));
+          DSS::getInstance()->getBonjourHandler().restart();
         } else {
           return failure("missing parameter 'newName'");
         }
