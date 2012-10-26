@@ -437,17 +437,20 @@ function stateChange() {
     var nextStateChange;
     var pTwilight = Property.getNode('/usr/states/twilight');
     var pDay = Property.getNode('/usr/states/daynight');
+    var pDaylight = Property.getNode('/usr/states/daylight');
 
     if ((dawn_start === "[Below]") && (dusk_end === "[Below]")) {
         // continuous night
         // night
         pTwilight.setStatusValue(false);
         pDay.setStatusValue(false);
+        pDaylight.setStatusValue(false);
     } else if ((sunrise === "[Above]") && (sunset === "[Above]")) {
         // continuous day
         // day
         pTwilight.setStatusValue(false);
         pDay.setStatusValue(true);
+        pDaylight.setStatusValue(true);
     } else if ((sunrise === "[Below]") && (sunset === "[Below]")) {
         // night-twilight
         if (now < dawn_start) {
@@ -455,17 +458,20 @@ function stateChange() {
             nextStateChange = dawn_start;
             pTwilight.setStatusValue(false);
             pDay.setStatusValue(false);
+            pDaylight.setStatusValue(false);
         } else if (now < dusk_end) {
             // twilight
             nextStateChange = dusk_end;
             pTwilight.setStatusValue(true);
             pDay.setStatusValue(false);
+            pDaylight.setStatusValue(true);
         } else {
             // night
             nextStateChange = dawn_start;
             nextStateChange.setDate(nextStateChange.getDate() + 1);
             pTwilight.setStatusValue(false);
             pDay.setStatusValue(false);
+            pDaylight.setStatusValue(false);
         }
     } else if ((dawn_start === "[Above]") && (dusk_end === "[Above]")) {
         // twilight-day
@@ -476,10 +482,12 @@ function stateChange() {
                 nextStateChange = sunrise;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else {
                 // day
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(true);
+                pDaylight.setStatusValue(true);
             }
         } else if (sunrise === "[Above]") {
             // first sunset
@@ -488,10 +496,12 @@ function stateChange() {
                 nextStateChange = sunset;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(true);
+                pDaylight.setStatusValue(true);
             } else {
                 // twilight
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             }
         } else {
             if (now < sunrise) {
@@ -499,17 +509,20 @@ function stateChange() {
                 nextStateChange = sunrise;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else if ( now < sunset) {
                 // day
                 nextStateChange = sunset;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(true);
+                pDaylight.setStatusValue(true);
             } else {
                 // twilight
                 nextStateChange = sunrise;
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             }
         }
     } else {
@@ -521,22 +534,26 @@ function stateChange() {
                 nextStateChange = dawn_start;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(false);
             } else if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else if (now < sunset) {
                 // day
                 nextStateChange = sunset;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(true);
+                pDaylight.setStatusValue(true);
             } else {
                 // twilight
                 nextStateChange = sunrise;
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             }
         } else if (dawn_start === "[Above]") {
             // first twilight
@@ -545,22 +562,26 @@ function stateChange() {
                 nextStateChange = sunrise;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else if (now < sunset) {
                 // day
                 nextStateChange = sunset;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(true);
+                pDaylight.setStatusValue(true);
             } else if (now < dusk_end) {
                 // twilight
                 nextStateChange = dusk_end;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else {
                 // night
                 nextStateChange = sunrise; // should be next dawn_start but this is not available
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(false);
             }
         } else {
             if (now < dawn_start) {
@@ -568,27 +589,32 @@ function stateChange() {
                 nextStateChange = dawn_start;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(false);
             } else if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else if (now < sunset) {
                 // day
                 nextStateChange = sunset;
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(true);
+                pDaylight.setStatusValue(true);
             } else if (now < dusk_end) {
                 // twilight
                 nextStateChange = dusk_end;
                 pTwilight.setStatusValue(true);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(true);
             } else {
                 // night
                 nextStateChange = dawn_start;
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
                 pTwilight.setStatusValue(false);
                 pDay.setStatusValue(false);
+                pDaylight.setStatusValue(false);
             }
         }
     }
