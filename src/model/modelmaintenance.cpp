@@ -1394,7 +1394,7 @@ namespace dss {
       json_object_put(json_request);
       json_tokener_free(tok);
 
-
+      state = DEVICE_OEM_VALID;
       iconFile = remoteIconPath.filename();
       if (!remoteIconPath.empty()) {
         std::string iconURL = oemWebservice + remoteIconPath.string();
@@ -1412,8 +1412,6 @@ namespace dss {
             Logger::getInstance()->log("OEMWebQuery::run: cannot delete "
                 "(incomplete) icon: " + std::string(e.what()), lsWarning);
           }
-        } else {
-          state = DEVICE_OEM_VALID;
         }
       }
     } else {
