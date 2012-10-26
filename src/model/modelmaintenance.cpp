@@ -525,7 +525,7 @@ namespace dss {
           onEANReady(pEventWithDSID->getDSID(),
                      event.getParameter(0),
                      (const DeviceOEMState_t)event.getParameter(1),
-                     ((unsigned long long)event.getParameter(2)) << 32 | (unsigned long long)event.getParameter(3),
+                     ((unsigned long long)event.getParameter(2)) << 32 | ((unsigned long long)event.getParameter(3) & 0xFFFFFFFF),
                      event.getParameter(4),
                      event.getParameter(5));
         }
