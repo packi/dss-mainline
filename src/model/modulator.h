@@ -49,9 +49,9 @@ namespace dss {
     int m_EnergyLevelRed;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
-    int m_EnergyMeterValue;
-    int m_EnergyMeterValueWh;
-    unsigned long m_LastReportedEnergyMeterValue;
+    unsigned long long m_EnergyMeterValue;
+    unsigned long long m_EnergyMeterValueWh;
+    unsigned long long m_LastReportedEnergyMeterValue;
     bool m_ReceivedMeterValue;
     DateTime m_EnergyMeterValueTimeStamp;
     int m_HardwareVersion;
@@ -85,14 +85,14 @@ namespace dss {
     /** Returns the consumption in mW */
     unsigned long getPowerConsumption();
     /** Returns the meter value in Wh */
-    unsigned long getEnergyMeterValue();
+    unsigned long long getEnergyMeterValue();
 
 
     /** set the consumption in mW */
     void setPowerConsumption(unsigned long _value);
     /** set the meter value in Wh */
     void updateEnergyMeterValue(unsigned long _value);
-    void initializeEnergyMeterValue(unsigned long _value);
+    void initializeEnergyMeterValue(unsigned long long _value);
 
     /** Returns the last consumption in mW returned from dS485 Bus, but never request it*/
     unsigned long getCachedPowerConsumption();
@@ -141,6 +141,9 @@ namespace dss {
     void setIsValid(const bool _value) { m_IsValid = _value; }
 
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
+
+    std::string getEnergyMeterValueWhAsString() const { return intToString(m_EnergyMeterValueWh); }
+    std::string getEnergyMeterValueAsString() const { return intToString(m_EnergyMeterValue); }
   }; // DSMeter
 
 
