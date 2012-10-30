@@ -462,9 +462,22 @@ namespace dss {
       if (_energyInWh) {
         currentCounter /= 3600;
       }
+      Value lastZeroValue(0);
+      for (std::deque<Value>::iterator iter = returnVector->begin();
+           iter < returnVector->end();
+           ++iter) {
+        if (iter->getValue() == 0) {
+          lastZeroValue = *iter;
+        } else {
+          break;
+        }
+      }
       for (std::deque<Value>::reverse_iterator iter = returnVector->rbegin();
            iter < returnVector->rend();
            ++iter) {
+        if (iter->getTimeStamp() == lastZeroValue.getTimeStamp()) {
+          break;
+        }
         double val = iter->getValue();
         iter->setValue(currentCounter);
         currentCounter -= val;
