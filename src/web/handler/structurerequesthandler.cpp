@@ -163,6 +163,9 @@ namespace dss {
         if(zone->getDevices().length() > 0) {
           return failure("Cannot delete a non-empty zone");
         }
+        StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+        manipulator.removeZoneOnDSMeters(zone);
+
         m_Apartment.removeZone(zoneID);
         m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
         return success();
