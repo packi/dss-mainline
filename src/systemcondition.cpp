@@ -37,6 +37,49 @@
 
 namespace dss {
 
+  bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode, int secNow) {
+    int startSinceMidnight = 0;
+    int endSinceMidnight = 24 * 60 * 60;
+
+    if (timeStartNode != NULL) {
+      std::string sTime = timeStartNode->getAsString();
+      std::vector<std::string> sTimeArr = splitString(sTime, ':');
+      if (sTimeArr.size() == 3) {
+        startSinceMidnight =
+            (strToInt(sTimeArr.at(0)) * 60 * 60) +
+            (strToInt(sTimeArr.at(1)) * 60) +
+            strToInt(sTimeArr.at(2));
+      }
+    }
+    if (timeEndNode != NULL) {
+      std::string eTime = timeEndNode->getAsString();
+      std::vector<std::string> eTimeArr = splitString(eTime, ':');
+      if (eTimeArr.size() == 3) {
+        endSinceMidnight =
+            (strToInt(eTimeArr.at(0)) * 60 * 60) +
+            (strToInt(eTimeArr.at(1)) * 60) +
+            strToInt(eTimeArr.at(2));
+      }
+    }
+    Logger::getInstance()->log("checkTimeCondition: "
+        "start: " + intToString(startSinceMidnight) + ", "
+        "end: " + intToString(endSinceMidnight) + ", "
+        "now: " + intToString(secNow), lsDebug);
+
+    if (startSinceMidnight < endSinceMidnight) {
+      // 1. 10:00:00 - 12:00:00
+      if ((secNow < startSinceMidnight) || (secNow > endSinceMidnight)) {
+        return false;
+      }
+    } else {
+      // 2. 22:00:00 - 04:00:00
+      if ((secNow < startSinceMidnight) && (secNow > endSinceMidnight)) {
+        return false;
+      }
+    }
+    return true;
+  } // checkTimeCondition
+
   bool checkSystemCondition(std::string _path) {
     PropertyNodePtr oBaseConditionNode =
         DSS::getInstance()->getPropertySystem().getProperty(
@@ -157,48 +200,20 @@ namespace dss {
         }
       } // oWeekdayNode != NULL
 
-      PropertyNodePtr oTimeStartNode =
-          oBaseConditionNode->getPropertyByName("time-start");
-      if (oTimeStartNode != NULL) {
-        std::string sTime = oTimeStartNode->getAsString();
-        std::vector<std::string> oTimeTemp = splitString(sTime, ':');
-        if (oTimeTemp.size() == 3) {
-          int secondsSinceMidnightCondition =
-              (strToInt(oTimeTemp.at(0)) * 3600) +
-              (strToInt(oTimeTemp.at(1)) * 60) +
-              strToInt(oTimeTemp.at(2));
-          DateTime oNow = DateTime();
-          int secondsSinceMidnightNow =
-              (oNow.getHour() * 3600) +
-              (oNow.getMinute() * 60) +
-              (oNow.getSecond());
-          if (secondsSinceMidnightNow < secondsSinceMidnightCondition) {
-            return false;
-          }
-        } // oTimeTemp.size() == 3
-      } // oTimeStartNode != NULL
+      PropertyNodePtr timeStartNode = oBaseConditionNode->getPropertyByName("time-start");
+      PropertyNodePtr timeEndNode = oBaseConditionNode->getPropertyByName("time-end");
+      if (timeStartNode != NULL || timeEndNode != NULL) {
+        DateTime nTime = DateTime();
+        int secNow =
+            (nTime.getHour() * 60 * 60) +
+            (nTime.getMinute() * 60) +
+            (nTime.getSecond());
+        if (!checkTimeCondition(timeStartNode, timeEndNode, secNow)) {
+          return false;
+        }
+      }
 
-      PropertyNodePtr oTimeEndNode =
-          oBaseConditionNode->getPropertyByName("time-end");
-      if (oTimeEndNode != NULL) {
-        std::string sTime = oTimeEndNode->getAsString();
-        std::vector<std::string> oTimeTemp = splitString(sTime, ':');
-        if (oTimeTemp.size() == 3) {
-          int secondsSinceMidnightCondition =
-              (strToInt(oTimeTemp.at(0)) * 3600) +
-              (strToInt(oTimeTemp.at(1)) * 60) +
-              strToInt(oTimeTemp.at(2));
-          DateTime oNow = DateTime();
-          int secondsSinceMidnightNow =
-              (oNow.getHour() * 3600) +
-              (oNow.getMinute() * 60) +
-              (oNow.getSecond());
-          if (secondsSinceMidnightCondition < secondsSinceMidnightNow) {
-            return false;
-          }
-        } // oTimeTemp.size() == 3
-      } // oTimeEndNode != NULL
-    }
+    } // (oBaseConditionNode != NULL)
     return true;
   } // checkSystemCondition
 
