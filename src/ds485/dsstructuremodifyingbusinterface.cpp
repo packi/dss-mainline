@@ -60,7 +60,12 @@ namespace dss {
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
     int ret = ZoneModify_remove(m_DSMApiHandle, meterDSID, _zoneID);
-    DSBusInterface::checkResultCode(ret);
+
+    if (IsBroadcastId(meterDSID)) {
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
   } // removeZone
 
   void DSStructureModifyingBusInterface::addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {

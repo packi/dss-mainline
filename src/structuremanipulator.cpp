@@ -33,8 +33,10 @@
 #include "src/model/set.h"
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
+#include "src/dsidhelper.h"
 
 #include <stdexcept>
+#include <digitalSTROM/ds.h>
 
 namespace dss {
 
@@ -153,6 +155,33 @@ namespace dss {
                                  e.what() + "'", lsWarning);
     }
   } // removeZoneOnDSMeter
+
+  void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
+    AssertLocked apartmentLocked(&m_Apartment);
+    try {
+      dsid_t broadcastDSID;
+      dss_dsid_t dSSBroadcastDSID;
+      SetBroadcastId(broadcastDSID);
+      dsid_helper::toDssDsid(broadcastDSID, dSSBroadcastDSID);
+
+      std::vector<boost::shared_ptr<const DSMeter> > meters = _zone->getDSMeters();
+      for (size_t s = 0; s < meters.size(); s++) {
+        boost::shared_ptr<dss::DSMeter> meter =
+            m_Apartment.getDSMeterByDSID(meters.at(s)->getDSID());
+        if (meter != NULL) {
+          _zone->removeFromDSMeter(meter);
+        }
+      }
+      m_Interface.removeZone(dSSBroadcastDSID, _zone->getID());
+      if(!_zone->isRegisteredOnAnyMeter()) {
+        _zone->setIsConnected(false);
+      }
+    } catch(BusApiError& e) {
+      Logger::getInstance()->log("Can't broadcast-remove zone " +
+                                 intToString(_zone->getID()) + ": " +
+                                 e.what() + "'", lsWarning);
+    }
+  } // removeZoneOnDSMeters
 
   void StructureManipulator::removeDeviceFromDSMeter(boost::shared_ptr<Device> _device) {
 
