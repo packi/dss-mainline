@@ -1,5 +1,20 @@
 dSS - digitalSTROM Server
 
+v1.17.1 02.11.2012
+	* add random data to secure session tokens, #1908
+	* fix time range condition checks, #2019
+	* add daylight state, #2011
+	* Broadcast remove zones on removeZone JSON call, #1679
+	* assume the energy counter started at zero if there is no more data, #2015
+	* ean device bugfixes - allow no icon, fix wrong sign extention,
+	  have a default icon
+	* restart Bonjour service when changing the name, #1573
+	* set "dSS" as apartment name if empty, #2013
+	* state_change event was never scheduled due to wrong time string
+	  calculation, #2027
+	* fix wrong configuration of ZWS devices, #1673
+	* Fix js warning in http module, #1907
+
 v1.17.0 22.10.2012
 	* fixed time-start condition, added time-end check
 	* fix system condition weekday processing
