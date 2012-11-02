@@ -28,9 +28,12 @@
 #define __SYSTEM_CONDITIONS_H__
 
 #include <string>
+#include "dss.h"
+#include "propertysystem.h"
 
 namespace dss {
 
+  bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode, int secNow);
   bool checkSystemCondition(std::string _path);
 
 };
