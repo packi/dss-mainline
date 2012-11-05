@@ -952,7 +952,7 @@ namespace dss {
       std::string sEvent = triggerEvent->getAsString();
       if (sEvent == id) {
         Logger::getInstance()->log("SystemTrigger::"
-                "checkHighlevelL Match: HighLevelEcent EventID:" + id);
+                "checkHighlevel Match: HighLevelEvent EventID:" + id);
         return true;
       }
 
