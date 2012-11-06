@@ -324,13 +324,14 @@ namespace dss {
     try {
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
       uint16_t result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2e);
+      DeviceOEMInetState_t deviceInetState = (DeviceOEMInetState_t)(result >> 12);
 
-      if ((result == 0x0000) || (result == 0xFFFF)) {
+      if (deviceInetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED) {
         // no EAN programmed
         state = DEVICE_OEM_NONE;
       } else {
         // EAN programmed
-        ean |= ((long long unsigned int)result << 32);
+        ean |= ((long long unsigned int)(result & 0xFFF) << 32);
 
         result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2a);
         ean |= result;
@@ -342,7 +343,7 @@ namespace dss {
 
         partNumber = getDeviceConfig(dsmId, m_deviceAdress, 1, 0x1e);
 
-        state = DEVICE_OEM_VALID;
+        state = (deviceInetState == DEVICE_OEM_EAN_NO_INTERNET_ACCESS) ? DEVICE_OEM_VALID_NO_INET : DEVICE_OEM_VALID;
       }
     } catch (BusApiError& er) {
       // Bus error
