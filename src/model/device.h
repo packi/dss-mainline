@@ -117,6 +117,7 @@ namespace dss {
     DEVICE_OEM_NONE,
     DEVICE_OEM_LOADING,
     DEVICE_OEM_VALID,
+    DEVICE_OEM_VALID_NO_INET,
   } DeviceOEMState_t;
 
   typedef enum {

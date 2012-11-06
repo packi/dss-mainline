@@ -1252,7 +1252,7 @@ namespace dss {
   {
     m_OemState = _state;
 
-    if ((m_OemState == DEVICE_OEM_NONE) || (m_OemState == DEVICE_OEM_VALID)) {
+    if ((m_OemState == DEVICE_OEM_NONE) || (m_OemState == DEVICE_OEM_VALID) || (m_OemState == DEVICE_OEM_VALID_NO_INET)) {
       dirty();
     }
   }
@@ -1268,6 +1268,8 @@ namespace dss {
       return "Loading";
     case DEVICE_OEM_VALID:
       return "Valid";
+    case DEVICE_OEM_VALID_NO_INET:
+      return "Valid_no_net";
     }
   }
 
@@ -1277,6 +1279,8 @@ namespace dss {
       return DEVICE_OEM_NONE;
     } else if (strcmp(_string, "Valid") == 0) {
       return DEVICE_OEM_VALID;
+    } else if (strcmp(_string, "Valid_no_net") == 0) {
+      return DEVICE_OEM_VALID_NO_INET;
     } else {
       return DEVICE_OEM_UNKOWN;
     }

@@ -1264,14 +1264,16 @@ namespace dss {
                                         const int& _partNumber) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
-      if (_state == DEVICE_OEM_VALID) {
+      if (_state == DEVICE_OEM_VALID_NO_INET) {
+        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
+      } else if (_state == DEVICE_OEM_VALID) {
         devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
         // query Webservice
         getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(devRef.getDevice())));
         devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
       devRef.getDevice()->setOemInfoState(_state);
-      devRef.getDevice()->setOemProductInfoState(_state);
+      devRef.getDevice()->setOemProductInfoState((_state == DEVICE_OEM_VALID_NO_INET) ? DEVICE_OEM_NONE : _state);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what());
     }
