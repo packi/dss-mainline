@@ -119,6 +119,13 @@ namespace dss {
     DEVICE_OEM_VALID,
   } DeviceOEMState_t;
 
+  typedef enum {
+    DEVICE_OEM_EAN_NO_EAN_CONFIGURED = 0,
+    DEVICE_OEM_EAN_NO_INTERNET_ACCESS = 1,
+    DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL = 2,
+    DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY = 3,
+  } DeviceOEMInetState_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
