@@ -155,7 +155,7 @@ namespace dss {
 
       DSS::getInstance()->getPropertySystem().setStringValue(
           getConfigPropertyBasePath() + "oemWebservice",
-          "http://developer.digitalstrom.org:8124/", true, false);
+          "http://dsservices.aizo.com/", true, false);
 
       DSS::getInstance()->getPropertySystem().setStringValue(
           getConfigPropertyBasePath() + "iconBasePath",
@@ -1337,17 +1337,19 @@ namespace dss {
     m_dsmId = _device->getDSMeterDSID();
     m_EAN = _device->getOemEanAsString();
     m_partNumber = _device->getOemPartNumber();
+    m_serialNumber = _device->getOemSerialNumber();
   }
 
   void ModelMaintenance::OEMWebQuery::run()
   {
     std::string oemWebservice;
     boost::filesystem::path iconBasePath;
+    PropertySystem propSys = DSS::getInstance()->getPropertySystem();
     if(DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
-      oemWebservice = DSS::getInstance()->getPropertySystem().getStringValue(
+      oemWebservice = propSys.getStringValue(
               "/config/subsystems/Apartment/oemWebservice");
-      iconBasePath = DSS::getInstance()->getPropertySystem().getStringValue(
+      iconBasePath = propSys.getStringValue(
               "/config/subsystems/Apartment/iconBasePath");
     } else {
       return;
@@ -1360,8 +1362,19 @@ namespace dss {
     std::string productURL;
     std::string defaultName;
 
-    std::string eanURL = oemWebservice + std::string("product/") + m_EAN +
-                         "/" + intToString(m_partNumber);
+    std::string mac = propSys.getStringValue("/system/host/interfaces/eth0/mac");
+    std::string country = propSys.getStringValue("/config/geodata/country");
+    std::string language = propSys.getStringValue("/system/language/locale");
+
+    std::string eanURL = oemWebservice +
+                         "product/EAN/getProductData" +
+                         "?EAN=" + m_EAN +
+                         "&PartNr=" + intToString(m_partNumber) +
+                         "&OEMSerialNumber=" + intToString(m_serialNumber) +
+                         "&MACAddress=" + mac +
+                         "&CountryCode=" + country +
+                         "&LanguageCode=" + language;
+
     Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
     long res = url.request(eanURL, false, &result);
     if (res == 200) {

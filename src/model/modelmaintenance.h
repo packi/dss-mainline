@@ -119,9 +119,10 @@ namespace dss {
       virtual void run();
     private:
       std::string m_EAN;
-	  uint16_t m_partNumber;
+      uint16_t m_partNumber;
       dss_dsid_t m_dsmId;
       devid_t m_deviceAdress;
+      uint16_t m_serialNumber;
     };
 
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
