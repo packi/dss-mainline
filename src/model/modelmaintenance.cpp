@@ -1414,7 +1414,7 @@ namespace dss {
       state = DEVICE_OEM_VALID;
       iconFile = remoteIconPath.filename();
       if (!remoteIconPath.empty()) {
-        std::string iconURL = oemWebservice + remoteIconPath.string();
+        std::string iconURL = remoteIconPath.string();
         boost::filesystem::path iconPath = iconBasePath / iconFile;
         res = url.downloadFile(iconURL, iconPath.string());
         if (res != 200) {
