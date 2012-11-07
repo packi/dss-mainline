@@ -585,6 +585,8 @@ namespace dss {
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);
+
+        setupWebUpdateEvent();
       }
     }
   } // readOutPendingMeter
@@ -1448,5 +1450,44 @@ namespace dss {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }
   }
+
+  const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
+
+  void ModelMaintenance::setupWebUpdateEvent() {
+    EventInterpreterInternalRelay* pRelay =
+      dynamic_cast<EventInterpreterInternalRelay*>(DSS::getInstance()->getEventInterpreter().getPluginByName(EventInterpreterInternalRelay::getPluginName()));
+    m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+
+    boost::shared_ptr<EventSubscription> updateWebSubscription(
+            new dss::EventSubscription(
+                kWebUpdateEventName,
+                EventInterpreterInternalRelay::getPluginName(),
+                DSS::getInstance()->getEventInterpreter(),
+                boost::shared_ptr<SubscriptionOptions>())
+    );
+    m_pRelayTarget->subscribeTo(updateWebSubscription);
+    m_pRelayTarget->setCallback(boost::bind(&ModelMaintenance::updateWebData, this, _1, _2));
+    sendWebUpdateEvent(5);
+  } // setupCleanupEvent
+
+  void ModelMaintenance::updateWebData(Event& _event, const EventSubscription& _subscription) {
+    std::vector<boost::shared_ptr<Device> > deviceVec = m_pApartment->getDevicesVector();
+    foreach(boost::shared_ptr<Device> device, deviceVec) {
+      if ((device->getOemInfoState() == DEVICE_OEM_VALID) &&
+           ((device->getOemProductInfoState() == DEVICE_OEM_VALID) ||
+            (device->getOemProductInfoState() == DEVICE_OEM_UNKOWN))) {
+        // query Webservice
+        getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(device)));
+        device->setOemProductInfoState(DEVICE_OEM_LOADING);
+      }
+    }
+    sendWebUpdateEvent();
+  } // cleanupTerminatedScripts
+
+  void ModelMaintenance::sendWebUpdateEvent(int _interval) {
+    boost::shared_ptr<Event> pEvent(new Event(kWebUpdateEventName));
+    pEvent->setProperty("time", "+" + intToString(_interval));
+    DSS::getInstance()->getEventInterpreter().getQueue().pushEvent(pEvent);
+  } // sendCleanupEvent
 
 } // namespace dss

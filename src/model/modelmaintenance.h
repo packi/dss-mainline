@@ -33,6 +33,8 @@
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
+#include "src/event.h"
+#include "src/internaleventrelaytarget.h"
 
 namespace dss {
   class Apartment;
@@ -188,6 +190,10 @@ namespace dss {
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
                            const std::string& _defaultName);
+
+    void setupWebUpdateEvent();
+    void updateWebData(Event& _event, const EventSubscription& _subscription);
+    void sendWebUpdateEvent(int _interval = 86400);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;
@@ -205,6 +211,9 @@ namespace dss {
     void checkConfigFile(boost::filesystem::path _filename);
 
     boost::shared_ptr<TaskProcessor> m_taskProcessor;
+
+    static const std::string kWebUpdateEventName;
+    boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
   }; // ModelMaintenance
 
 }
