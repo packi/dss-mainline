@@ -1388,25 +1388,44 @@ namespace dss {
 
       boost::filesystem::path remoteIconPath;
       if (tok->err == json_tokener_success) {
-          json_object* obj = json_object_object_get(json_request, "ProductName");
+        int resultCode = 99;
+        json_object* obj = json_object_object_get(json_request, "ReturnCode");
+        if (obj != NULL) {
+          resultCode = json_object_get_int(obj);
+        }
+        if (resultCode != 0) {
+          std::string errorMessage;
+          obj = json_object_object_get(json_request, "ReturnMessage");
           if (obj != NULL) {
-            productName = json_object_get_string(obj);
+            errorMessage = json_object_get_string(obj);
           }
+          Logger::getInstance()->log(std::string("OEMWebQuery::run: JSON-ERROR: ") + errorMessage, lsError);
+        } else {
+          json_object* result = json_object_object_get(json_request, "Response");
+          if (result == NULL) {
+            Logger::getInstance()->log(std::string("OEMWebQuery::run: no 'result' object in response"), lsError);
+          } else {
+            obj = json_object_object_get(result, "ArticleName");
+            if (obj != NULL) {
+              productName = json_object_get_string(obj);
+            }
 
-          obj = json_object_object_get(json_request, "IconPath");
-          if (obj != NULL) {
-            remoteIconPath = json_object_get_string(obj);
-          }
+            obj = json_object_object_get(result, "ArticleIcon");
+            if (obj != NULL) {
+              remoteIconPath = json_object_get_string(obj);
+            }
 
-          obj = json_object_object_get(json_request, "URL");
-          if (obj != NULL) {
-            productURL = json_object_get_string(obj);
-          }
+            obj = json_object_object_get(result, "ArticleDescriptionForCustomer");
+            if (obj != NULL) {
+              productURL = json_object_get_string(obj);
+            }
 
-          obj = json_object_object_get(json_request, "Name");
-          if (obj != NULL) {
-            defaultName = json_object_get_string(obj);
+            obj = json_object_object_get(result, "DefaultName");
+            if (obj != NULL) {
+              defaultName = json_object_get_string(obj);
+            }
           }
+        }
       }
       json_object_put(json_request);
       json_tokener_free(tok);
