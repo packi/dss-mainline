@@ -474,6 +474,7 @@ AC_CONFIG_FILES([
     build/Makefile
     tools/Makefile
     data/Makefile
+    doc/doxygen.conf
 ])
 
 AC_OUTPUT
