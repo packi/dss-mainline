@@ -117,7 +117,6 @@ namespace dss {
     DEVICE_OEM_NONE,
     DEVICE_OEM_LOADING,
     DEVICE_OEM_VALID,
-    DEVICE_OEM_VALID_NO_INET,
   } DeviceOEMState_t;
 
   typedef enum {
@@ -162,6 +161,7 @@ namespace dss {
     unsigned long long m_OemEanNumber;
     uint16_t m_OemSerialNumber;
     uint8_t m_OemPartNumber;
+    DeviceOEMInetState_t m_OemInetState;
     DeviceOEMState_t m_OemState;
 
     PropertyNodePtr m_pAliasNode;
@@ -406,7 +406,8 @@ namespace dss {
     bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
 
     void setOemInfo(const unsigned long long _eanNumber,
-        const uint16_t _serialNumber, const uint8_t _partNumber);
+        const uint16_t _serialNumber, const uint8_t _partNumber,
+        const DeviceOEMInetState_t _iNetState);
     void setOemInfoState(const DeviceOEMState_t _state);
 
     unsigned long long getOemEan() const { return m_OemEanNumber; }
@@ -416,8 +417,12 @@ namespace dss {
     static std::string oemStateToString(const DeviceOEMState_t _state);
     uint16_t getOemSerialNumber() const { return m_OemSerialNumber; }
     uint8_t getOemPartNumber() const { return m_OemPartNumber; }
+    DeviceOEMInetState_t getOemInetState() const { return m_OemInetState; }
+    std::string getOemInetStateAsString() const { return oemInetStateToString(m_OemInetState); }
+    static std::string oemInetStateToString(const DeviceOEMInetState_t _state);
 
     DeviceOEMState_t getOemStateFromString(const char* _string) const;
+    DeviceOEMInetState_t getOemInetStateFromString(const char* _string) const;
 
     static const std::string getDeviceTypeString(const DeviceTypes_t _type);
     static const std::string getDeviceClassString(const DeviceClasses_t _class);

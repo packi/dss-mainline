@@ -184,7 +184,8 @@ namespace dss {
     void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
     void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
     void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
-                      const DeviceOEMState_t& _state, const unsigned long long& _eanNumber,
+                      const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
+                      const unsigned long long& _eanNumber,
                       const int& _serialNumber, const int& _partNumber);
     void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,

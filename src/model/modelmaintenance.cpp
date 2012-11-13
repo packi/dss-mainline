@@ -519,15 +519,16 @@ namespace dss {
         break;
       case ModelEvent::etDeviceEANReady:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 6) {
-          log("Expected 5 parameters for ModelEvent::etDeviceEANReady");
+        if(event.getParameterCount() != 7) {
+          log("Expected 7 parameters for ModelEvent::etDeviceEANReady");
         } else {
           onEANReady(pEventWithDSID->getDSID(),
                      event.getParameter(0),
                      (const DeviceOEMState_t)event.getParameter(1),
-                     ((unsigned long long)event.getParameter(2)) << 32 | ((unsigned long long)event.getParameter(3) & 0xFFFFFFFF),
-                     event.getParameter(4),
-                     event.getParameter(5));
+                     (const DeviceOEMInetState_t)event.getParameter(2),
+                     ((unsigned long long)event.getParameter(3)) << 32 | ((unsigned long long)event.getParameter(4) & 0xFFFFFFFF),
+                     event.getParameter(5),
+                     event.getParameter(6));
         }
         break;
       case ModelEvent::etDeviceOEMDataReady:
@@ -1260,22 +1261,25 @@ namespace dss {
 
   void ModelMaintenance::onEANReady(dss_dsid_t _dsMeterID,
                                         const devid_t _deviceID,
-                                        const DeviceOEMState_t& _state,
+                                        const DeviceOEMState_t _state,
+                                        const DeviceOEMInetState_t _iNetState,
                                         const unsigned long long& _eanNumber,
                                         const int& _serialNumber,
                                         const int& _partNumber) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
-      if (_state == DEVICE_OEM_VALID_NO_INET) {
-        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
-      } else if (_state == DEVICE_OEM_VALID) {
-        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber);
-        // query Webservice
-        getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(devRef.getDevice())));
-        devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
+      if (_state == DEVICE_OEM_VALID) {
+        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber, _iNetState);
+        if ((_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
+            (_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
+          // query Webservice
+          getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(devRef.getDevice())));
+          devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
+        } else {
+          devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_NONE);
+        }
       }
       devRef.getDevice()->setOemInfoState(_state);
-      devRef.getDevice()->setOemProductInfoState((_state == DEVICE_OEM_VALID_NO_INET) ? DEVICE_OEM_NONE : _state);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what());
     }

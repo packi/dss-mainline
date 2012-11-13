@@ -311,6 +311,7 @@ namespace dss {
     uint16_t serialNumber = 0;
     uint8_t partNumber = 0;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
     dsid_t dsmId;
     dsid_helper::toDsmapiDsid(m_dsmId, dsmId);
 
@@ -324,7 +325,7 @@ namespace dss {
     try {
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
       uint16_t result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2e);
-      DeviceOEMInetState_t deviceInetState = (DeviceOEMInetState_t)(result >> 12);
+      deviceInetState = (DeviceOEMInetState_t)(result >> 12);
 
       if (deviceInetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED) {
         // no EAN programmed
@@ -343,7 +344,7 @@ namespace dss {
 
         partNumber = getDeviceConfig(dsmId, m_deviceAdress, 1, 0x1e);
 
-        state = (deviceInetState == DEVICE_OEM_EAN_NO_INTERNET_ACCESS) ? DEVICE_OEM_VALID_NO_INET : DEVICE_OEM_VALID;
+        state = DEVICE_OEM_VALID;
       }
     } catch (BusApiError& er) {
       // Bus error
@@ -355,6 +356,7 @@ namespace dss {
                                                 m_dsmId);
     pEvent->addParameter(m_deviceAdress);
     pEvent->addParameter(state);
+    pEvent->addParameter(deviceInetState);
     pEvent->addParameter(ean >> 32);
     pEvent->addParameter(ean & 0xFFFFFFFF);
     pEvent->addParameter(serialNumber);
