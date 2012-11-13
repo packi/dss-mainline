@@ -97,6 +97,7 @@ dist_dssdataimages_DATA =  \
    $(top_srcdir)/data/images/tkm_red.png \
    $(top_srcdir)/data/images/tkm_white.png \
    $(top_srcdir)/data/images/tkm_yellow.png \
+   $(top_srcdir)/data/images/unknown.png \
    $(top_srcdir)/data/images/zws_black_black.png \
    $(top_srcdir)/data/images/zws_black_blue.png \
    $(top_srcdir)/data/images/zws_black_cyan.png \
