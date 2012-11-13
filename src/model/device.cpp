@@ -143,7 +143,7 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
         m_pPropertyNode->createProperty("HWInfo")
           ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
-        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("OEM");
+        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
         oemNode->createProperty("ProductState")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
         oemNode->createProperty("ProductName")
