@@ -49,8 +49,8 @@ namespace dss {
     int m_EnergyLevelRed;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
-    unsigned long long m_EnergyMeterValue;
-    unsigned long long m_EnergyMeterValueWh;
+    double m_EnergyMeterValue;
+    double m_EnergyMeterValueWh;
     unsigned long long m_LastReportedEnergyMeterValue;
     bool m_ReceivedMeterValue;
     DateTime m_EnergyMeterValueTimeStamp;
