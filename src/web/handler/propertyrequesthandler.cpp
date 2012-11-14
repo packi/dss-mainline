@@ -102,6 +102,17 @@ namespace dss {
       } catch(PropertyTypeMismatch& ex) {
         return failure(std::string("Error getting property: '") + ex.what() + "'");
       }
+    } else if(_request.getMethod() == "getFloating") {
+      if(node == NULL) {
+        return failure("Could not find node named '" + propName + "'");
+      }
+      try {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("value", node->getFloatingValue());
+        return success(resultObj);
+      } catch(PropertyTypeMismatch& ex) {
+        return failure(std::string("Error getting property: '") + ex.what() + "'");
+      }
     } else if(_request.getMethod() == "setString") {
       std::string value = st.convert(_request.getParameter("value"));
       if(node == NULL) {
@@ -145,6 +156,23 @@ namespace dss {
       }
       try {
         node->setIntegerValue(value);
+      } catch(PropertyTypeMismatch& ex) {
+        return failure(std::string("Error setting property: '") + ex.what() + "'");
+      }
+      return success();
+    } else if(_request.getMethod() == "setFloating") {
+      std::string strValue = _request.getParameter("value");
+      int value;
+      try {
+        value = strToDouble(strValue);
+      } catch(...) {
+        return failure("Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
+      }
+      if(node == NULL) {
+        node = m_PropertySystem.createProperty(propName);
+      }
+      try {
+        node->setFloatingValue(value);
       } catch(PropertyTypeMismatch& ex) {
         return failure(std::string("Error setting property: '") + ex.what() + "'");
       }

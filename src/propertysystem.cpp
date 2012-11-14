@@ -242,6 +242,8 @@ namespace dss {
       case vTypeBoolean:
         delete m_Proxy.boolProxy;
         break;
+      case vTypeFloating:
+        delete m_Proxy.floatingProxy;
       case vTypeNone:
         break;
       }
@@ -501,6 +503,27 @@ namespace dss {
     }
   } // setBooleanValue
 
+  void PropertyNode::setFloatingValue(const double _value) {
+    checkWriteAccess();
+    if(m_Aliased) {
+      m_AliasTarget->setFloatingValue(_value);
+    } else {
+      if(m_LinkedToProxy) {
+        if(m_PropVal.valueType == vTypeFloating) {
+          m_Proxy.floatingProxy->setValue(_value);
+        } else {
+          Logger::getInstance()->log("*** setting float on a non floating-property");
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        }
+      } else {
+        clearValue();
+        m_PropVal.actualValue.floating = _value;
+      }
+      m_PropVal.valueType = vTypeFloating;
+      propertyChanged();
+    }
+  } // setBooleanValue
+
   std::string PropertyNode::getStringValue() {
     checkReadAccess();
     if(m_Aliased) {
@@ -547,6 +570,24 @@ namespace dss {
           return m_Proxy.boolProxy->getValue();
         } else {
           return m_PropVal.actualValue.boolean;
+        }
+      } else {
+//        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
+    }
+  } // getBoolValue
+
+  double PropertyNode::getFloatingValue() {
+    checkReadAccess();
+    if(m_Aliased) {
+      return m_AliasTarget->getFloatingValue();
+    } else {
+      if(m_PropVal.valueType == vTypeFloating) {
+        if(m_LinkedToProxy) {
+          return m_Proxy.floatingProxy->getValue();
+        } else {
+          return m_PropVal.actualValue.floating;
         }
       } else {
 //        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
@@ -613,6 +654,16 @@ namespace dss {
     m_Proxy.stringProxy = _proxy.clone();
     m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeString;
+    return true;
+  } // linkToProxy
+
+  bool PropertyNode::linkToProxy(const PropertyProxy<double>& _proxy) {
+    if(m_LinkedToProxy || m_Aliased) {
+      return false;
+    }
+    m_Proxy.floatingProxy = _proxy.clone();
+    m_LinkedToProxy = true;
+    m_PropVal.valueType = vTypeFloating;
     return true;
   } // linkToProxy
 
@@ -1329,6 +1380,9 @@ namespace dss {
       case vTypeBoolean:
         return "boolean";
         break;
+      case vTypeFloating:
+        return "floating";
+        break;
     }
     return "unknown";
   } // getValueTypeAsString
@@ -1343,6 +1397,8 @@ namespace dss {
       return vTypeBoolean;
     } else if(strVal == "string") {
       return vTypeString;
+    } else if(strVal == "floating") {
+      return vTypeFloating;
     } else {
       assert(false);
     }
@@ -1354,5 +1410,6 @@ namespace dss {
   template <> const int PropertyProxy<int>::DefaultValue = 0;
   template <> const bool PropertyProxy<bool>::DefaultValue = false;
   template <> const std::string PropertyProxy<std::string>::DefaultValue = std::string();
+  template <> const double PropertyProxy<double>::DefaultValue = 0.0;
 
 }

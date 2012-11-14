@@ -120,7 +120,12 @@ namespace dss {
   void JSONObject::addProperty(const std::string& _name, const bool _value) {
     boost::shared_ptr<JSONValue<bool> > elem(new JSONValue<bool>(_value));
     addElement(_name, elem);
-  }
+  } // addProperty
+
+  void JSONObject::addProperty(const std::string& _name, const double _value) {
+    boost::shared_ptr<JSONValue<double> > elem(new JSONValue<double>(_value));
+    addElement(_name, elem);
+  } // addProperty
 
   void JSONObject::writeTo(std::stringstream& _out) {
     _out << "{";

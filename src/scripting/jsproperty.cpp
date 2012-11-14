@@ -116,6 +116,8 @@ namespace dss {
           node->setBooleanValue(ctx->convertTo<bool>(JS_ARGV(cx, vp)[argIndex]));
         } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[argIndex])) {
           node->setIntegerValue(ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
+        } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[argIndex])) {
+          node->setFloatingValue(ctx->convertTo<double>(JS_ARGV(cx, vp)[argIndex]));
         } else {
           JS_ReportWarning(cx, "Property.setValue: unknown type of argument 2");
           return JS_FALSE;
@@ -208,6 +210,8 @@ namespace dss {
         valueNode->setBooleanValue(ctx->convertTo<bool>(statusValue));
       } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
         valueNode->setIntegerValue(ctx->convertTo<int>(statusValue));
+      } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[0])) {
+        valueNode->setFloatingValue(ctx->convertTo<double>(statusValue));
       } else {
         JS_ReportWarning(cx, "Property.setStatusProperty: unknown type of argument");
         return JS_FALSE;
@@ -266,6 +270,9 @@ namespace dss {
     break;
     case vTypeBoolean:
       JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(node->getBoolValue()));
+      break;
+    case vTypeFloating:
+      JS_SET_RVAL(cx, vp, DOUBLE_TO_JSVAL(node->getFloatingValue()));
       break;
     case vTypeNone:
       JS_SET_RVAL(cx, vp, JSVAL_VOID);

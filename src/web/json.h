@@ -58,6 +58,7 @@ namespace dss {
     virtual void addProperty(const std::string& _name, const unsigned long int _value);
     virtual void addProperty(const std::string& _name, const unsigned long long _value);
     virtual void addProperty(const std::string& _name, const bool _value);
+    virtual void addProperty(const std::string& _name, const double _value);
   protected:
     virtual void writeTo(std::stringstream& _out);
   };
