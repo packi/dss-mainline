@@ -99,7 +99,11 @@ namespace dss {
       Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
         Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + targetDSMeter->getDSID().toString(), lsInfo);
-        removeZoneOnDSMeter(oldZone, targetDSMeter);
+        try {
+          removeZoneOnDSMeter(oldZone, targetDSMeter);
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(std::string("StructureManipulator::addDeviceToZone: can't remove zone: ") + err.what(), lsInfo);
+        }
       }
 
       // cleanup group presence
