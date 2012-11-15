@@ -102,7 +102,7 @@ namespace dss {
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->callScene(IDeviceInterface::coEvent, sceneId, forceFlag);
+        group->callScene(IDeviceInterface::coJSScripting, sceneId, forceFlag);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -148,7 +148,7 @@ namespace dss {
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->undoScene(IDeviceInterface::coEvent, sceneId);
+        group->undoScene(IDeviceInterface::coJSScripting, sceneId);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -211,7 +211,7 @@ namespace dss {
         return;
       }
 
-      target->callScene(IDeviceInterface::coEvent, sceneId, forceFlag);
+      target->callScene(IDeviceInterface::coJSScripting, sceneId, forceFlag);
 
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -238,7 +238,7 @@ namespace dss {
         return;
       }
 
-      target->setValue(IDeviceInterface::coEvent,
+      target->setValue(IDeviceInterface::coJSScripting,
                        oValueNode->getIntegerValue());
 
     } catch (std::runtime_error& e) {
@@ -258,7 +258,7 @@ namespace dss {
         return;
       }
 
-      target->blink(IDeviceInterface::coEvent);
+      target->blink(IDeviceInterface::coJSScripting);
 
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -294,7 +294,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone;
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->blink(IDeviceInterface::coEvent);
+        group->blink(IDeviceInterface::coJSScripting);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
