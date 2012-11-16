@@ -38,10 +38,8 @@ clean-report:
 	rm -rf $(top_builddir)/build/*.gcda
 	rm -rf $(top_builddir)/build/..*.gcov
 
-if WITH_CURL
 gencurlheader:
 	python src/scripting/curl-js-constants.py < /usr/include/curl/curl.h > src/scripting/jscurl-constants.h
-endif
 
 if BUILD_GCOV_REPORT
 report: $(top_builddir)/build/dsstests

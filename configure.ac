@@ -52,10 +52,6 @@ MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
           [],[])
 
-MT_OPTION([curl], [disable],
-          [build dSS without curl support (default: enabled)],
-          [],[])
-
 MT_OPTION([libtcmalloc], [disable],
           [build dSS without libtcmalloc support (default: enabled)],
           [],[])
@@ -397,18 +393,14 @@ fi
 
 AM_CONDITIONAL(BUILD_SOAP, test "x$SOAP_OPTION_ENABLED" = "xyes")
 
-if test "x$CURL_OPTION_ENABLED" = "xyes"; then
-    PKG_CHECK_MODULES([CURL], [libcurl],
-        [
-            AC_DEFINE([HAVE_CURL], [1], [libcurl support available])
-            WITH_CURL=yes
-        ],
-        [
-            AC_MSG_ERROR([$CURL_PKG_ERRORS])
-        ])
-    AC_SUBST(HAVE_CURL)
-fi
-AM_CONDITIONAL(WITH_CURL, test "x$WITH_CURL" = "xyes")
+PKG_CHECK_MODULES([CURL], [libcurl],
+    [
+        AC_DEFINE([HAVE_CURL], [1], [libcurl support available])
+    ],
+    [
+        AC_MSG_ERROR([$CURL_PKG_ERRORS])
+    ])
+AC_SUBST(HAVE_CURL)
 
 if test "x$LIBTCMALLOC_OPTION_ENABLED" = "xyes"; then
     PKG_CHECK_MODULES([LIBTCMALLOC], [libtcmalloc],

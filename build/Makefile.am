@@ -60,15 +60,6 @@ libunix_a_CXXFLAGS = \
 			$(BOOST_CPPFLAGS) \
 			$(GCOV_CFLAGS)
 
-if WITH_CURL
-
-libdsscore_a_SOURCES +=  \
-	$(top_srcdir)/src/scripting/jscurl.cpp \
-	$(top_srcdir)/src/scripting/jscurl.h \
-	$(top_srcdir)/src/scripting/jscurl-constants.h
-
-endif
-
 dss_SOURCES = $(top_srcdir)/main.cpp
 
 nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
