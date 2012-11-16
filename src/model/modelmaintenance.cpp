@@ -204,10 +204,10 @@ namespace dss {
           boost::shared_ptr<DSMeter> dsMeter;
           try{
              dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
-             log ("dSM present");
+             log ("dSM already known: " + spec.DSID.toString());
           } catch(ItemNotFoundException& e) {
              dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
-             log ("dSM not present");
+             log ("Discovered new dSM: " + spec.DSID.toString(), lsWarning);
           }
 
           if (!dsMeter->isConnected()) {
@@ -602,10 +602,18 @@ namespace dss {
   } // eraseModelEventsFromQueue
 
   void ModelMaintenance::dsMeterReady(const dss_dsid_t& _dsMeterBusID) {
-    log("DSMeter with DSID: " + _dsMeterBusID.toString() + " is ready", lsInfo);
+    log("Scanning dSM: " + _dsMeterBusID.toString(), lsInfo);
     try {
+
+      boost::shared_ptr<DSMeter> mod;
       try {
-        boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
+        mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
+      } catch(ItemNotFoundException& e) {
+        log("Error scanning dSM: " + _dsMeterBusID.toString() + " not found in data model", lsError);
+        return; // nothing we could do here ...
+      }
+
+      try {
         Set devices = mod->getDevices();
         for (int i = 0; i < devices.length(); i++) {
           devices[i].getDevice()->setIsConnected(true);
@@ -617,14 +625,14 @@ namespace dss {
           raiseEvent(dsMeterReadyEvent);
         }
       } catch(BusApiError& e) {
-        log(std::string("Exception caught while scanning dsMeter " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
+        log(std::string("Bus error scanning dSM " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
 
         ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, _dsMeterBusID);
         addModelEvent(pEvent);
       }
+
     } catch(ItemNotFoundException& e) {
-      log("No dsMeter for bus-id (" + _dsMeterBusID.toString() + ") found, re-discovering devices");
-      discoverDS485Devices();
+      log("dsMeterReady " + _dsMeterBusID.toString() + ": item not found: " + std::string(e.what()), lsError);
     }
   } // dsMeterReady
 
