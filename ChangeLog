@@ -1,5 +1,14 @@
 dSS - digitalSTROM Server
 
+v1.17.2 16.11.2012
+	* add more logging for dsm discovery, #2035
+	* be more tolerant when moving devices, #2007
+	* make cURL library mandantory
+	* restructure ean data web request, use final url, #2044
+	* add inet state, refresh oem data every 24h, #2030
+	* fix system event log OriginId for new action handler, #2063
+	* fix uda event as trigger, #2048
+
 v1.17.1 02.11.2012
 	* add random data to secure session tokens, #1908
 	* fix time range condition checks, #2019
