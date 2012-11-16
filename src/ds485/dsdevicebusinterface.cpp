@@ -310,7 +310,9 @@ namespace dss {
     uint64_t ean = 0;
     uint16_t serialNumber = 0;
     uint8_t partNumber = 0;
+    bool isIndependent = false;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
     dsid_t dsmId;
     dsid_helper::toDsmapiDsid(m_dsmId, dsmId);
 
@@ -324,13 +326,14 @@ namespace dss {
     try {
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
       uint16_t result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2e);
+      deviceInetState = (DeviceOEMInetState_t)(result >> 12);
 
-      if ((result == 0x0000) || (result == 0xFFFF)) {
+      if (deviceInetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED) {
         // no EAN programmed
         state = DEVICE_OEM_NONE;
       } else {
         // EAN programmed
-        ean |= ((long long unsigned int)result << 32);
+        ean |= ((long long unsigned int)(result & 0xFFF) << 32);
 
         result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2a);
         ean |= result;
@@ -341,6 +344,8 @@ namespace dss {
         serialNumber = getDeviceConfigWord(dsmId, m_deviceAdress, 1, 0x1c);
 
         partNumber = getDeviceConfig(dsmId, m_deviceAdress, 1, 0x1e);
+        isIndependent = (partNumber & 0x80);
+        partNumber &= 0x7F;
 
         state = DEVICE_OEM_VALID;
       }
@@ -354,10 +359,12 @@ namespace dss {
                                                 m_dsmId);
     pEvent->addParameter(m_deviceAdress);
     pEvent->addParameter(state);
+    pEvent->addParameter(deviceInetState);
     pEvent->addParameter(ean >> 32);
     pEvent->addParameter(ean & 0xFFFFFFFF);
     pEvent->addParameter(serialNumber);
     pEvent->addParameter(partNumber);
+    pEvent->addParameter(isIndependent);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }

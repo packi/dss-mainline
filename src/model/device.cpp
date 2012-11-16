@@ -143,7 +143,7 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
         m_pPropertyNode->createProperty("HWInfo")
           ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
-        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("OEM");
+        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
         oemNode->createProperty("ProductState")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
         oemNode->createProperty("ProductName")
@@ -160,6 +160,10 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_OemSerialNumber, false));
         oemNode->createProperty("PartNumber")
           ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OemPartNumber, false));
+        oemNode->createProperty("isIndependent")
+          ->linkToProxy(PropertyProxyReference<bool>(m_OemIsIndependent, false));
+        oemNode->createProperty("InternetState")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemInetStateAsString));
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
         m_pPropertyNode->createProperty("shortAddress")
@@ -1239,11 +1243,15 @@ namespace dss {
   }
 
   void Device::setOemInfo(const unsigned long long _eanNumber,
-          const uint16_t _serialNumber, const uint8_t _partNumber)
+          const uint16_t _serialNumber, const uint8_t _partNumber,
+          const DeviceOEMInetState_t _iNetState,
+          bool _isIndependent)
   {
     m_OemEanNumber = _eanNumber;
     m_OemSerialNumber = _serialNumber;
     m_OemPartNumber = _partNumber;
+    m_OemInetState = _iNetState;
+    m_OemIsIndependent = _isIndependent;
 
     dirty();
   }
@@ -1268,6 +1276,35 @@ namespace dss {
       return "Loading";
     case DEVICE_OEM_VALID:
       return "Valid";
+    }
+  }
+
+  DeviceOEMInetState_t Device::getOemInetStateFromString(const char* _string) const
+  {
+    if (strcmp(_string, "No EAN") == 0) {
+      return DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
+    } else if (strcmp(_string, "No Internet") == 0) {
+      return DEVICE_OEM_EAN_NO_INTERNET_ACCESS;
+    } else if (strcmp(_string, "Internet optional") == 0) {
+      return DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL;
+    } else if (strcmp(_string, "Internet mandatory") == 0) {
+      return DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY;
+    } else {
+      return DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
+    }
+  }
+
+  std::string Device::oemInetStateToString(const DeviceOEMInetState_t _state)
+  {
+    switch (_state) {
+    case DEVICE_OEM_EAN_NO_EAN_CONFIGURED:
+      return "No EAN";
+    case DEVICE_OEM_EAN_NO_INTERNET_ACCESS:
+      return "No Internet";
+    case DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL:
+      return "Internet optional";
+    case DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY:
+      return "Internet mandatory";
     }
   }
 

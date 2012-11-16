@@ -119,6 +119,13 @@ namespace dss {
     DEVICE_OEM_VALID,
   } DeviceOEMState_t;
 
+  typedef enum {
+    DEVICE_OEM_EAN_NO_EAN_CONFIGURED = 0,
+    DEVICE_OEM_EAN_NO_INTERNET_ACCESS = 1,
+    DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL = 2,
+    DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY = 3,
+  } DeviceOEMInetState_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -154,7 +161,9 @@ namespace dss {
     unsigned long long m_OemEanNumber;
     uint16_t m_OemSerialNumber;
     uint8_t m_OemPartNumber;
+    DeviceOEMInetState_t m_OemInetState;
     DeviceOEMState_t m_OemState;
+    bool m_OemIsIndependent;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
@@ -398,7 +407,9 @@ namespace dss {
     bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
 
     void setOemInfo(const unsigned long long _eanNumber,
-        const uint16_t _serialNumber, const uint8_t _partNumber);
+        const uint16_t _serialNumber, const uint8_t _partNumber,
+        const DeviceOEMInetState_t _iNetState,
+        const bool _isIndependent);
     void setOemInfoState(const DeviceOEMState_t _state);
 
     unsigned long long getOemEan() const { return m_OemEanNumber; }
@@ -408,8 +419,13 @@ namespace dss {
     static std::string oemStateToString(const DeviceOEMState_t _state);
     uint16_t getOemSerialNumber() const { return m_OemSerialNumber; }
     uint8_t getOemPartNumber() const { return m_OemPartNumber; }
+    bool getOemIsIndependent() const { return m_OemIsIndependent; }
+    DeviceOEMInetState_t getOemInetState() const { return m_OemInetState; }
+    std::string getOemInetStateAsString() const { return oemInetStateToString(m_OemInetState); }
+    static std::string oemInetStateToString(const DeviceOEMInetState_t _state);
 
     DeviceOEMState_t getOemStateFromString(const char* _string) const;
+    DeviceOEMInetState_t getOemInetStateFromString(const char* _string) const;
 
     static const std::string getDeviceTypeString(const DeviceTypes_t _type);
     static const std::string getDeviceClassString(const DeviceClasses_t _class);

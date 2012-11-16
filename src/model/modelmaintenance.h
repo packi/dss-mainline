@@ -33,6 +33,8 @@
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
+#include "src/event.h"
+#include "src/internaleventrelaytarget.h"
 
 namespace dss {
   class Apartment;
@@ -119,9 +121,10 @@ namespace dss {
       virtual void run();
     private:
       std::string m_EAN;
-	  uint16_t m_partNumber;
+      uint16_t m_partNumber;
       dss_dsid_t m_dsmId;
       devid_t m_deviceAdress;
+      uint16_t m_serialNumber;
     };
 
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
@@ -181,12 +184,17 @@ namespace dss {
     void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
     void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
     void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
-                      const DeviceOEMState_t& _state, const unsigned long long& _eanNumber,
-                      const int& _serialNumber, const int& _partNumber);
+                      const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
+                      const unsigned long long _eanNumber,
+                      const int _serialNumber, const int _partNumber, const bool _isIndependent);
     void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
                            const std::string& _defaultName);
+
+    void setupWebUpdateEvent();
+    void updateWebData(Event& _event, const EventSubscription& _subscription);
+    void sendWebUpdateEvent(int _interval = 86400);
   private:
     bool m_IsInitializing;
     bool m_IsDirty;
@@ -204,6 +212,9 @@ namespace dss {
     void checkConfigFile(boost::filesystem::path _filename);
 
     boost::shared_ptr<TaskProcessor> m_taskProcessor;
+
+    static const std::string kWebUpdateEventName;
+    boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
   }; // ModelMaintenance
 
 }

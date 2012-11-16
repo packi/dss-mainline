@@ -96,7 +96,7 @@ namespace dss {
               }
             } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
               uint16_t serialNr = dev->getOemSerialNumber();
-              if (serialNr > 0) {
+              if ((serialNr > 0) & !dev->getOemIsIndependent()) {
                 unsigned long long ean = dev->getOemEan();
                 dss_dsid_t dsmId = dev->getDSMeterDSID();
                 std::vector<boost::shared_ptr<Device> > devices = DSS::getInstance()->getApartment().getDevicesVector();
@@ -106,7 +106,8 @@ namespace dss {
                       (device->getDSMeterDSID() == dsmId) &&
                       (device->getOemInfoState() == DEVICE_OEM_VALID) &&
                       (device->getOemEan() == ean) &&
-                      (device->getOemSerialNumber() == serialNr)) {
+                      (device->getOemSerialNumber() == serialNr) &&
+                      !device->getOemIsIndependent()) {
                     manipulator.addDeviceToZone(device, zone);
                     movedDevices.push_back(device);
                   }

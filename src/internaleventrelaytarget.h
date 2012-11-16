@@ -26,6 +26,7 @@
 #include <boost/function.hpp>
 
 #include "src/event.h"
+#include "src/eventinterpreterplugins.h"
 
 namespace dss {
 

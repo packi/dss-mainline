@@ -63,6 +63,8 @@ namespace dss {
     const char *oemEan = NULL;
     const char *oemSerial = NULL;
     const char *oemPar = NULL;
+    const char *oemIndep = NULL;
+    const char *oemInet = NULL;
     const char *oemProdState = NULL;
     const char *oemProdName = NULL;
     const char *oemProdIcon = NULL;
@@ -96,6 +98,10 @@ namespace dss {
         oemSerial = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "oemPartNumber") == 0) {
         oemPar = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemIsIndependent") == 0) {
+        oemIndep = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemInetState") == 0) {
+        oemInet = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "oemProductState") == 0) {
         oemProdState = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "oemProductName") == 0) {
@@ -166,6 +172,8 @@ namespace dss {
     unsigned long long oemEanNumber = 0;
     int oemSerialNumber = 0;
     int oemPartNumber = 0;
+    bool isIndependent = false;
+    DeviceOEMInetState_t oemInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
     if (oemEanState == DEVICE_OEM_VALID) {
       if (oemEan != NULL) {
         oemEanNumber = strToULongLongDef(oemEan, 0);
@@ -176,8 +184,15 @@ namespace dss {
       if (oemPar != NULL) {
         oemPartNumber = strToUIntDef(oemPar, 0);
       }
+      if (oemIndep != NULL) {
+        isIndependent = (strToIntDef(oemIndep, 0) == 1);
+      }
+      if (oemInet != NULL) {
+        oemInetState = m_tempDevice->getOemInetStateFromString(oemInet);
+      }
 
-      m_tempDevice->setOemInfo(oemEanNumber, oemSerialNumber, oemPartNumber);
+      m_tempDevice->setOemInfo(oemEanNumber, oemSerialNumber, oemPartNumber,
+                               oemInetState, isIndependent);
 
       DeviceOEMState_t productInfoState = DEVICE_OEM_UNKOWN;
       if (oemProdState != NULL) {
@@ -586,6 +601,8 @@ namespace dss {
       _ofs << " oemEanNumber=\"" << _pDevice->getOemEanAsString() << "\"";
       _ofs << " oemSerialNumber=\"" << intToString(_pDevice->getOemSerialNumber()) << "\"";
       _ofs << " oemPartNumber=\"" << intToString(_pDevice->getOemPartNumber()) << "\"";
+      _ofs << " oemIsIndependent=\"" << intToString(_pDevice->getOemIsIndependent() ? 1 : 0) << "\"";
+      _ofs << " oemInetState=\"" << _pDevice->getOemInetStateAsString() << "\"";
       if(_pDevice->getOemProductInfoState() == DEVICE_OEM_VALID) {
         _ofs << " oemProductState=\"" << _pDevice->getOemProductInfoStateAsString() << "\"";
         _ofs << " oemProductName=\"" << _pDevice->getOemProductName() << "\"";
