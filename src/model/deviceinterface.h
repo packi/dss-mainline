@@ -37,8 +37,7 @@ namespace dss {
       coSOAP = 3,
       coSubscription = 4,
       coSim = 5,
-      coTest = 6,
-      coEvent = 7
+      coTest = 6
     } callOrigin_t;
   public:
     /** Turns the device on.
