@@ -519,8 +519,8 @@ namespace dss {
         break;
       case ModelEvent::etDeviceEANReady:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 7) {
-          log("Expected 7 parameters for ModelEvent::etDeviceEANReady");
+        if(event.getParameterCount() != 8) {
+          log("Expected 8 parameters for ModelEvent::etDeviceEANReady");
         } else {
           onEANReady(pEventWithDSID->getDSID(),
                      event.getParameter(0),
@@ -528,7 +528,8 @@ namespace dss {
                      (const DeviceOEMInetState_t)event.getParameter(2),
                      ((unsigned long long)event.getParameter(3)) << 32 | ((unsigned long long)event.getParameter(4) & 0xFFFFFFFF),
                      event.getParameter(5),
-                     event.getParameter(6));
+                     event.getParameter(6),
+                     event.getParameter(7));
         }
         break;
       case ModelEvent::etDeviceOEMDataReady:
@@ -1263,13 +1264,14 @@ namespace dss {
                                         const devid_t _deviceID,
                                         const DeviceOEMState_t _state,
                                         const DeviceOEMInetState_t _iNetState,
-                                        const unsigned long long& _eanNumber,
-                                        const int& _serialNumber,
-                                        const int& _partNumber) {
+                                        const unsigned long long _eanNumber,
+                                        const int _serialNumber,
+                                        const int _partNumber,
+                                        const bool _isIndependent) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       if (_state == DEVICE_OEM_VALID) {
-        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber, _iNetState);
+        devRef.getDevice()->setOemInfo(_eanNumber, _serialNumber, _partNumber, _iNetState, _isIndependent);
         if ((_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
             (_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
           // query Webservice

@@ -163,6 +163,7 @@ namespace dss {
     uint8_t m_OemPartNumber;
     DeviceOEMInetState_t m_OemInetState;
     DeviceOEMState_t m_OemState;
+    bool m_OemIsIndependent;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
@@ -407,7 +408,8 @@ namespace dss {
 
     void setOemInfo(const unsigned long long _eanNumber,
         const uint16_t _serialNumber, const uint8_t _partNumber,
-        const DeviceOEMInetState_t _iNetState);
+        const DeviceOEMInetState_t _iNetState,
+        const bool _isIndependent);
     void setOemInfoState(const DeviceOEMState_t _state);
 
     unsigned long long getOemEan() const { return m_OemEanNumber; }
@@ -417,6 +419,7 @@ namespace dss {
     static std::string oemStateToString(const DeviceOEMState_t _state);
     uint16_t getOemSerialNumber() const { return m_OemSerialNumber; }
     uint8_t getOemPartNumber() const { return m_OemPartNumber; }
+    bool getOemIsIndependent() const { return m_OemIsIndependent; }
     DeviceOEMInetState_t getOemInetState() const { return m_OemInetState; }
     std::string getOemInetStateAsString() const { return oemInetStateToString(m_OemInetState); }
     static std::string oemInetStateToString(const DeviceOEMInetState_t _state);

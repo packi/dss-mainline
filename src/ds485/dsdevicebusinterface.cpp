@@ -310,6 +310,7 @@ namespace dss {
     uint64_t ean = 0;
     uint16_t serialNumber = 0;
     uint8_t partNumber = 0;
+    bool isIndependent = false;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
     dsid_t dsmId;
@@ -343,6 +344,8 @@ namespace dss {
         serialNumber = getDeviceConfigWord(dsmId, m_deviceAdress, 1, 0x1c);
 
         partNumber = getDeviceConfig(dsmId, m_deviceAdress, 1, 0x1e);
+        isIndependent = (partNumber & 0x80);
+        partNumber &= 0x7F;
 
         state = DEVICE_OEM_VALID;
       }
@@ -361,6 +364,7 @@ namespace dss {
     pEvent->addParameter(ean & 0xFFFFFFFF);
     pEvent->addParameter(serialNumber);
     pEvent->addParameter(partNumber);
+    pEvent->addParameter(isIndependent);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }

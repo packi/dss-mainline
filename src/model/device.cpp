@@ -160,6 +160,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_OemSerialNumber, false));
         oemNode->createProperty("PartNumber")
           ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OemPartNumber, false));
+        oemNode->createProperty("isIndependent")
+          ->linkToProxy(PropertyProxyReference<bool>(m_OemIsIndependent, false));
         oemNode->createProperty("InternetState")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemInetStateAsString));
         m_pPropertyNode->createProperty("lastKnownZoneID")
@@ -1242,12 +1244,14 @@ namespace dss {
 
   void Device::setOemInfo(const unsigned long long _eanNumber,
           const uint16_t _serialNumber, const uint8_t _partNumber,
-          const DeviceOEMInetState_t _iNetState)
+          const DeviceOEMInetState_t _iNetState,
+          bool _isIndependent)
   {
     m_OemEanNumber = _eanNumber;
     m_OemSerialNumber = _serialNumber;
     m_OemPartNumber = _partNumber;
     m_OemInetState = _iNetState;
+    m_OemIsIndependent = _isIndependent;
 
     dirty();
   }
