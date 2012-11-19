@@ -459,6 +459,7 @@ namespace dss {
 
       for (size_t s = 0; s < oDelay.size(); s++) {
         boost::shared_ptr<Event> evt(new Event("action_execute"));
+        evt->applyProperties(m_properties);
         evt->setProperty("path", _path);
         evt->setProperty("delay", intToString(oDelay.at(s)));
         evt->setProperty(EventPropertyTime, "+" + intToString(oDelay.at(s)));
@@ -469,11 +470,15 @@ namespace dss {
         }
       }
     } else {
-        if (!checkSystemCondition(_path)) {
-            Logger::getInstance()->log("SystemEventActionExecute: "
-                    "condition check failed in path " + _path);
-            return;
-        }
+      if (m_properties.has("ignoreConditions")) {
+        Logger::getInstance()->log("SystemEventActionExecute: "
+            "condition check disabled in path" + _path);
+      }
+      else if (!checkSystemCondition(_path)) {
+        Logger::getInstance()->log("SystemEventActionExecute: "
+            "condition check failed in path " + _path);
+        return;
+      }
       std::vector<PropertyNodePtr> oArrayActions;
       for (int i = 0; i < oBaseActionNode->getChildCount(); i++) {
         oArrayActions.push_back(oBaseActionNode->getChild(i));
@@ -524,7 +529,11 @@ namespace dss {
       return;
     }
 
-    if (!checkSystemCondition(_path)) {
+    if (m_properties.has("ignoreConditions")) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeWithDelay: condition check disabled in path" + _path);
+    }
+    else if (!checkSystemCondition(_path)) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeWithDelay: condition check failed in path " + _path,
               lsError);
