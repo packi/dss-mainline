@@ -119,7 +119,7 @@ namespace dss {
               // state found ...
               if (sValue != valueNode->getAsString()) {
                 Logger::getInstance()->log("checkSystemCondition: " +
-                    sName + " failed: value is " + sValue +
+                    sName + " failed: value is " + valueNode->getAsString() +
                     ", requested is " + sValue, lsDebug);
                 return false;
               }
