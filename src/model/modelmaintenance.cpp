@@ -1229,7 +1229,7 @@ namespace dss {
         }
       }
     } catch(std::runtime_error& e) {
-      log(std::string("Error updating config of device: ") + e.what());
+      log(std::string("Error updating config of device: ") + e.what(), lsWarning);
     }
   } // onDeviceConfigChanged
 
@@ -1252,7 +1252,7 @@ namespace dss {
       pEvent->setProperty("sensorIndex", "event" + intToString(_eventIndex));
       raiseEvent(pEvent);
     } catch(ItemNotFoundException& e) {
-      log("onSensorEvent: Event index not found: " + std::string(e.what()));
+      log("onSensorEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   } // onSensorEvent
 
@@ -1291,7 +1291,7 @@ namespace dss {
       pEvent->setProperty("sensorValue", intToString(_sensorValue));
       raiseEvent(pEvent);
     } catch(ItemNotFoundException& e) {
-      log("onSensorValue: Event index not found: " + std::string(e.what()));
+      log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   } // onSensorValue
 
@@ -1318,7 +1318,7 @@ namespace dss {
       }
       devRef.getDevice()->setOemInfoState(_state);
     } catch(std::runtime_error& e) {
-      log(std::string("Error updating OEM data of device: ") + e.what());
+      log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
   } // onEANReady
 
@@ -1339,7 +1339,7 @@ namespace dss {
       }
       devRef.getDevice()->setOemProductInfoState(_state);
     } catch(std::runtime_error& e) {
-      log(std::string("Error updating OEM data of device: ") + e.what());
+      log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
   } // onEANReady
 
