@@ -385,6 +385,13 @@ namespace dss {
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_EVENT,
                         &callback_struct);
 
+      EventDeviceSensor_binaryInputEvent_event_callback_t binaryInputCallback = DSBusInterface::handleBinaryInputEventCallback;
+      callback_struct.function = (void*)binaryInputCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_BINARYINPUTEVENT,
+                        &callback_struct);
+
       EventDeviceSensor_value_event_callback_t sensorValueCallback = DSBusInterface::handleSensorValueCallback;
       callback_struct.function = (void*)sensorValueCallback;
       callback_struct.arg = this;
@@ -791,6 +798,29 @@ namespace dss {
     }
   }
 
+  void DSBusInterface::handleBinaryInputEvent(uint8_t _errorCode,
+      dsid_t _sourceID, dsid_t _destinationID,
+      uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state) {
+    loginFromCallback();
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_sourceID, dsMeterID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceBinaryStateEvent, dsMeterID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_eventIndex);
+    pEvent->addParameter(_eventType);
+    pEvent->addParameter(_state);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleSensorEvent
+
+  void DSBusInterface::handleBinaryInputEventCallback(uint8_t _errorCode, void* _userData,
+      dsid_t _sourceID, dsid_t _destinationID,
+      uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleBinaryInputEvent(_errorCode, _sourceID, _destinationID,
+            _deviceID, _eventIndex, _eventType, _state);
+    }
+  }
 
   void DSBusInterface::handleSensorValueEvent(uint8_t _errorCode,
                                               dsid_t _sourceID,

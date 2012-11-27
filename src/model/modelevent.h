@@ -53,6 +53,7 @@ namespace dss {
                     etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
                     etDeviceSensorEvent, /**< A device has sent a sensor event */
                     etDeviceSensorValue, /**< A device has sent a new sensor value */
+                    etDeviceBinaryStateEvent, /**< A device has sent a new binary input state */
                     etDeviceEANReady, /** OEM data has finished reading out from device */
                     etDeviceOEMDataReady, /** OEM data has been retrieved from webservice */
                  } EventType;

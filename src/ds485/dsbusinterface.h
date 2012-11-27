@@ -176,30 +176,24 @@ namespace dss {
                                                 uint32_t _powerW,
                                                 uint32_t _energyWs);
     void handleSensorEvent(uint8_t _errorCode,
-                           dsid_t _sourceID,
-                           dsid_t _destinationID,
-                           uint16_t _deviceID,
-                           uint8_t _eventIndex);
-    static void handleSensorEventCallback(uint8_t _errorCode,
-                                          void* _userData,
-                                          dsid_t _sourceID,
-                                          dsid_t _destinationID,
-                                          uint16_t _deviceID,
-                                          uint8_t _eventIndex);
-
+        dsid_t _sourceID, dsid_t _destinationID,
+        uint16_t _deviceID, uint8_t _eventIndex);
+    static void handleSensorEventCallback(uint8_t _errorCode, void* _userData,
+        dsid_t _sourceID, dsid_t _destinationID,
+        uint16_t _deviceID, uint8_t _eventIndex);
+    void handleBinaryInputEvent(uint8_t _errorCode,
+        dsid_t _sourceID, dsid_t _destinationID,
+        uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state);
+    static void handleBinaryInputEventCallback(uint8_t _errorCode, void* _userData,
+        dsid_t _sourceID, dsid_t _destinationID,
+        uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state);
     void handleSensorValueEvent(uint8_t _errorCode,
-                                dsid_t _sourceID,
-                                dsid_t _destinationID,
-                                uint16_t _deviceID,
-                                uint8_t _sensorIndex,
-                                uint16_t _sensorValue);
-  static void handleSensorValueCallback(uint8_t _errorCode,
-                                        void* _userData,
-                                        dsid_t _sourceID,
-                                        dsid_t _destinationID,
-                                        uint16_t _deviceID,
-                                        uint8_t _sensorIndex,
-                                        uint16_t _sensorValue);
+        dsid_t _sourceID, dsid_t _destinationID,
+        uint16_t _deviceID, uint8_t _sensorIndex, uint16_t _sensorValue);
+    static void handleSensorValueCallback(uint8_t _errorCode, void* _userData,
+        dsid_t _sourceID, dsid_t _destinationID,
+        uint16_t _deviceID, uint8_t _sensorIndex, uint16_t _sensorValue);
+
   protected:
     virtual void doStart();
   public:

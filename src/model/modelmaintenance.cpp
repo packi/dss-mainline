@@ -509,6 +509,14 @@ namespace dss {
           onSensorEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
         break;
+      case ModelEvent::etDeviceBinaryStateEvent:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() < 4) {
+          log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
+        } else {
+          onBinaryInputEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
+        }
+        break;
       case ModelEvent::etDeviceSensorValue:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() < 3) {
@@ -1247,6 +1255,25 @@ namespace dss {
       log("onSensorEvent: Event index not found: " + std::string(e.what()));
     }
   } // onSensorEvent
+
+  void ModelMaintenance::onBinaryInputEvent(dss_dsid_t _meterID,
+      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter =
+        m_pApartment->getDSMeterByDSID(_meterID);
+      DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
+      boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
+      pEvent->setProperty("inputIndex", intToString(_eventIndex));
+      pEvent->setProperty("inputType", intToString(_eventType));
+      pEvent->setProperty("inputState", intToString(_state));
+      raiseEvent(pEvent);
+    } catch(ItemNotFoundException& e) {
+      log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onBinaryInputEvent
 
   void ModelMaintenance::onSensorValue(dss_dsid_t _meterID,
                                        const devid_t _deviceID,
