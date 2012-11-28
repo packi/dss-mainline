@@ -108,6 +108,9 @@ namespace dss {
     DeviceIterator pos = std::find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
     if(pos != m_ConnectedDevices.end()) {
       m_ConnectedDevices.erase(pos);
+    } else {
+      Logger::getInstance()->log("DSMeter::removeDevice: not found, dSM: " +
+          m_DSID.toString() + " device: " + _device.getDSID().toString(), lsFatal);
     }
   } // removeDevice
 

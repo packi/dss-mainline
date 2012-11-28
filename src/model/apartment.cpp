@@ -336,12 +336,19 @@ namespace dss {
         ipDevice != e; ++ipDevice) {
       boost::shared_ptr<Device> pDevice = *ipDevice;
       if(pDevice->getDSID() == _device) {
+        // Remove from zone
         int zoneID = pDevice->getZoneID();
         DeviceReference devRef = DeviceReference(pDevice, this);
         if(zoneID != 0) {
           getZone(zoneID)->removeDevice(devRef);
         }
         getZone(0)->removeDevice(devRef);
+
+        // Remove from dsm
+        boost::shared_ptr<DSMeter> dsMeter = getDSMeterByDSID(pDevice->getDSMeterDSID());
+        dsMeter->removeDevice(devRef);
+
+        // Erase
         m_Devices.erase(ipDevice);
         return;
       }
