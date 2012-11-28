@@ -61,6 +61,7 @@ namespace dss {
       bool checkUndoSceneZone(PropertyNodePtr _triggerProp);
       bool checkDeviceScene(PropertyNodePtr _triggerProp);
       bool checkDeviceSensor(PropertyNodePtr _triggerProp);
+      bool checkDeviceBinaryInput(PropertyNodePtr _triggerProp);
       bool checkDevice(PropertyNodePtr _tiggerProp);
       bool checkHighlevel(PropertyNodePtr _triggerProp);
       bool checkTrigger(std::string _path);

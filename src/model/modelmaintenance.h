@@ -182,6 +182,7 @@ namespace dss {
                                int _configClass, int _configIndex, int _value);
     void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
     void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
+    void onBinaryInputEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state);
     void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
     void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,

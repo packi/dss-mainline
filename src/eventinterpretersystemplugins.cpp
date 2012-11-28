@@ -889,6 +889,67 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkDeviceBinaryInput(PropertyNodePtr _triggerProp) {
+    if (m_evtName != "deviceBinaryInputEvent") {
+      return false;
+    }
+
+    dss_dsid_t dsid = m_evtSrcDSID;
+    std::string eventIndex = m_properties.get("inputIndex");
+    std::string eventType = m_properties.get("inputType");
+    std::string eventState = m_properties.get("inputState");
+
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
+    PropertyNodePtr triggerIndex = _triggerProp->getPropertyByName("index");
+    PropertyNodePtr triggerType = _triggerProp->getPropertyByName("type");
+    PropertyNodePtr triggerState = _triggerProp->getPropertyByName("state");
+
+    // need either: dsid + index + state or type + state (+ dsid)
+
+    if ((triggerDSID == NULL) && (triggerType == NULL)) {
+      return false;
+    }
+    if (triggerState == NULL) {
+      return false;
+    }
+
+    std::string sDSID;
+    std::string sIndex;
+    std::string sType;
+    std::string sState = triggerState->getStringValue();
+
+    if (triggerDSID) {
+      sDSID = triggerDSID->getStringValue();
+      if (!((sDSID == "-1") || (sDSID == dsid.toString()))) {
+        return false;
+      }
+      if (triggerIndex) {
+        if (triggerType && (triggerType->getStringValue() != eventType)) {
+          return false;
+        }
+        sIndex = triggerIndex->getStringValue();
+        if (sIndex == eventIndex && sState == eventState) {
+          Logger::getInstance()->log("SystemTrigger::"
+              "checkDeviceBinaryInput:: Match: BinaryInput dSID: " + sDSID +
+              " Index: " + sIndex + ", State: " + sState);
+          return true;
+        }
+      }
+    }
+
+    if (triggerType) {
+      sType = triggerType->getStringValue();
+      if (sType == eventType && sState == eventState) {
+        Logger::getInstance()->log("SystemTrigger::"
+            "checkDeviceBinaryInput:: Match: BinaryInput dSID: " + sDSID +
+            " Type: " + sType + ", State: " + sState);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool SystemTrigger::checkDevice(PropertyNodePtr _triggerProp) {
     if (m_evtName != "buttonClick") {
       return false;
@@ -1013,6 +1074,10 @@ namespace dss {
         }
       } else if (triggerValue == "device-msg") {
         if (checkDevice(triggerProp)) {
+          return true;
+        }
+      } else if (triggerValue == "device-binary-input") {
+        if (checkDeviceBinaryInput(triggerProp)) {
           return true;
         }
       } else if (triggerValue == "custom-event") {

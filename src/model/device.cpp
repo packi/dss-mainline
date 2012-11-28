@@ -1024,6 +1024,8 @@ namespace dss {
         return DEVICE_TYPE_ZWS;
       case 6:
         return DEVICE_TYPE_SDS;
+      case 8:
+        return DEVICE_TYPE_AKM;
       default:
         return DEVICE_TYPE_INVALID;
     }
@@ -1045,6 +1047,8 @@ namespace dss {
         return "ZWS";
       case DEVICE_TYPE_SDS:
         return "SDS";
+      case DEVICE_TYPE_AKM:
+        return "AKM";
       default:
         return "";
     }
