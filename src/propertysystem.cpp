@@ -724,6 +724,9 @@ namespace dss {
         case vTypeInteger:
           result = intToString(getIntegerValue());
           break;
+        case vTypeFloating:
+          result = doubleToString(getFloatingValue());
+          break;
         case vTypeBoolean:
           if(getBoolValue()) {
             result = "true";
