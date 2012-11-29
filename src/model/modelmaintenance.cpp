@@ -1487,6 +1487,10 @@ namespace dss {
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
 
   void ModelMaintenance::setupWebUpdateEvent() {
+    if (!DSS::hasInstance()) {
+      log(std::string("ModelMaintenance::setupWebUpdateEvent: no DSS instance available; not starting WebUpdateProcess"));
+      return;
+    }
     EventInterpreterInternalRelay* pRelay =
       dynamic_cast<EventInterpreterInternalRelay*>(DSS::getInstance()->getEventInterpreter().getPluginByName(EventInterpreterInternalRelay::getPluginName()));
     m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
