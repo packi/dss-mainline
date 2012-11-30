@@ -160,7 +160,7 @@ BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
   m_Params["id"] = m_ValidDSID.toString();
-  const long unsigned int kMeterValue = 8888888;
+  const long long unsigned int kMeterValue = 8888888;
   m_pApartment->getDSMeterByDSID(m_ValidDSID)->initializeEnergyMeterValue(kMeterValue);
   RestfulRequest req("circuit/getEnergyMeterValue", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
