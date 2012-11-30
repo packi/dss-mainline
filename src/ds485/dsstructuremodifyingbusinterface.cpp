@@ -114,7 +114,7 @@ namespace dss {
     dsid_t broadcastDSID;
     SetBroadcastId(broadcastDSID);
     int ret = CircuitRemoveDevice_by_dsid(m_DSMApiHandle, broadcastDSID, _deviceDSID.lower);
-    DSBusInterface::checkResultCode(ret);
+    DSBusInterface::checkBroadcastResultCode(ret);
   } // removeDeviceFromDSMeters
 
   void DSStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {

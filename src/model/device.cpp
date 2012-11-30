@@ -65,6 +65,7 @@ namespace dss {
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
     m_OemState(DEVICE_OEM_UNKOWN),
+    m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_HWInfo(),
     m_iconPath("unknown.png"),
     m_OemProductInfoState(DEVICE_OEM_UNKOWN),
@@ -1283,6 +1284,7 @@ namespace dss {
     case DEVICE_OEM_VALID:
       return "Valid";
     }
+    return "";
   }
 
   DeviceOEMInetState_t Device::getOemInetStateFromString(const char* _string) const
@@ -1312,6 +1314,7 @@ namespace dss {
     case DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY:
       return "Internet mandatory";
     }
+    return "";
   }
 
   DeviceOEMState_t Device::getOemStateFromString(const char* _string) const

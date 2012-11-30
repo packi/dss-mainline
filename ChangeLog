@@ -1,5 +1,10 @@
 dSS - digitalSTROM Server
 
+v1.17.4 30.11.2012
+	* fix crash on property tree read with non-ean devices
+	* escape strings read from webservices
+	* dont fail on broadcast dsm-api call when removing a device, #2112
+
 v1.17.3 20.11.2012
 	* system-actions ignore the condition when tested, #2041
 

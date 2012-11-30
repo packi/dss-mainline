@@ -605,9 +605,9 @@ namespace dss {
       _ofs << " oemInetState=\"" << _pDevice->getOemInetStateAsString() << "\"";
       if(_pDevice->getOemProductInfoState() == DEVICE_OEM_VALID) {
         _ofs << " oemProductState=\"" << _pDevice->getOemProductInfoStateAsString() << "\"";
-        _ofs << " oemProductName=\"" << _pDevice->getOemProductName() << "\"";
-        _ofs << " oemProductIcon=\"" << _pDevice->getOemProductIcon() << "\"";
-        _ofs << " oemProductURL=\"" << _pDevice->getOemProductURL() << "\"";
+        _ofs << " oemProductName=\"" << XMLStringEscape(_pDevice->getOemProductName()) << "\"";
+        _ofs << " oemProductIcon=\"" << XMLStringEscape(_pDevice->getOemProductIcon()) << "\"";
+        _ofs << " oemProductURL=\"" << XMLStringEscape(_pDevice->getOemProductURL()) << "\"";
       }
     }
     _ofs << ">" << std::endl;
