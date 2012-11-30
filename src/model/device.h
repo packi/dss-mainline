@@ -33,6 +33,7 @@
 #include "src/ds485types.h"
 #include "src/datetools.h"
 #include "addressablemodelitem.h"
+#include "businterface.h"
 
 #define DEV_PARAM_BUTTONINPUT_STANDARD              0
 #define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
@@ -175,6 +176,7 @@ namespace dss {
     std::string m_OemProductName;
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
+    std::vector<DeviceBinaryInputSpec_t> m_binaryInputs;
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -184,6 +186,7 @@ namespace dss {
     bool hasExtendendSceneTable();
     void calculateHWInfo();
     void updateIconPath();
+    void publishBinaryInputsToPropTree();
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
@@ -440,6 +443,8 @@ namespace dss {
     const std::string& getOemProductName() const { return m_OemProductName; }
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
+
+    void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) { m_binaryInputs = _binaryInputs; publishBinaryInputsToPropTree(); }
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

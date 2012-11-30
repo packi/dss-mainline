@@ -199,6 +199,8 @@ namespace dss {
         if (!m_pPropertyNode->getProperty("sensorEvents")) {
           PropertyNodePtr sensorNode = m_pPropertyNode->createProperty("sensorEvents");
         }
+        PropertyNodePtr binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
+
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
 
@@ -1339,6 +1341,24 @@ namespace dss {
 
     if ((m_OemProductInfoState == DEVICE_OEM_NONE) || (m_OemProductInfoState == DEVICE_OEM_VALID)) {
       dirty();
+    }
+  }
+
+  void Device::publishBinaryInputsToPropTree()
+  {
+    if (m_pPropertyNode != NULL && !m_binaryInputs.empty()) {
+      PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
+      for (int i = 0; i < m_binaryInputs.size(); i++) {
+        PropertyNodePtr entry = binaryInputNode->createProperty(std::string("binaryInput") + intToString(i));
+        entry->createProperty("targetGroupType")
+            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].TargetGroupType));
+        entry->createProperty("targetGroup")
+            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].TargetGroup));
+        entry->createProperty("inputType")
+            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].InputType));
+        entry->createProperty("inputID")
+            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].InputID));
+      }
     }
   }
 

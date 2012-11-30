@@ -247,6 +247,8 @@ namespace dss {
       dev->addToGroup(groupID);
     }
 
+    dev->setBinaryInputs(_spec.binaryInputs);
+
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
     _dsMeter->addDevice(devRef);
