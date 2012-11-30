@@ -445,6 +445,7 @@ namespace dss {
     const std::string& getOemProductURL() const { return m_OemProductURL; }
 
     void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) { m_binaryInputs = _binaryInputs; publishBinaryInputsToPropTree(); }
+    const std::vector<DeviceBinaryInputSpec_t>& getBinaryInputs() const { return m_binaryInputs; }
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

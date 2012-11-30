@@ -92,6 +92,18 @@ namespace dss {
       }
     }
 
+    boost::shared_ptr<JSONArrayBase> binaryInputArr(new JSONArrayBase());
+    result->addElement("binaryInputs", binaryInputArr);
+    const std::vector<DeviceBinaryInputSpec_t> binaryInputs = _device.getDevice()->getBinaryInputs();
+    for (std::vector<DeviceBinaryInputSpec_t>::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
+      boost::shared_ptr<JSONObject> element(new JSONObject());
+      element->addProperty("TargetGroupType", it->TargetGroupType);
+      element->addProperty("TargetGroup", it->TargetGroup);
+      element->addProperty("InputType", it->InputType);
+      element->addProperty("InputID", it->InputID);
+      binaryInputArr->addElement("", element);
+    }
+
     return result;
   } // toJSON(DeviceReference)
 
