@@ -48,6 +48,13 @@ namespace dss {
   } DSMeterSpec_t;
 
   typedef struct {
+    int TargetGroupType;
+    int TargetGroup;
+    int InputType;
+    int InputID;
+  } DeviceBinaryInputSpec_t;
+
+  typedef struct {
     devid_t ShortAddress;
     uint16_t FunctionID;
     uint16_t ProductID;
@@ -66,6 +73,7 @@ namespace dss {
     bool SetsLocalPriority;
     std::string Name;
     uint16_t ZoneID;
+    std::vector<DeviceBinaryInputSpec_t> binaryInputs;
   } DeviceSpec_t;
 
   typedef struct {

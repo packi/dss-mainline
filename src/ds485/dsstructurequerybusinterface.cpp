@@ -204,7 +204,7 @@ namespace dss {
                                            &_spec.GroupMembership, &_spec.ActiveGroup,
                                            &setsLocalPriority);
       if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
-        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo" + lsWarning);
+        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
       } else {
         DSBusInterface::checkResultCode(ret);
         _spec.SetsLocalPriority = (setsLocalPriority == 1);
@@ -214,6 +214,41 @@ namespace dss {
       std::string(e.what()), lsWarning);
     }
   } // updateButtonGroupFromMeter
+
+  void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+    if ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0)) {
+      try {
+        uint8_t numBinaryinputs = 0;
+        int ret = DeviceBinaryInput_get_count(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &numBinaryinputs);
+        if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+          Logger::getInstance()->log("Unsupported message-id DeviceBinaryInput_get_count", lsWarning);
+          return;
+        } else {
+          DSBusInterface::checkResultCode(ret);
+        }
+        _spec.binaryInputs.clear();
+        for (int i = 0; i < numBinaryinputs; i++) {
+          uint8_t TargetGroupType;
+          uint8_t TargetGroup;
+          uint8_t InputType;
+          uint8_t InputID;
+          ret = DeviceBinaryInput_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
+                                               &TargetGroupType, &TargetGroup,
+                                               &InputType, &InputID);
+          DSBusInterface::checkResultCode(ret);
+          DeviceBinaryInputSpec_t binaryInput;
+          binaryInput.TargetGroupType = TargetGroupType;
+          binaryInput.TargetGroup = TargetGroup;
+          binaryInput.InputType = InputType;
+          binaryInput.InputID = InputID;
+          _spec.binaryInputs.push_back(binaryInput);
+        }
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error reading DeviceBinaryInput: " +
+        std::string(e.what()), lsWarning);
+      }
+    }
+  } // updateBinaryInputTableFromMeter
 
   std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -245,6 +280,7 @@ namespace dss {
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
       updateButtonGroupFromMeter(dsid, spec);
+      updateBinaryInputTableFromMeter(dsid, spec);
 
       result.push_back(spec);
     }
@@ -282,6 +318,7 @@ namespace dss {
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
       updateButtonGroupFromMeter(dsid, spec);
+      updateBinaryInputTableFromMeter(dsid, spec);
 
       result.push_back(spec);
     }
@@ -313,6 +350,7 @@ namespace dss {
     dsid_helper::toDssDsid(devdsid, result.DSID);
 
     updateButtonGroupFromMeter(dsmDSID, result);
+    updateBinaryInputTableFromMeter(dsmDSID, result);
 
     return result;
   } // deviceGetSpec
