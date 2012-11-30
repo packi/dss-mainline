@@ -1,5 +1,19 @@
 dSS - digitalSTROM Server
 
+v1.18.0 30.11.2012
+	* add binary inputs to getStructure
+	* add missing OEM data to getStructure
+	* add binary inputs to device and export to property tree
+	* readout binary input table entries from dSM, #2042
+	* Remove red/gred from getReachableGroups, #1891
+	* represent energy meter values as float
+	* add floating type to property tree, #1910
+	* decode akm product type
+	* add system trigger for binary input events
+	* added event handler for binary inputs, #2042
+	* inactive devices should not be removed from the dsm, #1767
+	* removeDevice must cleanup dsm device list, #2107, #2035
+
 v1.17.4 30.11.2012
 	* fix crash on property tree read with non-ean devices
 	* escape strings read from webservices
