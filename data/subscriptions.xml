@@ -11,6 +11,9 @@
   <subscription event-name="deviceSensorEvent" handler-name="system_trigger">
   </subscription>
 
+  <subscription event-name="deviceBinaryInputEvent" handler-name="system_trigger">
+  </subscription>
+
   <subscription event-name="callScene" handler-name="system_trigger">
   </subscription>
 
