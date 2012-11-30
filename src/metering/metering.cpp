@@ -227,8 +227,8 @@ namespace dss {
   } // getOrCreateCachedSeries
 
   void Metering::postMeteringEvent(boost::shared_ptr<DSMeter> _meter,
-                                   int _valuePower,
-                                   int _valueEnergy,
+                                   unsigned int _valuePower,
+                                   unsigned int _valueEnergy,
                                    DateTime _sampledAt) {
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
 

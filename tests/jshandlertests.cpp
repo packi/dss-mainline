@@ -63,6 +63,13 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
     BOOST_CHECK_EQUAL(obj->getProperty<std::string>("testing2"), "test");
   }
   BOOST_CHECK_EQUAL(ctx->evaluate<std::string>("obj.testing2"), "test");
+
+  {
+    JSContextThread req(ctx);
+    obj->setProperty("testing3", 3.1415);
+    BOOST_CHECK_EQUAL(obj->getProperty<double>("testing3"), 3.1415);
+  }
+  BOOST_CHECK_EQUAL(ctx->evaluate<double>("obj.testing3"), 3.1415);
 } // testSimpleObject
 
 BOOST_AUTO_TEST_CASE(testCallingFunctions) {

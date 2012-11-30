@@ -112,10 +112,20 @@ namespace dss {
     addElement(_name, elem);
   } // addProperty
 
+  void JSONObject::addProperty(const std::string& _name, const unsigned long long _value) {
+    boost::shared_ptr<JSONValue<unsigned long long> > elem(new JSONValue<unsigned long long>(_value));
+    addElement(_name, elem);
+  } // addProperty
+
   void JSONObject::addProperty(const std::string& _name, const bool _value) {
     boost::shared_ptr<JSONValue<bool> > elem(new JSONValue<bool>(_value));
     addElement(_name, elem);
-  }
+  } // addProperty
+
+  void JSONObject::addProperty(const std::string& _name, const double _value) {
+    boost::shared_ptr<JSONValue<double> > elem(new JSONValue<double>(_value));
+    addElement(_name, elem);
+  } // addProperty
 
   void JSONObject::writeTo(std::stringstream& _out) {
     _out << "{";
@@ -133,6 +143,11 @@ namespace dss {
 
   template<>
   void JSONValue<unsigned long int>::writeTo(std::stringstream& _out) {
+    _out << m_Value;
+  }
+
+  template<>
+  void JSONValue<unsigned long long>::writeTo(std::stringstream& _out) {
     _out << m_Value;
   }
 

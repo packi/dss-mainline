@@ -45,7 +45,7 @@ namespace dss {
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   typedef enum {
-    vTypeNone = 0, vTypeInteger, vTypeString, vTypeBoolean
+    vTypeNone = 0, vTypeInteger, vTypeString, vTypeBoolean, vTypeFloating
   } aValueType;
 
   const char* getValueTypeAsString(aValueType _value);
@@ -57,6 +57,7 @@ namespace dss {
       char* pString;
       int integer;
       bool boolean;
+      double floating;
     } actualValue;
     int PropertyLevel;
   } aPropertyValue;
@@ -382,6 +383,7 @@ namespace dss {
       PropertyProxy<bool>* boolProxy;
       PropertyProxy<int>* intProxy;
       PropertyProxy<std::string>* stringProxy;
+      PropertyProxy<double>* floatingProxy;
     } m_Proxy;
     PropertyList m_ChildNodes;
     std::vector<PropertyNode*> m_AliasedBy;
@@ -432,6 +434,8 @@ namespace dss {
     void setIntegerValue(const int _value);
     /** Sets the value as boolean. */
     void setBooleanValue(const bool _value);
+    /** Sets the value as floating. */
+    void setFloatingValue(const double _value);
 
     /** Returns the string value.
      * Throws an exception if the value-types don't match. */
@@ -442,6 +446,9 @@ namespace dss {
     /** Returns the boolean value.
      * Throws an exception if the value-types don't match. */
     bool getBoolValue();
+    /** Returns the floating value.
+     * Throws an exception if the value-types don't match. */
+    double getFloatingValue();
 
     /** Returns the value as string, regardless of it's value-type.*/
     std::string getAsString();
@@ -470,6 +477,8 @@ namespace dss {
     bool linkToProxy(const PropertyProxy<int>& _proxy);
     /** @copydoc linkToProxy */
     bool linkToProxy(const PropertyProxy<std::string>& _proxy);
+    /** @copydoc linkToProxy */
+    bool linkToProxy(const PropertyProxy<double>& _proxy);
     /** Unlinks from a proxy */
     bool unlinkProxy(bool _recurse = false);
 

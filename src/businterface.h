@@ -234,8 +234,8 @@ namespace dss {
                                   const bool _explicit) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
-                                 const int _powerW,
-                                 const int _energyWs) = 0;
+                                 const unsigned int _powerW,
+                                 const unsigned int _energyWs) = 0;
     virtual ~BusEventSink() {};
   };
 

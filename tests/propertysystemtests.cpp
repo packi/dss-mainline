@@ -118,9 +118,26 @@ BOOST_AUTO_TEST_CASE(testIntProxy) {
   BOOST_CHECK_EQUAL(7, proxy.getValue());
   BOOST_CHECK_EQUAL(7, prop->getIntegerValue());
 
-  prop->setIntegerValue(false);
-  BOOST_CHECK_EQUAL(false, proxy.getValue());
-  BOOST_CHECK_EQUAL(false, prop->getIntegerValue());
+  prop->setIntegerValue(17);
+  BOOST_CHECK_EQUAL(17, proxy.getValue());
+  BOOST_CHECK_EQUAL(17, prop->getIntegerValue());
+} // testIntProxy
+
+BOOST_AUTO_TEST_CASE(testFloatProxy) {
+  PropertySystem propSys;
+  PropertyNodePtr prop = propSys.createProperty("/value");
+
+  PropTest<double> t(7.0);
+  PropertyProxyMemberFunction<class PropTest<double>, double>
+    proxy(t, &PropTest<double>::getValue, &PropTest<double>::setValue);
+  prop->linkToProxy(proxy);
+
+  BOOST_CHECK_EQUAL(7.0, proxy.getValue());
+  BOOST_CHECK_EQUAL(7.0, prop->getFloatingValue());
+
+  prop->setFloatingValue(17.65);
+  BOOST_CHECK_EQUAL(17.65, proxy.getValue());
+  BOOST_CHECK_EQUAL(17.65, prop->getFloatingValue());
 } // testIntProxy
 
 BOOST_AUTO_TEST_CASE(testStringProxy) {
@@ -396,6 +413,10 @@ BOOST_AUTO_TEST_CASE(testPropertyNodeGetAsString) {
   intNode->setIntegerValue(1);
   BOOST_CHECK_EQUAL("1", intNode->getAsString());
 
+  PropertyNodePtr floatNode = propSys.createProperty("/float");
+  floatNode->setFloatingValue(100.1);
+  BOOST_CHECK_EQUAL("100.1", floatNode->getAsString());
+
   PropertyNodePtr boolNode = propSys.createProperty("/bool");
   boolNode->setBooleanValue(true);
   BOOST_CHECK_EQUAL("true", boolNode->getAsString());
@@ -413,6 +434,7 @@ BOOST_AUTO_TEST_CASE(testPropertyNodeGetAsString) {
 BOOST_AUTO_TEST_CASE(testValueTypeFromAndToString) {
   BOOST_CHECK_EQUAL(vTypeBoolean, getValueTypeFromString(getValueTypeAsString(vTypeBoolean)));
   BOOST_CHECK_EQUAL(vTypeInteger, getValueTypeFromString(getValueTypeAsString(vTypeInteger)));
+  BOOST_CHECK_EQUAL(vTypeFloating, getValueTypeFromString(getValueTypeAsString(vTypeFloating)));
   BOOST_CHECK_EQUAL(vTypeString, getValueTypeFromString(getValueTypeAsString(vTypeString)));
   BOOST_CHECK_EQUAL(vTypeNone, getValueTypeFromString(getValueTypeAsString(vTypeNone)));
 } // testValueTypeFromAndToString

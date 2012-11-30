@@ -67,6 +67,9 @@ namespace dss {
             case vTypeInteger:
               obj->addProperty(childNode->getName(), childNode->getIntegerValue());
               break;
+            case vTypeFloating:
+              obj->addProperty(childNode->getName(), childNode->getFloatingValue());
+              break;
             case vTypeBoolean:
               obj->addProperty(childNode->getName(), childNode->getBoolValue());
               break;
@@ -88,6 +91,9 @@ namespace dss {
             break;
           case vTypeBoolean:
             obj->addProperty(subprop, node->getBoolValue());
+            break;
+          case vTypeFloating:
+            obj->addProperty(subprop, node->getFloatingValue());
             break;
           case vTypeNone:
           case vTypeString:

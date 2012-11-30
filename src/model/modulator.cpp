@@ -63,9 +63,9 @@ namespace dss {
       m_pPropertyNode->createProperty("powerConsumptionAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("energyMeterValue")
-        ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValueWh, false));
+        ->linkToProxy(PropertyProxyReference<double>(m_EnergyMeterValueWh));
       m_pPropertyNode->createProperty("energyMeterValueWs")
-        ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValue, false));
+        ->linkToProxy(PropertyProxyReference<double>(m_EnergyMeterValue));
       m_pPropertyNode->createProperty("energyMeterAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("isValid")
@@ -130,10 +130,10 @@ namespace dss {
     return m_PowerConsumption;
   } // getPowerConsumption
 
-  unsigned long DSMeter::getEnergyMeterValue() {
+  unsigned long long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
-      unsigned long newValue;
+      unsigned long long newValue;
       if(isPresent()) {
         newValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
         updateEnergyMeterValue(newValue);
@@ -161,7 +161,7 @@ namespace dss {
     m_EnergyMeterValueTimeStamp = now;
   }
 
-  void DSMeter::initializeEnergyMeterValue(unsigned long _value) {
+  void DSMeter::initializeEnergyMeterValue(unsigned long long _value) {
     m_EnergyMeterValue = _value;
     m_EnergyMeterValueWh = _value / 3600;
   } // initializeEnergyMeterValue
