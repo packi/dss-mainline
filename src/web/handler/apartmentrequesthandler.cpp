@@ -72,7 +72,8 @@ namespace dss {
 
       for (size_t g = 0; g < groups.size(); g++) {
         boost::shared_ptr<Group> group = groups.at(g);
-        if ((group->getID() == 0) || (group->getID() == 8)) {
+        if ((group->getID() == 0) || (group->getID() == 8) ||
+            (group->getID() == 6) || (group->getID() == 7)) {
           continue;
         }
 
