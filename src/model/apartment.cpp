@@ -344,9 +344,13 @@ namespace dss {
         }
         getZone(0)->removeDevice(devRef);
 
-        // Remove from dsm
-        boost::shared_ptr<DSMeter> dsMeter = getDSMeterByDSID(pDevice->getDSMeterDSID());
-        dsMeter->removeDevice(devRef);
+        try {
+          // Remove from dsm
+          boost::shared_ptr<DSMeter> dsMeter = getDSMeterByDSID(pDevice->getDSMeterDSID());
+          dsMeter->removeDevice(devRef);
+        } catch (ItemNotFoundException& e) {
+          Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown dSM: ") + e.what(), lsWarning);
+        }
 
         // Erase
         m_Devices.erase(ipDevice);
