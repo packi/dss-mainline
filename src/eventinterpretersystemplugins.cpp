@@ -901,10 +901,10 @@ namespace dss {
 
     PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
     PropertyNodePtr triggerIndex = _triggerProp->getPropertyByName("index");
-    PropertyNodePtr triggerType = _triggerProp->getPropertyByName("type");
+    PropertyNodePtr triggerType = _triggerProp->getPropertyByName("stype");
     PropertyNodePtr triggerState = _triggerProp->getPropertyByName("state");
 
-    // need either: dsid + index + state or type + state (+ dsid)
+    // need either: dsid + index + state or stype + state (+ dsid)
 
     if ((triggerDSID == NULL) && (triggerType == NULL)) {
       return false;
@@ -916,7 +916,7 @@ namespace dss {
     std::string sDSID;
     std::string sIndex;
     std::string sType;
-    std::string sState = triggerState->getStringValue();
+    std::string sState = triggerState->getAsString();
 
     if (triggerDSID) {
       sDSID = triggerDSID->getStringValue();
@@ -924,10 +924,10 @@ namespace dss {
         return false;
       }
       if (triggerIndex) {
-        if (triggerType && (triggerType->getStringValue() != eventType)) {
+        if (triggerType && (triggerType->getAsString() != eventType)) {
           return false;
         }
-        sIndex = triggerIndex->getStringValue();
+        sIndex = triggerIndex->getAsString();
         if (sIndex == eventIndex && sState == eventState) {
           Logger::getInstance()->log("SystemTrigger::"
               "checkDeviceBinaryInput:: Match: BinaryInput dSID: " + sDSID +
@@ -938,7 +938,7 @@ namespace dss {
     }
 
     if (triggerType) {
-      sType = triggerType->getStringValue();
+      sType = triggerType->getAsString();
       if (sType == eventType && sState == eventState) {
         Logger::getInstance()->log("SystemTrigger::"
             "checkDeviceBinaryInput:: Match: BinaryInput dSID: " + sDSID +
