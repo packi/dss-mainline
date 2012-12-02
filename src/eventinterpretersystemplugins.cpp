@@ -1056,35 +1056,55 @@ namespace dss {
       }
 
       std::string triggerValue = triggerType->getAsString();
-      if (triggerValue == "zone-scene") {
-        if (checkSceneZone(triggerProp)) {
-          return true;
+
+      if (m_evtName == "callScene") {
+        if (triggerValue == "zone-scene") {
+          if (checkSceneZone(triggerProp)) {
+            return true;
+          }
+        } else if (triggerValue == "device-scene") {
+          if (checkDeviceScene(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "undo-zone-scene") {
-        if (checkUndoSceneZone(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "undoScene") {
+        if (triggerValue == "undo-zone-scene") {
+          if (checkUndoSceneZone(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-scene") {
-        if (checkDeviceScene(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "buttonClick") {
+        if (triggerValue == "device-msg") {
+          if (checkDevice(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-sensor") {
-        if (checkDeviceSensor(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "deviceSensorEvent") {
+        if (triggerValue == "device-sensor") {
+          if (checkDeviceSensor(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-msg") {
-        if (checkDevice(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "deviceBinaryInputEvent") {
+        if (triggerValue == "device-binary-input") {
+          if (checkDeviceBinaryInput(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-binary-input") {
-        if (checkDeviceBinaryInput(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "highlevel") {
+        if (triggerValue == "custom-event") {
+          if (checkHighlevel(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "custom-event") {
-         if (checkHighlevel(triggerProp)) {
-          return true;
-        }
+
       }
+
     } // for loop
     return false;
   }
@@ -1163,9 +1183,7 @@ namespace dss {
         continue;
       }
       std::string sTriggerPath = triggerPathNode->getStringValue();
-      bool conditionsOk = checkSystemCondition(sTriggerPath);
-      bool triggersOk = checkTrigger(sTriggerPath);
-      if (conditionsOk && triggersOk) {
+      if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
         relayTrigger(triggerNode);
       }
     } // for loop
