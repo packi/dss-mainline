@@ -621,6 +621,76 @@ namespace dss {
       pDevice->setDeviceLedMode(id, config);
       return success();
 
+    } else if(_request.getMethod() == "getBinaryInputs") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONArrayBase> inputs(new JSONArrayBase());
+      resultObj->addElement("inputs", inputs);
+      std::vector<DeviceBinaryInputSpec_t> binputs = pDevice->getBinaryInputs();
+      for (std::vector<DeviceBinaryInputSpec_t>::iterator it = binputs.begin();
+          it != binputs.end();
+          it ++) {
+        boost::shared_ptr<JSONObject> inputObj(new JSONObject());
+        inputObj->addProperty("inputId", it->InputID);
+        inputObj->addProperty("inputType", it->InputType);
+        inputObj->addProperty("targetType", it->TargetGroupType);
+        inputObj->addProperty("targetGroup", it->TargetGroup);
+      }
+      return success(resultObj);
+    } else if(_request.getMethod() == "setBinaryInputType") {
+      int index = strToIntDef(_request.getParameter("index"), -1);
+      if (index < 0) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+      int type = strToIntDef(_request.getParameter("type"), -1);
+      if (type < 0 || type > 254) {
+        return failure("Invalid or missing parameter 'type'");
+      }
+      pDevice->setDeviceBinaryInputType(index, type);
+      return success();
+    } else if(_request.getMethod() == "setBinaryInputTarget") {
+      int index = strToIntDef(_request.getParameter("index"), -1);
+      if (index < 0) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+      int gtype = strToIntDef(_request.getParameter("groupType"), -1);
+      if (gtype < 0 || gtype > 4) {
+        return failure("Invalid or missing parameter 'groupType'");
+      }
+      int gid = strToIntDef(_request.getParameter("groupId"), -1);
+      if (gid < 0 || gid > 63) {
+        return failure("Invalid or missing parameter 'groupId'");
+      }
+      pDevice->setDeviceBinaryInputTarget(index, gtype, gid);
+      return success();
+    } else if(_request.getMethod() == "setBinaryInputId") {
+      int index = strToIntDef(_request.getParameter("index"), -1);
+      if (index < 0) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+      int id = strToIntDef(_request.getParameter("inputId"), -1);
+      if (id < 0 || id > 15) {
+        return failure("Invalid or missing parameter 'inputId'");
+      }
+      pDevice->setDeviceBinaryInputId(index, id);
+      return success();
+
+    } else if(_request.getMethod() == "getAKMInputTimeouts") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      int onDelay, offDelay;
+      pDevice->getDeviceAKMInputTimeouts(onDelay, offDelay);
+      resultObj->addProperty("ondelay", onDelay);
+      resultObj->addProperty("offdelay", onDelay);
+      return success(resultObj);
+    } else if(_request.getMethod() == "setAKMInputTimeouts") {
+      int mode = strToIntDef(_request.getParameter("mode"), -1);
+      if ((mode < 16) || (mode > 21)) {
+        return failure("Invalid or missing parameter 'mode'");
+      }
+      int onDelay = strToIntDef(_request.getParameter("ondelay"), -1);
+      int offDelay = strToIntDef(_request.getParameter("offdelay"), -1);
+      pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
+      return success();
+
     } else if(_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
