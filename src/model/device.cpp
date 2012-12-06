@@ -898,7 +898,7 @@ namespace dss {
 
   bool Device::hasExtendendSceneTable() {
     if ((((getFunctionID() & 0xf000) >> 12) == GroupIDGray) &&
-        (((getProductID() >> 10) & 0x3f) == DeviceTypeKL)) {
+        (((getProductID() >> 10) & 0x3f) == DEVICE_TYPE_KL)) {
       return true;
     }
     return false;

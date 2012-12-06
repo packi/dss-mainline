@@ -139,15 +139,6 @@ namespace dss {
   const int GroupIDUserGroupStart = GroupIDStandardMax + 1;
   const int GroupIDMax = 63;
 
-  //Device Types
-  const int DeviceTypeKM = 0;
-  const int DeviceTypeTKM = 1;
-  const int DeviceTypeSDM = 2;
-  const int DeviceTypeKL = 3;
-  const int DeviceTypeTUP = 4;
-  const int DeviceTypeZWS = 5;
-  const int DeviceTypeSDS = 6;
-
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
   const uint32_t SimulationPrefix = 0xFFC00000;
 
@@ -165,6 +156,8 @@ namespace dss {
   const uint8_t CfgFunction_DimTime0 = 0x06;
   const uint8_t CfgFunction_LedConfig0 = 0x18;
   const uint8_t CfgFunction_LTMode = 0x1E;
+  const uint8_t CfgFunction_LTTimeoutOff = 0x22;
+  const uint8_t CfgFunction_LTTimeoutOn = 0x24;
 
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;

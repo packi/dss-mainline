@@ -48,10 +48,10 @@ namespace dss {
   } DSMeterSpec_t;
 
   typedef struct {
-    int TargetGroupType;
-    int TargetGroup;
-    int InputType;
-    int InputID;
+    uint8_t TargetGroupType;
+    uint8_t TargetGroup;
+    uint8_t InputType;
+    uint8_t InputID;
   } DeviceBinaryInputSpec_t;
 
   typedef struct {
