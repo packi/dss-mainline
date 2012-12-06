@@ -32,6 +32,10 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/model/modulator.h"
+#include "src/model/devicereference.h"
+#include "src/event.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
 
@@ -50,6 +54,7 @@ namespace dss {
     m_ProductID(0),
     m_RevisionID(0),
     m_LastCalledScene(SceneOff),
+    m_LastButOneCalledScene(SceneOff),
     m_Consumption(0),
     m_Energymeter(0),
     m_LastDiscovered(DateTime::NullDate),
@@ -57,6 +62,8 @@ namespace dss {
     m_IsLockedInDSM(false),
     m_OutputMode(0),
     m_ButtonInputMode(0),
+    m_ButtonInputIndex(0),
+    m_ButtonInputCount(0),
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
@@ -65,6 +72,7 @@ namespace dss {
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
     m_OemState(DEVICE_OEM_UNKOWN),
+    m_OemIsIndependent(true),
     m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_HWInfo(),
     m_iconPath("unknown.png"),
@@ -242,6 +250,24 @@ namespace dss {
       }
     }
   } // publishToPropertyTree
+
+  void Device::publishBinaryInputsToPropTree()
+  {
+    if (m_pPropertyNode != NULL && !m_binaryInputs.empty()) {
+      PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
+      for (unsigned int i = 0; i < m_binaryInputs.size(); i++) {
+        PropertyNodePtr entry = binaryInputNode->createProperty(std::string("binaryInput") + intToString(i));
+        entry->createProperty("targetGroupType")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].TargetGroupType));
+        entry->createProperty("targetGroup")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].TargetGroup));
+        entry->createProperty("inputType")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].InputType));
+        entry->createProperty("inputID")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].InputID));
+      }
+    }
+  } // publishBinaryInputsToPropTree
 
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
@@ -1347,22 +1373,57 @@ namespace dss {
     }
   }
 
-  void Device::publishBinaryInputsToPropTree()
-  {
-    if (m_pPropertyNode != NULL && !m_binaryInputs.empty()) {
-      PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
-      for (int i = 0; i < m_binaryInputs.size(); i++) {
-        PropertyNodePtr entry = binaryInputNode->createProperty(std::string("binaryInput") + intToString(i));
-        entry->createProperty("targetGroupType")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].TargetGroupType));
-        entry->createProperty("targetGroup")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].TargetGroup));
-        entry->createProperty("inputType")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].InputType));
-        entry->createProperty("inputID")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].InputID));
-      }
+  void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
     }
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, _inputType);
+  }
+
+  void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup)
+  {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    uint8_t val = (_targetType & 0x3) << 6;
+    val |= (_targetGroup & 0x3f);
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, val);
+  }
+
+  uint8_t Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    return m_binaryInputs[_inputIndex].InputType;
+  }
+
+  void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    uint8_t val = (_targetId & 0xf) << 4;
+    if (_inputIndex == m_binaryInputs.size()) {
+      val |= 0x80;
+    }
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
+  }
+
+  void Device::setDeviceAKMInputTimeouts(int _onDelay, int _offDelay) {
+    if (_onDelay > 0) {
+      uint16_t onDelay = _onDelay / 10;
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOn, onDelay & 0xff);
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOn + 1, onDelay >> 8);
+    }
+    if (_offDelay > 0) {
+      uint16_t offDelay = _offDelay / 10;
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOff, offDelay & 0xff);
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOff + 1, offDelay >> 8);
+    }
+  }
+
+  void Device::getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay) {
+    _onDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOn) * 10;
+    _offDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOff) * 10;
   }
 
 } // namespace dss

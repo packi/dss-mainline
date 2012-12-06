@@ -129,6 +129,14 @@ namespace dss {
     DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY = 3,
   } DeviceOEMInetState_t;
 
+
+  typedef enum {
+    DEVICE_IOSTATE_INACTIVE = 0,
+    DEVICE_IOSTATE_ACTIVE = 1,
+    DEVICE_IOSTATE_UNKNOWN = 2,
+  } DeviceBinaryInputState_t;
+
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -153,6 +161,7 @@ namespace dss {
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
+
     uint8_t m_OutputMode;
     uint8_t m_ButtonInputMode;
     uint8_t m_ButtonInputIndex;
@@ -161,6 +170,8 @@ namespace dss {
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
+    std::vector<DeviceBinaryInputSpec_t> m_binaryInputs;
+
     unsigned long long m_OemEanNumber;
     uint16_t m_OemSerialNumber;
     uint8_t m_OemPartNumber;
@@ -176,7 +187,7 @@ namespace dss {
     std::string m_OemProductName;
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
-    std::vector<DeviceBinaryInputSpec_t> m_binaryInputs;
+
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -187,6 +198,7 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     void publishBinaryInputsToPropTree();
+
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
@@ -221,8 +233,16 @@ namespace dss {
     uint8_t transitionTimeEval(int timems);
     void setSceneValue(const int _scene, const int _value);
     int getSceneValue(const int _scene);
-
     void configureAreaMembership(const int _areaScene, const bool _addToArea);
+
+    /** Binary input devices */
+    void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
+    void setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup);
+    void setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType);
+    uint8_t getDeviceBinaryInputType(uint8_t _inputIndex);
+    /** AKM2xx timeout settings */
+    void setDeviceAKMInputTimeouts(int _onDelay, int _offDelay);
+    void getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay);
 
     /** Returns device configuration value */
     uint8_t getDeviceConfig(uint8_t _configIndex, uint8_t _value);
