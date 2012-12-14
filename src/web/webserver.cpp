@@ -426,35 +426,49 @@ namespace dss {
 
   void *WebServer::downloadHandler(struct mg_connection* _connection,
                                   const struct mg_request_info* _info) {
-    const std::string kURLID = "/download/";
-    std::string uri = _info->uri;
+    try {
+      const std::string kURLID = "/download/";
+      std::string uri = _info->uri;
 
-    std::string givenFileName = uri.substr(uri.find(kURLID) + kURLID.size());
+      std::string givenFileName = uri.substr(uri.find(kURLID) + kURLID.size());
 
-    log("Processing call to download/" + givenFileName);
+      log("Processing call to download/" + givenFileName);
 
-    // TODO: make the files-node readonly as this might pose a security threat
-    //       (you could download any file on the disk if you add it as a subnode
-    //        of files)
-    PropertyNodePtr filesNode = getDSS().getPropertySystem().getProperty(
-                                  getConfigPropertyBasePath() + "files"
-                                );
-    std::string fileName;
-    if(filesNode != NULL) {
-      PropertyNodePtr fileNode = filesNode->getProperty(givenFileName);
-      if(fileNode != NULL) {
-        fileName = fileNode->getStringValue();
+      // TODO: make the files-node readonly as this might pose a security threat
+      //     (you could download any file on the disk if you add it as a subnode
+      //      of files)
+      PropertyNodePtr filesNode = getDSS().getPropertySystem().getProperty(
+                                    getConfigPropertyBasePath() + "files");
+      std::string fileName;
+      if(filesNode != NULL) {
+        PropertyNodePtr fileNode = filesNode->getProperty(givenFileName);
+        if(fileNode != NULL) {
+          fileName = fileNode->getStringValue();
+        }
       }
-    }
-    log("Using local file: " + fileName);
-    if (boost::filesystem::exists(fileName)) {
+      log("Using local file: " + fileName);
+      if (boost::filesystem::exists(fileName)) {
         FILE *fp = fopen(fileName.c_str(), "r");
         if (fp != NULL)
         {
             mg_send_file(_connection, fp, fs::file_size(fileName));
             fclose(fp);
         }
+      }
+    } catch(SecurityException& e) {
+      emitHTTPHeader(403, _connection);
+      mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
+      mg_printf(_connection, e.what());
+      mg_printf(_connection, "</body></html>");
+      return _connection;
+    } catch(...) {
+      emitHTTPHeader(500, _connection);
+      mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
+      mg_printf(_connection, "Error processing request");
+      mg_printf(_connection, "</body></html>");
+      return _connection;
     }
+
     return _connection;
   } // downloadHandler
 
