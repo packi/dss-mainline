@@ -79,7 +79,8 @@ namespace dss {
     m_OemProductInfoState(DEVICE_OEM_UNKOWN),
     m_OemProductName(),
     m_OemProductIcon(),
-    m_OemProductURL()
+    m_OemProductURL(),
+    m_AKMInputProperty()
     { } // ctor
 
   Device::~Device() {
@@ -299,6 +300,11 @@ namespace dss {
       calculateHWInfo();
     }
     updateIconPath();
+
+    if ((getDeviceType() == DEVICE_TYPE_AKM) && (m_pPropertyNode != NULL)) {
+        m_pPropertyNode->createProperty("AKMInputProperty")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
+    }
   } // setProductID
 
   int Device::getRevisionID() const {
@@ -995,6 +1001,7 @@ namespace dss {
     bool wasSlave = is2WaySlave();
 
     m_ButtonInputMode = _value;
+    m_AKMInputProperty = getAKMButtonInputString(_value);
     if (is2WaySlave() && !wasSlave) {
       removeFromPropertyTree();
     } else if (wasSlave && !is2WaySlave()) {
@@ -1424,6 +1431,30 @@ namespace dss {
   void Device::getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay) {
     _onDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOn) * 100;
     _offDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOff) * 100;
+  }
+
+  std::string Device::getAKMButtonInputString(const int _mode) {
+    switch (_mode) {
+      case DEV_PARAM_BUTTONINPUT_AKM_STANDARD:
+        return BUTTONINPUT_AKM_STANDARD;
+      case DEV_PARAM_BUTTONINPUT_AKM_INVERTED:
+        return BUTTONINPUT_AKM_INVERTED;
+      case DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE:
+        return BUTTONINPUT_AKM_ON_RISING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE:
+        return BUTTONINPUT_AKM_OFF_FALLING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE:
+        return BUTTONINPUT_AKM_OFF_RISING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE:
+        return BUTTONINPUT_AKM_OFF_FALLING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE:
+        return BUTTONINPUT_AKM_RISING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE:
+        return BUTTONINPUT_AKM_FALLING_EDGE;
+      default:
+        break;
+    }
+    return "";
   }
 
 } // namespace dss

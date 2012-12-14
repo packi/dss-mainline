@@ -46,7 +46,33 @@
 #define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4   12
 #define DEV_PARAM_BUTTONINPUT_2WAY                  13
 #define DEV_PARAM_BUTTONINPUT_1WAY                  14
+#define DEV_PARAM_BUTTONINPUT_AKM_STANDARD          16
+#define DEV_PARAM_BUTTONINPUT_AKM_INVERTED          17
+#define DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE    18
+#define DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE   19
+#define DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE   20
+#define DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE  21
+#define DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE       22
+#define DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE      23
+
 #define DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2       0xff
+
+// pairing JSON strings
+#define BUTTONINPUT_1WAY            "1way"
+#define BUTTONINPUT_2WAY_DOWN       "2way_down"
+#define BUTTONINPUT_2WAY_UP         "2way_up"
+#define BUTTONINPUT_2WAY            "2way"
+#define BUTTONINPUT_1WAY_COMBINED   "1way_combined"
+
+// AKM JSON strings
+#define BUTTONINPUT_AKM_STANDARD            "standard"
+#define BUTTONINPUT_AKM_INVERTED            "inverted"
+#define BUTTONINPUT_AKM_ON_RISING_EDGE      "on_rising_edge"
+#define BUTTONINPUT_AKM_ON_FALLING_EDGE     "on_falling_edge"
+#define BUTTONINPUT_AKM_OFF_RISING_EDGE     "off_rising_edge"
+#define BUTTONINPUT_AKM_OFF_FALLING_EDGE    "off_falling_edge"
+#define BUTTONINPUT_AKM_RISING_EDGE         "rising_edge"
+#define BUTTONINPUT_AKM_FALLING_EDGE        "falling_edge"
 
 namespace dss {
 
@@ -188,6 +214,8 @@ namespace dss {
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
 
+    std::string m_AKMInputProperty;
+
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -198,6 +226,7 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     void publishBinaryInputsToPropTree();
+    std::string getAKMButtonInputString(const int _mode);
 
   public:
     /** Creates and initializes a device. */

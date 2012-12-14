@@ -35,12 +35,6 @@
 #include "src/web/json.h"
 #include "jsonhelper.h"
 
-#define BUTTONINPUT_1WAY            "1way"
-#define BUTTONINPUT_2WAY_DOWN       "2way_down"
-#define BUTTONINPUT_2WAY_UP         "2way_up"
-#define BUTTONINPUT_2WAY            "2way"
-#define BUTTONINPUT_1WAY_COMBINED   "1way_combined"
-
 namespace dss {
 
 
@@ -700,7 +694,36 @@ namespace dss {
       // values < 0 are ignored by this function
       pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
       return success();
+    } else if (_request.getMethod() == "setAKMInputProperty") {
+      std::string mode = _request.getParameter("mode");
+      if (mode.empty()) {
+        return failure("Invalid or missing parameter 'mode'");
+      }
 
+      if (pDevice->getDeviceType() != DEVICE_TYPE_AKM) {
+        return failure("This device does not support AKM properties");
+      }
+
+      if (mode == BUTTONINPUT_AKM_STANDARD) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_STANDARD);
+      } else if (mode == BUTTONINPUT_AKM_INVERTED) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_INVERTED);
+      } else if (mode == BUTTONINPUT_AKM_ON_RISING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_ON_FALLING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_OFF_RISING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_OFF_FALLING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_RISING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_FALLING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
+      } else {
+        return failure("Unsupported mode: " + mode);
+      }
+      return success();
     } else if(_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
