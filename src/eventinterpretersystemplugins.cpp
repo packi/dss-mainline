@@ -901,10 +901,10 @@ namespace dss {
 
     PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
     PropertyNodePtr triggerIndex = _triggerProp->getPropertyByName("index");
-    PropertyNodePtr triggerType = _triggerProp->getPropertyByName("type");
+    PropertyNodePtr triggerType = _triggerProp->getPropertyByName("stype");
     PropertyNodePtr triggerState = _triggerProp->getPropertyByName("state");
 
-    // need either: dsid + index + state or type + state (+ dsid)
+    // need either: dsid + index + state or stype + state (+ dsid)
 
     if ((triggerDSID == NULL) && (triggerType == NULL)) {
       return false;
@@ -916,7 +916,7 @@ namespace dss {
     std::string sDSID;
     std::string sIndex;
     std::string sType;
-    std::string sState = triggerState->getStringValue();
+    std::string sState = triggerState->getAsString();
 
     if (triggerDSID) {
       sDSID = triggerDSID->getStringValue();
@@ -924,10 +924,10 @@ namespace dss {
         return false;
       }
       if (triggerIndex) {
-        if (triggerType && (triggerType->getStringValue() != eventType)) {
+        if (triggerType && (triggerType->getAsString() != eventType)) {
           return false;
         }
-        sIndex = triggerIndex->getStringValue();
+        sIndex = triggerIndex->getAsString();
         if (sIndex == eventIndex && sState == eventState) {
           Logger::getInstance()->log("SystemTrigger::"
               "checkDeviceBinaryInput:: Match: BinaryInput dSID: " + sDSID +
@@ -938,7 +938,7 @@ namespace dss {
     }
 
     if (triggerType) {
-      sType = triggerType->getStringValue();
+      sType = triggerType->getAsString();
       if (sType == eventType && sState == eventState) {
         Logger::getInstance()->log("SystemTrigger::"
             "checkDeviceBinaryInput:: Match: BinaryInput dSID: " + sDSID +
@@ -1056,35 +1056,55 @@ namespace dss {
       }
 
       std::string triggerValue = triggerType->getAsString();
-      if (triggerValue == "zone-scene") {
-        if (checkSceneZone(triggerProp)) {
-          return true;
+
+      if (m_evtName == "callScene") {
+        if (triggerValue == "zone-scene") {
+          if (checkSceneZone(triggerProp)) {
+            return true;
+          }
+        } else if (triggerValue == "device-scene") {
+          if (checkDeviceScene(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "undo-zone-scene") {
-        if (checkUndoSceneZone(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "undoScene") {
+        if (triggerValue == "undo-zone-scene") {
+          if (checkUndoSceneZone(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-scene") {
-        if (checkDeviceScene(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "buttonClick") {
+        if (triggerValue == "device-msg") {
+          if (checkDevice(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-sensor") {
-        if (checkDeviceSensor(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "deviceSensorEvent") {
+        if (triggerValue == "device-sensor") {
+          if (checkDeviceSensor(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-msg") {
-        if (checkDevice(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "deviceBinaryInputEvent") {
+        if (triggerValue == "device-binary-input") {
+          if (checkDeviceBinaryInput(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "device-binary-input") {
-        if (checkDeviceBinaryInput(triggerProp)) {
-          return true;
+
+      } else if (m_evtName == "highlevel") {
+        if (triggerValue == "custom-event") {
+          if (checkHighlevel(triggerProp)) {
+            return true;
+          }
         }
-      } else if (triggerValue == "custom-event") {
-         if (checkHighlevel(triggerProp)) {
-          return true;
-        }
+
       }
+
     } // for loop
     return false;
   }
@@ -1163,9 +1183,7 @@ namespace dss {
         continue;
       }
       std::string sTriggerPath = triggerPathNode->getStringValue();
-      bool conditionsOk = checkSystemCondition(sTriggerPath);
-      bool triggersOk = checkTrigger(sTriggerPath);
-      if (conditionsOk && triggersOk) {
+      if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
         relayTrigger(triggerNode);
       }
     } // for loop
