@@ -79,6 +79,12 @@ namespace dss {
      */
     JSObject* createJSZone(ScriptContext& _ctx, boost::shared_ptr<Zone> _pZone);
 
+    /** Creates a JSObject that wraps a State
+     * @param _ctx Context in which to create the object
+     * @param _pState Reference to the \a State being wrapped
+     */
+    JSObject* createJSState(ScriptContext& _ctx, boost::shared_ptr<State> _pState);
+
     template<class t>
     t convertTo(ScriptContext& _context, jsval val);
 

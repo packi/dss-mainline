@@ -39,6 +39,7 @@
 #include "src/model/modelconst.h"
 #include "src/model/group.h"
 #include "src/model/zone.h"
+#include "src/model/state.h"
 #include "src/metering/metering.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
@@ -294,6 +295,92 @@ namespace dss {
     return JS_FALSE;
   } // global_getZoneByID
 
+  JSBool global_getStateByName(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+
+      std::string stateName;
+      try {
+        stateName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: state name");
+        return JS_FALSE;
+      }
+      try {
+        boost::shared_ptr<State> state = ext->getApartment().getState(stateName);
+        JSObject* obj = ext->createJSState(*ctx, state);
+        JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {
+        JS_ReportError(cx, "State with given name not found");
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_FALSE;
+  } // global_getStateByName
+
+  JSBool global_registerState(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+
+      std::string stateName;
+      try {
+        stateName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: state name");
+        return JS_FALSE;
+      }
+
+      bool isPersistent = false;
+      try {
+        if (argc >= 2) {
+          isPersistent = ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]);
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: persistence");
+        return JS_FALSE;
+      }
+
+      try {
+        boost::shared_ptr<State> state = ext->getApartment().allocateState(stateName, ctx->getWrapper()->getIdentifier());
+        state->setPersistence(isPersistent);
+        JSObject* obj = ext->createJSState(*ctx, state);
+        JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {
+        JS_ReportError(cx, "State with given name not found");
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
+      } catch(ItemDuplicateException& e) {
+        JS_ReportError(cx, "State with given name already existing");
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_FALSE;
+  } // global_registerState
+
   JSBool global_getEnergyMeterValue(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -364,6 +451,8 @@ namespace dss {
     JS_FS("getDSMeters", global_getDSMeters, 0, 0),
     JS_FS("getZones", global_getZones, 0, 0),
     JS_FS("getZoneByID", global_getZoneByID, 0, 0),
+    JS_FS("getState", global_getStateByName, 1, 0),
+    JS_FS("registerState", global_registerState, 1, 0),
     JS_FS_END
   };
 
@@ -1931,7 +2020,7 @@ namespace dss {
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
-    JS_ConvertStub, finalize_meter, JSCLASS_NO_OPTIONAL_MEMBERS
+    JS_ConvertStub, finalize_zone, JSCLASS_NO_OPTIONAL_MEMBERS
   };
 
   JSBool zone_JSGet(JSContext *cx, JSObject *obj, jsid id, jsval *vp) {
@@ -2180,6 +2269,181 @@ namespace dss {
     return result;
   } // createJSZone
 
+  //=== JSState ===
+
+  struct state_wrapper {
+    boost::shared_ptr<State> pState;
+  };
+
+  void finalize_state(JSContext *cx, JSObject *obj) {
+    struct state_wrapper* pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete pState;
+  } // finalize_state
+
+  static JSClass state_class = {
+    "State", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub, finalize_state, JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  JSBool state_JSGet(JSContext *cx, JSObject *obj, jsid id, jsval *vp) {
+    boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, obj))->pState;
+    if (pState != NULL) {
+      int opt = JSID_TO_INT(id);
+      switch(opt) {
+        case 0:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "State")));
+          return JS_TRUE;
+        case 1:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, pState->getName().c_str())));
+          return JS_TRUE;
+        case 2:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL((int) pState->getType()));
+          return JS_TRUE;
+        case 3:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL((int) pState->getState()));
+          return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  }
+
+  static JSPropertySpec state_properties[] = {
+    {"className", 0, 0, zone_JSGet, NULL},
+    {"name", 2, 0, zone_JSGet, NULL},
+    {"type", 1, 0, zone_JSGet, NULL},
+    {"value", 1, 0, zone_JSGet, NULL},
+    {NULL, 0, 0, NULL, NULL}
+  };
+
+  JSBool state_get_value(JSContext* cx, uintN argc, jsval* vp) {
+    try {
+      boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pState;
+      if (pState != NULL) {
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL((int) pState->getState()));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // state_get_value
+
+  JSBool state_set_value(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pState;
+      if (pState != NULL) {
+        if (pState->getType() != StateType_Service) {
+          JS_ReportError(cx, "State type is not allowed to be set by scripting");
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
+          return JS_FALSE;
+        }
+        if (pState->getProviderService() != ctx->getWrapper()->getIdentifier()) {
+          JS_ReportError(cx, "State is owned by %s", pState->getProviderService().c_str());
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
+          return JS_FALSE;
+        }
+        try {
+
+          eState svalue;
+          if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
+            std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+            if (value == "active") {
+              svalue = State_Active;
+            } else if (value == "inactive") {
+              svalue = State_Inactive;
+            } else if (value == "unknown") {
+              svalue = State_Unkown;
+            } else {
+              JS_ReportError(cx, "Invalid state value");
+              JS_SET_RVAL(cx, vp, JSVAL_NULL);
+              return JS_FALSE;
+            }
+          } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
+            int value = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            switch (value) {
+            case 1: svalue = State_Active; break;
+            case 2: svalue = State_Inactive; break;
+            case 3: svalue = State_Unkown; break;
+            default:
+              JS_ReportError(cx, "Invalid state value");
+              JS_SET_RVAL(cx, vp, JSVAL_NULL);
+              return JS_FALSE;
+            }
+          }
+          pState->setState(svalue);
+
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // state_set_value
+
+  JSBool state_get_property_node(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
+          ctx->getEnvironment().getExtension("propertyextension"));
+      boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pState;
+      if (pState != NULL) {
+        JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pState->getPropertyNode())));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // state_get_property_node
+
+  JSFunctionSpec state_methods[] = {
+    JS_FS("getValue", state_get_value, 0, 0),
+    JS_FS("setValue", state_set_value, 0, 0),
+    JS_FS("getPropertyNode", state_get_property_node, 0, 0),
+    JS_FS_END
+  };
+
+  JSObject* ModelScriptContextExtension::createJSState(ScriptContext& _ctx, boost::shared_ptr<State> _pState) {
+    JSObject* result = JS_NewObject(_ctx.getJSContext(), &state_class, NULL, NULL);
+    JS_DefineProperties(_ctx.getJSContext(), result, state_properties);
+    JS_DefineFunctions(_ctx.getJSContext(), result, state_methods);
+    struct state_wrapper* wrapper = new state_wrapper;
+    wrapper->pState = _pState;
+    JS_SetPrivate(_ctx.getJSContext(), result, wrapper);
+    return result;
+  } // createJSState
 
   //================================================== ModelConstantsScriptExtension
 
