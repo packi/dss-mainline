@@ -77,6 +77,7 @@
 namespace dss {
 
   class Group;
+  class State;
   class DSMeter;
 
   typedef struct {
@@ -114,6 +115,14 @@ namespace dss {
     bool pairing;       // device supports pairing
     bool syncButtonID;  // sync button ID setting of slave with master
   } DeviceFeatures_t;
+
+  typedef struct {
+    int m_inputIndex;        // input line index
+    int m_inputType;         // type of input signal
+    int m_inputId;           // target Id, like ButtonId
+    int m_targetGroupType;   // type of target group: standard, user, apartment
+    int m_targetGroupId;     // index of target group, 0..63
+  } DeviceBinaryInput_t;
 
   typedef enum {
     DEVICE_TYPE_INVALID = -1,
@@ -155,14 +164,6 @@ namespace dss {
     DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY = 3,
   } DeviceOEMInetState_t;
 
-
-  typedef enum {
-    DEVICE_IOSTATE_INACTIVE = 0,
-    DEVICE_IOSTATE_ACTIVE = 1,
-    DEVICE_IOSTATE_UNKNOWN = 2,
-  } DeviceBinaryInputState_t;
-
-
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -196,8 +197,6 @@ namespace dss {
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
-    std::vector<DeviceBinaryInputSpec_t> m_binaryInputs;
-
     unsigned long long m_OemEanNumber;
     uint16_t m_OemSerialNumber;
     uint8_t m_OemPartNumber;
@@ -214,6 +213,10 @@ namespace dss {
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
 
+    uint8_t m_binaryInputCount;
+    std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
+    std::vector<boost::shared_ptr<State> > m_binaryInputStates;
+
     std::string m_AKMInputProperty;
 
   protected:
@@ -225,7 +228,6 @@ namespace dss {
     bool hasExtendendSceneTable();
     void calculateHWInfo();
     void updateIconPath();
-    void publishBinaryInputsToPropTree();
     std::string getAKMButtonInputString(const int _mode);
 
   public:
@@ -493,8 +495,16 @@ namespace dss {
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
 
-    void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) { m_binaryInputs = _binaryInputs; publishBinaryInputsToPropTree(); }
-    const std::vector<DeviceBinaryInputSpec_t>& getBinaryInputs() const { return m_binaryInputs; }
+    void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
+    const uint8_t getBinaryInputCount() const;
+    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& getBinaryInputs() const;
+    const boost::shared_ptr<DeviceBinaryInput_t> getBinaryInput(uint8_t _inputIndex) const;
+    void setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup);
+    void setBinaryInputId(uint8_t _index, uint8_t _inputId);
+    void setBinaryInputType(uint8_t _index, uint8_t _inputType);
+
+    void setBinaryInputState(uint8_t _index, boost::shared_ptr<State> _state);
+    boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

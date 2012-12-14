@@ -44,6 +44,7 @@
 #include "device.h"
 #include "devicereference.h"
 #include "modulator.h"
+#include "state.h"
 #include "set.h"
 #include "modelpersistence.h"
 #include "busscanner.h"
@@ -636,6 +637,9 @@ namespace dss {
           dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
           raiseEvent(dsMeterReadyEvent);
         }
+
+        // TODO: check dsm event counter
+        scanner.syncBinaryInputStates(mod);
       } catch(BusApiError& e) {
         log(std::string("Bus error scanning dSM " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
 
@@ -1209,37 +1213,35 @@ namespace dss {
                                                int _configClass, int _configIndex, int _value) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
+      boost::shared_ptr<Device> device = devRef.getDevice();
       if(_configClass == CfgClassFunction) {
         if(_configIndex == CfgFunction_Mode) {
-          devRef.getDevice()->setOutputMode(_value);
+          device->setOutputMode(_value);
         } else if(_configIndex == CfgFunction_ButtonMode) {
-          devRef.getDevice()->setButtonID(_value & 0xf);
-          devRef.getDevice()->setButtonActiveGroup((_value >> 4) & 0xf);
+          device->setButtonID(_value & 0xf);
+          device->setButtonActiveGroup((_value >> 4) & 0xf);
         } else if(_configIndex == CfgFunction_LTMode) {
-          devRef.getDevice()->setButtonInputMode(_value);
+          device->setButtonInputMode(_value);
         }
       } else if (_configClass == CfgClassDevice) {
         if(_configIndex >= 0x40 && _configIndex <= 0x40 + 8 * 3) {
-          std::vector<DeviceBinaryInputSpec_t> binputs = devRef.getDevice()->getBinaryInputs();
           uint8_t inputIndex = (_configIndex - 0x40) / 3;
           uint8_t offset = (_configIndex - 0x40) % 3;
           switch (offset) {
           case 0:
-            binputs[inputIndex].TargetGroupType = _value >> 6;
-            binputs[inputIndex].TargetGroup = _value & 0x3f;
+            device->setBinaryInputTarget(inputIndex, _value >> 6, _value & 0x3f);
             break;
           case 1:
-            binputs[inputIndex].InputType = _value & 0xff;
+            device->setBinaryInputType(inputIndex, _value & 0xff);
             break;
           case 2:
-            binputs[inputIndex].InputID = _value >> 4;
+            device->setBinaryInputId(inputIndex, _value >> 4);
             break;
           }
-          devRef.getDevice()->setBinaryInputs(binputs);
         }
       }
     } catch(std::runtime_error& e) {
-      log(std::string("Error updating config of device: ") + e.what(), lsWarning);
+      log(std::string("Error updating config of device: ") + e.what(), lsError);
     }
   } // onDeviceConfigChanged
 
@@ -1280,6 +1282,19 @@ namespace dss {
       pEvent->setProperty("inputType", intToString(_eventType));
       pEvent->setProperty("inputState", intToString(_state));
       raiseEvent(pEvent);
+
+      boost::shared_ptr<State> pState;
+      try {
+        pState = devRef.getDevice()->getBinaryInputState(_eventIndex);
+      } catch(std::runtime_error& e) {}
+
+      if (pState != NULL) {
+        if (_state == 0) {
+          pState->setState(State_Inactive);
+        } else if (_state == 1) {
+          pState->setState(State_Active);
+        }
+      }
     } catch(ItemNotFoundException& e) {
       log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
     }

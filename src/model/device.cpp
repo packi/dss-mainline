@@ -33,6 +33,7 @@
 #include "src/model/modelmaintenance.h"
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
+#include "src/model/state.h"
 #include "src/event.h"
 
 #include <boost/shared_ptr.hpp>
@@ -251,24 +252,6 @@ namespace dss {
       }
     }
   } // publishToPropertyTree
-
-  void Device::publishBinaryInputsToPropTree()
-  {
-    if (m_pPropertyNode != NULL && !m_binaryInputs.empty()) {
-      PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
-      for (unsigned int i = 0; i < m_binaryInputs.size(); i++) {
-        PropertyNodePtr entry = binaryInputNode->createProperty(std::string("binaryInput") + intToString(i));
-        entry->createProperty("targetGroupType")
-            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].TargetGroupType));
-        entry->createProperty("targetGroup")
-            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].TargetGroup));
-        entry->createProperty("inputType")
-            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].InputType));
-        entry->createProperty("inputID")
-            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].InputID));
-      }
-    }
-  } // publishBinaryInputsToPropTree
 
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
@@ -1401,7 +1384,7 @@ namespace dss {
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
-    return m_binaryInputs[_inputIndex].InputType;
+    return m_binaryInputs[_inputIndex]->m_inputType;
   }
 
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
@@ -1455,6 +1438,91 @@ namespace dss {
         break;
     }
     return "";
+  }
+
+  const uint8_t Device::getBinaryInputCount() const {
+    return (uint8_t) m_binaryInputCount;
+  }
+
+  void Device::setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup) {
+    if (_index > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    m_binaryInputs[_index]->m_targetGroupId = targetGroup;
+    m_binaryInputs[_index]->m_targetGroupId = targetGroupType;
+  }
+
+  void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {
+    if (_index > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    m_binaryInputs[_index]->m_inputId = _inputId;
+  }
+
+  void Device::setBinaryInputType(uint8_t _index, uint8_t _inputType) {
+    if (_index > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    m_binaryInputs[_index]->m_inputType = _inputType;
+  }
+
+  void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
+    m_binaryInputCount = 0;
+    m_binaryInputs.clear();
+    m_binaryInputStates.clear();
+
+    for (std::vector<DeviceBinaryInputSpec_t>::const_iterator it = _binaryInputs.begin();
+        it != _binaryInputs.end();
+        ++it) {
+      boost::shared_ptr<DeviceBinaryInput_t> binput(new DeviceBinaryInput_t());
+      binput->m_inputIndex = m_binaryInputCount;
+      binput->m_inputId = it->InputID;
+      binput->m_inputType = it->InputType;
+      binput->m_targetGroupType = it->TargetGroupType;
+      binput->m_targetGroupId = it->TargetGroup;
+      m_binaryInputs.push_back(binput);
+
+      boost::shared_ptr<State> state(new State(me, m_binaryInputCount));
+      try {
+        getApartment().allocateState(state);
+      } catch (ItemDuplicateException& ex) {
+        state = getApartment().getState(state->getName());
+      }
+      m_binaryInputStates.push_back(state);
+
+      if (m_pPropertyNode != NULL) {
+        PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
+        std::string bpath = std::string("binaryInput") + intToString(m_binaryInputCount);
+        PropertyNodePtr entry = binaryInputNode->getPropertyByName(bpath);
+        if (entry != NULL) {
+          entry->getParentNode()->removeChild(entry);
+        }
+        entry = binaryInputNode->createProperty(bpath);
+        entry->createProperty("targetGroupType")
+                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupType));
+        entry->createProperty("targetGroupId")
+                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupId));
+        entry->createProperty("inputType")
+                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputType));
+        entry->createProperty("inputId")
+                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputId));
+        entry->createProperty("inputIndex")
+                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputIndex));
+      }
+
+      m_binaryInputCount ++;
+    }
+  }
+
+  const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& Device::getBinaryInputs() const {
+    return m_binaryInputs;
+  }
+
+  boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
+    if (_inputIndex >= m_binaryInputStates.size()) {
+      return boost::shared_ptr<State> ();
+    }
+    return m_binaryInputStates[_inputIndex];
   }
 
 } // namespace dss

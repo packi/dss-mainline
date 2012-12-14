@@ -49,6 +49,7 @@ namespace dss {
   class Zone;
   class Group;
   class DeviceReference;
+  class State;
   class Apartment;
 
   //================================================== Class definitions
@@ -58,7 +59,8 @@ namespace dss {
   typedef enum {
     erlGroup,
     erlDevice,
-    erlApartment
+    erlApartment,
+    erlState
   } EventRaiseLocation;
 
   class Event {
@@ -72,6 +74,7 @@ namespace dss {
     bool m_TimeSet;
     EventRaiseLocation m_RaiseLocation;
     boost::shared_ptr<Group> m_RaisedAtGroup;
+    boost::shared_ptr<State> m_RaisedAtState;
     boost::shared_ptr<DeviceReference> m_RaisedAtDevice;
 
     Properties m_Properties;
@@ -80,6 +83,7 @@ namespace dss {
   public:
     Event(const std::string& _name, boost::shared_ptr<Group> _context);
     Event(const std::string& _name, boost::shared_ptr<Zone> _context);
+    Event(const std::string& _name, boost::shared_ptr<State> _state);
     Event(const std::string& _name, boost::shared_ptr<DeviceReference> _ref);
     Event(const std::string& _name);
     Event();
@@ -99,6 +103,7 @@ namespace dss {
 
     boost::shared_ptr<const Group> getRaisedAtGroup(Apartment& _apartment) const;
     boost::shared_ptr<const DeviceReference> getRaisedAtDevice() const { return m_RaisedAtDevice; }
+    boost::shared_ptr<const State> getRaisedAtState() const { return m_RaisedAtState; }
     EventRaiseLocation getRaiseLocation() { return m_RaiseLocation; }
 
     const Properties& getProperties() const { return m_Properties; }

@@ -619,15 +619,16 @@ namespace dss {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       boost::shared_ptr<JSONArrayBase> inputs(new JSONArrayBase());
       resultObj->addElement("inputs", inputs);
-      std::vector<DeviceBinaryInputSpec_t> binputs = pDevice->getBinaryInputs();
-      for (std::vector<DeviceBinaryInputSpec_t>::iterator it = binputs.begin();
+      std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
+      for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::iterator it = binputs.begin();
           it != binputs.end();
           it ++) {
         boost::shared_ptr<JSONObject> inputObj(new JSONObject());
-        inputObj->addProperty("inputId", it->InputID);
-        inputObj->addProperty("inputType", it->InputType);
-        inputObj->addProperty("targetType", it->TargetGroupType);
-        inputObj->addProperty("targetGroup", it->TargetGroup);
+        inputObj->addProperty("inputIndex", (*it)->m_inputIndex);
+        inputObj->addProperty("inputId", (*it)->m_inputId);
+        inputObj->addProperty("inputType", (*it)->m_inputType);
+        inputObj->addProperty("targetType", (*it)->m_targetGroupType);
+        inputObj->addProperty("targetGroup", (*it)->m_targetGroupId);
         inputs->addElement("", inputObj);
       }
       return success(resultObj);
