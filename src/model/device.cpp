@@ -1409,21 +1409,21 @@ namespace dss {
   }
 
   void Device::setDeviceAKMInputTimeouts(int _onDelay, int _offDelay) {
-    if (_onDelay > 0) {
-      uint16_t onDelay = _onDelay / 10;
+    if (_onDelay >= 0) {
+      uint16_t onDelay = _onDelay / 100;
       setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOn, onDelay & 0xff);
       setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOn + 1, onDelay >> 8);
     }
-    if (_offDelay > 0) {
-      uint16_t offDelay = _offDelay / 10;
+    if (_offDelay >= 0) {
+      uint16_t offDelay = _offDelay / 100;
       setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOff, offDelay & 0xff);
       setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOff + 1, offDelay >> 8);
     }
   }
 
   void Device::getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay) {
-    _onDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOn) * 10;
-    _offDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOff) * 10;
+    _onDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOn) * 100;
+    _offDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOff) * 100;
   }
 
 } // namespace dss

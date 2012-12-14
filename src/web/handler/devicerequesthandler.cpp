@@ -634,6 +634,7 @@ namespace dss {
         inputObj->addProperty("inputType", it->InputType);
         inputObj->addProperty("targetType", it->TargetGroupType);
         inputObj->addProperty("targetGroup", it->TargetGroup);
+        inputs->addElement("", inputObj);
       }
       return success(resultObj);
     } else if(_request.getMethod() == "setBinaryInputType") {
@@ -679,15 +680,24 @@ namespace dss {
       int onDelay, offDelay;
       pDevice->getDeviceAKMInputTimeouts(onDelay, offDelay);
       resultObj->addProperty("ondelay", onDelay);
-      resultObj->addProperty("offdelay", onDelay);
+      resultObj->addProperty("offdelay", offDelay);
       return success(resultObj);
     } else if(_request.getMethod() == "setAKMInputTimeouts") {
-      int mode = strToIntDef(_request.getParameter("mode"), -1);
-      if ((mode < 16) || (mode > 21)) {
-        return failure("Invalid or missing parameter 'mode'");
-      }
       int onDelay = strToIntDef(_request.getParameter("ondelay"), -1);
+      if (onDelay > 6552000) { // ms
+        return failure("Invalid parameter 'ondelay', must be < 6552000");
+      }
+
       int offDelay = strToIntDef(_request.getParameter("offdelay"), -1);
+      if (offDelay > 6552000) {
+        return failure("Invalid parameter 'offdelay', must be < 6552000");
+      }
+
+      if ((onDelay < 0) && (offDelay < 0)) {
+        return failure("No valid parameters given");
+      }
+
+      // values < 0 are ignored by this function
       pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
       return success();
 
