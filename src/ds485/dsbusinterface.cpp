@@ -295,6 +295,11 @@ namespace dss {
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY,
                         EVENT_DEVICE_ACCESSIBILITY_OFF, &callback_struct);
+      EventTestDevicePresence_event_callback_t evDevPresence = DSBusInterface::eventDevicePresenceCallback;
+      callback_struct.function = (void*)evDevPresence;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_TEST_DEVICE_PRESENCE,
+                        0, &callback_struct);
       EventDeviceModelChanged_event_callback_t evDevModelChanged = DSBusInterface::eventDataModelChangedCallback;
       callback_struct.function = (void*)evDevModelChanged;
       callback_struct.arg = this;
@@ -514,6 +519,31 @@ namespace dss {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etLostDevice,
                                                 dsMeterID);
     pEvent->addParameter(_zoneID);
+    pEvent->addParameter(_deviceID);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
+
+  void DSBusInterface::eventDevicePresenceCallback(uint8_t _errorCode, void* _userData,
+                                                   dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
+                                                   uint16_t _deviceID, uint8_t _present) {
+    static_cast<DSBusInterface*>(_userData)->eventDevicePresence(_errorCode, _sourceDSMeterID, _deviceID,
+                                                                 _present);
+  }
+
+  void DSBusInterface::eventDevicePresence(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID,
+                                           uint8_t _present) {
+    loginFromCallback();
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
+
+    ModelEvent* pEvent;
+
+    if (_present == 0) {
+      pEvent = new ModelEventWithDSID(ModelEvent::etLostDevice,  dsMeterID);
+    } else {
+      pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice,  dsMeterID);
+    }
+    pEvent->addParameter(0);
     pEvent->addParameter(_deviceID);
     m_pModelMaintenance->addModelEvent(pEvent);
   }

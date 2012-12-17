@@ -1176,7 +1176,6 @@ namespace dss {
     log("  BusID:     " + intToString(_devID));
 
     try {
-      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
       boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_devID, _dsMeterID).getDevice();
       device->setIsPresent(false);
