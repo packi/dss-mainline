@@ -107,6 +107,7 @@ namespace dss {
     bool initSubsystems();
     bool initSecurity();
     std::string readDistroVersion();
+    void publishDSID();
   public:
     ~DSS();
     bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);
