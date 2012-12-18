@@ -1218,6 +1218,25 @@ namespace dss {
         } else if(_configIndex == CfgFunction_LTMode) {
           devRef.getDevice()->setButtonInputMode(_value);
         }
+      } else if (_configClass == CfgClassDevice) {
+        if(_configIndex >= 0x40 && _configIndex <= 0x40 + 8 * 3) {
+          std::vector<DeviceBinaryInputSpec_t> binputs = devRef.getDevice()->getBinaryInputs();
+          uint8_t inputIndex = (_configIndex - 0x40) / 3;
+          uint8_t offset = (_configIndex - 0x40) % 3;
+          switch (offset) {
+          case 0:
+            binputs[inputIndex].TargetGroupType = _value >> 6;
+            binputs[inputIndex].TargetGroup = _value & 0x3f;
+            break;
+          case 1:
+            binputs[inputIndex].InputType = _value & 0xff;
+            break;
+          case 2:
+            binputs[inputIndex].InputID = _value >> 4;
+            break;
+          }
+          devRef.getDevice()->setBinaryInputs(binputs);
+        }
       }
     } catch(std::runtime_error& e) {
       log(std::string("Error updating config of device: ") + e.what(), lsWarning);

@@ -46,7 +46,33 @@
 #define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4   12
 #define DEV_PARAM_BUTTONINPUT_2WAY                  13
 #define DEV_PARAM_BUTTONINPUT_1WAY                  14
+#define DEV_PARAM_BUTTONINPUT_AKM_STANDARD          16
+#define DEV_PARAM_BUTTONINPUT_AKM_INVERTED          17
+#define DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE    18
+#define DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE   19
+#define DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE   20
+#define DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE  21
+#define DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE       22
+#define DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE      23
+
 #define DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2       0xff
+
+// pairing JSON strings
+#define BUTTONINPUT_1WAY            "1way"
+#define BUTTONINPUT_2WAY_DOWN       "2way_down"
+#define BUTTONINPUT_2WAY_UP         "2way_up"
+#define BUTTONINPUT_2WAY            "2way"
+#define BUTTONINPUT_1WAY_COMBINED   "1way_combined"
+
+// AKM JSON strings
+#define BUTTONINPUT_AKM_STANDARD            "standard"
+#define BUTTONINPUT_AKM_INVERTED            "inverted"
+#define BUTTONINPUT_AKM_ON_RISING_EDGE      "on_rising_edge"
+#define BUTTONINPUT_AKM_ON_FALLING_EDGE     "on_falling_edge"
+#define BUTTONINPUT_AKM_OFF_RISING_EDGE     "off_rising_edge"
+#define BUTTONINPUT_AKM_OFF_FALLING_EDGE    "off_falling_edge"
+#define BUTTONINPUT_AKM_RISING_EDGE         "rising_edge"
+#define BUTTONINPUT_AKM_FALLING_EDGE        "falling_edge"
 
 namespace dss {
 
@@ -129,6 +155,14 @@ namespace dss {
     DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY = 3,
   } DeviceOEMInetState_t;
 
+
+  typedef enum {
+    DEVICE_IOSTATE_INACTIVE = 0,
+    DEVICE_IOSTATE_ACTIVE = 1,
+    DEVICE_IOSTATE_UNKNOWN = 2,
+  } DeviceBinaryInputState_t;
+
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -153,6 +187,7 @@ namespace dss {
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
+
     uint8_t m_OutputMode;
     uint8_t m_ButtonInputMode;
     uint8_t m_ButtonInputIndex;
@@ -161,6 +196,8 @@ namespace dss {
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
+    std::vector<DeviceBinaryInputSpec_t> m_binaryInputs;
+
     unsigned long long m_OemEanNumber;
     uint16_t m_OemSerialNumber;
     uint8_t m_OemPartNumber;
@@ -176,7 +213,9 @@ namespace dss {
     std::string m_OemProductName;
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
-    std::vector<DeviceBinaryInputSpec_t> m_binaryInputs;
+
+    std::string m_AKMInputProperty;
+
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -187,6 +226,8 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     void publishBinaryInputsToPropTree();
+    std::string getAKMButtonInputString(const int _mode);
+
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
@@ -221,8 +262,16 @@ namespace dss {
     uint8_t transitionTimeEval(int timems);
     void setSceneValue(const int _scene, const int _value);
     int getSceneValue(const int _scene);
-
     void configureAreaMembership(const int _areaScene, const bool _addToArea);
+
+    /** Binary input devices */
+    void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
+    void setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup);
+    void setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType);
+    uint8_t getDeviceBinaryInputType(uint8_t _inputIndex);
+    /** AKM2xx timeout settings */
+    void setDeviceAKMInputTimeouts(int _onDelay, int _offDelay);
+    void getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay);
 
     /** Returns device configuration value */
     uint8_t getDeviceConfig(uint8_t _configIndex, uint8_t _value);

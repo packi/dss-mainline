@@ -32,6 +32,10 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/model/modulator.h"
+#include "src/model/devicereference.h"
+#include "src/event.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
 
@@ -50,6 +54,7 @@ namespace dss {
     m_ProductID(0),
     m_RevisionID(0),
     m_LastCalledScene(SceneOff),
+    m_LastButOneCalledScene(SceneOff),
     m_Consumption(0),
     m_Energymeter(0),
     m_LastDiscovered(DateTime::NullDate),
@@ -57,6 +62,8 @@ namespace dss {
     m_IsLockedInDSM(false),
     m_OutputMode(0),
     m_ButtonInputMode(0),
+    m_ButtonInputIndex(0),
+    m_ButtonInputCount(0),
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
@@ -65,13 +72,15 @@ namespace dss {
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
     m_OemState(DEVICE_OEM_UNKOWN),
+    m_OemIsIndependent(true),
     m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_HWInfo(),
     m_iconPath("unknown.png"),
     m_OemProductInfoState(DEVICE_OEM_UNKOWN),
     m_OemProductName(),
     m_OemProductIcon(),
-    m_OemProductURL()
+    m_OemProductURL(),
+    m_AKMInputProperty()
     { } // ctor
 
   Device::~Device() {
@@ -243,6 +252,24 @@ namespace dss {
     }
   } // publishToPropertyTree
 
+  void Device::publishBinaryInputsToPropTree()
+  {
+    if (m_pPropertyNode != NULL && !m_binaryInputs.empty()) {
+      PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
+      for (unsigned int i = 0; i < m_binaryInputs.size(); i++) {
+        PropertyNodePtr entry = binaryInputNode->createProperty(std::string("binaryInput") + intToString(i));
+        entry->createProperty("targetGroupType")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].TargetGroupType));
+        entry->createProperty("targetGroup")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].TargetGroup));
+        entry->createProperty("inputType")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].InputType));
+        entry->createProperty("inputID")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_binaryInputs[i].InputID));
+      }
+    }
+  } // publishBinaryInputsToPropTree
+
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
            (m_LastCalledScene != SceneMin) &&
@@ -273,6 +300,11 @@ namespace dss {
       calculateHWInfo();
     }
     updateIconPath();
+
+    if ((getDeviceType() == DEVICE_TYPE_AKM) && (m_pPropertyNode != NULL)) {
+        m_pPropertyNode->createProperty("AKMInputProperty")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
+    }
   } // setProductID
 
   int Device::getRevisionID() const {
@@ -898,7 +930,7 @@ namespace dss {
 
   bool Device::hasExtendendSceneTable() {
     if ((((getFunctionID() & 0xf000) >> 12) == GroupIDGray) &&
-        (((getProductID() >> 10) & 0x3f) == DeviceTypeKL)) {
+        (((getProductID() >> 10) & 0x3f) == DEVICE_TYPE_KL)) {
       return true;
     }
     return false;
@@ -969,6 +1001,7 @@ namespace dss {
     bool wasSlave = is2WaySlave();
 
     m_ButtonInputMode = _value;
+    m_AKMInputProperty = getAKMButtonInputString(_value);
     if (is2WaySlave() && !wasSlave) {
       removeFromPropertyTree();
     } else if (wasSlave && !is2WaySlave()) {
@@ -1347,22 +1380,81 @@ namespace dss {
     }
   }
 
-  void Device::publishBinaryInputsToPropTree()
-  {
-    if (m_pPropertyNode != NULL && !m_binaryInputs.empty()) {
-      PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
-      for (int i = 0; i < m_binaryInputs.size(); i++) {
-        PropertyNodePtr entry = binaryInputNode->createProperty(std::string("binaryInput") + intToString(i));
-        entry->createProperty("targetGroupType")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].TargetGroupType));
-        entry->createProperty("targetGroup")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].TargetGroup));
-        entry->createProperty("inputType")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].InputType));
-        entry->createProperty("inputID")
-            ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[i].InputID));
-      }
+  void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
     }
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, _inputType);
+  }
+
+  void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup)
+  {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    uint8_t val = (_targetType & 0x3) << 6;
+    val |= (_targetGroup & 0x3f);
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, val);
+  }
+
+  uint8_t Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    return m_binaryInputs[_inputIndex].InputType;
+  }
+
+  void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    uint8_t val = (_targetId & 0xf) << 4;
+    if (_inputIndex == m_binaryInputs.size()) {
+      val |= 0x80;
+    }
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
+  }
+
+  void Device::setDeviceAKMInputTimeouts(int _onDelay, int _offDelay) {
+    if (_onDelay >= 0) {
+      uint16_t onDelay = _onDelay / 100;
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOn, onDelay & 0xff);
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOn + 1, onDelay >> 8);
+    }
+    if (_offDelay >= 0) {
+      uint16_t offDelay = _offDelay / 100;
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOff, offDelay & 0xff);
+      setDeviceConfig(CfgClassFunction, CfgFunction_LTTimeoutOff + 1, offDelay >> 8);
+    }
+  }
+
+  void Device::getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay) {
+    _onDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOn) * 100;
+    _offDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOff) * 100;
+  }
+
+  std::string Device::getAKMButtonInputString(const int _mode) {
+    switch (_mode) {
+      case DEV_PARAM_BUTTONINPUT_AKM_STANDARD:
+        return BUTTONINPUT_AKM_STANDARD;
+      case DEV_PARAM_BUTTONINPUT_AKM_INVERTED:
+        return BUTTONINPUT_AKM_INVERTED;
+      case DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE:
+        return BUTTONINPUT_AKM_ON_RISING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE:
+        return BUTTONINPUT_AKM_OFF_FALLING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE:
+        return BUTTONINPUT_AKM_OFF_RISING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE:
+        return BUTTONINPUT_AKM_OFF_FALLING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE:
+        return BUTTONINPUT_AKM_RISING_EDGE;
+      case DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE:
+        return BUTTONINPUT_AKM_FALLING_EDGE;
+      default:
+        break;
+    }
+    return "";
   }
 
 } // namespace dss
