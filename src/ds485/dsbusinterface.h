@@ -100,6 +100,12 @@ namespace dss {
     void eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
                                     uint16_t _deviceID, uint16_t _zoneID,
                                     uint16_t _vendorID, uint32_t _deviceDSID);
+    static void eventDevicePresenceCallback(uint8_t _errorCode, void* _userData,
+                                            dsid_t _sourceDSMeterID,
+                                            dsid_t _destinationDSMeterID,
+                                            uint16_t _deviceID, uint8_t _present);
+    void eventDevicePresence(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID,
+                             uint8_t _present);
     static void eventDataModelChangedCallback(uint8_t _errorCode, 
                                               void* _userData, 
                                               dsid_t _sourceID, 
