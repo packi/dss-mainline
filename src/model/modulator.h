@@ -45,8 +45,6 @@ namespace dss {
   private:
     dss_dsid_t m_DSID;
     DeviceVector m_ConnectedDevices;
-    int m_EnergyLevelOrange;
-    int m_EnergyLevelRed;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
     double m_EnergyMeterValue;
@@ -105,17 +103,6 @@ namespace dss {
 
     /** Returns timestamp of the last energy measurement */
     const DateTime& getCachedEnergyMeterTimeStamp() const;
-
-    /** Returns the orange energy level */
-    int getEnergyLevelOrange() const { return m_EnergyLevelOrange; }
-    /** Returns the red energy level */
-    int getEnergyLevelRed() const { return m_EnergyLevelRed; }
-    /** Sets the orange energy level.
-     * @note This has no effect on the dsMeter as of now. */
-    void setEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
-    /** Sets the red energy level.
-     * @note This has no effect on the dsMeter as of now. */
-    void setEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
 
     int getHardwareVersion() const { return m_HardwareVersion; }
     void setHardwareVersion(const int _value) { m_HardwareVersion = _value; }

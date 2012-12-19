@@ -72,10 +72,6 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
       m_pPropertyNode->createProperty("present")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
-      m_pPropertyNode->createProperty("energyLevelRed")
-        ->linkToProxy(PropertyProxyReference<int>(m_EnergyLevelRed, false));
-      m_pPropertyNode->createProperty("energyLevelOrange")
-        ->linkToProxy(PropertyProxyReference<int>(m_EnergyLevelOrange, false));
       m_pPropertyNode->createProperty("hardwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
       m_pPropertyNode->createProperty("armSoftwareVersion")
