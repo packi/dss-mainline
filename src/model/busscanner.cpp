@@ -56,7 +56,6 @@ namespace dss {
     DSMeterHash_t hash;
 
     log("scanDSMeter: Start " + _dsMeter->getDSID().toString() , lsInfo);
-    // TODO: implement energy border handling
 
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
@@ -116,6 +115,14 @@ namespace dss {
     _dsMeter->setDatamodelHash(hash.Hash);
     _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
     _dsMeter->setIsValid(true);
+
+    // event counter support first implemented in 2.6.0
+    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x260)) {
+      hash.EventCount = 0;
+    }
+    _dsMeter->setHasPendingEvents(((hash.EventCount == 0) ||
+        (_dsMeter->getBinaryInputEventCount() != hash.EventCount)));
+    _dsMeter->setBinaryInputEventCount(hash.EventCount);
     return true;
   } // scanDSMeter
 
@@ -369,16 +376,21 @@ namespace dss {
     return true;
   } // scanStatusOfZone
 
-  void BusScanner::syncBinaryInputStates(boost::shared_ptr<DSMeter> _dsMeter) {
-    std::vector<boost::shared_ptr<State> > states = m_Apartment.getStates();
+  void BusScanner::syncBinaryInputStates(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr <Device> _device) {
     std::vector<boost::shared_ptr<Device> > devices;
 
-    // create list of device state providers
-    foreach(boost::shared_ptr<State> s, states) {
-      if (s->getType() == StateType_Device) {
-        boost::shared_ptr<Device> dev = s->getProviderDevice();
-        if ((_dsMeter == NULL) || (dev->getDSMeterDSID() == _dsMeter->getDSID())) {
-          devices.push_back(s->getProviderDevice());
+    if (_device != NULL) {
+      // synchronize a single device
+      devices.push_back(_device);
+    } else {
+      // create list of device state providers
+      std::vector<boost::shared_ptr<State> > states = m_Apartment.getStates();
+      foreach(boost::shared_ptr<State> s, states) {
+        if (s->getType() == StateType_Device) {
+          boost::shared_ptr<Device> dev = s->getProviderDevice();
+          if ((_dsMeter == NULL) || (dev->getDSMeterDSID() == _dsMeter->getDSID())) {
+            devices.push_back(s->getProviderDevice());
+          }
         }
       }
     }

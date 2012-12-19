@@ -637,9 +637,11 @@ namespace dss {
           dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
           raiseEvent(dsMeterReadyEvent);
         }
-
-        // TODO: check dsm event counter
-        scanner.syncBinaryInputStates(mod);
+        if (mod->hasPendingEvents()) {
+          scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device> ());
+        } else {
+          log(std::string("Event counter match on dSM " + _dsMeterBusID.toString()), lsDebug);
+        }
       } catch(BusApiError& e) {
         log(std::string("Bus error scanning dSM " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
 
@@ -1270,8 +1272,14 @@ namespace dss {
   void ModelMaintenance::onBinaryInputEvent(dss_dsid_t _meterID,
       const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state) {
     try {
-      boost::shared_ptr<DSMeter> pMeter =
-        m_pApartment->getDSMeterByDSID(_meterID);
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+
+      try {
+        pMeter->incrementBinaryInputEventCount();
+      } catch(DSSException& e) {
+        log("onBinaryInputEvent: " + std::string(e.what()), lsWarning);
+      }
+
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
 
@@ -1376,8 +1384,12 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
       scanner.scanDeviceOnBus(dsMeter, _deviceID);
+      boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_deviceID, dsMeter).getDevice();
+      scanner.syncBinaryInputStates(dsMeter, device);
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error scanning device, item not found: ") + e.what(), lsWarning);
     } catch(std::runtime_error& e) {
-      log(std::string("Error scanning device: ") + e.what());
+      log(std::string("Error scanning device: ") + e.what(), lsWarning);
     }
   } // rescanDevice
 

@@ -47,7 +47,9 @@ namespace dss {
     m_ApiVersion(0),
     m_IsValid(false),
     m_IsInitialized(false),
-    m_pApartment(_pApartment)
+    m_HasPendingEvents(false),
+    m_pApartment(_pApartment),
+    m_BinaryInputEventCount(_dsid.toString())
   {
     publishToPropertyTree();
   } // ctor
@@ -70,6 +72,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("isValid")
         ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
+      m_pPropertyNode->createProperty("isInitialized")
+        ->linkToProxy(PropertyProxyReference<bool>(m_IsInitialized, false));
       m_pPropertyNode->createProperty("present")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
       m_pPropertyNode->createProperty("hardwareVersion")
