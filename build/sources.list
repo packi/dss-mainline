@@ -8,6 +8,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/businterface.h \
 	$(top_srcdir)/src/datetools.cpp \
 	$(top_srcdir)/src/datetools.h \
+	$(top_srcdir)/src/storagetools.cpp \
+	$(top_srcdir)/src/storagetools.h \
 	$(top_srcdir)/src/ds485/dsactionrequest.cpp \
 	$(top_srcdir)/src/ds485/dsactionrequest.h \
 	$(top_srcdir)/src/ds485/dsbusinterface.cpp \
