@@ -64,6 +64,7 @@ namespace dss {
       bool checkDeviceBinaryInput(PropertyNodePtr _triggerProp);
       bool checkDevice(PropertyNodePtr _tiggerProp);
       bool checkHighlevel(PropertyNodePtr _triggerProp);
+      bool checkState(PropertyNodePtr _triggerProp);
       bool checkTrigger(std::string _path);
       void relayTrigger(PropertyNodePtr _releay);
   };

@@ -20,6 +20,9 @@
   <subscription event-name="undoScene" handler-name="system_trigger">
   </subscription>
 
+  <subscription event-name="stateChange" handler-name="system_trigger">
+  </subscription>
+
   <subscription event-name="action_execute" handler-name="action_execute">
   </subscription>
 
