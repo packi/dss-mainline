@@ -42,6 +42,7 @@ namespace dss {
   class DSMeter;
   class Device;
   class Group;
+  class State;
   class Event;
   class ModelMaintenance;
   class PropertySystem;
@@ -62,6 +63,7 @@ namespace dss {
     std::vector<boost::shared_ptr<Zone> > m_Zones;
     std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Device> > m_Devices;
+    std::vector<boost::shared_ptr<State> > m_States;
 
     BusInterface* m_pBusInterface;
     PropertyNodePtr m_pPropertyNode;
@@ -84,8 +86,6 @@ namespace dss {
     /** Returns a reference to the device with the name \a _name*/
     boost::shared_ptr<Device> getDeviceByName(const std::string& _name);
     std::vector<boost::shared_ptr<Device> > getDevicesVector() { return m_Devices; }
-    /** Allocates a device and returns a reference to it. */
-    boost::shared_ptr<Device> allocateDevice(const dss_dsid_t _dsid);
 
     /** Returns the Zone by name */
     boost::shared_ptr<Zone> getZone(const std::string& _zoneName);
@@ -93,15 +93,6 @@ namespace dss {
     boost::shared_ptr<Zone> getZone(const int _id);
     /** Returns a vector of all zones */
     std::vector<boost::shared_ptr<Zone> > getZones();
-
-    /** Allocates a zone and returns a reference to it. Should a zone with
-      * the given _zoneID already exist, a reference to the existing zone will
-      * be returned.
-      * NOTE: Outside code should never call this function
-      */
-    boost::shared_ptr<Zone> allocateZone(int _zoneID);
-
-    boost::shared_ptr<DSMeter> allocateDSMeter(const dss_dsid_t _dsid);
 
     /** Returns a DSMeter by name */
     boost::shared_ptr<DSMeter> getDSMeter(const std::string& _modName);
@@ -115,10 +106,29 @@ namespace dss {
     /** Returns a Group by id */
     boost::shared_ptr<Group> getGroup(const int _id);
 
+    /** returns a vector of all states */
+    std::vector<boost::shared_ptr<State> > getStates() const;
+    /** Returns the State by name */
+    boost::shared_ptr<State> getState(const std::string& _stateName) const;
+
+    /** Allocates a device and returns a reference to it. */
+    boost::shared_ptr<Device> allocateDevice(const dss_dsid_t _dsid);
+    /** Allocates a zone and returns a reference to it. Should a zone with
+      * the given _zoneID already exist, a reference to the existing zone will
+      * be returned.
+      * NOTE: Outside code should never call this function
+      */
+    boost::shared_ptr<Zone> allocateZone(int _zoneID);
+    boost::shared_ptr<DSMeter> allocateDSMeter(const dss_dsid_t _dsid);
+    boost::shared_ptr<State> allocateState(const std::string& _name, const std::string& _scriptId);
+    void allocateState(boost::shared_ptr<State> _state);
+
     void removeZone(int _zoneID);
     void removeDevice(dss_dsid_t _device);
     void removeDSMeter(dss_dsid_t _dsMeter);
     void removeInactiveMeters();
+    void removeState(const std::string& _name);
+
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
     BusInterface* getBusInterface() { return m_pBusInterface; }
@@ -138,6 +148,13 @@ namespace dss {
   public:
     ItemNotFoundException(const std::string& _name) : DSSException(std::string("Could not find item ") + _name) {};
     ~ItemNotFoundException() throw() {}
+  };
+
+  /** Exception that will be thrown if a given item is duplicate in the data model */
+  class ItemDuplicateException : public DSSException {
+  public:
+    ItemDuplicateException(const std::string& _name) : DSSException(std::string("Duplicate item ") + _name) {};
+    ~ItemDuplicateException() throw() {}
   };
 
 } // namespace dss

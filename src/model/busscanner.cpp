@@ -36,6 +36,7 @@
 #include "group.h"
 #include "apartment.h"
 #include "zone.h"
+#include "state.h"
 #include "modelmaintenance.h"
 #include "src/ds485/dsdevicebusinterface.h"
 
@@ -247,7 +248,8 @@ namespace dss {
       dev->addToGroup(groupID);
     }
 
-    dev->setBinaryInputs(_spec.binaryInputs);
+    // synchronize binary input configuration
+    dev->setBinaryInputs(dev, _spec.binaryInputs);
 
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
@@ -366,6 +368,49 @@ namespace dss {
     }
     return true;
   } // scanStatusOfZone
+
+  void BusScanner::syncBinaryInputStates(boost::shared_ptr<DSMeter> _dsMeter) {
+    std::vector<boost::shared_ptr<State> > states = m_Apartment.getStates();
+    std::vector<boost::shared_ptr<Device> > devices;
+
+    // create list of device state providers
+    foreach(boost::shared_ptr<State> s, states) {
+      if (s->getType() == StateType_Device) {
+        boost::shared_ptr<Device> dev = s->getProviderDevice();
+        if ((_dsMeter == NULL) || (dev->getDSMeterDSID() == _dsMeter->getDSID())) {
+          devices.push_back(s->getProviderDevice());
+        }
+      }
+    }
+    sort(devices.begin(), devices.end());
+    devices.erase(unique(devices.begin(), devices.end()), devices.end());
+
+    // send a request to each binary input device to resend its current status
+    foreach(boost::shared_ptr<Device> dev, devices) {
+
+      uint32_t value = 0;
+      int index;
+      try {
+        value = m_Apartment.getDeviceBusInterface()->getSensorValue(*dev, 0x20);
+        for (index = 0; index < dev->getBinaryInputCount(); index++) {
+          boost::shared_ptr<State> state = dev->getBinaryInputState(index);
+          assert(state != NULL);
+          if ((value & (1 << index)) > 0) {
+            state->setState(State_Active);
+          } else {
+            state->setState(State_Inactive);
+          }
+        }
+      } catch (BusApiError& ex) {
+        log("Device " + dev->getDSID().toString() + " did not respond to input state query", lsError);
+        for (index = 0; index < dev->getBinaryInputCount(); index++) {
+          boost::shared_ptr<State> state = dev->getBinaryInputState(index);
+          assert(state != NULL);
+          state->setState(State_Unkown);
+        }
+      }
+    }
+  } // syncBinaryInputStates
 
   void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
     Logger::getInstance()->log(_line, _severity);

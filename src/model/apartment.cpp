@@ -41,6 +41,7 @@
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/modulator.h"
+#include "src/model/state.h"
 #include "src/metering/metering.h"
 
 namespace dss {
@@ -389,6 +390,81 @@ namespace dss {
       m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     }
   } // removeInactiveMeters
+
+  boost::shared_ptr<State> Apartment::allocateState(const std::string& _stateName, const std::string& _scriptId) {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    boost::shared_ptr<State> result;
+    foreach(boost::shared_ptr<State> state, m_States) {
+      if(state->getName() == _stateName) {
+        result = state;
+        break;
+      }
+    }
+
+    if(result == NULL) {
+      if (_scriptId.length()) {
+        result.reset(new State(_stateName, _scriptId));
+      } else {
+        result.reset(new State(_stateName));
+      }
+      m_States.push_back(result);
+    }
+    return result;
+  } // allocateState
+
+  void Apartment::allocateState(boost::shared_ptr<State> _state) {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    boost::shared_ptr<State> result;
+    foreach(boost::shared_ptr<State> state, m_States) {
+      if(state->getName() == _state->getName()) {
+        throw ItemDuplicateException("Duplicate state " + _state->getName());
+      }
+    }
+    m_States.push_back(_state);
+  } // allocateState
+
+  boost::shared_ptr<State> Apartment::getState(const std::string& _name) const {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    foreach(boost::shared_ptr<State> state, m_States) {
+      if(state->getName() == _name) {
+        return state;
+      }
+    }
+    throw ItemNotFoundException(_name);
+  } // getState
+
+  std::vector<boost::shared_ptr<State> > Apartment::getStates() const {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    return m_States;
+  } // getStates
+
+  void Apartment::removeState(const std::string& _name) {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    for(std::vector<boost::shared_ptr<State> >::iterator ips = m_States.begin(), e = m_States.end();
+        ips != e; ++ips) {
+      boost::shared_ptr<State> pState = *ips;
+      if(pState->getName() == _name) {
+        m_States.erase(ips);
+        return;
+      }
+    }
+    throw ItemNotFoundException("State does not exist: " + _name);
+  } // removeState
 
   ActionRequestInterface* Apartment::getActionRequestInterface() {
     if(m_pBusInterface != NULL) {

@@ -94,6 +94,23 @@ namespace dss {
   const uint8_t SceneAbsent = 0x48;
   const uint8_t SceneBell = 0x49;
   const uint8_t SceneAlarm = 0x4A;
+  const uint8_t SceneRoomActivate = 0x4B;
+  const uint8_t SceneFire = 0x4C;
+  const uint8_t SceneSmoke = 0x4D;
+  const uint8_t SceneWater = 0x4E;
+  const uint8_t SceneGas = 0x4F;
+  const uint8_t SceneBell2 = 0x50;
+  const uint8_t SceneBell3 = 0x51;
+  const uint8_t SceneBell4 = 0x52;
+  const uint8_t SceneAlarm2 = 0x53;
+  const uint8_t SceneAlarm3 = 0x54;
+  const uint8_t SceneAlarm4 = 0x55;
+  const uint8_t SceneWindActive = 0x56;
+  const uint8_t SceneWindInactive = 0x57;
+  const uint8_t SceneRainActive = 0x58;
+  const uint8_t SceneRainInactive = 0x59;
+  const uint8_t SceneHailActive = 0x5a;
+  const uint8_t SceneHailInactive = 0x5b;
 
   const uint8_t MaxSceneNumber = 255;
   const uint8_t MaxSceneNumberOutsideZoneZero = 63;
