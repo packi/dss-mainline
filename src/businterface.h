@@ -79,6 +79,7 @@ namespace dss {
   typedef struct {
     uint32_t Hash;
     uint32_t ModificationCount;
+    uint32_t EventCount;
   } DSMeterHash_t;
 
   class DeviceBusInterface {

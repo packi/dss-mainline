@@ -412,7 +412,7 @@ namespace dss {
     DSMeterHash_t result;
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = dSMConfig_get_hash(m_DSMApiHandle, dsid, &result.Hash, &result.ModificationCount);
+    int ret = dSMConfig_get_hash(m_DSMApiHandle, dsid, &result.Hash, &result.ModificationCount, &result.EventCount);
     DSBusInterface::checkResultCode(ret);
 
     return result;
