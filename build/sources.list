@@ -81,6 +81,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/model/scenehelper.h \
 	$(top_srcdir)/src/model/set.cpp \
 	$(top_srcdir)/src/model/set.h \
+	$(top_srcdir)/src/model/state.cpp \
+	$(top_srcdir)/src/model/state.h \
 	$(top_srcdir)/src/model/zone.cpp \
 	$(top_srcdir)/src/model/zone.h \
 	$(top_srcdir)/src/mutex.cpp \

@@ -44,6 +44,7 @@
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/device.h"
+#include "src/model/state.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -356,7 +357,7 @@ namespace dss {
             source.setProperty("isGroup", raiseLocation == erlGroup);
             source.setProperty("isDevice", false);
           }
-        } else {
+        } else if (raiseLocation == erlDevice) {
           boost::shared_ptr<const DeviceReference> device = _event.getRaisedAtDevice();
           source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
           source.setProperty("dsid", device->getDSID().toString());
@@ -364,6 +365,26 @@ namespace dss {
           source.setProperty("isApartment", false);
           source.setProperty("isGroup", false);
           source.setProperty("isDevice", true);
+        } else if (raiseLocation == erlState) {
+          boost::shared_ptr<const State> state = _event.getRaisedAtState();
+          if (state->getType() == StateType_Device) {
+            boost::shared_ptr<Device> device = state->getProviderDevice();
+            source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
+            source.setProperty("dsid", device->getDSID().toString());
+            source.setProperty("zoneID", device->getZoneID());
+            source.setProperty("isApartment", false);
+            source.setProperty("isGroup", false);
+            source.setProperty("isDevice", true);
+          } else if (state->getType() == StateType_Apartment) {
+            source.setProperty("isApartment", true);
+            source.setProperty("isGroup", false);
+            source.setProperty("isDevice", false);
+          } else if (state->getType() == StateType_Service) {
+            source.setProperty("isService", true);
+            source.setProperty("isGroup", false);
+            source.setProperty("isDevice", false);
+            source.setProperty("serviceName", state->getProviderService());
+          }
         }
         raisedEvent.setProperty("source", &source);
 

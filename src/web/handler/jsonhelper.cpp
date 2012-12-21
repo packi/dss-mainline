@@ -33,6 +33,7 @@
 #include "src/model/set.h"
 #include "src/model/group.h"
 #include "src/model/zone.h"
+#include "src/model/state.h"
 #include "src/model/apartment.h"
 
 namespace dss {
@@ -94,13 +95,14 @@ namespace dss {
 
     boost::shared_ptr<JSONArrayBase> binaryInputArr(new JSONArrayBase());
     result->addElement("binaryInputs", binaryInputArr);
-    const std::vector<DeviceBinaryInputSpec_t> binaryInputs = _device.getDevice()->getBinaryInputs();
-    for (std::vector<DeviceBinaryInputSpec_t>::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
+    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
+    for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       boost::shared_ptr<JSONObject> element(new JSONObject());
-      element->addProperty("TargetGroupType", it->TargetGroupType);
-      element->addProperty("TargetGroup", it->TargetGroup);
-      element->addProperty("InputType", it->InputType);
-      element->addProperty("InputID", it->InputID);
+      element->addProperty("targetGroupType", (*it)->m_targetGroupType);
+      element->addProperty("targetGroup", (*it)->m_targetGroupId);
+      element->addProperty("inputType", (*it)->m_inputType);
+      element->addProperty("inputId", (*it)->m_inputId);
+      element->addProperty("state", _device.getDevice()->getBinaryInputState((*it)->m_inputIndex)->getState());
       binaryInputArr->addElement("", element);
     }
 

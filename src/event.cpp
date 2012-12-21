@@ -74,6 +74,14 @@ namespace dss {
     reset();
   } // ctor
 
+  Event::Event(const std::string& _name, boost::shared_ptr<State> _state)
+  : m_Name(_name),
+    m_RaiseLocation(erlState)
+  {
+    m_RaisedAtState = _state;
+    reset();
+  } // ctor
+
   Event::Event(const std::string& _name, boost::shared_ptr<DeviceReference> _reference)
   : m_Name(_name),
     m_RaiseLocation(erlDevice)

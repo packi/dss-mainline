@@ -38,6 +38,8 @@
 #include "src/security/security.h"
 #include "src/stringconverter.h"
 
+#include "src/propertysystem.h"
+
 #include <sstream>
 
 namespace dss {
@@ -49,6 +51,20 @@ namespace dss {
     if(_request.getMethod() == "version") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("version", DSS::getInstance()->versionString());
+      return success(resultObj);
+    } else if (_request.getMethod() == "getDSID") {
+      std::string dsid;
+      DSS::getInstance()->getSecurity().loginAsSystemUser("dSID call needs system rights");
+
+      PropertyNodePtr dsidNode =
+          DSS::getInstance()->getPropertySystem().getProperty(
+                  "/system/dSID");
+      if (dsidNode != NULL) {
+        dsid = dsidNode->getAsString();
+      }
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("dSID", dsid);
       return success(resultObj);
     } else if (_request.getMethod() == "time") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

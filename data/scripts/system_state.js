@@ -20,6 +20,19 @@
  * Manage system level states
  */
 
+function bootstrap()
+{
+    print("Setup system state handling...");
+    registerState("alarm", true);
+    registerState("alarm2", true);
+    registerState("alarm3", true);
+    registerState("alarm4", true);
+    registerState("fire", true);
+    registerState("wind", true);
+    registerState("rain", true);
+    registerState("hail", true);
+}
+
 function startup()
 {
     var absent = false;
@@ -98,6 +111,7 @@ function callscene()
     var sceneID = parseInt(raisedEvent.parameter.sceneID);
     var zoneID = parseInt(raisedEvent.source.zoneID);
     var groupID = parseInt(raisedEvent.source.groupID);
+    var forced = raisedEvent.parameter.forced;
     var pNode;
 
     if (groupID === 0 && sceneID === Scene.Absent) {
@@ -124,6 +138,50 @@ function callscene()
         pNode = Property.getNode('/usr/states/hibernation');
         pNode.setStatusValue("awake");
     }
+    else if (groupID === 0 && sceneID === Scene.Fire && forced) {
+        state = getState("fire");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm && forced) {
+        state = getState("alarm");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm2 && forced) {
+        state = getState("alarm2");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm3 && forced) {
+        state = getState("alarm3");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm4 && forced) {
+        state = getState("alarm4");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.WindActive && forced) {
+        state = getState("wind");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.WindInactive) {
+        state = getState("wind");
+        state.setValue("inactive");
+    }
+    else if (groupID === 0 && sceneID === Scene.RainActive && forced) {
+        state = getState("rain");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.RainInactive) {
+        state = getState("rain");
+        state.setValue("inactive");
+    }
+    else if (groupID === 0 && sceneID === Scene.HailActive && forced) {
+        state = getState("hail");
+        state.setValue("active");
+    }
+    else if (groupID === 0 && sceneID === Scene.HailInactive) {
+        state = getState("hail");
+        state.setValue("inactive");
+    }
     else if (raisedEvent.source.isGroup && (sceneID < 64)) {
         var originDevice = parseInt(raisedEvent.parameter.originDeviceID, 16);
         // reserved origin addresses
@@ -146,13 +204,40 @@ function undoscene()
         var pNode = Property.getNode('/usr/states/panic');
         pNode.setStatusValue("inactive");
     }
-    if (groupID === 0 && sceneID === Scene.Alarm) {
+    else if (groupID === 0 && sceneID === Scene.Alarm) {
         var pNode = Property.getNode('/usr/states/alarm');
         pNode.setStatusValue("inactive");
     }
+    else if (groupID === 0 && sceneID === Scene.Fire) {
+        state = getState("fire");
+        state.setValue("inactive");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm) {
+        state = getState("alarm");
+        state.setValue("inactive");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm2) {
+        state = getState("alarm2");
+        state.setValue("inactive");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm3) {
+        state = getState("alarm3");
+        state.setValue("inactive");
+    }
+    else if (groupID === 0 && sceneID === Scene.Alarm4) {
+        state = getState("alarm4");
+        state.setValue("inactive");
+    }
 }
 
-if (raisedEvent.name == 'model_ready') {
+function binaryinput()
+{
+}
+
+if (raisedEvent.name == 'running') {
+    bootstrap();
+}
+else if (raisedEvent.name == 'model_ready') {
     startup();
 }
 else if (raisedEvent.name == 'callScene' && raisedEvent.source.isGroup) {
@@ -161,3 +246,7 @@ else if (raisedEvent.name == 'callScene' && raisedEvent.source.isGroup) {
 else if (raisedEvent.name == 'undoScene') {
     undoscene();
 }
+else if (raisedEvent.name == 'deviceBinaryInput') {
+    binaryinput();
+}
+

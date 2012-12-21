@@ -95,7 +95,19 @@ var sceneTable1 = [
     'Fire',
     'Smoke',
     'Water',
-    'Gas'
+    'Gas',
+    'Bell2',
+    'Bell3',
+    'Bell4',
+    'Alarm2',
+    'Alarm3',
+    'Alarm4',
+    'Wind',
+    'WindN',
+    'Rain',
+    'RainN',
+    'Hail',
+    'HailN'
 ];
 
 var groupTable = [
@@ -253,12 +265,37 @@ function logDeviceButtonClick(device, param)
     }
 }
 
+function logDeviceBinaryInput(device, param)
+{
+    var devName = device.name + ';' + device.dsid;
+    var index = param.inputIndex;
+    var state = param.inputState;
+    var type = param.inputType;
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
+    l.logln(';BinaryInput', ';State ' + state, ';' + index, ';;;;;', devName);
+}
+
 function logDeviceSensorEvent(device, param)
 {
     var devName = device.name + ';' + device.dsid;
-    
+ 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
     l.logln(';EventTable;', param.sensorEvent, ';;;;;;', devName);
+}
+
+function logStateChangeScript(state, value, script)
+{
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
+    l.logln(';State;', state, ';', value, ';;;;;;', script);
+}
+
+function logStateChangeDevice(state, value, device)
+{
+    var devName = device.name + ';' + device.dsid;
+ 
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
+    l.logln(';StateDevice;', state, ';State ' + value, ';;;;;', devName);
 }
 
 if (dumpEvent > 0) {
@@ -359,6 +396,15 @@ else if (raisedEvent.name == 'buttonClick')
 }
 
 /*
+ * joker devices binary inputs
+ */
+else if (raisedEvent.name == 'deviceBinaryInputEvent')
+{
+    var device = getDevices().byDSID(raisedEvent.source.dsid);
+    logDeviceBinaryInput(device, raisedEvent.parameter);
+}
+
+/*
  * some devices are capable of generating sensor events
  */
 else if (raisedEvent.name == 'deviceSensorEvent')
@@ -366,3 +412,21 @@ else if (raisedEvent.name == 'deviceSensorEvent')
     var device = getDevices().byDSID(raisedEvent.source.dsid);
     logDeviceSensorEvent(device, raisedEvent.parameter);
 }
+
+/*
+ * state changes
+ */
+else if (raisedEvent.name == 'stateChange')
+{
+    var state = raisedEvent.parameter.state;
+    var value = raisedEvent.parameter.value;
+    if (raisedEvent.source.isService) {
+        var scriptId = raisedEvent.source.serviceName;
+        logStateChangeScript(state, value, scriptId);
+    }
+    if (raisedEvent.source.isDevice) {
+        var device = getDevices().byDSID(raisedEvent.source.dsid);
+        logStateChangeDevice(state, value, device);
+    }
+}
+

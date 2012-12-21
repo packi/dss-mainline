@@ -35,12 +35,6 @@
 #include "src/web/json.h"
 #include "jsonhelper.h"
 
-#define BUTTONINPUT_1WAY            "1way"
-#define BUTTONINPUT_2WAY_DOWN       "2way_down"
-#define BUTTONINPUT_2WAY_UP         "2way_up"
-#define BUTTONINPUT_2WAY            "2way"
-#define BUTTONINPUT_1WAY_COMBINED   "1way_combined"
-
 namespace dss {
 
 
@@ -621,6 +615,116 @@ namespace dss {
       pDevice->setDeviceLedMode(id, config);
       return success();
 
+    } else if(_request.getMethod() == "getBinaryInputs") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONArrayBase> inputs(new JSONArrayBase());
+      resultObj->addElement("inputs", inputs);
+      std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
+      for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::iterator it = binputs.begin();
+          it != binputs.end();
+          it ++) {
+        boost::shared_ptr<JSONObject> inputObj(new JSONObject());
+        inputObj->addProperty("inputIndex", (*it)->m_inputIndex);
+        inputObj->addProperty("inputId", (*it)->m_inputId);
+        inputObj->addProperty("inputType", (*it)->m_inputType);
+        inputObj->addProperty("targetType", (*it)->m_targetGroupType);
+        inputObj->addProperty("targetGroup", (*it)->m_targetGroupId);
+        inputs->addElement("", inputObj);
+      }
+      return success(resultObj);
+    } else if(_request.getMethod() == "setBinaryInputType") {
+      int index = strToIntDef(_request.getParameter("index"), -1);
+      if (index < 0) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+      int type = strToIntDef(_request.getParameter("type"), -1);
+      if (type < 0 || type > 254) {
+        return failure("Invalid or missing parameter 'type'");
+      }
+      pDevice->setDeviceBinaryInputType(index, type);
+      return success();
+    } else if(_request.getMethod() == "setBinaryInputTarget") {
+      int index = strToIntDef(_request.getParameter("index"), -1);
+      if (index < 0) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+      int gtype = strToIntDef(_request.getParameter("groupType"), -1);
+      if (gtype < 0 || gtype > 4) {
+        return failure("Invalid or missing parameter 'groupType'");
+      }
+      int gid = strToIntDef(_request.getParameter("groupId"), -1);
+      if (gid < 0 || gid > 63) {
+        return failure("Invalid or missing parameter 'groupId'");
+      }
+      pDevice->setDeviceBinaryInputTarget(index, gtype, gid);
+      return success();
+    } else if(_request.getMethod() == "setBinaryInputId") {
+      int index = strToIntDef(_request.getParameter("index"), -1);
+      if (index < 0) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+      int id = strToIntDef(_request.getParameter("inputId"), -1);
+      if (id < 0 || id > 15) {
+        return failure("Invalid or missing parameter 'inputId'");
+      }
+      pDevice->setDeviceBinaryInputId(index, id);
+      return success();
+
+    } else if(_request.getMethod() == "getAKMInputTimeouts") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      int onDelay, offDelay;
+      pDevice->getDeviceAKMInputTimeouts(onDelay, offDelay);
+      resultObj->addProperty("ondelay", onDelay);
+      resultObj->addProperty("offdelay", offDelay);
+      return success(resultObj);
+    } else if(_request.getMethod() == "setAKMInputTimeouts") {
+      int onDelay = strToIntDef(_request.getParameter("ondelay"), -1);
+      if (onDelay > 6552000) { // ms
+        return failure("Invalid parameter 'ondelay', must be < 6552000");
+      }
+
+      int offDelay = strToIntDef(_request.getParameter("offdelay"), -1);
+      if (offDelay > 6552000) {
+        return failure("Invalid parameter 'offdelay', must be < 6552000");
+      }
+
+      if ((onDelay < 0) && (offDelay < 0)) {
+        return failure("No valid parameters given");
+      }
+
+      // values < 0 are ignored by this function
+      pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
+      return success();
+    } else if (_request.getMethod() == "setAKMInputProperty") {
+      std::string mode = _request.getParameter("mode");
+      if (mode.empty()) {
+        return failure("Invalid or missing parameter 'mode'");
+      }
+
+      if (pDevice->getDeviceType() != DEVICE_TYPE_AKM) {
+        return failure("This device does not support AKM properties");
+      }
+
+      if (mode == BUTTONINPUT_AKM_STANDARD) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_STANDARD);
+      } else if (mode == BUTTONINPUT_AKM_INVERTED) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_INVERTED);
+      } else if (mode == BUTTONINPUT_AKM_ON_RISING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_ON_FALLING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_OFF_RISING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_OFF_FALLING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_RISING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE);
+      } else if (mode == BUTTONINPUT_AKM_FALLING_EDGE) {
+        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
+      } else {
+        return failure("Unsupported mode: " + mode);
+      }
+      return success();
     } else if(_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {

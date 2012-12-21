@@ -35,6 +35,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #ifndef WIN32
   #include <csignal>
@@ -592,6 +593,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     SystemInfo info;
     info.collect();
+    publishDSID();
 
     m_State = ssInitializingSubsystems;
 
@@ -771,5 +773,37 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       }
     } catch (...) {}
     return version;
+  }
+
+  void DSS::publishDSID() {
+    std::string dsid;
+    PropertyNodePtr lastValidIf;
+    PropertyNodePtr interfaces =
+        getPropertySystem().getProperty(
+                "/system/host/interfaces");
+    if (interfaces != NULL) {
+        for (int i = 0; i < interfaces->getChildCount(); i++) {
+            PropertyNodePtr iface = interfaces->getChild(i);
+            if (iface->getName() != "lo") {
+                lastValidIf = iface;
+            }
+            if (iface->getName() == "eth0") {
+                break;
+            }
+        }
+    }
+
+    if (lastValidIf != NULL) {
+        PropertyNodePtr macNode = lastValidIf->getPropertyByName("mac");
+        if (macNode != NULL) {
+            std::string mac = macNode->getAsString();
+            mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
+            mac.insert(4, "0");
+            dsid = "3504175FEFF" + mac;
+        }
+    }
+
+    PropertyNodePtr dsidNode = getPropertySystem().createProperty("/system/dSID");
+    dsidNode->setStringValue(dsid);
   }
 }
