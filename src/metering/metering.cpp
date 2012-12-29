@@ -78,11 +78,11 @@ namespace dss {
 
     if (getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "enabled")) {
       if (!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
-        throw std::runtime_error("Metering directory " + m_MeteringStorageLocation + " does not exist!");
+        throw std::runtime_error("Metering directory " + boost::filesystem::system_complete(m_MeteringStorageLocation).string() + " does not exist!");
       }
 
       if (!rwAccess(m_MeteringStorageLocation)) {
-        throw std::runtime_error("Metering directory " + m_MeteringStorageLocation + " is not readable/writable!");
+        throw std::runtime_error("Metering directory " + boost::filesystem::system_complete(m_MeteringStorageLocation).string() + " is not readable/writable!");
       }
     }
   }
