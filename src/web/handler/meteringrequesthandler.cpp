@@ -89,6 +89,9 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getValues(const RestfulRequest& _request) {
     std::string deviceDSIDString = _request.getParameter("dsid");
+    std::string deviceDSIDStringSet = deviceDSIDString.empty()
+      ? _request.getParameter("set")
+      : ".meters(" + deviceDSIDString + ")";
     std::string resolutionString = _request.getParameter("resolution");
     std::string typeString = _request.getParameter("type");
     std::string unitString = _request.getParameter("unit");
@@ -98,18 +101,13 @@ namespace dss {
     int resolution;
     Metering::SeriesTypes energy;
     bool energyWh = false;
-    boost::shared_ptr<DSMeter> pMeter;
+    MeterSetBuilder builder(m_Apartment);
+    std::vector<boost::shared_ptr<DSMeter> > meters;
     try {
-      dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
-      try {
-        pMeter = m_Apartment.getDSMeterByDSID(deviceDSID);
-      } catch(std::runtime_error& e) {
-        return failure("Could not find device with dsid '" + deviceDSIDString + "'");
-      }
+      meters = builder.buildSet(deviceDSIDStringSet);
     } catch(std::runtime_error& e) {
-      return failure("Could not parse dsid '" + deviceDSIDString + "'");
-    } catch(std::invalid_argument& e) {
-      return failure("Could not parse dsid '" + deviceDSIDString + "'");
+      std::string param = deviceDSIDString.empty() ? "set" : "dsid";
+      return failure(std::string("Couldn't parse parameter '"+ param +"': '") + e.what() + "'");
     }
     resolution = strToIntDef(resolutionString, -1);
     if(resolution == -1) {
@@ -162,7 +160,7 @@ namespace dss {
     if (!valueCountString.empty()) {
       valueCount = strToIntDef(valueCountString, 0);
     }
-    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(meters,
                                                                          resolution,
                                                                          energy,
                                                                          energyWh,
@@ -172,7 +170,11 @@ namespace dss {
 
     if(pSeries != NULL) {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("meterID", deviceDSIDString);
+      if (deviceDSIDString.empty()) {
+        resultObj->addProperty("set", deviceDSIDStringSet);
+      } else {
+        resultObj->addProperty("meterID", deviceDSIDString);
+      }
       resultObj->addProperty("type", typeString);
       resultObj->addProperty("unit", unitString);
       resultObj->addProperty("resolution", intToString(resolution));
@@ -263,7 +265,7 @@ namespace dss {
     } else if(_request.getMethod() == "getLatest") {
       return getLatest(_request);
     } else if(_request.getMethod() == "getAggregatedValues") { //?set=;n=,resolution=;type=
-      // TODO: implement
+      return getValues(_request);
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest
