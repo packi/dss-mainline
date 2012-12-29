@@ -200,7 +200,7 @@ namespace dss {
     }
   }
 
-  boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request) {
+  boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request, bool aggregateMeterValues) {
     std::string from = _request.getParameter("from");
     std::string type = _request.getParameter("type");
     std::string unit = _request.getParameter("unit");
@@ -235,18 +235,33 @@ namespace dss {
     resultObj->addElement("values", modulators);
 
     bool isEnergy = (type == "energy");
+    DateTime temp_date;
+    unsigned long aggregatedValue = 0ul;
 
     for(size_t i = 0; i < meters.size(); i++) {
+      boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
+      unsigned long value = isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption();
+      temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+      if (aggregateMeterValues) {
+        aggregatedValue += value;
+      } else {
+        try {
+          boost::shared_ptr<JSONObject> modulator(new JSONObject());
+          modulator->addProperty("dsid", dsMeter->getDSID().toString());
+          modulator->addProperty("value", value);
+          modulator->addProperty("date", temp_date.toString());
+          modulators->addElement("", modulator);
+        } catch (std::runtime_error&) {
+          return failure("Could not apply properties to JSON object.");
+        }
+      }
+    }
+    if (aggregateMeterValues) {
       try {
-        boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
         boost::shared_ptr<JSONObject> modulator(new JSONObject());
-
-        modulator->addProperty("dsid", dsMeter->getDSID().toString());
-        modulator->addProperty("value", isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption());
-
-        DateTime temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+        modulator->addProperty("dsid", "0");
+        modulator->addProperty("value", aggregatedValue);
         modulator->addProperty("date", temp_date.toString());
-
         modulators->addElement("", modulator);
       } catch (std::runtime_error&) {
         return failure("Could not apply properties to JSON object.");
@@ -263,9 +278,11 @@ namespace dss {
     } else if(_request.getMethod() == "getValues") { //?dsid=;n=,resolution=,type=
       return getValues(_request);
     } else if(_request.getMethod() == "getLatest") {
-      return getLatest(_request);
+      return getLatest(_request, false);
     } else if(_request.getMethod() == "getAggregatedValues") { //?set=;n=,resolution=;type=
       return getValues(_request);
+    } else if(_request.getMethod() == "getAggregatedLatest") { //?dsid=;n=,resolution=;type=
+      return getLatest(_request, true);
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

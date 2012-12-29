@@ -42,7 +42,7 @@ namespace dss {
     boost::shared_ptr<JSONObject> getResolutions();
     boost::shared_ptr<JSONObject> getSeries();
     boost::shared_ptr<JSONObject> getValues(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> getLatest(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> getLatest(const RestfulRequest& _request, bool aggregateMeterValues);
 
   }; // MeteringRequestHandler
 
