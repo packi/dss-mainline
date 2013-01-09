@@ -1029,6 +1029,58 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkState(PropertyNodePtr _triggerProp) {
+    if (m_evtName != "stateChange") {
+      return false;
+    }
+
+    std::string name = m_properties.get("name");
+    std::string state = m_properties.get("state");
+    std::string value = m_properties.get("value");
+    std::string oldvalue = m_properties.get("oldvalue");
+
+    PropertyNodePtr triggerName = _triggerProp->getPropertyByName("name");
+    PropertyNodePtr triggerState = _triggerProp->getPropertyByName("state");
+    PropertyNodePtr triggerValue = _triggerProp->getPropertyByName("value");
+    PropertyNodePtr triggerOldvalue = _triggerProp->getPropertyByName("oldvalue");
+
+    if (triggerName == NULL) {
+      return false;
+    }
+    if (triggerState == NULL && triggerValue == NULL) {
+      return false;
+    }
+
+    std::string sName = triggerName->getAsString();
+    if (sName != name) {
+      return false;
+    }
+
+    std::string sState;
+    std::string sValue;
+    std::string sOldvalue;
+
+    if (triggerState) {
+      sState = triggerState->getAsString();
+    }
+    if (triggerValue) {
+      sValue = triggerValue->getAsString();
+    }
+    if (triggerOldvalue) {
+      sOldvalue = triggerOldvalue->getAsString();
+    }
+
+    if (sState == state || sValue == value) {
+      if (sOldvalue.empty() || sOldvalue == oldvalue) {
+        Logger::getInstance()->log("SystemTrigger::"
+            "checkState Match: State:" + name + ", Value: " + state + "/" + value);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool SystemTrigger::checkTrigger(std::string _path) {
     if (!DSS::hasInstance()) {
       return false;
@@ -1099,6 +1151,13 @@ namespace dss {
       } else if (m_evtName == "highlevel") {
         if (triggerValue == "custom-event") {
           if (checkHighlevel(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == "stateChange") {
+        if (triggerValue == "state-change") {
+          if (checkState(triggerProp)) {
             return true;
           }
         }
@@ -1209,13 +1268,16 @@ namespace dss {
       m_evtSrcIsDevice = false;
       m_evtSrcZone = group->getZoneID();
       m_evtSrcGroup = group->getID();
-    } else {
+    } else if (raiseLocation == erlDevice) {
       boost::shared_ptr<const DeviceReference> device =
           _event.getRaisedAtDevice();
       m_evtSrcIsGroup = false;
       m_evtSrcIsDevice = true;
       m_evtSrcZone = device->getDevice()->getZoneID();
       m_evtSrcDSID = device->getDSID();
+    } else if (raiseLocation == erlState) {
+      m_evtSrcIsGroup = false;
+      m_evtSrcIsDevice = false;
     }
 
     return true;

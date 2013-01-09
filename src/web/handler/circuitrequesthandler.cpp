@@ -75,11 +75,6 @@ namespace dss {
         } else {
           return failure("missing parameter newName");
         }
-      } else if(_request.getMethod() == "getEnergyBorder") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("orange", dsMeter->getEnergyLevelOrange());
-        resultObj->addProperty("red", dsMeter->getEnergyLevelRed());
-        return success(resultObj);
       } else if(_request.getMethod() == "getConsumption") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("consumption", dsMeter->getPowerConsumption());
