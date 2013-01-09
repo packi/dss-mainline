@@ -33,6 +33,7 @@
 #include "src/ds485types.h"
 #include "src/model/modeltypes.h"
 #include "src/datetools.h"
+#include "src/storagetools.h"
 
 namespace dss {
   class PropertyNode;
@@ -45,8 +46,6 @@ namespace dss {
   private:
     dss_dsid_t m_DSID;
     DeviceVector m_ConnectedDevices;
-    int m_EnergyLevelOrange;
-    int m_EnergyLevelRed;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
     double m_EnergyMeterValue;
@@ -61,10 +60,12 @@ namespace dss {
     std::string m_HardwareName;
     bool m_IsValid;
     bool m_IsInitialized;
+    bool m_HasPendingEvents;
     PropertyNodePtr m_pPropertyNode;
     Apartment* m_pApartment;
     unsigned int m_DatamodelHash;
     unsigned int m_DatamoderModificationCount;
+    PersistentCounter m_BinaryInputEventCount;
   private:
     void publishToPropertyTree();
   public:
@@ -106,17 +107,6 @@ namespace dss {
     /** Returns timestamp of the last energy measurement */
     const DateTime& getCachedEnergyMeterTimeStamp() const;
 
-    /** Returns the orange energy level */
-    int getEnergyLevelOrange() const { return m_EnergyLevelOrange; }
-    /** Returns the red energy level */
-    int getEnergyLevelRed() const { return m_EnergyLevelRed; }
-    /** Sets the orange energy level.
-     * @note This has no effect on the dsMeter as of now. */
-    void setEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
-    /** Sets the red energy level.
-     * @note This has no effect on the dsMeter as of now. */
-    void setEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
-
     int getHardwareVersion() const { return m_HardwareVersion; }
     void setHardwareVersion(const int _value) { m_HardwareVersion = _value; }
     int getArmSoftwareVersion() const { return m_armSoftwareVersion; }
@@ -132,6 +122,9 @@ namespace dss {
     void setDatamodelHash(const unsigned int hash) { m_DatamodelHash = hash; }
     unsigned int getDatamodelModificationCount() const { return m_DatamoderModificationCount; }
     void setDatamodelModificationcount(const unsigned int count) { m_DatamoderModificationCount = count; }
+    unsigned int getBinaryInputEventCount() const { return m_BinaryInputEventCount.getValue(); }
+    void setBinaryInputEventCount(const unsigned int _value) { m_BinaryInputEventCount.setValue(_value); }
+    void incrementBinaryInputEventCount() { m_BinaryInputEventCount.increment(); }
 
     /** Returns true if the dsMeter has been read-out completely. */
     bool isInitialized() const { return m_IsInitialized; }
@@ -139,6 +132,9 @@ namespace dss {
 
     bool isValid() const { return m_IsValid; }
     void setIsValid(const bool _value) { m_IsValid = _value; }
+
+    bool hasPendingEvents() const { return m_HasPendingEvents; }
+    void setHasPendingEvents(const bool _value) { m_HasPendingEvents = _value; }
 
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
 

@@ -40,14 +40,10 @@ public:
   Fixture() {
     m_ValidDSID = dss_dsid_t(0, 1);
     m_ValidName = "mod";
-    m_BorderOrange = 55;
-    m_BorderRed = 100;
 
     m_pApartment.reset(new Apartment(NULL));
     boost::shared_ptr<DSMeter> mod = m_pApartment->allocateDSMeter(m_ValidDSID);
     mod->setName(m_ValidName);
-    mod->setEnergyLevelOrange(m_BorderOrange);
-    mod->setEnergyLevelRed(m_BorderRed);
     m_pMaintenance.reset(new ModelMaintenance(NULL));
     m_pHandler.reset(new CircuitRequestHandler(*m_pApartment, *m_pMaintenance,
                                                NULL, NULL));
@@ -59,8 +55,6 @@ protected:
   HashMapStringString m_Params;
   dss_dsid_t m_ValidDSID;
   std::string m_ValidName;
-  int m_BorderOrange;
-  int m_BorderRed;
 }; // Fixture
 
 BOOST_FIXTURE_TEST_CASE(testMissingID, Fixture) {
@@ -117,16 +111,6 @@ BOOST_FIXTURE_TEST_CASE(testCircuitSetName, Fixture) {
 
   boost::shared_ptr<JSONObject> result = getResultObject(response2);
   checkPropertyEquals("name", kNewName, result);
-}
-
-BOOST_FIXTURE_TEST_CASE(testGetEnergyBorder, Fixture) {
-  m_Params["id"] = m_ValidDSID.toString();
-  RestfulRequest req("circuit/getEnergyBorder", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("orange", m_BorderOrange, result);
-  checkPropertyEquals("red", m_BorderRed, result);
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
