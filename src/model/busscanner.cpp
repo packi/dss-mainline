@@ -116,8 +116,8 @@ namespace dss {
     _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
     _dsMeter->setIsValid(true);
 
-    // event counter support first implemented in 2.6.0
-    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x260)) {
+    // event counter support first implemented in v2.6
+    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x206)) {
       hash.EventCount = 0;
     }
     _dsMeter->setHasPendingEvents(((hash.EventCount == 0) ||
