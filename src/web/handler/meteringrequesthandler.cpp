@@ -225,6 +225,8 @@ namespace dss {
 
     if(from.empty()) {
       return failure("Missing 'from' parameter");
+    } else if (!beginsWith(from, ".meters(")) {
+      from = ".meters(" + from + ")";
     }
 
     int energyQuotient = 3600;
