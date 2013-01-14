@@ -462,7 +462,7 @@ namespace dss {
       if (_energyInWh) {
         currentCounter /= 3600;
       }
-      Value lastZeroValue(0);
+      Value lastZeroValue(0, DateTime((time_t)0));
       for (std::deque<Value>::iterator iter = returnVector->begin();
            iter < returnVector->end();
            ++iter) {
