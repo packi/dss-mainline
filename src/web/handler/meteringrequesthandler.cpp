@@ -89,6 +89,14 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getValues(const RestfulRequest& _request) {
     std::string deviceDSIDString = _request.getParameter("dsid");
+    std::string deviceDSIDStringSet;
+    bool requestMeteringSet = false;
+    if (beginsWith(deviceDSIDString, ".meters(")) {
+      requestMeteringSet = true;
+      deviceDSIDStringSet = deviceDSIDString;
+    } else {
+      deviceDSIDStringSet = ".meters(" + deviceDSIDString + ")";
+    }
     std::string resolutionString = _request.getParameter("resolution");
     std::string typeString = _request.getParameter("type");
     std::string unitString = _request.getParameter("unit");
@@ -98,18 +106,12 @@ namespace dss {
     int resolution;
     Metering::SeriesTypes energy;
     bool energyWh = false;
-    boost::shared_ptr<DSMeter> pMeter;
+    MeterSetBuilder builder(m_Apartment);
+    std::vector<boost::shared_ptr<DSMeter> > meters;
     try {
-      dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
-      try {
-        pMeter = m_Apartment.getDSMeterByDSID(deviceDSID);
-      } catch(std::runtime_error& e) {
-        return failure("Could not find device with dsid '" + deviceDSIDString + "'");
-      }
+      meters = builder.buildSet(deviceDSIDStringSet);
     } catch(std::runtime_error& e) {
-      return failure("Could not parse dsid '" + deviceDSIDString + "'");
-    } catch(std::invalid_argument& e) {
-      return failure("Could not parse dsid '" + deviceDSIDString + "'");
+      return failure(std::string("Couldn't parse parameter 'dsid': '") + e.what() + "'");
     }
     resolution = strToIntDef(resolutionString, -1);
     if(resolution == -1) {
@@ -162,7 +164,7 @@ namespace dss {
     if (!valueCountString.empty()) {
       valueCount = strToIntDef(valueCountString, 0);
     }
-    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pSeries = m_Metering.getSeries(meters,
                                                                          resolution,
                                                                          energy,
                                                                          energyWh,
@@ -172,7 +174,21 @@ namespace dss {
 
     if(pSeries != NULL) {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("meterID", deviceDSIDString);
+      if (requestMeteringSet) {
+        boost::shared_ptr<JSONArrayBase> dsidSet(new JSONArrayBase());
+        resultObj->addElement("meterID", dsidSet);
+        for(std::vector<boost::shared_ptr<DSMeter> >::iterator iMeter = meters.begin(),
+            e = meters.end();
+            iMeter != e;
+            ++iMeter)
+        {
+          std::string dsid = iMeter->get()->getDSID().toString();
+          boost::shared_ptr<JSONValue<std::string> > dsidVal(new JSONValue<std::string>(dsid));
+          dsidSet->addElement("", dsidVal);
+        }
+      } else {
+        resultObj->addProperty("meterID", deviceDSIDString);
+      }
       resultObj->addProperty("type", typeString);
       resultObj->addProperty("unit", unitString);
       resultObj->addProperty("resolution", intToString(resolution));
@@ -198,7 +214,7 @@ namespace dss {
     }
   }
 
-  boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request) {
+  boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request, bool aggregateMeterValues) {
     std::string from = _request.getParameter("from");
     std::string type = _request.getParameter("type");
     std::string unit = _request.getParameter("unit");
@@ -209,6 +225,8 @@ namespace dss {
 
     if(from.empty()) {
       return failure("Missing 'from' parameter");
+    } else if (!beginsWith(from, ".meters(")) {
+      from = ".meters(" + from + ")";
     }
 
     int energyQuotient = 3600;
@@ -230,21 +248,40 @@ namespace dss {
 
     boost::shared_ptr<JSONObject> resultObj(new JSONObject());
     boost::shared_ptr<JSONArrayBase> modulators(new JSONArrayBase());
+    boost::shared_ptr<JSONArrayBase> dsidSet(new JSONArrayBase());
     resultObj->addElement("values", modulators);
 
     bool isEnergy = (type == "energy");
+    DateTime temp_date;
+    unsigned long aggregatedValue = 0ul;
 
     for(size_t i = 0; i < meters.size(); i++) {
+      boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
+      unsigned long value = isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption();
+      temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+      std::string dsid = dsMeter->getDSID().toString();
+      if (aggregateMeterValues) {
+        aggregatedValue += value;
+        boost::shared_ptr<JSONValue<std::string> > dsidVal(new JSONValue<std::string>(dsid));
+        dsidSet->addElement("", dsidVal);
+      } else {
+        try {
+          boost::shared_ptr<JSONObject> modulator(new JSONObject());
+          modulator->addProperty("dsid", dsid);
+          modulator->addProperty("value", value);
+          modulator->addProperty("date", temp_date.toString());
+          modulators->addElement("", modulator);
+        } catch (std::runtime_error&) {
+          return failure("Could not apply properties to JSON object.");
+        }
+      }
+    }
+    if (aggregateMeterValues) {
       try {
-        boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
         boost::shared_ptr<JSONObject> modulator(new JSONObject());
-
-        modulator->addProperty("dsid", dsMeter->getDSID().toString());
-        modulator->addProperty("value", isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption());
-
-        DateTime temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+        modulator->addElement("dsid", dsidSet);
+        modulator->addProperty("value", aggregatedValue);
         modulator->addProperty("date", temp_date.toString());
-
         modulators->addElement("", modulator);
       } catch (std::runtime_error&) {
         return failure("Could not apply properties to JSON object.");
@@ -261,9 +298,11 @@ namespace dss {
     } else if(_request.getMethod() == "getValues") { //?dsid=;n=,resolution=,type=
       return getValues(_request);
     } else if(_request.getMethod() == "getLatest") {
-      return getLatest(_request);
+      return getLatest(_request, false);
     } else if(_request.getMethod() == "getAggregatedValues") { //?set=;n=,resolution=;type=
-      // TODO: implement
+      return getValues(_request);
+    } else if(_request.getMethod() == "getAggregatedLatest") { //?dsid=;n=,resolution=;type=
+      return getLatest(_request, true);
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

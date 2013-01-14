@@ -31,6 +31,7 @@
 #include "src/businterface.h"
 #include "src/structuremanipulator.h"
 #include "src/foreach.h"
+#include "src/setbuilder.h"
 #include "src/model/device.h"
 #include "src/model/devicereference.h"
 #include "src/model/apartment.h"
@@ -49,12 +50,13 @@ namespace dss {
 
   JSBool metering_getSeries(JSContext* cx, uintN argc, jsval *vp);
   JSBool metering_getResolutions(JSContext* cx, uintN argc, jsval *vp);
-  JSBool metering_getValues(JSContext* cx, uintN argc, jsval *vp);
+  JSBool metering_getAggregatedValues(JSContext* cx, uintN argc, jsval *vp);
 
   JSFunctionSpec metering_static_methods[] = {
     JS_FS("getSeries", metering_getSeries, 0, 0),
     JS_FS("getResolutions", metering_getResolutions, 0, 0),
-    JS_FS("getValues", metering_getValues, 3, 0),
+    JS_FS("getValues", metering_getAggregatedValues, 3, 0),
+    JS_FS("getAggregatedValues", metering_getAggregatedValues, 3, 0),
     JS_FS_END
   };
 
@@ -176,7 +178,7 @@ namespace dss {
     return JS_FALSE;
   } // metering_getResolutions
 
-  JSBool metering_getValues(JSContext* cx, uintN argc, jsval *vp) {
+  JSBool metering_getAggregatedValues(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     try {
@@ -207,16 +209,15 @@ namespace dss {
         valueCount = ctx->convertTo<int>(JS_ARGV(cx, vp)[6]);
       }
 
-      boost::shared_ptr<DSMeter> pMeter;
+      std::vector<boost::shared_ptr<DSMeter> > pMeters;
+      if (!beginsWith(dsid, ".meters(")) {
+        dsid = ".meters(" + dsid + ")";
+      }
       try {
-        dss_dsid_t deviceDSID = dss_dsid_t::fromString(dsid);
-        pMeter = ext->getApartment().getDSMeterByDSID(deviceDSID);
+        MeterSetBuilder builder(ext->getApartment());
+        pMeters = builder.buildSet(dsid);
       } catch(std::runtime_error& e) {
-        Logger::getInstance()->log("Error getting device '" + dsid + "'", lsWarning);
-        JS_SET_RVAL(cx, vp, JSVAL_NULL);
-        return JS_TRUE;
-      } catch(std::invalid_argument& e) {
-        Logger::getInstance()->log("Error getting device '" + dsid + "'", lsWarning);
+        Logger::getInstance()->log("Couldn't parse parameter 'dsid': '" + std::string(e.what()) + "'", lsWarning);
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
       }
@@ -241,7 +242,7 @@ namespace dss {
         return JS_FALSE;
       }
 
-      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeter,
+      boost::shared_ptr<std::deque<Value> > pSeries = ext->getMetering().getSeries(pMeters,
                                                                                    resolution,
                                                                                    energy,
                                                                                    energyWh,
@@ -282,7 +283,7 @@ namespace dss {
       JS_ReportError(cx, "General failure: %s", ex.what());
     }
     return JS_FALSE;
-  } // metering_getValues
+  } // metering_getAggregatedValues
 
 
   MeteringScriptExtension::MeteringScriptExtension(Apartment& _apartment,

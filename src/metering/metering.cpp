@@ -309,13 +309,17 @@ namespace dss {
     return lastEnergyCounter;
   }
 
-  boost::shared_ptr<std::deque<Value> > Metering::getSeries(boost::shared_ptr<DSMeter> _meter,
+  boost::shared_ptr<std::deque<Value> > Metering::getSeries(std::vector<boost::shared_ptr<DSMeter> > _meters,
                                                             int &_resolution,
                                                             SeriesTypes _type,
                                                             bool _energyInWh,
                                                             DateTime &_startTime,
                                                             DateTime &_endTime,
                                                             int &_valueCount) {
+    if (_meters.size() == 0) {
+      _meters = getDSS().getApartment().getDSMeters();
+    }
+
     int numberOfValues = 0;
     for (int i = 0; i < m_ConfigChain->size(); ++i) {
       if (m_ConfigChain->getResolution(i) <= _resolution) {
@@ -324,7 +328,17 @@ namespace dss {
     }
 
     boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+    if (_meters.size() == 0) {
+      _valueCount = 0;
+      return returnVector;
+    }
+    std::vector<boost::shared_ptr<std::string> > rrdFileNames;
+
+    for (std::vector<boost::shared_ptr<DSMeter> >::iterator iter = _meters.begin();
+         iter < _meters.end();
+         ++iter) {
+      rrdFileNames.push_back(getOrCreateCachedSeries(m_ConfigChain, *iter));
+    }
 
     DateTime iCurrentTimeStamp;
     long unsigned int step = _resolution;
@@ -364,7 +378,11 @@ namespace dss {
       lines.push_back("flushcached");
       lines.push_back("--daemon");
       lines.push_back(m_RrdcachedPath);
-      lines.push_back(rrdFileName.get()->c_str());
+      for (std::vector<boost::shared_ptr<std::string> >::iterator iter = rrdFileNames.begin();
+           iter < rrdFileNames.end();
+           ++iter) {
+        lines.push_back(iter->get()->c_str());
+      }
       std::vector<const char*> starts;
       std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
       char** argString = (char**)&starts.front();
@@ -389,21 +407,40 @@ namespace dss {
     lines.push_back("--maxrows");
     lines.push_back("3000");
     {
+      int i = 0;
+      int size = rrdFileNames.size();
       std::stringstream sstream;
-      sstream << "DEF:data=" << rrdFileName.get()->c_str();
-      if ((_type == etConsumption) && (step == 1)) {
-        sstream << ":power";
-      } else {
-        sstream << ":energy";
+      for (i = 0; i < size; ++i) {
+        const char* filename = rrdFileNames.at(i)->c_str();
+        sstream << "DEF:raw" << i << "=" << filename;
+        if ((_type == etConsumption) && (step == 1)) {
+          sstream << ":power";
+        } else {
+          sstream << ":energy";
+        }
+        sstream << ":AVERAGE";
+        lines.push_back(sstream.str());
+
+        sstream.str(std::string());
+        sstream << "CDEF:data" << i << "=raw" << i << ",UN,0,raw" << i << ",IF";
+        lines.push_back(sstream.str());
+        sstream.str(std::string());
       }
-      sstream << ":AVERAGE";
+      sstream << "CDEF:sum=data0";
+      if (size == 2) {
+        sstream << ",data1,+";
+      } else if (size > 2) {
+        for (i = 2; i < size; ++i) {
+          sstream << ",data" << i << ",+";
+        }
+      }
       lines.push_back(sstream.str());
     }
-    lines.push_back("CDEF:noUnkn=data,0,40000,LIMIT,UN,0,data,IF");
+    lines.push_back("CDEF:limit=sum,0,40000,LIMIT");
     switch (_type) {
     case etEnergy:
     case etEnergyDelta: {
-      lines.push_back("CDEF:ratePerStep=noUnkn," + intToString(step) + ",*");
+      lines.push_back("CDEF:ratePerStep=limit," + intToString(step) + ",*");
       if (_energyInWh) {
         lines.push_back("CDEF:adj=ratePerStep,3600,/");
         lines.push_back("XPORT:adj");
@@ -413,7 +450,7 @@ namespace dss {
       break;
     }
     default: {
-      lines.push_back("XPORT:noUnkn");
+      lines.push_back("XPORT:limit");
       break;
     }
     }
@@ -458,7 +495,12 @@ namespace dss {
     }
 
     if (_type == etEnergy) {
-      double currentCounter = _meter->getCachedEnergyMeterValue();
+      double currentCounter = 0.0;
+      for (std::vector<boost::shared_ptr<DSMeter> >::iterator iter = _meters.begin();
+           iter < _meters.end();
+           ++iter) {
+        currentCounter += (*iter)->getCachedEnergyMeterValue();
+      }
       if (_energyInWh) {
         currentCounter /= 3600;
       }

@@ -1712,6 +1712,8 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
+  std::vector<boost::shared_ptr<dss::DSMeter> > pMeters;
+  pMeters.push_back(pMeter);
 
   dss::Metering::SeriesTypes seriesType = dss::Metering::etConsumption;
   bool energyInWh = true;
@@ -1749,7 +1751,7 @@ int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
   }
 
   dss::Metering& metering = dss::DSS::getInstance()->getMetering();
-  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeter,
+  boost::shared_ptr<std::deque<dss::Value> > pSeries = metering.getSeries(pMeters,
                                                                           _resolution,
                                                                           seriesType,
                                                                           energyInWh,
