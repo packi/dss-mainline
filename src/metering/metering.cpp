@@ -78,11 +78,11 @@ namespace dss {
 
     if (getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "enabled")) {
       if (!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
-        throw std::runtime_error("Metering directory " + m_MeteringStorageLocation + " does not exist!");
+        throw std::runtime_error("Metering directory " + boost::filesystem::system_complete(m_MeteringStorageLocation).string() + " does not exist!");
       }
 
       if (!rwAccess(m_MeteringStorageLocation)) {
-        throw std::runtime_error("Metering directory " + m_MeteringStorageLocation + " is not readable/writable!");
+        throw std::runtime_error("Metering directory " + boost::filesystem::system_complete(m_MeteringStorageLocation).string() + " is not readable/writable!");
       }
     }
   }
@@ -459,7 +459,7 @@ namespace dss {
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char**)&starts.front();
 
-    long unsigned int dscount = 0;
+    unsigned long dscount = 0;
     char **names = 0;
     rrd_value_t *data = 0;
 
@@ -480,12 +480,12 @@ namespace dss {
       log(rrd_get_error());
       return returnVector;
     }
-    for (unsigned int i = 0; i < dscount; ++i) {
+    for (unsigned long i = 0; i < dscount; ++i) {
       rrd_freemem(names[i]);
     }
     rrd_freemem(names);
     rrd_value_t *currentData = data;
-    for (int timeStamp = start + step; timeStamp <= (end - step); timeStamp += step) {
+    for (time_t timeStamp = start + step; timeStamp <= (time_t)(end - step); timeStamp += step) {
       returnVector->push_back(Value(*currentData, DateTime(timeStamp)));
       currentData++;
     }
