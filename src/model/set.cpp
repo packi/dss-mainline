@@ -154,6 +154,16 @@ namespace dss {
     return result;
   } // getByDSMeter
 
+  Set Set::getByLastKnownDSMeter(const dss_dsid_t& _dsMeterDSID) const {
+    Set result;
+    foreach(const DeviceReference& dev, m_ContainedDevices) {
+      if(dev.getDevice()->getLastKnownDSMeterDSID() == _dsMeterDSID) {
+        result.addDevice(dev);
+      }
+    }
+    return result;
+  } // getByLastKnownDSMeter
+
   Set Set::getByFunctionID(const int _functionID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
