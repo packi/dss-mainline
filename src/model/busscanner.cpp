@@ -379,7 +379,7 @@ namespace dss {
   void BusScanner::syncBinaryInputStates(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr <Device> _device) {
     std::vector<boost::shared_ptr<Device> > devices;
 
-    if (_device != NULL) {
+    if ((_device != NULL) && (_device->getBinaryInputCount() > 0)) {
       // synchronize a single device
       devices.push_back(_device);
     } else {
@@ -399,6 +399,9 @@ namespace dss {
 
     // send a request to each binary input device to resend its current status
     foreach(boost::shared_ptr<Device> dev, devices) {
+      if (dev->getBinaryInputCount() == 0) {
+        continue;
+      }
 
       uint32_t value = 0;
       int index;
