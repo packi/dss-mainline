@@ -263,6 +263,7 @@ namespace dss {
     _dsMeter->addDevice(devRef);
     dev->setIsPresent(_spec.ActiveState == 1);
     dev->setIsConnected(true);
+    dev->setIsValid(true);
 
     {
       boost::shared_ptr<Event> readyEvent(new Event("new_device"));

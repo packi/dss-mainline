@@ -187,6 +187,7 @@ namespace dss {
     unsigned long m_Energymeter;
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
+    bool m_IsValid;
     bool m_IsLockedInDSM;
 
     uint8_t m_OutputMode;
@@ -425,6 +426,12 @@ namespace dss {
         this device (cached value) */
     bool getIsLockedInDSM() const { return m_IsLockedInDSM; }
     void setIsLockedInDSM(const bool _value);
+
+    /** Returns whether the device data is completely synchronized or
+        the synchronization is pending. */
+    bool isValid() const { return m_IsValid; }
+    void setIsValid(const bool _value) { m_IsValid = _value; }
+
     /** Tells the dSM to never forget a device. */
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */
