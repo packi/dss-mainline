@@ -60,6 +60,7 @@ namespace dss {
     m_Energymeter(0),
     m_LastDiscovered(DateTime::NullDate),
     m_FirstSeen(DateTime::NullDate),
+    m_IsValid(false),
     m_IsLockedInDSM(false),
     m_OutputMode(0),
     m_ButtonInputMode(0),

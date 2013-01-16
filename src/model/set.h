@@ -105,6 +105,8 @@ namespace dss {
     Set getByDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const;
     /** Returns a subset that contains all devices belonging to DSMeter identified by \a _dsMeterDSID */
     Set getByDSMeter(const dss_dsid_t& _dsMeterDSID) const;
+    /** Returns a subset that contains all devices known to be registered last on DSMeter */
+    Set getByLastKnownDSMeter(const dss_dsid_t& _dsMeterDSID) const;
 
     /** Returns a subset that contains all devices that have the presence state of \a _present */
     Set getByPresence(const bool _present) const;

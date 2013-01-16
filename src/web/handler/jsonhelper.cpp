@@ -65,6 +65,7 @@ namespace dss {
     }
     result->addProperty("zoneID", _device.getDevice()->getZoneID());
     result->addProperty("isPresent", _device.getDevice()->isPresent());
+    result->addProperty("isValid", _device.getDevice()->isValid());
 
     tmp_date = _device.getDevice()->getLastDiscovered();
     result->addProperty("lastDiscovered", tmp_date);
