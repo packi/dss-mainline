@@ -211,6 +211,15 @@ namespace dss {
              log ("Discovered new dSM: " + spec.DSID.toString(), lsWarning);
           }
 
+          try {
+            Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(spec.DSID);
+            for (int i = 0; i < devices.length(); i++) {
+              devices[i].getDevice()->setIsValid(false);
+            }
+          } catch(ItemNotFoundException& e) {
+            log("discoverDS485Devices: error resetting device valid flags: " + std::string(e.what()));
+          }
+
           if (!dsMeter->isConnected()) {
             dsMeter->setIsPresent(true);
             dsMeter->setIsConnected(true);
@@ -444,6 +453,10 @@ namespace dss {
         assert(pEventWithDSID != NULL);
         onLostDSMeter(pEventWithDSID->getDSID());
         break;
+      case ModelEvent::etDS485DeviceDiscovered:
+        assert(pEventWithDSID != NULL);
+        onJoinedDSMeter(pEventWithDSID->getDSID());
+        break;
       case ModelEvent::etDSMeterReady:
         if(event.getParameterCount() != 0) {
           log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
@@ -480,26 +493,6 @@ namespace dss {
           } catch(ItemNotFoundException& _e) {
             log("Received metering data for unknown meter, discarding", lsWarning);
           }
-        }
-        break;
-      case ModelEvent::etDS485DeviceDiscovered:
-        if(event.getParameterCount() != 0) {
-          log("Expected exactly 0 parameter for ModelEvent::etDS485DeviceDiscovered");
-        } else {
-          assert(pEventWithDSID != NULL);
-          dss_dsid_t newDSID = pEventWithDSID->getDSID();
-          log ("Discovered device with DSID: " + newDSID.toString());
-          boost::shared_ptr<DSMeter> dsMeter;
-          try{
-             dsMeter = m_pApartment->getDSMeterByDSID(newDSID);
-             log ("dSM present");
-          } catch(ItemNotFoundException& e) {
-             dsMeter = m_pApartment->allocateDSMeter(newDSID);
-             log ("dSM not present");
-          }
-          dsMeter->setIsPresent(true);
-          dsMeter->setIsConnected(true);
-          dsMeter->setIsValid(false);
         }
         break;
       case ModelEvent::etDeviceSensorEvent:
@@ -627,28 +620,39 @@ namespace dss {
       }
 
       try {
+        BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
+        if (!scanner.scanDSMeter(mod)) {
+          log("Error scanning dSM: " + _dsMeterBusID.toString() + ", data model incomplete", lsError);
+          return;
+        }
+
         Set devices = mod->getDevices();
         for (int i = 0; i < devices.length(); i++) {
           devices[i].getDevice()->setIsConnected(true);
         }
-        BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
-        if(scanner.scanDSMeter(mod)) {
-          boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
-          dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
-          raiseEvent(dsMeterReadyEvent);
-        }
+
+        // synchronize devices with binary inputs
         if (mod->hasPendingEvents()) {
           scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device> ());
         } else {
           log(std::string("Event counter match on dSM " + _dsMeterBusID.toString()), lsDebug);
         }
+
+        // additionally set all previously connected device to valid now
+        devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dsMeterBusID);
+        for (int i = 0; i < devices.length(); i++) {
+          devices[i].getDevice()->setIsValid(true);
+        }
+
+        boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
+        dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
+        raiseEvent(dsMeterReadyEvent);
+
       } catch(BusApiError& e) {
         log(std::string("Bus error scanning dSM " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
-
         ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, _dsMeterBusID);
         addModelEvent(pEvent);
       }
-
     } catch(ItemNotFoundException& e) {
       log("dsMeterReady " + _dsMeterBusID.toString() + ": item not found: " + std::string(e.what()), lsError);
     }
@@ -1193,6 +1197,31 @@ namespace dss {
       log("Removed device " + _dsMeterID.toString() + " is not known to us");
     }
   } // onRemoveDevice
+
+  void ModelMaintenance::onJoinedDSMeter(const dss_dsid_t& _dSMeterID) {
+    boost::shared_ptr<DSMeter> meter;
+
+    log("onJoinedDSMeter: dSM Connected: " + _dSMeterID.toString());
+    try {
+      meter = m_pApartment->getDSMeterByDSID(_dSMeterID);
+    } catch (ItemNotFoundException& e) {
+      log("dSM is ready, but it is not yet known, re-discovering devices");
+      discoverDS485Devices();
+      return;
+    }
+    meter->setIsPresent(true);
+    meter->setIsConnected(true);
+    meter->setIsValid(false);
+
+    try {
+      Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dSMeterID);
+      for (int i = 0; i < devices.length(); i++) {
+        devices[i].getDevice()->setIsValid(false);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onJoinedDSMeter: error resetting device valid flags: " + std::string(e.what()));
+    }
+  } // onJoinedDSMeter
 
   void ModelMaintenance::onLostDSMeter(const dss_dsid_t& _dSMeterID) {
     log("dSM disconnected: " + _dSMeterID.toString());
