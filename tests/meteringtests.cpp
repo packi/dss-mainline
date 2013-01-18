@@ -49,6 +49,8 @@ BOOST_AUTO_TEST_SUITE(Metering)
 BOOST_AUTO_TEST_CASE(seriesSizes) {
   Apartment apt(NULL);
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dss_dsid_t(0,13));
+  std::vector<boost::shared_ptr<DSMeter> > pMeters;
+  pMeters.push_back(pMeter);
   dss::Metering metering(NULL);
 
   {
@@ -56,7 +58,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
     DateTime endTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -70,7 +72,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
     DateTime endTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 60;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -84,7 +86,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
     DateTime endTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 900;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -98,7 +100,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
     DateTime endTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 86400;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -112,7 +114,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
     DateTime endTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 604800;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -126,7 +128,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
     DateTime endTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 2592000;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -140,6 +142,8 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
 BOOST_AUTO_TEST_CASE(seriesRanges) {
   Apartment apt(NULL);
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dss_dsid_t(0,13));
+  std::vector<boost::shared_ptr<DSMeter> > pMeters;
+  pMeters.push_back(pMeter);
   dss::Metering metering(NULL);
 
   {
@@ -148,7 +152,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
     DateTime startTime(now.secondsSinceEpoch() - 20);
     int valueCount = 0;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -167,7 +171,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
     DateTime startTime(now.secondsSinceEpoch() - 20);
     int valueCount = 10;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -186,7 +190,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
     DateTime startTime(DateTime::NullDate);
     int valueCount = 0;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -205,7 +209,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
     DateTime startTime(DateTime::NullDate);
     int valueCount = 10;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -224,7 +228,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
     DateTime startTime(now.secondsSinceEpoch() - 580);
     int valueCount = 0;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,
@@ -243,7 +247,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
     DateTime startTime(now.secondsSinceEpoch() - 580);
     int valueCount = 10;
     int resolution = 1;
-    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeter,
+    boost::shared_ptr<std::deque<Value> > pValues = metering.getSeries(pMeters,
                                                                        resolution,
                                                                        dss::Metering::etConsumption,
                                                                        false,

@@ -208,6 +208,7 @@ namespace dss {
     }
     m_tempDevice->setOemInfoState(oemEanState);
 
+    m_tempDevice->setIsValid(true);
     m_tempDevice->setIsPresent(isPresent);
     if (isPresent == false) {
       m_tempDevice->setInactiveSince(inactiveSince);
