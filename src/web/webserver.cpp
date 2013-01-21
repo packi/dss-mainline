@@ -383,7 +383,12 @@ namespace dss {
         WebServerResponse response =
           m_Handlers[request.getClass()]->jsonHandleRequest(request, _session);
         if(response.getResponse() != NULL) {
-          result = response.getResponse()->toString();
+          std::string callback = request.getParameter("callback");
+          if (callback.empty()) {
+            result = response.getResponse()->toString();
+          } else {
+            result = callback + "(" + response.getResponse()->toString() + ")";
+          }
         }
         std::string cookies;
         if(response.getCookies().empty()) {
