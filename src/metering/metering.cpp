@@ -427,12 +427,8 @@ namespace dss {
         sstream.str(std::string());
       }
       sstream << "CDEF:sum=data0";
-      if (size == 2) {
-        sstream << ",data1,+";
-      } else if (size > 2) {
-        for (i = 2; i < size; ++i) {
-          sstream << ",data" << i << ",+";
-        }
+      for (i = 1; i < size; ++i) {
+        sstream << ",data" << i << ",+";
       }
       lines.push_back(sstream.str());
     }
