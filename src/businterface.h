@@ -184,8 +184,11 @@ namespace dss {
     virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) = 0;
     virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name) = 0;
 
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    /** Create and manage user groups */
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
+    virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
     /** Send sensoric data downstream to devices */
     virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) = 0;

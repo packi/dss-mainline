@@ -86,7 +86,7 @@ namespace dss {
   void SimStructureModifyingBusInterface::meterSetName(dss_dsid_t _meterDSID, const std::string& _name) {
   } // meterSetName
 
-  void SimStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID) {
+  void SimStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
     int numMeters = m_pSimulation->getDSMeterCount();
     for(int iMeter = 0; iMeter < numMeters; iMeter++) {
       boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
@@ -107,6 +107,12 @@ namespace dss {
       }
     }
   } // removeGroup
+
+  void SimStructureModifyingBusInterface::groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
+  } // groupSetName
+
+  void SimStructureModifyingBusInterface::groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupNumber) {
+  } // groupSetStandardID
 
   void SimStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
     int numMeters = m_pSimulation->getDSMeterCount();

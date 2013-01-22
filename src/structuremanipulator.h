@@ -54,14 +54,18 @@ namespace dss {
     void removeZoneOnDSMeters(boost::shared_ptr<Zone>);
     void removeDeviceFromDSMeter(boost::shared_ptr<Device> _device);
 
-    void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
     void deviceSetName(boost::shared_ptr<Device> _pDevice, const std::string& _name);
     void meterSetName(boost::shared_ptr<DSMeter> _pMeter, const std::string& _name);
     int persistSet(Set& _set, const std::string& _originalSet);
     int persistSet(Set& _set, const std::string& _originalSet, int _groupNumber);
     void unpersistSet(std::string _setDescription);
 
-    void createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
+    void createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int _standardGroupNumber, const std::string& _name);
+    void removeGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
+    void groupSetName(boost::shared_ptr<Group> _group, const std::string& _name);
+    void groupSetStandardID(boost::shared_ptr<Group> _group, const int _standardGroupNumber);
+    void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
+
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
     void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
 

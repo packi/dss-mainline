@@ -45,8 +45,10 @@ namespace dss {
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name);
     virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name);
     virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name);
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID);
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name);
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
+    virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID);
+    virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
     virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue);
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
   private:

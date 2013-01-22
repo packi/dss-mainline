@@ -365,14 +365,24 @@ namespace dss {
       m_pInner->meterSetName(_meterDSID, _name);
     }
 
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) {
-      m_pSimulationInterface->createGroup(_zoneID, _groupID);
-      m_pInner->createGroup(_zoneID, _groupID);
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
+      m_pSimulationInterface->createGroup(_zoneID, _groupID, _standardGroupID, _name);
+      m_pInner->createGroup(_zoneID, _groupID, _standardGroupID, _name);
     }
 
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
       m_pSimulationInterface->removeGroup(_zoneID, _groupID);
       m_pInner->removeGroup(_zoneID, _groupID);
+    }
+
+    virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
+      m_pSimulationInterface->groupSetName(_zoneID, _groupID, _name);
+      m_pInner->groupSetName(_zoneID, _groupID, _name);
+    }
+
+    virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
+      m_pSimulationInterface->groupSetStandardID(_zoneID, _groupID, _standardGroupID);
+      m_pInner->groupSetStandardID(_zoneID, _groupID, _standardGroupID);
     }
 
     virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
@@ -446,7 +456,7 @@ namespace dss {
       }
     }
 
-    virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
       if(isHandledBySimulation(_dsMeterID)) {
         return m_pSimulationInterface->getGroups(_dsMeterID, _zoneID);
       } else {
