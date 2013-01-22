@@ -128,7 +128,9 @@ namespace dss {
     boost::shared_ptr<JSONObject> result(new JSONObject());
     result->addProperty("id", _group->getID());
     result->addProperty("name", _group->getName());
+    result->addProperty("color", _group->getStandardGroupID());
     result->addProperty("isPresent", _group->isPresent());
+    result->addProperty("isValid", _group->isValid());
 
     boost::shared_ptr<JSONArray<std::string> > devicesArr(new JSONArray<std::string>());
     result->addElement("devices", devicesArr);
