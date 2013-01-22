@@ -48,6 +48,13 @@ namespace dss {
   } DSMeterSpec_t;
 
   typedef struct {
+    uint8_t GroupID;
+    uint8_t StandardGroupID;
+    uint16_t NumberOfDevices;
+    std::string Name;
+  } GroupSpec_t;
+
+  typedef struct {
     uint8_t TargetGroupType;
     uint8_t TargetGroup;
     uint8_t InputType;
@@ -137,7 +144,7 @@ namespace dss {
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
-    virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;

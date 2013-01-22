@@ -846,8 +846,8 @@ public:
   virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     return std::vector<DeviceSpec_t>();
   }
-  virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
-    return std::vector<int>();
+  virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    return std::vector<GroupSpec_t>();
   }
   virtual std::vector<std::pair<int,int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     return std::vector<std::pair<int,int> >();

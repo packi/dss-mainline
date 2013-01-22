@@ -105,31 +105,37 @@ namespace dss {
     return numberOfGroups;
   } // getGroupCount
 
-  std::vector<int> DSStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<GroupSpec_t> DSStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    std::vector<int> result;
+    std::vector<GroupSpec_t> gresult;
+    dsid_t dsid;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
 
     int numGroups = getGroupCount(_dsMeterID, _zoneID);
     Logger::getInstance()->log(std::string("DSMeter has ") + intToString(numGroups) + " groups");
 
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    uint8_t groupId;
-    uint8_t groupTargetId;
-    for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup, &groupId, &groupTargetId, NULL, NULL
+    for (int iGroup = 0; iGroup < numGroups; iGroup++) {
+      GroupSpec_t result;
+      uint8_t nameBuf[NAME_LEN];
+
+      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup,
+          &result.GroupID, &result.StandardGroupID, &result.NumberOfDevices, nameBuf
 #if DSM_API_VERSION >= 0x106
           , NULL, NULL
 #endif
           );
       DSBusInterface::checkResultCode(ret);
 
-      result.push_back(groupId);
+      char nameStr[NAME_LEN];
+      memcpy(nameStr, nameBuf, NAME_LEN);
+      result.Name = nameStr;
+
+      gresult.push_back(result);
     }
-    return result;
+    return gresult;
   } // getGroups
 
   std::vector<int> DSStructureQueryBusInterface::getZones(const dss_dsid_t& _dsMeterID) {
