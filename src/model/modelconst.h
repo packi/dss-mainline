@@ -117,6 +117,20 @@ namespace dss {
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
+  // Sensor functions for Automated Devices
+  const uint8_t SensorFunction_Generic = 0;
+  const uint8_t SensorFunction_Generic1 = 1;
+  const uint8_t SensorFunction_Generic2 = 2;
+  const uint8_t SensorFunction_Generic3 = 3;
+  const uint8_t SensorFunction_Generic4 = 4;
+  const uint8_t SensorFunction_Generic5 = 5;
+  const uint8_t SensorFunction_Generic6 = 6;
+  const uint8_t SensorFunction_Generic7 = 7;
+  const uint8_t SensorFunction_Generic8 = 8;
+  const uint8_t SensorFunction_Generic9 = 9;
+  const uint8_t SensorFunction_Generic10 = 10;
+  const uint8_t SensorFunction_Generic11 = 11;
+
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
   const uint8_t ClickType2T = 0x01;     // Tipp 2
@@ -146,7 +160,7 @@ namespace dss {
   const int GroupIDGreen = 7;
   const int GroupIDBlack = 8;
   const int GroupIDWhite = 9;
-  const int GroupIDDisplay = 10;
+  const int GroupIDReserved0 = 10;
   const int GroupIDReserved1 = 11;
   const int GroupIDReserved2 = 12;
   const int GroupIDReserved3 = 13;
