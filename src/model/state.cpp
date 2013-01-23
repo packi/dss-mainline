@@ -190,7 +190,8 @@ namespace dss {
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("stateChange", shared_from_this()));
 
-      pEvent->setProperty("state", m_name);
+      pEvent->setProperty("statename", m_name);
+      pEvent->setProperty("state", toString());
       pEvent->setProperty("value", intToString((int) m_state));
       pEvent->setProperty("oldvalue", intToString((int) oldstate));
 

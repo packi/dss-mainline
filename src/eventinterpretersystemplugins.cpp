@@ -1080,7 +1080,7 @@ namespace dss {
       return false;
     }
 
-    std::string name = m_properties.get("name");
+    std::string name = m_properties.get("statename");
     std::string state = m_properties.get("state");
     std::string value = m_properties.get("value");
     std::string oldvalue = m_properties.get("oldvalue");
