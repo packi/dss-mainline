@@ -31,6 +31,7 @@
 #include "model/group.h"
 #include "model/device.h"
 #include "model/apartment.h"
+#include "model/state.h"
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
@@ -50,6 +51,7 @@
 #define ACTION_DURATION_ZONE_BLINK      500
 #define ACTION_DURATION_CUSTOM_EVENT    100
 #define ACTION_DURATION_URL             100
+#define ACTION_DURATION_STATE_CHANGE    100
 
 namespace dss {
 
@@ -352,6 +354,47 @@ namespace dss {
 #endif
   }
 
+  void SystemEventActionExecute::executeStateChange(PropertyNodePtr _actionNode) {
+    PropertyNodePtr oStateNode = _actionNode->getPropertyByName("statename");
+    if (oStateNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeStateChange - missing statename parameter", lsError);
+      return;
+    }
+
+    boost::shared_ptr<State> pState;
+    try {
+      pState = DSS::getInstance()->getApartment().getState(oStateNode->getStringValue());
+    } catch(ItemNotFoundException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeStateChange - state '" + oStateNode->getStringValue() + "' does not exist", lsError);
+      return;
+    }
+
+    if (pState->getType() == StateType_Device) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeStateChange - cannot modify states of type \'device\'", lsError);
+      return;
+    }
+
+    PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
+    PropertyNodePtr oSValueNode = _actionNode->getPropertyByName("state");
+    if (oValueNode == NULL || oSValueNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeStateChange: missing value or state parameter", lsError);
+      return;
+    }
+
+    if (oValueNode && oValueNode->getValueType() == vTypeInteger) {
+      pState->setState(oValueNode->getIntegerValue());
+    } else if (oSValueNode && oSValueNode->getValueType() == vTypeString) {
+      pState->setState(oSValueNode->getStringValue());
+    } else {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeStateChange: wrong data type for value or state parameter", lsError);
+    }
+  }
+
   unsigned int SystemEventActionExecute::executeOne(
                                                 PropertyNodePtr _actionNode) {
     Logger::getInstance()->log("SystemEventActionExecute::"
@@ -385,6 +428,9 @@ namespace dss {
         } else if (sActionType == "url") {
           executeURL(_actionNode);
           return ACTION_DURATION_URL;
+        } else if (sActionType == "change-state") {
+          executeStateChange(_actionNode);
+          return ACTION_DURATION_STATE_CHANGE;
         }
       } else {
         Logger::getInstance()->log("SystemEventActionExecute::"

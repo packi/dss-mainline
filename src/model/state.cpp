@@ -178,7 +178,7 @@ namespace dss {
     return m_state;
   } // getState
 
-  void State::setState(eState _state) {
+  void State::setState(const eState _state) {
     if (_state != m_state) {
       eState oldstate = m_state;
       m_state = _state;
@@ -199,5 +199,24 @@ namespace dss {
       }
     }
   } // setState
+
+  void State::setState(const int _state) {
+    switch (_state) {
+      case 1: setState(State_Active); break;
+      case 2: setState(State_Inactive); break;
+      case 3: setState(State_Unkown); break;
+      default: break;
+    }
+  }
+
+  void State::setState(const std::string& _state) {
+    if (_state == "active") {
+      setState(State_Active);
+    } else if (_state == "inactive") {
+      setState(State_Inactive);
+    } else if (_state == "unknown") {
+      setState(State_Unkown);
+    }
+  }
 
 } // namespace dss
