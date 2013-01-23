@@ -29,11 +29,13 @@
 #include "src/model/apartment.h"
 #include "src/model/device.h"
 #include "src/model/group.h"
+#include "src/model/zone.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 
 #include "src/web/json.h"
 #include "jsonhelper.h"
+#include "foreach.h"
 
 namespace dss {
 
@@ -274,23 +276,78 @@ namespace dss {
 
       return success(resultObj);
     } else if(_request.getMethod() == "setJokerGroup") {
-      int value = strToIntDef(_request.getParameter("groupID"), -1);
-      if((value  < 1) || (value > 8)) {
+      int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
+      if((newGroupId  < 1) || (newGroupId > 8)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
-      pDevice->setDeviceJokerGroup(value);
+      boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
+      pDevice->setDeviceJokerGroup(newGroupId);
+
+      /* check if device is also in a colored user group */
+      bool deviceGroupModified = false;
+      for (int g = 16; g <= 23; g++) {
+        if (pDevice->getGroupBitmask().test(g-1)) {
+          boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
+          if (pGroup->getStandardGroupID() != newGroupId) {
+            if (m_pStructureBusInterface != NULL) {
+              StructureManipulator manipulator(*m_pStructureBusInterface,
+                                               *m_pStructureQueryBusInterface,
+                                               m_Apartment);
+              manipulator.deviceRemoveFromGroup(pDevice, pGroup);
+            }
+            deviceGroupModified = true;
+          }
+        }
+      }
+      std::vector<boost::shared_ptr<Device> > modifiedDevices;
+      if (deviceGroupModified) {
+        modifiedDevices.push_back(pDevice);
+      }
+
       if (pDevice->is2WayMaster()) {
         dss_dsid_t next = pDevice->getDSID();
         next.lower++;
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-          pPartnerDevice->setDeviceJokerGroup(value);
+          pPartnerDevice->setDeviceJokerGroup(newGroupId);
+
+          deviceGroupModified = false;
+          for (int g = 16; g <= 23; g++) {
+            if (pPartnerDevice->getGroupBitmask().test(g-1)) {
+              boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
+              if (pGroup->getStandardGroupID() != newGroupId) {
+                if (m_pStructureBusInterface != NULL) {
+                  StructureManipulator manipulator(*m_pStructureBusInterface,
+                                                   *m_pStructureQueryBusInterface,
+                                                   m_Apartment);
+                  manipulator.deviceRemoveFromGroup(pPartnerDevice, pGroup);
+                }
+                deviceGroupModified = true;
+              }
+            }
+          }
+          if (deviceGroupModified) {
+            modifiedDevices.push_back(pPartnerDevice);
+          }
         } catch(std::runtime_error& e) {
           return failure("Could not find partner device with dsid '" + next.toString() + "'");
         }
       }
-      return success();
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      if (!modifiedDevices.empty()) {
+        boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+        foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
+          const DeviceReference d(device, &m_Apartment);
+          modified->addElement("", toJSON(d));
+        }
+        resultObj->addProperty("action", "update");
+        resultObj->addElement("devices", modified);
+      } else {
+        resultObj->addProperty("action", "none");
+      }
+      return success(resultObj);
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
       if((value  < 0) || (value > 15)) {
