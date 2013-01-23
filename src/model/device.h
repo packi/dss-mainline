@@ -501,6 +501,7 @@ namespace dss {
     const std::string& getOemProductName() const { return m_OemProductName; }
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
+    bool isOemCoupledWith(boost::shared_ptr<Device> _otherDev);
 
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;

@@ -1519,6 +1519,21 @@ namespace dss {
     return m_binaryInputs;
   }
 
+  bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
+  {
+    return ((m_OemState == DEVICE_OEM_VALID) &&
+            !m_OemIsIndependent &&
+            (m_OemSerialNumber > 0) &&
+            isPresent() &&
+            _otherDev->isPresent() &&
+            !_otherDev->getOemIsIndependent() &&
+            (_otherDev->getOemInfoState() == DEVICE_OEM_VALID) &&
+            (_otherDev->getDSID() != m_DSID) &&
+            (_otherDev->getDSMeterDSID() == m_DSMeterDSID) &&
+            (_otherDev->getOemEan() == m_OemEanNumber) &&
+            (_otherDev->getOemSerialNumber() == m_OemSerialNumber));
+  }
+
   boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
     if (_inputIndex >= m_binaryInputStates.size()) {
       return boost::shared_ptr<State> ();
