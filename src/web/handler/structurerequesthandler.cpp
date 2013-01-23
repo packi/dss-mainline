@@ -489,7 +489,49 @@ namespace dss {
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.deviceRemoveFromGroup(dev, gr);
 
-    return success();
+    std::vector<boost::shared_ptr<Device> > modifiedDevices;
+    modifiedDevices.push_back(dev);
+
+    if (dev->is2WayMaster()) {
+      dss_dsid_t next = dev->getDSID();
+      next.lower++;
+      try {
+        boost::shared_ptr<Device> pPartnerDevice;
+
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+        manipulator.deviceRemoveFromGroup(pPartnerDevice, gr);
+        modifiedDevices.push_back(pPartnerDevice);
+      } catch(std::runtime_error& e) {
+        return failure("Could not find partner device with dsid '" + next.toString() + "'");
+      }
+    }
+    if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
+      uint16_t serialNr = dev->getOemSerialNumber();
+      if ((serialNr > 0) & !dev->getOemIsIndependent()) {
+        std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
+        foreach (const boost::shared_ptr<Device>& device, devices) {
+          if (dev->isOemCoupledWith(device)) {
+            manipulator.deviceRemoveFromGroup(device, gr);
+            modifiedDevices.push_back(device);
+          }
+        }
+      }
+    }
+
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    if (!modifiedDevices.empty()) {
+      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
+        const DeviceReference d(device, &m_Apartment);
+        modified->addElement("", toJSON(d));
+      }
+      resultObj->addProperty("action", "update");
+      resultObj->addElement("devices", modified);
+    } else {
+      resultObj->addProperty("action", "none");
+    }
+
+    return success(resultObj);
   } // groupRemoveDevice
 
 
