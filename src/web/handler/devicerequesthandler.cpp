@@ -706,21 +706,21 @@ namespace dss {
       }
 
       if (mode == BUTTONINPUT_AKM_STANDARD) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_STANDARD);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_STANDARD);
       } else if (mode == BUTTONINPUT_AKM_INVERTED) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_INVERTED);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_INVERTED);
       } else if (mode == BUTTONINPUT_AKM_ON_RISING_EDGE) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_ON_FALLING_EDGE) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_OFF_RISING_EDGE) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_OFF_FALLING_EDGE) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_RISING_EDGE) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_FALLING_EDGE) {
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
       } else {
         return failure("Unsupported mode: " + mode);
       }
