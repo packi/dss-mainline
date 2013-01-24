@@ -404,7 +404,7 @@ namespace dss {
         gr = boost::shared_ptr<Group> ();
       }
     }
-    if(!gr) {
+    if(!gr || !gr->isValid()) {
       return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
@@ -482,7 +482,7 @@ namespace dss {
         gr = boost::shared_ptr<Group> ();
       }
     }
-    if(!gr) {
+    if(!gr || !gr->isValid()) {
       return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
