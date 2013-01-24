@@ -408,6 +408,10 @@ namespace dss {
       return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
+    if (!dev->getGroupBitmask().test(gr->getStandardGroupID()-1)) {
+      return failure("Devices does not match color of group (" + intToString(gr->getStandardGroupID()) + ")");
+    }
+
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.deviceAddToGroup(dev, gr);
 
