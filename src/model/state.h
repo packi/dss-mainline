@@ -75,7 +75,9 @@ namespace dss {
     virtual ~State();
 
     eState getState() const;
-    void setState(eState _state);
+    void setState(const eState _state);
+    void setState(const int _state);
+    void setState(const std::string& _state);
 
     std::string getName() const { return m_name; }
     void setName(const std::string& _name) { m_name = _name; }
