@@ -103,6 +103,10 @@ namespace dss {
     virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
                                  uint8_t _configIndex, uint8_t _value) = 0;
 
+    /** Set the active group for the button */
+    virtual void setDeviceButtonActiveGroup(const Device& _device,
+                                            uint8_t _groupID) = 0;
+
     /** Enable or disable programming mode */
     virtual void setDeviceProgMode(const Device& _device, uint8_t modeId) = 0;
 
