@@ -287,6 +287,10 @@ namespace dss {
       return failure("Group with groupID : '" + _request.getParameter("groupID") + "' does not exist");
     }
 
+    if (!zone->getGroup(groupID)->getDevices().isEmpty()) {
+      return failure("Group with groupID : '" + _request.getParameter("groupID") + "' is not empty.");
+    }
+
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.removeGroup(zone, groupID);
 
