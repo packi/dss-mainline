@@ -412,7 +412,8 @@ namespace dss {
       return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
-    if (!dev->getGroupBitmask().test(gr->getStandardGroupID()-1)) {
+    if (!(dev->getGroupBitmask().test(gr->getStandardGroupID()-1) ||
+          (dev->getDeviceType() == DEVICE_TYPE_AKM))) {
       return failure("Devices does not match color of group (" + intToString(gr->getStandardGroupID()) + ")");
     }
 
