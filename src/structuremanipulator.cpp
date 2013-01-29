@@ -529,6 +529,11 @@ namespace dss {
     }
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->addToGroup(_group->getID());
+
+    if ((_device->getOutputMode() == 0) && (_group->getID() >= 16)) {
+      /* device has no output, button is active on group */
+      _device->setDeviceButtonActiveGroup(_group->getID());
+    }
   } // deviceAddToGroup
 
   void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
@@ -537,6 +542,11 @@ namespace dss {
     }
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
+
+    if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
+      /* device has no output, button is active on removed group */
+      _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
+    }
   } // deviceRemoveFromGroup
 
   void StructureManipulator::sensorPush(boost::shared_ptr<Zone> _zone, dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {
