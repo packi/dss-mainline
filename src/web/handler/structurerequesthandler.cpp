@@ -430,7 +430,6 @@ namespace dss {
 
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
         manipulator.deviceAddToGroup(pPartnerDevice, gr);
-        modifiedDevices.push_back(pPartnerDevice);
       } catch(std::runtime_error& e) {
         return failure("Could not find partner device with dsid '" + next.toString() + "'");
       }
@@ -508,7 +507,6 @@ namespace dss {
 
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
         manipulator.deviceRemoveFromGroup(pPartnerDevice, gr);
-        modifiedDevices.push_back(pPartnerDevice);
       } catch(std::runtime_error& e) {
         return failure("Could not find partner device with dsid '" + next.toString() + "'");
       }
