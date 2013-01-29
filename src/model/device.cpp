@@ -1249,11 +1249,11 @@ namespace dss {
       return -1;
     }
 
-    for (int g = 1; g <= 63; g++) {
+    for (int g = 1; g <= (int)DEVICE_CLASS_SW; g++) {
       if (m_GroupBitmask.test(g-1)) {
-        if (g != (int)DEVICE_CLASS_SW) {
+        if (g < (int)DEVICE_CLASS_SW) {
           return g;
-        } else {
+        } else if (g == (int)DEVICE_CLASS_SW) {
           joker = true;
         }
       }
