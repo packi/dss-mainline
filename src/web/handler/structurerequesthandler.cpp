@@ -346,7 +346,7 @@ namespace dss {
         return failure("Apartment user groups only allowed in Zone 0");
       }
       // find a group slot with unassigned state machine id
-      for (groupID = MIN_APP_USER_GROUP_ID; groupID < MAX_APP_USER_GROUP_ID; groupID ++) {
+      for (groupID = MIN_APP_USER_GROUP_ID; groupID <= MAX_APP_USER_GROUP_ID; groupID ++) {
         pGroup = zone->getGroup(groupID);
         if (pGroup->getStandardGroupID() == 0) {
           break;
