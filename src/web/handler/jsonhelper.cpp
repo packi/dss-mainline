@@ -35,6 +35,8 @@
 #include "src/model/zone.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
+#include "src/dss.h"
+#include "src/model/modulator.h"
 
 namespace dss {
 
@@ -58,9 +60,21 @@ namespace dss {
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     if(_device.getDevice()->isPresent()) {
       result->addProperty("meterDSID", _device.getDevice()->getDSMeterDSID().toString());
+      std::string dSMName;
+      try {
+        dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
+      } catch(std::runtime_error&) {
+      }
+      result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getShortAddress());
     } else {
       result->addProperty("meterDSID", _device.getDevice()->getLastKnownDSMeterDSID().toString());
+      std::string dSMName;
+      try {
+        dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
+      } catch(std::runtime_error&) {
+      }
+      result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getLastKnownShortAddress());
     }
     result->addProperty("zoneID", _device.getDevice()->getZoneID());
