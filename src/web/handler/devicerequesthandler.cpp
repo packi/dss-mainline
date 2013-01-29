@@ -281,6 +281,7 @@ namespace dss {
         return failure("Invalid or missing parameter 'groupID'");
       }
       boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
+      int oldGroupId = pDevice->getJokerGroup();
       pDevice->setDeviceJokerGroup(newGroupId);
 
       /* check if device is also in a colored user group */
@@ -300,7 +301,7 @@ namespace dss {
         }
       }
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
-      if (deviceGroupModified) {
+      if ((deviceGroupModified) || (oldGroupId != newGroupId)) {
         modifiedDevices.push_back(pDevice);
       }
 
