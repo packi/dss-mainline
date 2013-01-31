@@ -57,6 +57,8 @@
 
 #define DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2       0xff
 
+#define BUTTON_ACTIVE_GROUP_RESET    0xff
+
 // pairing JSON strings
 #define BUTTONINPUT_1WAY            "1way"
 #define BUTTONINPUT_2WAY_DOWN       "2way_down"
