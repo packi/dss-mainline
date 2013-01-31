@@ -1311,7 +1311,7 @@ namespace dss {
           device->setOutputMode(_value);
         } else if(_configIndex == CfgFunction_ButtonMode) {
           device->setButtonID(_value & 0xf);
-          device->setButtonActiveGroup((_value >> 4) & 0xf);
+          device->setButtonGroupMembership((_value >> 4) & 0xf);
         } else if(_configIndex == CfgFunction_LTMode) {
           device->setButtonInputMode(_value);
         }
