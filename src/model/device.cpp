@@ -1468,7 +1468,7 @@ namespace dss {
       throw ItemNotFoundException("Invalid binary input index");
     }
     m_binaryInputs[_index]->m_targetGroupId = targetGroup;
-    m_binaryInputs[_index]->m_targetGroupId = targetGroupType;
+    m_binaryInputs[_index]->m_targetGroupType = targetGroupType;
   }
 
   void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {

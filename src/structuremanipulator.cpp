@@ -530,9 +530,15 @@ namespace dss {
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->addToGroup(_group->getID());
 
-    if ((_device->getOutputMode() == 0) && (_group->getID() >= 16)) {
-      /* device has no output, button is active on group */
-      _device->setDeviceButtonActiveGroup(_group->getID());
+    if (_group->getID() >= 16) {
+      if ((_device->getDeviceType() == DEVICE_TYPE_AKM) && (_device->getBinaryInputCount() == 1)) {
+        /* AKM with single input, set active group to last group */
+        _device->setDeviceBinaryInputTarget(0, 0, _group->getID());
+        _device->setBinaryInputTarget(0, 0, _group->getID());
+      } else if (_device->getOutputMode() == 0) {
+        /* device has no output, button is active on group */
+        _device->setDeviceButtonActiveGroup(_group->getID());
+      }
     }
   } // deviceAddToGroup
 
@@ -543,7 +549,13 @@ namespace dss {
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
 
-    if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
+    if ((_device->getDeviceType() == DEVICE_TYPE_AKM) &&
+        (_device->getBinaryInputCount() == 1) &&
+        (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
+      /* AKM with single input, active on removed group */
+      _device->setDeviceBinaryInputTarget(0, 0, GroupIDBlack);
+      _device->setBinaryInputTarget(0, 0, GroupIDBlack);
+    } else if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
       /* device has no output, button is active on removed group */
       _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
     }
