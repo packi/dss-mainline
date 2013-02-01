@@ -424,8 +424,10 @@ function stateChange() {
     var schedEventNode = Property.getNode('/system/EventInterpreter/ScheduledEvents');
     var schedEvents = schedEventNode.getChildren();
     schedEvents.map(function(event) {
-        if (event.getChild('name').getValue().search('solar_computer.state_change') >= 0) {
-            schedEventNode.removeChild(event);
+        if ((event.getChild('name') != null) && (event.getChild('name').getValue() != null)) {
+            if (event.getChild('name').getValue().search('solar_computer.state_change') >= 0) {
+                schedEventNode.removeChild(event);
+            }
         }
     })
 
