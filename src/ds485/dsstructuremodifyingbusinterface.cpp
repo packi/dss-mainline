@@ -157,14 +157,40 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // meterSetName
 
-  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID) {
+  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
+    if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupModify_add(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, 0);
+    int ret = ZoneGroupModify_add(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _standardGroupID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    uint8_t grName[NAME_LEN];
+    strncpy((char *) grName, _name.c_str(), NAME_LEN);
+    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // createGroup
+
+  void DSStructureModifyingBusInterface::groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _standardGroupID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // groupSetStandardID
+
+  void DSStructureModifyingBusInterface::groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    uint8_t grName[NAME_LEN];
+    strncpy((char *) grName, _name.c_str(), NAME_LEN);
+    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // groupSetName
 
   void DSStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

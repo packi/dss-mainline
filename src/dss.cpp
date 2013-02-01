@@ -298,8 +298,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation,
                               pSimBusInterface, m_pModelMaintenance,
                               m_pApartment));
-
     m_pApartment->setBusInterface(m_pBusInterface.get());
+    m_pModelMaintenance->setStructureModifyingBusInterface(m_pBusInterface->getStructureModifyingBusInterface());
+    m_pModelMaintenance->setStructureQueryBusInterface(m_pBusInterface->getStructureQueryBusInterface());
 
     m_pMetering->setMeteringBusInterface(m_pBusInterface->getMeteringBusInterface());
     m_pModelMaintenance->setMetering(m_pMetering.get());

@@ -125,6 +125,9 @@ namespace dss {
     return static_cast<uint16_t>(m_DeviceConfig[_configClass][_configIndex]);
   } // getValue
 
+  void DSIDSim::setDeviceButtonActiveGroup(const uint8_t _groupID) {
+  } //setDeviceButtonActiveGroup
+
   void DSIDSim::setDeviceProgMode(const uint8_t _modeId) {
   } // setDeviceProgMode
 

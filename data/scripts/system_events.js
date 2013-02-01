@@ -284,18 +284,18 @@ function logDeviceSensorEvent(device, param)
     l.logln(';EventTable;', param.sensorEvent, ';;;;;;', devName);
 }
 
-function logStateChangeScript(state, value, script)
+function logStateChangeScript(statename, state, value, script)
 {
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
-    l.logln(';State;', state, ';', value, ';;;;;;', script);
+    l.logln(';State;', statename, ';', value, ';', state ,';;;;;', script);
 }
 
-function logStateChangeDevice(state, value, device)
+function logStateChangeDevice(statename, state, value, device)
 {
     var devName = device.name + ';' + device.dsid;
  
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
-    l.logln(';StateDevice;', state, ';State ' + value, ';;;;;', devName);
+    l.logln(';StateDevice;', statename, ';', value, ';', state, ';;;;', devName);
 }
 
 if (dumpEvent > 0) {
@@ -418,15 +418,16 @@ else if (raisedEvent.name == 'deviceSensorEvent')
  */
 else if (raisedEvent.name == 'stateChange')
 {
+    var statename = raisedEvent.parameter.statename;
     var state = raisedEvent.parameter.state;
     var value = raisedEvent.parameter.value;
     if (raisedEvent.source.isService) {
         var scriptId = raisedEvent.source.serviceName;
-        logStateChangeScript(state, value, scriptId);
+        logStateChangeScript(statename, state, value, scriptId);
     }
     if (raisedEvent.source.isDevice) {
         var device = getDevices().byDSID(raisedEvent.source.dsid);
-        logStateChangeDevice(state, value, device);
+        logStateChangeDevice(statename, state, value, device);
     }
 }
 

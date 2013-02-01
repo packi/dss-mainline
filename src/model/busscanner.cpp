@@ -306,40 +306,122 @@ namespace dss {
   }
 
   bool BusScanner::scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
-    std::vector<int> groupIDs;
+    std::vector<GroupSpec_t> groups;
     try {
-      groupIDs = m_Interface.getGroups(_dsMeter->getDSID(), _zone->getID());
-    } catch(BusApiError& e) {
+      groups = m_Interface.getGroups(_dsMeter->getDSID(), _zone->getID());
+    } catch (BusApiError& e) {
       log("scanDSMeter: Error getting getGroups", lsFatal);
       return false;
     }
 
-    foreach(int groupID, groupIDs) {
-      if(groupID == 0) {
+    foreach(GroupSpec_t group, groups) {
+      if (group.GroupID == 0) {
         // ignore broadcast group
         continue;
       }
-      log("scanDSMeter:    Found group with id: " + intToString(groupID));
-      boost::shared_ptr<Group> groupOnZone = _zone->getGroup(groupID);
-      if(groupOnZone == NULL) {
-        log(" scanDSMeter:    Adding new group to zone");
-        groupOnZone.reset(new Group(groupID, _zone, m_Apartment));
-        _zone->addGroup(groupOnZone);
-      }
-      groupOnZone->setIsPresent(true);
-      groupOnZone->setIsConnected(true);
-      groupOnZone->setLastCalledScene(SceneOff);
+
+      log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
+          " and devices: " + intToString(group.NumberOfDevices));
+
+      // apartment-wide unique standard- and user-groups published in zone<0>
       boost::shared_ptr<Group> pGroup;
-      try {
-        pGroup = m_Apartment.getGroup(groupID);
-      } catch(ItemNotFoundException&) {
-        boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-        pGroup.reset(new Group(groupID, zoneBroadcast, m_Apartment));
-        zoneBroadcast->addGroup(pGroup);
-        log("scanDSMeter:     Adding new group to zone 0");
+      boost::shared_ptr<Group> groupOnZone;
+
+      if (group.GroupID <= 15) {
+
+        groupOnZone = _zone->getGroup(group.GroupID);
+        if (groupOnZone == NULL) {
+          log(" scanDSMeter:    Adding new group to zone");
+          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
+          groupOnZone->setName(group.Name);
+          groupOnZone->setStandardGroupID(group.StandardGroupID);
+          _zone->addGroup(groupOnZone);
+        }
+        groupOnZone->setIsPresent(true);
+        groupOnZone->setIsConnected(true);
+        groupOnZone->setLastCalledScene(SceneOff);
+        groupOnZone->setIsValid(true);
+
+        try {
+          pGroup = m_Apartment.getGroup(group.GroupID);
+        } catch (ItemNotFoundException&) {
+          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
+          pGroup.reset(new Group(group.GroupID, zoneBroadcast, m_Apartment));
+          pGroup->setName(group.Name);
+          pGroup->setStandardGroupID(group.StandardGroupID);
+          zoneBroadcast->addGroup(pGroup);
+        }
+        pGroup->setIsPresent(true);
+        pGroup->setIsConnected(true);
+        pGroup->setLastCalledScene(SceneOff);
+        pGroup->setIsValid(true);
+
+      } else if (group.GroupID <= 23) {
+
+        groupOnZone = _zone->getGroup(group.GroupID);
+        if (groupOnZone == NULL) {
+          log(" scanDSMeter:    Adding new group to zone");
+          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
+          groupOnZone->setName(group.Name);
+          groupOnZone->setStandardGroupID(group.StandardGroupID);
+          _zone->addGroup(groupOnZone);
+        } else {
+          if (groupOnZone->getName() != group.Name ||
+              groupOnZone->getStandardGroupID() != group.StandardGroupID) {
+            groupOnZone->setIsSynchronized(false);
+          }
+        }
+        groupOnZone->setIsPresent(true);
+        groupOnZone->setIsConnected(true);
+        groupOnZone->setLastCalledScene(SceneOff);
+        groupOnZone->setIsValid(true);
+
+        try {
+          pGroup = m_Apartment.getGroup(group.GroupID);
+          // apartment-user-group has no color unassigned
+          if (pGroup->getStandardGroupID() == 0 && group.StandardGroupID > 0) {
+            pGroup->setName(group.Name);
+            pGroup->setStandardGroupID(group.StandardGroupID);
+          }
+        } catch (ItemNotFoundException&) {
+          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
+          pGroup.reset(new Group(group.GroupID, zoneBroadcast, m_Apartment));
+          pGroup->setName(group.Name);
+          pGroup->setStandardGroupID(group.StandardGroupID);
+          zoneBroadcast->addGroup(pGroup);
+        }
+        pGroup->setIsPresent(true);
+        pGroup->setIsConnected(true);
+        pGroup->setLastCalledScene(SceneOff);
+        pGroup->setIsValid(true);
+
+        // this zone's apartment-user-group settings do not match the global group (zone 0)
+        if (groupOnZone->getName() != pGroup->getName() ||
+            groupOnZone->getStandardGroupID() != pGroup->getStandardGroupID()) {
+          groupOnZone->setIsSynchronized(false);
+        }
+
+      } else {
+
+        groupOnZone = _zone->getGroup(group.GroupID);
+        if (groupOnZone == NULL) {
+          log(" scanDSMeter:    Adding new group to zone");
+          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
+          groupOnZone->setName(group.Name);
+          groupOnZone->setStandardGroupID(group.StandardGroupID);
+          _zone->addGroup(groupOnZone);
+        } else {
+          if (groupOnZone->getName() != group.Name ||
+              groupOnZone->getStandardGroupID() != group.StandardGroupID) {
+            groupOnZone->setIsSynchronized(false);
+          }
+        }
+        groupOnZone->setIsPresent(true);
+        groupOnZone->setIsConnected(true);
+        groupOnZone->setLastCalledScene(SceneOff);
+        groupOnZone->setIsValid(true);
+
       }
-      pGroup->setIsPresent(true);
-      pGroup->setIsConnected(true);
     }
     return true;
   } // scanGroupsOfZone

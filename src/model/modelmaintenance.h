@@ -151,6 +151,7 @@ namespace dss {
     void setApartment(Apartment* _value);
     void setMetering(Metering* _value);
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
+    void setStructureModifyingBusInterface(StructureModifyingBusInterface* _value);
 
     boost::shared_ptr<TaskProcessor> getTaskProcessor() const
         { return m_taskProcessor; }
@@ -163,6 +164,7 @@ namespace dss {
     void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void readOutPendingMeter();
+    void synchronizeGroups();
 
     void readConfiguration();
     void writeConfiguration();
@@ -208,6 +210,7 @@ namespace dss {
     Metering* m_pMetering;
     const int m_EventTimeoutMS;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
+    StructureModifyingBusInterface* m_pStructureModifyingBusInterface;
 
     std::list<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents;
 

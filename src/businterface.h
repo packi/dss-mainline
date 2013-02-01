@@ -48,6 +48,13 @@ namespace dss {
   } DSMeterSpec_t;
 
   typedef struct {
+    uint8_t GroupID;
+    uint8_t StandardGroupID;
+    uint16_t NumberOfDevices;
+    std::string Name;
+  } GroupSpec_t;
+
+  typedef struct {
     uint8_t TargetGroupType;
     uint8_t TargetGroup;
     uint8_t InputType;
@@ -96,6 +103,10 @@ namespace dss {
     virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
                                  uint8_t _configIndex, uint8_t _value) = 0;
 
+    /** Set the active group for the button */
+    virtual void setDeviceButtonActiveGroup(const Device& _device,
+                                            uint8_t _groupID) = 0;
+
     /** Enable or disable programming mode */
     virtual void setDeviceProgMode(const Device& _device, uint8_t modeId) = 0;
 
@@ -137,7 +148,7 @@ namespace dss {
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
-    virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;
@@ -177,8 +188,11 @@ namespace dss {
     virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) = 0;
     virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name) = 0;
 
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    /** Create and manage user groups */
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
+    virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
     /** Send sensoric data downstream to devices */
     virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) = 0;

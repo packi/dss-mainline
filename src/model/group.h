@@ -40,12 +40,14 @@ namespace dss {
   private:
     int m_ZoneID;
     int m_GroupID;
+    int m_StandardGroupID;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
+    bool m_IsValid;
+    bool m_SyncPending;
+    std::string m_AssociatedSet;
     std::map<uint8_t, std::string> m_SceneNames;
     static boost::mutex m_SceneNameMutex;
-    bool m_IsInitializedFromBus;
-    std::string m_AssociatedSet;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
@@ -53,14 +55,26 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Returns the id of the group */
-    int getID() const;
-    int getZoneID() const;
+    int getID() const { return m_GroupID; }
+    int getZoneID() const { return m_ZoneID; }
+
+    /** Returns the id of the default behavior and associated standard group number */
+    int getStandardGroupID() const { return m_StandardGroupID; }
+    void setStandardGroupID(const int _standardGroupNumber);
+
+    /** returns true if the group is configured and usable */
+    bool isValid() const;
+    void setIsValid(const bool _value) { m_IsValid = _value; }
+
+    bool isSynchronized() const { return !m_SyncPending; }
+    void setIsSynchronized(const bool _value) { m_SyncPending = !_value; }
+
+    std::string getAssociatedSet() const { return m_AssociatedSet; }
+    void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }
 
     virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force);
-
     virtual void nextScene(const callOrigin_t _origin);
     virtual void previousScene(const callOrigin_t _origin);
-
     virtual unsigned long getPowerConsumption();
 
     /** @copydoc Device::getLastCalledScene */
@@ -86,11 +100,8 @@ namespace dss {
     Group& operator=(const Group& _other);
     void setSceneName(int _sceneNumber, const std::string& _name);
     const std::string& getSceneName(int _sceneNumber);
-    bool isInitializedFromBus() { return m_IsInitializedFromBus; }
-    void setIsInitializedFromBus(bool _value) { m_IsInitializedFromBus = _value; }
+
     void publishToPropertyTree();
-    void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }
-    const std::string& getAssociatedSet() const { return m_AssociatedSet; }
   }; // Group
 
 } // namespace dss

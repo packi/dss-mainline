@@ -68,6 +68,8 @@ namespace dss {
     virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
                                        const uint8_t _configIndex);
 
+    virtual void setDeviceButtonActiveGroup(const uint8_t _groupID);
+
     virtual void setDeviceProgMode(const uint8_t _modeId);
 
     virtual uint32_t getDeviceSensorValue(const uint8_t _sensorIndex);

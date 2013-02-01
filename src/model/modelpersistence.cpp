@@ -229,7 +229,7 @@ namespace dss {
     if ((strcmp(_name, "dsMeter") != 0)  &&(strcmp(_name, "modulator") != 0)) {
       return;
     }
-        
+
     m_tempMeter.reset();
     const char *id = getSingleAttribute("id", _attrs);
     if (id == NULL) {
@@ -257,23 +257,37 @@ namespace dss {
       return;
     }
 
-    m_tempGroup.reset();
-    const char *gid = getSingleAttribute("id", _attrs);
+    const char *gid = NULL;
+    const char *grName = NULL;
+    for (int i = 0; _attrs[i]; i += 2)
+    {
+      if (strcmp(_attrs[i], "id") == 0) {
+        gid = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "name") == 0) {
+        grName = _attrs[i + 1];
+      }
+    }
+
     if (gid == NULL) {
       return;
     }
-
     int groupID = strToIntDef(gid, -1);
     if (groupID == -1) {
       return;
     }
+    std::string name;
+    if (grName) {
+      name = std::string(grName);
+    }
 
+    m_tempGroup.reset();
     m_tempGroup = m_tempZone->getGroup(groupID);
     if (m_tempGroup == NULL) {
       m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
       m_tempZone->addGroup(m_tempGroup);
     }
-    m_tempGroup->setIsInitializedFromBus(true);
+    m_tempGroup->setName(name);
+    m_tempGroup->setIsValid(true);
   }
 
   void ModelPersistence::parseScene(const char *_name, const char **_attrs) {
@@ -414,10 +428,11 @@ namespace dss {
         if (m_state == ps_group) {
           parseGroup(_name, _attrs);
         }
-      // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>
+      // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>
       } else if (m_level == 5) {
         if ((m_state == ps_group) && 
             ((strcmp(_name, "name") == 0) || 
+             (strcmp(_name, "color") == 0) ||
              (strcmp(_name, "associatedSet") == 0))) {
           m_expectString = true;
         } else if ((m_state == ps_group) && (strcmp(_name, "scenes") == 0)) {
@@ -516,6 +531,8 @@ namespace dss {
             m_tempGroup->setName(m_chardata);
           } else if (strcmp(_name, "associatedSet") == 0) {
             m_tempGroup->setAssociatedSet(m_chardata);
+          } else if (strcmp(_name, "color") == 0) {
+            m_tempGroup->setStandardGroupID(strToUIntDef(m_chardata, 0));
           }
         } else if ((m_state == ps_scene) && (strcmp(_name, "scenes") == 0)) {
           m_state = ps_group;
@@ -627,24 +644,23 @@ namespace dss {
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
-    if(!_pGroup->getName().empty()) {
+    if (!_pGroup->getName().empty()) {
       _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pGroup->getName()) << "</name>" << std::endl;
     }
-    if(!_pGroup->getAssociatedSet().empty()) {
-      _ofs << doIndent(_indent + 1) << "<associatedSet>" << _pGroup->getAssociatedSet() << "</associatedSet>" << std::endl;
+    if (!_pGroup->getAssociatedSet().empty()) {
+      _ofs << doIndent(_indent + 1) << "<associatedSet>" << XMLStringEscape(_pGroup->getAssociatedSet()) << "</associatedSet>" << std::endl;
     }
-    if(_pGroup->isInitializedFromBus()) {
-      _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
-      for(int iScene = 0; iScene < MaxSceneNumber; iScene++) {
-        std::string name = _pGroup->getSceneName(iScene);
-        if(!name.empty()) {
-          _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
-          _ofs << doIndent(_indent + 3) << "<name>" << XMLStringEscape(name) << "</name>" << std::endl;
-          _ofs << doIndent(_indent + 2) << "</scene>" << std::endl;
-        }
+    _ofs << doIndent(_indent + 1) << "<color>" << intToString(_pGroup->getStandardGroupID()) << "</color>" << std::endl;
+    _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
+    for (int iScene = 0; iScene < MaxSceneNumber; iScene++) {
+      std::string name = _pGroup->getSceneName(iScene);
+      if (!name.empty()) {
+        _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
+        _ofs << doIndent(_indent + 3) << "<name>" << XMLStringEscape(name) << "</name>" << std::endl;
+        _ofs << doIndent(_indent + 2) << "</scene>" << std::endl;
       }
-      _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
     }
+    _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
     _ofs << doIndent(_indent) << "</group>" << std::endl;
   } // groupToXML
 
@@ -654,8 +670,19 @@ namespace dss {
       _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pZone->getName()) << "</name>" << std::endl;
     }
     _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
-    foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-      groupToXML(pGroup, _ofs, _indent + 2);
+
+    if (_pZone->getID() == 0) {
+      // store unique "apartment user-groups" in zone 0
+      foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
+        if (pGroup->getID() >= 16 && pGroup->getID() <= 23) {
+          groupToXML(pGroup, _ofs, _indent + 2);
+        }
+      }
+    } else {
+      // store real user-groups per zone
+      foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
+        groupToXML(pGroup, _ofs, _indent + 2);
+      }
     }
     _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
     _ofs << doIndent(_indent) << "</zone>" << std::endl;

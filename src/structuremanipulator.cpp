@@ -228,13 +228,6 @@ namespace dss {
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
-  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group,
-                                          int _sceneNumber,
-                                          const std::string& _name) {
-    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber,
-                             _name);
-  } // sceneSetName
-
   void StructureManipulator::deviceSetName(boost::shared_ptr<Device> _pDevice,
                                            const std::string& _name) {
     m_Interface.deviceSetName(_pDevice->getDSMeterDSID(),
@@ -273,7 +266,7 @@ namespace dss {
       pGroup = boost::shared_ptr<Group>(
         new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
       m_Apartment.getZone(0)->addGroup(pGroup);
-      m_Interface.createGroup(0, _groupNumber);
+      m_Interface.createGroup(0, _groupNumber, 0, "");
       pGroup->setAssociatedSet(_originalSet);
     }
     Logger::getInstance()->log("creating new group " + intToString(_groupNumber));
@@ -311,21 +304,224 @@ namespace dss {
     }
   } // unpersistSet
 
-  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber) {
+  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int _standardGroupNumber, const std::string& _name) {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
-    boost::shared_ptr<Group> pGroup = _zone->getGroup(_groupNumber);
-    if (!pGroup) {
-      Logger::getInstance()->log("creating new group " + intToString(_groupNumber) +
-          " in zone " + intToString(_zone->getID()));
-      pGroup = boost::shared_ptr<Group>(
-        new Group(_groupNumber, _zone, m_Apartment));
-      // TODO: allow new groups across all zone, e.g. with ZoneID == 0
-      _zone->addGroup(pGroup);
-      m_Interface.createGroup(_zone->getID(), _groupNumber);
+    boost::shared_ptr<Group> pGroup;
+
+    if (_groupNumber <= 15) {
+      throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
+
+    if (_groupNumber <= 23) {
+      if (_zone->getID() != 0) {
+        throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
+      }
+      try {
+        Logger::getInstance()->log("Configure user group " + intToString(_groupNumber) +
+            " with standard-id " + intToString(_standardGroupNumber), lsInfo);
+        pGroup = m_Apartment.getGroup(_groupNumber);
+        pGroup->setName(_name);
+        pGroup->setStandardGroupID(_standardGroupNumber);
+        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zones) {
+          if (pZone->getID() == 0 || !pZone->isConnected()) {
+            continue;
+          }
+          pGroup = pZone->getGroup(_groupNumber);
+          if (pGroup == NULL) {
+            pGroup = boost::shared_ptr<Group>(new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
+            m_Apartment.getZone(0)->addGroup(pGroup);
+            m_Interface.createGroup(pZone->getID(), _groupNumber, _standardGroupNumber, _name);
+          } else {
+            m_Interface.groupSetName(pZone->getID(), _groupNumber, _name);
+            m_Interface.groupSetStandardID(pZone->getID(), _groupNumber, _standardGroupNumber);
+          }
+          pGroup->setName(_name);
+          pGroup->setStandardGroupID(_standardGroupNumber);
+        }
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Datamodel-Error creating user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error creating user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    if (_groupNumber <= 31) {
+      try {
+        pGroup = _zone->getGroup(_groupNumber);
+        throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Creating user group " + intToString(_groupNumber) +
+            " in zone " + intToString(_zone->getID()), lsInfo);
+        pGroup = boost::shared_ptr<Group>(new Group(_groupNumber, _zone, m_Apartment));
+        _zone->addGroup(pGroup);
+        m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
+      }
+      return;
+    }
+
+    throw DSSException("Create group: id " + intToString(_groupNumber) + " too large");
   } // createGroup
+
+  void StructureManipulator::removeGroup(boost::shared_ptr<Zone> _zone, int _groupNumber) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+    boost::shared_ptr<Group> pGroup;
+
+    if (_groupNumber <= 15) {
+      throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
+    }
+
+    if (_groupNumber <= 23) {
+      if (_zone->getID() != 0) {
+        throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
+      }
+      try {
+        Logger::getInstance()->log("Remove user group " + intToString(_groupNumber), lsInfo);
+        pGroup = m_Apartment.getGroup(_groupNumber);
+      } catch (ItemNotFoundException& e) {
+        throw DSSException("Remove group: id " + intToString(_groupNumber) + " does not exist");
+      }
+      try {
+        pGroup->setName("");
+        pGroup->setStandardGroupID(0);
+        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zones) {
+          if (pZone->getID() == 0 || !pZone->isConnected()) {
+            continue;
+          }
+          pGroup = pZone->getGroup(_groupNumber);
+          if (pGroup == NULL) {
+            continue;
+          }
+          pGroup->setName("");
+          pGroup->setStandardGroupID(0);
+          m_Interface.groupSetName(pZone->getID(), _groupNumber, "");
+          m_Interface.groupSetStandardID(pZone->getID(), _groupNumber, 0);
+        }
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Datamodel-Error removing user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    if (_groupNumber <= 31) {
+      try {
+        pGroup = _zone->getGroup(_groupNumber);
+      } catch (ItemNotFoundException& e) {
+        throw DSSException("Group id " + intToString(_groupNumber) + " does not exist");
+      }
+      try {
+        Logger::getInstance()->log("Removing user group " + intToString(_groupNumber) +
+          " in zone " + intToString(_zone->getID()), lsInfo);
+        _zone->removeGroup(pGroup);
+        m_Interface.removeGroup(_zone->getID(), _groupNumber);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    throw DSSException("Remove group: id " + intToString(_groupNumber) + " too large");
+  } // removeGroup
+
+  void StructureManipulator::groupSetName(boost::shared_ptr<Group> _group,
+                                          const std::string& _name) {
+    if (_group->getID() <= 15) {
+      throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
+    }
+
+    if (_group->getID() <= 23) {
+      _group->setName(_name);
+      try {
+        boost::shared_ptr<Group> pGroup;
+        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zones) {
+          if (pZone->getID() == 0 || !pZone->isConnected()) {
+            continue;
+          }
+          pGroup = pZone->getGroup(_group->getID());
+          if (pGroup == NULL) {
+            continue;
+          }
+          pGroup->setName(_name);
+          m_Interface.groupSetName(pZone->getID(), _group->getID(), _name);
+        }
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Datamodel-Error setting user group " + intToString(_group->getID()) +
+            " name: " + e.what(), lsWarning);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_group->getID()) +
+            " name: " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    if (_group->getID() <= 31) {
+      _group->setName(_name);
+      m_Interface.groupSetName(_group->getZoneID(), _group->getID(), _name);
+    }
+
+    throw DSSException("Remove group: id " + intToString(_group->getID()) + " too large");
+  } // groupSetName
+
+  void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
+                                                const int _standardGroupNumber) {
+    if (_group->getID() <= 15) {
+      throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
+    }
+
+    if (_group->getID() <= 23) {
+      _group->setStandardGroupID(_standardGroupNumber);
+      try {
+        boost::shared_ptr<Group> pGroup;
+        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zones) {
+          if (pZone->getID() == 0 || !pZone->isConnected()) {
+            continue;
+          }
+          pGroup = pZone->getGroup(_group->getID());
+          if (pGroup == NULL) {
+            continue;
+          }
+          pGroup->setStandardGroupID(_standardGroupNumber);
+          m_Interface.groupSetStandardID(pZone->getID(), _group->getID(), _standardGroupNumber);
+        }
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Datamodel-Error setting user group " + intToString(_group->getID()) +
+            " name: " + e.what(), lsWarning);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_group->getID()) +
+            " name: " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    if (_group->getID() <= 31) {
+      _group->setStandardGroupID(_standardGroupNumber);
+      m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
+    }
+
+    throw DSSException("Remove group: id " + intToString(_group->getID()) + " too large");
+  } // groupSetStandardID
+
+  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group,
+                                          int _sceneNumber,
+                                          const std::string& _name) {
+    _group->setSceneName(_sceneNumber, _name);
+    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
+  } // sceneSetName
 
   void StructureManipulator::deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
     if(m_Apartment.getPropertyNode() != NULL) {
@@ -333,6 +529,17 @@ namespace dss {
     }
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->addToGroup(_group->getID());
+
+    if (_group->getID() >= 16) {
+      if ((_device->getDeviceType() == DEVICE_TYPE_AKM) && (_device->getBinaryInputCount() == 1)) {
+        /* AKM with single input, set active group to last group */
+        _device->setDeviceBinaryInputTarget(0, 0, _group->getID());
+        _device->setBinaryInputTarget(0, 0, _group->getID());
+      } else if (_device->getOutputMode() == 0) {
+        /* device has no output, button is active on group */
+        _device->setDeviceButtonActiveGroup(_group->getID());
+      }
+    }
   } // deviceAddToGroup
 
   void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
@@ -341,6 +548,17 @@ namespace dss {
     }
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
+
+    if ((_device->getDeviceType() == DEVICE_TYPE_AKM) &&
+        (_device->getBinaryInputCount() == 1) &&
+        (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
+      /* AKM with single input, active on removed group */
+      _device->setDeviceBinaryInputTarget(0, 0, GroupIDBlack);
+      _device->setBinaryInputTarget(0, 0, GroupIDBlack);
+    } else if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
+      /* device has no output, button is active on removed group */
+      _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
+    }
   } // deviceRemoveFromGroup
 
   void StructureManipulator::sensorPush(boost::shared_ptr<Zone> _zone, dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {

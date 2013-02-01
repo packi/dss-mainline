@@ -35,6 +35,8 @@
 #include "src/model/zone.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
+#include "src/dss.h"
+#include "src/model/modulator.h"
 
 namespace dss {
 
@@ -58,9 +60,21 @@ namespace dss {
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     if(_device.getDevice()->isPresent()) {
       result->addProperty("meterDSID", _device.getDevice()->getDSMeterDSID().toString());
+      std::string dSMName;
+      try {
+        dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
+      } catch(std::runtime_error&) {
+      }
+      result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getShortAddress());
     } else {
       result->addProperty("meterDSID", _device.getDevice()->getLastKnownDSMeterDSID().toString());
+      std::string dSMName;
+      try {
+        dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
+      } catch(std::runtime_error&) {
+      }
+      result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getLastKnownShortAddress());
     }
     result->addProperty("zoneID", _device.getDevice()->getZoneID());
@@ -81,16 +95,17 @@ namespace dss {
     result->addProperty("outputMode", _device.getDevice()->getOutputMode());
     result->addProperty("buttonID", _device.getDevice()->getButtonID());
     result->addProperty("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
+    result->addProperty("buttonGroupMembership", _device.getDevice()->getButtonGroupMembership());
     result->addProperty("buttonInputMode", _device.getDevice()->getButtonInputMode());
     result->addProperty("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
     result->addProperty("buttonInputCount", _device.getDevice()->getButtonInputCount());
 
-    boost::shared_ptr<JSONArray<std::string> > groupsArr(new JSONArray<std::string>());
+    boost::shared_ptr<JSONArray<int> > groupsArr(new JSONArray<int>());
     result->addElement("groups", groupsArr);
     std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
     for (int g = 1; g <= 63; g++) {
       if (deviceGroups.test(g-1)) {
-        groupsArr->add(intToString(g));
+        groupsArr->add(g);
       }
     }
 
@@ -128,7 +143,9 @@ namespace dss {
     boost::shared_ptr<JSONObject> result(new JSONObject());
     result->addProperty("id", _group->getID());
     result->addProperty("name", _group->getName());
+    result->addProperty("color", _group->getStandardGroupID());
     result->addProperty("isPresent", _group->isPresent());
+    result->addProperty("isValid", _group->isValid());
 
     boost::shared_ptr<JSONArray<std::string> > devicesArr(new JSONArray<std::string>());
     result->addElement("devices", devicesArr);

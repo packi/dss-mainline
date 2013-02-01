@@ -36,9 +36,16 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/modelmaintenance.h"
+#include "src/stringconverter.h"
 
 #include "foreach.h"
 #include "jsonhelper.h"
+#include "foreach.h"
+
+#define MIN_APP_USER_GROUP_ID   16  // minimum allowed apartment user group id
+#define MAX_APP_USER_GROUP_ID   23
+#define MIN_USER_GROUP_ID       24  // minimum allowed user group id
+#define MAX_USER_GROUP_ID       31
 
 namespace dss {
 
@@ -97,17 +104,9 @@ namespace dss {
             } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
               uint16_t serialNr = dev->getOemSerialNumber();
               if ((serialNr > 0) & !dev->getOemIsIndependent()) {
-                unsigned long long ean = dev->getOemEan();
-                dss_dsid_t dsmId = dev->getDSMeterDSID();
-                std::vector<boost::shared_ptr<Device> > devices = DSS::getInstance()->getApartment().getDevicesVector();
+                std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
                 foreach (const boost::shared_ptr<Device>& device, devices) {
-                  if ((device->getDSID() != deviceID) &&
-                      device->isPresent() &&
-                      (device->getDSMeterDSID() == dsmId) &&
-                      (device->getOemInfoState() == DEVICE_OEM_VALID) &&
-                      (device->getOemEan() == ean) &&
-                      (device->getOemSerialNumber() == serialNr) &&
-                      !device->getOemIsIndependent()) {
+                  if (dev->isOemCoupledWith(device)) {
                     manipulator.addDeviceToZone(device, zone);
                     movedDevices.push_back(device);
                   }
@@ -262,35 +261,125 @@ namespace dss {
     }
   } // persistSet
 
-  boost::shared_ptr<JSONObject> StructureRequestHandler::addGroup(const RestfulRequest& _request) {
+  boost::shared_ptr<JSONObject> StructureRequestHandler::removeGroup(const RestfulRequest& _request) {
     boost::shared_ptr<Zone> zone;
     int groupID = -1;
     int zoneID = -1;
 
-    if(_request.hasParameter("zoneID")) {
+    if (_request.hasParameter("zoneID")) {
       std::string zoneIDStr = _request.getParameter("zoneID");
       zoneID = strToIntDef(zoneIDStr, -1);
       zone = m_Apartment.getZone(zoneID);
     }
-    if(zoneID < 1 || !zone) {
+    if (zoneID < 0 || !zone) {
       return failure("Invalid value for parameter zoneID : '" + _request.getParameter("zoneID") + "'");
     }
 
-    if(_request.hasParameter("groupID")) {
+    if (_request.hasParameter("groupID")) {
       std::string groupIDStr = _request.getParameter("groupID");
       groupID = strToIntDef(groupIDStr, -1);
-      if(zone->getGroup(groupID)) {
-        return failure("Group with groupID : '" + _request.getParameter("groupID") + "' already exists");
-      }
     }
-    if(groupID == -1) {
-      return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
+    if (groupID == -1) {
+      return failure("Invalid groupID : '" + _request.getParameter("groupID") + "'");
+    }
+
+    if (zone->getGroup(groupID) == NULL) {
+      return failure("Group with groupID : '" + _request.getParameter("groupID") + "' does not exist");
+    }
+
+    if (!zone->getGroup(groupID)->getDevices().isEmpty()) {
+      return failure("Group with groupID : '" + _request.getParameter("groupID") + "' is not empty.");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(zone, groupID);
+    manipulator.removeGroup(zone, groupID);
 
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return success();
+  } // removeGroup
+
+  boost::shared_ptr<JSONObject> StructureRequestHandler::addGroup(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    boost::shared_ptr<Group> pGroup;
+    int groupID = -1;
+    int zoneID = -1;
+    int standardGroupID = 0;
+    std::string groupName;
+
+    if (_request.hasParameter("zoneID")) {
+      std::string zoneIDStr = _request.getParameter("zoneID");
+      zoneID = strToIntDef(zoneIDStr, -1);
+      zone = m_Apartment.getZone(zoneID);
+    }
+    if (zoneID < 0 || !zone) {
+      return failure("Parameter zoneID missing or empty: '" + _request.getParameter("zoneID") + "'");
+    }
+
+    if (_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+      if (groupID < 0) {
+        return failure("Parameter GroupID '" + _request.getParameter("groupID") + "' is not valid");
+      }
+      if (zone->getGroup(groupID) != NULL) {
+        return failure("Group with ID " + _request.getParameter("groupID") + " already exists");
+      }
+    }
+    else if (_request.hasParameter("groupAutoSelect")) {
+      std::string grType = _request.getParameter("groupAutoSelect");
+      if (grType == "user") {
+        groupID = -1;
+      } else if (grType == "global") {
+        groupID = -2;
+      }
+    } else {
+      return failure("Parameter groupID or groupAutoSelect missing");
+    }
+
+    if (groupID == -1) {
+      // find any free group slot
+      for (groupID = MIN_USER_GROUP_ID; pGroup == NULL && groupID < MAX_USER_GROUP_ID; groupID ++) {
+        pGroup = zone->getGroup(groupID);
+      }
+    } else if (groupID == -2) {
+      if (zoneID != 0) {
+        return failure("Apartment user groups only allowed in Zone 0");
+      }
+      // find a group slot with unassigned state machine id
+      for (groupID = MIN_APP_USER_GROUP_ID; groupID <= MAX_APP_USER_GROUP_ID; groupID ++) {
+        pGroup = zone->getGroup(groupID);
+        if (pGroup->getStandardGroupID() == 0) {
+          break;
+        }
+      }
+      if (pGroup->getStandardGroupID() > 0) {
+        pGroup.reset();
+      }
+    }
+
+    if (pGroup == NULL) {
+      return failure("No free user groups");
+    }
+
+    if (_request.hasParameter("groupName")) {
+      StringConverter st("UTF-8", "UTF-8");
+      groupName = st.convert(_request.getParameter("groupName"));
+    }
+    if (_request.hasParameter("groupColor")) {
+      standardGroupID = strToIntDef(_request.getParameter("groupColor"), 0);
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.createGroup(zone, groupID, standardGroupID, groupName);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    resultObj->addProperty("groupID", groupID);
+    resultObj->addProperty("zoneID", zoneID);
+    resultObj->addProperty("groupName", groupName);
+    resultObj->addProperty("groupColor", standardGroupID);
+    return success(resultObj);
   } // addGroup
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::groupAddDevice(const RestfulRequest& _request) {
@@ -319,14 +408,60 @@ namespace dss {
         gr = boost::shared_ptr<Group> ();
       }
     }
-    if(!gr) {
+    if(!gr || !gr->isValid()) {
       return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
+    }
+
+    if (!(dev->getGroupBitmask().test(gr->getStandardGroupID()-1) ||
+          (dev->getDeviceType() == DEVICE_TYPE_AKM))) {
+      return failure("Devices does not match color of group (" + intToString(gr->getStandardGroupID()) + ")");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.deviceAddToGroup(dev, gr);
 
-    return success();
+    std::vector<boost::shared_ptr<Device> > modifiedDevices;
+    modifiedDevices.push_back(dev);
+
+    if (dev->is2WayMaster()) {
+      dss_dsid_t next = dev->getDSID();
+      next.lower++;
+      try {
+        boost::shared_ptr<Device> pPartnerDevice;
+
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+        manipulator.deviceAddToGroup(pPartnerDevice, gr);
+      } catch(std::runtime_error& e) {
+        return failure("Could not find partner device with dsid '" + next.toString() + "'");
+      }
+    }
+    if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
+      uint16_t serialNr = dev->getOemSerialNumber();
+      if ((serialNr > 0) & !dev->getOemIsIndependent()) {
+        std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
+        foreach (const boost::shared_ptr<Device>& device, devices) {
+          if (dev->isOemCoupledWith(device)) {
+            manipulator.deviceAddToGroup(device, gr);
+            modifiedDevices.push_back(device);
+          }
+        }
+      }
+    }
+
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    if (!modifiedDevices.empty()) {
+      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
+        const DeviceReference d(device, &m_Apartment);
+        modified->addElement("", toJSON(d));
+      }
+      resultObj->addProperty("action", "update");
+      resultObj->addElement("devices", modified);
+    } else {
+      resultObj->addProperty("action", "none");
+    }
+
+    return success(resultObj);
   } // groupAddDevice
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::groupRemoveDevice(const RestfulRequest& _request) {
@@ -355,15 +490,135 @@ namespace dss {
         gr = boost::shared_ptr<Group> ();
       }
     }
-    if(!gr) {
+    if(!gr || !gr->isValid()) {
       return failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.deviceRemoveFromGroup(dev, gr);
 
-    return success();
+    std::vector<boost::shared_ptr<Device> > modifiedDevices;
+    modifiedDevices.push_back(dev);
+
+    if (dev->is2WayMaster()) {
+      dss_dsid_t next = dev->getDSID();
+      next.lower++;
+      try {
+        boost::shared_ptr<Device> pPartnerDevice;
+
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+        manipulator.deviceRemoveFromGroup(pPartnerDevice, gr);
+      } catch(std::runtime_error& e) {
+        return failure("Could not find partner device with dsid '" + next.toString() + "'");
+      }
+    }
+    if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
+      uint16_t serialNr = dev->getOemSerialNumber();
+      if ((serialNr > 0) & !dev->getOemIsIndependent()) {
+        std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
+        foreach (const boost::shared_ptr<Device>& device, devices) {
+          if (dev->isOemCoupledWith(device)) {
+            manipulator.deviceRemoveFromGroup(device, gr);
+            modifiedDevices.push_back(device);
+          }
+        }
+      }
+    }
+
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    if (!modifiedDevices.empty()) {
+      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
+        const DeviceReference d(device, &m_Apartment);
+        modified->addElement("", toJSON(d));
+      }
+      resultObj->addProperty("action", "update");
+      resultObj->addElement("devices", modified);
+    } else {
+      resultObj->addProperty("action", "none");
+    }
+
+    return success(resultObj);
   } // groupRemoveDevice
+
+
+  boost::shared_ptr<JSONObject> StructureRequestHandler::groupSetName(const RestfulRequest& _request) {
+    StringConverter st("UTF-8", "UTF-8");
+    boost::shared_ptr<Zone> zone;
+    boost::shared_ptr<Group> group;
+    int groupID = -1;
+    int zoneID = -1;
+
+    if(_request.hasParameter("zoneID")) {
+      std::string zoneIDStr = _request.getParameter("zoneID");
+      zoneID = strToIntDef(zoneIDStr, -1);
+      zone = m_Apartment.getZone(zoneID);
+    }
+    if(zoneID < 0 || !zone) {
+      return failure("Invalid value for parameter zoneID : '" + _request.getParameter("zoneID") + "'");
+    }
+
+    if(_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+    }
+
+    group = zone->getGroup(groupID);
+    if ((groupID < 1) || !group) {
+      return failure("Could not find group with id : '" + _request.getParameter("groupID") + "'");
+    }
+
+    if (!_request.hasParameter("newName")) {
+      return failure("missing parameter 'newName'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.groupSetName(group, _request.getParameter("newName"));
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return success();
+  }
+
+  boost::shared_ptr<JSONObject> StructureRequestHandler::groupSetColor(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    boost::shared_ptr<Group> group;
+    int groupID = -1;
+    int zoneID = -1;
+
+    if(_request.hasParameter("zoneID")) {
+      std::string zoneIDStr = _request.getParameter("zoneID");
+      zoneID = strToIntDef(zoneIDStr, -1);
+      zone = m_Apartment.getZone(zoneID);
+    }
+    if(zoneID < 0 || !zone) {
+      return failure("Invalid value for parameter zoneID : '" + _request.getParameter("zoneID") + "'");
+    }
+
+    if(_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+    }
+
+    group = zone->getGroup(groupID);
+    if ((groupID < 1) || !group) {
+      return failure("Could not find group with id : '" + _request.getParameter("groupID") + "'");
+    }
+
+    if (!_request.hasParameter("newColor")) {
+      return failure("missing parameter 'newColor'");
+    }
+
+    int newColor = strToIntDef(_request.getParameter("newColor"), -1);
+    if (newColor < 0) {
+      return failure("Invalid value for parameter newColor: '" + _request.getParameter("newColor") + "'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.groupSetStandardID(group, newColor);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return success();
+  }
 
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
@@ -380,10 +635,16 @@ namespace dss {
       return unpersistSet(_request);
     } else if(_request.getMethod() == "addGroup") {
       return addGroup(_request);
+    } else if(_request.getMethod() == "removeGroup") {
+      return removeGroup(_request);
     } else if(_request.getMethod() == "groupAddDevice") {
       return groupAddDevice(_request);
     } else if(_request.getMethod() == "groupRemoveDevice") {
       return groupRemoveDevice(_request);
+    } else if(_request.getMethod() == "groupSetName") {
+      return groupSetName(_request);
+    } else if(_request.getMethod() == "groupSetColor") {
+      return groupSetColor(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }

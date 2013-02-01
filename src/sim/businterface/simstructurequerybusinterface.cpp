@@ -93,13 +93,8 @@ namespace dss {
     return std::vector<DeviceSpec_t>();
   } // getInactiveDevicesInZone
 
-  std::vector<int> SimStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
-    std::vector<int> result;
-    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
-    if(pMeter != NULL) {
-      result = pMeter->getGroupsOfZone(_zoneID);
-    }
-    return result;
+  std::vector<GroupSpec_t> SimStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    return std::vector<GroupSpec_t>();
   } // getGroups
 
   std::vector<std::pair<int, int> > SimStructureQueryBusInterface::getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {

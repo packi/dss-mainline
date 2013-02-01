@@ -36,18 +36,23 @@ namespace dss {
   : AddressableModelItem(&_apartment),
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
+    m_StandardGroupID(0),
     m_LastCalledScene(SceneOff),
-    m_IsInitializedFromBus(false)
+    m_IsValid(false),
+    m_SyncPending(false)
   {
   } // ctor
 
-  int Group::getID() const {
-    return m_GroupID;
-  } // getID
+  bool Group::isValid() const {
+    if (m_GroupID <= 23) {
+      return m_IsValid && (m_StandardGroupID > 0);
+    }
+    return m_IsValid;
+  } // isValid
 
-  int Group::getZoneID() const {
-    return m_ZoneID;
-  } // getZoneID
+  void Group::setStandardGroupID(const int _standardGroupNumber) {
+    m_StandardGroupID = _standardGroupNumber;
+  } // getID
 
   Set Group::getDevices() const {
     return m_pApartment->getZone(m_ZoneID)->getDevices().getByGroup(m_GroupID);
@@ -102,12 +107,18 @@ namespace dss {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(m_GroupID));
         m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
+        m_pPropertyNode->createProperty("color")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getStandardGroupID, &Group::setStandardGroupID));
+        m_pPropertyNode->createProperty("valid")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, bool>(*this, &Group::isValid, &Group::setIsValid));
+        m_pPropertyNode->createProperty("sync")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, bool>(*this, &Group::isSynchronized, &Group::setIsSynchronized));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
         m_pPropertyNode->createProperty("lastCalledScene")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
-        m_pPropertyNode->createProperty("scenes");
         m_pPropertyNode->createProperty("devices");
+        m_pPropertyNode->createProperty("scenes");
       }
     }
   } // publishToPropertyTree
