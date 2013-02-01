@@ -530,7 +530,8 @@ namespace dss {
       return success(resultObj);
     } else if(_request.getMethod() == "setButtonActiveGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -2);
-      if ((value < -1) || (value > 63)) {
+      if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
+          ((value < -1) || (value > 63))) {
         return failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceButtonActiveGroup(value);
