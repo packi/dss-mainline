@@ -98,6 +98,15 @@ namespace dss {
       }
     }
 
+    virtual void setDeviceButtonActiveGroup(const Device& _device,
+                                            uint8_t _groupID) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->setDeviceButtonActiveGroup(_device, _groupID);
+      } else {
+        m_pInner->setDeviceButtonActiveGroup(_device, _groupID);
+      }
+    }
+
     virtual void setDeviceProgMode(const Device& _device, uint8_t _modeId) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
         m_pSimulationInterface->setDeviceProgMode(_device, _modeId);

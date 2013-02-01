@@ -348,6 +348,24 @@ namespace dss {
         ((m_ButtonActiveGroup & 0xf) << 4) | (_buttonId & 0xf));
   } // setDeviceButtonId
 
+  void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this,
+                                                                        _buttonActiveGroup);
+
+      /* refresh device information for correct active group */
+      if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged,
+                                                    m_DSMeterDSID);
+        pEvent->addParameter(m_ShortAddress);
+        m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+      }
+    }
+  } // setDeviceActiveGroup
+
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
     if((_groupId < 1) && (_groupId > 7)) {
       throw std::runtime_error("Invalid joker group value");
@@ -1450,7 +1468,7 @@ namespace dss {
       throw ItemNotFoundException("Invalid binary input index");
     }
     m_binaryInputs[_index]->m_targetGroupId = targetGroup;
-    m_binaryInputs[_index]->m_targetGroupId = targetGroupType;
+    m_binaryInputs[_index]->m_targetGroupType = targetGroupType;
   }
 
   void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {

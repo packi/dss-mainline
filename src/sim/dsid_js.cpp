@@ -206,6 +206,20 @@ namespace dss {
       }
     } // setDeviceConfig
 
+    virtual void setDeviceButtonActiveGroup(const uint8_t _groupID) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(int(_groupID));
+          m_pSelf->callFunctionByName<void>("setDeviceButtonActiveGroup", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setDeviceButtonActiveGroup'") + e.what(), lsError);
+        }
+      }
+    } // setDeviceConfig
+
 
     virtual uint8_t getDeviceConfig(uint8_t _configClass,
                               uint8_t _configIndex) {

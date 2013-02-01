@@ -57,6 +57,8 @@
 
 #define DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2       0xff
 
+#define BUTTON_ACTIVE_GROUP_RESET    0xff
+
 // pairing JSON strings
 #define BUTTONINPUT_1WAY            "1way"
 #define BUTTONINPUT_2WAY_DOWN       "2way_down"
@@ -242,6 +244,7 @@ namespace dss {
     /** Set device configuration values */
     void setDeviceConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value);
     void setDeviceButtonID(uint8_t _buttonId);
+    void setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup);
     void setDeviceJokerGroup(uint8_t _groupId);
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);

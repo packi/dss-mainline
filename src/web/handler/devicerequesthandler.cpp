@@ -528,6 +528,30 @@ namespace dss {
         }
       }
       return success(resultObj);
+    } else if(_request.getMethod() == "setButtonActiveGroup") {
+      int value = strToIntDef(_request.getParameter("groupID"), -2);
+      if ((value < -1) || (value > 63)) {
+        return failure("Invalid or missing parameter 'groupID'");
+      }
+      pDevice->setDeviceButtonActiveGroup(value);
+
+      if (pDevice->is2WayMaster()) {
+        DeviceFeatures_t features = pDevice->getFeatures();
+        if (!features.syncButtonID) {
+          return success();
+        }
+
+        dss_dsid_t next = pDevice->getDSID();
+        next.lower++;
+        try {
+          boost::shared_ptr<Device> pPartnerDevice;
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+          pPartnerDevice->setDeviceButtonActiveGroup(value);
+        } catch(std::runtime_error& e) {
+          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        }
+      }
+      return success();
     } else if(_request.getMethod() == "setOutputMode") {
       int value = strToIntDef(_request.getParameter("modeID"), -1);
       if((value  < 0) || (value > 255)) {

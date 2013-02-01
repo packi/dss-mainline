@@ -95,6 +95,7 @@ namespace dss {
     result->addProperty("outputMode", _device.getDevice()->getOutputMode());
     result->addProperty("buttonID", _device.getDevice()->getButtonID());
     result->addProperty("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
+    result->addProperty("buttonGroupMembership", _device.getDevice()->getButtonGroupMembership());
     result->addProperty("buttonInputMode", _device.getDevice()->getButtonInputMode());
     result->addProperty("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
     result->addProperty("buttonInputCount", _device.getDevice()->getButtonInputCount());
