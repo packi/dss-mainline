@@ -1,4 +1,5 @@
 dist_dssdataimages_DATA =  \
+   $(top_srcdir)/data/images/akm_black_black.png \
    $(top_srcdir)/data/images/kl_black_black.png \
    $(top_srcdir)/data/images/kl_black_blue.png \
    $(top_srcdir)/data/images/kl_black_cyan.png \
