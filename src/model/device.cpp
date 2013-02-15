@@ -1011,6 +1011,10 @@ namespace dss {
     }
   }
 
+  std::string Device::getAKMInputProperty() const {
+    return m_AKMInputProperty;
+  }
+
   bool Device::is2WayMaster() const {
     return (getFeatures().pairing &&
              ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
