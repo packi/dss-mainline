@@ -41,7 +41,7 @@ namespace dss {
   State::State(const std::string& _name)
     : m_name(_name),
       m_IsPersistent(false),
-      m_state(State_Invalid),
+      m_state(State_Inactive),
       m_type(StateType_Apartment)
   {
     load();
@@ -51,7 +51,7 @@ namespace dss {
   State::State(const std::string& _name, const std::string& _serviceId)
   : m_name(_name),
     m_IsPersistent(false),
-    m_state(State_Invalid),
+    m_state(State_Inactive),
     m_type(StateType_Service),
     m_serviceName(_serviceId)
   {
