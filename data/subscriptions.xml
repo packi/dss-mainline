@@ -152,26 +152,6 @@
     <property name="script_id" type="string">system_state</property>
   </state>
 
-  <state name="panic">
-    <property name="value" type="string"></property>
-    <property name="persistent" type="boolean">true</property>
-    <property name="valuerange">
-        <property name="active" type="string">active</property>
-        <property name="inactive" type="string">inactive</property>
-    </property>
-    <property name="script_id" type="string">system_state</property>
-  </state>
-
-  <state name="alarm">
-    <property name="value" type="string"></property>
-    <property name="persistent" type="boolean">true</property>
-    <property name="valuerange">
-        <property name="active" type="string">active</property>
-        <property name="inactive" type="string">inactive</property>
-    </property>
-    <property name="script_id" type="string">system_state</property>
-  </state>
-
   <state name="hibernation">
     <property name="value" type="string"></property>
     <property name="persistent" type="boolean">true</property>
