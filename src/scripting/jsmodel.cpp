@@ -2312,10 +2312,10 @@ namespace dss {
   }
 
   static JSPropertySpec state_properties[] = {
-    {"className", 0, 0, zone_JSGet, NULL},
-    {"name", 2, 0, zone_JSGet, NULL},
-    {"type", 1, 0, zone_JSGet, NULL},
-    {"value", 1, 0, zone_JSGet, NULL},
+    {"className", 0, 0, state_JSGet, NULL},
+    {"name", 1, 0, state_JSGet, NULL},
+    {"type", 2, 0, state_JSGet, NULL},
+    {"value", 3, 0, state_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
