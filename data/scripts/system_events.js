@@ -61,7 +61,7 @@ var sceneTable0 = [
     'On-Stimmung31',
     'Off-Stimmung40',
     'On-Stimmung41',
-    'N/A',
+    'Off-Automatic',
     'N/A',
     'Dec-Area1',
     'Inc-Area1',
