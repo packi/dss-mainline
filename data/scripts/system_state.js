@@ -274,9 +274,8 @@ function stateBinaryinput()
 
             if (inputType === 7) {
                 var stateName = 'fire';
-                var state = getState(stateName);
-                if (raisedEvent.parameter.value == "1") {
-                    state.setValue('active');
+                if (raisedEvent.parameter.inputState == "1") {
+                    stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
                 }
             }
 
@@ -323,7 +322,7 @@ function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
     }
 
     // only change "Apartment" states
-    if (stype != 0) {
+    if (stype == 1) {
         return;
     }
     if (newvalue == 0) {
