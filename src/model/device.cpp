@@ -344,8 +344,9 @@ namespace dss {
   } // setDeviceConfig
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
+    setButtonID(_buttonId);
     setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
-        ((m_ButtonActiveGroup & 0xf) << 4) | (_buttonId & 0xf));
+        ((m_ButtonGroupMembership & 0xf) << 4) | (_buttonId & 0xf));
   } // setDeviceButtonId
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
@@ -378,6 +379,7 @@ namespace dss {
     }
     addToGroup(_groupId);
     // propagate target group value to device
+    setButtonGroupMembership(_groupId);
     setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
         ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
 

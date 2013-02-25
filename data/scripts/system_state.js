@@ -256,7 +256,8 @@ function stateBinaryinput()
     var dev = getDevices().byDSID(raisedEvent.source.dsid);
     if (dev) {
         var devNode = dev.getPropertyNode();
-        var stateNode = Property.getNode('/usr/states/' + raisedEvent.parameter.statename);
+        var devStateName = 'dev.' + raisedEvent.source.dsid + '.' + raisedEvent.parameter.inputIndex;
+        var stateNode = Property.getNode('/usr/states/' + devStateName);
         var inputIndex = stateNode.getChild('device/inputIndex').getValue();
         var devInput = devNode.getChild('binaryInputs/binaryInput' + inputIndex);
 
@@ -312,6 +313,22 @@ function stateBinaryinput()
 function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
 {
     var state = getState(stateName);
+    var stype = state.type;
+    var svalue = state.value;
+    var newvalue = parseInt(parameter.inputState);
+    var groupId = 0;
+    var groupName = stateName.indexOf('.group');
+    if (groupName > 0) {
+        groupId = parseInt(stateName.substring(groupName + 6));
+    }
+
+    // only change "Apartment" states
+    if (stype != 0) {
+        return;
+    }
+    if (newvalue == 0) {
+        newvalue = 2;
+    }
 
     var cntNode = Property.getNode(stateName + '.' + targetType + '.' + targetId);
     if (cntNode == null) {
@@ -319,11 +336,11 @@ function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
         cntNode.setValue(0);
     }
 
-    if (parameter.value == "1") {
+    if (newvalue == 1) {
         cntNode.setValue(cntNode.getValue() + 1);
         state.setValue("active");
     }
-    if (parameter.value == "2") {
+    if (newvalue == 2) {
         if (cntNode.getValue() > 0) {
             cntNode.setValue(cntNode.getValue() - 1);
         }
@@ -331,50 +348,40 @@ function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
             state.setValue("inactive");
         }
     }
-}
 
-function stateApartment()
-{
-    var stateName = raisedEvent.parameter.statename;
-    var groupId = 0;
-    var groupName = stateName.indexOf('.group');
-    if (groupName > 0) {
-        groupId = parseInt(stateName.substring(groupName + 6));
-    }
+    if (newvalue != svalue) {
 
-    print('stateApartment: ', stateName, ', GroupId: ', groupId);
-
-    if (stateName == 'fire') {
-        if (raisedEvent.parameter.value == '1') {
-            var z = getZoneByID(0);
-            z.callScene(0, Scene.Fire, false);
+        if (stateName == 'fire') {
+            if (newvalue == 1) {
+                var z = getZoneByID(0);
+                z.callScene(0, Scene.Fire, false);
+            }
         }
-    }
 
-    if (stateName.substring(0, 4) == 'rain') {
-        if (raisedEvent.parameter.value == '1') {
-            var z = getZoneByID(0);
-            z.callScene(groupId, Scene.RainActive, false);
+        if (stateName.substring(0, 4) == 'rain') {
+            if (newvalue == 1) {
+                var z = getZoneByID(0);
+                z.callScene(groupId, Scene.RainActive, false);
+            }
+            if (newvalue == 2) {
+                var z = getZoneByID(0);
+                z.callScene(groupId, Scene.RainInactive, false);
+            }
         }
-        if (raisedEvent.parameter.value == '2') {
-            var z = getZoneByID(0);
-            z.callScene(groupId, Scene.RainInactive, false);
-        }
-    }
 
-    if (stateName.substring(0, 4) == 'wind') {
-        if (raisedEvent.parameter.value == '1') {
-            var z = getZoneByID(0);
-            z.callScene(groupId, Scene.WindActive, false);
-        }
-        if (raisedEvent.parameter.value == '2') {
-            var z = getZoneByID(0);
-            z.callScene(groupId, Scene.WindInactive, false);
+        if (stateName.substring(0, 4) == 'wind') {
+            if (newvalue == 1) {
+                var z = getZoneByID(0);
+                z.callScene(groupId, Scene.WindActive, false);
+            }
+            if (newvalue == 2) {
+                var z = getZoneByID(0);
+                z.callScene(groupId, Scene.WindInactive, false);
+            }
         }
     }
 
 }
-
 
 if (raisedEvent.name == 'running') {
     bootstrap();
@@ -388,9 +395,6 @@ else if (raisedEvent.name == 'callScene' && raisedEvent.source.isGroup) {
 else if (raisedEvent.name == 'undoScene') {
     undoscene();
 }
-else if (raisedEvent.name == 'stateChange'  && raisedEvent.source.isDevice) {
+else if (raisedEvent.name == 'deviceBinaryInputEvent') {
     stateBinaryinput();
-}
-else if (raisedEvent.name == 'stateChange'  && raisedEvent.source.isService) {
-    stateApartment();
 }
