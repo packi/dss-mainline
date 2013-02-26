@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.19.1	26.02.2013
+	* remove panic and alarm state subscriptions, #2276
+	* remove circular dependency for stateChange and callScene events, #2279
+	* fix wrong variable reference and race condition, #2289
+	* fix smoke detector and fire state change
+
 v1.19.0 15.02.2013
     * default state value is inactive, #2187
     * added AKMInputProperty value to getStructure response, #2180
