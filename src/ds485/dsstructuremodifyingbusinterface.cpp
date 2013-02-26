@@ -218,7 +218,7 @@ namespace dss {
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
     int ret = DeviceProperties_set_button_set_local_priority(m_DSMApiHandle, meterDSID, _deviceID, _setsPriority ? 1 : 0);
-    DSBusInterface::checkBroadcastResultCode(ret);
+    DSBusInterface::checkResultCode(ret);
   } // setButtonSetsLocalPriority
 
 } // namespace dss
