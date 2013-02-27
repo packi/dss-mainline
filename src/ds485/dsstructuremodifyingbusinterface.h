@@ -59,6 +59,7 @@ namespace dss {
     virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue);
 
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
+    virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
 private:
     dsid_t m_BroadcastDSID;
   }; // DSStructureModifyingBusInterface

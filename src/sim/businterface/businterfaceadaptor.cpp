@@ -411,6 +411,19 @@ namespace dss {
                                              _setsPriority);
       }
     }
+
+    virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID,
+                                            const devid_t _deviceID,
+                                            bool _callsPresent) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        m_pSimulationInterface->setButtonCallsPresent(_dsMeterID,
+                                                      _deviceID,
+                                                      _callsPresent);
+      } else {
+        m_pInner->setButtonCallsPresent(_dsMeterID, _deviceID,
+                                        _callsPresent);
+      }
+    }
   private:
     StructureModifyingBusInterface* m_pInner;
     StructureModifyingBusInterface* m_pSimulationInterface;

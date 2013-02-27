@@ -218,6 +218,7 @@ namespace dss {
     dev->setButtonActiveGroup(_spec.ActiveGroup);
     dev->setButtonGroupMembership(_spec.GroupMembership);
     dev->setButtonSetsLocalPriority(_spec.SetsLocalPriority);
+    dev->setButtonCallsPresent(_spec.CallsPresent);
     dev->setButtonID(_spec.ButtonID);
 
     uint8_t inputCount = 0;
