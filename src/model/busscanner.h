@@ -23,17 +23,25 @@
 #ifndef BUSSCANNER_H
 #define BUSSCANNER_H
 
+#include <digitalSTROM/ds.h>
 #include "src/logger.h"
 #include "src/ds485types.h"
 #include "src/businterface.h"
+#include "src/ds485/dsbusinterface.h"
+#include "model/device.h"
+#include "model/set.h"
+#include "taskprocessor.h"
 
 namespace dss {
 
   class StructureQueryBusInterface;
+  class DSDeviceBusInterface;
   class Apartment;
   class DSMeter;
+  class Device;
   class ModelMaintenance;
   class Zone;
+  class Set;
 
   class BusScanner {
   public:
@@ -53,6 +61,46 @@ namespace dss {
     Apartment& m_Apartment;
     StructureQueryBusInterface& m_Interface;
     ModelMaintenance& m_Maintenance;
+  };
+
+  class BinaryInputDeviceFilter : public IDeviceAction {
+  private:
+    std::vector<boost::shared_ptr<Device> > m_devs;
+  public:
+    BinaryInputDeviceFilter() {}
+    virtual ~BinaryInputDeviceFilter() {}
+    virtual bool perform(boost::shared_ptr<Device> _device) {
+      if (_device->isPresent() && (_device->getBinaryInputCount() > 0)) {
+        m_devs.push_back(_device);
+      }
+      return true;
+    }
+    std::vector<boost::shared_ptr<Device> > getDeviceList() {
+      return m_devs;
+    }
+  };
+
+  class BinaryInputScanner : public Task {
+  public:
+    BinaryInputScanner(Apartment* _papartment, const std::string& _busConnection);
+    virtual ~BinaryInputScanner();
+
+    virtual void run();
+    virtual void setup(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Device> _device);
+
+    uint16_t getDeviceSensorValue(const dsid_t& _dsm,
+                              dev_t _device,
+                              uint8_t _sensorIndex) const;
+    uint8_t getDeviceConfig(const dsid_t& _dsm,
+                              dev_t _device,
+                              uint8_t _configClass,
+                              uint8_t _configIndex) const;
+  private:
+    Apartment* m_pApartment;
+    std::string m_busConnection;
+    DsmApiHandle_t m_dsmApiHandle;
+    boost::shared_ptr<DSMeter> m_dsm;
+    boost::shared_ptr<Device> m_device;
   };
 
 } // namespace dss
