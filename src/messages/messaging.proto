@@ -1,0 +1,30 @@
+package dsmsg;
+
+enum Type {
+    GENERIC_RESPONSE = 1;
+    DEVICE_SCENE_TABLE_UPDATE_START = 2;
+    DEVICE_SCENE_TABLE_UPDATE_SUSPEND = 3;
+    DEVICE_SCENE_TABLE_UPDATE_ABORT = 4;
+    DEVICE_SCENE_TABLE_UPDATE_RESUME = 5;
+    DEVICE_SCENE_TABLE_UPDATE_STATE_REQUEST = 6;
+    DEVICE_SCENE_TABLE_UPDATE_STATE_RESPONSE = 7;
+    DEVICE_SCENE_TABLE_UPDATE_STATE = 8;
+}
+
+message Message {
+    required Type type = 1;
+
+    optional GenericResponse generic_res = 16;
+
+    extensions 100 to max;
+}
+
+enum ResultCode {
+    RESULT_OK = 1;
+    RESULT_MESSAGE_UNKNOWN = 2;
+}
+
+message GenericResponse {
+    optional ResultCode result = 1;
+    optional string description = 2;
+}
