@@ -206,6 +206,16 @@ namespace dss {
         return success();
       } else if(_request.getMethod() == "getReachableGroups") {
         return getReachableGroups(_request);
+      } else if(_request.getMethod() == "getLockedScenes") {
+        std::list<uint32_t> scenes = CommChannel::getInstance()->getLockedScenes();
+        boost::shared_ptr<JSONObject> result(new JSONObject());
+        boost::shared_ptr<JSONArray<int> > lockedScenes(new JSONArray<int>());
+        result->addElement("lockedScenes", lockedScenes);
+        while (!scenes.empty()) {
+          lockedScenes->add((int)scenes.front());
+          scenes.pop_front();
+        }
+        return success(result);
       } else {
         throw std::runtime_error("Unhandled function");
       }
