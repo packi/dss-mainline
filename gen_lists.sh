@@ -2,7 +2,7 @@ FILE="build/sources.list"
 
 echo -n 'libdsscore_a_SOURCES = ' > $FILE
 
-for f in `find src | egrep '\.(cpp?|h)$' | egrep -v 'build_info.h' | sort`
+for f in `find src | egrep '\.(cpp?|h)$' | egrep -v '(messages|build_info.h)' | sort`
 do
     if (test -f $f); then
         echo " \\" >> $FILE
