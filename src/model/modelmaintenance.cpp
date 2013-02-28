@@ -1408,6 +1408,19 @@ namespace dss {
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
 
+      // binary input state synchronization event
+      if (_sensorIndex == 32) {
+        for (int index = 0; index < devRef.getDevice()->getBinaryInputCount(); index++) {
+          boost::shared_ptr<State> state = devRef.getDevice()->getBinaryInputState(index);
+          assert(state != NULL);
+          if ((_sensorValue & (1 << index)) > 0) {
+            state->setState(State_Active);
+          } else {
+            state->setState(State_Inactive);
+          }
+        }
+      }
+
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("deviceSensorValue", pDevRev));
       pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
@@ -1476,7 +1489,9 @@ namespace dss {
       boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
       scanner.scanDeviceOnBus(dsMeter, _deviceID);
       boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_deviceID, dsMeter).getDevice();
-      scanner.syncBinaryInputStates(dsMeter, device);
+      if (device->getBinaryInputCount() > 0) {
+        scanner.syncBinaryInputStates(dsMeter, device);
+      }
     } catch(ItemNotFoundException& e) {
       log(std::string("Error scanning device, item not found: ") + e.what(), lsWarning);
     } catch(std::runtime_error& e) {
