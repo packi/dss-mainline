@@ -1194,7 +1194,7 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "highlevel") {
+      } else if (m_evtName == "highlevelevent") {
         if (triggerValue == "custom-event") {
           if (checkHighlevel(triggerProp)) {
             return true;
