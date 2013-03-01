@@ -1331,6 +1331,16 @@ namespace dss {
             JS_ReportError(cx, "Convert parameter scene number: %s", ex.what());
             return JS_FALSE;
           }
+          try {
+            if (CommChannel::getInstance()->isSceneLocked((uint32_t)sceneNr)) {
+              JS_ReportError(cx, "Device settings are being updated for selected activity, please try again later");
+              return JS_FALSE;
+            }
+          } catch (std::runtime_error &err) {
+            JS_ReportError(cx, "Can't save scene: %s", err.what());
+            return JS_FALSE;
+          }
+
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
             intf->saveScene(IDeviceInterface::coJSScripting, sceneNr);

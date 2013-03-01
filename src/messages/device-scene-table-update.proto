@@ -1,0 +1,37 @@
+import "messaging.proto";
+
+package dsmsg;
+
+extend Message {
+    optional DeviceSceneTableUpdateStart device_scene_table_update_start = 100;
+    optional DeviceSceneTableUpdatePause device_scene_table_update_pause = 101;
+    optional DeviceSceneTableUpdateAbort device_scene_table_update_abort = 102;
+    optional DeviceSceneTableUpdateResume device_scene_table_update_resume = 103;
+    optional DeviceSceneTableUpdateStateReq device_scene_table_update_state_req = 104;
+    optional DeviceSceneTableUpdateStateRes device_scene_table_update_state_res = 105;
+    optional DeviceSceneTableUpdateState device_scene_table_update_state = 106;
+}
+
+message DeviceSceneTableUpdateStart {
+}
+
+message DeviceSceneTableUpdatePause {
+}
+
+message DeviceSceneTableUpdateAbort {
+}
+
+message DeviceSceneTableUpdateResume {
+}
+
+message DeviceSceneTableUpdateStateReq {
+}
+
+message DeviceSceneTableUpdateStateRes {
+    optional ResultCode result = 1;
+    repeated uint32 locked_scene = 2 [packed=true];
+}
+
+message DeviceSceneTableUpdateState {
+    repeated uint32 locked_scene = 1 [packed=true];
+}

@@ -31,6 +31,7 @@
 #include <boost/shared_ptr.hpp>
 #include "bonjour.h"
 
+#include "comm-channel.h"
 #include <vector>
 
 namespace dss {
@@ -88,6 +89,7 @@ namespace dss {
     std::string m_webrootDirectory;
     std::string m_jsLogDirectory;
     std::string m_savedPropsDirectory;
+    CommChannel *m_commChannel;
 
     aDSSState m_State;
     bool m_ShutdownFlag;

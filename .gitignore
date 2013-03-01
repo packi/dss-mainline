@@ -27,3 +27,4 @@ webservices/soapdssObject.h
 webservices/soapH.h
 webservices/soapC.cpp
 
+*.pb.*

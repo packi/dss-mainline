@@ -619,6 +619,12 @@ namespace dss {
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);
+        try {
+          CommChannel::getInstance()->resumeUpdateTask();
+          CommChannel::getInstance()->requestLockedScenes();
+        } catch (std::runtime_error &err) {
+          log(err.what(), lsError);
+        }
 
         setupWebUpdateEvent();
       }

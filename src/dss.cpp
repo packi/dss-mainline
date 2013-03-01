@@ -265,6 +265,15 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
     m_State = ssCreatingSubsystems;
 
+    try {
+      m_commChannel = CommChannel::createInstance();
+      m_commChannel->run();
+      m_commChannel->suspendUpdateTask();
+    } catch (std::runtime_error &err) {
+      Logger::getInstance()->log("Could not start dSA communication channel: " +
+              std::string(err.what()), lsError);
+    }
+
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
 
@@ -640,11 +649,15 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pBonjour->terminate();
 #endif
 
-
+    if (m_commChannel) {
+      delete m_commChannel;
+      m_commChannel = NULL;
+    }
   } // run
 
   void DSS::initiateShutdown() {
     m_ShutdownFlag = true;
+
     if (m_State != ssRunning) {
       return;
     }
