@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.19.2 01.03.2013
+	* fix system trigger user-defined-actions, #2300
+	* synchronize binary inputs on a separate task, #2287
+
 v1.19.1	26.02.2013
 	* remove panic and alarm state subscriptions, #2276
 	* remove circular dependency for stateChange and callScene events, #2279
