@@ -306,11 +306,10 @@ void CommChannel::taskThread()
 {
     try
     {
+        lockMessageList();
         while (!m_shutdown_flag)
         {
-            lockMessageList();
-
-            while (m_datalist.empty())
+            if (m_datalist.empty())
             {
                 pthread_cond_wait(&m_condition, &m_mutex);
                 continue;
@@ -378,6 +377,10 @@ void CommChannel::taskThread()
                                       "[CommChannel] Could not send reply:" +
                                       ex.getMessage());
                 }
+            }
+
+            if (!m_shutdown_flag) {
+                lockMessageList();
             }
         }
     }
