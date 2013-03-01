@@ -204,16 +204,26 @@ namespace dss {
     _spec.ActiveGroup = 0xff;
     _spec.GroupMembership = 0xff;
     _spec.SetsLocalPriority = false;
+    _spec.CallsPresent = true;
     try {
-      uint8_t setsLocalPriority;
+      union {
+        uint8_t flags;
+        struct {
+          uint8_t setLocalPriority : 1;
+          uint8_t callsNoPresent : 1;
+          uint8_t reserved : 6;
+        };
+      } flags;
+
       int ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
                                            &_spec.GroupMembership, &_spec.ActiveGroup,
-                                           &setsLocalPriority);
+                                           &flags.flags);
       if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
         Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
       } else {
         DSBusInterface::checkResultCode(ret);
-        _spec.SetsLocalPriority = (setsLocalPriority == 1);
+        _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
+        _spec.CallsPresent = (flags.callsNoPresent == 0);
       }
     } catch(BusApiError& e) {
       Logger::getInstance()->log("Error reading DeviceButtonInfo: " +

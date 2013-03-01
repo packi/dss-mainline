@@ -449,6 +449,19 @@ if (test "x$SENDMAIL_OPTION_ENABLED" = "xyes") && (test "x$SENDMAIL" = "x"); the
 fi
 AC_DEFINE_UNQUOTED([SENDMAIL], ["$SENDMAIL"], [location of the sendmail program])
 
+PKG_CHECK_MODULES([LIBPROTOBUF], [protobuf], [],
+    [
+        AC_MSG_ERROR([$LIBPROTBUF_PKG_ERRORS])
+    ])
+
+PKG_CHECK_MODULES([LIBCOMMCHANNEL], [libcommchannel], [],
+    [
+        echo
+        echo "Get libcommchannel from"
+        echo "      http://gitorious.digitalstrom.org/dss-misc/libcommchannel"
+        echo
+        AC_MSG_ERROR([$LIBCOMMCHANNEL_PKG_ERRORS])
+    ])
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"

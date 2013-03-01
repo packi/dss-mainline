@@ -67,6 +67,7 @@ namespace dss {
     m_ButtonInputIndex(0),
     m_ButtonInputCount(0),
     m_ButtonSetsLocalPriority(false),
+    m_ButtonCallsPresent(true),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
     m_ButtonID(0),
@@ -208,6 +209,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
         m_pPropertyNode->createProperty("button/setsLocalPriority")
           ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
+        m_pPropertyNode->createProperty("button/callsPresent")
+          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonCallsPresent));
         if (!m_pPropertyNode->getProperty("sensorEvents")) {
           PropertyNodePtr sensorNode = m_pPropertyNode->createProperty("sensorEvents");
         }

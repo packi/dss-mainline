@@ -2,13 +2,36 @@ bin_PROGRAMS = dss
 
 noinst_PROGRAMS = dsstests
 
+EXTRA_DIST =	$(top_srcdir)/src/messages/messaging.proto \
+				$(top_srcdir)/src/messages/device-scene-table-update.proto
+
 CLEANFILES = \
 			build_info.h
+			$(top_builddir)/src/messages/messaging.pb.h \
+			$(top_builddir)/src/messages/messaging.pb.cc \
+			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
+			$(top_builddir)/src/messages/device-scene-table-update.pb.c
 
 BUILT_SOURCES = \
-			build_info.h
+			build_info.h \
+			$(top_builddir)/src/messages/messaging.pb.h \
+			$(top_builddir)/src/messages/messaging.pb.cc \
+			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
+			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
 
-noinst_LIBRARIES = libdsscore.a libmongoose.a libunix.a
+noinst_LIBRARIES = libdsscore.a libmongoose.a libunix.a libprotomessages.a
+
+nodist_libprotomessages_a_SOURCES = \
+			$(top_builddir)/src/messages/messaging.pb.h \
+			$(top_builddir)/src/messages/messaging.pb.cc \
+			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
+			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
+
+libprotomessages_a_CXXFLAGS = -I$(top_builddir)
+
+%.pb.cc %.pb.h: %.proto
+	$(MKDIR_P) $(top_builddir)/src/messages
+	protoc -I$(top_srcdir)/src/messages --cpp_out=$(top_builddir)/src/messages $(top_srcdir)/src/messages/$(<F)
 
 if BUILD_SOAP
 
@@ -41,6 +64,7 @@ include $(top_srcdir)/build/sources.list
 libdsscore_a_CXXFLAGS = \
 			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
+			-I$(top_builddir)/src \
 			-I$(top_srcdir)/external \
 			$(JS_CFLAGS) \
 			$(ICAL_CFLAGS) \
@@ -53,12 +77,17 @@ libdsscore_a_CXXFLAGS = \
 			$(LIBRRD_CFLAGS) \
 			$(EXPAT_CFLAGS) \
 			$(GCOV_CFLAGS) \
-			$(JSONC_CFLAGS)
+			$(JSONC_CFLAGS) \
+            $(LIBPROTOBUF_CFLAGS) \
+            $(LIBCOMMCHANNEL_CFLAGS)
 
 libunix_a_CXXFLAGS = \
 			-I$(top_srcdir) \
 			$(BOOST_CPPFLAGS) \
-			$(GCOV_CFLAGS)
+			$(GCOV_CFLAGS) \
+            $(LIBPROTOBUF_CFLAGS) \
+            $(LIBCOMMCHANNEL_CFLAGS)
+
 
 dss_SOURCES = $(top_srcdir)/main.cpp
 
@@ -67,9 +96,11 @@ nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
 dss_CXXFLAGS = \
 			$(LIBXML2_CFLAGS) \
 			$(GSOAP_CFLAGS) \
-			$(GCOV_CFLAGS)
+			$(GCOV_CFLAGS) \
+            $(LIBPROTOBUF_CFLAGS) \
+            $(LIBCOMMCHANNEL_CFLAGS)
 
-dss_LDADD = libdsscore.a libunix.a libmongoose.a \
+dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
 			$(BOOST_SYSTEM_LIBS) \
 			$(BOOST_PROGRAM_OPTIONS_LIBS) \
@@ -87,7 +118,9 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a \
 			$(BACKTRACE_LDFLAGS) \
 			$(GCOV_LIBS) \
 			$(LIBTCMALLOC_LIBS) \
-			$(JSONC_LIBS)
+			$(JSONC_LIBS) \
+            $(LIBPROTOBUF_LIBS) \
+            $(LIBCOMMCHANNEL_LIBS)
 
 if BUILD_SOAP
 
@@ -126,7 +159,7 @@ dsstests_CXXFLAGS = \
 			$(GCOV_CFLAGS)
 
 dsstests_LDADD = \
-			libdsscore.a libunix.a libmongoose.a \
+			libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
 			$(BOOST_SYSTEM_LIBS) \
 			$(BOOST_PROGRAM_OPTIONS_LIBS) \
@@ -144,7 +177,9 @@ dsstests_LDADD = \
 			$(EXPAT_LIBS) \
 			$(GCOV_LIBS) \
 			$(LIBTCMALLOC_LIBS) \
-			$(JSONC_LIBS)
+			$(JSONC_LIBS) \
+            $(LIBPROTOBUF_LIBS) \
+            $(LIBCOMMCHANNEL_LIBS)
 
 if BUILD_SOAP
 

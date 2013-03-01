@@ -79,6 +79,10 @@ namespace dss {
          (_changedNode->getValueType() == vTypeBoolean)) {
         handleLocalPriority(_changedNode);
       }
+      if((_changedNode->getName() == "callsPresent") &&
+         (_changedNode->getValueType() == vTypeBoolean)) {
+        handleCallsPresent(_changedNode);
+      }
     }
 
   private:
@@ -96,6 +100,23 @@ namespace dss {
           pInterface->setButtonSetsLocalPriority(dev->getDSMeterDSID(),
                                                  dev->getShortAddress(),
                                                  value);
+        }
+      }
+    }
+    void handleCallsPresent(PropertyNodePtr _changedNode) {
+      if((_changedNode->getParentNode() != NULL) &&
+         (_changedNode->getParentNode()->getParentNode() != NULL)) {
+        PropertyNode* deviceNode =
+          _changedNode->getParentNode()->getParentNode();
+        boost::shared_ptr<Device> dev =
+          m_pApartment->getDeviceByDSID(dss_dsid_t::fromString(deviceNode->getName()));
+        bool value = _changedNode->getBoolValue();
+        if(DSS::hasInstance()) {
+          StructureModifyingBusInterface* pInterface;
+          pInterface = DSS::getInstance()->getBusInterface().getStructureModifyingBusInterface();
+          pInterface->setButtonCallsPresent(dev->getDSMeterDSID(),
+                                            dev->getShortAddress(),
+                                            value);
         }
       }
     }
@@ -598,6 +619,12 @@ namespace dss {
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);
+        try {
+          CommChannel::getInstance()->resumeUpdateTask();
+          CommChannel::getInstance()->requestLockedScenes();
+        } catch (std::runtime_error &err) {
+          log(err.what(), lsError);
+        }
 
         setupWebUpdateEvent();
       }

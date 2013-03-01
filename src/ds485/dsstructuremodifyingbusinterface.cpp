@@ -218,7 +218,18 @@ namespace dss {
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
     int ret = DeviceProperties_set_button_set_local_priority(m_DSMApiHandle, meterDSID, _deviceID, _setsPriority ? 1 : 0);
-    DSBusInterface::checkBroadcastResultCode(ret);
+    DSBusInterface::checkResultCode(ret);
   } // setButtonSetsLocalPriority
+
+  void DSStructureModifyingBusInterface::setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = DeviceProperties_set_button_set_no_coming_home_call(m_DSMApiHandle, meterDSID, _deviceID, _callsPresent ? 0 : 1);
+    DSBusInterface::checkResultCode(ret);
+  } // setButtonCallsPresent
 
 } // namespace dss

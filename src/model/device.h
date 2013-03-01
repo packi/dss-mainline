@@ -197,6 +197,7 @@ namespace dss {
     uint8_t m_ButtonInputIndex;
     uint8_t m_ButtonInputCount;
     bool m_ButtonSetsLocalPriority;
+    bool m_ButtonCallsPresent;
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
     int m_ButtonID;
@@ -443,6 +444,8 @@ namespace dss {
 
     void setButtonSetsLocalPriority(const bool _value) { m_ButtonSetsLocalPriority = _value; }
     bool getButtonSetsLocalPriority() const { return m_ButtonSetsLocalPriority; }
+    void setButtonCallsPresent(const bool _value) { m_ButtonCallsPresent = _value; }
+    bool getButtonCallsPresent() const { return m_ButtonCallsPresent; }
     void setButtonGroupMembership(const int _value) { m_ButtonGroupMembership = _value; }
     int getButtonGroupMembership() const { return m_ButtonGroupMembership; }
     void setButtonActiveGroup(const int _value) { m_ButtonActiveGroup = _value; }

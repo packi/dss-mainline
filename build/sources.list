@@ -6,10 +6,10 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/bonjour.cpp \
 	$(top_srcdir)/src/bonjour.h \
 	$(top_srcdir)/src/businterface.h \
+	$(top_srcdir)/src/comm-channel.cpp \
+	$(top_srcdir)/src/comm-channel.h \
 	$(top_srcdir)/src/datetools.cpp \
 	$(top_srcdir)/src/datetools.h \
-	$(top_srcdir)/src/storagetools.cpp \
-	$(top_srcdir)/src/storagetools.h \
 	$(top_srcdir)/src/ds485/dsactionrequest.cpp \
 	$(top_srcdir)/src/ds485/dsactionrequest.h \
 	$(top_srcdir)/src/ds485/dsbusinterface.cpp \
@@ -147,6 +147,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/sim/dsmetersim.h \
 	$(top_srcdir)/src/sim/dssim.cpp \
 	$(top_srcdir)/src/sim/dssim.h \
+	$(top_srcdir)/src/storagetools.cpp \
+	$(top_srcdir)/src/storagetools.h \
 	$(top_srcdir)/src/stringconverter.cpp \
 	$(top_srcdir)/src/stringconverter.h \
 	$(top_srcdir)/src/structuremanipulator.cpp \

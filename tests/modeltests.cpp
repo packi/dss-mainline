@@ -831,6 +831,8 @@ public:
   }
   virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
   }
+  virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
+  }
 };
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
