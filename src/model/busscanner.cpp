@@ -30,6 +30,7 @@
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/dsidhelper.h"
+#include "security/security.h"
 
 #include "modulator.h"
 #include "device.h"
@@ -461,37 +462,124 @@ namespace dss {
   } // scanStatusOfZone
 
   void BusScanner::syncBinaryInputStates(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr <Device> _device) {
+    boost::shared_ptr<BinaryInputScanner> task;
+    std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
+    task = boost::shared_ptr<BinaryInputScanner> (new BinaryInputScanner(&m_Apartment, connURI));
+    task->setup(_dsMeter, _device);
+    boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+    pTP->addEvent(task);
+  } // syncBinaryInputStates
+
+  void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
+    Logger::getInstance()->log(_line, _severity);
+  } // log
+
+
+  BinaryInputScanner::BinaryInputScanner(Apartment* _papartment, const std::string& _busConnection)
+    : m_pApartment(_papartment),
+      m_busConnection(_busConnection),
+      m_dsmApiHandle(NULL)
+  {
+    m_device.reset();
+    m_dsm.reset();
+  }
+
+  BinaryInputScanner::~BinaryInputScanner()
+  {
+    if (m_dsmApiHandle != NULL) {
+      DsmApiClose(m_dsmApiHandle);
+      DsmApiCleanup(m_dsmApiHandle);
+      m_dsmApiHandle = NULL;
+    }
+  }
+
+  uint16_t BinaryInputScanner::getDeviceSensorValue(const dsid_t& _dsm,
+                            dev_t _device,
+                            uint8_t _sensorIndex) const
+  {
+    if (m_dsmApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    uint16_t retVal;
+    int ret = DeviceSensor_get_value_sync(m_dsmApiHandle, _dsm,
+        _device,
+        _sensorIndex,
+        30,
+        &retVal);
+    DSBusInterface::checkResultCode(ret);
+    return retVal;
+  }
+
+  uint8_t BinaryInputScanner::getDeviceConfig(const dsid_t& _dsm,
+      dev_t _device,
+      uint8_t _configClass,
+      uint8_t _configIndex) const
+  {
+    if (m_dsmApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    uint8_t retVal;
+    int ret = DeviceConfig_get_sync_8(m_dsmApiHandle, _dsm,
+        _device,
+        _configClass,
+        _configIndex,
+        30,
+        &retVal);
+    DSBusInterface::checkResultCode(ret);
+    return retVal;
+  }
+
+  void BinaryInputScanner::run() {
+
+    Logger::getInstance()->log("BinaryInputScanner run:"
+        " dsm = " + (m_dsm ? m_dsm->getDSID().toString() : "NULL") +
+        ", dev = " + (m_device ? m_device->getDSID().toString() : "NULL"), lsDebug);
+
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser("BinaryInputScanner needs system-rights");
+    }
+
+    m_dsmApiHandle = DsmApiInitialize();
+
+    int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
+    if (result < 0) {
+      throw std::runtime_error(std::string("BinaryInputScanner: Unable to open connection to: ") + m_busConnection);
+    }
+
     std::vector<boost::shared_ptr<Device> > devices;
 
-    if ((_device != NULL) && (_device->getBinaryInputCount() > 0)) {
+    if (m_device != NULL) {
       // synchronize a single device
-      devices.push_back(_device);
-    } else {
-      // create list of device state providers
-      std::vector<boost::shared_ptr<State> > states = m_Apartment.getStates();
-      foreach(boost::shared_ptr<State> s, states) {
-        if (s->getType() == StateType_Device) {
-          boost::shared_ptr<Device> dev = s->getProviderDevice();
-          if ((_dsMeter == NULL) || (dev->getDSMeterDSID() == _dsMeter->getDSID())) {
-            devices.push_back(s->getProviderDevice());
-          }
-        }
+      if (m_device->isPresent() && m_device->getBinaryInputCount() > 0) {
+        devices.push_back(m_device);
       }
+    } else if (m_dsm != NULL) {
+      Set D = m_dsm->getDevices();
+      BinaryInputDeviceFilter filter;
+      D.perform(filter);
+      devices = filter.getDeviceList();
+    } else {
+      Set D = m_pApartment->getDevices();
+      BinaryInputDeviceFilter filter;
+      D.perform(filter);
+      devices = filter.getDeviceList();
     }
-    sort(devices.begin(), devices.end());
-    devices.erase(unique(devices.begin(), devices.end()), devices.end());
 
     // send a request to each binary input device to resend its current status
     foreach(boost::shared_ptr<Device> dev, devices) {
-      if (dev->getBinaryInputCount() == 0) {
-        continue;
-      }
+      dsid_t dsmId;
+      dsid_helper::toDsmapiDsid(dev->getDSMeterDSID(), dsmId);
+      uint16_t value = 0;
 
-      uint32_t value = 0;
-      int index;
       try {
-        value = m_Apartment.getDeviceBusInterface()->getSensorValue(*dev, 0x20);
-        for (index = 0; index < dev->getBinaryInputCount(); index++) {
+
+        value = getDeviceSensorValue(dsmId, dev->getShortAddress(), 0x20);
+        Logger::getInstance()->log("BinaryInputScanner: device " +
+                  dev->getDSID().toString() + ", state = " + intToString(value), lsDebug);
+
+        for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
           assert(state != NULL);
           if ((value & (1 << index)) > 0) {
@@ -500,19 +588,26 @@ namespace dss {
             state->setState(State_Inactive);
           }
         }
+
+        // avoid bus monopolization
+        sleep(5);
+
       } catch (BusApiError& ex) {
-        log("Device " + dev->getDSID().toString() + " did not respond to input state query", lsError);
-        for (index = 0; index < dev->getBinaryInputCount(); index++) {
+        Logger::getInstance()->log("BinaryInputScanner: device " + dev->getDSID().toString()
+              + " did not respond to input state query", lsWarning);
+        for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
           assert(state != NULL);
           state->setState(State_Unkown);
         }
       }
     }
-  } // syncBinaryInputStates
+  }
 
-  void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
-    Logger::getInstance()->log(_line, _severity);
-  } // log
+  void BinaryInputScanner::setup(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Device> _device)
+  {
+    m_dsm = _dsMeter;
+    m_device = _device;
+  }
 
 } // namespace dss
