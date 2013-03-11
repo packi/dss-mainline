@@ -267,6 +267,11 @@ namespace dss {
         m_pEventSink->onGroupBlink(NULL, NullDSID, pGroup->getZoneID(),
                                    pGroup->getID(), _origin);
       }
+      Device* pDevice = dynamic_cast<Device*>(pTarget);
+      if(pDevice != NULL) {
+        m_pEventSink->onDeviceBlink(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
+                                    _origin);
+      }
     }
 
     virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value) {
@@ -718,6 +723,24 @@ namespace dss {
       pEvent->addParameter(_originDeviceId);
       m_pModelMaintenance->addModelEvent(pEvent);
     } // onDeviceUndoScene
+
+    virtual void onDeviceBlink(BusInterface* _source,
+                               const dss_dsid_t& _dsMeterID,
+                               const int _deviceID,
+                               const int _originDeviceId) {
+      boost::shared_ptr<BusInterface> target;
+      if(_source == m_pInnerBusInterface.get()) {
+        try {
+          DeviceReference devRef =  m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_deviceID, _dsMeterID);
+          m_pSimBusInterface->getActionRequestInterface()->blink(devRef.getDevice().get(), _originDeviceId);
+        } catch(std::runtime_error& e) {
+        }
+      }
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etBlinkDevice, _dsMeterID);
+      pEvent->addParameter(_deviceID);
+      pEvent->addParameter(_originDeviceId);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    } // onDeviceCallScene
 
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,

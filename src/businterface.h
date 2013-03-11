@@ -256,6 +256,10 @@ namespace dss {
                                   const int _originDeviceId,
                                   const int _sceneID,
                                   const bool _force) = 0;
+    virtual void onDeviceBlink(BusInterface* _source,
+                               const dss_dsid_t& _dsMeterID,
+                               const int _deviceID,
+                               const int _originDeviceId) = 0;
     virtual void onDeviceUndoScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
                                   const int _deviceID,

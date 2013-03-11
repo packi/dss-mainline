@@ -424,6 +424,14 @@ namespace dss {
           log("Unexpected parameter count for ModelEvent::etCallSceneDevice");
         }
         break;
+      case ModelEvent::etBlinkDevice:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() == 2) {
+          onDeviceBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+        } else {
+          log("Unexpected parameter count for ModelEvent::etBlinkDevice");
+        }
+        break;
       case ModelEvent::etCallSceneDeviceLocal:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() == 2) {
@@ -1263,6 +1271,24 @@ namespace dss {
       }
     } catch(ItemNotFoundException& e) {
       log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
+    }
+  } // onDeviceCallScene
+
+  void ModelMaintenance::onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID) {
+    try {
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      try {
+        log("OnDeviceBlink: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID));
+        DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
+        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+        boost::shared_ptr<Event> event(new Event("blink", pDevRev));
+        event->setProperty("originDeviceID", intToString(_originDeviceID));
+        raiseEvent(event);
+      } catch(ItemNotFoundException& e) {
+        log("OnDeviceBlink: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString(), lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("OnDeviceBlink: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
     }
   } // onDeviceCallScene
 

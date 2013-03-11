@@ -164,6 +164,11 @@ namespace dss {
                                            dsid_t _sourceID, dsid_t _destinationID,
                                            uint16_t _deviceID, uint8_t _sceneID);
 
+    void handleDeviceBlink(dsid_t _destinationID, uint16_t _deviceID);
+    static void handleDeviceBlinkCallback(uint8_t _errorCode, void* _userData,
+                                          dsid_t _sourceID, dsid_t _destinationID,
+                                          uint16_t _deviceID);
+
     void handleDeviceSetName(dsid_t _destinationID, uint16_t _deviceID, 
                              std::string _name);
     static void handleDeviceSetNameCallback(uint8_t _errorCode, void* _userData, 

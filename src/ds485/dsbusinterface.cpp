@@ -369,6 +369,13 @@ namespace dss {
                         DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
                         &callback_struct);
 
+      DeviceActionRequest_action_blink_request_callback_t deviceBlinkCallback = DSBusInterface::handleDeviceBlinkCallback;
+      callback_struct.function = (void*)deviceBlinkCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_BLINK,
+                        &callback_struct);
+
       DeviceProperties_set_name_request_callback_t deviceSetNameCallback = DSBusInterface::handleDeviceSetNameCallback;
       callback_struct.function = (void*)deviceSetNameCallback;
       callback_struct.arg = this;
@@ -800,6 +807,19 @@ namespace dss {
                                                      dsid_t _sourceID, dsid_t _destinationID,
                                                      uint16_t _deviceID, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID, true);
+  }
+
+  void DSBusInterface::handleDeviceBlink(dsid_t _dsMeterID, uint16_t _deviceID) {
+    loginFromCallback();
+    dss_dsid_t dsmDSID;
+    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
+    m_pBusEventSink->onDeviceBlink(this, dsmDSID, _deviceID, 0);
+  }
+
+  void DSBusInterface::handleDeviceBlinkCallback(uint8_t _errorCode, void* _userData,
+                                                 dsid_t _sourceID, dsid_t _destinationID,
+                                                 uint16_t _deviceID) {
+    static_cast<DSBusInterface*>(_userData)->handleDeviceBlink(_destinationID, _deviceID);
   }
 
 

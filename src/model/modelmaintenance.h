@@ -172,6 +172,7 @@ namespace dss {
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
     void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const bool _forced);
+    void onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID);
     void onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType);
 
     void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced);
