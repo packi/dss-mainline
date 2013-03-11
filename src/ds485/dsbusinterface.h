@@ -138,6 +138,12 @@ namespace dss {
                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                  uint16_t _originDeviceId, uint8_t _sceneID);
 
+    void handleBusBlink(uint8_t _errorCode, dsid_t _sourceID, uint16_t _zoneID,
+                        uint8_t _groupID, uint16_t _originDeviceId);
+    static void handleBusBlinkCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                       dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                       uint16_t _originDeviceId);
+
     void handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state);
     static void handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,
                                         dsid_t _sourceID, dsid_t _destinationID,

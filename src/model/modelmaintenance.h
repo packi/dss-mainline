@@ -176,6 +176,7 @@ namespace dss {
 
     void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced);
     void onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType);
+    void onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID);
 
     void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);

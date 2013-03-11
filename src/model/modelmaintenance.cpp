@@ -467,6 +467,14 @@ namespace dss {
           onGroupUndoScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), sceneID);
         }
         break;
+      case ModelEvent::etBlinkGroup:
+        assert(pEventWithDSID != NULL);
+        if (event.getParameterCount() < 3) {
+          log("Expected at least 3 parameter for ModelEvent::etBlinkGroup");
+        } else {
+          onGroupBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
       case ModelEvent::etModelDirty:
         eraseModelEventsFromQueue(ModelEvent::etModelDirty);
         eraseEventFromList = false;
@@ -1072,6 +1080,33 @@ namespace dss {
     boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced));
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
+
+  void ModelMaintenance::onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID) {
+    try {
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      boost::shared_ptr<Group> group = zone->getGroup(_groupID);
+      if(group != NULL) {
+        log("OnGroupBlink: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID));
+        boost::shared_ptr<Event> pEvent;
+        pEvent.reset(new Event("blink", group));
+        pEvent->setProperty("groupID", intToString(_groupID));
+        pEvent->setProperty("zoneID", intToString(_zoneID));
+        dss_dsid_t originDSID;
+        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+          DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
+          originDSID = devRef.getDSID();
+        } else {
+          originDSID.lower = _originDeviceID;
+        }
+        pEvent->setProperty("originDeviceID", originDSID.toString());
+        raiseEvent(pEvent);
+      } else {
+        log("OnGroupBlink: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("OnGroupBlink: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
+    }
+  } // onGroupBlink
 
   void ModelMaintenance::onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType) {
 

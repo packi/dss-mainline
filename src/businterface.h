@@ -245,6 +245,11 @@ namespace dss {
                                   const int _originDeviceId,
                                   const int _sceneID,
                                   const bool _explicit) = 0;
+    virtual void onGroupBlink(BusInterface* _source,
+                              const dss_dsid_t& _dsMeterID,
+                              const int _zoneID,
+                              const int _groupID,
+                              const int _originDeviceId) = 0;
     virtual void onDeviceCallScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
                                   const int _deviceID,
