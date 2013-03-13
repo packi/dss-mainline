@@ -67,6 +67,7 @@ namespace dss {
       int groupId;
       int sceneId;
       bool forceFlag = false;
+      SceneAccessCategory sceneAccess = SAC_UNKNOWN;
 
       PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
       if (oZoneNode == NULL) {
@@ -99,12 +100,17 @@ namespace dss {
       if (oForceNode != NULL) {
         forceFlag = oForceNode->getBoolValue();
       }
+
+      PropertyNodePtr oCategoryNode = _actionNode->getPropertyByName("category");
+      if (oCategoryNode != NULL) {
+        sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
+      }
     
       boost::shared_ptr<Zone> zone;
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->callScene(IDeviceInterface::coJSScripting, sceneId, forceFlag);
+        group->callScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId, forceFlag);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -118,6 +124,7 @@ namespace dss {
       int zoneId;
       int groupId;
       int sceneId;
+      SceneAccessCategory sceneAccess = SAC_UNKNOWN;
 
       PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
       if (oZoneNode == NULL) {
@@ -146,11 +153,16 @@ namespace dss {
         sceneId = oSceneNode->getIntegerValue();
       }
 
+      PropertyNodePtr oCategoryNode = _actionNode->getPropertyByName("category");
+      if (oCategoryNode != NULL) {
+        sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
+      }
+
       boost::shared_ptr<Zone> zone;
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->undoScene(IDeviceInterface::coJSScripting, sceneId);
+        group->undoScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -189,7 +201,7 @@ namespace dss {
     try {
       int sceneId;
       bool forceFlag = false;
-
+      SceneAccessCategory sceneAccess = SAC_UNKNOWN;
 
       PropertyNodePtr oSceneNode = _actionNode->getPropertyByName("scene");
       if (oSceneNode == NULL) {
@@ -204,6 +216,11 @@ namespace dss {
       if (oForceNode != NULL) {
         forceFlag = oForceNode->getBoolValue();
       }
+
+      PropertyNodePtr oCategoryNode = _actionNode->getPropertyByName("category");
+      if (oCategoryNode != NULL) {
+        sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
+      }
   
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
@@ -213,7 +230,7 @@ namespace dss {
         return;
       }
 
-      target->callScene(IDeviceInterface::coJSScripting, sceneId, forceFlag);
+      target->callScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId, forceFlag);
 
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -252,6 +269,8 @@ namespace dss {
 
   void SystemEventActionExecute::executeDeviceBlink(PropertyNodePtr _actionNode) {
     try {
+      SceneAccessCategory sceneAccess = SAC_UNKNOWN;
+
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
         Logger::getInstance()->log("SystemEventActionExecute::"
@@ -260,7 +279,12 @@ namespace dss {
         return;
       }
 
-      target->blink(IDeviceInterface::coJSScripting);
+      PropertyNodePtr oCategoryNode = _actionNode->getPropertyByName("category");
+      if (oCategoryNode != NULL) {
+        sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
+      }
+
+      target->blink(IDeviceInterface::coJSScripting, sceneAccess);
 
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -273,6 +297,7 @@ namespace dss {
     try {
       int zoneId;
       int groupId;
+      SceneAccessCategory sceneAccess = SAC_UNKNOWN;
 
       PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
       if (oZoneNode == NULL) {
@@ -292,11 +317,16 @@ namespace dss {
         groupId = oGroupNode->getIntegerValue();
       }
 
+      PropertyNodePtr oCategoryNode = _actionNode->getPropertyByName("category");
+      if (oCategoryNode != NULL) {
+        sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
+      }
+
       if (DSS::hasInstance()) {
         boost::shared_ptr<Zone> zone;
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->blink(IDeviceInterface::coJSScripting);
+        group->blink(IDeviceInterface::coJSScripting, sceneAccess);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"

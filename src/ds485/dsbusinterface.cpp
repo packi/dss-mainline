@@ -35,6 +35,7 @@
 #include "src/propertysystem.h"
 #include "src/foreach.h"
 #include "src/dsidhelper.h"
+#include "src/sceneaccess.h"
 
 #include "src/model/modelevent.h"
 #include "src/model/modelconst.h"
@@ -634,7 +635,7 @@ namespace dss {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, _sceneID, _forced);
+      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, _forced);
     }
   }
 
@@ -659,7 +660,7 @@ namespace dss {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupBlink(this, dsMeterID, _zoneID, _groupID, _originDeviceId);
+      m_pBusEventSink->onGroupBlink(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL);
     }
   }
 
@@ -678,7 +679,7 @@ namespace dss {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, _sceneID, _explicit);
+      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, _explicit);
     }
   }
 
@@ -794,7 +795,7 @@ namespace dss {
     loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    m_pBusEventSink->onDeviceCallScene(this, dsmDSID, _deviceID, 0, _sceneID, _forced);
+    m_pBusEventSink->onDeviceCallScene(this, dsmDSID, _deviceID, 0, SAC_MANUAL, _sceneID, _forced);
   }
 
   void DSBusInterface::handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
@@ -813,7 +814,7 @@ namespace dss {
     loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    m_pBusEventSink->onDeviceBlink(this, dsmDSID, _deviceID, 0);
+    m_pBusEventSink->onDeviceBlink(this, dsmDSID, _deviceID, 0, SAC_MANUAL);
   }
 
   void DSBusInterface::handleDeviceBlinkCallback(uint8_t _errorCode, void* _userData,

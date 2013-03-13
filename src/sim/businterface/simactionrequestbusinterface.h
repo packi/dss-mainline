@@ -35,11 +35,11 @@ namespace dss {
     : m_pSimulation(_pSimulation)
     { }
 
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const bool _force);
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const bool _force);
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene);
-    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene);
-    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin);
-    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin);
+    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene);
+    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category);
+    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category);
     virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value);
   private:
     boost::shared_ptr<DSSim> m_pSimulation;

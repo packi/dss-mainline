@@ -45,10 +45,12 @@ namespace dss {
       _interface->turnOff(IDeviceInterface::coJSON);
       return success();
     } else if(_request.getMethod() == "increaseValue") {
-      _interface->increaseValue(IDeviceInterface::coJSON);
+      std::string categoryStr = _request.getParameter("category");
+      _interface->increaseValue(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "decreaseValue") {
-      _interface->decreaseValue(IDeviceInterface::coJSON);
+      std::string categoryStr = _request.getParameter("category");
+      _interface->decreaseValue(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "setValue") {
       std::string valueStr = _request.getParameter("value");
@@ -63,9 +65,10 @@ namespace dss {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       bool force = _request.getParameter("force") == "true";
+      SceneAccessCategory category = SceneAccess::stringToCategory(_request.getParameter("category"));
       if(sceneID != -1) {
         if(SceneHelper::isInRange(sceneID, 0)) {
-          _interface->callScene(IDeviceInterface::coJSON, sceneID, force);
+          _interface->callScene(IDeviceInterface::coJSON, category, sceneID, force);
         } else {
           return failure("Parameter 'sceneNumber' out of bounds ('" + sceneStr + "')");
         }
@@ -91,11 +94,12 @@ namespace dss {
       return success();
     } else if(_request.getMethod() == "undoScene") {
       std::string sceneStr = _request.getParameter("sceneNumber");
+      std::string categoryStr = _request.getParameter("category");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID == -1) {
-        _interface->undoSceneLast(IDeviceInterface::coJSON);
+        _interface->undoSceneLast(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr));
       } else {
-        _interface->undoScene(IDeviceInterface::coJSON, sceneID);
+        _interface->undoScene(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr), sceneID);
       }
       return success();
     } else if(_request.getMethod() == "getConsumption") {
@@ -103,7 +107,8 @@ namespace dss {
       resultObj->addProperty("consumption", _interface->getPowerConsumption());
       return success(resultObj);
     } else if(_request.getMethod() == "blink") {
-      _interface->blink(IDeviceInterface::coJSON);
+      std::string categoryStr = _request.getParameter("category");
+      _interface->blink(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     }
     throw std::runtime_error("Unknown function");

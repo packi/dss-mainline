@@ -99,8 +99,8 @@ namespace dss {
     bool isRegisteredOnAnyMeter() const;
     std::vector<boost::shared_ptr<const DSMeter> > getDSMeters() { return m_DSMeters; }
 
-    virtual void nextScene(const callOrigin_t _origin);
-    virtual void previousScene(const callOrigin_t _origin);
+    virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
 
     void publishToPropertyTree();
     void removeFromPropertyTree();

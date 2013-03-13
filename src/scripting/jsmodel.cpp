@@ -45,6 +45,7 @@
 #include "src/scripting/jsproperty.h"
 #include "src/security/security.h"
 #include "src/stringconverter.h"
+#include "src/sceneaccess.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -1056,7 +1057,11 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->blink(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->blink(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1085,7 +1090,11 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->increaseValue(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->increaseValue(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1115,7 +1124,11 @@ namespace dss {
 
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->decreaseValue(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->decreaseValue(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1183,10 +1196,14 @@ namespace dss {
         if(argc >= 1) {
           int sceneNr;
           bool forceFlag = false;
+          SceneAccessCategory category = SAC_UNKNOWN;
           try {
             sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
             if (argc >= 2) {
               forceFlag = ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]);
+            }
+            if (argc >= 3) {
+              category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
             }
           } catch (ScriptException& ex) {
             JS_ReportError(cx, "Device.callScene: cannot convert parameters: %s", ex.what());
@@ -1194,7 +1211,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->callScene(IDeviceInterface::coJSScripting, sceneNr, forceFlag);
+            intf->callScene(IDeviceInterface::coJSScripting, category, sceneNr, forceFlag);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1223,6 +1240,7 @@ namespace dss {
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         int sceneNr = -1;
+        SceneAccessCategory category = SAC_UNKNOWN;
         if(argc > 1) {
           try {
             sceneNr = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
@@ -1230,13 +1248,16 @@ namespace dss {
             JS_ReportError(cx, "Convert parameter scene number: %s", ex.what());
             return JS_FALSE;
           }
+          if (argc >= 2) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+          }
         }
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
           if (sceneNr >= 0) {
-            intf->undoScene(IDeviceInterface::coJSScripting, sceneNr);
+            intf->undoScene(IDeviceInterface::coJSScripting, category, sceneNr);
           } else {
-            intf->undoSceneLast(IDeviceInterface::coJSScripting);
+            intf->undoSceneLast(IDeviceInterface::coJSScripting, category);
           }
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
@@ -1266,7 +1287,11 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->nextScene(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->nextScene(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1295,7 +1320,11 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->previousScene(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->previousScene(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1686,15 +1715,15 @@ namespace dss {
   JSFunctionSpec device_interface_methods[] = {
     JS_FS("turnOn", dev_turn_on, 0, 0),
     JS_FS("turnOff", dev_turn_off, 0, 0),
-    JS_FS("blink", dev_blink, 0, 0),
+    JS_FS("blink", dev_blink, 1, 0),
     JS_FS("setValue", dev_set_value, 0, 0),
-    JS_FS("increaseValue", dev_increase_value, 0, 0),
-    JS_FS("decreaseValue", dev_decrease_value, 0, 0),
-    JS_FS("callScene", dev_call_scene, 1, 0),
+    JS_FS("increaseValue", dev_increase_value, 1, 0),
+    JS_FS("decreaseValue", dev_decrease_value, 1, 0),
+    JS_FS("callScene", dev_call_scene, 2, 0),
     JS_FS("saveScene", dev_save_scene, 1, 0),
-    JS_FS("undoScene", dev_undo_scene, 0, 0),
-    JS_FS("nextScene", dev_next_scene, 0, 0),
-    JS_FS("previousScene", dev_previous_scene, 0, 0),
+    JS_FS("undoScene", dev_undo_scene, 1, 0),
+    JS_FS("nextScene", dev_next_scene, 1, 0),
+    JS_FS("previousScene", dev_previous_scene, 1, 0),
     JS_FS("getConfig", dev_get_config, 2, 0),
     JS_FS("getConfigWord", dev_get_config_word, 2, 0),
     JS_FS("setConfig", dev_set_config, 3, 0),
@@ -2096,12 +2125,16 @@ namespace dss {
       int groupID;
       int sceneID;
       bool forcedCall = false;
+      SceneAccessCategory category = SAC_UNKNOWN;
       if(pZone != NULL) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
           if (argc >= 3) {
             forcedCall = ctx->convertTo<bool>(JS_ARGV(cx, vp)[2]);
+          }
+          if (argc >= 4) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]));
           }
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
@@ -2112,7 +2145,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        pGroup->callScene(IDeviceInterface::coJSScripting, sceneID, forcedCall);
+        pGroup->callScene(IDeviceInterface::coJSScripting, category, sceneID, forcedCall);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2135,10 +2168,14 @@ namespace dss {
     try {
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       int groupID = 0;
+      SceneAccessCategory category = SAC_UNKNOWN;
       if(pZone != NULL) {
         if (argc >= 1) {
           try {
             groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            if (argc >= 2) {
+              category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+            }
           } catch(ScriptException& e) {
             JS_ReportError(cx, e.what());
             return JS_FALSE;
@@ -2153,7 +2190,7 @@ namespace dss {
           JS_ReportWarning(cx, "Zone.blink: group with id \"%d\" not found", groupID);
           return JS_FALSE;
         }
-        pGroup->blink(IDeviceInterface::coJSScripting);
+        pGroup->blink(IDeviceInterface::coJSScripting, category);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2261,8 +2298,8 @@ namespace dss {
 
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
-    JS_FS("callScene", zone_callScene, 3, 0),
-    JS_FS("blink", zone_blink, 1, 0),
+    JS_FS("callScene", zone_callScene, 4, 0),
+    JS_FS("blink", zone_blink, 2, 0),
     JS_FS("getPowerConsumption", zone_getPowerConsumption, 0, 0),
     JS_FS("pushSensorValue", zone_pushSensorValue, 3, 0),
     JS_FS("getPropertyNode", zone_get_property_node, 0, 0),
@@ -2366,7 +2403,7 @@ namespace dss {
         }
         try {
 
-          eState svalue;
+          eState svalue = State_Unkown;
           if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
             std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
             if (value == "active") {
