@@ -602,7 +602,54 @@ namespace dss {
       }
       pDevice->setDeviceOutputValue(offset, value);
       return success();
+    } else if(_request.getMethod() == "setSceneValue") {
+      int id = strToIntDef(_request.getParameter("sceneID"), -1);
+      if((id  < 0) || (id > 127)) {
+        return failure("Invalid or missing parameter 'sceneID'");
+      }
 
+      if (!_request.hasParameter("value") && !_request.hasParameter("angle")) {
+        return failure("Must supply at least value or angle");
+      }
+      int value = strToIntDef(_request.getParameter("value"), -1);
+      int angle = strToIntDef(_request.getParameter("angle"), -1);
+      if ((value < 0) && (angle < 0)) {
+        return failure("Invalid value and/or angle parameter");
+      }
+      if (value > 65535) {
+        return failure("Invalid value parameter");
+      }
+      if (angle > 255) {
+        return failure("Invalid angle parameter");
+      }
+
+      if (angle != -1) {
+        DeviceFeatures_t features = pDevice->getFeatures();
+        if (!features.hasOutputAngle) {
+          return failure("Device does not support output angle configuration");
+        }
+        pDevice->setSceneAngle(id, angle);
+      }
+
+      if (value != -1) {
+        pDevice->setSceneValue(id, value);
+      }
+
+      return success();
+    } else if(_request.getMethod() == "getSceneValue") {
+      int id = strToIntDef(_request.getParameter("sceneID"), -1);
+      if((id  < 0) || (id > 127)) {
+        return failure("Invalid or missing parameter 'sceneID'");
+      }
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("value", pDevice->getSceneValue(id));
+
+      DeviceFeatures_t features = pDevice->getFeatures();
+      if (features.hasOutputAngle) {
+        resultObj->addProperty("angle", pDevice->getSceneAngle(id));
+      }
+
+      return success(resultObj);
     } else if(_request.getMethod() == "getSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
