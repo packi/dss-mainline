@@ -6,11 +6,11 @@ EXTRA_DIST =	$(top_srcdir)/src/messages/messaging.proto \
 				$(top_srcdir)/src/messages/device-scene-table-update.proto
 
 CLEANFILES = \
-			build_info.h
+			build_info.h \
 			$(top_builddir)/src/messages/messaging.pb.h \
 			$(top_builddir)/src/messages/messaging.pb.cc \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
-			$(top_builddir)/src/messages/device-scene-table-update.pb.c
+			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
 
 BUILT_SOURCES = \
 			build_info.h \
@@ -28,10 +28,6 @@ nodist_libprotomessages_a_SOURCES = \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
 
 libprotomessages_a_CXXFLAGS = -I$(top_builddir)
-
-%.pb.cc %.pb.h: %.proto
-	$(MKDIR_P) $(top_builddir)/src/messages
-	protoc -I$(top_srcdir)/src/messages --cpp_out=$(top_builddir)/src/messages $(top_srcdir)/src/messages/$(<F)
 
 if BUILD_SOAP
 
@@ -213,3 +209,10 @@ webservices/soapC.cpp: $(top_srcdir)/webservices/model_soap.cpp $(top_srcdir)/we
 	$(GSOAP_SOAPCPP2) -I$(GSOAP_IMPORT_DIR) -SLx -dwebservices $(top_srcdir)/webservices/model_soap.h
 
 endif
+
+$(top_srcdir)/src/comm-channel.h: $(top_builddir)/src/messages/messaging.pb.h
+$(top_srcdir)/src/comm-channel.cpp: $(top_builddir)/src/messages/device-scene-table-update.pb.h
+
+%.pb.cc %.pb.h: %.proto
+	$(MKDIR_P) $(top_builddir)/src/messages
+	protoc -I$(top_srcdir)/src/messages --cpp_out=$(top_builddir)/src/messages $(top_srcdir)/src/messages/$(<F)
