@@ -181,6 +181,7 @@ namespace dss {
   const uint8_t CfgClassRuntime = 0x40;
   const uint8_t CfgClassScene = 0x80;
   const uint8_t CfgClassSceneExtention = 0x81;
+  const uint8_t CfgClassSceneAngle = 0x82;
 
   const uint8_t CfgFunction_Mode = 0;
   const uint8_t CfgFunction_ButtonMode = 1;

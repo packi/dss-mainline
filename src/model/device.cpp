@@ -426,6 +426,27 @@ namespace dss {
     _config.dimtimeIndex = (mode >> 6) & 3;
   } // getDeviceSceneMode
 
+  int Device::getSceneAngle(const int _scene) {
+    DeviceFeatures_t features = getFeatures();
+    if (features.hasOutputAngle) {
+      return getDeviceConfig(CfgClassSceneAngle, _scene);
+    } else {
+      throw std::runtime_error("Device does not support output angle setting");
+    }
+  }
+
+  void Device::setSceneAngle(const int _scene, const int _angle) {
+    DeviceFeatures_t features = getFeatures();
+    if (!features.hasOutputAngle) {
+      throw std::runtime_error("Device does not support output angle setting");
+    }
+    if ((_angle < 0) || (_angle > 255)) {
+      throw std::runtime_error("Device angle value out of bounds");
+    }
+
+    setDeviceConfig(CfgClassSceneAngle, _scene, _angle);
+  }
+
   void Device::setDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t _config) {
     if(_ledconIndex > 2) {
       throw DSSException("Device::setDeviceLedMode: index out of range");
@@ -1242,6 +1263,7 @@ namespace dss {
     DeviceFeatures_t features;
     features.pairing = false;
     features.syncButtonID = false;
+    features.hasOutputAngle = false;
 
     if ((m_ProductID == 0) || (m_FunctionID == 0)) {
         return features;
@@ -1263,6 +1285,11 @@ namespace dss {
                this->hasMultibuttons() &&
                (m_ButtonInputIndex == 0)) {
       features.pairing = true;
+    }
+
+    if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL) &&
+        (devNumber = 220)) {
+      features.hasOutputAngle = true;
     }
 
     return features;

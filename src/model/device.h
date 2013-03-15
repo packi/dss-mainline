@@ -116,6 +116,7 @@ namespace dss {
   typedef struct {
     bool pairing;       // device supports pairing
     bool syncButtonID;  // sync button ID setting of slave with master
+    bool hasOutputAngle;
   } DeviceFeatures_t;
 
   typedef struct {
@@ -270,6 +271,8 @@ namespace dss {
     uint8_t transitionTimeEval(int timems);
     void setSceneValue(const int _scene, const int _value);
     int getSceneValue(const int _scene);
+    void setSceneAngle(const int _scene, const int _angle);
+    int getSceneAngle(const int _scene);
     void configureAreaMembership(const int _areaScene, const bool _addToArea);
 
     /** Binary input devices */
