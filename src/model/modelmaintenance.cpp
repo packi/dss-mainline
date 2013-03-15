@@ -424,6 +424,14 @@ namespace dss {
           log("Unexpected parameter count for ModelEvent::etCallSceneDevice");
         }
         break;
+      case ModelEvent::etBlinkDevice:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() == 2) {
+          onDeviceBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+        } else {
+          log("Unexpected parameter count for ModelEvent::etBlinkDevice");
+        }
+        break;
       case ModelEvent::etCallSceneDeviceLocal:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() == 2) {
@@ -465,6 +473,14 @@ namespace dss {
             sceneID = event.getParameter(3);
           }
           onGroupUndoScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), sceneID);
+        }
+        break;
+      case ModelEvent::etBlinkGroup:
+        assert(pEventWithDSID != NULL);
+        if (event.getParameterCount() < 3) {
+          log("Expected at least 3 parameter for ModelEvent::etBlinkGroup");
+        } else {
+          onGroupBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
         }
         break;
       case ModelEvent::etModelDirty:
@@ -1073,6 +1089,33 @@ namespace dss {
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
 
+  void ModelMaintenance::onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID) {
+    try {
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      boost::shared_ptr<Group> group = zone->getGroup(_groupID);
+      if(group != NULL) {
+        log("OnGroupBlink: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID));
+        boost::shared_ptr<Event> pEvent;
+        pEvent.reset(new Event("blink", group));
+        pEvent->setProperty("groupID", intToString(_groupID));
+        pEvent->setProperty("zoneID", intToString(_zoneID));
+        dss_dsid_t originDSID;
+        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+          DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
+          originDSID = devRef.getDSID();
+        } else {
+          originDSID.lower = _originDeviceID;
+        }
+        pEvent->setProperty("originDeviceID", originDSID.toString());
+        raiseEvent(pEvent);
+      } else {
+        log("OnGroupBlink: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("OnGroupBlink: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
+    }
+  } // onGroupBlink
+
   void ModelMaintenance::onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType) {
 
     // Filter Strategy:
@@ -1228,6 +1271,24 @@ namespace dss {
       }
     } catch(ItemNotFoundException& e) {
       log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
+    }
+  } // onDeviceCallScene
+
+  void ModelMaintenance::onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID) {
+    try {
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      try {
+        log("OnDeviceBlink: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID));
+        DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
+        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+        boost::shared_ptr<Event> event(new Event("blink", pDevRev));
+        event->setProperty("originDeviceID", intToString(_originDeviceID));
+        raiseEvent(event);
+      } catch(ItemNotFoundException& e) {
+        log("OnDeviceBlink: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString(), lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("OnDeviceBlink: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
     }
   } // onDeviceCallScene
 

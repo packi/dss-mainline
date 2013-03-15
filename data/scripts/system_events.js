@@ -215,6 +215,15 @@ function logZoneGroupScene(zone, groupId, sceneId, isForced, originDeviceId)
     }
 }
 
+function logZoneGroupBlink(zone, groupId, originDeviceId)
+{
+    var zoneName = genZoneName(zone);
+    var groupName = genGroupName(groupId);
+    var devName = genDeviceName(originDeviceId);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
+    l.logln(';Blink;;', zoneName, ';', groupName, ';', devName);
+}
+
 function logZoneGroupUndo(zone, groupId, sceneId, originDeviceId)
 {
     var zoneName = genZoneName(zone);
@@ -239,6 +248,15 @@ function logDeviceScene(device, zone, sceneId, isForced, originDeviceId)
       //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID');
       l.logln(';DeviceScene;', sceneName, ';', zoneName, ';', devName, ';', origName);
     }
+}
+
+function logDeviceBlink(device, zone, originDeviceId)
+{
+    var zoneName = genZoneName(zone);
+    var devName = device.name + ';' + device.dsid;
+    var origName = genDeviceName(originDeviceId);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID');
+    l.logln(';DeviceBlink;;', zoneName, ';', devName, ';', origName);
 }
 
 function logDeviceLocalScene(sceneId, originDeviceId)
@@ -369,6 +387,26 @@ else if (raisedEvent.name == 'callScene')
             var device = getDevices().byDSID(raisedEvent.source.dsid);
             logDeviceScene(device, getZoneByID(zoneId), sceneId, isForced, originDeviceId);
         }
+    }
+}
+
+/*
+ * blink can be on device or on zone/group
+ */
+else if (raisedEvent.name == 'blink')
+{
+    var zoneId = raisedEvent.source.zoneID;
+    if (raisedEvent.source.isGroup) {
+        // ZoneGroup Action Request
+        var groupId = raisedEvent.source.groupID;
+        var originDeviceId = raisedEvent.parameter.originDeviceID;
+        logZoneGroupBlink(getZoneByID(zoneId), groupId, originDeviceId);
+    }
+    if (raisedEvent.source.isDevice) {
+        // Device Action Request
+        var originDeviceId = raisedEvent.parameter.originDeviceID;
+        var device = getDevices().byDSID(raisedEvent.source.dsid);
+        logDeviceBlink(device, getZoneByID(zoneId), originDeviceId);
     }
 }
 
