@@ -37,8 +37,10 @@ namespace dss {
   public:
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
                     etUndoSceneGroup,  /**< An undo scene command for a group. */
+                    etBlinkGroup,  /**< A group was blinked. */
                     etCallSceneDevice, /**< A device has changed the scene */
                     etUndoSceneDevice, /**< A device undo scene command */
+                    etBlinkDevice, /**< A device was blinked */
                     etCallSceneDeviceLocal, /**< A device has changed the status locally */
                     etButtonClickDevice, /** < A button click on a device not handled by the dSMeter */
                     etNewDevice,       /**< A new device has been detected */

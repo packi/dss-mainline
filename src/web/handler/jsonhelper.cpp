@@ -101,12 +101,12 @@ namespace dss {
     result->addProperty("buttonInputCount", _device.getDevice()->getButtonInputCount());
     result->addProperty("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
 
-    boost::shared_ptr<JSONArray<std::string> > groupsArr(new JSONArray<std::string>());
+    boost::shared_ptr<JSONArray<int> > groupsArr(new JSONArray<int>());
     result->addElement("groups", groupsArr);
     std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
     for (int g = 1; g <= 63; g++) {
       if (deviceGroups.test(g-1)) {
-        groupsArr->add(intToString(g));
+        groupsArr->add(g);
       }
     }
 

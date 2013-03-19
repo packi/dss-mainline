@@ -115,6 +115,12 @@
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
+  <subscription event-name="blink" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_events.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
   <subscription event-name="deviceBinaryInputEvent" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/system_events.js</parameter>
