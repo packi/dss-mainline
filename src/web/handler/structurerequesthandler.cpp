@@ -573,7 +573,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetName(group, _request.getParameter("newName"));
+    manipulator.groupSetName(group, st.convert(_request.getParameter("newName")));
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return success();
