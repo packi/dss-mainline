@@ -164,7 +164,6 @@ namespace dss {
     void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void readOutPendingMeter();
-    void synchronizeGroups();
 
     void readConfiguration();
     void writeConfiguration();
