@@ -986,13 +986,14 @@ namespace dss {
     if (hasExtendendSceneTable()) {
       value <<= 8;
       int extValue = getDeviceConfig(CfgClassSceneExtention, _scene / 2);
-      if ((_scene % 2) == 0) {
-        extValue &= 0xF0;
-        value |= extValue & (extValue >> 4);
+      if ((_scene % 2) == 1) {
+        extValue &= 0xF0; // high bits for odd scene numbers
+        extValue |= (extValue >> 4);
       } else {
-        extValue &= 0x0F;
-        value |= (extValue << 4) & extValue;
+        extValue &= 0x0F; // lower bits for even scene numbers
+        extValue |= (extValue << 4);
       }
+      value |= extValue;
     }
     return value;
   }
