@@ -146,7 +146,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value) {
+  void DSActionRequest::setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("decreaseValue");
     }
-    virtual void setValue(const callOrigin_t _origin, const uint8_t _value)  {
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value)  {
       functionCalled("setValue(" + intToString(_value) + ")");
     }
     virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force)  {

@@ -75,8 +75,8 @@ namespace dss {
     getDevice()->decreaseValue(_origin, _category);
   } // decreaseValue
 
-  void DeviceReference::setValue(const callOrigin_t _origin, const uint8_t _value) {
-    getDevice()->setValue(_origin, _value);
+  void DeviceReference::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
+    getDevice()->setValue(_origin, _category, _value);
   } // setValue
 
   bool DeviceReference::isOn() const {

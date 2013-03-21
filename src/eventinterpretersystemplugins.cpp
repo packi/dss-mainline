@@ -241,6 +241,8 @@ namespace dss {
 
   void SystemEventActionExecute::executeDeviceValue(PropertyNodePtr _actionNode) {
     try {
+      SceneAccessCategory sceneAccess = SAC_UNKNOWN;
+
       PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
       if (oValueNode == NULL) {
         Logger::getInstance()->log("SystemEventActionExecute::"
@@ -257,7 +259,13 @@ namespace dss {
         return;
       }
 
+      PropertyNodePtr oCategoryNode = _actionNode->getPropertyByName("category");
+      if (oCategoryNode != NULL) {
+        sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
+      }
+
       target->setValue(IDeviceInterface::coJSScripting,
+                       sceneAccess,
                        oValueNode->getIntegerValue());
 
     } catch (std::runtime_error& e) {

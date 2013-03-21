@@ -212,7 +212,7 @@ namespace dss {
     virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene) = 0;
     virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) = 0;
     virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) = 0;
-    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value) = 0;
+    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) = 0;
   }; // ActionRequestInterface
 
 

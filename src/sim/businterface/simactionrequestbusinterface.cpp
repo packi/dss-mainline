@@ -109,6 +109,7 @@ namespace dss {
 
   void SimActionRequestBusInterface::setValue(AddressableModelItem *pTarget,
                                               const uint16_t _origin,
+                                              const SceneAccessCategory _category,
                                               const uint8_t _value) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);

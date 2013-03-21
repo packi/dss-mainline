@@ -43,10 +43,10 @@ namespace dss {
     }
   } // decreaseValue
 
-  void NonAddressableModelItem::setValue(const callOrigin_t _origin, const uint8_t _value) {
+  void NonAddressableModelItem::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->setValue(_origin, _value);
+      item->setValue(_origin, _category, _value);
     }
   } // setValue
 

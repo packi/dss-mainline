@@ -895,7 +895,7 @@ public:
   }
   virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
   }
-  virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value) {
+  virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
   }
 
   std::string getLog() {

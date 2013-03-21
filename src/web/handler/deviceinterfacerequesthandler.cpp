@@ -54,11 +54,12 @@ namespace dss {
       return success();
     } else if(_request.getMethod() == "setValue") {
       std::string valueStr = _request.getParameter("value");
+      std::string categoryStr = _request.getParameter("category");
       int value = strToIntDef(valueStr, -1);
       if((value  < 0) || (value > UCHAR_MAX)) {
         return failure("Invalid or missing parameter value: '" + valueStr + "'");
       } else {
-        _interface->setValue(IDeviceInterface::coJSON, value);
+        _interface->setValue(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr), value);
       }
       return success();
     } else if(_request.getMethod() == "callScene") {

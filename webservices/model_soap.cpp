@@ -599,7 +599,7 @@ int dss__SetSetValue(struct soap *soap, char* _token, char* _setSpec, uint8_t _v
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.setValue(dss::IDeviceInterface::coSOAP, _value);
+  set.setValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _value);
   result = true;
   return SOAP_OK;
 }
@@ -700,7 +700,7 @@ int dss__ApartmentSetValue(struct soap *soap, char* _token, int _groupID, uint8_
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->setValue(dss::IDeviceInterface::coSOAP, _value);
+  group->setValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _value);
   result = true;
   return SOAP_OK;
 }
@@ -813,7 +813,7 @@ int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->setValue(dss::IDeviceInterface::coSOAP, _value);
+  group->setValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _value);
   result = true;
   return SOAP_OK;
 }

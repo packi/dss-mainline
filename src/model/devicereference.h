@@ -74,7 +74,7 @@ namespace dss {
      * @note This will lookup the device. */
     std::string getName() const;
 
-    virtual void setValue(const callOrigin_t _origin, uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _value);
 
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);

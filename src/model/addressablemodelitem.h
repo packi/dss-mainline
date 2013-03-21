@@ -44,7 +44,7 @@ namespace dss {
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void setValue(const callOrigin_t _origin, const uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value);
 
     virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force);
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr);

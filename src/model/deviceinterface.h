@@ -56,7 +56,7 @@ namespace dss {
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
     /** Sets the output value */
-    virtual void setValue(const callOrigin_t _origin, const uint8_t _value) = 0;
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) = 0;
     /** Sets the scene on the device.
      * The output value will be set according to the scene lookup table in the device.
      */

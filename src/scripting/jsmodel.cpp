@@ -1156,16 +1156,21 @@ namespace dss {
       if(self.is("Set") || self.is("Device")) {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         if(argc >= 1) {
-          uint8_t value;
+          uint8_t value = 0;
+          SceneAccessCategory category = SAC_UNKNOWN;
           try {
             value = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[0]);
+
+            if(argc >= 2) {
+              category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+            }
           } catch (ScriptException& ex) {
             JS_ReportError(cx, ex.what());
             return JS_FALSE;
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->setValue(IDeviceInterface::coJSScripting, value);
+            intf->setValue(IDeviceInterface::coJSScripting, category, value);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;

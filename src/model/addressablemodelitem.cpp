@@ -51,11 +51,11 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneDec, false);
   } // decreaseValue
 
-  void AddressableModelItem::setValue(const callOrigin_t _origin, const uint8_t _value) {
+  void AddressableModelItem::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->setValue(this, _origin, _value);
+    m_pApartment->getActionRequestInterface()->setValue(this, _origin, _category, _value);
   } // setValue
 
   void AddressableModelItem::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force) {

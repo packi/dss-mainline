@@ -296,6 +296,11 @@ namespace dss {
     }
 
     virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
+      if (!SceneAccess::access(pTarget, _category)) {
+        Logger::getInstance()->log("DeviceActionAdaptor: callScene blocked", lsDebug);
+        return;
+      }
+
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->setValue(pTarget, _origin, _category, _value);
       }
