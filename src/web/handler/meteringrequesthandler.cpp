@@ -252,13 +252,16 @@ namespace dss {
     resultObj->addElement("values", modulators);
 
     bool isEnergy = (type == "energy");
-    DateTime temp_date;
+    DateTime lastUpdateAll(DateTime::NullDate);
     unsigned long aggregatedValue = 0ul;
 
     for(size_t i = 0; i < meters.size(); i++) {
       boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
       unsigned long value = isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption();
-      temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+      DateTime lastUpdateGlobal = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+      if (lastUpdateGlobal > lastUpdateAll) {
+        lastUpdateAll = lastUpdateGlobal;
+      }
       std::string dsid = dsMeter->getDSID().toString();
       if (aggregateMeterValues) {
         aggregatedValue += value;
@@ -269,7 +272,7 @@ namespace dss {
           boost::shared_ptr<JSONObject> modulator(new JSONObject());
           modulator->addProperty("dsid", dsid);
           modulator->addProperty("value", value);
-          modulator->addProperty("date", temp_date.toString());
+          modulator->addProperty("date", lastUpdateAll.toString());
           modulators->addElement("", modulator);
         } catch (std::runtime_error&) {
           return failure("Could not apply properties to JSON object.");
@@ -281,7 +284,7 @@ namespace dss {
         boost::shared_ptr<JSONObject> modulator(new JSONObject());
         modulator->addElement("dsid", dsidSet);
         modulator->addProperty("value", aggregatedValue);
-        modulator->addProperty("date", temp_date.toString());
+        modulator->addProperty("date", lastUpdateAll.toString());
         modulators->addElement("", modulator);
       } catch (std::runtime_error&) {
         return failure("Could not apply properties to JSON object.");
