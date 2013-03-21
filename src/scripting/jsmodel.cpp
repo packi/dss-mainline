@@ -999,7 +999,11 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->turnOn(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->turnOn(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1028,7 +1032,11 @@ namespace dss {
         IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          intf->turnOff(IDeviceInterface::coJSScripting);
+          SceneAccessCategory category = SAC_UNKNOWN;
+          if (argc >= 1) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          }
+          intf->turnOff(IDeviceInterface::coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;

@@ -44,11 +44,11 @@ namespace dss {
     /** Turns the device on.
      *  This will invoke scene "max".
      */
-    virtual void turnOn(const callOrigin_t _origin);
+    virtual void turnOn(const callOrigin_t _origin, const SceneAccessCategory _category);
     /** Turns the device off.
      * This will invoke scene "min"
      */
-    virtual void turnOff(const callOrigin_t _origin);
+    virtual void turnOff(const callOrigin_t _origin, const SceneAccessCategory _category);
 
     /** Increases the main value (e.g. brightness) */
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;

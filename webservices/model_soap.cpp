@@ -555,7 +555,7 @@ int dss__SetTurnOn(struct soap *soap, char* _token, char* _setSpec, bool& result
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.turnOn(dss::IDeviceInterface::coSOAP);
+  set.turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -566,7 +566,7 @@ int dss__SetTurnOff(struct soap *soap, char* _token, char* _setSpec, bool& resul
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.turnOff(dss::IDeviceInterface::coSOAP);
+  set.turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -656,7 +656,7 @@ int dss__ApartmentTurnOn(struct soap *soap, char* _token, int _groupID, bool& re
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOn(dss::IDeviceInterface::coSOAP);
+  group->turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -667,7 +667,7 @@ int dss__ApartmentTurnOff(struct soap *soap, char* _token, int _groupID, bool& r
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOff(dss::IDeviceInterface::coSOAP);
+  group->turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -769,7 +769,7 @@ int dss__ZoneTurnOn(struct soap *soap, char* _token, int _zoneID, int _groupID, 
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOn(dss::IDeviceInterface::coSOAP);
+  group->turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -780,7 +780,7 @@ int dss__ZoneTurnOff(struct soap *soap, char* _token, int _zoneID, int _groupID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOff(dss::IDeviceInterface::coSOAP);
+  group->turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -917,7 +917,7 @@ int dss__DeviceTurnOn(struct soap *soap, char* _token, char* _deviceID, bool& re
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.turnOn(dss::IDeviceInterface::coSOAP);
+  dev.turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -928,7 +928,7 @@ int dss__DeviceTurnOff(struct soap *soap, char* _token, char* _deviceID, bool& r
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.turnOff(dss::IDeviceInterface::coSOAP);
+  dev.turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }

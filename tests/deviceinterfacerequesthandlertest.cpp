@@ -41,10 +41,10 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     : m_NumberOfCalls(0)
     {
     }
-    virtual void turnOn(const callOrigin_t _origin) {
+    virtual void turnOn(const callOrigin_t _origin, const SceneAccessCategory _category) {
       functionCalled("turnOn");
     }
-    virtual void turnOff(const callOrigin_t _origin) {
+    virtual void turnOff(const callOrigin_t _origin, const SceneAccessCategory _category) {
       functionCalled("turnOff");
     }
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category)  {

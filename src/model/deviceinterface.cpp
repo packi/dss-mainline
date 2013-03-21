@@ -28,12 +28,12 @@
 namespace dss {
   //================================================== IDeviceInterface
 
-  void IDeviceInterface::turnOn(const callOrigin_t _origin) {
-    callScene(_origin, SceneMax);
+  void IDeviceInterface::turnOn(const callOrigin_t _origin, const SceneAccessCategory _category) {
+    callScene(_origin, _category, SceneMax);
   }
 
-  void IDeviceInterface::turnOff(const callOrigin_t _origin) {
-    callScene(_origin, SceneMin);
+  void IDeviceInterface::turnOff(const callOrigin_t _origin, const SceneAccessCategory _category) {
+    callScene(_origin, _category, SceneMin);
   }
 
 }

@@ -39,10 +39,12 @@ namespace dss {
     assert(_interface != NULL);
     assert(isDeviceInterfaceCall(_request));
     if(_request.getMethod() == "turnOn") {
-      _interface->turnOn(IDeviceInterface::coJSON);
+      std::string categoryStr = _request.getParameter("category");
+      _interface->turnOn(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "turnOff") {
-      _interface->turnOff(IDeviceInterface::coJSON);
+      std::string categoryStr = _request.getParameter("category");
+      _interface->turnOff(IDeviceInterface::coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "increaseValue") {
       std::string categoryStr = _request.getParameter("category");
