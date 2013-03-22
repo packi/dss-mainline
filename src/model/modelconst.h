@@ -117,6 +117,16 @@ namespace dss {
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
+  // Button input id's
+  const uint8_t ButtonId_Device = 0;
+  const uint8_t ButtonId_Area1 = 1;
+  const uint8_t ButtonId_Area2 = 2;
+  const uint8_t ButtonId_Area3 = 3;
+  const uint8_t ButtonId_Area4 = 4;
+  const uint8_t ButtonId_Zone = 5;
+  const uint8_t ButtonId_Apartment = 14;
+  const uint8_t ButtonId_Generic = 15;
+
   // Sensor functions for Automated Devices
   const uint8_t SensorFunction_Generic = 0;
   const uint8_t SensorFunction_Generic1 = 1;
@@ -167,7 +177,9 @@ namespace dss {
   const int GroupIDReserved4 = 14;
   const int GroupIDReserved5 = 15;
   const int GroupIDStandardMax = 15;
-  const int GroupIDUserGroupStart = GroupIDStandardMax + 1;
+  const int GroupIDAppUserMin = 16;
+  const int GroupIDAppUserMax = 23;
+  const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
   const int GroupIDMax = 63;
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
