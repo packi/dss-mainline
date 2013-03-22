@@ -359,7 +359,11 @@ namespace dss {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this,
                                                                         _buttonActiveGroup);
-
+      if (_buttonActiveGroup >= GroupIDAppUserMin &&
+          _buttonActiveGroup <= GroupIDAppUserMax &&
+          m_ButtonID == ButtonId_Device) {
+        setDeviceButtonID(ButtonId_Zone);
+      }
       /* refresh device information for correct active group */
       if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
         ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged,
