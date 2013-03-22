@@ -34,6 +34,7 @@
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
 #include "src/dsidhelper.h"
+#include "src/util.h"
 
 #include <stdexcept>
 #include <digitalSTROM/ds.h>
@@ -56,6 +57,7 @@ namespace dss {
     foreach(boost::shared_ptr<Group> group, groupList) {
       group->setIsConnected(true);
     }
+    synchronizeGroups(&m_Apartment, &m_Interface);
   } // createZone
 
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
@@ -69,6 +71,7 @@ namespace dss {
     if(!_device->isPresent()) {
       throw std::runtime_error("Need device to be present");
     }
+
     int oldZoneID = _device->getZoneID();
     boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByDSID(_device->getDSMeterDSID());
     if(!_zone->registeredOnDSMeter(targetDSMeter)) {
@@ -332,9 +335,11 @@ namespace dss {
           pGroup = pZone->getGroup(_groupNumber);
           if (pGroup == NULL) {
             pGroup = boost::shared_ptr<Group>(new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
+            pGroup->setIsValid(true);
             m_Apartment.getZone(0)->addGroup(pGroup);
             m_Interface.createGroup(pZone->getID(), _groupNumber, _standardGroupNumber, _name);
           } else {
+            pGroup->setIsValid(true);
             m_Interface.groupSetName(pZone->getID(), _groupNumber, _name);
             m_Interface.groupSetStandardID(pZone->getID(), _groupNumber, _standardGroupNumber);
           }

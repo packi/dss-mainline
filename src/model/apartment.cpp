@@ -117,6 +117,18 @@ namespace dss {
     grp->setStandardGroupID(0);
     grp->setIsValid(true);
     _zone->addGroup(grp);
+    if (_zone->getID() != 0) {
+      foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
+        if ((pGroup->getID() >= 16) && (pGroup->getID() <= 23)) {
+            grp.reset(new Group(pGroup->getID(), _zone, *this));
+            grp->setName(pGroup->getName());
+            grp->setStandardGroupID(pGroup->getStandardGroupID());
+            grp->setIsValid(pGroup->isValid());
+            grp->setIsSynchronized(false);
+          _zone->addGroup(grp);
+        }
+      }
+    }
   } // addDefaultGroupsToZone
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) const {

@@ -53,6 +53,7 @@
 #include "src/ds485/dsdevicebusinterface.h"
 #include "url.h"
 #include "boost/filesystem.hpp"
+#include "util.h"
 
 namespace dss {
   //=============================================== ApartmentTreeListener
@@ -617,12 +618,12 @@ namespace dss {
 
     // If dSMeter configuration has changed we need to synchronize user-groups
     if (hadToUpdate && !m_IsInitializing) {
-      synchronizeGroups();
+      synchronizeGroups(m_pApartment, m_pStructureModifyingBusInterface);
     }
 
     // If we didn't have to update for one cycle, assume that we're done
     if (!hadToUpdate && m_IsInitializing) {
-      synchronizeGroups();
+      synchronizeGroups(m_pApartment, m_pStructureModifyingBusInterface);
 
       log("******** Finished loading model from dSM(s)...", lsInfo);
       m_IsInitializing = false;
@@ -646,59 +647,6 @@ namespace dss {
       }
     }
   } // readOutPendingMeter
-
-  void ModelMaintenance::synchronizeGroups() {
-    std::vector<boost::shared_ptr<Zone> > zones = m_pApartment->getZones();
-    foreach(boost::shared_ptr<Zone> pZone, zones) {
-      if (pZone->getID() == 0 || !pZone->isConnected()) {
-        continue;
-      }
-      std::vector<boost::shared_ptr<Group> > groups = pZone->getGroups();
-      foreach(boost::shared_ptr<Group> pGroup, groups) {
-        if (!pGroup->isSynchronized()) {
-
-          log("Forced user group configuration update in zone " +
-              intToString(pZone->getID()) + " and group " + intToString(pGroup->getID()), lsInfo);
-
-          // Special-User-Groups 16..23: get configuration from Zone-0
-          if (pGroup->getID() >= 16 && pGroup->getID() <= 23) {
-            try {
-              boost::shared_ptr<Group> refGroup = m_pApartment->getGroup(pGroup->getID());
-              m_pStructureModifyingBusInterface->groupSetName(pZone->getID(), refGroup->getID(),
-                  refGroup->getName());
-              m_pStructureModifyingBusInterface->groupSetStandardID(pZone->getID(), refGroup->getID(),
-                  refGroup->getStandardGroupID());
-              pGroup->setName(refGroup->getName());
-              pGroup->setStandardGroupID(refGroup->getStandardGroupID());
-              pGroup->setIsSynchronized(true);
-            } catch (BusApiError& e) {
-              log("Error updating user group configuration in zone " +
-                  intToString(pZone->getID()) + " and group " + intToString(pGroup->getID()) +
-                  ": " + e.what(), lsWarning);
-            }
-          }
-
-          // Regular-User-Groups >=24
-          if (pGroup->getID() >= 24) {
-            try {
-              m_pStructureModifyingBusInterface->createGroup(pZone->getID(), pGroup->getID(),
-                  pGroup->getStandardGroupID(), pGroup->getName());
-              m_pStructureModifyingBusInterface->groupSetName(pZone->getID(), pGroup->getID(),
-                  pGroup->getName());
-              m_pStructureModifyingBusInterface->groupSetStandardID(pZone->getID(), pGroup->getID(),
-                  pGroup->getStandardGroupID());
-              pGroup->setIsSynchronized(true);
-            } catch (BusApiError& e) {
-              log("Error updating user group configuration in zone " +
-                  intToString(pZone->getID()) + " and group " + intToString(pGroup->getID()) +
-                  ": " + e.what(), lsWarning);
-            }
-          }
-
-        }
-      }
-    }
-  } // synchronizeGroups
 
   void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
     m_ModelEventsMutex.lock();
