@@ -143,6 +143,7 @@
   <subscription event-name="stateChange" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/system_events.js</parameter>
+      <parameter name="filename2">scripts/system_state.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
