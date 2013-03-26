@@ -2175,6 +2175,133 @@ namespace dss {
     return JS_FALSE;
   } // zone_callScene
 
+  JSBool zone_callSceneSys(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      int groupID;
+      int sceneID;
+      bool forcedCall = false;
+      SceneAccessCategory category = SAC_UNKNOWN;
+      if(pZone != NULL) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+          if (argc >= 3) {
+            forcedCall = ctx->convertTo<bool>(JS_ARGV(cx, vp)[2]);
+          }
+          if (argc >= 4) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]));
+          }
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        pGroup->callScene(coSystem, category, sceneID, forcedCall);
+
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_callSceneSys
+
+  JSBool zone_undoScene(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      int groupID;
+      int sceneID;
+      SceneAccessCategory category = SAC_UNKNOWN;
+      if(pZone != NULL) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+          if (argc >= 3) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
+          }
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        pGroup->undoScene(coJSScripting, category, sceneID);
+
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_undoScene
+
+  JSBool zone_undoSceneSys(JSContext* cx, uintN argc, jsval* vp) {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      try {
+        boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+        int groupID;
+        int sceneID;
+        SceneAccessCategory category = SAC_UNKNOWN;
+        if(pZone != NULL) {
+          try {
+            groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+            if (argc >= 3) {
+              category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
+            }
+          } catch(ScriptException& e) {
+            JS_ReportError(cx, e.what());
+            return JS_FALSE;
+          } catch(std::invalid_argument& e) {
+            JS_ReportError(cx, e.what());
+            return JS_FALSE;
+          }
+
+          boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+          pGroup->undoScene(coSystem, category, sceneID);
+
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+          return JS_TRUE;
+        }
+      } catch(ItemNotFoundException& ex) {
+        JS_ReportWarning(cx, "Item not found: %s", ex.what());
+      } catch (SecurityException& ex) {
+        JS_ReportError(cx, "Access denied: %s", ex.what());
+      } catch (DSSException& ex) {
+        JS_ReportError(cx, "Failure: %s", ex.what());
+      } catch (std::exception& ex) {
+        JS_ReportError(cx, "General failure: %s", ex.what());
+      }
+      return JS_FALSE;
+    } // zone_undoSceneSys
+
   JSBool zone_blink(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -2312,6 +2439,9 @@ namespace dss {
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 4, 0),
+    JS_FS("undoScene", zone_undoScene, 3, 0),
+    JS_FS("callSceneSys", zone_callSceneSys, 4, 0),
+    JS_FS("undoSceneSys", zone_undoSceneSys, 3, 0),
     JS_FS("blink", zone_blink, 2, 0),
     JS_FS("getPowerConsumption", zone_getPowerConsumption, 0, 0),
     JS_FS("pushSensorValue", zone_pushSensorValue, 3, 0),
