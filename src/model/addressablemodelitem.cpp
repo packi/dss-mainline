@@ -41,12 +41,20 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: increaseValue blocked", lsDebug);
+      return;
+    }
     m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneInc, false);
   } // increaseValue
 
   void AddressableModelItem::decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: decreaseValue blocked", lsDebug);
+      return;
     }
     m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneDec, false);
   } // decreaseValue
@@ -55,12 +63,20 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: setValue blocked", lsDebug);
+      return;
+    }
     m_pApartment->getActionRequestInterface()->setValue(this, _origin, _category, _value);
   } // setValue
 
   void AddressableModelItem::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: callScene blocked", lsDebug);
+      return;
     }
     m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, _sceneNr, _force);
   } // callScene
@@ -76,6 +92,10 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: undoScene blocked", lsDebug);
+      return;
+    }
     m_pApartment->getActionRequestInterface()->undoScene(this, _origin, _category, _sceneNr);
   } // undoScene
 
@@ -83,12 +103,20 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: undoSceneLast blocked", lsDebug);
+      return;
+    }
     m_pApartment->getActionRequestInterface()->undoSceneLast(this, _origin, _category);
   } // undoSceneLast
 
   void AddressableModelItem::blink(const callOrigin_t _origin, const SceneAccessCategory _category) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: blink blocked", lsDebug);
+      return;
     }
     m_pApartment->getActionRequestInterface()->blink(this, _origin, _category);
   } // blink

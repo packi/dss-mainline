@@ -25,6 +25,7 @@
 #define SCENE_ACCESS_H_INCLUDED
 
 #include <string>
+#include <base.h>
 
 namespace dss {
 
@@ -40,10 +41,17 @@ class AddressableModelItem;
 class SceneAccess
 {
 public:
-  static bool access(const AddressableModelItem *_pTarget, const SceneAccessCategory _category);
+  static bool checkAccess(const AddressableModelItem *_pTarget, const SceneAccessCategory _category);
   static SceneAccessCategory stringToCategory(const std::string& _categoryString);
   static std::string categoryToString(const SceneAccessCategory _category);
 };
+
+class SceneAccessException : public DSSException {
+public:
+  SceneAccessException(const std::string& _message)
+    : DSSException(_message)
+    {}
+}; // SceneAccessException
 
 } // namespace dss
 

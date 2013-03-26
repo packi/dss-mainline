@@ -190,11 +190,6 @@ namespace dss {
     { }
 
     virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const bool _force) {
-      if (!SceneAccess::access(pTarget, _category)) {
-        Logger::getInstance()->log("DeviceActionAdaptor: callScene blocked", lsDebug);
-        return;
-      }
-
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->callScene(pTarget, _origin, _category, scene, _force);
       }
@@ -224,11 +219,6 @@ namespace dss {
     }
 
     virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene) {
-      if (!SceneAccess::access(pTarget, _category)) {
-        Logger::getInstance()->log("DeviceActionAdaptor: undoScene blocked", lsDebug);
-        return;
-      }
-
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->undoScene(pTarget, _origin, _category, scene);
       }
@@ -248,11 +238,6 @@ namespace dss {
     }
 
     virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
-      if (!SceneAccess::access(pTarget, _category)) {
-        Logger::getInstance()->log("DeviceActionAdaptor: undoSceneLast blocked", lsDebug);
-        return;
-      }
-
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->undoSceneLast(pTarget, _origin, _category);
       }
@@ -272,11 +257,6 @@ namespace dss {
     }
 
     virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
-      if (!SceneAccess::access(pTarget, _category)) {
-        Logger::getInstance()->log("DeviceActionAdaptor: blink blocked", lsDebug);
-        return;
-      }
-
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->blink(pTarget, _origin, _category);
       }
@@ -296,11 +276,6 @@ namespace dss {
     }
 
     virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
-      if (!SceneAccess::access(pTarget, _category)) {
-        Logger::getInstance()->log("DeviceActionAdaptor: callScene blocked", lsDebug);
-        return;
-      }
-
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->setValue(pTarget, _origin, _category, _value);
       }
