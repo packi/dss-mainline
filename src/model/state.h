@@ -23,7 +23,9 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include "deviceinterface.h"
 #include "modeltypes.h"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/smart_ptr.hpp>
 
@@ -75,9 +77,9 @@ namespace dss {
     virtual ~State();
 
     eState getState() const;
-    void setState(const eState _state);
-    void setState(const int _state);
-    void setState(const std::string& _state);
+    void setState(const callOrigin_t _origin, const eState _state);
+    void setState(const callOrigin_t _origin, const int _state);
+    void setState(const callOrigin_t _origin, const std::string& _state);
 
     std::string getName() const { return m_name; }
     void setName(const std::string& _name) { m_name = _name; }

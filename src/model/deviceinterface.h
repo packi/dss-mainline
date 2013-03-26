@@ -28,18 +28,19 @@
 
 namespace dss {
 
+  typedef enum callOrigin {
+    coJSScripting = 1,
+    coJSON = 2,
+    coSOAP = 3,
+    coSubscription = 4,
+    coSim = 5,
+    coTest = 6,
+    coSystem = 7
+  } callOrigin_t;
+
   /** Interface to a single or multiple devices.
    */
   class IDeviceInterface {
-  public:
-    typedef enum callOrigin {
-      coJSScripting = 1,
-      coJSON = 2,
-      coSOAP = 3,
-      coSubscription = 4,
-      coSim = 5,
-      coTest = 6
-    } callOrigin_t;
   public:
     /** Turns the device on.
      *  This will invoke scene "max".

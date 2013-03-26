@@ -178,7 +178,7 @@ namespace dss {
     return m_state;
   } // getState
 
-  void State::setState(const eState _state) {
+  void State::setState(const callOrigin_t _origin, const eState _state) {
     if (_state != m_state) {
       eState oldstate = m_state;
       m_state = _state;
@@ -194,6 +194,7 @@ namespace dss {
       pEvent->setProperty("state", toString());
       pEvent->setProperty("value", intToString((int) m_state));
       pEvent->setProperty("oldvalue", intToString((int) oldstate));
+      pEvent->setProperty("originDeviceID", intToString((int) _origin));
 
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -201,22 +202,22 @@ namespace dss {
     }
   } // setState
 
-  void State::setState(const int _state) {
+  void State::setState(const callOrigin_t _origin, const int _state) {
     switch (_state) {
-      case 1: setState(State_Active); break;
-      case 2: setState(State_Inactive); break;
-      case 3: setState(State_Unkown); break;
+      case 1: setState(_origin, State_Active); break;
+      case 2: setState(_origin, State_Inactive); break;
+      case 3: setState(_origin, State_Unkown); break;
       default: break;
     }
   }
 
-  void State::setState(const std::string& _state) {
+  void State::setState(const callOrigin_t _origin, const std::string& _state) {
     if (_state == "active") {
-      setState(State_Active);
+      setState(_origin, State_Active);
     } else if (_state == "inactive") {
-      setState(State_Inactive);
+      setState(_origin, State_Inactive);
     } else if (_state == "unknown") {
-      setState(State_Unkown);
+      setState(_origin, State_Unkown);
     }
   }
 

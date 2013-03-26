@@ -1424,9 +1424,9 @@ namespace dss {
 
       if (pState != NULL) {
         if (_state == 0) {
-          pState->setState(State_Inactive);
+          pState->setState(coSystem, State_Inactive);
         } else if (_state == 1) {
-          pState->setState(State_Active);
+          pState->setState(coSystem, State_Active);
         }
       }
     } catch(ItemNotFoundException& e) {
@@ -1450,9 +1450,9 @@ namespace dss {
           boost::shared_ptr<State> state = devRef.getDevice()->getBinaryInputState(index);
           assert(state != NULL);
           if ((_sensorValue & (1 << index)) > 0) {
-            state->setState(State_Active);
+            state->setState(coSystem, State_Active);
           } else {
-            state->setState(State_Inactive);
+            state->setState(coSystem, State_Inactive);
           }
         }
       }
