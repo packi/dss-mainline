@@ -489,7 +489,7 @@ namespace dss {
 
     PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
     PropertyNodePtr oSValueNode = _actionNode->getPropertyByName("state");
-    if (oValueNode == NULL || oSValueNode == NULL) {
+    if (oValueNode == NULL && oSValueNode == NULL) {
       Logger::getInstance()->log("SystemEventActionExecute::"
           "executeStateChange: missing value or state parameter", lsError);
       return;
