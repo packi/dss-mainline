@@ -112,6 +112,18 @@ namespace dss {
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
         group->callScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId, forceFlag);
       }
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeZoneScene: execution not allowed: " +
+                    std::string(e.what()));
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("executionDenied"));
+      pEvent->setProperty("action-type", "zone-scene");
+      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeZoneScene: could not call scene on zone " +
@@ -163,6 +175,18 @@ namespace dss {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
         group->undoScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId);
+      }
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeZoneUndoScene: execution not allowed: " +
+                    std::string(e.what()));
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("executionDenied"));
+      pEvent->setProperty("action-type", "zone-undo-scene");
+      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -232,6 +256,18 @@ namespace dss {
 
       target->callScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId, forceFlag);
 
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeDeviceScene: execution not allowed: " +
+                    std::string(e.what()));
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("executionDenied"));
+      pEvent->setProperty("action-type", "device-scene");
+      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeDeviceScene: could not call scene on zone " +
@@ -268,6 +304,18 @@ namespace dss {
                        sceneAccess,
                        oValueNode->getIntegerValue());
 
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeDeviceValue: execution not allowed: " +
+                    std::string(e.what()));
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("executionDenied"));
+      pEvent->setProperty("action-type", "device-value");
+      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeDeviceValue: could not set value on device " +
@@ -294,6 +342,18 @@ namespace dss {
 
       target->blink(IDeviceInterface::coJSScripting, sceneAccess);
 
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeDeviceBlink: execution not allowed: " +
+                    std::string(e.what()));
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("executionDenied"));
+      pEvent->setProperty("action-type", "device-blink");
+      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeDeviceBlink: could not blink device " +
@@ -335,6 +395,18 @@ namespace dss {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
         group->blink(IDeviceInterface::coJSScripting, sceneAccess);
+      }
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeZoneBlink: execution not allowed: " +
+                    std::string(e.what()));
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event("executionDenied"));
+      pEvent->setProperty("action-type", "zone-blink");
+      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
