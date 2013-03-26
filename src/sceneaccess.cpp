@@ -80,7 +80,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
       }
       const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
       if (pDevice != NULL) {
-        if (pDevice->getGroupBitmask().test(DEVICE_CLASS_GR)) {
+        if (pDevice->getGroupBitmask().test(DEVICE_CLASS_GR-1)) {
           switch (_category) {
           case SAC_MANUAL:
             break;
@@ -114,7 +114,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
           }
           const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
           if (pDevice != NULL) {
-            if (pDevice->getGroupBitmask().test(i)) {
+            if (pDevice->getGroupBitmask().test(i-1)) {
               switch (_category) {
               case SAC_MANUAL:
                 break;
