@@ -160,6 +160,8 @@ function genDeviceName(originDeviceID)
             devName = 'Simulation';
         } else if (originDevice == 6) {
             devName = 'Test';
+        } else if (originDevice == 7) {
+            devName = 'System';
         } else {
             devName = '';
         }
@@ -302,10 +304,12 @@ function logDeviceSensorEvent(device, param)
     l.logln(';EventTable;', param.sensorEvent, ';;;;;;', devName);
 }
 
-function logStateChangeScript(statename, state, value, script)
+function logStateChangeScript(statename, state, value, originDeviceId)
 {
+    var origin = genDeviceName(originDeviceId);
+
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID');
-    l.logln(';State;', statename, ';', value, ';', state ,';;;;;', script);
+    l.logln(';StateApartment;', statename, ';', value, ';', state ,';;;;;', origin);
 }
 
 function logStateChangeDevice(statename, state, value, device)
@@ -460,8 +464,8 @@ else if (raisedEvent.name == 'stateChange')
     var state = raisedEvent.parameter.state;
     var value = raisedEvent.parameter.value;
     if (raisedEvent.source.isService) {
-        var scriptId = raisedEvent.source.serviceName;
-        logStateChangeScript(statename, state, value, scriptId);
+        var originId = raisedEvent.parameter.originDeviceID;
+        logStateChangeScript(statename, state, value, originId);
     }
     if (raisedEvent.source.isDevice) {
         var device = getDevices().byDSID(raisedEvent.source.dsid);
