@@ -44,6 +44,10 @@ namespace dss {
 
 bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneAccessCategory _category)
 {
+  if (!DSS::hasInstance()) {
+    return true;
+  }
+
   Apartment& apartment = DSS::getInstance()->getApartment();
   PropertyNodePtr property = apartment.getPropertySystem()->getRootNode();
   {
