@@ -41,44 +41,44 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     : m_NumberOfCalls(0)
     {
     }
-    virtual void turnOn(const callOrigin_t _origin) {
+    virtual void turnOn(const callOrigin_t _origin, const SceneAccessCategory _category) {
       functionCalled("turnOn");
     }
-    virtual void turnOff(const callOrigin_t _origin) {
+    virtual void turnOff(const callOrigin_t _origin, const SceneAccessCategory _category) {
       functionCalled("turnOff");
     }
-    virtual void increaseValue(const callOrigin_t _origin)  {
+    virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("increaseValue");
     }
-    virtual void decreaseValue(const callOrigin_t _origin)  {
+    virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("decreaseValue");
     }
-    virtual void setValue(const callOrigin_t _origin, const uint8_t _value)  {
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value)  {
       functionCalled("setValue(" + intToString(_value) + ")");
     }
-    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force)  {
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");
     }
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoScene(const callOrigin_t _origin, const int _sceneNr)  {
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr)  {
       functionCalled("undoScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoSceneLast(const callOrigin_t _origin)  {
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("undoSceneLast");
     }
     virtual unsigned long getPowerConsumption()  {
       functionCalled("getConsumption");
       return 50;
     }
-    virtual void nextScene(const callOrigin_t _origin)  {
+    virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("nextScene");
     }
-    virtual void previousScene(const callOrigin_t _origin)  {
+    virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("previousScene");
     }
-    virtual void blink(const callOrigin_t _origin)  {
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("blink");
     }
 

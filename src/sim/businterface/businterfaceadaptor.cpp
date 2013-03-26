@@ -189,22 +189,23 @@ namespace dss {
       m_pEventSink(_pEventSink)
     { }
 
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const bool _force) {
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const bool _force) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->callScene(pTarget, _origin, scene, _force);
+        m_pSimulationInterface->callScene(pTarget, _origin, _category, scene, _force);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->callScene(pTarget, _origin, scene, _force);
+        m_pInner->callScene(pTarget, _origin, _category, scene, _force);
       }
+
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupCallScene(NULL, NullDSID, pGroup->getZoneID(),
-                                       pGroup->getID(), _origin, scene, _force);
+                                       pGroup->getID(), _origin, _category, scene, _force);
       }
       Device* pDevice = dynamic_cast<Device*>(pTarget);
       if(pDevice != NULL) {
         m_pEventSink->onDeviceCallScene(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
-                                       _origin, scene, _force);
+                                       _origin, _category, scene, _force);
       }
     }
 
@@ -217,69 +218,69 @@ namespace dss {
       }
     }
 
-    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene) {
+    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->undoScene(pTarget, _origin, scene);
+        m_pSimulationInterface->undoScene(pTarget, _origin, _category, scene);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->undoScene(pTarget, _origin, scene);
+        m_pInner->undoScene(pTarget, _origin, _category, scene);
       }
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
-                                       pGroup->getID(), _origin, scene, true);
+                                       pGroup->getID(), _origin, _category, scene, true);
       }
       Device* pDevice = dynamic_cast<Device*>(pTarget);
       if(pDevice != NULL) {
         m_pEventSink->onDeviceUndoScene(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
-                                       _origin, scene, true);
+                                       _origin, _category, scene, true);
       }
     }
 
-    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin) {
+    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->undoSceneLast(pTarget, _origin);
+        m_pSimulationInterface->undoSceneLast(pTarget, _origin, _category);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->undoSceneLast(pTarget, _origin);
+        m_pInner->undoSceneLast(pTarget, _origin, _category);
       }
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
-                                       pGroup->getID(), _origin, -1, false);
+                                       pGroup->getID(), _origin, _category, -1, false);
       }
       Device* pDevice = dynamic_cast<Device*>(pTarget);
       if(pDevice != NULL) {
         m_pEventSink->onDeviceUndoScene(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
-                                        _origin, -1, false);
+                                        _origin, _category, -1, false);
       }
     }
 
-    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin) {
+    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->blink(pTarget, _origin);
+        m_pSimulationInterface->blink(pTarget, _origin, _category);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->blink(pTarget, _origin);
+        m_pInner->blink(pTarget, _origin, _category);
       }
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupBlink(NULL, NullDSID, pGroup->getZoneID(),
-                                   pGroup->getID(), _origin);
+                                   pGroup->getID(), _origin, _category);
       }
       Device* pDevice = dynamic_cast<Device*>(pTarget);
       if(pDevice != NULL) {
         m_pEventSink->onDeviceBlink(NULL, pDevice->getDSMeterDSID(), pDevice->getShortAddress(),
-                                    _origin);
+                                    _origin, _category);
       }
     }
 
-    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const uint8_t _value) {
+    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->setValue(pTarget, _origin, _value);
+        m_pSimulationInterface->setValue(pTarget, _origin, _category, _value);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->setValue(pTarget, _origin, _value);
+        m_pInner->setValue(pTarget, _origin, _category, _value);
       }
     }
 
@@ -605,6 +606,7 @@ namespace dss {
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _originDeviceId,
+                                  const SceneAccessCategory _category,
                                   const int _sceneID,
                                   const bool _force) {
       boost::shared_ptr<BusInterface> target;
@@ -612,7 +614,7 @@ namespace dss {
         try {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
           boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _originDeviceId, _sceneID, _force);
+          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _originDeviceId, _category, _sceneID, _force);
         } catch(std::runtime_error& e) {
         }
       }
@@ -630,6 +632,7 @@ namespace dss {
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _originDeviceId,
+                                  const SceneAccessCategory _category,
                                   const int _sceneID,
                                   const bool _explicit) {
       boost::shared_ptr<BusInterface> target;
@@ -638,9 +641,9 @@ namespace dss {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
           boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
           if (_explicit) {
-            m_pSimBusInterface->getActionRequestInterface()->undoScene(pGroup.get(), _originDeviceId, _sceneID);
+            m_pSimBusInterface->getActionRequestInterface()->undoScene(pGroup.get(), _originDeviceId, _category, _sceneID);
           } else {
-            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(pGroup.get(), _originDeviceId);
+            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(pGroup.get(), _originDeviceId, _category);
           }
         } catch(std::runtime_error& e) {
         }
@@ -659,13 +662,14 @@ namespace dss {
                               const dss_dsid_t& _dsMeterID,
                               const int _zoneID,
                               const int _groupID,
-                              const int _originDeviceId) {
+                              const int _originDeviceId,
+                              const SceneAccessCategory _category) {
       boost::shared_ptr<BusInterface> target;
       if(_source == m_pInnerBusInterface.get()) {
         try {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
           boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-          m_pSimBusInterface->getActionRequestInterface()->blink(pGroup.get(), _originDeviceId);
+          m_pSimBusInterface->getActionRequestInterface()->blink(pGroup.get(), _originDeviceId, _category);
         } catch(std::runtime_error& e) {
         }
       }
@@ -680,13 +684,14 @@ namespace dss {
                                   const dss_dsid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
+                                  const SceneAccessCategory _category,
                                   const int _sceneID,
                                   const bool _force) {
       boost::shared_ptr<BusInterface> target;
       if(_source == m_pInnerBusInterface.get()) {
         try {
           DeviceReference devRef =  m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_deviceID, _dsMeterID);
-          m_pSimBusInterface->getActionRequestInterface()->callScene(devRef.getDevice().get(), _originDeviceId, _sceneID, _force);
+          m_pSimBusInterface->getActionRequestInterface()->callScene(devRef.getDevice().get(), _originDeviceId, _category, _sceneID, _force);
         } catch(std::runtime_error& e) {
         }
       }
@@ -702,6 +707,7 @@ namespace dss {
                                   const dss_dsid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
+                                  const SceneAccessCategory _category,
                                   const int _sceneID,
                                   const bool _explicit) {
       boost::shared_ptr<BusInterface> target;
@@ -709,9 +715,9 @@ namespace dss {
         try {
           DeviceReference devRef =  m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_deviceID, _dsMeterID);
           if (_explicit) {
-            m_pSimBusInterface->getActionRequestInterface()->undoScene(devRef.getDevice().get(), _originDeviceId, _sceneID);
+            m_pSimBusInterface->getActionRequestInterface()->undoScene(devRef.getDevice().get(), _originDeviceId, _category, _sceneID);
           } else {
-            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(devRef.getDevice().get(), _originDeviceId);
+            m_pSimBusInterface->getActionRequestInterface()->undoSceneLast(devRef.getDevice().get(), _originDeviceId, _category);
           }
         } catch(std::runtime_error& e) {
         }
@@ -727,12 +733,13 @@ namespace dss {
     virtual void onDeviceBlink(BusInterface* _source,
                                const dss_dsid_t& _dsMeterID,
                                const int _deviceID,
-                               const int _originDeviceId) {
+                               const int _originDeviceId,
+                               const SceneAccessCategory _category) {
       boost::shared_ptr<BusInterface> target;
       if(_source == m_pInnerBusInterface.get()) {
         try {
           DeviceReference devRef =  m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_deviceID, _dsMeterID);
-          m_pSimBusInterface->getActionRequestInterface()->blink(devRef.getDevice().get(), _originDeviceId);
+          m_pSimBusInterface->getActionRequestInterface()->blink(devRef.getDevice().get(), _originDeviceId, _category);
         } catch(std::runtime_error& e) {
         }
       }

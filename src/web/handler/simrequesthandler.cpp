@@ -67,31 +67,31 @@ namespace dss {
           case 9: // lower-right
             break;
           case 2: // up
-            pGroup->increaseValue(IDeviceInterface::coSim);
+            pGroup->increaseValue(IDeviceInterface::coSim, SAC_UNKNOWN);
             break;
           case 8: // down
-            pGroup->decreaseValue(IDeviceInterface::coSim);
+            pGroup->decreaseValue(IDeviceInterface::coSim, SAC_UNKNOWN);
             break;
           case 4: // left
-            pGroup->previousScene(IDeviceInterface::coSim);
+            pGroup->previousScene(IDeviceInterface::coSim, SAC_UNKNOWN);
             break;
           case 6: // right
-            pGroup->nextScene(IDeviceInterface::coSim);
+            pGroup->nextScene(IDeviceInterface::coSim, SAC_UNKNOWN);
             break;
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                m_Apartment.getGroup(0)->callScene(IDeviceInterface::coSim, SceneBell, false);
+                m_Apartment.getGroup(0)->callScene(IDeviceInterface::coSim, SAC_UNKNOWN, SceneBell, false);
               } else if(groupID == GroupIDRed){
-                m_Apartment.getGroup(0)->callScene(IDeviceInterface::coSim, SceneAlarm, false);
+                m_Apartment.getGroup(0)->callScene(IDeviceInterface::coSim, SAC_UNKNOWN, SceneAlarm, false);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();
                 if(lastScene == SceneOff || lastScene == SceneDeepOff ||
                   lastScene == SceneStandBy || lastScene == ScenePanic)
                 {
-                  pGroup->callScene(IDeviceInterface::coSim, Scene1, false);
+                  pGroup->callScene(IDeviceInterface::coSim, SAC_UNKNOWN, Scene1, false);
                 } else {
-                  pGroup->callScene(IDeviceInterface::coSim, SceneOff, false);
+                  pGroup->callScene(IDeviceInterface::coSim, SAC_UNKNOWN, SceneOff, false);
                 }
               }
             }

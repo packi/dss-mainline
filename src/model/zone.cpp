@@ -186,12 +186,12 @@ namespace dss {
     }
   } // sensorPush
 
-  void Zone::nextScene(const callOrigin_t _origin) {
-    getGroup(GroupIDBroadcast)->nextScene(_origin);
+  void Zone::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
+    getGroup(GroupIDBroadcast)->nextScene(_origin, _category);
   } // nextScene
 
-  void Zone::previousScene(const callOrigin_t _origin) {
-    getGroup(GroupIDBroadcast)->previousScene(_origin);
+  void Zone::previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
+    getGroup(GroupIDBroadcast)->previousScene(_origin, _category);
   } // previousScene
 
   std::vector<boost::shared_ptr<AddressableModelItem> > Zone::splitIntoAddressableItems() {

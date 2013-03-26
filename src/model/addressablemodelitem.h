@@ -41,17 +41,17 @@ namespace dss {
   public:
     AddressableModelItem(Apartment* _pApartment);
 
-    virtual void increaseValue(const callOrigin_t _origin);
-    virtual void decreaseValue(const callOrigin_t _origin);
+    virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void setValue(const callOrigin_t _origin, const uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value);
 
-    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force);
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force);
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr);
-    virtual void undoScene(const callOrigin_t _origin, const int _sceneNr);
-    virtual void undoSceneLast(const callOrigin_t _origin);
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr);
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void blink(const callOrigin_t _origin);
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category);
   protected:
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;

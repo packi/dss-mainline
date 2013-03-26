@@ -29,31 +29,31 @@ namespace dss {
 
   //================================================== NonAddressableModelItem
 
-  void NonAddressableModelItem::increaseValue(const callOrigin_t _origin) {
+  void NonAddressableModelItem::increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->increaseValue(_origin);
+      item->increaseValue(_origin, _category);
     }
   } // increaseValue
 
-  void NonAddressableModelItem::decreaseValue(const callOrigin_t _origin) {
+  void NonAddressableModelItem::decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->decreaseValue(_origin);
+      item->decreaseValue(_origin, _category);
     }
   } // decreaseValue
 
-  void NonAddressableModelItem::setValue(const callOrigin_t _origin, const uint8_t _value) {
+  void NonAddressableModelItem::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->setValue(_origin, _value);
+      item->setValue(_origin, _category, _value);
     }
   } // setValue
 
-  void NonAddressableModelItem::callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force) {
+  void NonAddressableModelItem::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->callScene(_origin, _sceneNr, _force);
+      item->callScene(_origin, _category, _sceneNr, _force);
     }
   } // callScene
 
@@ -64,24 +64,24 @@ namespace dss {
     }
   } // saveScene
 
-  void NonAddressableModelItem::undoScene(const callOrigin_t _origin, const int _sceneNr) {
+  void NonAddressableModelItem::undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->undoScene(_origin, _sceneNr);
+      item->undoScene(_origin, _category, _sceneNr);
     }
   } // undoScene
 
-  void NonAddressableModelItem::undoSceneLast(const callOrigin_t _origin) {
+  void NonAddressableModelItem::undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->undoSceneLast(_origin);
+      item->undoSceneLast(_origin, _category);
     }
   } // undoSceneLast
 
-  void NonAddressableModelItem::blink(const callOrigin_t _origin) {
+  void NonAddressableModelItem::blink(const callOrigin_t _origin, const SceneAccessCategory _category) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->blink(_origin);
+      item->blink(_origin, _category);
     }
   }
 

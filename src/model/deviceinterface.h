@@ -24,6 +24,7 @@
 #define DEVICEINTERFACE_H
 
 #include <stdint.h>
+#include "sceneaccess.h"
 
 namespace dss {
 
@@ -43,31 +44,31 @@ namespace dss {
     /** Turns the device on.
      *  This will invoke scene "max".
      */
-    virtual void turnOn(const callOrigin_t _origin);
+    virtual void turnOn(const callOrigin_t _origin, const SceneAccessCategory _category);
     /** Turns the device off.
      * This will invoke scene "min"
      */
-    virtual void turnOff(const callOrigin_t _origin);
+    virtual void turnOff(const callOrigin_t _origin, const SceneAccessCategory _category);
 
     /** Increases the main value (e.g. brightness) */
-    virtual void increaseValue(const callOrigin_t _origin) = 0;
+    virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
     /** Decreases the main value (e.g. brightness) */
-    virtual void decreaseValue(const callOrigin_t _origin) = 0;
+    virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
     /** Sets the output value */
-    virtual void setValue(const callOrigin_t _origin, const uint8_t _value) = 0;
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) = 0;
     /** Sets the scene on the device.
      * The output value will be set according to the scene lookup table in the device.
      */
-    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force = false) = 0;
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force = false) = 0;
     /** Stores the current output value into the scene lookup table.
      * The next time scene _sceneNr gets called the output will be set according to the lookup table.
      */
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr) = 0;
     /** Restores the last scene value if identical to _sceneNr */
-    virtual void undoScene(const callOrigin_t _origin, const int _sceneNr) = 0;
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr) = 0;
     /** Restores the last scene value */
-    virtual void undoSceneLast(const callOrigin_t _origin) = 0;
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
     /** Returns the consumption in mW */
     virtual unsigned long getPowerConsumption() = 0;
@@ -75,13 +76,13 @@ namespace dss {
     /** Calls the next scene according to the last called scene.
      * @see dss::SceneHelper::getNextScene
      */
-    virtual void nextScene(const callOrigin_t _origin) = 0;
+    virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
     /** Calls the previos scene according to the last called scene.
      * @see dss::SceneHelper::getPreviousScene
      */
-    virtual void previousScene(const callOrigin_t _origin) = 0;
+    virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
-    virtual void blink(const callOrigin_t _origin) = 0;
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
     virtual ~IDeviceInterface() {};
   }; // IDeviceInterface

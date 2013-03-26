@@ -51,6 +51,7 @@
 #include "src/businterface.h"
 #include "src/metering/metering.h"
 #include "src/web/json.h"
+#include "src/sceneaccess.h"
 
 inline dss::dss_dsid_t FromSOAP(const char* _dsid) {
   dss::dss_dsid_t result;
@@ -554,7 +555,7 @@ int dss__SetTurnOn(struct soap *soap, char* _token, char* _setSpec, bool& result
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.turnOn(dss::IDeviceInterface::coSOAP);
+  set.turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -565,7 +566,7 @@ int dss__SetTurnOff(struct soap *soap, char* _token, char* _setSpec, bool& resul
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.turnOff(dss::IDeviceInterface::coSOAP);
+  set.turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -576,7 +577,7 @@ int dss__SetIncreaseValue(struct soap *soap, char* _token, char* _setSpec, bool&
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.increaseValue(dss::IDeviceInterface::coSOAP);
+  set.increaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -587,7 +588,7 @@ int dss__SetDecreaseValue(struct soap *soap, char* _token, char* _setSpec, bool&
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.decreaseValue(dss::IDeviceInterface::coSOAP);
+  set.decreaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -598,7 +599,7 @@ int dss__SetSetValue(struct soap *soap, char* _token, char* _setSpec, uint8_t _v
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.setValue(dss::IDeviceInterface::coSOAP, _value);
+  set.setValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _value);
   result = true;
   return SOAP_OK;
 }
@@ -609,7 +610,7 @@ int dss__SetCallScene(struct soap *soap, char* _token, char* _setSpec, int _scen
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.callScene(dss::IDeviceInterface::coSOAP, _sceneID);
+  set.callScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID);
   result = true;
   return SOAP_OK;
 }
@@ -631,7 +632,7 @@ int dss__SetUndoScene(struct soap *soap, char* _token, char* _setSpec, int _scen
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.undoScene(dss::IDeviceInterface::coSOAP, _sceneID);
+  set.undoScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID);
   result = true;
   return SOAP_OK;
 }
@@ -642,7 +643,7 @@ int dss__SetUndoLastScene(struct soap *soap, char* _token, char* _setSpec, bool&
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.undoSceneLast(dss::IDeviceInterface::coSOAP);
+  set.undoSceneLast(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -655,7 +656,7 @@ int dss__ApartmentTurnOn(struct soap *soap, char* _token, int _groupID, bool& re
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOn(dss::IDeviceInterface::coSOAP);
+  group->turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -666,7 +667,7 @@ int dss__ApartmentTurnOff(struct soap *soap, char* _token, int _groupID, bool& r
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOff(dss::IDeviceInterface::coSOAP);
+  group->turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -677,7 +678,7 @@ int dss__ApartmentIncreaseValue(struct soap *soap, char* _token, int _groupID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->increaseValue(dss::IDeviceInterface::coSOAP);
+  group->increaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -688,7 +689,7 @@ int dss__ApartmentDecreaseValue(struct soap *soap, char* _token, int _groupID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->decreaseValue(dss::IDeviceInterface::coSOAP);
+  group->decreaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -699,7 +700,7 @@ int dss__ApartmentSetValue(struct soap *soap, char* _token, int _groupID, uint8_
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->setValue(dss::IDeviceInterface::coSOAP, _value);
+  group->setValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _value);
   result = true;
   return SOAP_OK;
 }
@@ -710,7 +711,7 @@ int dss__ApartmentCallScene(struct soap *soap, char* _token, int _groupID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->callScene(dss::IDeviceInterface::coSOAP, _sceneID, false);
+  group->callScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID, false);
   result = true;
   return SOAP_OK;
 }
@@ -732,7 +733,7 @@ int dss__ApartmentUndoScene(struct soap *soap, char* _token, int _groupID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene(dss::IDeviceInterface::coSOAP, _sceneID);
+  group->undoScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID);
   result = true;
   return SOAP_OK;
 }
@@ -743,7 +744,7 @@ int dss__ApartmentUndoLastScene(struct soap *soap, char* _token, int _groupID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoSceneLast(dss::IDeviceInterface::coSOAP);
+  group->undoSceneLast(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -754,7 +755,7 @@ int dss__ApartmentBlink(struct soap *soap, char* _token, int _groupID, bool& res
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->blink(dss::IDeviceInterface::coSOAP);
+  group->blink(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -768,7 +769,7 @@ int dss__ZoneTurnOn(struct soap *soap, char* _token, int _zoneID, int _groupID, 
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOn(dss::IDeviceInterface::coSOAP);
+  group->turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -779,7 +780,7 @@ int dss__ZoneTurnOff(struct soap *soap, char* _token, int _zoneID, int _groupID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->turnOff(dss::IDeviceInterface::coSOAP);
+  group->turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -790,7 +791,7 @@ int dss__ZoneIncreaseValue(struct soap *soap, char* _token, int _zoneID, int _gr
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->increaseValue(dss::IDeviceInterface::coSOAP);
+  group->increaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -801,7 +802,7 @@ int dss__ZoneDecreaseValue(struct soap *soap, char* _token, int _zoneID, int _gr
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->decreaseValue(dss::IDeviceInterface::coSOAP);
+  group->decreaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -812,7 +813,7 @@ int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->setValue(dss::IDeviceInterface::coSOAP, _value);
+  group->setValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _value);
   result = true;
   return SOAP_OK;
 }
@@ -823,7 +824,7 @@ int dss__ZoneCallScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->callScene(dss::IDeviceInterface::coSOAP, _sceneID, _force);
+  group->callScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID, _force);
   result = true;
   return SOAP_OK;
 }
@@ -845,7 +846,7 @@ int dss__ZoneUndoScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene(dss::IDeviceInterface::coSOAP, _sceneID);
+  group->undoScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID);
   result = true;
   return SOAP_OK;
 }
@@ -856,7 +857,7 @@ int dss__ZoneUndoLastScene(struct soap *soap, char* _token, int _zoneID, int _gr
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoSceneLast(dss::IDeviceInterface::coSOAP);
+  group->undoSceneLast(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -867,7 +868,7 @@ int dss__ZoneBlink(struct soap *soap, char* _token, int _zoneID, int _groupID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->blink(dss::IDeviceInterface::coSOAP);
+  group->blink(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -905,7 +906,7 @@ int dss__DeviceBlink(struct soap *soap, char* _token, char* _deviceID, bool& res
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.blink(dss::IDeviceInterface::coSOAP);
+  dev.blink(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -916,7 +917,7 @@ int dss__DeviceTurnOn(struct soap *soap, char* _token, char* _deviceID, bool& re
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.turnOn(dss::IDeviceInterface::coSOAP);
+  dev.turnOn(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -927,7 +928,7 @@ int dss__DeviceTurnOff(struct soap *soap, char* _token, char* _deviceID, bool& r
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.turnOff(dss::IDeviceInterface::coSOAP);
+  dev.turnOff(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -938,7 +939,7 @@ int dss__DeviceIncreaseValue(struct soap *soap, char* _token, char* _deviceID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.increaseValue(dss::IDeviceInterface::coSOAP);
+  dev.increaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -949,7 +950,7 @@ int dss__DeviceDecreaseValue(struct soap *soap, char* _token, char* _deviceID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.decreaseValue(dss::IDeviceInterface::coSOAP);
+  dev.decreaseValue(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }
@@ -960,7 +961,7 @@ int dss__DeviceCallScene(struct soap *soap, char* _token, char* _deviceID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.callScene(dss::IDeviceInterface::coSOAP, _sceneID, _force);
+  device.callScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID, _force);
   result = true;
   return SOAP_OK;
 }
@@ -982,7 +983,7 @@ int dss__DeviceUndoScene(struct soap *soap, char* _token, char* _deviceID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.undoScene(dss::IDeviceInterface::coSOAP, _sceneID);
+  device.undoScene(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN, _sceneID);
   result = true;
   return SOAP_OK;
 }
@@ -993,7 +994,7 @@ int dss__DeviceUndoLastScene(struct soap *soap, char* _token, char* _deviceID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.undoSceneLast(dss::IDeviceInterface::coSOAP);
+  device.undoSceneLast(dss::IDeviceInterface::coSOAP, dss::SAC_UNKNOWN);
   result = true;
   return SOAP_OK;
 }

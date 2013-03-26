@@ -54,11 +54,11 @@ namespace dss {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
 
-  void Set::nextScene(const callOrigin_t _origin) {
+  void Set::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
     throw std::runtime_error("Not yet implemented");
   } // nextScene
 
-  void Set::previousScene(const callOrigin_t _origin) {
+  void Set::previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
     throw std::runtime_error("Not yet implemented");
   } // previousScene
 

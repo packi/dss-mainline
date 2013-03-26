@@ -74,10 +74,10 @@ namespace dss {
      * @note This will lookup the device. */
     std::string getName() const;
 
-    virtual void setValue(const callOrigin_t _origin, uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _value);
 
-    virtual void increaseValue(const callOrigin_t _origin);
-    virtual void decreaseValue(const callOrigin_t _origin);
+    virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
 
     /** Returns wheter the device is turned on.
      * @note The detection is soly based on the last called scene. As soon as we've
@@ -85,15 +85,15 @@ namespace dss {
      */
     virtual bool isOn() const;
 
-    virtual void callScene(const callOrigin_t _origin, const int _sceneNr, const bool _force);
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force);
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr);
-    virtual void undoScene(const callOrigin_t _origin, const int _sceneNr);
-    virtual void undoSceneLast(const callOrigin_t _origin);
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr);
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void nextScene(const callOrigin_t _origin);
-    virtual void previousScene(const callOrigin_t _origin);
+    virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void blink(const callOrigin_t _origin);
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category);
 
     virtual unsigned long getPowerConsumption();
  }; // DeviceReference

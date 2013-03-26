@@ -32,12 +32,13 @@ namespace dss {
 
   //================================================== SimActionRequestBusInterface
 
-  void SimActionRequestBusInterface::blink(AddressableModelItem* pTarget, const uint16_t _origin) {
+  void SimActionRequestBusInterface::blink(AddressableModelItem* pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
     // TODO: the simulation can't blink
   } // blink
 
   void SimActionRequestBusInterface::callScene(AddressableModelItem *pTarget,
                                                const uint16_t _origin,
+                                               const SceneAccessCategory _category,
                                                const uint16_t scene,
                                                const bool _force) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
@@ -73,6 +74,7 @@ namespace dss {
 
   void SimActionRequestBusInterface::undoScene(AddressableModelItem *pTarget,
                                                const uint16_t _origin,
+                                               const SceneAccessCategory _category,
                                                const uint16_t scene) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
@@ -89,7 +91,8 @@ namespace dss {
   } // undoScene
 
   void SimActionRequestBusInterface::undoSceneLast(AddressableModelItem *pTarget,
-                                                   const uint16_t _origin) {
+                                                   const uint16_t _origin,
+                                                   const SceneAccessCategory _category) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
@@ -106,6 +109,7 @@ namespace dss {
 
   void SimActionRequestBusInterface::setValue(AddressableModelItem *pTarget,
                                               const uint16_t _origin,
+                                              const SceneAccessCategory _category,
                                               const uint8_t _value) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
