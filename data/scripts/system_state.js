@@ -127,6 +127,19 @@ function callscene()
     var forced = raisedEvent.parameter.forced;
     var pNode;
 
+    var originDeviceId = 0;
+    if (raisedEvent.source.isGroup) {
+        originDeviceId = parseInt(raisedEvent.parameter.originDeviceID, 16);
+    } else if (raisedEvent.source.dsid) {
+        originDeviceId = parseInt(raisedEvent.source.dsid, 16);
+    }
+    if (originDeviceId == 7) {
+        // ignore scene calls originated by server generated system level events,
+        // e.g. scene calls issued by state changes
+        print('system_state: ignoring callScene initiated by myself');
+        return;
+    }
+
     if (groupID === 0 && sceneID === Scene.Absent) {
         pNode = Property.getNode('/usr/states/presence');
         pNode.setStatusValue("absent");
@@ -145,51 +158,81 @@ function callscene()
     }
     else if (groupID === 0 && sceneID === Scene.Panic) {
         state = getState('panic');
-        state.setValue('active');
+        state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Fire) {
         state = getState('fire');
-        state.setValue('active');
+        state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm) {
         state = getState('alarm');
-        state.setValue('active');
+        state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm2) {
         state = getState('alarm2');
-        state.setValue('active');
+        state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm3) {
         state = getState('alarm3');
-        state.setValue('active');
+        state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm4) {
         state = getState('alarm4');
-        state.setValue('active');
+        state.setValue('active', 7);
     }
-    else if (groupID === 0 && sceneID === Scene.WindActive) {
-        state = getState('wind');
-        state.setValue('active');
+    else if (sceneID === Scene.WindActive) {
+        if (groupID === 0) {
+            state = getState('wind');
+            state.setValue('active', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getState('wind.group' + groupID);
+            state.setValue('active', 7);
+        }
     }
-    else if (groupID === 0 && sceneID === Scene.WindInactive) {
-        state = getState('wind');
-        state.setValue('inactive');
+    else if (sceneID === Scene.WindInactive) {
+        if (groupID === 0) {
+            state = getState('wind');
+            state.setValue('inactive', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getState('wind.group' + groupID);
+            state.setValue('inactive', 7);
+        }
     }
-    else if (groupID === 0 && sceneID === Scene.RainActive) {
-        state = getState('rain');
-        state.setValue('active');
+    else if (sceneID === Scene.RainActive) {
+        if (groupID === 0) {
+            state = getState('rain');
+            state.setValue('active', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getState('rain.group' + groupID);
+            state.setValue('active', 7);
+        }
     }
     else if (groupID === 0 && sceneID === Scene.RainInactive) {
-        state = getState('rain');
-        state.setValue('inactive');
+        if (groupID === 0) {
+            state = getState('rain');
+            state.setValue('inactive', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getState('rain.group' + groupID);
+            state.setValue('inactive', 7);
+        }
     }
     else if (groupID === 0 && sceneID === Scene.HailActive) {
-        state = getState('hail');
-        state.setValue('active');
+        if (groupID === 0) {
+            state = getState('hail');
+            state.setValue('active', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getState('hail.group' + groupID);
+            state.setValue('active', 7);
+        }
     }
     else if (groupID === 0 && sceneID === Scene.HailInactive) {
-        state = getState('hail');
-        state.setValue('inactive');
+        if (groupID === 0) {
+            state = getState('hail');
+            state.setValue('inactive', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getState('hail.group' + groupID);
+            state.setValue('inactive', 7);
+        }
     }
 
     if (raisedEvent.source.isGroup && (sceneID < 64)) {
@@ -213,27 +256,27 @@ function undoscene()
 
     if (groupID === 0 && sceneID === Scene.Panic) {
         state = getState('panic');
-        state.setValue('inactive');
+        state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Fire) {
         state = getState('fire');
-        state.setValue('inactive');
+        state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm) {
         state = getState('alarm');
-        state.setValue('inactive');
+        state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm2) {
         state = getState('alarm2');
-        state.setValue('inactive');
+        state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm3) {
         state = getState('alarm3');
-        state.setValue('inactive');
+        state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm4) {
         state = getState('alarm4');
-        state.setValue('inactive');
+        state.setValue('inactive', 7);
     }
 }
 
@@ -256,11 +299,12 @@ function stateBinaryinput()
     var dev = getDevices().byDSID(raisedEvent.source.dsid);
     if (dev) {
         var devNode = dev.getPropertyNode();
-        var devStateName = 'dev.' + raisedEvent.source.dsid + '.' + raisedEvent.parameter.inputIndex;
-        var stateNode = Property.getNode('/usr/states/' + devStateName);
+        var stateNode = Property.getNode('/usr/states/' + raisedEvent.parameter.statename);
+        if (stateNode == null) {
+            return;
+        }
         var inputIndex = stateNode.getChild('device/inputIndex').getValue();
         var devInput = devNode.getChild('binaryInputs/binaryInput' + inputIndex);
-
         if (devInput) {
             var inputType = devInput.getChild('inputType').getValue();
             var inputId = devInput.getChild('inputId').getValue();
@@ -274,8 +318,9 @@ function stateBinaryinput()
 
             if (inputType === 7) {
                 var stateName = 'fire';
-                if (raisedEvent.parameter.inputState == "1") {
-                    stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
+                var state = getState(stateName);
+                if (raisedEvent.parameter.value == "1") {
+                    state.setValue('active');
                 }
             }
 
@@ -312,22 +357,6 @@ function stateBinaryinput()
 function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
 {
     var state = getState(stateName);
-    var stype = state.type;
-    var svalue = state.value;
-    var newvalue = parseInt(parameter.inputState);
-    var groupId = 0;
-    var groupName = stateName.indexOf('.group');
-    if (groupName > 0) {
-        groupId = parseInt(stateName.substring(groupName + 6));
-    }
-
-    // only change "Apartment" states
-    if (stype == 1) {
-        return;
-    }
-    if (newvalue == 0) {
-        newvalue = 2;
-    }
 
     var cntNode = Property.getNode(stateName + '.' + targetType + '.' + targetId);
     if (cntNode == null) {
@@ -335,11 +364,11 @@ function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
         cntNode.setValue(0);
     }
 
-    if (newvalue == 1) {
+    if (parameter.value == "1") {
         cntNode.setValue(cntNode.getValue() + 1);
         state.setValue("active");
     }
-    if (newvalue == 2) {
+    if (parameter.value == "2") {
         if (cntNode.getValue() > 0) {
             cntNode.setValue(cntNode.getValue() - 1);
         }
@@ -347,39 +376,62 @@ function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
             state.setValue("inactive");
         }
     }
+}
 
-    if (newvalue != svalue) {
+function stateApartment()
+{
+    var stateName = raisedEvent.parameter.statename;
+    var groupId = 0;
+    var groupName = stateName.indexOf('.group');
+    if (groupName > 0) {
+        groupId = parseInt(stateName.substring(groupName + 6));
+    }
+    var z = getZoneByID(0);
 
-        if (stateName == 'fire') {
-            if (newvalue == 1) {
-                var z = getZoneByID(0);
-                z.callScene(0, Scene.Fire, false);
-            }
-        }
-
-        if (stateName.substring(0, 4) == 'rain') {
-            if (newvalue == 1) {
-                var z = getZoneByID(0);
-                z.callScene(groupId, Scene.RainActive, false);
-            }
-            if (newvalue == 2) {
-                var z = getZoneByID(0);
-                z.callScene(groupId, Scene.RainInactive, false);
-            }
-        }
-
-        if (stateName.substring(0, 4) == 'wind') {
-            if (newvalue == 1) {
-                var z = getZoneByID(0);
-                z.callScene(groupId, Scene.WindActive, false);
-            }
-            if (newvalue == 2) {
-                var z = getZoneByID(0);
-                z.callScene(groupId, Scene.WindInactive, false);
-            }
-        }
+    var originDeviceId = 0;
+    if (raisedEvent.source.dsid) {
+        originDeviceId = parseInt(raisedEvent.source.dsid, 16);
+    } else {
+        originDeviceId = parseInt(raisedEvent.parameter.originDeviceID, 16);
+    }
+    if (originDeviceId == 7) {
+        // ignore scene calls originated by server generated system level events,
+        // e.g. scene calls issued by state changes
+        print('system_state: ignoring stateChange initiated by myself');
+        return;
     }
 
+    print('stateApartment: ', stateName, ', GroupId: ', groupId, ', Origin: ', originDeviceId);
+
+    if (stateName == 'fire') {
+        if (raisedEvent.parameter.value == '1') {
+            z.callSceneSys(0, Scene.Fire, false, "manual");
+        }
+    }
+    if (stateName.substring(0, 4) == 'rain') {
+        if (raisedEvent.parameter.value == '1') {
+            z.callSceneSys(groupId, Scene.RainActive, false, "manual");
+        }
+        if (raisedEvent.parameter.value == '2') {
+            z.callSceneSys(groupId, Scene.RainInactive, false, "manual");
+        }
+    }
+    if (stateName.substring(0, 4) == 'wind') {
+        if (raisedEvent.parameter.value == '1') {
+            z.callSceneSys(groupId, Scene.WindActive, false, "manual");
+        }
+        if (raisedEvent.parameter.value == '2') {
+            z.callSceneSys(groupId, Scene.WindInactive, false, "manual");
+        }
+    }
+    if (stateName.substring(0, 4) == 'hail') {
+        if (raisedEvent.parameter.value == '1') {
+            z.callSceneSys(groupId, Scene.HailActive, false, "manual");
+        }
+        if (raisedEvent.parameter.value == '2') {
+            z.callSceneSys(groupId, Scene.HailInactive, false, "manual");
+        }
+    }
 }
 
 if (raisedEvent.name == 'running') {
@@ -394,6 +446,9 @@ else if (raisedEvent.name == 'callScene' && raisedEvent.source.isGroup) {
 else if (raisedEvent.name == 'undoScene') {
     undoscene();
 }
-else if (raisedEvent.name == 'deviceBinaryInputEvent') {
+else if (raisedEvent.name == 'stateChange'  && raisedEvent.source.isDevice) {
     stateBinaryinput();
+}
+else if (raisedEvent.name == 'stateChange'  && raisedEvent.source.isService) {
+    stateApartment();
 }

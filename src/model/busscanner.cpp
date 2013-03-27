@@ -583,9 +583,9 @@ namespace dss {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
           assert(state != NULL);
           if ((value & (1 << index)) > 0) {
-            state->setState(State_Active);
+            state->setState(coSystem, State_Active);
           } else {
-            state->setState(State_Inactive);
+            state->setState(coSystem, State_Inactive);
           }
         }
 
@@ -598,7 +598,7 @@ namespace dss {
         for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
           assert(state != NULL);
-          state->setState(State_Unkown);
+          state->setState(coSystem, State_Unkown);
         }
       }
     }

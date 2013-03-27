@@ -983,12 +983,12 @@ BOOST_AUTO_TEST_CASE(testPersistSet) {
   set.addDevice(dev1);
   set.addDevice(dev2);
 
-  set.callScene(IDeviceInterface::coTest, SAC_MANUAL, 5);
+  set.callScene(coTest, SAC_MANUAL, 5);
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
 
   manipulator.persistSet(set, "");
   actionInterface.clearLog();
-  set.callScene(IDeviceInterface::coTest, SAC_MANUAL, 5);
+  set.callScene(coTest, SAC_MANUAL, 5);
 
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,16,5)");
 }
@@ -1033,18 +1033,18 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   set.addDevice(dev1);
   set.addDevice(dev2);
 
-  set.callScene(IDeviceInterface::coTest, SAC_MANUAL, 5);
+  set.callScene(coTest, SAC_MANUAL, 5);
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
 
   std::string setDescription = "addDevices(1,2)";
   manipulator.persistSet(set, setDescription);
   actionInterface.clearLog();
-  set.callScene(IDeviceInterface::coTest, SAC_MANUAL, 5);
+  set.callScene(coTest, SAC_MANUAL, 5);
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,16,5)");
 
   manipulator.unpersistSet(setDescription);
   actionInterface.clearLog();
-  set.callScene(IDeviceInterface::coTest, SAC_MANUAL, 5);
+  set.callScene(coTest, SAC_MANUAL, 5);
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
 }
 

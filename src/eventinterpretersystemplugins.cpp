@@ -110,7 +110,7 @@ namespace dss {
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->callScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId, forceFlag);
+        group->callScene(coJSScripting, sceneAccess, sceneId, forceFlag);
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -174,7 +174,7 @@ namespace dss {
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->undoScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId);
+        group->undoScene(coJSScripting, sceneAccess, sceneId);
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -254,7 +254,7 @@ namespace dss {
         return;
       }
 
-      target->callScene(IDeviceInterface::coJSScripting, sceneAccess, sceneId, forceFlag);
+      target->callScene(coJSScripting, sceneAccess, sceneId, forceFlag);
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -300,7 +300,7 @@ namespace dss {
         sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
       }
 
-      target->setValue(IDeviceInterface::coJSScripting,
+      target->setValue(coJSScripting,
                        sceneAccess,
                        oValueNode->getIntegerValue());
 
@@ -340,7 +340,7 @@ namespace dss {
         sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
       }
 
-      target->blink(IDeviceInterface::coJSScripting, sceneAccess);
+      target->blink(coJSScripting, sceneAccess);
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -394,7 +394,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone;
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->blink(IDeviceInterface::coJSScripting, sceneAccess);
+        group->blink(coJSScripting, sceneAccess);
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -496,9 +496,9 @@ namespace dss {
     }
 
     if (oValueNode && oValueNode->getValueType() == vTypeInteger) {
-      pState->setState(oValueNode->getIntegerValue());
+      pState->setState(coJSScripting, oValueNode->getIntegerValue());
     } else if (oSValueNode && oSValueNode->getValueType() == vTypeString) {
-      pState->setState(oSValueNode->getStringValue());
+      pState->setState(coJSScripting, oSValueNode->getStringValue());
     } else {
       Logger::getInstance()->log("SystemEventActionExecute::"
           "executeStateChange: wrong data type for value or state parameter", lsError);

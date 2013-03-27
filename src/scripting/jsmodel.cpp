@@ -1003,7 +1003,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->turnOn(IDeviceInterface::coJSScripting, category);
+          intf->turnOn(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1036,7 +1036,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->turnOff(IDeviceInterface::coJSScripting, category);
+          intf->turnOff(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1069,7 +1069,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->blink(IDeviceInterface::coJSScripting, category);
+          intf->blink(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1102,7 +1102,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->increaseValue(IDeviceInterface::coJSScripting, category);
+          intf->increaseValue(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1136,7 +1136,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->decreaseValue(IDeviceInterface::coJSScripting, category);
+          intf->decreaseValue(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1178,7 +1178,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->setValue(IDeviceInterface::coJSScripting, category, value);
+            intf->setValue(coJSScripting, category, value);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1224,7 +1224,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->callScene(IDeviceInterface::coJSScripting, category, sceneNr, forceFlag);
+            intf->callScene(coJSScripting, category, sceneNr, forceFlag);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1268,9 +1268,9 @@ namespace dss {
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
           if (sceneNr >= 0) {
-            intf->undoScene(IDeviceInterface::coJSScripting, category, sceneNr);
+            intf->undoScene(coJSScripting, category, sceneNr);
           } else {
-            intf->undoSceneLast(IDeviceInterface::coJSScripting, category);
+            intf->undoSceneLast(coJSScripting, category);
           }
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
@@ -1304,7 +1304,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->nextScene(IDeviceInterface::coJSScripting, category);
+          intf->nextScene(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1337,7 +1337,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->previousScene(IDeviceInterface::coJSScripting, category);
+          intf->previousScene(coJSScripting, category);
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1385,7 +1385,7 @@ namespace dss {
 
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->saveScene(IDeviceInterface::coJSScripting, sceneNr);
+            intf->saveScene(coJSScripting, sceneNr);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -2158,7 +2158,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        pGroup->callScene(IDeviceInterface::coJSScripting, category, sceneID, forcedCall);
+        pGroup->callScene(coJSScripting, category, sceneID, forcedCall);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2174,6 +2174,133 @@ namespace dss {
     }
     return JS_FALSE;
   } // zone_callScene
+
+  JSBool zone_callSceneSys(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      int groupID;
+      int sceneID;
+      bool forcedCall = false;
+      SceneAccessCategory category = SAC_UNKNOWN;
+      if(pZone != NULL) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+          if (argc >= 3) {
+            forcedCall = ctx->convertTo<bool>(JS_ARGV(cx, vp)[2]);
+          }
+          if (argc >= 4) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]));
+          }
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        pGroup->callScene(coSystem, category, sceneID, forcedCall);
+
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_callSceneSys
+
+  JSBool zone_undoScene(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      int groupID;
+      int sceneID;
+      SceneAccessCategory category = SAC_UNKNOWN;
+      if(pZone != NULL) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+          if (argc >= 3) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
+          }
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        pGroup->undoScene(coJSScripting, category, sceneID);
+
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_undoScene
+
+  JSBool zone_undoSceneSys(JSContext* cx, uintN argc, jsval* vp) {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      try {
+        boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+        int groupID;
+        int sceneID;
+        SceneAccessCategory category = SAC_UNKNOWN;
+        if(pZone != NULL) {
+          try {
+            groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+            sceneID = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+            if (argc >= 3) {
+              category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
+            }
+          } catch(ScriptException& e) {
+            JS_ReportError(cx, e.what());
+            return JS_FALSE;
+          } catch(std::invalid_argument& e) {
+            JS_ReportError(cx, e.what());
+            return JS_FALSE;
+          }
+
+          boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+          pGroup->undoScene(coSystem, category, sceneID);
+
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+          return JS_TRUE;
+        }
+      } catch(ItemNotFoundException& ex) {
+        JS_ReportWarning(cx, "Item not found: %s", ex.what());
+      } catch (SecurityException& ex) {
+        JS_ReportError(cx, "Access denied: %s", ex.what());
+      } catch (DSSException& ex) {
+        JS_ReportError(cx, "Failure: %s", ex.what());
+      } catch (std::exception& ex) {
+        JS_ReportError(cx, "General failure: %s", ex.what());
+      }
+      return JS_FALSE;
+    } // zone_undoSceneSys
 
   JSBool zone_blink(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -2203,7 +2330,7 @@ namespace dss {
           JS_ReportWarning(cx, "Zone.blink: group with id \"%d\" not found", groupID);
           return JS_FALSE;
         }
-        pGroup->blink(IDeviceInterface::coJSScripting, category);
+        pGroup->blink(coJSScripting, category);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2312,6 +2439,9 @@ namespace dss {
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 4, 0),
+    JS_FS("undoScene", zone_undoScene, 3, 0),
+    JS_FS("callSceneSys", zone_callSceneSys, 4, 0),
+    JS_FS("undoSceneSys", zone_undoSceneSys, 3, 0),
     JS_FS("blink", zone_blink, 2, 0),
     JS_FS("getPowerConsumption", zone_getPowerConsumption, 0, 0),
     JS_FS("pushSensorValue", zone_pushSensorValue, 3, 0),
@@ -2417,32 +2547,38 @@ namespace dss {
         try {
 
           eState svalue = State_Unkown;
-          if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
-            std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-            if (value == "active") {
-              svalue = State_Active;
-            } else if (value == "inactive") {
-              svalue = State_Inactive;
-            } else if (value == "unknown") {
-              svalue = State_Unkown;
-            } else {
-              JS_ReportError(cx, "Invalid state value");
-              JS_SET_RVAL(cx, vp, JSVAL_NULL);
-              return JS_FALSE;
-            }
-          } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
-            int value = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-            switch (value) {
-            case 1: svalue = State_Active; break;
-            case 2: svalue = State_Inactive; break;
-            case 3: svalue = State_Unkown; break;
-            default:
-              JS_ReportError(cx, "Invalid state value");
-              JS_SET_RVAL(cx, vp, JSVAL_NULL);
-              return JS_FALSE;
+          if (argc >= 1) {
+            if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
+              std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+              if (value == "active") {
+                svalue = State_Active;
+              } else if (value == "inactive") {
+                svalue = State_Inactive;
+              } else if (value == "unknown") {
+                svalue = State_Unkown;
+              } else {
+                JS_ReportError(cx, "Invalid state value");
+                JS_SET_RVAL(cx, vp, JSVAL_NULL);
+                return JS_FALSE;
+              }
+            } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
+              int value = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+              switch (value) {
+              case 1: svalue = State_Active; break;
+              case 2: svalue = State_Inactive; break;
+              case 3: svalue = State_Unkown; break;
+              default:
+                JS_ReportError(cx, "Invalid state value");
+                JS_SET_RVAL(cx, vp, JSVAL_NULL);
+                return JS_FALSE;
+              }
             }
           }
-          pState->setState(svalue);
+          callOrigin_t origin = coJSScripting;
+          if (argc >= 2) {
+            origin = (callOrigin_t) ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+          }
+          pState->setState(origin, svalue);
 
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
