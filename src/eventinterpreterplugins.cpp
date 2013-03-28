@@ -45,6 +45,7 @@
 #include "src/model/group.h"
 #include "src/model/device.h"
 #include "src/model/state.h"
+#include "src/model/apartment.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -897,5 +898,71 @@ namespace dss {
     return NULL;
   } // run
 
+  EventInterpreterPluginExecutionDeniedDigest::EventInterpreterPluginExecutionDeniedDigest(EventInterpreter* _pInterpreter)
+        : EventInterpreterPlugin("execution_denied_digest", _pInterpreter) {
+    m_timestamp = DateTime();
+    m_check_scheduled = false;
+  }
 
+  void EventInterpreterPluginExecutionDeniedDigest::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    if (_event.getName() == "executionDenied") {
+      boost::mutex::scoped_lock lock(m_digest_mutex);
+      std::string action;
+      std::string reason;
+      if (_event.hasPropertySet("source-name")) {
+        action = _event.getPropertyByName("source-name");
+      }
+      if (action.empty()) {
+        if (_event.hasPropertySet("action-name")) {
+          action = _event.getPropertyByName("action-name");
+        }
+      }
+      if (_event.hasPropertySet("reason")) {
+        reason = _event.getPropertyByName("reason");
+      }
+
+      m_timestamp = DateTime();
+
+      m_digest << "[" << m_timestamp.toString() << "] "
+               << "Action \"" << action << "\" was not executed. "
+               << reason << "!" << std::endl << std::endl;
+
+      if (!m_check_scheduled) {
+        boost::shared_ptr<Event> pEvent(new Event("execution_denied_digest_check"));
+        pEvent->setProperty("time", "+60");
+        if (DSS::hasInstance()) {
+          DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+          m_check_scheduled = true;
+        }
+      }
+
+    } else if  (_event.getName() == "execution_denied_digest_check") {
+      boost::mutex::scoped_lock lock(m_digest_mutex);
+      m_check_scheduled = false;
+
+      DateTime now = DateTime();
+      DateTime last = DateTime(m_timestamp);
+      last.addSeconds(60);
+      if ((last >= now) && (m_digest.str().length() < 2048)) {
+        return;
+      }
+
+      if (m_digest.str().length() == 0) {
+        return;
+      }
+      boost::shared_ptr<Event> pEvent(new Event("sendmail"));
+      pEvent->setProperty("body", m_digest.str());
+      pEvent->setProperty("subject",
+                          "digitalSTROM server actions not executed");
+      pEvent->setProperty("from", "dSS");
+      if (DSS::hasInstance()) {
+        pEvent->setProperty("to",
+                            DSS::getInstance()->getApartment().getName());
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+      m_digest.clear();
+      m_digest.str("");
+      m_timestamp = DateTime();
+    }
+  }
 } // namespace dss

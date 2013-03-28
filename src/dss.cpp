@@ -457,6 +457,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginSystemTrigger(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
