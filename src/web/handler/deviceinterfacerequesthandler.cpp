@@ -83,7 +83,7 @@ namespace dss {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
-        if (CommChannel::getInstance()->isSceneLocked((uint32_t)sceneID)) {
+        if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)sceneID)) {
           return failure("Device settings are being updated for selected activity, please try again later");
         }
         if(SceneHelper::isInRange(sceneID, 0)) {
