@@ -100,8 +100,14 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     /*
      * Partial Wind (in user groups): Prevent automatic actions in relevant user group.
      */
+    boost::shared_ptr<Group> gr;
     for (int i = 16; i < 24; ++i) {
-      boost::shared_ptr<Group> gr = apartment.getGroup(i);
+      try {
+        gr.reset();
+        gr = apartment.getGroup(i);
+      } catch (ItemNotFoundException& e) {
+        continue;
+      }
       if (gr && gr->isValid() && gr->getStandardGroupID() == DEVICE_CLASS_GR) {
         boost::shared_ptr<State> wind = apartment.getState("wind.group" + intToString(i));
         if (wind != NULL && (wind->getState() == State_Active)) {
