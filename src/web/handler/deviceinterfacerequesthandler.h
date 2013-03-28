@@ -37,6 +37,7 @@ namespace dss {
     boost::shared_ptr<JSONObject> handleDeviceInterfaceRequest(const RestfulRequest& _request, boost::shared_ptr<IDeviceInterface> _interface);
 
   protected:
+    std::string getCategory(const RestfulRequest& _request);
     bool isDeviceInterfaceCall(const RestfulRequest& _request);
   };
 
