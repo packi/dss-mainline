@@ -35,28 +35,33 @@ namespace dss {
 
   //=========================================== DeviceInterfaceRequestHandler
 
+  // compatibility helper which will be removed in R1.8
+  std::string DeviceInterfaceRequestHandler::getCategory(const RestfulRequest& _request) {
+    if (_request.hasParameter("category")) {
+      return _request.getParameter("category");
+    } else {
+      return "manual";
+    }
+  }
+
   boost::shared_ptr<JSONObject> DeviceInterfaceRequestHandler::handleDeviceInterfaceRequest(const RestfulRequest& _request, boost::shared_ptr<IDeviceInterface> _interface) {
     assert(_interface != NULL);
     assert(isDeviceInterfaceCall(_request));
+    std::string categoryStr = getCategory(_request);
     if(_request.getMethod() == "turnOn") {
-      std::string categoryStr = _request.getParameter("category");
       _interface->turnOn(coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "turnOff") {
-      std::string categoryStr = _request.getParameter("category");
       _interface->turnOff(coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "increaseValue") {
-      std::string categoryStr = _request.getParameter("category");
       _interface->increaseValue(coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "decreaseValue") {
-      std::string categoryStr = _request.getParameter("category");
       _interface->decreaseValue(coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     } else if(_request.getMethod() == "setValue") {
       std::string valueStr = _request.getParameter("value");
-      std::string categoryStr = _request.getParameter("category");
       int value = strToIntDef(valueStr, -1);
       if((value  < 0) || (value > UCHAR_MAX)) {
         return failure("Invalid or missing parameter value: '" + valueStr + "'");
@@ -68,7 +73,7 @@ namespace dss {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       bool force = _request.getParameter("force") == "true";
-      SceneAccessCategory category = SceneAccess::stringToCategory(_request.getParameter("category"));
+      SceneAccessCategory category = SceneAccess::stringToCategory(categoryStr);
       if(sceneID != -1) {
         if(SceneHelper::isInRange(sceneID, 0)) {
           _interface->callScene(coJSON, category, sceneID, force);
@@ -97,7 +102,6 @@ namespace dss {
       return success();
     } else if(_request.getMethod() == "undoScene") {
       std::string sceneStr = _request.getParameter("sceneNumber");
-      std::string categoryStr = _request.getParameter("category");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID == -1) {
         _interface->undoSceneLast(coJSON, SceneAccess::stringToCategory(categoryStr));
@@ -110,7 +114,6 @@ namespace dss {
       resultObj->addProperty("consumption", _interface->getPowerConsumption());
       return success(resultObj);
     } else if(_request.getMethod() == "blink") {
-      std::string categoryStr = _request.getParameter("category");
       _interface->blink(coJSON, SceneAccess::stringToCategory(categoryStr));
       return success();
     }
