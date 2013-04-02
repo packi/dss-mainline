@@ -136,7 +136,6 @@ function callscene()
     if (originDeviceId == 7) {
         // ignore scene calls originated by server generated system level events,
         // e.g. scene calls issued by state changes
-        print('system_state: ignoring callScene initiated by myself');
         return;
     }
 
@@ -312,7 +311,6 @@ function stateBinaryinput()
             var targetId = devInput.getChild('targetGroupId').getValue();
 
             if (inputId != 15) {
-                print('stateBinaryinput: ignoring event, device is not in app mode');
                 return;
             }
 
@@ -397,11 +395,8 @@ function stateApartment()
     if (originDeviceId == 7) {
         // ignore scene calls originated by server generated system level events,
         // e.g. scene calls issued by state changes
-        print('system_state: ignoring stateChange initiated by myself');
         return;
     }
-
-    print('stateApartment: ', stateName, ', GroupId: ', groupId, ', Origin: ', originDeviceId);
 
     if (stateName == 'fire') {
         if (raisedEvent.parameter.value == '1') {
