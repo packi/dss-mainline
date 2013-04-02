@@ -82,8 +82,6 @@ function unregisterTrigger(tPath)
         }
         if (oOldNode != null) {
             oBaseNode.removeChild(oOldNode);
-        } else {
-            printf('unregisterTrigger: unknown trigger path: ' + tPath);
         }
     }
 }
