@@ -1,5 +1,82 @@
 dSS - digitalSTROM Server
 
+v1.20.0	03.04.2013
+	* control device update task that is running on dSA, #2190
+	* do not allow to save locked scenes
+	* add a JSON call to retrieve list of locked scenes
+	* fixed AKM off_falling_edge setting, #2308
+	* check for valid UTF-8 input when setting group names, #2304
+	* fixed extended scene value calculation
+	* fix synchronization of user groups in the model, #2277
+	* fix old timestamp when last dSM in set is offline
+	* automatically adjust button id when changing the button configuration
+	  to control a user group, #2260
+	* block non manual actions in special cases, #2183
+	* added scripting methods to generate call/undo scene system level
+	  events, #2191
+
+v1.19.2 01.03.2013
+	* fix system trigger user-defined-actions, #2300
+	* synchronize binary inputs on a separate task, #2287
+
+v1.19.1	26.02.2013
+	* remove panic and alarm state subscriptions, #2276
+	* remove circular dependency for stateChange and callScene events, #2279
+	* fix wrong variable reference and race condition, #2289
+	* fix smoke detector and fire state change
+
+v1.19.0 15.02.2013
+	* default state value is inactive, #2187
+	* added AKMInputProperty value to getStructure response, #2180
+	* Update AKM icon, #2180
+	* handle AKMs with a single input similar as devices without output, #2184
+	* add setButtonActiveGroup call, #2184
+	* add buttonGroupMembership (=JokerColor) to device JSON, #2184
+	* joker group is stored in GroupMembership instead of ActiveGroup, #2184
+	* if device has no output button is active in group, #2184
+	* add setDeviceButtonActiveGroup() to Device, #2184
+	* fix stateChange event log to include a state name
+	* automatic posting of fire, wind and rain system events, #2166
+	* device request handler must call device config methods, #2204
+	* added json methods to set group names and standard group id, #2213
+	* synchronize user group setup over any dsMeter, #2212
+	* extended busscanner to readout all group data, #2165
+	* fix stateChange system trigger, do not use "name" as parameter
+	* add change-state as system action for add-ons, #2186
+	* WebServer - Wrap JSON answer in callback for crosssite-query
+      compatibility (jsonp)
+	* Metering - fix aggregation discarding second meter values
+	* use device isValid flag to indicate synchronization status, #1710
+	* add a device IsValid flag
+	* Metering/JSMetering - Add support for getAggregatedValues,
+	  getAggregatedLatest
+	* Metering - aggregate metering values from multiple dSM
+	* fix energy counter calculation
+	* fix rescanDevice synchronization for state inputs, #2177
+	* add stateChange event as system trigger
+	* use dsm event counter to avoid unecessary synchronization, #2125
+	* add simple class for a persistent counter value
+	* use new state object to manage binary input states, #2125
+	* add new apartment high level events
+	* added class for state handling
+	* Make MAC based dSID available via JSON, #1020
+	* observe device presence callback, #1767
+	* Add interface to set/read AKM input properties, #2126
+	* Catch exceptions in download handler, #1912
+	* add json methods for akm binary inputs, #2126
+	* optimize trigger and condition evaluation
+	* get trigger parameters as strings, #2133
+	* add binary inputs to device and export to property tree, #2091
+	* subscribe system trigger to binary input event, #2042
+	* added event handler for binary inputs, #2042
+	* Remove red/green from getReachableGroups, #1891
+	* add support for property query for floating types
+	* represent energy meter values as float
+	* decode akm product type
+	* add system trigger for binary input events
+	* inactive devices should not be removed from the dsm, #1767
+	* Apartment::removeDevice must cleanup dsm device list, #2107
+
 v1.18.0 30.11.2012
 	* add binary inputs to getStructure
 	* add missing OEM data to getStructure
