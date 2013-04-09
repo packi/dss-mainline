@@ -29,6 +29,7 @@
 #include "src/model/deviceinterface.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
+#include "src/comm-channel.h"
 
 namespace dss {
 
