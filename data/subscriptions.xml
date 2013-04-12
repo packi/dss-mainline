@@ -29,6 +29,11 @@
   <subscription event-name="highlevelevent" handler-name="highlevelevent">
   </subscription>
 
+  <subscription event-name="executionDenied" handler-name="execution_denied_digest">
+  </subscription>
+  <subscription event-name="execution_denied_digest_check" handler-name="execution_denied_digest">
+  </subscription>
+
 
   <!-- Examples -->
   <!--
