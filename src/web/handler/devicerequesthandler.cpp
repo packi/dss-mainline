@@ -32,6 +32,7 @@
 #include "src/model/zone.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
+#include "src/comm-channel.h"
 
 #include "src/web/json.h"
 #include "jsonhelper.h"
@@ -623,6 +624,10 @@ namespace dss {
         return failure("Invalid angle parameter");
       }
 
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
+        return failure("Device settings are being updated for selected activity, please try again later");
+      }
+
       if (angle != -1) {
         DeviceFeatures_t features = pDevice->getFeatures();
         if (!features.hasOutputAngle) {
@@ -641,6 +646,11 @@ namespace dss {
       if((id  < 0) || (id > 127)) {
         return failure("Invalid or missing parameter 'sceneID'");
       }
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
+        return failure("Device settings are being updated for selected activity, please try again later");
+      }
+
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("value", pDevice->getSceneValue(id));
 
@@ -655,6 +665,11 @@ namespace dss {
       if((id  < 0) || (id > 255)) {
         return failure("Invalid or missing parameter 'sceneID'");
       }
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
+        return failure("Device settings are being updated for selected activity, please try again later");
+      }
+
       DeviceSceneSpec_t config;
       pDevice->getDeviceSceneMode(id, config);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -671,6 +686,11 @@ namespace dss {
       if((id  < 0) || (id > 255)) {
         return failure("Invalid or missing parameter 'sceneID'");
       }
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
+        return failure("Device settings are being updated for selected activity, please try again later");
+      }
+
       DeviceSceneSpec_t config;
       pDevice->getDeviceSceneMode(id, config);
       if(_request.hasParameter("dontCare"))
