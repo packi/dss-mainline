@@ -124,6 +124,17 @@ namespace dss {
      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
    }; // EventInterpreterPluginSendmail
 
+  class EventInterpreterPluginExecutionDeniedDigest : public EventInterpreterPlugin {
+  private:
+    std::ostringstream m_digest;
+    DateTime m_timestamp;
+    boost::mutex m_digest_mutex;
+    bool m_check_scheduled;
+
+  public:
+    EventInterpreterPluginExecutionDeniedDigest(EventInterpreter* _pInterpreter);
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */
