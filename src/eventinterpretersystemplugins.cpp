@@ -116,10 +116,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeZoneScene: execution not allowed: " +
                     std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("executionDenied"));
       pEvent->setProperty("action-type", "zone-scene");
-      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
       pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -180,10 +182,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeZoneUndoScene: execution not allowed: " +
                     std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("executionDenied"));
       pEvent->setProperty("action-type", "zone-undo-scene");
-      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
       pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -260,10 +264,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeDeviceScene: execution not allowed: " +
                     std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("executionDenied"));
       pEvent->setProperty("action-type", "device-scene");
-      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
       pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -308,10 +314,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeDeviceValue: execution not allowed: " +
                     std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("executionDenied"));
       pEvent->setProperty("action-type", "device-value");
-      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
       pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -346,10 +354,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeDeviceBlink: execution not allowed: " +
                     std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("executionDenied"));
       pEvent->setProperty("action-type", "device-blink");
-      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
       pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -400,10 +410,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeZoneBlink: execution not allowed: " +
                     std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("executionDenied"));
       pEvent->setProperty("action-type", "zone-blink");
-      pEvent->setProperty("action-path", m_path);
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
       pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -425,6 +437,7 @@ namespace dss {
 
     boost::shared_ptr<Event> evt(new Event("highlevelevent"));
     evt->setProperty("id", oEventNode->getStringValue());
+    evt->setProperty("source-name", getActionName(_actionNode));
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(evt);
     }
@@ -738,6 +751,21 @@ namespace dss {
   SystemEvent::SystemEvent() : Task() {
   }
   SystemEvent::~SystemEvent() {
+  }
+
+  std::string SystemEvent::getActionName(PropertyNodePtr _actionNode) {
+    std::string action_name;
+    PropertyNode *parent1 = _actionNode->getParentNode();
+    if (parent1 != NULL) {
+      PropertyNode *parent2 = parent1->getParentNode();
+      if (parent2 != NULL) {
+        PropertyNodePtr name = parent2->getPropertyByName("name");
+        if (name != NULL) {
+          action_name = name->getAsString();
+        }
+      }
+    }
+    return action_name;
   }
 
   SystemEventHighlevel::SystemEventHighlevel() : SystemEventActionExecute() {

@@ -109,7 +109,12 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
         continue;
       }
       if (gr && gr->isValid() && gr->getStandardGroupID() == DEVICE_CLASS_GR) {
-        boost::shared_ptr<State> wind = apartment.getState("wind.group" + intToString(i));
+        boost::shared_ptr<State> wind;
+        try {
+          wind = apartment.getState("wind.group" + intToString(i));
+        } catch (ItemNotFoundException& e) {
+          continue;
+        }
         if (wind != NULL && (wind->getState() == State_Active)) {
           const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
           if (pGroup != NULL) {

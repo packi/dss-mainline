@@ -135,7 +135,8 @@ libwebservices_a_CXXFLAGS = \
 			$(LIBXML2_CFLAGS) \
 			$(OPENSSL_CFLAGS) \
 			$(AVAHI_CFLAGS) \
-			$(GCOV_CFLAGS)
+			$(GCOV_CFLAGS) \
+			$(LIBCOMMCHANNEL_CFLAGS)
 
 nodist_libwebservices_a_SOURCES = \
 			webservices/soapC.cpp \
