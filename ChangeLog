@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.21.0	15.04.2013
+	* fixed SOAP compilation
+	* also block get/setSceneValue and sceneMode, #2384
+	* send mail when an executionDenied event is received, #2183
+	* catch exception when trying to access a state, #2407
+
 v1.20.0	03.04.2013
 	* control device update task that is running on dSA, #2190
 	* do not allow to save locked scenes
