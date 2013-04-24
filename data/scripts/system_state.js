@@ -34,6 +34,18 @@ function bootstrap()
     registerState("hail", true);
 }
 
+function getOrRegisterState(stateName)
+{
+    var s;
+    try {
+        s = getState(stateName);
+    }
+    catch(err) {
+        s = registerState(stateName, true);
+    }
+    return s;
+}
+
 function startup()
 {
     var absent = false;
@@ -328,9 +340,7 @@ function stateBinaryinput()
                 // create state for a user group if it does not exist (new group?)
                 if (targetId >= 16) {
                     stateName = stateName + '.group' + targetId;
-                    if (! getState(stateName)) {
-                        registerState(stateName, true);
-                    }
+                    getOrRegisterState(stateName);
                 }
                 stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
             }
@@ -341,9 +351,7 @@ function stateBinaryinput()
                 // create state for a user group if it does not exist (new group?)
                 if (targetId >= 16) {
                     stateName = stateName + '.group' + targetId;
-                    if (! getState(stateName)) {
-                        registerState(stateName, true);
-                    }
+                    getOrRegisterState(stateName);
                 }
                 stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
             }
