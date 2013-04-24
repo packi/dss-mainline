@@ -193,55 +193,55 @@ function callscene()
     }
     else if (sceneID === Scene.WindActive) {
         if (groupID === 0) {
-            state = getState('wind');
+            state = getOrRegisterState('wind');
             state.setValue('active', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('wind.group' + groupID);
+            state = getOrRegisterState('wind.group' + groupID);
             state.setValue('active', 7);
         }
     }
     else if (sceneID === Scene.WindInactive) {
         if (groupID === 0) {
-            state = getState('wind');
+            state = getOrRegisterState('wind');
             state.setValue('inactive', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('wind.group' + groupID);
+            state = getOrRegisterState('wind.group' + groupID);
             state.setValue('inactive', 7);
         }
     }
     else if (sceneID === Scene.RainActive) {
         if (groupID === 0) {
-            state = getState('rain');
+            state = getOrRegisterState('rain');
             state.setValue('active', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('rain.group' + groupID);
-            state.setValue('active', 7);
-        }
-    }
-    else if (groupID === 0 && sceneID === Scene.RainInactive) {
-        if (groupID === 0) {
-            state = getState('rain');
-            state.setValue('inactive', 7);
-        } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('rain.group' + groupID);
-            state.setValue('inactive', 7);
-        }
-    }
-    else if (groupID === 0 && sceneID === Scene.HailActive) {
-        if (groupID === 0) {
-            state = getState('hail');
-            state.setValue('active', 7);
-        } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('hail.group' + groupID);
+            state = getOrRegisterState('rain.group' + groupID);
             state.setValue('active', 7);
         }
     }
-    else if (groupID === 0 && sceneID === Scene.HailInactive) {
+    else if (sceneID === Scene.RainInactive) {
         if (groupID === 0) {
-            state = getState('hail');
+            state = getOrRegisterState('rain');
             state.setValue('inactive', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('hail.group' + groupID);
+            state = getOrRegisterState('rain.group' + groupID);
+            state.setValue('inactive', 7);
+        }
+    }
+    else if (sceneID === Scene.HailActive) {
+        if (groupID === 0) {
+            state = getOrRegisterState('hail');
+            state.setValue('active', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getOrRegisterState('hail.group' + groupID);
+            state.setValue('active', 7);
+        }
+    }
+    else if (sceneID === Scene.HailInactive) {
+        if (groupID === 0) {
+            state = getOrRegisterState('hail');
+            state.setValue('inactive', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getOrRegisterState('hail.group' + groupID);
             state.setValue('inactive', 7);
         }
     }
