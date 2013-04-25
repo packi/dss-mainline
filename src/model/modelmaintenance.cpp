@@ -1400,13 +1400,6 @@ namespace dss {
       const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
-
-      try {
-        pMeter->incrementBinaryInputEventCount();
-      } catch(DSSException& e) {
-        log("onBinaryInputEvent: " + std::string(e.what()), lsWarning);
-      }
-
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
 
@@ -1429,6 +1422,15 @@ namespace dss {
           pState->setState(coSystem, State_Active);
         }
       }
+
+      // increment event counter as last step to catch possible
+      // data model exceptions in above sequence
+      try {
+        pMeter->incrementBinaryInputEventCount();
+      } catch(DSSException& e) {
+        log("onBinaryInputEvent: " + std::string(e.what()), lsWarning);
+      }
+
     } catch(ItemNotFoundException& e) {
       log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
