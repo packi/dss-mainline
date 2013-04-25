@@ -125,10 +125,6 @@ function startup()
     else if (panic === false) {
         state.setValue('inactive');
     }
-
-    /* fire is always reset on system restart */
-    state = getState('fire');
-    state.setValue('inactive');
 }
 
 function callscene()
