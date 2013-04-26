@@ -34,6 +34,18 @@ function bootstrap()
     registerState("hail", true);
 }
 
+function getOrRegisterState(stateName)
+{
+    var s;
+    try {
+        s = getState(stateName);
+    }
+    catch(err) {
+        s = registerState(stateName, true);
+    }
+    return s;
+}
+
 function startup()
 {
     var absent = false;
@@ -113,10 +125,6 @@ function startup()
     else if (panic === false) {
         state.setValue('inactive');
     }
-
-    /* fire is always reset on system restart */
-    state = getState('fire');
-    state.setValue('inactive');
 }
 
 function callscene()
@@ -181,55 +189,55 @@ function callscene()
     }
     else if (sceneID === Scene.WindActive) {
         if (groupID === 0) {
-            state = getState('wind');
+            state = getOrRegisterState('wind');
             state.setValue('active', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('wind.group' + groupID);
+            state = getOrRegisterState('wind.group' + groupID);
             state.setValue('active', 7);
         }
     }
     else if (sceneID === Scene.WindInactive) {
         if (groupID === 0) {
-            state = getState('wind');
+            state = getOrRegisterState('wind');
             state.setValue('inactive', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('wind.group' + groupID);
+            state = getOrRegisterState('wind.group' + groupID);
             state.setValue('inactive', 7);
         }
     }
     else if (sceneID === Scene.RainActive) {
         if (groupID === 0) {
-            state = getState('rain');
+            state = getOrRegisterState('rain');
             state.setValue('active', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('rain.group' + groupID);
-            state.setValue('active', 7);
-        }
-    }
-    else if (groupID === 0 && sceneID === Scene.RainInactive) {
-        if (groupID === 0) {
-            state = getState('rain');
-            state.setValue('inactive', 7);
-        } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('rain.group' + groupID);
-            state.setValue('inactive', 7);
-        }
-    }
-    else if (groupID === 0 && sceneID === Scene.HailActive) {
-        if (groupID === 0) {
-            state = getState('hail');
-            state.setValue('active', 7);
-        } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('hail.group' + groupID);
+            state = getOrRegisterState('rain.group' + groupID);
             state.setValue('active', 7);
         }
     }
-    else if (groupID === 0 && sceneID === Scene.HailInactive) {
+    else if (sceneID === Scene.RainInactive) {
         if (groupID === 0) {
-            state = getState('hail');
+            state = getOrRegisterState('rain');
             state.setValue('inactive', 7);
         } else if (groupID >= 16 && groupID <= 23) {
-            state = getState('hail.group' + groupID);
+            state = getOrRegisterState('rain.group' + groupID);
+            state.setValue('inactive', 7);
+        }
+    }
+    else if (sceneID === Scene.HailActive) {
+        if (groupID === 0) {
+            state = getOrRegisterState('hail');
+            state.setValue('active', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getOrRegisterState('hail.group' + groupID);
+            state.setValue('active', 7);
+        }
+    }
+    else if (sceneID === Scene.HailInactive) {
+        if (groupID === 0) {
+            state = getOrRegisterState('hail');
+            state.setValue('inactive', 7);
+        } else if (groupID >= 16 && groupID <= 23) {
+            state = getOrRegisterState('hail.group' + groupID);
             state.setValue('inactive', 7);
         }
     }
@@ -328,9 +336,7 @@ function stateBinaryinput()
                 // create state for a user group if it does not exist (new group?)
                 if (targetId >= 16) {
                     stateName = stateName + '.group' + targetId;
-                    if (! getState(stateName)) {
-                        registerState(stateName, true);
-                    }
+                    getOrRegisterState(stateName);
                 }
                 stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
             }
@@ -341,9 +347,7 @@ function stateBinaryinput()
                 // create state for a user group if it does not exist (new group?)
                 if (targetId >= 16) {
                     stateName = stateName + '.group' + targetId;
-                    if (! getState(stateName)) {
-                        registerState(stateName, true);
-                    }
+                    getOrRegisterState(stateName);
                 }
                 stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
             }
