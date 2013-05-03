@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.21.1	03.05.2013
+	* catch scripting exceptions in getState, #2444
+	* set user groups states for wind, rain and hail by scene calls, #2438
+	* do not reset fire state on startup, #2336
+	* fix binary input events on startup, #2331
+
 v1.21.0	15.04.2013
 	* fixed SOAP compilation
 	* also block get/setSceneValue and sceneMode, #2384
