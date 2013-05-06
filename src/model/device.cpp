@@ -361,7 +361,7 @@ namespace dss {
                                                                         _buttonActiveGroup);
       if (_buttonActiveGroup >= GroupIDAppUserMin &&
           _buttonActiveGroup <= GroupIDAppUserMax &&
-          m_ButtonID == ButtonId_Device) {
+          ((m_ButtonID < ButtonId_Zone) || (m_ButtonID >= ButtonId_Area1_Extended))) {
         setDeviceButtonID(ButtonId_Zone);
       }
       /* refresh device information for correct active group */
