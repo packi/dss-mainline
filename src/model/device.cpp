@@ -1592,6 +1592,13 @@ namespace dss {
     return m_binaryInputs;
   }
 
+  const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
+    if (_inputIndex > getBinaryInputCount()) {
+      return boost::shared_ptr<DeviceBinaryInput_t>();
+    }
+    return m_binaryInputs[_inputIndex];
+  }
+
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
   {
     return ((m_OemState == DEVICE_OEM_VALID) &&
