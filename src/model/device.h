@@ -29,6 +29,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "src/ds485types.h"
 #include "src/datetools.h"
@@ -223,6 +224,8 @@ namespace dss {
     std::vector<boost::shared_ptr<State> > m_binaryInputStates;
 
     std::string m_AKMInputProperty;
+
+    mutable boost::mutex m_deviceMutex;
 
   protected:
     /** Sends the application a note that something has changed.
@@ -521,8 +524,8 @@ namespace dss {
     void setBinaryInputId(uint8_t _index, uint8_t _inputId);
     void setBinaryInputType(uint8_t _index, uint8_t _inputType);
 
-    void setBinaryInputState(uint8_t _index, boost::shared_ptr<State> _state);
     boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
+    void clearBinaryInputStates();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

@@ -380,6 +380,16 @@ namespace dss {
           Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown dSM: ") + e.what(), lsWarning);
         }
 
+        uint8_t binaryInputCount = pDevice->getBinaryInputCount();
+        for (uint8_t i = 0; i < binaryInputCount; i++) {
+          boost::shared_ptr<State> state = pDevice->getBinaryInputState(i);
+          try {
+            removeState(state->getName());
+          } catch (ItemNotFoundException& e) {
+            Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
+          }
+        }
+        pDevice->clearBinaryInputStates();
         // Erase
         m_Devices.erase(ipDevice);
         return;
