@@ -174,6 +174,9 @@ namespace dss {
         case ERROR_RESPONSE_TIMEOUT:
           message = "response timeout";
           break;
+        case ERROR_SYNC_RESPONSE_TIMEOUT:
+          message = "device response timeout";
+          break;
         case ERROR_INVALID_HANDLE:
           message = "invalid handle";
           break;
