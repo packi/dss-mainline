@@ -290,9 +290,15 @@ namespace dss {
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
+
       dsid_t devdsid;
-      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &devdsid);
-      DSBusInterface::checkResultCode(ret);
+      try {
+        ret = DsmApiGetDeviceDSID(spec.VendorID, spec.ProductID, spec.FunctionID >> 12, spec.Version, spec.SerialNumber, &devdsid);
+        DSBusInterface::checkResultCode(ret);
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
+            intToString(spec.SerialNumber, true), lsWarning);
+      }
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
       updateButtonGroupFromMeter(dsid, spec);
@@ -329,8 +335,13 @@ namespace dss {
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
       dsid_t devdsid;
-      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &devdsid);
-      DSBusInterface::checkResultCode(ret);
+      try {
+        ret = DsmApiGetDeviceDSID(spec.VendorID, spec.ProductID, spec.FunctionID >> 12, spec.Version, spec.SerialNumber, &devdsid);
+        DSBusInterface::checkResultCode(ret);
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
+            intToString(spec.SerialNumber, true), lsWarning);
+      }
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
       updateButtonGroupFromMeter(dsid, spec);
@@ -360,9 +371,15 @@ namespace dss {
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);
     result.Name = std::string(reinterpret_cast<char*>(name));
+
     dsid_t devdsid;
-    ret = DsmApiExpandDeviceDSID(result.VendorID, result.SerialNumber, &devdsid);
-    DSBusInterface::checkResultCode(ret);
+    try {
+      ret = DsmApiGetDeviceDSID(result.VendorID, result.ProductID, result.FunctionID >> 12, result.Version, result.SerialNumber, &devdsid);
+      DSBusInterface::checkResultCode(ret);
+    } catch(BusApiError& e) {
+      Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
+          intToString(result.SerialNumber, true), lsWarning);
+    }
     dsid_helper::toDssDsid(devdsid, result.DSID);
 
     updateButtonGroupFromMeter(dsmDSID, result);

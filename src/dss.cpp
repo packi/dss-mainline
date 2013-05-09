@@ -46,6 +46,7 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "src/ds485/dsbusinterface.h"
+#include "src/dsidhelper.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
@@ -814,8 +815,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         if (macNode != NULL) {
             std::string mac = macNode->getAsString();
             mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
-            mac.insert(4, "0");
-            dsid = "3504175FEFF" + mac;
+            dsid_t d;
+            DsmApiGetEthernetDSID(mac.c_str(), &d);
+            dss_dsid_t D;
+            dsid_helper::toDssDsid(d, D);
+            dsid = D.toString();
         }
     }
 
