@@ -212,6 +212,7 @@ namespace dss {
     dev->setZoneID(_zone->getID());
     dev->setFunctionID(_spec.FunctionID);
     dev->setProductID(_spec.ProductID);
+    dev->setVendorID(_spec.VendorID);
     dev->setRevisionID(_spec.Version);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setOutputMode(_spec.OutputMode);

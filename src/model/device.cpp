@@ -21,6 +21,7 @@
 */
 
 #include "device.h"
+#include <digitalSTROM/dsm-api-v2/dsm-api.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -53,6 +54,7 @@ namespace dss {
     m_LastKnownMeterDSID(NullDSID),
     m_FunctionID(0),
     m_ProductID(0),
+    m_VendorID(0),
     m_RevisionID(0),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
@@ -74,9 +76,9 @@ namespace dss {
     m_OemEanNumber(0),
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
+    m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_OemState(DEVICE_OEM_UNKOWN),
     m_OemIsIndependent(true),
-    m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_HWInfo(),
     m_iconPath("unknown.png"),
     m_OemProductInfoState(DEVICE_OEM_UNKOWN),
@@ -154,8 +156,12 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
         m_pPropertyNode->createProperty("productID")
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+        m_pPropertyNode->createProperty("vendorID")
+          ->linkToProxy(PropertyProxyReference<int>(m_VendorID, false));
         m_pPropertyNode->createProperty("HWInfo")
           ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
+        m_pPropertyNode->createProperty("GTIN")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
         PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
         oemNode->createProperty("ProductState")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
@@ -270,7 +276,7 @@ namespace dss {
 
   void Device::setFunctionID(const int _value) {
     m_FunctionID = _value;
-    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
     updateIconPath();
@@ -283,7 +289,7 @@ namespace dss {
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
     fillSensorTable(_value);
-    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
     updateIconPath();
@@ -301,6 +307,18 @@ namespace dss {
   void Device::setRevisionID(const int _value) {
     m_RevisionID = _value;
   } // setRevisionID
+
+  int Device::getVendorID() const {
+    return m_VendorID;
+  } // getVendrID
+
+  void Device::setVendorID(const int _value) {
+    m_VendorID = _value;
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
+      calculateHWInfo();
+    }
+    updateIconPath();
+  } // setVendorID
 
   void Device::fillSensorTable(const int _productId) {
     if(m_pPropertyNode) {
@@ -1167,8 +1185,19 @@ namespace dss {
       m_HWInfo.clear();
     }
 
+    char* displayName = NULL;
+    char* hwInfo = NULL;
+    char* devGTIN = NULL;
+
+    DsmApiGetDeviceDescription(m_VendorID, m_ProductID,
+        m_FunctionID >> 12, m_RevisionID,
+        &displayName, &hwInfo, &devGTIN);
+
+    // HWInfo - Priorities: 1. OEM Data, 2. Device Product Data, 3. Device EEPROM Data (Vendor independent)
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
       m_HWInfo = m_OemProductName;
+    } else if (displayName != NULL) {
+      m_HWInfo = displayName;
     } else {
       DeviceClasses_t deviceClass = getDeviceClass();
       m_HWInfo += getDeviceClassString(deviceClass);
@@ -1179,6 +1208,11 @@ namespace dss {
 
       int deviceNumber = getDeviceNumber();
       m_HWInfo += intToString(deviceNumber);
+    }
+
+    // if GTIN is known ...
+    if (devGTIN) {
+      m_GTIN = devGTIN;
     }
   }
 
