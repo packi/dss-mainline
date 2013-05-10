@@ -260,6 +260,14 @@ namespace dss {
     // synchronize binary input configuration
     dev->setBinaryInputs(dev, _spec.binaryInputs);
 
+    if ((dev->getDeviceType() == DEVICE_TYPE_AKM) &&
+        (dev->getBinaryInputCount() > 0) &&
+        (dev->getBinaryInput(0)->m_targetGroupType == 0) &&
+        (!dev->getGroupBitmask().test(dev->getBinaryInput(0)->m_targetGroupId - 1))) {
+      /* group is only added in dSS datamodel, not on the dSM and device */
+      dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);
+    }
+
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
     _dsMeter->addDevice(devRef);
