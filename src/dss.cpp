@@ -804,7 +804,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
             if (iface->getName() != "lo") {
                 lastValidIf = iface;
             }
-            if (iface->getName() == "eth0") {
+            // The Ethernet MAC interface may have eth0 or eth0:alias name
+            if (beginsWith(iface->getName(), "eth0")) {
                 break;
             }
         }
