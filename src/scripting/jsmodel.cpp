@@ -1997,7 +1997,7 @@ namespace dss {
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
         try {
           obj.setProperty<std::string>("timestamp", meter->getCachedEnergyMeterTimeStamp().toString());
-          obj.setProperty<int>("value", meter->getCachedEnergyMeterValue());
+          obj.setProperty<double>("value", meter->getCachedEnergyMeterValue());
         } catch (BusApiError& ex) {
           JS_ReportError(cx, "Bus failure: %s", ex.what());
           return JS_FALSE;

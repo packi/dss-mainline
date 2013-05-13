@@ -257,7 +257,7 @@ namespace dss {
 
     for(size_t i = 0; i < meters.size(); i++) {
       boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
-      unsigned long value = isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption();
+      double value = isEnergy ? (dsMeter->getCachedEnergyMeterValue() / energyQuotient) : dsMeter->getCachedPowerConsumption();
       DateTime lastUpdateGlobal = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
       if (lastUpdateGlobal > lastUpdateAll) {
         lastUpdateAll = lastUpdateGlobal;

@@ -174,7 +174,7 @@ namespace dss {
     return m_PowerConsumptionTimeStamp;
   }
 
-  unsigned long DSMeter::getCachedEnergyMeterValue() {
+  double DSMeter::getCachedEnergyMeterValue() {
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
 
