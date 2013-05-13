@@ -51,6 +51,7 @@ namespace dss {
   class DSSim;
   class SessionManager;
   class Security;
+  class Watchdog;
 
   typedef enum {
     ssInvalid,
@@ -84,6 +85,7 @@ namespace dss {
     boost::shared_ptr<SessionManager> m_pSessionManager;
     boost::shared_ptr<Security> m_pSecurity;
     boost::shared_ptr<BonjourHandler> m_pBonjour;
+    boost::shared_ptr<Watchdog> m_pWatchdog;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;

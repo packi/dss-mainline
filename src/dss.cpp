@@ -63,6 +63,7 @@
 #endif
 #include "event.h"
 #include "metering/metering.h"
+#include "src/watchdog.h"
 #include "foreach.h"
 #include "backtrace.h"
 #include "src/sessionmanager.h"
@@ -147,6 +148,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
   DSS::~DSS() {
     m_State = ssTerminating;
+
+    m_pWatchdog.reset();
 
     m_pWebServer.reset();
     m_pWebServices.reset();
@@ -388,6 +391,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       aLogSeverity logLevel = static_cast<aLogSeverity> (pNode->getIntegerValue());
       Logger::getInstance()->getLogChannel()->setMinimumSeverity(logLevel);
     }
+
+    m_pWatchdog = boost::shared_ptr<Watchdog>(new Watchdog(this));
+    m_Subsystems.push_back(m_pWatchdog.get());
 
     return checkDirectoriesExist();
   } // initialize
