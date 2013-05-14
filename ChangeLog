@@ -1,5 +1,18 @@
 dSS - digitalSTROM Server
 
+v1.21.2	14.05.2013
+	* adjust button id for area buttons when assigning the button to a user
+	  group, #2439
+	* resolve cyclic shared_ptr references when removing devices, #2401
+	* remove any whitespace form the cookie key, #2489
+	* add implementation for Device::getBinaryInput()
+	* add error message for new dSM API return code, #2155
+	* add AKM to active group, 2445
+	* use new dsid generator methods provided by libdsmapi, #2400
+	* publish device GTIN and hardware info in prop tree, #2400
+	* devices SDS20x and SDS22x have identical features, #2472
+	* fix dss dsid network interface detection
+
 v1.21.1	03.05.2013
 	* catch scripting exceptions in getState, #2444
 	* set user groups states for wind, rain and hail by scene calls, #2438
