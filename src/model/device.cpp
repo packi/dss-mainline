@@ -21,6 +21,7 @@
 */
 
 #include "device.h"
+#include <digitalSTROM/dsm-api-v2/dsm-api.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -53,6 +54,7 @@ namespace dss {
     m_LastKnownMeterDSID(NullDSID),
     m_FunctionID(0),
     m_ProductID(0),
+    m_VendorID(0),
     m_RevisionID(0),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
@@ -74,9 +76,9 @@ namespace dss {
     m_OemEanNumber(0),
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
+    m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_OemState(DEVICE_OEM_UNKOWN),
     m_OemIsIndependent(true),
-    m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
     m_HWInfo(),
     m_iconPath("unknown.png"),
     m_OemProductInfoState(DEVICE_OEM_UNKOWN),
@@ -154,8 +156,12 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
         m_pPropertyNode->createProperty("productID")
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+        m_pPropertyNode->createProperty("vendorID")
+          ->linkToProxy(PropertyProxyReference<int>(m_VendorID, false));
         m_pPropertyNode->createProperty("HWInfo")
           ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
+        m_pPropertyNode->createProperty("GTIN")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
         PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
         oemNode->createProperty("ProductState")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
@@ -270,7 +276,7 @@ namespace dss {
 
   void Device::setFunctionID(const int _value) {
     m_FunctionID = _value;
-    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
     updateIconPath();
@@ -283,7 +289,7 @@ namespace dss {
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
     fillSensorTable(_value);
-    if ((m_FunctionID != 0) && (m_ProductID != 0)) {
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
     updateIconPath();
@@ -301,6 +307,18 @@ namespace dss {
   void Device::setRevisionID(const int _value) {
     m_RevisionID = _value;
   } // setRevisionID
+
+  int Device::getVendorID() const {
+    return m_VendorID;
+  } // getVendrID
+
+  void Device::setVendorID(const int _value) {
+    m_VendorID = _value;
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
+      calculateHWInfo();
+    }
+    updateIconPath();
+  } // setVendorID
 
   void Device::fillSensorTable(const int _productId) {
     if(m_pPropertyNode) {
@@ -361,7 +379,7 @@ namespace dss {
                                                                         _buttonActiveGroup);
       if (_buttonActiveGroup >= GroupIDAppUserMin &&
           _buttonActiveGroup <= GroupIDAppUserMax &&
-          m_ButtonID == ButtonId_Device) {
+          ((m_ButtonID < ButtonId_Zone) || (m_ButtonID >= ButtonId_Area1_Extended))) {
         setDeviceButtonID(ButtonId_Zone);
       }
       /* refresh device information for correct active group */
@@ -1167,8 +1185,19 @@ namespace dss {
       m_HWInfo.clear();
     }
 
+    char* displayName = NULL;
+    char* hwInfo = NULL;
+    char* devGTIN = NULL;
+
+    DsmApiGetDeviceDescription(m_VendorID, m_ProductID,
+        m_FunctionID >> 12, m_RevisionID,
+        &displayName, &hwInfo, &devGTIN);
+
+    // HWInfo - Priorities: 1. OEM Data, 2. Device Product Data, 3. Device EEPROM Data (Vendor independent)
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
       m_HWInfo = m_OemProductName;
+    } else if (displayName != NULL) {
+      m_HWInfo = displayName;
     } else {
       DeviceClasses_t deviceClass = getDeviceClass();
       m_HWInfo += getDeviceClassString(deviceClass);
@@ -1179,6 +1208,11 @@ namespace dss {
 
       int deviceNumber = getDeviceNumber();
       m_HWInfo += intToString(deviceNumber);
+    }
+
+    // if GTIN is known ...
+    if (devGTIN) {
+      m_GTIN = devGTIN;
     }
   }
 
@@ -1284,9 +1318,9 @@ namespace dss {
        ((m_ButtonInputIndex == 0) || (m_ButtonInputIndex == 2))) {
       features.pairing = true;
       features.syncButtonID = true;
-    } else if ((devCls == DEVICE_CLASS_GE) && // GE SDS-200
+    } else if ((devCls == DEVICE_CLASS_GE) && // GE-SDS20x, GE-SDS22x
                (devType == DEVICE_TYPE_SDS) &&
-               ((devNumber == 200) || (devNumber == 220)) &&
+               ((devNumber % 10 == 20) || (devNumber % 10 == 22)) &&
                this->hasMultibuttons() &&
                (m_ButtonInputIndex == 0)) {
       features.pairing = true;
@@ -1424,14 +1458,17 @@ namespace dss {
   }
 
   void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
+    lock.unlock();
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, _inputType);
   }
 
   void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup)
   {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -1441,6 +1478,7 @@ namespace dss {
   }
 
   uint8_t Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -1448,6 +1486,7 @@ namespace dss {
   }
 
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -1505,6 +1544,7 @@ namespace dss {
   }
 
   void Device::setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_index > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -1513,6 +1553,7 @@ namespace dss {
   }
 
   void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_index > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -1520,13 +1561,20 @@ namespace dss {
   }
 
   void Device::setBinaryInputType(uint8_t _index, uint8_t _inputType) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_index > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     m_binaryInputs[_index]->m_inputType = _inputType;
   }
 
+  void Device::clearBinaryInputStates() {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    m_binaryInputStates.clear();
+  }
+
   void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     m_binaryInputCount = 0;
     m_binaryInputs.clear();
     m_binaryInputStates.clear();
@@ -1578,6 +1626,13 @@ namespace dss {
     return m_binaryInputs;
   }
 
+  const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
+    if (_inputIndex > getBinaryInputCount()) {
+      return boost::shared_ptr<DeviceBinaryInput_t>();
+    }
+    return m_binaryInputs[_inputIndex];
+  }
+
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
   {
     return ((m_OemState == DEVICE_OEM_VALID) &&
@@ -1594,6 +1649,7 @@ namespace dss {
   }
 
   boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex >= m_binaryInputStates.size()) {
       return boost::shared_ptr<State> ();
     }

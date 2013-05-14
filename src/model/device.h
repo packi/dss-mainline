@@ -29,6 +29,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "src/ds485types.h"
 #include "src/datetools.h"
@@ -183,7 +184,10 @@ namespace dss {
     std::vector<int> m_Groups;
     int m_FunctionID;
     int m_ProductID;
+    int m_VendorID;
     int m_RevisionID;
+    std::string m_hardwareInfo;
+    std::string m_GTIN;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
     unsigned long m_Consumption;
@@ -223,6 +227,8 @@ namespace dss {
     std::vector<boost::shared_ptr<State> > m_binaryInputStates;
 
     std::string m_AKMInputProperty;
+
+    mutable boost::mutex m_deviceMutex;
 
   protected:
     /** Sends the application a note that something has changed.
@@ -329,6 +335,13 @@ namespace dss {
     int getRevisionID() const;
     /** Sets the ProductID to \a _value */
     void setRevisionID(const int _value);
+
+    /** Returns the Vendor ID of the device.
+     * The ID identifies the device hardware vendor.
+     */
+    int getVendorID() const;
+    /** Sets the VendorID to \a _value */
+    void setVendorID(const int _value);
 
     /** Returns the name of the device. */
     const std::string& getName() const;
@@ -521,8 +534,8 @@ namespace dss {
     void setBinaryInputId(uint8_t _index, uint8_t _inputId);
     void setBinaryInputType(uint8_t _index, uint8_t _inputType);
 
-    void setBinaryInputState(uint8_t _index, boost::shared_ptr<State> _state);
     boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
+    void clearBinaryInputStates();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
