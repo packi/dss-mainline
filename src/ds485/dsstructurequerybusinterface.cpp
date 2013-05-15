@@ -200,11 +200,7 @@ namespace dss {
   } // getDevicesCountInZone
 
   void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
-    _spec.ButtonID = 0xff;
-    _spec.ActiveGroup = 0xff;
-    _spec.GroupMembership = 0xff;
-    _spec.SetsLocalPriority = false;
-    _spec.CallsPresent = true;
+    int ret = -1;
     try {
       union {
         uint8_t flags;
@@ -215,19 +211,28 @@ namespace dss {
         };
       } flags;
 
-      int ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
-                                           &_spec.GroupMembership, &_spec.ActiveGroup,
-                                           &flags.flags);
-      if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
-        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
-      } else {
-        DSBusInterface::checkResultCode(ret);
-        _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
-        _spec.CallsPresent = (flags.callsNoPresent == 0);
-      }
+      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
+                                       &_spec.GroupMembership, &_spec.ActiveGroup,
+                                       &flags.flags);
+      DSBusInterface::checkResultCode(ret);
+      _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
+      _spec.CallsPresent = (flags.callsNoPresent == 0);
     } catch(BusApiError& e) {
-      Logger::getInstance()->log("Error reading DeviceButtonInfo: " +
-      std::string(e.what()), lsWarning);
+      _spec.ButtonID = 0xff;
+      _spec.ActiveGroup = 0xff;
+      _spec.GroupMembership = 0xff;
+      _spec.SetsLocalPriority = false;
+      _spec.CallsPresent = true;
+      if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
+      } else if (ret == ERROR_WRONG_PARAMETER) {
+        Logger::getInstance()->log("DeviceButtonInfo: Device: " +
+                                   _spec.DSID.toString() +
+                                   " has no buttons", lsInfo);
+      } else {
+        Logger::getInstance()->log("Error reading DeviceButtonInfo: " +
+                                   std::string(e.what()), lsWarning);
+      }
     }
   } // updateButtonGroupFromMeter
 
