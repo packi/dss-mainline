@@ -46,6 +46,7 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "src/ds485/dsbusinterface.h"
+#include "src/dsidhelper.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
@@ -62,6 +63,7 @@
 #endif
 #include "event.h"
 #include "metering/metering.h"
+#include "src/watchdog.h"
 #include "foreach.h"
 #include "backtrace.h"
 #include "src/sessionmanager.h"
@@ -146,6 +148,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
   DSS::~DSS() {
     m_State = ssTerminating;
+
+    m_pWatchdog.reset();
 
     m_pWebServer.reset();
     m_pWebServices.reset();
@@ -387,6 +391,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       aLogSeverity logLevel = static_cast<aLogSeverity> (pNode->getIntegerValue());
       Logger::getInstance()->getLogChannel()->setMinimumSeverity(logLevel);
     }
+
+    m_pWatchdog = boost::shared_ptr<Watchdog>(new Watchdog(this));
+    m_Subsystems.push_back(m_pWatchdog.get());
 
     return checkDirectoriesExist();
   } // initialize
@@ -803,7 +810,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
             if (iface->getName() != "lo") {
                 lastValidIf = iface;
             }
-            if (iface->getName() == "eth0") {
+            // The Ethernet MAC interface may have eth0 or eth0:alias name
+            if (beginsWith(iface->getName(), "eth0")) {
                 break;
             }
         }
@@ -814,8 +822,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         if (macNode != NULL) {
             std::string mac = macNode->getAsString();
             mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
-            mac.insert(4, "0");
-            dsid = "3504175FEFF" + mac;
+            dsid_t d;
+            DsmApiGetEthernetDSID(mac.c_str(), &d);
+            dss_dsid_t D;
+            dsid_helper::toDssDsid(d, D);
+            dsid = D.toString();
         }
     }
 

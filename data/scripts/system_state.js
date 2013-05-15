@@ -241,17 +241,6 @@ function callscene()
             state.setValue('inactive', 7);
         }
     }
-
-    if (raisedEvent.source.isGroup && (sceneID < 64)) {
-        var originDevice = parseInt(raisedEvent.parameter.originDeviceID, 16);
-        // reserved origin addresses
-        if (originDevice >= 16) {
-            pNode = Property.getNode('/usr/states/presence');
-            if (pNode.getChild('value').getValue() == 'absent') {
-                pNode.setStatusValue("present");
-            }
-        }
-    }
 }
 
 function undoscene()

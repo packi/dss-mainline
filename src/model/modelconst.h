@@ -124,6 +124,14 @@ namespace dss {
   const uint8_t ButtonId_Area3 = 3;
   const uint8_t ButtonId_Area4 = 4;
   const uint8_t ButtonId_Zone = 5;
+  const uint8_t ButtonId_Zone_Extended1 = 6;
+  const uint8_t ButtonId_Zone_Extended2 = 7;
+  const uint8_t ButtonId_Zone_Extended3 = 8;
+  const uint8_t ButtonId_Zone_Extended4 = 9;
+  const uint8_t ButtonId_Area1_Extended = 10;
+  const uint8_t ButtonId_Area2_Extended = 11;
+  const uint8_t ButtonId_Area3_Extended = 12;
+  const uint8_t ButtonId_Area4_Extended = 13;
   const uint8_t ButtonId_Apartment = 14;
   const uint8_t ButtonId_Generic = 15;
 

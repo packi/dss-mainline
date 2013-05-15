@@ -315,6 +315,8 @@ namespace dss {
         std::string key = pairStr.substr(0, eq);
         std::string value = pairStr.substr(eq+1);
 
+        key.erase(remove_if(key.begin(), key.end(), isspace), key.end());
+
         if (key.empty()) {
           continue;
         }

@@ -200,11 +200,7 @@ namespace dss {
   } // getDevicesCountInZone
 
   void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
-    _spec.ButtonID = 0xff;
-    _spec.ActiveGroup = 0xff;
-    _spec.GroupMembership = 0xff;
-    _spec.SetsLocalPriority = false;
-    _spec.CallsPresent = true;
+    int ret = -1;
     try {
       union {
         uint8_t flags;
@@ -215,19 +211,28 @@ namespace dss {
         };
       } flags;
 
-      int ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
-                                           &_spec.GroupMembership, &_spec.ActiveGroup,
-                                           &flags.flags);
-      if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
-        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
-      } else {
-        DSBusInterface::checkResultCode(ret);
-        _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
-        _spec.CallsPresent = (flags.callsNoPresent == 0);
-      }
+      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
+                                       &_spec.GroupMembership, &_spec.ActiveGroup,
+                                       &flags.flags);
+      DSBusInterface::checkResultCode(ret);
+      _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
+      _spec.CallsPresent = (flags.callsNoPresent == 0);
     } catch(BusApiError& e) {
-      Logger::getInstance()->log("Error reading DeviceButtonInfo: " +
-      std::string(e.what()), lsWarning);
+      _spec.ButtonID = 0xff;
+      _spec.ActiveGroup = 0xff;
+      _spec.GroupMembership = 0xff;
+      _spec.SetsLocalPriority = false;
+      _spec.CallsPresent = true;
+      if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
+      } else if (ret == ERROR_WRONG_PARAMETER) {
+        Logger::getInstance()->log("DeviceButtonInfo: Device: " +
+                                   _spec.DSID.toString() +
+                                   " has no buttons", lsInfo);
+      } else {
+        Logger::getInstance()->log("Error reading DeviceButtonInfo: " +
+                                   std::string(e.what()), lsWarning);
+      }
     }
   } // updateButtonGroupFromMeter
 
@@ -290,9 +295,15 @@ namespace dss {
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
+
       dsid_t devdsid;
-      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &devdsid);
-      DSBusInterface::checkResultCode(ret);
+      try {
+        ret = DsmApiGetDeviceDSID(spec.VendorID, spec.ProductID, spec.FunctionID >> 12, spec.Version, spec.SerialNumber, &devdsid);
+        DSBusInterface::checkResultCode(ret);
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
+            intToString(spec.SerialNumber, true), lsWarning);
+      }
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
       updateButtonGroupFromMeter(dsid, spec);
@@ -329,8 +340,13 @@ namespace dss {
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
       dsid_t devdsid;
-      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &devdsid);
-      DSBusInterface::checkResultCode(ret);
+      try {
+        ret = DsmApiGetDeviceDSID(spec.VendorID, spec.ProductID, spec.FunctionID >> 12, spec.Version, spec.SerialNumber, &devdsid);
+        DSBusInterface::checkResultCode(ret);
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
+            intToString(spec.SerialNumber, true), lsWarning);
+      }
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
       updateButtonGroupFromMeter(dsid, spec);
@@ -360,9 +376,15 @@ namespace dss {
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);
     result.Name = std::string(reinterpret_cast<char*>(name));
+
     dsid_t devdsid;
-    ret = DsmApiExpandDeviceDSID(result.VendorID, result.SerialNumber, &devdsid);
-    DSBusInterface::checkResultCode(ret);
+    try {
+      ret = DsmApiGetDeviceDSID(result.VendorID, result.ProductID, result.FunctionID >> 12, result.Version, result.SerialNumber, &devdsid);
+      DSBusInterface::checkResultCode(ret);
+    } catch(BusApiError& e) {
+      Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
+          intToString(result.SerialNumber, true), lsWarning);
+    }
     dsid_helper::toDssDsid(devdsid, result.DSID);
 
     updateButtonGroupFromMeter(dsmDSID, result);

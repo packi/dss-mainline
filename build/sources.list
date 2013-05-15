@@ -170,6 +170,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/url.h \
 	$(top_srcdir)/src/util.cpp \
 	$(top_srcdir)/src/util.h \
+	$(top_srcdir)/src/watchdog.cpp \
+	$(top_srcdir)/src/watchdog.h \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.cpp \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.h \
 	$(top_srcdir)/src/web/handler/circuitrequesthandler.cpp \

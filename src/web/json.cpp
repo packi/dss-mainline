@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "src/foreach.h"
 #include "src/base.h"
@@ -167,7 +168,7 @@ namespace dss {
 
   template<>
   void JSONValue<double>::writeTo(std::stringstream& _out) {
-    _out << m_Value;
+    _out << std::setprecision(16) << m_Value;
   }
 
   //================================================== JSONArrayBase

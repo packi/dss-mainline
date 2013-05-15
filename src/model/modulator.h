@@ -102,7 +102,7 @@ namespace dss {
     const DateTime& getCachedPowerConsumptionTimeStamp() const;
 
     /** Returns the last meter value in Wh returned from dS485 Bus, but never request it*/
-    unsigned long getCachedEnergyMeterValue();
+    double getCachedEnergyMeterValue();
 
     /** Returns timestamp of the last energy measurement */
     const DateTime& getCachedEnergyMeterTimeStamp() const;
