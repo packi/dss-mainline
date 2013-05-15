@@ -110,7 +110,7 @@ namespace dss {
       m_ConnectedDevices.erase(pos);
     } else {
       Logger::getInstance()->log("DSMeter::removeDevice: not found, dSM: " +
-          m_DSID.toString() + " device: " + _device.getDSID().toString(), lsFatal);
+          m_DSID.toString() + " device: " + _device.getDSID().toString(), lsInfo);
     }
   } // removeDevice
 
