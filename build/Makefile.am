@@ -62,6 +62,7 @@ libdsscore_a_CXXFLAGS = \
 			-I$(top_srcdir)/src \
 			-I$(top_builddir)/src \
 			-I$(top_srcdir)/external \
+			$(JSONC_CFLAGS) \
 			$(JS_CFLAGS) \
 			$(ICAL_CFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
@@ -73,9 +74,8 @@ libdsscore_a_CXXFLAGS = \
 			$(LIBRRD_CFLAGS) \
 			$(EXPAT_CFLAGS) \
 			$(GCOV_CFLAGS) \
-			$(JSONC_CFLAGS) \
-            $(LIBPROTOBUF_CFLAGS) \
-            $(LIBCOMMCHANNEL_CFLAGS)
+			$(LIBPROTOBUF_CFLAGS) \
+			$(LIBCOMMCHANNEL_CFLAGS)
 
 libunix_a_CXXFLAGS = \
 			-I$(top_srcdir) \
@@ -115,8 +115,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(GCOV_LIBS) \
 			$(LIBTCMALLOC_LIBS) \
 			$(JSONC_LIBS) \
-            $(LIBPROTOBUF_LIBS) \
-            $(LIBCOMMCHANNEL_LIBS)
+			$(LIBPROTOBUF_LIBS) \
+			$(LIBCOMMCHANNEL_LIBS)
 
 if BUILD_SOAP
 
@@ -175,8 +175,8 @@ dsstests_LDADD = \
 			$(GCOV_LIBS) \
 			$(LIBTCMALLOC_LIBS) \
 			$(JSONC_LIBS) \
-            $(LIBPROTOBUF_LIBS) \
-            $(LIBCOMMCHANNEL_LIBS)
+			$(LIBPROTOBUF_LIBS) \
+			$(LIBCOMMCHANNEL_LIBS)
 
 if BUILD_SOAP
 

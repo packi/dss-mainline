@@ -26,7 +26,7 @@
 #include "modelmaintenance.h"
 
 #include <unistd.h>
-#include <json/json.h>
+#include <json.h>
 
 #include "src/foreach.h"
 #include "src/base.h"
