@@ -59,6 +59,7 @@
 #include <spawn.h>
 #include <sys/wait.h>
 #include <sys/time.h>
+#include <signal.h>
 
 namespace dss {
 
