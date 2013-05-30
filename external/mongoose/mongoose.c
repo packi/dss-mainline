@@ -28,6 +28,9 @@
 #if defined(__APPLE__)
 #define _DARWIN_C_SOURCE 1
 #include <sys/socket.h>
+#ifndef SOCK_CLOEXEC
+#define SOCK_CLOEXEC 0
+#endif
 #endif
 
 #ifndef _WIN32_WCE // Some ANSI #includes are not available on Windows CE
@@ -1561,6 +1564,9 @@ struct mg_connection *mg_connect(struct mg_connection *conn,
   } else if ((sock = socket(PF_INET, SOCK_CLOEXEC | SOCK_STREAM, 0)) == INVALID_SOCKET) {
     cry(conn, "%s: socket: %s", __func__, strerror(ERRNO));
   } else {
+#ifdef __APPLE__
+    fcntl(sock, F_SETFD, FD_CLOEXEC);
+#endif
     sin.sin_family = AF_INET;
     sin.sin_port = htons((uint16_t) port);
     sin.sin_addr = * (struct in_addr *) he->h_addr_list[0];
