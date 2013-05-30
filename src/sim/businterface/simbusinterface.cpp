@@ -43,7 +43,7 @@ namespace dss {
   }
 
   void SimBusInterface::setBusEventSink(BusEventSink* _eventSink) {
-    boost::shared_dynamic_cast<SimMeteringBusInterface>(m_pMeteringBusInterface)->setBusEventSink(_eventSink);
+    boost::dynamic_pointer_cast<SimMeteringBusInterface>(m_pMeteringBusInterface)->setBusEventSink(_eventSink);
   }
 
 

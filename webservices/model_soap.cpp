@@ -1632,7 +1632,7 @@ int dss__PropertyQuery(struct soap *soap, char* _token, std::string _query, dss_
 
   dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
   dss::PropertyQuery propertyQuery(propSys.getRootNode(), _query);
-  boost::shared_ptr<dss::JSONObject> jsonResult = boost::shared_dynamic_cast<dss::JSONObject>(propertyQuery.run());
+  boost::shared_ptr<dss::JSONObject> jsonResult = boost::dynamic_pointer_cast<dss::JSONObject>(propertyQuery.run());
 
   result.name = "root";
   transformJSONResult("", jsonResult, result);
