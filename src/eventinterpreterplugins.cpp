@@ -311,10 +311,12 @@ namespace dss {
       struct timespec tSubscriptionPre = { 0, 0 };
       struct timespec tSubscriptionPost = { 0, 0 };
       bool timingEnabled = false;
+#ifndef __APPLE__
       if (m_pEnvironment->isTimingEnabled()) {
         clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPre);
         timingEnabled = true;
       }
+#endif
 
       std::string scriptID;
       if(_subscription.getOptions()->hasParameter("script_id")) {
@@ -427,9 +429,11 @@ namespace dss {
 
         struct timespec tpre = { 0, 0 };
         struct timespec tpost = { 0, 0 };
+#ifndef __APPLE__
         if (timingEnabled) {
           clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpre);
         }
+#endif
 
         try {
 
@@ -464,6 +468,7 @@ namespace dss {
           return;
         }
 
+#ifndef __APPLE__
         try {
           if (timingEnabled) {
             clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpost);
@@ -485,10 +490,12 @@ namespace dss {
                   "Cannot store timing for script '")
                   + scriptName + "'. Message: " + ex.what(), lsError);
         }
+#endif
 
         scripts = scripts + scriptName + " ";
       }
 
+#ifndef __APPLE__
       try {
         if (timingEnabled) {
           clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPost);
@@ -510,6 +517,7 @@ namespace dss {
                 "Cannot store timing for subscription '")
                 + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
       }
+#endif
 
       if(ctx->hasAttachedObjects()) {
         m_WrappedContexts.push_back(wrapper);
