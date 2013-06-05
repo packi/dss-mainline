@@ -756,32 +756,39 @@ namespace dss {
     }
   } // removeListener
 
+  PropertyNodePtr PropertyNode::createProperty(dss::path_tokenizer::const_iterator &it,
+                                               dss::path_tokenizer::const_iterator &end) {
+    std::string nextOne = std::string(*it);
+    PropertyNodePtr nextNode;
+    if ((nextNode = getPropertyByName(nextOne)) == NULL) {
+      /* s.back() needs -std=c++11 */
+      if (nextOne[ nextOne.length() - 1 ] == '+') {
+        nextOne.erase(nextOne.length() - 1, 1);
+      }
+
+      /* extract n from fieldName[n], if exists */
+      /* already called internally by getPropertyName, see above */
+      int index = getAndRemoveIndexFromPropertyName(nextOne);
+      if (index == 0) {
+        index = count(nextOne) + 1;
+      }
+
+      nextNode.reset(new PropertyNode(nextOne.c_str(), index));
+      addChild(nextNode);
+    }
+
+    return (++it == end) ? nextNode :  nextNode->createProperty(it, end);
+  }
+
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
     checkWriteAccess();
     if(m_Aliased) {
       return m_AliasTarget->createProperty(_propPath);
     } else {
-      std::string nextOne = getRoot(_propPath);
-      std::string remainder = _propPath;
-      remainder.erase(0, nextOne.length() + 1);
-      PropertyNodePtr nextNode;
-      if((nextNode = getPropertyByName(nextOne)) == NULL) {
-        if(nextOne[ nextOne.length() - 1 ] == '+') {
-          nextOne.erase(nextOne.length() - 1, 1);
-        }
-        int index = getAndRemoveIndexFromPropertyName(nextOne);
-        if(index == 0) {
-          index = count(nextOne) + 1;
-        }
-        nextNode.reset(new PropertyNode(nextOne.c_str(), index));
-        addChild(nextNode);
-      }
-
-      if(remainder.length() > 0) {
-        return nextNode->createProperty(remainder);
-      } else {
-        return nextNode;
-      }
+      path_tokenizer pt = createPathTokenizer(_propPath);
+      path_tokenizer::const_iterator cur(pt.begin());
+      path_tokenizer::const_iterator end(pt.end());
+      return createProperty(cur, end);
     }
   } // createProperty
 
@@ -1341,6 +1348,11 @@ namespace dss {
 
   //=============================================== Utilities
 
+  path_tokenizer createPathTokenizer(const std::string &path) {
+    boost::char_separator<char> sep("/");
+    return boost::tokenizer<boost::char_separator<char> >(path, sep);
+  }
+
   std::string getBasePath(const std::string& _path) {
     std::string result = _path;
     if(result.length() > 1) {
@@ -1359,15 +1371,6 @@ namespace dss {
     result.erase(0, pos + 1);
     return result;
   } // getProperty
-
-  std::string getRoot(const std::string& _path) {
-    std::string result = _path;
-    std::string::size_type pos = result.find('/');
-    if(pos != std::string::npos) {
-      result.erase(pos);
-    }
-    return result;
-  } // getRoot
 
   const char* getValueTypeAsString(aValueType _value) {
     switch(_value) {
