@@ -47,6 +47,7 @@ namespace dss {
     bool m_SyncPending;
     std::string m_AssociatedSet;
     std::map<uint8_t, std::string> m_SceneNames;
+    typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
@@ -99,7 +100,7 @@ namespace dss {
 
     Group& operator=(const Group& _other);
     void setSceneName(int _sceneNumber, const std::string& _name);
-    const std::string& getSceneName(int _sceneNumber);
+    std::string getSceneName(int _sceneNumber);
 
     void publishToPropertyTree();
   }; // Group

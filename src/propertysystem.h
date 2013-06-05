@@ -28,6 +28,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/type_traits/is_class.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -64,7 +65,9 @@ namespace dss {
 
   std::string getBasePath(const std::string& _path);
   std::string getProperty(const std::string& _path);
-  std::string getRoot(const std::string& _path);
+
+  typedef boost::tokenizer<boost::char_separator<char> > path_tokenizer;
+  path_tokenizer createPathTokenizer(const std::string &path);
 
   /** A tree tree consisting of different value nodes.
    * The tree can by serialized to and from XML. Nodes can either
@@ -455,6 +458,8 @@ namespace dss {
 
     /** Recursively adds a child-node. */
     PropertyNodePtr createProperty(const std::string& _propPath);
+    PropertyNodePtr createProperty(path_tokenizer::const_iterator & _propPath,
+                                   path_tokenizer::const_iterator &end);
 
     /** Returns a child node by name.
      * Or NULL if not found.*/

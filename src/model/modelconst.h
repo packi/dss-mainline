@@ -112,7 +112,7 @@ namespace dss {
   const uint8_t SceneHailActive = 0x5a;
   const uint8_t SceneHailInactive = 0x5b;
 
-  const uint8_t MaxSceneNumber = 255;
+  const uint8_t MaxSceneNumber = 127;
   const uint8_t MaxSceneNumberOutsideZoneZero = 63;
 
   const uint16_t SceneFlagLocalOff = 0x0100;
