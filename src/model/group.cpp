@@ -97,9 +97,14 @@ namespace dss {
     }
   } // setSceneName
 
-  const std::string& Group::getSceneName(int _sceneNumber) {
+  std::string Group::getSceneName(int _sceneNumber) {
     boost::mutex::scoped_lock lock(m_SceneNameMutex);
-    return m_SceneNames[_sceneNumber];
+    m_SceneNames_t::iterator it = m_SceneNames.find(_sceneNumber);
+    if (it == m_SceneNames.end()) {
+      return std::string();
+    } else {
+      return m_SceneNames[_sceneNumber];
+    }
   } // getSceneName
 
   void Group::publishToPropertyTree() {
