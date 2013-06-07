@@ -343,8 +343,10 @@ MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
 
 MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
-MT_CHECK_REQUIRED_PACKAGE([jsonc], [json/json], [json],
-                          [json_object_new_object])
+PKG_CHECK_MODULES([JSONC], [json], [],
+    [
+        AC_MSG_ERROR([$JSON_PKG_ERRORS])
+    ])
 
 if test "x$SOAP_OPTION_ENABLED" = "xyes"; then
     PKG_CHECK_MODULES([GSOAP], [gsoapssl++], [],
