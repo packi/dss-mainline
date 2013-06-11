@@ -423,6 +423,24 @@ namespace dss {
     return result;
   } // getLastCalledScenes
 
+  std::bitset<7> DSStructureQueryBusInterface::getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
+
+    uint16_t room;
+
+    // not adding the area stuf
+    int ret = ZoneProperties_get_room_states(m_DSMApiHandle, dsmDSID,
+                (uint16_t) _zoneID, &room, NULL, NULL, NULL, NULL);
+    DSBusInterface::checkResultCode(ret);
+    return std::bitset<7>(room);
+  }
+
   bool DSStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     // TODO: libdsm
     Logger::getInstance()->log("getEnergyBorder(): not implemented yet", lsInfo);

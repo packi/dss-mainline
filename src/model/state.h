@@ -71,6 +71,7 @@ namespace dss {
   public:
     /** Constructs a state. */
     State(const std::string& _name);
+    State(const std::string& _name, eState _state);
     State(boost::shared_ptr<Device>_device, int _inputIndex);
     State(const std::string& _name, const std::string& _serviceId);
 

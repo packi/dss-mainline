@@ -29,6 +29,7 @@
 
 #include <string>
 #include <vector>
+#include <bitset>
 #include <boost/shared_ptr.hpp>
 #include "sceneaccess.h"
 
@@ -153,6 +154,7 @@ namespace dss {
     virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::bitset<7> getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;
 
     /** Returns the function, product and revision id of the device. */

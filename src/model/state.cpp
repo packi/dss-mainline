@@ -48,6 +48,16 @@ namespace dss {
     publishToPropertyTree();
   } // ctor
 
+  State::State(const std::string& _name, eState _state)
+    : m_name(_name),
+      m_IsPersistent(false),
+      m_state(_state),
+      m_type(StateType_Apartment)
+  {
+    load();
+    publishToPropertyTree();
+  } // ctor
+
   State::State(const std::string& _name, const std::string& _serviceId)
   : m_name(_name),
     m_IsPersistent(false),

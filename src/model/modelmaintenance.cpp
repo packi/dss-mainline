@@ -799,11 +799,21 @@ namespace dss {
             if(_groupID == 0) {
               foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
+                if (pGroup->getStandardGroupID() == GroupIDYellow) {
+                  pGroup->setOnState((callOrigin_t)_originDeviceID,
+                            SceneHelper::isOnScene(
+                              pGroup->getStandardGroupID(), _sceneID & 0x00ff));
+                }
               }
             } else {
               boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
               if(pGroup != NULL) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
+                if (pGroup->getStandardGroupID() == GroupIDYellow) {
+                  pGroup->setOnState((callOrigin_t)_originDeviceID,
+                            SceneHelper::isOnScene(
+                              pGroup->getStandardGroupID(), _sceneID & 0x00ff));
+                }
               }
             }
           }

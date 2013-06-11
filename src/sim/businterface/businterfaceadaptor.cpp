@@ -505,6 +505,14 @@ namespace dss {
       }
     }
 
+    virtual std::bitset<7> getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        return m_pSimulationInterface->getZoneStates(_dsMeterID, _zoneID);
+      } else {
+        return m_pInner->getZoneStates(_dsMeterID, _zoneID);
+      }
+    }
+
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
       if(isHandledBySimulation(_dsMeterID)) {
         return m_pSimulationInterface->getEnergyBorder(_dsMeterID, _lower, _upper);
