@@ -37,6 +37,9 @@
 #include <ctime>
 #include <csignal>
 #include <getopt.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
+#include <string.h>
 
 #include <boost/program_options.hpp>
 
@@ -60,14 +63,6 @@ pair<string, string> parse_prop(const string& s) {
 
 void dssHandleSignal(int _sig) {
   switch (_sig) {
-  case SIGSEGV:
-    fprintf(stderr, "\nSystem signal SIGSEGV\n");
-    dss::Backtrace::logBacktrace();
-    exit(EXIT_FAILURE);
-  case SIGABRT:
-    fprintf(stderr, "\nSystem signal SIGABRT\n");
-    dss::Backtrace::logBacktrace();
-    exit(EXIT_FAILURE);
   case SIGINT:
     fprintf(stderr, "\nSystem signal SIGINT\n");
     break;
@@ -80,6 +75,9 @@ void platformSpecificStartup() {
   sigset_t signal_set;
   pthread_t sig_thread;
 
+  // disable coredumps
+  prctl(PR_SET_DUMPABLE, 0, 0, 0, 0);
+
   /* block all signals, enable and handle only a few selected signals globally */
   sigfillset(&signal_set);
   sigdelset(&signal_set, SIGINT);
@@ -87,10 +85,6 @@ void platformSpecificStartup() {
   sigdelset(&signal_set, SIGSEGV);
   sigdelset(&signal_set, SIGABRT);
   pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
-
-  /* direct handling of critical errors */
-  signal(SIGSEGV, dssHandleSignal);
-  signal(SIGABRT, dssHandleSignal);
 
   /* create the signal handling thread */
   pthread_create(&sig_thread, NULL, dss::DSS::handleSignal, NULL);
@@ -131,6 +125,8 @@ int main (int argc, char* argv[]) {
       ("configdir,c", po::value<string>(), "set config directory")
       ("config,C", po::value<string>(), "set configuration file to use")
       ("savedpropsdir,p", po::value<string>(), "set saved properties directory")
+      ("coredumps", po::value<string>(), "set to true to enable coredumps")
+      ("corelimit", po::value<string>(), "maximum allowed coredump size")
 #ifndef __APPLE__ // daemon() is marked as deprecated on OS X
       ("daemonize,d", "start as a daemon")
 #endif
@@ -184,6 +180,39 @@ int main (int argc, char* argv[]) {
     properties.push_back("/config/savedpropsdirectory=" +
                          vm["savedpropsdir"].as<string>());
   }
+
+  if (vm.count("coredumps")) {
+    properties.push_back("/config/debug/coredumps/enabled=" +
+                         vm["coredumps"].as<string>());
+    if (vm["coredumps"].as<string>() == "true") {
+      if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) {
+        fprintf(stderr, "Could not apply coredump settings: %s\n",
+                        strerror(errno));
+      }
+      struct rlimit rlim;
+      rlim.rlim_cur = RLIM_INFINITY;
+      rlim.rlim_max = RLIM_INFINITY;
+      if (vm.count("corelimit")) {
+        try {
+          rlim.rlim_max = dss::strToUInt(vm["corelimit"].as<string>());
+          rlim.rlim_cur = rlim.rlim_max;
+
+          properties.push_back("/config/debug/coredumps/limit=" +
+                         vm["corelimit"].as<string>());
+        } catch(std::invalid_argument&) {
+          fprintf(stderr, "Could not parse softlimit value: %s\n",
+                           vm["corelimit"].as<string>().c_str());
+          exit(EXIT_FAILURE);
+        }
+      }
+      if (setrlimit(RLIMIT_CORE, &rlim) != 0) {
+        fprintf(stderr, "Could not configure coredump size limit: %s\n",
+                       strerror(errno));
+        exit(EXIT_FAILURE);
+      }
+    }
+  }
+
 
 #ifndef __APPLE__
   bool daemonize = vm.count("daemonize") != 0;
