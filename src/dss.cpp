@@ -41,6 +41,8 @@
   #include <csignal>
 #endif
 
+#include <sys/resource.h>
+
 #include "logger.h"
 #include "propertysystem.h"
 #include "eventinterpreterplugins.h"
@@ -140,6 +142,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
+    m_pPropertySystem->createProperty("/config/debug/coredumps/enabled")->setBooleanValue(false);
+    m_pPropertySystem->createProperty("/config/debug/coredumps/limit")->setFloatingValue(RLIM_INFINITY);
     m_pPropertySystem->createProperty("/system/version/version")->setStringValue(DSS_VERSION);
     m_pPropertySystem->createProperty("/system/version/distroVersion")->setStringValue(readDistroVersion());
     m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
