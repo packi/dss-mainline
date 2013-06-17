@@ -61,7 +61,7 @@ namespace dss {
       // zone.123.light
       boost::shared_ptr<State> state(new State("zone." +
                                                intToString(getZoneID()) +
-                                               ".light", State_Unkown));
+                                               ".light", State_Unknown));
       try {
         m_pApartment->allocateState(state);
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
@@ -144,7 +144,7 @@ namespace dss {
 
   eState Group::getState() {
     if (getZoneID() == 0) {
-      return State_Unkown;
+      return State_Unknown;
     }
    
     // only publish states for light
@@ -157,7 +157,7 @@ namespace dss {
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
 
-    return State_Unkown;
+    return State_Unknown;
   }
 
 

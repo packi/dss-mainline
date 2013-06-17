@@ -169,7 +169,7 @@ namespace dss {
 
   std::string State::toString() const {
     switch(m_state) {
-    case State_Unkown:
+    case State_Unknown:
       return std::string("unknown");
       break;
     case State_Active:
@@ -216,7 +216,7 @@ namespace dss {
     switch (_state) {
       case 1: setState(_origin, State_Active); break;
       case 2: setState(_origin, State_Inactive); break;
-      case 3: setState(_origin, State_Unkown); break;
+      case 3: setState(_origin, State_Unknown); break;
       default: break;
     }
   }
@@ -227,7 +227,7 @@ namespace dss {
     } else if (_state == "inactive") {
       setState(_origin, State_Inactive);
     } else if (_state == "unknown") {
-      setState(_origin, State_Unkown);
+      setState(_origin, State_Unknown);
     }
   }
 

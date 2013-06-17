@@ -35,7 +35,7 @@ namespace dss {
     State_Invalid = 0,
     State_Active = 1,
     State_Inactive = 2,
-    State_Unkown = 3,
+    State_Unknown = 3,
   } eState;
 
   typedef enum {
