@@ -1721,7 +1721,12 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
     DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-    JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, intf->getDevice()->getPropertyNode())));
+    PropertyNodePtr pnode = intf->getDevice()->getPropertyNode();
+    if (NULL != pnode) {
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pnode)));
+    } else {
+      JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
+    }
     return JS_TRUE;
   } // dev_get_property_node
 
