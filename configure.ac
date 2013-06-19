@@ -233,6 +233,13 @@ AC_CHECK_HEADERS(execinfo.h,
     []
 )
 
+# For mongoose
+# Function dlsym() comes from the C library or -ldl
+AC_CHECK_FUNCS(
+    [dlsym],
+    [],
+    [ AC_SEARCH_LIBS([dlsym], [dl]) ])
+
 AC_CHECK_FUNCS([clock_gettime])
 if test $ac_cv_func_clock_gettime = no; then
     AC_CHECK_LIB(rt, clock_gettime, [LIBS="-lrt $LIBS"])
