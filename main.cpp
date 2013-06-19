@@ -37,7 +37,9 @@
 #include <ctime>
 #include <csignal>
 #include <getopt.h>
+#ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
+#endif
 #include <sys/resource.h>
 #include <string.h>
 
@@ -75,8 +77,10 @@ void platformSpecificStartup() {
   sigset_t signal_set;
   pthread_t sig_thread;
 
+#ifdef HAVE_PRCTL
   // disable coredumps
   prctl(PR_SET_DUMPABLE, 0, 0, 0, 0);
+#endif
 
   /* block all signals, enable and handle only a few selected signals globally */
   sigfillset(&signal_set);
@@ -125,8 +129,10 @@ int main (int argc, char* argv[]) {
       ("configdir,c", po::value<string>(), "set config directory")
       ("config,C", po::value<string>(), "set configuration file to use")
       ("savedpropsdir,p", po::value<string>(), "set saved properties directory")
+#ifdef HAVE_PRCTL
       ("coredumps", po::value<string>(), "set to true to enable coredumps")
       ("corelimit", po::value<string>(), "maximum allowed coredump size")
+#endif
 #ifndef __APPLE__ // daemon() is marked as deprecated on OS X
       ("daemonize,d", "start as a daemon")
 #endif
@@ -181,6 +187,7 @@ int main (int argc, char* argv[]) {
                          vm["savedpropsdir"].as<string>());
   }
 
+#ifdef HAVE_PRCTL
   if (vm.count("coredumps")) {
     properties.push_back("/config/debug/coredumps/enabled=" +
                          vm["coredumps"].as<string>());
@@ -212,6 +219,7 @@ int main (int argc, char* argv[]) {
       }
     }
   }
+#endif
 
 
 #ifndef __APPLE__
