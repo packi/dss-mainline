@@ -20,11 +20,15 @@
 
 */
 
+#include <unistd.h>
+
 #include "dsstructuremodifyingbusinterface.h"
 
 #include "dsbusinterface.h"
 
 #include "src/dsidhelper.h"
+
+#define BROADCAST_SLEEP_MICROSECONDS    50000 // 50ms
 
 namespace dss {
 
@@ -178,6 +182,7 @@ namespace dss {
     }
     ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetStandardID
 
   void DSStructureModifyingBusInterface::groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
@@ -190,6 +195,7 @@ namespace dss {
     strncpy((char *) grName, _name.c_str(), NAME_LEN);
     ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
     DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetName
 
   void DSStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
