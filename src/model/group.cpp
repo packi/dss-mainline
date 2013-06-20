@@ -85,10 +85,7 @@ namespace dss {
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
-
-    if (m_GroupID == GroupIDYellow) {
-      setOnState(_origin, SceneHelper::isOnScene(GroupIDYellow, _sceneNr));
-    }
+    setOnState(_origin, _sceneNr);
 
     AddressableModelItem::callScene(_origin, _category, _sceneNr, _force);
   } // callScene
@@ -128,17 +125,30 @@ namespace dss {
   } // getSceneName
 
   void Group::setOnState(const callOrigin_t _origin, bool _on) {
-    // only publish states for light
     if (getZoneID() == 0) {
       return;
     }
-
     if (m_GroupID == GroupIDYellow) {
       try {
         boost::shared_ptr<State> state = m_pApartment->getState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
         state->setState(_origin, _on == true ? 1 : 2);
+      } catch (ItemNotFoundException& ex) {} // should never happen
+    }
+  }
+
+  void Group::setOnState(const callOrigin_t _origin, const int _sceneId) {
+    if (getZoneID() == 0) {
+      return;
+    }
+    if (m_GroupID == GroupIDYellow) {
+      bool isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
+      try {
+        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+                                               intToString(getZoneID()) +
+                                                                ".light");
+        state->setState(_origin, isOn == true ? 1 : 2);
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
   }

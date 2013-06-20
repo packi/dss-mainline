@@ -105,7 +105,8 @@ namespace dss {
 
     void publishToPropertyTree();
 
-    void setOnState(const callOrigin_t _origin, bool _on);
+    void setOnState(const callOrigin_t _origin, const bool _on);
+    void setOnState(const callOrigin_t _origin, const int _sceneId);
     eState getState();
   }; // Group
 
