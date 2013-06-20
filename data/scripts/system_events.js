@@ -320,6 +320,15 @@ function logStateChangeDevice(statename, state, value, device)
     l.logln(';StateDevice;', statename, ';', value, ';', state, ';;;;', devName);
 }
 
+function logStateChangeGroup(statename, state, value, groupID, zoneID)
+{
+    var zone = getZoneByID(zoneID);
+    var groupName = genGroupName(groupID);
+
+    l.logln(  ';StateGroup;', statename, ';', value, ';', state, ';', zone.name, ';', zoneID, ';', groupName, ';;');
+}
+
+
 if (dumpEvent > 0) {
     for (key in raisedEvent)
     {
@@ -470,6 +479,11 @@ else if (raisedEvent.name == 'stateChange')
     if (raisedEvent.source.isDevice) {
         var device = getDevices().byDSID(raisedEvent.source.dsid);
         logStateChangeDevice(statename, state, value, device);
+    }
+    if (raisedEvent.source.isGroup) {
+        var groupID = raisedEvent.source.groupID;
+        var zoneID = raisedEvent.source.zoneID;
+        logStateChangeGroup(statename, state, value, groupID, zoneID);
     }
 }
 

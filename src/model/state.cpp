@@ -27,6 +27,7 @@
 #include "event.h"
 #include "model/state.h"
 #include "model/device.h"
+#include "model/group.h"
 #include "model/apartment.h"
 #include "model/modelconst.h"
 #include "modelmaintenance.h"
@@ -77,6 +78,28 @@ namespace dss {
       m_providerDev(_device),
       m_providerDevInput(_inputIndex)
   {
+    load();
+    publishToPropertyTree();
+  }
+
+  State::State(boost::shared_ptr<Group> _group)
+      :
+    m_IsPersistent(false),
+    m_state(State_Unknown),
+    m_type(StateType_Group),
+    m_providerGroup(_group)
+  {
+    std::string logicalName = "unknown";
+
+    switch (_group->getStandardGroupID()) {
+      case GroupIDYellow:
+        logicalName = "light";
+        break;
+      default:
+        break;
+    }
+
+    m_name = "zone." + intToString(_group->getZoneID()) + "." + logicalName;
     load();
     publishToPropertyTree();
   }

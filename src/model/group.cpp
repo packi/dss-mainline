@@ -59,9 +59,10 @@ namespace dss {
 
     if (m_GroupID == GroupIDYellow) {
       // zone.123.light
-      boost::shared_ptr<State> state(new State("zone." +
-                                               intToString(getZoneID()) +
-                                               ".light", State_Unknown));
+      boost::shared_ptr<Group> me =
+          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<State> state(new State(me));
+
       try {
         m_pApartment->allocateState(state);
       } catch (ItemDuplicateException& ex) {} // we only care that it exists

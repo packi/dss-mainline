@@ -30,6 +30,8 @@
 #include <boost/smart_ptr.hpp>
 
 namespace dss {
+  class Device;
+  class Group;
 
   typedef enum {
     State_Invalid = 0,
@@ -42,6 +44,7 @@ namespace dss {
     StateType_Apartment = 0,
     StateType_Device = 1,
     StateType_Service = 2,
+    StateType_Group = 3
   } eStateType;
 
   /** Represents a common class for Device, Service and Apartment states.*/
@@ -63,6 +66,9 @@ namespace dss {
     /** State provider is a js script representing an external state source */
     std::string m_serviceName;
 
+    /** State provider is a group */
+    boost::shared_ptr<Group> m_providerGroup;
+
   private:
     void save();
     void load();
@@ -73,6 +79,7 @@ namespace dss {
     State(const std::string& _name);
     State(const std::string& _name, eState _state);
     State(boost::shared_ptr<Device>_device, int _inputIndex);
+    State(boost::shared_ptr<Group> _group);
     State(const std::string& _name, const std::string& _serviceId);
 
     virtual ~State();
@@ -92,6 +99,7 @@ namespace dss {
     PropertyNodePtr getPropertyNode() const { return m_pPropertyNode; }
 
     boost::shared_ptr<Device> getProviderDevice() const { return m_providerDev; }
+    boost::shared_ptr<Group> getProviderGroup() const { return m_providerGroup; }
     void setProviderDevice(boost::shared_ptr<Device> _dev, int _inputIndex) {
       m_providerDev = _dev; m_providerDevInput = _inputIndex;
       removeFromPropertyTree();

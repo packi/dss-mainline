@@ -383,6 +383,13 @@ namespace dss {
             source.setProperty("isApartment", true);
             source.setProperty("isGroup", false);
             source.setProperty("isDevice", false);
+          } else if (state->getType() == StateType_Group) {
+            boost::shared_ptr<Group> group = state->getProviderGroup();
+            source.setProperty("isApartment", false);
+            source.setProperty("isGroup", true);
+            source.setProperty("isDevice", false);
+            source.setProperty("groupID", group->getID());
+            source.setProperty("zoneID", group->getZoneID());
           } else if (state->getType() == StateType_Service) {
             source.setProperty("isService", true);
             source.setProperty("isGroup", false);
