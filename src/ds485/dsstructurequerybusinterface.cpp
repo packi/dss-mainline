@@ -437,6 +437,9 @@ namespace dss {
     // not adding the area stuf
     int ret = ZoneProperties_get_room_states(m_DSMApiHandle, dsmDSID,
                 (uint16_t) _zoneID, &room, NULL, NULL, NULL, NULL);
+    if (ret == ERROR_WRONG_MODIFIER) {
+      return std::bitset<7>(0);
+    }
     DSBusInterface::checkResultCode(ret);
     return std::bitset<7>(room);
   }
