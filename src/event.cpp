@@ -48,6 +48,7 @@
 using std::set;
 
 namespace dss {
+  const std::string empty_string("");
 
   //================================================== Event
 
@@ -115,7 +116,7 @@ namespace dss {
     } else if(_name == EventPropertyTime) {
       return m_Time;
     }
-    return m_Properties.get(_name, "");
+    return m_Properties.get(_name, empty_string);
   } // getPropertyByName
 
   bool Event::hasPropertySet(const std::string& _name) const {
