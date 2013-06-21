@@ -931,49 +931,59 @@ namespace dss {
       }
       DeviceSensorEventSpec_t event;
       event.name = st.convert(_request.getParameter("eventName"));
-      event.sensorIndex = strToIntDef(_request.getParameter("sensorIndex"), -1);
-      if ((event.sensorIndex < 0) || (event.sensorIndex > 0xF)) {
+      int sensorIndex = strToIntDef(_request.getParameter("sensorIndex"), -1);
+      if ((sensorIndex < 0) || (sensorIndex > 0xF)) {
         return failure("Invalid or missing parameter 'sensorIndex'");
       }
-      event.test = strToIntDef(_request.getParameter("test"), -1);
-      if ((event.test < 0) || (event.test > 0x3)) {
+      event.sensorIndex = sensorIndex;
+      int test = strToIntDef(_request.getParameter("test"), -1);
+      if ((test < 0) || (test > 0x3)) {
         return failure("Invalid or missing parameter 'test'");
       }
-      event.action = strToIntDef(_request.getParameter("action"), -1);
-      if ((event.action < 0) || (event.action > 0x3)) {
+      event.test = test;
+      int action = strToIntDef(_request.getParameter("action"), -1);
+      if ((action < 0) || (action > 0x3)) {
         return failure("Invalid or missing parameter 'action'");
       }
-      event.value = strToIntDef(_request.getParameter("value"), -1);
-      if ((event.value < 0) || (event.value > 0xFFF)) {
+      event.action = action;
+      int value = strToIntDef(_request.getParameter("value"), -1);
+      if ((value < 0) || (value > 0xFFF)) {
         return failure("Invalid or missing parameter 'value'");
       }
-      event.hysteresis = strToIntDef(_request.getParameter("hysteresis"), -1);
-      if ((event.hysteresis < 0) || (event.hysteresis > 0xFFF)) {
+      event.value = value;
+      int hysteresis = strToIntDef(_request.getParameter("hysteresis"), -1);
+      if ((hysteresis < 0) || (hysteresis > 0xFFF)) {
         return failure("Invalid or missing parameter 'hysteresis'");
       }
-      event.validity = strToIntDef(_request.getParameter("validity"), -1);
-      if ((event.validity < 0) || (event.validity > 0x3)) {
+      event.hysteresis = hysteresis;
+      int validity = strToIntDef(_request.getParameter("validity"), -1);
+      if ((validity < 0) || (validity > 0x3)) {
         return failure("Invalid or missing parameter 'validity'");
       }
+      event.validity = validity;
       if (event.action == 2) {
         if (!pDevice->isSceneDevice()) {
-          event.buttonNumber = strToIntDef(_request.getParameter("buttonNumber"), -1);
-          if ((event.buttonNumber < 0) || (event.buttonNumber > 0xF)) {
+          int buttonNumber = strToIntDef(_request.getParameter("buttonNumber"), -1);
+          if ((buttonNumber < 0) || (buttonNumber > 0xF)) {
             return failure("Invalid or missing parameter 'buttonNumber'");
           }
-          event.clickType = strToIntDef(_request.getParameter("clickType"), -1);
-          if ((event.clickType < 0) || (event.clickType > 0xF)) {
+	  event.buttonNumber = buttonNumber;
+          int clickType = strToIntDef(_request.getParameter("clickType"), -1);
+          if ((clickType < 0) || (clickType > 0xF)) {
             return failure("Invalid or missing parameter 'clickType'");
           }
+	  event.clickType = clickType;
         } else {
-          event.sceneDeviceMode = strToIntDef(_request.getParameter("sceneDeviceMode"), -1);
-          if ((event.sceneDeviceMode < 0) || (event.sceneDeviceMode > 0x3)) {
+          int sceneDeviceMode = strToIntDef(_request.getParameter("sceneDeviceMode"), -1);
+          if ((sceneDeviceMode < 0) || (sceneDeviceMode > 0x3)) {
             return failure("Invalid or missing parameter 'sceneDeviceMode'");
           }
-          event.sceneID = strToIntDef(_request.getParameter("sceneID"), -1);
-          if ((event.sceneID < 0) || (event.sceneID > 0x7F)) {
+	  event.sceneDeviceMode = sceneDeviceMode;
+          int sceneID = strToIntDef(_request.getParameter("sceneID"), -1);
+          if ((sceneID < 0) || (sceneID > 0x7F)) {
             return failure("Invalid or missing parameter 'sceneID'");
           }
+	  event.sceneID = sceneID;
         }
       } else {
         event.buttonNumber = 0;

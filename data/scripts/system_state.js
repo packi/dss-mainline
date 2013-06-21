@@ -53,6 +53,73 @@ function startup()
     var alarm = false;
     var sleeping = false;
 
+    var devices = getDevices();
+    devices.perform(function (device) {
+        var devNode;
+        var bInputNode;
+        var inputIndex = 0;
+
+        devNode = device.getPropertyNode();
+        if (!devNode) {
+            return;
+        }
+        bInputNode = devNode.getChild('binaryInputs/binaryInput' + inputIndex);
+        if (!bInputNode) {
+            return;
+        }
+        for (inputIndex = 0;
+            bInputNode != null;
+            inputIndex ++, bInputNode = devNode.getChild('binaryInputs/binaryInput' + inputIndex))
+        {
+            var inputType = bInputNode.getChild('inputType').getValue();
+            var inputId = bInputNode.getChild('inputId').getValue();
+            var targetType = bInputNode.getChild('targetGroupType').getValue();
+            var targetId = bInputNode.getChild('targetGroupId').getValue();
+
+            // Motion
+            if (inputType === 5 || inputType === 6) {
+                var stateName;
+                if (targetId >= 16) {
+                    stateName = 'zone.0.group.' + targetId + '.motion';
+                } else {
+                    stateName = 'zone.' + device.zoneID + '.motion';
+                }
+                getOrRegisterState(stateName);
+            }
+
+            // Presence
+            if (inputType === 1 || inputType === 3) {
+                var stateName;
+                if (targetId >= 16) {
+                    stateName = 'zone.0.group.' + targetId + '.presence';
+                } else {
+                    stateName = 'zone.' + device.zoneID + '.presence';
+                }
+                getOrRegisterState(stateName);
+            }
+
+            // Wind Monitor
+            if (inputType === 8) {
+                var stateName = 'wind';
+                if (targetId >= 16) {
+                    stateName = stateName + '.group' + targetId;
+                    getOrRegisterState(stateName);
+                }
+            }
+
+            // Rain Monitor
+            if (inputType === 9) {
+                var stateName = 'rain';
+                if (targetId >= 16) {
+                    stateName = stateName + '.group' + targetId;
+                    getOrRegisterState(stateName);
+                }
+            }
+
+            inputIndex ++;
+        }
+    })
+
     var zones = getZones();
     for (var z = 0; z < zones.length; z++) {
         if (!zones[z].present) {
@@ -311,6 +378,35 @@ function stateBinaryinput()
                 return;
             }
 
+            // Motion
+            if (inputType === 5 || inputType === 6) {
+                var stateName;
+                if (targetId >= 16) {
+                // create state for a user group if it does not exist (new group?)
+                    stateName = 'zone.0.group.' + targetId + '.motion';
+                } else {
+                // set motion state in the zone the dsid is logical attached to
+                    stateName = 'zone.' + dev.zoneID + '.motion';
+                }
+                getOrRegisterState(stateName);
+                stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
+            }
+
+            // Presence
+            if (inputType === 1 || inputType === 3) {
+                var stateName;
+                if (targetId >= 16) {
+                // create state for a user group if it does not exist (new group?)
+                    stateName = 'zone.0.group.' + targetId + '.presence';
+                } else {
+                // set presence state in the zone the dsid is logical attached to
+                    stateName = 'zone.' + dev.zoneID + '.presence';
+                }
+                getOrRegisterState(stateName);
+                stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
+            }
+
+            // Smoke Detector
             if (inputType === 7) {
                 var stateName = 'fire';
                 var state = getState(stateName);
@@ -319,6 +415,7 @@ function stateBinaryinput()
                 }
             }
 
+            // Wind Monitor
             if (inputType === 8) {
                 var stateName = 'wind';
 
@@ -330,6 +427,7 @@ function stateBinaryinput()
                 stateBinaryInputGeneric(stateName, targetType, targetId, raisedEvent.parameter);
             }
 
+            // Rain Monitor
             if (inputType === 9) {
                 var stateName = 'rain';
 

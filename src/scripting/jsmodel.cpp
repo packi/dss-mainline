@@ -1721,7 +1721,12 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
     DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-    JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, intf->getDevice()->getPropertyNode())));
+    PropertyNodePtr pnode = intf->getDevice()->getPropertyNode();
+    if (NULL != pnode) {
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, pnode)));
+    } else {
+      JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
+    }
     return JS_TRUE;
   } // dev_get_property_node
 
@@ -2546,7 +2551,7 @@ namespace dss {
         }
         try {
 
-          eState svalue = State_Unkown;
+          eState svalue = State_Unknown;
           if (argc >= 1) {
             if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
               std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
@@ -2555,7 +2560,7 @@ namespace dss {
               } else if (value == "inactive") {
                 svalue = State_Inactive;
               } else if (value == "unknown") {
-                svalue = State_Unkown;
+                svalue = State_Unknown;
               } else {
                 JS_ReportError(cx, "Invalid state value");
                 JS_SET_RVAL(cx, vp, JSVAL_NULL);
@@ -2566,7 +2571,7 @@ namespace dss {
               switch (value) {
               case 1: svalue = State_Active; break;
               case 2: svalue = State_Inactive; break;
-              case 3: svalue = State_Unkown; break;
+              case 3: svalue = State_Unknown; break;
               default:
                 JS_ReportError(cx, "Invalid state value");
                 JS_SET_RVAL(cx, vp, JSVAL_NULL);

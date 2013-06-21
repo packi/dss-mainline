@@ -48,6 +48,18 @@ AC_SUBST(GCOV_CFLAGS)
 AC_SUBST(GCOV_LIBS)
 AM_CONDITIONAL(BUILD_GCOV_REPORT, test "x$GCOV_CFLAGS" != "x")
 
+MT_OPTION([stack-protect], [enable],
+          [emit code to check for buffer overflows],
+          [
+            CXXFLAGS+=' -fstack-protector-all -Wstack-protector --param ssp-buffer-size=4'
+            CXXFLAGS+=" -D_FORTIFY_SOURCE=2"
+            CFLAGS+=' -fstack-protector-all -Wstack-protector --param ssp-buffer-size=4'
+            CFLAGS+=" -D_FORTIFY_SOURCE=2"
+            LDFLAGS+=" -Wl,-z,relro,-z,now"
+          ],
+          [])
+AM_CONDITIONAL(BUILD_STACK_PROTECT, test "x$STACK_PROTECT_OPTION_ENABLED" = "xyes")
+
 MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
           [],[])
@@ -195,7 +207,7 @@ AC_SUBST(PTHREAD_LIBS)
 AC_LANG_CPLUSPLUS
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h], [], [AC_MSG_ERROR([required system header not found])])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h sys/resource.h], [], [AC_MSG_ERROR([required system header not found])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -217,8 +229,11 @@ AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS(dup2 gethostbyname gettimeofday inet_ntoa localtime_r memchr memmove memset select setlocale socket strchr strcspn strdup strerror strrchr strspn strstr strtol strtoul iconv, [],
+AC_CHECK_FUNCS(dup2 gethostbyname gettimeofday inet_ntoa localtime_r memchr memmove memset select setlocale socket strchr strcspn strdup strerror strrchr strspn strstr strtol strtoul iconv setrlimit, [],
         [ AC_MSG_ERROR([required function not available]) ])
+
+AC_CHECK_HEADERS(sys/prctl.h)
+AC_CHECK_FUNCS(prctl)
 
 # Check for execinfo.h and backtrace
 AC_CHECK_HEADERS(execinfo.h,
@@ -232,6 +247,13 @@ AC_CHECK_HEADERS(execinfo.h,
     ]
     []
 )
+
+# For mongoose
+# Function dlsym() comes from the C library or -ldl
+AC_CHECK_FUNCS(
+    [dlsym],
+    [],
+    [ AC_SEARCH_LIBS([dlsym], [dl]) ])
 
 AC_CHECK_FUNCS([clock_gettime])
 if test $ac_cv_func_clock_gettime = no; then

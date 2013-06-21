@@ -799,11 +799,13 @@ namespace dss {
             if(_groupID == 0) {
               foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
+                pGroup->setOnState((callOrigin_t)_originDeviceID, _sceneID);
               }
             } else {
               boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
               if(pGroup != NULL) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
+                pGroup->setOnState((callOrigin_t)_originDeviceID, _sceneID);
               }
             }
           }
@@ -861,6 +863,7 @@ namespace dss {
               } else {
                 pGroup->setLastButOneCalledScene();
               }
+              pGroup->setOnState((callOrigin_t)_originDeviceID, pGroup->getLastCalledScene());
             }
           } else {
             boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
@@ -870,6 +873,7 @@ namespace dss {
               } else {
                 pGroup->setLastButOneCalledScene();
               }
+              pGroup->setOnState((callOrigin_t)_originDeviceID, pGroup->getLastCalledScene());
             }
           }
         }

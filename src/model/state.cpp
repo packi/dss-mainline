@@ -27,6 +27,7 @@
 #include "event.h"
 #include "model/state.h"
 #include "model/device.h"
+#include "model/group.h"
 #include "model/apartment.h"
 #include "model/modelconst.h"
 #include "modelmaintenance.h"
@@ -42,6 +43,16 @@ namespace dss {
     : m_name(_name),
       m_IsPersistent(false),
       m_state(State_Inactive),
+      m_type(StateType_Apartment)
+  {
+    load();
+    publishToPropertyTree();
+  } // ctor
+
+  State::State(const std::string& _name, eState _state)
+    : m_name(_name),
+      m_IsPersistent(false),
+      m_state(_state),
       m_type(StateType_Apartment)
   {
     load();
@@ -67,6 +78,28 @@ namespace dss {
       m_providerDev(_device),
       m_providerDevInput(_inputIndex)
   {
+    load();
+    publishToPropertyTree();
+  }
+
+  State::State(boost::shared_ptr<Group> _group)
+      :
+    m_IsPersistent(false),
+    m_state(State_Unknown),
+    m_type(StateType_Group),
+    m_providerGroup(_group)
+  {
+    std::string logicalName = "unknown";
+
+    switch (_group->getStandardGroupID()) {
+      case GroupIDYellow:
+        logicalName = "light";
+        break;
+      default:
+        break;
+    }
+
+    m_name = "zone." + intToString(_group->getZoneID()) + "." + logicalName;
     load();
     publishToPropertyTree();
   }
@@ -159,7 +192,7 @@ namespace dss {
 
   std::string State::toString() const {
     switch(m_state) {
-    case State_Unkown:
+    case State_Unknown:
       return std::string("unknown");
       break;
     case State_Active:
@@ -206,7 +239,7 @@ namespace dss {
     switch (_state) {
       case 1: setState(_origin, State_Active); break;
       case 2: setState(_origin, State_Inactive); break;
-      case 3: setState(_origin, State_Unkown); break;
+      case 3: setState(_origin, State_Unknown); break;
       default: break;
     }
   }
@@ -217,7 +250,7 @@ namespace dss {
     } else if (_state == "inactive") {
       setState(_origin, State_Inactive);
     } else if (_state == "unknown") {
-      setState(_origin, State_Unkown);
+      setState(_origin, State_Unknown);
     }
   }
 

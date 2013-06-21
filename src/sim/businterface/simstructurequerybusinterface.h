@@ -43,6 +43,7 @@ namespace dss {
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual std::bitset<7> getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID);
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual std::string getSceneName(dss_dsid_t _dsMeterID,

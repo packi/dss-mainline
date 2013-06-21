@@ -1,0 +1,75 @@
+* graph iscomplete
+* event handling/filtering in event interpreter is missing
+* message entry from top/mongoose is missing
+* ds485: should be okay
+
+
+     +-----+                            +-----------+
+     | DSS |                            |CommChannel|
+     +-----+                            +-----------+
+               \
+                \
+                 \
+                  \               ^
+                   \             /
+                    V           /
+                     +-------------------+
+                     | EventInterpreter  |
+                     |  (execute)        |
+                     +-------------------+
+                                       ^                       +------+
+  +---------+                           \                      | DSS' |
+  |pushEvent|                            \                     +------+
+  +---------+                             \                     /
+        - EventRunner                      \                   /
+            poll 500ms                  raiseEvent            /
+        - BusScanner                        \                /
+           (new device)                      \              /
+                                              \            V
+                                            +----------------+
+                                            |ModelMaintenance|
+                        addModelEvent       |(exectue)       |
+   +------------+ ------------------------> |meter-/deferred-|
+   |BusEventSink|                           |and model-events|
+   +------------+                           +----------------+
+    builds Event
+           ^                              ^
+            \                            /
+      onGroupCallScene                  /
+      onGroupUndoScene             addModelEvent
+      onGroupBlink                 onDeviceNameChanged
+      onDeviceCallScene            onDsmNameChanged
+      onDeviceBlinke                /
+      onMeteringEvent              /
+                  \               /
+                   \             /
+                    \           /
+                 +--------------+
+                 |DSBusInterface|
+                 +--------------+
+                  20 cb -> create events
+
+                ^
+               /
+        DsmApiCallback
+             /
+            /
+           /
+      +------+
+      |DsmApi|
+      +------+
+        dsm-api.xml
+        dsm_api_ds485_message_callback (hashmap)
+
+          |
+      stateCallback
+     receiveCallback
+    busChangeCallback
+          |
+          V
+      +-------------+                       +------+
+      |DS485-client |     ----- TCP ----->  |DS485d|
+      +-------------+                       +------+
+        get_dsid
+        queryState/queryDevices
+        sendCommand

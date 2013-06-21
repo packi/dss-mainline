@@ -29,6 +29,7 @@
 #include "modeltypes.h"
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
+#include "state.h"
 
 namespace dss {
 
@@ -103,6 +104,10 @@ namespace dss {
     std::string getSceneName(int _sceneNumber);
 
     void publishToPropertyTree();
+
+    void setOnState(const callOrigin_t _origin, const bool _on);
+    void setOnState(const callOrigin_t _origin, const int _sceneId);
+    eState getState();
   }; // Group
 
 } // namespace dss

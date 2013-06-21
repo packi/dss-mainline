@@ -258,3 +258,6 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/tests.h \
 	$(top_srcdir)/tests/webfixture.h
 
+dsstests_stackprotect_SOURCES = \
+	$(top_srcdir)/tests/stackprotect.c
+

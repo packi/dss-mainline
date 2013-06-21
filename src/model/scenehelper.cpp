@@ -293,4 +293,53 @@ namespace dss {
     return 0uLL;
   } // getReachableScenesBitmapForButtonID
 
+  bool SceneHelper::isOnScene(const int _groupID, const unsigned int _scene) {
+    bool ret = false;
+
+    // other groups not yet supported
+    if (_groupID != GroupIDYellow) {
+      return ret;
+    }
+
+    switch (_scene) {
+      case SceneOff:
+      case SceneDeepOff:
+      case SceneSleeping:
+      case SceneAutoOff:
+      case SceneStandBy:
+      case SceneOffE1:
+      case SceneOffE2:
+      case SceneOffE3:
+      case SceneOffE4:
+          break; // false
+      case Scene1:
+      case Scene2:
+      case Scene3:
+      case Scene4:
+      case SceneOnE1:
+      case SceneOnE2:
+      case SceneOnE3:
+      case SceneOnE4:
+      case Scene12:
+      case Scene13:
+      case Scene14:
+      case Scene22:
+      case Scene23:
+      case Scene24:
+      case Scene32:
+      case Scene33:
+      case Scene34:
+      case Scene42:
+      case Scene43:
+      case Scene44:
+      case ScenePanic:
+      case SceneFire:
+          ret = true;
+          break;
+      default:
+          break;
+    }
+
+    return ret;
+  }
 }

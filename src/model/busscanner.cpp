@@ -467,6 +467,15 @@ namespace dss {
         }
       }
     }
+
+    std::bitset<7> states = m_Interface.getZoneStates(_dsMeter->getDSID(), _zone->getID());
+    // only for light
+    boost::shared_ptr<Group> pGroup = _zone->getGroup(GroupIDYellow);
+    // light group will automatically generate the appropriate state
+    if ((pGroup) && (pGroup->getState() == State_Unknown)) {
+      pGroup->setOnState(coUnknown, states.test(GroupIDYellow-1));
+    }
+
     return true;
   } // scanStatusOfZone
 
@@ -607,7 +616,7 @@ namespace dss {
         for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
           assert(state != NULL);
-          state->setState(coSystem, State_Unkown);
+          state->setState(coSystem, State_Unknown);
         }
       }
     }

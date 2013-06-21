@@ -56,6 +56,7 @@ namespace dss {
     static bool isMultiTipSequence(const unsigned int _scene);
     static bool isDimSequence(const unsigned int _scene);
     static uint64_t getReachableScenesBitmapForButtonID(const int _buttonID);
+    static bool isOnScene(const int _groupID, const unsigned int _scene);
   }; // SceneHelper
 
 } // namespace dss

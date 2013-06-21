@@ -2,6 +2,10 @@ bin_PROGRAMS = dss
 
 noinst_PROGRAMS = dsstests
 
+if BUILD_STACK_PROTECT
+noinst_PROGRAMS += dsstests_stackprotect
+endif
+
 EXTRA_DIST =	$(top_srcdir)/src/messages/messaging.proto \
 				$(top_srcdir)/src/messages/device-scene-table-update.proto
 
@@ -27,7 +31,9 @@ nodist_libprotomessages_a_SOURCES = \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
 
-libprotomessages_a_CXXFLAGS = -I$(top_builddir)
+libprotomessages_a_CXXFLAGS = \
+			-I$(top_builddir) \
+			$(LIBPROTOBUF_CFLAGS)
 
 if BUILD_SOAP
 

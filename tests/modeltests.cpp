@@ -858,6 +858,10 @@ public:
   virtual std::vector<std::pair<int,int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     return std::vector<std::pair<int,int> >();
   }
+  virtual std::bitset<7> getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+      return std::bitset<7>(0);
+  }
+
   virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     _lower = 0;
     _upper = 0;

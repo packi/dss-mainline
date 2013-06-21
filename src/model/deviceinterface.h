@@ -29,6 +29,7 @@
 namespace dss {
 
   typedef enum callOrigin {
+    coUnknown = 0,
     coJSScripting = 1,
     coJSON = 2,
     coSOAP = 3,

@@ -25,6 +25,7 @@
 #include "scenehelper.h"
 #include "set.h"
 #include "apartment.h"
+#include "state.h"
 #include "src/propertysystem.h"
 
 #include "src/model/modelconst.h"
@@ -52,6 +53,20 @@ namespace dss {
 
   void Group::setStandardGroupID(const int _standardGroupNumber) {
     m_StandardGroupID = _standardGroupNumber;
+    if (getZoneID() == 0) {
+      return;
+    }
+
+    if (m_GroupID == GroupIDYellow) {
+      // zone.123.light
+      boost::shared_ptr<Group> me =
+          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<State> state(new State(me));
+
+      try {
+        m_pApartment->allocateState(state);
+      } catch (ItemDuplicateException& ex) {} // we only care that it exists
+    }
   } // getID
 
   Set Group::getDevices() const {
@@ -70,6 +85,8 @@ namespace dss {
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
+    setOnState(_origin, _sceneNr);
+
     AddressableModelItem::callScene(_origin, _category, _sceneNr, _force);
   } // callScene
 
@@ -106,6 +123,54 @@ namespace dss {
       return m_SceneNames[_sceneNumber];
     }
   } // getSceneName
+
+  void Group::setOnState(const callOrigin_t _origin, bool _on) {
+    if (getZoneID() == 0) {
+      return;
+    }
+    if (m_GroupID == GroupIDYellow) {
+      try {
+        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+                                               intToString(getZoneID()) +
+                                                                ".light");
+        state->setState(_origin, _on == true ? 1 : 2);
+      } catch (ItemNotFoundException& ex) {} // should never happen
+    }
+  }
+
+  void Group::setOnState(const callOrigin_t _origin, const int _sceneId) {
+    if (getZoneID() == 0) {
+      return;
+    }
+    if (m_GroupID == GroupIDYellow) {
+      bool isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
+      try {
+        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+                                               intToString(getZoneID()) +
+                                                                ".light");
+        state->setState(_origin, isOn == true ? 1 : 2);
+      } catch (ItemNotFoundException& ex) {} // should never happen
+    }
+  }
+
+  eState Group::getState() {
+    if (getZoneID() == 0) {
+      return State_Unknown;
+    }
+   
+    // only publish states for light
+    if (m_GroupID == GroupIDYellow) {
+      try {
+        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+                                               intToString(getZoneID()) +
+                                                                ".light");
+        return state->getState();
+      } catch (ItemNotFoundException& ex) {} // should never happen
+    }
+
+    return State_Unknown;
+  }
+
 
   void Group::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {

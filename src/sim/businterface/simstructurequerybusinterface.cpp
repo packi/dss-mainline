@@ -102,6 +102,11 @@ namespace dss {
     return result;
   } // getLastCalledScenes
 
+  std::bitset<7> SimStructureQueryBusInterface::getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+      return std::bitset<7>(0);
+  } // getZoneStates
+
+
   bool SimStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     return false; // TODO: implement if it gets implemented on the dSM11
   } // getEnergyBorder
