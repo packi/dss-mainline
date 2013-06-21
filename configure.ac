@@ -48,6 +48,18 @@ AC_SUBST(GCOV_CFLAGS)
 AC_SUBST(GCOV_LIBS)
 AM_CONDITIONAL(BUILD_GCOV_REPORT, test "x$GCOV_CFLAGS" != "x")
 
+MT_OPTION([stack-protect], [enable],
+          [emit code to check for buffer overflows],
+          [
+            CXXFLAGS+=' -fstack-protector-all -Wstack-protector --param ssp-buffer-size=4'
+            CXXFLAGS+=" -D_FORTIFY_SOURCE=2"
+            CFLAGS+=' -fstack-protector-all -Wstack-protector --param ssp-buffer-size=4'
+            CFLAGS+=" -D_FORTIFY_SOURCE=2"
+            LDFLAGS+=" -Wl,-z,relro,-z,now"
+          ],
+          [])
+AM_CONDITIONAL(BUILD_STACK_PROTECT, test "x$STACK_PROTECT_OPTION_ENABLED" = "xyes")
+
 MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
           [],[])
