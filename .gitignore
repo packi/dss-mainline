@@ -26,5 +26,8 @@ webservices/soapStub.h
 webservices/soapdssObject.h
 webservices/soapH.h
 webservices/soapC.cpp
+internal/
+data/metering
+doc/webservices/html
 
 *.pb.*
