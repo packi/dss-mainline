@@ -2,6 +2,10 @@ bin_PROGRAMS = dss
 
 noinst_PROGRAMS = dsstests
 
+if BUILD_STACK_PROTECT
+noinst_PROGRAMS += dsstests_stackprotect
+endif
+
 EXTRA_DIST =	$(top_srcdir)/src/messages/messaging.proto \
 				$(top_srcdir)/src/messages/device-scene-table-update.proto
 

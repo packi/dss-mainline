@@ -58,6 +58,7 @@ MT_OPTION([stack-protect], [enable],
             LDFLAGS+=" -Wl,-z,relro,-z,now"
           ],
           [])
+AM_CONDITIONAL(BUILD_STACK_PROTECT, test "x$STACK_PROTECT_OPTION_ENABLED" = "xyes")
 
 MT_OPTION([soap], [disable],
           [build dSS without SOAP support (default: enabled)],
