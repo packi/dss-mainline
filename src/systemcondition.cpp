@@ -135,6 +135,65 @@ namespace dss {
         } // oStateNode loop
       } // nodes NULL check
 
+      PropertyNodePtr oAddonStateNode = oBaseConditionNode->getPropertyByName("addon-states");
+
+      if ((oAddonStateNode != NULL)) {
+        for (int j = 0; j < oAddonStateNode->getChildCount(); j++) {
+          //assuming condi = /addon-states/<scriptID>/myFire=true
+          std::string sAddonID = oAddonStateNode->getChild(j)->getName();
+          PropertyNodePtr oAddonStateSubnode=oAddonStateNode->getChild(j);
+          // searching for a specific addon subpath in /usr/addon-states/<scriptid>
+          PropertyNodePtr oSystemAddonStates =
+              DSS::getInstance()->getPropertySystem().getProperty("/usr/addon-states/" + sAddonID);
+
+          if (oSystemAddonStates != NULL) {
+            for (int k = 0; k < oAddonStateSubnode->getChildCount(); k++) {
+              bool fFound = false;
+              std::string sName = oAddonStateNode->getChild(j)->getName();
+              std::string sValue = oAddonStateNode->getChild(j)->getAsString();
+              for (int i = 0; i < oSystemAddonStates->getChildCount(); i++) {
+                PropertyNodePtr nameNode =
+                    oSystemAddonStates->getChild(i)->getPropertyByName("name");
+
+                PropertyNodePtr valueNode =
+                    oSystemAddonStates->getChild(i)->getPropertyByName("value");
+
+                if ((nameNode == NULL) || (valueNode == NULL)) {
+                  Logger::getInstance()->log("checkSystemAddonCondition: can not check"
+                          " addon condition, missing name or value node!", lsError);
+                  continue;
+                }
+
+                // search for a requested state
+                if (sName == nameNode->getAsString()) {
+                  fFound = true;
+                  // state found ...
+                  if (sValue != valueNode->getAsString()) {
+                    Logger::getInstance()->log("checkSystemAddonCondition: " +
+                            sName + " failed: value is " + valueNode->getAsString() +
+                            ", requested is " + sValue, lsDebug);
+                    return false;
+                  }
+                  break;
+                }
+              }
+              // state was requested as active - but not found in /usr/states
+
+              if (fFound == false) {
+                Logger::getInstance()->log("checkSystemCondition: " +
+                        sName + " requested but not found in system states!", lsError);
+                return false;
+              }
+            }
+          } else {
+              // addon states for required addon generally not found
+              Logger::getInstance()->log("checkSystemCondition: " +
+                      sAddonID + " addon states for required addon generally not found!", lsError);
+              return false;
+          }
+        } // oSystemAddonStates loop
+      } // nodes NULL check
+
       // at least one of the zone states must match
       PropertyNodePtr oZoneNode =
           oBaseConditionNode->getPropertyByName("zone-states");

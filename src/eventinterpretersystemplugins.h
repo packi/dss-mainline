@@ -91,6 +91,7 @@ namespace dss {
       void executeCustomEvent(PropertyNodePtr _actionNode);
       void executeURL(PropertyNodePtr _actionNode);
       void executeStateChange(PropertyNodePtr _actionNode);
+      void executeAddonStateChange(PropertyNodePtr _actionNode);
       unsigned int executeOne(PropertyNodePtr _actionNode);
       void executeStep(std::vector<PropertyNodePtr> _actionNodes);
       std::vector<PropertyNodePtr> filterActionsWithDelay(PropertyNodePtr _actionNode, int _delayValue);

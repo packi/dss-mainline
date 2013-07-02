@@ -25,6 +25,7 @@
 
 #include "deviceinterface.h"
 #include "modeltypes.h"
+#include "propertysystem.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/smart_ptr.hpp>
@@ -44,7 +45,8 @@ namespace dss {
     StateType_Apartment = 0,
     StateType_Device = 1,
     StateType_Service = 2,
-    StateType_Group = 3
+    StateType_Group = 3,
+    StateType_Script = 4
   } eStateType;
 
   /** Represents a common class for Device, Service and Apartment states.*/
@@ -63,7 +65,7 @@ namespace dss {
     boost::shared_ptr<Device> m_providerDev;
     int m_providerDevInput;
 
-    /** State provider is a js script representing an external state source */
+    /** State provider is a web service or js script*/
     std::string m_serviceName;
 
     /** State provider is a group */
@@ -80,7 +82,8 @@ namespace dss {
     State(const std::string& _name, eState _state);
     State(boost::shared_ptr<Device>_device, int _inputIndex);
     State(boost::shared_ptr<Group> _group);
-    State(const std::string& _name, const std::string& _serviceId);
+    State(eStateType _type, const std::string& _name,
+          const std::string& _identifier);
 
     virtual ~State();
 

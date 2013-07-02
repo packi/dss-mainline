@@ -395,7 +395,13 @@ namespace dss {
             source.setProperty("isGroup", false);
             source.setProperty("isDevice", false);
             source.setProperty("serviceName", state->getProviderService());
+          } else if (state->getType() == StateType_Script) {
+            source.setProperty("isScript", true);
+            source.setProperty("isGroup", false);
+            source.setProperty("isDevice", false);
+            source.setProperty("serviceName", state->getProviderService());
           }
+
         }
         raisedEvent.setProperty("source", &source);
 
