@@ -28,7 +28,7 @@
                                               \            V
                                             +----------------+
                                             |ModelMaintenance|
-                        addModelEvent       |(exectue)       |
+                        addModelEvent       |(execute)       |
    +------------+ ------------------------> |meter-/deferred-|
    |BusEventSink|                           |and model-events|
    +------------+                           +----------------+
