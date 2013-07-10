@@ -149,8 +149,8 @@ namespace dss {
           if (oSystemAddonStates != NULL) {
             for (int k = 0; k < oAddonStateSubnode->getChildCount(); k++) {
               bool fFound = false;
-              std::string sName = oAddonStateNode->getChild(j)->getName();
-              std::string sValue = oAddonStateNode->getChild(j)->getAsString();
+              std::string sName = oAddonStateSubnode->getChild(k)->getName();
+              std::string sValue = oAddonStateSubnode->getChild(k)->getAsString();
               for (int i = 0; i < oSystemAddonStates->getChildCount(); i++) {
                 PropertyNodePtr nameNode =
                     oSystemAddonStates->getChild(i)->getPropertyByName("name");
