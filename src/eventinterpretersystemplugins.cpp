@@ -487,7 +487,7 @@ namespace dss {
 
     boost::shared_ptr<State> pState;
     try {
-      pState = DSS::getInstance()->getApartment().getState(oStateNode->getStringValue());
+      pState = DSS::getInstance()->getApartment().getNonScriptState(oStateNode->getStringValue());
     } catch(ItemNotFoundException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
           "executeStateChange - state '" + oStateNode->getStringValue() + "' does not exist", lsError);
@@ -515,6 +515,50 @@ namespace dss {
     } else {
       Logger::getInstance()->log("SystemEventActionExecute::"
           "executeStateChange: wrong data type for value or state parameter", lsError);
+    }
+  }
+
+  void SystemEventActionExecute::executeAddonStateChange(PropertyNodePtr _actionNode) {
+
+    PropertyNodePtr oScriptNode = _actionNode->getPropertyByName("addon-id");
+    if (oScriptNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeAddonStateChange - missing addon-id parameter", lsError);
+      return;
+    }
+
+    PropertyNodePtr oStateNode = _actionNode->getPropertyByName("statename");
+    if (oStateNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeAddonStateChange - missing statename parameter", lsError);
+      return;
+    }
+
+    boost::shared_ptr<State> pState;
+    try {
+      pState = DSS::getInstance()->getApartment().getState(StateType_Script,
+        oScriptNode->getStringValue(), oStateNode->getStringValue());
+    } catch(ItemNotFoundException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeAddonStateChange - state '" + oStateNode->getStringValue() + "' does not exist", lsError);
+      return;
+    }
+
+    PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
+    PropertyNodePtr oSValueNode = _actionNode->getPropertyByName("state");
+    if (oValueNode == NULL && oSValueNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeAddonStateChange: missing value or state parameter", lsError);
+      return;
+    }
+
+    if (oValueNode && oValueNode->getValueType() == vTypeInteger) {
+      pState->setState(coJSScripting, oValueNode->getIntegerValue());
+    } else if (oSValueNode && oSValueNode->getValueType() == vTypeString) {
+      pState->setState(coJSScripting, oSValueNode->getStringValue());
+    } else {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeAddonStateChange: wrong data type for value or state parameter", lsError);
     }
   }
 
@@ -554,7 +598,11 @@ namespace dss {
         } else if (sActionType == "change-state") {
           executeStateChange(_actionNode);
           return ACTION_DURATION_STATE_CHANGE;
+        } else if (sActionType == "change-addon-state") {
+          executeAddonStateChange(_actionNode);
+          return ACTION_DURATION_STATE_CHANGE;
         }
+
       } else {
         Logger::getInstance()->log("SystemEventActionExecute::"
                 "type is not available", lsError);
@@ -1214,7 +1262,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkState(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "stateChange") {
+    if ((m_evtName != "addonStateChange") && (m_evtName != "stateChange")) {
       return false;
     }
 
@@ -1227,6 +1275,18 @@ namespace dss {
     PropertyNodePtr triggerState = _triggerProp->getPropertyByName("state");
     PropertyNodePtr triggerValue = _triggerProp->getPropertyByName("value");
     PropertyNodePtr triggerOldvalue = _triggerProp->getPropertyByName("oldvalue");
+
+    if (m_evtName == "addonStateChange") {
+      std::string scriptID = m_properties.get("scriptID");
+      PropertyNodePtr triggerScriptID = _triggerProp->getPropertyByName("addon-id");      
+      if (triggerScriptID == NULL) {
+        return false;
+      }
+      std::string sScriptID = triggerScriptID->getAsString();
+      if (sScriptID != scriptID) {
+        return false;
+      }
+    }
 
     if (triggerName == NULL) {
       return false;
@@ -1345,9 +1405,13 @@ namespace dss {
             return true;
           }
         }
-
+      } else if (m_evtName == "addonStateChange") {
+        if (triggerValue == "addon-state-change") {
+          if (checkState(triggerProp)) {
+            return true;
+          }
+        }
       }
-
     } // for loop
     return false;
   }

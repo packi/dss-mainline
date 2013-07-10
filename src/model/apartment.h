@@ -34,6 +34,7 @@
 #include "src/subsystem.h"
 #include "src/mutex.h"
 #include "src/base.h"
+#include "src/model/state.h"
 
 namespace dss {
   class PropertyNode;
@@ -42,7 +43,6 @@ namespace dss {
   class DSMeter;
   class Device;
   class Group;
-  class State;
   class Event;
   class ModelMaintenance;
   class PropertySystem;
@@ -108,8 +108,14 @@ namespace dss {
 
     /** returns a vector of all states */
     std::vector<boost::shared_ptr<State> > getStates() const;
-    /** Returns the State by name */
-    boost::shared_ptr<State> getState(const std::string& _stateName) const;
+    /** Returns the State by name and type */
+    boost::shared_ptr<State> getState(const eStateType _type, 
+                                      const std::string& _stateName) const;
+    boost::shared_ptr<State> getNonScriptState(const std::string& _stateName) const;
+    /** Returns the state by type, identifier and name */
+    boost::shared_ptr<State> getState(const eStateType _type,
+                                      const std::string& _identifier,
+                                      const std::string& _stateName) const;
 
     /** Allocates a device and returns a reference to it. */
     boost::shared_ptr<Device> allocateDevice(const dss_dsid_t _dsid);
@@ -120,7 +126,9 @@ namespace dss {
       */
     boost::shared_ptr<Zone> allocateZone(int _zoneID);
     boost::shared_ptr<DSMeter> allocateDSMeter(const dss_dsid_t _dsid);
-    boost::shared_ptr<State> allocateState(const std::string& _name, const std::string& _scriptId);
+    boost::shared_ptr<State> allocateState(eStateType _type,
+                                           const std::string& _name,
+                                           const std::string& _scriptId);
     void allocateState(boost::shared_ptr<State> _state);
 
     void removeZone(int _zoneID);

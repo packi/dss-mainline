@@ -59,12 +59,13 @@ namespace dss {
     publishToPropertyTree();
   } // ctor
 
-  State::State(const std::string& _name, const std::string& _serviceId)
+  State::State(eStateType _type, const std::string& _name,
+               const std::string& _identifier)
   : m_name(_name),
     m_IsPersistent(false),
     m_state(State_Inactive),
-    m_type(StateType_Service),
-    m_serviceName(_serviceId)
+    m_type(_type),
+    m_serviceName(_identifier)
   {
     load();
     publishToPropertyTree();
@@ -110,12 +111,16 @@ namespace dss {
 
   void State::publishToPropertyTree() {
     removeFromPropertyTree();
+    std::string basepath = "/usr/states/";
+    if (m_type == StateType_Script) {
+      basepath = "/usr/addon-states/" + m_serviceName + "/";
+    }
     if (m_pPropertyNode == NULL && DSS::hasInstance()) {
-      if (DSS::getInstance()->getPropertySystem().getProperty("/usr/states/" + m_name) != NULL) {
+      if (DSS::getInstance()->getPropertySystem().getProperty(basepath + m_name) != NULL) {
         // avoid publishing duplicate state information when reading out devices multiple times
         return;
       }
-      m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty("/usr/states/" + m_name);
+      m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(basepath + m_name);
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyReference<std::string>(m_name, false));
       m_pPropertyNode->createProperty("value")
@@ -221,7 +226,13 @@ namespace dss {
       }
 
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("stateChange", shared_from_this()));
+
+      if (m_type == StateType_Script) {
+        pEvent.reset(new Event("addonStateChange", shared_from_this()));
+        pEvent->setProperty("scriptID", m_serviceName);
+      } else {
+        pEvent.reset(new Event("stateChange", shared_from_this()));
+      }
 
       pEvent->setProperty("statename", m_name);
       pEvent->setProperty("state", toString());

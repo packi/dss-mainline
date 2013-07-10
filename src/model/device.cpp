@@ -1594,7 +1594,7 @@ namespace dss {
       try {
         getApartment().allocateState(state);
       } catch (ItemDuplicateException& ex) {
-        state = getApartment().getState(state->getName());
+        state = getApartment().getNonScriptState(state->getName());
       }
       m_binaryInputStates.push_back(state);
 

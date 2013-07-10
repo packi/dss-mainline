@@ -23,15 +23,15 @@
 function bootstrap()
 {
     print("Setup system state handling...");
-    registerState("alarm", true);
-    registerState("alarm2", true);
-    registerState("alarm3", true);
-    registerState("alarm4", true);
-    registerState("panic", true);
-    registerState("fire", true);
-    registerState("wind", true);
-    registerState("rain", true);
-    registerState("hail", true);
+    registerState("alarm", true, false);
+    registerState("alarm2", true, false);
+    registerState("alarm3", true, false);
+    registerState("alarm4", true, false);
+    registerState("panic", true, false);
+    registerState("fire", true, false);
+    registerState("wind", true, false);
+    registerState("rain", true, false);
+    registerState("hail", true, false);
 }
 
 function getOrRegisterState(stateName)
@@ -41,7 +41,7 @@ function getOrRegisterState(stateName)
         s = getState(stateName);
     }
     catch(err) {
-        s = registerState(stateName, true);
+        s = registerState(stateName, true, false);
     }
     return s;
 }
@@ -139,7 +139,7 @@ function startup()
             }
             if (gindex >= 16 && gindex <= 23) {
                 if (g.getChild('color').getValue() == 2) {
-                    registerState('wind.group' + gindex, true);
+                    registerState('wind.group' + gindex, true, false);
                 }
                 continue;
             }

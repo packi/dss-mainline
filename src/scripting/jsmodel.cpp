@@ -310,8 +310,26 @@ namespace dss {
         JS_ReportError(cx, "Error converting parameter: state name");
         return JS_FALSE;
       }
+
+      eStateType stateType = StateType_Script;
       try {
-        boost::shared_ptr<State> state = ext->getApartment().getState(stateName);
+        if (argc >= 2) {
+          if (!ctx->convertTo<bool>(JS_ARGV(cx, vp)[1])) { // private param false
+            stateType = StateType_Service;
+          }
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: persistence");
+        return JS_FALSE;
+      }
+
+      boost::shared_ptr<State> state;
+      try {
+        if (stateType == StateType_Script) {
+          state = ext->getApartment().getState(StateType_Script, ctx->getWrapper()->getIdentifier(), stateName);
+        } else {
+          state = ext->getApartment().getState(StateType_Script, stateName);
+        }
         JSObject* obj = ext->createJSState(*ctx, state);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
         return JS_TRUE;
@@ -356,8 +374,25 @@ namespace dss {
         return JS_FALSE;
       }
 
+      eStateType stateType = StateType_Script;
+
       try {
-        boost::shared_ptr<State> state = ext->getApartment().allocateState(stateName, ctx->getWrapper()->getIdentifier());
+        if (argc >= 3) {
+          if (!ctx->convertTo<bool>(JS_ARGV(cx, vp)[2])) {
+            stateType = StateType_Service;
+          }
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: private");
+        return JS_FALSE;
+      }
+
+      std::string identifier;
+      if (stateType == StateType_Script) {
+        identifier = ctx->getWrapper()->getIdentifier();
+      }
+      try {
+        boost::shared_ptr<State> state = ext->getApartment().allocateState(stateType, stateName, identifier);
         state->setPersistence(isPersistent);
         JSObject* obj = ext->createJSState(*ctx, state);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
@@ -2539,7 +2574,8 @@ namespace dss {
     try {
       boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pState;
       if (pState != NULL) {
-        if (pState->getType() != StateType_Service) {
+        if ((pState->getType() != StateType_Service) &&
+            (pState->getType() != StateType_Script)) {
           JS_ReportError(cx, "State type is not allowed to be set by scripting");
           JS_SET_RVAL(cx, vp, JSVAL_NULL);
           return JS_FALSE;

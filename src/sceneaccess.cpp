@@ -54,7 +54,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     /*
      * Fire: Prohibit all automatic actions.
      */
-    boost::shared_ptr<State> fire = apartment.getState("fire");
+    boost::shared_ptr<State> fire = apartment.getNonScriptState("fire");
     if (fire && (fire->getState() == State_Active)) {
       switch (_category) {
       case SAC_MANUAL:
@@ -69,7 +69,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     /*
      * Wind: Prohibit automatic actions in group shade
      */
-    boost::shared_ptr<State> wind = apartment.getState("wind");
+    boost::shared_ptr<State> wind = apartment.getNonScriptState("wind");
     if (wind && (wind->getState() == State_Active)) {
       const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
       if (pGroup != NULL) {
@@ -111,7 +111,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
       if (gr && gr->isValid() && gr->getStandardGroupID() == DEVICE_CLASS_GR) {
         boost::shared_ptr<State> wind;
         try {
-          wind = apartment.getState("wind.group" + intToString(i));
+          wind = apartment.getNonScriptState("wind.group" + intToString(i));
         } catch (ItemNotFoundException& e) {
           continue;
         }
