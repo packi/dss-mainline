@@ -130,7 +130,7 @@ namespace dss {
     }
     if (m_GroupID == GroupIDYellow) {
       try {
-        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
         state->setState(_origin, _on == true ? 1 : 2);
@@ -145,7 +145,7 @@ namespace dss {
     if (m_GroupID == GroupIDYellow) {
       bool isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
       try {
-        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
         state->setState(_origin, isOn == true ? 1 : 2);
@@ -161,7 +161,7 @@ namespace dss {
     // only publish states for light
     if (m_GroupID == GroupIDYellow) {
       try {
-        boost::shared_ptr<State> state = m_pApartment->getState("zone." +
+        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
         return state->getState();

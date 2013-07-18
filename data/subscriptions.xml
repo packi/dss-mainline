@@ -23,6 +23,9 @@
   <subscription event-name="stateChange" handler-name="system_trigger">
   </subscription>
 
+  <subscription event-name="addonStateChange" handler-name="system_trigger">
+  </subscription>
+
   <subscription event-name="action_execute" handler-name="action_execute">
   </subscription>
 
@@ -149,6 +152,13 @@
     <parameter>
       <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="filename2">scripts/system_state.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+
+  <subscription event-name="addonStateChange" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>

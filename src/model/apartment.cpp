@@ -428,14 +428,15 @@ namespace dss {
     }
   } // removeInactiveMeters
 
-  boost::shared_ptr<State> Apartment::allocateState(const std::string& _stateName, const std::string& _scriptId) {
+  boost::shared_ptr<State> Apartment::allocateState(const eStateType _type, const std::string& _stateName, const std::string& _scriptId) {
     AssertLocked lock(this);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
     boost::shared_ptr<State> result;
     foreach(boost::shared_ptr<State> state, m_States) {
-      if(state->getName() == _stateName) {
+      if ((state->getName() == _stateName) && (state->getType() == _type) &&
+          (state->getProviderService() == _scriptId)) {
         result = state;
         break;
       }
@@ -443,7 +444,7 @@ namespace dss {
 
     if(result == NULL) {
       if (_scriptId.length()) {
-        result.reset(new State(_stateName, _scriptId));
+        result.reset(new State(_type, _stateName, _scriptId));
       } else {
         result.reset(new State(_stateName));
       }
@@ -466,18 +467,49 @@ namespace dss {
     m_States.push_back(_state);
   } // allocateState
 
-  boost::shared_ptr<State> Apartment::getState(const std::string& _name) const {
+  boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
     AssertLocked lock(this);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkReadAccess();
     }
     foreach(boost::shared_ptr<State> state, m_States) {
-      if(state->getName() == _name) {
+      if ((state->getType() == _type) && (state->getName() == _name)) {
         return state;
       }
     }
     throw ItemNotFoundException(_name);
   } // getState
+
+  boost::shared_ptr<State> Apartment::getNonScriptState(const std::string& _stateName) const {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    foreach(boost::shared_ptr<State> state, m_States) {
+      if ((state->getType() != StateType_Script) &&
+          (state->getName() == _stateName)) {
+        return state;
+      }
+    }
+    throw ItemNotFoundException(_stateName);
+  }
+
+  boost::shared_ptr<State> Apartment::getState(const eStateType _type,
+                                               const std::string& _identifier,
+                                               const std::string& _stateName) const {
+    AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
+    foreach(boost::shared_ptr<State> state, m_States) {
+      if ((state->getType() == _type) &&
+          (state->getProviderService() == _identifier) &&
+          (state->getName() == _stateName)) {
+        return state;
+      }
+    }
+    throw ItemNotFoundException(_stateName);
+  }
 
   std::vector<boost::shared_ptr<State> > Apartment::getStates() const {
     AssertLocked lock(this);
