@@ -38,7 +38,7 @@ function getOrRegisterState(stateName)
 {
     var s;
     try {
-        s = getState(stateName);
+        s = getState(stateName, false);
     }
     catch(err) {
         s = registerState(stateName, true, false);
@@ -177,7 +177,7 @@ function startup()
     }
 
     var state;
-    state = getState('panic');
+    state = getState('panic', false);
     if (panic === true && state.getValue() == 'inactive') {
         state.setValue('active');
     }
@@ -185,7 +185,7 @@ function startup()
         state.setValue('inactive');
     }
 
-    state = getState('alarm');
+    state = getState('alarm', false);
     if (alarm === true && state.getValue() == 'inactive') {
         state.setValue('active');
     }
@@ -231,27 +231,27 @@ function callscene()
         pNode.setStatusValue("awake");
     }
     else if (groupID === 0 && sceneID === Scene.Panic) {
-        state = getState('panic');
+        state = getState('panic', false);
         state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Fire) {
-        state = getState('fire');
+        state = getState('fire', false);
         state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm) {
-        state = getState('alarm');
+        state = getState('alarm', false);
         state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm2) {
-        state = getState('alarm2');
+        state = getState('alarm2', false);
         state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm3) {
-        state = getState('alarm3');
+        state = getState('alarm3', false);
         state.setValue('active', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm4) {
-        state = getState('alarm4');
+        state = getState('alarm4', false);
         state.setValue('active', 7);
     }
     else if (sceneID === Scene.WindActive) {
@@ -318,27 +318,27 @@ function undoscene()
     var state;
 
     if (groupID === 0 && sceneID === Scene.Panic) {
-        state = getState('panic');
+        state = getState('panic', false);
         state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Fire) {
-        state = getState('fire');
+        state = getState('fire', false);
         state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm) {
-        state = getState('alarm');
+        state = getState('alarm', false);
         state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm2) {
-        state = getState('alarm2');
+        state = getState('alarm2', false);
         state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm3) {
-        state = getState('alarm3');
+        state = getState('alarm3', false);
         state.setValue('inactive', 7);
     }
     else if (groupID === 0 && sceneID === Scene.Alarm4) {
-        state = getState('alarm4');
+        state = getState('alarm4', false);
         state.setValue('inactive', 7);
     }
 }
@@ -409,7 +409,7 @@ function stateBinaryinput()
             // Smoke Detector
             if (inputType === 7) {
                 var stateName = 'fire';
-                var state = getState(stateName);
+                var state = getState(stateName, false);
                 if (raisedEvent.parameter.value == "1") {
                     state.setValue('active');
                 }
