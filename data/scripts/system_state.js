@@ -510,14 +510,6 @@ function stateApartment()
             z.callSceneSys(groupId, Scene.WindInactive, false, "manual");
         }
     }
-    if (stateName.substring(0, 4) == 'hail') {
-        if (raisedEvent.parameter.value == '1') {
-            z.callSceneSys(groupId, Scene.HailActive, false, "manual");
-        }
-        if (raisedEvent.parameter.value == '2') {
-            z.callSceneSys(groupId, Scene.HailInactive, false, "manual");
-        }
-    }
 }
 
 if (raisedEvent.name == 'running') {
