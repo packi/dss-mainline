@@ -1608,7 +1608,7 @@ namespace dss {
                          "&LanguageCode=" + language;
 
     Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
-    long res = url.request(eanURL, false, &result);
+    long res = url.request(eanURL, GET, &result);
     if (res == 200) {
       Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + std::string(result.memory));
       struct json_tokener* tok;

@@ -30,6 +30,7 @@
 
 #include "logger.h"
 #include "url.h"
+#include "base.h"
 
 namespace dss {
 
@@ -54,17 +55,38 @@ size_t URL::writeMemoryCallback(void* contents, size_t size, size_t nmemb, void*
   return realsize;
 }
 
-long URL::request(std::string url, bool HTTP_POST, struct URLResult* result) {
+long URL::request(const std::string& url, RequestType type, struct URLResult* result)
+{
+  return request(url, type, NULL, result);
+}
+
+long URL::request(const std::string& url, RequestType type,
+                  const HashMapStringString* headers,
+                  struct URLResult* result)
+{
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+  struct curl_slist *cheaders = NULL;
   long http_code = -1;
 
   CURL *curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-  if (HTTP_POST) {
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, 1);
-  } else {
+
+  switch (type) {
+  case GET:
     curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
+    break;
+  case POST:
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, 1);
+    break;
+  }
+
+  if (headers && !headers->empty()) {
+    for (HashMapStringString::const_iterator it = headers->begin();
+         it != headers->end(); it++) {
+      cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
+    }
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, cheaders);
   }
 
   if (result != NULL) {
@@ -79,6 +101,10 @@ long URL::request(std::string url, bool HTTP_POST, struct URLResult* result) {
     Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
     curl_easy_cleanup(curl_handle);
     return http_code;
+  }
+
+  if (cheaders) {
+    curl_slist_free_all(cheaders);
   }
 
   curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);

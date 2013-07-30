@@ -25,7 +25,15 @@
 
 #ifdef HAVE_CURL
 
+#include "base.h"
+
 namespace dss {
+
+  typedef enum {
+    GET,
+    POST,
+  } RequestType;
+
   class URL {
     public:
       struct URLResult {
@@ -34,7 +42,11 @@ namespace dss {
         URLResult() : memory(NULL), size(0) {}
       };
       URL();
-      long request(std::string url, bool HTTP_POST = false, struct URLResult* result = NULL);
+      long request(const std::string& url, RequestType type = GET,
+                   struct URLResult* result = NULL);
+      long request(const std::string& url, RequestType type,
+                   const HashMapStringString* headers,
+                   struct URLResult* result);
       long downloadFile(std::string url, std::string filename);
     private:
       static size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp);
