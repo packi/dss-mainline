@@ -366,7 +366,7 @@ namespace dss {
     virtual void execute();
     void executePendingEvent();
 
-    void addPlugin(EventInterpreterPlugin* _plugin);
+    EventInterpreter& addPlugin(EventInterpreterPlugin* _plugin);
     EventInterpreterPlugin* getPluginByName(const std::string& _name);
 
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);

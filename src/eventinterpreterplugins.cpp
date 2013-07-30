@@ -1000,4 +1000,21 @@ namespace dss {
       m_timestamp = DateTime();
     }
   }
+
+  EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
+                                                                               _pInterpreter)
+        : EventInterpreterPlugin("apartment_model_change", _pInterpreter)
+  {
+  }
+
+  void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    Logger::getInstance()->log("handleEvent: name " + _event.getName());
+
+    HashMapStringString ps = _event.getProperties().getContainer();
+    for (HashMapStringString::iterator it = ps.begin(); it != ps.end(); it++) {
+      Logger::getInstance()->log(" name " + it->first + " : " + it->second);
+
+    }
+  }
 } // namespace dss

@@ -313,8 +313,9 @@ namespace dss {
     }
   } // initialize
 
-  void EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
+  EventInterpreter& EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
     m_Plugins.push_back(_plugin);
+    return *this;
   } // addPlugin
 
   void EventInterpreter::execute() {

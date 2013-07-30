@@ -135,6 +135,13 @@ namespace dss {
     EventInterpreterPluginExecutionDeniedDigest(EventInterpreter* _pInterpreter);
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
+
+  class EventInterpreterPluginApartmentChange : public EventInterpreterPlugin {
+  public:
+    EventInterpreterPluginApartmentChange(EventInterpreter* _pInterpreter);
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+
+  };
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */
