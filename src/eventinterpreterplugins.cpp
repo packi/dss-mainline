@@ -256,6 +256,18 @@ namespace dss {
       } else {
         pNode = wrapper->getPropertyNode();
       }
+
+      boost::shared_ptr<Event> pEvent;
+      if (wrapper->getIdentifier().find("user-defined-actions") != std::string::npos) {
+        pEvent = ModelChangedEvent::createUdaChanged();
+      } else if (wrapper->getIdentifier().find("system-addon-timed-events") != std::string::npos) {
+        pEvent = ModelChangedEvent::createTimedEventChanged();
+      }
+
+      if (pEvent) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+
       // TODO: sanitize filename to prevent world-domination
       return m_PropertySystem.saveToXML(
                                 m_StoreDirectory + fileName + ".xml",

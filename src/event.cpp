@@ -57,8 +57,8 @@ namespace dss {
     const char* Time = "time";
     const char* ICalStartTime = "iCalStartTime";
     const char* ICalRRule = "iCalRRule";
+    const char* Unique = "unique";
   }
-
 
   //================================================== Event
 
@@ -202,6 +202,35 @@ namespace dss {
     }
   } // applyProperties
 
+
+  //================================================== ModelChangedEvent
+  //
+  const char *ModelChangedEvent::Apartment = "apartmentModelChanged";
+  const char *ModelChangedEvent::UserDefinedAction = "userDefinedActionChanged";
+  const char *ModelChangedEvent::TimedEvent = "timedEventChanged";
+
+  boost::shared_ptr<Event> ModelChangedEvent::createEvent(const char *desc)
+  {
+    boost::shared_ptr<Event> pEvent(new Event(desc));
+    pEvent->setProperty(EventProperty::Time, "+" + intToString(30));
+    pEvent->setProperty(EventProperty::Unique, "Yes");
+    return pEvent;
+  }
+
+  boost::shared_ptr<Event> ModelChangedEvent::createApartmentChanged()
+  {
+    return createEvent(Apartment);
+  }
+
+  boost::shared_ptr<Event> ModelChangedEvent::createTimedEventChanged()
+  {
+    return createEvent(TimedEvent);
+  }
+
+  boost::shared_ptr<Event> ModelChangedEvent::createUdaChanged()
+  {
+    return createEvent(UserDefinedAction);
+  }
 
   //================================================== EventInterpreter
 
@@ -628,7 +657,7 @@ namespace dss {
       m_EventRunner->addEvent(scheduledEvent);
     } else {
       bool addToQueue = true;
-      if(!_event->getPropertyByName("unique").empty()) {
+      if(!_event->getPropertyByName(EventProperty::Unique).empty()) {
         boost::mutex::scoped_lock lock(m_QueueMutex);
 
         foreach(boost::shared_ptr<Event> pEvent, m_EventQueue) {
@@ -776,7 +805,7 @@ namespace dss {
 
     boost::mutex::scoped_lock lock(m_EventsMutex);
     bool addToQueue = true;
-    if(!_scheduledEvent->getEvent()->getPropertyByName("unique").empty()) {
+    if(!_scheduledEvent->getEvent()->getPropertyByName(EventProperty::Unique).empty()) {
       foreach(ScheduledEvent& scheduledEvent, m_ScheduledEvents) {
         if(_scheduledEvent->getEvent()->isReplacementFor(*scheduledEvent.getEvent())) {
           scheduledEvent.getEvent()->setProperties(_scheduledEvent->getEvent()->getProperties());
@@ -785,8 +814,10 @@ namespace dss {
             scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
           }
           addToQueue = false;
-          if( DebugEventRunner) {
-            log("Runner: found target for unique event, not adding it to the queue");
+          if (DebugEventRunner) {
+            log("Runner: merge unique event " +
+                _scheduledEvent->getEvent()->getName() + " scheduled " +
+                scheduledEvent.getSchedule().getNextOccurence(DateTime()).toString());
           }
           break;
         }
