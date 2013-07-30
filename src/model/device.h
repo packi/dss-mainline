@@ -353,6 +353,7 @@ namespace dss {
     void setName(const std::string& _name);
 
     const std::string& getHWInfo() const { return m_HWInfo; }
+    const std::string& getGTIN() const { return m_GTIN; }
     const std::string& getIconPath() const { return m_iconPath; }
 
     /** Returns the group bitmask (1 based) of the device */
