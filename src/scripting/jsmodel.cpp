@@ -328,7 +328,7 @@ namespace dss {
         if (stateType == StateType_Script) {
           state = ext->getApartment().getState(StateType_Script, ctx->getWrapper()->getIdentifier(), stateName);
         } else {
-          state = ext->getApartment().getState(StateType_Script, stateName);
+          state = ext->getApartment().getState(StateType_Service, stateName);
         }
         JSObject* obj = ext->createJSState(*ctx, state);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
@@ -375,7 +375,6 @@ namespace dss {
       }
 
       eStateType stateType = StateType_Script;
-
       try {
         if (argc >= 3) {
           if (!ctx->convertTo<bool>(JS_ARGV(cx, vp)[2])) {
@@ -387,10 +386,7 @@ namespace dss {
         return JS_FALSE;
       }
 
-      std::string identifier;
-      if (stateType == StateType_Script) {
-        identifier = ctx->getWrapper()->getIdentifier();
-      }
+      std::string identifier = ctx->getWrapper()->getIdentifier();
       try {
         boost::shared_ptr<State> state = ext->getApartment().allocateState(stateType, stateName, identifier);
         state->setPersistence(isPersistent);

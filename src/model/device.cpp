@@ -1117,6 +1117,8 @@ namespace dss {
         return DEVICE_TYPE_SDS;
       case 8:
         return DEVICE_TYPE_AKM;
+      case 10:
+        return DEVICE_TYPE_TNY;
       default:
         return DEVICE_TYPE_INVALID;
     }
@@ -1140,6 +1142,8 @@ namespace dss {
         return "SDS";
       case DEVICE_TYPE_AKM:
         return "AKM";
+      case DEVICE_TYPE_TNY:
+        return "TNY";
       default:
         return "";
     }
