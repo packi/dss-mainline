@@ -147,6 +147,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pPropertySystem->createProperty("/system/version/distroVersion")->setStringValue(readDistroVersion());
     m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
     m_pPropertySystem->createProperty("/system/version/gitRevision")->setStringValue(DSS_RCS_REVISION);
+    m_pPropertySystem->createProperty(ModelChangedEvent::propPathDelay)->setIntegerValue(30);
   } // ctor
 
   DSS::~DSS() {

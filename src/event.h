@@ -134,6 +134,9 @@ namespace dss {
     static const char *TimedEvent;
     static const char *UserDefinedAction;
 
+    /* property path */
+    static const char *propPathDelay;
+
     /* has to be different events, for 'Unique' to work */
     static boost::shared_ptr<Event> createApartmentChanged();
     static boost::shared_ptr<Event> createTimedEventChanged();

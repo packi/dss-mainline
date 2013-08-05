@@ -209,10 +209,15 @@ namespace dss {
   const char *ModelChangedEvent::UserDefinedAction = "userDefinedActionChanged";
   const char *ModelChangedEvent::TimedEvent = "timedEventChanged";
 
+  const char *ModelChangedEvent::propPathDelay= "/config/cloud-api/model-pusher/delay";
+
   boost::shared_ptr<Event> ModelChangedEvent::createEvent(const char *desc)
   {
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+
     boost::shared_ptr<Event> pEvent(new Event(desc));
-    pEvent->setProperty(EventProperty::Time, "+" + intToString(30));
+    pEvent->setProperty(EventProperty::Time, "+" +
+                        intToString(propSystem.getIntValue(propPathDelay)));
     pEvent->setProperty(EventProperty::Unique, "Yes");
     return pEvent;
   }
