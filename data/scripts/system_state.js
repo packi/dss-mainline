@@ -445,7 +445,7 @@ function stateBinaryinput()
 
 function stateBinaryInputGeneric(stateName, targetType, targetId, parameter)
 {
-    var state = getState(stateName);
+    var state = getState(stateName, false);
 
     var cntNode = Property.getNode(stateName + '.' + targetType + '.' + targetId);
     if (cntNode == null) {
