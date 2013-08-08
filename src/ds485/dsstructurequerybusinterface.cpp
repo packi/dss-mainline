@@ -73,6 +73,7 @@ namespace dss {
     result.DSID = _dsMeterID;
     dsid_t dsid;
     uint8_t nameBuf[NAME_LEN];
+    uint8_t flags;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
     int ret = dSMInfo(m_DSMApiHandle, dsid, &result.HardwareVersion,
                       &result.SoftwareRevisionARM, &result.SoftwareRevisionDSP,
@@ -82,6 +83,10 @@ namespace dss {
     char nameStr[NAME_LEN];
     memcpy(nameStr, nameBuf, NAME_LEN);
     result.Name = nameStr;
+
+    ret = dSMProperties_get_flags(m_DSMApiHandle, dsid, &flags);
+    DSBusInterface::checkResultCode(ret);
+    result.flags = std::bitset<8>(flags);
     return result;
   } // getDSMeterSpec
 

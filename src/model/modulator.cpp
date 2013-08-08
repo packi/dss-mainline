@@ -49,7 +49,8 @@ namespace dss {
     m_IsInitialized(false),
     m_HasPendingEvents(false),
     m_pApartment(_pApartment),
-    m_BinaryInputEventCount(_dsid.toString())
+    m_BinaryInputEventCount(_dsid.toString()),
+    m_dSMPropertyFlags(0)
   {
     publishToPropertyTree();
   } // ctor

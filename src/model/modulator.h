@@ -25,6 +25,7 @@
 #define MODULATOR_H
 
 #include <string>
+#include <bitset>
 
 #include <boost/shared_ptr.hpp>
 
@@ -66,6 +67,7 @@ namespace dss {
     unsigned int m_DatamodelHash;
     unsigned int m_DatamoderModificationCount;
     PersistentCounter m_BinaryInputEventCount;
+    std::bitset<8> m_dSMPropertyFlags;
   private:
     void publishToPropertyTree();
   public:
@@ -125,7 +127,8 @@ namespace dss {
     unsigned int getBinaryInputEventCount() const { return m_BinaryInputEventCount.getValue(); }
     void setBinaryInputEventCount(const unsigned int _value) { m_BinaryInputEventCount.setValue(_value); }
     void incrementBinaryInputEventCount() { m_BinaryInputEventCount.increment(); }
-
+    void setPropertyFlags(std::bitset<8> _flags) { m_dSMPropertyFlags = _flags; }
+    std::bitset<8> getPropertyFlags() { return m_dSMPropertyFlags; }
     /** Returns true if the dsMeter has been read-out completely. */
     bool isInitialized() const { return m_IsInitialized; }
     void setIsInitialized(const bool _value) { m_IsInitialized = _value; }
