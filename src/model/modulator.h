@@ -68,6 +68,7 @@ namespace dss {
     unsigned int m_DatamoderModificationCount;
     PersistentCounter m_BinaryInputEventCount;
     std::bitset<8> m_dSMPropertyFlags;
+    bool m_IgnoreActionsFromNewDevices;
   private:
     void publishToPropertyTree();
   public:
@@ -127,7 +128,7 @@ namespace dss {
     unsigned int getBinaryInputEventCount() const { return m_BinaryInputEventCount.getValue(); }
     void setBinaryInputEventCount(const unsigned int _value) { m_BinaryInputEventCount.setValue(_value); }
     void incrementBinaryInputEventCount() { m_BinaryInputEventCount.increment(); }
-    void setPropertyFlags(std::bitset<8> _flags) { m_dSMPropertyFlags = _flags; }
+    void setPropertyFlags(std::bitset<8> _flags);
     std::bitset<8> getPropertyFlags() { return m_dSMPropertyFlags; }
     /** Returns true if the dsMeter has been read-out completely. */
     bool isInitialized() const { return m_IsInitialized; }
