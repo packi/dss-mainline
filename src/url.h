@@ -34,20 +34,32 @@ namespace dss {
     POST,
   } RequestType;
 
+  struct URLResult {
+      char* memory;
+      size_t size;
+      URLResult() : memory(NULL), size(0) {}
+  };
+
   class URL {
     public:
-      struct URLResult {
-        char* memory;
-        size_t size;
-        URLResult() : memory(NULL), size(0) {}
-      };
+
+      static HashMapStringString emptyHeader;
+      static HashMapStringString emptyForm;
+
       URL();
+
       long request(const std::string& url, RequestType type = GET,
                    struct URLResult* result = NULL);
+
       long request(const std::string& url, RequestType type,
-                   const HashMapStringString* headers,
+                   const HashMapStringString &headers,
+                   const HashMapStringString &formpost,
                    struct URLResult* result);
+
       long downloadFile(std::string url, std::string filename);
+
+      /* TODO evtl. URI wrapper easy appending/parsing of query options */
+
     private:
       static size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp);
   };

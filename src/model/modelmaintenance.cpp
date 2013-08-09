@@ -1587,7 +1587,7 @@ namespace dss {
       return;
     }
     URL url;
-    URL::URLResult result;
+    URLResult result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     std::string productName;
     boost::filesystem::path iconFile;

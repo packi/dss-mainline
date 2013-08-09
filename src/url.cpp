@@ -28,11 +28,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "foreach.h"
 #include "logger.h"
 #include "url.h"
 #include "base.h"
 
 namespace dss {
+
+HashMapStringString URL::emptyHeader;
+HashMapStringString URL::emptyForm;
 
 URL::URL() {}
 
@@ -57,36 +61,47 @@ size_t URL::writeMemoryCallback(void* contents, size_t size, size_t nmemb, void*
 
 long URL::request(const std::string& url, RequestType type, struct URLResult* result)
 {
-  return request(url, type, NULL, result);
+  return request(url, type, HashMapStringString(), HashMapStringString(), result);
 }
 
 long URL::request(const std::string& url, RequestType type,
-                  const HashMapStringString* headers,
+                  const HashMapStringString &headers,
+                  const HashMapStringString &formpost,
                   struct URLResult* result)
 {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   struct curl_slist *cheaders = NULL;
+  struct curl_httppost *formpost_start = NULL;
+  struct curl_httppost *formpost_end = NULL;
   long http_code = -1;
 
   CURL *curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 
+  if (!headers.empty()) {
+    foreach(HashMapStringString::value_type elt, headers) {
+      cheaders = curl_slist_append(cheaders, (elt.first + ": " + elt.second).c_str());
+    }
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, cheaders);
+  }
+
   switch (type) {
   case GET:
     curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
     break;
   case POST:
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, 1);
-    break;
-  }
-
-  if (headers && !headers->empty()) {
-    for (HashMapStringString::const_iterator it = headers->begin();
-         it != headers->end(); it++) {
-      cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
+    curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
+    foreach(HashMapStringString::value_type elt, formpost) {
+      curl_formadd(&formpost_start, &formpost_end,
+                   CURLFORM_COPYNAME, elt.first.c_str(),
+                   CURLFORM_COPYCONTENTS, elt.second.c_str(),
+                   CURLFORM_END);
     }
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, cheaders);
+    /* must be set even if it's null */
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost_start);
+    break;
   }
 
   if (result != NULL) {
@@ -105,6 +120,10 @@ long URL::request(const std::string& url, RequestType type,
 
   if (cheaders) {
     curl_slist_free_all(cheaders);
+  }
+
+  if (formpost_start) {
+    curl_formfree(formpost_start);
   }
 
   curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
