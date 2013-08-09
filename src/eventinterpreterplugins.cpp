@@ -47,6 +47,7 @@
 #include "src/model/state.h"
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
+#include "src/url.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -1007,14 +1008,78 @@ namespace dss {
   {
   }
 
+  int EventInterpreterPluginApartmentChange::doCall(ChangeType type)
+  {
+    const char* sDsid = "/system/dSID";
+
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+
+    std::string url(propSystem.getStringValue(ModelChangedEvent::propPathUrl));
+
+    url += "?apartmentChangeType=";
+    switch (type) {
+    case Apartment:
+        url += "Apartment";
+        break;
+    case TimedEvent:
+        url += "TimedEvent";
+        break;
+    case UDA:
+        url += "UserDefinedAction";
+        break;
+    }
+    url += "&dssid=" + propSystem.getStringValue(sDsid);
+
+    Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+            " executeURL: " + url);
+
+    URLResult result;
+    boost::shared_ptr<URL> curl(new URL());
+    long code = curl->request(url, POST, URL::emptyHeader, URL::emptyForm, &result);
+    if (code != 0) {
+      const char *desc;
+      switch (code) {
+      case 1:
+        desc = "The dSS was not found in the database";
+        break;
+      case 2:
+        desc = "Wrong type given";
+        break;
+      default:
+      case 99:
+        desc = "Unknown Exception";
+        break;
+      }
+      Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                                 ": " + desc, lsError);
+      return code;
+    }
+
+    return 0;
+  }
+
+
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-    Logger::getInstance()->log("handleEvent: name " + _event.getName());
-
     HashMapStringString ps = _event.getProperties().getContainer();
     for (HashMapStringString::iterator it = ps.begin(); it != ps.end(); it++) {
       Logger::getInstance()->log(" name " + it->first + " : " + it->second);
-
     }
+
+    ChangeType type;
+    /* momentan ist definiert: 1=Apartment, 2=TimedEvent, 3=UDA */
+    if (_event.getName() == ModelChangedEvent::Apartment) {
+      type = Apartment;
+    } else if (_event.getName() == ModelChangedEvent::TimedEvent) {
+      type = TimedEvent;
+    } else if (_event.getName() == ModelChangedEvent::UserDefinedAction) {
+      type = UDA;
+    } else {
+      Logger::getInstance()->log(" unkown ModelChange event " +
+                                 _event.getName(), lsError);
+    }
+
+    /* ignore retval, error already logged */
+    (void)doCall(type);
   }
 } // namespace dss
