@@ -47,6 +47,7 @@ namespace dss {
     uint32_t HardwareVersion;
     uint16_t APIVersion;
     std::string Name;
+    std::bitset<8> flags;
   } DSMeterSpec_t;
 
   typedef struct {

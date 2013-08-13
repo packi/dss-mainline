@@ -1197,6 +1197,20 @@ namespace dss {
       }
   }
 
+  void ModelMaintenance::onDsmFlagsChanged(dss_dsid_t _meterID,
+                                          const std::bitset<8> _flags)
+  {
+      log("dSM flags changed on the bus. Meter: " + _meterID.toString(), lsInfo);
+      try {
+        boost::shared_ptr<DSMeter> pMeter =
+          m_pApartment->getDSMeterByDSID(_meterID);
+        pMeter->setPropertyFlags(_flags);
+
+      } catch(ItemNotFoundException& e) {
+        log("onDsmFlagsChanged: Item not found: " + std::string(e.what()));
+      }
+  }
+
   void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const bool _forced) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {

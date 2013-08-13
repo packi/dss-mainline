@@ -75,6 +75,7 @@ namespace dss {
         _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
         _dsMeter->setHardwareVersion(spec.HardwareVersion);
         _dsMeter->setApiVersion(spec.APIVersion);
+        _dsMeter->setPropertyFlags(spec.flags);
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }

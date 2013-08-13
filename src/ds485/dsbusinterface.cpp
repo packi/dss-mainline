@@ -422,6 +422,13 @@ namespace dss {
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_VALUE,
                         &callback_struct);
 
+      dSMProperties_set_flags_request_callback_t dSMSetFlagsCallback = DSBusInterface::handleDsmSetFlagsCallback;
+      callback_struct.function = (void*)dSMSetFlagsCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        DSM_PROPERTIES, DSM_PROPERTIES_SET_FLAGS,
+                        &callback_struct);
+
       m_dsmApiReady = true;
     }
   }
@@ -952,5 +959,22 @@ namespace dss {
     return m_pActionRequestInterface.get();
   } // getActionRequestInterface
 
+  void DSBusInterface::handleDsmSetFlags(dsid_t _destinationID,
+                                         std::bitset<8> _flags) {
+    loginFromCallback();
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_destinationID, dsMeterID);
+    m_pModelMaintenance->onDsmFlagsChanged(dsMeterID, _flags);
+  } //handleDsmSetName
+
+  void DSBusInterface::handleDsmSetFlagsCallback(uint8_t _errorCode,
+                                                void *_userData,
+                                                dsid_t _sourceID,
+                                                dsid_t _destinationID,
+                                                uint8_t _flags) {
+
+    static_cast<DSBusInterface*>(_userData)->handleDsmSetFlags(_destinationID,
+                                                        std::bitset<8>(_flags));
+  } // handleDsmSetNameCallback
 
 } // namespace dss

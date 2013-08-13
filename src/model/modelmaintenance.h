@@ -146,6 +146,7 @@ namespace dss {
     void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
                              const std::string& _name);
     void onDsmNameChanged(dss_dsid_t _meterID, const std::string& _name);
+    void onDsmFlagsChanged(dss_dsid_t _meterID, const std::bitset<8> _flags);
 
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
