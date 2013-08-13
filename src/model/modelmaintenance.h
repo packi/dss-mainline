@@ -27,14 +27,13 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/filesystem.hpp>
 
+#include "dssfwd.h"
 #include "src/subsystem.h"
 #include "src/thread.h"
 #include "src/syncevent.h"
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
-#include "src/event.h"
-#include "src/internaleventrelaytarget.h"
 
 namespace dss {
   class Apartment;

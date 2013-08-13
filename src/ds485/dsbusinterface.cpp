@@ -31,7 +31,6 @@
 
 #include "src/dss.h"
 #include "src/logger.h"
-#include "src/event.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"
 #include "src/dsidhelper.h"

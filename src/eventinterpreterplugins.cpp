@@ -46,6 +46,7 @@
 #include "src/model/device.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
+#include "src/internaleventrelaytarget.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>

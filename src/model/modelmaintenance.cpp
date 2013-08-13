@@ -44,6 +44,8 @@
 #include "group.h"
 #include "device.h"
 #include "devicereference.h"
+#include "eventinterpreterplugins.h"
+#include "internaleventrelaytarget.h"
 #include "modulator.h"
 #include "state.h"
 #include "set.h"

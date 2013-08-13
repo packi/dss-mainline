@@ -38,6 +38,8 @@
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jslogger.h"
 #include "src/foreach.h"
+#include "src/event.h"
+#include "internaleventrelaytarget.h"
 
 using namespace std;
 using namespace dss;

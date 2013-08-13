@@ -36,7 +36,6 @@
 #include <sstream>
 
 #include "src/logger.h"
-#include "src/event.h"
 #include "src/session.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/internaleventrelaytarget.h"

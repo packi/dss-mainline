@@ -27,10 +27,6 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include "src/mutex.h"
 #include "src/scripting/jshandler.h"
 
-#include "src/event.h"
-#include "src/eventinterpreterplugins.h"
-#include "src/internaleventrelaytarget.h"
-
 #include <string>
 #include <boost/shared_ptr.hpp>
 

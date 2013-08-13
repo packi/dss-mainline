@@ -27,6 +27,8 @@
   #include "config.h"
 #endif
 
+#include "dssfwd.h"
+
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include "bonjour.h"
@@ -42,10 +44,6 @@ namespace dss {
   class BusInterface;
   class PropertySystem;
   class Metering;
-  class EventRunner;
-  class EventQueue;
-  class EventInterpreter;
-  class Apartment;
   class WebServices;
   class ModelMaintenance;
   class DSSim;
