@@ -40,23 +40,60 @@ HashMapStringString URL::emptyForm;
 
 URL::URL() {}
 
-size_t URL::writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp)
+URLResult::~URLResult()
+{
+  reset();
+}
+
+void URLResult::reset()
+{
+  if (m_size) {
+    free(m_memory);
+  }
+  m_size = 0;
+  m_memory = NULL;
+}
+
+const char *URLResult::content()
+{
+  if (!m_size) {
+    return NULL;
+  }
+  return m_memory;
+}
+
+void *URLResult::grow_tail(size_t increase)
+{
+  m_memory = (char *)realloc(m_memory, m_size + increase + 1);
+  if (!m_memory) {
+    return NULL;
+  }
+  return &m_memory[m_size];
+}
+
+size_t URLResult::appendCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
   size_t realsize = size * nmemb;
   struct URLResult *mem = (struct URLResult *)userp;
 
-  mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
-  if (mem->memory == NULL) {
+  void *space = mem->grow_tail(realsize);
+  if (space == NULL) {
     /* out of memory! */
-    Logger::getInstance()->log(std::string("URL::writeMemoryCallback: not enough memory (realloc returned NULL)\n"));
+    Logger::getInstance()->log(std::string("URL::appendCallback: (realloc failed)\n"));
     return -1;
   }
 
-  memcpy(&(mem->memory[mem->size]), contents, realsize);
-  mem->size += realsize;
-  mem->memory[mem->size] = 0;
+  memcpy(space, contents, realsize);
+  mem->m_size += realsize;
+  mem->m_memory[mem->m_size] = 0;
 
   return realsize;
+}
+
+size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp)
+{
+  /* throw it away */
+  return size * nmemb;
 }
 
 long URL::request(const std::string& url, RequestType type, struct URLResult* result)
@@ -106,8 +143,12 @@ long URL::request(const std::string& url, RequestType type,
 
   if (result != NULL) {
     /* send all data to this function  */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::writeMemoryCallback);
+    result->reset();
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URLResult::appendCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)result);
+  } else {
+    /* suppress output to stdout */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
   }
 
   curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);

@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(curlTest) {
     aprtmntChange += "?apartmentChangeType=Apartment";
     aprtmntChange += "&dssid=3504175feff28d2044084179";
     curl->request(aprtmntChange, POST, HashMapStringString(), HashMapStringString(), &result);
-    std::cout << result.memory << std::endl;
+    std::cout << result.content() << std::endl;
 
     std::cout << "CURL test done\n";
 }

@@ -34,10 +34,20 @@ namespace dss {
     POST,
   } RequestType;
 
-  struct URLResult {
-      char* memory;
-      size_t size;
-      URLResult() : memory(NULL), size(0) {}
+  class URLResult {
+  public:
+      friend class URL;
+      URLResult() : m_memory(NULL), m_size(0) {}
+      virtual ~URLResult();
+
+      void reset();
+      void *grow_tail(size_t increase);
+      const char* content();
+
+  private:
+      static size_t appendCallback(void* contents, size_t size, size_t nmemb, void* userp);
+      char* m_memory;
+      size_t m_size;
   };
 
   class URL {
@@ -61,7 +71,7 @@ namespace dss {
       /* TODO evtl. URI wrapper easy appending/parsing of query options */
 
     private:
-      static size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp);
+      static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
   };
 };
 
