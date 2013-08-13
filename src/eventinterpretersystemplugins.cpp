@@ -679,7 +679,7 @@ namespace dss {
         evt->applyProperties(m_properties);
         evt->setProperty("path", _path);
         evt->setProperty("delay", intToString(oDelay.at(s)));
-        evt->setProperty(EventPropertyTime, "+" + intToString(oDelay.at(s)));
+        evt->setProperty(EventProperty::Time, "+" + intToString(oDelay.at(s)));
         if (DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(evt);
         } else {
