@@ -39,6 +39,7 @@
 #include <boost/thread/recursive_mutex.hpp>
 
 #include "expatparser.h"
+#include "dssfwd.h"
 
 namespace dss {
 

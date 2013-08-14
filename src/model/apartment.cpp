@@ -27,7 +27,6 @@
 #include "src/model/modelconst.h"
 #include "src/logger.h"
 #include "src/propertysystem.h"
-#include "src/event.h"
 #include "src/foreach.h"
 
 #include "src/model/busscanner.h"

@@ -44,6 +44,8 @@
 #include "group.h"
 #include "device.h"
 #include "devicereference.h"
+#include "eventinterpreterplugins.h"
+#include "internaleventrelaytarget.h"
 #include "modulator.h"
 #include "state.h"
 #include "set.h"
@@ -1599,7 +1601,7 @@ namespace dss {
       return;
     }
     URL url;
-    URL::URLResult result;
+    URLResult result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     std::string productName;
     boost::filesystem::path iconFile;
@@ -1620,13 +1622,14 @@ namespace dss {
                          "&LanguageCode=" + language;
 
     Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
-    long res = url.request(eanURL, false, &result);
+    long res = url.request(eanURL, GET, &result);
     if (res == 200) {
-      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + std::string(result.memory));
+      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") +
+                                 std::string(result.content()));
       struct json_tokener* tok;
 
       tok = json_tokener_new();
-      json_object* json_request = json_tokener_parse_ex(tok, result.memory, -1);
+      json_object* json_request = json_tokener_parse_ex(tok, result.content(), -1);
 
       boost::filesystem::path remoteIconPath;
       if (tok->err == json_tokener_success) {
@@ -1695,9 +1698,6 @@ namespace dss {
     } else {
       Logger::getInstance()->log("OEMWebQuery::run: could not download OEM "
           "data from: " + eanURL, lsWarning);
-    }
-    if (result.size) {
-      free(result.memory);
     }
 
     ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);

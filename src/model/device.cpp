@@ -35,7 +35,6 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
-#include "src/event.h"
 
 #include <boost/shared_ptr.hpp>
 

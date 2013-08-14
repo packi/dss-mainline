@@ -63,7 +63,6 @@
 #ifdef WITH_SOAP
   #include "webservices/webservices.h"
 #endif
-#include "event.h"
 #include "metering/metering.h"
 #include "src/watchdog.h"
 #include "foreach.h"

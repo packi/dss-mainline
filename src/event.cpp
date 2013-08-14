@@ -50,6 +50,16 @@ using std::set;
 namespace dss {
   const std::string empty_string("");
 
+  namespace EventProperty {
+    const char* Name = "name";
+    const char* Location = "location";
+    const char* Context = "context";
+    const char* Time = "time";
+    const char* ICalStartTime = "iCalStartTime";
+    const char* ICalRRule = "iCalRRule";
+  }
+
+
   //================================================== Event
 
   Event::Event(const std::string& _name)
@@ -107,39 +117,39 @@ namespace dss {
   } // reset
 
   const std::string& Event::getPropertyByName(const std::string& _name) const {
-    if(_name == EventPropertyName) {
+    if (_name == EventProperty::Name) {
       return m_Name;
-    } else if(_name == EventPropertyLocation) {
+    } else if (_name == EventProperty::Location) {
       return m_Location;
-    } else if(_name == EventPropertyContext) {
+    } else if (_name == EventProperty::Context) {
       return m_Context;
-    } else if(_name == EventPropertyTime) {
+    } else if (_name == EventProperty::Time) {
       return m_Time;
     }
     return m_Properties.get(_name, empty_string);
   } // getPropertyByName
 
   bool Event::hasPropertySet(const std::string& _name) const {
-    if(_name == EventPropertyName) {
+    if (_name == EventProperty::Name) {
       return true;
-    } else if(_name == EventPropertyLocation) {
+    } else if (_name == EventProperty::Location) {
       return m_LocationSet;
-    } else if(_name == EventPropertyContext) {
+    } else if (_name == EventProperty::Context) {
       return m_ContextSet;
-    } else if(_name == EventPropertyTime) {
+    } else if (_name == EventProperty::Time) {
       return m_TimeSet;
     }
     return m_Properties.has(_name);
   } // hasPropertySet
 
   void Event::unsetProperty(const std::string& _name) {
-    if(_name == EventPropertyLocation) {
+    if (_name == EventProperty::Location) {
       m_LocationSet = false;
       m_Location = "";
-    } else if(_name == EventPropertyContext) {
+    } else if (_name == EventProperty::Context) {
       m_ContextSet = false;
       m_Context = "";
-    } else if(_name == EventPropertyTime) {
+    } else if (_name == EventProperty::Time) {
       m_TimeSet = false;
       m_Time = "";
     } else {
@@ -149,13 +159,13 @@ namespace dss {
 
   bool Event::setProperty(const std::string& _name, const std::string& _value) {
     if(!_name.empty()) {
-      if(_name == EventPropertyLocation) {
+      if (_name == EventProperty::Location) {
         m_LocationSet = true;
         m_Location = _value;
-      } else if(_name == EventPropertyContext) {
+      } else if (_name == EventProperty::Context) {
         m_ContextSet = true;
         m_Context = _value;
-      } else if(_name == EventPropertyTime) {
+      } else if (_name == EventProperty::Time) {
         m_TimeSet = true;
         m_Time = _value;
       } else {
@@ -567,10 +577,10 @@ namespace dss {
 
   boost::shared_ptr<Schedule> EventQueue::scheduleFromEvent(boost::shared_ptr<Event> _event) {
     boost::shared_ptr<Schedule> result;
-    if(_event->hasPropertySet(EventPropertyTime)) {
+    if(_event->hasPropertySet(EventProperty::Time)) {
       DateTime when;
       bool validDate = false;
-      std::string timeStr = _event->getPropertyByName(EventPropertyTime);
+      std::string timeStr = _event->getPropertyByName(EventProperty::Time);
       if(timeStr.size() >= 2) {
         // relative time
         if(timeStr[0] == '+') {
@@ -600,9 +610,9 @@ namespace dss {
       } else {
         log("scheduleFromEvent: dropping event with invalid time", lsError);
       }
-    } else if(_event->hasPropertySet(EventPropertyICalStartTime) && _event->hasPropertySet(EventPropertyICalRRule)) {
-      std::string timeStr = _event->getPropertyByName(EventPropertyICalStartTime);
-      std::string rRuleStr = _event->getPropertyByName(EventPropertyICalRRule);
+    } else if (_event->hasPropertySet(EventProperty::ICalStartTime) && _event->hasPropertySet(EventProperty::ICalRRule)) {
+      std::string timeStr = _event->getPropertyByName(EventProperty::ICalStartTime);
+      std::string rRuleStr = _event->getPropertyByName(EventProperty::ICalRRule);
       log(std::string("scheduleFromEvent: Event \"" + _event->getName() + "\" has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsDebug);
       result.reset(new ICalSchedule(rRuleStr, timeStr));
     }
@@ -833,14 +843,14 @@ namespace dss {
         result = true;
         if(m_EventQueue != NULL) {
           boost::shared_ptr<Event> evt = ipSchedEvt->getEvent();
-          if(evt->hasPropertySet(EventPropertyTime)) {
-            evt->unsetProperty(EventPropertyTime);
+          if (evt->hasPropertySet(EventProperty::Time)) {
+            evt->unsetProperty(EventProperty::Time);
           }
-          if(evt->hasPropertySet(EventPropertyICalStartTime)) {
-            evt->unsetProperty(EventPropertyICalStartTime);
+          if (evt->hasPropertySet(EventProperty::ICalStartTime)) {
+            evt->unsetProperty(EventProperty::ICalStartTime);
           }
-          if(evt->hasPropertySet(EventPropertyICalRRule)) {
-            evt->unsetProperty(EventPropertyICalRRule);
+          if (evt->hasPropertySet(EventProperty::ICalRRule)) {
+            evt->unsetProperty(EventProperty::ICalRRule);
           }
 
           m_EventQueue->pushEvent(evt);
@@ -884,7 +894,7 @@ namespace dss {
 
   void EventSubscription::initialize() {
     m_FilterOption = foMatchAll;
-    addPropertyFilter(new EventPropertyMatchFilter(EventPropertyName, m_EventName));
+    addPropertyFilter(new EventPropertyMatchFilter(EventProperty::Name, m_EventName));
   } // initialize
 
   void EventSubscription::addPropertyFilter(EventPropertyFilter* _pPropertyFilter) {
@@ -1005,12 +1015,5 @@ namespace dss {
   } // ScheduledEvent
 
   //================================================== External consts
-
-  const char* EventPropertyName = "name";
-  const char* EventPropertyLocation = "location";
-  const char* EventPropertyContext = "context";
-  const char* EventPropertyTime = "time";
-  const char* EventPropertyICalStartTime = "iCalStartTime";
-  const char* EventPropertyICalRRule = "iCalRRule";
 
 } // namespace dss

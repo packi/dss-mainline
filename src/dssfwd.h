@@ -1,7 +1,7 @@
 /*
-    Copyright (c) 2011 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2013 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Michael Tross, aizo GmbH <michael.tross@aizo.com>
+    Authors: Andreas Fenkart, <andreas.fenkart@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -20,32 +20,25 @@
 
 */
 
-#ifndef _JSMETERING_INCLUDED
-#define _JSMETERING_INCLUDED
-
-#include <boost/ptr_container/ptr_vector.hpp>
-#include "src/scripting/jshandler.h"
-#include "src/propertysystem.h"
+#ifndef DSS_FWD_INCLUDED
+#define DSS_FWD_INCLUDED
 
 namespace dss {
-
   class Apartment;
-  class Metering;
-
-  class MeteringScriptExtension : public ScriptExtension {
-  public:
-    MeteringScriptExtension(Apartment& _apartment, Metering& _metering);
-    virtual ~MeteringScriptExtension() {}
-
-    virtual void extendContext(ScriptContext& _context);
-
-    Apartment& getApartment() { return m_Apartment; }
-    Metering& getMetering() { return m_Metering; }
-  private:
-    Apartment& m_Apartment;
-    Metering& m_Metering;
-  }; // MeteringScriptExtension
-
+  class DeviceReference;
+  class Event;
+  class EventInterpreter;
+  class EventInterpreterPlugin;
+  class EventQueue;
+  class EventRunner;
+  class EventSubscription;
+  class Group;
+  class InternalEventRelayTarget;
+  class Properties;
+  class PropertyNode;
+  class ScheduledEvent;
+  class State;
+  class Zone;
 }
 
 #endif

@@ -26,6 +26,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include "scriptobject.h"
 #include "src/dss.h"
 #include "src/logger.h"
+#include "src/internaleventrelaytarget.h"
 #include "src/propertysystem.h"
 #include "src/datetools.h"
 #include "src/stringconverter.h"

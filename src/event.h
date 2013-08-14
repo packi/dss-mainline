@@ -41,7 +41,19 @@
 
 namespace dss {
 
+  //================================================== Constants
+
+  namespace EventProperty {
+    extern const char* Name;
+    extern const char* Location;
+    extern const char* Context;
+    extern const char* Time;
+    extern const char* ICalStartTime;
+    extern const char* ICalRRule;
+  }
+
   //================================================== Forward declarations
+
 
   class EventInterpreter;
   class ScheduledEvent;
@@ -388,15 +400,6 @@ namespace dss {
     const std::string& getID() const { return m_EventID; }
   }; // ScheduledEvent
 
-
-  //================================================== Constants
-
-  extern const char* EventPropertyName;
-  extern const char* EventPropertyLocation;
-  extern const char* EventPropertyContext;
-  extern const char* EventPropertyTime;
-  extern const char* EventPropertyICalStartTime;
-  extern const char* EventPropertyICalRRule;
 
 } // namespace dss
 

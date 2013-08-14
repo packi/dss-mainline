@@ -229,7 +229,7 @@ namespace dss {
         readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[2], newEvent);
       }
 
-      newEvent->setProperty(EventPropertyTime, time);
+      newEvent->setProperty(EventProperty::Time, time);
 
       event_wrapper* evtWrapper = new event_wrapper();
       evtWrapper->event = newEvent;
@@ -289,8 +289,8 @@ namespace dss {
         readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[3], newEvent);
       }
 
-      newEvent->setProperty(EventPropertyICalStartTime, time);
-      newEvent->setProperty(EventPropertyICalRRule, rrule);
+      newEvent->setProperty(EventProperty::ICalStartTime, time);
+      newEvent->setProperty(EventProperty::ICalRRule, rrule);
 
       event_wrapper* evtWrapper = new event_wrapper();
       evtWrapper->event = newEvent;

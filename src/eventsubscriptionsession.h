@@ -28,12 +28,12 @@
 #include <string>
 
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include "src/event.h"
+#include "dssfwd.h"
 
 namespace dss {
 
-  class EventInterpreter;
   class Session;
   class EventCollector;
   class JSONObject;

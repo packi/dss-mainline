@@ -46,6 +46,7 @@
 #include "src/model/device.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
+#include "src/internaleventrelaytarget.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -83,8 +84,8 @@ namespace dss {
       }
     }
     applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent, false);
-    if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
-      std::string location = _subscription.getOptions()->getParameter(EventPropertyLocation);
+    if (_subscription.getOptions()->hasParameter(EventProperty::Location)) {
+      std::string location = _subscription.getOptions()->getParameter(EventProperty::Location);
       if(!location.empty()) {
         Logger::getInstance()->log("RaiseEvent: Event has location");
         newEvent->setLocation(location);
@@ -344,8 +345,8 @@ namespace dss {
         ScriptObject raisedEvent(*ctx, NULL);
         raisedEvent.setProperty<const std::string&>("name", _event.getName());
         ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
-        if(_event.hasPropertySet(EventPropertyLocation)) {
-          raisedEvent.setProperty<const std::string&>("location", _event.getPropertyByName(EventPropertyLocation));
+        if (_event.hasPropertySet(EventProperty::Location)) {
+          raisedEvent.setProperty<const std::string&>("location", _event.getPropertyByName(EventProperty::Location));
         }
         EventRaiseLocation raiseLocation = _event.getRaiseLocation();
         ScriptObject source(*ctx, NULL);
