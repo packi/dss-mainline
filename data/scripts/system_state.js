@@ -192,6 +192,22 @@ function startup()
     else if (panic === false) {
         state.setValue('inactive');
     }
+
+    // clear fire alarm after 6h
+    var t0 = 6 * 60 * 60;
+    var sr = '{ "name":"FireAutoClear", "id": "system_state_fire_alarm_reset",\
+      "triggers":[{ "type":"state-change", "name":"fire", "state":"active"}],\
+      "delay":' + t0 + ',\
+      "actions":[{ "type":"undo-zone-scene", "zone":0, "group":0, "scene":76, "force":"false", "delay":0 }],\
+      "conditions":{ "enabled":null,"weekdays":null,"timeframe":null,"zoneState":null,\
+        "systemState":[{"name":"fire","value":"1"}],\
+        "addonState":null},\
+      "scope":"system_state.auto_cleanup"\
+      }';
+
+    var src = escape(sr);
+    var evt = new Event("system-addon-scene-responder.config", { actions: "save", value: src });
+    evt.raise();
 }
 
 function callscene()
