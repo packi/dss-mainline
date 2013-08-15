@@ -192,7 +192,8 @@ namespace dss {
     void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
                       const unsigned long long _eanNumber,
-                      const int _serialNumber, const int _partNumber, const bool _isIndependent);
+                      const int _serialNumber, const int _partNumber,
+                      const bool _isIndependent, const bool _isConfigLocked);
     void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,

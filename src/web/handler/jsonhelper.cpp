@@ -93,6 +93,7 @@ namespace dss {
 
     result->addProperty("on", _device.getDevice()->isOn());
     result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());
+    result->addProperty("configurationLocked", _device.getDevice()->isConfigLocked());
     result->addProperty("outputMode", _device.getDevice()->getOutputMode());
     result->addProperty("buttonID", _device.getDevice()->getButtonID());
     result->addProperty("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());

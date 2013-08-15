@@ -59,6 +59,7 @@ namespace dss {
       DsmApiHandle_t m_dsmApiHandle;
       devid_t m_deviceAdress;
       dss_dsid_t m_dsmId;
+      int m_revisionID;
     };
 
     DSDeviceBusInterface()

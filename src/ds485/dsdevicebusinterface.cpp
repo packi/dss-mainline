@@ -21,6 +21,8 @@
 
 */
 
+#include <bitset>
+
 #include "dsdevicebusinterface.h"
 
 #include "dsbusinterface.h"
@@ -264,6 +266,7 @@ namespace dss {
     , m_dsmApiHandle(NULL)
     , m_deviceAdress(0)
     , m_dsmId()
+    , m_revisionID(0)
   {
   }
 
@@ -326,6 +329,7 @@ namespace dss {
     uint16_t serialNumber = 0;
     uint8_t partNumber = 0;
     bool isIndependent = false;
+    bool isConfigLocked = true;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
     dsid_t dsmId;
@@ -364,6 +368,14 @@ namespace dss {
 
         state = DEVICE_OEM_VALID;
       }
+
+      if (m_revisionID >= 0x355) {
+        if (std::bitset<8>(
+                    getDeviceConfig(dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
+          isConfigLocked = true;
+        }
+      }
+
     } catch (BusApiError& er) {
       // Bus error
       Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what(), lsWarning);
@@ -380,6 +392,7 @@ namespace dss {
     pEvent->addParameter(serialNumber);
     pEvent->addParameter(partNumber);
     pEvent->addParameter(isIndependent);
+    pEvent->addParameter(isConfigLocked);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }
@@ -389,6 +402,7 @@ namespace dss {
   {
     m_deviceAdress = _device->getShortAddress();
     m_dsmId = _device->getDSMeterDSID();
+    m_revisionID = _device->getRevisionID();
   }
 
 } // namespace dss

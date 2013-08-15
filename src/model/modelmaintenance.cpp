@@ -561,7 +561,7 @@ namespace dss {
         break;
       case ModelEvent::etDeviceEANReady:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 8) {
+        if(event.getParameterCount() != 9) {
           log("Expected 8 parameters for ModelEvent::etDeviceEANReady");
         } else {
           onEANReady(pEventWithDSID->getDSID(),
@@ -571,7 +571,8 @@ namespace dss {
                      ((unsigned long long)event.getParameter(3)) << 32 | ((unsigned long long)event.getParameter(4) & 0xFFFFFFFF),
                      event.getParameter(5),
                      event.getParameter(6),
-                     event.getParameter(7));
+                     event.getParameter(7),
+                     event.getParameter(8));
         }
         break;
       case ModelEvent::etDeviceOEMDataReady:
@@ -1494,7 +1495,8 @@ namespace dss {
                                         const unsigned long long _eanNumber,
                                         const int _serialNumber,
                                         const int _partNumber,
-                                        const bool _isIndependent) {
+                                        const bool _isIndependent,
+                                        const bool _isConfigLocked) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       if (_state == DEVICE_OEM_VALID) {
@@ -1509,6 +1511,7 @@ namespace dss {
         }
       }
       devRef.getDevice()->setOemInfoState(_state);
+      devRef.getDevice()->setConfigLock(_isConfigLocked);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
