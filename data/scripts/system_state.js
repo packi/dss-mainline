@@ -192,6 +192,22 @@ function startup()
     else if (panic === false) {
         state.setValue('inactive');
     }
+
+    // clear fire alarm after 6h
+    var t0 = 6 * 60 * 60;
+    var sr = '{ "name":"FireAutoClear", "id": "system_state_fire_alarm_reset",\
+      "triggers":[{ "type":"state-change", "name":"fire", "state":"active"}],\
+      "delay":' + t0 + ',\
+      "actions":[{ "type":"undo-zone-scene", "zone":0, "group":0, "scene":76, "force":"false", "delay":0 }],\
+      "conditions":{ "enabled":null,"weekdays":null,"timeframe":null,"zoneState":null,\
+        "systemState":[{"name":"fire","value":"1"}],\
+        "addonState":null},\
+      "scope":"system_state.auto_cleanup"\
+      }';
+
+    var src = escape(sr);
+    var evt = new Event("system-addon-scene-responder.config", { actions: "save", value: src });
+    evt.raise();
 }
 
 function callscene()
@@ -267,6 +283,7 @@ function callscene()
         if (groupID === 0) {
             state = getOrRegisterState('wind');
             state.setValue('inactive', 7);
+            /* do not auto-clear wind state in user groups */
         } else if (groupID >= 16 && groupID <= 23) {
             state = getOrRegisterState('wind.group' + groupID);
             state.setValue('inactive', 7);
@@ -285,6 +302,13 @@ function callscene()
         if (groupID === 0) {
             state = getOrRegisterState('rain');
             state.setValue('inactive', 7);
+            for (grp = 16; grp <= 23; grp++) {
+                try {
+                    state = getState('rain.group' + groupID, false);
+                    state.setValue('inactive', 7);
+                } catch (e) {
+                }
+            }
         } else if (groupID >= 16 && groupID <= 23) {
             state = getOrRegisterState('rain.group' + groupID);
             state.setValue('inactive', 7);
@@ -303,6 +327,13 @@ function callscene()
         if (groupID === 0) {
             state = getOrRegisterState('hail');
             state.setValue('inactive', 7);
+            for (grp = 16; grp <= 23; grp++) {
+                try {
+                    state = getState('hail.group' + groupID, false);
+                    state.setValue('inactive', 7);
+                } catch (e) {
+                }
+            }
         } else if (groupID >= 16 && groupID <= 23) {
             state = getOrRegisterState('hail.group' + groupID);
             state.setValue('inactive', 7);
