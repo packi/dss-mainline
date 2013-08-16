@@ -277,6 +277,12 @@ namespace dss {
     dev->setIsConnected(true);
     dev->setIsValid(true);
 
+    if ((dev->getRevisionID() >= 0x355) &&
+        (dev->getOemInfoState() == DEVICE_OEM_UNKOWN)){
+        // will be reset in OEM Readout
+        dev->setConfigLock(true);
+    }
+
     {
       boost::shared_ptr<Event> readyEvent(new Event("new_device"));
       readyEvent->setProperty("device", _spec.DSID.toString());
@@ -305,6 +311,7 @@ namespace dss {
         _pDevice->setOemInfoState(DEVICE_OEM_LOADING);
       } else {
         _pDevice->setOemInfoState(DEVICE_OEM_NONE);
+        _pDevice->setConfigLock(false);
       }
     } else if (_pDevice->isPresent() &&
                 (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&

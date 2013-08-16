@@ -69,6 +69,7 @@ namespace dss {
     const char *oemProdName = NULL;
     const char *oemProdIcon = NULL;
     const char *oemProdURL = NULL;
+    const char *configLocked = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -110,6 +111,8 @@ namespace dss {
         oemProdIcon = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "oemProductURL") == 0) {
         oemProdURL = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "configurationLocked") == 0) {
+        configLocked = _attrs[i + 1];
       }
     }
 
@@ -207,6 +210,15 @@ namespace dss {
       }
     }
     m_tempDevice->setOemInfoState(oemEanState);
+
+    bool isConfigLocked = false;
+    if (configLocked != NULL) {
+      try {
+        int p = strToUInt(configLocked);
+        isConfigLocked = p > 0;
+      } catch(std::invalid_argument&) {}
+    }
+    m_tempDevice->setConfigLock(isConfigLocked);
 
     m_tempDevice->setIsValid(true);
     m_tempDevice->setIsPresent(isPresent);
@@ -628,6 +640,7 @@ namespace dss {
         _ofs << " oemProductURL=\"" << XMLStringEscape(_pDevice->getOemProductURL()) << "\"";
       }
     }
+    _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
     _ofs << ">" << std::endl;
 
     if(!_pDevice->getName().empty()) {

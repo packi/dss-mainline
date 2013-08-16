@@ -223,6 +223,8 @@ namespace dss {
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
 
+    bool m_IsConfigLocked;
+
     uint8_t m_binaryInputCount;
     std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
     std::vector<boost::shared_ptr<State> > m_binaryInputStates;
@@ -527,7 +529,8 @@ namespace dss {
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
     bool isOemCoupledWith(boost::shared_ptr<Device> _otherDev);
-
+    void setConfigLock(bool _lockConfig);
+    bool isConfigLocked() const { return m_IsConfigLocked; }
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& getBinaryInputs() const;
