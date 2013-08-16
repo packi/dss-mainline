@@ -37,6 +37,14 @@
   <subscription event-name="execution_denied_digest_check" handler-name="execution_denied_digest">
   </subscription>
 
+  <!-- Cloud notification -->
+  <subscription event-name="apartmentModelChanged" handler-name="apartment_model_change">
+  </subscription>
+  <subscription event-name="userDefinedActionChanged" handler-name="apartment_model_change">
+  </subscription>
+  <subscription event-name="timedEventChanged" handler-name="apartment_model_change">
+  </subscription>
+
 
   <!-- Examples -->
   <!--

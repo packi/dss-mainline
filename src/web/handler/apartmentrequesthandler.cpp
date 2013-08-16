@@ -178,6 +178,8 @@ namespace dss {
           circuit->addProperty("hwName", dsMeter->getHardwareName());
           circuit->addProperty("isPresent", dsMeter->isPresent());
           circuit->addProperty("isValid", dsMeter->isValid());
+          std::bitset<8> flags = dsMeter->getPropertyFlags();
+          circuit->addProperty("ignoreActionsFromNewDevices", flags.test(4));
         }
         return success(resultObj);
       } else if(_request.getMethod() == "getName") {

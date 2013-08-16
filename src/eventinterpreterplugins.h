@@ -135,6 +135,22 @@ namespace dss {
     EventInterpreterPluginExecutionDeniedDigest(EventInterpreter* _pInterpreter);
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
+
+  class EventInterpreterPluginApartmentChange : public EventInterpreterPlugin {
+  private:
+    typedef enum {
+      Apartment = 1,
+      TimedEvent = 2,
+      UDA = 3
+    } ChangeType;
+
+    int doCall(ChangeType type);
+
+  public:
+    EventInterpreterPluginApartmentChange(EventInterpreter* _pInterpreter);
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+
+  };
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

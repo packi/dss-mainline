@@ -211,6 +211,12 @@ namespace dss {
         dsid_t _sourceID, dsid_t _destinationID,
         uint16_t _deviceID, uint8_t _sensorIndex, uint16_t _sensorValue);
 
+    void handleDsmSetFlags(dsid_t _destinationID, std::bitset<8> _flags);
+    static void handleDsmSetFlagsCallback(uint8_t _errorCode,
+                                         void *_userData, dsid_t _sourceID,
+                                         dsid_t _destinationID,
+                                         uint8_t flags);
+
   protected:
     virtual void doStart();
   public:

@@ -63,7 +63,6 @@
 #ifdef WITH_SOAP
   #include "webservices/webservices.h"
 #endif
-#include "event.h"
 #include "metering/metering.h"
 #include "src/watchdog.h"
 #include "foreach.h"
@@ -148,6 +147,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pPropertySystem->createProperty("/system/version/distroVersion")->setStringValue(readDistroVersion());
     m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
     m_pPropertySystem->createProperty("/system/version/gitRevision")->setStringValue(DSS_RCS_REVISION);
+    m_pPropertySystem->createProperty(ModelChangedEvent::propPathDelay)->setIntegerValue(30);
+    m_pPropertySystem->createProperty(ModelChangedEvent::propPathUrl)
+        ->setStringValue("https://testdsservices.aizo.com/dss/DSSApartment/ApartmentHasChanged");
   } // ctor
 
   DSS::~DSS() {
@@ -470,6 +472,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin)
+      .addPlugin(new EventInterpreterPluginApartmentChange(m_pEventInterpreter.get()));
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());

@@ -49,7 +49,9 @@ namespace dss {
     m_IsInitialized(false),
     m_HasPendingEvents(false),
     m_pApartment(_pApartment),
-    m_BinaryInputEventCount(_dsid.toString())
+    m_BinaryInputEventCount(_dsid.toString()),
+    m_dSMPropertyFlags(0),
+    m_IgnoreActionsFromNewDevices(false)
   {
     publishToPropertyTree();
   } // ctor
@@ -88,6 +90,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
+      m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
+        ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
     }
   } // publishToPropertyTree
 
@@ -180,5 +184,10 @@ namespace dss {
 
   const DateTime& DSMeter::getCachedEnergyMeterTimeStamp() const {
     return m_EnergyMeterValueTimeStamp;
+  }
+
+  void DSMeter::setPropertyFlags(std::bitset<8> _flags) {
+    m_dSMPropertyFlags = _flags;
+    m_IgnoreActionsFromNewDevices = m_dSMPropertyFlags.test(4);
   }
 } // namespace dss

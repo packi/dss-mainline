@@ -35,7 +35,6 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
-#include "src/event.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -85,6 +84,7 @@ namespace dss {
     m_OemProductName(),
     m_OemProductIcon(),
     m_OemProductURL(),
+    m_IsConfigLocked(false),
     m_AKMInputProperty()
     { } // ctor
 
@@ -183,6 +183,9 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<bool>(m_OemIsIndependent, false));
         oemNode->createProperty("InternetState")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemInetStateAsString));
+        oemNode->createProperty("configurationLocked")
+          ->linkToProxy(PropertyProxyReference<bool>(m_IsConfigLocked, false));
+
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
         m_pPropertyNode->createProperty("shortAddress")
@@ -1660,4 +1663,8 @@ namespace dss {
     return m_binaryInputStates[_inputIndex];
   }
 
+  void Device::setConfigLock(bool _lockConfig) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    m_IsConfigLocked = _lockConfig;
+  }
 } // namespace dss

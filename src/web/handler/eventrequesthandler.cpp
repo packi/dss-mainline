@@ -30,7 +30,6 @@
 
 #include "src/web/json.h"
 
-#include "src/event.h"
 #include "src/eventcollector.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/eventsubscriptionsession.h"

@@ -41,7 +41,20 @@
 
 namespace dss {
 
+  //================================================== Constants
+
+  namespace EventProperty {
+    extern const char* Name;
+    extern const char* Location;
+    extern const char* Context;
+    extern const char* Time;
+    extern const char* ICalStartTime;
+    extern const char* ICalRRule;
+    extern const char* Unique;
+  }
+
   //================================================== Forward declarations
+
 
   class EventInterpreter;
   class ScheduledEvent;
@@ -113,6 +126,25 @@ namespace dss {
     bool isReplacementFor(const Event& _other);
   }; // Event
 
+  //-------------------------------------------------- Events
+
+  class ModelChangedEvent {
+  public:
+    static const char *Apartment;
+    static const char *TimedEvent;
+    static const char *UserDefinedAction;
+
+    /* property path */
+    static const char *propPathDelay;
+    static const char *propPathUrl;
+
+    /* has to be different events, for 'Unique' to work */
+    static boost::shared_ptr<Event> createApartmentChanged();
+    static boost::shared_ptr<Event> createTimedEventChanged();
+    static boost::shared_ptr<Event> createUdaChanged();
+  private:
+    static boost::shared_ptr<Event> createEvent(const char *desc);
+  };
 
   //-------------------------------------------------- SubscriptionOptions
 
@@ -338,7 +370,7 @@ namespace dss {
     virtual void execute();
     void executePendingEvent();
 
-    void addPlugin(EventInterpreterPlugin* _plugin);
+    EventInterpreter& addPlugin(EventInterpreterPlugin* _plugin);
     EventInterpreterPlugin* getPluginByName(const std::string& _name);
 
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);
@@ -388,15 +420,6 @@ namespace dss {
     const std::string& getID() const { return m_EventID; }
   }; // ScheduledEvent
 
-
-  //================================================== Constants
-
-  extern const char* EventPropertyName;
-  extern const char* EventPropertyLocation;
-  extern const char* EventPropertyContext;
-  extern const char* EventPropertyTime;
-  extern const char* EventPropertyICalStartTime;
-  extern const char* EventPropertyICalRRule;
 
 } // namespace dss
 

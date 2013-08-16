@@ -28,7 +28,6 @@
 #include <vector>
 #include <string>
 
-#include "src/event.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/mutex.h"
 #include "src/syncevent.h"

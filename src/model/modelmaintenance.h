@@ -27,14 +27,13 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/filesystem.hpp>
 
+#include "dssfwd.h"
 #include "src/subsystem.h"
 #include "src/thread.h"
 #include "src/syncevent.h"
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
-#include "src/event.h"
-#include "src/internaleventrelaytarget.h"
 
 namespace dss {
   class Apartment;
@@ -146,6 +145,7 @@ namespace dss {
     void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
                              const std::string& _name);
     void onDsmNameChanged(dss_dsid_t _meterID, const std::string& _name);
+    void onDsmFlagsChanged(dss_dsid_t _meterID, const std::bitset<8> _flags);
 
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
@@ -191,7 +191,8 @@ namespace dss {
     void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
                       const unsigned long long _eanNumber,
-                      const int _serialNumber, const int _partNumber, const bool _isIndependent);
+                      const int _serialNumber, const int _partNumber,
+                      const bool _isIndependent, const bool _isConfigLocked);
     void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,

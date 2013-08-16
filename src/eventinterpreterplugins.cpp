@@ -46,6 +46,8 @@
 #include "src/model/device.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
+#include "src/internaleventrelaytarget.h"
+#include "src/url.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -83,8 +85,8 @@ namespace dss {
       }
     }
     applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent, false);
-    if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
-      std::string location = _subscription.getOptions()->getParameter(EventPropertyLocation);
+    if (_subscription.getOptions()->hasParameter(EventProperty::Location)) {
+      std::string location = _subscription.getOptions()->getParameter(EventProperty::Location);
       if(!location.empty()) {
         Logger::getInstance()->log("RaiseEvent: Event has location");
         newEvent->setLocation(location);
@@ -255,6 +257,18 @@ namespace dss {
       } else {
         pNode = wrapper->getPropertyNode();
       }
+
+      boost::shared_ptr<Event> pEvent;
+      if (wrapper->getIdentifier().find("user-defined-actions") != std::string::npos) {
+        pEvent = ModelChangedEvent::createUdaChanged();
+      } else if (wrapper->getIdentifier().find("system-addon-timed-events") != std::string::npos) {
+        pEvent = ModelChangedEvent::createTimedEventChanged();
+      }
+
+      if (pEvent) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+
       // TODO: sanitize filename to prevent world-domination
       return m_PropertySystem.saveToXML(
                                 m_StoreDirectory + fileName + ".xml",
@@ -344,8 +358,8 @@ namespace dss {
         ScriptObject raisedEvent(*ctx, NULL);
         raisedEvent.setProperty<const std::string&>("name", _event.getName());
         ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
-        if(_event.hasPropertySet(EventPropertyLocation)) {
-          raisedEvent.setProperty<const std::string&>("location", _event.getPropertyByName(EventPropertyLocation));
+        if (_event.hasPropertySet(EventProperty::Location)) {
+          raisedEvent.setProperty<const std::string&>("location", _event.getPropertyByName(EventProperty::Location));
         }
         EventRaiseLocation raiseLocation = _event.getRaiseLocation();
         ScriptObject source(*ctx, NULL);
@@ -986,5 +1000,86 @@ namespace dss {
       m_digest.str("");
       m_timestamp = DateTime();
     }
+  }
+
+  EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
+                                                                               _pInterpreter)
+        : EventInterpreterPlugin("apartment_model_change", _pInterpreter)
+  {
+  }
+
+  int EventInterpreterPluginApartmentChange::doCall(ChangeType type)
+  {
+    const char* sDsid = "/system/dSID";
+
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+
+    std::string url(propSystem.getStringValue(ModelChangedEvent::propPathUrl));
+
+    url += "?apartmentChangeType=";
+    switch (type) {
+    case Apartment:
+        url += "Apartment";
+        break;
+    case TimedEvent:
+        url += "TimedEvent";
+        break;
+    case UDA:
+        url += "UserDefinedAction";
+        break;
+    }
+    url += "&dssid=" + propSystem.getStringValue(sDsid);
+
+    Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+            " executeURL: " + url);
+
+    URLResult result;
+    boost::shared_ptr<URL> curl(new URL());
+    long code = curl->request(url, POST, URL::emptyHeader, URL::emptyForm, &result);
+    if (code != 0) {
+      const char *desc;
+      switch (code) {
+      case 1:
+        desc = "The dSS was not found in the database";
+        break;
+      case 2:
+        desc = "Wrong type given";
+        break;
+      default:
+      case 99:
+        desc = "Unknown Exception";
+        break;
+      }
+      Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                                 ": " + desc, lsError);
+      return code;
+    }
+
+    return 0;
+  }
+
+
+  void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    HashMapStringString ps = _event.getProperties().getContainer();
+    for (HashMapStringString::iterator it = ps.begin(); it != ps.end(); it++) {
+      Logger::getInstance()->log(" name " + it->first + " : " + it->second);
+    }
+
+    ChangeType type;
+    /* momentan ist definiert: 1=Apartment, 2=TimedEvent, 3=UDA */
+    if (_event.getName() == ModelChangedEvent::Apartment) {
+      type = Apartment;
+    } else if (_event.getName() == ModelChangedEvent::TimedEvent) {
+      type = TimedEvent;
+    } else if (_event.getName() == ModelChangedEvent::UserDefinedAction) {
+      type = UDA;
+    } else {
+      Logger::getInstance()->log(" unkown ModelChange event " +
+                                 _event.getName(), lsError);
+    }
+
+    /* ignore retval, error already logged */
+    (void)doCall(type);
   }
 } // namespace dss

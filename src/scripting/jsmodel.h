@@ -28,8 +28,8 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
+#include "src/dssfwd.h"
 #include "src/scripting/jshandler.h"
-#include "src/event.h"
 #include "src/propertysystem.h"
 
 namespace dss {

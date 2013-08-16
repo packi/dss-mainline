@@ -44,6 +44,8 @@
 #include "group.h"
 #include "device.h"
 #include "devicereference.h"
+#include "eventinterpreterplugins.h"
+#include "internaleventrelaytarget.h"
 #include "modulator.h"
 #include "state.h"
 #include "set.h"
@@ -488,6 +490,7 @@ namespace dss {
         eraseModelEventsFromQueue(ModelEvent::etModelDirty);
         eraseEventFromList = false;
         writeConfiguration();
+        raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
         break;
       case ModelEvent::etLostDSMeter:
         assert(pEventWithDSID != NULL);
@@ -561,7 +564,7 @@ namespace dss {
         break;
       case ModelEvent::etDeviceEANReady:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 8) {
+        if(event.getParameterCount() != 9) {
           log("Expected 8 parameters for ModelEvent::etDeviceEANReady");
         } else {
           onEANReady(pEventWithDSID->getDSID(),
@@ -571,7 +574,8 @@ namespace dss {
                      ((unsigned long long)event.getParameter(3)) << 32 | ((unsigned long long)event.getParameter(4) & 0xFFFFFFFF),
                      event.getParameter(5),
                      event.getParameter(6),
-                     event.getParameter(7));
+                     event.getParameter(7),
+                     event.getParameter(8));
         }
         break;
       case ModelEvent::etDeviceOEMDataReady:
@@ -1197,6 +1201,20 @@ namespace dss {
       }
   }
 
+  void ModelMaintenance::onDsmFlagsChanged(dss_dsid_t _meterID,
+                                          const std::bitset<8> _flags)
+  {
+      log("dSM flags changed on the bus. Meter: " + _meterID.toString(), lsInfo);
+      try {
+        boost::shared_ptr<DSMeter> pMeter =
+          m_pApartment->getDSMeterByDSID(_meterID);
+        pMeter->setPropertyFlags(_flags);
+
+      } catch(ItemNotFoundException& e) {
+        log("onDsmFlagsChanged: Item not found: " + std::string(e.what()));
+      }
+  }
+
   void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const bool _forced) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
@@ -1480,7 +1498,8 @@ namespace dss {
                                         const unsigned long long _eanNumber,
                                         const int _serialNumber,
                                         const int _partNumber,
-                                        const bool _isIndependent) {
+                                        const bool _isIndependent,
+                                        const bool _isConfigLocked) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       if (_state == DEVICE_OEM_VALID) {
@@ -1495,6 +1514,7 @@ namespace dss {
         }
       }
       devRef.getDevice()->setOemInfoState(_state);
+      devRef.getDevice()->setConfigLock(_isConfigLocked);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
@@ -1585,7 +1605,7 @@ namespace dss {
       return;
     }
     URL url;
-    URL::URLResult result;
+    URLResult result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     std::string productName;
     boost::filesystem::path iconFile;
@@ -1606,13 +1626,14 @@ namespace dss {
                          "&LanguageCode=" + language;
 
     Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
-    long res = url.request(eanURL, false, &result);
+    long res = url.request(eanURL, GET, &result);
     if (res == 200) {
-      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + std::string(result.memory));
+      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") +
+                                 std::string(result.content()));
       struct json_tokener* tok;
 
       tok = json_tokener_new();
-      json_object* json_request = json_tokener_parse_ex(tok, result.memory, -1);
+      json_object* json_request = json_tokener_parse_ex(tok, result.content(), -1);
 
       boost::filesystem::path remoteIconPath;
       if (tok->err == json_tokener_success) {
@@ -1681,9 +1702,6 @@ namespace dss {
     } else {
       Logger::getInstance()->log("OEMWebQuery::run: could not download OEM "
           "data from: " + eanURL, lsWarning);
-    }
-    if (result.size) {
-      free(result.memory);
     }
 
     ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);

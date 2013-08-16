@@ -1,0 +1,94 @@
+main thread
+-----------
+
+- DSS::DSS() creates root of PropertySystem
+- DSS::initialize creates the singletons
+   -- CommChannel, Metering, ModelMaintenance, Apartment, Simulation, WebServer,
+      EventInterpreter BusInterfacea, EventRunner, EventQueue, Security,
+      SessionManager
+- main() calls DSS::run()
+- DSS::run() calls EventRunner::run
+
+
+event loop
+----------
+- see DSS::initialize, DSS::addDefaultInterpreterPlugins
+- EventRunner::run() waits 500ms max for wakeup from new Event or ListenerEvent
+  --  calls raisePendingEvents, which checks m_ScheduledEvents for expired timer
+      and pushes events to EventQueue
+
+
+               Node/ScheduledEvents
+       ScheduledEvent  /
+           \          /
+            v        v                 Event
+         +-------------+                 |
+         | EventRunner | <----------+    |
+         +-------------+ <--+       |    |
+            o th|ead        |       |    |
+                v           |       v    v
+         +--------------+   |    +------------+     +-------------+
+         |SheduledEvents|   | +> | EventQueue |---> |InternalQueue|
+         +--------------+   | |  +------------+     +-------------+
+                            | |
+                            v v
+                   +------------------+
+                   | EventInterpreter |
+                   +------------------+
+                        o thread
+
+- EventQueue::pushEvent, checks for delay/timer and pushes events back to
+  EventRunner if scheduled time is in the future
+- Once timer expires, EventRunner forwards it to EventQueue,
+  (after clearing timer properties)
+
+"InternalQueue" and "ScheduledEvents" are similar in purpose, the former
+is implemented as a deque the latter as a vector. Could be probably be
+merged into one class also handling signal/wakeup upon new event.
+
+
+EventInterpreter
+----------------
+- main logic
+- Filter / Subscription / Plugin
+- initialize, sets default propertyNodes, if empty
+  - parses subscription files into 'temp/' node then extracts states and
+    subscriptions from parser
+  - subscriptons is event/handler where handler might be javascript, then then
+    the filename with the js implementation is given plus a script-id
+    (non-unique)
+  - event-name seems system builtin
+  - pre-defined states: presence/hibernation/day/night/twilight
+   -- contains some value, not understood and a script-id, matches JS but not
+      explicitly said
+  - filter are on subscriptions, typically property-filter, several properties can
+    be matched, witch and/any semantics
+
+
+                 EventInterpreter
+                  |
+                  v
+       SubscriptionList --------->  Plugin
+
+
+- main loop polls executePendingEvent
+  -- advertizes cur event in '/system/EventInterperter/event'
+  -- iterates over copy of subscription list
+     - if subscriber matches, looks up handler, aka plugin, and calls handle
+     - calls any matching subscribtion
+- TODO unclear how states are used
+
+
+ModelMaintenance
+----------------
+- has it's own event queue for model events
+- see dss-control-flow.txt, aka ds485 event flow
+- synchronizes '/system/apartement' with apartement.xml
+- any changes to it's nodes are serialized via addModelEvent, sources
+  -- ds485: DSBusInterface, BusEventRelay
+  -- BusScanner
+  -- JavaScript: StructureRequestHandler
+  -- src/model: various classes
+- rarely, events are forwarded to EventInterpreter via raiseEvent
+- TaskProcessor; separate thread for I/O bound, e.g. OEMWebQuery
+- TODO deferred events
