@@ -7,6 +7,9 @@
 
 #define HAVE_CURL 1
 #include "src/url.h"
+#include "src/propertysystem.h"
+#include "src/dss.h"
+#include "src/event.h"
 
 using namespace dss;
 
@@ -16,9 +19,7 @@ BOOST_AUTO_TEST_CASE(curlTest) {
 
     URLResult result;
     boost::shared_ptr<URL> curl(new URL());
-    //std::string url = "www.aizo.com";
-    //std::string url = "http://www.aizo.com";
-    std::string url = "http://testdsservices.aizo.com";
+    std::string url = "http://www.aizo.com";
 
     std::cout << "HTTP GET\n";
     curl->request(url, GET, &result);
@@ -33,15 +34,6 @@ BOOST_AUTO_TEST_CASE(curlTest) {
     HashMapStringString postform;
     postform["foo"] = "bogus";
     curl->request(url, POST, header, postform, &result);
-
-    /* cloud api */
-    std::cout << "HTTP POST cloud aptm change\n";
-    std::string aprtmntChange(url);
-    aprtmntChange += "/dss/DSSApartment/ApartmentHasChanged";
-    aprtmntChange += "?apartmentChangeType=Apartment";
-    aprtmntChange += "&dssid=3504175feff28d2044084179";
-    curl->request(aprtmntChange, POST, HashMapStringString(), HashMapStringString(), &result);
-    std::cout << result.content() << std::endl;
 
     std::cout << "CURL test done\n";
 }

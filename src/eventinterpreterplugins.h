@@ -144,7 +144,7 @@ namespace dss {
       UDA = 3
     } ChangeType;
 
-    int doCall(ChangeType type);
+    void doCall(ChangeType type);
 
   public:
     EventInterpreterPluginApartmentChange(EventInterpreter* _pInterpreter);
