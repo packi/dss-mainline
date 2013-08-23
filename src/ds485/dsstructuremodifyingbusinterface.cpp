@@ -80,6 +80,7 @@ namespace dss {
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
     int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, meterDSID, _deviceID, _groupID);
+    sleep(1); // #2578 prevent dS485 bus flooding with multiple requests
     DSBusInterface::checkResultCode(ret);
   } // addToGroup
 
