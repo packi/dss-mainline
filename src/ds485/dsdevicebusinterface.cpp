@@ -329,7 +329,7 @@ namespace dss {
     uint16_t serialNumber = 0;
     uint8_t partNumber = 0;
     bool isIndependent = false;
-    bool isConfigLocked = true;
+    bool isConfigLocked = false;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
     dsid_t dsmId;
