@@ -48,6 +48,7 @@
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
 #include "src/url.h"
+#include "src/webservice_replies.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -1008,7 +1009,7 @@ namespace dss {
   {
   }
 
-  int EventInterpreterPluginApartmentChange::doCall(ChangeType type)
+  void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
   {
     const char* sDsid = "/system/dSID";
 
@@ -1036,26 +1037,29 @@ namespace dss {
     URLResult result;
     boost::shared_ptr<URL> curl(new URL());
     long code = curl->request(url, POST, URL::emptyHeader, URL::emptyForm, &result);
-    if (code != 0) {
-      const char *desc;
-      switch (code) {
-      case 1:
-        desc = "The dSS was not found in the database";
-        break;
-      case 2:
-        desc = "Wrong type given";
-        break;
-      default:
-      case 99:
-        desc = "Unknown Exception";
-        break;
-      }
-      Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                 ": " + desc, lsError);
-      return code;
+
+    if (code != 200) {
+        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                                   " HTTP POST failed " + intToString(code), lsError);
+        return;
     }
 
-    return 0;
+    try {
+
+    ModelChangeResponse resp = parseModelChange(result.content());
+
+    if (resp.code != 0) {
+        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                                   ": " + resp.desc, lsError);
+        return;
+    }
+
+    } catch (ParseError &ex) {
+        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                                   " invalid return message " + result.content(), lsError);
+        return;
+    }
+
   }
 
 
@@ -1079,7 +1083,7 @@ namespace dss {
                                  _event.getName(), lsError);
     }
 
-    /* ignore retval, error already logged */
-    (void)doCall(type);
+    /* no retval, no error handling, just log entry */
+    doCall(type);
   }
 } // namespace dss
