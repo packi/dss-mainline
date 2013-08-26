@@ -129,6 +129,7 @@ namespace dss {
             delete u;
           }
           m_LoggedInUser.reset(new User(pUserNode));
+          m_LoggedInUser->setToken(_applicationToken);
           return true;
         }
       }
