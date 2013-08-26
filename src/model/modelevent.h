@@ -62,6 +62,10 @@ namespace dss {
   private:
     EventType m_EventType;
     std::vector<int> m_Parameter;
+    std::string m_SingleStringParameter; // won't add a vector/list until
+                                         // we really need more string
+                                         // parameters which is not yet the
+                                         // case
   public:
     /** Constructs a ModelEvent with the given EventType. */
     ModelEvent(EventType _type)
@@ -79,6 +83,9 @@ namespace dss {
     int getParameterCount() const { return m_Parameter.size(); }
     /** Returns the type of the event. */
     EventType getEventType() { return m_EventType; }
+
+    void setSingleStringParameter(const std::string _param) { m_SingleStringParameter = _param; }
+    std::string getSingleStringParameter() const { return m_SingleStringParameter; }
   }; // ModelEvent
 
   // TODO: use boost::any for values and remove this class

@@ -123,7 +123,7 @@ namespace dss {
             if(interface == NULL) {
               interface = pZone;
             }
-            return handleDeviceInterfaceRequest(_request, interface);
+            return handleDeviceInterfaceRequest(_request, interface, _session);
           }
         } else if(_request.getMethod() == "getLastCalledScene") {
           int lastScene = 0;

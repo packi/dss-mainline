@@ -146,7 +146,7 @@ namespace dss {
         interface = m_Apartment.getGroup(GroupIDBroadcast);
       }
 
-      return handleDeviceInterfaceRequest(_request, interface);
+      return handleDeviceInterfaceRequest(_request, interface, _session);
 
     } else {
       if(_request.getMethod() == "getStructure") {

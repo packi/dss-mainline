@@ -81,17 +81,17 @@ namespace dss {
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                m_Apartment.getGroup(0)->callScene(coSim, SAC_UNKNOWN, SceneBell, false);
+                m_Apartment.getGroup(0)->callScene(coSim, SAC_UNKNOWN, SceneBell, "", false);
               } else if(groupID == GroupIDRed){
-                m_Apartment.getGroup(0)->callScene(coSim, SAC_UNKNOWN, SceneAlarm, false);
+                m_Apartment.getGroup(0)->callScene(coSim, SAC_UNKNOWN, SceneAlarm, "", false);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();
                 if(lastScene == SceneOff || lastScene == SceneDeepOff ||
                   lastScene == SceneStandBy || lastScene == ScenePanic)
                 {
-                  pGroup->callScene(coSim, SAC_UNKNOWN, Scene1, false);
+                  pGroup->callScene(coSim, SAC_UNKNOWN, Scene1, "", false);
                 } else {
-                  pGroup->callScene(coSim, SAC_UNKNOWN, SceneOff, false);
+                  pGroup->callScene(coSim, SAC_UNKNOWN, SceneOff, "", false);
                 }
               }
             }

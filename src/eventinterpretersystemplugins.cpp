@@ -110,7 +110,7 @@ namespace dss {
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->callScene(coJSScripting, sceneAccess, sceneId, forceFlag);
+        group->callScene(coJSScripting, sceneAccess, sceneId, "", forceFlag);
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -176,7 +176,7 @@ namespace dss {
       if (DSS::hasInstance()) {
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->undoScene(coJSScripting, sceneAccess, sceneId);
+        group->undoScene(coJSScripting, sceneAccess, sceneId, "");
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -258,7 +258,7 @@ namespace dss {
         return;
       }
 
-      target->callScene(coJSScripting, sceneAccess, sceneId, forceFlag);
+      target->callScene(coJSScripting, sceneAccess, sceneId, "", forceFlag);
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -308,7 +308,7 @@ namespace dss {
 
       target->setValue(coJSScripting,
                        sceneAccess,
-                       oValueNode->getIntegerValue());
+                       oValueNode->getIntegerValue(), "");
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -348,7 +348,7 @@ namespace dss {
         sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
       }
 
-      target->blink(coJSScripting, sceneAccess);
+      target->blink(coJSScripting, sceneAccess, "");
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -404,7 +404,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone;
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->blink(coJSScripting, sceneAccess);
+        group->blink(coJSScripting, sceneAccess, "");
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"

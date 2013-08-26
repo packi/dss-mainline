@@ -131,7 +131,7 @@ namespace dss {
         SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, boost::shared_ptr<Zone>());
         boost::shared_ptr<Set> pSet(new Set(set));
-        return handleDeviceInterfaceRequest(_request, pSet);
+        return handleDeviceInterfaceRequest(_request, pSet, _session);
       } else {
         throw std::runtime_error("Unhandled function");
       }
