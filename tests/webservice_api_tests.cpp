@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(cloudTest) {
 
     boost::shared_ptr<URL> curl(new URL());
     std::cout << "Testing cloud ApartmentHasChanged event... ";
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+    PropertySystem propSystem;
     std::string aprtmntChange(propSystem.getStringValue(ModelChangedEvent::propPathUrl));
     aprtmntChange += "?apartmentChangeType=Apartment";
     aprtmntChange += "&dssid=3504175feff28d2044084179";

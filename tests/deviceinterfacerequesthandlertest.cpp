@@ -165,7 +165,7 @@ BOOST_FIXTURE_TEST_CASE(testCallScene, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testSaveScene, Fixture) {
-  testFunction("saveScene", "sceneNumber", "5", "");
+  testFunction("saveScene", "sceneNumber", "5");
 }
 
 BOOST_FIXTURE_TEST_CASE(testUndoScene, Fixture) {

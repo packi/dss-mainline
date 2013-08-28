@@ -155,6 +155,9 @@ namespace dss {
   } // removeFromPropertyTree
 
   std::string State::getStorageName() {
+    if (!DSS::hasInstance()) {
+      return "";
+    }
     std::string dirname = DSS::getInstance()->getSavedPropsDirectory();
     std::string filename = "state." + getName();
     return dirname + "/" + filename;
