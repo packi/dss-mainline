@@ -75,28 +75,28 @@ namespace dss {
     getDevice()->decreaseValue(_origin, _category);
   } // decreaseValue
 
-  void DeviceReference::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
-    getDevice()->setValue(_origin, _category, _value);
+  void DeviceReference::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
+    getDevice()->setValue(_origin, _category, _value, _token);
   } // setValue
 
   bool DeviceReference::isOn() const {
     return getDevice()->isOn();
   }
 
-  void DeviceReference::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force) {
-    getDevice()->callScene(_origin, _category, _sceneNr, _force);
+  void DeviceReference::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, std::string _token, const bool _force) {
+    getDevice()->callScene(_origin, _category, _sceneNr, _token, _force);
   } // callScene
 
-  void DeviceReference::saveScene(const callOrigin_t _origin, const int _sceneNr) {
-    getDevice()->saveScene(_origin, _sceneNr);
+  void DeviceReference::saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token) {
+    getDevice()->saveScene(_origin, _sceneNr, _token);
   } // saveScene
 
-  void DeviceReference::undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr) {
-    getDevice()->undoScene(_origin, _category, _sceneNr);
+  void DeviceReference::undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
+    getDevice()->undoScene(_origin, _category, _sceneNr, _token);
   } // undoScene
 
-  void DeviceReference::undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    getDevice()->undoSceneLast(_origin, _category);
+  void DeviceReference::undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) {
+    getDevice()->undoSceneLast(_origin, _category, _token);
   } // undoSceneLast
 
   unsigned long DeviceReference::getPowerConsumption() {
@@ -111,8 +111,8 @@ namespace dss {
     getDevice()->previousScene(_origin, _category);
   }
 
-  void DeviceReference::blink(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    getDevice()->blink(_origin, _category);
+  void DeviceReference::blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) {
+    getDevice()->blink(_origin, _category, _token);
   }
 
   std::string DeviceReference::getSensorEventName(const int _eventIndex) {

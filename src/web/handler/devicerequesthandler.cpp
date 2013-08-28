@@ -111,7 +111,7 @@ namespace dss {
     }
     assert(pDevice != NULL);
     if(isDeviceInterfaceCall(_request)) {
-      return handleDeviceInterfaceRequest(_request, pDevice);
+      return handleDeviceInterfaceRequest(_request, pDevice, _session);
     } else if(_request.getMethod() == "getSpec") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("functionID", pDevice->getFunctionID());

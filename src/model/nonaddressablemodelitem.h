@@ -37,14 +37,14 @@ namespace dss {
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token);
 
-    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force = false);
-    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr);
-    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr);
-    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, std::string _token, const bool _force = false);
+    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token);
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token);
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);
 
-    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems() = 0;
   }; // NonAddressableModelItem

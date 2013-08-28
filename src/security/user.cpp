@@ -23,6 +23,7 @@
 #include "user.h"
 
 #include <cassert>
+#include <string>
 
 #include "src/base.h"
 #include "src/propertysystem.h"
@@ -41,6 +42,15 @@ namespace dss {
   const std::string& User::getName() {
     return m_pUserNode->getDisplayName();
   } // getName
+
+  const std::string& User::getToken() const {
+    return m_Token;
+  } // getToken
+
+  void User::setToken(const std::string _token) {
+    m_Token = _token;
+  } // getToken
+
 
   PropertyNodePtr User::getRole() {
     return m_pRoleNode;

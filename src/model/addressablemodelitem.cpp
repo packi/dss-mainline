@@ -45,7 +45,7 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: increaseValue blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneInc, false);
+    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneInc, "", false);
   } // increaseValue
 
   void AddressableModelItem::decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) {
@@ -56,10 +56,10 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: decreaseValue blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneDec, false);
+    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, SceneDec, "", false);
   } // decreaseValue
 
-  void AddressableModelItem::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
+  void AddressableModelItem::setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -67,10 +67,10 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: setValue blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->setValue(this, _origin, _category, _value);
+    m_pApartment->getActionRequestInterface()->setValue(this, _origin, _category, _value, _token);
   } // setValue
 
-  void AddressableModelItem::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force) {
+  void AddressableModelItem::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -78,17 +78,17 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: callScene blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, _sceneNr, _force);
+    m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, _sceneNr, _token, _force);
   } // callScene
 
-  void AddressableModelItem::saveScene(const callOrigin_t _origin, const int _sceneNr) {
+  void AddressableModelItem::saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->saveScene(this, _origin, _sceneNr);
+    m_pApartment->getActionRequestInterface()->saveScene(this, _origin, _sceneNr, _token);
   } // saveScene
 
-  void AddressableModelItem::undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr) {
+  void AddressableModelItem::undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -96,10 +96,10 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: undoScene blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->undoScene(this, _origin, _category, _sceneNr);
+    m_pApartment->getActionRequestInterface()->undoScene(this, _origin, _category, _sceneNr, _token);
   } // undoScene
 
-  void AddressableModelItem::undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category) {
+  void AddressableModelItem::undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -107,10 +107,10 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: undoSceneLast blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->undoSceneLast(this, _origin, _category);
+    m_pApartment->getActionRequestInterface()->undoSceneLast(this, _origin, _category, _token);
   } // undoSceneLast
 
-  void AddressableModelItem::blink(const callOrigin_t _origin, const SceneAccessCategory _category) {
+  void AddressableModelItem::blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -118,7 +118,7 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: blink blocked", lsDebug);
       return;
     }
-    m_pApartment->getActionRequestInterface()->blink(this, _origin, _category);
+    m_pApartment->getActionRequestInterface()->blink(this, _origin, _category, _token);
   } // blink
 
 } // namespace dss

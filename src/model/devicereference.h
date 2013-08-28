@@ -74,7 +74,7 @@ namespace dss {
      * @note This will lookup the device. */
     std::string getName() const;
 
-    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _value);
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _value, const std::string _token);
 
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
@@ -85,15 +85,15 @@ namespace dss {
      */
     virtual bool isOn() const;
 
-    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force);
-    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr);
-    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr);
-    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, std::string _token, const bool _force);
+    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token);
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token);
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);
 
     virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category);
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);
 
     virtual unsigned long getPowerConsumption();
  }; // DeviceReference

@@ -599,7 +599,7 @@ int dss__SetSetValue(struct soap *soap, char* _token, char* _setSpec, uint8_t _v
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.setValue(dss::coSOAP, dss::SAC_UNKNOWN, _value);
+  set.setValue(dss::coSOAP, dss::SAC_UNKNOWN, _value, "");
   result = true;
   return SOAP_OK;
 }
@@ -610,7 +610,7 @@ int dss__SetCallScene(struct soap *soap, char* _token, char* _setSpec, int _scen
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID);
+  set.callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -621,7 +621,7 @@ int dss__SetSaveScene(struct soap *soap, char* _token, char* _setSpec, int _scen
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.saveScene(dss::coSOAP, _sceneID);
+  set.saveScene(dss::coSOAP, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -632,7 +632,7 @@ int dss__SetUndoScene(struct soap *soap, char* _token, char* _setSpec, int _scen
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID);
+  set.undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -643,7 +643,7 @@ int dss__SetUndoLastScene(struct soap *soap, char* _token, char* _setSpec, bool&
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN);
+  set.undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }
@@ -700,7 +700,7 @@ int dss__ApartmentSetValue(struct soap *soap, char* _token, int _groupID, uint8_
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->setValue(dss::coSOAP, dss::SAC_UNKNOWN, _value);
+  group->setValue(dss::coSOAP, dss::SAC_UNKNOWN, _value, "");
   result = true;
   return SOAP_OK;
 }
@@ -711,7 +711,7 @@ int dss__ApartmentCallScene(struct soap *soap, char* _token, int _groupID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, false);
+  group->callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "", false);
   result = true;
   return SOAP_OK;
 }
@@ -722,7 +722,7 @@ int dss__ApartmentSaveScene(struct soap *soap, char* _token, int _groupID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->saveScene(dss::coSOAP, _sceneID);
+  group->saveScene(dss::coSOAP, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -733,7 +733,7 @@ int dss__ApartmentUndoScene(struct soap *soap, char* _token, int _groupID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID);
+  group->undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -744,7 +744,7 @@ int dss__ApartmentUndoLastScene(struct soap *soap, char* _token, int _groupID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN);
+  group->undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }
@@ -755,7 +755,7 @@ int dss__ApartmentBlink(struct soap *soap, char* _token, int _groupID, bool& res
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->blink(dss::coSOAP, dss::SAC_UNKNOWN);
+  group->blink(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }
@@ -813,7 +813,7 @@ int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->setValue(dss::coSOAP, dss::SAC_UNKNOWN, _value);
+  group->setValue(dss::coSOAP, dss::SAC_UNKNOWN, _value, "");
   result = true;
   return SOAP_OK;
 }
@@ -824,7 +824,7 @@ int dss__ZoneCallScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, _force);
+  group->callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "", _force);
   result = true;
   return SOAP_OK;
 }
@@ -835,7 +835,7 @@ int dss__ZoneSaveScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->saveScene(dss::coSOAP, _sceneID);
+  group->saveScene(dss::coSOAP, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -846,7 +846,7 @@ int dss__ZoneUndoScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID);
+  group->undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -857,7 +857,7 @@ int dss__ZoneUndoLastScene(struct soap *soap, char* _token, int _zoneID, int _gr
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN);
+  group->undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }
@@ -868,7 +868,7 @@ int dss__ZoneBlink(struct soap *soap, char* _token, int _zoneID, int _groupID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->blink(dss::coSOAP, dss::SAC_UNKNOWN);
+  group->blink(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }
@@ -906,7 +906,7 @@ int dss__DeviceBlink(struct soap *soap, char* _token, char* _deviceID, bool& res
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.blink(dss::coSOAP, dss::SAC_UNKNOWN);
+  dev.blink(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }
@@ -961,7 +961,7 @@ int dss__DeviceCallScene(struct soap *soap, char* _token, char* _deviceID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, _force);
+  device.callScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "", _force);
   result = true;
   return SOAP_OK;
 }
@@ -972,7 +972,7 @@ int dss__DeviceSaveScene(struct soap *soap, char* _token, char* _deviceID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.saveScene(dss::coSOAP, _sceneID);
+  device.saveScene(dss::coSOAP, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -983,7 +983,7 @@ int dss__DeviceUndoScene(struct soap *soap, char* _token, char* _deviceID, int _
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID);
+  device.undoScene(dss::coSOAP, dss::SAC_UNKNOWN, _sceneID, "");
   result = true;
   return SOAP_OK;
 }
@@ -994,7 +994,7 @@ int dss__DeviceUndoLastScene(struct soap *soap, char* _token, char* _deviceID, b
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN);
+  device.undoSceneLast(dss::coSOAP, dss::SAC_UNKNOWN, "");
   result = true;
   return SOAP_OK;
 }

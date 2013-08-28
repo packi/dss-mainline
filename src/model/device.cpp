@@ -624,11 +624,11 @@ namespace dss {
   } // getEnergymeterValue
 
   void Device::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, SceneHelper::getNextScene(m_LastCalledScene), false);
+    callScene(_origin, _category, SceneHelper::getNextScene(m_LastCalledScene),  "", false);
   } // nextScene
 
   void Device::previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, SceneHelper::getNextScene(m_LastCalledScene), false);
+    callScene(_origin, _category, SceneHelper::getNextScene(m_LastCalledScene), "", false);
   } // previousScene
 
   const std::string& Device::getName() const {

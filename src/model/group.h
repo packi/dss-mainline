@@ -74,7 +74,7 @@ namespace dss {
     std::string getAssociatedSet() const { return m_AssociatedSet; }
     void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }
 
-    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force);
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force);
     virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual unsigned long getPowerConsumption();
