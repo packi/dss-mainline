@@ -233,6 +233,18 @@ function callscene()
     if (groupID === 0 && sceneID === Scene.Absent) {
         pNode = Property.getNode('/usr/states/presence');
         pNode.setStatusValue("absent");
+
+        // #2561: auto-clear panic and fire
+        state = getState('panic', false);
+        if (state.getValue() == 1) {
+            var z = getZoneByID(0);
+            z.undoSceneSys(0, Scene.Panic, "manual");
+        }
+        state = getState('fire', false);
+        if (state.getValue() == 1) {
+            var z = getZoneByID(0);
+            z.undoSceneSys(0, Scene.Fire, "manual");
+        }
     }
     else if (groupID === 0 && sceneID === Scene.Present) {
         pNode = Property.getNode('/usr/states/presence');
@@ -348,13 +360,34 @@ function undoscene()
     var groupID = parseInt(raisedEvent.source.groupID);
     var state;
 
+    var originDeviceId = 0;
+    if (raisedEvent.source.isGroup) {
+        originDeviceId = parseInt(raisedEvent.parameter.originDeviceID, 16);
+    } else if (raisedEvent.source.dsid) {
+        originDeviceId = parseInt(raisedEvent.source.dsid, 16);
+    }
+
     if (groupID === 0 && sceneID === Scene.Panic) {
         state = getState('panic', false);
         state.setValue('inactive', 7);
+
+        // #2561: auto-reset fire if panic was reset by a button
+        state = getState('fire', false);
+        if ((originDeviceId >= 16) && (state.getValue() == 1)) {
+            var z = getZoneByID(0);
+            z.undoSceneSys(0, Scene.Fire, "manual");
+        }
     }
     else if (groupID === 0 && sceneID === Scene.Fire) {
         state = getState('fire', false);
         state.setValue('inactive', 7);
+
+        // #2561: auto-reset panic if fire was reset by a button
+        state = getState('panic', false);
+        if ((originDeviceId >= 16) && (state.getValue() == 1)) {
+            var z = getZoneByID(0);
+            z.undoSceneSys(0, Scene.Panic, "manual");
+        }
     }
     else if (groupID === 0 && sceneID === Scene.Alarm) {
         state = getState('alarm', false);
