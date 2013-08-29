@@ -33,6 +33,8 @@
 #include "url.h"
 #include "base.h"
 
+#define CURL_TRANSFER_TIMEOUT_SECS 2*60 // 2 minutes
+
 namespace dss {
 
 HashMapStringString URL::emptyHeader;
@@ -150,7 +152,7 @@ long URL::request(const std::string& url, RequestType type,
     /* suppress output to stdout */
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
   }
-
+  curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
   res = curl_easy_perform(curl_handle);
   if (res != CURLE_OK) {
