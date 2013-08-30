@@ -33,7 +33,7 @@ namespace dss {
 
   //================================================== DSActionRequest
 
-  void DSActionRequest::callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const bool _force) {
+  void DSActionRequest::callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -62,7 +62,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene) {
+  void DSActionRequest::saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const std::string _token) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -83,7 +83,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene) {
+  void DSActionRequest::undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -104,7 +104,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
+  void DSActionRequest::undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -125,7 +125,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
+  void DSActionRequest::blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -146,7 +146,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) {
+  void DSActionRequest::setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

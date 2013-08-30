@@ -210,12 +210,12 @@ namespace dss {
 
   class ActionRequestInterface {
   public:
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const bool _force) = 0;
-    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene) = 0;
-    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene) = 0;
-    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) = 0;
-    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category) = 0;
-    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value) = 0;
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) = 0;
+    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const std::string _token) = 0;
+    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) = 0;
+    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
+    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
+    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) = 0;
   }; // ActionRequestInterface
 
 
@@ -242,6 +242,7 @@ namespace dss {
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
+                                  const std::string _token,
                                   const bool _force) = 0;
     virtual void onGroupUndoScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
@@ -250,32 +251,37 @@ namespace dss {
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
-                                  const bool _explicit) = 0;
+                                  const bool _explicit,
+                                  const std::string _token) = 0;
     virtual void onGroupBlink(BusInterface* _source,
                               const dss_dsid_t& _dsMeterID,
                               const int _zoneID,
                               const int _groupID,
                               const int _originDeviceId,
-                              const SceneAccessCategory _category) = 0;
+                              const SceneAccessCategory _category,
+                              const std::string _token) = 0;
     virtual void onDeviceCallScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
+                                  const std::string _token,
                                   const bool _force) = 0;
     virtual void onDeviceBlink(BusInterface* _source,
                                const dss_dsid_t& _dsMeterID,
                                const int _deviceID,
                                const int _originDeviceId,
-                               const SceneAccessCategory _category) = 0;
+                               const SceneAccessCategory _category,
+                               const std::string _token) = 0;
     virtual void onDeviceUndoScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
-                                  const bool _explicit) = 0;
+                                  const bool _explicit,
+                                  const std::string _token) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
                                  const unsigned int _powerW,

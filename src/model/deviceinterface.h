@@ -58,19 +58,19 @@ namespace dss {
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
     /** Sets the output value */
-    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value) = 0;
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) = 0;
     /** Sets the scene on the device.
      * The output value will be set according to the scene lookup table in the device.
      */
-    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force = false) = 0;
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force = false) = 0;
     /** Stores the current output value into the scene lookup table.
      * The next time scene _sceneNr gets called the output will be set according to the lookup table.
      */
-    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr) = 0;
+    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token) = 0;
     /** Restores the last scene value if identical to _sceneNr */
-    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr) = 0;
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) = 0;
     /** Restores the last scene value */
-    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
 
     /** Returns the consumption in mW */
     virtual unsigned long getPowerConsumption() = 0;
@@ -84,7 +84,7 @@ namespace dss {
      */
     virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
 
-    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category) = 0;
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
 
     virtual ~IDeviceInterface() {};
   }; // IDeviceInterface

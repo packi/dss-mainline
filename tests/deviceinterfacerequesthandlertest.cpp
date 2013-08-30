@@ -29,6 +29,7 @@
 #include "src/model/deviceinterface.h"
 #include "src/web/handler/deviceinterfacerequesthandler.h"
 #include "src/web/json.h"
+#include "src/session.h"
 
 using namespace dss;
 
@@ -53,19 +54,19 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("decreaseValue");
     }
-    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value)  {
+    virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token)  {
       functionCalled("setValue(" + intToString(_value) + ")");
     }
-    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const bool _force)  {
+    virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr)  {
+    virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr)  {
+    virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token)  {
       functionCalled("undoScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category)  {
+    virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token)  {
       functionCalled("undoSceneLast");
     }
     virtual unsigned long getPowerConsumption()  {
@@ -78,7 +79,7 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category)  {
       functionCalled("previousScene");
     }
-    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category)  {
+    virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token)  {
       functionCalled("blink");
     }
 
@@ -128,8 +129,9 @@ public:
 private:
   void testFunction(const std::string& _functionName, const std::string& _functionNameWithParams, const HashMapStringString& _params) {
     boost::shared_ptr<DeviceInterfaceDummy> dummy(new DeviceInterfaceDummy);
+    boost::shared_ptr<Session> dummySession(new Session("dummy"));
     RestfulRequest req("bla/" + _functionName, _params);
-    WebServerResponse response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy);
+    WebServerResponse response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession);
     BOOST_CHECK_EQUAL(dummy->getNumberOfCalls(), 1);
     BOOST_CHECK_EQUAL(dummy->getLastFunction(), _functionNameWithParams);
     testOkIs(response, true);

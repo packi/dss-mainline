@@ -32,7 +32,7 @@ namespace dss {
 
   //================================================== SimActionRequestBusInterface
 
-  void SimActionRequestBusInterface::blink(AddressableModelItem* pTarget, const uint16_t _origin, const SceneAccessCategory _category) {
+  void SimActionRequestBusInterface::blink(AddressableModelItem* pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) {
     // TODO: the simulation can't blink
   } // blink
 
@@ -40,6 +40,7 @@ namespace dss {
                                                const uint16_t _origin,
                                                const SceneAccessCategory _category,
                                                const uint16_t scene,
+                                               const std::string _token,
                                                const bool _force) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
@@ -57,7 +58,8 @@ namespace dss {
 
   void SimActionRequestBusInterface::saveScene(AddressableModelItem *pTarget,
                                                const uint16_t _origin,
-                                               const uint16_t scene) {
+                                               const uint16_t scene,
+                                               const std::string _token) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
@@ -75,7 +77,8 @@ namespace dss {
   void SimActionRequestBusInterface::undoScene(AddressableModelItem *pTarget,
                                                const uint16_t _origin,
                                                const SceneAccessCategory _category,
-                                               const uint16_t scene) {
+                                               const uint16_t scene,
+                                               const std::string _token) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
@@ -92,7 +95,8 @@ namespace dss {
 
   void SimActionRequestBusInterface::undoSceneLast(AddressableModelItem *pTarget,
                                                    const uint16_t _origin,
-                                                   const SceneAccessCategory _category) {
+                                                   const SceneAccessCategory _category,
+                                                   const std::string _token) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
@@ -110,7 +114,8 @@ namespace dss {
   void SimActionRequestBusInterface::setValue(AddressableModelItem *pTarget,
                                               const uint16_t _origin,
                                               const SceneAccessCategory _category,
-                                              const uint8_t _value) {
+                                              const uint8_t _value,
+                                              const std::string _token) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {

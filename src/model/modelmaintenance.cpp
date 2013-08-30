@@ -285,6 +285,7 @@ namespace dss {
         int groupID = mEvent->getGroupID();
         int zoneID = mEvent->getZoneID();
         int originDeviceID = mEvent->getOriginDeviceID();
+        std::string originToken = mEvent->getOriginToken();
 
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
@@ -305,6 +306,7 @@ namespace dss {
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
               pEvent->setProperty("originDeviceID", originDSID.toString());
+              pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
                 pEvent->setProperty("forced", "yes");
               }
@@ -319,6 +321,7 @@ namespace dss {
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
               pEvent->setProperty("originDeviceID", originDSID.toString());
+              pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
                 pEvent->setProperty("forced", "yes");
               }
@@ -422,7 +425,7 @@ namespace dss {
       case ModelEvent::etCallSceneDevice:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() == 4) {
-          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
+          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getSingleStringParameter(), event.getParameter(3));
         } else {
           log("Unexpected parameter count for ModelEvent::etCallSceneDevice");
         }
@@ -430,7 +433,7 @@ namespace dss {
       case ModelEvent::etBlinkDevice:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() == 2) {
-          onDeviceBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+          onDeviceBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getSingleStringParameter());
         } else {
           log("Unexpected parameter count for ModelEvent::etBlinkDevice");
         }
@@ -438,7 +441,7 @@ namespace dss {
       case ModelEvent::etCallSceneDeviceLocal:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() == 2) {
-          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), 0, event.getParameter(1), false);
+          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), 0, event.getParameter(1), event.getSingleStringParameter(), false);
         } else {
           log("Unexpected parameter count for ModelEvent::etCallSceneDeviceLocal");
         }
@@ -459,9 +462,9 @@ namespace dss {
           if (event.getParameterCount() >= 5) {
             forceFlag = event.getParameter(4);
           }
-          onGroupCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), forceFlag);
+          onGroupCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), forceFlag, event.getSingleStringParameter());
           if (pEventWithDSID) {
-            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), forceFlag);
+            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), event.getSingleStringParameter(), forceFlag);
           }
         } else {
           log("Expected minimal 4 parameter for ModelEvent::etCallSceneGroup");
@@ -475,7 +478,7 @@ namespace dss {
           if(event.getParameterCount() >= 4) {
             sceneID = event.getParameter(3);
           }
-          onGroupUndoScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), sceneID);
+          onGroupUndoScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), sceneID, event.getSingleStringParameter());
         }
         break;
       case ModelEvent::etBlinkGroup:
@@ -483,7 +486,7 @@ namespace dss {
         if (event.getParameterCount() < 3) {
           log("Expected at least 3 parameter for ModelEvent::etBlinkGroup");
         } else {
-          onGroupBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          onGroupBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getSingleStringParameter());
         }
         break;
       case ModelEvent::etModelDirty:
@@ -778,7 +781,7 @@ namespace dss {
     }
   };
 
-  void ModelMaintenance::onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced) {
+  void ModelMaintenance::onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced, std::string _token) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
         log("onGroupCallScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -819,6 +822,7 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
+        pEvent->setProperty("token", _token);
         dss_dsid_t originDSID;
         if ((_source != NullDSID) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
@@ -839,7 +843,7 @@ namespace dss {
     }
   } // onGroupCallScene
 
-  void ModelMaintenance::onGroupUndoScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID) {
+  void ModelMaintenance::onGroupUndoScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const std::string _token) {
     try {
       if(_sceneID < -1 || _sceneID > MaxSceneNumber) {
         log("onGroupUndoScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -895,6 +899,7 @@ namespace dss {
           originDSID.lower = _originDeviceID;
         }
         pEvent->setProperty("originDeviceID", originDSID.toString());
+        pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
         log("OnGroupUndoScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -904,7 +909,7 @@ namespace dss {
     }
   } // onGroupUndoScene
 
-  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const bool _forced) {
+  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, std::string _token, const bool _forced) {
     // Filter Strategy:
     // Check for Source != 0 and per Zone and Group
     // - delayed On-Scene processing, for Scene1/Scene2/Scene3/Scene4
@@ -934,6 +939,7 @@ namespace dss {
           ": Zone=" + intToString(_zoneID) +
           ", Gruppe=" + intToString(_groupID) +
           ", OriginDevice=" + intToString(_originDeviceID) +
+          ", OriginToken=" + _token +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
       // flush all pending events from same origin
@@ -944,7 +950,7 @@ namespace dss {
         }
       }
 
-      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced));
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced, _token));
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
       return;
@@ -1039,13 +1045,14 @@ namespace dss {
         ": Zone=" + intToString(_zoneID) +
         ", Group=" + intToString(_groupID) +
         ", OriginDevice=" + intToString(_originDeviceID) +
+        ", OriginToken=" + _token +
         ", Scene=" + intToString(_sceneID), lsDebug);
 
-    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced));
+    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _forced, _token));
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
 
-  void ModelMaintenance::onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID) {
+  void ModelMaintenance::onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const std::string _token) {
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
@@ -1063,6 +1070,7 @@ namespace dss {
           originDSID.lower = _originDeviceID;
         }
         pEvent->setProperty("originDeviceID", originDSID.toString());
+        pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
         log("OnGroupBlink: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -1215,7 +1223,7 @@ namespace dss {
       }
   }
 
-  void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const bool _forced) {
+  void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const std::string _token, const bool _forced) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
         log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
@@ -1232,6 +1240,7 @@ namespace dss {
         boost::shared_ptr<Event> event(new Event("callScene", pDevRev));
         event->setProperty("sceneID", intToString(_sceneID));
         event->setProperty("originDeviceID", intToString(_originDeviceID));
+        event->setProperty("originToken", _token);
         if (_forced) {
           event->setProperty("forced", "yes");
         }
@@ -1244,7 +1253,7 @@ namespace dss {
     }
   } // onDeviceCallScene
 
-  void ModelMaintenance::onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID) {
+  void ModelMaintenance::onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const std::string _token) {
     try {
       boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
       try {
@@ -1253,6 +1262,8 @@ namespace dss {
         boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
         boost::shared_ptr<Event> event(new Event("blink", pDevRev));
         event->setProperty("originDeviceID", intToString(_originDeviceID));
+        event->setProperty("originToken", _token);
+        printf("\n\n--------------> %s <---------------\n\n", _token.c_str());
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
         log("OnDeviceBlink: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString(), lsError);
@@ -1260,7 +1271,7 @@ namespace dss {
     } catch(ItemNotFoundException& e) {
       log("OnDeviceBlink: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
     }
-  } // onDeviceCallScene
+  } // onDeviceBlink
 
   void ModelMaintenance::onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType) {
     try {

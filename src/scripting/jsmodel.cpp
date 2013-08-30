@@ -1100,7 +1100,7 @@ namespace dss {
           if (argc >= 1) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
           }
-          intf->blink(coJSScripting, category);
+          intf->blink(coJSScripting, category, "");
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
           return JS_TRUE;
@@ -1209,7 +1209,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->setValue(coJSScripting, category, value);
+            intf->setValue(coJSScripting, category, value, "");
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1255,7 +1255,7 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->callScene(coJSScripting, category, sceneNr, forceFlag);
+            intf->callScene(coJSScripting, category, sceneNr, "", forceFlag);
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -1299,9 +1299,9 @@ namespace dss {
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
           if (sceneNr >= 0) {
-            intf->undoScene(coJSScripting, category, sceneNr);
+            intf->undoScene(coJSScripting, category, sceneNr, "");
           } else {
-            intf->undoSceneLast(coJSScripting, category);
+            intf->undoSceneLast(coJSScripting, category, "");
           }
           JS_ResumeRequest(cx, ref);
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
@@ -1416,7 +1416,7 @@ namespace dss {
 
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            intf->saveScene(coJSScripting, sceneNr);
+            intf->saveScene(coJSScripting, sceneNr, "");
             JS_ResumeRequest(cx, ref);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
             return JS_TRUE;
@@ -2194,7 +2194,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        pGroup->callScene(coJSScripting, category, sceneID, forcedCall);
+        pGroup->callScene(coJSScripting, category, sceneID, "", forcedCall);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2239,7 +2239,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        pGroup->callScene(coSystem, category, sceneID, forcedCall);
+        pGroup->callScene(coSystem, category, sceneID, "", forcedCall);
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2280,7 +2280,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        pGroup->undoScene(coJSScripting, category, sceneID);
+        pGroup->undoScene(coJSScripting, category, sceneID, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -2321,7 +2321,7 @@ namespace dss {
           }
 
           boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-          pGroup->undoScene(coSystem, category, sceneID);
+          pGroup->undoScene(coSystem, category, sceneID, "");
 
           JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
           return JS_TRUE;
@@ -2366,7 +2366,7 @@ namespace dss {
           JS_ReportWarning(cx, "Zone.blink: group with id \"%d\" not found", groupID);
           return JS_FALSE;
         }
-        pGroup->blink(coJSScripting, category);
+        pGroup->blink(coJSScripting, category, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;

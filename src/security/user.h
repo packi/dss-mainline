@@ -24,6 +24,7 @@
 #define USER_H_INCLUDED
 
 #include <boost/shared_ptr.hpp>
+#include <string>
 
 namespace dss {
 
@@ -37,9 +38,12 @@ namespace dss {
     void setPassword(const std::string& _password);
     const std::string& getName();
     PropertyNodePtr getRole();
+    const std::string& getToken() const;
+    void setToken(const std::string _token);
   private:
     PropertyNodePtr m_pUserNode;
     PropertyNodePtr m_pRoleNode;
+    std::string m_Token;
   }; // User
 
 } // namespace dss
