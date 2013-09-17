@@ -15,6 +15,9 @@
  *  Copyright (c) 2012 digitalSTROM.org, Zurich, Switzerland
  *  Author: Michael Troß <michael.tross@aizo.com>
  *
+ *  Copyright (c) 2013 digitalSTROM.org, Zurich, Switzerland
+ *  Author: Sergey Bostandzhyan <jin@dev.digitalstrom.org>
+ *
  *  Based on the gpsee module written by Wes Garland <wes@page.ca>,
  *  http://code.google.com/p/gpsee/
  */
@@ -96,6 +99,15 @@ var HTTP = function HTTP(options, extraHeaders)
     this.header_list.push(s);
   }
 
+  var scope = this;
+  this._easy.asyncdone = function easycurl$$asyncdone()
+  {
+      if (this.async_callback)
+      {
+          this.async_callback(scope._process(scope));
+      }
+  }
+
   this._easy.setopt(this._easy.CURLOPT_VERBOSE, options.debug ? 1 : 0);
   this._easy.debug = function easycurl$$debug(itype, data)
   {
@@ -147,25 +159,94 @@ var HTTP = function HTTP(options, extraHeaders)
 
 HTTP.prototype =
 {
-  get: function get(url, referrer)
+  get: function get(url, referrer, callback)
   {
     this._easy.setopt(this._easy.CURLOPT_HTTPGET, 1);
     this._easy.setopt(this._easy.CURLOPT_POST, 0);
-    return this._setup(url, referrer);
+    return this._setup(url, referrer, undefined, callback);
   },
 
   /**
    * post data must be formatted appropriated into one string
    */
-  post: function post(url, referrer, post)
+  post: function post(url, referrer, post, callback)
   {
     this._easy.setopt(this._easy.CURLOPT_HTTPGET, 0);
     this._easy.setopt(this._easy.CURLOPT_POST, 1);
     this._easy.setopt(this._easy.CURLOPT_COPYPOSTFIELDS, post);
-    return this._setup(url, referrer);
+    return this._setup(url, referrer, undefined, callback);
   },
 
-  _setup: function _setup(url, referrer, headers)
+    /* Merge per-connection and per-method extra headers */
+  _process: function(scope)
+    {
+
+    var code = 100;
+    var i = 0;
+    /* code http 100 is a bit funny
+     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+     */
+    while (code === 100)
+    {
+      var status = scope._easy.header_list[i].trim();
+      if (status.length > 0)
+      {
+        /** @todo 	maybe use this._easy.getinfo(this._easy.CURLINFO_RESPONSE_CODE)
+         *  		instead of the regexp
+         */
+        var parts = /^HTTP\/[0-9.]+ ([0-9]+)/(status);
+        code = parseInt(parts[1]);
+      }
+      ++i; /**@todo future: break if i > XXX? */
+    }
+
+    var parts = this._easy.blobs.length;
+    if (parts == 0)
+    {
+      this.body = "";
+    }
+    else
+    {
+      scope.body = scope._easy.blobs[0];
+      for (var i=1; i< parts; ++i)
+        scope.body += scope._easy.blobs[i];
+    }
+
+    scope.headers = scope._easy.header_list.splice(0);
+    if (scope.headers[scope.headers.length - 1] === "\r\n")
+      scope.headers.pop();
+
+    var ret = { body: scope.body, status: {} };
+    var statusStr = scope.headers.shift() + "";
+    ret.status.valueOf 	= function() { return +code };
+    ret.status.toString = function() { return statusStr };
+    ret.headers = {};
+    scope.headers.forEach(function(val)
+        {
+            var a=val.trim().split(/: /);
+            ret.headers[a[0].toLowerCase()] = a[1];
+        });
+
+    if (ret.headers['content-type'])
+    {
+      ret.contentType 	= (ret.headers['content-type'].match(/[a-zA-Z0-9_/-]*/) + "").toLowerCase();
+      ret.charset 	= (ret.headers['content-type'].match(/charset=[a-zA-Z0-9_/-]*/) + "").toLowerCase().slice(8);
+    }
+
+    ret.valueOf = ret.status.valueOf;
+    ret.body.toString = function()
+    {
+      if (!ret.charset)
+        throw new TypeError("Cannot convert content with undefined charset");
+
+      //return ret.body.decodeToString(ret.charset);
+      return ret.body;
+    }
+
+    return ret;
+  },
+
+  _setup: function _setup(url, referrer, headers, callback)
   {
     /* Merge per-connection and per-method extra headers */
     var extraHeaders = [];
@@ -190,71 +271,14 @@ HTTP.prototype =
     this._easy.setopt(this._easy.CURLOPT_URL, url);
     this._easy.setopt(this._easy.CURLOPT_REFERER, referrer || "");
     this.reset();
-    this._easy.perform();
-
-    var code = 100;
-    var i = 0;
-    /* code http 100 is a bit funny
-     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-     */
-    while (code === 100)
-    {
-      var status = this._easy.header_list[i].trim();
-      if (status.length > 0)
-      {
-        /** @todo 	maybe use this._easy.getinfo(this._easy.CURLINFO_RESPONSE_CODE)
-         *  		instead of the regexp
-         */
-        var parts = /^HTTP\/[0-9.]+ ([0-9]+)/(status);
-        code = parseInt(parts[1]);
-      }
-      ++i; /**@todo future: break if i > XXX? */
+    if (callback == undefined) {
+      this._easy.perform();
+      return this._process(this);
+    } else {
+      this._easy.async_callback = callback;
+      this._easy.perform_async();
+      return null;
     }
-
-    var parts = this._easy.blobs.length;
-    if (parts == 0)
-    {
-      this.body = "";
-    }
-    else
-    {
-      this.body = this._easy.blobs[0];
-      for (var i=1; i< parts; ++i)
-        this.body += this._easy.blobs[i];
-    }
-
-    this.headers = this._easy.header_list.splice(0);
-    if (this.headers[this.headers.length - 1] === "\r\n")
-      this.headers.pop();
-
-    var ret = { body: this.body, status: {} };
-    var statusStr = this.headers.shift() + "";
-    ret.status.valueOf 	= function() { return +code };
-    ret.status.toString = function() { return statusStr };
-    ret.headers = {};
-    this.headers.forEach(function(val)
-        {
-            var a=val.trim().split(/: /);
-            ret.headers[a[0].toLowerCase()] = a[1];
-        });
-
-    if (ret.headers['content-type'])
-    {
-      ret.contentType 	= (ret.headers['content-type'].match(/[a-zA-Z0-9_/-]*/) + "").toLowerCase();
-      ret.charset 	= (ret.headers['content-type'].match(/charset=[a-zA-Z0-9_/-]*/) + "").toLowerCase().slice(8);
-    }
-
-    ret.valueOf = ret.status.valueOf;
-    ret.body.toString = function()
-    {
-      if (!ret.charset)
-        throw new TypeError("Cannot convert content with undefined charset");
-
-      //return ret.body.decodeToString(ret.charset);
-      return ret.body;
-    }
-
-    return ret;
   },
 
   /**

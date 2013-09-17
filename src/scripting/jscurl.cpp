@@ -30,6 +30,10 @@
 
 #include <curl/curl.h>
 #include <jsapi.h>
+
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
 #include "jscurl.h"
 #include "jscurl-constants.h"
 #include "jscurl-options.h"
@@ -469,6 +473,46 @@ namespace dss {
     return JS_FALSE;
   }
 
+  class SessionAttachedAsyncCurlObject : public ScriptContextAttachedObject {
+  public:
+    SessionAttachedAsyncCurlObject(ScriptContext* _pContext)
+    : ScriptContextAttachedObject(_pContext)
+    {}
+
+    virtual ~SessionAttachedAsyncCurlObject() {}
+
+    void asyncCurlRequest(struct callback_data* cb, JSContext *cx) {
+      jsval rval;
+      cb->dataIndex = 0;
+
+      cb->ref = JS_SuspendRequest(cx);
+      CURLcode c = curl_easy_perform(cb->handle);
+      JS_ResumeRequest(cx, cb->ref);
+
+      if(JS_IsExceptionPending(cx)) {
+        JS_ReportPendingException(cx);
+        jsval exval;
+        if(JS_GetPendingException(cx, &exval)) {
+          JS_ClearPendingException(cx);
+          JSString* errstr = JS_ValueToString(cx, exval);
+          if(errstr != NULL) {
+            char* errmsgBytes = JS_EncodeString(cx, errstr);
+            std::string errMsg(errmsgBytes);
+            JS_free(cx, errmsgBytes);
+            Logger::getInstance()->log("JS Curl Exception: " + errMsg, lsWarning);
+          }
+        }
+      }
+
+      JS_BeginRequest(cx);
+      JSObject* obj = cb->obj;
+      JS_CallFunctionName(cx, obj, "asyncdone", 0, NULL, &rval);
+      JS_EndRequest(cx);
+
+      delete this;
+    }
+  };
+
   static JSBool jscurl_perform(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext *ctx = static_cast<ScriptContext *> (JS_GetContextPrivate(cx));
     JSRequest req(ctx);
@@ -507,6 +551,25 @@ namespace dss {
     // something bad happened
     JS_ReportError(cx, "curl perform failed: %s [%d]", curl_easy_strerror(c), c);
     return JS_FALSE;
+  }
+
+  static JSBool jscurl_perform_async(JSContext *cx, uintN argc, jsval *vp) {
+    JSObject* jsFunction;
+    jsval functionVal;
+
+    ScriptContext *ctx = static_cast<ScriptContext *> (JS_GetContextPrivate(cx));
+    JSRequest req(ctx);
+
+    struct callback_data* cb = (struct callback_data*)
+        (JS_GetInstancePrivate(cx, JS_THIS_OBJECT(cx, vp), easycurl_class, JS_ARGV(cx, vp)));
+    if (!cb)
+      return JS_FALSE;
+
+    SessionAttachedAsyncCurlObject* pAsyncCurlObj = new SessionAttachedAsyncCurlObject(ctx);
+    boost::thread(boost::bind(&SessionAttachedAsyncCurlObject::asyncCurlRequest, pAsyncCurlObj, cb, cx));
+
+    JS_SET_RVAL(cx, vp, JSVAL_TRUE);
+    return JS_TRUE;
   }
 
   /*
@@ -691,6 +754,7 @@ namespace dss {
       JS_FS("setopt", jscurl_setopt, 2, 0),
       JS_FS("getinfo", jscurl_getinfo, 1, 0),
       JS_FS("perform", jscurl_perform, 0, 0),
+      JS_FS("perform_async", jscurl_perform_async, 0, 0),
       JS_FS("getdate", jscurl_getdate, 1, 0),
       JS_FS("version", jscurl_version, 0, 0),
       JS_FS_END
