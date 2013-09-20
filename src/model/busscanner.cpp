@@ -291,6 +291,14 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
       }
     }
+    {
+      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
+      boost::shared_ptr<Event> readyEvent(new Event("DeviceEvent", pDevRef));
+      readyEvent->setProperty("action", "ready");
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
+      }
+    }
 
     scheduleOEMReadout(dev);
 

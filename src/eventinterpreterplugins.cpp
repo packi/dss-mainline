@@ -378,9 +378,12 @@ namespace dss {
           }
         } else if (raiseLocation == erlDevice) {
           boost::shared_ptr<const DeviceReference> device = _event.getRaisedAtDevice();
-          source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
-          source.setProperty("dsid", device->getDSID().toString());
-          source.setProperty("zoneID", device->getDevice()->getZoneID());
+          try {
+            source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
+            source.setProperty("dsid", device->getDSID().toString());
+            source.setProperty("zoneID", device->getDevice()->getZoneID());
+          } catch(ItemNotFoundException& e) {
+          }
           source.setProperty("isApartment", false);
           source.setProperty("isGroup", false);
           source.setProperty("isDevice", true);
