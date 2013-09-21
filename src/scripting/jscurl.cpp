@@ -40,6 +40,8 @@
 #include "src/scripting/scriptobject.h"
 #include "src/dss.h"
 #include "src/propertysystem.h"
+#include "src/security/user.h"
+#include "src/security/security.h"
 
 namespace dss {
 
@@ -477,40 +479,79 @@ namespace dss {
   public:
     SessionAttachedAsyncCurlObject(ScriptContext* _pContext)
     : ScriptContextAttachedObject(_pContext)
-    {}
+    {
+      if (Security::getCurrentlyLoggedInUser() != NULL) {
+        m_pRunAsUser = new User(*Security::getCurrentlyLoggedInUser());
+      }
+    }
 
-    virtual ~SessionAttachedAsyncCurlObject() {}
+    virtual ~SessionAttachedAsyncCurlObject() {
+      if (m_pRunAsUser) {
+        delete m_pRunAsUser;
+      }
+    }
 
-    void asyncCurlRequest(struct callback_data* cb, JSContext *cx) {
-      jsval rval;
-      cb->dataIndex = 0;
+    void asyncCurlRequest(struct callback_data* cb, JSObject* _obj, jsval _function, ScriptFunctionRooter* _rooter) {
 
-      cb->ref = JS_SuspendRequest(cx);
-      CURLcode c = curl_easy_perform(cb->handle);
-      JS_ResumeRequest(cx, cb->ref);
+      if (m_pRunAsUser != NULL) {
+        Security* pSecurity = getContext()->getEnvironment().getSecurity();
+        if (pSecurity != NULL) {
+          pSecurity->signIn(m_pRunAsUser);
+        }
+      }
 
-      if(JS_IsExceptionPending(cx)) {
-        JS_ReportPendingException(cx);
-        jsval exval;
-        if(JS_GetPendingException(cx, &exval)) {
-          JS_ClearPendingException(cx);
-          JSString* errstr = JS_ValueToString(cx, exval);
-          if(errstr != NULL) {
-            char* errmsgBytes = JS_EncodeString(cx, errstr);
-            std::string errMsg(errmsgBytes);
-            JS_free(cx, errmsgBytes);
-            Logger::getInstance()->log("JS Curl Exception: " + errMsg, lsWarning);
+      {
+        ScriptLock lock(cb->ctx);
+        JSContextThread thread(cb->cx);
+        JSRequest req(cb->ctx);
+        cb->ref = JS_SuspendRequest(cb->cx);
+
+        curl_easy_perform(cb->handle);
+
+        JS_ResumeRequest(cb->cx, cb->ref);
+        if (JS_IsExceptionPending(cb->cx)) {
+          JS_ReportPendingException(cb->cx);
+          jsval exval;
+          if (JS_GetPendingException(cb->cx, &exval)) {
+            JS_ClearPendingException(cb->cx);
+            JSString* errstr = JS_ValueToString(cb->cx, exval);
+            if (errstr != NULL) {
+              char* errmsgBytes = JS_EncodeString(cb->cx, errstr);
+              std::string errMsg(errmsgBytes);
+              JS_free(cb->cx, errmsgBytes);
+              Logger::getInstance()->log("JS Curl Async Exception: " + errMsg, lsWarning);
+            }
           }
         }
       }
 
-      JS_BeginRequest(cx);
-      JSObject* obj = cb->obj;
-      JS_CallFunctionName(cx, obj, "asyncdone", 0, NULL, &rval);
-      JS_EndRequest(cx);
+      if (!getIsStopped()) {
+        ScriptLock lock(getContext());
+        {
+          JSContextThread req(getContext());
+          ScriptObject sobj(cb->obj, *getContext());
+          ScriptFunctionParameterList params(*getContext());
+
+          try {
+            sobj.callFunctionByName<void>("asyncdone", params);
+          } catch(ScriptException& e) {
+            Logger::getInstance()->log("JavaScript: error calling curl callback handler: '" +
+                std::string(e.what()) + "'", lsError);
+          }
+
+          delete _rooter;
+        }
+
+      } else {
+        ScriptLock lock(getContext());
+        JSContextThread req(getContext());
+        delete _rooter;
+      }
 
       delete this;
     }
+  private:
+      User* m_pRunAsUser;
   };
 
   static JSBool jscurl_perform(JSContext *cx, uintN argc, jsval *vp) {
@@ -554,19 +595,33 @@ namespace dss {
   }
 
   static JSBool jscurl_perform_async(JSContext *cx, uintN argc, jsval *vp) {
-    JSObject* jsFunction;
-    jsval functionVal;
-
     ScriptContext *ctx = static_cast<ScriptContext *> (JS_GetContextPrivate(cx));
-    JSRequest req(ctx);
 
     struct callback_data* cb = (struct callback_data*)
         (JS_GetInstancePrivate(cx, JS_THIS_OBJECT(cx, vp), easycurl_class, JS_ARGV(cx, vp)));
     if (!cb)
       return JS_FALSE;
+    cb->dataIndex = 0;
+
+    JSObject* jsFunction;
+    jsval functionVal;
+    if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, vp), "o", &jsFunction)) {
+      JS_ReportError(cx, "curl.perform_async(): invalid parameter");
+      return JS_FALSE;
+    }
+
+    if (jsFunction == NULL || !JS_ObjectIsCallable(cx, jsFunction)) {
+      JS_ReportError(cx, "curl.perform_async(): callback handler is not a function");
+      return JS_FALSE;
+    }
+    functionVal = OBJECT_TO_JSVAL(jsFunction);
+
+    boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
+    ScriptFunctionRooter* functionRoot(new ScriptFunctionRooter(ctx, scriptObj->getJSObject(), functionVal));
 
     SessionAttachedAsyncCurlObject* pAsyncCurlObj = new SessionAttachedAsyncCurlObject(ctx);
-    boost::thread(boost::bind(&SessionAttachedAsyncCurlObject::asyncCurlRequest, pAsyncCurlObj, cb, cx));
+    boost::thread(boost::bind(&SessionAttachedAsyncCurlObject::asyncCurlRequest, pAsyncCurlObj,
+      cb, JS_THIS_OBJECT(cx, vp), functionVal, functionRoot));
 
     JS_SET_RVAL(cx, vp, JSVAL_TRUE);
     return JS_TRUE;

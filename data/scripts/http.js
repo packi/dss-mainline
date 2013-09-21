@@ -98,7 +98,6 @@ var HTTP = function HTTP(options, extraHeaders)
     //print("GOT HEADER " + s.length + ": ", s.trim());
     this.header_list.push(s);
   }
-
   var scope = this;
   this._easy.asyncdone = function easycurl$$asyncdone()
   {
@@ -276,7 +275,7 @@ HTTP.prototype =
       return this._process(this);
     } else {
       this._easy.async_callback = callback;
-      this._easy.perform_async();
+      this._easy.perform_async(callback);
       return null;
     }
   },
