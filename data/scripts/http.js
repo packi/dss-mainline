@@ -99,10 +99,16 @@ var HTTP = function HTTP(options, extraHeaders)
     this.header_list.push(s);
   }
   var scope = this;
-  this._easy.asyncdone = function easycurl$$asyncdone()
+  this._easy.asyncdone = function easycurl$$asyncdone(success)
   {
       if (this.async_callback)
       {
+          if (!success)
+          {
+              var code = { 'success': false };
+              this.async_callback(code);
+              return;
+          }
           this.async_callback(scope._process(scope));
       }
   }
@@ -215,7 +221,7 @@ HTTP.prototype =
     if (scope.headers[scope.headers.length - 1] === "\r\n")
       scope.headers.pop();
 
-    var ret = { body: scope.body, status: {} };
+    var ret = { body: scope.body, status: {}, 'success': true };
     var statusStr = scope.headers.shift() + "";
     ret.status.valueOf 	= function() { return +code };
     ret.status.toString = function() { return statusStr };

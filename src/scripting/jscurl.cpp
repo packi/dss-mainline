@@ -492,6 +492,8 @@ namespace dss {
     }
 
     void asyncCurlRequest(struct callback_data* cb, JSObject* _obj, jsval _function, ScriptFunctionRooter* _rooter) {
+      CURLcode c;
+      JSBool success;
 
       if (m_pRunAsUser != NULL) {
         Security* pSecurity = getContext()->getEnvironment().getSecurity();
@@ -506,23 +508,9 @@ namespace dss {
         JSRequest req(cb->ctx);
         cb->ref = JS_SuspendRequest(cb->cx);
 
-        curl_easy_perform(cb->handle);
+        c = curl_easy_perform(cb->handle);
 
         JS_ResumeRequest(cb->cx, cb->ref);
-        if (JS_IsExceptionPending(cb->cx)) {
-          JS_ReportPendingException(cb->cx);
-          jsval exval;
-          if (JS_GetPendingException(cb->cx, &exval)) {
-            JS_ClearPendingException(cb->cx);
-            JSString* errstr = JS_ValueToString(cb->cx, exval);
-            if (errstr != NULL) {
-              char* errmsgBytes = JS_EncodeString(cb->cx, errstr);
-              std::string errMsg(errmsgBytes);
-              JS_free(cb->cx, errmsgBytes);
-              Logger::getInstance()->log("JS Curl Async Exception: " + errMsg, lsWarning);
-            }
-          }
-        }
       }
 
       if (!getIsStopped()) {
@@ -531,6 +519,15 @@ namespace dss {
           JSContextThread req(getContext());
           ScriptObject sobj(cb->obj, *getContext());
           ScriptFunctionParameterList params(*getContext());
+
+          if (c != CURLE_OK) {
+              Logger::getInstance()->log(std::string("JavaScript: curl error ")+
+                      curl_easy_strerror(c), lsError);
+              success = JS_FALSE;
+          } else {
+              success = JS_TRUE;
+          }
+          params.addJSVal(BOOLEAN_TO_JSVAL(success));
 
           try {
             sobj.callFunctionByName<void>("asyncdone", params);
