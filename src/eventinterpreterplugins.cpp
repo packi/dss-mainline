@@ -1065,6 +1065,13 @@ namespace dss {
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
+
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+    bool enabled = propSystem.getBoolValue("/config/webservice-api/enabled");
+    if (!enabled) {
+      return;
+    }
+
     HashMapStringString ps = _event.getProperties().getContainer();
     for (HashMapStringString::iterator it = ps.begin(); it != ps.end(); it++) {
       Logger::getInstance()->log(" name " + it->first + " : " + it->second);
