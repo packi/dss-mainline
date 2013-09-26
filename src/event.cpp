@@ -209,8 +209,8 @@ namespace dss {
   const char *ModelChangedEvent::UserDefinedAction = "userDefinedActionChanged";
   const char *ModelChangedEvent::TimedEvent = "timedEventChanged";
 
-  const char *ModelChangedEvent::propPathDelay= "/config/cloud-api/model-pusher/delay";
-  const char *ModelChangedEvent::propPathUrl = "/config/cloud-api/model-pusher/url";
+  const char *ModelChangedEvent::propPathDelay= "/config/webservice-api/model-pusher/delay";
+  const char *ModelChangedEvent::propPathUrl = "/config/webservice-api/model-pusher/url";
 
   boost::shared_ptr<Event> ModelChangedEvent::createEvent(const char *desc)
   {
