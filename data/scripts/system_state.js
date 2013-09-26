@@ -31,7 +31,6 @@ function bootstrap()
     registerState("fire", true, false);
     registerState("wind", true, false);
     registerState("rain", true, false);
-    registerState("hail", true, false);
 }
 
 function getOrRegisterState(stateName)
@@ -323,31 +322,6 @@ function callscene()
             }
         } else if (groupID >= 16 && groupID <= 23) {
             state = getOrRegisterState('rain.group' + groupID);
-            state.setValue('inactive', 7);
-        }
-    }
-    else if (sceneID === Scene.HailActive) {
-        if (groupID === 0) {
-            state = getOrRegisterState('hail');
-            state.setValue('active', 7);
-        } else if (groupID >= 16 && groupID <= 23) {
-            state = getOrRegisterState('hail.group' + groupID);
-            state.setValue('active', 7);
-        }
-    }
-    else if (sceneID === Scene.HailInactive) {
-        if (groupID === 0) {
-            state = getOrRegisterState('hail');
-            state.setValue('inactive', 7);
-            for (grp = 16; grp <= 23; grp++) {
-                try {
-                    state = getState('hail.group' + groupID, false);
-                    state.setValue('inactive', 7);
-                } catch (e) {
-                }
-            }
-        } else if (groupID >= 16 && groupID <= 23) {
-            state = getOrRegisterState('hail.group' + groupID);
             state.setValue('inactive', 7);
         }
     }
