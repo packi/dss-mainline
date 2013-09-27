@@ -48,8 +48,8 @@
  *     2  inactive
  *
  * Example:
- * /json/event/raise?name=system.hail.state&value=active
- * /json/event/raise?name=system.hail.state&value=inactive
+ * /json/event/raise?name=system.hail.state&parameter=value=active
+ * /json/event/raise?name=system.hail.state&parameter=value=inactive
  *
  */
 
