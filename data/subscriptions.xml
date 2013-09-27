@@ -163,11 +163,42 @@
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
-
   <subscription event-name="addonStateChange" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
+
+  <!-- System Hail Handler -->
+  <subscription event-name="running" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_register_trigger.js</parameter>
+      <parameter name="filename2">scripts/system_hail.js</parameter>
+      <parameter name="script_id">system_hail</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="system.hail.config" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_register_trigger.js</parameter>
+      <parameter name="filename2">scripts/system_hail.js</parameter>
+      <parameter name="script_id">system_hail</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="system.hail.state" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_hail.js</parameter>
+      <parameter name="script_id">system_hail</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="callScene" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_hail.js</parameter>
+      <parameter name="script_id">system_hail</parameter>
+      <filter match="all">
+        <property-filter type="matches" value="90" property="sceneID" />
+        <property-filter type="matches" value="91" property="sceneID" />
+      </filter>
     </parameter>
   </subscription>
 
