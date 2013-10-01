@@ -31,6 +31,7 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/dsidhelper.h \
 	$(top_srcdir)/src/dss.cpp \
 	$(top_srcdir)/src/dss.h \
+	$(top_srcdir)/src/dssfwd.h \
 	$(top_srcdir)/src/eventcollector.cpp \
 	$(top_srcdir)/src/eventcollector.h \
 	$(top_srcdir)/src/event.cpp \
