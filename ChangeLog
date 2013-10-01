@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.22.1 01.10.2013
+	* fixed missing file in dist tarball
+
 v1.22.0 01.10.2013
 	* make webservice URL configurable from command line, #3282
 	* add boost 1.5 compatibility
