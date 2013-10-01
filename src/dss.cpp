@@ -148,8 +148,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
     m_pPropertySystem->createProperty("/system/version/gitRevision")->setStringValue(DSS_RCS_REVISION);
     m_pPropertySystem->createProperty(ModelChangedEvent::propPathDelay)->setIntegerValue(30);
+    m_pPropertySystem->createProperty("/config/webservice-api/base-url")
+        ->setStringValue("https://dsservices.aizo.com");
+
     m_pPropertySystem->createProperty(ModelChangedEvent::propPathUrl)
-        ->setStringValue("https://dsservices.aizo.com/dss/DSSApartment/ApartmentHasChanged");
+        ->setStringValue("dss/DSSApartment/ApartmentHasChanged");
+
     m_pPropertySystem->createProperty("/config/webservice-api/enabled")->setBooleanValue(false);
   } // ctor
 
