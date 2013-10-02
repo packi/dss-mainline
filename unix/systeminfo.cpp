@@ -75,10 +75,7 @@ namespace dss {
 
 #ifndef __APPLE__
   void SystemInfo::enumerateInterfaces() {
-    struct ifreq* ifr;
-    struct ifconf ifc;
     int sock;
-    char buf[1024];
 
     PropertySystem& propSys = DSS::getInstance()->getPropertySystem();
     PropertyNodePtr hostNode = propSys.createProperty("/system/host");
@@ -90,47 +87,47 @@ namespace dss {
       return;
     }
 
-    memset(&ifc, '\0', sizeof(ifc));
-    ifc.ifc_len = sizeof(buf);
-    ifc.ifc_buf = buf;
-    if(ioctl(sock,  SIOCGIFCONF, &ifc) < 0) {
-      Logger::getInstance()->log("ioctl(SIOCGIFCONF)", lsError);
-      return;
-    }
+    //Retrieve the available list of network interface cards and their names and indices
+    struct if_nameindex* if_name = if_nameindex();
 
-    ifr = ifc.ifc_req;
-    int numIntfs = ifc.ifc_len / sizeof(struct ifreq);
-    for(int iInterface = 0; iInterface < numIntfs; iInterface++) {
-      struct ifreq* pRequest = &ifr[iInterface];
-      struct sockaddr* sa = &(pRequest->ifr_addr);
+    for (int i = 0; if_name && if_name[i].if_name != NULL; i++) {
+      struct ifreq ifr;
+      memcpy(&ifr.ifr_name, if_name[i].if_name, IFNAMSIZ);
 
-      std::string ip = ipToString(sa);
-
-      if(ioctl(sock, SIOCGIFHWADDR, pRequest) < 0) {
-        Logger::getInstance()->log("ioctl(SIOCGIFHWADDR)", lsError);
-        continue;
+      std::string ip;
+      if(ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
+        Logger::getInstance()->log("ioctl(SIOCGIFADDR)", lsError);
+      } else {
+        struct sockaddr* sa = &(ifr.ifr_addr);
+        ip = ipToString(sa);
       }
 
       char mac[32];
-      for(int j=0, k=0; j<6; j++) {
+      if(ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
+        Logger::getInstance()->log("ioctl(SIOCGIFHWADDR)", lsError);
+      } else {
+        for(int j=0, k=0; j<6; j++) {
           k+=snprintf(mac+k, sizeof(mac)-k-1, j ? ":%02X" : "%02X",
-              (int)(unsigned int)(unsigned char)pRequest->ifr_hwaddr.sa_data[j]);
+              (int)(unsigned int)(unsigned char) ifr.ifr_hwaddr.sa_data[j]);
+        }
+        mac[sizeof(mac)-1]='\0';
       }
-      mac[sizeof(mac)-1]='\0';
 
-      if(ioctl(sock, SIOCGIFNETMASK, pRequest) < 0) {
+      std::string netmask;
+      if(ioctl(sock, SIOCGIFNETMASK, &ifr) < 0) {
         Logger::getInstance()->log("ioctl(SIOCGIFNETMASK)", lsError);
-        continue;
+      } else {
+        struct sockaddr* sa = &(ifr.ifr_netmask);
+        netmask = ipToString(sa);
       }
-      sa = &(pRequest->ifr_netmask);
-      std::string netmask = ipToString(sa);
 
-      PropertyNodePtr intfNode = interfacesNode->createProperty(pRequest->ifr_name);
+      PropertyNodePtr intfNode = interfacesNode->createProperty(ifr.ifr_name);
       intfNode->createProperty("mac")->setStringValue(mac);
       intfNode->createProperty("ip")->setStringValue(ip);
       intfNode->createProperty("netmask")->setStringValue(netmask);
     }
 
+    if_freenameindex(if_name);
     close(sock);
   } // enumerateInterfaces
 #else
