@@ -96,7 +96,8 @@ namespace dss {
 
       std::string ip;
       if(ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
-        Logger::getInstance()->log("ioctl(SIOCGIFADDR)", lsError);
+        Logger::getInstance()->log(std::string("Could not retrieve IP address of interface: ") +
+                                   std::string(if_name[i].if_name), lsInfo);
       } else {
         struct sockaddr* sa = &(ifr.ifr_addr);
         ip = ipToString(sa);
@@ -104,7 +105,8 @@ namespace dss {
 
       char mac[32];
       if(ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
-        Logger::getInstance()->log("ioctl(SIOCGIFHWADDR)", lsError);
+        Logger::getInstance()->log(std::string("Could not retrieve MAC address of interface: ") +
+                                   std::string(if_name[i].if_name), lsInfo);
       } else {
         for(int j=0, k=0; j<6; j++) {
           k+=snprintf(mac+k, sizeof(mac)-k-1, j ? ":%02X" : "%02X",
@@ -115,7 +117,8 @@ namespace dss {
 
       std::string netmask;
       if(ioctl(sock, SIOCGIFNETMASK, &ifr) < 0) {
-        Logger::getInstance()->log("ioctl(SIOCGIFNETMASK)", lsError);
+        Logger::getInstance()->log(std::string("Could not retrieve netmask address of interface: ") +
+                                   std::string(if_name[i].if_name), lsInfo);
       } else {
         struct sockaddr* sa = &(ifr.ifr_netmask);
         netmask = ipToString(sa);
