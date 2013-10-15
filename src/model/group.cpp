@@ -143,13 +143,15 @@ namespace dss {
       return;
     }
     if (m_GroupID == GroupIDYellow) {
-      bool isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
-      try {
-        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                               intToString(getZoneID()) +
+      SceneHelper::SceneOnState isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
+      if (isOn != SceneHelper::DontCare) {
+        try {
+          boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
+                                                 intToString(getZoneID()) +
                                                                 ".light");
-        state->setState(_origin, isOn == true ? 1 : 2);
-      } catch (ItemNotFoundException& ex) {} // should never happen
+          state->setState(_origin, isOn == SceneHelper::True ? 1 : 2);
+        } catch (ItemNotFoundException& ex) {} // should never happen
+      }
     }
   }
 

@@ -293,8 +293,8 @@ namespace dss {
     return 0uLL;
   } // getReachableScenesBitmapForButtonID
 
-  bool SceneHelper::isOnScene(const int _groupID, const unsigned int _scene) {
-    bool ret = false;
+  SceneHelper::SceneOnState SceneHelper::isOnScene(const int _groupID, const unsigned int _scene) {
+      SceneHelper::SceneOnState ret = SceneHelper::DontCare;
 
     // other groups not yet supported
     if (_groupID != GroupIDYellow) {
@@ -306,11 +306,14 @@ namespace dss {
       case SceneDeepOff:
       case SceneSleeping:
       case SceneAutoOff:
+      case SceneAutoStandBy:
       case SceneStandBy:
+      case SceneAbsent:
       case SceneOffE1:
       case SceneOffE2:
       case SceneOffE3:
       case SceneOffE4:
+          ret = SceneHelper::False;
           break; // false
       case Scene1:
       case Scene2:
@@ -334,9 +337,26 @@ namespace dss {
       case Scene44:
       case ScenePanic:
       case SceneFire:
-          ret = true;
+          ret = SceneHelper::True;
           break;
-      default:
+      case SceneAlarm:
+      case SceneAlarm2:
+      case SceneAlarm3:
+      case SceneAlarm4:
+      case SceneWindActive:
+      case SceneWindInactive:
+      case SceneRainActive:
+      case SceneRainInactive:
+      case SceneHailActive:
+      case SceneHailInactive:
+      case SceneRoomActivate:
+      case ScenePresent:
+      case SceneWakeUp:
+      case SceneBell:
+      case SceneBell2:
+      case SceneBell3:
+      case SceneBell4:
+      default: // don't care
           break;
     }
 

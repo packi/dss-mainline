@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.22.2 15.20.2013
+	* fix multibutton device detection (slave/not slave), #3146, #3147
+	* improve some log messages
+	* improve network interface enumeration
+	* ignore scene state changes that are irrelevant for light, #3174
+
 v1.22.1 01.10.2013
 	* fixed missing file in dist tarball
 
