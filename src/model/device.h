@@ -263,6 +263,7 @@ namespace dss {
     bool is2WayMaster() const;
     bool is2WaySlave() const;
     bool hasMultibuttons() const;
+    bool hasInput() const;
     DeviceTypes_t getDeviceType() const;
     int getDeviceNumber() const;
     DeviceClasses_t getDeviceClass() const;
