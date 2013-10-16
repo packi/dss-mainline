@@ -1014,8 +1014,11 @@ namespace dss {
     const char* sDsid = "/system/dSID";
 
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-
-    std::string url(propSystem.getStringValue(ModelChangedEvent::propPathUrl));
+    std::string url(propSystem.getStringValue("/config/webservice-api/base-url"));
+    if (!endsWith(url, "/")) {
+      url = url + "/";
+    }
+    url += propSystem.getStringValue(ModelChangedEvent::propPathUrl);
 
     url += "?apartmentChangeType=";
     switch (type) {

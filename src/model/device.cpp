@@ -1079,6 +1079,10 @@ namespace dss {
   }
 
   bool Device::is2WaySlave() const {
+    if (!hasInput()) {
+      return false;
+    }
+
     return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
@@ -1092,6 +1096,17 @@ namespace dss {
     int funcmodule = (m_FunctionID & 0x3f);
 
     if ((subclass == 0x04) && ((funcmodule & 0x3) > 1)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool Device::hasInput() const {
+    int subclass = (m_FunctionID & 0xfc0) >> 6;
+    int funcmodule = (m_FunctionID & 0x3f);
+
+    if ((subclass == 0x04) && ((funcmodule & 0x3) > 0)) {
       return true;
     }
 

@@ -1,5 +1,39 @@
 dSS - digitalSTROM Server
 
+v1.22.2 15.20.2013
+	* fix multibutton device detection (slave/not slave), #3146, #3147
+	* improve some log messages
+	* improve network interface enumeration
+	* ignore scene state changes that are irrelevant for light, #3174
+
+v1.22.1 01.10.2013
+	* fixed missing file in dist tarball
+
+v1.22.0 01.10.2013
+	* make webservice URL configurable from command line, #3282
+	* add boost 1.5 compatibility
+	* add hail system script to provide a simple api, #3254
+	* allow to execute async HTTP requests from JS, #3152
+	* do not contact webservice if it is not enabled by the user, #2968
+	* fix parameter verification, #2600
+	* set a 5 minute timeout for URL requests, #2464
+	* automatically clear panic and fire states, #2561
+	* log device token in JSON requests, #1915
+	* allow device configuration if it is not blocked, #3027
+	* add sleep when adding device to group, #2578
+	* read out and provide device configuration lock flag, #2619
+	* automatically reset fire alarm after 6 hours, #2883
+	* notify webservice of apartment changes
+	* listen do dSM property flag changes on the bus and update model, #974
+	* enable POST and custom headers in curl
+	* add GTIN to getStructure(), #2717
+	* add support for TNY devices, #2675
+	* ignore responses from dsm's that do not support room states, #2590
+	* fix use of unitialized memory
+	* add a delay to broadcast requests on certain dS485 calls, #2611
+	* fix state events for groups, #2590
+	* read out and track states for light group in each zone, #2590
+
 v1.21.2	14.05.2013
 	* adjust button id for area buttons when assigning the button to a user
 	  group, #2439
