@@ -200,6 +200,7 @@ std::string SceneAccess::categoryToString(const SceneAccessCategory _category)
   case SAC_UNKNOWN:
     return "unknown";
   }
+  return "invalid";
 }
 
 }
