@@ -78,6 +78,12 @@ namespace dss {
       Logger::getInstance()->log("AddressableModelItem: callScene blocked", lsDebug);
       return;
     }
+    if ((_origin == coJSON || _origin == coSOAP)) {
+      if (_force == false && (!SceneAccess::checkStates(this, _sceneNr))) {
+        Logger::getInstance()->log("AddressableModelItem: callScene from web service blocked", lsDebug);
+        return;
+      }
+    }
     m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, _sceneNr, _token, _force);
   } // callScene
 

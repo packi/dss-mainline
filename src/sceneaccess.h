@@ -42,6 +42,7 @@ class SceneAccess
 {
 public:
   static bool checkAccess(const AddressableModelItem *_pTarget, const SceneAccessCategory _category);
+  static bool checkStates(const AddressableModelItem *_pTarget, const int _sceneNr);
   static SceneAccessCategory stringToCategory(const std::string& _categoryString);
   static std::string categoryToString(const SceneAccessCategory _category);
 };

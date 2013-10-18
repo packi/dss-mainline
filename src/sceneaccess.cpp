@@ -37,6 +37,7 @@
 #include "model/addressablemodelitem.h"
 #include "model/group.h"
 #include "model/state.h"
+#include "model/modelconst.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -146,6 +147,35 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
   return true;
 }
 
+bool SceneAccess::checkStates(const AddressableModelItem *_pTarget, int _sceneNr)
+{
+  if (!DSS::hasInstance()) {
+    return true;
+  }
+
+  std::string stateName;
+  switch (_sceneNr) {
+    case SceneWindActive: stateName = "wind"; break;
+    case SceneRainActive: stateName = "rain"; break;
+    case SceneHailActive: stateName = "hail"; break;
+    case SceneFire: stateName = "fire"; break;
+    case SceneAlarm: stateName = "alarm"; break;
+    case SceneAlarm2: stateName = "alarm2"; break;
+    case SceneAlarm3: stateName = "alarm3"; break;
+    case SceneAlarm4: stateName = "alarm4"; break;
+    default: return true;
+  }
+
+  Apartment& apartment = DSS::getInstance()->getApartment();
+  boost::shared_ptr<State> s = apartment.getNonScriptState(stateName);
+  if (s && (s->getState() == State_Active)) {
+    std::string errorMessage("Execution blocked: state " + stateName + " is already active");
+    throw SceneAccessException(errorMessage);
+  }
+
+  return true;
+}
+
 SceneAccessCategory SceneAccess::stringToCategory(const std::string& _categoryString)
 {
   if (_categoryString == "manual") {
@@ -170,6 +200,7 @@ std::string SceneAccess::categoryToString(const SceneAccessCategory _category)
   case SAC_UNKNOWN:
     return "unknown";
   }
+  return "invalid";
 }
 
 }
