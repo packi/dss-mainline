@@ -1113,6 +1113,11 @@ namespace dss {
     return false;
   }
 
+  bool Device::hasOutput() const {
+    int funcmodule = (m_FunctionID & 0x3f);
+    return (((funcmodule & 0x10) == 0x10) || (m_FunctionID == 0x6001));
+  }
+
   DeviceTypes_t Device::getDeviceType() const {
     if (m_ProductID == 0) {
       return DEVICE_TYPE_INVALID;

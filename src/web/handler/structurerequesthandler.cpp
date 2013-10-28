@@ -36,6 +36,7 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/modelmaintenance.h"
+#include "src/model/modelconst.h"
 #include "src/stringconverter.h"
 
 #include "foreach.h"
@@ -418,6 +419,18 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    if (((dev->getDeviceType() == DEVICE_TYPE_AKM) ||
+        ((dev->getDeviceType() == DEVICE_TYPE_TKM) && !dev->hasOutput())) &&
+        (dev->getGroupsCount() > 1)) {
+      for (int g = 0; g < dev->getGroupsCount(); g++) {
+        boost::shared_ptr<Group> oldGroup = dev->getGroupByIndex(g);
+
+        if ((oldGroup != NULL) && (oldGroup->getID() >= GroupIDAppUserMin)) {
+          manipulator.deviceRemoveFromGroup(dev, oldGroup);
+        }
+      }
+    }
+
     manipulator.deviceAddToGroup(dev, gr);
 
     std::vector<boost::shared_ptr<Device> > modifiedDevices;
