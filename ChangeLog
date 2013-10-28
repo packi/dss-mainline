@@ -1,6 +1,10 @@
 dSS - digitalSTROM Server
 
-v1.22.2 15.20.2013
+v1.22.3 28.10.2013
+	* don't allow to assign AKMs/TKMs without output to multiple groups, #2686
+	* avoid duplicate scene calls for alarm states, #2191, #2520
+
+v1.22.2 15.10.2013
 	* fix multibutton device detection (slave/not slave), #3146, #3147
 	* improve some log messages
 	* improve network interface enumeration
