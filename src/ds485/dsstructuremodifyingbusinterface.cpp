@@ -208,12 +208,12 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
 
-  void DSStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+  void DSStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneSensorPush(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _sourceID.lower, _sensorType, _sensorValue, 0);
+    int ret = ZoneGroupSensorPush(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sourceID.lower, _sensorType, _sensorValue, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sensorPush
 

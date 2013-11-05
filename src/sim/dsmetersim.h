@@ -103,7 +103,7 @@ namespace dss {
     void removeDeviceFromGroup(DSIDInterface* _pDevice, int _groupID);
     void addGroup(uint16_t _zoneID, uint8_t _groupID);
     void removeGroup(uint16_t _zoneID, uint8_t _groupID);
-    void sensorPush(uint16_t _zoneID, uint32_t _sourceSerialNumber, uint8_t _sensorType, uint16_t _sensorValue);
+    void sensorPush(uint16_t _zoneID, uint8_t _groupID, uint32_t _sourceSerialNumber, uint8_t _sensorType, uint16_t _sensorValue);
   }; // DSMeterSim
 
 }

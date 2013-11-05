@@ -211,6 +211,9 @@ namespace dss {
           }
           return success(resultObj);
         } else if(_request.getMethod() == "pushSensorValue") {
+          if(pGroup == NULL) {
+            return failure("Need group to work");
+          }
           dss_dsid_t sourceID;
           std::string deviceIDStr = _request.getParameter("sourceDSID");
           if(!deviceIDStr.empty()) {
@@ -225,7 +228,7 @@ namespace dss {
             return failure("Need valid parameter 'sensorType' and 'sensorValue'");
           }
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-          manipulator.sensorPush(pZone, sourceID, sensorType, sensorValue);
+          manipulator.sensorPush(pGroup, sourceID, sensorType, sensorValue);
         } else {
           throw std::runtime_error("Unhandled function");
         }

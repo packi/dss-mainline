@@ -108,6 +108,9 @@ namespace dss {
     void setOnState(const callOrigin_t _origin, const bool _on);
     void setOnState(const callOrigin_t _origin, const int _sceneId);
     eState getState();
+
+    /** Publish a sensor value to all devices of this zone */
+    void sensorPush(dss_dsid_t _sourceID, int _sensorType, int _sensorValue);
   }; // Group
 
 } // namespace dss
