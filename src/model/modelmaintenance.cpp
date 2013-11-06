@@ -1626,7 +1626,7 @@ namespace dss {
     std::string language = propSys.getStringValue("/system/language/locale");
 
     std::string eanURL = oemWebservice +
-                         "/product/EAN/getProductData" +
+                         "/public/MaterialMaster/v1_0/oemservice/GetArticleData" +
                          "?EAN=" + m_EAN +
                          "&PartNr=" + intToString(m_partNumber) +
                          "&OEMSerialNumber=" + intToString(m_serialNumber) +
