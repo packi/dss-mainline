@@ -152,7 +152,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         ->setStringValue("https://dsservices.aizo.com");
 
     m_pPropertySystem->createProperty(ModelChangedEvent::propPathUrl)
-        ->setStringValue("dss/DSSApartment/ApartmentHasChanged");
+        ->setStringValue("internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
 
     m_pPropertySystem->createProperty("/config/webservice-api/enabled")->setBooleanValue(false);
   } // ctor
