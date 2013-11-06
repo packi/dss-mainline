@@ -180,10 +180,6 @@ namespace dss {
                                    getConfigPropertyBasePath() + "configfile"));
 
       DSS::getInstance()->getPropertySystem().setStringValue(
-          getConfigPropertyBasePath() + "oemWebservice",
-          "http://dsservices.aizo.com/", true, false);
-
-      DSS::getInstance()->getPropertySystem().setStringValue(
           getConfigPropertyBasePath() + "iconBasePath",
           DSS::getInstance()->getPropertySystem().getStringValue(
               "/config/datadirectory") + "images/", true, false);
@@ -1611,7 +1607,7 @@ namespace dss {
     if(DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
       oemWebservice = propSys.getStringValue(
-              "/config/subsystems/Apartment/oemWebservice");
+              "/config/webservice-api/base-url");
       iconBasePath = propSys.getStringValue(
               "/config/subsystems/Apartment/iconBasePath");
     } else {
@@ -1630,7 +1626,7 @@ namespace dss {
     std::string language = propSys.getStringValue("/system/language/locale");
 
     std::string eanURL = oemWebservice +
-                         "product/EAN/getProductData" +
+                         "/product/EAN/getProductData" +
                          "?EAN=" + m_EAN +
                          "&PartNr=" + intToString(m_partNumber) +
                          "&OEMSerialNumber=" + intToString(m_serialNumber) +
