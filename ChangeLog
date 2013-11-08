@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.22.4 08.11.2013
+	* use configured base address for webservice, #3671
+	* fix trigger comparisons, #3350
+
 v1.22.3 28.10.2013
 	* don't allow to assign AKMs/TKMs without output to multiple groups, #2686
 	* avoid duplicate scene calls for alarm states, #2191, #2520
