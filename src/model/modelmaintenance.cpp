@@ -304,7 +304,7 @@ namespace dss {
               pEvent->setProperty("originDeviceID", originDSID.toString());
               pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
-                pEvent->setProperty("forced", "yes");
+                pEvent->setProperty("forced", "true");
               }
               raiseEvent(pEvent);
             }
@@ -319,7 +319,7 @@ namespace dss {
               pEvent->setProperty("originDeviceID", originDSID.toString());
               pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
-                pEvent->setProperty("forced", "yes");
+                pEvent->setProperty("forced", "true");
               }
               raiseEvent(pEvent);
               mEvent->setCalled();
@@ -1240,7 +1240,7 @@ namespace dss {
         event->setProperty("originDeviceID", intToString(_originDeviceID));
         event->setProperty("originToken", _token);
         if (_forced) {
-          event->setProperty("forced", "yes");
+          event->setProperty("forced", "true");
         }
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
