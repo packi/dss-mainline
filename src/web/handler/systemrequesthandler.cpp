@@ -190,6 +190,12 @@ namespace dss {
         return failure("Need parameter 'applicationName'");
       }
 
+      if ((applicationName.find('<') != std::string::npos) ||
+          (applicationName.find('%') != std::string::npos) ||
+          (applicationName.find('>') != std::string::npos)) {
+        return failure("Parameter 'applicationName' contains invalid characters");
+      }
+
       std::string applicationToken =  m_pSessionManager->generateToken();
       m_pSessionManager->getSecurity()->loginAsSystemUser("Temporary access to create token");
       m_pSessionManager->getSecurity()->createApplicationToken(applicationName,
