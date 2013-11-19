@@ -336,6 +336,9 @@ namespace dss {
     dsid_helper::toDsmapiDsid(m_dsmId, dsmId);
 
     m_dsmApiHandle = DsmApiInitialize();
+    if (!m_dsmApiHandle) {
+      throw std::runtime_error("OEMDataReader: Unable to get dsmapi handle");
+    }
 
     int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
     if (result < 0) {
