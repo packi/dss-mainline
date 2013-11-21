@@ -369,7 +369,7 @@ namespace dss {
         state = DEVICE_OEM_VALID;
       }
 
-      if (m_revisionID >= 0x355) {
+      if (m_revisionID >= 0x357) {
         if (std::bitset<8>(
                     getDeviceConfig(dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
           isConfigLocked = true;
