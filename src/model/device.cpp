@@ -85,6 +85,7 @@ namespace dss {
     m_OemProductIcon(),
     m_OemProductURL(),
     m_IsConfigLocked(false),
+    m_binaryInputCount(0),
     m_AKMInputProperty()
     { } // ctor
 
