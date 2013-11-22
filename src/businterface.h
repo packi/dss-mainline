@@ -200,7 +200,7 @@ namespace dss {
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
     /** Send sensoric data downstream to devices */
-    virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) = 0;
+    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) = 0;
 
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;

@@ -408,9 +408,9 @@ namespace dss {
       m_pInner->groupSetStandardID(_zoneID, _groupID, _standardGroupID);
     }
 
-    virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
-      m_pSimulationInterface->sensorPush(_zoneID, _sourceID, _sensorType, _sensorValue);
-      m_pInner->sensorPush(_zoneID, _sourceID, _sensorType, _sensorValue);
+    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+      m_pSimulationInterface->sensorPush(_zoneID, _groupID, _sourceID, _sensorType, _sensorValue);
+      m_pInner->sensorPush(_zoneID, _groupID, _sourceID, _sensorType, _sensorValue);
     }
 
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID,

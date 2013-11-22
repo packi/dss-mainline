@@ -168,7 +168,7 @@ int dss__ZoneUndoLastScene(char* _token, int _zoneID, int _groupID, bool& result
 /** Send a generic blink command to all devices in the zone */
 int dss__ZoneBlink(char* _token, int _zoneID, int _groupID, bool& result);
 /** Send a sensoric value into the zone */
-int dss__ZonePushSensorValue(char* _token, int _zoneID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool& result);
+int dss__ZonePushSensorValue(char* _token, int _zoneID, int _groupID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool& result);
 
 //--------------------------- Device
 

@@ -108,9 +108,6 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
 
-    /** Publish a sensor value to all devices of this zone */
-    void sensorPush(dss_dsid_t _sourceID, int _sensorType, int _sensorValue);
-
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
   protected:

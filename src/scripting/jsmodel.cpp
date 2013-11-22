@@ -2411,15 +2411,17 @@ namespace dss {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      uint8_t groupID;
       dss_dsid_t sourceDSID;
       uint8_t sensorType;
       uint16_t sensorValue;
       if(pZone != NULL) {
         try {
-          std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
           sourceDSID = dsid::fromString(sDSID);
-          sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[1]);
-          sensorValue = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[2]);
+          sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
+          sensorValue = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[3]);
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
@@ -2431,7 +2433,8 @@ namespace dss {
             *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
             *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
             ext->getApartment());
-        manipulator.sensorPush(pZone, sourceDSID, sensorType, sensorValue);
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        manipulator.sensorPush(pGroup, sourceDSID, sensorType, sensorValue);
         //DSS::getInstance()->getBusInterface().getStructureModifyingBusInterface()->sensorPush(pZone->getID(), sourceDSID, sensorType, sensorValue);
         //pZone->sensorPush(sourceDSID, sensorType, sensorValue);
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));

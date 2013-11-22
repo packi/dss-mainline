@@ -191,9 +191,21 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("devices");
         m_pPropertyNode->createProperty("scenes");
+        m_pPropertyNode->createProperty("SensorHistory/");
       }
     }
   } // publishToPropertyTree
+
+  void Group::sensorPush(dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr node = m_pPropertyNode->createProperty("SensorHistory/SensorType" +
+        intToString(_sensorType));
+      node->createProperty("value")->setIntegerValue(_sensorValue);
+      node->createProperty("dsid")->setStringValue(_sourceID.toString());
+      DateTime now;
+      node->createProperty("timestamp")->setStringValue(now.toString());
+    }
+  } // sensorPush
 
   boost::mutex Group::m_SceneNameMutex;
 

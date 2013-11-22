@@ -49,7 +49,7 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID);
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
-    virtual void sensorPush(uint16_t _zoneID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue);
+    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue);
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
     virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
   private:

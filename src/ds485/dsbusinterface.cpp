@@ -235,9 +235,9 @@ namespace dss {
     log("initializing DSBusInterface");
 
     m_dsmApiHandle = DsmApiInitialize();
-    if(!m_dsmApiHandle) {
-      log("Couldn't init dsmapi connection");
-      return;
+    if (!m_dsmApiHandle) {
+      log("DSBusInterface::initialize: Couldn't init dsmapi handle");
+      throw std::runtime_error("DSBusInterface::initialize: Couldn't init dsmapi handle");
     }
 
     // the callbacks from libdsm-api are running on different thread(s)

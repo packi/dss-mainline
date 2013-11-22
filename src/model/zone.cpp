@@ -175,17 +175,6 @@ namespace dss {
     return getDevices().getPowerConsumption();
   } // getPowerConsumption
 
-  void Zone::sensorPush(dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {
-    if (m_pPropertyNode != NULL) {
-      PropertyNodePtr node = m_pPropertyNode->createProperty("SensorHistory/SensorType" +
-        intToString(_sensorType));
-      node->createProperty("value")->setIntegerValue(_sensorValue);
-      node->createProperty("dsid")->setStringValue(_sourceID.toString());
-      DateTime now;
-      node->createProperty("timestamp")->setStringValue(now.toString());
-    }
-  } // sensorPush
-
   void Zone::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
     getGroup(GroupIDBroadcast)->nextScene(_origin, _category);
   } // nextScene
@@ -208,7 +197,6 @@ namespace dss {
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
         m_pPropertyNode->createProperty("devices/");
-        m_pPropertyNode->createProperty("SensorHistory/");
         foreach(boost::shared_ptr<Group> pGroup, m_Groups) {
           pGroup->publishToPropertyTree();
         }

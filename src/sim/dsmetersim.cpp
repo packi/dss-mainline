@@ -92,7 +92,7 @@ namespace dss {
     }
   } // removeGroup
 
-  void DSMeterSim::sensorPush(uint16_t _zoneID, uint32_t _sourceSerialNumber, uint8_t _sensorType, uint16_t _sensorValue) {
+  void DSMeterSim::sensorPush(uint16_t _zoneID, uint8_t _groupID, uint32_t _sourceSerialNumber, uint8_t _sensorType, uint16_t _sensorValue) {
     // TODO: validate sourceID against local push table
     foreach(DSIDInterface* interface, m_SimulatedDevices) {
       interface->sensorPush(_sensorType, _sensorValue);

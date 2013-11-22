@@ -873,12 +873,12 @@ int dss__ZoneBlink(struct soap *soap, char* _token, int _zoneID, int _groupID, b
   return SOAP_OK;
 }
 
-int dss__ZonePushSensorValue(struct soap *soap, char* _token, int _zoneID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool& result) {
-  boost::shared_ptr<dss::Zone> zone;
+int dss__ZonePushSensorValue(struct soap *soap, char* _token, int _zoneID, int _groupID, char *_sourceDeviceID, int _sensorType, int _sensorValue, bool& result) {
+  boost::shared_ptr<dss::Group> group;
   dss::DSS& dssRef = *dss::DSS::getInstance();
   dss::Apartment& aptRef = dssRef.getApartment();
 
-  int getResult = AuthorizeAndGetZone(soap, _token, _zoneID, zone);
+  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
@@ -887,7 +887,7 @@ int dss__ZonePushSensorValue(struct soap *soap, char* _token, int _zoneID, char 
     dss::StructureManipulator manipulator(*dssRef.getBusInterface().getStructureModifyingBusInterface(),
                                           *dssRef.getBusInterface().getStructureQueryBusInterface(),
                                           aptRef);
-    manipulator.sensorPush(zone, sourceDSID, _sensorType, _sensorValue);
+    manipulator.sensorPush(group, sourceDSID, _sensorType, _sensorValue);
   } catch(std::runtime_error& _ex) {
     return soap_receiver_fault(soap, "Error handling request", NULL);
   } catch(std::invalid_argument&) {

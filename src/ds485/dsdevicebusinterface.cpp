@@ -336,6 +336,9 @@ namespace dss {
     dsid_helper::toDsmapiDsid(m_dsmId, dsmId);
 
     m_dsmApiHandle = DsmApiInitialize();
+    if (!m_dsmApiHandle) {
+      throw std::runtime_error("OEMDataReader: Unable to get dsmapi handle");
+    }
 
     int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
     if (result < 0) {
@@ -369,7 +372,7 @@ namespace dss {
         state = DEVICE_OEM_VALID;
       }
 
-      if (m_revisionID >= 0x355) {
+      if (m_revisionID >= 0x357) {
         if (std::bitset<8>(
                     getDeviceConfig(dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
           isConfigLocked = true;
