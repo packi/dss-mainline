@@ -128,6 +128,16 @@ namespace dss {
     int m_targetGroupId;     // index of target group, 0..63
   } DeviceBinaryInput_t;
 
+  typedef struct {
+    int m_sensorIndex;       // sensor index
+    int m_sensorType;        // type of sensor
+    int m_sensorPollInterval;
+    bool m_sensorBroadcastFlag;
+    bool m_sensorPushConversionFlag;
+    unsigned int m_sensorValue;
+    DateTime m_sensorValueTS;
+  } DeviceSensor_t;
+
   typedef enum {
     DEVICE_TYPE_INVALID = -1,
     DEVICE_TYPE_KM      = 0,
@@ -228,6 +238,9 @@ namespace dss {
     uint8_t m_binaryInputCount;
     std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
     std::vector<boost::shared_ptr<State> > m_binaryInputStates;
+
+    uint8_t m_sensorInputCount;
+    std::vector<boost::shared_ptr<DeviceSensor_t> > m_sensorInputs;
 
     std::string m_AKMInputProperty;
 
@@ -543,6 +556,13 @@ namespace dss {
 
     boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
     void clearBinaryInputStates();
+
+    void setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _binaryInput);
+    const uint8_t getSensorCount() const;
+    const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
+    const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
+    const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
+
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

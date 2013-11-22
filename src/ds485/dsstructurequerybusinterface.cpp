@@ -244,6 +244,8 @@ namespace dss {
   void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
     if ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0)) {
       try {
+        _spec.binaryInputs.clear();
+
         uint8_t numBinaryinputs = 0;
         int ret = DeviceBinaryInput_get_count(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &numBinaryinputs);
         if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
@@ -252,7 +254,7 @@ namespace dss {
         } else {
           DSBusInterface::checkResultCode(ret);
         }
-        _spec.binaryInputs.clear();
+
         for (int i = 0; i < numBinaryinputs; i++) {
           uint8_t TargetGroupType;
           uint8_t TargetGroup;
@@ -271,6 +273,43 @@ namespace dss {
         }
       } catch(BusApiError& e) {
         Logger::getInstance()->log("Error reading DeviceBinaryInput: " +
+        std::string(e.what()), lsWarning);
+      }
+    }
+  } // updateBinaryInputTableFromMeter
+
+  void DSStructureQueryBusInterface::updateSensorInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+    if (true || ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0))) {
+      try {
+        _spec.sensorInputs.clear();
+
+        uint8_t numSensors = 0;
+        int ret = DeviceSensor_get_count(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &numSensors);
+        if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+          Logger::getInstance()->log("Unsupported message-id DeviceSensor_get_count", lsWarning);
+          return;
+        } else {
+          DSBusInterface::checkResultCode(ret);
+        }
+
+        for (int i = 0; i < numSensors; i++) {
+          uint8_t SensorType;
+          uint8_t SensorPollInterval;
+          uint8_t SensorBroadcastFlag;
+          uint8_t SensorConversionFlag;
+          ret = DeviceSensor_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
+                                               &SensorType, &SensorPollInterval,
+                                               &SensorBroadcastFlag, &SensorConversionFlag);
+          DSBusInterface::checkResultCode(ret);
+          DeviceSensorSpec_t sensorInput;
+          sensorInput.SensorType = SensorType;
+          sensorInput.SensorPollInterval = SensorPollInterval;
+          sensorInput.SensorBroadcastFlag = SensorBroadcastFlag;
+          sensorInput.SensorConversionFlag = SensorConversionFlag;
+          _spec.sensorInputs.push_back(sensorInput);
+        }
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error reading DeviceSensor: " +
         std::string(e.what()), lsWarning);
       }
     }
@@ -313,6 +352,7 @@ namespace dss {
 
       updateButtonGroupFromMeter(dsid, spec);
       updateBinaryInputTableFromMeter(dsid, spec);
+      updateSensorInputTableFromMeter(dsid, spec);
 
       result.push_back(spec);
     }
@@ -356,6 +396,7 @@ namespace dss {
 
       updateButtonGroupFromMeter(dsid, spec);
       updateBinaryInputTableFromMeter(dsid, spec);
+      updateSensorInputTableFromMeter(dsid, spec);
 
       result.push_back(spec);
     }
@@ -394,6 +435,7 @@ namespace dss {
 
     updateButtonGroupFromMeter(dsmDSID, result);
     updateBinaryInputTableFromMeter(dsmDSID, result);
+    updateSensorInputTableFromMeter(dsmDSID, result);
 
     return result;
   } // deviceGetSpec
