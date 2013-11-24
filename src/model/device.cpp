@@ -1657,7 +1657,7 @@ namespace dss {
   }
 
   const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
-    if (_inputIndex > getBinaryInputCount()) {
+    if (_inputIndex >= getBinaryInputCount()) {
       return boost::shared_ptr<DeviceBinaryInput_t>();
     }
     return m_binaryInputs[_inputIndex];
@@ -1725,7 +1725,7 @@ namespace dss {
   }
 
   const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
-    if (_sensorIndex > getSensorCount()) {
+    if (_sensorIndex >= getSensorCount()) {
       return;
     }
     DateTime now;
