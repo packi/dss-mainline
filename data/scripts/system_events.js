@@ -299,9 +299,18 @@ function logDeviceBinaryInput(device, param)
 function logDeviceSensorEvent(device, param)
 {
     var devName = device.name + ';' + device.dsid;
- 
+
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     l.logln(';EventTable;', param.sensorEvent, ';;;;;;', devName, ';');
+}
+
+function logDeviceSensorValue(device, param)
+{
+    var devName = device.name + ';' + device.dsid;
+    var zoneName = genZoneName(getZoneByID(device.zoneID));
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    l.logln(';SensorValue;', param.sensorIndex, ';', param.sensorValue, ';', zoneName, ';;;', devName, ';');
 }
 
 function logStateChangeApartment(statename, state, value, originDeviceId)
@@ -482,6 +491,12 @@ else if (raisedEvent.name == 'deviceSensorEvent')
 {
     var device = getDevices().byDSID(raisedEvent.source.dsid);
     logDeviceSensorEvent(device, raisedEvent.parameter);
+}
+
+else if (raisedEvent.name == 'deviceSensorValue')
+{
+    var device = getDevices().byDSID(raisedEvent.source.dsid);
+    logDeviceSensorValue(device, raisedEvent.parameter);
 }
 
 /*

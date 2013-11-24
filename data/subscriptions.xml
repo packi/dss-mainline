@@ -156,6 +156,12 @@
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
+  <subscription event-name="deviceSensorValue" handler-name="javascript">
+    <parameter>
+      <parameter name="filename1">scripts/system_events.js</parameter>
+      <parameter name="script_id">system_state</parameter>
+    </parameter>
+  </subscription>
   <subscription event-name="stateChange" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/system_events.js</parameter>
