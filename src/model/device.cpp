@@ -86,6 +86,7 @@ namespace dss {
     m_OemProductURL(),
     m_IsConfigLocked(false),
     m_binaryInputCount(0),
+    m_sensorInputCount(0),
     m_AKMInputProperty()
     { } // ctor
 
@@ -225,6 +226,7 @@ namespace dss {
           PropertyNodePtr sensorNode = m_pPropertyNode->createProperty("sensorEvents");
         }
         PropertyNodePtr binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
+        PropertyNodePtr sensorInputNode = m_pPropertyNode->createProperty("sensorInputs");
 
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
@@ -1655,10 +1657,80 @@ namespace dss {
   }
 
   const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
-    if (_inputIndex > getBinaryInputCount()) {
+    if (_inputIndex >= getBinaryInputCount()) {
       return boost::shared_ptr<DeviceBinaryInput_t>();
     }
     return m_binaryInputs[_inputIndex];
+  }
+
+  const uint8_t Device::getSensorCount() const {
+    return (uint8_t) m_sensorInputCount;
+  }
+
+  void Device::setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    m_sensorInputCount = 0;
+    m_sensorInputs.clear();
+
+    for (std::vector<DeviceSensorSpec_t>::const_iterator it = _sensorInputs.begin();
+        it != _sensorInputs.end();
+        ++it) {
+      boost::shared_ptr<DeviceSensor_t> binput(new DeviceSensor_t());
+      binput->m_sensorIndex = m_sensorInputCount;
+      binput->m_sensorType = it->SensorType;
+      binput->m_sensorPollInterval = it->SensorPollInterval;
+      binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
+      binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
+      binput->m_sensorValue = 0;
+      binput->m_sensorValueTS = DateTime::NullDate;
+      m_sensorInputs.push_back(binput);
+
+      if (m_pPropertyNode != NULL) {
+        PropertyNodePtr sensorInputNode = m_pPropertyNode->getPropertyByName("sensorInputs");
+        std::string bpath = std::string("sensorInput") + intToString(m_sensorInputCount);
+        PropertyNodePtr entry = sensorInputNode->getPropertyByName(bpath);
+        if (entry != NULL) {
+          entry->getParentNode()->removeChild(entry);
+        }
+        entry = sensorInputNode->createProperty(bpath);
+        entry->createProperty("type")
+                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
+        entry->createProperty("index")
+                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
+        entry->createProperty("value")
+                ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
+        entry->createProperty("timestamp")
+                ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
+        entry->createProperty("pollinterval")
+                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
+        entry->createProperty("conversion")
+                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorPushConversionFlag));
+        entry->createProperty("broadcast")
+                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorBroadcastFlag));
+      }
+
+      m_sensorInputCount ++;
+    }
+  }
+
+  const std::vector<boost::shared_ptr<DeviceSensor_t> >& Device::getSensors() const {
+    return m_sensorInputs;
+  }
+
+  const boost::shared_ptr<DeviceSensor_t> Device::getSensor(uint8_t _sensorIndex) const {
+    if (_sensorIndex >= getSensorCount()) {
+      return boost::shared_ptr<DeviceSensor_t>();
+    }
+    return m_sensorInputs[_sensorIndex];
+  }
+
+  const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
+    if (_sensorIndex >= getSensorCount()) {
+      return;
+    }
+    DateTime now;
+    m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
+    m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
   }
 
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)

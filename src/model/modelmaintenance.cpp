@@ -1488,6 +1488,8 @@ namespace dss {
             state->setState(coSystem, State_Inactive);
           }
         }
+      } else if (_sensorIndex <= 15) {
+        devRef.getDevice()->setSensorValue(_sensorIndex, _sensorValue);
       }
 
       boost::shared_ptr<Event> pEvent;

@@ -65,6 +65,13 @@ namespace dss {
   } DeviceBinaryInputSpec_t;
 
   typedef struct {
+    uint8_t SensorType;
+    uint8_t SensorPollInterval;
+    uint8_t SensorBroadcastFlag;
+    uint8_t SensorConversionFlag;
+  } DeviceSensorSpec_t;
+
+  typedef struct {
     devid_t ShortAddress;
     uint16_t FunctionID;
     uint16_t ProductID;
@@ -85,6 +92,7 @@ namespace dss {
     std::string Name;
     uint16_t ZoneID;
     std::vector<DeviceBinaryInputSpec_t> binaryInputs;
+    std::vector<DeviceSensorSpec_t> sensorInputs;
   } DeviceSpec_t;
 
   typedef struct {
