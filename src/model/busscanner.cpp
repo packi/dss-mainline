@@ -270,6 +270,9 @@ namespace dss {
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);
     }
 
+    // synchronize sensor configuration
+    dev->setSensors(dev, _spec.sensorInputs);
+
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
     _dsMeter->addDevice(devRef);

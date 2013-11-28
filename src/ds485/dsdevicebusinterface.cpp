@@ -173,6 +173,7 @@ namespace dss {
         kDSM_API_TIMEOUT, &retVal);
 
     DSBusInterface::checkResultCode(ret);
+    _device.setSensorValue(_sensorIndex, retVal);
     return retVal;
   } // getSensorValue
 
