@@ -32,6 +32,8 @@
 
 namespace dss {
 
+  const int kSessionCleanupInterval = 30;
+
   class EventQueue;
   class EventInterpreter;
   class InternalEventRelayTarget;
@@ -69,6 +71,10 @@ namespace dss {
       m_timeoutSecs = _timeoutSeconds;
     }
 
+    void setMaxSessionCount(const int _max) {
+      m_maxSessionCount = _max;
+    }
+
     boost::shared_ptr<Security> getSecurity() {
       return m_pSecurity;
     }
@@ -81,6 +87,7 @@ namespace dss {
     boost::shared_ptr<Security> m_pSecurity;
     std::string m_Salt;
     int m_timeoutSecs;
+    unsigned int m_maxSessionCount;
     unsigned int m_NextSessionID;
     std::string m_VersionInfo;
 
@@ -89,6 +96,7 @@ namespace dss {
 
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     void sendCleanupEvent();
+    void cleanupOldestSession();
   };
 }
 

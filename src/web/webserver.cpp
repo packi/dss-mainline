@@ -134,6 +134,9 @@ namespace dss {
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes", WEB_SESSION_TIMEOUT_MINUTES, true, false);
     m_SessionManager->setTimeout(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60);
 
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionLimit", WEB_SESSION_LIMIT, true, false);
+    m_SessionManager->setMaxSessionCount(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionLimit"));
+
     publishJSLogfiles();
     setupAPI();
     instantiateHandlers();

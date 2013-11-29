@@ -40,6 +40,7 @@
 #include "src/eventinterpreterplugins.h"
 #include "src/internaleventrelaytarget.h"
 #include "src/hasher.h"
+#include "src/security/security.h"
 
 
 namespace dss {
@@ -51,7 +52,8 @@ namespace dss {
     m_EventInterpreter(_eventInterpreter),
     m_pSecurity(_pSecurity),
     m_Salt(_salt),
-    m_timeoutSecs(60)
+    m_timeoutSecs(60),
+    m_maxSessionCount(100)
   {
     m_NextSessionID = rand();
     std::ostringstream ostr;
@@ -68,8 +70,8 @@ namespace dss {
 
   void SessionManager::sendCleanupEvent() {
     boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
-    pEvent->setProperty("time", "+" + intToString(m_timeoutSecs));
-    m_EventQueue.pushEvent(pEvent);
+    pEvent->setProperty("time", "+" + intToString(kSessionCleanupInterval));
+    m_EventQueue.pushTimedEvent(pEvent);
   }
 
   void SessionManager::setupCleanupEventRelayTarget() {
@@ -103,22 +105,32 @@ namespace dss {
 
   std::string SessionManager::registerSession() {
     m_MapMutex.lock();
-
+    if (m_Sessions.size() >= m_maxSessionCount) {
+      m_MapMutex.unlock();
+      cleanupOldestSession();
+      m_MapMutex.lock();
+    }
     boost::shared_ptr<Session> session = createSession();
     std::string id = session->getID();
     m_Sessions[id] = session;
     m_MapMutex.unlock();
+    Logger::getInstance()->log("SessionManager: register session " + id, lsDebug);
     return id;
   }
 
   std::string SessionManager::registerApplicationSession() {
     m_MapMutex.lock();
-
+    if (m_Sessions.size() >= m_maxSessionCount) {
+      m_MapMutex.unlock();
+      cleanupOldestSession();
+      m_MapMutex.lock();
+    }
     boost::shared_ptr<Session> session = createSession();
     session->markAsApplicationSession();
     std::string id = session->getID();
     m_Sessions[id] = session;
     m_MapMutex.unlock();
+    Logger::getInstance()->log("SessionManager: register application session " + id, lsDebug);
     return id;
   }
 
@@ -133,9 +145,8 @@ namespace dss {
     hasher.add(m_NextSessionID);
     hasher.add(DateTime().toString());
     m_NextSessionID++;
-    std::string tmp = hasher.str();
     Hasher stage2;
-    stage2.add(tmp);
+    stage2.add(hasher.str());
     return stage2.str();
   }
 
@@ -166,18 +177,42 @@ namespace dss {
     m_MapMutex.unlock();
   }
 
+  void SessionManager::cleanupOldestSession() {
+    m_MapMutex.lock();
+    unsigned int age = 0;
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i, oldest;
+    for (oldest = m_Sessions.end(), i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
+      boost::shared_ptr<Session> s = i->second;
+      if (s == NULL) {
+        m_Sessions.erase(i);
+      } else {
+        if (s->getIdleTime() > age) {
+          oldest = i;
+        }
+      }
+    }
+    if (oldest != m_Sessions.end()) {
+      boost::shared_ptr<Session> oSession = oldest->second;
+      Logger::getInstance()->log("SessionManager: auto-cleanup session: " + oSession->getID(), lsWarning);
+      m_Sessions.erase(oldest);
+    }
+    m_MapMutex.unlock();
+  }
+
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
     m_MapMutex.lock();
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i;
     for(i = m_Sessions.begin(); i != m_Sessions.end(); ) {
       boost::shared_ptr<Session> s = i->second;
       if((s == NULL) || (!s->isStillValid())) {
+        if (s) {
+          Logger::getInstance()->log("SessionManager: cleanup session " + s->getID(), lsDebug);
+        }
         m_Sessions.erase(i++);
       } else {
-        ++i;
+        i++;
       }
     }
-
     m_MapMutex.unlock();
     this->sendCleanupEvent();
   }
