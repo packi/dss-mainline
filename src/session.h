@@ -55,6 +55,7 @@ namespace dss {
     void inheritUserFromSecurity();
     User* getUser() { return m_pUser; }
     bool isApplicationSession() { return m_IsApplicationSession; }
+    unsigned int getIdleTime() { return m_LastTouched.secondsSinceEpoch(); }
   protected:
     const std::string m_Token;
     Mutex m_UseCountMutex;

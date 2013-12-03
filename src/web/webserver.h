@@ -34,7 +34,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#define WEB_SESSION_TIMEOUT_MINUTES 15
+#define WEB_SESSION_TIMEOUT_MINUTES 3
+#define WEB_SESSION_LIMIT 30
 
 namespace dss {
 

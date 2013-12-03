@@ -131,6 +131,16 @@ namespace dss {
 
     log("Webserver: Configured SSL certificate: " + sslCert, lsInfo);
 
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes", WEB_SESSION_TIMEOUT_MINUTES, true, false);
+    m_SessionManager->setTimeout(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60);
+
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionLimit", WEB_SESSION_LIMIT, true, false);
+    m_SessionManager->setMaxSessionCount(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionLimit"));
+
+    publishJSLogfiles();
+    setupAPI();
+    instantiateHandlers();
+
     const char *mgOptions[] = {
       "document_root", configAliases.c_str(),
       "listening_ports", configPorts.c_str(),
@@ -143,13 +153,6 @@ namespace dss {
       throw std::runtime_error("Could not start webserver");
     }
     log("Webserver started", lsInfo);
-
-    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes", WEB_SESSION_TIMEOUT_MINUTES, true, false);
-    m_SessionManager->setTimeout(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60);
-
-    publishJSLogfiles();
-    setupAPI();
-    instantiateHandlers();
   } // initialize
 
   void WebServer::setSessionManager(boost::shared_ptr<SessionManager> _pSessionManager) {
