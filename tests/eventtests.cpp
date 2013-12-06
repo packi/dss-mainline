@@ -223,6 +223,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
 
 BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {
   EventInterpreter interpreter(NULL);
+  interpreter.initialize();
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
   interpreter.addPlugin(plugin);
 
@@ -646,6 +647,7 @@ BOOST_AUTO_TEST_CASE(testMultipleScriptFiles) {
   ofs2.close();
 
   EventInterpreter interpreter(NULL);
+  interpreter.initialize();
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
   interpreter.addPlugin(plugin);
 
@@ -672,6 +674,7 @@ BOOST_AUTO_TEST_CASE(testEventSourceGetsPassed) {
   ofs1.close();
 
   EventInterpreter interpreter(NULL);
+  interpreter.initialize();
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
   interpreter.addPlugin(plugin);
 

@@ -299,6 +299,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pModelMaintenance->setApartment(m_pApartment.get());
 
+    m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
+    m_Subsystems.push_back(m_pEventInterpreter.get());
+
     m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
     m_Subsystems.push_back(m_pSimulation.get());
 
@@ -314,9 +317,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
     m_Subsystems.push_back(m_pWebServices.get());
 #endif
-
-    m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
-    m_Subsystems.push_back(m_pEventInterpreter.get());
 
     m_pBusInterface = boost::shared_ptr<BusInterface>(
       new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation,
@@ -762,6 +762,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     /* wait for any and all signals */
     sigfillset(&signal_set);
+    sigdelset(&signal_set, SIGUSR2); /* tcmalloc dump profile */
 
     for (;;) {
       sigwait(&signal_set, &sig);

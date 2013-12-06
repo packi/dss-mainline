@@ -1296,6 +1296,14 @@ namespace dss {
     try {
       DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
       log("  DSID   : " +  devRef.getDSID().toString());
+      {
+        boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
+        boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+        mEvent->setProperty("action", "added");
+        if(DSS::hasInstance()) {
+          DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+        }
+      }
     } catch(ItemNotFoundException& e) {}
     log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
@@ -1309,6 +1317,14 @@ namespace dss {
     try {
       DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
       log("  DSID   : " +  devRef.getDSID().toString());
+      {
+        boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
+        boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+        mEvent->setProperty("action", "removed");
+        if(DSS::hasInstance()) {
+          DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+        }
+      }
     } catch(ItemNotFoundException& e) {}
     log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
@@ -1397,6 +1413,14 @@ namespace dss {
             device->setBinaryInputId(inputIndex, _value >> 4);
             break;
           }
+        }
+      }
+      {
+        boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
+        boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+        mEvent->setProperty("action", "configure");
+        if(DSS::hasInstance()) {
+          DSS::getInstance()->getEventQueue().pushEvent(mEvent);
         }
       }
     } catch(std::runtime_error& e) {

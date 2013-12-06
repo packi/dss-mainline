@@ -251,6 +251,8 @@ namespace dss {
       getDSS().getPropertySystem().createProperty(getPropertyBasePath() + "eventsProcessed")
           ->linkToProxy(PropertyProxyPointer<int>(&m_EventsProcessed));
     }
+    // lock subscriptions until initialization is complete
+    m_SubscriptionsMutex.lock();
   } // ctor()
 
   EventInterpreter::~EventInterpreter() {
@@ -264,59 +266,63 @@ namespace dss {
   void EventInterpreter::initialize() {
     Subsystem::initialize();
 
-    if(DSS::hasInstance()) {
-      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
-      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
+    if (!DSS::hasInstance()) {
+      m_SubscriptionsMutex.unlock();
+      return;
+    }
 
-      PropertySystem subProperties;
-      boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
-          subProperties.createProperty("/temp"),
-          getDSS().getPropertySystem().createProperty("/usr/states")));
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
 
-      if (!subParser) {
-        log("Memory error while loading subscriptions", lsFatal);
-        return;
-      }
+    PropertySystem subProperties;
+    boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+        subProperties.createProperty("/temp"),
+        getDSS().getPropertySystem().createProperty("/usr/states")));
 
-      std::string fileName = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile");
-      bool ret = subParser->loadFromXML(fileName);
-      if (!ret) {
-        throw std::runtime_error("EventInterpreter::initialize: "
-                                 "parse error in configuration file \"" + fileName + "\"");
-      }
+    if (!subParser) {
+      log("Memory error while loading subscriptions", lsFatal);
+      return;
+    }
 
-      if (boost::filesystem::is_directory((getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir")))) {
-        boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-        for (boost::filesystem::directory_iterator itr(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir"));
-             itr != end_itr;
-             ++itr )
+    std::string fileName = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile");
+    bool ret = subParser->loadFromXML(fileName);
+    if (!ret) {
+      throw std::runtime_error("EventInterpreter::initialize: "
+          "parse error in configuration file \"" + fileName + "\"");
+    }
+
+    if (boost::filesystem::is_directory((getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir")))) {
+      boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
+      for (boost::filesystem::directory_iterator itr(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir"));
+          itr != end_itr;
+          ++itr )
+      {
+        if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
         {
-          if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
-          {
-            subParser->reset();
+          subParser->reset();
 #if defined(BOOST_VERSION_135)
-            fileName = itr->path().file_string();
+          fileName = itr->path().file_string();
 #else
-            fileName = itr->path().string();
+          fileName = itr->path().string();
 #endif
-            ret = subParser->loadFromXML(fileName);
-            if (!ret) {
-              log("Parse error in configuration file \"" + fileName + "\"", lsFatal);
-            }
+          ret = subParser->loadFromXML(fileName);
+          if (!ret) {
+            log("Parse error in configuration file \"" + fileName + "\"", lsFatal);
           }
         }
       }
-
-      // clear current subscription list
-      {
-        boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
-        m_Subscriptions.clear();
-      }
-
-      // reload subscriptions
-      loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
-      loadStatesFromProperty(subParser->getStatesNode());
     }
+
+    // clear current subscription list
+    if (m_Subscriptions.size() > 0) {
+      log("EventInterpreter: setup messed up, lost early subscriptions", lsFatal);
+    }
+    m_Subscriptions.clear();
+
+    // reload subscriptions
+    m_SubscriptionsMutex.unlock();
+    loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
+    loadStatesFromProperty(subParser->getStatesNode());
   } // initialize
 
   EventInterpreter& EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
