@@ -27,6 +27,7 @@
 #include "src/mutex.h"
 #include "src/propertysystem.h"
 #include "src/model/device.h"
+#include "src/model/devicereference.h"
 #include "src/model/apartment.h"
 #include "src/model/modulator.h"
 #include "src/model/zone.h"
@@ -35,6 +36,8 @@
 #include "src/model/modelconst.h"
 #include "src/dsidhelper.h"
 #include "src/util.h"
+#include "src/event.h"
+#include "src/dss.h"
 
 #include <stdexcept>
 #include <digitalSTROM/ds.h>
@@ -82,6 +85,16 @@ namespace dss {
     _device->setZoneID(_zone->getID());
     DeviceReference ref(_device, &m_Apartment);
     _zone->addDevice(ref);
+
+    {
+      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
+      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      mEvent->setProperty("action", "moved");
+      mEvent->setProperty("id", intToString(_zone->getID()));
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+      }
+    }
 
     // update group presence
     for (int g = 0; g < GroupIDStandardMax; g++ ) {
@@ -235,6 +248,17 @@ namespace dss {
                                            const std::string& _name) {
     m_Interface.deviceSetName(_pDevice->getDSMeterDSID(),
                               _pDevice->getShortAddress(), _name);
+
+    {
+      DeviceReference ref(_pDevice, &m_Apartment);
+      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
+      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      mEvent->setProperty("action", "name");
+      mEvent->setProperty("name", _name);
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+      }
+    }
   } // deviceSetName
 
   void StructureManipulator::meterSetName(boost::shared_ptr<DSMeter> _pMeter, const std::string& _name) {
@@ -545,6 +569,16 @@ namespace dss {
         _device->setDeviceButtonActiveGroup(_group->getID());
       }
     }
+    {
+      DeviceReference ref(_device, &m_Apartment);
+      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
+      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      mEvent->setProperty("action", "groupAdd");
+      mEvent->setProperty("id", intToString(_group->getID()));
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+      }
+    }
   } // deviceAddToGroup
 
   void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
@@ -563,6 +597,16 @@ namespace dss {
     } else if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
       /* device has no output, button is active on removed group */
       _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
+    }
+    {
+      DeviceReference ref(_device, &m_Apartment);
+      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
+      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      mEvent->setProperty("action", "groupRemove");
+      mEvent->setProperty("id", intToString(_group->getID()));
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+      }
     }
   } // deviceRemoveFromGroup
 
