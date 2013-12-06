@@ -762,6 +762,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     /* wait for any and all signals */
     sigfillset(&signal_set);
+    sigdelset(&signal_set, SIGUSR2); /* tcmalloc dump profile */
 
     for (;;) {
       sigwait(&signal_set, &sig);
