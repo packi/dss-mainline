@@ -28,6 +28,8 @@
 #include "src/logger.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"
+#include "src/dss.h"
+#include "src/event.h"
 
 #include "src/model/busscanner.h"
 #include "src/model/scenehelper.h"
@@ -366,6 +368,16 @@ namespace dss {
         // Remove from zone
         int zoneID = pDevice->getZoneID();
         DeviceReference devRef = DeviceReference(pDevice, this);
+
+        {
+          boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
+          boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+          mEvent->setProperty("action", "deleted");
+          if (DSS::hasInstance()) {
+            DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+          }
+        }
+
         if(zoneID != 0) {
           getZone(zoneID)->removeDevice(devRef);
         }
@@ -389,6 +401,7 @@ namespace dss {
           }
         }
         pDevice->clearBinaryInputStates();
+
         // Erase
         m_Devices.erase(ipDevice);
         return;
