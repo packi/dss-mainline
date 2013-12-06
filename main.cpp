@@ -88,6 +88,7 @@ void platformSpecificStartup() {
   sigdelset(&signal_set, SIGQUIT);
   sigdelset(&signal_set, SIGSEGV);
   sigdelset(&signal_set, SIGABRT);
+  sigdelset(&signal_set, SIGUSR2); /* tcmalloc dump profile */
   pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 
   /* create the signal handling thread */
