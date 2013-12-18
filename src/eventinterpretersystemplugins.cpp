@@ -899,7 +899,7 @@ namespace dss {
     if (m_properties.has("originDeviceID")) {
       originDevice = dss_dsid_t::fromString(m_properties.get("originDeviceID"));
     }
-    std::string forced = "false";
+    std::string forced;
     if (m_properties.has("forced")) {
       forced = m_properties.get("forced");
     }
@@ -948,18 +948,15 @@ namespace dss {
       }
     }
 
-    std::string iForced = "false";
     PropertyNodePtr forcedFlag = _triggerProp->getPropertyByName("forced");
     if (forcedFlag) {
-      iForced = forcedFlag->getAsString();
-    }
-
-    if (forced.compare("true") && iForced.compare("false")) {
-      return false;
-    }
-
-    if (forced.compare("false") && iForced.compare("true")) {
-      return false;
+      std::string iForced = forcedFlag->getAsString();
+      if (forced.compare("true") && iForced.compare("false")) {
+        return false;
+      }
+      if (forced.compare("false") && iForced.compare("true")) {
+        return false;
+      }
     }
 
     Logger::getInstance()->log("SystemTrigger::"
