@@ -927,7 +927,7 @@ public:
     return NULL;
   }
   virtual StructureQueryBusInterface* getStructureQueryBusInterface() {
-    return NULL;
+    return m_pStructureQuery;
   }
   virtual MeteringBusInterface* getMeteringBusInterface() {
     return NULL;

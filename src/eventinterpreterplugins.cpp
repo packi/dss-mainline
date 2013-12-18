@@ -220,10 +220,9 @@ namespace dss {
 
   class WrapperAwarePropertyScriptExtension : public PropertyScriptExtension {
   public:
-    WrapperAwarePropertyScriptExtension(EventInterpreterPluginJavascript& _plugin, PropertySystem& _propertySystem,
+    WrapperAwarePropertyScriptExtension(PropertySystem& _propertySystem,
                                         const std::string& _storeDirectory)
     : PropertyScriptExtension(_propertySystem),
-      m_Plugin(_plugin),
       m_StoreDirectory(addTrailingBackslash(_storeDirectory))
     { }
 
@@ -285,7 +284,6 @@ namespace dss {
                                 wrapper->getPropertyNode());
     }
   private:
-    EventInterpreterPluginJavascript& m_Plugin;
     std::string m_StoreDirectory;
   }; // WrapperAwarePropertyScriptExtension
 
@@ -580,7 +578,7 @@ namespace dss {
       ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
       m_pEnvironment->addExtension(ext);
 
-      ext = new WrapperAwarePropertyScriptExtension(*this, DSS::getInstance()->getPropertySystem(),
+      ext = new WrapperAwarePropertyScriptExtension(DSS::getInstance()->getPropertySystem(),
                                                     DSS::getInstance()->getSavedPropsDirectory());
       m_pEnvironment->addExtension(ext);
 

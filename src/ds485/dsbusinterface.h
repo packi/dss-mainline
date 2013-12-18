@@ -64,8 +64,6 @@ namespace dss {
     std::string m_connectionURI;
     BusEventSink* m_pBusEventSink;
 
-    dsid_t m_ownDSID;
-
     void loginFromCallback();
 
     void busReady();

@@ -72,8 +72,6 @@ namespace dss {
 
   class Metering : public ThreadedSubsystem {
   private:
-    int m_MeterEnergyCheckIntervalSeconds;
-    int m_MeterConsumptionCheckIntervalSeconds;
     std::string m_MeteringStorageLocation;
     std::string m_RrdcachedPath;
     boost::shared_ptr<MeteringConfigChain> m_ConfigChain;

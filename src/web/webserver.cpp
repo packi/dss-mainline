@@ -77,7 +77,7 @@ namespace dss {
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
-    : Subsystem(_pDSS, "WebServer"), m_mgContext(0), m_LastSessionID(0),
+    : Subsystem(_pDSS, "WebServer"), m_mgContext(0),
       m_TrustedPort(0)
   {
   } // ctor
@@ -271,7 +271,6 @@ namespace dss {
         getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
-            getDSS().getModelMaintenance(),
             getDSS().getBusInterface().getStructureModifyingBusInterface(),
             getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
