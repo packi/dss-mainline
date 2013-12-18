@@ -76,7 +76,7 @@ void *URLResult::grow_tail(size_t increase)
 size_t URLResult::appendCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
   size_t realsize = size * nmemb;
-  struct URLResult *mem = (struct URLResult *)userp;
+  URLResult *mem = (URLResult *)userp;
 
   void *space = mem->grow_tail(realsize);
   if (space == NULL) {
@@ -98,7 +98,7 @@ size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* u
   return size * nmemb;
 }
 
-long URL::request(const std::string& url, RequestType type, struct URLResult* result)
+long URL::request(const std::string& url, RequestType type, class URLResult* result)
 {
   return request(url, type, HashMapStringString(), HashMapStringString(), result);
 }
@@ -106,7 +106,7 @@ long URL::request(const std::string& url, RequestType type, struct URLResult* re
 long URL::request(const std::string& url, RequestType type,
                   const HashMapStringString &headers,
                   const HashMapStringString &formpost,
-                  struct URLResult* result)
+                  URLResult* result)
 {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
