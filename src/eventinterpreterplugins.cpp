@@ -1092,6 +1092,7 @@ namespace dss {
     } else {
       Logger::getInstance()->log(" unkown ModelChange event " +
                                  _event.getName(), lsError);
+      return;
     }
 
     /* no retval, no error handling, just log entry */
