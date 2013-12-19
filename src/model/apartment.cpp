@@ -135,7 +135,7 @@ namespace dss {
     _zone->addGroup(grp);
     if (_zone->getID() != 0) {
       foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
-        if ((pGroup->getID() >= 16) && (pGroup->getID() <= 23)) {
+        if ((pGroup->getID() >= GroupIDAppUserMin) && (pGroup->getID() <= GroupIDAppUserMax)) {
             grp.reset(new Group(pGroup->getID(), _zone, *this));
             grp->setName(pGroup->getName());
             grp->setStandardGroupID(pGroup->getStandardGroupID());

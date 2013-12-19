@@ -689,7 +689,7 @@ namespace dss {
     if (_pZone->getID() == 0) {
       // store unique "apartment user-groups" in zone 0
       foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-        if (pGroup->getID() >= 16 && pGroup->getID() <= 23) {
+        if (pGroup->getID() >= GroupIDAppUserMin && pGroup->getID() <= GroupIDAppUserMax) {
           groupToXML(pGroup, _ofs, _indent + 2);
         }
       }
