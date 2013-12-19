@@ -410,24 +410,28 @@ namespace dss {
           cookies = generateCookieString(response.getCookies());
         }
         emitHTTPHeader(200, _connection, "application/json", cookies);
+        log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
       } catch(SecurityException& e) {
         emitHTTPHeader(403, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+        log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
       } catch(std::runtime_error& e) {
         emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+        log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
       } catch(std::invalid_argument& e) {
         emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+        log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
       }
     } else {
       emitHTTPHeader(404, _connection, "application/json");
