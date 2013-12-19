@@ -70,6 +70,9 @@
 #include "src/model/device.h"
 #include "src/model/apartment.h"
 
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 namespace fs = boost::filesystem;
 
 namespace dss {
@@ -373,6 +376,11 @@ namespace dss {
 
     std::string uri = _info->uri;
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
+
+    struct in_addr remote;
+    remote.s_addr = htonl(_info->remote_ip);
+    std::string query = (_info->query_string != NULL) ? _info->query_string : "";
+    log("JSON request from "+ std::string(inet_ntoa(remote)) + ": " + uri + "?" + query, lsInfo);
 
     RestfulRequest request(method, _parameter, _cookies);
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
