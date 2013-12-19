@@ -218,8 +218,6 @@ namespace dss {
      * Equaly, if the Mode is Hourly and the interval is 12, we're scheduled every 12 hours.
      */
     int m_RepeatingInterval;
-    /** If the Mode is Weekly, the m_Weekdays represents a bit-set of the days, when we're being scheduled */
-    int m_Weekdays;
     DateTime m_BeginingAt;
     DateTime m_EndingAt;
   private:

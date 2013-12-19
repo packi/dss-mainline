@@ -35,10 +35,10 @@ namespace dss {
 
   //=========================================== CircuitRequestHandler
 
-  CircuitRequestHandler::CircuitRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance,
+  CircuitRequestHandler::CircuitRequestHandler(Apartment& _apartment,
                                                StructureModifyingBusInterface* _pStructureBusInterface,
                                                StructureQueryBusInterface* _pStructureQueryBusInterface)
-  : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance),
+  : m_Apartment(_apartment),
     m_pStructureBusInterface(_pStructureBusInterface),
     m_pStructureQueryBusInterface(_pStructureQueryBusInterface)
   { }
