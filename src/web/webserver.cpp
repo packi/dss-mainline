@@ -70,6 +70,9 @@
 #include "src/model/device.h"
 #include "src/model/apartment.h"
 
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 namespace fs = boost::filesystem;
 
 namespace dss {
@@ -77,7 +80,7 @@ namespace dss {
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
-    : Subsystem(_pDSS, "WebServer"), m_mgContext(0), m_LastSessionID(0),
+    : Subsystem(_pDSS, "WebServer"), m_mgContext(0),
       m_TrustedPort(0)
   {
   } // ctor
@@ -271,7 +274,6 @@ namespace dss {
         getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
-            getDSS().getModelMaintenance(),
             getDSS().getBusInterface().getStructureModifyingBusInterface(),
             getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
@@ -374,6 +376,11 @@ namespace dss {
     std::string uri = _info->uri;
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
+    struct in_addr remote;
+    remote.s_addr = htonl(_info->remote_ip);
+    std::string query = (_info->query_string != NULL) ? _info->query_string : "";
+    log("JSON request from "+ std::string(inet_ntoa(remote)) + ": " + uri + "?" + query, lsInfo);
+
     RestfulRequest request(method, _parameter, _cookies);
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
 
@@ -402,24 +409,28 @@ namespace dss {
           cookies = generateCookieString(response.getCookies());
         }
         emitHTTPHeader(200, _connection, "application/json", cookies);
+        log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
       } catch(SecurityException& e) {
         emitHTTPHeader(403, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+        log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
       } catch(std::runtime_error& e) {
         emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+        log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
       } catch(std::invalid_argument& e) {
         emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
+        log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
       }
     } else {
       emitHTTPHeader(404, _connection, "application/json");

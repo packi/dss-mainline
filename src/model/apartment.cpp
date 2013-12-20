@@ -83,9 +83,9 @@ namespace dss {
     grp->setStandardGroupID(GroupIDGray);
     grp->setIsValid(true);
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDBlue, _zone, *this));
-    grp->setName("blue");
-    grp->setStandardGroupID(GroupIDBlue);
+    grp.reset(new Group(GroupIDHeating, _zone, *this));
+    grp->setName("heating");
+    grp->setStandardGroupID(GroupIDHeating);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDCyan, _zone, *this));
@@ -113,14 +113,29 @@ namespace dss {
     grp->setStandardGroupID(0);
     grp->setIsValid(true);
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDWhite, _zone, *this));
-    grp->setName("white");
-    grp->setStandardGroupID(0);
+    grp.reset(new Group(GroupIDCooling, _zone, *this));
+    grp->setName("cooling");
+    grp->setStandardGroupID(GroupIDCooling);
+    grp->setIsValid(true);
+    _zone->addGroup(grp);
+    grp.reset(new Group(GroupIDVentilation, _zone, *this));
+    grp->setName("ventilation");
+    grp->setStandardGroupID(GroupIDVentilation);
+    grp->setIsValid(true);
+    _zone->addGroup(grp);
+    grp.reset(new Group(GroupIDWindow, _zone, *this));
+    grp->setName("window");
+    grp->setStandardGroupID(GroupIDWindow);
+    grp->setIsValid(true);
+    _zone->addGroup(grp);
+    grp.reset(new Group(GroupIDControlTemperature, _zone, *this));
+    grp->setName("controltemperature");
+    grp->setStandardGroupID(GroupIDControlTemperature);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     if (_zone->getID() != 0) {
       foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
-        if ((pGroup->getID() >= 16) && (pGroup->getID() <= 23)) {
+        if ((pGroup->getID() >= GroupIDAppUserMin) && (pGroup->getID() <= GroupIDAppUserMax)) {
             grp.reset(new Group(pGroup->getID(), _zone, *this));
             grp->setName(pGroup->getName());
             grp->setStandardGroupID(pGroup->getStandardGroupID());

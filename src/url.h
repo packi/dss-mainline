@@ -59,12 +59,12 @@ namespace dss {
       URL();
 
       long request(const std::string& url, RequestType type = GET,
-                   struct URLResult* result = NULL);
+                   URLResult* result = NULL);
 
       long request(const std::string& url, RequestType type,
                    const HashMapStringString &headers,
                    const HashMapStringString &formpost,
-                   struct URLResult* result);
+                   URLResult* result);
 
       long downloadFile(std::string url, std::string filename);
 
