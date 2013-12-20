@@ -172,15 +172,15 @@ namespace dss {
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
   const int GroupIDGray = 2;
-  const int GroupIDBlue = 3;
+  const int GroupIDHeating = 3;
   const int GroupIDCyan = 4;
   const int GroupIDViolet = 5;
   const int GroupIDRed = 6;
   const int GroupIDGreen = 7;
   const int GroupIDBlack = 8;
-  const int GroupIDWhite = 9;
-  const int GroupIDReserved0 = 10;
-  const int GroupIDReserved1 = 11;
+  const int GroupIDCooling = 9;
+  const int GroupIDVentilation = 10;
+  const int GroupIDWindow = 11;
   const int GroupIDReserved2 = 12;
   const int GroupIDReserved3 = 13;
   const int GroupIDReserved4 = 14;
@@ -189,6 +189,8 @@ namespace dss {
   const int GroupIDAppUserMin = 16;
   const int GroupIDAppUserMax = 23;
   const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
+  const int GroupIDControlGroupStart = 48;
+  const int GroupIDControlTemperature = 48;
   const int GroupIDMax = 63;
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
