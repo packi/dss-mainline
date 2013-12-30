@@ -194,6 +194,7 @@ AC_ARG_WITH(distro-version-file,
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
