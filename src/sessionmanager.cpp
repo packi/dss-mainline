@@ -181,14 +181,15 @@ namespace dss {
     m_MapMutex.lock();
     unsigned int age = 0;
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i, oldest;
-    for (oldest = m_Sessions.end(), i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
+    for (oldest = m_Sessions.end(), i = m_Sessions.begin(); i != m_Sessions.end(); ) {
       boost::shared_ptr<Session> s = i->second;
       if (s == NULL) {
-        m_Sessions.erase(i);
+        m_Sessions.erase(i++);
       } else {
         if (s->getIdleTime() > age) {
           oldest = i;
         }
+        i++;
       }
     }
     if (oldest != m_Sessions.end()) {
