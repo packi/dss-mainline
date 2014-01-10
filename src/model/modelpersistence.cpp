@@ -287,10 +287,6 @@ namespace dss {
     if (groupID == -1) {
       return;
     }
-    std::string name;
-    if (grName) {
-      name = std::string(grName);
-    }
 
     m_tempGroup.reset();
     m_tempGroup = m_tempZone->getGroup(groupID);
@@ -298,7 +294,9 @@ namespace dss {
       m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
       m_tempZone->addGroup(m_tempGroup);
     }
-    m_tempGroup->setName(name);
+    if (grName) {
+      m_tempGroup->setName(grName);
+    }
     m_tempGroup->setIsValid(true);
   }
 
