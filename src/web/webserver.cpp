@@ -688,14 +688,15 @@ namespace dss {
           std::string userName = digest.substr(userNamePos + userNamePrefix.size(),
                                                userNameEnd - userNamePos - 1);
           self.log("Logging-in from a trusted port as '" + userName + "'");
-          self.m_SessionManager->getSecurity()->impersonate(userName);
-          if (session == NULL) {
+          if (self.m_SessionManager->getSecurity()->impersonate(userName) && (session == NULL)) {
             std::string newToken = self.m_SessionManager->registerSession();
             session = self.m_SessionManager->getSession(newToken);
             injectedCookies["path"] = "/";
             injectedCookies["token"] = newToken;
+            if (session != NULL) {
+              session->inheritUserFromSecurity();
+            }
           }
-          session->inheritUserFromSecurity();
         }
       }
     }
