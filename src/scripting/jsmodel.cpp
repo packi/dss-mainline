@@ -2429,14 +2429,15 @@ namespace dss {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
         }
+        if (sensorValue >= (1 << 10)) {
+          JS_ReportWarning(cx, "sensorValue too large: %d", sensorValue);
+        }
         StructureManipulator manipulator(
             *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
             *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
             ext->getApartment());
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
         manipulator.sensorPush(pGroup, sourceDSID, sensorType, sensorValue);
-        //DSS::getInstance()->getBusInterface().getStructureModifyingBusInterface()->sensorPush(pZone->getID(), sourceDSID, sensorType, sensorValue);
-        //pZone->sensorPush(sourceDSID, sensorType, sensorValue);
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       }
