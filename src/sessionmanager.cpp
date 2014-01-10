@@ -106,9 +106,9 @@ namespace dss {
   std::string SessionManager::registerSession() {
     m_MapMutex.lock();
     if (m_Sessions.size() >= m_maxSessionCount) {
+      Logger::getInstance()->log("SessionManager: session limit reached!", lsWarning);
       m_MapMutex.unlock();
-      cleanupOldestSession();
-      m_MapMutex.lock();
+      return std::string();
     }
     boost::shared_ptr<Session> session = createSession();
     std::string id = session->getID();
@@ -120,11 +120,6 @@ namespace dss {
 
   std::string SessionManager::registerApplicationSession() {
     m_MapMutex.lock();
-    if (m_Sessions.size() >= m_maxSessionCount) {
-      m_MapMutex.unlock();
-      cleanupOldestSession();
-      m_MapMutex.lock();
-    }
     boost::shared_ptr<Session> session = createSession();
     session->markAsApplicationSession();
     std::string id = session->getID();

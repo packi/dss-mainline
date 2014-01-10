@@ -227,6 +227,9 @@ namespace dss {
           if(sensorType == -1 || sensorValue == -1) {
             return failure("Need valid parameter 'sensorType' and 'sensorValue'");
           }
+          if (sensorValue >= (1 << 10)) {
+            return failure("sensorValue is too large - max. size is 10 bit");
+          }
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sensorPush(pGroup, sourceID, sensorType, sensorValue);
         } else {
