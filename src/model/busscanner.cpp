@@ -40,6 +40,7 @@
 #include "state.h"
 #include "modelmaintenance.h"
 #include "src/ds485/dsdevicebusinterface.h"
+#include "src/ds485/dsbusinterface.h"
 
 
 namespace dss {
@@ -61,7 +62,7 @@ namespace dss {
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
-      log("scanDSMeter: Error getting dSMHash", lsFatal);
+      log(std::string("scanDSMeter: getDSMeterHash") + e.what(), lsFatal);
       return false;
     }
 
