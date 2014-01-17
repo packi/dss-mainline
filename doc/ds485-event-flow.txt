@@ -1,31 +1,21 @@
-* graph iscomplete
-* event handling/filtering in event interpreter is missing
-* message entry from top/mongoose is missing
-* ds485: should be okay
+* graph incomplete
+* only handles data model yet
+* no value updates
 
 
-     +-----+                            +-----------+
-     | DSS |                            |CommChannel|
-     +-----+                            +-----------+
-               \
-                \
-                 \
-                  \               ^
-                   \             /
-                    V           /
                      +-------------------+
                      | EventInterpreter  |
                      |  (execute)        |
                      +-------------------+
-                                       ^                       +------+
-  +---------+                           \                      | DSS' |
-  |pushEvent|                            \                     +------+
-  +---------+                             \                     /
-        - EventRunner                      \                   /
-            poll 500ms                  raiseEvent            /
-        - BusScanner                        \                /
-           (new device)                      \              /
-                                              \            V
+                                       ^
+  +---------+                           \
+  |pushEvent|                            \
+  +---------+                             \
+        - EventRunner                      \
+            poll 500ms                  raiseEvent
+        - BusScanner                        \
+           (new device)                      \
+                                              \
                                             +----------------+
                                             |ModelMaintenance|
                         addModelEvent       |(execute)       |
@@ -36,14 +26,19 @@
            ^                              ^
             \                            /
       onGroupCallScene                  /
-      onGroupUndoScene             addModelEvent
+      onGroupUndoScene             addModelEvent(etBusReady, etLostMeter, etDS485DeviceDiscovered,
+              |                        |         etLostDevice, etNewDevice, etDeviceChanged,
+              |                        |         etDeviceConfigChanged,
+              |                        |         etCallSceneDeviceLocal, etButtonClickDevice,
+              |                        |         etDeviceSensorEvent, etDeviceBinaryStateEvent,
+              |                        |         etDeviceSensorValue)
       onGroupBlink                 onDeviceNameChanged
       onDeviceCallScene            onDsmNameChanged
       onDeviceBlinke                /
       onMeteringEvent              /
                   \               /
                    \             /
-                    \           /
+                    \           /                     BusScanner
                  +--------------+
                  |DSBusInterface|
                  +--------------+
@@ -51,25 +46,373 @@
 
                 ^
                /
-        DsmApiCallback
+        DsmApiCallback                      StructureQueryBusInterface
              /
-            /
+---------------------------------------------------------------------------
            /
-      +------+
-      |DsmApi|
-      +------+
-        dsm-api.xml
-        dsm_api_ds485_message_callback (hashmap)
+                       +------+
+                       |DsmApi| dsm-api.xml
+                       +------+ dsm_api_ds485_message_callback (hashmap)
+                          |
+                      stateCallback
+                     receiveCallback
+                    busChangeCallback
+                          |
+                          V
+                      +-------------+  get_dsid
+                      |DS485-client |  queryState/queryDevices
+                      +-------------+  sendCommand
+                           |
+                          TCP
+                           v
+                        +------+
+                        |DS485d|
+                        +------+
 
-          |
-      stateCallback
-     receiveCallback
-    busChangeCallback
-          |
-          V
-      +-------------+                       +------+
-      |DS485-client |     ----- TCP ----->  |DS485d|
-      +-------------+                       +------+
-        get_dsid
-        queryState/queryDevices
-        sendCommand
+scan dS structure
+-----------------
+
+ModelMaintenance::execute
+- discoverDS485Devices
+- while True:
+  ...
+  - readOutPendingMeter();
+
+ModelMaintenance::discoverDS485Devices
+- foreach dsm in ds485->getDsMeters
+  - apartment->getDSMeterByDSID(dsid)
+  - else: apartment->allocateDSMeter
+
+  - for dev in m_pApartment->getDevices().getByLastKnownDSMeter(spec.DSID);
+    - dev.isValid = False
+
+  - if not dsMeter->isConnected():
+    - dsMeter->isPresent(true);
+    - dsMeter->isConnected(true);
+    - dsMeter->isValid(false);
+    - raise etDSMeterReady
+
+case etDSMeterReady:
+- dsm = apartment->getDSMeterByDSID(dsid)
+- dsm.isConnected = true
+- dsm.isValid = True
+- discoverDS485Devices, if exception
+
+
+ModelMaintenance::readOutPendingMeter periodically scans dS bus
+- foreach m: apartment->dSMeters
+    if m->present:
+      if not m->valid:
+        ModelMaintenance::dsMeterReady(dsmid)
+        hadToUpdate = True  # m->dirty
+- hadToUpdate && !m_IsInitializing or !hadToUpdate && m_IsInitializing
+    - util::synchronizeGroups(apartment)
+    - return, if hadToUpdate
+    -> raise etModelDirty if m_isDirty
+    -> raise global "model_ready"
+    CommChannel::resumeUpdateTask, requestLockedScenes
+
+
+ModelMaintenance::dsMeterReady(dsmid)
+- dsm = apartment->getDSMeterByDSID(dsmid)
+- return, if not dsm # TODO
+- Buscanner.scanDSMeter(dsm)
+- for d in dsm->devices
+    d->isConnected = True
+- dsm->hasPendingEvents  // should be InputPendingEvents
+    scanner.syncBinaryInputStates(dsm, void)
+- for dev in devices.getByLastKnownDSMeter(dsm)
+    dev->isValid = True
+- raise dsMeterReadyEvent
+
+
+BusScanner::scanDSMeter(dsm)
+- dsm->isPresent = True
+- dsm->isValid = False
+- hash, modification count, BinaryInputEventCount
+- if (ds485->getHash(dsm) != dsm.hash and <modification count>
+      maintenance->isInitializing and not dsm->isInitialized)
+  - spec = ds458->dsmInfo / dSMProperties_get_flags
+  - dsm.update(armv, dspv, hwv, apiv, flags)
+  - dsm.update(name) if not dsm.name set
+  - if dsm.api in [0..0x200]:
+    - dsm->isPresent = False # incompatible
+    - dsm->isValid = True
+    - return, update (hash, modification)
+  - for zoneId in ds485->getZones(dsm->dsid)
+    - zone = apartment.allocateZone(zoneID, dsM, prsent, connected)
+    - z->addDsMeter(dsm)
+    - z->isPresent = True
+    - z->isConnected = True
+    - scanZone(z)
+  - dsm->isInitialized = True
+  - raise etModelDirty
+- dsm update (hash, modification)
+- dsm->isValid = True
+
+- if dsm.api in [0..0x206]: # probably more checks
+  - # has not input event
+- else:
+  - dsm.update(InputBinaryEventCount)
+
+
+Apartment::allocateZone(zoneId)
+- zone = find(zoneid in zones)
+- if not zone:
+    zone = new zone
+    Apartment::addDefaultGroupsToZone(zone)
+- return zone
+
+BusScanner::scanZone(dsm)
+- if dsm->apiv in [0..0x200]:
+    - incompatible
+    - return
+- else:
+  - for spec in ds485->getDevicesInZone(dsm->dsid, zone->zoneId):
+    - initializeDeviceFromSpec(dsm, _zone, spec)
+  - scanGroupsOfZone(dsm, zone)
+  - scanStatusOfZone(dsm, zone)
+
+BusScanner::scanGroupsOfZone(dsm, zone)
+- foreach groupSpec in ds485->getGroups(dsmid, zoneId):
+  - continue, if groupSpec->id == 0
+  - if groupSpec in [0..15]:
+    - groupOnZone = zone->getGroup(groupSpec->id)
+    - if not groupOnZone
+      - new groupOnZone
+      - groupOnZone->setName(groupSpec->Name)
+      - groupOnZone->setStandardGroupId(groupSpec.StandardGroupID)
+      - zone->addGroup(groupOnZone);
+    - groupOnZone->isPresent = True
+    - groupOnZone->isConnected = True
+    - groupOnZone->setLastCalledScene(SceneOff)
+    - groupOnZone->isValid = True
+
+    - group = Apartment->getGroup(groupSpec->id)
+    - group->isPresent(true);
+    - group->isConnected(true);
+    - group->setLastCalledScene(SceneOff);
+    - group->isValid(true);
+
+  - elif group in [16..23]:
+    - groupOnZone = zone->getGroup(groupSpec.GroupID);
+    - if not groupOnZone
+      - new groupOnZone
+      - groupOnZone->setName(groupSpec->Name)
+      - groupOnZone->setStandardGroupId(group.StandardGroupID)
+      - zone->addGroup(groupOnZone);
+    - groupOnZone->isPresent = True
+    - groupOnZone->isConnected = True
+    - groupOnZone->setLastCalledScene(SceneOff)
+    - groupOnZone->isValid = True
+
+    - group = Apartment->getGroup(groupSpec->id)
+    - group->isPresent(true);
+    - group->isConnected(true);
+    - group->setLastCalledScene(SceneOff);
+    - group->isValid(true);
+
+    - if (groupOnZone->getName() != group->getName() ||
+            groupOnZone->getStandardGroupID() != group->getStandardGroupID()) {
+      - groupOnZone->setIsSynchronized = False;
+
+  - else:
+    - groupOnZone = zone->getGroup(groupSpec.GroupID);
+    - if not groupOnZone
+      - new groupOnZone
+      - groupOnZone->setName(groupSpec->Name)
+      - groupOnZone->setStandardGroupId(group.StandardGroupID)
+      - zone->addGroup(groupOnZone);
+    - elif (groupOnZone->getName() != group->getName() ||
+            groupOnZone->getStandardGroupID() != group->getStandardGroupID()) {
+      - groupOnZone->setIsSynchronized = False;
+
+    - groupOnZone->isPresent = True
+    - groupOnZone->isConnected = True
+    - groupOnZone->setLastCalledScene(SceneOff)
+    - groupOnZone->isValid = True
+
+
+BusScanner::scanStatusOfZone
+- which scene active
+- which state active
+- TODO move to where
+
+util::synchronizeGroups
+- foreach zone: Zone
+    continue, if zone->id == 0 or zone->isConnected == False
+    foreach group: zone->getGroups
+      continue, if group->isSynchronized
+      if group->id in [16..23]:
+        refGroup -> model->getGroup(group->id)
+        ds485->setGroupName(zone->id, group->id, refGroup->name)
+        ds485->setStandardGroupId(zone->id, group->id, refGroup->name)
+        group->isSynchronized = True
+      if group->id >= 24:
+        ds485->createGroup(zone->id, group->id, group->getStandardGroupID,
+                           group->getName)
+        ds485->setGroupName(zone->id, group->id, group->name)
+        ds485->setStandardGroupId(zone->id, group->id, refGroup->name)
+        group->isSynchronized = True
+      no else
+
+
+CommChannel::resumeUpdateTask
+- tell dSA to resume it's tasks?
+
+
+update dS structure
+-------------------
+BusChangeCallback
+- etLostDSMeter -> onLostDSMeter
+- etDS485DeviceDiscovered -> onJoinedDSMeter
+
+ModelMaintenance::onLostDSMeter(dsid)
+- dsm = apartment->getDSMeterByDSID(dsid)
+- dsm.isConnected = False
+- dsm.setPowerConsumption = 0
+- forall dev in dsm->getDevices
+  - dev->isConnected = False
+
+ModelMaintenance::onJoinedDSMeter(dsid)
+- dsm = apartment->getDSMeterByDSID(dsid)
+- if not dsm:
+  - ModelMaintenance::discoverDS485Devices # new device
+  - return
+- dsm->isPresent(true);
+- dsm->isConnected(true);
+- dsm->isValid(false); -> readOutPendingMeter picks up
+- for dev in apartment->devices.getByLastKnownDSMeter(dsid)
+  - dev.isValid = False
+
+
+update dS devices
+-----------------
+device On/Off/Changed callbacks
+
+ModelMaintenance::rescanDevice
+- upon events: etNewDevice / etDeviceChanged
+
+ModelMaintenance::rescanDevice
+- scanner.scanDeviceOnBus(dmsid, deviceid)
+  - StructureQueryBusInterface::deviceGetSpec(deviceId, dsid) -> fills spec object
+    - DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id, zone ..
+    - DsmApiGetDeviceDSID(vendorId, productId -> dsid)
+    - updateButtonGroupFromMeter(dsmDSID, deviceSpec);
+      - DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress,...
+    - updateBinaryInputTableFromMeter(dsmDSID, deviceSpec);
+      - DeviceBinaryInput_get_count(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress,...
+      - loop: DeviceBinaryInput_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress,..
+  - Apartment::allocateZone(zoneId)
+    - new Zone, if not exist
+      - addDefaultGroupsToZone
+  - BusScanner::initializeDeviceFromSpec(meter, zone, spec)
+- scanner.syncBinaryInputStates(dmsid, deviceid), if Device::getBinaryInputCount() > 0
+  - launch task BinaryInputScanner
+    - loop dev in [device]
+      - DeviceSensor_get_value_sync(m_dsmApiHandle, _dsm,
+      - loop: (int index = 0; index < dev->getBinaryInputCount(); index++) {
+        - State := Device::m_binaryInputStates[_inputIndex];
+        - State::setState(coSystem, State_Active|State_Inactive)
+
+BusScanner::initializeDeviceFromSpec(meter, zone, spec)
+- device: find(Apartment::m_devices == dsid)
+- return if dev->isPresent() && spec->ActiveState == False !!! TODO why
+- Apartment::allocateDevice, if not found
+  - Zone(0)->addDevice
+- oldDSM = Apartment::getDSMeterByDSID(DeviceReference::getLastKnownDSMeterDSID())
+- oldDSM->removeDevice(DeviceReference)
+- Device::resetGroups()
+- oldZone->removeDevice(devRef), if oldZone != 0;
+- set ShortAddress / Meter / Zone / FunctionID, etc
+- derive inputCount, tricky
+- loop: spec.Groups: Device::addToGroup(int), append to vector
+- if AKM, Device::addToGroup(DeviceReference::getBinaryInput[0]->targetGroup)
+- Zone->addToDSMeter, Zone->addDevice
+- DSMeter::addDevice
+- Device->isPresent = (spec.ActiveState == 1)
+- Device->isConnected = True
+- scheduleOEMReadout(dev);
+- emit event: etModelDirty / no specific 'new_device'
+
+OEM readout
+----------
+scheduleOEMReadout
+- if oemInfoState == DEVICE_OEM_UNKOWN:
+    - revisionID < 0x350
+        oemInfoState == DEVICE_OEM_NONE
+      else
+        schedule OEMDataReader task
+   elif oemInfoState() == DEVICE_OEM_VALID) &&
+          oemProductInfoState & (DEVICE_OEM_VALID | DEVICE_OEM_LOADING) == 0):
+        schedule OEMWebQuery task
+
+OEMDataReader::run
+- eeprom(bank3, 0x2e) >> 12 -> inetState
+- inetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED:
+    oemInfoState = DEVICE_OEM_NONE
+  else:
+      eeprom(bank3, 0x2a | 0x2c | 0x1e) -> ean
+      eeprom(bank1, 0x1e) & 0x7f -> partnumber
+      eeprom(bank1, 0x1e) & 0x80 -> isIndependent
+      revisionId >= 0x355
+        eeprom(bank3, 0x1f) & 0x01 -> isConfigLocked
+     oemInfoState = DEVICE_OEM_VALID
+
+     emitEvent(etDeviceEANReady) -> ModelMaintenance::onEANReady
+
+ModelMaintenance::onEANReady
+    if oeInfoState != DEVICE_OEM_VALID:
+        Device::setOemInfoState(state)
+        return
+
+    if inetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL | MANDATORY:
+            schedule OEMWebQuery task
+            oemProductInfoState = DEVICE_OEM_LOADING
+    else:
+            oemProductInfoState = DEVICE_OEM_NONE
+
+    Device::setOemInfoState(valid)
+    Device::setConfigLock(valid) # probably isIndependent, partNumber, serialNumber too
+
+OEMWebQuery::run
+- triggered by onEANReady and updateWebData # TODO chitz, WTF is updateWebData?
+    fetch: ArticleName/Icon/DescriptionForCustomer/Default
+    download icon
+    oemProductInfoState -> [DEVICE_OEM_NONE | DEVICE_OEM_VALID]
+    emit etDeviceOEMDataReady -> onOEMDataReady
+
+ModelMaintenance::onOEMDataReady
+- Device::setOemProductInfo(productName, iconPath, productURL)
+- Device::setOemProductInfoState
+
+
+Device::calculateHWInfo
+- triggered by setFunctionID / setProductID / setVendorID / setOemProductInfoState
+- if oemProductInfoState == valid and not m_OemProductName.empty # TODO how can it be valid then
+    hwinfo = m_OemProductName
+  elif: not DsmApiGetDeviceDescription.displayName.empty
+    hwinfo = DsmApiGetDeviceDescription.displayName.empty
+  else:
+    hwinfo = synthesize_from(deviceClass, deviceType, deviceNumber)
+
+
+Device::updateIconPath
+- triggered by setFunctionID / setProductID / setVendorID / setOemProductInfoState
+- triggered by setDeviceJokerGroup / addToGroup / removeFromGroup -> changes color
+
+- if m_OemProductInfoState == valid and not m_OemProductIcon.empty:
+    m_iconPath = m_OemProductIcon;
+  elif deviceClass == Invalid:
+      m_iconPath = "unknown.png"
+  else:
+      m_iconPath = synthesize(deviceType, deviceClass, isJoker)
+
+
+GTIN
+- not mandatory for 1.x, not always existent
+
+
+EEPROM
+------
+layout partially defined in src/model/modelconst.h
