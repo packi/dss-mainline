@@ -884,7 +884,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkSceneZone(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "callScene") {
+    if (!((m_evtName == "callScene") || (m_evtName == "callSceneBus"))) {
       return false;
     }
 
@@ -959,9 +959,11 @@ namespace dss {
       }
     }
 
+    std::string bus = ((m_evtName == "callSceneBus") ? "Bus" : "");
     Logger::getInstance()->log("SystemTrigger::"
-            "checkSceneZone: *** Match: CallScene Zone: " + iZone +
-            ", Group: " + iGroup + ", Scene: " +
+            "checkSceneZone: *** Match: CallScene" +
+            bus +
+            " Zone: " + iZone + ", Group: " + iGroup + ", Scene: " +
             iScene + ", Origin: " + iDevice);
 
     return true;
@@ -1363,6 +1365,13 @@ namespace dss {
           }
         } else if (triggerValue == "device-scene") {
           if (checkDeviceScene(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == "callSceneBus") {
+        if (triggerValue == "bus-zone-scene") {
+          if (checkSceneZone(triggerProp)) {
             return true;
           }
         }

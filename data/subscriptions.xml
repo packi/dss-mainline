@@ -17,6 +17,9 @@
   <subscription event-name="callScene" handler-name="system_trigger">
   </subscription>
 
+  <subscription event-name="callSceneBus" handler-name="system_trigger">
+  </subscription>
+
   <subscription event-name="undoScene" handler-name="system_trigger">
   </subscription>
 
