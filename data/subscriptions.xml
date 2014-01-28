@@ -109,7 +109,6 @@
   <!-- System State/Event Handler -->
   <subscription event-name="model_ready" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="filename2">scripts/system_state.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
@@ -122,62 +121,39 @@
   </subscription>
   <subscription event-name="callScene" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="filename2">scripts/system_state.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
   <subscription event-name="undoScene" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="filename2">scripts/system_state.js</parameter>
-      <parameter name="script_id">system_state</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="blink" handler-name="javascript">
-    <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
   <subscription event-name="deviceBinaryInputEvent" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="filename2">scripts/system_state.js</parameter>
-      <parameter name="script_id">system_state</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="buttonClick" handler-name="javascript">
-    <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
-      <parameter name="script_id">system_state</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="deviceSensorEvent" handler-name="javascript">
-    <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
-      <parameter name="script_id">system_state</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="deviceSensorValue" handler-name="javascript">
-    <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
   <subscription event-name="stateChange" handler-name="javascript">
     <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
       <parameter name="filename2">scripts/system_state.js</parameter>
       <parameter name="script_id">system_state</parameter>
     </parameter>
   </subscription>
-  <subscription event-name="addonStateChange" handler-name="javascript">
-    <parameter>
-      <parameter name="filename1">scripts/system_events.js</parameter>
-      <parameter name="script_id">system_state</parameter>
-    </parameter>
-  </subscription>
+
+  <subscription event-name="model_ready" handler-name="system_event_log"/>
+  <subscription event-name="running" handler-name="system_event_log"/>
+  <subscription event-name="callScene" handler-name="system_event_log"/>
+  <subscription event-name="blink" handler-name="system_event_log"/>
+  <subscription event-name="undoScene" handler-name="system_event_log"/>
+  <subscription event-name="buttonClick" handler-name="system_event_log"/>
+  <subscription event-name="deviceBinaryInputEvent" handler-name="system_event_log"/>
+  <subscription event-name="deviceSensorEvent" handler-name="system_event_log"/>
+  <subscription event-name="deviceSensorValue" handler-name="system_event_log"/>
+  <subscription event-name="stateChange" handler-name="system_event_log"/>
 
   <!-- System Hail Handler -->
   <subscription event-name="running" handler-name="javascript">

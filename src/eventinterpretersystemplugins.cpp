@@ -22,7 +22,10 @@
 
 #include "config.h"
 
+#include <signal.h>
+
 #include "eventinterpretersystemplugins.h"
+#include "internaleventrelaytarget.h"
 #include "logger.h"
 #include "base.h"
 #include "dss.h"
@@ -32,6 +35,7 @@
 #include "model/device.h"
 #include "model/apartment.h"
 #include "model/state.h"
+#include "model/modelconst.h"
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
@@ -54,6 +58,100 @@
 #define ACTION_DURATION_STATE_CHANGE    100
 
 namespace dss {
+
+  const int SceneTable0_length = 56;
+  const char *SceneTable0[] =
+  {
+    "Off",
+    "Off-Area1",
+    "Off-Area2",
+    "Off-Area3",
+    "Off-Area4",
+    "Stimmung1",
+    "On-Area1",
+    "On-Area2",
+    "On-Area3",
+    "On-Area4",
+    "Dimm-Area",
+    "Dec",
+    "Inc",
+    "Min",
+    "Max",
+    "Stop",
+    "N/A",
+    "Stimmung2",
+    "Stimmung3",
+    "Stimmung4",
+    "Stimmung12",
+    "Stimmung13",
+    "Stimmung14",
+    "Stimmung22",
+    "Stimmung23",
+    "Stimmung24",
+    "Stimmung32",
+    "Stimmung33",
+    "Stimmung34",
+    "Stimmung42",
+    "Stimmung43",
+    "Stimmung44",
+    "Off-Stimmung10",
+    "On-Stimmung11",
+    "Off-Stimmung20",
+    "On-Stimmung21",
+    "Off-Stimmung30",
+    "On-Stimmung31",
+    "Off-Stimmung40",
+    "On-Stimmung41",
+    "Off-Automatic",
+    "N/A",
+    "Dec-Area1",
+    "Inc-Area1",
+    "Dec-Area2",
+    "Inc-Area2",
+    "Dec-Area3",
+    "Inc-Area3",
+    "Dec-Area4",
+    "Inc-Area4",
+    "Off-Device",
+    "On-Device",
+    "Stop-Area1",
+    "Stop-Area2",
+    "Stop-Area3",
+    "Stop-Area4"
+  };
+
+  const int SceneTable1_length = 28;
+  const char *SceneTable1[] =
+  {
+    "N/A",
+    "Panic",
+    "Overload",
+    "Zone-Standby",
+    "Zone-Deep-Off",
+    "Sleeping",
+    "Wake-Up",
+    "Present",
+    "Absent",
+    "Bell",
+    "Alarm",
+    "Zone-Activate",
+    "Fire",
+    "Smoke",
+    "Water",
+    "Gas",
+    "Bell2",
+    "Bell3",
+    "Bell4",
+    "Alarm2",
+    "Alarm3",
+    "Alarm4",
+    "Wind",
+    "WindN",
+    "Rain",
+    "RainN",
+    "Hail",
+    "HailN"
+  };
 
   SystemEventActionExecute::SystemEventActionExecute() : SystemEvent() {
   }
@@ -1618,5 +1716,613 @@ namespace dss {
     addEvent(hl);
   }
 
+  EventInterpreterPluginSystemEventLog::EventInterpreterPluginSystemEventLog(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("system_event_log", _pInterpreter)
+  { }
 
+  EventInterpreterPluginSystemEventLog::~EventInterpreterPluginSystemEventLog()
+  { }
+
+  void EventInterpreterPluginSystemEventLog::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    Logger::getInstance()->log("EventInterpreterPluginSystemEventLog::"
+            "handleEvent: processing event \'" + _event.getName() + "\'",
+            lsDebug);
+
+    boost::shared_ptr<SystemEventLog> log(new SystemEventLog());
+
+    if (!log->setup(_event)) {
+      Logger::getInstance()->log("EventInterpreterPluginSystemEventLog::"
+              "handleEvent: could not setup event data!");
+      return;
+    }
+
+    addEvent(log);
+  }
+
+
+  SystemEventLog::SystemEventLog() : SystemEvent() {
+  }
+
+  SystemEventLog::~SystemEventLog() {
+  }
+
+  std::string SystemEventLog::getZoneName(boost::shared_ptr<Zone> _zone) {
+    std::string zName = _zone->getName();
+    if (_zone->getID() == 0) {
+      zName = "Broadcast";
+    }
+    return zName + ";" + intToString(_zone->getID());
+  }
+
+  std::string SystemEventLog::getGroupName(boost::shared_ptr<Group> _group) {
+    std::string gName = _group->getName();
+    if (gName.empty()) {
+      gName = "Unknown";
+    }
+
+    return gName + ";" + intToString(_group->getID());
+  }
+
+  std::string SystemEventLog::getSceneName(int _scene_id) {
+    std::string sceneName;
+
+    if ((_scene_id >= 0) && (_scene_id < 64) &&
+        (_scene_id < SceneTable0_length)) {
+      sceneName = SceneTable0[_scene_id];
+    }
+    if ((_scene_id >= 64) && ((_scene_id - 64) < SceneTable1_length)) {
+      sceneName = SceneTable1[_scene_id - 64];
+    }
+
+    sceneName += ";" + intToString(_scene_id);
+
+    return sceneName;
+  }
+
+  std::string SystemEventLog::getDeviceName(std::string _origin_device_id) {
+    std::string devName = "Unknown";
+
+    if (!_origin_device_id.empty()) {
+      dss_dsid_t dsid = dsid::fromString(_origin_device_id);
+      if ((dsid.upper == 0) && (dsid.lower < 16)) {
+        if (dsid.lower == 0) {
+            devName = "(unspecified)";
+        } else if (dsid.lower == 1) {
+            devName = "Scripting";
+        } else if (dsid.lower == 2) {
+            devName = "JSON";
+        } else if (dsid.lower == 3) {
+            devName = "SOAP";
+        } else if (dsid.lower == 4) {
+            devName = "Bus-Handler";
+        } else if (dsid.lower == 5) {
+            devName = "Simulation";
+        } else if (dsid.lower == 6) {
+            devName = "Test";
+        } else if (dsid.lower == 7) {
+            devName = "System";
+        } else {
+            devName = "";
+        }
+        devName += ";" + _origin_device_id;
+      } else {
+        boost::shared_ptr<Device> device =
+            DSS::getInstance()->getApartment().getDeviceByDSID(
+                                dss_dsid_t::fromString(_origin_device_id));
+        if (device && (!device->getName().empty())) {
+            devName = device->getName();
+        } else {
+            devName = "Unknown";
+        }
+        devName += ";" + _origin_device_id;
+      }
+    }
+    return devName;
+  }
+
+  void SystemEventLog::logLastScene(boost::shared_ptr<ScriptLogger> _logger,
+                                    boost::shared_ptr<Zone> _zone,
+                                    boost::shared_ptr<Group> _group,
+                                    int _scene_id) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_group);
+    std::string sceneName = getSceneName(_scene_id);
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";Last Scene;" + sceneName + ';' + zoneName + ';' +
+                  groupName + ";;;");
+  }
+
+  void SystemEventLog::logZoneGroupScene(boost::shared_ptr<ScriptLogger> _logger,
+                                         boost::shared_ptr<Zone> _zone,
+                                         int _group_id, int _scene_id,
+                                         bool _is_forced,
+                                         std::string _origin_device_id,
+                                         std::string _origin_token) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_zone->getGroup(_group_id));
+    std::string sceneName = getSceneName(_scene_id);
+    std::string devName = getDeviceName(_origin_device_id);
+    if (_is_forced) {
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+      _logger->logln(";CallSceneForced;" + sceneName + ";" + zoneName + ";" +
+                     groupName + ";" + devName + ";" + _origin_token);
+    } else {
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+      _logger->logln(";CallScene;" + sceneName + ";" + zoneName + ";" +
+                     groupName + ";" + devName +";" + _origin_token);
+    }
+  }
+
+  void SystemEventLog::logDeviceLocalScene(
+                                        boost::shared_ptr<ScriptLogger> _logger,
+                                        int _scene_id,
+                                        std::string _origin_device_id) {
+    std::string devName = getDeviceName(_origin_device_id);
+    std::string sceneName = getSceneName(_scene_id);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";Device;" + sceneName + ";;;;;" + devName + ";");
+  }
+
+  void SystemEventLog::logDeviceScene(boost::shared_ptr<ScriptLogger> _logger,
+                                      boost::shared_ptr<const Device> _device,
+                                      boost::shared_ptr<Zone> _zone,
+                                      int _scene_id, bool _is_forced,
+                                      std::string _origin_device_id,
+                                      std::string _token) {
+    std::string zoneName = getZoneName(_zone);
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+    std::string origName = getDeviceName(_origin_device_id);
+    std::string sceneName = getSceneName(_scene_id);
+
+    if (_is_forced) {
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;originToken');
+      _logger->logln(";DeviceSceneForced;" + sceneName + ";" + zoneName + ";"
+                     + devName + ";" + origName + ";" + _token);
+    } else {
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;originToken');
+      _logger->logln(";DeviceScene;" + sceneName + ";" + zoneName + ";" +
+                     devName + ";" + origName + ";" + _token);
+    }
+  }
+
+  void SystemEventLog::logZoneGroupBlink(
+                                        boost::shared_ptr<ScriptLogger> _logger,
+                                        boost::shared_ptr<Zone> _zone,
+                                        int _group_id,
+                                        std::string _origin_device_id,
+                                        std::string _origin_token) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_zone->getGroup(_group_id));
+    std::string devName = getDeviceName(_origin_device_id);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";Blink;;" + zoneName + ";" + groupName + ";" + devName + 
+                   ";;" + _origin_token);
+  }
+
+  void SystemEventLog::logDeviceBlink(boost::shared_ptr<ScriptLogger> _logger,
+                                      boost::shared_ptr<const Device> _device,
+                                      boost::shared_ptr<Zone> _zone,
+                                      std::string _origin_device_id,
+                                      std::string _origin_token) {
+    std::string zoneName = getZoneName(_zone);
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+    std::string origName = getDeviceName(_origin_device_id);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";DeviceBlink;;" + zoneName + ";" + devName + ";;" +
+                   origName + ";" + _origin_token);
+  }
+
+  void SystemEventLog::logZoneGroupUndo(boost::shared_ptr<ScriptLogger> _logger,
+                                        boost::shared_ptr<Zone> _zone,
+                                        int _group_id, int _scene_id,
+                                        std::string _origin_device_id,
+                                        std::string _origin_token) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_zone->getGroup(_group_id));
+    std::string devName = getDeviceName(_origin_device_id);
+    std::string sceneName = getSceneName(_scene_id);
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";UndoScene;" + sceneName + ";" + zoneName + ";" +
+                   groupName + ";" + devName + ";" + _origin_token);
+  }
+
+  void SystemEventLog::logDeviceButtonClick(
+                                boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+    std::string keynum;
+    if (m_properties.has("buttonIndex")) {
+      keynum = m_properties.get("buttonIndex");
+    }
+
+    std::string clicknum;
+    if (m_properties.has("clickType")) {
+      clicknum = m_properties.get("clickType");
+    }
+
+    std::string holdcount;
+    if (m_properties.has("holdCount")) {
+      holdcount = m_properties.get("holdCount");
+    }
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    if (holdcount.empty()) {
+      _logger->logln(";ButtonClick;Type " + clicknum + ";" + keynum +
+                     ";;;;;" + devName + ";");
+    } else {
+      _logger->logln(";ButtonClick;Hold " + holdcount + ';' + keynum +
+                     ";;;;;" + devName + ";");
+    }
+  }
+
+  void SystemEventLog::logDeviceBinaryInput(
+                                boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+
+    std::string index;
+    if (m_properties.has("inputIndex")) {
+      index = m_properties.get("inputIndex");
+    }
+
+    std::string state;
+    if (m_properties.has("inputState")) {
+      state = m_properties.get("inputState");
+    }
+
+    std::string type;
+    if (m_properties.has("inputType")) {
+      type = m_properties.get("inputType");
+    }
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";BinaryInput;State " + state + ";" + index + ";;;;;" +
+                   devName + ";");
+  }
+
+  void SystemEventLog::logDeviceSensorEvent(
+                                    boost::shared_ptr<ScriptLogger> _logger,
+                                    boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+
+    std::string sensorEvent;
+    if (m_properties.has("sensorEvent")) {
+      sensorEvent = m_properties.get("sensorEvent");
+    }
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";EventTable;" + sensorEvent + ";;;;;;" + devName + ";");
+  }
+
+  void SystemEventLog::logDeviceSensorValue(
+                                    boost::shared_ptr<ScriptLogger> _logger,
+                                    boost::shared_ptr<const Device> _device,
+                                    boost::shared_ptr<Zone> _zone) {
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+    std::string zoneName = getZoneName(_zone);
+
+    std::string sensorIndex;
+    if (m_properties.has("sensorIndex")) {
+      sensorIndex = m_properties.get("sensorIndex");
+    }
+
+    std::string sensorValue;
+    if (m_properties.has("sensorValue")) {
+      sensorValue = m_properties.get("sensorValue");
+    }
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";SensorValue;" + sensorIndex + ';' + sensorValue + ';' +
+                   zoneName + ";;;" + devName + ";");
+  }
+
+  void SystemEventLog::logStateChangeScript(
+                                    boost::shared_ptr<ScriptLogger> _logger,
+                                    std::string _statename, std::string _state,
+                                    std::string _value,
+                                    std::string _origin_device_id) {
+
+    std::string origName = getDeviceName(_origin_device_id);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";StateAddonScript;" + _statename + ";" + _value + ";" +
+                   _state + ";;;;;" + origName + ";");
+  }
+
+  void SystemEventLog::logStateChangeApartment(
+                                    boost::shared_ptr<ScriptLogger> _logger,
+                                    std::string _statename, std::string _state,
+                                    std::string _value,
+                                    std::string _origin_device_id) {
+
+    std::string origName = getDeviceName(_origin_device_id);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken'');
+    _logger->logln(";StateApartment;" + _statename + ";" + _value + ";" +
+                   _state  + ";;;;;" + origName + ";");
+  }
+
+  void SystemEventLog::logStateChangeDevice(
+                                    boost::shared_ptr<ScriptLogger> _logger,
+                                    std::string _statename, std::string _state,
+                                    std::string _value,
+                                    boost::shared_ptr<const Device> _device) {
+
+    std::string devName = _device->getName() + ";" +
+                          _device->getDSID().toString();
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state +
+                   ";;;;" + devName + ";");
+  }
+
+  void SystemEventLog::logStateChangeGroup(
+                                    boost::shared_ptr<ScriptLogger> _logger,
+                                    std::string _statename, std::string _state,
+                                    std::string _value,
+                                    int _group_id, int _zone_id) {
+
+    boost::shared_ptr<Zone> zone =
+            DSS::getInstance()->getApartment().getZone(_zone_id);
+
+    std::string groupName = getGroupName(zone->getGroup(_group_id));
+    std::string zoneName = getZoneName(zone);
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";StateGroup;" + _statename + ";" + _value + ";" + _state +
+                   ";" + zoneName + ";" + intToString(_zone_id) + ';' +
+                   groupName + ";;");
+  }
+
+  void SystemEventLog::model_ready(boost::shared_ptr<ScriptLogger> _logger) {
+    _logger->logln("Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken");
+
+    std::vector<boost::shared_ptr<Zone> > zones = DSS::getInstance()->getApartment().getZones();
+    for (size_t z = 0; z < zones.size(); z++) {
+      if (!zones.at(z)->isPresent()) {
+        continue;
+      }
+
+      std::vector<boost::shared_ptr<Group> > groups = zones.at(z)->getGroups();
+      for (size_t g = 0; z < groups.size(); g++) {
+        int group_id = groups.at(g)->getID();
+        if ((group_id <= 0) || (group_id >= 16)) {
+          continue;
+        }
+
+        int scene_id = groups.at(g)->getLastCalledScene();
+        if (scene_id > 0) {
+            logLastScene(_logger, zones.at(z), groups.at(g), scene_id);
+        }
+      }
+    }
+  }
+
+  void SystemEventLog::callScene(boost::shared_ptr<ScriptLogger> _logger) {
+    int sceneId = -1;
+    if (m_properties.has("sceneID")) {
+        sceneId = strToIntDef(m_properties.get("sceneID"), -1);
+    }
+
+    bool isForced = false;
+    if (m_properties.has("forced")) {
+        if (m_properties.get("forced") == "yes") {
+          isForced = true;
+        }
+    }
+    int zoneId = -1;
+    std::string token;
+    if (m_properties.has("originToken")) {
+      token = m_properties.get("originToken");
+    }
+
+    std::string originDeviceId;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceId = m_properties.get("originDeviceID");
+    }
+
+    if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+      // ZoneGroup Action Request
+      zoneId = m_raisedAtGroup->getZoneID();
+      int groupId = m_raisedAtGroup->getID();
+      boost::shared_ptr<Zone> zone =
+          DSS::getInstance()->getApartment().getZone(zoneId);
+
+      logZoneGroupScene(_logger, zone, groupId, sceneId, isForced,
+                        originDeviceId, token);
+    } else if ((m_evtRaiseLocation == erlDevice) &&
+               (m_raisedAtDevice != NULL)) {
+      zoneId = m_raisedAtDevice->getDevice()->getZoneID();
+
+      dss_dsid_t dsid = dsid::fromString(originDeviceId);
+      if ((dsid.upper == 0) && (dsid.lower == 0)) {
+        // DeviceLocal Action Event
+        logDeviceLocalScene(_logger, sceneId,
+                        m_raisedAtDevice->getDevice()->getDSID().toString());
+      } else {
+        // Device Action Request
+        boost::shared_ptr<Zone> zone =
+            DSS::getInstance()->getApartment().getZone(zoneId);
+        logDeviceScene(_logger, m_raisedAtDevice->getDevice(), zone, sceneId,
+                       isForced, originDeviceId, token);
+      }
+    }
+  }
+
+  void SystemEventLog::blink(boost::shared_ptr<ScriptLogger> _logger) {
+    int zoneId = -1;
+    std::string token;
+    if (m_properties.has("originToken")) {
+      token = m_properties.get("originToken");
+    }
+
+    std::string originDeviceId;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceId = m_properties.get("originDeviceID");
+    }
+
+    if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+      zoneId = m_raisedAtGroup->getZoneID();
+      int groupId = m_raisedAtGroup->getID();
+      boost::shared_ptr<Zone> zone =
+          DSS::getInstance()->getApartment().getZone(zoneId);
+      logZoneGroupBlink(_logger, zone, groupId, originDeviceId, token);
+
+    } else if ((m_evtRaiseLocation == erlDevice) &&
+               (m_raisedAtDevice != NULL)) {
+      zoneId = m_raisedAtDevice->getDevice()->getZoneID();
+      boost::shared_ptr<Zone> zone =
+          DSS::getInstance()->getApartment().getZone(zoneId);
+      logDeviceBlink(_logger, m_raisedAtDevice->getDevice(), zone,
+                     originDeviceId, token);
+    }
+  }
+
+  void SystemEventLog::undoScene(boost::shared_ptr<ScriptLogger> _logger) {
+    int sceneId = -1;
+    if (m_properties.has("sceneID")) {
+        sceneId = strToIntDef(m_properties.get("sceneID"), -1);
+    }
+
+    std::string token;
+    if (m_properties.has("originToken")) {
+      token = m_properties.get("originToken");
+    }
+
+    std::string originDeviceId;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceId = m_properties.get("originDeviceID");
+    }
+
+    if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+      int groupId = m_raisedAtGroup->getID();
+      int zoneId = m_raisedAtGroup->getZoneID();
+      boost::shared_ptr<Zone> zone =
+                            DSS::getInstance()->getApartment().getZone(zoneId);
+      logZoneGroupUndo(_logger, zone, groupId, sceneId, originDeviceId,
+                       token);
+    }
+  }
+
+  void SystemEventLog::buttonClick(boost::shared_ptr<ScriptLogger> _logger) {
+    if (m_raisedAtDevice != NULL) {
+      logDeviceButtonClick(_logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
+  void SystemEventLog::deviceBinaryInputEvent(
+                                    boost::shared_ptr<ScriptLogger> _logger) {
+    if (m_raisedAtDevice != NULL) {
+      logDeviceBinaryInput(_logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
+  void SystemEventLog::deviceSensorEvent(
+                                    boost::shared_ptr<ScriptLogger> _logger) {
+    if (m_raisedAtDevice != NULL) {
+      logDeviceSensorEvent(_logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
+  void SystemEventLog::deviceSensorValue(
+                                    boost::shared_ptr<ScriptLogger> _logger) {
+    if (m_raisedAtDevice != NULL) {
+      int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
+      boost::shared_ptr<Zone> zone =
+          DSS::getInstance()->getApartment().getZone(zoneId);
+      logDeviceSensorValue(_logger, m_raisedAtDevice->getDevice(), zone);
+    }
+  }
+
+  void SystemEventLog::stateChange(boost::shared_ptr<ScriptLogger> _logger) {
+    std::string statename;
+    if (m_properties.has("statename")) {
+      statename = m_properties.get("statename");
+    }
+
+    std::string state;
+    if (m_properties.has("state")) {
+      state = m_properties.get("state");
+    }
+
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+
+    std::string originDeviceId;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceId = m_properties.get("originDeviceID");
+    }
+
+    if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
+      if (m_raisedAtState->getType() == StateType_Script) {
+        logStateChangeScript(_logger, statename, state, value, originDeviceId);
+      } else if (m_raisedAtState->getType() == StateType_Service) {
+        logStateChangeApartment(_logger, statename, state, value,
+                                originDeviceId);
+      } else if (m_raisedAtState->getType() == StateType_Device) {
+        boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
+        logStateChangeDevice(_logger, statename, state, value, device);
+      } else if (m_raisedAtState->getType() == StateType_Group) {
+        boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
+        int groupID = group->getID();
+        int zoneID = group->getZoneID();
+        logStateChangeGroup(_logger, statename, state, value, groupID, zoneID);
+      }
+    }
+  }
+
+  void SystemEventLog::run() {
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser(
+        "SystemEventLog needs system rights");
+    } else {
+      return;
+    }
+
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(
+                                DSS::getInstance()->getJSLogDirectory(),
+                                "system-event.log", NULL));
+
+    if (logger == NULL) {
+      Logger::getInstance()->log("SystemEventLog::run(): could not init "
+                                 "logger!");
+      return;
+    }
+
+    if (m_evtName == "model_ready") {
+      model_ready(logger);
+    } else if (m_evtName == "callScene") {
+      callScene(logger);
+    } else if (m_evtName == "blink") {
+      blink(logger);
+    } else if (m_evtName == "undoScene") {
+      undoScene(logger);
+    } else if (m_evtName == "buttonClick") {
+      buttonClick(logger);
+    } else if (m_evtName == "deviceBinaryInputEvent") {
+      deviceBinaryInputEvent(logger);
+    } else if (m_evtName == "deviceSensorEvent") {
+      deviceSensorEvent(logger);
+    } else if (m_evtName == "deviceSensorValue") {
+      deviceSensorValue(logger);
+    } else if (m_evtName == "stateChange") {
+      stateChange(logger);
+    }
+  }
+
+  bool SystemEventLog::setup(Event& _event) {
+    m_evtName = _event.getName();
+    m_evtRaiseLocation = _event.getRaiseLocation();
+    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+    m_raisedAtDevice = _event.getRaisedAtDevice();
+    m_raisedAtState = _event.getRaisedAtState();
+    return SystemEvent::setup(_event);
+  }
 } // namespace dss

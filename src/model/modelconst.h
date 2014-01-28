@@ -118,7 +118,7 @@ namespace dss {
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
-  // Button input id's
+  // Button input id"s
   const uint8_t ButtonId_Device = 0;
   const uint8_t ButtonId_Area1 = 1;
   const uint8_t ButtonId_Area2 = 2;
@@ -168,7 +168,7 @@ namespace dss {
   const uint8_t ClickTypeLS = 0x0e;     // Local-Stop Click
   const uint8_t ClickTypeRES = 0x0f;
 
-  // Group ID's
+  // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
   const int GroupIDGray = 2;
@@ -220,6 +220,5 @@ namespace dss {
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
   const uint16_t ProductID_KL_210 = 0x14C8;
-
 } // namespace dss
 #endif
