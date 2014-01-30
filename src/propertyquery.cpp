@@ -55,53 +55,47 @@ namespace dss {
     m_PartList.erase(m_PartList.begin());
   } // parseParts
 
+  boost::shared_ptr<JSONElement>
+    PropertyQuery::addProperty(boost::shared_ptr<JSONObject> obj,
+                               PropertyNodePtr node) {
+    log(std::string(__func__) + " " + node->getName() + ": " + node->getAsString(), lsDebug);
+    switch (node->getValueType()) {
+    case vTypeInteger:
+      obj->addProperty(node->getName(), node->getIntegerValue());
+      break;
+    case vTypeFloating:
+      obj->addProperty(node->getName(), node->getFloatingValue());
+      break;
+    case vTypeBoolean:
+      obj->addProperty(node->getName(), node->getBoolValue());
+      break;
+    case vTypeNone:
+      break;
+    case vTypeString:
+    default:
+      obj->addProperty(node->getName(), node->getAsString());
+      break;
+    }
+    return obj;
+  }
+
   boost::shared_ptr<JSONElement> PropertyQuery::addProperties(part_t& _part,
                                     boost::shared_ptr<JSONElement> _parentElement,
                                     dss::PropertyNodePtr _node) {
     boost::shared_ptr<JSONObject> obj(new JSONObject());
     foreach(std::string subprop, _part.properties) {
+      log(std::string(__func__) + " from node: <" + _node->getName() + "> filter: " + subprop, lsDebug);
       if(subprop == "*") {
         for(int iChild = 0; iChild < _node->getChildCount(); iChild++) {
           PropertyNodePtr childNode = _node->getChild(iChild);
-          if(childNode != NULL) {
-            switch (childNode->getValueType()) {
-            case vTypeInteger:
-              obj->addProperty(childNode->getName(), childNode->getIntegerValue());
-              break;
-            case vTypeFloating:
-              obj->addProperty(childNode->getName(), childNode->getFloatingValue());
-              break;
-            case vTypeBoolean:
-              obj->addProperty(childNode->getName(), childNode->getBoolValue());
-              break;
-            case vTypeNone:
-              break;
-            case vTypeString:
-            default:
-              obj->addProperty(childNode->getName(), childNode->getAsString());
-              break;
-            }
+          if (childNode != NULL) {
+            addProperty(obj, childNode);
           }
         }
       } else {
         PropertyNodePtr node = _node->getPropertyByName(subprop);
-        if(node != NULL) {
-          switch (node->getValueType()) {
-          case vTypeInteger:
-            obj->addProperty(subprop, node->getIntegerValue());
-            break;
-          case vTypeBoolean:
-            obj->addProperty(subprop, node->getBoolValue());
-            break;
-          case vTypeFloating:
-            obj->addProperty(subprop, node->getFloatingValue());
-            break;
-          case vTypeNone:
-          case vTypeString:
-          default:
-            obj->addProperty(subprop, node->getAsString());
-            break;
-          }
+        if (node != NULL) {
+          addProperty(obj, node);
         }
       }
     }

@@ -32,6 +32,7 @@ namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class JSONElement;
+  class JSONObject;
   class JSONArrayBase;
 
   class PropertyQuery {
@@ -59,10 +60,29 @@ namespace dss {
     void parseParts();
     void runFor(PropertyNodePtr _parentNode, unsigned int _partIndex,
                 boost::shared_ptr<JSONElement> _parentElement);
+
+    /**
+     * Filter children of _node by part and store
+     * and extracted values in JSON object
+     *
+     * @param _part contains filter
+     * @param _parentElement values are added to it
+     * @param _node element that should be filtered
+     * @return JSON object with the added properties
+     */
     boost::shared_ptr<JSONElement>
       addProperties(part_t& _part,
                     boost::shared_ptr<JSONElement> _parentElement,
                     dss::PropertyNodePtr _node);
+
+    /**
+     * Read int/float/bool value from node and store
+     * in JSON object
+     */
+    boost::shared_ptr<JSONElement>
+      addProperty(boost::shared_ptr<JSONObject> _obj,
+                  dss::PropertyNodePtr _node);
+
     PropertyNodePtr m_pProperty;
     std::string m_Query;
     std::vector<part_t> m_PartList;
