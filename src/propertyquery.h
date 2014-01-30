@@ -58,6 +58,16 @@ namespace dss {
     }; // part_t
   private:
     void parseParts();
+
+    /**
+     * Handles one level of the query
+     *
+     * query1 = ../part(property1,property2)/...
+     * qeury2 = ../part/...
+     *
+     * property is what we are extracting, part is what needs to match
+     * query2 will extract nothing at this level
+     */
     void runFor(PropertyNodePtr _parentNode, unsigned int _partIndex,
                 boost::shared_ptr<JSONElement> _parentElement);
 
