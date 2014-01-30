@@ -25,6 +25,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "src/logger.h"
+
 namespace dss {
 
   class PropertyNode;
@@ -33,6 +35,8 @@ namespace dss {
   class JSONArrayBase;
 
   class PropertyQuery {
+    __DECL_LOG_CHANNEL__
+
   public:
     PropertyQuery(PropertyNodePtr _pProperty, const std::string& _query)
     : m_pProperty(_pProperty),

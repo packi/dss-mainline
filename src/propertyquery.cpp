@@ -33,6 +33,7 @@
 
 namespace dss {
 
+  __DEFINE_LOG_CHANNEL__(PropertyQuery, lsInfo);
 
   std::vector<std::string> extractPropertyList(std::string& _part) {
     std::size_t bracketPos = _part.find('(');
