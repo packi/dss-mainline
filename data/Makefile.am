@@ -14,8 +14,7 @@ dist_dssjs_DATA = \
 	$(top_srcdir)/data/scripts/system_trigger.js \
 	$(top_srcdir)/data/scripts/system_register_trigger.js \
 	$(top_srcdir)/data/scripts/http.js \
-	$(top_srcdir)/data/scripts/system_hail.js \
-	$(top_srcdir)/data/scripts/system_state.js
+	$(top_srcdir)/data/scripts/system_hail.js
 
 webrootdir = $(pkgdatadir)/data/webroot
 

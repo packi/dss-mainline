@@ -2325,4 +2325,802 @@ namespace dss {
     m_raisedAtState = _event.getRaisedAtState();
     return SystemEvent::setup(_event);
   }
+
+  EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("system_state", _pInterpreter)
+  { }
+
+  EventInterpreterPluginSystemState::~EventInterpreterPluginSystemState()
+  { }
+
+  void EventInterpreterPluginSystemState::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    Logger::getInstance()->log("EventInterpreterPluginSystemState::"
+            "handleEvent: processing event \'" + _event.getName() + "\'",
+            lsDebug);
+
+    boost::shared_ptr<SystemState> state(new SystemState());
+
+    if (!state->setup(_event)) {
+      Logger::getInstance()->log("EventInterpreterPluginSystemState::"
+              "handleEvent: could not setup event data!");
+      return;
+    }
+
+    addEvent(state);
+  }
+
+
+  SystemState::SystemState() : SystemEvent() {
+  }
+
+  SystemState::~SystemState() {
+  }
+
+  boost::shared_ptr<State>  SystemState::registerState(std::string _name,
+                                                       bool _persistent) {
+    boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().allocateState(
+                    StateType_Service, _name, "system_state");
+    state->setPersistence(_persistent);
+    return state;
+  }
+
+  boost::shared_ptr<State> SystemState::getOrRegisterState(std::string _name) {
+    try {
+      return DSS::getInstance()->getApartment().getState(
+                StateType_Service, _name);
+    } catch (ItemNotFoundException &ex) {
+      return registerState(_name, true);
+    }
+  }
+
+  void SystemState::bootstrap() {
+    Logger::getInstance()->log("Setup system state handling...");
+    registerState("alarm", true);
+    registerState("alarm2", true);
+    registerState("alarm3", true);
+    registerState("alarm4", true);
+    registerState("panic", true);
+    registerState("fire", true);
+    registerState("wind", true);
+    registerState("rain", true);
+  }
+
+  void SystemState::startup() {
+    bool absent = false;
+    bool panic = false;
+    bool alarm = false;
+    bool sleeping = false;
+
+    std::vector<boost::shared_ptr<Device> > devices =
+            DSS::getInstance()->getApartment().getDevicesVector();
+
+    for (size_t i = 0; i < devices.size(); i++) {
+      boost::shared_ptr<Device> device = devices.at(i);
+      if (device == NULL) {
+        continue;
+      }
+
+      const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > bInputs =
+          device->getBinaryInputs();
+      for (size_t j = 0; j < bInputs.size(); j++) {
+        boost::shared_ptr<DeviceBinaryInput_t> input = bInputs.at(j);
+
+        // motion
+        if ((input->m_inputType == 5) || (input->m_inputType == 7)) {
+          std::string stateName;
+          if (input->m_targetGroupId >= 16) {
+            stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
+                        ".motion";
+          } else {
+            stateName = "zone." + intToString(device->getZoneID()) + ".motion";
+          }
+          getOrRegisterState(stateName);
+        }
+
+        // presence
+        if ((input->m_inputType == 1) || (input->m_inputType == 3)) {
+          std::string stateName;
+          if (input->m_targetGroupId >= 16) {
+            stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
+                        ".presence";
+          } else {
+            stateName = "zone." + intToString(device->getZoneID()) +
+                        ".presence";
+          }
+          getOrRegisterState(stateName);
+        }
+
+        // wind monitor
+        if (input->m_inputType == 8) {
+          std::string stateName = "wind";
+          if (input->m_targetGroupId >= 16) {
+            stateName = stateName + ".group" +
+                        intToString(input->m_targetGroupId);
+            getOrRegisterState(stateName);
+          }
+        }
+
+        // rain monitor
+        if (input->m_inputType == 9) {
+          std::string stateName = "rain";
+          if (input->m_targetGroupId >= 16) {
+            stateName = stateName + ".group" +
+                        intToString(input->m_targetGroupId);
+            getOrRegisterState(stateName);
+          }
+        }
+      } // per device binary inputs for loop
+    } // devices for loop
+
+    std::vector<boost::shared_ptr<Zone> > zones =
+        DSS::getInstance()->getApartment().getZones();
+    for (size_t z = 0; z < zones.size(); z++) {
+      boost::shared_ptr<Zone> zone = zones.at(z);
+      if ((zone == NULL) || (!zone->isPresent())) {
+        continue;
+      }
+
+      std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
+      for (size_t g = 0; g < groups.size(); g++) {
+        boost::shared_ptr<Group> group = groups.at(g);
+        if ((group->getID() >= 16) && (group->getID() <= 23)) {
+            if (group->getStandardGroupID() == 2) {
+              registerState("wind.group" + intToString(group->getID()), true);
+            }
+            continue;
+        }
+
+        if (group->getLastCalledScene() == SceneAbsent) {
+          absent = true;
+        }
+
+        if (group->getLastCalledScene() == ScenePanic) {
+          panic = true;
+        }
+
+        if (group->getLastCalledScene() == SceneAlarm) {
+          alarm = true;
+        }
+
+        if (group->getLastCalledScene() == SceneSleeping) {
+          sleeping = true;
+        }
+      } // groups for loop
+    } // zones for loop
+
+    PropertyNodePtr pNode =
+        DSS::getInstance()->getPropertySystem().getProperty(
+                                                        "/usr/states/presence");
+    if (pNode != NULL) {
+      PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+      if (valueNode != NULL) {
+        std::string val = valueNode->getStringValue();
+        if ((absent == true) && (val == "present")) {
+          valueNode->setStringValue("absent");
+        } else if (absent == false) {
+          valueNode->setStringValue("present");
+        }
+      }
+    } // pNode
+
+    pNode = DSS::getInstance()->getPropertySystem().getProperty(
+            "/usr/states/hibernation");
+    if (pNode != NULL) {
+      PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+      if (valueNode != NULL) {
+        std::string val = valueNode->getStringValue();
+        if (sleeping == true) {
+          valueNode->setStringValue("sleeping");
+        } else if (val.empty()) {
+          valueNode->setStringValue("awake");
+        }
+      }
+    } // pNode
+
+    boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
+    if (state != NULL) {
+      if ((panic == true) && (state->getState() == State_Inactive)) {
+        state->setState(coJSScripting, State_Active);
+      } else if (panic == false) {
+        state->setState(coJSScripting, State_Inactive);
+      }
+    } // panic state
+
+    state = DSS::getInstance()->getApartment().getState(
+                                                    StateType_Service, "alarm");
+    if (state != NULL) {
+      if ((alarm == true) && (state->getState() == State_Inactive)) {
+        state->setState(coJSScripting, State_Active);
+      } else if (panic == false) {
+        state->setState(coJSScripting, State_Inactive);
+      }
+    } // alarm state
+
+    // clear fire alarm after 6h
+    #define CLEAR_ALARM_URLENCODED_JSON "%7B%20%22name%22%3A%22FireAutoClear%22%2C%20%22id%22%3A%20%22system_state_fire_alarm_reset%22%2C%22triggers%22%3A%5B%7B%20%22type%22%3A%22state-change%22%2C%20%22name%22%3A%22fire%22%2C%20%22state%22%3A%22active%22%7D%5D%2C%22delay%22%3A21600%2C%22actions%22%3A%5B%7B%20%22type%22%3A%22undo-zone-scene%22%2C%20%22zone%22%3A0%2C%20%22group%22%3A0%2C%20%22scene%22%3A76%2C%20%22force%22%3A%22false%22%2C%20%22delay%22%3A0%20%7D%5D%2C%22conditions%22%3A%7B%20%22enabled%22%3Anull%2C%22weekdays%22%3Anull%2C%22timeframe%22%3Anull%2C%22zoneState%22%3Anull%2C%22systemState%22%3A%5B%7B%22name%22%3A%22fire%22%2C%22value%22%3A%221%22%7D%5D%2C%22addonState%22%3Anull%7D%2C%22scope%22%3A%22system_state.auto_cleanup%22%7D"
+/*
+    var t0 = 6 * 60 * 60;
+    var sr = '{ "name":"FireAutoClear", "id": "system_state_fire_alarm_reset",\
+      "triggers":[{ "type":"state-change", "name":"fire", "state":"active"}],\
+      "delay":' + t0 + ',\
+      "actions":[{ "type":"undo-zone-scene", "zone":0, "group":0, "scene":76, "force":"false", "delay":0 }],\
+      "conditions":{ "enabled":null,"weekdays":null,"timeframe":null,"zoneState":null,\
+        "systemState":[{"name":"fire","value":"1"}],\
+        "addonState":null},\
+      "scope":"system_state.auto_cleanup"\
+      }';
+*/
+    boost::shared_ptr<Event> event(new Event("system-addon-scene-responder.config"));
+    event->setProperty("actions", "save");
+    event->setProperty("value", CLEAR_ALARM_URLENCODED_JSON);
+    DSS::getInstance()->getEventQueue().pushEvent(event);
+  }
+
+  std::string SystemState::getData(int *zoneId, int *groupId, int *sceneId) {
+    std::string originDeviceId;
+
+    if (!zoneId || !groupId || !sceneId) {
+      return originDeviceId;
+    }
+
+    *zoneId = -1;
+    *groupId = -1;
+    *sceneId = -1;
+
+    if (m_properties.has("sceneID")) {
+        *sceneId = strToIntDef(m_properties.get("sceneID"), -1);
+    }
+
+    if (m_properties.has("originDeviceID")) {
+      originDeviceId = m_properties.get("originDeviceID");
+    }
+
+    if (((m_evtRaiseLocation == erlGroup) ||
+         (m_evtRaiseLocation == erlApartment)) && (m_raisedAtGroup != NULL)) {
+        *zoneId = m_raisedAtGroup->getZoneID();
+        *groupId = m_raisedAtGroup->getID();
+        if (m_properties.has("originDeviceID")) {
+          originDeviceId = m_properties.get("originDeviceID");
+        }
+    } else if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
+      if (m_raisedAtState->getType() == StateType_Device) {
+        boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
+        *zoneId = device->getZoneID();
+        originDeviceId = device->getDSID().toString();
+      } else if (m_raisedAtState->getType() == StateType_Group) {
+        boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
+        *zoneId = group->getZoneID();
+        *groupId = group->getID();
+      }
+    } else if ((m_evtRaiseLocation == erlDevice) &&
+               (m_raisedAtDevice != NULL)) {
+      originDeviceId = m_raisedAtDevice->getDSID().toString();
+    }
+
+    return originDeviceId;
+  }
+
+  void SystemState::callscene() {
+    int zoneId = -1;
+    int groupId = -1;
+    int sceneId = -1;
+
+    std::string originDeviceId = getData(&zoneId, &groupId, &sceneId);
+
+    dss_dsid_t dsid = dsid::fromString(originDeviceId);
+
+    if ((dsid.upper == 0) && (dsid.lower  == 7)) {
+        // ignore scene calls originated by server generated system level events
+        //  e.g. scene calls issued by state changes
+        return;
+    }
+
+    if ((groupId == 0) && (sceneId == SceneAbsent)) {
+      PropertyNodePtr pNode =
+          DSS::getInstance()->getPropertySystem().getProperty(
+                                                      "/usr/states/presence");
+      if (pNode != NULL) {
+        PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+        if (valueNode != NULL) {
+            valueNode->setStringValue("absent");
+        }
+      } // pNode
+
+      // #2561: auto-clear panic and fire
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
+      if (state != NULL) {
+        if (state->getState() == State_Active) {
+          boost::shared_ptr<Zone> z =
+              DSS::getInstance()->getApartment().getZone(0);
+          if (z != NULL) {
+            boost::shared_ptr<Group> g = z->getGroup(0);
+            g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
+          }
+        }
+      }
+
+      state = DSS::getInstance()->getApartment().getState(
+                                                    StateType_Service, "fire");
+      if (state != NULL) {
+        if (state->getState() == State_Active) {
+          boost::shared_ptr<Zone> z =
+              DSS::getInstance()->getApartment().getZone(0);
+          if (z != NULL) {
+            boost::shared_ptr<Group> g = z->getGroup(0);
+            g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
+          }
+        }
+      }
+    } else if ((groupId == 0) && (sceneId == ScenePresent)) {
+      PropertyNodePtr pNode =
+          DSS::getInstance()->getPropertySystem().getProperty(
+                                                      "/usr/states/presence");
+      if (pNode != NULL) {
+        PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+        if (valueNode != NULL) {
+          valueNode->setStringValue("present");
+        }
+      } // pNode
+    } else if ((groupId == 0) && (sceneId == SceneSleeping)) {
+      PropertyNodePtr pNode =
+          DSS::getInstance()->getPropertySystem().getProperty(
+                                                  "/usr/states/hibernation");
+      if (pNode != NULL) {
+        PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+        if (valueNode != NULL) {
+          valueNode->setStringValue("sleeping");
+        }
+      } // pNode
+    } else if ((groupId == 0) && (sceneId == SceneWakeUp)) {
+      PropertyNodePtr pNode =
+          DSS::getInstance()->getPropertySystem().getProperty(
+                                                  "/usr/states/hibernation");
+      if (pNode != NULL) {
+        PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+        if (valueNode != NULL) {
+          valueNode->setStringValue("awake");
+        }
+      } // pNode
+    } else if ((groupId == 0) && (sceneId == ScenePanic)) {
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
+      if (state != NULL) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneFire)) {
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
+      if (state != NULL) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(StateType_Service, "alarm");
+      if (state != NULL) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm2)) {
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(
+                                                StateType_Service, "alarm2");
+      if (state != NULL) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm3)) {
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(
+                                                StateType_Service, "alarm3");
+      if (state != NULL) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm4)) {
+      boost::shared_ptr<State> state =
+        DSS::getInstance()->getApartment().getState(
+                                                StateType_Service, "alarm4");
+      if (state != NULL) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if (sceneId == SceneWindActive) {
+      boost::shared_ptr<State> state;
+      if (groupId == 0) {
+        state = getOrRegisterState("wind");
+      } else if ((groupId >= 16) && (groupId <= 23)) {
+        state = getOrRegisterState("wind.group" + intToString(groupId));
+      }
+      state->setState(coSystem, State_Active);
+    } else if (sceneId == SceneWindInactive) {
+      boost::shared_ptr<State> state;
+      if (groupId == 0) {
+        state = getOrRegisterState("wind");
+      } else if ((groupId >= 16) && (groupId <= 23)) {
+        state = getOrRegisterState("wind.group" + intToString(groupId));
+      }
+      state->setState(coSystem, State_Inactive);
+    } else if (sceneId == SceneRainActive) {
+      boost::shared_ptr<State> state;
+      if (groupId == 0) {
+        state = getOrRegisterState("rain");
+      } else if ((groupId >= 16) && (groupId <= 23)) {
+        state = getOrRegisterState("rain.group" + intToString(groupId));
+      }
+      state->setState(coSystem, State_Active);
+    } else if (sceneId == SceneRainInactive) {
+      boost::shared_ptr<State> state;
+      if (groupId == 0) {
+        state = getOrRegisterState("rain");
+        state->setState(coSystem, State_Inactive);
+        for (size_t grp = 16; grp <= 23; grp++) {
+          try {
+            state = DSS::getInstance()->getApartment().getState(
+                                    StateType_Service,
+                                    "rain.group" + intToString(groupId));
+            state->setState(coSystem, State_Inactive);
+          } catch (ItemNotFoundException &ex) {
+          }
+        }
+      } else if ((groupId >= 16) && (groupId <= 23)) {
+        state = getOrRegisterState("rain.group" + intToString(groupId));
+        state->setState(coSystem, State_Inactive);
+      }
+    }
+  }
+
+  void SystemState::undoscene() {
+    int zoneId = -1;
+    int groupId = -1;
+    int sceneId = -1;
+    std::string originDeviceId;
+    boost::shared_ptr<State> state;
+
+    originDeviceId = getData(&zoneId, &groupId, &sceneId);
+
+    if ((groupId == 0) && (sceneId == ScenePanic)) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "panic");
+        state->setState(coSystem, State_Inactive);
+
+        // #2561: auto-reset fire if panic was reset by a button
+        state = DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                            "fire");
+        dss_dsid_t dsid = dsid::fromString(originDeviceId);
+        if (((dsid.lower >= 16) || (dsid.upper != 0)) &&
+            (state->getState() == State_Active)) {
+          boost::shared_ptr<Zone> z =
+              DSS::getInstance()->getApartment().getZone(0);
+          if (z != NULL) {
+            boost::shared_ptr<Group> g = z->getGroup(0);
+            g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
+          }
+        } // originDeviceId >= 16 && state == active
+      } catch (ItemNotFoundException &ex) {}
+    } else if ((groupId == 0) && (sceneId == SceneFire)) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "fire");
+        state->setState(coSystem, State_Inactive);
+
+        // #2561: auto-reset panic if fire was reset by a button
+        state = DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                            "panic");
+        dss_dsid_t dsid = dsid::fromString(originDeviceId);
+        if (((dsid.lower >= 16) || (dsid.upper != 0)) &&
+            (state->getState() == State_Active)) {
+          boost::shared_ptr<Zone> z =
+              DSS::getInstance()->getApartment().getZone(0);
+          if (z != NULL) {
+            boost::shared_ptr<Group> g = z->getGroup(0);
+            g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
+          }
+        } // originDeviceId >= 16 && state == active
+      } catch (ItemNotFoundException &ex) {}
+    } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "alarm");
+        state->setState(coSystem, State_Inactive);
+      } catch (ItemNotFoundException &ex) {}
+    } else if ((groupId == 0) && (sceneId == SceneAlarm2)) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "alarm2");
+        state->setState(coSystem, State_Inactive);
+      } catch (ItemNotFoundException &ex) {}
+    } else if ((groupId == 0) && (sceneId == SceneAlarm3)) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "alarm3");
+        state->setState(coSystem, State_Inactive);
+      } catch (ItemNotFoundException &ex) {}
+    } else if ((groupId == 0) && (sceneId == SceneAlarm4)) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "alarm4");
+        state->setState(coSystem, State_Inactive);
+      } catch (ItemNotFoundException &ex) {}
+    }
+  }
+
+  void SystemState::stateBinaryInputGeneric(std::string stateName,
+                                            int targetGroupType,
+                                            int targetGroupId) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        stateName);
+
+        PropertyNodePtr pNode =
+            DSS::getInstance()->getPropertySystem().getProperty(
+                "/scripts/system_state/" + stateName + "." +
+                intToString(targetGroupType) + "." +
+                intToString(targetGroupId));
+        if (pNode == NULL) {
+          pNode = DSS::getInstance()->getPropertySystem().createProperty(
+                "/scripts/system_state/" + stateName + "." +
+                intToString(targetGroupType) + "." +
+                intToString(targetGroupId));
+          pNode->setIntegerValue(0);
+        }
+
+        if (m_properties.has("value")) {
+          std::string val = m_properties.get("value");
+          int iVal = strToIntDef(val, -1);
+          if (iVal == 1) {
+            pNode->setIntegerValue(pNode->getIntegerValue() + 1);
+            state->setState(coSystem, State_Active);
+          } else if (iVal == 2) {
+            if (pNode->getIntegerValue() > 0) {
+              pNode->setIntegerValue(pNode->getIntegerValue() - 1);
+            }
+            if (pNode->getIntegerValue() == 0) {
+              state->setState(coSystem, State_Inactive);
+            }
+          }
+        } // m_properties.has("value")
+      } catch (ItemNotFoundException &ex) {}
+  }
+
+/**
+1 Präsenz
+2 Helligkeit (Raum)
+3 Präsenz bei Dunkelheit
+4 Dämmerung (Außen)
+5 Bewegung
+6 Bewegung bei Dunkelheit
+7 Rauchmelder
+8 Windwächter
+9 Regenwächter
+10 Sonneneinstrahlung
+11 Raumthermostat
+*/
+
+  void SystemState::stateBinaryinput() {
+    if (m_raisedAtDevice == NULL) {
+      return;
+    }
+
+    if (!m_properties.has("statename")) {
+      return;
+    }
+
+    std::string statename = m_properties.get("statename");
+    if (statename.empty()) {
+      return;
+    }
+
+    PropertyNodePtr stateNode =
+          DSS::getInstance()->getPropertySystem().getProperty(
+                                                  "/usr/states/" + statename);
+    if (stateNode == NULL) {
+      return;
+    }
+
+    PropertyNodePtr iiNode = stateNode->getProperty("device/inputIndex");
+    if (iiNode == NULL) {
+      return;
+    }
+
+    uint8_t inputIndex = (uint8_t)iiNode->getIntegerValue();
+    const boost::shared_ptr<DeviceBinaryInput_t> devInput =
+        m_raisedAtDevice->getDevice()->getBinaryInput(inputIndex);
+    if (devInput == NULL) {
+      return;
+    }
+
+    if (devInput->m_inputId != 15) {
+      return;
+    }
+
+    // motion
+    if ((devInput->m_inputType == 5) || (devInput->m_inputType == 6)) {
+      if (devInput->m_targetGroupId >= 16) {
+        // create state for a user group if it does not exist (new group?)
+        statename = "zone.0.group." + intToString(devInput->m_targetGroupId) +
+                    ".motion";
+      } else {
+        // set presence state in the zone the dsid is logical attached to
+        statename = "zone." +
+                    intToString(m_raisedAtDevice->getDevice()->getZoneID()) +
+                    ".motion";
+      }
+      getOrRegisterState(statename);
+      stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
+    }
+
+    // presence
+    if ((devInput->m_inputType == 1) || (devInput->m_inputType == 3)) {
+      if (devInput->m_targetGroupId >= 16) {
+        // create state for a user group if it does not exist (new group?)
+        statename = "zone.0.group." + intToString(devInput->m_targetGroupId) +
+                    ".presence";
+      } else {
+        // set presence state in the zone the dsid is logical attached to
+        statename = "zone." +
+                    intToString(m_raisedAtDevice->getDevice()->getZoneID()) +
+                    ".presence";
+      }
+      getOrRegisterState(statename);
+      stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
+    }
+
+    // smoke detector
+    if (devInput->m_inputType == 7) {
+      try {
+        boost::shared_ptr<State> state =
+            DSS::getInstance()->getApartment().getState(StateType_Service,
+                                                        "fire");
+        if (m_properties.has("value")) {
+          std::string val = m_properties.get("value");
+          int iVal = strToIntDef(val, -1);
+          if (iVal == 1) {
+            state->setState(coSystem, State_Active);
+          }
+        }
+      } catch (ItemNotFoundException &ex) {}
+    }
+
+    // wind monitor
+    if (devInput->m_inputType == 8) {
+      statename = "wind";
+      // create state for a user group if it does not exist (new group?)
+      if (devInput->m_targetGroupId >= 16) {
+        statename = statename + ".group" +
+                    intToString(devInput->m_targetGroupId);
+        getOrRegisterState(statename);
+      }
+      stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
+    }
+
+    // rain monitor
+    if (devInput->m_inputType == 9) {
+      statename = "rain";
+      // create state for a user group if it does not exist (new group?)
+      if (devInput->m_targetGroupId >= 16) {
+        statename = statename + ".group" +
+                    intToString(devInput->m_targetGroupId);
+        getOrRegisterState(statename);
+      }
+      stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
+    }
+  }
+
+  void SystemState::stateApartment() {
+    if (!m_properties.has("statename")) {
+      return;
+    }
+
+    std::string statename = m_properties.get("statename");
+    if (statename.empty()) {
+      return;
+    }
+
+    int zoneId;
+    int groupId;
+    int sceneId;
+
+    std::string originDeviceId = getData(&zoneId, &groupId, &sceneId);
+
+    groupId = 0;
+    size_t groupName = statename.find(".group");
+    if (groupName > 0) {
+      std::string id = statename.substr(groupName + 6);
+      groupId = strToIntDef(id, 0);
+    }
+    boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
+
+    dss_dsid_t dsid = dsid::fromString(originDeviceId);
+    if ((dsid.upper == 0) && (dsid.lower == 7)) {
+      // ignore scene calls originated by server generated system level events,
+      // e.g. scene calls issued by state changes
+      return;
+    }
+
+    int iVal = -1;
+    if (m_properties.has("value")) {
+      std::string val = m_properties.get("value");
+      iVal = strToIntDef(val, -1);
+    }
+
+    if (statename == "fire") {
+      if (iVal == 1) {
+        boost::shared_ptr<Group> g = z->getGroup(0);
+        if (g != NULL) {
+          g->callScene(coSystem, SAC_MANUAL, SceneFire, "", false);
+        }
+      }
+    }
+
+    if (statename.substr(0, 4) == "rain") {
+      boost::shared_ptr<Group> g = z->getGroup(groupId);
+      if (g != NULL) {
+        if (iVal == 1) {
+          g->callScene(coSystem, SAC_MANUAL, SceneRainActive, "", false);
+        } else if (iVal == 2) {
+          g->callScene(coSystem, SAC_MANUAL, SceneRainInactive, "", false);
+        }
+      }
+    }
+
+    if (statename.substr(0, 4) == "wind") {
+      boost::shared_ptr<Group> g = z->getGroup(groupId);
+      if (g != NULL) {
+        if (iVal == 1) {
+          g->callScene(coSystem, SAC_MANUAL, SceneWindActive, "", false);
+        } else if (iVal == 2) {
+          g->callScene(coSystem, SAC_MANUAL, SceneWindInactive, "", false);
+        }
+      }
+    }
+  }
+
+  bool SystemState::setup(Event& _event) {
+    m_evtName = _event.getName();
+    m_evtRaiseLocation = _event.getRaiseLocation();
+    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+    m_raisedAtDevice = _event.getRaisedAtDevice();
+    m_raisedAtState = _event.getRaisedAtState();
+    return SystemEvent::setup(_event);
+  }
+
+  void SystemState::run() {
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser(
+        "SystemEventLog needs system rights");
+    } else {
+      return;
+    }
+
+    if (m_evtName == "running") {
+      bootstrap();
+    } else if (m_evtName == "model_ready") {
+      startup();
+    } else if (m_evtName == "callScene") {
+      if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+        callscene();
+      }
+    } else if (m_evtName == "undoScene") {
+      undoscene();
+    } else if ((m_evtName == "stateChange") &&
+               (m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
+      if (m_raisedAtState->getType() == StateType_Device) {
+        stateBinaryinput();
+      } else if (m_raisedAtState->getType() == StateType_Service) {
+        stateApartment();
+      }
+    }
+  }
+
 } // namespace dss
