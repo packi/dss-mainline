@@ -136,7 +136,7 @@ namespace dss {
 
   std::string doubleToString(const double _value) {
     std::stringstream sstream;
-    sstream << std::setprecision(16) << _value;
+    sstream << std::setprecision(12) << _value;
     return sstream.str();
   } // doubleToString
 

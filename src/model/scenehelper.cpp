@@ -24,6 +24,7 @@
 #include "scenehelper.h"
 
 #include <cassert>
+#include <math.h>
 
 namespace dss {
 
@@ -361,5 +362,131 @@ namespace dss {
     }
 
     return ret;
+  }
+
+  double SceneHelper::sensorToFloat10(int _sensorType, int _sensorValue) {
+    double convertedSensorValue;
+    switch (_sensorType) {
+    case SensorIDActivePower:
+    case SensorIDOutputCurrent:
+    case SensorIDPowerConsumptionVA:
+      convertedSensorValue = (double) _sensorValue;
+      break;
+    case SensorIDElectricMeter:
+      convertedSensorValue = (double) (_sensorValue * 0.01);
+      break;
+    case SensorIDOutputCurrentEx:
+      convertedSensorValue = (double) (_sensorValue * 4);
+      break;
+    case SensorIDTemperatureIndoors:
+    case SensorIDTemperatureOutdoors:
+    case SensorIDRoomTemperatureSetpoint:
+      convertedSensorValue = (double) ((_sensorValue * 0.1) - 273.15 + 230.0);
+      break;
+    case SensorIDBrightnessIndoors:
+    case SensorIDBrightnessOutdoors:
+      convertedSensorValue = (double) (exp10(_sensorValue / 200));
+      break;
+    case SensorIDHumidityIndoors:
+    case SensorIDHumidityOutdoors:
+      convertedSensorValue = (double) (_sensorValue /* * 0.1 */);
+      break;
+    case SensorIDWindSpeed:
+      convertedSensorValue = (double) (_sensorValue * 0.1);
+      break;
+    case SensorIDRoomTemperatureControlVariable:
+      convertedSensorValue = (double) ((_sensorValue - 100) /* * 0.1 */ );
+      break;
+    case SensorIDWindDirection:
+    case SensorIDPrecipitation:
+    default:
+      convertedSensorValue = (double) _sensorValue;
+      break;
+    }
+    return convertedSensorValue;
+  }
+
+  double SceneHelper::sensorToFloat12(int _sensorType, int _sensorValue) {
+    double convertedSensorValue;
+    switch (_sensorType) {
+    case SensorIDActivePower:
+    case SensorIDOutputCurrent:
+    case SensorIDPowerConsumptionVA:
+      convertedSensorValue = (double) _sensorValue;
+      break;
+    case SensorIDElectricMeter:
+      convertedSensorValue = (double) (_sensorValue * 0.01);
+      break;
+    case SensorIDOutputCurrentEx:
+      convertedSensorValue = (double) (_sensorValue * 4);
+      break;
+    case SensorIDTemperatureIndoors:
+    case SensorIDTemperatureOutdoors:
+    case SensorIDRoomTemperatureSetpoint:
+      convertedSensorValue = (double) ((_sensorValue * 0.1 / 4) - 273.15 + 230.0);
+      break;
+    case SensorIDBrightnessIndoors:
+    case SensorIDBrightnessOutdoors:
+      convertedSensorValue = (double) (exp10(_sensorValue / 800));
+      break;
+    case SensorIDHumidityIndoors:
+    case SensorIDHumidityOutdoors:
+      convertedSensorValue = (double) (_sensorValue /* * 0.1 */ / 4);
+      break;
+    case SensorIDWindSpeed:
+      convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
+      break;
+    case SensorIDRoomTemperatureControlVariable:
+      convertedSensorValue = (double) ((_sensorValue - 100) /* * 0.1 / 4 */ );
+      break;
+    case SensorIDWindDirection:
+    case SensorIDPrecipitation:
+    default:
+      convertedSensorValue = (double) _sensorValue;
+      break;
+    }
+    return convertedSensorValue;
+  }
+
+  int SceneHelper::sensorToSystem(int _sensorType, double _sensorValue) {
+    int convertedSensorValue;
+    switch (_sensorType) {
+    case SensorIDActivePower:
+    case SensorIDOutputCurrent:
+    case SensorIDPowerConsumptionVA:
+      convertedSensorValue = (int) _sensorValue;
+      break;
+    case SensorIDElectricMeter:
+      convertedSensorValue = (int) (_sensorValue / 0.01);
+      break;
+    case SensorIDOutputCurrentEx:
+      convertedSensorValue = (int) (_sensorValue / 4);
+      break;
+    case SensorIDTemperatureIndoors:
+    case SensorIDTemperatureOutdoors:
+    case SensorIDRoomTemperatureSetpoint:
+      convertedSensorValue = (int) ((_sensorValue + 273.15 - 230.0) / 0.025);
+      break;
+    case SensorIDBrightnessIndoors:
+    case SensorIDBrightnessOutdoors:
+      convertedSensorValue = (int) (200 * log10(_sensorValue));
+      break;
+    case SensorIDHumidityIndoors:
+    case SensorIDHumidityOutdoors:
+      convertedSensorValue = (int) (_sensorValue /* / 0.1 */);
+      break;
+    case SensorIDWindSpeed:
+      convertedSensorValue = (int) (_sensorValue / 0.1);
+      break;
+    case SensorIDRoomTemperatureControlVariable:
+      convertedSensorValue = (int) ((_sensorValue + 100) /* / 0.1 */);
+      break;
+    case SensorIDWindDirection:
+    case SensorIDPrecipitation:
+    default:
+      convertedSensorValue = (int) _sensorValue;
+      break;
+    }
+    return convertedSensorValue;
   }
 }

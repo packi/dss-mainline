@@ -40,6 +40,7 @@
 #include "src/model/group.h"
 #include "src/model/zone.h"
 #include "src/model/state.h"
+#include "src/model/scenehelper.h"
 #include "src/metering/metering.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
@@ -2415,7 +2416,7 @@ namespace dss {
       dss_dsid_t sourceDSID;
       uint8_t sensorType;
       uint16_t sensorValue;
-      if(pZone != NULL) {
+      if (pZone != NULL && argc >= 4) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
@@ -2430,8 +2431,9 @@ namespace dss {
           return JS_FALSE;
         }
         if (sensorValue >= (1 << 10)) {
-          JS_ReportWarning(cx, "sensorValue too large: %d", sensorValue);
+          JS_ReportWarning(cx, "sensor value too large: %d", sensorValue);
         }
+
         StructureManipulator manipulator(
             *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
             *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
@@ -2452,6 +2454,72 @@ namespace dss {
     }
     return JS_FALSE;
   } // zone_pushSensorValue
+
+  JSBool zone_pushSensorValueFloat(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      uint8_t groupID;
+      dss_dsid_t sourceDSID;
+      uint8_t sensorType;
+      uint16_t sensorValue;
+      if (pZone != NULL && argc >= 4) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+          sourceDSID = dsid::fromString(sDSID);
+          sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+        try {
+          if (JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[0])) {
+            double fvalue = ctx->convertTo<double>(JS_ARGV(cx, vp)[3]);
+            sensorValue = SceneHelper::sensorToSystem(sensorType, fvalue);
+          } else {
+            std::string svalue = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
+            double fvalue = ::strtod(svalue.c_str(), 0);
+            sensorValue = SceneHelper::sensorToSystem(sensorType, fvalue);
+          }
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+        if (sensorValue >= (1 << 10)) {
+          std::string sval = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
+          JS_ReportWarning(cx, "sensor value out of range: %d", sval.c_str());
+        }
+
+        StructureManipulator manipulator(
+            *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
+            *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
+            ext->getApartment());
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        manipulator.sensorPush(pGroup, sourceDSID, sensorType, sensorValue);
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_pushSensorValueFloat
 
   JSBool zone_get_property_node(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -2484,7 +2552,8 @@ namespace dss {
     JS_FS("undoSceneSys", zone_undoSceneSys, 3, 0),
     JS_FS("blink", zone_blink, 2, 0),
     JS_FS("getPowerConsumption", zone_getPowerConsumption, 0, 0),
-    JS_FS("pushSensorValue", zone_pushSensorValue, 3, 0),
+    JS_FS("pushSensorValue", zone_pushSensorValue, 4, 0),
+    JS_FS("pushSensorValueFloat", zone_pushSensorValueFloat, 4, 0),
     JS_FS("getPropertyNode", zone_get_property_node, 0, 0),
     JS_FS_END
   };
