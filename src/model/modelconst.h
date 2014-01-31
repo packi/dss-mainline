@@ -150,6 +150,25 @@ namespace dss {
   const uint8_t SensorFunction_Generic10 = 10;
   const uint8_t SensorFunction_Generic11 = 11;
 
+  // Sensor Type ID's
+  const int SensorIDActivePower = 4;
+  const int SensorIDOutputCurrent = 5;
+  const int SensorIDElectricMeter = 6;
+  const int SensorIDOutputCurrentEx = 64;
+  const int SensorIDPowerConsumptionVA = 65;
+  const int SensorIDTemperatureIndoors = 9;
+  const int SensorIDTemperatureOutdoors = 10;
+  const int SensorIDBrightnessIndoors = 11;
+  const int SensorIDBrightnessOutdoors = 12;
+  const int SensorIDHumidityIndoors = 13;
+  const int SensorIDHumidityOutdoors = 14;
+  const int SensorIDAirPressure = 15;
+  const int SensorIDWindSpeed = 18;
+  const int SensorIDWindDirection = 19;
+  const int SensorIDPrecipitation = 20;
+  const int SensorIDRoomTemperatureSetpoint = 50;
+  const int SensorIDRoomTemperatureControlVariable = 51;
+
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
   const uint8_t ClickType2T = 0x01;     // Tipp 2

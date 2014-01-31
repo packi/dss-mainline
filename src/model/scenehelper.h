@@ -63,6 +63,10 @@ namespace dss {
     static bool isDimSequence(const unsigned int _scene);
     static uint64_t getReachableScenesBitmapForButtonID(const int _buttonID);
     static SceneOnState isOnScene(const int _groupID, const unsigned int _scene);
+
+    static double sensorToFloat10(const int _sensorType, const int _sensorValue);
+    static double sensorToFloat12(const int _sensorType, const int _sensorValue);
+    static int sensorToSystem(const int _sensorType, const double _sensorValue);
   }; // SceneHelper
 
 } // namespace dss
