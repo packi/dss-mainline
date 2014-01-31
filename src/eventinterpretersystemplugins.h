@@ -28,6 +28,7 @@
 
 #include <pthread.h>
 #include "src/ds485types.h"
+#include "scripting/jslogger.h"
 
 namespace dss {
   class Device;
@@ -133,6 +134,139 @@ namespace dss {
       virtual ~EventInterpreterPluginSystemTrigger();
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
+
+  class EventInterpreterPluginSystemEventLog :
+                                            public TaskProcessor,
+                                            public EventInterpreterPlugin {
+    public:
+      EventInterpreterPluginSystemEventLog(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterPluginSystemEventLog();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
+  class SystemEventLog : public SystemEvent {
+    public:
+      SystemEventLog();
+      virtual ~SystemEventLog();
+      virtual void run();
+      virtual bool setup(Event& _event);
+    private:
+      std::string getZoneName(boost::shared_ptr<Zone> _zone);
+      std::string getGroupName(boost::shared_ptr<Group> _group);
+      std::string getSceneName(int _scene_id);
+      std::string getDeviceName(std::string _orgin_device_id);
+      void logDeviceLocalScene(boost::shared_ptr<ScriptLogger> _logger,
+                               int _scene_id, std::string _origin_device_id);
+      void logZoneGroupScene(boost::shared_ptr<ScriptLogger> _logger,
+                             boost::shared_ptr<Zone> _zone,
+                             int _group_id, int _scene_id,
+                             bool _is_forced, std::string _origin_device_id,
+                             std::string _origin_token);
+      void logDeviceScene(boost::shared_ptr<ScriptLogger> _logger,
+                          boost::shared_ptr<const Device> _device,
+                          boost::shared_ptr<Zone> _zone,
+                          int scene_id, bool _is_forced,
+                          std::string _origin_device_id,
+                          std::string _token);
+      void logLastScene(boost::shared_ptr<ScriptLogger> _logger,
+                        boost::shared_ptr<Zone> _zone,
+                        boost::shared_ptr<Group> _group, int _scene_id);
+      void logZoneGroupBlink(boost::shared_ptr<ScriptLogger> _logger,
+                             boost::shared_ptr<Zone> _zone,
+                             int _group_id, std::string _origin_device_id,
+                             std::string _origin_token);
+      void logDeviceBlink(boost::shared_ptr<ScriptLogger> _logger,
+                          boost::shared_ptr<const Device> _device,
+                          boost::shared_ptr<Zone> _zone,
+                          std::string _origin_device_id,
+                          std::string _token);
+      void logZoneGroupUndo(boost::shared_ptr<ScriptLogger> _logger,
+                            boost::shared_ptr<Zone> _zone,
+                            int _group_id, int _scene_id,
+                            std::string _origin_device_id,
+                            std::string _origin_token);
+      void logDeviceButtonClick(boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device);
+      void logDeviceBinaryInput(boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device);
+      void logDeviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device);
+      void logDeviceSensorValue(boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device,
+                                boost::shared_ptr<Zone> _zone);
+      void logStateChangeScript(boost::shared_ptr<ScriptLogger> _logger,
+                                std::string _statename, std::string _state,
+                                std::string _value,
+                                std::string _origin_device_id);
+      void logStateChangeApartment(boost::shared_ptr<ScriptLogger> _logger,
+                                   std::string _statename, std::string _state,
+                                   std::string _value,
+                                   std::string _origin_device_id);
+      void logStateChangeDevice(boost::shared_ptr<ScriptLogger> _logger,
+                                std::string _statename, std::string _state,
+                                std::string _value,
+                                boost::shared_ptr<const Device> _device);
+      void logStateChangeGroup(boost::shared_ptr<ScriptLogger> _logger,
+                               std::string _statename, std::string _state,
+                               std::string _value,
+                               int _group_id, int _zone_id);
+
+      void model_ready(boost::shared_ptr<ScriptLogger> _logger);
+      void callScene(boost::shared_ptr<ScriptLogger> _logger);
+      void blink(boost::shared_ptr<ScriptLogger> _logger);
+      void undoScene(boost::shared_ptr<ScriptLogger> _logger);
+      void buttonClick(boost::shared_ptr<ScriptLogger> _logger);
+      void deviceBinaryInputEvent(boost::shared_ptr<ScriptLogger> _logger);
+      void deviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger);
+      void deviceSensorValue(boost::shared_ptr<ScriptLogger> _logger);
+      void stateChange(boost::shared_ptr<ScriptLogger> _logger);
+
+      std::string m_evtName;
+
+      EventRaiseLocation m_evtRaiseLocation;
+      boost::shared_ptr<const Group> m_raisedAtGroup;
+      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
+      boost::shared_ptr<const State> m_raisedAtState;
+  };
+
+  class EventInterpreterPluginSystemState : public TaskProcessor,
+                                            public EventInterpreterPlugin {
+    public:
+      EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterPluginSystemState();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
+  class SystemState : public SystemEvent {
+    public:
+      SystemState();
+      virtual ~SystemState();
+      virtual void run();
+      virtual bool setup(Event& _event);
+    private:
+      std::string m_evtName;
+
+      EventRaiseLocation m_evtRaiseLocation;
+      boost::shared_ptr<const Group> m_raisedAtGroup;
+      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
+      boost::shared_ptr<const State> m_raisedAtState;
+
+      boost::shared_ptr<State> registerState(std::string _name,
+                                             bool _persistent);
+      boost::shared_ptr<State> getOrRegisterState(std::string _name);
+      std::string getData(int *zoneId, int *groupId, int *sceneId);
+
+      void bootstrap();
+      void startup();
+      void callscene();
+      void undoscene();
+      void stateBinaryInputGeneric(std::string stateName,
+                                   int targetGroupType,
+                                   int targetGroupId);
+      void stateBinaryinput();
+      void stateApartment();
+  };
+
 }; // namespace
 
 #endif
