@@ -223,13 +223,11 @@ namespace dss {
             return failure("Need valid parameter 'sourceDSID'");
           }
           int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
-          int sensorValue = strToIntDef(_request.getParameter("sensorValue"), -1);
-          if(sensorType == -1 || sensorValue == -1) {
+          std::string sensorValueString = _request.getParameter("sensorValue");
+          if(sensorType == -1 || sensorValueString.length() == 0) {
             return failure("Need valid parameter 'sensorType' and 'sensorValue'");
           }
-          if (sensorValue >= (1 << 10)) {
-            return failure("sensorValue is too large - max. size is 10 bit");
-          }
+          double sensorValue = ::strtod(sensorValueString.c_str(), 0);
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sensorPush(pGroup, sourceID, sensorType, sensorValue);
         } else {
