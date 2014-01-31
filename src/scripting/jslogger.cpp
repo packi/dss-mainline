@@ -234,7 +234,10 @@ namespace dss {
     if(m_f) {
       fclose(m_f);
     }
-    m_pExtension->removeLogger(m_logName);
+
+    if (m_pExtension) {
+      m_pExtension->removeLogger(m_logName);
+    }
   } // dtor
 
 

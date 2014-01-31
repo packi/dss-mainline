@@ -34,6 +34,7 @@
 #include "src/model/set.h"
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
+#include "src/model/scenehelper.h"
 #include "src/dsidhelper.h"
 #include "src/util.h"
 #include "src/event.h"
@@ -615,6 +616,15 @@ namespace dss {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
     m_Interface.sensorPush(_group->getZoneID(), _group->getID(), _sourceID, _sensorType, _sensorValue);
+    _group->sensorPush(_sourceID, _sensorType, SceneHelper::sensorToFloat12(_sensorType, _sensorValue));
+  } // sensorPush
+
+  void StructureManipulator::sensorPush(boost::shared_ptr<Group> _group, dss_dsid_t _sourceID, int _sensorType, double _sensorValue) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+    int convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValue);
+    m_Interface.sensorPush(_group->getZoneID(), _group->getID(), _sourceID, _sensorType, convertedSensorValue);
     _group->sensorPush(_sourceID, _sensorType, _sensorValue);
   } // sensorPush
 

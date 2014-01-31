@@ -118,7 +118,7 @@ namespace dss {
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
-  // Button input id's
+  // Button input id"s
   const uint8_t ButtonId_Device = 0;
   const uint8_t ButtonId_Area1 = 1;
   const uint8_t ButtonId_Area2 = 2;
@@ -150,6 +150,25 @@ namespace dss {
   const uint8_t SensorFunction_Generic10 = 10;
   const uint8_t SensorFunction_Generic11 = 11;
 
+  // Sensor Type ID's
+  const int SensorIDActivePower = 4;
+  const int SensorIDOutputCurrent = 5;
+  const int SensorIDElectricMeter = 6;
+  const int SensorIDOutputCurrentEx = 64;
+  const int SensorIDPowerConsumptionVA = 65;
+  const int SensorIDTemperatureIndoors = 9;
+  const int SensorIDTemperatureOutdoors = 10;
+  const int SensorIDBrightnessIndoors = 11;
+  const int SensorIDBrightnessOutdoors = 12;
+  const int SensorIDHumidityIndoors = 13;
+  const int SensorIDHumidityOutdoors = 14;
+  const int SensorIDAirPressure = 15;
+  const int SensorIDWindSpeed = 18;
+  const int SensorIDWindDirection = 19;
+  const int SensorIDPrecipitation = 20;
+  const int SensorIDRoomTemperatureSetpoint = 50;
+  const int SensorIDRoomTemperatureControlVariable = 51;
+
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
   const uint8_t ClickType2T = 0x01;     // Tipp 2
@@ -168,7 +187,7 @@ namespace dss {
   const uint8_t ClickTypeLS = 0x0e;     // Local-Stop Click
   const uint8_t ClickTypeRES = 0x0f;
 
-  // Group ID's
+  // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
   const int GroupIDGray = 2;
@@ -220,6 +239,5 @@ namespace dss {
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
   const uint16_t ProductID_KL_210 = 0x14C8;
-
 } // namespace dss
 #endif
