@@ -31,6 +31,23 @@
 #include <list>
 #include "mutex.h"
 
+/*
+ * Usage:
+ * class FooBar {
+ *  __DECL_LOG_CHANNEL__
+ *
+ * foobar.cpp
+ * __DEFINE_LOG_CHANNEL__
+ *
+ * Adds function 'log' with personalized 'FooBar' channel
+ * to your class
+ */
+#define __DEFINE_LOG_CHANNEL__(_NAME_ , level) LogChannel _NAME_::s_logChannel(#_NAME_, level);
+#define __DECL_LOG_CHANNEL__ static LogChannel s_logChannel; \
+  void log(const std::string& message, const aLogSeverity severity) { \
+    Logger::getInstance()->log(s_logChannel, message, severity); \
+  }
+
 typedef enum {
   lsDebug = 0,
   lsInfo = 1,

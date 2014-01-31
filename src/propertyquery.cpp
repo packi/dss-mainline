@@ -33,6 +33,7 @@
 
 namespace dss {
 
+  __DEFINE_LOG_CHANNEL__(PropertyQuery, lsInfo);
 
   std::vector<std::string> extractPropertyList(std::string& _part) {
     std::size_t bracketPos = _part.find('(');
@@ -54,53 +55,47 @@ namespace dss {
     m_PartList.erase(m_PartList.begin());
   } // parseParts
 
+  boost::shared_ptr<JSONElement>
+    PropertyQuery::addProperty(boost::shared_ptr<JSONObject> obj,
+                               PropertyNodePtr node) {
+    log(std::string(__func__) + " " + node->getName() + ": " + node->getAsString(), lsDebug);
+    switch (node->getValueType()) {
+    case vTypeInteger:
+      obj->addProperty(node->getName(), node->getIntegerValue());
+      break;
+    case vTypeFloating:
+      obj->addProperty(node->getName(), node->getFloatingValue());
+      break;
+    case vTypeBoolean:
+      obj->addProperty(node->getName(), node->getBoolValue());
+      break;
+    case vTypeNone:
+      break;
+    case vTypeString:
+    default:
+      obj->addProperty(node->getName(), node->getAsString());
+      break;
+    }
+    return obj;
+  }
+
   boost::shared_ptr<JSONElement> PropertyQuery::addProperties(part_t& _part,
                                     boost::shared_ptr<JSONElement> _parentElement,
                                     dss::PropertyNodePtr _node) {
     boost::shared_ptr<JSONObject> obj(new JSONObject());
     foreach(std::string subprop, _part.properties) {
+      log(std::string(__func__) + " from node: <" + _node->getName() + "> filter: " + subprop, lsDebug);
       if(subprop == "*") {
         for(int iChild = 0; iChild < _node->getChildCount(); iChild++) {
           PropertyNodePtr childNode = _node->getChild(iChild);
-          if(childNode != NULL) {
-            switch (childNode->getValueType()) {
-            case vTypeInteger:
-              obj->addProperty(childNode->getName(), childNode->getIntegerValue());
-              break;
-            case vTypeFloating:
-              obj->addProperty(childNode->getName(), childNode->getFloatingValue());
-              break;
-            case vTypeBoolean:
-              obj->addProperty(childNode->getName(), childNode->getBoolValue());
-              break;
-            case vTypeNone:
-              break;
-            case vTypeString:
-            default:
-              obj->addProperty(childNode->getName(), childNode->getAsString());
-              break;
-            }
+          if (childNode != NULL) {
+            addProperty(obj, childNode);
           }
         }
       } else {
         PropertyNodePtr node = _node->getPropertyByName(subprop);
-        if(node != NULL) {
-          switch (node->getValueType()) {
-          case vTypeInteger:
-            obj->addProperty(subprop, node->getIntegerValue());
-            break;
-          case vTypeBoolean:
-            obj->addProperty(subprop, node->getBoolValue());
-            break;
-          case vTypeFloating:
-            obj->addProperty(subprop, node->getFloatingValue());
-            break;
-          case vTypeNone:
-          case vTypeString:
-          default:
-            obj->addProperty(subprop, node->getAsString());
-            break;
-          }
+        if (node != NULL) {
+          addProperty(obj, node);
         }
       }
     }
@@ -108,33 +103,46 @@ namespace dss {
     return obj;
   } // addProperties
 
+  /**
+   * Handles one level of the query
+   *
+   * query1 = ../part(property1,property2)/...
+   * qeury2 = ../part/...
+   *
+   * property is what we are extracting, part is what needs to match
+   * query2 will extract nothing at this level
+   */
   void PropertyQuery::runFor(PropertyNodePtr _parentNode,
                              unsigned int _partIndex,
                              boost::shared_ptr<JSONElement> _parentElement) {
+
+    log(std::string(__func__) + " Level" + intToString(_partIndex) + " : " +
+        m_PartList[_partIndex].name, lsDebug);
+
     assert(_partIndex < m_PartList.size());
     part_t& part = m_PartList[_partIndex];
     bool hasSubpart = m_PartList.size() > (_partIndex + 1);
-    if(!part.properties.empty()) {
-      boost::shared_ptr<JSONElement> container(new JSONArrayBase());
-      if(part.name == "*") {
-        _parentElement->addElement(_parentNode->getName(), container);
-      } else {
-        _parentElement->addElement(part.name, container);
-      }
-      for(int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
-        PropertyNodePtr childNode = _parentNode->getChild(iChild);
-        if((part.name == "*") || (childNode->getName() == part.name)) {
-          boost::shared_ptr<JSONElement> elem = addProperties(part, container, childNode);
-          if(hasSubpart) {
-            runFor(childNode, _partIndex + 1, elem);
-          }
+    boost::shared_ptr<JSONElement> container;
+
+    if (!part.properties.empty()) {
+      /* add current node */
+      std::string name = (part.name == "*") ? _parentNode->getName() : part.name;
+      log(std::string(__func__) + "   addElement " + name, lsDebug);
+      container = boost::shared_ptr<JSONElement>(new JSONArrayBase());
+      _parentElement->addElement(name, container);
+    }
+
+    for (int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
+      PropertyNodePtr childNode = _parentNode->getChild(iChild);
+      boost::shared_ptr<JSONElement> node = _parentElement;
+      if ((part.name == "*") || (childNode->getName() == part.name)) {
+
+        if (!part.properties.empty()) {
+          node = addProperties(part, container, childNode);
         }
-      }
-    } else if(hasSubpart) {
-      for(int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
-        PropertyNodePtr childNode = _parentNode->getChild(iChild);
-        if((part.name == "*") || (childNode->getName() == part.name)) {
-          runFor(childNode, _partIndex + 1, _parentElement);
+
+        if (hasSubpart) {
+          runFor(childNode, _partIndex + 1, node);
         }
       }
     }
