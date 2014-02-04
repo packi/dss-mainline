@@ -37,6 +37,7 @@
 #include "src/web/json.h"
 #include "jsonhelper.h"
 #include "foreach.h"
+#include "util.h"
 
 namespace dss {
 
@@ -150,6 +151,10 @@ namespace dss {
     } else if(_request.getMethod() == "setName") {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
+        if (!userInputOK(name)) {
+          return failure("Parameter 'newName' contains invalid characters");
+        }
+
         pDevice->setName(st.convert(name));
 
         if (m_pStructureBusInterface != NULL) {
@@ -187,6 +192,11 @@ namespace dss {
       if(tagName.empty()) {
         return failure("missing parameter 'tag'");
       }
+
+      if (!userInputOK(tagName)) {
+        return failure("Parameter 'tag' contains invalid characters");
+      }
+     
       pDevice->addTag(st.convert(tagName));
       return success();
     } else if(_request.getMethod() == "removeTag") {

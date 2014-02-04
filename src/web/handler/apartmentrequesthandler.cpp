@@ -36,7 +36,7 @@
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
 #include "src/stringconverter.h"
-
+#include "util.h"
 #include "jsonhelper.h"
 
 namespace dss {
@@ -189,7 +189,12 @@ namespace dss {
       } else if(_request.getMethod() == "setName") {
         if (_request.hasParameter("newName")) {
           StringConverter st("UTF-8", "UTF-8");
-          m_Apartment.setName(st.convert(_request.getParameter("newName")));
+          std::string newName = st.convert(_request.getParameter("newName"));
+          if (!userInputOK(newName)) {
+            return failure("Parameter 'newName' contains invalid characters");
+          }
+
+          m_Apartment.setName(newName);
           DSS::getInstance()->getBonjourHandler().restart();
         } else {
           return failure("missing parameter 'newName'");

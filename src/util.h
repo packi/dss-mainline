@@ -24,6 +24,8 @@
 #ifndef __DSS_UTIL_H_INCLUDED__
 #define __DSS_UTIL_H_INCLUDED__
 
+#include <string>
+
 namespace dss {
 
   class Apartment;
@@ -31,6 +33,7 @@ namespace dss {
 
   void synchronizeGroups(Apartment* _apartment, StructureModifyingBusInterface* _interface);
 
+  bool userInputOK(std::string _input);
 }
 
 #endif

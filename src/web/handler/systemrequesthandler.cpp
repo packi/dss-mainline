@@ -39,7 +39,7 @@
 #include "src/stringconverter.h"
 
 #include "src/propertysystem.h"
-
+#include "util.h"
 #include <sstream>
 
 namespace dss {
@@ -189,10 +189,7 @@ namespace dss {
       if(applicationName.empty()) {
         return failure("Need parameter 'applicationName'");
       }
-
-      if ((applicationName.find('<') != std::string::npos) ||
-          (applicationName.find('%') != std::string::npos) ||
-          (applicationName.find('>') != std::string::npos)) {
+      if (!userInputOK(applicationName)) {
         return failure("Parameter 'applicationName' contains invalid characters");
       }
 
