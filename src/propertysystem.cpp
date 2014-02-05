@@ -1203,6 +1203,12 @@ namespace dss {
           case vTypeBoolean:
             m_currentNode->setBooleanValue(m_temporaryValue == "true");
             break;
+          case vTypeFloating:
+            {
+              double value = ::strtod(m_temporaryValue.c_str(), 0);
+              m_currentNode->setFloatingValue(value);
+            }
+            break;
           default:
             Logger::getInstance()->log("PropertySystem::loadFromXML: character "
                                        "data callback - unknown value type!");
