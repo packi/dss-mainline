@@ -87,5 +87,15 @@ namespace dss {
     }
   }
 
+  bool userInputOK(std::string _input) {
+    if ((_input.find('<') != std::string::npos) ||
+        (_input.find('%') != std::string::npos) ||
+        (_input.find('>') != std::string::npos)) {
+      return false;
+    }
+
+    return true;
+  }
+
 }
 
