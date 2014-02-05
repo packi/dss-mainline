@@ -465,7 +465,7 @@ namespace dss {
     case SensorIDTemperatureIndoors:
     case SensorIDTemperatureOutdoors:
     case SensorIDRoomTemperatureSetpoint:
-      convertedSensorValue = (int) ((_sensorValue + 273.15 - 230.0) / 0.025);
+      convertedSensorValue = (int) ((_sensorValue + 273.15 - 230.0) / 0.1);
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:

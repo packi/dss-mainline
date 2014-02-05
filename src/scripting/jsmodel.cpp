@@ -2465,7 +2465,7 @@ namespace dss {
       uint8_t groupID;
       dss_dsid_t sourceDSID;
       uint8_t sensorType;
-      uint16_t sensorValue;
+      double sensorValue;
       if (pZone != NULL && argc >= 4) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
@@ -2479,14 +2479,13 @@ namespace dss {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
         }
+
         try {
-          if (JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[0])) {
-            double fvalue = ctx->convertTo<double>(JS_ARGV(cx, vp)[3]);
-            sensorValue = SceneHelper::sensorToSystem(sensorType, fvalue);
+          if (JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[3])) {
+            sensorValue = ctx->convertTo<double>(JS_ARGV(cx, vp)[3]);
           } else {
             std::string svalue = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
-            double fvalue = ::strtod(svalue.c_str(), 0);
-            sensorValue = SceneHelper::sensorToSystem(sensorType, fvalue);
+            sensorValue = ::strtod(svalue.c_str(), 0);
           }
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
@@ -2495,10 +2494,6 @@ namespace dss {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
         }
-        if (sensorValue >= (1 << 10)) {
-          std::string sval = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
-          JS_ReportWarning(cx, "sensor value out of range: %d", sval.c_str());
-        }
 
         StructureManipulator manipulator(
             *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
@@ -2506,6 +2501,7 @@ namespace dss {
             ext->getApartment());
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
         manipulator.sensorPush(pGroup, sourceDSID, sensorType, sensorValue);
+
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       }
