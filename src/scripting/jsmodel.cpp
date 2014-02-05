@@ -47,6 +47,7 @@
 #include "src/security/security.h"
 #include "src/stringconverter.h"
 #include "src/sceneaccess.h"
+#include "src/util.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -96,8 +97,14 @@ namespace dss {
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       if(ext != NULL && argc >= 1) {
         StringConverter st("UTF-8", "UTF-8");
-        std::string aptName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-        ext->getApartment().setName(st.convert(aptName));
+        std::string aptName = st.convert(
+                               ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+        if (!userInputOK(aptName)) {
+          JS_ReportError(cx, "apartment name contains invalid characters");
+          return JS_FALSE;
+        }
+
+        ext->getApartment().setName(aptName);
         JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
         return JS_TRUE;
       }
