@@ -117,6 +117,8 @@ namespace dss {
 
   //================================================== ScriptContextWrapper
 
+  __DEFINE_LOG_CHANNEL__(ScriptContextWrapper, lsInfo)
+
   ScriptContextWrapper::ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
       PropertyNodePtr _pRootNode,
       const std::string& _identifier,
