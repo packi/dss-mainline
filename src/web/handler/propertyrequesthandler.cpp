@@ -27,6 +27,7 @@
 #include "src/web/json.h"
 #include "src/propertyquery.h"
 #include "src/stringconverter.h"
+#include "util.h"
 
 namespace dss {
 
@@ -51,6 +52,9 @@ namespace dss {
     std::string propName = st.convert(_request.getParameter("path"));
     if(propName.empty()) {
       return failure("Need parameter 'path' for property operations");
+    }
+    if (!userInputOK(propName)) {
+      return failure("Property path contains invalid characters");
     }
     PropertyNodePtr node = m_PropertySystem.getProperty(propName);
 
@@ -115,6 +119,11 @@ namespace dss {
       }
     } else if(_request.getMethod() == "setString") {
       std::string value = st.convert(_request.getParameter("value"));
+
+      if (!userInputOK(value)) {
+        return failure("Parameter 'value' contains invalid characters");
+      }
+
       if(node == NULL) {
         node = m_PropertySystem.createProperty(propName);
       }

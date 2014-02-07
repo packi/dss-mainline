@@ -35,6 +35,10 @@
 #include "src/eventsubscriptionsession.h"
 #include "src/stringconverter.h"
 
+#include "src/model/apartment.h"
+#include "src/model/group.h"
+#include "src/model/device.h"
+
 namespace dss {
 
   //=========================================== EventRequestHandler
@@ -249,6 +253,67 @@ namespace dss {
       const dss::HashMapStringString& props =  evt.getProperties().getContainer();
       for(dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         evtprops->addProperty(iParam->first, iParam->second);
+      }
+
+      boost::shared_ptr<JSONObject> source(new JSONObject());
+      evtObj->addElement("source", source);
+
+      EventRaiseLocation raiseLocation = evt.getRaiseLocation();
+      if((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
+        if (DSS::hasInstance()) {
+          boost::shared_ptr<const Group> group =
+              evt.getRaisedAtGroup(DSS::getInstance()->getApartment());
+          source->addProperty("set", ".zone(" + intToString(group->getZoneID())+
+                  ").group(" + intToString(group->getID()) + ")");
+          source->addProperty("groupID", group->getID());
+          source->addProperty("zoneID", group->getZoneID());
+          source->addProperty("isApartment", raiseLocation == erlApartment);
+          source->addProperty("isGroup", raiseLocation == erlGroup);
+          source->addProperty("isDevice", false);
+        }
+      } else if (raiseLocation == erlDevice) {
+        boost::shared_ptr<const DeviceReference> device = evt.getRaisedAtDevice();
+        try {
+          source->addProperty("set", "dsid(" + device->getDSID().toString() + ")");
+          source->addProperty("dsid", device->getDSID().toString());
+          source->addProperty("zoneID", device->getDevice()->getZoneID());
+        } catch(ItemNotFoundException& e) {
+        }
+        source->addProperty("isApartment", false);
+        source->addProperty("isGroup", false);
+        source->addProperty("isDevice", true);
+      } else if (raiseLocation == erlState) {
+        boost::shared_ptr<const State> state = evt.getRaisedAtState();
+        if (state->getType() == StateType_Device) {
+          boost::shared_ptr<Device> device = state->getProviderDevice();
+          source->addProperty("set", "dsid(" + device->getDSID().toString() + ")");
+          source->addProperty("dsid", device->getDSID().toString());
+          source->addProperty("zoneID", device->getZoneID());
+          source->addProperty("isApartment", false);
+          source->addProperty("isGroup", false);
+          source->addProperty("isDevice", true);
+        } else if (state->getType() == StateType_Apartment) {
+          source->addProperty("isApartment", true);
+          source->addProperty("isGroup", false);
+          source->addProperty("isDevice", false);
+        } else if (state->getType() == StateType_Group) {
+          boost::shared_ptr<Group> group = state->getProviderGroup();
+          source->addProperty("isApartment", false);
+          source->addProperty("isGroup", true);
+          source->addProperty("isDevice", false);
+          source->addProperty("groupID", group->getID());
+          source->addProperty("zoneID", group->getZoneID());
+        } else if (state->getType() == StateType_Service) {
+          source->addProperty("isService", true);
+          source->addProperty("isGroup", false);
+          source->addProperty("isDevice", false);
+          source->addProperty("serviceName", state->getProviderService());
+        } else if (state->getType() == StateType_Script) {
+          source->addProperty("isScript", true);
+          source->addProperty("isGroup", false);
+          source->addProperty("isDevice", false);
+          source->addProperty("serviceName", state->getProviderService());
+        }
       }
     }
 

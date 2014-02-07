@@ -32,7 +32,7 @@
 #include "src/model/modelmaintenance.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
-
+#include "util.h"
 #include "src/web/json.h"
 
 namespace dss {
@@ -144,7 +144,13 @@ namespace dss {
           return success(resultObj);
         } else if(_request.getMethod() == "setName") {
           if (_request.hasParameter("newName")) {
-            pZone->setName(st.convert(_request.getParameter("newName")));
+
+            std::string newName = st.convert(_request.getParameter("newName"));
+            if (!userInputOK(newName)) {
+              return failure("Parameter 'newName' contains invalid characters");
+            }
+
+            pZone->setName(newName);
           } else {
             return failure("missing parameter 'newName'");
           }
@@ -163,6 +169,10 @@ namespace dss {
 
           if (_request.hasParameter("newName")) {
             std::string name = st.convert(_request.getParameter("newName"));
+            if (!userInputOK(name)) {
+              return failure("Parameter 'newName' contains invalid characters");
+            }
+
             pGroup->setSceneName(sceneNumber, name);
             StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
             manipulator.sceneSetName(pGroup, sceneNumber, name);

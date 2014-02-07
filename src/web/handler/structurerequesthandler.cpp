@@ -42,6 +42,7 @@
 #include "foreach.h"
 #include "jsonhelper.h"
 #include "foreach.h"
+#include "util.h"
 
 #define MIN_APP_USER_GROUP_ID   16  // minimum allowed apartment user group id
 #define MAX_APP_USER_GROUP_ID   23
@@ -365,6 +366,9 @@ namespace dss {
     if (_request.hasParameter("groupName")) {
       StringConverter st("UTF-8", "UTF-8");
       groupName = st.convert(_request.getParameter("groupName"));
+      if (!userInputOK(groupName)) {
+        return failure("Parameter 'groupName' contains invalid characters");
+      }
     }
     if (_request.hasParameter("groupColor")) {
       standardGroupID = strToIntDef(_request.getParameter("groupColor"), 0);
@@ -585,8 +589,13 @@ namespace dss {
       return failure("missing parameter 'newName'");
     }
 
+    std::string newName = st.convert(_request.getParameter("newName"));
+    if (!userInputOK(newName)) {
+      return failure("Parameter 'newName' contains invalid characters");
+    }
+
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetName(group, st.convert(_request.getParameter("newName")));
+    manipulator.groupSetName(group, newName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return success();
