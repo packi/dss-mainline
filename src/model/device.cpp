@@ -1658,7 +1658,7 @@ namespace dss {
 
   const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
     if (_inputIndex >= getBinaryInputCount()) {
-      return boost::shared_ptr<DeviceBinaryInput_t>();
+      throw ItemNotFoundException(std::string("Device::getBinaryInput: index out of bounds"));
     }
     return m_binaryInputs[_inputIndex];
   }
@@ -1719,14 +1719,14 @@ namespace dss {
 
   const boost::shared_ptr<DeviceSensor_t> Device::getSensor(uint8_t _sensorIndex) const {
     if (_sensorIndex >= getSensorCount()) {
-      return boost::shared_ptr<DeviceSensor_t>();
+      throw ItemNotFoundException(std::string("Device::getSensor: index out of bounds"));
     }
     return m_sensorInputs[_sensorIndex];
   }
 
   const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
-      return;
+      throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
@@ -1751,7 +1751,7 @@ namespace dss {
   boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
     boost::mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex >= m_binaryInputStates.size()) {
-      return boost::shared_ptr<State> ();
+      throw ItemNotFoundException(std::string("Device::getBinaryInputState: index out of bounds"));
     }
     return m_binaryInputStates[_inputIndex];
   }
