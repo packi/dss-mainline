@@ -1496,16 +1496,20 @@ namespace dss {
                                        const int& _sensorIndex,
                                        const int& _sensorValue) {
     try {
-      boost::shared_ptr<DSMeter> pMeter =
-        m_pApartment->getDSMeterByDSID(_meterID);
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+      boost::shared_ptr<Device> pDev = devRef.getDevice();
 
       // binary input state synchronization event
       if (_sensorIndex == 32) {
-        for (int index = 0; index < devRef.getDevice()->getBinaryInputCount(); index++) {
-          boost::shared_ptr<State> state = devRef.getDevice()->getBinaryInputState(index);
-          assert(state != NULL);
+        for (int index = 0; index < pDev->getBinaryInputCount(); index++) {
+          boost::shared_ptr<State> state;
+          try {
+            state = pDev->getBinaryInputState(index);
+          } catch (ItemNotFoundException& e) {
+            continue;
+          }
           eState oldState = state->getState();
           eState newState;
           if ((_sensorValue & (1 << index)) > 0) {
@@ -1519,7 +1523,7 @@ namespace dss {
             boost::shared_ptr<Event> pEvent;
             pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
             pEvent->setProperty("inputIndex", intToString(index));
-            pEvent->setProperty("inputType", intToString(devRef.getDevice()->getDeviceBinaryInputType(index)));
+            pEvent->setProperty("inputType", intToString(pDev->getDeviceBinaryInputType(index)));
             pEvent->setProperty("inputState", intToString(newState));
             raiseEvent(pEvent);
           }
@@ -1527,7 +1531,6 @@ namespace dss {
 
       // device status and error event
       } else if (_sensorIndex <= 31 && _sensorIndex >= 16) {
-
         boost::shared_ptr<Event> pEvent;
         pEvent.reset(new Event("deviceStatusEvent", pDevRev));
         pEvent->setProperty("statusIndex", intToString(_sensorIndex));
@@ -1536,17 +1539,20 @@ namespace dss {
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        boost::shared_ptr<DeviceSensor_t> pdSensor = devRef.getDevice()->getSensor(_sensorIndex);
-        devRef.getDevice()->setSensorValue(_sensorIndex, _sensorValue);
-
         boost::shared_ptr<Event> pEvent;
         pEvent.reset(new Event("deviceSensorValue", pDevRev));
         pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
-        pEvent->setProperty("sensorType", intToString(pdSensor->m_sensorType));
         pEvent->setProperty("sensorValue", intToString(_sensorValue));
+        try {
+          pDev->setSensorValue(_sensorIndex, _sensorValue);
 
-        double fValue = SceneHelper::sensorToFloat12(pdSensor->m_sensorType, _sensorValue);
-        pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
+          boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
+          uint8_t sensorType = pdSensor->m_sensorType;
+          pEvent->setProperty("sensorType", intToString(sensorType));
+
+          double fValue = SceneHelper::sensorToFloat12(sensorType, _sensorValue);
+          pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
+        } catch (ItemNotFoundException& e) {}
         raiseEvent(pEvent);
       }
     } catch(ItemNotFoundException& e) {
