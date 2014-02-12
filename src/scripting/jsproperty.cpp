@@ -91,10 +91,7 @@ namespace dss {
         std::string propName;
         try {
           propName = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
-          if (!userInputOK(propName)) {
-            JS_ReportError(cx, "property name contains invalid characters");
-            return JS_FALSE;
-          }
+          propName = escapeHTML(propName);
         } catch(ScriptException& ex) {
           JS_ReportError(cx, "Property.setValue: cannot convert argument: property-path");
           return JS_FALSE;
@@ -117,11 +114,7 @@ namespace dss {
       try {
         if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[argIndex])) {
           std::string propValue = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[argIndex]));
-          if (!userInputOK(propValue)) {
-            JS_ReportError(cx, "property value contains invalid characters");
-            return JS_FALSE;
-          }
-
+          propValue = escapeHTML(propValue);
           node->setStringValue(propValue);
         } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[argIndex])) {
           node->setBooleanValue(ctx->convertTo<bool>(JS_ARGV(cx, vp)[argIndex]));
@@ -217,10 +210,7 @@ namespace dss {
     try {
       if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
         std::string propValue = st.convert(ctx->convertTo<std::string>(statusValue));
-        if (!userInputOK(propValue)) {
-          JS_ReportError(cx, "property value contains invalid characters");
-          return JS_FALSE;
-        }
+        propValue = escapeHTML(propValue);
         valueNode->setStringValue(propValue);
       } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[0])) {
         valueNode->setBooleanValue(ctx->convertTo<bool>(statusValue));
@@ -740,10 +730,7 @@ namespace dss {
     std::string propName;
     try {
       propName = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
-      if (!userInputOK(propName)) {
-        JS_ReportError(cx, "property name contains invalid characters");
-        return JS_FALSE;
-      }
+      propName = escapeHTML(propName);
     } catch (DSSException& dex) {
       JS_ReportError(cx, "Property.construct: could not get/create node, not in UTF-8");
       return JS_FALSE;

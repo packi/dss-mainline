@@ -146,9 +146,7 @@ namespace dss {
           if (_request.hasParameter("newName")) {
 
             std::string newName = st.convert(_request.getParameter("newName"));
-            if (!userInputOK(newName)) {
-              return failure("Parameter 'newName' contains invalid characters");
-            }
+            newName = escapeHTML(newName);
 
             pZone->setName(newName);
           } else {
@@ -169,9 +167,7 @@ namespace dss {
 
           if (_request.hasParameter("newName")) {
             std::string name = st.convert(_request.getParameter("newName"));
-            if (!userInputOK(name)) {
-              return failure("Parameter 'newName' contains invalid characters");
-            }
+            name = escapeHTML(name);
 
             pGroup->setSceneName(sceneNumber, name);
             StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);

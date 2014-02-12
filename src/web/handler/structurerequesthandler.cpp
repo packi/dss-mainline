@@ -366,9 +366,7 @@ namespace dss {
     if (_request.hasParameter("groupName")) {
       StringConverter st("UTF-8", "UTF-8");
       groupName = st.convert(_request.getParameter("groupName"));
-      if (!userInputOK(groupName)) {
-        return failure("Parameter 'groupName' contains invalid characters");
-      }
+      groupName = escapeHTML(groupName);
     }
     if (_request.hasParameter("groupColor")) {
       standardGroupID = strToIntDef(_request.getParameter("groupColor"), 0);
@@ -590,9 +588,7 @@ namespace dss {
     }
 
     std::string newName = st.convert(_request.getParameter("newName"));
-    if (!userInputOK(newName)) {
-      return failure("Parameter 'newName' contains invalid characters");
-    }
+    newName = escapeHTML(newName);
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.groupSetName(group, newName);

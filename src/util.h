@@ -33,7 +33,7 @@ namespace dss {
 
   void synchronizeGroups(Apartment* _apartment, StructureModifyingBusInterface* _interface);
 
-  bool userInputOK(std::string _input);
+  std::string escapeHTML(std::string _input);
 }
 
 #endif

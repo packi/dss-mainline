@@ -32,6 +32,7 @@
 #include "ds485/dsdevicebusinterface.h"
 #include "structuremanipulator.h"
 #include "foreach.h"
+#include <boost/algorithm/string/replace.hpp>
 
 namespace dss {
 
@@ -87,14 +88,14 @@ namespace dss {
     }
   }
 
-  bool userInputOK(std::string _input) {
-    if ((_input.find('<') != std::string::npos) ||
-        (_input.find('%') != std::string::npos) ||
-        (_input.find('>') != std::string::npos)) {
-      return false;
-    }
+  std::string escapeHTML(std::string _input) {
+    boost::replace_all(_input, "&", "&amp;");
+    boost::replace_all(_input, "\"", "&quot;");
+    boost::replace_all(_input, "'", "&#039;");
+    boost::replace_all(_input, "<", "&lt;");
+    boost::replace_all(_input, ">", "&gt;");
 
-    return true;
+    return _input;
   }
 
 }

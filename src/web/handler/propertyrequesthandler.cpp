@@ -53,9 +53,7 @@ namespace dss {
     if(propName.empty()) {
       return failure("Need parameter 'path' for property operations");
     }
-    if (!userInputOK(propName)) {
-      return failure("Property path contains invalid characters");
-    }
+    propName = escapeHTML(propName);
     PropertyNodePtr node = m_PropertySystem.getProperty(propName);
 
     if(_request.getMethod() == "remove") {
@@ -120,9 +118,7 @@ namespace dss {
     } else if(_request.getMethod() == "setString") {
       std::string value = st.convert(_request.getParameter("value"));
 
-      if (!userInputOK(value)) {
-        return failure("Parameter 'value' contains invalid characters");
-      }
+      value = escapeHTML(value);
 
       if(node == NULL) {
         node = m_PropertySystem.createProperty(propName);

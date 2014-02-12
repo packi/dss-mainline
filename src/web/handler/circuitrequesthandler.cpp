@@ -66,9 +66,7 @@ namespace dss {
           StringConverter st("UTF-8", "UTF-8");
           std::string nameStr = _request.getParameter("newName");
           nameStr = st.convert(nameStr);
-          if (!userInputOK(nameStr)) {
-            return failure("Parameter 'newName' contains invalid characters");
-          }
+          nameStr = escapeHTML(nameStr);
           dsMeter->setName(nameStr);
           if (m_pStructureBusInterface != NULL) {
             StructureManipulator manipulator(*m_pStructureBusInterface,
