@@ -187,7 +187,10 @@ namespace dss {
   }
 
   void ScriptContextWrapper::addRuntimeInfos(const std::string& _name, unsigned long _timingNS) {
-    if (DSS::hasInstance()) {
+    if (!DSS::hasInstance()) {
+      return; /* really, we make till here without an instance */
+    }
+    try {
       std::string propertyName = _name;
       dss::replaceAll(propertyName, "/", "_");
       PropertyNodePtr pPtr = DSS::getInstance()->getPropertySystem().createProperty("/system/js/timings/" + propertyName);
@@ -204,6 +207,12 @@ namespace dss {
       }
       pScriptCount->setIntegerValue(pScriptCount->getIntegerValue() + 1);
       pScriptTime->setIntegerValue(pScriptTime->getIntegerValue() + _timingNS);
+    } catch(PropertyTypeMismatch& ex) {
+      log(std::string("JavaScript Event Handler: Datatype error storing timing for script '")
+          + _name + "'. Message: " + ex.what(), lsWarning);
+    } catch(std::runtime_error& ex) {
+      log(std::string("JavaScript Event Handler: Cannot store timing for script '")
+          + _name + "'. Message: " + ex.what(), lsError);
     }
   }
 
@@ -501,26 +510,14 @@ namespace dss {
         }
 
 #ifndef __APPLE__
-        try {
-          if (timingEnabled) {
-            clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpost);
+        if (timingEnabled) {
+          clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpost);
 
-            #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
-            unsigned long tns =
-                (SEC_TO_NSEC(tpost.tv_sec) + tpost.tv_nsec) -
-                (SEC_TO_NSEC(tpre.tv_sec) + tpre.tv_nsec);
-            wrapper->addRuntimeInfos(scriptName, tns);
-          }
-        } catch(PropertyTypeMismatch& ex) {
-          Logger::getInstance()->log(
-              std::string("JavaScript Event Handler:"
-                  "Datatype error storing timing for script '")
-                  + scriptName + "'. Message: " + ex.what(), lsError);
-        } catch(std::runtime_error& ex) {
-          Logger::getInstance()->log(
-              std::string("JavaScript Event Handler:"
-                  "Cannot store timing for script '")
-                  + scriptName + "'. Message: " + ex.what(), lsError);
+          #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
+          unsigned long tns =
+              (SEC_TO_NSEC(tpost.tv_sec) + tpost.tv_nsec) -
+              (SEC_TO_NSEC(tpre.tv_sec) + tpre.tv_nsec);
+          wrapper->addRuntimeInfos(scriptName, tns);
         }
 #endif
 
@@ -528,26 +525,14 @@ namespace dss {
       }
 
 #ifndef __APPLE__
-      try {
-        if (timingEnabled) {
-          clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPost);
+      if (timingEnabled) {
+        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPost);
 
-          #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
-          unsigned long tns =
-              (SEC_TO_NSEC(tSubscriptionPost.tv_sec) + tSubscriptionPost.tv_nsec) -
-              (SEC_TO_NSEC(tSubscriptionPre.tv_sec) + tSubscriptionPre.tv_nsec);
-          wrapper->addRuntimeInfos(wrapper->getIdentifier(), tns);
-        }
-      } catch(PropertyTypeMismatch& ex) {
-        Logger::getInstance()->log(
-            std::string("JavaScript Event Handler:"
-                "Datatype error storing timing for subscription '")
-                + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
-      } catch(std::runtime_error& ex) {
-        Logger::getInstance()->log(
-            std::string("JavaScript Event Handler:"
-                "Cannot store timing for subscription '")
-                + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
+        #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
+        unsigned long tns =
+            (SEC_TO_NSEC(tSubscriptionPost.tv_sec) + tSubscriptionPost.tv_nsec) -
+            (SEC_TO_NSEC(tSubscriptionPre.tv_sec) + tSubscriptionPre.tv_nsec);
+        wrapper->addRuntimeInfos(wrapper->getIdentifier(), tns);
       }
 #endif
 
