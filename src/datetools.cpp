@@ -277,6 +277,16 @@ namespace dss {
     return std::string(buf);
   } // toRFC2822String
 
+  std::string DateTime::toRFC2445IcalDataTime() const {
+    /*
+     * http://www.ietf.org/rfc/rfc2445.txt
+     * http://www.kanzaki.com/docs/ical/dateTime.html
+     */
+    char buf[20];
+    strftime(buf, sizeof buf, "%Y%m%dT%H%M%S", &m_DateTime);
+    return std::string(buf);
+  }
+
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
     _dt << out;
     return out;
@@ -368,6 +378,8 @@ namespace dss {
   //================================================== ICalSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
+  __DEFINE_LOG_CHANNEL__(ICalSchedule, lsInfo);
+
   ICalSchedule::ICalSchedule(const std::string& _rrule, const std::string _startDateISO) {
     m_Recurrence = icalrecurrencetype_from_string(_rrule.c_str());
     m_StartDate = icaltime_from_string(_startDateISO.c_str());
@@ -440,6 +452,7 @@ namespace dss {
     else {
       result = DateTime::NullDate;
     }
+    log(std::string(__func__) + " " + result.toString(), lsDebug);
     return result;
   } // getNextOccurence
 
