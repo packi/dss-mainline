@@ -50,6 +50,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/internaleventrelaytarget.h \
 	$(top_srcdir)/src/logger.cpp \
 	$(top_srcdir)/src/logger.h \
+	$(top_srcdir)/src/subscription_profiler.h \
+	$(top_srcdir)/src/subscription_profiler.cpp \
 	$(top_srcdir)/src/metering/metering.cpp \
 	$(top_srcdir)/src/metering/metering.h \
 	$(top_srcdir)/src/model/addressablemodelitem.cpp \

@@ -48,6 +48,9 @@
   <subscription event-name="timedEventChanged" handler-name="apartment_model_change">
   </subscription>
 
+  <!-- Export Subscription Timings to PropertyTree -->
+  <subscription event-name="running" handler-name="subscription_benchmark_uploader"/>
+  <subscription event-name="reexport_timings" handler-name="subscription_benchmark_uploader"/>
 
   <!-- Examples -->
   <!--
