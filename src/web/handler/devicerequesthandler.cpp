@@ -151,9 +151,7 @@ namespace dss {
     } else if(_request.getMethod() == "setName") {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
-        if (!userInputOK(name)) {
-          return failure("Parameter 'newName' contains invalid characters");
-        }
+        name = escapeHTML(name);
 
         pDevice->setName(st.convert(name));
 
@@ -193,9 +191,7 @@ namespace dss {
         return failure("missing parameter 'tag'");
       }
 
-      if (!userInputOK(tagName)) {
-        return failure("Parameter 'tag' contains invalid characters");
-      }
+      tagName = escapeHTML(tagName);
      
       pDevice->addTag(st.convert(tagName));
       return success();

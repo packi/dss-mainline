@@ -190,9 +190,7 @@ namespace dss {
         if (_request.hasParameter("newName")) {
           StringConverter st("UTF-8", "UTF-8");
           std::string newName = st.convert(_request.getParameter("newName"));
-          if (!userInputOK(newName)) {
-            return failure("Parameter 'newName' contains invalid characters");
-          }
+          newName = escapeHTML(newName);
 
           m_Apartment.setName(newName);
           DSS::getInstance()->getBonjourHandler().restart();

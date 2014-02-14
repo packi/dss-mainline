@@ -189,9 +189,7 @@ namespace dss {
       if(applicationName.empty()) {
         return failure("Need parameter 'applicationName'");
       }
-      if (!userInputOK(applicationName)) {
-        return failure("Parameter 'applicationName' contains invalid characters");
-      }
+      applicationName = escapeHTML(applicationName);
 
       std::string applicationToken =  m_pSessionManager->generateToken();
       m_pSessionManager->getSecurity()->loginAsSystemUser("Temporary access to create token");

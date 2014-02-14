@@ -29,6 +29,7 @@
 #include "src/model/modelmaintenance.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
+#include "src/util.h"
 
 namespace dss {
 
@@ -64,7 +65,9 @@ namespace dss {
         if(_request.hasParameter("newName")) {
           StringConverter st("UTF-8", "UTF-8");
           std::string nameStr = _request.getParameter("newName");
-          dsMeter->setName(st.convert(nameStr));
+          nameStr = st.convert(nameStr);
+          nameStr = escapeHTML(nameStr);
+          dsMeter->setName(nameStr);
           if (m_pStructureBusInterface != NULL) {
             StructureManipulator manipulator(*m_pStructureBusInterface,
                                              *m_pStructureQueryBusInterface,

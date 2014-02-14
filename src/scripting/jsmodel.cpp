@@ -99,10 +99,7 @@ namespace dss {
         StringConverter st("UTF-8", "UTF-8");
         std::string aptName = st.convert(
                                ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
-        if (!userInputOK(aptName)) {
-          JS_ReportError(cx, "apartment name contains invalid characters");
-          return JS_FALSE;
-        }
+        aptName = escapeHTML(aptName);
 
         ext->getApartment().setName(aptName);
         JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
