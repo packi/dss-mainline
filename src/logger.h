@@ -44,7 +44,7 @@
  */
 #define __DEFINE_LOG_CHANNEL__(_NAME_ , level) LogChannel _NAME_::s_logChannel(#_NAME_, level);
 #define __DECL_LOG_CHANNEL__ static LogChannel s_logChannel; \
-  void log(const std::string& message, const aLogSeverity severity) { \
+  static void log(const std::string& message, const aLogSeverity severity) { \
     Logger::getInstance()->log(s_logChannel, message, severity); \
   }
 
