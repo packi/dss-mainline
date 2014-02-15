@@ -36,6 +36,7 @@
 #include "model/apartment.h"
 #include "model/state.h"
 #include "model/modelconst.h"
+#include "model/scenehelper.h"
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
@@ -2016,14 +2017,34 @@ namespace dss {
       sensorIndex = m_properties.get("sensorIndex");
     }
 
+    uint8_t sensorType = 255;
+    if (m_properties.has("sensorType")) {
+      sensorType = strToInt(m_properties.get("sensorType"));
+    } else {
+      try {
+        boost::shared_ptr<DeviceSensor_t> pSensor = _device->getSensor(strToInt(sensorIndex));
+        sensorType = pSensor->m_sensorType;
+      } catch (ItemNotFoundException& ex) {}
+    }
+
     std::string sensorValue;
     if (m_properties.has("sensorValue")) {
       sensorValue = m_properties.get("sensorValue");
     }
 
+    std::string sensorValueFloat;
+    if (m_properties.has("sensorValueFloat")) {
+      sensorValueFloat = m_properties.get("sensorValueFloat");
+    }
+
+    std::string typeName;
+    SceneHelper::sensorName(sensorType, typeName);
+
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";SensorValue;" + sensorIndex + ';' + sensorValue + ';' +
-                   zoneName + ";;;" + devName + ";");
+    _logger->logln(";SensorValue;" +
+        typeName + " [" + intToString(sensorType) + '/' + sensorIndex + "];" +
+        sensorValueFloat + " [" + sensorValue + "];" +
+        zoneName + ";;;" + devName + ";");
   }
 
   void SystemEventLog::logStateChangeScript(
