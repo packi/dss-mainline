@@ -2943,9 +2943,10 @@ namespace dss {
 */
 
   void SystemState::stateBinaryinput() {
-    if (m_raisedAtDevice == NULL) {
+    if (m_raisedAtState == NULL) {
       return;
     }
+    boost::shared_ptr<Device> pDev = m_raisedAtState->getProviderDevice();
 
     if (!m_properties.has("statename")) {
       return;
@@ -2969,11 +2970,7 @@ namespace dss {
     }
 
     uint8_t inputIndex = (uint8_t)iiNode->getIntegerValue();
-    const boost::shared_ptr<DeviceBinaryInput_t> devInput =
-        m_raisedAtDevice->getDevice()->getBinaryInput(inputIndex);
-    if (devInput == NULL) {
-      return;
-    }
+    const boost::shared_ptr<DeviceBinaryInput_t> devInput = pDev->getBinaryInput(inputIndex);
 
     if (devInput->m_inputId != 15) {
       return;
@@ -2983,13 +2980,10 @@ namespace dss {
     if ((devInput->m_inputType == 5) || (devInput->m_inputType == 6)) {
       if (devInput->m_targetGroupId >= 16) {
         // create state for a user group if it does not exist (new group?)
-        statename = "zone.0.group." + intToString(devInput->m_targetGroupId) +
-                    ".motion";
+        statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".motion";
       } else {
         // set presence state in the zone the dsid is logical attached to
-        statename = "zone." +
-                    intToString(m_raisedAtDevice->getDevice()->getZoneID()) +
-                    ".motion";
+        statename = "zone." + intToString(pDev->getZoneID()) + ".motion";
       }
       getOrRegisterState(statename);
       stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
@@ -3000,13 +2994,10 @@ namespace dss {
     if ((devInput->m_inputType == 1) || (devInput->m_inputType == 3)) {
       if (devInput->m_targetGroupId >= 16) {
         // create state for a user group if it does not exist (new group?)
-        statename = "zone.0.group." + intToString(devInput->m_targetGroupId) +
-                    ".presence";
+        statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".presence";
       } else {
         // set presence state in the zone the dsid is logical attached to
-        statename = "zone." +
-                    intToString(m_raisedAtDevice->getDevice()->getZoneID()) +
-                    ".presence";
+        statename = "zone." + intToString(pDev->getZoneID()) + ".presence";
       }
       getOrRegisterState(statename);
       stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
@@ -3017,13 +3008,12 @@ namespace dss {
     if (devInput->m_inputType == 7) {
       try {
         boost::shared_ptr<State> state =
-            DSS::getInstance()->getApartment().getState(StateType_Service,
-                                                        "fire");
+            DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
         if (m_properties.has("value")) {
           std::string val = m_properties.get("value");
           int iVal = strToIntDef(val, -1);
           if (iVal == 1) {
-            state->setState(coSystem, State_Active);
+            state->setState(coSystemBinaryInput, State_Active);
           }
         }
       } catch (ItemNotFoundException &ex) {}
@@ -3034,8 +3024,7 @@ namespace dss {
       statename = "wind";
       // create state for a user group if it does not exist (new group?)
       if (devInput->m_targetGroupId >= 16) {
-        statename = statename + ".group" +
-                    intToString(devInput->m_targetGroupId);
+        statename = statename + ".group" + intToString(devInput->m_targetGroupId);
         getOrRegisterState(statename);
       }
       stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
@@ -3137,28 +3126,34 @@ namespace dss {
   void SystemState::run() {
     if (DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser(
-        "SystemEventLog needs system rights");
+        "SystemState needs system rights");
     } else {
       return;
     }
 
-    if (m_evtName == "running") {
-      bootstrap();
-    } else if (m_evtName == "model_ready") {
-      startup();
-    } else if (m_evtName == "callScene") {
-      if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
-        callscene();
+    try {
+      if (m_evtName == "running") {
+        bootstrap();
+      } else if (m_evtName == "model_ready") {
+        startup();
+      } else if (m_evtName == "callScene") {
+        if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+          callscene();
+        }
+      } else if (m_evtName == "undoScene") {
+        undoscene();
+      } else if (m_evtName == "stateChange") {
+        if (m_evtRaiseLocation) {
+
+        }
+        if (m_raisedAtState->getType() == StateType_Device) {
+          stateBinaryinput();
+        } else if (m_raisedAtState->getType() == StateType_Service) {
+          stateApartment();
+        }
       }
-    } else if (m_evtName == "undoScene") {
-      undoscene();
-    } else if ((m_evtName == "stateChange") &&
-               (m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
-      if (m_raisedAtState->getType() == StateType_Device) {
-        stateBinaryinput();
-      } else if (m_raisedAtState->getType() == StateType_Service) {
-        stateApartment();
-      }
+    } catch(ItemNotFoundException& ex) {
+      Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
     }
   }
 
