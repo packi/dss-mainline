@@ -404,7 +404,7 @@ namespace dss {
       break;
     }
     return convertedSensorValue;
-  }
+  } // sensorToFloat10
 
   double SceneHelper::sensorToFloat12(int _sensorType, int _sensorValue) {
     double convertedSensorValue;
@@ -446,7 +446,7 @@ namespace dss {
       break;
     }
     return convertedSensorValue;
-  }
+  } // sensorToFloat12
 
   int SceneHelper::sensorToSystem(int _sensorType, double _sensorValue) {
     int convertedSensorValue;
@@ -488,5 +488,49 @@ namespace dss {
       break;
     }
     return convertedSensorValue;
-  }
+  } // sensorToSystem
+
+  void SceneHelper::sensorName(const int _sensorType, std::string& _name) {
+    switch(_sensorType) {
+      case SensorIDActivePower:
+        _name = "Active Power"; break;
+      case SensorIDOutputCurrent:
+        _name = "Output Current"; break;
+      case SensorIDElectricMeter:
+        _name = "Electric Meter"; break;
+      case SensorIDOutputCurrentEx:
+        _name = "Output Current Ex"; break;
+      case SensorIDPowerConsumptionVA:
+        _name = "Active Power Ex"; break;
+      case SensorIDTemperatureIndoors:
+        _name = "Temperature Indoors"; break;
+      case SensorIDTemperatureOutdoors:
+        _name = "Temperature Outdoors"; break;
+      case SensorIDBrightnessIndoors:
+        _name = "Brightness Indoors"; break;
+      case SensorIDBrightnessOutdoors:
+        _name = "Brightness Outdoors"; break;
+      case SensorIDHumidityIndoors:
+        _name = "Humidity Indoors"; break;
+      case SensorIDHumidityOutdoors:
+        _name = "Humidity Outdoors"; break;
+      case SensorIDAirPressure:
+        _name = "Air Pressure"; break;
+      case SensorIDWindSpeed:
+        _name = "Wind Speed"; break;
+      case SensorIDWindDirection:
+        _name = "Wind Direction"; break;
+      case SensorIDPrecipitation:
+        _name = "Precipitation"; break;
+      case SensorIDRoomTemperatureSetpoint:
+        _name = "Temperature Setpoint"; break;
+      case SensorIDRoomTemperatureControlVariable:
+        _name = "Temperature Control"; break;
+      case 255:
+        _name = "Unknown Type"; break;
+    default:
+      break;
+    }
+  } // sensorName
+
 }
