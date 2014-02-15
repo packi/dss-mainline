@@ -3063,7 +3063,7 @@ namespace dss {
 
     groupId = 0;
     size_t groupName = statename.find(".group");
-    if (groupName > 0) {
+    if (groupName != std::string::npos) {
       std::string id = statename.substr(groupName + 6);
       groupId = strToIntDef(id, 0);
     }
