@@ -2915,13 +2915,13 @@ namespace dss {
           int iVal = strToIntDef(val, -1);
           if (iVal == 1) {
             pNode->setIntegerValue(pNode->getIntegerValue() + 1);
-            state->setState(coSystem, State_Active);
+            state->setState(coSystemBinaryInput, State_Active);
           } else if (iVal == 2) {
             if (pNode->getIntegerValue() > 0) {
               pNode->setIntegerValue(pNode->getIntegerValue() - 1);
             }
             if (pNode->getIntegerValue() == 0) {
-              state->setState(coSystem, State_Inactive);
+              state->setState(coSystemBinaryInput, State_Inactive);
             }
           }
         } // m_properties.has("value")
@@ -3036,8 +3036,7 @@ namespace dss {
       statename = "rain";
       // create state for a user group if it does not exist (new group?)
       if (devInput->m_targetGroupId >= 16) {
-        statename = statename + ".group" +
-                    intToString(devInput->m_targetGroupId);
+        statename = statename + ".group" + intToString(devInput->m_targetGroupId);
         getOrRegisterState(statename);
       }
       stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
@@ -3070,9 +3069,9 @@ namespace dss {
     boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
 
     dss_dsid_t dsid = dsid::fromString(originDeviceId);
-    if ((dsid.upper == 0) && (dsid.lower == 7)) {
-      // ignore scene calls originated by server generated system level events,
-      // e.g. scene calls issued by state changes
+    if ((dsid.upper == 0) && (dsid.lower == coSystem)) {
+      // ignore state change originated by server generated system level events,
+      // e.g. scene calls issued by state changes, to avoid loops
       return;
     }
 
