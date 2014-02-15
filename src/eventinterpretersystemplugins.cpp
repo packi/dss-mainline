@@ -2134,7 +2134,7 @@ namespace dss {
 
     bool isForced = false;
     if (m_properties.has("forced")) {
-        if (m_properties.get("forced") == "yes") {
+        if (m_properties.get("forced") == "true") {
           isForced = true;
         }
     }
