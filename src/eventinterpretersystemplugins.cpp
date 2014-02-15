@@ -2092,15 +2092,14 @@ namespace dss {
       }
 
       std::vector<boost::shared_ptr<Group> > groups = zones.at(z)->getGroups();
-      for (size_t g = 0; z < groups.size(); g++) {
+      for (size_t g = 0; g < groups.size(); g++) {
         int group_id = groups.at(g)->getID();
-        if ((group_id <= 0) || (group_id >= 16)) {
-          continue;
-        }
-
-        int scene_id = groups.at(g)->getLastCalledScene();
-        if (scene_id > 0) {
+        if (((group_id > 0) && (group_id < GroupIDStandardMax)) ||
+            (group_id == GroupIDControlTemperature)) {
+          int scene_id = groups.at(g)->getLastCalledScene();
+          if (scene_id >= 0) {
             logLastScene(_logger, zones.at(z), groups.at(g), scene_id);
+          }
         }
       }
     }
