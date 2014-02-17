@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <boost/bind.hpp>
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <libical/ical.h>
 #include <time.h>
@@ -133,7 +134,7 @@ namespace dss {
   }
 
   TimeStamp StopWatch::calcInterval() {
-    struct TimeStamp prev;
+    TimeStamp prev;
     prev = m_tic;
     m_tic.timestamp();
     return (m_tic - prev);

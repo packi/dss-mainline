@@ -62,7 +62,7 @@ namespace dss {
   struct SubscriptionTime {
     std::string m_eventName;
     std::string m_subscriptionName;
-    struct TimeStamp m_init, m_end;
+    TimeStamp m_init, m_end;
     unsigned count;
 
     bool operator==(const SubscriptionTime &other) const;
@@ -106,9 +106,9 @@ namespace dss {
   private:
     TimeStamp calcInterval();
     std::string m_eventName;
-    struct TimeStamp m_tic;
-    struct SubscriptionTime m_thisRun;
-    struct ScriptTime m_script;
+    TimeStamp m_tic;
+    SubscriptionTime m_thisRun;
+    ScriptTime m_script;
     bool  m_cancelled;
   };
 
@@ -124,8 +124,8 @@ namespace dss {
     void uploadSubscriptionTime(PropertyNodePtr timingTree, const
                                 SubscriptionTime subs);
     boost::mutex m_mutex;
-    typedef std::vector<struct SubscriptionTime> subscriptionTimes_t;
-    std::vector<struct SubscriptionTime> m_subscriptionTimes;
+    typedef std::vector<SubscriptionTime> subscriptionTimes_t;
+    std::vector<SubscriptionTime> m_subscriptionTimes;
   };
 
   class BenchmarkPublisherPlugin : public EventInterpreterPlugin {
