@@ -358,7 +358,8 @@ namespace dss {
       boost::shared_ptr<Group> pGroup;
       boost::shared_ptr<Group> groupOnZone;
 
-      if (group.GroupID <= 15) {
+      if ((group.GroupID <= GroupIDStandardMax) ||
+          (group.GroupID >= GroupIDControlGroupStart)) {
 
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
@@ -387,7 +388,7 @@ namespace dss {
         pGroup->setLastCalledScene(SceneOff);
         pGroup->setIsValid(true);
 
-      } else if (group.GroupID <= 23) {
+      } else if (group.GroupID <= GroupIDAppUserMax) {
 
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
