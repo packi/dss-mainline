@@ -37,7 +37,7 @@
  *  __DECL_LOG_CHANNEL__
  *
  * foobar.cpp
- * __DEFINE_LOG_CHANNEL__
+ * __DEFINE_LOG_CHANNEL__(yourClassName, logLevel)
  *
  * Adds function 'log' with personalized 'FooBar' channel
  * to your class

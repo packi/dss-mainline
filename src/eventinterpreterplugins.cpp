@@ -49,6 +49,7 @@
 #include "src/internaleventrelaytarget.h"
 #include "src/url.h"
 #include "src/webservice_replies.h"
+#include "src/subscription_profiler.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -56,7 +57,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include <time.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <spawn.h>
@@ -116,6 +116,8 @@ namespace dss {
 
 
   //================================================== ScriptContextWrapper
+
+  __DEFINE_LOG_CHANNEL__(ScriptContextWrapper, lsInfo)
 
   ScriptContextWrapper::ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
       PropertyNodePtr _pRootNode,
@@ -181,27 +183,6 @@ namespace dss {
         m_FilesNode = m_pPropertyNode->createProperty("files+");
       }
       m_FilesNode->createProperty("file+")->setStringValue(_name);
-    }
-  }
-
-  void ScriptContextWrapper::addRuntimeInfos(const std::string& _name, unsigned long _timingNS) {
-    if (DSS::hasInstance()) {
-      std::string propertyName = _name;
-      dss::replaceAll(propertyName, "/", "_");
-      PropertyNodePtr pPtr = DSS::getInstance()->getPropertySystem().createProperty("/system/js/timings/" + propertyName);
-
-      PropertyNodePtr pScriptCount = pPtr->getProperty("count");
-      if (!pScriptCount) {
-        pScriptCount = pPtr->createProperty("count");
-        pScriptCount->setIntegerValue(0);
-      }
-      PropertyNodePtr pScriptTime = pPtr->getProperty("time");
-      if (!pScriptTime) {
-        pScriptTime = pPtr->createProperty("time");
-        pScriptTime->setIntegerValue(0);
-      }
-      pScriptCount->setIntegerValue(pScriptCount->getIntegerValue() + 1);
-      pScriptTime->setIntegerValue(pScriptTime->getIntegerValue() + _timingNS);
     }
   }
 
@@ -317,20 +298,20 @@ namespace dss {
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.getOptions()->hasParameter("filename1")) {
+      StopWatch stopWatch(_event.getName());
+      bool timingEnabled = true;
+
+      stopWatch.startSubscription(); /* start before environment setup */
 
       if(m_pEnvironment == NULL) {
         initializeEnvironment();
       }
 
-      struct timespec tSubscriptionPre = { 0, 0 };
-      struct timespec tSubscriptionPost = { 0, 0 };
-      bool timingEnabled = false;
-#ifndef __APPLE__
-      if (m_pEnvironment->isTimingEnabled()) {
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPre);
-        timingEnabled = true;
+      /* TODO this should be done one in SubscriptionProfiler */
+      if (!m_pEnvironment->isTimingEnabled()) {
+        timingEnabled = false;
+        stopWatch.cancel();
       }
-#endif
 
       std::string scriptID;
       if(_subscription.getOptions()->hasParameter("script_id")) {
@@ -340,6 +321,10 @@ namespace dss {
       if(scriptID.empty()) {
         uniqueNode = true;
         scriptID = _event.getName() + _subscription.getID();
+      }
+
+      if (timingEnabled) {
+        stopWatch.setSubscriptionName(scriptID);
       }
 
       boost::shared_ptr<ScriptContext> ctx(m_pEnvironment->getContext());
@@ -442,6 +427,11 @@ namespace dss {
       std::string scripts;
 
       for (int i = 0; i < UCHAR_MAX; i++) {
+
+        if (timingEnabled) {
+          stopWatch.startScript();
+        }
+
         std::string paramName = std::string("filename") + intToString(i + 1);
         if (!_subscription.getOptions()->hasParameter(paramName)) {
           break;
@@ -457,13 +447,9 @@ namespace dss {
 
         wrapper->addFile(scriptName);
 
-        struct timespec tpre = { 0, 0 };
-        struct timespec tpost = { 0, 0 };
-#ifndef __APPLE__
         if (timingEnabled) {
-          clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpre);
+          stopWatch.setScriptName(scriptName);
         }
-#endif
 
         try {
 
@@ -498,56 +484,12 @@ namespace dss {
           return;
         }
 
-#ifndef __APPLE__
-        try {
-          if (timingEnabled) {
-            clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tpost);
-
-            #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
-            unsigned long tns =
-                (SEC_TO_NSEC(tpost.tv_sec) + tpost.tv_nsec) -
-                (SEC_TO_NSEC(tpre.tv_sec) + tpre.tv_nsec);
-            wrapper->addRuntimeInfos(scriptName, tns);
-          }
-        } catch(PropertyTypeMismatch& ex) {
-          Logger::getInstance()->log(
-              std::string("JavaScript Event Handler:"
-                  "Datatype error storing timing for script '")
-                  + scriptName + "'. Message: " + ex.what(), lsError);
-        } catch(std::runtime_error& ex) {
-          Logger::getInstance()->log(
-              std::string("JavaScript Event Handler:"
-                  "Cannot store timing for script '")
-                  + scriptName + "'. Message: " + ex.what(), lsError);
-        }
-#endif
-
         scripts = scripts + scriptName + " ";
-      }
 
-#ifndef __APPLE__
-      try {
         if (timingEnabled) {
-          clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tSubscriptionPost);
-
-          #define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
-          unsigned long tns =
-              (SEC_TO_NSEC(tSubscriptionPost.tv_sec) + tSubscriptionPost.tv_nsec) -
-              (SEC_TO_NSEC(tSubscriptionPre.tv_sec) + tSubscriptionPre.tv_nsec);
-          wrapper->addRuntimeInfos(wrapper->getIdentifier(), tns);
+          stopWatch.stopScript();
         }
-      } catch(PropertyTypeMismatch& ex) {
-        Logger::getInstance()->log(
-            std::string("JavaScript Event Handler:"
-                "Datatype error storing timing for subscription '")
-                + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
-      } catch(std::runtime_error& ex) {
-        Logger::getInstance()->log(
-            std::string("JavaScript Event Handler:"
-                "Cannot store timing for subscription '")
-                + wrapper->getIdentifier() + "'. Message: " + ex.what(), lsError);
       }
-#endif
 
       if(ctx->hasAttachedObjects()) {
         m_WrappedContexts.push_back(wrapper);
@@ -556,6 +498,10 @@ namespace dss {
       } else {
         ctx->detachWrapper();
         wrapper->destroy();
+      }
+
+      if (timingEnabled) {
+        stopWatch.stopSubscription();
       }
 
     } else {

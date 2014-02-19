@@ -195,6 +195,8 @@ namespace dss {
 
   //=============================================== PropertyNode
 
+  __DEFINE_LOG_CHANNEL__(PropertyNode, lsInfo);
+
   PropertyNode::PropertyNode(const char* _name, int _index)
     : m_ParentNode(NULL),
       m_Name(_name),
@@ -207,6 +209,8 @@ namespace dss {
   } // ctor
 
   PropertyNode::~PropertyNode() {
+    log(std::string(__func__) + " " + m_Name, lsDebug);
+
     // remove listeners
     boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
     for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();

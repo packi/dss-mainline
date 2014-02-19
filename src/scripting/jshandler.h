@@ -212,6 +212,7 @@ namespace dss {
   /** Wrap the script context and add script_id and property node
    * data around */
   class ScriptContextWrapper {
+    __DECL_LOG_CHANNEL__
   public:
     ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
                          PropertyNodePtr _pRootNode,
@@ -223,7 +224,6 @@ namespace dss {
     void destroy();
     boost::shared_ptr<ScriptContext> get();
     void addFile(const std::string& _name);
-    void addRuntimeInfos(const std::string& _name, unsigned long _timingNS);
     PropertyNodePtr getPropertyNode();
     const std::string& getIdentifier() const;
   private:

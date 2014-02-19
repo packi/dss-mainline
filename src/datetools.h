@@ -29,6 +29,7 @@
 #endif
 
 #include "base.h"
+#include "logger.h"
 
 #ifdef HAVE_LIBICAL_ICAL_H
 #include <libical/ical.h>
@@ -162,6 +163,7 @@ namespace dss {
     operator std::string() const;
     std::string toString() const;
     std::string toRFC2822String() const;
+    std::string toRFC2445IcalDataTime() const;
 
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
@@ -234,6 +236,7 @@ namespace dss {
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
   /** Schedule that gets it's schedule from an iCal's RRULE */
   class ICalSchedule : public Schedule {
+    __DECL_LOG_CHANNEL__
   private:
     struct icalrecurrencetype m_Recurrence;
     struct icaltimetype m_StartDate;

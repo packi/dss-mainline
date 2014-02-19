@@ -203,7 +203,7 @@ else if (raisedEvent.name === "callScene")
         // ignore scene calls originated by server generated system level events,
         // e.g. scene calls issued by state changes
         //return;
-    } else if (raisedEvent.parameter.forced) {
+    } else if (!raisedEvent.parameter.forced) {
         // ignore non-forced calls
     } else if (raisedEvent.source.isGroup) {
         var sceneID = parseInt(raisedEvent.parameter.sceneID, 10);

@@ -38,6 +38,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
+#include "src/logger.h"
 #include "expatparser.h"
 #include "dssfwd.h"
 
@@ -375,6 +376,7 @@ namespace dss {
 
   /** The heart of the PropertySystem. */
   class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
+    __DECL_LOG_CHANNEL__
   public:
     enum Flag {
       Readable = 1 << 0, /**< Node is readable */

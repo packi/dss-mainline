@@ -52,6 +52,7 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
+#include "subscription_profiler.h"
 
 #ifdef WITH_BONJOUR
   #include "bonjour.h"
@@ -477,14 +478,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
-    m_pEventInterpreter->addPlugin(plugin)
-      .addPlugin(new EventInterpreterPluginApartmentChange(m_pEventInterpreter.get()));
-
+    plugin = new EventInterpreterPluginApartmentChange(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginSystemEventLog(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-
     plugin = new EventInterpreterPluginSystemState(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new BenchmarkPublisherPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());

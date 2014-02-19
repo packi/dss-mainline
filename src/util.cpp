@@ -67,7 +67,7 @@ namespace dss {
             }
           }
           // Regular-User-Groups >=24
-          if (pGroup->getID() >= 24) {
+          if (pGroup->getID() >= 24 && pGroup->getID() <= 47) {
             try {
               _interface->createGroup(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID(), pGroup->getName());
