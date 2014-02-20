@@ -3,6 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <iostream>
 
 #define HAVE_CURL 1
@@ -25,15 +26,16 @@ BOOST_AUTO_TEST_CASE(curlTest) {
     curl->request(url, GET, &result);
 
     std::cout << "HTTP POST without postform\n";
-    curl->request(url, POST, HashMapStringString(), HashMapStringString(),
-                  NULL);
+    curl->request(url, POST, NULL);
 
     std::cout << "HTTP POST with postform\n";
     HashMapStringString header;
     header["bar"] = "dada";
     HashMapStringString postform;
     postform["foo"] = "bogus";
-    curl->request(url, POST, header, postform, &result);
+    curl->request(url, POST, boost::make_shared<HashMapStringString>(header),
+                             boost::make_shared<HashMapStringString>(postform),
+                             &result);
 
     std::cout << "CURL test done\n";
 }

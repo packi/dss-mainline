@@ -387,9 +387,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     parseProperties(_properties);
 
 #ifdef HAVE_CURL
-    if (m_pPropertySystem->getBoolValue("/config/webservice-api/enabled")) {
-        WebserviceConnection::getInstance();
-    }
+    WebserviceConnection::getInstance();
 #endif
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly

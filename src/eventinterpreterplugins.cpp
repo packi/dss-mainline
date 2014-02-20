@@ -38,6 +38,7 @@
 #include "src/scripting/jslogger.h"
 #if HAVE_CURL
   #include "src/scripting/jscurl.h"
+  #include "src/scripting/jswebservice.h"
 #endif
 #include "src/foreach.h"
 #include "src/model/set.h"
@@ -539,6 +540,9 @@ namespace dss {
 #if HAVE_CURL
       ext = new CurlScriptContextExtension();
       m_pEnvironment->addExtension(ext);
+
+      ext = new WebserviceConnectionScriptContextExtension();
+      m_pEnvironment->addExtension(ext);
 #endif
 
       ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
@@ -1012,8 +1016,7 @@ namespace dss {
 
     boost::shared_ptr<ModelChangeRequestCallback> mcb(
                                             new ModelChangeRequestCallback());
-    WebserviceConnection::getInstance()->request(url, POST, URL::emptyHeader,
-                                                 URL::emptyForm, mcb, NULL);
+    WebserviceConnection::getInstance()->request(url, POST, mcb, NULL);
   }
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)

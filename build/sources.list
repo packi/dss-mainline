@@ -104,6 +104,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/scripting/jscurl.cpp \
 	$(top_srcdir)/src/scripting/jscurl.h \
 	$(top_srcdir)/src/scripting/jscurl-options.h \
+	$(top_srcdir)/src/scripting/jswebservice.h \
+	$(top_srcdir)/src/scripting/jswebservice.cpp \
 	$(top_srcdir)/src/scripting/jsevent.cpp \
 	$(top_srcdir)/src/scripting/jsevent.h \
 	$(top_srcdir)/src/scripting/jshandler.cpp \

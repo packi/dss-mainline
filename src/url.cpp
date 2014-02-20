@@ -108,12 +108,12 @@ size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* u
 
 long URL::request(const std::string& url, RequestType type, class URLResult* result)
 {
-  return request(url, type, HashMapStringString(), HashMapStringString(), result);
+  return request(url, type, boost::shared_ptr<HashMapStringString>(new HashMapStringString()), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
 }
 
 long URL::request(const std::string& url, RequestType type,
-                  const HashMapStringString &headers,
-                  const HashMapStringString &formpost,
+                  boost::shared_ptr<HashMapStringString> headers,
+                  boost::shared_ptr<HashMapStringString> formpost,
                   URLResult* result)
 {
   CURLcode res;
@@ -125,12 +125,17 @@ long URL::request(const std::string& url, RequestType type,
 
   if (!m_curl_handle) {
     m_curl_handle = curl_easy_init();
+  } else {
+    curl_easy_reset(m_curl_handle);
   }
+
   curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
 
-  if (!headers.empty()) {
-    foreach(HashMapStringString::value_type elt, headers) {
-      cheaders = curl_slist_append(cheaders, (elt.first + ": " + elt.second).c_str());
+  HashMapStringString::iterator it;
+
+  if (!headers->empty()) {
+    for (it = headers->begin(); it != headers->end(); it++) {
+      cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
     }
     curl_easy_setopt(m_curl_handle, CURLOPT_HTTPHEADER, cheaders);
   }
@@ -142,10 +147,10 @@ long URL::request(const std::string& url, RequestType type,
     break;
   case POST:
     curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
-    foreach(HashMapStringString::value_type elt, formpost) {
+    for (it = formpost->begin(); it != formpost->end(); it++) {
       curl_formadd(&formpost_start, &formpost_end,
-                   CURLFORM_COPYNAME, elt.first.c_str(),
-                   CURLFORM_COPYCONTENTS, elt.second.c_str(),
+                   CURLFORM_COPYNAME, it->first.c_str(),
+                   CURLFORM_COPYCONTENTS, it->second.c_str(),
                    CURLFORM_END);
     }
     /* must be set even if it's null */

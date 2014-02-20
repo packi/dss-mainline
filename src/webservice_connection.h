@@ -49,8 +49,8 @@ public:
                boost::shared_ptr<URLRequestCallback> cb,
                void *arg);
   void request(const std::string& url, RequestType type,
-               const HashMapStringString headers,
-               const HashMapStringString formpost,
+               boost::shared_ptr<HashMapStringString> headers,
+               boost::shared_ptr<HashMapStringString> formpost,
                boost::shared_ptr<URLRequestCallback> cb,
                void *arg);
   static WebserviceConnection *getInstance();
@@ -61,7 +61,6 @@ private:
 
   CURL *m_handle;
   std::string m_base_url;
-  bool m_active;
   boost::shared_ptr<URL> m_url;
 
   class URLRequestTask : public Task {
@@ -73,8 +72,8 @@ private:
     URLRequestTask(boost::shared_ptr<URL> req, 
                    const std::string& base, const std::string& url, 
                    RequestType type,
-                   const HashMapStringString headers,
-                   const HashMapStringString formpost,
+                   boost::shared_ptr<HashMapStringString> headers,
+                   boost::shared_ptr<HashMapStringString> formpost,
                    boost::shared_ptr<URLRequestCallback> cb, void *arg);
     virtual ~URLRequestTask() {};
     virtual void run();
@@ -83,8 +82,8 @@ private:
     std::string m_base_url;
     std::string m_url;
     RequestType m_type;
-    const HashMapStringString m_headers;
-    const HashMapStringString m_formpost;
+    boost::shared_ptr<HashMapStringString> m_headers;
+    boost::shared_ptr<HashMapStringString> m_formpost;
     URLResult *m_result;
     boost::shared_ptr<URLRequestCallback> m_cb;
     void *m_arg;

@@ -41,7 +41,6 @@ WebserviceConnection::WebserviceConnection()
     if (!endsWith(m_base_url, "/")) {
       m_base_url = m_base_url + "/";
     }
-    m_active = DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled");
     m_url = boost::shared_ptr<URL>(new URL(true));
 }
 
@@ -77,8 +76,8 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
 }
 
 void WebserviceConnection::request(const std::string& url, RequestType type,
-                                   const HashMapStringString headers,
-                                   const HashMapStringString formpost,
+                                boost::shared_ptr<HashMapStringString> headers,
+                                boost::shared_ptr<HashMapStringString> formpost,
                                    boost::shared_ptr<URLRequestCallback> cb,
                                    void *arg)
 {
@@ -106,8 +105,8 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      const std::string& base,
                                                      const std::string& url,
                                                      RequestType type,
-                                             const HashMapStringString headers,
-                                             const HashMapStringString formpost,
+                               boost::shared_ptr<HashMapStringString> headers,
+                               boost::shared_ptr<HashMapStringString> formpost,
                                     boost::shared_ptr<URLRequestCallback> cb,
                                                      void *arg) : m_req(req),
                                                      m_base_url(base),
