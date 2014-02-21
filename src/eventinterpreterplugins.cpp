@@ -965,8 +965,7 @@ namespace dss {
   {
   public:
     virtual ~ModelChangeRequestCallback() {};
-    virtual void result(long code, boost::shared_ptr<URLResult> result,
-                        void *arg)
+    virtual void result(long code, boost::shared_ptr<URLResult> result)
     {
       if (code != 200) {
         Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
@@ -1016,7 +1015,7 @@ namespace dss {
 
     boost::shared_ptr<ModelChangeRequestCallback> mcb(
                                             new ModelChangeRequestCallback());
-    WebserviceConnection::getInstance()->request(url, POST, mcb, NULL);
+    WebserviceConnection::getInstance()->request(url, POST, mcb);
   }
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)

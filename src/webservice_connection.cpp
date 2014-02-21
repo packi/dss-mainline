@@ -66,24 +66,22 @@ void WebserviceConnection::shutdown() {
 }
 
 void WebserviceConnection::request(const std::string& url, RequestType type,
-                                   boost::shared_ptr<URLRequestCallback> cb,
-                                   void *arg)
+                                   boost::shared_ptr<URLRequestCallback> cb)
 {
     boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
             new WebserviceConnection::URLRequestTask::URLRequestTask(
-                m_url, m_base_url, url, type, cb, arg));
+                m_url, m_base_url, url, type, cb));
     addEvent(task);
 }
 
 void WebserviceConnection::request(const std::string& url, RequestType type,
                                 boost::shared_ptr<HashMapStringString> headers,
                                 boost::shared_ptr<HashMapStringString> formpost,
-                                   boost::shared_ptr<URLRequestCallback> cb,
-                                   void *arg)
+                                   boost::shared_ptr<URLRequestCallback> cb)
 {
     boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
             new WebserviceConnection::URLRequestTask::URLRequestTask(
-                m_url, m_base_url, url, type, headers, formpost, cb, arg));
+                m_url, m_base_url, url, type, headers, formpost, cb));
     addEvent(task);
 }
 
@@ -91,11 +89,11 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      const std::string& base,
                                                      const std::string& url,
                                                      RequestType type,
-                                    boost::shared_ptr<URLRequestCallback> cb,
-                                                     void *arg) : m_req(req),
+                                    boost::shared_ptr<URLRequestCallback> cb) :
+                                                     m_req(req),
                                                      m_base_url(base),
                                                      m_url(url), m_type(type),
-                                                     m_cb(cb), m_arg(arg),
+                                                     m_cb(cb),
                                                      m_simple(true)
 
 {
@@ -107,14 +105,14 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      RequestType type,
                                boost::shared_ptr<HashMapStringString> headers,
                                boost::shared_ptr<HashMapStringString> formpost,
-                                    boost::shared_ptr<URLRequestCallback> cb,
-                                                     void *arg) : m_req(req),
+                                    boost::shared_ptr<URLRequestCallback> cb) :
+                                                     m_req(req),
                                                      m_base_url(base),
                                                      m_url(url), m_type(type),
                                                      m_headers(headers),
                                                      m_formpost(formpost),
                                                      m_cb(cb),
-                                                     m_arg(arg), m_simple(false)
+                                                     m_simple(false)
 
 {
 }
@@ -136,7 +134,7 @@ void WebserviceConnection::URLRequestTask::run()
                             m_formpost, result.get());
     }
     if (m_cb != NULL) {
-      m_cb->result(code, result, m_arg);
+      m_cb->result(code, result);
     }
 }
 

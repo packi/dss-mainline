@@ -38,7 +38,7 @@ namespace dss {
 class URLRequestCallback
 {
 public:
-  virtual void result(long code, boost::shared_ptr<URLResult> res, void *arg) = 0;
+  virtual void result(long code, boost::shared_ptr<URLResult> res) = 0;
 };
 
 class WebserviceConnection : public TaskProcessor {
@@ -46,13 +46,11 @@ public:
   WebserviceConnection();
   virtual ~WebserviceConnection();
   void request(const std::string& url, RequestType type,
-               boost::shared_ptr<URLRequestCallback> cb,
-               void *arg);
+               boost::shared_ptr<URLRequestCallback> cb);
   void request(const std::string& url, RequestType type,
                boost::shared_ptr<HashMapStringString> headers,
                boost::shared_ptr<HashMapStringString> formpost,
-               boost::shared_ptr<URLRequestCallback> cb,
-               void *arg);
+               boost::shared_ptr<URLRequestCallback> cb);
   static WebserviceConnection *getInstance();
   static void shutdown();
 
@@ -68,13 +66,13 @@ private:
     URLRequestTask(boost::shared_ptr<URL> req,
                    const std::string& base, const std::string& url, 
                    RequestType type,
-                   boost::shared_ptr<URLRequestCallback> cb, void *arg);
+                   boost::shared_ptr<URLRequestCallback> cb);
     URLRequestTask(boost::shared_ptr<URL> req, 
                    const std::string& base, const std::string& url, 
                    RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
-                   boost::shared_ptr<URLRequestCallback> cb, void *arg);
+                   boost::shared_ptr<URLRequestCallback> cb);
     virtual ~URLRequestTask() {};
     virtual void run();
   private:
@@ -86,7 +84,6 @@ private:
     boost::shared_ptr<HashMapStringString> m_formpost;
     URLResult *m_result;
     boost::shared_ptr<URLRequestCallback> m_cb;
-    void *m_arg;
     bool m_simple;
   };
 };

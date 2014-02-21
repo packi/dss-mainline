@@ -71,7 +71,7 @@ namespace dss {
           delete m_pRunAsUser;
         }
     }
-    virtual void result(long code, boost::shared_ptr<URLResult> result, void *arg) {
+    virtual void result(long code, boost::shared_ptr<URLResult> result) {
       if (code != 200) {
         Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
             " HTTP request failed " + intToString(code), lsError);
@@ -179,7 +179,7 @@ namespace dss {
     boost::shared_ptr<WebserviceRequestCallback> mcb(
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
-    WebserviceConnection::getInstance()->request(url, reqtype, mcb, NULL);
+    WebserviceConnection::getInstance()->request(url, reqtype, mcb);
 
     return JS_TRUE;
   }
@@ -357,7 +357,7 @@ namespace dss {
     WebserviceConnection::getInstance()->request(url, reqtype,
                             boost::make_shared<HashMapStringString>(headers),
                             boost::make_shared<HashMapStringString>(formpost),
-                            mcb, NULL);
+                            mcb);
 
     return JS_TRUE;
   }
