@@ -46,20 +46,20 @@ namespace dss {
                                     public ScriptContextAttachedObject
   {
   public:
+    boost::shared_ptr<ScriptObject> m_pScriptObject;
     ScriptFunctionRooter* m_ScriptRoot;
+    User* m_pRunAsUser;
     ScriptContext* m_pContext;
     JSObject* m_pFunctionObject;
     jsval m_Function;
-    boost::shared_ptr<ScriptObject> m_pScriptObject;
-    User* m_pRunAsUser;
   public:
     WebserviceRequestCallback(ScriptContext* _context, ScriptFunctionRooter* _rooter, JSObject *_functionObj, jsval _function ) :
       ScriptContextAttachedObject(_context),
+      m_ScriptRoot(_rooter),
+      m_pRunAsUser(NULL),
       m_pContext(_context),
       m_pFunctionObject(_functionObj),
-      m_Function(_function),
-      m_ScriptRoot(_rooter),
-      m_pRunAsUser(NULL)
+      m_Function(_function)
       {
         if(Security::getCurrentlyLoggedInUser() != NULL) {
           m_pRunAsUser = new User(*Security::getCurrentlyLoggedInUser());

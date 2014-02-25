@@ -69,7 +69,7 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
                                    boost::shared_ptr<URLRequestCallback> cb)
 {
     boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
-            new WebserviceConnection::URLRequestTask::URLRequestTask(
+            new WebserviceConnection::URLRequestTask(
                 m_url, m_base_url, url, type, cb));
     addEvent(task);
 }
@@ -80,7 +80,7 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
                                    boost::shared_ptr<URLRequestCallback> cb)
 {
     boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
-            new WebserviceConnection::URLRequestTask::URLRequestTask(
+            new WebserviceConnection::URLRequestTask(
                 m_url, m_base_url, url, type, headers, formpost, cb));
     addEvent(task);
 }
