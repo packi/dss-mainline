@@ -58,6 +58,10 @@ namespace dss {
   boost::shared_ptr<JSONElement>
     PropertyQuery::addProperty(boost::shared_ptr<JSONObject> obj,
                                PropertyNodePtr node) {
+    if (node->getValueType() == vTypeNone) {
+      /* ignore container type */
+      return obj;
+    }
     log(std::string(__func__) + " " + node->getName() + ": " + node->getAsString(), lsDebug);
     switch (node->getValueType()) {
     case vTypeInteger:
@@ -172,6 +176,7 @@ namespace dss {
                              boost::shared_ptr<JSONElement> _parentElement) {
 
     log(std::string(__func__) + " Level" + intToString(_partIndex) + " : " +
+        "node: <" + _parentNode->getName() + "> filter: " +
         m_PartList[_partIndex].name, lsDebug);
 
     assert(_partIndex < m_PartList.size());
@@ -182,7 +187,9 @@ namespace dss {
       PropertyNodePtr childNode = _parentNode->getChild(iChild);
       boost::shared_ptr<JSONElement> node = _parentElement;
 
-      if ((part.name == "*") || (childNode->getName() == part.name)) {
+      if (((part.name == "*") || (childNode->getName() == part.name)) &&
+          (childNode->getValueType() == vTypeNone)) {
+        /* none means node is not value node, but container */
 
         if (!part.properties.empty()) {
           node = addProperties(part, _parentElement, childNode);
