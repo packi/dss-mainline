@@ -34,6 +34,7 @@ namespace dss {
   void synchronizeGroups(Apartment* _apartment, StructureModifyingBusInterface* _interface);
 
   std::string escapeHTML(std::string _input);
+  std::string unescapeHTML(std::string _input);
 }
 
 #endif
