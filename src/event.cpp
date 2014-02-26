@@ -380,7 +380,8 @@ namespace dss {
         for(SubscriptionVector::iterator ipSubscription = subscriptionsCopy.begin(), e = subscriptionsCopy.end();
             ipSubscription != e; ++ipSubscription)
         {
-          if((*ipSubscription)->matches(*toProcess)) {
+          if (((*ipSubscription)->getEventName() == toProcess->getName()) &&
+              (*ipSubscription)->matches(toProcess)) {
             log(std::string("Interpreter: subscription '") + (*ipSubscription)->getID() + "' matches event");
             EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
             if(plugin != NULL) {
@@ -488,19 +489,20 @@ namespace dss {
     }
   } // loadStatesFromProperty
 
-  void EventInterpreter::loadFilter(PropertyNodePtr _node, EventSubscription& _subscription) {
+  void EventInterpreter::loadFilter(PropertyNodePtr _node, boost::shared_ptr<EventSubscription> _subscription) {
     if (_node) {
       std::string matchType = _node->getStringValue();
       if(matchType == "all") {
-        _subscription.setFilterOption(EventSubscription::foMatchAll);
+        _subscription->setFilterOption(EventSubscription::foMatchAll);
       } else if(matchType == "none") {
-        _subscription.setFilterOption(EventSubscription::foMatchNone);
+        _subscription->setFilterOption(EventSubscription::foMatchNone);
       } else if(matchType == "one") {
-        _subscription.setFilterOption(EventSubscription::foMatchOne);
+        _subscription->setFilterOption(EventSubscription::foMatchOne);
       } else {
         log(std::string("loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
-        _subscription.setFilterOption(EventSubscription::foMatchAll);
+        _subscription->setFilterOption(EventSubscription::foMatchAll);
       }
+
       for (int i = 0; i < _node->getChildCount(); i++) {
         PropertyNodePtr fProp = _node->getChild(i);
         EventPropertyFilter* filter = NULL;
@@ -527,8 +529,8 @@ namespace dss {
             log("Unknown property-filter type: " + fType, lsError);
           }
         }
-        if(filter != NULL) {
-          _subscription.addPropertyFilter(filter);
+        if (filter != NULL) {
+          _subscription->addPropertyFilter(filter);
         }
       }
     }
@@ -572,10 +574,16 @@ namespace dss {
         }
       }
 
-      boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, *this, opts));
+      boost::shared_ptr<EventSubscription> subscription(
+          new EventSubscription(evtName, handlerName, *this, opts));
+
       try {
-        loadFilter(_node->getPropertyByName("filter"), *subscription);
+        PropertyNodePtr filter = _node->getPropertyByName("filter");
+        if (filter) {
+          loadFilter(filter, subscription);
+        }
       } catch(std::runtime_error& e) {
+        log("Load subscription " + handlerName + "filter: " + e.what(), lsWarning);
       }
 
       subscribe(subscription);
@@ -938,28 +946,35 @@ namespace dss {
 
   void EventSubscription::initialize() {
     m_FilterOption = foMatchAll;
-    addPropertyFilter(new EventPropertyMatchFilter(EventProperty::Name, m_EventName));
   } // initialize
 
   void EventSubscription::addPropertyFilter(EventPropertyFilter* _pPropertyFilter) {
     m_Filter.push_back(_pPropertyFilter);
   } // addPropertyFilter
 
-  bool EventSubscription::matches(Event& _event) {
+  bool EventSubscription::matches(boost::shared_ptr<Event> _event) {
+    if (m_Filter.size() == 0) {
+      return true;
+    }
+    bool fMatch = false;
     for(boost::ptr_vector<EventPropertyFilter>::iterator ipFilter = m_Filter.begin(), e = m_Filter.end();
         ipFilter != e; ++ipFilter)
     {
-      if(ipFilter->matches(_event)) {
-        if(m_FilterOption == foMatchOne) {
+      bool match = ipFilter->matches(_event);
+      if (match) {
+        if (m_FilterOption == foMatchOne) {
+          EventPropertyMatchFilter f = dynamic_cast<EventPropertyMatchFilter&> (*ipFilter);
           return true;
-        } else if(m_FilterOption == foMatchNone) {
+        } else if (m_FilterOption == foMatchNone) {
           return false;
+        } else {
+          fMatch = true;
         }
-      } else if(m_FilterOption == foMatchAll) {
+      } else if (m_FilterOption == foMatchAll) {
         return false;
       }
     }
-    return true;
+    return fMatch;
   } // matches
 
 
@@ -1017,11 +1032,10 @@ namespace dss {
 
   //================================================== EventPropertyMatchFilter
 
-  bool EventPropertyMatchFilter::matches(const Event& _event) {
-    if(_event.hasPropertySet(getPropertyName())) {
-      return _event.getPropertyByName(getPropertyName()) == m_Value;
-    }
-    return false;
+  bool EventPropertyMatchFilter::matches(boost::shared_ptr<Event> _event) {
+    std::string filterProp = getPropertyName();
+    std::string eventProp = _event->getPropertyByName(filterProp);
+    return eventProp == m_Value;
   } // matches
 
 
@@ -1031,8 +1045,8 @@ namespace dss {
   : EventPropertyFilter(_propertyName)
   { } // ctor
 
-  bool EventPropertyExistsFilter::matches(const Event& _event) {
-    return _event.hasPropertySet(getPropertyName());
+  bool EventPropertyExistsFilter::matches(boost::shared_ptr<Event> _event) {
+    return _event->hasPropertySet(getPropertyName());
   } // matches
 
 
@@ -1042,8 +1056,8 @@ namespace dss {
   : EventPropertyFilter(_propertyName)
   { } // ctor
 
-  bool EventPropertyMissingFilter::matches(const Event& _event) {
-    return !_event.hasPropertySet(getPropertyName());
+  bool EventPropertyMissingFilter::matches(boost::shared_ptr<Event> _event) {
+    return !_event->hasPropertySet(getPropertyName());
   } // matches
 
   //================================================= ScheduledEvent

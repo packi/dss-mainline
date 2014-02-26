@@ -153,11 +153,11 @@
     <parameter>
       <parameter name="filename1">scripts/system_hail.js</parameter>
       <parameter name="script_id">system_hail</parameter>
-      <filter match="all">
-        <property-filter type="matches" value="90" property="sceneID" />
-        <property-filter type="matches" value="91" property="sceneID" />
-      </filter>
     </parameter>
+    <filter match="one">
+      <property-filter type="matches" value="90" property="sceneID" />
+      <property-filter type="matches" value="91" property="sceneID" />
+    </filter>
   </subscription>
 
   <!-- State Definitions -->

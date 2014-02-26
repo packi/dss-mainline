@@ -69,6 +69,29 @@ namespace dss {
           optsObj->addProperty(option.first, option.second);
         }
       }
+      EventPropertyFilter** filter = pSubscription->getFilter();
+      if (filter && *filter) {
+        boost::shared_ptr<JSONObject> filterObj(new JSONObject());
+        subscription->addElement("filter", filterObj);
+        filterObj->addProperty("mode", pSubscription->getFilterMode());
+        boost::shared_ptr<JSONArrayBase> jsonFilter(new JSONArrayBase());
+        filterObj->addElement("list", jsonFilter);
+        for (; *filter; filter++) {
+          boost::shared_ptr<JSONObject> f(new JSONObject());
+          jsonFilter->addElement("", f);
+          f->addProperty("property", (*filter)->getPropertyName());
+          EventPropertyMatchFilter* fm = dynamic_cast<EventPropertyMatchFilter *> (*filter);
+          if (fm) {
+            f->addProperty("match", fm->getValue());
+          }
+          else if (dynamic_cast<EventPropertyMissingFilter *> (*filter)) {
+            f->addProperty("missing", "");
+          }
+          else if (dynamic_cast<EventPropertyExistsFilter *> (*filter)) {
+            f->addProperty("exists", "");
+          }
+        }
+      }
     }
     return success(result);
   } // list
