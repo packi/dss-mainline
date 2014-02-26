@@ -33,7 +33,7 @@ usage()
   echo " -e  enable options not support by busybox wget"
   echo "     limit number of retries if a fetch fails"
   echo ""
-  echo "url, e.g. '/json/property/query?query=/system/js/timings/*(count,time)/*(*)'"
+  echo "url, e.g. '/json/property/query2?query=/system/js/timings(*)/*(*)/*(*)'"
   echo "all options must come in front of url, incl. output"
   echo ""
   echo "Troubleshoot:"
