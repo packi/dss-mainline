@@ -40,12 +40,15 @@ namespace dss {
 
   WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
-    if(_request.getMethod() == "query") {
+    if (_request.getMethod() == "query" || _request.getMethod() == "query2") {
       std::string query = _request.getParameter("query");
       if(query.empty()) {
         return failure("Need parameter 'query'");
       }
       PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query);
+      if (_request.getMethod() == "query2") {
+          return success(propertyQuery.run2());
+      }
       return success(propertyQuery.run());
     }
 

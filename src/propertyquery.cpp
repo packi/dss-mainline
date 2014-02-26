@@ -58,6 +58,10 @@ namespace dss {
   boost::shared_ptr<JSONElement>
     PropertyQuery::addProperty(boost::shared_ptr<JSONObject> obj,
                                PropertyNodePtr node) {
+    if (node->getValueType() == vTypeNone) {
+      /* ignore container type */
+      return obj;
+    }
     log(std::string(__func__) + " " + node->getName() + ": " + node->getAsString(), lsDebug);
     switch (node->getValueType()) {
     case vTypeInteger:
@@ -111,6 +115,11 @@ namespace dss {
    *
    * property is what we are extracting, part is what needs to match
    * query2 will extract nothing at this level
+   *
+   * returned json:
+   *    {"prop1":val, "prop2": val, "part":[{},{}]}
+   *
+   * @see also runFor2
    */
   void PropertyQuery::runFor(PropertyNodePtr _parentNode,
                              unsigned int _partIndex,
@@ -148,6 +157,51 @@ namespace dss {
     }
   } // runFor
 
+  /**
+   * Handles one level of the query
+   *
+   * query1 = ../part(property1,property2)/...
+   * qeury2 = ../part/...
+   *
+   * property is what we are extracting, part is what needs to match
+   * query2 will extract nothing at this level
+   *
+   * Similar to runFor but easier parsable json return
+   * json:
+   *    "part" : { "prop1" : val, "prop2" : val }
+   *
+   */
+  void PropertyQuery::runFor2(PropertyNodePtr _parentNode,
+                             unsigned int _partIndex,
+                             boost::shared_ptr<JSONElement> _parentElement) {
+
+    log(std::string(__func__) + " Level" + intToString(_partIndex) + " : " +
+        "node: <" + _parentNode->getName() + "> filter: " +
+        m_PartList[_partIndex].name, lsDebug);
+
+    assert(_partIndex < m_PartList.size());
+    part_t& part = m_PartList[_partIndex];
+    bool hasSubpart = m_PartList.size() > (_partIndex + 1);
+
+    for (int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
+      PropertyNodePtr childNode = _parentNode->getChild(iChild);
+      boost::shared_ptr<JSONElement> node = _parentElement;
+
+      if (((part.name == "*") || (childNode->getName() == part.name)) &&
+          (childNode->getValueType() == vTypeNone)) {
+        /* none means node is not value node, but container */
+
+        if (!part.properties.empty()) {
+          node = addProperties(part, _parentElement, childNode);
+        }
+
+        if (hasSubpart) {
+          runFor2(childNode, _partIndex + 1, node);
+        }
+      }
+    }
+  } // runFor2
+
   boost::shared_ptr<JSONElement> PropertyQuery::run() {
     boost::shared_ptr<JSONObject> result(new JSONObject());
     if(beginsWith(m_Query, m_pProperty->getName())) {
@@ -155,5 +209,13 @@ namespace dss {
     }
     return result;
   } // run
+
+  boost::shared_ptr<JSONElement> PropertyQuery::run2() {
+    boost::shared_ptr<JSONObject> result(new JSONObject());
+    if(beginsWith(m_Query, m_pProperty->getName())) {
+      runFor2(m_pProperty, 0, result);
+    }
+    return result;
+  } // run2
 
 } // namespace dss

@@ -47,6 +47,7 @@ namespace dss {
     }
 
     boost::shared_ptr<JSONElement> run();
+    boost::shared_ptr<JSONElement> run2();
   private:
     class part_t {
     public:
@@ -67,10 +68,31 @@ namespace dss {
      *
      * property is what we are extracting, part is what needs to match
      * query2 will extract nothing at this level
+     *
+     * returned json:
+     *    {"prop1":val, "prop2": val, "part":[{},{}]}
+     *
+     * @see also runFor2
      */
     void runFor(PropertyNodePtr _parentNode, unsigned int _partIndex,
                 boost::shared_ptr<JSONElement> _parentElement);
 
+    /**
+     * Handles one level of the query
+     *
+     * query1 = ../part(property1,property2)/...
+     * qeury2 = ../part/...
+     *
+     * property is what we are extracting, part is what needs to match
+     * query2 will extract nothing at this level
+     *
+     * Similar to runFor but easier parsable json return
+     * json:
+     *    "part" : { "prop1" : val, "prop2" : val }
+     *
+     */
+    void runFor2(PropertyNodePtr _parentNode, unsigned int _partIndex,
+                 boost::shared_ptr<JSONElement> _parentElement);
     /**
      * Filter children of _node by part and store
      * and extracted values in JSON object
