@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(cloudTest) {
     aprtmntChange += "?apartmentChangeType=Apartment";
     aprtmntChange += "&dssid=3504175feff28d2044084179";
 
-    int code = curl->request(aprtmntChange, POST, URL::emptyHeader, URL::emptyForm, &result);
+    int code = curl->request(aprtmntChange, POST, &result);
 
     if (code != 200) {
         std::cout << "invalid return code " << std::dec << code << "\n";

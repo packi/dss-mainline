@@ -38,6 +38,7 @@
 #include "src/scripting/jslogger.h"
 #if HAVE_CURL
   #include "src/scripting/jscurl.h"
+  #include "src/scripting/jswebservice.h"
 #endif
 #include "src/foreach.h"
 #include "src/model/set.h"
@@ -49,6 +50,7 @@
 #include "src/internaleventrelaytarget.h"
 #include "src/url.h"
 #include "src/webservice_replies.h"
+#include "src/webservice_connection.h"
 #include "src/subscription_profiler.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -538,6 +540,9 @@ namespace dss {
 #if HAVE_CURL
       ext = new CurlScriptContextExtension();
       m_pEnvironment->addExtension(ext);
+
+      ext = new WebserviceConnectionScriptContextExtension();
+      m_pEnvironment->addExtension(ext);
 #endif
 
       ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
@@ -956,16 +961,40 @@ namespace dss {
   {
   }
 
+  class ModelChangeRequestCallback : public URLRequestCallback
+  {
+  public:
+    virtual ~ModelChangeRequestCallback() {};
+    virtual void result(long code, boost::shared_ptr<URLResult> result)
+    {
+      if (code != 200) {
+        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                             " HTTP POST failed " + intToString(code), lsError);
+        return;
+      }
+
+      try {
+        ModelChangeResponse resp = parseModelChange(result->content());
+
+        if (resp.code != 0) {
+          Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                                     ": " + resp.desc, lsError);
+          return;
+        }
+      } catch (ParseError &ex) {
+        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
+                       " invalid return message " + result->content(), lsError);
+        return;
+      }
+    }
+  };
+
   void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
   {
     const char* sDsid = "/system/dSID";
 
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url(propSystem.getStringValue("/config/webservice-api/base-url"));
-    if (!endsWith(url, "/")) {
-      url = url + "/";
-    }
-    url += propSystem.getStringValue(ModelChangedEvent::propPathUrl);
+    std::string url = propSystem.getStringValue(ModelChangedEvent::propPathUrl);
 
     url += "?apartmentChangeType=";
     switch (type) {
@@ -984,37 +1013,16 @@ namespace dss {
     Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
             " executeURL: " + url);
 
-    URLResult result;
-    boost::shared_ptr<URL> curl(new URL());
-    long code = curl->request(url, POST, URL::emptyHeader, URL::emptyForm, &result);
-
-    if (code != 200) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                   " HTTP POST failed " + intToString(code), lsError);
-        return;
-    }
-
-    try {
-
-    ModelChangeResponse resp = parseModelChange(result.content());
-
-    if (resp.code != 0) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                   ": " + resp.desc, lsError);
-        return;
-    }
-
-    } catch (ParseError &ex) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                   " invalid return message " + result.content(), lsError);
-        return;
-    }
-
+    boost::shared_ptr<ModelChangeRequestCallback> mcb(
+                                            new ModelChangeRequestCallback());
+    WebserviceConnection::getInstance()->request(url, POST, mcb);
   }
-
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
+#ifndef HAVE_CURL
+    return;
+#endif
 
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     bool enabled = propSystem.getBoolValue("/config/webservice-api/enabled");

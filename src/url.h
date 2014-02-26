@@ -25,6 +25,8 @@
 
 #ifdef HAVE_CURL
 
+#include <curl/curl.h>
+
 #include "base.h"
 
 namespace dss {
@@ -56,14 +58,15 @@ namespace dss {
       static HashMapStringString emptyHeader;
       static HashMapStringString emptyForm;
 
-      URL();
+      URL(bool _reuse_handle = false);
+      ~URL();
 
       long request(const std::string& url, RequestType type = GET,
                    URLResult* result = NULL);
 
       long request(const std::string& url, RequestType type,
-                   const HashMapStringString &headers,
-                   const HashMapStringString &formpost,
+                   boost::shared_ptr<HashMapStringString> headers,
+                   boost::shared_ptr<HashMapStringString> formpost,
                    URLResult* result);
 
       long downloadFile(std::string url, std::string filename);
@@ -72,6 +75,8 @@ namespace dss {
 
     private:
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
+      bool m_reuse_handle;
+      CURL *m_curl_handle;
   };
 };
 
