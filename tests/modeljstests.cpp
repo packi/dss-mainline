@@ -435,6 +435,21 @@ BOOST_AUTO_TEST_CASE(testProperties) {
 //  BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 2);
 }
 
+BOOST_AUTO_TEST_CASE(testPropertiesStrings) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("Property.setProperty('/testing', '<a href=\"test&\">\\\'bla\\\'</a>')");
+  /* string should be HTML escaped */
+  BOOST_CHECK_EQUAL(propSys.getStringValue("/testing"), "&lt;a href=&quot;test&amp;&quot;&gt;&#039;bla&#039;&lt;/a&gt;");
+  /* getProperty in JS automatically unescapes HTML */
+  BOOST_CHECK_EQUAL(ctx->evaluate<std::string>("Property.getProperty('/testing')"), "<a href=\"test&\">'bla'</a>");
+}
+
 BOOST_AUTO_TEST_CASE(testPropertyListener) {
   PropertySystem propSys;
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
