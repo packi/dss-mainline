@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(testSimpleScripts2) {
          "  return result;\n"
          "}\n"
          "\n"
-         "obj = newTestObj();\n"
+         "var obj = newTestObj();\n"
          "obj.x = obj.x * obj.x;\n"
          "print(obj.x);\n"
          "obj.x;\n";
