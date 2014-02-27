@@ -20,24 +20,19 @@ BOOST_AUTO_TEST_CASE(curlTest) {
 
     URLResult result;
     boost::shared_ptr<URL> curl(new URL());
-    std::string url = "http://www.aizo.com";
+    std::string url = "http://www.digitalstrom.com";
 
-    std::cout << "HTTP GET\n";
-    curl->request(url, GET, &result);
+    BOOST_CHECK_EQUAL(curl->request(url, GET, &result), 200);
 
-    std::cout << "HTTP POST without postform\n";
-    curl->request(url, POST, NULL);
+    BOOST_CHECK_EQUAL(curl->request(url, POST, NULL), 200);
 
-    std::cout << "HTTP POST with postform\n";
     HashMapStringString header;
     header["bar"] = "dada";
     HashMapStringString postform;
     postform["foo"] = "bogus";
-    curl->request(url, POST, boost::make_shared<HashMapStringString>(header),
-                             boost::make_shared<HashMapStringString>(postform),
-                             &result);
-
-    std::cout << "CURL test done\n";
+    BOOST_CHECK_EQUAL(curl->request(url, POST, boost::make_shared<HashMapStringString>(header),
+                                    boost::make_shared<HashMapStringString>(postform),
+                                    &result), 200);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
