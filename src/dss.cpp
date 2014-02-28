@@ -84,6 +84,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/finder.hpp>
 
+#include "webservice_connection.h"
+
 namespace dss {
 
   //============================================= DSS
@@ -178,6 +180,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pModelMaintenance.reset();
 
     m_pApartment.reset();
+
+#ifdef HAVE_CURL
+    WebserviceConnection::shutdown();
+#endif
   }
 
   void DSS::setupDirectories()
@@ -380,6 +386,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     // options override config.xml
     parseProperties(_properties);
 
+#ifdef HAVE_CURL
+    WebserviceConnection::getInstance();
+#endif
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly
     PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");

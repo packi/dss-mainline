@@ -98,5 +98,15 @@ namespace dss {
     return _input;
   }
 
+  std::string unescapeHTML(std::string _input) {
+    boost::replace_all(_input, "&amp;", "&");
+    boost::replace_all(_input, "&quot;", "\"");
+    boost::replace_all(_input, "&#039;", "'");
+    boost::replace_all(_input, "&lt;", "<");
+    boost::replace_all(_input, "&gt;", ">");
+
+    return _input;
+  }
+
 }
 

@@ -288,14 +288,6 @@ namespace dss {
     }
 
     {
-      boost::shared_ptr<Event> readyEvent(new Event("new_device"));
-      readyEvent->setProperty("device", _spec.DSID.toString());
-      readyEvent->setProperty("zone", intToString(_zone->getID()));
-      if(DSS::hasInstance()) {
-        DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
-      }
-    }
-    {
       boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
       boost::shared_ptr<Event> readyEvent(new Event("DeviceEvent", pDevRef));
       readyEvent->setProperty("action", "ready");

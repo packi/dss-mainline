@@ -40,7 +40,15 @@ namespace dss {
 HashMapStringString URL::emptyHeader;
 HashMapStringString URL::emptyForm;
 
-URL::URL() {}
+URL::URL(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
+                               m_curl_handle(NULL) {}
+URL::~URL()
+{
+  if (m_curl_handle) {
+      curl_easy_cleanup(m_curl_handle);
+      m_curl_handle = NULL;
+  }
+}
 
 URLResult::~URLResult()
 {
@@ -100,12 +108,12 @@ size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* u
 
 long URL::request(const std::string& url, RequestType type, class URLResult* result)
 {
-  return request(url, type, HashMapStringString(), HashMapStringString(), result);
+  return request(url, type, boost::shared_ptr<HashMapStringString>(new HashMapStringString()), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
 }
 
 long URL::request(const std::string& url, RequestType type,
-                  const HashMapStringString &headers,
-                  const HashMapStringString &formpost,
+                  boost::shared_ptr<HashMapStringString> headers,
+                  boost::shared_ptr<HashMapStringString> formpost,
                   URLResult* result)
 {
   CURLcode res;
@@ -115,49 +123,59 @@ long URL::request(const std::string& url, RequestType type,
   struct curl_httppost *formpost_end = NULL;
   long http_code = -1;
 
-  CURL *curl_handle = curl_easy_init();
-  curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+  if (!m_curl_handle) {
+    m_curl_handle = curl_easy_init();
+  } else {
+    curl_easy_reset(m_curl_handle);
+  }
 
-  if (!headers.empty()) {
-    foreach(HashMapStringString::value_type elt, headers) {
-      cheaders = curl_slist_append(cheaders, (elt.first + ": " + elt.second).c_str());
+  curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
+
+  HashMapStringString::iterator it;
+
+  if (!headers->empty()) {
+    for (it = headers->begin(); it != headers->end(); it++) {
+      cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
     }
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, cheaders);
+    curl_easy_setopt(m_curl_handle, CURLOPT_HTTPHEADER, cheaders);
   }
 
   switch (type) {
   case GET:
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
-    curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(m_curl_handle, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(m_curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
     break;
   case POST:
-    curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
-    foreach(HashMapStringString::value_type elt, formpost) {
+    curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
+    for (it = formpost->begin(); it != formpost->end(); it++) {
       curl_formadd(&formpost_start, &formpost_end,
-                   CURLFORM_COPYNAME, elt.first.c_str(),
-                   CURLFORM_COPYCONTENTS, elt.second.c_str(),
+                   CURLFORM_COPYNAME, it->first.c_str(),
+                   CURLFORM_COPYCONTENTS, it->second.c_str(),
                    CURLFORM_END);
     }
     /* must be set even if it's null */
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost_start);
+    curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, formpost_start);
     break;
   }
 
   if (result != NULL) {
     /* send all data to this function  */
     result->reset();
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URLResult::appendCallback);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)result);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URLResult::appendCallback);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, (void *)result);
   } else {
     /* suppress output to stdout */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
   }
-  curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
-  curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
-  res = curl_easy_perform(curl_handle);
+  curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
+  curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+  res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
     Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
-    curl_easy_cleanup(curl_handle);
+    if (!m_reuse_handle) {
+      curl_easy_cleanup(m_curl_handle);
+      m_curl_handle = NULL;
+    }
     return http_code;
   }
 
@@ -169,8 +187,12 @@ long URL::request(const std::string& url, RequestType type,
     curl_formfree(formpost_start);
   }
 
-  curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
-  curl_easy_cleanup(curl_handle);
+  curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+    
+  if (!m_reuse_handle) {
+    curl_easy_cleanup(m_curl_handle);
+    m_curl_handle = NULL;
+  }
   return http_code;
 }
 
@@ -180,31 +202,42 @@ long URL::downloadFile(std::string url, std::string filename) {
   long http_code = -1;
   FILE *data;
 
-  CURL *curl_handle = curl_easy_init();
-  curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-  curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
+  if (!m_curl_handle) {
+    m_curl_handle = curl_easy_init();
+  }
+  curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(m_curl_handle, CURLOPT_HTTPGET, 1);
 
-  curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+  curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
   data = fopen(filename.c_str(), "w");
   if (data == NULL) {
-    curl_easy_cleanup(curl_handle);
+    if (!m_reuse_handle) {
+      curl_easy_cleanup(m_curl_handle);
+      m_curl_handle = NULL;
+    }
     return http_code;
   }
 
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, data);
+  curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, data);
 
-  res = curl_easy_perform(curl_handle);
+  res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
     Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
     fclose(data);
-    curl_easy_cleanup(curl_handle);
+    if (!m_reuse_handle) {
+      curl_easy_cleanup(m_curl_handle);
+      m_curl_handle = NULL;
+    }
     return http_code;
   }
 
-  curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+  curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
   fclose(data);
-  curl_easy_cleanup(curl_handle);
+  if (!m_reuse_handle) {
+    curl_easy_cleanup(m_curl_handle);
+    m_curl_handle = NULL;
+  }
   return http_code;
 }
 

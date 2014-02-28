@@ -1,8 +1,7 @@
 /*
-    Copyright (c) 2013 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2014 digitalSTROM AG, Zurich, Switzerland
 
-    Authors: Christian Hitz, aizo AG <christian.hitz@aizo.com>
-             Michael Tross, aizo GmbH <michael.tross@aizo.com>
+    Author: Sergey Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -21,20 +20,23 @@
 
 */
 
-#ifndef __DSS_UTIL_H_INCLUDED__
-#define __DSS_UTIL_H_INCLUDED__
+#ifndef __DSS_JSWEBSERVICE_H__
+#define __DSS_JSWEBSERVICE_H__
 
-#include <string>
+#ifdef HAVE_CURL
 
 namespace dss {
 
-  class Apartment;
-  class StructureModifyingBusInterface;
+class WebserviceConnectionScriptContextExtension : public ScriptExtension {
+public:
+  WebserviceConnectionScriptContextExtension();
+  virtual ~WebserviceConnectionScriptContextExtension() {}
 
-  void synchronizeGroups(Apartment* _apartment, StructureModifyingBusInterface* _interface);
+  virtual void extendContext(ScriptContext& _context);
+};
 
-  std::string escapeHTML(std::string _input);
-  std::string unescapeHTML(std::string _input);
-}
+} // namespace
 
 #endif
+
+#endif//__DSS_JSWEBSERVICE_H__

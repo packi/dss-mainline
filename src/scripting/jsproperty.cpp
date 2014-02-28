@@ -270,7 +270,7 @@ namespace dss {
       JS_SET_RVAL(cx, vp, INT_TO_JSVAL(node->getIntegerValue()));
       break;
     case vTypeString: {
-      std::string val = node->getStringValue();
+      std::string val = unescapeHTML(node->getStringValue());
       JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, val.c_str())));
     }
     break;

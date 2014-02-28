@@ -176,7 +176,7 @@ namespace dss {
 
     const std::string& getPropertyName() const { return m_PropertyName; }
 
-    virtual bool matches(const Event& _event) = 0;
+    virtual bool matches(boost::shared_ptr<Event> _event) = 0;
   }; // EventPropertyFilter
 
 
@@ -188,10 +188,11 @@ namespace dss {
   public:
     EventPropertyMatchFilter(const std::string& _propertyName, const std::string& _value)
     : EventPropertyFilter(_propertyName), m_Value(_value) {}
-
     virtual ~EventPropertyMatchFilter() {}
 
-    virtual bool matches(const Event& _event);
+    const std::string& getValue() const { return m_Value; }
+
+    virtual bool matches(boost::shared_ptr<Event> _event);
   }; // EventPropertyMatchFilter
 
 
@@ -202,7 +203,7 @@ namespace dss {
     EventPropertyExistsFilter(const std::string& _propertyName);
     virtual ~EventPropertyExistsFilter() {};
 
-    virtual bool matches(const Event& _event);
+    virtual bool matches(boost::shared_ptr<Event> _event);
   }; // EventPropertyExistsFilter
 
 
@@ -213,7 +214,7 @@ namespace dss {
     EventPropertyMissingFilter(const std::string& _propertyName);
     virtual ~EventPropertyMissingFilter() {};
 
-    virtual bool matches(const Event& _event);
+    virtual bool matches(boost::shared_ptr<Event> _event);
   }; // EventPropertyMissingFilter
 
 
@@ -249,10 +250,13 @@ namespace dss {
     boost::shared_ptr<SubscriptionOptions> getOptions() { return m_SubscriptionOptions; }
     boost::shared_ptr<const SubscriptionOptions> getOptions() const { return m_SubscriptionOptions; }
 
+    const EventPropertyFilterOption getFilterMode() { return m_FilterOption; }
+    EventPropertyFilter** const getFilter() { return m_Filter.c_array(); }
+
     void addPropertyFilter(EventPropertyFilter* _pPropertyFilter);
 
     void setFilterOption(const EventPropertyFilterOption _value) { m_FilterOption = _value; }
-    bool matches(Event& _event);
+    bool matches(boost::shared_ptr<Event> _event);
   }; // EventSubscription
 
 
@@ -357,7 +361,7 @@ namespace dss {
   private:
     void loadSubscription(PropertyNodePtr _node);
     void loadState(PropertyNodePtr _node);
-    void loadFilter(PropertyNodePtr _node, EventSubscription& _subscription);
+    void loadFilter(PropertyNodePtr _node, boost::shared_ptr<EventSubscription> _subscription);
     boost::shared_ptr<EventSubscription> subscriptionByID(const std::string& _name);
   protected:
     virtual void doStart();

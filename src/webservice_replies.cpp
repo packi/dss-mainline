@@ -15,7 +15,14 @@ ModelChangeResponse parseModelChange(const char* buf)
 {
     ModelChangeResponse resp;
 
+    if (!buf) {
+      throw ParseError("buffer is NULL");
+    }
+
     json_object * jobj = json_tokener_parse(buf);
+    if (!jobj) {
+      throw ParseError("invalid JSON");
+    }
     json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
         enum json_type type = json_object_get_type(val);
         if (!strcmp(key, "ReturnCode")) {
