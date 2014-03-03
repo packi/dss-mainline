@@ -160,6 +160,32 @@ void setupPrivileges(PropertySystem &propSys) {
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }
 
+class FixtureSentinelTest : public FixtureTestUserTest {
+public:
+  FixtureSentinelTest() : FixtureTestUserTest() {
+    PropertyNodePtr userNode, roleNode;
+    boost::shared_ptr<User> sentinel;
+
+    roleNode = m_PropertySystem.createProperty("/system/security/roles/sentinel");
+    userNode = m_PropertySystem.createProperty("/system/security/users/sentinel");
+    userNode->createProperty("role")->alias(roleNode);
+
+    sentinel.reset(new User(userNode));
+    sentinel->setPassword("sentinel");
+    m_PropertySystem.createProperty("/readme");
+
+    /* will not create privileges for role sentinel */
+    setupPrivileges(m_PropertySystem);
+    /* from now on need to logged in */
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(testSentinelHasLessPrivilegesThanNobody, FixtureSentinelTest) {
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
+  m_pSecurity->authenticate("sentinel", "sentinel");
+  BOOST_CHECK_THROW(m_PropertySystem.getProperty("/readme"), SecurityException);
+}
+
 class FixtureTwoUsers : public FixtureTestUserTest {
 public:
   FixtureTwoUsers()

@@ -921,19 +921,30 @@ namespace dss {
   } // checkWriteAccess
 
   boost::shared_ptr<Privilege> PropertyNode::searchForPrivilege() {
-    boost::shared_ptr<Privilege> result;
-    if(m_pPrivileges != NULL) {
+    if (m_pPrivileges != NULL) {
       User* pUser = Security::getCurrentlyLoggedInUser();
-      PropertyNodePtr pRole;
-      if(pUser != NULL) {
-        pRole = pUser->getRole();
+      if (pUser == NULL) {
+        /* nobody user */
+        return m_pPrivileges->getPrivilegeForRole(PropertyNodePtr());
       }
-      result = m_pPrivileges->getPrivilegeForRole(pRole);
+
+      boost::shared_ptr<Privilege> result =
+        m_pPrivileges->getPrivilegeForRole(pUser->getRole());
+      if (!result) {
+        throw SecurityException("No privileges for user " + pUser->getName());
+      }
+      return result;
     }
-    if((result == NULL) && (m_ParentNode != NULL)) {
-      result = m_ParentNode->searchForPrivilege();
+
+    if (m_ParentNode != NULL) {
+      return m_ParentNode->searchForPrivilege();
     }
-    return result;
+
+    if (Security::getCurrentlyLoggedInUser()) {
+      /* usually only during init, while no privileges set on the root node */
+      log("No privileges defined, but user accounts present", lsDebug);
+    }
+    return boost::shared_ptr<Privilege>();
   } // searchForPrivilege
 
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
