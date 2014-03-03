@@ -516,7 +516,6 @@ namespace dss {
     boost::shared_ptr<NodePrivileges> getPrivileges() { return m_pPrivileges; }
     void setPrivileges(boost::shared_ptr<NodePrivileges> _value) { m_pPrivileges = _value; }
 
-    void checkReadAccess();
     void checkWriteAccess();
 
     /** Performs \a _callback for each child node (non-recursive) */

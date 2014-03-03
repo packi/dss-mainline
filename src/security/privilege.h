@@ -40,7 +40,6 @@ namespace dss {
     {};
 
     typedef enum {
-      Read = 1,
       Write = 2
     } Right;
 

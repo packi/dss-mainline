@@ -332,7 +332,6 @@ namespace dss {
   } // getDisplayName
 
   PropertyNodePtr PropertyNode::getProperty(const std::string& _propPath) {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getProperty(_propPath);
     } else {
@@ -378,7 +377,6 @@ namespace dss {
   } // getAndRemoveIndexFromPropertyName
 
   PropertyNodePtr PropertyNode::getPropertyByName(const std::string& _name) {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getPropertyByName(_name);
     } else {
@@ -427,7 +425,6 @@ namespace dss {
   } // count
 
   int PropertyNode::size() {
-    checkReadAccess();
     return m_ChildNodes.size();
   } // size
 
@@ -529,7 +526,6 @@ namespace dss {
   } // setBooleanValue
 
   std::string PropertyNode::getStringValue() {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getStringValue();
     } else {
@@ -547,7 +543,6 @@ namespace dss {
   } // getStringValue
 
   int PropertyNode::getIntegerValue() {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getIntegerValue();
     } else {
@@ -565,7 +560,6 @@ namespace dss {
   } // getIntegerValue
 
   bool PropertyNode::getBoolValue() {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getBoolValue();
     } else {
@@ -583,7 +577,6 @@ namespace dss {
   } // getBoolValue
 
   double PropertyNode::getFloatingValue() {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getFloatingValue();
     } else {
@@ -715,7 +708,6 @@ namespace dss {
   } // setFlag
 
   std::string PropertyNode::getAsString() {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getAsString();
     } else {
@@ -746,13 +738,11 @@ namespace dss {
   } // getAsString
 
   void PropertyNode::addListener(PropertyListener* _listener) {
-    checkReadAccess();
     _listener->registerProperty(this);
     m_Listeners.push_back(_listener);
   } // addListener
 
   void PropertyNode::removeListener(PropertyListener* _listener) {
-    checkReadAccess();
     std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
     if(it != m_Listeners.end()) {
       m_Listeners.erase(it);
@@ -797,7 +787,6 @@ namespace dss {
   } // createProperty
 
   bool PropertyNode::saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
-    checkReadAccess();
 
     _ofs << doIndent(_indent) << "<property type=\"" << getValueTypeAsString(getValueType()) << "\"" <<
                                           " name=\"" << XMLStringEscape(getDisplayName()) << "\"";
@@ -832,7 +821,6 @@ namespace dss {
   } // saveAsXML
 
   bool PropertyNode::saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
-    checkReadAccess();
     foreach(PropertyNodePtr pChild, m_ChildNodes) {
       if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
         if(!pChild->saveAsXML(_ofs, _indent, _flagsMask)) {
@@ -891,20 +879,6 @@ namespace dss {
       prop->notifyListeners(_callback, _node);
     }
   } // notifyListeners
-
-  void PropertyNode::checkReadAccess() {
-    boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
-    if(pPrivilege != NULL) {
-      if(!pPrivilege->hasRight(Privilege::Read)) {
-        User* pUser = Security::getCurrentlyLoggedInUser();
-        std::string userName = "(nobody)";
-        if(pUser != NULL) {
-          userName = pUser->getName();
-        }
-        throw SecurityException("Read access denied for user " + userName);
-      }
-    }
-  } // checkReadAccess
 
   void PropertyNode::checkWriteAccess() {
     boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();

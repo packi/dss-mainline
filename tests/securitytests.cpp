@@ -146,15 +146,12 @@ void setupPrivileges(PropertySystem &propSys) {
   boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody, privilegeUser;
 
   privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
-  privilegeSystem->addRight(Privilege::Read);
   privilegeSystem->addRight(Privilege::Write);
 
   privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
-  privilegeUser->addRight(Privilege::Read);
   privilegeUser->addRight(Privilege::Write);
 
   privilegeNobody.reset(new Privilege(PropertyNodePtr()));
-  privilegeNobody->addRight(Privilege::Read);
 
   boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
   privileges->addPrivilege(privilegeSystem);
@@ -164,7 +161,6 @@ void setupPrivileges(PropertySystem &propSys) {
 
   /* security: passwords and credentials */
   boost::shared_ptr<Privilege> privilegeNobodySecurity(new Privilege(PropertyNodePtr()));
-  privilegeNobodySecurity->addRight(Privilege::Read);
 
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
   privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
@@ -189,8 +185,7 @@ BOOST_FIXTURE_TEST_CASE(testReadPrivilege, FixturePrivilegeTest) {
 BOOST_FIXTURE_TEST_CASE(testReadPrivilegeSecurity, FixturePrivilegeTest) {
   BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser + "/password"));
   m_pSecurity->authenticate("testuser", "test");
-  /* TODO, unauthenticated users can read but not authenticated ones */
-  BOOST_CHECK_THROW(m_PropertySystem.getProperty(pathTestUser), SecurityException);
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser));
   m_pSecurity->signOff();
 }
 
@@ -231,10 +226,10 @@ public:
   }
 };
 
-BOOST_FIXTURE_TEST_CASE(testSentinelHasLessPrivilegesThanNobody, FixtureSentinelTest) {
+BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesHasSameAccessAsNobody, FixtureSentinelTest) {
   BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
   m_pSecurity->authenticate("sentinel", "sentinel");
-  BOOST_CHECK_THROW(m_PropertySystem.getProperty("/readme"), SecurityException);
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
 }
 
 class FixtureSystemUser : public FixtureTestUserTest {
