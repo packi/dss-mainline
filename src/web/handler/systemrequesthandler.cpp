@@ -105,7 +105,8 @@ namespace dss {
             return failure("Authentication failed");
           }
           m_pSessionManager->getSession(token)->inheritUserFromSecurity();
-          log("Registered new JSON session");
+          log("Registered new JSON session for user: " + user +
+              " (" + token + ")");
 
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           resultObj->addProperty("token", token);
@@ -141,7 +142,9 @@ namespace dss {
           return failure("Application-Authentication failed");
         }
         m_pSessionManager->getSession(token)->inheritUserFromSecurity();
-        log("Registered new JSON-Application session");
+        log("Registered new JSON-Application session for " +
+            m_pSessionManager->getSecurity()->getApplicationName(loginToken) +
+            " (" + token + ")");
 
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("token", token);

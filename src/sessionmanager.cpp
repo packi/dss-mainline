@@ -209,7 +209,7 @@ namespace dss {
       boost::shared_ptr<Session> s = i->second;
       if((s == NULL) || (!s->isStillValid())) {
         if (s) {
-          Logger::getInstance()->log("SessionManager: cleanup session " + s->getID(), lsDebug);
+          Logger::getInstance()->log("SessionManager: cleanup session " + s->getID() + " (" + intToString(m_Sessions.size()) + ")", lsDebug);
         }
         m_Sessions.erase(i++);
       } else {

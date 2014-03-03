@@ -694,6 +694,7 @@ namespace dss {
               self.log("Session limit reached", lsError);
               return NULL;
             }
+            self.log("Registered new JSON session for trusted port (" + newToken + ")");
             session = self.m_SessionManager->getSession(newToken);
             injectedCookies["path"] = "/";
             injectedCookies["token"] = newToken;
