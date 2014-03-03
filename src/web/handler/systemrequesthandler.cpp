@@ -100,6 +100,10 @@ namespace dss {
         m_pSessionManager->getSecurity()->signOff();
         if(m_pSessionManager->getSecurity()->authenticate(user, password)) {
           std::string token = m_pSessionManager->registerSession();
+          if (token.empty()) {
+            log("Session limit reached", lsError);
+            return failure("Authentication failed");
+          }
           m_pSessionManager->getSession(token)->inheritUserFromSecurity();
           log("Registered new JSON session");
 
@@ -132,6 +136,10 @@ namespace dss {
       m_pSessionManager->getSecurity()->signOff();
       if(m_pSessionManager->getSecurity()->authenticateApplication(loginToken)) {
         std::string token = m_pSessionManager->registerApplicationSession();
+        if (token.empty()) {
+          log("Session limit reached", lsError);
+          return failure("Application-Authentication failed");
+        }
         m_pSessionManager->getSession(token)->inheritUserFromSecurity();
         log("Registered new JSON-Application session");
 

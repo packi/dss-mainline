@@ -690,6 +690,10 @@ namespace dss {
           self.log("Logging-in from a trusted port as '" + userName + "'");
           if (self.m_SessionManager->getSecurity()->impersonate(userName) && (session == NULL)) {
             std::string newToken = self.m_SessionManager->registerSession();
+            if (newToken.empty()) {
+              self.log("Session limit reached", lsError);
+              return NULL;
+            }
             session = self.m_SessionManager->getSession(newToken);
             injectedCookies["path"] = "/";
             injectedCookies["token"] = newToken;
