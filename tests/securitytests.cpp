@@ -54,7 +54,6 @@ public:
     boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->signOff();
-    m_pNobodyRole = m_PropertySystem.createProperty("/system/security/roles/nobody");
     m_pSystemRole = m_PropertySystem.createProperty("/system/security/roles/system");
     m_pUserRole = m_PropertySystem.createProperty("/system/security/roles/user");
     m_pUserNode = m_PropertySystem.createProperty("/system/security/users/testuser");
@@ -70,7 +69,6 @@ protected:
   PropertyNodePtr m_pUserNode;
   PropertyNodePtr m_pSystemRole;
   PropertyNodePtr m_pUserRole;
-  PropertyNodePtr m_pNobodyRole;
 };
 
 BOOST_FIXTURE_TEST_CASE(testFixtureDoesntLogInAUser, FixtureTestUserTest) {
@@ -148,35 +146,26 @@ protected:
 BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
   PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
   pNode->setStringValue("not modified");
-  boost::shared_ptr<Privilege>
-    privilegeSystem(
-      new Privilege(
-        m_pSystemRole));
 
+  boost::shared_ptr<Privilege> privilegeSystem( new Privilege( m_pSystemRole));
   privilegeSystem->addRight(Privilege::Read);
   privilegeSystem->addRight(Privilege::Write);
   privilegeSystem->addRight(Privilege::Security);
 
-  boost::shared_ptr<Privilege>
-    privilegeNobody(
-      new Privilege(
-        PropertyNodePtr()));
+  boost::shared_ptr<Privilege> privilegeNobody( new Privilege( PropertyNodePtr()));
   privilegeNobody->addRight(Privilege::Read);
+
   boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
   privileges->addPrivilege(privilegeSystem);
   privileges->addPrivilege(privilegeNobody);
   m_PropertySystem.getProperty("/")->setPrivileges(privileges);
 
-
-  boost::shared_ptr<Privilege>
-    privilegeNobody2(
-      new Privilege(
-        PropertyNodePtr()));
+  boost::shared_ptr<Privilege> privilegeNobody2( new Privilege( PropertyNodePtr()));
   privilegeNobody2->addRight(Privilege::Read);
+
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
   privilegesSecurityNode->addPrivilege(privilegeNobody2);
   m_PropertySystem.getProperty("/system/security")->setPrivileges(privilegesSecurityNode);
-
 
   BOOST_CHECK_THROW(pNode->setStringValue("Test"), SecurityException);
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "not modified");
