@@ -41,10 +41,11 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
-BOOST_AUTO_TEST_CASE(testSystemUserIsInitialized) {
+BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
   PropertySystem propertysystem;
   Security security(propertysystem.createProperty("/system/security"));
-  security.loginAsSystemUser("Some reason");
+  security.loginAsSystemUser("system_user_does_not_exist");
+  BOOST_CHECK(security.getCurrentlyLoggedInUser() == NULL);
 }
 
 class FixtureTestUserTest {
