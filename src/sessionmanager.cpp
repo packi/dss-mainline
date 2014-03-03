@@ -69,9 +69,11 @@ namespace dss {
   }
 
   void SessionManager::sendCleanupEvent() {
+    DateTime now;
     boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
-    pEvent->setProperty("time", "+" + intToString(kSessionCleanupInterval));
-    m_EventQueue.pushTimedEvent(pEvent);
+    pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+    pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(kSessionCleanupInterval));
+    m_EventQueue.pushEvent(pEvent);
   }
 
   void SessionManager::setupCleanupEventRelayTarget() {
@@ -215,7 +217,6 @@ namespace dss {
       }
     }
     m_MapMutex.unlock();
-    this->sendCleanupEvent();
   }
 }
 
