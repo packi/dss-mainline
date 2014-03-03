@@ -148,12 +148,10 @@ void setupPrivileges(PropertySystem &propSys) {
   privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
   privilegeSystem->addRight(Privilege::Read);
   privilegeSystem->addRight(Privilege::Write);
-  privilegeSystem->addRight(Privilege::Security);
 
   privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
   privilegeUser->addRight(Privilege::Read);
   privilegeUser->addRight(Privilege::Write);
-  privilegeUser->addRight(Privilege::Security);
 
   privilegeNobody.reset(new Privilege(PropertyNodePtr()));
   privilegeNobody->addRight(Privilege::Read);
