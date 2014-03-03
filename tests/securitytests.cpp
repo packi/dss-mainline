@@ -44,6 +44,8 @@ static std::string pathSecurity = "/system/security";
 static std::string pathUserRole = "/system/security/roles/user";
 static std::string pathSystemRole = "/system/security/roles/system";
 
+static std::string pathTestUser = "/system/security/users/testuser";
+
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
 BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
@@ -64,7 +66,7 @@ public:
     m_pSystemRole = m_PropertySystem.createProperty(pathSystemRole);
     m_pUserRole = m_PropertySystem.createProperty(pathUserRole);
 
-    m_pUserNode = m_PropertySystem.createProperty("/system/security/users/testuser");
+    m_pUserNode = m_PropertySystem.createProperty(pathTestUser);
     m_pUserNode->createProperty("role")->alias(m_pUserRole);
     m_pUser.reset(new User(m_pUserNode));
     m_pUser->setPassword("test");
@@ -135,19 +137,29 @@ BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
   BOOST_CHECK(threadObj->result == true);
 }
 
+/**
+ * TODO move this to security::init since it is how
+ * the security is actually configured in the system
+ */
 void setupPrivileges(PropertySystem &propSys) {
-  boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody;
+  boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody, privilegeUser;
 
   privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
   privilegeSystem->addRight(Privilege::Read);
   privilegeSystem->addRight(Privilege::Write);
   privilegeSystem->addRight(Privilege::Security);
 
+  privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
+  privilegeUser->addRight(Privilege::Read);
+  privilegeUser->addRight(Privilege::Write);
+  privilegeUser->addRight(Privilege::Security);
+
   privilegeNobody.reset(new Privilege(PropertyNodePtr()));
   privilegeNobody->addRight(Privilege::Read);
 
   boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
   privileges->addPrivilege(privilegeSystem);
+  privileges->addPrivilege(privilegeUser);
   privileges->addPrivilege(privilegeNobody);
   propSys.getProperty("/")->setPrivileges(privileges);
 
@@ -158,6 +170,46 @@ void setupPrivileges(PropertySystem &propSys) {
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
   privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
+}
+
+class FixturePrivilegeTest : public FixtureTestUserTest {
+public:
+  FixturePrivilegeTest() : FixtureTestUserTest() {
+    m_PropertySystem.createProperty("/folder")->createProperty("property");
+    setupPrivileges(m_PropertySystem);
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(testReadPrivilege, FixturePrivilegeTest) {
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/folder/property"));
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/folder/property"));
+  m_pSecurity->signOff();
+}
+
+BOOST_FIXTURE_TEST_CASE(testReadPrivilegeSecurity, FixturePrivilegeTest) {
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser + "/password"));
+  m_pSecurity->authenticate("testuser", "test");
+  /* TODO, unauthenticated users can read but not authenticated ones */
+  BOOST_CHECK_THROW(m_PropertySystem.getProperty(pathTestUser), SecurityException);
+  m_pSecurity->signOff();
+}
+
+BOOST_FIXTURE_TEST_CASE(testWritePrivilege, FixturePrivilegeTest) {
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/foo"), SecurityException);
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_NO_THROW(m_PropertySystem.createProperty("/foo"));
+  m_pSecurity->signOff();
+}
+
+BOOST_FIXTURE_TEST_CASE(testWritePrivilegeSecurity, FixturePrivilegeTest) {
+  /* TODO, nobody has the right to create new users, probably a good thing */
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/evil_E"),
+                    SecurityException);
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/new_user"),
+                    SecurityException);
+  m_pSecurity->signOff();
 }
 
 class FixtureSentinelTest : public FixtureTestUserTest {
