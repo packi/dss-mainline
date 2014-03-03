@@ -39,6 +39,11 @@
 
 using namespace dss;
 
+static std::string pathSecurity = "/system/security";
+
+static std::string pathUserRole = "/system/security/roles/user";
+static std::string pathSystemRole = "/system/security/roles/system";
+
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
 BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
@@ -51,12 +56,14 @@ BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
-    m_pSecurity.reset(new Security(m_PropertySystem.createProperty("/system/security")));
+    m_pSecurity.reset(new Security(m_PropertySystem.createProperty(pathSecurity)));
     boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->signOff();
-    m_pSystemRole = m_PropertySystem.createProperty("/system/security/roles/system");
-    m_pUserRole = m_PropertySystem.createProperty("/system/security/roles/user");
+
+    m_pSystemRole = m_PropertySystem.createProperty(pathSystemRole);
+    m_pUserRole = m_PropertySystem.createProperty(pathUserRole);
+
     m_pUserNode = m_PropertySystem.createProperty("/system/security/users/testuser");
     m_pUserNode->createProperty("role")->alias(m_pUserRole);
     m_pUser.reset(new User(m_pUserNode));
@@ -128,6 +135,31 @@ BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
   BOOST_CHECK(threadObj->result == true);
 }
 
+void setupPrivileges(PropertySystem &propSys) {
+  boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody;
+
+  privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
+  privilegeSystem->addRight(Privilege::Read);
+  privilegeSystem->addRight(Privilege::Write);
+  privilegeSystem->addRight(Privilege::Security);
+
+  privilegeNobody.reset(new Privilege(PropertyNodePtr()));
+  privilegeNobody->addRight(Privilege::Read);
+
+  boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
+  privileges->addPrivilege(privilegeSystem);
+  privileges->addPrivilege(privilegeNobody);
+  propSys.getProperty("/")->setPrivileges(privileges);
+
+  /* security: passwords and credentials */
+  boost::shared_ptr<Privilege> privilegeNobodySecurity(new Privilege(PropertyNodePtr()));
+  privilegeNobodySecurity->addRight(Privilege::Read);
+
+  boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
+  privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
+  propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
+}
+
 class FixtureTwoUsers : public FixtureTestUserTest {
 public:
   FixtureTwoUsers()
@@ -147,26 +179,7 @@ protected:
 BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
   PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
   pNode->setStringValue("not modified");
-
-  boost::shared_ptr<Privilege> privilegeSystem( new Privilege( m_pSystemRole));
-  privilegeSystem->addRight(Privilege::Read);
-  privilegeSystem->addRight(Privilege::Write);
-  privilegeSystem->addRight(Privilege::Security);
-
-  boost::shared_ptr<Privilege> privilegeNobody( new Privilege( PropertyNodePtr()));
-  privilegeNobody->addRight(Privilege::Read);
-
-  boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
-  privileges->addPrivilege(privilegeSystem);
-  privileges->addPrivilege(privilegeNobody);
-  m_PropertySystem.getProperty("/")->setPrivileges(privileges);
-
-  boost::shared_ptr<Privilege> privilegeNobody2( new Privilege( PropertyNodePtr()));
-  privilegeNobody2->addRight(Privilege::Read);
-
-  boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
-  privilegesSecurityNode->addPrivilege(privilegeNobody2);
-  m_PropertySystem.getProperty("/system/security")->setPrivileges(privilegesSecurityNode);
+  setupPrivileges(m_PropertySystem);
 
   BOOST_CHECK_THROW(pNode->setStringValue("Test"), SecurityException);
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "not modified");
@@ -174,10 +187,6 @@ BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
   BOOST_CHECK(m_pSecurity->authenticate("system", "secret"));
   pNode->setStringValue("Test");
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
-
-  m_pSecurity->signOff();
-
-  m_pSecurity->authenticate("testuser", "test");
 }
 
 BOOST_AUTO_TEST_CASE(testDigestPasswords) {
