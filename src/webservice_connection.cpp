@@ -74,6 +74,18 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
     addEvent(task);
 }
 
+void WebserviceConnection::request(const std::string& url,
+                                 boost::shared_ptr<HashMapStringString> headers,
+                                 const std::string& postdata,
+                                 boost::shared_ptr<URLRequestCallback> cb)
+{
+    boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
+            new WebserviceConnection::URLRequestTask(
+                m_url, m_base_url, url, headers, postdata, cb));
+    addEvent(task);
+}
+
+
 void WebserviceConnection::request(const std::string& url, RequestType type,
                                 boost::shared_ptr<HashMapStringString> headers,
                                 boost::shared_ptr<HashMapStringString> formpost,
@@ -98,6 +110,24 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
 
 {
 }
+
+WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
+                                                     const std::string& base,
+                                                     const std::string& url,
+                               boost::shared_ptr<HashMapStringString> headers,
+                                                     const std::string& postdata,
+                                    boost::shared_ptr<URLRequestCallback> cb) :
+                                                     m_req(req),
+                                                     m_base_url(base),
+                                                     m_url(url), m_type(POST),
+                                                     m_postdata(postdata),
+                                                     m_headers(headers),
+                                                     m_cb(cb),
+                                                     m_simple(false)
+
+{
+}
+
 
 WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      const std::string& base,
@@ -130,8 +160,12 @@ void WebserviceConnection::URLRequestTask::run()
     if (m_simple) {
       code = m_req->request(m_base_url + m_url, m_type, result.get());
     } else {
-      code = m_req->request(m_base_url + m_url, m_type, m_headers,
-                            m_formpost, result.get());
+      if (m_postdata.empty()) {
+        code = m_req->request(m_base_url + m_url, m_type, m_headers,
+                              m_formpost, result.get());
+      } else {
+        code = m_req->request(m_base_url + m_url, m_headers, m_postdata, result.get());
+      }
     }
     if (m_cb != NULL) {
       m_cb->result(code, result);
