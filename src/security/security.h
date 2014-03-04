@@ -58,6 +58,7 @@ namespace dss {
     bool authenticate(const std::string& _user, const std::string& _password);
     bool authenticate(boost::shared_ptr<Session> _session);
     bool authenticateApplication(const std::string& _applicationToken);
+    std::string getApplicationName(const std::string& _applicationToken);
     bool signIn(User* _pUser);
     void signOff();
     bool impersonate(const std::string& _user);

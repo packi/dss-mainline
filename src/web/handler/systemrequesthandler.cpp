@@ -100,8 +100,13 @@ namespace dss {
         m_pSessionManager->getSecurity()->signOff();
         if(m_pSessionManager->getSecurity()->authenticate(user, password)) {
           std::string token = m_pSessionManager->registerSession();
+          if (token.empty()) {
+            log("Session limit reached", lsError);
+            return failure("Authentication failed");
+          }
           m_pSessionManager->getSession(token)->inheritUserFromSecurity();
-          log("Registered new JSON session");
+          log("Registered new JSON session for user: " + user +
+              " (" + token + ")");
 
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           resultObj->addProperty("token", token);
@@ -132,8 +137,14 @@ namespace dss {
       m_pSessionManager->getSecurity()->signOff();
       if(m_pSessionManager->getSecurity()->authenticateApplication(loginToken)) {
         std::string token = m_pSessionManager->registerApplicationSession();
+        if (token.empty()) {
+          log("Session limit reached", lsError);
+          return failure("Application-Authentication failed");
+        }
         m_pSessionManager->getSession(token)->inheritUserFromSecurity();
-        log("Registered new JSON-Application session");
+        log("Registered new JSON-Application session for " +
+            m_pSessionManager->getSecurity()->getApplicationName(loginToken) +
+            " (" + token + ")");
 
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("token", token);
