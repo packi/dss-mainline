@@ -193,7 +193,7 @@ namespace dss {
     std::string url;
     std::string req = "GET";
     HashMapStringString headers;
-    HashMapStringString formpost;
+    std::string formdata;
 
     /* for some reason JS_ConvertArguments() ALWAYS returned false so had to
      * avoid using it */
@@ -279,55 +279,10 @@ namespace dss {
       }
     }
 
-    // formpost hashmap
+    // formpost data, string, may be empty/null
     if ((argc >= 4) && (!JSVAL_IS_NULL(JS_ARGV(cx, vp)[3]))) {
-      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[3])) {
-        JSObject *obj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[3]);
-        JSIdArray *ids = JS_Enumerate(cx, obj);
-        if (ids) {
-          for (jsint i = 0; i < ids->length; i++) {
-            jsid id = ids->vector[i];
-            jsval key;
-            if (!JS_IdToValue(cx, id, &key)) {
-              JS_ReportError(cx, "request(): could not parse formpost key",
-                            lsWarning);
-              continue;
-            }
-
-            if (!JSVAL_IS_STRING(key)) {
-              JS_ReportError(cx, "request(): could not parse formpost key",
-                            lsWarning);
-              continue;
-            }
-
-            std::string name = ctx->convertTo<std::string>(key);
-            if (name.empty()) {
-              JS_ReportError(cx, "request(): could not parse formpost key",
-                            lsWarning);
-              continue;
-            }
-
-            jsval value;
-            if (!JS_GetProperty(cx, obj, name.c_str(), &value)) {
-              JS_ReportError(cx, "request(): could not parse formpost value",
-                            lsWarning);
-              continue;
-            }
-
-            if (!JSVAL_IS_STRING(value)) {
-              JS_ReportError(cx, "request(): could not parse formpost value",
-                            lsWarning);
-              continue;
-            }
-
-            formpost[name] = ctx->convertTo<std::string>(value);
-          }
-        }
-        JS_DestroyIdArray(cx, ids);
-      } else {
-        JS_ReportError(cx, "simplerequest(): invalid formpost parameter",
-                       lsError);
-        return JS_FALSE;
+      if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[3])) {
+        formdata = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
       }
     }
 
@@ -354,10 +309,15 @@ namespace dss {
     boost::shared_ptr<WebserviceRequestCallback> mcb(
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
-    WebserviceConnection::getInstance()->request(url, reqtype,
-                            boost::make_shared<HashMapStringString>(headers),
-                            boost::make_shared<HashMapStringString>(formpost),
-                            mcb);
+    if (reqtype == POST) {
+      WebserviceConnection::getInstance()->request(url, 
+        boost::make_shared<HashMapStringString>(headers), formdata, mcb);
+    } else {
+      WebserviceConnection::getInstance()->request(url, reqtype,
+          boost::make_shared<HashMapStringString>(headers),
+          boost::shared_ptr<HashMapStringString>(new HashMapStringString()),
+          mcb);
+    }
 
     return JS_TRUE;
   }
