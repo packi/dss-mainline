@@ -137,6 +137,17 @@ namespace dss {
     return false;
   } // authenticateApplication
 
+  std::string Security::getApplicationName(const std::string& _applicationToken) {
+    PropertyNodePtr pTokenNode = m_pRootNode->getProperty("applicationTokens/enabled/" + _applicationToken);
+    if(pTokenNode != NULL) {
+      PropertyNodePtr pApplicationNameNode = pTokenNode->getProperty("applicationName");
+      if(pApplicationNameNode != NULL) {
+        return pApplicationNameNode->getStringValue();
+      }
+    }
+    return std::string();
+  } // getApplicationName
+
   bool Security::signIn(User* _pUser) {
     User* u = m_LoggedInUser.release();
     if (NULL != u) {
