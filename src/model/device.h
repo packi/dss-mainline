@@ -150,6 +150,8 @@ namespace dss {
     DEVICE_TYPE_IST     = 7,
     DEVICE_TYPE_AKM     = 8,
     DEVICE_TYPE_TNY     = 10,
+    DEVICE_TYPE_UMV     = 11,
+    DEVICE_TYPE_UMR     = 12,
   } DeviceTypes_t;
 
   typedef enum {

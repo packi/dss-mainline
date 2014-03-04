@@ -1130,6 +1130,10 @@ namespace dss {
         return DEVICE_TYPE_AKM;
       case 10:
         return DEVICE_TYPE_TNY;
+      case 11:
+        return DEVICE_TYPE_UMV;
+      case 12:
+        return DEVICE_TYPE_UMR;
       default:
         return DEVICE_TYPE_INVALID;
     }
@@ -1155,6 +1159,10 @@ namespace dss {
         return "AKM";
       case DEVICE_TYPE_TNY:
         return "TNY";
+      case DEVICE_TYPE_UMV:
+        return "UMV";
+      case DEVICE_TYPE_UMR:
+        return "UMR";
       default:
         return "";
     }
