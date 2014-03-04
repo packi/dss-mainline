@@ -64,6 +64,10 @@ namespace dss {
       long request(const std::string& url, RequestType type = GET,
                    URLResult* result = NULL);
 
+      long request(const std::string& url,
+                   boost::shared_ptr<HashMapStringString> headers,
+                   std::string postdata, URLResult* result);
+
       long request(const std::string& url, RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
@@ -74,6 +78,12 @@ namespace dss {
       /* TODO evtl. URI wrapper easy appending/parsing of query options */
 
     private:
+      long internalRequest(const std::string& url, RequestType type,
+                   std::string postdata,
+                   boost::shared_ptr<HashMapStringString> headers,
+                   boost::shared_ptr<HashMapStringString> formpost,
+                   URLResult* result);
+
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
       bool m_reuse_handle;
       CURL *m_curl_handle;
