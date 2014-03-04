@@ -170,7 +170,7 @@ namespace dss {
       }
       m_LoggedInUser.reset(new User(*m_pSystemUser));
     } else {
-      Logger::getInstance()->log("Failed to login as system-user (" + _reason + ")", lsFatal);
+      Logger::getInstance()->log("Failed to login as system-user (" + _reason + ")", lsWarning);
     }
   } // loginAsSystemUser
 

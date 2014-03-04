@@ -539,9 +539,6 @@ namespace dss {
   } // getDeviceTransitionTime
 
   uint8_t Device::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkReadAccess();
-    }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       return m_pApartment->getDeviceBusInterface()->getDeviceConfig(*this,
                                                                   _configClass,
@@ -551,9 +548,6 @@ namespace dss {
   } // getDeviceConfig
 
   uint16_t Device::getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkReadAccess();
-    }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       return m_pApartment->getDeviceBusInterface()->getDeviceConfigWord(*this,
                                                                   _configClass,
@@ -591,25 +585,16 @@ namespace dss {
   } // setDeviceOutputValue (offset)
 
   uint16_t Device::getDeviceOutputValue(uint8_t _offset) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkReadAccess();
-    }
     uint16_t result = getDeviceConfigWord(CfgClassRuntime, _offset);
     if(_offset == 0) result &= 0xff;   // fix offset 0 value which is 8-bit actually
     return result;
   } // getDeviceOutputValue (offset)
 
   uint32_t Device::getDeviceSensorValue(const int _sensorIndex) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkReadAccess();
-    }
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex);
   } // getDeviceSensorValue
 
   uint8_t Device::getDeviceSensorType(const int _sensorIndex) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkReadAccess();
-    }
     if (getRevisionID() > 0x0321) {
       uint16_t value = getDeviceConfigWord(CfgClassDevice, CfgDevice_SensorParameter + _sensorIndex * 2);
       return (value & 0xFF00) >> 8;
