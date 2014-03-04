@@ -45,6 +45,7 @@ static std::string pathUserRole = "/system/security/roles/user";
 static std::string pathSystemRole = "/system/security/roles/system";
 
 static std::string pathTestUser = "/system/security/users/testuser";
+static std::string pathSystemUser = "/system/security/users/system";
 
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
@@ -238,32 +239,31 @@ BOOST_FIXTURE_TEST_CASE(testSentinelHasLessPrivilegesThanNobody, FixtureSentinel
   BOOST_CHECK_THROW(m_PropertySystem.getProperty("/readme"), SecurityException);
 }
 
-class FixtureTwoUsers : public FixtureTestUserTest {
+class FixtureSystemUser : public FixtureTestUserTest {
 public:
-  FixtureTwoUsers()
-  : FixtureTestUserTest()
-  {
-    m_pSystemUserNode = m_PropertySystem.createProperty("/system/security/users/system");
-    m_pSystemUserNode->createProperty("role")->alias(m_pSystemRole);
-    m_pSystemUser.reset(new User(m_pSystemUserNode));
-    m_pSystemUser->setPassword("secret");
-  }
+  FixtureSystemUser() : FixtureTestUserTest() {
+    PropertyNodePtr systemUserNode = m_PropertySystem.createProperty(pathSystemUser);
+    systemUserNode->createProperty("role")->alias(m_pSystemRole);
 
-protected:
-  PropertyNodePtr m_pSystemUserNode;
-  boost::shared_ptr<User> m_pSystemUser;
+    /* this will enable loginAsSystemUser */
+    m_pSecurity->setSystemUser(new User(systemUserNode));
+
+    /* test node */
+    PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
+    pNode->setStringValue("not modified");
+
+    setupPrivileges(m_PropertySystem);
+  }
 };
 
-BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
-  PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
-  pNode->setStringValue("not modified");
-  setupPrivileges(m_PropertySystem);
+BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
+  PropertyNodePtr pNode = m_PropertySystem.getProperty("/test");
 
   BOOST_CHECK_THROW(pNode->setStringValue("Test"), SecurityException);
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "not modified");
 
-  BOOST_CHECK(m_pSecurity->authenticate("system", "secret"));
-  pNode->setStringValue("Test");
+  m_pSecurity->loginAsSystemUser("unit tests");
+  BOOST_CHECK_NO_THROW(pNode->setStringValue("Test"));
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
 }
 
