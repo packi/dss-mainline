@@ -45,16 +45,7 @@ namespace dss {
 
   const int PROPERTY_FORMAT_VERSION = 1;
 
-  //=============================================== PropertySystem
-  //
-  __DEFINE_LOG_CHANNEL__(PropertySystem, lsInfo);
-
-  PropertySystem::PropertySystem()
-  : m_RootNode(new PropertyNode("/"))
-  { } // ctor
-
-  PropertySystem::~PropertySystem() {
-  } // dtor
+  //=============================================== Util
 
   bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode) {
     assert(_rootNode != NULL);
@@ -87,6 +78,17 @@ namespace dss {
 
     return true;
   } // saveToXML
+
+  //=============================================== PropertySystem
+
+  __DEFINE_LOG_CHANNEL__(PropertySystem, lsInfo);
+
+  PropertySystem::PropertySystem()
+  : m_RootNode(new PropertyNode("/"))
+  { } // ctor
+
+  PropertySystem::~PropertySystem() {
+  } // dtor
 
   PropertyNodePtr PropertySystem::getProperty(const std::string& _propPath) const {
     if(_propPath[ 0 ] != '/') {
