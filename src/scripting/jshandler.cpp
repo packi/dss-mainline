@@ -221,7 +221,7 @@ namespace dss {
     int len;
 
     if (er->linebuf != NULL){
-      len = er->tokenptr - er->linebuf + 1;
+      len = er->tokenptr - er->linebuf + 2;
       pointer = (char*)malloc(len);
       memset(pointer, '-', len);
       pointer[len-1]='\0';

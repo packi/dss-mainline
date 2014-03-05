@@ -47,6 +47,10 @@ public:
   virtual ~WebserviceConnection();
   void request(const std::string& url, RequestType type,
                boost::shared_ptr<URLRequestCallback> cb);
+  void request(const std::string& url,
+               boost::shared_ptr<HashMapStringString> headers,
+               const std::string& postdata,
+               boost::shared_ptr<URLRequestCallback> cb);
   void request(const std::string& url, RequestType type,
                boost::shared_ptr<HashMapStringString> headers,
                boost::shared_ptr<HashMapStringString> formpost,
@@ -64,11 +68,16 @@ private:
   class URLRequestTask : public Task {
   public:
     URLRequestTask(boost::shared_ptr<URL> req,
-                   const std::string& base, const std::string& url, 
+                   const std::string& base, const std::string& url,
                    RequestType type,
                    boost::shared_ptr<URLRequestCallback> cb);
+    URLRequestTask(boost::shared_ptr<URL> req,
+                   const std::string& base, const std::string& url,
+                   boost::shared_ptr<HashMapStringString> headers,
+                   const std::string& postdata,
+                   boost::shared_ptr<URLRequestCallback> cb);
     URLRequestTask(boost::shared_ptr<URL> req, 
-                   const std::string& base, const std::string& url, 
+                   const std::string& base, const std::string& url,
                    RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
@@ -80,6 +89,7 @@ private:
     std::string m_base_url;
     std::string m_url;
     RequestType m_type;
+    std::string m_postdata;
     boost::shared_ptr<HashMapStringString> m_headers;
     boost::shared_ptr<HashMapStringString> m_formpost;
     URLResult *m_result;

@@ -108,10 +108,26 @@ size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* u
 
 long URL::request(const std::string& url, RequestType type, class URLResult* result)
 {
-  return request(url, type, boost::shared_ptr<HashMapStringString>(new HashMapStringString()), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
+  return internalRequest(url, type, std::string(), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
+}
+
+long URL::request(const std::string& url,
+                  boost::shared_ptr<HashMapStringString> headers,
+                  std::string postdata, class URLResult* result)
+{
+  return internalRequest(url, POST, postdata, headers, boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
 }
 
 long URL::request(const std::string& url, RequestType type,
+                  boost::shared_ptr<HashMapStringString> headers,
+                  boost::shared_ptr<HashMapStringString> formpost,
+                  URLResult* result)
+{
+  return internalRequest(url, type, std::string(), headers, formpost, result);
+}
+
+long URL::internalRequest(const std::string& url, RequestType type,
+                  std::string postdata,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
                   URLResult* result)
@@ -147,14 +163,19 @@ long URL::request(const std::string& url, RequestType type,
     break;
   case POST:
     curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
-    for (it = formpost->begin(); it != formpost->end(); it++) {
-      curl_formadd(&formpost_start, &formpost_end,
-                   CURLFORM_COPYNAME, it->first.c_str(),
-                   CURLFORM_COPYCONTENTS, it->second.c_str(),
-                   CURLFORM_END);
+    if (!postdata.empty()) {
+      curl_easy_setopt(m_curl_handle, CURLOPT_COPYPOSTFIELDS, postdata.c_str());
+    } else {
+      for (it = formpost->begin(); it != formpost->end(); it++) {
+        curl_formadd(&formpost_start, &formpost_end,
+                     CURLFORM_COPYNAME, it->first.c_str(),
+                     CURLFORM_COPYCONTENTS, it->second.c_str(),
+                     CURLFORM_END);
+      }
+
+      /* must be set even if it's null */
+      curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, formpost_start);
     }
-    /* must be set even if it's null */
-    curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, formpost_start);
     break;
   }
 
