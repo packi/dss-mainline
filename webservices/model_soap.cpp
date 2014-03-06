@@ -180,6 +180,9 @@ int dss__Authenticate(struct soap *soap, char* _userName, char* _password, std::
   manager.getSecurity()->signOff();
   if(manager.getSecurity()->authenticate(_userName, _password)) {
     token = dss::DSS::getInstance()->getWebServices().getSessionManager()->registerSession();
+    if (token.empty()) {
+      return soap_sender_fault(soap, "Session limit reached", NULL);
+    }
     manager.getSession(token)->inheritUserFromSecurity();
     return SOAP_OK;
   } else {
@@ -192,6 +195,9 @@ int dss__AuthenticateAsApplication(struct soap *soap, char* _applicationToken, s
   manager.getSecurity()->signOff();
   if(manager.getSecurity()->authenticateApplication(_applicationToken)) {
     token = dss::DSS::getInstance()->getWebServices().getSessionManager()->registerApplicationSession();
+    if (token.empty()) {
+      return soap_sender_fault(soap, "Session limit reached", NULL);
+    }
     manager.getSession(token)->inheritUserFromSecurity();
     return SOAP_OK;
   } else {

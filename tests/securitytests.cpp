@@ -39,25 +39,52 @@
 
 using namespace dss;
 
+static std::string pathSecurity = "/system/security";
+
+static std::string pathUserRole = "/system/security/roles/user";
+static std::string pathSystemRole = "/system/security/roles/system";
+
+static std::string pathTestUser = "/system/security/users/testuser";
+static std::string pathSystemUser = "/system/security/users/system";
+
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
-BOOST_AUTO_TEST_CASE(testSystemUserIsInitialized) {
+BOOST_AUTO_TEST_CASE(testDigestPasswords) {
+  std::string fileName = getTempDir() + "/digest_test_file";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "dssadmin:dSS11:79f2e01bf54e8a0626f04b139a1decc2";
+  ofs.close();
+
+  PropertySystem propertySystem;
+  PropertyNodePtr userNode = propertySystem.createProperty("/dssadmin");
+
+  boost::shared_ptr<HTDigestPasswordChecker> checker(new HTDigestPasswordChecker(fileName));
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "dssadmin"), true);
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "asfd"), false);
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, ""), false);
+
+  boost::filesystem::remove_all(fileName);
+}
+
+BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
   PropertySystem propertysystem;
   Security security(propertysystem.createProperty("/system/security"));
-  security.loginAsSystemUser("Some reason");
+  security.loginAsSystemUser("system_user_does_not_exist");
+  BOOST_CHECK(security.getCurrentlyLoggedInUser() == NULL);
 }
 
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
-    m_pSecurity.reset(new Security(m_PropertySystem.createProperty("/system/security")));
+    m_pSecurity.reset(new Security(m_PropertySystem.createProperty(pathSecurity)));
     boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->signOff();
-    m_pNobodyRole = m_PropertySystem.createProperty("/system/security/roles/nobody");
-    m_pSystemRole = m_PropertySystem.createProperty("/system/security/roles/system");
-    m_pUserRole = m_PropertySystem.createProperty("/system/security/roles/user");
-    m_pUserNode = m_PropertySystem.createProperty("/system/security/users/testuser");
+
+    m_pSystemRole = m_PropertySystem.createProperty(pathSystemRole);
+    m_pUserRole = m_PropertySystem.createProperty(pathUserRole);
+
+    m_pUserNode = m_PropertySystem.createProperty(pathTestUser);
     m_pUserNode->createProperty("role")->alias(m_pUserRole);
     m_pUser.reset(new User(m_pUserNode));
     m_pUser->setPassword("test");
@@ -70,7 +97,6 @@ protected:
   PropertyNodePtr m_pUserNode;
   PropertyNodePtr m_pSystemRole;
   PropertyNodePtr m_pUserRole;
-  PropertyNodePtr m_pNobodyRole;
 };
 
 BOOST_FIXTURE_TEST_CASE(testFixtureDoesntLogInAUser, FixtureTestUserTest) {
@@ -129,82 +155,144 @@ BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
   BOOST_CHECK(threadObj->result == true);
 }
 
-class FixtureTwoUsers : public FixtureTestUserTest {
-public:
-  FixtureTwoUsers()
-  : FixtureTestUserTest()
-  {
-    m_pSystemUserNode = m_PropertySystem.createProperty("/system/security/users/system");
-    m_pSystemUserNode->createProperty("role")->alias(m_pSystemRole);
-    m_pSystemUser.reset(new User(m_pSystemUserNode));
-    m_pSystemUser->setPassword("secret");
-  }
+/**
+ * TODO move this to security::init since it is how
+ * the security is actually configured in the system
+ */
+void setupPrivileges(PropertySystem &propSys) {
+  boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody, privilegeUser;
 
-protected:
-  PropertyNodePtr m_pSystemUserNode;
-  boost::shared_ptr<User> m_pSystemUser;
-};
-
-BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
-  PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
-  pNode->setStringValue("not modified");
-  boost::shared_ptr<Privilege>
-    privilegeSystem(
-      new Privilege(
-        m_pSystemRole));
-
-  privilegeSystem->addRight(Privilege::Read);
+  privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
   privilegeSystem->addRight(Privilege::Write);
-  privilegeSystem->addRight(Privilege::Security);
 
-  boost::shared_ptr<Privilege>
-    privilegeNobody(
-      new Privilege(
-        PropertyNodePtr()));
-  privilegeNobody->addRight(Privilege::Read);
+  privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
+  privilegeUser->addRight(Privilege::Write);
+
+  privilegeNobody.reset(new Privilege(PropertyNodePtr()));
+
   boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
   privileges->addPrivilege(privilegeSystem);
+  privileges->addPrivilege(privilegeUser);
   privileges->addPrivilege(privilegeNobody);
-  m_PropertySystem.getProperty("/")->setPrivileges(privileges);
+  propSys.getProperty("/")->setPrivileges(privileges);
 
+  /* security: passwords and credentials */
+  boost::shared_ptr<Privilege> privilegeNobodySecurity(new Privilege(PropertyNodePtr()));
 
-  boost::shared_ptr<Privilege>
-    privilegeNobody2(
-      new Privilege(
-        PropertyNodePtr()));
-  privilegeNobody2->addRight(Privilege::Read);
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
-  privilegesSecurityNode->addPrivilege(privilegeNobody2);
-  m_PropertySystem.getProperty("/system/security")->setPrivileges(privilegesSecurityNode);
+  privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
+  privilegesSecurityNode->addPrivilege(privilegeSystem);
+  propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
+}
 
+class FixturePrivilegeTest : public FixtureTestUserTest {
+public:
+  FixturePrivilegeTest() : FixtureTestUserTest() {
+    m_PropertySystem.createProperty("/folder")->createProperty("property");
+    setupPrivileges(m_PropertySystem);
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(testReadPrivilege, FixturePrivilegeTest) {
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/folder/property"));
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/folder/property"));
+  m_pSecurity->signOff();
+}
+
+BOOST_FIXTURE_TEST_CASE(testReadPrivilegeSecurity, FixturePrivilegeTest) {
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser + "/password"));
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser));
+  m_pSecurity->signOff();
+}
+
+BOOST_FIXTURE_TEST_CASE(testWritePrivilege, FixturePrivilegeTest) {
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/foo"), SecurityException);
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_NO_THROW(m_PropertySystem.createProperty("/foo"));
+  m_pSecurity->signOff();
+}
+
+BOOST_FIXTURE_TEST_CASE(testWritePrivilegeSecurity, FixturePrivilegeTest) {
+  /* TODO, nobody has the right to create new users, probably a good thing */
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/evil_E"),
+                    SecurityException);
+  m_pSecurity->authenticate("testuser", "test");
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/new_user"),
+                    SecurityException);
+  m_pSecurity->signOff();
+}
+
+class FixtureSentinelTest : public FixtureTestUserTest {
+public:
+  FixtureSentinelTest() : FixtureTestUserTest() {
+    PropertyNodePtr userNode, roleNode;
+    boost::shared_ptr<User> sentinel;
+
+    roleNode = m_PropertySystem.createProperty("/system/security/roles/sentinel");
+    userNode = m_PropertySystem.createProperty("/system/security/users/sentinel");
+    userNode->createProperty("role")->alias(roleNode);
+
+    sentinel.reset(new User(userNode));
+    sentinel->setPassword("sentinel");
+    m_PropertySystem.createProperty("/readme");
+
+    /* will not create privileges for role sentinel */
+    setupPrivileges(m_PropertySystem);
+    /* from now on need to logged in */
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesHasSameAccessAsNobody, FixtureSentinelTest) {
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
+  m_pSecurity->authenticate("sentinel", "sentinel");
+  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
+}
+
+class FixtureSystemUser : public FixtureTestUserTest {
+public:
+  FixtureSystemUser() : FixtureTestUserTest() {
+    PropertyNodePtr systemUserNode = m_PropertySystem.createProperty(pathSystemUser);
+    systemUserNode->createProperty("role")->alias(m_pSystemRole);
+
+    /* this will enable loginAsSystemUser */
+    m_pSecurity->setSystemUser(new User(systemUserNode));
+
+    /* test node */
+    PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
+    pNode->setStringValue("not modified");
+
+    setupPrivileges(m_PropertySystem);
+  }
+};
+
+BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
+  PropertyNodePtr pNode = m_PropertySystem.getProperty("/test");
 
   BOOST_CHECK_THROW(pNode->setStringValue("Test"), SecurityException);
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "not modified");
 
-  BOOST_CHECK(m_pSecurity->authenticate("system", "secret"));
-  pNode->setStringValue("Test");
+  m_pSecurity->loginAsSystemUser("unit tests");
+  BOOST_CHECK_NO_THROW(pNode->setStringValue("Test"));
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
-
-  m_pSecurity->signOff();
-
-  m_pSecurity->authenticate("testuser", "test");
 }
 
-BOOST_AUTO_TEST_CASE(testDigestPasswords) {
-  std::string fileName = getTempDir() + "/digest_test_file";
-  std::ofstream ofs(fileName.c_str());
-  ofs << "dssadmin:dSS11:79f2e01bf54e8a0626f04b139a1decc2";
-  ofs.close();
+BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
 
-  PropertySystem propertySystem;
-  PropertyNodePtr userNode = propertySystem.createProperty("/dssadmin");
+  std::string applicationToken = "fake-token-123467890";
 
-  boost::shared_ptr<HTDigestPasswordChecker> checker(new HTDigestPasswordChecker(fileName));
-  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "dssadmin"), true);
-  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "asfd"), false);
-  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, ""), false);
+  m_pSecurity->loginAsSystemUser("unit test: create token");
+  m_pSecurity->createApplicationToken("unit-test-app", applicationToken);
+  BOOST_CHECK_EQUAL(m_pSecurity->enableToken(applicationToken, m_pUser.get()), true);
+  BOOST_CHECK_EQUAL(m_pSecurity->authenticateApplication(applicationToken), true);
+  BOOST_CHECK_EQUAL(Security::getCurrentlyLoggedInUser()->getToken(), applicationToken);
+  BOOST_CHECK_EQUAL(Security::getCurrentlyLoggedInUser()->getRole(), m_pUser->getRole());
 
-  boost::filesystem::remove_all(fileName);
+  m_pSecurity->loginAsSystemUser("unit test: create token");
+  m_pSecurity->revokeToken(applicationToken);
+  BOOST_CHECK_EQUAL(m_pSecurity->authenticateApplication(applicationToken), false);
+  BOOST_CHECK(Security::getCurrentlyLoggedInUser() == NULL);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

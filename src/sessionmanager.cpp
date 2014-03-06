@@ -69,9 +69,11 @@ namespace dss {
   }
 
   void SessionManager::sendCleanupEvent() {
+    DateTime now;
     boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
-    pEvent->setProperty("time", "+" + intToString(kSessionCleanupInterval));
-    m_EventQueue.pushTimedEvent(pEvent);
+    pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+    pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(kSessionCleanupInterval));
+    m_EventQueue.pushEvent(pEvent);
   }
 
   void SessionManager::setupCleanupEventRelayTarget() {
@@ -120,6 +122,11 @@ namespace dss {
 
   std::string SessionManager::registerApplicationSession() {
     m_MapMutex.lock();
+    if (m_Sessions.size() >= m_maxSessionCount) {
+      Logger::getInstance()->log("SessionManager: session limit reached!", lsWarning);
+      m_MapMutex.unlock();
+      return std::string();
+    }
     boost::shared_ptr<Session> session = createSession();
     session->markAsApplicationSession();
     std::string id = session->getID();
@@ -202,7 +209,7 @@ namespace dss {
       boost::shared_ptr<Session> s = i->second;
       if((s == NULL) || (!s->isStillValid())) {
         if (s) {
-          Logger::getInstance()->log("SessionManager: cleanup session " + s->getID(), lsDebug);
+          Logger::getInstance()->log("SessionManager: cleanup session " + s->getID() + " (" + intToString(m_Sessions.size()) + ")", lsDebug);
         }
         m_Sessions.erase(i++);
       } else {
@@ -210,7 +217,6 @@ namespace dss {
       }
     }
     m_MapMutex.unlock();
-    this->sendCleanupEvent();
   }
 }
 

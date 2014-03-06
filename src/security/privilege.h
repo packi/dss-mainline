@@ -40,9 +40,7 @@ namespace dss {
     {};
 
     typedef enum {
-      Read = 1,
-      Write = 2,
-      Security = 4,
+      Write = 2
     } Right;
 
     bool hasRight(Right _right) {
