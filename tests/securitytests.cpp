@@ -181,6 +181,7 @@ void setupPrivileges(PropertySystem &propSys) {
 
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
   privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
+  privilegesSecurityNode->addPrivilege(privilegeSystem);
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }
 
@@ -275,6 +276,23 @@ BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
   m_pSecurity->loginAsSystemUser("unit tests");
   BOOST_CHECK_NO_THROW(pNode->setStringValue("Test"));
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
+}
+
+BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
+
+  std::string applicationToken = "fake-token-123467890";
+
+  m_pSecurity->loginAsSystemUser("unit test: create token");
+  m_pSecurity->createApplicationToken("unit-test-app", applicationToken);
+  BOOST_CHECK_EQUAL(m_pSecurity->enableToken(applicationToken, m_pUser.get()), true);
+  BOOST_CHECK_EQUAL(m_pSecurity->authenticateApplication(applicationToken), true);
+  BOOST_CHECK_EQUAL(Security::getCurrentlyLoggedInUser()->getToken(), applicationToken);
+  BOOST_CHECK_EQUAL(Security::getCurrentlyLoggedInUser()->getRole(), m_pUser->getRole());
+
+  m_pSecurity->loginAsSystemUser("unit test: create token");
+  m_pSecurity->revokeToken(applicationToken);
+  BOOST_CHECK_EQUAL(m_pSecurity->authenticateApplication(applicationToken), false);
+  BOOST_CHECK(Security::getCurrentlyLoggedInUser() == NULL);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

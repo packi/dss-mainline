@@ -619,6 +619,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
           PropertyNodePtr()));
     boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
     privilegesSecurityNode->addPrivilege(privilegeNobodySecurityNode);
+    privilegesSecurityNode->addPrivilege(privilegeSystem);
     pSecurityNode->setPrivileges(privilegesSecurityNode);
 
     m_pSecurity->startListeningForChanges();
