@@ -49,6 +49,23 @@ static std::string pathSystemUser = "/system/security/users/system";
 
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
+BOOST_AUTO_TEST_CASE(testDigestPasswords) {
+  std::string fileName = getTempDir() + "/digest_test_file";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "dssadmin:dSS11:79f2e01bf54e8a0626f04b139a1decc2";
+  ofs.close();
+
+  PropertySystem propertySystem;
+  PropertyNodePtr userNode = propertySystem.createProperty("/dssadmin");
+
+  boost::shared_ptr<HTDigestPasswordChecker> checker(new HTDigestPasswordChecker(fileName));
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "dssadmin"), true);
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "asfd"), false);
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, ""), false);
+
+  boost::filesystem::remove_all(fileName);
+}
+
 BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
   PropertySystem propertysystem;
   Security security(propertysystem.createProperty("/system/security"));
@@ -258,23 +275,6 @@ BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
   m_pSecurity->loginAsSystemUser("unit tests");
   BOOST_CHECK_NO_THROW(pNode->setStringValue("Test"));
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
-}
-
-BOOST_AUTO_TEST_CASE(testDigestPasswords) {
-  std::string fileName = getTempDir() + "/digest_test_file";
-  std::ofstream ofs(fileName.c_str());
-  ofs << "dssadmin:dSS11:79f2e01bf54e8a0626f04b139a1decc2";
-  ofs.close();
-
-  PropertySystem propertySystem;
-  PropertyNodePtr userNode = propertySystem.createProperty("/dssadmin");
-
-  boost::shared_ptr<HTDigestPasswordChecker> checker(new HTDigestPasswordChecker(fileName));
-  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "dssadmin"), true);
-  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "asfd"), false);
-  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, ""), false);
-
-  boost::filesystem::remove_all(fileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
