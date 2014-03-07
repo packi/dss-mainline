@@ -73,6 +73,18 @@ BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
   BOOST_CHECK(security.getCurrentlyLoggedInUser() == NULL);
 }
 
+void addOwnerGroup(PropertyNodePtr securityNode, PropertyNodePtr userNode)
+{
+  PropertyNodePtr userRole = securityNode->createProperty("roles/user");
+  userNode->createProperty("role")->alias(userRole);
+}
+
+void addSystemGroup(PropertyNodePtr securityNode, PropertyNodePtr userNode)
+{
+  PropertyNodePtr userRole = securityNode->createProperty("roles/system");
+  userNode->createProperty("role")->alias(userRole);
+}
+
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
@@ -81,11 +93,9 @@ public:
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->signOff();
 
-    m_pSystemRole = m_PropertySystem.createProperty(pathSystemRole);
-    m_pUserRole = m_PropertySystem.createProperty(pathUserRole);
-
     m_pUserNode = m_PropertySystem.createProperty(pathTestUser);
-    m_pUserNode->createProperty("role")->alias(m_pUserRole);
+    addOwnerGroup(m_PropertySystem.getProperty(pathSecurity), m_pUserNode);
+
     m_pUser.reset(new User(m_pUserNode));
     m_pUser->setPassword("test");
   }
@@ -95,8 +105,6 @@ protected:
   PropertySystem m_PropertySystem;
   boost::shared_ptr<User> m_pUser;
   PropertyNodePtr m_pUserNode;
-  PropertyNodePtr m_pSystemRole;
-  PropertyNodePtr m_pUserRole;
 };
 
 BOOST_FIXTURE_TEST_CASE(testFixtureDoesntLogInAUser, FixtureTestUserTest) {
@@ -254,7 +262,7 @@ class FixtureSystemUser : public FixtureTestUserTest {
 public:
   FixtureSystemUser() : FixtureTestUserTest() {
     PropertyNodePtr systemUserNode = m_PropertySystem.createProperty(pathSystemUser);
-    systemUserNode->createProperty("role")->alias(m_pSystemRole);
+    addSystemGroup(m_PropertySystem.getProperty(pathSecurity), systemUserNode);
 
     /* this will enable loginAsSystemUser */
     m_pSecurity->setSystemUser(new User(systemUserNode));
