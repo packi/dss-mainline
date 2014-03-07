@@ -75,6 +75,18 @@ namespace dss {
       return m_LoggedInUser.get();
     }
 
+    /**
+     * Add user to role 'user'
+     * @param userNode -- user to be added
+     */
+    void addUserRole(PropertyNodePtr userNode);
+
+    /**
+     * Add user to role 'system'
+     * @param userNode -- user to be added
+     */
+    void addSystemRole(PropertyNodePtr userNode);
+
     void startListeningForChanges();
     void setFileName(const std::string& _value) {
       m_FileName = _value;

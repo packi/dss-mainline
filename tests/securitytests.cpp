@@ -41,7 +41,7 @@ using namespace dss;
 
 static std::string pathSecurity = "/system/security";
 
-static std::string pathUserRole = "/system/security/roles/user";
+static std::string pathUserRole = "/system/security/roles/owner";
 static std::string pathSystemRole = "/system/security/roles/system";
 
 static std::string pathTestUser = "/system/security/users/testuser";
@@ -73,18 +73,6 @@ BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
   BOOST_CHECK(security.getCurrentlyLoggedInUser() == NULL);
 }
 
-void addOwnerGroup(PropertyNodePtr securityNode, PropertyNodePtr userNode)
-{
-  PropertyNodePtr userRole = securityNode->createProperty("roles/user");
-  userNode->createProperty("role")->alias(userRole);
-}
-
-void addSystemGroup(PropertyNodePtr securityNode, PropertyNodePtr userNode)
-{
-  PropertyNodePtr userRole = securityNode->createProperty("roles/system");
-  userNode->createProperty("role")->alias(userRole);
-}
-
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
@@ -94,7 +82,7 @@ public:
     m_pSecurity->signOff();
 
     m_pUserNode = m_PropertySystem.createProperty(pathTestUser);
-    addOwnerGroup(m_PropertySystem.getProperty(pathSecurity), m_pUserNode);
+    m_pSecurity->addUserRole(m_pUserNode);
 
     m_pUser.reset(new User(m_pUserNode));
     m_pUser->setPassword("test");
@@ -262,7 +250,7 @@ class FixtureSystemUser : public FixtureTestUserTest {
 public:
   FixtureSystemUser() : FixtureTestUserTest() {
     PropertyNodePtr systemUserNode = m_PropertySystem.createProperty(pathSystemUser);
-    addSystemGroup(m_PropertySystem.getProperty(pathSecurity), systemUserNode);
+    m_pSecurity->addSystemRole(systemUserNode);
 
     /* this will enable loginAsSystemUser */
     m_pSecurity->setSystemUser(new User(systemUserNode));
@@ -326,7 +314,7 @@ BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
 
   BOOST_CHECK_EQUAL(security.loadFromXML(), true);
   //vaultRootNode->saveAsXML(std::cout, 1, PropertyNode::Archive);
-  addOwnerGroup(vaultRootNode, vaultRootNode->getProperty("users/testuser"));
+  security.addUserRole(vaultRootNode->getProperty("users/testuser"));
 
   BOOST_CHECK(!security.authenticate("testuser", "test"));
   BOOST_CHECK(security.authenticate("testuser", "unittest"));

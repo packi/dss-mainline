@@ -555,39 +555,31 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->setFileName(getDataDirectory() + "security.xml");
     m_pSecurity->loadFromXML();
+
     PropertyNodePtr pSecurityNode = m_pPropertySystem->getProperty("/system/security");
     pSecurityNode->setFlag(PropertyNode::Archive, true);
     pSecurityNode->createProperty("users")->setFlag(PropertyNode::Archive, true);
 
-    // setup system user
-    PropertyNodePtr pSystemNode = pSecurityNode->getProperty("users/system");
-    if(pSystemNode == NULL) {
-      PropertyNodePtr pSystemNode = pSecurityNode->createProperty("users/system");
-      PropertyNodePtr pRoleNode = pSecurityNode->getProperty("roles/system");
-      if(pRoleNode == NULL) {
-        pRoleNode = pSecurityNode->createProperty("roles/system");
-      }
-      pSystemNode->createProperty("role")->alias(pRoleNode);
-      // set username/password to a dummy-value so nobody's able to log in
-      pSystemNode->createProperty("salt")->setStringValue("dummyvalue");
-      pSystemNode->createProperty("password")->setStringValue("dummyvalue");
-    }
-    m_pSecurity->setSystemUser(new User(pSecurityNode->getProperty("users/system")));
+    // recreate system user, it's not archived
+    PropertyNodePtr pSystemNode = pSecurityNode->createProperty("users/system");
+
+    // set username/password to a dummy-value so nobody's able to log in
+    pSystemNode->createProperty("salt")->setStringValue("dummyvalue");
+    pSystemNode->createProperty("password")->setStringValue("dummyvalue");
+
+    m_pSecurity->addSystemRole(pSystemNode);
+    m_pSecurity->setSystemUser(new User(pSystemNode));
 
     // setup owner user
     PropertyNodePtr pOwnerNode = pSecurityNode->getProperty("users/dssadmin");
-    if(pOwnerNode == NULL) {
+    if (pOwnerNode == NULL) {
       pOwnerNode = pSecurityNode->createProperty("users/dssadmin");
       pOwnerNode->setFlag(PropertyNode::Archive, true);
-    }
-    PropertyNodePtr pRoleOwnerNode = pSecurityNode->getProperty("roles/owner");
-    if(pRoleOwnerNode == NULL) {
-      pRoleOwnerNode = pSecurityNode->createProperty("roles/owner");
-    }
-    pOwnerNode->createProperty("role")->alias(pRoleOwnerNode);
-    if(pOwnerNode->getProperty("password") == NULL) {
-      boost::shared_ptr<User> user(new User(pOwnerNode));
-      user->setPassword("dssadmin"); // default password for dssadmin
+      m_pSecurity->addUserRole(pOwnerNode);
+      User(pOwnerNode).setPassword("dssadmin"); // default password
+    } else {
+      /* role membership is not stored */
+      m_pSecurity->addUserRole(pOwnerNode);
     }
 
     boost::shared_ptr<Privilege>

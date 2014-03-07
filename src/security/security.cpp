@@ -152,6 +152,18 @@ namespace dss {
     return std::string();
   } // getApplicationName
 
+  void Security::addUserRole(PropertyNodePtr userNode)
+  {
+    PropertyNodePtr userRole = m_pRootNode->createProperty("roles/owner");
+    userNode->createProperty("role")->alias(userRole);
+  }
+
+  void Security::addSystemRole(PropertyNodePtr userNode)
+  {
+    PropertyNodePtr userRole = m_pRootNode->createProperty("roles/system");
+    userNode->createProperty("role")->alias(userRole);
+  }
+
   bool Security::signIn(User* _pUser) {
     User* u = m_LoggedInUser.release();
     if (NULL != u) {
