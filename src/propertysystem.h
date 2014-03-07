@@ -548,9 +548,9 @@ namespace dss {
     }
   public:
     /** Writes the node to XML */
-    bool saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask);
+    bool saveAsXML(std::ostream& _os, const int _indent, const int _flagsMask);
     /** Saves the nodes children to XML */
-    bool saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask);
+    bool saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask);
   }; // PropertyNode
 
   /** Exception that gets thrown if a incompatible assignment would take place. */

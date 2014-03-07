@@ -788,7 +788,7 @@ namespace dss {
     }
   } // createProperty
 
-  bool PropertyNode::saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
+  bool PropertyNode::saveAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
 
     _ofs << doIndent(_indent) << "<property type=\"" << getValueTypeAsString(getValueType()) << "\"" <<
                                           " name=\"" << XMLStringEscape(getDisplayName()) << "\"";
@@ -822,7 +822,7 @@ namespace dss {
     return result;
   } // saveAsXML
 
-  bool PropertyNode::saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
+  bool PropertyNode::saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
     foreach(PropertyNodePtr pChild, m_ChildNodes) {
       if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
         if(!pChild->saveAsXML(_ofs, _indent, _flagsMask)) {
