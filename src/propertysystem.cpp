@@ -66,19 +66,16 @@ namespace dss {
     return pp->loadFromXML(_fileName, root);
   } // loadFromXML
 
-  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask) const {
+  bool saveToXML(const std::string& _fileName, PropertyNodePtr root, const int _flagsMask) {
     std::string tmpOut = _fileName + ".tmp";
     std::ofstream ofs(tmpOut.c_str());
+    assert(root != NULL);
 
-    if(ofs) {
+    if (ofs) {
       int indent = 0;
 
       ofs << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
       ofs << "<properties version=\"1\">" << std::endl;
-      PropertyNodePtr root = _rootNode;
-      if(root == NULL) {
-        root = m_RootNode;
-      }
       root->saveAsXML(ofs, indent + 1, _flagsMask);
       ofs << "</properties>" << std::endl;
 

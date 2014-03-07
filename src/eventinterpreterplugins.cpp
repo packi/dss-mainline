@@ -253,9 +253,7 @@ namespace dss {
       }
 
       // TODO: sanitize filename to prevent world-domination
-      return m_PropertySystem.saveToXML(
-                                m_StoreDirectory + fileName + ".xml",
-                                pNode, PropertyNode::Archive);
+      return saveToXML(m_StoreDirectory + fileName + ".xml", pNode, PropertyNode::Archive);
     }
 
     virtual bool load(ScriptContext* _context) {

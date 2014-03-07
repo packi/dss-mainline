@@ -71,6 +71,13 @@ namespace dss {
   typedef boost::tokenizer<boost::char_separator<char> > path_tokenizer;
   path_tokenizer createPathTokenizer(const std::string &path);
 
+  /**
+   * Saves a subtree to XML.
+   * @param _rootNode
+   */
+  bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode,
+                 const int _flagsMask = 0);
+
   /** A tree tree consisting of different value nodes.
    * The tree can by serialized to and from XML. Nodes can either
    * store values by themselves or, with the use of proxies be
@@ -88,8 +95,6 @@ namespace dss {
     /** Loads a subtree from XML.
      * Everything in the XML has to be relative to _rootNode. */
     bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
-    /** Saves a subtree to XML. */
-    bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask = 0) const;
 
     /** Searches a property by path.
      * @return The node, or NULL if not found. */
