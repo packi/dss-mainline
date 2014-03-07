@@ -419,7 +419,11 @@ namespace dss {
     void childRemoved(PropertyNodePtr _child);
     void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
 
-    boost::shared_ptr<Privilege> searchForPrivilege();
+    /**
+     * traverse towards root node and return first privileges found
+     * @ret NodePrivileges or NULL if no restrictions implied
+     */
+    boost::shared_ptr<NodePrivileges> lookupPrivileges();
   public:
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();

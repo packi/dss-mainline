@@ -878,45 +878,36 @@ namespace dss {
   } // notifyListeners
 
   void PropertyNode::checkWriteAccess() {
-    boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
-    if(pPrivilege != NULL) {
-      if(!pPrivilege->hasRight(Privilege::Write)) {
-        User* pUser = Security::getCurrentlyLoggedInUser();
-        std::string userName = "(nobody)";
-        if(pUser != NULL) {
-          userName = pUser->getName();
-        }
-        throw SecurityException("Write access denied for user " + userName);
-      }
+    boost::shared_ptr<NodePrivileges> privileges = lookupPrivileges();
+    if (!privileges) {
+      /* no restrictions implied */
+      return;
+    }
+
+    User* pUser = Security::getCurrentlyLoggedInUser();
+    std::string userName("nobody");
+    PropertyNodePtr role; /* now it's a nobody */
+    if (pUser) {
+      userName = pUser->getName();
+      role = pUser->getRole();
+    }
+
+    boost::shared_ptr<Privilege> privilege =
+      privileges->getPrivilegeForRole(role);
+    if (!privilege || !privilege->hasRight(Privilege::Write)) {
+      throw SecurityException("Write access denied for user " + userName);
     }
   } // checkWriteAccess
 
-  boost::shared_ptr<Privilege> PropertyNode::searchForPrivilege() {
+  boost::shared_ptr<NodePrivileges> PropertyNode::lookupPrivileges() {
     if (m_pPrivileges != NULL) {
-      User* pUser = Security::getCurrentlyLoggedInUser();
-      if (pUser == NULL) {
-        /* nobody user */
-        return m_pPrivileges->getPrivilegeForRole(PropertyNodePtr());
-      }
-
-      boost::shared_ptr<Privilege> result =
-        m_pPrivileges->getPrivilegeForRole(pUser->getRole());
-      if (!result) {
-        throw SecurityException("No privileges for user " + pUser->getName());
-      }
-      return result;
+      return m_pPrivileges;
+    } else if (m_ParentNode == NULL) {
+      return boost::shared_ptr<NodePrivileges>();
     }
 
-    if (m_ParentNode != NULL) {
-      return m_ParentNode->searchForPrivilege();
-    }
-
-    if (Security::getCurrentlyLoggedInUser()) {
-      /* usually only during init, while no privileges set on the root node */
-      log("No privileges defined, but user accounts present", lsDebug);
-    }
-    return boost::shared_ptr<Privilege>();
-  } // searchForPrivilege
+    return m_ParentNode->lookupPrivileges();
+  }
 
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
 
