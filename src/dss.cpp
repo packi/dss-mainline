@@ -592,25 +592,14 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       privilegeOwner(
         new Privilege(
           pSecurityNode->getProperty("roles/owner")));
-
     privilegeOwner->addRight(Privilege::Write);
 
-    boost::shared_ptr<Privilege>
-      privilegeNobody(
-        new Privilege(
-          PropertyNodePtr()));
     boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
     privileges->addPrivilege(privilegeSystem);
     privileges->addPrivilege(privilegeOwner);
-    privileges->addPrivilege(privilegeNobody);
     m_pPropertySystem->getProperty("/")->setPrivileges(privileges);
 
-    boost::shared_ptr<Privilege>
-      privilegeNobodySecurityNode(
-        new Privilege(
-          PropertyNodePtr()));
     boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
-    privilegesSecurityNode->addPrivilege(privilegeNobodySecurityNode);
     privilegesSecurityNode->addPrivilege(privilegeSystem);
     pSecurityNode->setPrivileges(privilegesSecurityNode);
 

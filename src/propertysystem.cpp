@@ -885,17 +885,14 @@ namespace dss {
     }
 
     User* pUser = Security::getCurrentlyLoggedInUser();
-    std::string userName("nobody");
-    PropertyNodePtr role; /* now it's a nobody */
-    if (pUser) {
-      userName = pUser->getName();
-      role = pUser->getRole();
+    if (pUser == NULL) {
+      throw SecurityException("Write access denied for unauthenticated user");
     }
 
     boost::shared_ptr<Privilege> privilege =
-      privileges->getPrivilegeForRole(role);
+      privileges->getPrivilegeForRole(pUser->getRole());
     if (!privilege || !privilege->hasRight(Privilege::Write)) {
-      throw SecurityException("Write access denied for user " + userName);
+      throw SecurityException("Write access denied for user " + pUser->getName());
     }
   } // checkWriteAccess
 

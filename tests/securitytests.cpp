@@ -156,7 +156,7 @@ BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
  * the security is actually configured in the system
  */
 void setupPrivileges(PropertySystem &propSys) {
-  boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody, privilegeUser;
+  boost::shared_ptr<Privilege> privilegeSystem, privilegeUser;
 
   privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
   privilegeSystem->addRight(Privilege::Write);
@@ -164,19 +164,13 @@ void setupPrivileges(PropertySystem &propSys) {
   privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
   privilegeUser->addRight(Privilege::Write);
 
-  privilegeNobody.reset(new Privilege(PropertyNodePtr()));
-
   boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
   privileges->addPrivilege(privilegeSystem);
   privileges->addPrivilege(privilegeUser);
-  privileges->addPrivilege(privilegeNobody);
   propSys.getProperty("/")->setPrivileges(privileges);
 
   /* security: passwords and credentials */
-  boost::shared_ptr<Privilege> privilegeNobodySecurity(new Privilege(PropertyNodePtr()));
-
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
-  privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
   privilegesSecurityNode->addPrivilege(privilegeSystem);
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }
@@ -211,7 +205,6 @@ BOOST_FIXTURE_TEST_CASE(testWritePrivilege, FixturePrivilegeTest) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testWritePrivilegeSecurity, FixturePrivilegeTest) {
-  /* TODO, nobody has the right to create new users, probably a good thing */
   BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/evil_E"),
                     SecurityException);
   m_pSecurity->authenticate("testuser", "test");
@@ -240,10 +233,16 @@ public:
   }
 };
 
-BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesHasSameAccessAsNobody, FixtureSentinelTest) {
+BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesReadAccess, FixtureSentinelTest) {
   BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
   m_pSecurity->authenticate("sentinel", "sentinel");
   BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
+}
+
+BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesWriteAccess, FixtureSentinelTest) {
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/no_write_access"), SecurityException);
+  m_pSecurity->authenticate("sentinel", "sentinel");
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/no_write_access"), SecurityException);
 }
 
 class FixtureSystemUser : public FixtureTestUserTest {
