@@ -303,4 +303,35 @@ BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
   BOOST_CHECK(Security::getCurrentlyLoggedInUser() == NULL);
 }
 
+BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
+
+  std::string fileName = getTempDir() + "/security_config.xml";
+
+  /* saveXML is method of propertySystem, will remove in next commit */
+  m_pSecurity->setPropertySystem(boost::shared_ptr<PropertySystem>(new PropertySystem()));
+  m_pSecurity->setFileName(fileName);
+  m_pSecurity->startListeningForChanges();
+
+  /* this will trigger writeXML */
+  m_pUser->setPassword("unittest");
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "unittest"));
+
+  /* must be security or the loadFromXML will add 'security' subnode */
+  PropertyNodePtr vaultRootNode(new PropertyNode("security"));
+  Security security(PropertyNodePtr(vaultRootNode),
+                    boost::shared_ptr<PropertySystem>(new PropertySystem()));
+  security.setFileName(fileName);
+  boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
+  security.setPasswordChecker(checker);
+
+  BOOST_CHECK_EQUAL(security.loadFromXML(), true);
+  //vaultRootNode->saveAsXML(std::cout, 1, PropertyNode::Archive);
+  addOwnerGroup(vaultRootNode, vaultRootNode->getProperty("users/testuser"));
+
+  BOOST_CHECK(!security.authenticate("testuser", "test"));
+  BOOST_CHECK(security.authenticate("testuser", "unittest"));
+
+  boost::filesystem::remove_all(fileName);
+  // TODO explicit saveToXML
+}
 BOOST_AUTO_TEST_SUITE_END()

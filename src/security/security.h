@@ -82,6 +82,11 @@ namespace dss {
     void setPasswordChecker(boost::shared_ptr<PasswordChecker> _value) {
       m_pPasswordChecker = _value;
     }
+    /* TODO only used by unit tests, will remove in followup patch */
+    void setPropertySystem(boost::shared_ptr<PropertySystem> propSys) {
+      assert(propSys);
+      m_pPropertySystem = propSys;
+    }
     void createApplicationToken(const std::string& _applicationName,
                                 const std::string& _token);
     bool enableToken(const std::string& _token, User* _pUser);

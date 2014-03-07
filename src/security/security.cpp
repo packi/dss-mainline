@@ -169,11 +169,11 @@ namespace dss {
   } // signOff
 
   bool Security::loadFromXML() {
-    bool result = false;
-    if(m_pPropertySystem != NULL) {
-      result = m_pPropertySystem->loadFromXML(m_FileName, m_pRootNode);
+    if (m_pPropertySystem == NULL) {
+      log(std::string(__func__) + " no property system", lsInfo);
+      return false;
     }
-    return result;
+    return m_pPropertySystem->loadFromXML(m_FileName, m_pRootNode);
   } // loadFromXML
 
   void Security::loginAsSystemUser(const std::string& _reason) {
@@ -190,6 +190,8 @@ namespace dss {
   } // loginAsSystemUser
 
   void Security::startListeningForChanges() {
+    assert(m_pPropertySystem);
+    assert(!m_FileName.empty());
     m_pTreeListener.reset(new SecurityTreeListener(m_pPropertySystem, m_pRootNode, m_FileName));
   } // startListeningForChanges
 
