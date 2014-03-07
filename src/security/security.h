@@ -26,6 +26,7 @@
 #include <boost/thread.hpp>
 
 #include "src/base.h"
+#include "logger.h"
 
 namespace dss {
 
@@ -38,6 +39,7 @@ namespace dss {
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class Security {
+    __DECL_LOG_CHANNEL__
   public:
     Security(PropertyNodePtr _pRootNode)
     : m_pRootNode(_pRootNode),

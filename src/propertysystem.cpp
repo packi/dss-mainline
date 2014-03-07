@@ -46,6 +46,8 @@ namespace dss {
   const int PROPERTY_FORMAT_VERSION = 1;
 
   //=============================================== PropertySystem
+  //
+  __DEFINE_LOG_CHANNEL__(PropertySystem, lsInfo);
 
   PropertySystem::PropertySystem()
   : m_RootNode(new PropertyNode("/"))

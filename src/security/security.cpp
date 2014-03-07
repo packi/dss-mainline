@@ -36,6 +36,7 @@ namespace dss {
   //================================================== SecurityTreeListener
 
   class SecurityTreeListener : public PropertyListener {
+    __DECL_LOG_CHANNEL__
   public:
     SecurityTreeListener(boost::shared_ptr<PropertySystem> _pPropertySystem,
                          PropertyNodePtr _pSecurityNode,
@@ -70,8 +71,11 @@ namespace dss {
     const std::string m_Path;
   }; // SecurityTreeListener
 
+  __DEFINE_LOG_CHANNEL__(SecurityTreeListener, lsInfo)
 
   //================================================== Security
+
+  __DEFINE_LOG_CHANNEL__(Security, lsInfo)
 
   bool Security::authenticate(const std::string& _user, const std::string& _password) {
     signOff();

@@ -78,6 +78,7 @@ namespace dss {
    * @author Patrick Staehlin <me@packi.ch>
    */
   class PropertySystem {
+    __DECL_LOG_CHANNEL__
   private:
     PropertyNodePtr m_RootNode;
   public:
