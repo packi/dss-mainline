@@ -100,6 +100,24 @@ dist_dssdataimages_DATA =  \
    $(top_srcdir)/data/images/tkm_yellow.png \
    $(top_srcdir)/data/images/tny_black_black.png \
    $(top_srcdir)/data/images/unknown.png \
+   $(top_srcdir)/data/images/umr_black.png \
+   $(top_srcdir)/data/images/umr_blue.png \
+   $(top_srcdir)/data/images/umr_cyan.png \
+   $(top_srcdir)/data/images/umr_green.png \
+   $(top_srcdir)/data/images/umr_grey.png \
+   $(top_srcdir)/data/images/umr_magenta.png \
+   $(top_srcdir)/data/images/umr_red.png \
+   $(top_srcdir)/data/images/umr_white.png \
+   $(top_srcdir)/data/images/umr_yellow.png \
+   $(top_srcdir)/data/images/umv_black.png \
+   $(top_srcdir)/data/images/umv_blue.png \
+   $(top_srcdir)/data/images/umv_cyan.png \
+   $(top_srcdir)/data/images/umv_green.png \
+   $(top_srcdir)/data/images/umv_grey.png \
+   $(top_srcdir)/data/images/umv_magenta.png \
+   $(top_srcdir)/data/images/umv_red.png \
+   $(top_srcdir)/data/images/umv_white.png \
+   $(top_srcdir)/data/images/umv_yellow.png \
    $(top_srcdir)/data/images/zws_black_black.png \
    $(top_srcdir)/data/images/zws_black_blue.png \
    $(top_srcdir)/data/images/zws_black_cyan.png \
