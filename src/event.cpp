@@ -610,7 +610,7 @@ namespace dss {
         pValue->setFlag(PropertyNode::Archive, true);
         std::string filename = DSS::getInstance()->getSavedPropsDirectory() + "/" +
             pScript->getStringValue() + "_" + evtName + ".xml";
-        DSS::getInstance()->getPropertySystem().loadFromXML(filename, _node);
+        loadFromXML(filename, _node);
       }
     }
   } // loadState

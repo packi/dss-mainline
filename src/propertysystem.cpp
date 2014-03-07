@@ -56,14 +56,10 @@ namespace dss {
   PropertySystem::~PropertySystem() {
   } // dtor
 
-  bool PropertySystem::loadFromXML(const std::string& _fileName,
-                                   PropertyNodePtr _rootNode) {
-    PropertyNodePtr root = _rootNode;
-    if (root == NULL) {
-      root = getRootNode();
-    }
+  bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode) {
+    assert(_rootNode != NULL);
     boost::shared_ptr<PropertyParser> pp(new PropertyParser());
-    return pp->loadFromXML(_fileName, root);
+    return pp->loadFromXML(_fileName, _rootNode);
   } // loadFromXML
 
   bool saveToXML(const std::string& _fileName, PropertyNodePtr root, const int _flagsMask) {

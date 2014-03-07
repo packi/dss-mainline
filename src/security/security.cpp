@@ -169,11 +169,8 @@ namespace dss {
   } // signOff
 
   bool Security::loadFromXML() {
-    if (m_pPropertySystem == NULL) {
-      log(std::string(__func__) + " no property system", lsInfo);
-      return false;
-    }
-    return m_pPropertySystem->loadFromXML(m_FileName, m_pRootNode);
+    assert(!m_FileName.empty());
+    return dss::loadFromXML(m_FileName, m_pRootNode);
   } // loadFromXML
 
   void Security::loginAsSystemUser(const std::string& _reason) {

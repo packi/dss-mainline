@@ -724,10 +724,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         {
 #if defined(BOOST_VERSION_135)
           Logger::getInstance()->log("Loading config from " + itr->path().file_string(), lsInfo);
-          if (getPropertySystem().loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
+          if (loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
 #else
           Logger::getInstance()->log("Loading config from " + itr->path().string(), lsInfo);
-          if (getPropertySystem().loadFromXML(itr->path().string(), getPropertySystem().getProperty("/config")))
+          if (loadFromXML(itr->path().string(), getPropertySystem().getProperty("/config")))
 #endif
             n++;
         }
@@ -745,7 +745,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       cfgFile = getConfigDirectory() + "config.xml";
 
     Logger::getInstance()->log("Loading config file " + cfgFile, lsInfo);
-    getPropertySystem().loadFromXML(cfgFile, getPropertySystem().getProperty("/config"));
+    loadFromXML(cfgFile, getPropertySystem().getProperty("/config"));
 
     loadConfigDir(getConfigDirectory() + "config.d");
     return true;

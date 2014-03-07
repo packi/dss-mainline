@@ -77,6 +77,10 @@ namespace dss {
    */
   bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode,
                  const int _flagsMask = 0);
+  /**
+   * Loads a subtree from XML.
+   * @param _rootNode -- content of the XML is appended to the _rootNode. */
+  bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
 
   /** A tree tree consisting of different value nodes.
    * The tree can by serialized to and from XML. Nodes can either
@@ -91,10 +95,6 @@ namespace dss {
   public:
     PropertySystem();
     ~PropertySystem();
-
-    /** Loads a subtree from XML.
-     * Everything in the XML has to be relative to _rootNode. */
-    bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
 
     /** Searches a property by path.
      * @return The node, or NULL if not found. */
