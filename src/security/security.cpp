@@ -38,14 +38,11 @@ namespace dss {
   class SecurityTreeListener : public PropertyListener {
     __DECL_LOG_CHANNEL__
   public:
-    SecurityTreeListener(boost::shared_ptr<PropertySystem> _pPropertySystem,
-                         PropertyNodePtr _pSecurityNode,
+    SecurityTreeListener(PropertyNodePtr _pSecurityNode,
                          const std::string _path)
-    : m_pPropertySystem(_pPropertySystem),
-      m_pSecurityNode(_pSecurityNode),
+    : m_pSecurityNode(_pSecurityNode),
       m_Path(_path)
     {
-      assert(_pPropertySystem != NULL);
       assert(_pSecurityNode != NULL);
       assert(!_path.empty());
       m_pSecurityNode->addListener(this);
@@ -65,7 +62,6 @@ namespace dss {
     }
 
   private:
-    boost::shared_ptr<PropertySystem> m_pPropertySystem;
     PropertyNodePtr m_pSecurityNode;
     boost::mutex m_WriteXMLMutex;
     const std::string m_Path;
@@ -199,9 +195,8 @@ namespace dss {
   } // loginAsSystemUser
 
   void Security::startListeningForChanges() {
-    assert(m_pPropertySystem);
     assert(!m_FileName.empty());
-    m_pTreeListener.reset(new SecurityTreeListener(m_pPropertySystem, m_pRootNode, m_FileName));
+    m_pTreeListener.reset(new SecurityTreeListener(m_pRootNode, m_FileName));
   } // startListeningForChanges
 
   void Security::createApplicationToken(const std::string& _applicationName,

@@ -46,13 +46,6 @@ namespace dss {
       m_pSystemUser(NULL)
     { }
 
-    Security(PropertyNodePtr _pRootNode,
-             boost::shared_ptr<PropertySystem> _pPropertySystem)
-    : m_pRootNode(_pRootNode),
-      m_pPropertySystem(_pPropertySystem),
-      m_pSystemUser(NULL)
-    { }
-
     ~Security() {
       m_LoggedInUser.release();
     }
@@ -94,11 +87,6 @@ namespace dss {
     void setPasswordChecker(boost::shared_ptr<PasswordChecker> _value) {
       m_pPasswordChecker = _value;
     }
-    /* TODO only used by unit tests, will remove in followup patch */
-    void setPropertySystem(boost::shared_ptr<PropertySystem> propSys) {
-      assert(propSys);
-      m_pPropertySystem = propSys;
-    }
     void createApplicationToken(const std::string& _applicationName,
                                 const std::string& _token);
     bool enableToken(const std::string& _token, User* _pUser);
@@ -107,7 +95,6 @@ namespace dss {
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
     boost::shared_ptr<SecurityTreeListener> m_pTreeListener;
-    boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<PasswordChecker> m_pPasswordChecker;
     User* m_pSystemUser;
     std::string m_FileName;

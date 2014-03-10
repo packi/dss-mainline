@@ -362,8 +362,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
     m_pSecurity.reset(
-        new Security(m_pPropertySystem->createProperty("/system/security"),
-                     m_pPropertySystem));
+        new Security(m_pPropertySystem->createProperty("/system/security")));
     m_pSessionManager.reset(
       new SessionManager(getEventQueue(),
                          getEventInterpreter(),

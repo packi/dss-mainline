@@ -295,7 +295,6 @@ BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
   std::string fileName = getTempDir() + "/security_config.xml";
 
   /* saveXML is method of propertySystem, will remove in next commit */
-  m_pSecurity->setPropertySystem(boost::shared_ptr<PropertySystem>(new PropertySystem()));
   m_pSecurity->setFileName(fileName);
   m_pSecurity->startListeningForChanges();
 
@@ -305,8 +304,7 @@ BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
 
   /* must be security or the loadFromXML will add 'security' subnode */
   PropertyNodePtr vaultRootNode(new PropertyNode("security"));
-  Security security(PropertyNodePtr(vaultRootNode),
-                    boost::shared_ptr<PropertySystem>(new PropertySystem()));
+  Security security = Security(PropertyNodePtr(vaultRootNode));
   security.setFileName(fileName);
   boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
   security.setPasswordChecker(checker);
