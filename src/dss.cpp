@@ -362,8 +362,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
     m_pSecurity.reset(
-        new Security(m_pPropertySystem->createProperty("/system/security"),
-                     m_pPropertySystem));
+        new Security(m_pPropertySystem->createProperty("/system/security")));
     m_pSessionManager.reset(
       new SessionManager(getEventQueue(),
                          getEventInterpreter(),
@@ -555,39 +554,31 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->setFileName(getDataDirectory() + "security.xml");
     m_pSecurity->loadFromXML();
+
     PropertyNodePtr pSecurityNode = m_pPropertySystem->getProperty("/system/security");
     pSecurityNode->setFlag(PropertyNode::Archive, true);
     pSecurityNode->createProperty("users")->setFlag(PropertyNode::Archive, true);
 
-    // setup system user
-    PropertyNodePtr pSystemNode = pSecurityNode->getProperty("users/system");
-    if(pSystemNode == NULL) {
-      PropertyNodePtr pSystemNode = pSecurityNode->createProperty("users/system");
-      PropertyNodePtr pRoleNode = pSecurityNode->getProperty("roles/system");
-      if(pRoleNode == NULL) {
-        pRoleNode = pSecurityNode->createProperty("roles/system");
-      }
-      pSystemNode->createProperty("role")->alias(pRoleNode);
-      // set username/password to a dummy-value so nobody's able to log in
-      pSystemNode->createProperty("salt")->setStringValue("dummyvalue");
-      pSystemNode->createProperty("password")->setStringValue("dummyvalue");
-    }
-    m_pSecurity->setSystemUser(new User(pSecurityNode->getProperty("users/system")));
+    // recreate system user, it's not archived
+    PropertyNodePtr pSystemNode = pSecurityNode->createProperty("users/system");
+
+    // set username/password to a dummy-value so nobody's able to log in
+    pSystemNode->createProperty("salt")->setStringValue("dummyvalue");
+    pSystemNode->createProperty("password")->setStringValue("dummyvalue");
+
+    m_pSecurity->addSystemRole(pSystemNode);
+    m_pSecurity->setSystemUser(new User(pSystemNode));
 
     // setup owner user
     PropertyNodePtr pOwnerNode = pSecurityNode->getProperty("users/dssadmin");
-    if(pOwnerNode == NULL) {
+    if (pOwnerNode == NULL) {
       pOwnerNode = pSecurityNode->createProperty("users/dssadmin");
       pOwnerNode->setFlag(PropertyNode::Archive, true);
-    }
-    PropertyNodePtr pRoleOwnerNode = pSecurityNode->getProperty("roles/owner");
-    if(pRoleOwnerNode == NULL) {
-      pRoleOwnerNode = pSecurityNode->createProperty("roles/owner");
-    }
-    pOwnerNode->createProperty("role")->alias(pRoleOwnerNode);
-    if(pOwnerNode->getProperty("password") == NULL) {
-      boost::shared_ptr<User> user(new User(pOwnerNode));
-      user->setPassword("dssadmin"); // default password for dssadmin
+      m_pSecurity->addUserRole(pOwnerNode);
+      User(pOwnerNode).setPassword("dssadmin"); // default password
+    } else {
+      /* role membership is not stored */
+      m_pSecurity->addUserRole(pOwnerNode);
     }
 
     boost::shared_ptr<Privilege>
@@ -600,25 +591,14 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       privilegeOwner(
         new Privilege(
           pSecurityNode->getProperty("roles/owner")));
-
     privilegeOwner->addRight(Privilege::Write);
 
-    boost::shared_ptr<Privilege>
-      privilegeNobody(
-        new Privilege(
-          PropertyNodePtr()));
     boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
     privileges->addPrivilege(privilegeSystem);
     privileges->addPrivilege(privilegeOwner);
-    privileges->addPrivilege(privilegeNobody);
     m_pPropertySystem->getProperty("/")->setPrivileges(privileges);
 
-    boost::shared_ptr<Privilege>
-      privilegeNobodySecurityNode(
-        new Privilege(
-          PropertyNodePtr()));
     boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
-    privilegesSecurityNode->addPrivilege(privilegeNobodySecurityNode);
     privilegesSecurityNode->addPrivilege(privilegeSystem);
     pSecurityNode->setPrivileges(privilegesSecurityNode);
 
@@ -724,10 +704,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         {
 #if defined(BOOST_VERSION_135)
           Logger::getInstance()->log("Loading config from " + itr->path().file_string(), lsInfo);
-          if (getPropertySystem().loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
+          if (loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
 #else
           Logger::getInstance()->log("Loading config from " + itr->path().string(), lsInfo);
-          if (getPropertySystem().loadFromXML(itr->path().string(), getPropertySystem().getProperty("/config")))
+          if (loadFromXML(itr->path().string(), getPropertySystem().getProperty("/config")))
 #endif
             n++;
         }
@@ -745,7 +725,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       cfgFile = getConfigDirectory() + "config.xml";
 
     Logger::getInstance()->log("Loading config file " + cfgFile, lsInfo);
-    getPropertySystem().loadFromXML(cfgFile, getPropertySystem().getProperty("/config"));
+    loadFromXML(cfgFile, getPropertySystem().getProperty("/config"));
 
     loadConfigDir(getConfigDirectory() + "config.d");
     return true;

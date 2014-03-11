@@ -253,18 +253,15 @@ namespace dss {
       }
 
       // TODO: sanitize filename to prevent world-domination
-      return m_PropertySystem.saveToXML(
-                                m_StoreDirectory + fileName + ".xml",
-                                pNode, PropertyNode::Archive);
+      return saveToXML(m_StoreDirectory + fileName + ".xml", pNode, PropertyNode::Archive);
     }
 
     virtual bool load(ScriptContext* _context) {
       boost::shared_ptr<ScriptContextWrapper> wrapper = _context->getWrapper();
       assert(wrapper != NULL);
       // TODO: sanitize filename to prevent world-domination
-      return m_PropertySystem.loadFromXML(
-                                m_StoreDirectory + wrapper->getIdentifier() + ".xml",
-                                wrapper->getPropertyNode());
+      return loadFromXML(m_StoreDirectory + wrapper->getIdentifier() + ".xml",
+                         wrapper->getPropertyNode());
     }
   private:
     std::string m_StoreDirectory;
