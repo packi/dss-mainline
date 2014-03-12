@@ -160,6 +160,54 @@ namespace dss {
     }
   } // groupSaveScene
 
+  void DSMeterSim::deviceIncreaseOutputChannelValue(int _deviceID, const uint8_t _channel) {
+    lookupDevice(_deviceID).increaseDeviceOutputChannelValue(_channel);
+  } // increaseOutputChannelValue
+
+  void DSMeterSim::groupIncreaseOutputChannelValue(const int _zoneID, const int _groupID, const uint8_t _channel) {
+    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->increaseDeviceOutputChannelValue(_channel);
+      }
+    }
+  } // increaseOutputChannelValue
+
+  void DSMeterSim::deviceDecreaseOutputChannelValue(int _deviceID, const uint8_t _channel) {
+    lookupDevice(_deviceID).decreaseDeviceOutputChannelValue(_channel);
+  } // decreaseOutputChannelValue
+
+  void DSMeterSim::groupDecreaseOutputChannelValue(const int _zoneID, const int _groupID, const uint8_t _channel) {
+    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->decreaseDeviceOutputChannelValue(_channel);
+      }
+    }
+  } // decreaseOutputChannelValue
+
+  void DSMeterSim::deviceStopOutputChannelValue(int _deviceID, const uint8_t _channel) {
+    lookupDevice(_deviceID).decreaseDeviceOutputChannelValue(_channel);
+  } // stopOutputChannelValue
+
+  void DSMeterSim::groupStopOutputChannelValue(const int _zoneID, const int _groupID, const uint8_t _channel) {
+    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->stopDeviceOutputChannelValue(_channel);
+      }
+    }
+  } // stopOutputChannelValue
+
   void DSMeterSim::deviceUndoScene(int _deviceID, const int _sceneID) {
     lookupDevice(_deviceID).undoScene(_sceneID);
   } // deviceUndoScene

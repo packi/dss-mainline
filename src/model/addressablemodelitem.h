@@ -52,6 +52,11 @@ namespace dss {
     virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);
 
     virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);
+
+    virtual void increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
+    virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
+    virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
+
   protected:
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;

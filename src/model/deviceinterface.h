@@ -87,6 +87,10 @@ namespace dss {
 
     virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
 
+    virtual void increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token) = 0;
+    virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token) = 0;
+    virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token) = 0;
+
     virtual ~IDeviceInterface() {};
   }; // IDeviceInterface
 

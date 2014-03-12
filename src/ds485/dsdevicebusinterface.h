@@ -93,6 +93,15 @@ namespace dss {
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device);
+
+    virtual void increaseDeviceOutputChannelValue(const Device& _device,
+                                            uint8_t _channel);
+
+    virtual void decreaseDeviceOutputChannelValue(const Device& _device,
+                                            uint8_t _channel);
+
+    virtual void stopDeviceOutputChannelValue(const Device& _device,
+                                        uint8_t _channel);
   }; // DSDeviceBusInterface
 
 

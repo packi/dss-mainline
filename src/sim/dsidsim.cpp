@@ -145,6 +145,15 @@ namespace dss {
     return std::make_pair(down, up);
   }
 
+  void DSIDSim::increaseDeviceOutputChannelValue(const uint8_t _channel) {
+  } // increaseDeviceOutputChannelValue
+
+  void DSIDSim::decreaseDeviceOutputChannelValue(const uint8_t _channel) {
+  } // decreaseDeviceOutputChannelValue
+
+  void DSIDSim::stopDeviceOutputChannelValue(const uint8_t _channel) {
+  } // stopDeviceOutputChannelValue
+
   void DSIDSim::setValue(const uint8_t _value) {
     if(m_Enabled) {
       m_CurrentValue = int(_value);

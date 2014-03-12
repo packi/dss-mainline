@@ -262,6 +262,55 @@ namespace dss {
     return std::make_pair(downstream, upstream);
   }
 
+  void DSDeviceBusInterface::increaseDeviceOutputChannelValue(
+                                                        const Device& _device,
+                                                        uint8_t _channel) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle, dsmDSID,
+                                                 _device.getShortAddress(),
+                                                 _channel);
+    DSBusInterface::checkResultCode(ret);
+  } // increaseDeviceOutputChannelValue
+
+  void DSDeviceBusInterface::decreaseDeviceOutputChannelValue(const Device& _device,
+                                                        uint8_t _channel) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle, dsmDSID,
+                                                 _device.getShortAddress(),
+                                                 _channel);
+    DSBusInterface::checkResultCode(ret);
+  } // decreaseDeviceOutputChannelValue
+
+  void DSDeviceBusInterface::stopDeviceOutputChannelValue(const Device& _device,
+                                                    uint8_t _channel) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle, dsmDSID,
+                                                  _device.getShortAddress(),
+                                                  _channel);
+    DSBusInterface::checkResultCode(ret);
+  } // stopDeviceOutputChannelValue
+
   DSDeviceBusInterface::OEMDataReader::OEMDataReader(const std::string& _busConnection)
     : m_busConnection(_busConnection)
     , m_dsmApiHandle(NULL)

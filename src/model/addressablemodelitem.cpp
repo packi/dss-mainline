@@ -127,4 +127,36 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->blink(this, _origin, _category, _token);
   } // blink
 
+  void AddressableModelItem::increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: increaseOutputChannelValue blocked", lsDebug);
+      return;
+    }
+    m_pApartment->getActionRequestInterface()->increaseOutputChannelValue(this, _origin, _category, _channel, _token);
+  } // increaseOutputChannelValue
+
+  void AddressableModelItem::decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: decreaseOutputChannelValue blocked", lsDebug);
+      return;
+    }
+    m_pApartment->getActionRequestInterface()->decreaseOutputChannelValue(this, _origin, _category, _channel, _token);
+  } // decreaseOutputChannelValue
+
+  void AddressableModelItem::stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: stopOutputChannelValue blocked", lsDebug);
+      return;
+    }
+    m_pApartment->getActionRequestInterface()->stopOutputChannelValue(this, _origin, _category, _channel, _token);
+  } // stopOutputChannelValue
 } // namespace dss
