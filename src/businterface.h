@@ -122,6 +122,18 @@ namespace dss {
     /** Enable or disable programming mode */
     virtual void setDeviceProgMode(const Device& _device, uint8_t modeId) = 0;
 
+    /** Increase Increase value of selected output channel. */
+    virtual void increaseDeviceOutputChannelValue(const Device& _device,
+                                            uint8_t _channel) = 0;
+
+    /** Decrease value of selected output channel. */
+    virtual void decreaseDeviceOutputChannelValue(const Device& _device,
+                                            uint8_t _channel) = 0;
+
+    /** Stop dimming value of selected output channel. */
+    virtual void stopDeviceOutputChannelValue(const Device& _device,
+                                        uint8_t _channel) = 0;
+
     /** Tests transmission quality to a device, where the first returned
       value is the DownstreamQuality and the second value the UpstreamQuality */
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device) = 0;
@@ -141,7 +153,6 @@ namespace dss {
 
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;
-
     virtual ~DeviceBusInterface() {}; // please the compiler (virtual dtor)
   }; // DeviceBusInterface
 
@@ -224,6 +235,9 @@ namespace dss {
     virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
     virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
     virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) = 0;
+    virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
   }; // ActionRequestInterface
 
 

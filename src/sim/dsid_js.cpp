@@ -319,6 +319,49 @@ namespace dss {
         return std::make_pair(rand() % 255, rand() % 255);
     } // getTransmissionQuality
 
+    virtual void increaseDeviceOutputChannelValue(uint8_t _channel) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(int(_channel));
+          m_pSelf->callFunctionByName<void>("increaseDeviceOutputChannelValue", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'increaseDeviceOutputChannelValue'") + e.what(), lsError);
+        }
+      }
+    } // increaseDeviceOutputChannelValue
+
+    virtual void decreaseDeviceOutputChannelValue(uint8_t _channel) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(int(_channel));
+          m_pSelf->callFunctionByName<void>("decreaseDeviceOutputChannelValue", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'decreaseDeviceOutputChannelValue'") + e.what(), lsError);
+        }
+      }
+    } // decreaseDeviceOutputChannelValue
+
+    virtual void stopDeviceOutputChannelValue(uint8_t _channel) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(int(_channel));
+          m_pSelf->callFunctionByName<void>("stopDeviceOutputChannelValue", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'stopDeviceOutputChannelValue'") + e.what(), lsError);
+        }
+      }
+    } // stopDeviceOutputChannelValue
+
+
     virtual uint16_t getFunctionID() {
       if(m_pSelf != NULL) {
         try {

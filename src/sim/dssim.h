@@ -139,6 +139,10 @@ namespace dss {
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() = 0;
 
+    virtual void increaseDeviceOutputChannelValue(const uint8_t _channel) = 0;
+    virtual void decreaseDeviceOutputChannelValue(const uint8_t _channel) = 0;
+    virtual void stopDeviceOutputChannelValue(const uint8_t _channel) = 0;
+
     virtual void setValue(const uint8_t _value) = 0;
     virtual uint16_t getFunctionID() = 0;
     virtual uint16_t getProductID() = 0;

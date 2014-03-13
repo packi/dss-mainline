@@ -85,4 +85,25 @@ namespace dss {
     }
   }
 
+  void NonAddressableModelItem::increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
+      item->increaseOutputChannelValue(_origin, _category, _channel, _token);
+    }
+  }
+
+  void NonAddressableModelItem::decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
+      item->decreaseOutputChannelValue(_origin, _category, _channel, _token);
+    }
+  }
+
+  void NonAddressableModelItem::stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
+      item->stopOutputChannelValue(_origin, _category, _channel, _token);
+    }
+  }
+
 } // namespace dss

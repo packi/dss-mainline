@@ -434,6 +434,33 @@ namespace dss {
     }
   } // setProgMode
 
+ void Device::increaseDeviceOutputChannelValue(uint8_t _channel) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->increaseDeviceOutputChannelValue(*this, _channel);
+    }
+  } // increaseDeviceOutputChannelValue
+
+  void Device::decreaseDeviceOutputChannelValue(uint8_t _channel) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->decreaseDeviceOutputChannelValue(*this, _channel);
+    }
+  } // decreaseDeviceOutputChannelValue
+
+  void Device::stopDeviceOutputChannelValue(uint8_t _channel) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->stopDeviceOutputChannelValue(*this, _channel);
+    }
+  } // decreaseDeviceOutputChannelValue
+
   void Device::setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config) {
     uint8_t mode = _config.dontcare ? 1 : 0;
     mode |= _config.localprio ? 2 : 0;

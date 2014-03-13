@@ -67,6 +67,19 @@ namespace dss {
     void groupUndoSceneLast(const int _zoneID, const int _groupID);
     void deviceSetValue(const int _deviceID, const uint8_t _value);
     void groupSetValue(const int _zoneID, const int _groupID, const uint8_t _value);
+    void groupIncreaseOutputChannelValue(const int _zoneID, const int _groupID,
+                                         const uint8_t _channel);
+    void groupDecreaseOutputChannelValue(const int _zoneID, const int _groupID,
+                                         const uint8_t _channel);
+    void groupStopOutputChannelValue(const int _zoneID, const int _groupID,
+                                     const uint8_t _channel);
+    void deviceIncreaseOutputChannelValue(const int _deviceID,
+                                          const uint8_t _channel);
+    void deviceDecreaseOutputChannelValue(const int _deviceID,
+                                          const uint8_t _channel);
+    void deviceStopOutputChannelValue(const int _deviceID,
+                                      const uint8_t _channel);
+
   public:
     uint32_t getPowerConsumption();
     uint32_t getEnergyMeterValue();

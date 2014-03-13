@@ -275,6 +275,11 @@ namespace dss {
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);
     void setProgMode(uint8_t _modeId);
+
+    void increaseDeviceOutputChannelValue(uint8_t _channel);
+    void decreaseDeviceOutputChannelValue(uint8_t _channel);
+    void stopDeviceOutputChannelValue(uint8_t _channel);
+
     bool is2WayMaster() const;
     bool is2WaySlave() const;
     bool hasMultibuttons() const;
