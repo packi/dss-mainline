@@ -74,6 +74,66 @@ namespace dss {
     }
   } // saveScene
 
+  void SimActionRequestBusInterface::increaseOutputChannelValue(
+                                           AddressableModelItem *pTarget,
+                                           const uint16_t _origin,
+                                           const SceneAccessCategory _category,
+                                           const uint8_t _channel,
+                                           const std::string _token) {
+    Group* pGroup = dynamic_cast<Group*>(pTarget);
+    Device* pDevice = dynamic_cast<Device*>(pTarget);
+    for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
+      boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
+      if(pGroup != NULL) {
+        pMeter->groupIncreaseOutputChannelValue(pGroup->getZoneID(), pGroup->getID(), _channel);
+      } else {
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceIncreaseOutputChannelValue(pDevice->getShortAddress(), _channel);
+        }
+      }
+    }
+  } // increaseOutputChannelValue
+
+  void SimActionRequestBusInterface::decreaseOutputChannelValue(
+                                           AddressableModelItem *pTarget,
+                                           const uint16_t _origin,
+                                           const SceneAccessCategory _category,
+                                           const uint8_t _channel,
+                                           const std::string _token) {
+    Group* pGroup = dynamic_cast<Group*>(pTarget);
+    Device* pDevice = dynamic_cast<Device*>(pTarget);
+    for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
+      boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
+      if(pGroup != NULL) {
+        pMeter->groupDecreaseOutputChannelValue(pGroup->getZoneID(), pGroup->getID(), _channel);
+      } else {
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceDecreaseOutputChannelValue(pDevice->getShortAddress(), _channel);
+        }
+      }
+    }
+  } // decreaseOutputChannelValue
+
+  void SimActionRequestBusInterface::stopOutputChannelValue(
+                                           AddressableModelItem *pTarget,
+                                           const uint16_t _origin,
+                                           const SceneAccessCategory _category,
+                                           const uint8_t _channel,
+                                           const std::string _token) {
+    Group* pGroup = dynamic_cast<Group*>(pTarget);
+    Device* pDevice = dynamic_cast<Device*>(pTarget);
+    for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
+      boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
+      if(pGroup != NULL) {
+        pMeter->groupStopOutputChannelValue(pGroup->getZoneID(), pGroup->getID(), _channel);
+      } else {
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceStopOutputChannelValue(pDevice->getShortAddress(), _channel);
+        }
+      }
+    }
+  } // stopOutputChannelValue
+
   void SimActionRequestBusInterface::undoScene(AddressableModelItem *pTarget,
                                                const uint16_t _origin,
                                                const SceneAccessCategory _category,

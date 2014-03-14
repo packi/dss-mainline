@@ -41,7 +41,7 @@ using namespace dss;
 
 static std::string pathSecurity = "/system/security";
 
-static std::string pathUserRole = "/system/security/roles/user";
+static std::string pathUserRole = "/system/security/roles/owner";
 static std::string pathSystemRole = "/system/security/roles/system";
 
 static std::string pathTestUser = "/system/security/users/testuser";
@@ -81,11 +81,9 @@ public:
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->signOff();
 
-    m_pSystemRole = m_PropertySystem.createProperty(pathSystemRole);
-    m_pUserRole = m_PropertySystem.createProperty(pathUserRole);
-
     m_pUserNode = m_PropertySystem.createProperty(pathTestUser);
-    m_pUserNode->createProperty("role")->alias(m_pUserRole);
+    m_pSecurity->addUserRole(m_pUserNode);
+
     m_pUser.reset(new User(m_pUserNode));
     m_pUser->setPassword("test");
   }
@@ -95,8 +93,6 @@ protected:
   PropertySystem m_PropertySystem;
   boost::shared_ptr<User> m_pUser;
   PropertyNodePtr m_pUserNode;
-  PropertyNodePtr m_pSystemRole;
-  PropertyNodePtr m_pUserRole;
 };
 
 BOOST_FIXTURE_TEST_CASE(testFixtureDoesntLogInAUser, FixtureTestUserTest) {
@@ -160,7 +156,7 @@ BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
  * the security is actually configured in the system
  */
 void setupPrivileges(PropertySystem &propSys) {
-  boost::shared_ptr<Privilege> privilegeSystem, privilegeNobody, privilegeUser;
+  boost::shared_ptr<Privilege> privilegeSystem, privilegeUser;
 
   privilegeSystem.reset(new Privilege(propSys.getProperty(pathSystemRole)));
   privilegeSystem->addRight(Privilege::Write);
@@ -168,19 +164,13 @@ void setupPrivileges(PropertySystem &propSys) {
   privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
   privilegeUser->addRight(Privilege::Write);
 
-  privilegeNobody.reset(new Privilege(PropertyNodePtr()));
-
   boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
   privileges->addPrivilege(privilegeSystem);
   privileges->addPrivilege(privilegeUser);
-  privileges->addPrivilege(privilegeNobody);
   propSys.getProperty("/")->setPrivileges(privileges);
 
   /* security: passwords and credentials */
-  boost::shared_ptr<Privilege> privilegeNobodySecurity(new Privilege(PropertyNodePtr()));
-
   boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
-  privilegesSecurityNode->addPrivilege(privilegeNobodySecurity);
   privilegesSecurityNode->addPrivilege(privilegeSystem);
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }
@@ -215,7 +205,6 @@ BOOST_FIXTURE_TEST_CASE(testWritePrivilege, FixturePrivilegeTest) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testWritePrivilegeSecurity, FixturePrivilegeTest) {
-  /* TODO, nobody has the right to create new users, probably a good thing */
   BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/evil_E"),
                     SecurityException);
   m_pSecurity->authenticate("testuser", "test");
@@ -244,17 +233,23 @@ public:
   }
 };
 
-BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesHasSameAccessAsNobody, FixtureSentinelTest) {
+BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesReadAccess, FixtureSentinelTest) {
   BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
   m_pSecurity->authenticate("sentinel", "sentinel");
   BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
+}
+
+BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesWriteAccess, FixtureSentinelTest) {
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/no_write_access"), SecurityException);
+  m_pSecurity->authenticate("sentinel", "sentinel");
+  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/no_write_access"), SecurityException);
 }
 
 class FixtureSystemUser : public FixtureTestUserTest {
 public:
   FixtureSystemUser() : FixtureTestUserTest() {
     PropertyNodePtr systemUserNode = m_PropertySystem.createProperty(pathSystemUser);
-    systemUserNode->createProperty("role")->alias(m_pSystemRole);
+    m_pSecurity->addSystemRole(systemUserNode);
 
     /* this will enable loginAsSystemUser */
     m_pSecurity->setSystemUser(new User(systemUserNode));
@@ -295,4 +290,33 @@ BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
   BOOST_CHECK(Security::getCurrentlyLoggedInUser() == NULL);
 }
 
+BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
+
+  std::string fileName = getTempDir() + "/security_config.xml";
+
+  /* saveXML is method of propertySystem, will remove in next commit */
+  m_pSecurity->setFileName(fileName);
+  m_pSecurity->startListeningForChanges();
+
+  /* this will trigger writeXML */
+  m_pUser->setPassword("unittest");
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "unittest"));
+
+  /* must be security or the loadFromXML will add 'security' subnode */
+  PropertyNodePtr vaultRootNode(new PropertyNode("security"));
+  Security security = Security(PropertyNodePtr(vaultRootNode));
+  security.setFileName(fileName);
+  boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
+  security.setPasswordChecker(checker);
+
+  BOOST_CHECK_EQUAL(security.loadFromXML(), true);
+  //vaultRootNode->saveAsXML(std::cout, 1, PropertyNode::Archive);
+  security.addUserRole(vaultRootNode->getProperty("users/testuser"));
+
+  BOOST_CHECK(!security.authenticate("testuser", "test"));
+  BOOST_CHECK(security.authenticate("testuser", "unittest"));
+
+  boost::filesystem::remove_all(fileName);
+  // TODO explicit saveToXML
+}
 BOOST_AUTO_TEST_SUITE_END()

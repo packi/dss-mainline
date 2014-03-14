@@ -83,6 +83,18 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
       functionCalled("blink");
     }
 
+    virtual void increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
+      functionCalled("increaseOutputChannelValue(" + intToString(_channel) + ")");
+    }
+
+    virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
+      functionCalled("decreaseOutputChannelValue(" + intToString(_channel) + ")");
+    }
+
+    virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
+      functionCalled("stopOutputChannelValue(" + intToString(_channel) + ")");
+    }
+
     int getNumberOfCalls() const { return m_NumberOfCalls; }
     const std::string& getLastFunction() const { return m_LastFunction; }
 

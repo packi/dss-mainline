@@ -87,6 +87,10 @@ namespace dss {
     void setSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
     virtual void setConfigParameter(const std::string& _name, const std::string& _value);
     virtual std::string getConfigParameter(const std::string& _name) const;
+
+    virtual void increaseDeviceOutputChannelValue(const uint8_t _channel);
+    virtual void decreaseDeviceOutputChannelValue(const uint8_t _channel);
+    virtual void stopDeviceOutputChannelValue(const uint8_t _channel);
   }; // DSIDSim
 
 }

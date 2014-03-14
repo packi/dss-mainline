@@ -83,6 +83,67 @@ namespace dss {
     }
   }
 
+  void DSActionRequest::increaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) {
+    int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+
+    if(pGroup) {
+      ret = ZoneGroupActionRequest_action_opc_inc(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _origin, _channel);
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else if(pDevice) {
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _channel);
+      DSBusInterface::checkResultCode(ret);
+    }
+  }
+  void DSActionRequest::decreaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) {
+    int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+
+    if(pGroup) {
+      ret = ZoneGroupActionRequest_action_opc_dec(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _origin, _channel);
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else if(pDevice) {
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _channel);
+      DSBusInterface::checkResultCode(ret);
+    }
+  }
+  void DSActionRequest::stopOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) {
+    int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+
+    if(pGroup) {
+      ret = ZoneGroupActionRequest_action_opc_stop(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _origin, _channel);
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else if(pDevice) {
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _channel);
+      DSBusInterface::checkResultCode(ret);
+    }
+  }
+
   void DSActionRequest::undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) {
     int ret;
 

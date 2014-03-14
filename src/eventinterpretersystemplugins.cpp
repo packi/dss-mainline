@@ -40,6 +40,7 @@
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
+#include "util.h"
 
 #ifdef HAVE_CURL
 #include "url.h"
@@ -555,7 +556,7 @@ namespace dss {
       return;
     }
 
-    std::string oUrl = oUrlNode->getAsString();
+    std::string oUrl = unescapeHTML(oUrlNode->getAsString());
     if (oUrl.empty()) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeURL: empty url parameter", lsError);

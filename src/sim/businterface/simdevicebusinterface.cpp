@@ -151,4 +151,36 @@ namespace dss {
     }
   } // lockOrUnlockDevice
 
+  void SimDeviceBusInterface::increaseDeviceOutputChannelValue(const Device& _device,
+                                                         uint8_t _channel) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        pDevice->increaseDeviceOutputChannelValue(_channel);
+      }
+    }
+  } // increaseDeviceOutputChannelValue
+
+  void SimDeviceBusInterface::decreaseDeviceOutputChannelValue(const Device& _device,
+                                                         uint8_t _channel) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        pDevice->decreaseDeviceOutputChannelValue(_channel);
+      }
+    }
+  } // decreaseDeviceOutputChannelValue
+
+  void SimDeviceBusInterface::stopDeviceOutputChannelValue(const Device& _device,
+                                                         uint8_t _channel) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        pDevice->stopDeviceOutputChannelValue(_channel);
+      }
+    }
+  } // stopDeviceOutputChannelValue
 } // namespace dss

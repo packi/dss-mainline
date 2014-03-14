@@ -36,15 +36,13 @@ namespace dss {
   //================================================== SecurityTreeListener
 
   class SecurityTreeListener : public PropertyListener {
+    __DECL_LOG_CHANNEL__
   public:
-    SecurityTreeListener(boost::shared_ptr<PropertySystem> _pPropertySystem,
-                         PropertyNodePtr _pSecurityNode,
+    SecurityTreeListener(PropertyNodePtr _pSecurityNode,
                          const std::string _path)
-    : m_pPropertySystem(_pPropertySystem),
-      m_pSecurityNode(_pSecurityNode),
+    : m_pSecurityNode(_pSecurityNode),
       m_Path(_path)
     {
-      assert(_pPropertySystem != NULL);
       assert(_pSecurityNode != NULL);
       assert(!_path.empty());
       m_pSecurityNode->addListener(this);
@@ -53,7 +51,7 @@ namespace dss {
   public:
     void writeXML() {
       boost::mutex::scoped_lock lock(m_WriteXMLMutex);
-      m_pPropertySystem->saveToXML(m_Path, m_pSecurityNode, PropertyNode::Archive);
+      saveToXML(m_Path, m_pSecurityNode, PropertyNode::Archive);
     }
   protected:
     virtual void propertyChanged(PropertyNodePtr _caller,
@@ -64,14 +62,16 @@ namespace dss {
     }
 
   private:
-    boost::shared_ptr<PropertySystem> m_pPropertySystem;
     PropertyNodePtr m_pSecurityNode;
     boost::mutex m_WriteXMLMutex;
     const std::string m_Path;
   }; // SecurityTreeListener
 
+  __DEFINE_LOG_CHANNEL__(SecurityTreeListener, lsInfo)
 
   //================================================== Security
+
+  __DEFINE_LOG_CHANNEL__(Security, lsInfo)
 
   bool Security::authenticate(const std::string& _user, const std::string& _password) {
     signOff();
@@ -148,6 +148,18 @@ namespace dss {
     return std::string();
   } // getApplicationName
 
+  void Security::addUserRole(PropertyNodePtr userNode)
+  {
+    PropertyNodePtr userRole = m_pRootNode->createProperty("roles/owner");
+    userNode->createProperty("role")->alias(userRole);
+  }
+
+  void Security::addSystemRole(PropertyNodePtr userNode)
+  {
+    PropertyNodePtr userRole = m_pRootNode->createProperty("roles/system");
+    userNode->createProperty("role")->alias(userRole);
+  }
+
   bool Security::signIn(User* _pUser) {
     User* u = m_LoggedInUser.release();
     if (NULL != u) {
@@ -165,11 +177,8 @@ namespace dss {
   } // signOff
 
   bool Security::loadFromXML() {
-    bool result = false;
-    if(m_pPropertySystem != NULL) {
-      result = m_pPropertySystem->loadFromXML(m_FileName, m_pRootNode);
-    }
-    return result;
+    assert(!m_FileName.empty());
+    return dss::loadFromXML(m_FileName, m_pRootNode);
   } // loadFromXML
 
   void Security::loginAsSystemUser(const std::string& _reason) {
@@ -186,7 +195,8 @@ namespace dss {
   } // loginAsSystemUser
 
   void Security::startListeningForChanges() {
-    m_pTreeListener.reset(new SecurityTreeListener(m_pPropertySystem, m_pRootNode, m_FileName));
+    assert(!m_FileName.empty());
+    m_pTreeListener.reset(new SecurityTreeListener(m_pRootNode, m_FileName));
   } // startListeningForChanges
 
   void Security::createApplicationToken(const std::string& _applicationName,

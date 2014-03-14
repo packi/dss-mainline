@@ -150,6 +150,8 @@ namespace dss {
     DEVICE_TYPE_IST     = 7,
     DEVICE_TYPE_AKM     = 8,
     DEVICE_TYPE_TNY     = 10,
+    DEVICE_TYPE_UMV     = 11,
+    DEVICE_TYPE_UMR     = 12,
   } DeviceTypes_t;
 
   typedef enum {
@@ -273,6 +275,11 @@ namespace dss {
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);
     void setProgMode(uint8_t _modeId);
+
+    void increaseDeviceOutputChannelValue(uint8_t _channel);
+    void decreaseDeviceOutputChannelValue(uint8_t _channel);
+    void stopDeviceOutputChannelValue(uint8_t _channel);
+
     bool is2WayMaster() const;
     bool is2WaySlave() const;
     bool hasMultibuttons() const;

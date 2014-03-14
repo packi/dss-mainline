@@ -171,6 +171,33 @@ namespace dss {
       }
     }
 
+    virtual void increaseDeviceOutputChannelValue(const Device& _device,
+                                            uint8_t _channel) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->increaseDeviceOutputChannelValue(_device, _channel);
+      } else {
+        m_pInner->increaseDeviceOutputChannelValue(_device, _channel);
+      }
+    }
+
+    virtual void decreaseDeviceOutputChannelValue(const Device& _device,
+                                            uint8_t _channel) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->decreaseDeviceOutputChannelValue(_device, _channel);
+      } else {
+        m_pInner->decreaseDeviceOutputChannelValue(_device, _channel);
+      }
+    }
+
+    virtual void stopDeviceOutputChannelValue(const Device& _device,
+                                        uint8_t _channel) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->stopDeviceOutputChannelValue(_device, _channel);
+      } else {
+        m_pInner->stopDeviceOutputChannelValue(_device, _channel);
+      }
+    }
+
   private:
     DeviceBusInterface* m_pInner;
     DeviceBusInterface* m_pSimulationInterface;
@@ -216,6 +243,33 @@ namespace dss {
       }
       if(targetIsInner(pTarget)) {
         m_pInner->saveScene(pTarget, _origin, scene, _token);
+      }
+    }
+
+    virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+      if(targetIsSim(pTarget)) {
+        m_pSimulationInterface->increaseOutputChannelValue(pTarget, _origin, _category, _channel, _token);
+      }
+      if(targetIsInner(pTarget)) {
+        m_pInner->increaseOutputChannelValue(pTarget, _origin, _category, _channel, _token);
+      }
+    }
+
+    virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+      if(targetIsSim(pTarget)) {
+        m_pSimulationInterface->decreaseOutputChannelValue(pTarget, _origin, _category, _channel, _token);
+      }
+      if(targetIsInner(pTarget)) {
+        m_pInner->decreaseOutputChannelValue(pTarget, _origin, _category, _channel, _token);
+      }
+    }
+
+    virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+      if(targetIsSim(pTarget)) {
+        m_pSimulationInterface->stopOutputChannelValue(pTarget, _origin, _category, _channel, _token);
+      }
+      if(targetIsInner(pTarget)) {
+        m_pInner->stopOutputChannelValue(pTarget, _origin, _category, _channel, _token);
       }
     }
 

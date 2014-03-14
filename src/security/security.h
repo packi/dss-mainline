@@ -26,6 +26,7 @@
 #include <boost/thread.hpp>
 
 #include "src/base.h"
+#include "logger.h"
 
 namespace dss {
 
@@ -38,16 +39,10 @@ namespace dss {
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class Security {
+    __DECL_LOG_CHANNEL__
   public:
     Security(PropertyNodePtr _pRootNode)
     : m_pRootNode(_pRootNode),
-      m_pSystemUser(NULL)
-    { }
-
-    Security(PropertyNodePtr _pRootNode,
-             boost::shared_ptr<PropertySystem> _pPropertySystem)
-    : m_pRootNode(_pRootNode),
-      m_pPropertySystem(_pPropertySystem),
       m_pSystemUser(NULL)
     { }
 
@@ -73,6 +68,18 @@ namespace dss {
       return m_LoggedInUser.get();
     }
 
+    /**
+     * Add user to role 'user'
+     * @param userNode -- user to be added
+     */
+    void addUserRole(PropertyNodePtr userNode);
+
+    /**
+     * Add user to role 'system'
+     * @param userNode -- user to be added
+     */
+    void addSystemRole(PropertyNodePtr userNode);
+
     void startListeningForChanges();
     void setFileName(const std::string& _value) {
       m_FileName = _value;
@@ -88,7 +95,6 @@ namespace dss {
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
     boost::shared_ptr<SecurityTreeListener> m_pTreeListener;
-    boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<PasswordChecker> m_pPasswordChecker;
     User* m_pSystemUser;
     std::string m_FileName;

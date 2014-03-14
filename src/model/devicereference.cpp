@@ -119,4 +119,17 @@ namespace dss {
     return getDevice()->getSensorEventName(_eventIndex);
   }
 
+  void DeviceReference::increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+      getDevice()->increaseOutputChannelValue(_origin, _category,
+                                              _channel, _token);
+  }
+
+  void DeviceReference::decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+      getDevice()->decreaseOutputChannelValue(_origin, _category,
+                                              _channel, _token);
+  }
+
+  void DeviceReference::stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token) {
+      getDevice()->stopOutputChannelValue(_origin, _category, _channel, _token);
+  }
 } // namespace dss

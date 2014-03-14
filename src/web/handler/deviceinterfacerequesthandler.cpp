@@ -123,6 +123,27 @@ namespace dss {
     } else if(_request.getMethod() == "blink") {
       _interface->blink(coJSON, SceneAccess::stringToCategory(categoryStr), sessionToken);
       return success();
+    } else if(_request.getMethod() == "increaseOutputChannelValue") {
+      int channel = strToIntDef(_request.getParameter("channel"), -1);
+      if((channel  < 0) || (channel > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'channel'");
+      }
+      _interface->increaseOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel, sessionToken);
+      return success();
+    } else if(_request.getMethod() == "decreaseOutputChannelValue") {
+      int channel = strToIntDef(_request.getParameter("channel"), -1);
+      if((channel  < 0) || (channel > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'channel'");
+      }
+      _interface->decreaseOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel, sessionToken);
+      return success();
+    } else if(_request.getMethod() == "stopOutputChannelValue") {
+      int channel = strToIntDef(_request.getParameter("channel"), -1);
+      if((channel  < 0) || (channel > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'channel'");
+      }
+      _interface->stopOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel, sessionToken);
+      return success();
     }
     throw std::runtime_error("Unknown function");
   } // handleRequest
@@ -137,7 +158,10 @@ namespace dss {
         || _request.getMethod() == "saveScene"
         || _request.getMethod() == "undoScene"
         || _request.getMethod() == "getConsumption"
-        || _request.getMethod() == "blink";
+        || _request.getMethod() == "blink"
+        || _request.getMethod() == "increaseOutputChannelValue"
+        || _request.getMethod() == "decreaseOutputChannelValue"
+        || _request.getMethod() == "stopOutputChannelValue";
   } // isDeviceInterfaceCall
 
 } // namespace dss

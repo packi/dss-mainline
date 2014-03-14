@@ -441,7 +441,8 @@ BOOST_AUTO_TEST_CASE(testValueTypeFromAndToString) {
 
 BOOST_AUTO_TEST_CASE(testReadingFromNonexistentFile) {
   boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
-  BOOST_CHECK_EQUAL(propSys->loadFromXML("idontexistandneverwill.xml", PropertyNodePtr()), false);
+  BOOST_CHECK_EQUAL(loadFromXML("idontexistandneverwill.xml",
+                                propSys->getProperty("/")), false);
 } // testReadingFromNonexistentFile
 
 BOOST_AUTO_TEST_CASE(testAddChildMovesNode) {
@@ -482,7 +483,8 @@ BOOST_AUTO_TEST_CASE(testLoadingEmptyNodesWorks) {
     "</properties>";
   ofs.close();
 
-  BOOST_CHECK_EQUAL(propSys.loadFromXML(getTempDir() + "testconfig.xml", propSys.createProperty("/config")), true);
+  BOOST_CHECK_EQUAL(loadFromXML(getTempDir() + "testconfig.xml",
+                                propSys.createProperty("/config")), true);
   boost::filesystem::remove_all(fileName);
 }
 
@@ -502,7 +504,8 @@ BOOST_AUTO_TEST_CASE(testInvalidXML) {
     "</properties>";
   ofs.close();
 
-  BOOST_CHECK_EQUAL(propSys.loadFromXML(getTempDir() + "testconfig.xml", propSys.createProperty("/config")), false);
+  BOOST_CHECK_EQUAL(loadFromXML(getTempDir() + "testconfig.xml",
+                                propSys.createProperty("/config")), false);
   boost::filesystem::remove_all(fileName);
 }
 
@@ -522,7 +525,8 @@ BOOST_AUTO_TEST_CASE(testExceptionWhileParsing) {
     "</properties>";
   ofs.close();
 
-  BOOST_CHECK_EQUAL(propSys.loadFromXML(getTempDir() + "testconfig.xml", propSys.createProperty("/config")), false);
+  BOOST_CHECK_EQUAL(loadFromXML(getTempDir() + "testconfig.xml",
+                                propSys.createProperty("/config")), false);
   boost::filesystem::remove_all(fileName);
 }
 

@@ -45,38 +45,24 @@ namespace dss {
 
   const int PROPERTY_FORMAT_VERSION = 1;
 
-  //=============================================== PropertySystem
+  //=============================================== Util
 
-  PropertySystem::PropertySystem()
-  : m_RootNode(new PropertyNode("/"))
-  { } // ctor
-
-  PropertySystem::~PropertySystem() {
-  } // dtor
-
-  bool PropertySystem::loadFromXML(const std::string& _fileName,
-                                   PropertyNodePtr _rootNode) {
-    PropertyNodePtr root = _rootNode;
-    if (root == NULL) {
-      root = getRootNode();
-    }
+  bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode) {
+    assert(_rootNode != NULL);
     boost::shared_ptr<PropertyParser> pp(new PropertyParser());
-    return pp->loadFromXML(_fileName, root);
+    return pp->loadFromXML(_fileName, _rootNode);
   } // loadFromXML
 
-  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask) const {
+  bool saveToXML(const std::string& _fileName, PropertyNodePtr root, const int _flagsMask) {
     std::string tmpOut = _fileName + ".tmp";
     std::ofstream ofs(tmpOut.c_str());
+    assert(root != NULL);
 
-    if(ofs) {
+    if (ofs) {
       int indent = 0;
 
       ofs << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
       ofs << "<properties version=\"1\">" << std::endl;
-      PropertyNodePtr root = _rootNode;
-      if(root == NULL) {
-        root = m_RootNode;
-      }
       root->saveAsXML(ofs, indent + 1, _flagsMask);
       ofs << "</properties>" << std::endl;
 
@@ -92,6 +78,17 @@ namespace dss {
 
     return true;
   } // saveToXML
+
+  //=============================================== PropertySystem
+
+  __DEFINE_LOG_CHANNEL__(PropertySystem, lsInfo);
+
+  PropertySystem::PropertySystem()
+  : m_RootNode(new PropertyNode("/"))
+  { } // ctor
+
+  PropertySystem::~PropertySystem() {
+  } // dtor
 
   PropertyNodePtr PropertySystem::getProperty(const std::string& _propPath) const {
     if(_propPath[ 0 ] != '/') {
@@ -786,7 +783,7 @@ namespace dss {
     }
   } // createProperty
 
-  bool PropertyNode::saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
+  bool PropertyNode::saveAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
 
     _ofs << doIndent(_indent) << "<property type=\"" << getValueTypeAsString(getValueType()) << "\"" <<
                                           " name=\"" << XMLStringEscape(getDisplayName()) << "\"";
@@ -820,7 +817,7 @@ namespace dss {
     return result;
   } // saveAsXML
 
-  bool PropertyNode::saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask) {
+  bool PropertyNode::saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
     foreach(PropertyNodePtr pChild, m_ChildNodes) {
       if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
         if(!pChild->saveAsXML(_ofs, _indent, _flagsMask)) {
@@ -881,45 +878,33 @@ namespace dss {
   } // notifyListeners
 
   void PropertyNode::checkWriteAccess() {
-    boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
-    if(pPrivilege != NULL) {
-      if(!pPrivilege->hasRight(Privilege::Write)) {
-        User* pUser = Security::getCurrentlyLoggedInUser();
-        std::string userName = "(nobody)";
-        if(pUser != NULL) {
-          userName = pUser->getName();
-        }
-        throw SecurityException("Write access denied for user " + userName);
-      }
+    boost::shared_ptr<NodePrivileges> privileges = lookupPrivileges();
+    if (!privileges) {
+      /* no restrictions implied */
+      return;
+    }
+
+    User* pUser = Security::getCurrentlyLoggedInUser();
+    if (pUser == NULL) {
+      throw SecurityException("Write access denied for unauthenticated user");
+    }
+
+    boost::shared_ptr<Privilege> privilege =
+      privileges->getPrivilegeForRole(pUser->getRole());
+    if (!privilege || !privilege->hasRight(Privilege::Write)) {
+      throw SecurityException("Write access denied for user " + pUser->getName());
     }
   } // checkWriteAccess
 
-  boost::shared_ptr<Privilege> PropertyNode::searchForPrivilege() {
+  boost::shared_ptr<NodePrivileges> PropertyNode::lookupPrivileges() {
     if (m_pPrivileges != NULL) {
-      User* pUser = Security::getCurrentlyLoggedInUser();
-      if (pUser == NULL) {
-        /* nobody user */
-        return m_pPrivileges->getPrivilegeForRole(PropertyNodePtr());
-      }
-
-      boost::shared_ptr<Privilege> result =
-        m_pPrivileges->getPrivilegeForRole(pUser->getRole());
-      if (!result) {
-        throw SecurityException("No privileges for user " + pUser->getName());
-      }
-      return result;
+      return m_pPrivileges;
+    } else if (m_ParentNode == NULL) {
+      return boost::shared_ptr<NodePrivileges>();
     }
 
-    if (m_ParentNode != NULL) {
-      return m_ParentNode->searchForPrivilege();
-    }
-
-    if (Security::getCurrentlyLoggedInUser()) {
-      /* usually only during init, while no privileges set on the root node */
-      log("No privileges defined, but user accounts present", lsDebug);
-    }
-    return boost::shared_ptr<Privilege>();
-  } // searchForPrivilege
+    return m_ParentNode->lookupPrivileges();
+  }
 
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
 

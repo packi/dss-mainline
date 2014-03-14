@@ -902,6 +902,15 @@ public:
   virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
   }
 
+  virtual void increaseOutputChannelValue(AddressableModelItem*, uint16_t, SceneAccessCategory, uint8_t, std::string) {
+  }
+
+  virtual void decreaseOutputChannelValue(AddressableModelItem*, uint16_t, SceneAccessCategory, uint8_t, std::string) {
+  }
+
+  virtual void stopOutputChannelValue(AddressableModelItem*, uint16_t, SceneAccessCategory, uint8_t, std::string) {
+  }
+
   std::string getLog() {
     return m_Log;
   }

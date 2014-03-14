@@ -71,6 +71,17 @@ namespace dss {
   typedef boost::tokenizer<boost::char_separator<char> > path_tokenizer;
   path_tokenizer createPathTokenizer(const std::string &path);
 
+  /**
+   * Saves a subtree to XML.
+   * @param _rootNode
+   */
+  bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode,
+                 const int _flagsMask = 0);
+  /**
+   * Loads a subtree from XML.
+   * @param _rootNode -- content of the XML is appended to the _rootNode. */
+  bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
+
   /** A tree tree consisting of different value nodes.
    * The tree can by serialized to and from XML. Nodes can either
    * store values by themselves or, with the use of proxies be
@@ -78,17 +89,12 @@ namespace dss {
    * @author Patrick Staehlin <me@packi.ch>
    */
   class PropertySystem {
+    __DECL_LOG_CHANNEL__
   private:
     PropertyNodePtr m_RootNode;
   public:
     PropertySystem();
     ~PropertySystem();
-
-    /** Loads a subtree from XML.
-     * Everything in the XML has to be relative to _rootNode. */
-    bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
-    /** Saves a subtree to XML. */
-    bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask = 0) const;
 
     /** Searches a property by path.
      * @return The node, or NULL if not found. */
@@ -413,7 +419,11 @@ namespace dss {
     void childRemoved(PropertyNodePtr _child);
     void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
 
-    boost::shared_ptr<Privilege> searchForPrivilege();
+    /**
+     * traverse towards root node and return first privileges found
+     * @ret NodePrivileges or NULL if no restrictions implied
+     */
+    boost::shared_ptr<NodePrivileges> lookupPrivileges();
   public:
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
@@ -547,9 +557,9 @@ namespace dss {
     }
   public:
     /** Writes the node to XML */
-    bool saveAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask);
+    bool saveAsXML(std::ostream& _os, const int _indent, const int _flagsMask);
     /** Saves the nodes children to XML */
-    bool saveChildrenAsXML(std::ofstream& _ofs, const int _indent, const int _flagsMask);
+    bool saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask);
   }; // PropertyNode
 
   /** Exception that gets thrown if a incompatible assignment would take place. */
