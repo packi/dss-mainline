@@ -46,7 +46,7 @@ namespace dss {
     return sstream.str();
   }
 
-  void JSONElement::writeElementsTo(std::stringstream& _out) {
+  void JSONElement::writeElementsTo(std::ostream& _out) {
     bool first = true;
     foreach(NamedElement& namedElement, m_Elements) {
       if(!first) {
@@ -58,7 +58,7 @@ namespace dss {
     }
   }
 
-  void JSONElement::writeElementsNoNamesTo(std::stringstream& _out) {
+  void JSONElement::writeElementsNoNamesTo(std::ostream& _out) {
     bool first = true;
     foreach(NamedElement& namedElement, m_Elements) {
       if(!first) {
@@ -128,7 +128,7 @@ namespace dss {
     addElement(_name, elem);
   } // addProperty
 
-  void JSONObject::writeTo(std::stringstream& _out) {
+  void JSONObject::writeTo(std::ostream& _out) {
     _out << "{";
     writeElementsTo(_out);
     _out << "}";
@@ -138,27 +138,27 @@ namespace dss {
   //================================================== JSONValue
 
   template<>
-  void JSONValue<int>::writeTo(std::stringstream& _out) {
+  void JSONValue<int>::writeTo(std::ostream& _out) {
     _out << m_Value;
   }
 
   template<>
-  void JSONValue<unsigned long int>::writeTo(std::stringstream& _out) {
+  void JSONValue<unsigned long int>::writeTo(std::ostream& _out) {
     _out << m_Value;
   }
 
   template<>
-  void JSONValue<unsigned long long>::writeTo(std::stringstream& _out) {
+  void JSONValue<unsigned long long>::writeTo(std::ostream& _out) {
     _out << m_Value;
   }
 
   template<>
-  void JSONValue<std::string>::writeTo(std::stringstream& _out) {
+  void JSONValue<std::string>::writeTo(std::ostream& _out) {
     _out << '"' << jsonEncode(m_Value) << '"';
   }
 
   template<>
-  void JSONValue<bool>::writeTo(std::stringstream& _out) {
+  void JSONValue<bool>::writeTo(std::ostream& _out) {
     if(m_Value) {
       _out << "true";
     } else {
@@ -167,7 +167,7 @@ namespace dss {
   }
 
   template<>
-  void JSONValue<double>::writeTo(std::stringstream& _out) {
+  void JSONValue<double>::writeTo(std::ostream& _out) {
     std::streamsize ss = _out.precision();
     _out << std::setprecision(16) << m_Value;
     _out << std::setprecision(ss);
@@ -175,7 +175,7 @@ namespace dss {
 
   //================================================== JSONArrayBase
 
-  void JSONArrayBase::writeTo(std::stringstream& _out) {
+  void JSONArrayBase::writeTo(std::ostream& _out) {
     _out << "[";
     writeElementsNoNamesTo(_out);
     _out << "]";

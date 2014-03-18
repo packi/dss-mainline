@@ -42,9 +42,10 @@ namespace dss {
     virtual ~JSONElement() {}
     std::string toString();
   protected:
-    virtual void writeTo(std::stringstream& _out) = 0;
-    virtual void writeElementsTo(std::stringstream& _out);
-    virtual void writeElementsNoNamesTo(std::stringstream& _out);
+    virtual void writeTo(std::ostream& _out) = 0;
+    virtual void writeElementsTo(std::ostream& _out);
+    /** same as writeElements but skip empty names field */
+    virtual void writeElementsNoNamesTo(std::ostream& _out);
   private:
     typedef std::pair<std::string, boost::shared_ptr<JSONElement> > NamedElement;
     std::vector<NamedElement> m_Elements;
@@ -60,7 +61,7 @@ namespace dss {
     virtual void addProperty(const std::string& _name, const bool _value);
     virtual void addProperty(const std::string& _name, const double _value);
   protected:
-    virtual void writeTo(std::stringstream& _out);
+    virtual void writeTo(std::ostream& _out);
   };
 
   template<class T>
@@ -72,14 +73,14 @@ namespace dss {
       return m_Value;
     }
   protected:
-    virtual void writeTo(std::stringstream& _out);
+    virtual void writeTo(std::ostream& _out);
   private:
     T m_Value;
   };
 
   class JSONArrayBase : public JSONElement {
   protected:
-    virtual void writeTo(std::stringstream& _out);
+    virtual void writeTo(std::ostream& _out);
   }; // JSONArrayBase
 
   template<class T>
