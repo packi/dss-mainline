@@ -142,18 +142,8 @@ namespace dss {
 
   //================================================== JSONValue
 
-  template<>
-  void JSONValue<int>::writeTo(std::ostream& _out) const {
-    _out << m_Value;
-  }
-
-  template<>
-  void JSONValue<unsigned long int>::writeTo(std::ostream& _out) const {
-    _out << m_Value;
-  }
-
-  template<>
-  void JSONValue<unsigned long long>::writeTo(std::ostream& _out) const {
+  template<class T>
+  void JSONValue<T>::writeTo(std::ostream& _out) const {
     _out << m_Value;
   }
 
@@ -164,11 +154,7 @@ namespace dss {
 
   template<>
   void JSONValue<bool>::writeTo(std::ostream& _out) const {
-    if(m_Value) {
-      _out << "true";
-    } else {
-      _out << "false";
-    }
+    _out << ((m_Value) ? "true" : "false");
   }
 
   template<>
@@ -177,6 +163,13 @@ namespace dss {
     _out << std::setprecision(16) << m_Value;
     _out << std::setprecision(ss);
   }
+
+  /* explicit instantiation */
+  template class JSONValue<bool>;
+  template class JSONValue<int>;
+  template class JSONValue<double>;
+  template class JSONValue<std::string>;
+  template class JSONValue<JSONObject>;
 
   //================================================== JSONArrayBase
 
