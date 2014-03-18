@@ -30,6 +30,15 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(JSON)
 
+BOOST_AUTO_TEST_CASE(testStreamOperator) {
+  JSONObject obj;
+  std::ostringstream s;
+  obj.addProperty("id", "foo");
+  s << obj;
+  s << obj;
+  BOOST_CHECK_EQUAL(s.str(), "{\"id\":\"foo\"}{\"id\":\"foo\"}");
+}
+
 BOOST_AUTO_TEST_CASE(testObjectEmpty) {
   JSONObject obj;
   std::string value = obj.toString();

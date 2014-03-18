@@ -41,11 +41,11 @@ namespace dss {
     int getElementCount() const;
     virtual ~JSONElement() {}
     std::string toString();
+    virtual void writeTo(std::ostream& _out) const = 0;
   protected:
-    virtual void writeTo(std::ostream& _out) = 0;
-    virtual void writeElementsTo(std::ostream& _out);
+    virtual void writeElementsTo(std::ostream& _out) const;
     /** same as writeElements but skip empty names field */
-    virtual void writeElementsNoNamesTo(std::ostream& _out);
+    virtual void writeElementsNoNamesTo(std::ostream& _out) const;
   private:
     typedef std::pair<std::string, boost::shared_ptr<JSONElement> > NamedElement;
     std::vector<NamedElement> m_Elements;
@@ -60,9 +60,10 @@ namespace dss {
     virtual void addProperty(const std::string& _name, const unsigned long long _value);
     virtual void addProperty(const std::string& _name, const bool _value);
     virtual void addProperty(const std::string& _name, const double _value);
-  protected:
-    virtual void writeTo(std::ostream& _out);
+    virtual void writeTo(std::ostream& _out) const;
   };
+
+  std::ostream& operator<<(std::ostream& stream, const JSONObject &obj);
 
   template<class T>
   class JSONValue : public JSONElement {
@@ -72,15 +73,14 @@ namespace dss {
     const T& getValue() const {
       return m_Value;
     }
-  protected:
-    virtual void writeTo(std::ostream& _out);
+    virtual void writeTo(std::ostream& _out) const;
   private:
     T m_Value;
   };
 
   class JSONArrayBase : public JSONElement {
-  protected:
-    virtual void writeTo(std::ostream& _out);
+  public:
+    virtual void writeTo(std::ostream& _out) const;
   }; // JSONArrayBase
 
   template<class T>
