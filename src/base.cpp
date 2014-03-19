@@ -277,7 +277,7 @@ namespace dss {
 
   std::string truncateUTF8String(const std::string& _in, int _maxBytes) {
     assert(_maxBytes >= 0);
-    char* buffer = static_cast<char*>(malloc(_maxBytes));
+    char* buffer = static_cast<char*>(malloc(_maxBytes+1));
     strncpy(buffer, _in.c_str(), _maxBytes);
     buffer[_maxBytes] = '\0';
     int len = strlen(buffer);
@@ -331,6 +331,7 @@ namespace dss {
       }
     }
     std::string result(buffer);
+    free(buffer);
     return result;
   } // truncateUTF8String
 
