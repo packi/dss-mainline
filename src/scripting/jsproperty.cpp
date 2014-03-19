@@ -294,8 +294,10 @@ namespace dss {
       break;
     case vTypeNone:
       JS_SET_RVAL(cx, vp, JSVAL_VOID);
+      break;
     default:
       JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      break;
     }
     return JS_TRUE;
   } // prop_getProperty
