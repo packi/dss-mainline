@@ -707,26 +707,31 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   std::string DSS::getRandomSalt() {
-    std::string randomSalt;
 #ifdef __linux__
-    {
-      long long int u;
-      std::ifstream file ("/dev/urandom", std::ios::binary);
-      if (file.is_open()) {
-        char *urandom;
-        int size = sizeof(u);
-        urandom = new char [size];
-        file.read(urandom, size);
-        file.close();
-        u = *reinterpret_cast<long long int*>(urandom);
-        delete[] urandom;
-        std::ostringstream s;
-        s << std::hex << u;
-        randomSalt = s.str();
-      }
+    unsigned char urandom[sizeof(long long int)];
+
+    std::ifstream file ("/dev/urandom", std::ios::binary);
+    if (!file.is_open()) {
+      /* TODO this will probably crash the server at startup */
+      throw std::runtime_error("failed to open /dev/urandom");
     }
+
+    file.read(reinterpret_cast<char *>(urandom), sizeof(urandom));
+    if (!file) {
+      throw std::runtime_error("failed to read from /dev/urandom");
+    }
+    file.close();
+
+    std::ostringstream s;
+    s.fill('0');
+    for (unsigned i = 0; i < sizeof(urandom); i++) {
+      s << std::hex << std::setw(2) << static_cast<unsigned int>(urandom[i]);
+    }
+    return s.str();
+#else
+#error missing random genarator on platform
+      // return "TOOTHBRUSH";
 #endif
-    return randomSalt;
   }
 
 #ifndef WIN32
