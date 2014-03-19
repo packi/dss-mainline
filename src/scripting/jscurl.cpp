@@ -478,7 +478,8 @@ namespace dss {
   class SessionAttachedAsyncCurlObject : public ScriptContextAttachedObject {
   public:
     SessionAttachedAsyncCurlObject(ScriptContext* _pContext)
-    : ScriptContextAttachedObject(_pContext)
+    : ScriptContextAttachedObject(_pContext),
+      m_pRunAsUser(NULL)
     {
       if (Security::getCurrentlyLoggedInUser() != NULL) {
         m_pRunAsUser = new User(*Security::getCurrentlyLoggedInUser());

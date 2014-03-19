@@ -89,6 +89,7 @@ const std::string SocketScriptExtensionName = "socketextension";
   public:
     SocketHelper(SocketScriptContextExtension& _extension)
     : m_Extension(_extension),
+      m_pContext(NULL),
       m_CallbackFunction(JSVAL_NULL)
     { }
 
@@ -231,7 +232,8 @@ const std::string SocketScriptExtensionName = "socketextension";
                                public boost::enable_shared_from_this<SocketHelperInstance> {
   public:
     SocketHelperInstance(SocketScriptContextExtension& _extension)
-    : SocketHelper(_extension)
+    : SocketHelper(_extension),
+      m_BytesToRead(0)
     { }
 
     ~SocketHelperInstance() {
