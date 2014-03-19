@@ -1802,8 +1802,6 @@ namespace dss {
             devName = "SOAP";
         } else if (dsid.lower == 4) {
             devName = "Bus-Handler";
-        } else if (dsid.lower == 5) {
-            devName = "Simulation";
         } else if (dsid.lower == 6) {
             devName = "Test";
         } else if (dsid.lower == 7) {

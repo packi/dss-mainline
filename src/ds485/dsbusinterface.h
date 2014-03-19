@@ -229,9 +229,7 @@ namespace dss {
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface();
     virtual ActionRequestInterface* getActionRequestInterface();
 
-    virtual void setBusEventSink(BusEventSink* _eventSink) {
-      m_pBusEventSink = _eventSink;
-    }
+    virtual void setBusEventSink(BusEventSink* _eventSink);
     static void checkResultCode(const int _resultCode);
     static void checkBroadcastResultCode(const int _resultCode);
 

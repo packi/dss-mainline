@@ -71,12 +71,4 @@ namespace dss {
 
     return result;
   }
-
-  bool dss_dsid_t::isSimulated() {
-    bool headerMatches = (upper & DSIDHeader) == DSIDHeader;
-    bool prefixMatches = (lower & SimulationPrefix) == SimulationPrefix;
-    return headerMatches && prefixMatches;
-  } // isSimulatedDSID
-
-
 }

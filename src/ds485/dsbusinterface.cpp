@@ -76,6 +76,11 @@ namespace dss {
     m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface());
   } // ctor
 
+  void DSBusInterface::setBusEventSink(BusEventSink* _eventSink) {
+      m_pBusEventSink = _eventSink;
+      m_pActionRequestInterface->setBusEventSink(_eventSink);
+  }
+
   void DSBusInterface::checkResultCode(const int _resultCode) {
     if(_resultCode != ERROR_OK) {
       std::string message;

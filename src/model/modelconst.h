@@ -213,7 +213,6 @@ namespace dss {
   const int GroupIDMax = 63;
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
-  const uint32_t SimulationPrefix = 0xFFC00000;
 
   const uint8_t CfgClassComm = 0x00;
   const uint8_t CfgClassDevice = 0x01;

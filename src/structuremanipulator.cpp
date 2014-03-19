@@ -205,11 +205,6 @@ namespace dss {
   } // removeZoneOnDSMeters
 
   void StructureManipulator::removeDeviceFromDSMeter(boost::shared_ptr<Device> _device) {
-
-    if (_device->getDSID().isSimulated()) {
-      return;
-    }
-
     dss_dsid_t dsmDsid = _device->getDSMeterDSID();
     dss_dsid_t devDsid = _device->getDSID();
     devid_t shortAddr = _device->getShortAddress();
