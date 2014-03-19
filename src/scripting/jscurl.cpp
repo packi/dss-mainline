@@ -93,7 +93,10 @@ namespace dss {
       if (!s)
         return JS_FALSE;
       jsval v = STRING_TO_JSVAL(s);
-      JS_SetElement(cx, ary, count, &v);
+      JSBool res = JS_SetElement(cx, ary, count, &v);
+      if(!res) {
+        return JS_FALSE;
+      }
       slist = slist->next;
       ++count;
     }
@@ -478,7 +481,8 @@ namespace dss {
   class SessionAttachedAsyncCurlObject : public ScriptContextAttachedObject {
   public:
     SessionAttachedAsyncCurlObject(ScriptContext* _pContext)
-    : ScriptContextAttachedObject(_pContext)
+    : ScriptContextAttachedObject(_pContext),
+      m_pRunAsUser(NULL)
     {
       if (Security::getCurrentlyLoggedInUser() != NULL) {
         m_pRunAsUser = new User(*Security::getCurrentlyLoggedInUser());

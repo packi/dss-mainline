@@ -47,7 +47,13 @@ namespace dss {
 
   ScriptEnvironment::ScriptEnvironment(Security* _pSecurity)
   : m_pRuntime(NULL),
-    m_pSecurity(_pSecurity)
+    m_pSecurity(_pSecurity),
+    m_RuntimeSize(0),
+    m_StackSize(0),
+    m_cxOptionSet(0),
+    m_cxOptionClear(0),
+    m_TimingEnabled(false),
+    m_pContext(NULL)
   {
   } // ctor
 

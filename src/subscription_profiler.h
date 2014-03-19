@@ -14,7 +14,10 @@ namespace dss {
 
   class TimeStamp {
   public:
-    TimeStamp() {};
+    TimeStamp() {
+      m_stamp.tv_sec = 0;
+      m_stamp.tv_nsec = 0;
+    };
 
     void timestamp();
     //unsigned toNanoSec() const; /* mind the range is only 32bit */

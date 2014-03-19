@@ -398,6 +398,7 @@ void CommChannel::taskThread()
     {
         Logger::getInstance()->log("[CommChannel] exit communication loop");
     }
+    unlockMessageList();
     return;
 }
 

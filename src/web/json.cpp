@@ -168,7 +168,9 @@ namespace dss {
 
   template<>
   void JSONValue<double>::writeTo(std::stringstream& _out) {
+    std::streamsize ss = _out.precision();
     _out << std::setprecision(16) << m_Value;
+    _out << std::setprecision(ss);
   }
 
   //================================================== JSONArrayBase
