@@ -212,6 +212,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getDSMeters: ext of wrong type");
+        return JS_FALSE;
+      }
 
       JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
@@ -242,6 +246,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getZones: ext of wrong type");
+        return JS_FALSE;
+      }
 
       JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
@@ -272,6 +280,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getZoneByID: ext of wrong type");
+        return JS_FALSE;
+      }
 
       int zoneID;
       try {
@@ -307,6 +319,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getStateByName: ext of wrong type");
+        return JS_FALSE;
+      }
 
       std::string stateName;
       try {
@@ -360,6 +376,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_registerState: ext of wrong type");
+        return JS_FALSE;
+      }
 
       std::string stateName;
       try {
@@ -623,6 +643,10 @@ namespace dss {
 
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
         ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Model.set_perform: ext of wrong type");
+      return JS_FALSE;
+    }
     if(self.is("Set")) {
       Set* set = static_cast<Set*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
       if(argc == 1) {
@@ -2160,6 +2184,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_getDevices: ext of wrong type");
+        return JS_FALSE;
+      }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       if(pZone != NULL) {
         Set devices = pZone->getDevices();
@@ -2423,6 +2451,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_pushSensorValue: ext of wrong type");
+        return JS_FALSE;
+      }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       uint8_t groupID;
       dss_dsid_t sourceDSID;
@@ -2473,6 +2505,10 @@ namespace dss {
     try {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_pushSensorValueFloat: ext of wrong type");
+        return JS_FALSE;
+      }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       uint8_t groupID;
       dss_dsid_t sourceDSID;
