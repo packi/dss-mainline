@@ -2577,7 +2577,7 @@ namespace dss {
       if (state != NULL) {
         if ((alarm == true) && (state->getState() == State_Inactive)) {
           state->setState(coJSScripting, State_Active);
-        } else if (panic == false) {
+        } else if (alarm == false) {
           state->setState(coJSScripting, State_Inactive);
         }
       } // alarm state
