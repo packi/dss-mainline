@@ -75,6 +75,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_setProperty: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     int argIndex;
@@ -150,6 +154,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.setStatusProperty: ext of wrong type");
+      return JS_FALSE;
+    }
 
     StringConverter st("UTF-8", "UTF-8");
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
@@ -245,6 +253,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_getProperty: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
@@ -292,6 +304,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_setListener: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     jsval function;
@@ -341,6 +357,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_removeListener: ext of wrong type");
+      return JS_FALSE;
+    }
 
     std::string listenerIdent;
     try {
@@ -360,6 +380,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_setFlag: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     std::string flagName;
@@ -427,6 +451,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_hasFlag: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     std::string flagName;
@@ -489,6 +517,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_getChild: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
@@ -522,6 +554,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_getChildren: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
@@ -547,6 +583,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_getNode: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr pNode;
     if(argc >= 1) {
@@ -576,6 +616,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_getParent: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
@@ -596,6 +640,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_removeChild: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, JS_THIS_OBJECT(cx, vp));
     if(node == NULL) {
@@ -634,6 +682,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_store: ext of wrong type");
+      return JS_FALSE;
+    }
 
     if(ext->store(ctx)) {
       JS_SET_RVAL(cx, vp, JSVAL_TRUE);
@@ -647,6 +699,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.getName: ext of wrong type");
+      return JS_FALSE;
+    }
 
     if(ext->load(ctx)) {
       JS_SET_RVAL(cx, vp, JSVAL_TRUE);
@@ -726,6 +782,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.property_construct: ext of wrong type");
+      return JS_FALSE;
+    }
     StringConverter st("UTF-8", "UTF-8");
     std::string propName;
     try {
@@ -759,6 +819,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(
         ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "Property.prop_JSGet: ext of wrong type");
+      return JS_FALSE;
+    }
 
     PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
     if(node == NULL) {

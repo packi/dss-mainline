@@ -317,6 +317,10 @@ namespace dss {
     try {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if (ext == NULL) {
+        Logger::getInstance()->log(std::string("JS: scripting failure: ext of wrong type"), lsFatal);
+        return JS_FALSE;
+      }
       if(self.is("Event")) {
         event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         ext->getEventQueue().pushEvent(eventWrapper->event);
@@ -340,6 +344,10 @@ namespace dss {
     try {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if (ext == NULL) {
+        Logger::getInstance()->log(std::string("JS: scripting failure: ext of wrong type"), lsFatal);
+        return JS_FALSE;
+      }
       if(self.is("Event")) {
         event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         std::string id = ext->getEventQueue().pushTimedEvent(eventWrapper->event);
@@ -402,6 +410,10 @@ namespace dss {
     try {
       ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
       EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if (ext == NULL) {
+        Logger::getInstance()->log("JS: scripting failure: ext of wrong type", lsFatal);
+        return JS_FALSE;
+      }
       if(self.is("Subscription")) {
         subscription_wrapper* subscriptionWrapper = static_cast<subscription_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
         ext->getEventInterpreter().subscribe(subscriptionWrapper->subscription);
@@ -423,7 +435,8 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
-    if(ext == NULL) {
+    if (ext == NULL) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: ext of wrong type"), lsFatal);
       return JS_FALSE;
     }
 
