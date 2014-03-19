@@ -53,6 +53,7 @@ namespace dss {
       m_expectValue(false),
       m_ignore(false),
       m_nSubscriptions(0),
+      m_nFilter(0),
       m_currentValueType(vTypeNone) {
     m_subscriptionNode = _subs;
     m_statesNode = _states;

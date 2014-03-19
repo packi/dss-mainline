@@ -125,6 +125,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
   DSS::DSS()
+  : m_commChannel(NULL)
   {
     m_ShutdownFlag = false;
     m_State = ssInvalid;

@@ -73,7 +73,8 @@ bool Mutex::unlock() {
 
 
 LockableObject::LockableObject() :
-  m_Locked( false )
+  m_Locked( false ),
+  m_LockedBy(0)
 {
 
 } // ctor

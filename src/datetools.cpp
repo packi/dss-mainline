@@ -48,6 +48,7 @@ namespace dss {
   }
 
   DateTime::DateTime(const struct icaltimetype& _icaltime) {
+    memset(&m_DateTime, 0, sizeof(m_DateTime));
     time_t t0 = icaltime_as_timet(_icaltime);
     if(_icaltime.is_utc) {
       localtime_r(&t0, &m_DateTime);
