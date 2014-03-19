@@ -330,8 +330,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pSessionManager.reset(
       new SessionManager(getEventQueue(),
                          getEventInterpreter(),
-                         m_pSecurity,
-                         getRandomSalt()));
+                         m_pSecurity));
     m_pWebServer->setSessionManager(m_pSessionManager);
 
     parseProperties(_properties);

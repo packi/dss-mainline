@@ -47,7 +47,7 @@ namespace dss {
     /// \param Specifies how long a session can remain idle before it gets
     /// removed, value of 0 means - never remove.
     SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter,
-                   boost::shared_ptr<Security> _pSecurity, const std::string _salt = "");
+                   boost::shared_ptr<Security> _pSecurity);
     /// \brief Registers a new session, creates a new Session object
     /// \return session identifier
     std::string registerSession();

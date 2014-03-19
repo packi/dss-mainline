@@ -35,6 +35,7 @@
 #include <vector>
 #include <sstream>
 
+#include "dss.h"
 #include "src/logger.h"
 #include "src/session.h"
 #include "src/eventinterpreterplugins.h"
@@ -46,26 +47,16 @@
 namespace dss {
   SessionManager::SessionManager(EventQueue& _EventQueue,
                                  EventInterpreter& _eventInterpreter,
-                                 boost::shared_ptr<Security> _pSecurity,
-                                 const std::string _salt)
+                                 boost::shared_ptr<Security> _pSecurity)
   : m_EventQueue(_EventQueue),
     m_EventInterpreter(_eventInterpreter),
     m_pSecurity(_pSecurity),
-    m_Salt(_salt),
     m_timeoutSecs(60),
     m_maxSessionCount(100)
   {
     m_NextSessionID = rand();
-    std::ostringstream ostr;
-    ostr << "DSS";
-#ifdef HAVE_CONFIG_H
-    ostr << " v" << DSS_VERSION;
-#endif
-#ifdef HAVE_BUILD_INFO_H
-    ostr << " (" << DSS_RCS_REVISION << ")"
-         << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")";
-#endif
-    m_VersionInfo = ostr.str();
+    m_Salt = DSS::getRandomSalt();
+    m_VersionInfo = DSS::versionString();
   }
 
   void SessionManager::sendCleanupEvent() {
