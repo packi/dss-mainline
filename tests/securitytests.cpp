@@ -36,6 +36,7 @@
 #include "src/security/user.h"
 #include "src/security/privilege.h"
 #include "src/security/security.h"
+#include "dss.h"
 
 using namespace dss;
 
@@ -48,6 +49,16 @@ static std::string pathTestUser = "/system/security/users/testuser";
 static std::string pathSystemUser = "/system/security/users/system";
 
 BOOST_AUTO_TEST_SUITE(SecurityTests)
+
+BOOST_AUTO_TEST_CASE(testUrandom) {
+  for (int i = 0; i < 10; i++) {
+    std::string seed = DSS::getRandomSalt();
+    /* This fails if there is a leading '0' */
+    BOOST_CHECK(seed.length() == 16);
+    BOOST_CHECK(seed.length() == 2 * sizeof(long long int));
+    BOOST_CHECK(seed.find_first_not_of("1234567890abcdef") == std::string::npos);
+  }
+}
 
 BOOST_AUTO_TEST_CASE(testDigestPasswords) {
   std::string fileName = getTempDir() + "/digest_test_file";

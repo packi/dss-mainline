@@ -325,33 +325,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(m_pEventInterpreter.get(), eventMonitor));
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue(m_pEventInterpreter.get()));
 
-    std::string randomSalt;
-#ifdef __linux__
-    {
-      long long int u;
-      std::ifstream file ("/dev/urandom", std::ios::binary);
-      if (file.is_open()) {
-        char *urandom;
-        int size = sizeof(u);
-        urandom = new char [size];
-        file.read(urandom, size);
-        file.close();
-        u = *reinterpret_cast<long long int*>(urandom);
-        delete[] urandom;
-        std::ostringstream s;
-        s << std::hex << u;
-        randomSalt = s.str();
-      }
-    }
-#endif
-
     m_pSecurity.reset(
         new Security(m_pPropertySystem->createProperty("/system/security")));
     m_pSessionManager.reset(
       new SessionManager(getEventQueue(),
                          getEventInterpreter(),
                          m_pSecurity,
-                         randomSalt));
+                         getRandomSalt()));
     m_pWebServer->setSessionManager(m_pSessionManager);
 
     parseProperties(_properties);
@@ -724,6 +704,29 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
          << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")";
 #endif
     return ostr.str();
+  }
+
+  std::string DSS::getRandomSalt() {
+    std::string randomSalt;
+#ifdef __linux__
+    {
+      long long int u;
+      std::ifstream file ("/dev/urandom", std::ios::binary);
+      if (file.is_open()) {
+        char *urandom;
+        int size = sizeof(u);
+        urandom = new char [size];
+        file.read(urandom, size);
+        file.close();
+        u = *reinterpret_cast<long long int*>(urandom);
+        delete[] urandom;
+        std::ostringstream s;
+        s << std::hex << u;
+        randomSalt = s.str();
+      }
+    }
+#endif
+    return randomSalt;
   }
 
 #ifndef WIN32
