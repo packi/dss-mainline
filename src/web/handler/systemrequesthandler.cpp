@@ -202,7 +202,7 @@ namespace dss {
       }
       applicationName = escapeHTML(applicationName);
 
-      std::string applicationToken =  m_pSessionManager->generateToken();
+      std::string applicationToken =  SessionTokenGenerator::generate();
       m_pSessionManager->getSecurity()->loginAsSystemUser("Temporary access to create token");
       m_pSessionManager->getSecurity()->createApplicationToken(applicationName,
                                                                applicationToken);

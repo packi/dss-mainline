@@ -45,6 +45,41 @@
 
 
 namespace dss {
+
+  //========================================== SessionTokenGenerator
+
+  __DEFINE_LOG_CHANNEL__(SessionTokenGenerator, lsInfo);
+
+  std::string SessionTokenGenerator::generate() {
+    static SessionTokenGenerator instance;
+    return instance._generate();
+  }
+
+  SessionTokenGenerator::SessionTokenGenerator() {
+    m_NextSessionID = rand();
+    m_VersionInfo = DSS::versionString();
+    m_Salt = hexEncodeByteArray(DSS::getRandomSalt(8)); /* magic number */
+  }
+
+  std::string SessionTokenGenerator::_generate() {
+    Hasher hasher;
+    if(!m_Salt.empty()) {
+      hasher.add(m_Salt);
+    } else {
+      log("No salt specified, sessions ids might not be secure", lsWarning);
+    }
+
+    hasher.add(m_VersionInfo);
+    hasher.add(m_NextSessionID);
+    hasher.add(DateTime().toString());
+    m_NextSessionID++;
+    Hasher stage2;
+    stage2.add(hasher.str());
+    return stage2.str();
+  }
+
+  //================================================== SessionManager
+
   SessionManager::SessionManager(EventQueue& _EventQueue,
                                  EventInterpreter& _eventInterpreter,
                                  boost::shared_ptr<Security> _pSecurity)
@@ -54,9 +89,6 @@ namespace dss {
     m_timeoutSecs(60),
     m_maxSessionCount(100)
   {
-    m_NextSessionID = rand();
-    m_Salt = hexEncodeByteArray(DSS::getRandomSalt(8)); /* magic number */
-    m_VersionInfo = DSS::versionString();
   }
 
   void SessionManager::sendCleanupEvent() {
@@ -91,7 +123,7 @@ namespace dss {
   boost::shared_ptr<Session> SessionManager::createSession() {
     setupCleanupEventRelayTarget();
 
-    boost::shared_ptr<Session> result(new Session(generateToken()));
+    boost::shared_ptr<Session> result(new Session(SessionTokenGenerator::generate()));
     result->setTimeout(m_timeoutSecs);
     return result;
   }
@@ -125,22 +157,6 @@ namespace dss {
     m_MapMutex.unlock();
     Logger::getInstance()->log("SessionManager: register application session " + id, lsDebug);
     return id;
-  }
-
-  std::string SessionManager::generateToken() {
-    Hasher hasher;
-    if(!m_Salt.empty()) {
-      hasher.add(m_Salt);
-    } else {
-      Logger::getInstance()->log("SessionManager: No salt specified, sessions ids might not be secure", lsWarning);
-    }
-    hasher.add(m_VersionInfo);
-    hasher.add(m_NextSessionID);
-    hasher.add(DateTime().toString());
-    m_NextSessionID++;
-    Hasher stage2;
-    stage2.add(hasher.str());
-    return stage2.str();
   }
 
   boost::shared_ptr<Session> SessionManager::getSession(const std::string& _id) {
