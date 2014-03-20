@@ -685,7 +685,11 @@ namespace dss {
           std::string userName = digest.substr(userNamePos + userNamePrefix.size(),
                                                userNameEnd - userNamePos - 1);
           self.log("Logging-in from a trusted port as '" + userName + "'");
-          if (self.m_SessionManager->getSecurity()->impersonate(userName) && (session == NULL)) {
+          if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
+            self.log("Unknown user", lsInfo);
+            return NULL;
+          }
+          if (session == NULL) {
             std::string newToken = self.m_SessionManager->registerSession();
             if (newToken.empty()) {
               self.log("Session limit reached", lsError);
