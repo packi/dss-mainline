@@ -381,8 +381,7 @@ namespace dss {
                                                         uint8_t _channel,
                                                         uint8_t _size,
                                                         uint8_t _scene,
-                                                        uint16_t _value,
-                                                        bool _applyNow) {
+                                                        uint16_t _value) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
@@ -390,24 +389,14 @@ namespace dss {
 
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-    int ret;
-
-    if (_applyNow) {
-      ret = DeviceOPCConfig_set_scene_and_apply(m_DSMApiHandle, dsmDSID,
-                                                _device.getShortAddress(),
-                                                _channel, _size, _scene,
-                                                _value);
-    } else {
-      ret = DeviceOPCConfig_set_scene(m_DSMApiHandle, dsmDSID,
-                                      _device.getShortAddress(),
-                                      _channel, _size, _scene, _value);
-    }
+    int ret = DeviceOPCConfig_set_scene(m_DSMApiHandle, dsmDSID,
+                                        _device.getShortAddress(),
+                                        _channel, _size, _scene, _value);
     DSBusInterface::checkResultCode(ret);
   } // setDeviceOutputChannelSceneValue
 
   uint16_t DSDeviceBusInterface::getDeviceOutputChannelSceneConfig(
                                                         const Device& _device,
-                                                        uint8_t _channel,
                                                         uint8_t _scene) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -420,7 +409,7 @@ namespace dss {
 
     int ret = DeviceOPCConfig_get_scene_config_sync(m_DSMApiHandle, dsmDSID,
                                                     _device.getShortAddress(),
-                                                    _channel, _scene,
+                                                    _scene,
                                                     kDSM_API_TIMEOUT, &out);
     DSBusInterface::checkResultCode(ret);
     return out;
@@ -428,11 +417,8 @@ namespace dss {
 
   void DSDeviceBusInterface::setDeviceOutputChannelSceneConfig(
                                                         const Device& _device,
-                                                        uint8_t _channel,
-                                                        uint8_t _size,
                                                         uint8_t _scene,
-                                                        uint16_t _value,
-                                                        bool _applyNow) {
+                                                        uint16_t _value) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
@@ -440,18 +426,9 @@ namespace dss {
 
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-    int ret;
-
-    if (_applyNow) {
-      ret = DeviceOPCConfig_set_scene_config_and_apply(m_DSMApiHandle, dsmDSID,
-                                                      _device.getShortAddress(),
-                                                      _channel, _size, _scene,
-                                                      _value);
-    } else {
-      ret = DeviceOPCConfig_set_scene_config(m_DSMApiHandle, dsmDSID,
-                                             _device.getShortAddress(),
-                                             _channel, _size, _scene, _value);
-    }
+    int ret = DeviceOPCConfig_set_scene_config(m_DSMApiHandle, dsmDSID,
+                                               _device.getShortAddress(),
+                                               _scene, _value);
     DSBusInterface::checkResultCode(ret);
   } // setDeviceOutputChannelSceneConfig
 

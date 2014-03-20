@@ -709,7 +709,11 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      pDevice->getDeviceSceneMode(id, config);
+      if (pDevice->getDeviceType() == DEVICE_TYPE_UMV) {
+        pDevice->getDeviceOutputChannelSceneConfig(id, config);
+      } else {
+        pDevice->getDeviceSceneMode(id, config);
+      }
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("sceneID", id);
       resultObj->addProperty("dontCare", config.dontcare);
@@ -730,7 +734,12 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      pDevice->getDeviceSceneMode(id, config);
+      if (pDevice->getDeviceType() == DEVICE_TYPE_UMV) {
+        pDevice->getDeviceOutputChannelSceneConfig(id, config);
+      } else {
+        pDevice->getDeviceSceneMode(id, config);
+      }
+
       if(_request.hasParameter("dontCare"))
         config.dontcare = strToIntDef(_request.getParameter("dontCare"), config.dontcare);
       if(_request.hasParameter("localPrio"))
@@ -743,7 +752,12 @@ namespace dss {
         config.ledconIndex = strToIntDef(_request.getParameter("ledconIndex"), config.ledconIndex);
       if(_request.hasParameter("dimtimeIndex"))
         config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
-      pDevice->setDeviceSceneMode(id, config);
+      if (pDevice->getDeviceType() == DEVICE_TYPE_UMV) {
+        pDevice->setDeviceOutputChannelSceneConfig(id, config);
+      } else {
+        pDevice->setDeviceSceneMode(id, config);
+      }
+
       return success();
 
     } else if(_request.getMethod() == "getTransitionTime") {
@@ -1060,7 +1074,7 @@ namespace dss {
       for (size_t i = 0; i < channels->size(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
         chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
-        chanObj->addProperty("value", pDevice->getDeviceOutputChannelValue(channels->at(i).first));
+        chanObj->addProperty("value", 50);
         channelsObj->addElement("", chanObj);
       }
 
@@ -1107,13 +1121,13 @@ namespace dss {
       for (size_t i = 0; i < channels->size(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
         chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
-        chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
+        //chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
+        chanObj->addProperty("value", 50);
         channelsObj->addElement("", chanObj);
       }
 
       return success(resultObj);
     } else if (_request.getMethod() == "setOutputChannelSceneValue") {
-      bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
       std::string vals = _request.getParameter("channelvalues");
       if (vals.empty()) {
         return failure("Missing or invalid parameter 'channelvalues'");
@@ -1131,62 +1145,7 @@ namespace dss {
                                              boost::get<0>(channels->at(i)),
                                              boost::get<1>(channels->at(i)),
                                              scene,
-                                             boost::get<2>(channels->at(i)),
-                                             applyNow);
-        // don't flood the bus on bulk requests
-        if ((channels->size() > 1) && (i < channels->size() - 1)) {
-          sleep(1);
-        }
-      }
-
-      return success();
-    } else if (_request.getMethod() == "getOutputChannelSceneConfig") {
-      std::string str_chan = _request.getParameter("channels");
-      if (str_chan.empty()) {
-        return failure("Missing or invalid parameter 'channels'");
-      }
-
-      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
-      if ((scene < 0) || (scene > MaxSceneNumber)) {
-        return failure("Missing or invalid parameter 'sceneNumber'");
-      }
-
-      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
-
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("sceneID", scene);
-      boost::shared_ptr<JSONArrayBase> channelsObj(new JSONArrayBase());
-      resultObj->addElement("channels", channelsObj);
-
-      for (size_t i = 0; i < channels->size(); i++) {
-        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
-        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
-        chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneConfig(channels->at(i).first, scene));
-        channelsObj->addElement("", chanObj);
-      }
-
-      return success(resultObj);
-    } else if (_request.getMethod() == "setOutputChannelSceneConfig") {
-      bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
-      std::string vals = _request.getParameter("channelvalues");
-      if (vals.empty()) {
-        return failure("Missing or invalid parameter 'channelvalues'");
-      }
-
-      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
-      if ((scene < 0) || (scene > MaxSceneNumber)) {
-        return failure("Missing or invalid parameter 'sceneNumber'");
-      }
-
-      boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
-
-      for (size_t i = 0; i < channels->size(); i++) {
-        pDevice->setDeviceOutputChannelSceneConfig(
-                                             boost::get<0>(channels->at(i)),
-                                             boost::get<1>(channels->at(i)),
-                                             scene,
-                                             boost::get<2>(channels->at(i)),
-                                             applyNow);
+                                             boost::get<2>(channels->at(i)));
         // don't flood the bus on bulk requests
         if ((channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);

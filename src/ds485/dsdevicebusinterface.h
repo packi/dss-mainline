@@ -118,19 +118,14 @@ namespace dss {
     virtual void setDeviceOutputChannelSceneValue(const Device& _device,
                                                   uint8_t _channel,
                                                   uint8_t _size, uint8_t _scene,
-                                                  uint16_t _value,
-                                                  bool _applyNow = true);
+                                                  uint16_t _value);
 
     virtual uint16_t getDeviceOutputChannelSceneConfig(const Device& _device,
-                                                       uint8_t _channel,
                                                        uint8_t _scene);
 
     virtual void setDeviceOutputChannelSceneConfig(const Device& _device,
-                                                   uint8_t _channel,
-                                                   uint8_t _size,
                                                    uint8_t _scene,
-                                                   uint16_t _value,
-                                                   bool _applyNow = true);
+                                                   uint16_t _value);
   }; // DSDeviceBusInterface
 
 
