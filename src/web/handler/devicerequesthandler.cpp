@@ -30,6 +30,7 @@
 #include "src/model/device.h"
 #include "src/model/group.h"
 #include "src/model/zone.h"
+#include "src/model/modelconst.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
@@ -58,6 +59,37 @@ namespace dss {
     : std::runtime_error(__arg)
     { }
   };
+
+  boost::shared_ptr<std::vector<std::pair<int, int> > > DeviceRequestHandler::parseOutputChannels(std::string _channels) {
+    boost::shared_ptr<std::vector<std::pair<int, int> > > out(new std::vector<std::pair<int, int> >);
+
+    std::vector<std::string> chans = dss::splitString(_channels, ';');
+    for (size_t i = 0; i < chans.size(); i++) {
+      out->push_back(getOutputChannelIdAndSize(chans.at(i)));
+    }
+
+    return out;
+  }
+
+  boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > DeviceRequestHandler::parseOutputChannelsWithValues(std::string _values) {
+    boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > out(new std::vector<boost::tuple<int, int, int> >);
+
+    std::pair<std::string, std::string> kv;
+    std::vector<std::string> vals = dss::splitString(_values, ';');
+    for (size_t i = 0; i < vals.size(); i++) {
+      kv = splitIntoKeyValue(vals.at(i));
+      int v = strToIntDef(kv.second, -1);
+      if (v == -1) {
+        throw std::invalid_argument("invalid channel value for channel '" +
+                                    kv.first + "'");
+      }
+      std::pair<int, int> cs = getOutputChannelIdAndSize(kv.first);
+      out->push_back(boost::make_tuple(cs.first, cs.second, v));
+    }
+
+    return out;
+  }
+
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result = getDeviceByDSID(_request);
@@ -1012,6 +1044,155 @@ namespace dss {
         return failure("Missing parameter 'areaScene'");
       }
       pDevice->configureAreaMembership(areaScene, false);
+      return success();
+    } else if (_request.getMethod() == "getOutputChannelValue") {
+      std::string str_chan = _request.getParameter("channels");
+      if (str_chan.empty()) {
+        return failure("Missing or invalid parameter 'channels'");
+      }
+
+      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONArrayBase> channelsObj(new JSONArrayBase());
+      resultObj->addElement("channels", channelsObj);
+
+      for (size_t i = 0; i < channels->size(); i++) {
+        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
+        chanObj->addProperty("value", pDevice->getDeviceOutputChannelValue(channels->at(i).first));
+        channelsObj->addElement("", chanObj);
+      }
+
+      return success(resultObj);
+    } else if (_request.getMethod() == "setOutputChannelValue") {
+      bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
+      std::string vals = _request.getParameter("channelvalues");
+      if (vals.empty()) {
+        return failure("Missing or invalid parameter 'channelvalues'");
+      }
+
+      boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
+
+      for (size_t i = 0; i < channels->size(); i++) {
+        pDevice->setDeviceOutputChannelValue(boost::get<0>(channels->at(i)),
+                                             boost::get<1>(channels->at(i)),
+                                             boost::get<2>(channels->at(i)),
+                                             applyNow);
+        // don't flood the bus on bulk requests
+        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+          sleep(1);
+        }
+      }
+
+      return success();
+    } else if (_request.getMethod() == "getOutputChannelSceneValue") {
+      std::string str_chan = _request.getParameter("channels");
+      if (str_chan.empty()) {
+        return failure("Missing or invalid parameter 'channels'");
+      }
+
+      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
+      if ((scene < 0) || (scene > MaxSceneNumber)) {
+        return failure("Missing or invalid parameter 'sceneNumber'");
+      }
+
+      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("sceneID", scene);
+      boost::shared_ptr<JSONArrayBase> channelsObj(new JSONArrayBase());
+      resultObj->addElement("channels", channelsObj);
+
+      for (size_t i = 0; i < channels->size(); i++) {
+        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
+        chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
+        channelsObj->addElement("", chanObj);
+      }
+
+      return success(resultObj);
+    } else if (_request.getMethod() == "setOutputChannelSceneValue") {
+      bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
+      std::string vals = _request.getParameter("channelvalues");
+      if (vals.empty()) {
+        return failure("Missing or invalid parameter 'channelvalues'");
+      }
+
+      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
+      if ((scene < 0) || (scene > MaxSceneNumber)) {
+        return failure("Missing or invalid parameter 'sceneNumber'");
+      }
+
+      boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
+
+      for (size_t i = 0; i < channels->size(); i++) {
+        pDevice->setDeviceOutputChannelSceneValue(
+                                             boost::get<0>(channels->at(i)),
+                                             boost::get<1>(channels->at(i)),
+                                             scene,
+                                             boost::get<2>(channels->at(i)),
+                                             applyNow);
+        // don't flood the bus on bulk requests
+        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+          sleep(1);
+        }
+      }
+
+      return success();
+    } else if (_request.getMethod() == "getOutputChannelSceneConfig") {
+      std::string str_chan = _request.getParameter("channels");
+      if (str_chan.empty()) {
+        return failure("Missing or invalid parameter 'channels'");
+      }
+
+      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
+      if ((scene < 0) || (scene > MaxSceneNumber)) {
+        return failure("Missing or invalid parameter 'sceneNumber'");
+      }
+
+      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("sceneID", scene);
+      boost::shared_ptr<JSONArrayBase> channelsObj(new JSONArrayBase());
+      resultObj->addElement("channels", channelsObj);
+
+      for (size_t i = 0; i < channels->size(); i++) {
+        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
+        chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneConfig(channels->at(i).first, scene));
+        channelsObj->addElement("", chanObj);
+      }
+
+      return success(resultObj);
+    } else if (_request.getMethod() == "setOutputChannelSceneConfig") {
+      bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
+      std::string vals = _request.getParameter("channelvalues");
+      if (vals.empty()) {
+        return failure("Missing or invalid parameter 'channelvalues'");
+      }
+
+      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
+      if ((scene < 0) || (scene > MaxSceneNumber)) {
+        return failure("Missing or invalid parameter 'sceneNumber'");
+      }
+
+      boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
+
+      for (size_t i = 0; i < channels->size(); i++) {
+        pDevice->setDeviceOutputChannelSceneConfig(
+                                             boost::get<0>(channels->at(i)),
+                                             boost::get<1>(channels->at(i)),
+                                             scene,
+                                             boost::get<2>(channels->at(i)),
+                                             applyNow);
+        // don't flood the bus on bulk requests
+        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+          sleep(1);
+        }
+      }
+
       return success();
     } else {
       throw std::runtime_error("Unhandled function");

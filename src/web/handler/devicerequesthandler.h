@@ -23,8 +23,12 @@
 #ifndef DEVICEREQUESTHANDLER_H_
 #define DEVICEREQUESTHANDLER_H_
 
-#include "deviceinterfacerequesthandler.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <vector>
+#include <string>
 
+#include "deviceinterfacerequesthandler.h"
 namespace dss {
 
   class Device;
@@ -37,6 +41,14 @@ namespace dss {
                          StructureModifyingBusInterface* _pStructureBusInterface,
                          StructureQueryBusInterface* _pStructureQueryBusInterface);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+
+    // parse string of semicolon separated integers, returns a pair of
+    // channelid:valuesize
+    boost::shared_ptr<std::vector<std::pair<int, int> > > parseOutputChannels(std::string _channels);
+    // parse string of type key=value;key=value
+    // returns a tuple of channelid:valuesize:value
+    boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > parseOutputChannelsWithValues(std::string _values);
+
   private:
     boost::shared_ptr<Device> getDeviceFromRequest(const RestfulRequest& _request);
     boost::shared_ptr<Device> getDeviceByName(const RestfulRequest& _request);

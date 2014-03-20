@@ -461,6 +461,67 @@ namespace dss {
     }
   } // decreaseDeviceOutputChannelValue
 
+  uint16_t Device::getDeviceOutputChannelValue(uint8_t _channel) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      return m_pApartment->getDeviceBusInterface()->getDeviceOutputChannelValue(*this, _channel);
+    }
+    throw std::runtime_error("Bus interface not available");
+  } // getDeviceOutputChannelValue
+
+  void Device::setDeviceOutputChannelValue(uint8_t _channel, uint8_t _size,
+                                   uint16_t _value, bool _applyNow) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceOutputChannelValue(*this, _channel, _size, _value, _applyNow);
+    }
+  } // setDeviceOutputChannelValue
+
+  uint16_t Device::getDeviceOutputChannelSceneValue(uint8_t _channel,
+                                                    uint8_t _scene) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      return m_pApartment->getDeviceBusInterface()->getDeviceOutputChannelSceneValue(*this, _channel, _scene);
+    }
+    throw std::runtime_error("Bus interface not available");
+  } // getDeviceOutputChannelSceneValue
+
+  void Device::setDeviceOutputChannelSceneValue(uint8_t _channel,
+                                                uint8_t _size,
+                                                uint8_t _scene,
+                                                uint16_t _value,
+                                                bool _applyNow) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceOutputChannelSceneValue(*this, _channel, _size, _scene, _value, _applyNow);
+    }
+  }
+
+  // TODO: once it becomes clear how to decode the scene config for those
+  // devices return a DeviceSceneSpec_t 
+  uint16_t Device::getDeviceOutputChannelSceneConfig(uint8_t _channel,
+                                                     uint8_t _scene) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      return m_pApartment->getDeviceBusInterface()->getDeviceOutputChannelSceneConfig(*this, _channel, _scene);
+    }
+    throw std::runtime_error("Bus interface not available");
+  } // getDeviceOutputChannelSceneConfig
+
+  void Device::setDeviceOutputChannelSceneConfig(uint8_t _channel,
+                                                 uint8_t _size,
+                                                 uint8_t _scene,
+                                                 uint16_t _value,
+                                                bool _applyNow) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceOutputChannelSceneConfig(*this, _channel, _size, _scene, _value, _applyNow);
+    }
+  } // setDeviceOutputChannelSceneConfig
+
   void Device::setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config) {
     uint8_t mode = _config.dontcare ? 1 : 0;
     mode |= _config.localprio ? 2 : 0;

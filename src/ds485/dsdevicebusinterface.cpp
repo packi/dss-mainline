@@ -311,6 +311,150 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // stopDeviceOutputChannelValue
 
+  uint16_t DSDeviceBusInterface::getDeviceOutputChannelValue(
+                                                        const Device& _device,
+                                                        uint8_t _channel) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");;
+    }
+
+    dsid_t dsmDSID;
+    uint16_t out = 0;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceOPCConfig_get_current_sync(m_DSMApiHandle, dsmDSID,
+                                               _device.getShortAddress(),
+                                                _channel, kDSM_API_TIMEOUT,
+                                                &out);
+    DSBusInterface::checkResultCode(ret);
+    return out;
+  } // getDeviceOutputChannelValue
+
+  void DSDeviceBusInterface::setDeviceOutputChannelValue(const Device& _device,
+                                   uint8_t _channel, uint8_t _size,
+                                   uint16_t _value, bool _applyNow) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+    int ret;
+
+    if (_applyNow) {
+      ret = DeviceOPCConfig_set_current_and_apply(m_DSMApiHandle, dsmDSID,
+                                                  _device.getShortAddress(),
+                                                  _channel, _size, _value);
+    } else {
+      ret = DeviceOPCConfig_set_current(m_DSMApiHandle, dsmDSID,
+                                        _device.getShortAddress(),
+                                        _channel, _size, _value);
+    }
+    DSBusInterface::checkResultCode(ret);
+  } // setDeviceOutputChannelValue
+
+  uint16_t DSDeviceBusInterface::getDeviceOutputChannelSceneValue(
+                                                        const Device& _device,
+                                                        uint8_t _channel,
+                                                        uint8_t _scene) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    dsid_t dsmDSID;
+    uint16_t out = 0;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceOPCConfig_get_scene_sync(m_DSMApiHandle, dsmDSID,
+                                             _device.getShortAddress(),
+                                             _channel, _scene, kDSM_API_TIMEOUT,
+                                              &out);
+    DSBusInterface::checkResultCode(ret);
+    return out;
+  } // getDeviceOutputChannelSceneValue
+
+  void DSDeviceBusInterface::setDeviceOutputChannelSceneValue(
+                                                        const Device& _device,
+                                                        uint8_t _channel,
+                                                        uint8_t _size,
+                                                        uint8_t _scene,
+                                                        uint16_t _value,
+                                                        bool _applyNow) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+    int ret;
+
+    if (_applyNow) {
+      ret = DeviceOPCConfig_set_scene_and_apply(m_DSMApiHandle, dsmDSID,
+                                                _device.getShortAddress(),
+                                                _channel, _size, _scene,
+                                                _value);
+    } else {
+      ret = DeviceOPCConfig_set_scene(m_DSMApiHandle, dsmDSID,
+                                      _device.getShortAddress(),
+                                      _channel, _size, _scene, _value);
+    }
+    DSBusInterface::checkResultCode(ret);
+  } // setDeviceOutputChannelSceneValue
+
+  uint16_t DSDeviceBusInterface::getDeviceOutputChannelSceneConfig(
+                                                        const Device& _device,
+                                                        uint8_t _channel,
+                                                        uint8_t _scene) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    dsid_t dsmDSID;
+    uint16_t out = 0;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceOPCConfig_get_scene_config_sync(m_DSMApiHandle, dsmDSID,
+                                                    _device.getShortAddress(),
+                                                    _channel, _scene,
+                                                    kDSM_API_TIMEOUT, &out);
+    DSBusInterface::checkResultCode(ret);
+    return out;
+  } // getDeviceOutputChannelSceneConfig
+
+  void DSDeviceBusInterface::setDeviceOutputChannelSceneConfig(
+                                                        const Device& _device,
+                                                        uint8_t _channel,
+                                                        uint8_t _size,
+                                                        uint8_t _scene,
+                                                        uint16_t _value,
+                                                        bool _applyNow) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+    int ret;
+
+    if (_applyNow) {
+      ret = DeviceOPCConfig_set_scene_config_and_apply(m_DSMApiHandle, dsmDSID,
+                                                      _device.getShortAddress(),
+                                                      _channel, _size, _scene,
+                                                      _value);
+    } else {
+      ret = DeviceOPCConfig_set_scene_config(m_DSMApiHandle, dsmDSID,
+                                             _device.getShortAddress(),
+                                             _channel, _size, _scene, _value);
+    }
+    DSBusInterface::checkResultCode(ret);
+  } // setDeviceOutputChannelSceneConfig
+
   DSDeviceBusInterface::OEMDataReader::OEMDataReader(const std::string& _busConnection)
     : m_busConnection(_busConnection)
     , m_dsmApiHandle(NULL)

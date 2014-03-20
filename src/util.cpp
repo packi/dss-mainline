@@ -108,5 +108,21 @@ namespace dss {
     return _input;
   }
 
+#warning This code needs to be adapted once informatoin about the klemmen becomes available.
+  std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {
+    // channel names and meanings are not yet known
+    int channel = strToIntDef(_channelName, -1);
+    if (channel == -1) {
+      throw std::invalid_argument("invalid channel name: '" + _channelName +
+                                  "'");
+    }
+
+    // so far return the same size for all channels
+    return std::make_pair((uint8_t)channel, 8);
+  }
+
+  std::string getOutputChannelName(uint8_t channel) {
+    return intToString(channel);
+  }
 }
 

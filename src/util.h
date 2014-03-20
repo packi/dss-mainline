@@ -25,6 +25,7 @@
 #define __DSS_UTIL_H_INCLUDED__
 
 #include <string>
+#include <inttypes.h>
 
 namespace dss {
 
@@ -35,6 +36,9 @@ namespace dss {
 
   std::string escapeHTML(std::string _input);
   std::string unescapeHTML(std::string _input);
+
+  std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName);
+  std::string getOutputChannelName(uint8_t _channel);
 }
 
 #endif
