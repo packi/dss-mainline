@@ -32,6 +32,7 @@
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
 #include "src/comm-channel.h"
+#include "src/util.h"
 
 namespace dss {
 
@@ -124,25 +125,25 @@ namespace dss {
       _interface->blink(coJSON, SceneAccess::stringToCategory(categoryStr), sessionToken);
       return success();
     } else if(_request.getMethod() == "increaseOutputChannelValue") {
-      int channel = strToIntDef(_request.getParameter("channel"), -1);
-      if((channel  < 0) || (channel > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'channel'");
+      if (_request.getParameter("channel").empty()) {
+        return failure("Missing parameter 'channel'");
       }
-      _interface->increaseOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel, sessionToken);
+      std::pair<uint8_t, uint8_t> channel = getOutputChannelIdAndSize(_request.getParameter("channel"));
+      _interface->increaseOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel.first, sessionToken);
       return success();
     } else if(_request.getMethod() == "decreaseOutputChannelValue") {
-      int channel = strToIntDef(_request.getParameter("channel"), -1);
-      if((channel  < 0) || (channel > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'channel'");
+      if (_request.getParameter("channel").empty()) {
+        return failure("Missing parameter 'channel'");
       }
-      _interface->decreaseOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel, sessionToken);
+      std::pair<uint8_t, uint8_t> channel = getOutputChannelIdAndSize(_request.getParameter("channel"));
+      _interface->decreaseOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel.first, sessionToken);
       return success();
     } else if(_request.getMethod() == "stopOutputChannelValue") {
-      int channel = strToIntDef(_request.getParameter("channel"), -1);
-      if((channel  < 0) || (channel > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'channel'");
+      if (_request.getParameter("channel").empty()) {
+        return failure("Missing parameter 'channel'");
       }
-      _interface->stopOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel, sessionToken);
+      std::pair<uint8_t, uint8_t> channel = getOutputChannelIdAndSize(_request.getParameter("channel"));
+      _interface->stopOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel.first, sessionToken);
       return success();
     }
     throw std::runtime_error("Unknown function");

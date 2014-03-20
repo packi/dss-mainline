@@ -108,21 +108,44 @@ namespace dss {
     return _input;
   }
 
-#warning This code needs to be adapted once informatoin about the klemmen becomes available.
+typedef struct OutputChannelInfo
+{
+    const char *id;
+    uint8_t size;
+} OutputChannelInfo_t;
+
+static const uint8_t kMinChan = 1;
+static const uint8_t kMaxChan = 10;
+static OutputChannelInfo kOutputChannels[] = {
+    { NULL,             0   },  // 0
+    { "brightness",     8   },  // 1
+    { "hue",            8   },  // 2
+    { "saturation",     8   },  // 3
+    { "colortemp",      8   },  // 4
+    { "x",              8   },  // 5
+    { "y",              8   },  // 6
+    { "verticalpos",    16  },  // 7
+    { "horizontalpos",  16  },  // 8
+    { "openinganglepos",8   },  // 9
+    { "permeability",   8   }   // 10
+};
+
   std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {
-    // channel names and meanings are not yet known
-    int channel = strToIntDef(_channelName, -1);
-    if (channel == -1) {
-      throw std::invalid_argument("invalid channel name: '" + _channelName +
-                                  "'");
+    for (uint8_t i = kMinChan; i <= kMaxChan; i++) {
+      if (_channelName == kOutputChannels[i].id) {
+        return std::make_pair(i, kOutputChannels[i].size);
+      }
     }
 
-    // so far return the same size for all channels
-    return std::make_pair((uint8_t)channel, 8);
+    throw std::invalid_argument("invalid channel name: '" + _channelName + "'");
   }
 
   std::string getOutputChannelName(uint8_t channel) {
-    return intToString(channel);
+    if ((channel < kMinChan) || (channel > kMaxChan)) {
+      throw std::invalid_argument("invalid channel id: '" +
+                                   intToString(channel) + "'");
+    }
+    return kOutputChannels[channel].id;
   }
 }
 
