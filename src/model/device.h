@@ -289,6 +289,9 @@ namespace dss {
                                            DeviceSceneSpec_t& _config);
     void setDeviceOutputChannelSceneConfig(uint8_t _scene,
                                            DeviceSceneSpec_t _config);
+    void setDeviceOutputChannelDontCareFlags(uint8_t _scene, uint16_t _value);
+    uint16_t getDeviceOutputChannelDontCareFlags(uint8_t _scene);
+
 
     bool is2WayMaster() const;
     bool is2WaySlave() const;

@@ -157,6 +157,11 @@ namespace dss {
     virtual void setDeviceOutputChannelSceneConfig(const Device& _device,
                                                    uint8_t _scene,
                                                    uint16_t _value) = 0;
+    virtual void setDeviceOutputChannelDontCareFlags(const Device& _device,
+                                                     uint8_t _scene,
+                                                     uint16_t _value) = 0;
+    virtual uint16_t getDeviceOutputChannelDontCareFlags(const Device& _device,
+                                                         uint8_t _scene) = 0;
 
     /** Tests transmission quality to a device, where the first returned
       value is the DownstreamQuality and the second value the UpstreamQuality */

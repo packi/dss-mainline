@@ -548,6 +548,20 @@ namespace dss {
     _config.dimtimeIndex = (mode >> 6) & 3;
   } // getDeviceSceneMode
 
+  void Device::setDeviceOutputChannelDontCareFlags(uint8_t _scene,
+                                                   uint16_t _value) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceOutputChannelDontCareFlags(*this, _scene, _value);
+    }
+  }
+
+  uint16_t Device::getDeviceOutputChannelDontCareFlags(uint8_t _scene) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      return m_pApartment->getDeviceBusInterface()->getDeviceOutputChannelDontCareFlags(*this, _scene);
+    }
+    throw std::runtime_error("Bus interface not available");
+  }
+
   int Device::getSceneAngle(const int _scene) {
     DeviceFeatures_t features = getFeatures();
     if (features.hasOutputAngle) {
