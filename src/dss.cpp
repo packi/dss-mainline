@@ -58,9 +58,6 @@
   #include "bonjour.h"
 #endif
 
-#ifdef WITH_SOAP
-  #include "webservices/webservices.h"
-#endif
 #include "metering/metering.h"
 #include "src/watchdog.h"
 #include "foreach.h"
@@ -315,11 +312,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
 
-#ifdef WITH_SOAP
-    m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
-    m_Subsystems.push_back(m_pWebServices.get());
-#endif
-
     m_pBusInterface = boost::shared_ptr<BusInterface>(pDSBusInterface);
     m_pApartment->setBusInterface(m_pBusInterface.get());
     m_pModelMaintenance->setStructureModifyingBusInterface(m_pBusInterface->getStructureModifyingBusInterface());
@@ -361,9 +353,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
                          m_pSecurity,
                          randomSalt));
     m_pWebServer->setSessionManager(m_pSessionManager);
-#ifdef WITH_SOAP
-    m_pWebServices->setSessionManager(m_pSessionManager);
-#endif
 
     parseProperties(_properties);
 

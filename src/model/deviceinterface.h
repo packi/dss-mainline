@@ -32,9 +32,7 @@ namespace dss {
     coUnknown = 0,
     coJSScripting = 1,
     coJSON = 2,
-    coSOAP = 3,
     coSubscription = 4,
-    coSim = 5,
     coTest = 6,
     coSystem = 7,
     coSystemBinaryInput = 8

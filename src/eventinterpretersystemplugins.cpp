@@ -1798,8 +1798,6 @@ namespace dss {
             devName = "Scripting";
         } else if (dsid.lower == 2) {
             devName = "JSON";
-        } else if (dsid.lower == 3) {
-            devName = "SOAP";
         } else if (dsid.lower == 4) {
             devName = "Bus-Handler";
         } else if (dsid.lower == 6) {
