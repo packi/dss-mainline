@@ -124,7 +124,7 @@ public:
 
 class FileLogTarget : public LogTarget {
 public:
-  FileLogTarget(const std::string& _fileName) : m_fileName(_fileName) {}
+  FileLogTarget(const std::string& _fileName) : m_fileName(_fileName), m_fileOpen(false) {}
   virtual bool open() { 
     m_fileOutputStream.open(m_fileName.c_str(), std::ios::out|std::ios::app); 
     m_fileOpen = true;

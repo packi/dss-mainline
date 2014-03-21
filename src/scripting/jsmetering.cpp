@@ -82,6 +82,10 @@ namespace dss {
     try {
       MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(
           ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+      if (ext == NULL) {
+        Logger::getInstance()->log("JS: metering_getSeries: ext of wrong type", lsFatal);
+        return JS_FALSE;
+      }
 
       int iMeter = 0;
       std::vector<boost::shared_ptr<DSMeter> > dsMeters = ext->getApartment().getDSMeters();
@@ -134,6 +138,11 @@ namespace dss {
       MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(
           ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
 
+      if (ext == NULL) {
+        Logger::getInstance()->log("JS: metering_getResolutions: ext of wrong type", lsFatal);
+        return JS_FALSE;
+      }
+
       std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = ext->getMetering().getConfig();
       int iResolution = 0;
       foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
@@ -184,6 +193,11 @@ namespace dss {
     try {
       MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(
           ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+
+      if (ext == NULL) {
+        Logger::getInstance()->log("JS: metering_getValues: ext of wrong type", lsFatal);
+        return JS_FALSE;
+      }
 
       if(argc < 3) {
         Logger::getInstance()->log("JS: metering_getValues: need three parameters: (dsid, type, resolution)", lsError);

@@ -770,7 +770,8 @@ namespace dss {
     }
 
     char mailText[PATH_MAX];
-    strcpy(mailText, m_mailq_dir.c_str());
+    strncpy(mailText, m_mailq_dir.c_str(), (m_mailq_dir.length() < PATH_MAX) ? m_mailq_dir.length() : PATH_MAX);
+    mailText[PATH_MAX-1] = '\0';
     strcat(mailText, "/mailXXXXXX");
 
     int mailFile = mkstemp((char *) mailText);

@@ -213,7 +213,6 @@ namespace dss {
   const int GroupIDMax = 63;
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
-  const uint32_t SimulationPrefix = 0xFFC00000;
 
   const uint8_t CfgClassComm = 0x00;
   const uint8_t CfgClassDevice = 0x01;
@@ -239,5 +238,9 @@ namespace dss {
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
   const uint16_t ProductID_KL_210 = 0x14C8;
+
+  const uint8_t MinimumOutputChannelID = 1;
+  const uint8_t MaximumOutputChannelID = 10;
+
 } // namespace dss
 #endif

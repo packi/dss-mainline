@@ -35,32 +35,6 @@ libprotomessages_a_CXXFLAGS = \
 			-I$(top_builddir) \
 			$(LIBPROTOBUF_CFLAGS)
 
-if BUILD_SOAP
-
-CLEANFILES += \
-			 webservices/soapC.cpp \
-			 webservices/soapH.h
-			 webservices/dss.nsmap \
-			 webservices/dss.wsdl \
-			 webservices/dss.xsd \
-			 webservices/soapServer.cpp \
-			 webservices/soapStub.h \
-			 webservices/soapdssObject.h
-
-BUILT_SOURCES += \
-			webservices/soapC.cpp \
-			webservices/soapH.h \
-			webservices/dss.nsmap \
-			webservices/dss.wsdl \
-			webservices/dss.xsd \
-			webservices/soapServer.cpp \
-			webservices/soapStub.h \
-			webservices/soapdssObject.h
-
-noinst_LIBRARIES += libwebservices.a
-
-endif
-
 include $(top_srcdir)/build/sources.list
 
 libdsscore_a_CXXFLAGS = \
@@ -72,7 +46,6 @@ libdsscore_a_CXXFLAGS = \
 			$(JS_CFLAGS) \
 			$(ICAL_CFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
-			$(GSOAP_CFLAGS) \
 			$(LIBXML2_CFLAGS) \
 			$(OPENSSL_CFLAGS) \
 			$(AVAHI_CFLAGS) \
@@ -97,7 +70,6 @@ nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
 
 dss_CXXFLAGS = \
 			$(LIBXML2_CFLAGS) \
-			$(GSOAP_CFLAGS) \
 			$(GCOV_CFLAGS) \
             $(LIBPROTOBUF_CFLAGS) \
             $(LIBCOMMCHANNEL_CFLAGS)
@@ -123,35 +95,6 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(JSONC_LIBS) \
 			$(LIBPROTOBUF_LIBS) \
 			$(LIBCOMMCHANNEL_LIBS)
-
-if BUILD_SOAP
-
-dss_SOURCES += $(top_srcdir)/namespaces.cpp
-
-dss_LDADD += \
-			libwebservices.a \
-			$(GSOAP_LIBS) \
-			$(OPENSSL_LIBS)
-
-libwebservices_a_CXXFLAGS = \
-			-I$(top_srcdir) \
-			-I$(top_srcdir)/src \
-			$(JS_CFLAGS) \
-			$(GSOAP_CFLAGS) \
-			$(LIBXML2_CFLAGS) \
-			$(OPENSSL_CFLAGS) \
-			$(AVAHI_CFLAGS) \
-			$(GCOV_CFLAGS) \
-			$(LIBCOMMCHANNEL_CFLAGS)
-
-nodist_libwebservices_a_SOURCES = \
-			webservices/soapC.cpp \
-			webservices/soapH.h \
-			webservices/soapServer.cpp \
-			webservices/soapStub.h \
-			webservices/soapdssObject.h
-
-endif
 
 dsstests_CXXFLAGS = \
 			-I$(top_srcdir) \
@@ -184,38 +127,10 @@ dsstests_LDADD = \
 			$(LIBPROTOBUF_LIBS) \
 			$(LIBCOMMCHANNEL_LIBS)
 
-if BUILD_SOAP
-
-dsstests_LDADD += \
-			libwebservices.a \
-			$(GSOAP_LIBS) \
-			$(OPENSSL_LIBS)
-
-dsstests_SOURCES += $(top_srcdir)/namespaces.cpp
-
-endif
-
-
 build_info.h:
 	$(top_srcdir)/tools/dss_gen_version_unix.sh $(top_srcdir) .
 
 $(top_srcdir)/src/dss.cpp: build_info.h
-
-if BUILD_SOAP
-
-webservices/soapH.h: webservices/soapC.cpp
-webservices/soapServer.cpp: webservices/soapC.cpp
-webservices/soapStub.h: webservices/soapC.cpp
-webservices/soapdssObject.h: webservices/soapC.cpp
-webservices/dss.nsmap: webservices/soapC.cpp
-webservices/dss.wsdl: webservices/soapC.cpp
-webservices/dss.xsd: webservices/soapC.cpp
-
-webservices/soapC.cpp: $(top_srcdir)/webservices/model_soap.cpp $(top_srcdir)/webservices/model_soap.h
-	$(MKDIR_P) webservices
-	$(GSOAP_SOAPCPP2) -I$(GSOAP_IMPORT_DIR) -SLx -dwebservices $(top_srcdir)/webservices/model_soap.h
-
-endif
 
 $(top_srcdir)/src/comm-channel.h: $(top_builddir)/src/messages/messaging.pb.h
 $(top_srcdir)/src/comm-channel.cpp: $(top_builddir)/src/messages/device-scene-table-update.pb.h

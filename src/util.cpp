@@ -29,6 +29,7 @@
 #include "model/group.h"
 #include "model/device.h"
 #include "model/modulator.h"
+#include "model/modelconst.h"
 #include "ds485/dsdevicebusinterface.h"
 #include "structuremanipulator.h"
 #include "foreach.h"
@@ -108,5 +109,42 @@ namespace dss {
     return _input;
   }
 
+typedef struct OutputChannelInfo
+{
+    const char *id;
+    uint8_t size;
+} OutputChannelInfo_t;
+
+static OutputChannelInfo kOutputChannels[] = {
+    { NULL,             0   },  // 0
+    { "brightness",     8   },  // 1
+    { "hue",            8   },  // 2
+    { "saturation",     8   },  // 3
+    { "colortemp",      8   },  // 4
+    { "x",              8   },  // 5
+    { "y",              8   },  // 6
+    { "verticalpos",    16  },  // 7
+    { "horizontalpos",  16  },  // 8
+    { "openinganglepos",8   },  // 9
+    { "permeability",   8   }   // 10
+};
+
+  std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {
+    for (uint8_t i = MinimumOutputChannelID; i <= MaximumOutputChannelID; i++) {
+      if (_channelName == kOutputChannels[i].id) {
+        return std::make_pair(i, kOutputChannels[i].size);
+      }
+    }
+
+    throw std::invalid_argument("invalid channel name: '" + _channelName + "'");
+  }
+
+  std::string getOutputChannelName(uint8_t channel) {
+    if ((channel < MinimumOutputChannelID) || (channel > MaximumOutputChannelID)) {
+      throw std::invalid_argument("invalid channel id: '" +
+                                   intToString(channel) + "'");
+    }
+    return kOutputChannels[channel].id;
+  }
 }
 

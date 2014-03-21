@@ -50,7 +50,6 @@
 #include "src/web/webrequests.h"
 
 #include "src/web/handler/systemrequesthandler.h"
-#include "src/web/handler/simrequesthandler.h"
 #include "src/web/handler/meteringrequesthandler.h"
 #include "src/web/handler/structurerequesthandler.h"
 #include "src/web/handler/eventrequesthandler.h"
@@ -256,7 +255,6 @@ namespace dss {
   const char* kHandlerEvent = "event";
   const char* kHandlerSystem = "system";
   const char* kHandlerStructure = "structure";
-  const char* kHandlerSim = "sim";
   const char* kHandlerMetering = "metering";
   const char* kHandlerSubscription = "subscription";
 
@@ -287,7 +285,6 @@ namespace dss {
         *getDSS().getBusInterface().getStructureModifyingBusInterface(),
         *getDSS().getBusInterface().getStructureQueryBusInterface()
       );
-    m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers

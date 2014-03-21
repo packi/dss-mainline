@@ -60,10 +60,6 @@ MT_OPTION([stack-protect], [enable],
           [])
 AM_CONDITIONAL(BUILD_STACK_PROTECT, test "x$STACK_PROTECT_OPTION_ENABLED" = "xyes")
 
-MT_OPTION([soap], [disable],
-          [build dSS without SOAP support (default: enabled)],
-          [],[])
-
 MT_OPTION([libtcmalloc], [disable],
           [build dSS without libtcmalloc support (default: enabled)],
           [],[])
@@ -370,53 +366,6 @@ PKG_CHECK_MODULES([JSONC], [json], [],
     [
         AC_MSG_ERROR([$JSON_PKG_ERRORS])
     ])
-
-if test "x$SOAP_OPTION_ENABLED" = "xyes"; then
-    PKG_CHECK_MODULES([GSOAP], [gsoapssl++], [],
-        [
-            AC_MSG_ERROR([$GSOAP_PKG_ERRORS])
-        ])
-
-    AC_PATH_PROG(GSOAP_SOAPCPP2, soapcpp2, no)
-    if test "x$GSOAP_SOAPCPP2" = xno; then
-        AC_MSG_ERROR([soapcpp2 utility not found])
-    fi
-    AC_SUBST(GSOAP_SOAPCPP2)
-
-    GSOAP_IMPORT_DIR=
-    AC_ARG_WITH(gsoap-import,
-        AC_HELP_STRING([--with-gsoap-import=DIR], [search for gSOAP import headers in DIR]),
-        [
-            if test "x$withval" != "x"; then
-                if (test -d "$withval") && (test -f "$withval/wsa.h") ; then
-                    GSOAP_IMPORT_DIR="$withval"
-                    AC_MSG_NOTICE([gSOAP import headers path set to $withval])
-                else
-                    AC_MSG_ERROR([you specified $withval as gSOAP import header directory, but this path does not exist or does not contain valid headers!])
-                fi
-            fi
-        ])
-
-    AC_MSG_CHECKING([for gSOAP import header directory])
-    if (test -z $GSOAP_IMPORT_DIR); then
-        for GSPATH in /usr/share/gsoap/import \
-                      /usr/local/share/gsoap/import \
-		      /opt/local/share/gsoap/import ; do
-            if (test -z $GSOAP_IMPORT_DIR) && (test -s $GSPATH/wsa.h); then
-                GSOAP_IMPORT_DIR=$GSPATH
-            fi
-        done
-    fi
-    if (test -z $GSOAP_IMPORT_DIR); then
-        AC_MSG_ERROR([could not find gSOAP import header directory])
-    fi
-
-    AC_MSG_RESULT([$GSOAP_IMPORT_DIR])
-    AC_SUBST(GSOAP_IMPORT_DIR)
-    AC_DEFINE([WITH_SOAP], [1], [ build with SOAP support ])
-fi
-
-AM_CONDITIONAL(BUILD_SOAP, test "x$SOAP_OPTION_ENABLED" = "xyes")
 
 PKG_CHECK_MODULES([CURL], [libcurl],
     [

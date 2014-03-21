@@ -199,6 +199,7 @@ namespace dss {
       m_Name(_name),
       m_LinkedToProxy(false),
       m_Aliased(false),
+      m_AliasTarget(NULL),
       m_Index(_index),
       m_Flags(Readable | Writeable)
   {

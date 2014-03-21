@@ -46,10 +46,10 @@ namespace dss {
   class Metering;
   class WebServices;
   class ModelMaintenance;
-  class DSSim;
   class SessionManager;
   class Security;
   class Watchdog;
+  class BusEventSink;
 
   typedef enum {
     ssInvalid,
@@ -73,7 +73,6 @@ namespace dss {
     boost::shared_ptr<BusInterface> m_pBusInterface;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<Apartment> m_pApartment;
-    boost::shared_ptr<DSSim> m_pSimulation;
     boost::shared_ptr<EventRunner> m_pEventRunner;
     boost::shared_ptr<WebServices> m_pWebServices;
     boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
@@ -84,6 +83,7 @@ namespace dss {
     boost::shared_ptr<Security> m_pSecurity;
     boost::shared_ptr<BonjourHandler> m_pBonjour;
     boost::shared_ptr<Watchdog> m_pWatchdog;
+    boost::shared_ptr<BusEventSink> m_pDefaultBusEventSink;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -132,7 +132,6 @@ namespace dss {
 
     BusInterface& getBusInterface() { return *m_pBusInterface; }
     Apartment& getApartment() { return *m_pApartment; }
-    DSSim& getSimulation() { return *m_pSimulation; }
     EventRunner& getEventRunner() { return *m_pEventRunner; }
     WebServices& getWebServices() { return *m_pWebServices; }
     EventQueue& getEventQueue() { return *m_pEventQueue; }

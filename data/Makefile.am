@@ -18,15 +18,6 @@ dist_dssjs_DATA = \
 
 webrootdir = $(pkgdatadir)/data/webroot
 
-if BUILD_SOAP
-
-dist_webroot_DATA = \
-	$(top_builddir)/build/webservices/dss.wsdl \
-	$(top_builddir)/build/webservices/dss.nsmap \
-	$(top_builddir)/build/webservices/dss.xsd
-
-endif
-
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/config.d
 	$(MKDIR_P) $(DESTDIR)$(dssdatadir)/subscriptions.d

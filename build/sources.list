@@ -12,6 +12,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/comm-channel.h \
 	$(top_srcdir)/src/datetools.cpp \
 	$(top_srcdir)/src/datetools.h \
+	$(top_srcdir)/src/defaultbuseventsink.h \
+	$(top_srcdir)/src/defaultbuseventsink.cpp \
 	$(top_srcdir)/src/ds485/dsactionrequest.cpp \
 	$(top_srcdir)/src/ds485/dsactionrequest.h \
 	$(top_srcdir)/src/ds485/dsbusinterface.cpp \
@@ -134,28 +136,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/sessionmanager.h \
 	$(top_srcdir)/src/setbuilder.cpp \
 	$(top_srcdir)/src/setbuilder.h \
-	$(top_srcdir)/src/sim/businterface/businterfaceadaptor.cpp \
-	$(top_srcdir)/src/sim/businterface/businterfaceadaptor.h \
-	$(top_srcdir)/src/sim/businterface/simactionrequestbusinterface.cpp \
-	$(top_srcdir)/src/sim/businterface/simactionrequestbusinterface.h \
-	$(top_srcdir)/src/sim/businterface/simbusinterface.cpp \
-	$(top_srcdir)/src/sim/businterface/simbusinterface.h \
-	$(top_srcdir)/src/sim/businterface/simdevicebusinterface.cpp \
-	$(top_srcdir)/src/sim/businterface/simdevicebusinterface.h \
-	$(top_srcdir)/src/sim/businterface/simmeteringbusinterface.cpp \
-	$(top_srcdir)/src/sim/businterface/simmeteringbusinterface.h \
-	$(top_srcdir)/src/sim/businterface/simstructuremodifyingbusinterface.cpp \
-	$(top_srcdir)/src/sim/businterface/simstructuremodifyingbusinterface.h \
-	$(top_srcdir)/src/sim/businterface/simstructurequerybusinterface.cpp \
-	$(top_srcdir)/src/sim/businterface/simstructurequerybusinterface.h \
-	$(top_srcdir)/src/sim/dsid_js.cpp \
-	$(top_srcdir)/src/sim/dsid_js.h \
-	$(top_srcdir)/src/sim/dsidsim.cpp \
-	$(top_srcdir)/src/sim/dsidsim.h \
-	$(top_srcdir)/src/sim/dsmetersim.cpp \
-	$(top_srcdir)/src/sim/dsmetersim.h \
-	$(top_srcdir)/src/sim/dssim.cpp \
-	$(top_srcdir)/src/sim/dssim.h \
 	$(top_srcdir)/src/storagetools.cpp \
 	$(top_srcdir)/src/storagetools.h \
 	$(top_srcdir)/src/stringconverter.cpp \
@@ -200,8 +180,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/web/handler/propertyrequesthandler.h \
 	$(top_srcdir)/src/web/handler/setrequesthandler.cpp \
 	$(top_srcdir)/src/web/handler/setrequesthandler.h \
-	$(top_srcdir)/src/web/handler/simrequesthandler.cpp \
-	$(top_srcdir)/src/web/handler/simrequesthandler.h \
 	$(top_srcdir)/src/web/handler/structurerequesthandler.cpp \
 	$(top_srcdir)/src/web/handler/structurerequesthandler.h \
 	$(top_srcdir)/src/web/handler/subscriptionrequesthandler.cpp \

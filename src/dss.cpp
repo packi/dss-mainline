@@ -53,17 +53,11 @@
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
 #include "subscription_profiler.h"
-
+#include "defaultbuseventsink.h"
 #ifdef WITH_BONJOUR
   #include "bonjour.h"
 #endif
 
-#include "sim/dssim.h"
-#include "sim/businterface/simbusinterface.h"
-#include "sim/businterface/businterfaceadaptor.h"
-#ifdef WITH_SOAP
-  #include "webservices/webservices.h"
-#endif
 #include "metering/metering.h"
 #include "src/watchdog.h"
 #include "foreach.h"
@@ -125,6 +119,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
   DSS::DSS()
+  : m_commChannel(NULL)
   {
     m_ShutdownFlag = false;
     m_State = ssInvalid;
@@ -174,9 +169,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter.reset();
     m_pMetering.reset();
 
-    m_pSimulation.reset();
-
     m_pBusInterface.reset();
+    m_pDefaultBusEventSink.reset();
     m_pModelMaintenance.reset();
 
     m_pApartment.reset();
@@ -309,26 +303,16 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
     m_Subsystems.push_back(m_pEventInterpreter.get());
 
-    m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
-    m_Subsystems.push_back(m_pSimulation.get());
-
     boost::shared_ptr<DSBusInterface> pDSBusInterface(new DSBusInterface(this, m_pModelMaintenance.get()));
     m_Subsystems.push_back(pDSBusInterface.get());
 
-    boost::shared_ptr<SimBusInterface> pSimBusInterface(new SimBusInterface(m_pSimulation));
+    m_pDefaultBusEventSink = boost::shared_ptr<DefaultBusEventSink>(new DefaultBusEventSink(m_pApartment, m_pModelMaintenance));
+    pDSBusInterface->setBusEventSink(m_pDefaultBusEventSink.get());
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
 
-#ifdef WITH_SOAP
-    m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
-    m_Subsystems.push_back(m_pWebServices.get());
-#endif
-
-    m_pBusInterface = boost::shared_ptr<BusInterface>(
-      new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation,
-                              pSimBusInterface, m_pModelMaintenance,
-                              m_pApartment));
+    m_pBusInterface = boost::shared_ptr<BusInterface>(pDSBusInterface);
     m_pApartment->setBusInterface(m_pBusInterface.get());
     m_pModelMaintenance->setStructureModifyingBusInterface(m_pBusInterface->getStructureModifyingBusInterface());
     m_pModelMaintenance->setStructureQueryBusInterface(m_pBusInterface->getStructureQueryBusInterface());
@@ -369,9 +353,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
                          m_pSecurity,
                          randomSalt));
     m_pWebServer->setSessionManager(m_pSessionManager);
-#ifdef WITH_SOAP
-    m_pWebServices->setSessionManager(m_pSessionManager);
-#endif
 
     parseProperties(_properties);
 

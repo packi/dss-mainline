@@ -976,8 +976,13 @@ namespace dss {
 
   }
 
-  SystemTrigger::SystemTrigger() : SystemEvent(),
-      m_evtSrcIsGroup(false), m_evtSrcIsDevice(false) {
+  SystemTrigger::SystemTrigger()
+    : SystemEvent(),
+      m_evtSrcIsGroup(false),
+      m_evtSrcIsDevice(false),
+      m_evtSrcZone(0),
+      m_evtSrcGroup(0)
+  {
   }
 
   SystemTrigger::~SystemTrigger() {
@@ -1742,7 +1747,7 @@ namespace dss {
   }
 
 
-  SystemEventLog::SystemEventLog() : SystemEvent() {
+  SystemEventLog::SystemEventLog() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
   }
 
   SystemEventLog::~SystemEventLog() {
@@ -1793,12 +1798,8 @@ namespace dss {
             devName = "Scripting";
         } else if (dsid.lower == 2) {
             devName = "JSON";
-        } else if (dsid.lower == 3) {
-            devName = "SOAP";
         } else if (dsid.lower == 4) {
             devName = "Bus-Handler";
-        } else if (dsid.lower == 5) {
-            devName = "Simulation";
         } else if (dsid.lower == 6) {
             devName = "Test";
         } else if (dsid.lower == 7) {
@@ -2385,7 +2386,7 @@ namespace dss {
   }
 
 
-  SystemState::SystemState() : SystemEvent() {
+  SystemState::SystemState() : SystemEvent(), m_evtRaiseLocation(erlState) {
   }
 
   SystemState::~SystemState() {
@@ -2572,7 +2573,7 @@ namespace dss {
       if (state != NULL) {
         if ((alarm == true) && (state->getState() == State_Inactive)) {
           state->setState(coJSScripting, State_Active);
-        } else if (panic == false) {
+        } else if (alarm == false) {
           state->setState(coJSScripting, State_Inactive);
         }
       } // alarm state

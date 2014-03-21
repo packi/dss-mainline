@@ -33,7 +33,7 @@ namespace dss {
                           public ActionRequestInterface {
   public:
     DSActionRequest()
-    : DSBusInterfaceObj()
+    : DSBusInterfaceObj(), m_pBusEventSink(NULL)
     {
       SetBroadcastId(m_BroadcastDSID);
     }
@@ -47,8 +47,10 @@ namespace dss {
     virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token);
     virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token);
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token);
+    void setBusEventSink(BusEventSink* _eventSink);
   private:
     dsid_t m_BroadcastDSID;
+    BusEventSink* m_pBusEventSink;
   }; // DSActionRequest
 
 } // namespace dss

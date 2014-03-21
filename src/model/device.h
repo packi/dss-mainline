@@ -279,6 +279,19 @@ namespace dss {
     void increaseDeviceOutputChannelValue(uint8_t _channel);
     void decreaseDeviceOutputChannelValue(uint8_t _channel);
     void stopDeviceOutputChannelValue(uint8_t _channel);
+    uint16_t getDeviceOutputChannelValue(uint8_t _channel);
+    void setDeviceOutputChannelValue(uint8_t _channel, uint8_t _size,
+                                     uint16_t _value, bool _applyNow = true);
+    uint16_t getDeviceOutputChannelSceneValue(uint8_t _channel, uint8_t _scene);
+    void setDeviceOutputChannelSceneValue(uint8_t _channel, uint8_t _size,
+                                          uint8_t _scene, uint16_t _value);
+    void getDeviceOutputChannelSceneConfig(uint8_t _scene,
+                                           DeviceSceneSpec_t& _config);
+    void setDeviceOutputChannelSceneConfig(uint8_t _scene,
+                                           DeviceSceneSpec_t _config);
+    void setDeviceOutputChannelDontCareFlags(uint8_t _scene, uint16_t _value);
+    uint16_t getDeviceOutputChannelDontCareFlags(uint8_t _scene);
+
 
     bool is2WayMaster() const;
     bool is2WaySlave() const;

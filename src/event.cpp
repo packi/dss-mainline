@@ -102,7 +102,8 @@ namespace dss {
   }
 
   Event::Event()
-  : m_Name("unnamed_event")
+  : m_Name("unnamed_event"),
+    m_RaiseLocation(erlDevice)
   {
     reset();
   }

@@ -134,10 +134,10 @@ namespace dss {
         int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
         if (regCompErr != 0) {
           int errSize = regerror(regCompErr, &rraRowRegex, 0, 0);
-          char *errString = new char(errSize);
+          char *errString = new char[errSize];
           regerror(regCompErr, &rraRowRegex, errString, errSize);
           log(errString, lsError);
-          free(errString);
+          delete [] errString;
         }
         rrd_info_t *rrdInfoOrig = rrdInfo;
         log("RRD DB present");
