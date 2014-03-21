@@ -29,6 +29,7 @@
 #include "model/group.h"
 #include "model/device.h"
 #include "model/modulator.h"
+#include "model/modelconst.h"
 #include "ds485/dsdevicebusinterface.h"
 #include "structuremanipulator.h"
 #include "foreach.h"
@@ -114,8 +115,6 @@ typedef struct OutputChannelInfo
     uint8_t size;
 } OutputChannelInfo_t;
 
-static const uint8_t kMinChan = 1;
-static const uint8_t kMaxChan = 10;
 static OutputChannelInfo kOutputChannels[] = {
     { NULL,             0   },  // 0
     { "brightness",     8   },  // 1
@@ -131,7 +130,7 @@ static OutputChannelInfo kOutputChannels[] = {
 };
 
   std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {
-    for (uint8_t i = kMinChan; i <= kMaxChan; i++) {
+    for (uint8_t i = MinimumOutputChannelID; i <= MaximumOutputChannelID; i++) {
       if (_channelName == kOutputChannels[i].id) {
         return std::make_pair(i, kOutputChannels[i].size);
       }
@@ -141,7 +140,7 @@ static OutputChannelInfo kOutputChannels[] = {
   }
 
   std::string getOutputChannelName(uint8_t channel) {
-    if ((channel < kMinChan) || (channel > kMaxChan)) {
+    if ((channel < MinimumOutputChannelID) || (channel > MaximumOutputChannelID)) {
       throw std::invalid_argument("invalid channel id: '" +
                                    intToString(channel) + "'");
     }

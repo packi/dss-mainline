@@ -238,5 +238,9 @@ namespace dss {
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
   const uint16_t ProductID_KL_210 = 0x14C8;
+
+  const uint8_t MinimumOutputChannelID = 1;
+  const uint8_t MaximumOutputChannelID = 10;
+
 } // namespace dss
 #endif

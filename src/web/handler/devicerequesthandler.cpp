@@ -1100,6 +1100,54 @@ namespace dss {
       }
 
       return success();
+    } else if (_request.getMethod() == "setOutputChannelDontCareFlag") {
+      std::string str_chan = _request.getParameter("channels");
+      if (str_chan.empty()) {
+        return failure("Missing or invalid parameter 'channels'");
+      }
+
+      int flag = strToIntDef(_request.getParameter("dontCare"), -1);
+      if (flag < 0) {
+        return failure("Missing or invalid parameter 'dontCare'");
+      }
+
+      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
+      if ((scene < 0) || (scene > MaxSceneNumber)) {
+        return failure("Missing or invalid parameter 'sceneNumber'");
+      }
+
+      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
+
+      uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
+      for (size_t i = 0; i < channels->size(); i++) {
+        if (flag) {
+          value |= 1 << channels->at(i).first;
+        } else {
+          value &= ~(1 << channels->at(i).first);
+        }
+      }
+      pDevice->setDeviceOutputChannelDontCareFlags(scene, value);
+      return success();
+    } else if (_request.getMethod() == "getOutputChannelDontCareFlags") {
+      int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
+      if ((scene < 0) || (scene > MaxSceneNumber)) {
+        return failure("Missing or invalid parameter 'sceneNumber'");
+      }
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> channelsObj(new JSONObject());
+
+      resultObj->addElement("channels", channelsObj);
+
+      uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
+      for (size_t i = MinimumOutputChannelID; i <= MaximumOutputChannelID; i++) {
+        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        chanObj->addProperty("channel", getOutputChannelName(i));
+
+        chanObj->addProperty("dontCare", ((value & (1 << i)) > 0));
+        channelsObj->addElement("", chanObj);
+      }
+      return success(resultObj);
     } else if (_request.getMethod() == "getOutputChannelSceneValue") {
       std::string str_chan = _request.getParameter("channels");
       if (str_chan.empty()) {
