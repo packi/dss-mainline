@@ -55,7 +55,7 @@ namespace dss {
     m_maxSessionCount(100)
   {
     m_NextSessionID = rand();
-    m_Salt = hexEncodeByteArray(DSS::getRandomSalt());
+    m_Salt = hexEncodeByteArray(DSS::getRandomSalt(8)); /* magic number */
     m_VersionInfo = DSS::versionString();
   }
 

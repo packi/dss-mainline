@@ -705,10 +705,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return ostr.str();
   }
 
-  std::vector<unsigned char> DSS::getRandomSalt() {
+  std::vector<unsigned char> DSS::getRandomSalt(unsigned int len) {
 #ifdef __linux__
-    /* 8 is a magic number, change if you like */
-    std::vector<unsigned char> urandom(8);
+    std::vector<unsigned char> urandom(len);
 
     std::ifstream file ("/dev/urandom", std::ios::binary);
     if (!file.is_open()) {
