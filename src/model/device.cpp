@@ -1859,6 +1859,30 @@ namespace dss {
     }
   }
 
+  const int Device::getOutputChannelIndex(int _channelId) const {
+    int index = 0;
+    for (std::vector<int>::const_iterator it = m_outputChannels.begin();
+            it != m_outputChannels.end();
+            ++it) {
+      if (*it == _channelId) {
+        return index;
+      }
+      index++;
+    }
+    return -1;
+  }
+
+  const int Device::getOutputChannel(int _index) const {
+    if (_index > m_outputChannelCount) {
+      return -1;
+    }
+    return m_outputChannels[_index];
+  }
+
+  const int Device::getOutputChannelCount() const {
+    return m_outputChannelCount;
+  }
+
   const std::vector<boost::shared_ptr<DeviceSensor_t> >& Device::getSensors() const {
     return m_sensorInputs;
   }

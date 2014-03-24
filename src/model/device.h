@@ -586,6 +586,9 @@ namespace dss {
     const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
 
     void setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels);
+    const int getOutputChannelCount() const;
+    const int getOutputChannelIndex(int _channelId) const;
+    const int getOutputChannel(int _index) const;
 
   }; // Device
 
