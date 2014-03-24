@@ -607,7 +607,6 @@ namespace dss {
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }
-    delete pEvent;
   }
 
   void DSDeviceBusInterface::OEMDataReader::setup(boost::shared_ptr<Device> _device)
