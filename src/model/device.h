@@ -243,6 +243,8 @@ namespace dss {
 
     uint8_t m_sensorInputCount;
     std::vector<boost::shared_ptr<DeviceSensor_t> > m_sensorInputs;
+    uint8_t m_outputChannelCount;
+    std::vector<int> m_outputChannels;
 
     std::string m_AKMInputProperty;
 
@@ -582,6 +584,11 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
+
+    void setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels);
+    const int getOutputChannelCount() const;
+    const int getOutputChannelIndex(int _channelId) const;
+    const int getOutputChannel(int _index) const;
 
   }; // Device
 
