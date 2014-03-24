@@ -1120,10 +1120,14 @@ namespace dss {
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
       for (size_t i = 0; i < channels->size(); i++) {
+        int channelIndex = pDevice->getOutputChannelIndex(channels->at(i).first);
+        if (channelIndex < 0) {
+          return failure("Channel '" + getOutputChannelName(channels->at(i).first) + "' is unknown on this device");
+        }
         if (flag) {
-          value |= 1 << channels->at(i).first;
+          value |= 1 << channelIndex;
         } else {
-          value &= ~(1 << channels->at(i).first);
+          value &= ~(1 << channelIndex);
         }
       }
       pDevice->setDeviceOutputChannelDontCareFlags(scene, value);
@@ -1140,9 +1144,10 @@ namespace dss {
       resultObj->addElement("channels", channelsObj);
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
-      for (size_t i = MinimumOutputChannelID; i <= MaximumOutputChannelID; i++) {
+      for (int i = 0; i < pDevice->getOutputChannelCount(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
-        chanObj->addProperty("channel", getOutputChannelName(i));
+        int channelId = pDevice->getOutputChannel(i);
+        chanObj->addProperty("channel", getOutputChannelName(channelId));
 
         chanObj->addProperty("dontCare", ((value & (1 << i)) > 0));
         channelsObj->addElement("", chanObj);

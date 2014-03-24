@@ -315,6 +315,34 @@ namespace dss {
     }
   } // updateBinaryInputTableFromMeter
 
+  void DSStructureQueryBusInterface::updateOutputChannelTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+    if (true || ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0))) {
+      try {
+        _spec.outputChannels.clear();
+
+        uint8_t numChannels = 0;
+        int ret = DeviceOPCTable_get_count(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &numChannels);
+        if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+          Logger::getInstance()->log("Unsupported message-id DeviceOPCTable_get_count", lsWarning);
+          return;
+        } else {
+          DSBusInterface::checkResultCode(ret);
+        }
+
+        for (int i = 0; i < numChannels; i++) {
+          uint8_t outputChannel;
+          ret = DeviceOPCTable_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
+                                            &outputChannel);
+          DSBusInterface::checkResultCode(ret);
+          _spec.outputChannels.push_back(outputChannel);
+        }
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error reading DeviceOPCTable: " +
+        std::string(e.what()), lsWarning);
+      }
+    }
+  } // updateOutputChannelTableFromMeter
+
   std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -353,6 +381,7 @@ namespace dss {
       updateButtonGroupFromMeter(dsid, spec);
       updateBinaryInputTableFromMeter(dsid, spec);
       updateSensorInputTableFromMeter(dsid, spec);
+      updateOutputChannelTableFromMeter(dsid, spec);
 
       result.push_back(spec);
     }
@@ -397,6 +426,7 @@ namespace dss {
       updateButtonGroupFromMeter(dsid, spec);
       updateBinaryInputTableFromMeter(dsid, spec);
       updateSensorInputTableFromMeter(dsid, spec);
+      updateOutputChannelTableFromMeter(dsid, spec);
 
       result.push_back(spec);
     }
@@ -436,6 +466,7 @@ namespace dss {
     updateButtonGroupFromMeter(dsmDSID, result);
     updateBinaryInputTableFromMeter(dsmDSID, result);
     updateSensorInputTableFromMeter(dsmDSID, result);
+    updateOutputChannelTableFromMeter(dsmDSID, result);
 
     return result;
   } // deviceGetSpec

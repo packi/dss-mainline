@@ -325,7 +325,7 @@ namespace dss {
 
     int ret = DeviceOPCConfig_get_current_sync(m_DSMApiHandle, dsmDSID,
                                                _device.getShortAddress(),
-                                                _channel, kDSM_API_TIMEOUT,
+                                                _channel, 2*kDSM_API_TIMEOUT,
                                                 &out);
     DSBusInterface::checkResultCode(ret);
     return out;
@@ -370,7 +370,7 @@ namespace dss {
 
     int ret = DeviceOPCConfig_get_scene_sync(m_DSMApiHandle, dsmDSID,
                                              _device.getShortAddress(),
-                                             _channel, _scene, kDSM_API_TIMEOUT,
+                                             _channel, _scene, 2*kDSM_API_TIMEOUT,
                                               &out);
     DSBusInterface::checkResultCode(ret);
     return out;
@@ -410,7 +410,7 @@ namespace dss {
     int ret = DeviceOPCConfig_get_scene_config_sync(m_DSMApiHandle, dsmDSID,
                                                     _device.getShortAddress(),
                                                     _scene,
-                                                    kDSM_API_TIMEOUT, &out);
+                                                    2*kDSM_API_TIMEOUT, &out);
     DSBusInterface::checkResultCode(ret);
     return out;
   } // getDeviceOutputChannelSceneConfig
@@ -464,7 +464,7 @@ namespace dss {
     int ret = DeviceOPCConfig_get_dc_flags_sync(m_DSMApiHandle, dsmDSID,
                                                     _device.getShortAddress(),
                                                     _scene,
-                                                    kDSM_API_TIMEOUT, &out);
+                                                    2*kDSM_API_TIMEOUT, &out);
     DSBusInterface::checkResultCode(ret);
     return out;
   }

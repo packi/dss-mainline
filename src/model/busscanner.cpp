@@ -274,6 +274,9 @@ namespace dss {
     // synchronize sensor configuration
     dev->setSensors(dev, _spec.sensorInputs);
 
+    // synchronize output channel configuration
+    dev->setOutputChannels(dev, _spec.outputChannels);
+
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
     _dsMeter->addDevice(devRef);
