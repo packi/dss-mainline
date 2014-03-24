@@ -114,6 +114,22 @@ BOOST_AUTO_TEST_CASE(testUnsignedLongIntToHexString) {
   BOOST_CHECK_EQUAL("42", unsignedLongIntToHexString(0x42));
 } // testUnsignedLongIntToHexString
 
+BOOST_AUTO_TEST_CASE(testHexEncodeByteArray) {
+  /* leading zeros must not be ignored */
+  unsigned char t[] = {0, };
+  BOOST_CHECK_EQUAL("00", hexEncodeByteArray(t, 1));
+  unsigned char t2[] = {0, 0, 0, 0, 0, 0, 0, 0 };
+  BOOST_CHECK_EQUAL("0000000000000000", hexEncodeByteArray(t2, sizeof(t2)));
+  std::vector<unsigned char> t3;
+
+  /* verify every char gets mapped to hex values */
+  for (int i = 0; i <= 255; i++) {
+    t3.push_back(i);
+  }
+  BOOST_CHECK(hexEncodeByteArray(t3).find_first_not_of("1234567890abcdef") ==
+              std::string::npos);
+}
+
 BOOST_AUTO_TEST_CASE(testTrim) {
   // reductions to zero-std::string
   BOOST_CHECK_EQUAL(std::string(""), trim(""));

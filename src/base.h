@@ -88,6 +88,11 @@ namespace dss {
 
   std::string truncateUTF8String(const std::string& _in, int _maxBytes);
 
+  std::string hexEncodeByteArray(const unsigned char *ar, unsigned int len);
+  inline std::string hexEncodeByteArray(const std::vector<unsigned char> &v) {
+    return hexEncodeByteArray(&v[0], v.size());
+  }
+
   //============================================= Encoding helpers
 
   uint16_t crc16(unsigned const char* _data, const int _size);
