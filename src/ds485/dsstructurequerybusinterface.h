@@ -56,6 +56,7 @@ namespace dss {
     void updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateBinaryInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateSensorInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
+    void updateOutputChannelTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
   private:
     dss_dsid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface

@@ -87,6 +87,7 @@ namespace dss {
     m_IsConfigLocked(false),
     m_binaryInputCount(0),
     m_sensorInputCount(0),
+    m_outputChannelCount(0),
     m_AKMInputProperty()
     { } // ctor
 
@@ -227,6 +228,7 @@ namespace dss {
         }
         PropertyNodePtr binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
         PropertyNodePtr sensorInputNode = m_pPropertyNode->createProperty("sensorInputs");
+        PropertyNodePtr outputChannelNode = m_pPropertyNode->createProperty("outputChannels");
 
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
@@ -1811,6 +1813,49 @@ namespace dss {
       }
 
       m_sensorInputCount ++;
+    }
+  }
+
+  void Device::setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels) {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    m_outputChannelCount = 0;
+    m_outputChannels.clear();
+
+    // The first entry of the table describes the default channel. Do not add to channel list.
+    if (_outputChannels.size() >= 1) {
+      PropertyNodePtr outputChannelNode = m_pPropertyNode->getPropertyByName("outputChannels");
+      std::string bpath = std::string("outputChannelDefault");
+      PropertyNodePtr entry = outputChannelNode->getPropertyByName(bpath);
+      if (entry != NULL) {
+        entry->getParentNode()->removeChild(entry);
+      }
+      entry = outputChannelNode->createProperty(bpath);
+      entry->createProperty("channelID")->setIntegerValue(_outputChannels[0]);
+    }
+
+    // Only continue if there are 2 or more entries in the table
+    if (_outputChannels.size() < 2) {
+      return;
+    }
+
+    for (std::vector<int>::const_iterator it = ++_outputChannels.begin();
+        it != _outputChannels.end();
+        ++it) {
+      m_outputChannels.push_back(*it);
+
+      if (m_pPropertyNode != NULL) {
+        PropertyNodePtr outputChannelNode = m_pPropertyNode->getPropertyByName("outputChannels");
+        std::string bpath = std::string("outputChannel") + intToString(m_outputChannelCount);
+        PropertyNodePtr entry = outputChannelNode->getPropertyByName(bpath);
+        if (entry != NULL) {
+          entry->getParentNode()->removeChild(entry);
+        }
+        entry = outputChannelNode->createProperty(bpath);
+        entry->createProperty("channelID")
+                ->linkToProxy(PropertyProxyReference<int>(m_outputChannels[m_outputChannelCount]));
+      }
+
+      m_outputChannelCount ++;
     }
   }
 
