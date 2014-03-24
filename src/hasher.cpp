@@ -24,6 +24,8 @@
 #include <cassert>
 #include <sstream>
 
+#include "base.h"
+
 namespace dss {
 
   //============================================= Hasher
@@ -51,14 +53,7 @@ namespace dss {
     m_Finalized = true;
     unsigned char digest[SHA256_DIGEST_LENGTH];
     SHA256_Final(digest, &m_Context);
-    std::ostringstream sstr;
-    sstr << std::hex;
-    sstr.fill('0');
-    for(int iByte = 0; iByte < SHA256_DIGEST_LENGTH; iByte++) {
-      sstr.width(2);
-      sstr << static_cast<unsigned int>(digest[iByte] & 0x0ff);
-    }
-    return sstr.str();
+    return hexEncodeByteArray(digest, SHA256_DIGEST_LENGTH);
   } // str
 
   //============================================= HasherMD5
@@ -86,14 +81,7 @@ namespace dss {
     m_Finalized = true;
     unsigned char digest[MD5_DIGEST_LENGTH];
     MD5_Final(digest, &m_Context);
-    std::ostringstream sstr;
-    sstr << std::hex;
-    sstr.fill('0');
-    for(int iByte = 0; iByte < MD5_DIGEST_LENGTH; iByte++) {
-      sstr.width(2);
-      sstr << static_cast<unsigned int>(digest[iByte] & 0x0ff);
-    }
-    return sstr.str();
+    return hexEncodeByteArray(digest, MD5_DIGEST_LENGTH);
   } // str
 
 } // namespace dss

@@ -34,6 +34,11 @@ namespace dss {
 
   std::string jsonEncode(const std::string& _value);
 
+  std::ostream& operator<<(std::ostream& stream, const JSONObject &obj) {
+    obj.writeTo(stream);
+    return stream;
+  }
+
   //================================================== JSONElement
 
   void JSONElement::addElement(const std::string& _name, boost::shared_ptr<JSONElement> _element) {
@@ -46,9 +51,9 @@ namespace dss {
     return sstream.str();
   }
 
-  void JSONElement::writeElementsTo(std::stringstream& _out) {
+  void JSONElement::writeElementsTo(std::ostream& _out) const {
     bool first = true;
-    foreach(NamedElement& namedElement, m_Elements) {
+    foreach(const NamedElement& namedElement, m_Elements) {
       if(!first) {
         _out << ',';
       }
@@ -58,9 +63,9 @@ namespace dss {
     }
   }
 
-  void JSONElement::writeElementsNoNamesTo(std::stringstream& _out) {
+  void JSONElement::writeElementsNoNamesTo(std::ostream& _out) const {
     bool first = true;
-    foreach(NamedElement& namedElement, m_Elements) {
+    foreach(const NamedElement& namedElement, m_Elements) {
       if(!first) {
         _out << ',';
       }
@@ -128,7 +133,7 @@ namespace dss {
     addElement(_name, elem);
   } // addProperty
 
-  void JSONObject::writeTo(std::stringstream& _out) {
+  void JSONObject::writeTo(std::ostream& _out) const {
     _out << "{";
     writeElementsTo(_out);
     _out << "}";
@@ -137,45 +142,38 @@ namespace dss {
 
   //================================================== JSONValue
 
-  template<>
-  void JSONValue<int>::writeTo(std::stringstream& _out) {
+  template<class T>
+  void JSONValue<T>::writeTo(std::ostream& _out) const {
     _out << m_Value;
   }
 
   template<>
-  void JSONValue<unsigned long int>::writeTo(std::stringstream& _out) {
-    _out << m_Value;
-  }
-
-  template<>
-  void JSONValue<unsigned long long>::writeTo(std::stringstream& _out) {
-    _out << m_Value;
-  }
-
-  template<>
-  void JSONValue<std::string>::writeTo(std::stringstream& _out) {
+  void JSONValue<std::string>::writeTo(std::ostream& _out) const {
     _out << '"' << jsonEncode(m_Value) << '"';
   }
 
   template<>
-  void JSONValue<bool>::writeTo(std::stringstream& _out) {
-    if(m_Value) {
-      _out << "true";
-    } else {
-      _out << "false";
-    }
+  void JSONValue<bool>::writeTo(std::ostream& _out) const {
+    _out << ((m_Value) ? "true" : "false");
   }
 
   template<>
-  void JSONValue<double>::writeTo(std::stringstream& _out) {
+  void JSONValue<double>::writeTo(std::ostream& _out) const {
     std::streamsize ss = _out.precision();
     _out << std::setprecision(16) << m_Value;
     _out << std::setprecision(ss);
   }
 
+  /* explicit instantiation */
+  template class JSONValue<bool>;
+  template class JSONValue<int>;
+  template class JSONValue<double>;
+  template class JSONValue<std::string>;
+  template class JSONValue<JSONObject>;
+
   //================================================== JSONArrayBase
 
-  void JSONArrayBase::writeTo(std::stringstream& _out) {
+  void JSONArrayBase::writeTo(std::ostream& _out) const {
     _out << "[";
     writeElementsNoNamesTo(_out);
     _out << "]";

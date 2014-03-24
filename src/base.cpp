@@ -158,6 +158,17 @@ namespace dss {
     return sstream.str();
   } // uintToString
 
+  std::string hexEncodeByteArray(const unsigned char *a, unsigned int len) {
+    std::ostringstream s;
+    s << std::hex;
+    s.fill('0');
+    for (unsigned i = 0; i < len; i++) {
+      s.width(2);
+      s << static_cast<unsigned int>(a[i] & 0x0ff);
+    }
+    return s.str();
+  }
+
   std::string unsignedLongIntToHexString(const unsigned long long _value) {
     std::stringstream sstream;
     sstream << std::hex << _value;
