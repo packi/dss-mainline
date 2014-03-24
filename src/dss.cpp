@@ -705,9 +705,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return ostr.str();
   }
 
-  std::string DSS::getRandomSalt() {
+  std::vector<unsigned char> DSS::getRandomSalt() {
 #ifdef __linux__
-    unsigned char urandom[sizeof(long long int)];
+    /* 8 is a magic number, change if you like */
+    std::vector<unsigned char> urandom(8);
 
     std::ifstream file ("/dev/urandom", std::ios::binary);
     if (!file.is_open()) {
@@ -715,21 +716,14 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       throw std::runtime_error("failed to open /dev/urandom");
     }
 
-    file.read(reinterpret_cast<char *>(urandom), sizeof(urandom));
+    file.read(reinterpret_cast<char *>(&urandom[0]), urandom.size());
     if (!file) {
       throw std::runtime_error("failed to read from /dev/urandom");
     }
     file.close();
-
-    std::ostringstream s;
-    s.fill('0');
-    for (unsigned i = 0; i < sizeof(urandom); i++) {
-      s << std::hex << std::setw(2) << static_cast<unsigned int>(urandom[i]);
-    }
-    return s.str();
+    return urandom;
 #else
 #error missing random genarator on platform
-      // return "TOOTHBRUSH";
 #endif
   }
 

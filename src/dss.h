@@ -123,7 +123,7 @@ namespace dss {
     static void teardown();
 #endif
     static std::string versionString();
-    static std::string getRandomSalt();
+    static std::vector<unsigned char> getRandomSalt();
 
 #ifndef WIN32
     static void* handleSignal(void* arg);

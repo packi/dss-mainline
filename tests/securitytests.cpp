@@ -52,10 +52,8 @@ BOOST_AUTO_TEST_SUITE(SecurityTests)
 
 BOOST_AUTO_TEST_CASE(testUrandom) {
   for (int i = 0; i < 10; i++) {
-    std::string seed = DSS::getRandomSalt();
-    /* This fails if there is a leading '0' */
+    std::string seed = hexEncodeByteArray(DSS::getRandomSalt());
     BOOST_CHECK(seed.length() == 16);
-    BOOST_CHECK(seed.length() == 2 * sizeof(long long int));
     BOOST_CHECK(seed.find_first_not_of("1234567890abcdef") == std::string::npos);
   }
 }
