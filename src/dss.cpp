@@ -461,35 +461,18 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->setEventQueue(m_pEventQueue.get());
   }
 
-  void InitializeSubsystem(Subsystem* _pSubsystem) {
-    Logger::getInstance()->log("Initialize subsystem \"" +
-        _pSubsystem->getName() + "\"", lsDebug);
-    _pSubsystem->initialize();
-  } // initializeSubsystem
-
-  void StartSubsystem(Subsystem* _pSubsystem) {
-    Logger::getInstance()->log("Start subsystem \"" +
-        _pSubsystem->getName() + "\"", lsDebug);
-    _pSubsystem->start();
-  }
-
-  void StopSubsystem(Subsystem* _pSubsystem) {
-    Logger::getInstance()->log("Shutdown subsystem \"" +
-        _pSubsystem->getName() + "\"", lsDebug);
-    _pSubsystem->shutdown();
-  }
-
   bool DSS::initSubsystems() {
-    for (size_t i = 0; i < m_Subsystems.size(); i++) {
-      if(m_ShutdownFlag) {
+    foreach (Subsystem *subsys, m_Subsystems) {
+      if (m_ShutdownFlag) {
         return false;
       }
 
       try {
-        InitializeSubsystem(m_Subsystems.at(i));
+        log("Initialize subsystem \"" + subsys->getName() + "\"", lsDebug);
+        subsys->initialize();
       } catch(std::exception& e) {
-        log("Failed to initialize subsystem '" + m_Subsystems.at(i)->getName() +
-            "': " + e.what(), lsFatal);
+        log("Failed to initialize subsystem '" + subsys->getName() + "': " + e.what(),
+            lsFatal);
         m_State = ssTerminating;
         return false;
       }
@@ -594,7 +577,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     }
 
     m_State = ssStarting;
-    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
+    foreach (Subsystem *subsys, m_Subsystems) {
+      log("Start subsystem \"" + subsys->getName() + "\"", lsDebug);
+      subsys->start();
+    }
 
 #ifdef WITH_BONJOUR
     m_pBonjour = boost::shared_ptr<BonjourHandler>(new BonjourHandler());
@@ -612,7 +598,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     m_State = ssTerminating;
 
-    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StopSubsystem);
+    foreach (Subsystem *subsys, m_Subsystems) {
+      log("Shutdown subsystem \"" + subsys->getName() + "\"", lsDebug);
+      subsys->shutdown();
+    }
+
     m_pEventQueue->shutdown();
     m_pEventInterpreter->terminate();
 
