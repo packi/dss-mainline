@@ -118,6 +118,8 @@ const char* kSavedPropsDirectory = DSS_SAVEDPROPSDIR;
 const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
+  __DEFINE_LOG_CHANNEL__(DSS, lsInfo);
+
   DSS::DSS()
   : m_commChannel(NULL)
   {
