@@ -250,12 +250,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     foreach(std::string propLine, _properties) {
       std::string::size_type pos = propLine.find("=");
       if(pos == std::string::npos) {
-        Logger::getInstance()->log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
+        log("invalid property specified on commandline (format is name=value): '" +
+            propLine + "'", lsError);
         return false;
       } else {
         std::string name = propLine.substr(0, pos);
         std::string value = propLine.substr(pos+1, std::string::npos);
-        Logger::getInstance()->log("Setting property '" + name + "' to '" + value + "'", lsInfo);
+        log("Setting property '" + name + "' to '" + value + "'", lsInfo);
         try {
           int val = strToInt(value);
           m_pPropertySystem->setIntValue(name, val, true);
@@ -288,8 +289,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       m_commChannel->run();
       m_commChannel->suspendUpdateTask();
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log("Could not start dSA communication channel: " +
-              std::string(err.what()), lsError);
+      log("Could not start dSA communication channel: " + std::string(err.what()), lsError);
     }
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
@@ -339,7 +339,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     // -- setup logging
     if(!loadConfig(_configFile)) {
-      Logger::getInstance()->log("Could not parse config file", lsFatal);
+      log("Could not parse config file", lsFatal);
       return false;
     }
 
@@ -355,18 +355,16 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");
     if (pNode) {
       std::string logFileName = pNode->getStringValue();
-      Logger::getInstance()->log("Logging to file: " + logFileName, lsInfo);
+      log("Logging to file: " + logFileName, lsInfo);
 
       boost::shared_ptr<dss::LogTarget>
         logTarget(new dss::FileLogTarget(logFileName));
       if (!dss::Logger::getInstance()->setLogTarget(logTarget)) {
-        Logger::getInstance()->log("Failed to open logfile '" +
-                                   logFileName + "'", lsFatal);
+        log("Failed to open logfile '" + logFileName + "'", lsFatal);
         return false;
       }
     } else {
-      Logger::getInstance()->log("No logfile configured, logging to stdout",
-                                 lsInfo);
+      log("No logfile configured, logging to stdout", lsInfo);
     }
     pNode = getPropertySystem().getProperty("/config/loglevel");
     if (pNode) {
@@ -383,27 +381,27 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   bool DSS::checkDirectoriesExist() {
     bool sane = true;
     if(!isSaneDirectory(m_dataDirectory)) {
-      Logger::getInstance()->log("Invalid data directory specified: '" + m_dataDirectory + "'", lsFatal);
+      log("Invalid data directory specified: '" + m_dataDirectory + "'", lsFatal);
       sane = false;
     }
 
     if(!isSaneDirectory(m_configDirectory)) {
-      Logger::getInstance()->log("Invalid config directory specified: '" + m_configDirectory + "'", lsFatal);
+      log("Invalid config directory specified: '" + m_configDirectory + "'", lsFatal);
       sane = false;
     }
 
     if(!isSaneDirectory(m_webrootDirectory)) {
-      Logger::getInstance()->log("Invalid webroot directory specified: '" + m_webrootDirectory + "'", lsFatal);
+      log("Invalid webroot directory specified: '" + m_webrootDirectory + "'", lsFatal);
       sane = false;
     }
 
     if(!isSaneDirectory(m_jsLogDirectory)) {
-      Logger::getInstance()->log("Invalid js-log directory specified: '" + m_jsLogDirectory + "'", lsFatal);
+      log("Invalid js-log directory specified: '" + m_jsLogDirectory + "'", lsFatal);
       sane = false;
     }
 
     if(!isSaneDirectory(m_savedPropsDirectory)) {
-      Logger::getInstance()->log("Invalid saved-props directory specified: '" + m_savedPropsDirectory + "'", lsFatal);
+      log("Invalid saved-props directory specified: '" + m_savedPropsDirectory + "'", lsFatal);
       sane = false;
     }
     return sane;
@@ -490,9 +488,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       try {
         InitializeSubsystem(m_Subsystems.at(i));
       } catch(std::exception& e) {
-        Logger::getInstance()->log("Failed to initialize subsystem '" +
-                                   m_Subsystems.at(i)->getName() +
-                                   "': " + e.what(), lsFatal);
+        log("Failed to initialize subsystem '" + m_Subsystems.at(i)->getName() +
+            "': " + e.what(), lsFatal);
         m_State = ssTerminating;
         return false;
       }
@@ -504,13 +501,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   bool DSS::initSecurity() {
     PropertyNodePtr pDigestFile = getPropertySystem().getProperty("/config/digestfile");
     boost::shared_ptr<PasswordChecker> checker;
-    if(pDigestFile != NULL) {
-      Logger::getInstance()->log("Using digest file: '" +
-    		  pDigestFile->getStringValue() +
-    		  "' for authentication.", lsInfo);
-	  checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
+    if (pDigestFile != NULL) {
+      log("Using digest file: '" + pDigestFile->getStringValue() +
+          "' for authentication.", lsInfo);
+      checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
     } else {
-      Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
+      log("Using internal authentication mechanism.", lsInfo);
       checker.reset(new BuiltinPasswordChecker());
     }
     m_pSecurity->setPasswordChecker(checker);
@@ -569,14 +565,14 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   } // initSecurity
 
   void DSS::run() {
-    Logger::getInstance()->log("DSS starting up....", lsInfo);
-    Logger::getInstance()->log(versionString(), lsInfo);
-    Logger::getInstance()->log("Configuration: ", lsInfo);
-    Logger::getInstance()->log("  data:      '" + getDataDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  config:    '" + getConfigDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  webroot:   '" + getWebrootDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  log dir:   '" + getJSLogDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  props dir: '" + getSavedPropsDirectory() + "'", lsInfo);
+    log("DSS starting up....", lsInfo);
+    log(versionString(), lsInfo);
+    log("Configuration: ", lsInfo);
+    log("  data:      '" + getDataDirectory() + "'", lsInfo);
+    log("  config:    '" + getConfigDirectory() + "'", lsInfo);
+    log("  webroot:   '" + getWebrootDirectory() + "'", lsInfo);
+    log("  log dir:   '" + getJSLogDirectory() + "'", lsInfo);
+    log("  props dir: '" + getSavedPropsDirectory() + "'", lsInfo);
 
     SystemInfo info;
     info.collect();
@@ -587,13 +583,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     addDefaultInterpreterPlugins();
 
     if (!initSecurity()) {
-      Logger::getInstance()->log("Failed to initialize security, exiting...", lsFatal);
+      log("Failed to initialize security, exiting...", lsFatal);
       return;
     }
     m_pSecurity->loginAsSystemUser("Main thread needs system privileges");
 
     if (!initSubsystems()) {
-      Logger::getInstance()->log("Failed to initialize subsystems, exiting...", lsFatal);
+      log("Failed to initialize subsystems, exiting...", lsFatal);
       return;
     }
 
@@ -653,7 +649,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   } // shutdown
 
   int DSS::loadConfigDir(const std::string& _configDir) {
-    Logger::getInstance()->log("Loading config directory " + _configDir, lsInfo);
+    log("Loading config directory " + _configDir, lsInfo);
 
     int n = 0;
     if (!boost::filesystem::exists(_configDir)) return n;
@@ -665,10 +661,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
         {
 #if defined(BOOST_VERSION_135)
-          Logger::getInstance()->log("Loading config from " + itr->path().file_string(), lsInfo);
+          log("Loading config from " + itr->path().file_string(), lsInfo);
           if (loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
 #else
-          Logger::getInstance()->log("Loading config from " + itr->path().string(), lsInfo);
+          log("Loading config from " + itr->path().string(), lsInfo);
           if (loadFromXML(itr->path().string(), getPropertySystem().getProperty("/config")))
 #endif
             n++;
@@ -686,7 +682,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     else
       cfgFile = getConfigDirectory() + "config.xml";
 
-    Logger::getInstance()->log("Loading config file " + cfgFile, lsInfo);
+    log("Loading config file " + cfgFile, lsInfo);
     loadFromXML(cfgFile, getPropertySystem().getProperty("/config"));
 
     loadConfigDir(getConfigDirectory() + "config.d");
@@ -752,8 +748,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
           }
           break;
         default: {
-          Logger::getInstance()->log("System signal unhandled: " +
-              intToString(sig), lsDebug);
+          log("System signal unhandled: " + intToString(sig), lsDebug);
           break;
         }
       }
