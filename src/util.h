@@ -39,6 +39,8 @@ namespace dss {
 
   std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName);
   std::string getOutputChannelName(uint8_t _channel);
+  uint16_t convertToOutputChannelValue(uint8_t channel, double value);
+  double convertFromOutputChannelValue(uint8_t channel, uint16_t value);
 }
 
 #endif
