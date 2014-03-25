@@ -1098,7 +1098,8 @@ namespace dss {
         pDevice->setDeviceOutputChannelValue(boost::get<0>(channels->at(i)),
                                              boost::get<1>(channels->at(i)),
                                              boost::get<2>(channels->at(i)),
-                                             applyNow);
+                                             applyNow &&
+                                             (i == (channels->size() - 1)));
         // don't flood the bus on bulk requests
         if ((channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
