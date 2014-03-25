@@ -25,10 +25,20 @@
 #include <boost/test/unit_test.hpp>
 
 #include "src/web/json.h"
+#include "base.h"
 
 using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(JSON)
+
+BOOST_AUTO_TEST_CASE(testStreamOperator) {
+  JSONObject obj;
+  std::ostringstream s;
+  obj.addProperty("id", "foo");
+  s << obj;
+  s << obj;
+  BOOST_CHECK_EQUAL(s.str(), "{\"id\":\"foo\"}{\"id\":\"foo\"}");
+}
 
 BOOST_AUTO_TEST_CASE(testObjectEmpty) {
   JSONObject obj;
@@ -130,6 +140,22 @@ BOOST_AUTO_TEST_CASE(testObjectWithSubArray) {
   array->add(2);
   std::string value = obj.toString();
   BOOST_CHECK_EQUAL(value, "{\"elements\":[1,2]}");
+}
+
+BOOST_AUTO_TEST_CASE(testObjectWithSubArrayOfObject) {
+  JSONObject obj;
+  boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  int i;
+
+  obj.addElement("elements", array);
+  for (i = 0; i < 2; i++) {
+    JSONObject tmp;
+    tmp.addProperty("id", "foo" + intToString(i));
+    tmp.addProperty("val", "bar" + intToString(i));
+    array->add(tmp);
+  }
+  std::string value = obj.toString();
+  BOOST_CHECK_EQUAL(value, "{\"elements\":[{\"id\":\"foo0\",\"val\":\"bar0\"},{\"id\":\"foo1\",\"val\":\"bar1\"}]}");
 }
 
 BOOST_AUTO_TEST_CASE(testJSONEscape) {
