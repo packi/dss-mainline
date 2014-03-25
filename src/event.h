@@ -269,6 +269,11 @@ namespace dss {
     virtual ~EventInterpreterPlugin() {}
 
     const std::string& getName() const { return m_Name; }
+    /**
+     * Subscribe to given events.
+     * Fallback when subscribtions.xml makes no sense
+     */
+    virtual void subscribe() {};
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);

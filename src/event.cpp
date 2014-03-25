@@ -327,6 +327,10 @@ namespace dss {
     loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
     loadStatesFromProperty(subParser->getStatesNode());
 
+    foreach(EventInterpreterPlugin *handler, m_Plugins) {
+      handler->subscribe();
+    }
+
     log("initialize -- done", lsInfo);
   } // initialize
 
