@@ -34,6 +34,7 @@
 #include "structuremanipulator.h"
 #include "foreach.h"
 #include <boost/algorithm/string/replace.hpp>
+#include <math.h>
 
 namespace dss {
 
@@ -113,20 +114,22 @@ typedef struct OutputChannelInfo
 {
     const char *id;
     uint8_t size;
+    uint8_t min;
+    double max;
 } OutputChannelInfo_t;
 
 static OutputChannelInfo kOutputChannels[] = {
-    { NULL,             0   },  // 0
-    { "brightness",     8   },  // 1
-    { "hue",            8   },  // 2
-    { "saturation",     8   },  // 3
-    { "colortemp",      8   },  // 4
-    { "x",              8   },  // 5
-    { "y",              8   },  // 6
-    { "verticalpos",    16  },  // 7
-    { "horizontalpos",  16  },  // 8
-    { "openinganglepos",8   },  // 9
-    { "permeability",   8   }   // 10
+    { NULL,             0,  0,      0       },  // id 0
+    { "brightness",     8,  0,      100     },  // id 1,    %
+    { "hue",            8,  0,      358.6   },  // id 2,    °
+    { "saturation",     8,  0,      100     },  // id 3,    %
+    { "colortemp",      8,  100,    1000    },  // id 4,    mired
+    { "x",              8,  0,      1.0     },  // id 5
+    { "y",              8,  0,      1.0     },  // id 6
+    { "verticalpos",    16, 0,      100     },  // id 7,    %
+    { "horizontalpos",  16, 0,      100     },  // id 8,    %
+    { "openinganglepos",8,  0,      100     },  // id 9,    %
+    { "permeability",   8,  0,      100     }   // id 10,   %
 };
 
   std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {
@@ -146,5 +149,33 @@ static OutputChannelInfo kOutputChannels[] = {
     }
     return kOutputChannels[channel].id;
   }
-}
 
+  uint16_t convertToOutputChannelValue(uint8_t channel, double value) {
+    if ((channel < MinimumOutputChannelID) ||
+        (channel > MaximumOutputChannelID)) {
+      throw std::invalid_argument("invalid channel id: '" +
+                                   intToString(channel) + "'");
+    }
+
+    if ((value < kOutputChannels[channel].min) ||
+        (value > kOutputChannels[channel].max)) {
+        throw std::invalid_argument("invalid value for channel id: '" +
+                                        intToString(channel) + "'");
+    }
+
+    return (uint16_t)round(((pow(2, kOutputChannels[channel].size) - 1) *
+                                        value / kOutputChannels[channel].max));
+  }
+
+  double convertFromOutputChannelValue(uint8_t channel, uint16_t value) {
+    if ((channel < MinimumOutputChannelID) ||
+        (channel > MaximumOutputChannelID)) {
+      throw std::invalid_argument("invalid channel id: '" +
+                                   intToString(channel) + "'");
+    }
+
+    return (kOutputChannels[channel].max * value) /
+                    (double)(pow(2, kOutputChannels[channel].size) - 1);
+  }
+
+} // namespace

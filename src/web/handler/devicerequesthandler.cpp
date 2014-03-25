@@ -78,18 +78,17 @@ namespace dss {
     std::vector<std::string> vals = dss::splitString(_values, ';');
     for (size_t i = 0; i < vals.size(); i++) {
       kv = splitIntoKeyValue(vals.at(i));
-      int v = strToIntDef(kv.second, -1);
+      double v = strToDouble(kv.second, -1);
       if (v == -1) {
         throw std::invalid_argument("invalid channel value for channel '" +
                                     kv.first + "'");
       }
       std::pair<int, int> cs = getOutputChannelIdAndSize(kv.first);
-      out->push_back(boost::make_tuple(cs.first, cs.second, v));
+      out->push_back(boost::make_tuple(cs.first, cs.second, convertToOutputChannelValue(cs.first, v)));
     }
 
     return out;
   }
-
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result = getDeviceByDSID(_request);
@@ -1074,8 +1073,15 @@ namespace dss {
       for (size_t i = 0; i < channels->size(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
         chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
-        chanObj->addProperty("value", 50);
+        chanObj->addProperty("value",
+                convertFromOutputChannelValue(
+                    channels->at(i).first,
+                    pDevice->getDeviceOutputChannelValue(channels->at(i).first)));
         channelsObj->addElement("", chanObj);
+        // don't flood the bus on bulk requests
+        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+          sleep(1);
+        }
       }
 
       return success(resultObj);
@@ -1092,7 +1098,8 @@ namespace dss {
         pDevice->setDeviceOutputChannelValue(boost::get<0>(channels->at(i)),
                                              boost::get<1>(channels->at(i)),
                                              boost::get<2>(channels->at(i)),
-                                             applyNow);
+                                             applyNow &&
+                                             (i == (channels->size() - 1)));
         // don't flood the bus on bulk requests
         if ((channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
