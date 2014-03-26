@@ -40,19 +40,6 @@ done
 echo >> $FILE
 echo >> $FILE
 
-echo -n "libwebservices_a_SOURCES =" >> $FILE
-for f in `find webservices | egrep '\.(cpp?|h)$' | egrep -v '(soapH.h|soapC.cpp|soapServer.cpp|soapStub.h|soapdssObject.h)' | sort`
-do
-    if (test -f $f); then
-        echo " \\" >> $FILE
-        echo -n '	$(top_srcdir)/' >>$FILE
-        echo -n $f >> $FILE
-    fi
-done
-
-echo >> $FILE
-echo >> $FILE
-
 echo -n "dsstests_SOURCES =" >> $FILE
 for f in `find tests | egrep '\.(cpp?|h)$' | egrep -v '(dsidhelpertest.cpp|dssimtest.cpp)'| sort`
 do
