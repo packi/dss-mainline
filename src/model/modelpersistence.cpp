@@ -765,7 +765,11 @@ namespace dss {
       syncFile(tmpOut);
 
       // move it to the desired location
-      rename(tmpOut.c_str(), _fileName.c_str());
+      int ret = rename(tmpOut.c_str(), _fileName.c_str());
+      if (ret < 0) {
+        Logger::getInstance()->log("Copying to final destination (" + _fileName + ") failed: " +
+            std::string(strerror(errno)), lsFatal);
+      }
     } else {
       Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }

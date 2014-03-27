@@ -130,6 +130,7 @@ namespace dss {
     std::string nameStr = truncateUTF8String(_name, 19);
     uint8_t name[20];
     strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
+    name[19] = '\0';
     int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sceneNumber, name);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
@@ -142,6 +143,7 @@ namespace dss {
     std::string nameStr = truncateUTF8String(_name, 19);
     uint8_t name[20];
     strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
+    name[19] = '\0';
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
     int ret = DeviceProperties_set_name(m_DSMApiHandle, meterDSID, _deviceID, name);
@@ -156,6 +158,7 @@ namespace dss {
     std::string nameStr = truncateUTF8String(_name, 19);
     uint8_t name[20];
     strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
+    name[19] = '\0';
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
     int ret = dSMProperties_set_name(m_DSMApiHandle, meterDSID, name);
@@ -171,6 +174,7 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
     uint8_t grName[NAME_LEN];
     strncpy((char *) grName, _name.c_str(), NAME_LEN);
+    grName[NAME_LEN-1] = '\0';
     ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // createGroup
@@ -194,6 +198,7 @@ namespace dss {
     }
     uint8_t grName[NAME_LEN];
     strncpy((char *) grName, _name.c_str(), NAME_LEN);
+    grName[NAME_LEN-1] = '\0';
     ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);

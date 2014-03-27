@@ -606,6 +606,8 @@ namespace dss {
     pEvent->addParameter(isConfigLocked);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    } else {
+      delete pEvent;
     }
   }
 

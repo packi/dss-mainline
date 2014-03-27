@@ -39,6 +39,7 @@ namespace dss {
     m_GroupID(_id),
     m_StandardGroupID(0),
     m_LastCalledScene(SceneOff),
+    m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false)
   {
