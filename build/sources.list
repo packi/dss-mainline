@@ -6,8 +6,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/bonjour.cpp \
 	$(top_srcdir)/src/bonjour.h \
 	$(top_srcdir)/src/businterface.h \
-	$(top_srcdir)/src/webservice_replies.cpp \
-	$(top_srcdir)/src/webservice_replies.h \
 	$(top_srcdir)/src/comm-channel.cpp \
 	$(top_srcdir)/src/comm-channel.h \
 	$(top_srcdir)/src/datetools.cpp \
@@ -162,6 +160,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/watchdog.cpp \
 	$(top_srcdir)/src/watchdog.h \
 	$(top_srcdir)/src/watchdog.h \
+	$(top_srcdir)/src/webservice_api.cpp \
+	$(top_srcdir)/src/webservice_api.h \
 	$(top_srcdir)/src/webservice_connection.h \
 	$(top_srcdir)/src/webservice_connection.cpp \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.cpp \

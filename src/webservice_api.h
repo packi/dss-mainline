@@ -1,5 +1,5 @@
-#ifndef __WEBSERVICE_REPLIES__
-#define __WEBSERVICE_REPLIES__
+#ifndef __WEBSERVICE_API__
+#define __WEBSERVICE_API__
 
 #include <stdexcept>
 

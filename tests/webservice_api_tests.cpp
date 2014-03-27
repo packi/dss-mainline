@@ -11,7 +11,7 @@
 #include "src/dss.h"
 #include "src/event.h"
 
-#include "webservice_replies.h"
+#include "webservice_api.h"
 
 using namespace dss;
 

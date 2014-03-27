@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstring>
 
-#include "webservice_replies.h"
+#include "webservice_api.h"
 
 namespace dss {
 

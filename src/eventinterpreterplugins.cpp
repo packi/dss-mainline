@@ -49,7 +49,7 @@
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
 #include "src/url.h"
-#include "src/webservice_replies.h"
+#include "src/webservice_api.h"
 #include "src/webservice_connection.h"
 #include "src/subscription_profiler.h"
 
