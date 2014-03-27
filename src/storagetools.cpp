@@ -33,6 +33,7 @@
 namespace dss {
 
   //================================================== PersistentCounter
+  __DEFINE_LOG_CHANNEL__(PersistentCounter, lsInfo);
 
   extern const char* DataDirectory;
 
@@ -45,7 +46,11 @@ namespace dss {
     } else {
       dirname = std::string(DataDirectory) + "/store/";
     }
-    mkdir(dirname.c_str(), S_IRWXU | S_IRGRP);
+    int ret = mkdir(dirname.c_str(), S_IRWXU | S_IRGRP);
+    if (ret < 0) {
+      Logger::getInstance()->log("Create directory '" + dirname + "' failed: " +
+          std::string(strerror(errno)), lsFatal);
+    }
     m_filename = dirname + "count." + _name;
     load();
   }
@@ -75,7 +80,11 @@ namespace dss {
     }
     fprintf(fout, "%llu\n", (unsigned long long) m_value);
     fclose(fout);
-    rename(tempFile.c_str(), m_filename.c_str());
+    int ret = rename(tempFile.c_str(), m_filename.c_str());
+    if (ret < 0) {
+      Logger::getInstance()->log("Copying to final destination (" + m_filename + ") failed: " +
+          std::string(strerror(errno)), lsFatal);
+    }
   }
 
 }
