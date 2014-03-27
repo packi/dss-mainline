@@ -65,6 +65,8 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 namespace dss {
 
@@ -774,7 +776,9 @@ namespace dss {
     mailText[PATH_MAX-1] = '\0';
     strcat(mailText, "/mailXXXXXX");
 
+    int prevUmask = umask(S_IRWXG | S_IRWXO);
     int mailFile = mkstemp((char *) mailText);
+    umask(prevUmask);
     if (mailFile < 0) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
           intToString(errno) + "]", lsFatal);
