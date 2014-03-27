@@ -139,6 +139,7 @@ namespace dss {
     m_pMetering(NULL),
     m_EventTimeoutMS(_eventTimeoutMS),
     m_pStructureQueryBusInterface(NULL),
+    m_pStructureModifyingBusInterface(NULL),
     m_taskProcessor(boost::shared_ptr<TaskProcessor>(new TaskProcessor()))
   { }
 

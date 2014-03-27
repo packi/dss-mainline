@@ -56,6 +56,7 @@ namespace dss {
 
   DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
   : ThreadedSubsystem(_pDSS, "DSBusInterface"),
+    m_SystemUser(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
