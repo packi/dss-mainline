@@ -41,6 +41,12 @@ const char *pp_sysinfo_build_host = "/system/version/buildHost";
 const char *pp_sysinfo_git_revision = "/system/version/gitRevision";
 #endif
 
+const char *pp_websvc_enabled = "/config/webservice-api/enabled";
+const char *pp_websvc_url_authority = "/config/webservice-api/base-url";
+const char *pp_websvc_apartment_changed_url_path = "/config/webservice-api/model-pusher/url";
+const char *pp_websvc_apartment_changed_notify_delay = "/config/webservice-api/model-pusher/delay";
+const char *pp_websvc_access_mgmt_delete_token_url_path = "/config/webservice-api/account_mgmt/url";
+
 void setupCommonProperties(PropertySystem &propSystem) {
   propSystem.createProperty(pp_sysinfo_dss_version)->setStringValue(DSS_VERSION);
   propSystem.createProperty(pp_sysinfo_distro_version)
@@ -53,6 +59,16 @@ void setupCommonProperties(PropertySystem &propSystem) {
   // TODO if adding predifined strings, also use them in main.cpp
   propSystem.createProperty("/config/debug/coredumps/enabled")->setBooleanValue(false);
   propSystem.createProperty("/config/debug/coredumps/limit")->setFloatingValue(RLIM_INFINITY);
+
+  propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
+  propSystem.createProperty(pp_websvc_url_authority)
+    ->setStringValue("https://dsservices.aizo.com");
+  propSystem.createProperty(pp_websvc_apartment_changed_url_path)
+    ->setStringValue("internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
+  propSystem.createProperty(pp_websvc_apartment_changed_notify_delay)
+    ->setIntegerValue(30);
+  propSystem.createProperty(pp_websvc_access_mgmt_delete_token_url_path)
+    ->setStringValue("public/accessmanagement/v1_0/RemoteConnectivity/DeleteApplicationToken");
 }
 
 }

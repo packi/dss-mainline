@@ -994,7 +994,7 @@ namespace dss {
   void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
   {
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url = propSystem.getStringValue(ModelChangedEvent::propPathUrl);
+    std::string url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
 
     url += "?apartmentChangeType=";
     switch (type) {

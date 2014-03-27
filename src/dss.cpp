@@ -144,14 +144,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
-    m_pPropertySystem->createProperty(ModelChangedEvent::propPathDelay)->setIntegerValue(30);
-    m_pPropertySystem->createProperty("/config/webservice-api/base-url")
-        ->setStringValue("https://dsservices.aizo.com");
-
-    m_pPropertySystem->createProperty(ModelChangedEvent::propPathUrl)
-        ->setStringValue("internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
-
-    m_pPropertySystem->createProperty("/config/webservice-api/enabled")->setBooleanValue(false);
   } // ctor
 
   DSS::~DSS() {

@@ -33,6 +33,12 @@ extern const char *pp_sysinfo_build_host;
 extern const char *pp_sysinfo_git_revision;
 #endif
 
+extern const char *pp_websvc_enabled;
+extern const char *pp_websvc_url_authority;
+extern const char *pp_websvc_access_mgmt_delete_token_url_path;
+extern const char *pp_websvc_apartment_changed_url_path;
+extern const char *pp_websvc_apartment_changed_notify_delay;
+
 void setupCommonProperties(PropertySystem &propSystem);
 
 }

@@ -38,7 +38,7 @@ WebserviceConnection* WebserviceConnection::m_instance = NULL;
 WebserviceConnection::WebserviceConnection()
   : m_handle(NULL)
 {
-    m_base_url = DSS::getInstance()->getPropertySystem().getStringValue("/config/webservice-api/base-url");
+    m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
     if (!endsWith(m_base_url, "/")) {
       m_base_url = m_base_url + "/";
     }
