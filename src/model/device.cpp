@@ -401,7 +401,7 @@ namespace dss {
   } // setDeviceActiveGroup
 
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
-    if((_groupId < 1) && (_groupId > 7)) {
+    if((_groupId < 1) || (_groupId > 7)) {
       throw std::runtime_error("Invalid joker group value");
     }
     // for standard groups force that only one group is active
@@ -1460,7 +1460,7 @@ namespace dss {
     }
 
     if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL) &&
-        (devNumber = 220)) {
+        (devNumber == 220)) {
       features.hasOutputAngle = true;
     }
 
