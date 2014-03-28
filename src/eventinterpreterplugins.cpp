@@ -49,7 +49,6 @@
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
 #include "src/webservice_api.h"
-#include "src/webservice_connection.h"
 #include "src/subscription_profiler.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -957,44 +956,6 @@ namespace dss {
   }
 
 #ifdef HAVE_CURL
-  class WebserviceApartment {
-    __DECL_LOG_CHANNEL__
-  public:
-    typedef enum {
-      ApartmentChange = 1,
-      TimedEventChange = 2,
-      UDAChange = 3,
-    } ChangeType;
-
-    static void doModelChangedNotification(ChangeType type);
-  };
-
-  __DEFINE_LOG_CHANNEL__(WebserviceApartment, lsInfo)
-
-  void WebserviceApartment::doModelChangedNotification(ChangeType type) {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url;
-
-    url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-    url += "?apartmentChangeType=";
-    switch (type) {
-    case ApartmentChange:
-        url += "Apartment";
-        break;
-    case TimedEventChange:
-        url += "TimedEvent";
-        break;
-    case UDAChange:
-        url += "UserDefinedAction";
-        break;
-    }
-    url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-
-    log("execute: " + url, lsDebug);
-    boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker());
-    WebserviceConnection::getInstance()->request(url, POST, mcb);
-  }
-
   EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
                                                                                _pInterpreter)
         : EventInterpreterPlugin("apartment_model_change", _pInterpreter)

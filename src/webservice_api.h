@@ -12,6 +12,10 @@
 
 namespace dss {
 
+
+// --------------------------------------------------------------------
+// helper
+
 struct WebserviceReply {
     int code;
     std::string desc;
@@ -35,6 +39,22 @@ public:
   StatusReplyChecker() {};
   virtual ~StatusReplyChecker() {};
   virtual void result(long code, boost::shared_ptr<URLResult> result);
+};
+
+
+// --------------------------------------------------------------------
+// interface calls
+
+class WebserviceApartment {
+  __DECL_LOG_CHANNEL__
+public:
+  typedef enum {
+    ApartmentChange = 1,
+    TimedEventChange = 2,
+    UDAChange = 3,
+  } ChangeType;
+
+  static void doModelChangedNotification(ChangeType type);
 };
 
 }

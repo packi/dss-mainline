@@ -70,6 +70,37 @@ void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) 
   }
 }
 
+/*
+ * Apartment management
+ */
+
+__DEFINE_LOG_CHANNEL__(WebserviceApartment, lsInfo)
+
+void WebserviceApartment::doModelChangedNotification(ChangeType type)
+{
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+
+  url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
+  url += "?apartmentChangeType=";
+  switch (type) {
+  case ApartmentChange:
+      url += "Apartment";
+      break;
+  case TimedEventChange:
+      url += "TimedEvent";
+      break;
+  case UDAChange:
+      url += "UserDefinedAction";
+      break;
+  }
+  url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+
+  log("execute: " + url, lsDebug);
+  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker());
+  WebserviceConnection::getInstance()->request(url, POST, mcb);
+}
+
 }
 
 #endif // ifdef HAVE_CURL
