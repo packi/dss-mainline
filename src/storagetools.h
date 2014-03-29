@@ -26,10 +26,12 @@
 #include <stdint.h>
 #include <string>
 
+#include "logger.h"
 
 namespace dss {
 
   class PersistentCounter {
+    __DECL_LOG_CHANNEL__
   private:
     uint64_t m_value;
     std::string m_filename;

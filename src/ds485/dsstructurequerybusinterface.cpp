@@ -218,7 +218,7 @@ namespace dss {
 
       ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
                                        &_spec.GroupMembership, &_spec.ActiveGroup,
-                                       &flags.flags);
+                                       &flags.flags, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
       _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
       _spec.CallsPresent = (flags.callsNoPresent == 0);

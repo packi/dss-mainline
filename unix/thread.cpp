@@ -95,7 +95,7 @@ bool Thread::stop() {
   TerminateThread( m_ThreadHandle, 0 );
 #else
     // FIXME: Hmm... Quit rude ;)
-  pthread_kill( m_ThreadHandle, -9 );
+  pthread_kill( m_ThreadHandle, SIGKILL );
 #endif
   return true;
 } // stop

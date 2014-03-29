@@ -49,6 +49,8 @@ namespace dss {
     m_IsInitialized(false),
     m_HasPendingEvents(false),
     m_pApartment(_pApartment),
+    m_DatamodelHash(0),
+    m_DatamoderModificationCount(0),
     m_BinaryInputEventCount(_dsid.toString()),
     m_dSMPropertyFlags(0),
     m_IgnoreActionsFromNewDevices(false)
