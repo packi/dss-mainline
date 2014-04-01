@@ -2592,6 +2592,94 @@ namespace dss {
     return JS_FALSE;
   } // zone_get_property_node
 
+  JSBool zone_addConnectedDevice(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_addConnectedDevice: ext of wrong type");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      uint8_t groupID;
+      if (pZone != NULL && argc >= 1) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        if (!pGroup) {
+          JS_ReportWarning(cx, "Model.zone_addConnectedDevice: group with id \"%d\" not found", groupID);
+          return JS_FALSE;
+        }
+        pGroup->addConnectedDevice();
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_addConnectedDevice
+
+  JSBool zone_removeConnectedDevice(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_removeConnectedDevice: ext of wrong type");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      uint8_t groupID;
+      if (pZone != NULL && argc >= 1) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        if (!pGroup) {
+          JS_ReportWarning(cx, "Model.zone_removeConnectedDevice: group with id \"%d\" not found", groupID);
+          return JS_FALSE;
+        }
+        pGroup->removeConnectedDevice();
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_removeConnectedDevice
+
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 4, 0),
@@ -2603,6 +2691,8 @@ namespace dss {
     JS_FS("pushSensorValue", zone_pushSensorValue, 4, 0),
     JS_FS("pushSensorValueFloat", zone_pushSensorValueFloat, 4, 0),
     JS_FS("getPropertyNode", zone_get_property_node, 0, 0),
+    JS_FS("addConnectedDevice", zone_addConnectedDevice, 1, 0),
+    JS_FS("removeConnectedDevice", zone_removeConnectedDevice, 1, 0),
     JS_FS_END
   };
 
