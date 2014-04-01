@@ -957,42 +957,54 @@ namespace dss {
   }
 
 #ifdef HAVE_CURL
+  class WebserviceApartment {
+    __DECL_LOG_CHANNEL__
+  public:
+    typedef enum {
+      ApartmentChange = 1,
+      TimedEventChange = 2,
+      UDAChange = 3,
+    } ChangeType;
+
+    static void doModelChangedNotification(ChangeType type);
+  };
+
+  __DEFINE_LOG_CHANNEL__(WebserviceApartment, lsInfo)
+
+  void WebserviceApartment::doModelChangedNotification(ChangeType type) {
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+    std::string url;
+
+    url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
+    url += "?apartmentChangeType=";
+    switch (type) {
+    case ApartmentChange:
+        url += "Apartment";
+        break;
+    case TimedEventChange:
+        url += "TimedEvent";
+        break;
+    case UDAChange:
+        url += "UserDefinedAction";
+        break;
+    }
+    url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+
+    log("execute: " + url, lsDebug);
+    boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker());
+    WebserviceConnection::getInstance()->request(url, POST, mcb);
+  }
+
   EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
                                                                                _pInterpreter)
         : EventInterpreterPlugin("apartment_model_change", _pInterpreter)
   {
   }
 
-  void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
-  {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-
-    url += "?apartmentChangeType=";
-    switch (type) {
-    case Apartment:
-        url += "Apartment";
-        break;
-    case TimedEvent:
-        url += "TimedEvent";
-        break;
-    case UDA:
-        url += "UserDefinedAction";
-        break;
-    }
-    url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-
-    Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-            " executeURL: " + url);
-
-    boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker());
-    WebserviceConnection::getInstance()->request(url, POST, mcb);
-  }
-
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    bool enabled = propSystem.getBoolValue("/config/webservice-api/enabled");
+    bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
     if (!enabled) {
       return;
     }
@@ -1002,22 +1014,21 @@ namespace dss {
       Logger::getInstance()->log(" name " + it->first + " : " + it->second);
     }
 
-    ChangeType type;
+    WebserviceApartment::ChangeType type;
     /* momentan ist definiert: 1=Apartment, 2=TimedEvent, 3=UDA */
     if (_event.getName() == ModelChangedEvent::Apartment) {
-      type = Apartment;
+      type = WebserviceApartment::ApartmentChange;
     } else if (_event.getName() == ModelChangedEvent::TimedEvent) {
-      type = TimedEvent;
+      type = WebserviceApartment::TimedEventChange;
     } else if (_event.getName() == ModelChangedEvent::UserDefinedAction) {
-      type = UDA;
+      type = WebserviceApartment::UDAChange;
     } else {
-      Logger::getInstance()->log(" unkown ModelChange event " +
-                                 _event.getName(), lsError);
+      log(" unkown ModelChange event " + _event.getName(), lsError);
       return;
     }
 
     /* no retval, no error handling, just log entry */
-    doCall(type);
+    WebserviceApartment::doModelChangedNotification(type);
   }
 #endif
 
