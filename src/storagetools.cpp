@@ -48,8 +48,11 @@ namespace dss {
     }
     int ret = mkdir(dirname.c_str(), S_IRWXU | S_IRGRP);
     if (ret < 0) {
-      Logger::getInstance()->log("Create directory '" + dirname + "' failed: " +
-          std::string(strerror(errno)), lsFatal);
+      // do not warn about already existing directory
+      if (errno != EEXIST) {
+        Logger::getInstance()->log("Create directory '" + dirname + "' failed: " +
+            std::string(strerror(errno)), lsFatal);
+      }
     }
     m_filename = dirname + "count." + _name;
     load();
