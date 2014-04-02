@@ -802,7 +802,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         }
     }
 
-    PropertyNodePtr dsidNode = getPropertySystem().createProperty("/system/dSID");
+    PropertyNodePtr dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsid);
     dsidNode->setStringValue(dsid);
   }
 }

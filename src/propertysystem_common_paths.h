@@ -25,6 +25,7 @@
 
 namespace dss {
 
+extern const char *pp_sysinfo_dsid;
 extern const char *pp_sysinfo_dss_version;
 extern const char *pp_sysinfo_distro_version;
 #ifdef HAVE_BUILD_INFO_H

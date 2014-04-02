@@ -33,6 +33,7 @@
 
 namespace dss {
 
+const char *pp_sysinfo_dsid = "/system/dSID";
 const char *pp_sysinfo_dss_version = "/system/version/version";
 const char *pp_sysinfo_distro_version = "/system/version/distroVersion";
 #ifdef HAVE_BUILD_INFO_H
