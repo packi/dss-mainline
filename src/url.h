@@ -55,9 +55,6 @@ namespace dss {
   class URL {
     public:
 
-      static HashMapStringString emptyHeader;
-      static HashMapStringString emptyForm;
-
       URL(bool _reuse_handle = false);
       ~URL();
 

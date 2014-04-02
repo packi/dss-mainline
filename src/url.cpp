@@ -37,9 +37,6 @@
 
 namespace dss {
 
-HashMapStringString URL::emptyHeader;
-HashMapStringString URL::emptyForm;
-
 URL::URL(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
                                m_curl_handle(NULL) {}
 URL::~URL()
