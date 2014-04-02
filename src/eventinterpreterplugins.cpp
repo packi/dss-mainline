@@ -957,6 +957,7 @@ namespace dss {
     }
   }
 
+#ifdef HAVE_CURL
   EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
                                                                                _pInterpreter)
         : EventInterpreterPlugin("apartment_model_change", _pInterpreter)
@@ -1020,10 +1021,6 @@ namespace dss {
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-#ifndef HAVE_CURL
-    return;
-#endif
-
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     bool enabled = propSystem.getBoolValue("/config/webservice-api/enabled");
     if (!enabled) {
@@ -1052,6 +1049,7 @@ namespace dss {
     /* no retval, no error handling, just log entry */
     doCall(type);
   }
+#endif
 
   EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
                                                                                _pInterpreter)
@@ -1082,4 +1080,5 @@ namespace dss {
     boost::shared_ptr<URLRequestCallback> cb;
     WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
   }
+
 } // namespace dss

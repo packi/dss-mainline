@@ -21,15 +21,15 @@
 */
 
 #include "config.h"
-
 #ifdef HAVE_CURL
+
+#include "webservice_connection.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
 #include "propertysystem.h"
-#include "webservice_connection.h"
 #include "event.h"
 
 namespace dss {
@@ -212,4 +212,4 @@ WebserviceTreeListener::~WebserviceTreeListener() {
 
 } // namespace
 
-#endif//HAVE_CURL
+#endif //HAVE_CURL

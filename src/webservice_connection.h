@@ -23,6 +23,7 @@
 #ifndef __DSS_WEBSERVICE_CONNECTION_H__
 #define __DSS_WEBSERVICE_CONNECTION_H__
 
+#include "config.h"
 #ifdef HAVE_CURL
 
 #include <string>

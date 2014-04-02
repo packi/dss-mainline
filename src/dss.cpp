@@ -440,8 +440,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+#ifdef HAVE_CURL
     plugin = new EventInterpreterPluginApartmentChange(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+#endif
     plugin = new EventInterpreterPluginSystemEventLog(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginSystemState(m_pEventInterpreter.get());
