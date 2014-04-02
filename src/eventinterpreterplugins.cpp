@@ -48,7 +48,6 @@
 #include "src/model/state.h"
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
-#include "src/url.h"
 #include "src/webservice_api.h"
 #include "src/webservice_connection.h"
 #include "src/subscription_profiler.h"
@@ -964,34 +963,6 @@ namespace dss {
   {
   }
 
-  class ModelChangeRequestCallback : public URLRequestCallback
-  {
-  public:
-    virtual ~ModelChangeRequestCallback() {};
-    virtual void result(long code, boost::shared_ptr<URLResult> result)
-    {
-      if (code != 200) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                             " HTTP POST failed " + intToString(code), lsError);
-        return;
-      }
-
-      try {
-        WebserviceReply resp = parse_reply(result->content());
-
-        if (resp.code != 0) {
-          Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                     ": " + resp.desc, lsError);
-          return;
-        }
-      } catch (ParseError &ex) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                       " invalid return message " + result->content(), lsError);
-        return;
-      }
-    }
-  };
-
   void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
   {
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
@@ -1014,8 +985,7 @@ namespace dss {
     Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
             " executeURL: " + url);
 
-    boost::shared_ptr<ModelChangeRequestCallback> mcb(
-                                            new ModelChangeRequestCallback());
+    boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker());
     WebserviceConnection::getInstance()->request(url, POST, mcb);
   }
 

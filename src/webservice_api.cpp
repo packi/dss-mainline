@@ -1,9 +1,13 @@
+#include "webservice_api.h"
+#ifdef HAVE_CURL
+
 #include <json/json.h>
 #include <stdio.h>
 #include <iostream>
 #include <cstring>
 
-#include "webservice_api.h"
+#include "dss.h"
+#include "propertysystem.h"
 
 namespace dss {
 
@@ -46,4 +50,26 @@ WebserviceReply parse_reply(const char* buf) {
     return resp;
 }
 
+__DEFINE_LOG_CHANNEL__(StatusReplyChecker, lsInfo);
+
+void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) {
+  if (code != 200) {
+    log("HTTP POST failed " + intToString(code), lsError);
+    return;
+  }
+
+  try {
+    WebserviceReply resp = parse_reply(result->content());
+    if (resp.code != 0) {
+      log(resp.desc, lsError);
+      return;
+    }
+  } catch (ParseError &ex) {
+    log(std::string("Invalid return message ") + result->content(), lsError);
+    return;
+  }
 }
+
+}
+
+#endif // ifdef HAVE_CURL
