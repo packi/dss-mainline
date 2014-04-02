@@ -23,6 +23,8 @@
 #ifndef DSS_H_INCLUDED
 #define DSS_H_INCLUDED
 
+#include <vector>
+
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
@@ -32,9 +34,9 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include "bonjour.h"
+#include "logger.h"
 
 #include "comm-channel.h"
-#include <vector>
 
 namespace dss {
 
@@ -65,6 +67,7 @@ namespace dss {
     *
     */
   class DSS {
+    __DECL_LOG_CHANNEL__
   private:
     static DSS* m_Instance;
     std::vector<Subsystem*> m_Subsystems;
