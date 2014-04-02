@@ -5,7 +5,7 @@
 
 namespace dss {
 
-struct ModelChangeResponse {
+struct WebserviceReply {
     int code;
     std::string desc;
 };
@@ -15,7 +15,12 @@ public:
     ParseError(const std::string& _message);
 };
 
-ModelChangeResponse parseModelChange(const char* buf);
+/**
+ * Extract return code and message
+ * @param json -- json encoded reply
+ * @return decodod struct or throw ParseError if failed
+ */
+WebserviceReply parse_reply(const char* json);
 
 }
 

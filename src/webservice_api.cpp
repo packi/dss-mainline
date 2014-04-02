@@ -10,10 +10,14 @@ namespace dss {
 ParseError::ParseError(const std::string& _message) : runtime_error( _message )
 {
 }
-/*Parsing the json object*/
-ModelChangeResponse parseModelChange(const char* buf)
-{
-    ModelChangeResponse resp;
+
+/**
+ * Extract return code and message
+ * @param json -- json encoded reply
+ * @return decodod struct or throw ParseError if failed
+ */
+WebserviceReply parse_reply(const char* buf) {
+    WebserviceReply resp;
 
     if (!buf) {
       throw ParseError("buffer is NULL");

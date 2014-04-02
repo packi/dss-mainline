@@ -976,7 +976,7 @@ namespace dss {
       }
 
       try {
-        ModelChangeResponse resp = parseModelChange(result->content());
+        WebserviceReply resp = parse_reply(result->content());
 
         if (resp.code != 0) {
           Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +

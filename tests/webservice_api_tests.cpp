@@ -20,30 +20,32 @@ BOOST_AUTO_TEST_SUITE(CloudTest)
 BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
 
   /* test sample response */
-  ModelChangeResponse resp;
+  WebserviceReply resp;
   {
     const char *buf =  "{\"ReturnCode\":2,\"ReturnMessage\":\"The dSS was not found in the database\"}";
-    BOOST_CHECK_NO_THROW(resp = parseModelChange(buf));
+    BOOST_CHECK_NO_THROW(resp = parse_reply(buf));
+    BOOST_CHECK_EQUAL(resp.code, 2);
+    BOOST_CHECK_EQUAL(resp.desc, "The dSS was not found in the database");
   }
   {
     const char *buf =  "{\"ReturnCode\":\"2\",\"ReturnMessage\":\"The dSS was not found in the database\"}";
-    BOOST_CHECK_THROW(resp = parseModelChange(buf), ParseError);
+    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
   }
   {
     const char *buf =  "{\"ReturnCode\":2,\"ReturnMessage\":42}";
-    BOOST_CHECK_THROW(resp = parseModelChange(buf), ParseError);
+    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
   }
   {
     const char *buf =  "";
-    BOOST_CHECK_THROW(resp = parseModelChange(buf), ParseError);
+    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
   }
   {
     const char *buf =  "{128471049asdfhla}";
-    BOOST_CHECK_THROW(resp = parseModelChange(buf), ParseError);
+    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
   }
   {
     const char *buf =  NULL;
-    BOOST_CHECK_THROW(resp = parseModelChange(buf), ParseError);
+    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
   }
 }
 
@@ -58,7 +60,7 @@ BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
 
   BOOST_CHECK_EQUAL(curl->request(aprtmntChange, POST, &result), 200);
 
-  BOOST_CHECK_NO_THROW(ModelChangeResponse resp = parseModelChange(result.content()));
+  BOOST_CHECK_NO_THROW(WebserviceReply resp = parse_reply(result.content()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
