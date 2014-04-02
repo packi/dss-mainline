@@ -33,10 +33,15 @@
 #include "url.h"
 #include "base.h"
 
+/* TODO move to propertysystem_common_paths */
 #define CURL_TRANSFER_TIMEOUT_SECS 2*60 // 2 minutes
 
 namespace dss {
 
+/**
+ * TODO drop _reuse_handle, and reuse by default
+ * follow RAII principle
+ */
 URL::URL(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
                                m_curl_handle(NULL) {}
 URL::~URL()
@@ -97,6 +102,8 @@ size_t URLResult::appendCallback(void* contents, size_t size, size_t nmemb, void
   return realsize;
 }
 
+__DEFINE_LOG_CHANNEL__(URL, lsInfo)
+
 size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp)
 {
   /* throw it away */
@@ -137,8 +144,10 @@ long URL::internalRequest(const std::string& url, RequestType type,
   long http_code = -1;
 
   if (!m_curl_handle) {
+    log("create new handle", lsDebug);
     m_curl_handle = curl_easy_init();
   } else {
+    log("reuse handle", lsDebug);
     curl_easy_reset(m_curl_handle);
   }
 
@@ -187,9 +196,11 @@ long URL::internalRequest(const std::string& url, RequestType type,
   }
   curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+
+  log("perform: " + std::string((type == POST) ? "POST " : " ") + url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
+    log(std::string("request: ") + error_buffer, lsError);
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
       m_curl_handle = NULL;
@@ -206,6 +217,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
   }
 
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+  log("return code: " + intToString(http_code), lsDebug);
     
   if (!m_reuse_handle) {
     curl_easy_cleanup(m_curl_handle);
@@ -239,9 +251,10 @@ long URL::downloadFile(std::string url, std::string filename) {
 
   curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, data);
 
+  log("download : " + url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    Logger::getInstance()->log(std::string("URL::request: ") + error_buffer);
+    log(std::string("request: ") + error_buffer, lsError);
     fclose(data);
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
@@ -251,6 +264,8 @@ long URL::downloadFile(std::string url, std::string filename) {
   }
 
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+  log("return code: " + intToString(http_code), lsDebug);
+
   fclose(data);
   if (!m_reuse_handle) {
     curl_easy_cleanup(m_curl_handle);
