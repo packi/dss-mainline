@@ -993,10 +993,8 @@ namespace dss {
 
   void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
   {
-    const char* sDsid = "/system/dSID";
-
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url = propSystem.getStringValue(ModelChangedEvent::propPathUrl);
+    std::string url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
 
     url += "?apartmentChangeType=";
     switch (type) {
@@ -1010,7 +1008,7 @@ namespace dss {
         url += "UserDefinedAction";
         break;
     }
-    url += "&dssid=" + propSystem.getStringValue(sDsid);
+    url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
 
     Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
             " executeURL: " + url);

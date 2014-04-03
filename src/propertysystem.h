@@ -41,6 +41,7 @@
 #include "src/logger.h"
 #include "expatparser.h"
 #include "dssfwd.h"
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 

@@ -57,8 +57,7 @@ namespace dss {
       DSS::getInstance()->getSecurity().loginAsSystemUser("dSID call needs system rights");
 
       PropertyNodePtr dsidNode =
-          DSS::getInstance()->getPropertySystem().getProperty(
-                  "/system/dSID");
+          DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid);
       if (dsidNode != NULL) {
         dsid = dsidNode->getAsString();
       }

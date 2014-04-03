@@ -111,7 +111,6 @@ namespace dss {
     void setupDirectories();
     bool initSubsystems();
     bool initSecurity();
-    std::string readDistroVersion();
     void publishDSID();
   public:
     ~DSS();
@@ -126,6 +125,7 @@ namespace dss {
     static void teardown();
 #endif
     static std::string versionString();
+    static std::string readDistroVersion();
     static std::vector<unsigned char> getRandomSalt(unsigned int len);
 
 #ifndef WIN32
