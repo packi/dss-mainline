@@ -37,7 +37,6 @@ namespace dss {
 WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
 WebserviceConnection::WebserviceConnection()
-  : m_handle(NULL)
 {
     m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
     if (!endsWith(m_base_url, "/")) {
@@ -107,7 +106,6 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      m_req(req),
                                                      m_base_url(base),
                                                      m_url(url), m_type(type),
-                                                     m_result(NULL),
                                                      m_cb(cb),
                                                      m_simple(true)
 
@@ -125,7 +123,6 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      m_url(url), m_type(POST),
                                                      m_postdata(postdata),
                                                      m_headers(headers),
-                                                     m_result(NULL),
                                                      m_cb(cb),
                                                      m_simple(false)
 
@@ -145,7 +142,6 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      m_url(url), m_type(type),
                                                      m_headers(headers),
                                                      m_formpost(formpost),
-                                                     m_result(NULL),
                                                      m_cb(cb),
                                                      m_simple(false)
 
