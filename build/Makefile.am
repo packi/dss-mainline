@@ -58,6 +58,7 @@ libdsscore_a_CXXFLAGS = \
 
 libunix_a_CXXFLAGS = \
 			-I$(top_srcdir) \
+			-I$(top_builddir)/src \
 			$(BOOST_CPPFLAGS) \
 			$(GCOV_CFLAGS) \
             $(LIBPROTOBUF_CFLAGS) \
@@ -69,6 +70,7 @@ dss_SOURCES = $(top_srcdir)/main.cpp
 nodist_dss_SOURCES = $(top_srcdir)/src/build_info.h
 
 dss_CXXFLAGS = \
+			-I$(top_builddir)/src \
 			$(LIBXML2_CFLAGS) \
 			$(GCOV_CFLAGS) \
             $(LIBPROTOBUF_CFLAGS) \
@@ -99,6 +101,7 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 dsstests_CXXFLAGS = \
 			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
+			-I$(top_builddir)/src \
 			$(JS_CFLAGS) \
 			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
