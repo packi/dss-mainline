@@ -125,10 +125,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   {
     m_ShutdownFlag = false;
     m_State = ssInvalid;
-    m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
-    setupDirectories();
-
     m_TimeStarted = time(NULL);
+
+    m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
+    setupCommonProperties(*m_pPropertySystem);
+
+    // TODO why this setFooDirectoryPath
+    setupDirectories();
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
     m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
@@ -141,12 +144,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
-    m_pPropertySystem->createProperty("/config/debug/coredumps/enabled")->setBooleanValue(false);
-    m_pPropertySystem->createProperty("/config/debug/coredumps/limit")->setFloatingValue(RLIM_INFINITY);
-    m_pPropertySystem->createProperty("/system/version/version")->setStringValue(DSS_VERSION);
-    m_pPropertySystem->createProperty("/system/version/distroVersion")->setStringValue(readDistroVersion());
-    m_pPropertySystem->createProperty("/system/version/buildHost")->setStringValue(DSS_BUILD_HOST);
-    m_pPropertySystem->createProperty("/system/version/gitRevision")->setStringValue(DSS_RCS_REVISION);
     m_pPropertySystem->createProperty(ModelChangedEvent::propPathDelay)->setIntegerValue(30);
     m_pPropertySystem->createProperty("/config/webservice-api/base-url")
         ->setStringValue("https://dsservices.aizo.com");

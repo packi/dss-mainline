@@ -1,7 +1,5 @@
 /*
-    Copyright (c) 2013 digitalSTROM.org, Zurich, Switzerland
-
-    Authors: Andreas Fenkart, <andreas.fenkart@dev.digitalstrom.org>
+    Copyright (c) 2014 digitalSTROM AG, Zurich, Switzerland
 
     This file is part of digitalSTROM Server.
 
@@ -20,26 +18,22 @@
 
 */
 
-#ifndef DSS_FWD_INCLUDED
-#define DSS_FWD_INCLUDED
+#ifndef __PROPERTYSYSTEM_COMMON_PATHS__
+#define __PROPERTYSYSTEM_COMMON_PATHS__
+
+#include "dssfwd.h"
 
 namespace dss {
-  class Apartment;
-  class DeviceReference;
-  class Event;
-  class EventInterpreter;
-  class EventInterpreterPlugin;
-  class EventQueue;
-  class EventRunner;
-  class EventSubscription;
-  class Group;
-  class InternalEventRelayTarget;
-  class Properties;
-  class PropertyNode;
-  class PropertySystem;
-  class ScheduledEvent;
-  class State;
-  class Zone;
+
+extern const char *pp_sysinfo_dss_version;
+extern const char *pp_sysinfo_distro_version;
+#ifdef HAVE_BUILD_INFO_H
+extern const char *pp_sysinfo_build_host;
+extern const char *pp_sysinfo_git_revision;
+#endif
+
+void setupCommonProperties(PropertySystem &propSystem);
+
 }
 
 #endif
