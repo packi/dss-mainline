@@ -30,6 +30,7 @@
 
 #include "propertysystem.h"
 #include "webservice_connection.h"
+#include "event.h"
 
 namespace dss {
 
@@ -176,6 +177,31 @@ void WebserviceConnection::URLRequestTask::run()
     }
 }
 
+WebserviceTreeListener::WebserviceTreeListener(
+                    PropertyNodePtr _pWebserviceApiEnabledNode) :
+                    m_pWebserviceApiEnabledNode(_pWebserviceApiEnabledNode) {
+  assert(_pWebserviceApiEnabledNode != NULL);
+  m_pWebserviceApiEnabledNode->addListener(this);
 } // namespace dss
+
+void WebserviceTreeListener::propertyChanged(PropertyNodePtr _caller,
+                                        PropertyNodePtr _changedNode) {
+  // initiate connection as soon as webservice got enabled
+  if (_changedNode->getBoolValue() == true) {
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
+      DateTime now;
+      pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+  }
+}
+
+WebserviceTreeListener::~WebserviceTreeListener() {
+  m_pWebserviceApiEnabledNode->removeListener(this);
+}
+
+} // namespace
 
 #endif//HAVE_CURL
