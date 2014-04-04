@@ -37,6 +37,8 @@
 #include "src/model/device.h"
 #include "src/model/modulator.h"
 #include "src/model/modelconst.h"
+#include "src/model/zone.h"
+#include "src/model/group.h"
 #include "src/metering/metering.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -989,5 +991,40 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   int num = ctx->evaluate<int>("Apartment.getDSMeters().length");
   BOOST_CHECK_EQUAL(num, 1);
 } // testApartmentGetDSMeters
+
+BOOST_AUTO_TEST_CASE(testConnectedDevice) {
+  Apartment apt(NULL);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+  apt.allocateZone(42);
+  apt.allocateZone(43);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+
+  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), false);
+  PropertyNodePtr connectedNode = propSys.getProperty("/apartment/zones/zone42/groups/group4/connectedDevices");
+  BOOST_CHECK(connectedNode);
+  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 0);
+
+  ctx->evaluate<void>("getZoneByID(42).addConnectedDevice(4)");
+
+  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), true);
+  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 1);
+
+  ctx->evaluate<void>("getZoneByID(43).removeConnectedDevice(4)");
+
+  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), true);
+  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 1);
+
+  ctx->evaluate<void>("getZoneByID(42).removeConnectedDevice(4)");
+
+  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), false);
+  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 0);
+} // testConnectedDevice
 
 BOOST_AUTO_TEST_SUITE_END()
