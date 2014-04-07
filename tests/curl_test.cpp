@@ -19,7 +19,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(CurlTest)
 
 BOOST_AUTO_TEST_CASE(curlTest) {
-    boost::shared_ptr<URL> curl(new URL());
+    boost::shared_ptr<HttpClient> curl(new HttpClient());
     std::string url = "http://www.digitalstrom.com";
     std::string result;
 
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(curlTest) {
 }
 
 BOOST_AUTO_TEST_CASE(curlTestReuseHandle) {
-    URL curl(true);
+    HttpClient curl(true);
     std::string url = "http://www.digitalstrom.com";
     std::string result;
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(curlTestReuseHandle) {
 BOOST_AUTO_TEST_CASE(test_emptyHeaderMaps) {
   std::string url = "http://www.digitalstrom.com";
   boost::shared_ptr<HashMapStringString> headers;
-  URL curl(true);
+  HttpClient curl(true);
 
   /* does it crash, is the test */
   BOOST_CHECK_EQUAL(curl.request(url, headers, std::string(), NULL), 200);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_emptyHeaderAndFormPostMaps) {
   std::string url = "http://www.digitalstrom.com";
   boost::shared_ptr<HashMapStringString> headers;
   boost::shared_ptr<HashMapStringString> formpost;
-  URL curl(true);
+  HttpClient curl(true);
 
   /* does it crash, is the test */
   BOOST_CHECK_EQUAL(curl.request(url, POST, headers, formpost, NULL), 200);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_URLRequestStruct) {
   HttpRequest req;
   req.url = "http://www.digitalstrom.com";
   req.type = POST;
-  URL curl(true);
+  HttpClient curl(true);
   std::string result;
 
   /* does it crash, is the test */
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_URLRequestStruct) {
 }
 
 void fetcher_do() {
-  URL curl(false);
+  HttpClient curl(false);
   std::string url = "http://www.google.com";
 
   /*

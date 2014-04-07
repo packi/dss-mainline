@@ -42,7 +42,7 @@ namespace dss {
  */
 class URLResult {
 public:
-    friend class URL;
+    friend class HttpClient;
     URLResult() : m_memory(NULL), m_size(0) {}
     virtual ~URLResult();
 
@@ -60,9 +60,9 @@ private:
  * TODO drop _reuse_handle, and reuse by default
  * follow RAII principle
  */
-URL::URL(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
+HttpClient::HttpClient(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
                                m_curl_handle(NULL) {}
-URL::~URL()
+HttpClient::~HttpClient()
 {
   if (m_curl_handle) {
       curl_easy_cleanup(m_curl_handle);
@@ -120,28 +120,28 @@ size_t URLResult::appendCallback(void* contents, size_t size, size_t nmemb, void
   return realsize;
 }
 
-__DEFINE_LOG_CHANNEL__(URL, lsInfo)
+__DEFINE_LOG_CHANNEL__(HttpClient, lsInfo)
 
-size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp)
+size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp)
 {
   /* throw it away */
   return size * nmemb;
 }
 
-long URL::request(const std::string& url, RequestType type, std::string *result)
+long HttpClient::request(const std::string& url, RequestType type, std::string *result)
 {
   return internalRequest(url, type, std::string(), headers_t(), formpost_t(),
                          result);
 }
 
-long URL::request(const std::string& url,
+long HttpClient::request(const std::string& url,
                   boost::shared_ptr<HashMapStringString> headers,
                   std::string postdata, std::string *result)
 {
   return internalRequest(url, POST, postdata, headers, formpost_t(), result);
 }
 
-long URL::request(const std::string& url, RequestType type,
+long HttpClient::request(const std::string& url, RequestType type,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
                   std::string *result)
@@ -149,7 +149,7 @@ long URL::request(const std::string& url, RequestType type,
   return internalRequest(url, type, std::string(), headers, formpost, result);
 }
 
-long URL::request(const HttpRequest &req, std::string *result) {
+long HttpClient::request(const HttpRequest &req, std::string *result) {
   return internalRequest(req.url, req.type, req.postdata, req.headers,
                          req.formpost, result);
 }
@@ -251,7 +251,7 @@ static int my_trace(CURL *handle, curl_infotype type,
 struct data config;
 #endif
 
-long URL::internalRequest(const std::string& url, RequestType type,
+long HttpClient::internalRequest(const std::string& url, RequestType type,
                   std::string postdata,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
@@ -321,7 +321,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
     curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, &outputCollector);
   } else {
     /* suppress output to stdout */
-    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient::writeCallbackMute);
   }
   curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
@@ -359,7 +359,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
   return http_code;
 }
 
-long URL::downloadFile(std::string url, std::string filename) {
+long HttpClient::downloadFile(std::string url, std::string filename) {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   long http_code = -1;

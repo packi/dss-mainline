@@ -62,19 +62,19 @@ private:
   static WebserviceConnection *m_instance;
 
   std::string m_base_url;
-  boost::shared_ptr<URL> m_url;
+  boost::shared_ptr<HttpClient> m_url;
 };
 
 class URLRequestTask : public Task {
   __DECL_LOG_CHANNEL__
 public:
-  URLRequestTask(boost::shared_ptr<URL> client,
+  URLRequestTask(boost::shared_ptr<HttpClient> client,
                  boost::shared_ptr<HttpRequest> req,
                  boost::shared_ptr<URLRequestCallback> cb);
   virtual ~URLRequestTask() {};
   virtual void run();
 private:
-  boost::shared_ptr<URL> m_client;
+  boost::shared_ptr<HttpClient> m_client;
   boost::shared_ptr<HttpRequest> m_req;
   boost::shared_ptr<URLRequestCallback> m_cb;
 };

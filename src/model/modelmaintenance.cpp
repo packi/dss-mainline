@@ -1756,7 +1756,7 @@ namespace dss {
     } else {
       return;
     }
-    URL url;
+    HttpClient url;
     std::string result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     std::string productName;

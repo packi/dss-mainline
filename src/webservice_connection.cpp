@@ -42,7 +42,7 @@ WebserviceConnection::WebserviceConnection()
     if (!endsWith(m_base_url, "/")) {
       m_base_url = m_base_url + "/";
     }
-    m_url = boost::shared_ptr<URL>(new URL(true));
+    m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
 }
 
 WebserviceConnection::~WebserviceConnection()
@@ -110,7 +110,7 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
 
 __DEFINE_LOG_CHANNEL__(URLRequestTask, lsInfo)
 
-URLRequestTask::URLRequestTask(boost::shared_ptr<URL> client,
+URLRequestTask::URLRequestTask(boost::shared_ptr<HttpClient> client,
                                boost::shared_ptr<HttpRequest> req,
                                boost::shared_ptr<URLRequestCallback> cb)
   : m_client(client), m_req(req), m_cb(cb)

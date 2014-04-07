@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
 }
 
 BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
-  boost::shared_ptr<URL> curl(new URL());
+  boost::shared_ptr<HttpClient> curl(new HttpClient());
   std::string result;
   std::string url;
 

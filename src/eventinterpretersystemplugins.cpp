@@ -557,7 +557,7 @@ namespace dss {
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: " + oUrl);
 
-    boost::shared_ptr<URL> url(new URL());
+    boost::shared_ptr<HttpClient> url(new HttpClient());
     long code = url->request(oUrl, GET, NULL);
     std::ostringstream out;
     out << code;

@@ -55,12 +55,12 @@ namespace dss {
   };
 
   // TODO rename to HttpClient
-  class URL {
+  class HttpClient {
     __DECL_LOG_CHANNEL__
     public:
 
-      URL(bool _reuse_handle = false);
-      ~URL();
+      HttpClient(bool _reuse_handle = false);
+      ~HttpClient();
 
       long request(const std::string& url, RequestType type,
                    std::string *result);
