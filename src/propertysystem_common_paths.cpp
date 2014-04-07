@@ -62,7 +62,15 @@ void setupCommonProperties(PropertySystem &propSystem) {
 
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
   propSystem.createProperty(pp_websvc_url_authority)
-    ->setStringValue("https://dsservices.aizo.com");
+    ->setStringValue("https://dsservices.aizo.com/");
+#if 0
+  /*
+   * TODO: for devel build override pp_websvc_url_authority, with
+   * test services url, use compile switch to select between the two
+   */
+  propSystem.createProperty(pp_websvc_url_authority)
+      ->setStringValue("https://testdsservices.aizo.com/");
+#endif
   propSystem.createProperty(pp_websvc_apartment_changed_url_path)
     ->setStringValue("internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
   propSystem.createProperty(pp_websvc_apartment_changed_notify_delay)

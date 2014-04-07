@@ -1,21 +1,28 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 
+#include "config.h"
+#ifdef HAVE_CURL // without CURL no HTTP client, no WebService
+
 #include <boost/test/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <curl/curl.h>
 #include <iostream>
 
-#define HAVE_CURL 1
 #include "src/url.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
-
+#include "unix/systeminfo.h"
 #include "webservice_api.h"
 
 using namespace dss;
 
-BOOST_AUTO_TEST_SUITE(CloudTest)
+static const char *websvc_url_authority_test = "https://testdsservices.aizo.com/";
+
+BOOST_AUTO_TEST_SUITE(WebserviceTest)
 
 BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
 
@@ -50,17 +57,25 @@ BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
 }
 
 BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
-  URLResult result;
-
   boost::shared_ptr<URL> curl(new URL());
+  URLResult result;
+  std::string url;
+
   PropertySystem propSystem;
-  std::string aprtmntChange("https://testdsservices.aizo.com/internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
-  aprtmntChange += "?apartmentChangeType=Apartment";
-  aprtmntChange += "&dssid=3504175feff28d2044084179";
+  setupCommonProperties(propSystem);
 
-  BOOST_CHECK_EQUAL(curl->request(aprtmntChange, POST, &result), 200);
+  //std::string url("https://testdsservices.aizo.com/internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
+  url = websvc_url_authority_test;
+  url += propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
+  url += "?apartmentChangeType=Apartment";
+  url += "&dssid=3504175feff28d2044084179";
 
-  BOOST_CHECK_NO_THROW(WebserviceReply resp = parse_reply(result.content()));
+  BOOST_CHECK_EQUAL(curl->request(url, POST, &result), 200);
+  WebserviceReply resp;
+  BOOST_CHECK_NO_THROW(resp = parse_reply(result.content()));
+  BOOST_CHECK_EQUAL(resp.code, 9); /* unknown dsid */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // HAVE_CURL
