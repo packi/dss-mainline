@@ -257,7 +257,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
 
   HashMapStringString::iterator it;
 
-  if (!headers->empty()) {
+  if (headers.get() && !headers->empty()) {
     for (it = headers->begin(); it != headers->end(); it++) {
       cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
     }
@@ -273,16 +273,17 @@ long URL::internalRequest(const std::string& url, RequestType type,
     curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
     if (!postdata.empty()) {
       curl_easy_setopt(m_curl_handle, CURLOPT_COPYPOSTFIELDS, postdata.c_str());
-    } else {
+    } else if (formpost.get() && !formpost->empty()) {
       for (it = formpost->begin(); it != formpost->end(); it++) {
         curl_formadd(&formpost_start, &formpost_end,
                      CURLFORM_COPYNAME, it->first.c_str(),
                      CURLFORM_COPYCONTENTS, it->second.c_str(),
                      CURLFORM_END);
       }
-
-      /* must be set even if it's null */
       curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, formpost_start);
+    } else {
+      // empty post is valid request, but not without this call
+      curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, NULL);
     }
     break;
   }

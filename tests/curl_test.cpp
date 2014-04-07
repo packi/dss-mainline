@@ -46,6 +46,27 @@ BOOST_AUTO_TEST_CASE(curlTestReuseHandle) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_emptyHeaderMaps) {
+  std::string url = "http://www.digitalstrom.com";
+  boost::shared_ptr<HashMapStringString> headers;
+  URLResult result;
+  URL curl(true);
+
+  /* does it crash, is the test */
+  BOOST_CHECK_EQUAL(curl.request(url, headers, std::string(), NULL), 200);
+}
+
+BOOST_AUTO_TEST_CASE(test_emptyHeaderAndFormPostMaps) {
+  std::string url = "http://www.digitalstrom.com";
+  boost::shared_ptr<HashMapStringString> headers;
+  boost::shared_ptr<HashMapStringString> formpost;
+  URL curl(true);
+  URLResult result;
+
+  /* does it crash, is the test */
+  BOOST_CHECK_EQUAL(curl.request(url, POST, headers, formpost, NULL), 200);
+}
+
 void fetcher_do() {
   URL curl(false);
   std::string url = "http://www.google.com";
