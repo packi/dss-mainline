@@ -63,38 +63,38 @@ private:
 
   std::string m_base_url;
   boost::shared_ptr<URL> m_url;
+};
 
-  class URLRequestTask : public Task {
-    __DECL_LOG_CHANNEL__
-  public:
-    URLRequestTask(boost::shared_ptr<URL> req,
-                   const std::string& base, const std::string& url,
-                   RequestType type,
-                   boost::shared_ptr<URLRequestCallback> cb);
-    URLRequestTask(boost::shared_ptr<URL> req,
-                   const std::string& base, const std::string& url,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   const std::string& postdata,
-                   boost::shared_ptr<URLRequestCallback> cb);
-    URLRequestTask(boost::shared_ptr<URL> req, 
-                   const std::string& base, const std::string& url,
-                   RequestType type,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   boost::shared_ptr<HashMapStringString> formpost,
-                   boost::shared_ptr<URLRequestCallback> cb);
-    virtual ~URLRequestTask() {};
-    virtual void run();
-  private:
-    boost::shared_ptr<URL> m_req;
-    std::string m_base_url;
-    std::string m_url;
-    RequestType m_type;
-    std::string m_postdata;
-    boost::shared_ptr<HashMapStringString> m_headers;
-    boost::shared_ptr<HashMapStringString> m_formpost;
-    boost::shared_ptr<URLRequestCallback> m_cb;
-    bool m_simple;
-  };
+class URLRequestTask : public Task {
+  __DECL_LOG_CHANNEL__
+public:
+  URLRequestTask(boost::shared_ptr<URL> req,
+                 const std::string& base, const std::string& url,
+                 RequestType type,
+                 boost::shared_ptr<URLRequestCallback> cb);
+  URLRequestTask(boost::shared_ptr<URL> req,
+                 const std::string& base, const std::string& url,
+                 boost::shared_ptr<HashMapStringString> headers,
+                 const std::string& postdata,
+                 boost::shared_ptr<URLRequestCallback> cb);
+  URLRequestTask(boost::shared_ptr<URL> req,
+                 const std::string& base, const std::string& url,
+                 RequestType type,
+                 boost::shared_ptr<HashMapStringString> headers,
+                 boost::shared_ptr<HashMapStringString> formpost,
+                 boost::shared_ptr<URLRequestCallback> cb);
+  virtual ~URLRequestTask() {};
+  virtual void run();
+private:
+  boost::shared_ptr<URL> m_req;
+  std::string m_base_url;
+  std::string m_url;
+  RequestType m_type;
+  std::string m_postdata;
+  boost::shared_ptr<HashMapStringString> m_headers;
+  boost::shared_ptr<HashMapStringString> m_formpost;
+  boost::shared_ptr<URLRequestCallback> m_cb;
+  bool m_simple;
 };
 
 class WebserviceTreeListener : public PropertyListener {
@@ -111,4 +111,3 @@ private:
 } // namespace dss
 
 #endif//__DSS_WEBSERVICE_CONNECTION_H__
-
