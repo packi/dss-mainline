@@ -86,7 +86,7 @@ public:
   virtual ~URLRequestTask() {};
   virtual void run();
 private:
-  boost::shared_ptr<URL> m_req;
+  boost::shared_ptr<URL> m_client;
   std::string m_base_url;
   std::string m_url;
   RequestType m_type;

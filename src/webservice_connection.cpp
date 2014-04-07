@@ -109,7 +109,7 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                const std::string& url,
                                RequestType type,
                                boost::shared_ptr<URLRequestCallback> cb) :
-    m_req(req),
+    m_client(req),
     m_base_url(base),
     m_url(url),
     m_type(type),
@@ -123,7 +123,7 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                boost::shared_ptr<HashMapStringString> headers,
                                const std::string& postdata,
                                boost::shared_ptr<URLRequestCallback> cb) :
-    m_req(req),
+    m_client(req),
     m_base_url(base),
     m_url(url),
     m_type(POST),
@@ -141,7 +141,7 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                boost::shared_ptr<HashMapStringString> headers,
                                boost::shared_ptr<HashMapStringString> formpost,
                                boost::shared_ptr<URLRequestCallback> cb) :
-    m_req(req),
+    m_client(req),
     m_base_url(base),
     m_url(url),
     m_type(type),
@@ -156,7 +156,7 @@ void URLRequestTask::run()
 {
     long code;
 
-    if (m_req == NULL) {
+    if (m_client == NULL) {
       return;
     }
 
@@ -169,10 +169,10 @@ void URLRequestTask::run()
     log("URLRequestTask::run(): sending request to " + m_base_url + m_url,
         lsDebug);
     if (m_postdata.empty()) {
-      code = m_req->request(m_base_url + m_url, m_type, m_headers, m_formpost,
+      code = m_client->request(m_base_url + m_url, m_type, m_headers, m_formpost,
                             result.get());
     } else {
-      code = m_req->request(m_base_url + m_url, m_headers, m_postdata, result.get());
+      code = m_client->request(m_base_url + m_url, m_headers, m_postdata, result.get());
     }
 
     log("URLRequestTask::run(): request to " +
