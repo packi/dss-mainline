@@ -129,6 +129,11 @@ long URL::request(const std::string& url, RequestType type,
   return internalRequest(url, type, std::string(), headers, formpost, result);
 }
 
+long URL::request(const HttpRequest &req, URLResult *result) {
+  return internalRequest(req.url, req.type, req.postdata, req.headers,
+                         req.formpost, result);
+}
+
 #if CURL_DEEP_DEBUG
 struct data {
   char trace_ascii; /* 1 or 0 */

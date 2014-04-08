@@ -67,6 +67,17 @@ BOOST_AUTO_TEST_CASE(test_emptyHeaderAndFormPostMaps) {
   BOOST_CHECK_EQUAL(curl.request(url, POST, headers, formpost, NULL), 200);
 }
 
+BOOST_AUTO_TEST_CASE(test_URLRequestStruct) {
+  HttpRequest req;
+  req.url = "http://www.digitalstrom.com";
+  req.type = POST;
+  URL curl(true);
+  URLResult result;
+
+  /* does it crash, is the test */
+  BOOST_CHECK_EQUAL(curl.request(req, &result), 200);
+}
+
 void fetcher_do() {
   URL curl(false);
   std::string url = "http://www.google.com";

@@ -38,6 +38,22 @@ namespace dss {
   typedef boost::shared_ptr<HashMapStringString> headers_t;
   typedef boost::shared_ptr<HashMapStringString> formpost_t;
 
+  /**
+   * HttpRequest - Combine all data describing an HTTP request
+   * @url: http://www.something.org/path/to/something?query1=foo&query2=bar
+   * @type: POST|GET
+   * @header: will be unrolled as 'tag: value' form
+   * @formpost: will be unrolled as 'tag: value' form
+   * @postdata: preformatted postdata, has precedence over formpost
+   */
+  struct HttpRequest {
+    std::string url;
+    RequestType type;
+    headers_t headers;
+    formpost_t formpost;
+    std::string postdata;
+  };
+
   class URLResult {
   public:
       friend class URL;
@@ -73,6 +89,8 @@ namespace dss {
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
                    URLResult* result);
+
+      long request(const HttpRequest &req, URLResult *result);
 
       long downloadFile(std::string url, std::string filename);
 
