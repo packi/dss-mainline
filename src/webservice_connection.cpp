@@ -120,7 +120,7 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> client,
 
 void URLRequestTask::run()
 {
-    boost::shared_ptr<URLResult> result(new URLResult);
+    std::string result;
     long code;
 
     if (m_client == NULL) {
@@ -133,7 +133,7 @@ void URLRequestTask::run()
 
     log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
 
-    code = m_client->request(*m_req, result.get());
+    code = m_client->request(*m_req, &result);
     log("URLRequestTask::run(): request to " + m_req->url + " returned with HTTP code " +
         intToString(code), lsDebug);
 

@@ -1757,7 +1757,7 @@ namespace dss {
       return;
     }
     URL url;
-    URLResult result;
+    std::string result;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     std::string productName;
     boost::filesystem::path iconFile;
@@ -1780,12 +1780,11 @@ namespace dss {
     Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
     long res = url.request(eanURL, GET, &result);
     if (res == 200) {
-      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") +
-                                 std::string(result.content()));
+      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + result);
       struct json_tokener* tok;
 
       tok = json_tokener_new();
-      json_object* json_request = json_tokener_parse_ex(tok, result.content(), -1);
+      json_object* json_request = json_tokener_parse_ex(tok, result.c_str(), -1);
 
       boost::filesystem::path remoteIconPath;
       if (tok->err == json_tokener_success) {

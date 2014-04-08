@@ -54,22 +54,6 @@ namespace dss {
     std::string postdata;
   };
 
-  class URLResult {
-  public:
-      friend class URL;
-      URLResult() : m_memory(NULL), m_size(0) {}
-      virtual ~URLResult();
-
-      void reset();
-      void *grow_tail(size_t increase);
-      const char* content();
-
-  private:
-      static size_t appendCallback(void* contents, size_t size, size_t nmemb, void* userp);
-      char* m_memory;
-      size_t m_size;
-  };
-
   // TODO rename to HttpClient
   class URL {
     __DECL_LOG_CHANNEL__
@@ -78,19 +62,19 @@ namespace dss {
       URL(bool _reuse_handle = false);
       ~URL();
 
-      long request(const std::string& url, RequestType type = GET,
-                   URLResult* result = NULL);
+      long request(const std::string& url, RequestType type,
+                   std::string *result);
 
       long request(const std::string& url,
                    boost::shared_ptr<HashMapStringString> headers,
-                   std::string postdata, URLResult* result);
+                   std::string postdata, std::string *result);
 
       long request(const std::string& url, RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
-                   URLResult* result);
+                   std::string *result);
 
-      long request(const HttpRequest &req, URLResult *result);
+      long request(const HttpRequest &req, std::string *result);
 
       long downloadFile(std::string url, std::string filename);
 
@@ -101,7 +85,7 @@ namespace dss {
                    std::string postdata,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
-                   URLResult* result);
+                   std::string *result);
 
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
       bool m_reuse_handle;

@@ -36,6 +36,26 @@
 
 namespace dss {
 
+/*
+ * TODO URLResult, could probably be replaced by a std::string
+ * http://codereview.stackexchange.com/questions/14389/tiny-curl-c-wrapper
+ */
+class URLResult {
+public:
+    friend class URL;
+    URLResult() : m_memory(NULL), m_size(0) {}
+    virtual ~URLResult();
+
+    void reset();
+    void *grow_tail(size_t increase);
+    const char* content();
+
+private:
+    static size_t appendCallback(void* contents, size_t size, size_t nmemb, void* userp);
+    char* m_memory;
+    size_t m_size;
+};
+
 /**
  * TODO drop _reuse_handle, and reuse by default
  * follow RAII principle
@@ -108,7 +128,7 @@ size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* u
   return size * nmemb;
 }
 
-long URL::request(const std::string& url, RequestType type, class URLResult* result)
+long URL::request(const std::string& url, RequestType type, std::string *result)
 {
   return internalRequest(url, type, std::string(), headers_t(), formpost_t(),
                          result);
@@ -116,7 +136,7 @@ long URL::request(const std::string& url, RequestType type, class URLResult* res
 
 long URL::request(const std::string& url,
                   boost::shared_ptr<HashMapStringString> headers,
-                  std::string postdata, class URLResult* result)
+                  std::string postdata, std::string *result)
 {
   return internalRequest(url, POST, postdata, headers, formpost_t(), result);
 }
@@ -124,12 +144,12 @@ long URL::request(const std::string& url,
 long URL::request(const std::string& url, RequestType type,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
-                  URLResult* result)
+                  std::string *result)
 {
   return internalRequest(url, type, std::string(), headers, formpost, result);
 }
 
-long URL::request(const HttpRequest &req, URLResult *result) {
+long URL::request(const HttpRequest &req, std::string *result) {
   return internalRequest(req.url, req.type, req.postdata, req.headers,
                          req.formpost, result);
 }
@@ -235,9 +255,10 @@ long URL::internalRequest(const std::string& url, RequestType type,
                   std::string postdata,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
-                  URLResult* result)
+                  std::string *result)
 {
   CURLcode res;
+  URLResult outputCollector;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   struct curl_slist *cheaders = NULL;
   struct curl_httppost *formpost_start = NULL;
@@ -296,9 +317,8 @@ long URL::internalRequest(const std::string& url, RequestType type,
 
   if (result != NULL) {
     /* send all data to this function  */
-    result->reset();
     curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URLResult::appendCallback);
-    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, (void *)result);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, &outputCollector);
   } else {
     /* suppress output to stdout */
     curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
@@ -315,6 +335,10 @@ long URL::internalRequest(const std::string& url, RequestType type,
       m_curl_handle = NULL;
     }
     return http_code;
+  }
+
+  if (result != NULL) {
+    *result = outputCollector.content();
   }
 
   if (cheaders) {

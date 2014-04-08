@@ -37,7 +37,7 @@ namespace dss {
 class URLRequestCallback
 {
 public:
-  virtual void result(long code, boost::shared_ptr<URLResult> res) = 0;
+  virtual void result(long code, const std::string &res) = 0;
 };
 
 class WebserviceConnection : public TaskProcessor {

@@ -51,7 +51,8 @@ WebserviceReply parse_reply(const char* buf) {
 
 __DEFINE_LOG_CHANNEL__(StatusReplyChecker, lsInfo);
 
-void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) {
+void StatusReplyChecker::result(long code, const std::string &result) {
+
   if (code != 200) {
     log("HTTP POST failed " + intToString(code), lsError);
     if (m_callback) {
@@ -61,7 +62,7 @@ void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) 
   }
 
   try {
-    WebserviceReply resp = parse_reply(result->content());
+    WebserviceReply resp = parse_reply(result.c_str());
     if (resp.code != 0) {
       log("Webservice complained: <" + intToString(resp.code) + "> " + resp.desc,
           lsWarning);
@@ -71,7 +72,7 @@ void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) 
       m_callback->done(REST_OK, resp);
     }
   } catch (ParseError &ex) {
-    log(std::string("Invalid return message ") + result->content(), lsError);
+    log(std::string("Invalid return message ") + result, lsError);
     if (m_callback) {
       m_callback->done(JSON_ERROR, WebserviceReply());
     }

@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
 
 BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
   boost::shared_ptr<URL> curl(new URL());
-  URLResult result;
+  std::string result;
   std::string url;
 
   PropertySystem propSystem;
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
 
   BOOST_CHECK_EQUAL(curl->request(url, POST, &result), 200);
   WebserviceReply resp;
-  BOOST_CHECK_NO_THROW(resp = parse_reply(result.content()));
+  BOOST_CHECK_NO_THROW(resp = parse_reply(result.c_str()));
   BOOST_CHECK_EQUAL(resp.code, 9); /* unknown dsid */
 }
 

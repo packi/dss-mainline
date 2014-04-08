@@ -558,7 +558,7 @@ namespace dss {
             "executeURL: " + oUrl);
 
     boost::shared_ptr<URL> url(new URL());
-    long code = url->request(oUrl);
+    long code = url->request(oUrl, GET, NULL);
     std::ostringstream out;
     out << code;
 
