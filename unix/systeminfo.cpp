@@ -50,6 +50,7 @@
 #include "src/base.h"
 
 namespace dss {
+  __DEFINE_LOG_CHANNEL__(SystemInfo, lsInfo)
 
   void SystemInfo::collect() {
     enumerateInterfaces();
@@ -68,7 +69,7 @@ namespace dss {
       break;
     default:
       ipBuf[0] = '\0';
-      Logger::getInstance()->log("Unknown address type");
+      Logger::getInstance()->log("Unknown address type", lsWarning);
     }
     return ipBuf;
   } // ipToString
@@ -83,7 +84,7 @@ namespace dss {
 
     sock = socket(PF_INET, SOCK_STREAM, 0);
     if(sock < 0) {
-      Logger::getInstance()->log("socket()", lsError);
+      log("socket()", lsError);
       return;
     }
 
@@ -96,8 +97,8 @@ namespace dss {
 
       std::string ip;
       if(ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
-        Logger::getInstance()->log(std::string("Could not retrieve IP address of interface: ") +
-                                   std::string(if_name[i].if_name), lsInfo);
+        log(std::string("Could not retrieve IP address of interface: ") +
+            std::string(if_name[i].if_name), lsInfo);
       } else {
         struct sockaddr* sa = &(ifr.ifr_addr);
         ip = ipToString(sa);
@@ -105,8 +106,8 @@ namespace dss {
 
       char mac[32];
       if(ioctl(sock, SIOCGIFHWADDR, &ifr) < 0) {
-        Logger::getInstance()->log(std::string("Could not retrieve MAC address of interface: ") +
-                                   std::string(if_name[i].if_name), lsInfo);
+        log(std::string("Could not retrieve MAC address of interface: ") +
+            std::string(if_name[i].if_name), lsInfo);
       } else {
         for(int j=0, k=0; j<6; j++) {
           k+=snprintf(mac+k, sizeof(mac)-k-1, j ? ":%02X" : "%02X",
@@ -117,8 +118,8 @@ namespace dss {
 
       std::string netmask;
       if(ioctl(sock, SIOCGIFNETMASK, &ifr) < 0) {
-        Logger::getInstance()->log(std::string("Could not retrieve netmask address of interface: ") +
-                                   std::string(if_name[i].if_name), lsInfo);
+        log(std::string("Could not retrieve netmask address of interface: ") +
+            std::string(if_name[i].if_name), lsInfo);
       } else {
         struct sockaddr* sa = &(ifr.ifr_netmask);
         netmask = ipToString(sa);
