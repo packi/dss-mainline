@@ -989,7 +989,7 @@ namespace dss {
     }
 
     /* no retval, no error handling, just log entry */
-    WebserviceApartment::doModelChangedNotification(type);
+    WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
 #endif
 

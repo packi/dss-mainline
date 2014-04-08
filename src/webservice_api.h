@@ -17,9 +17,15 @@ namespace dss {
 // helper
 
 struct WebserviceReply {
-    int code;
-    std::string desc;
+  int code;
+  std::string desc;
 };
+
+typedef enum {
+  REST_OK = 0,
+  NETWORK_ERROR,
+  JSON_ERROR,
+} RestTransferStatus_t;
 
 class ParseError : public std::runtime_error {
 public:
@@ -33,14 +39,31 @@ public:
  */
 WebserviceReply parse_reply(const char* json);
 
+class WebserviceCallDone {
+public:
+  /**
+   * @RestTransferStatus -- connection established, valid json received
+   * @WebserviceReply -- webserver reply
+   */
+  virtual void done(RestTransferStatus_t status, WebserviceReply reply) = 0;
+};
+
+typedef boost::shared_ptr<WebserviceCallDone> WebserviceCallDone_t;
+
 class StatusReplyChecker : public URLRequestCallback {
   __DECL_LOG_CHANNEL__
 public:
-  StatusReplyChecker() {};
+  /**
+   * StatusReplyChecker - triggered by http client, will parse the returned
+   * JSON as WebserviceReply structure, and trigger provided callbac
+   * @callback: trigger
+   */
+  StatusReplyChecker(WebserviceCallDone_t callback) : m_callback(callback) {};
   virtual ~StatusReplyChecker() {};
   virtual void result(long code, boost::shared_ptr<URLResult> result);
+private:
+  WebserviceCallDone_t m_callback;
 };
-
 
 // --------------------------------------------------------------------
 // interface calls
@@ -54,7 +77,12 @@ public:
     UDAChange = 3,
   } ChangeType;
 
-  static void doModelChangedNotification(ChangeType type);
+  /**
+   * doModelChanged - schedules asynchronous http request
+   * @type: what part of the model changed
+   * @callback: provides network and server status
+   */
+  static void doModelChanged(ChangeType type, WebserviceCallDone_t callback);
 };
 
 }

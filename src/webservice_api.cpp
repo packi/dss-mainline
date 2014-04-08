@@ -55,17 +55,27 @@ __DEFINE_LOG_CHANNEL__(StatusReplyChecker, lsInfo);
 void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) {
   if (code != 200) {
     log("HTTP POST failed " + intToString(code), lsError);
+    if (m_callback) {
+      m_callback->done(NETWORK_ERROR, WebserviceReply());
+    }
     return;
   }
 
   try {
     WebserviceReply resp = parse_reply(result->content());
     if (resp.code != 0) {
-      log(resp.desc, lsError);
-      return;
+      log("Webservice complained: <" + intToString(resp.code) + "> " + resp.desc,
+          lsWarning);
+    }
+
+    if (m_callback) {
+      m_callback->done(REST_OK, resp);
     }
   } catch (ParseError &ex) {
     log(std::string("Invalid return message ") + result->content(), lsError);
+    if (m_callback) {
+      m_callback->done(JSON_ERROR, WebserviceReply());
+    }
     return;
   }
 }
@@ -76,8 +86,8 @@ void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) 
 
 __DEFINE_LOG_CHANNEL__(WebserviceApartment, lsInfo)
 
-void WebserviceApartment::doModelChangedNotification(ChangeType type)
-{
+void WebserviceApartment::doModelChanged(ChangeType type,
+                                         WebserviceCallDone_t callback) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   std::string url;
 
@@ -97,7 +107,7 @@ void WebserviceApartment::doModelChangedNotification(ChangeType type)
   url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
 
   log("execute: " + url, lsDebug);
-  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker());
+  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
   WebserviceConnection::getInstance()->request(url, POST, mcb);
 }
 
