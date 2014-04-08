@@ -89,11 +89,20 @@ namespace dss {
     }
 
     //Retrieve the available list of network interface cards and their names and indices
-    struct if_nameindex* if_name = if_nameindex();
+    struct if_nameindex *if_name;
 
-    for (int i = 0; if_name && if_name[i].if_name != NULL; i++) {
+    if_name = if_nameindex();
+    if (if_name == NULL) {
+      log(std::string("if_nameindex: ") + strerror(errno), lsWarning);
+      close(sock);
+      return;
+    }
+
+    for (int i = 0; if_name[i].if_index || if_name[i].if_name != NULL; i++) {
       struct ifreq ifr;
-      memcpy(&ifr.ifr_name, if_name[i].if_name, IFNAMSIZ);
+      log(std::string("intf") + intToString(i) + " : " +
+          intToString(if_name[i].if_index) + " " + if_name[i].if_name, lsDebug);
+      strncpy(ifr.ifr_name, if_name[i].if_name, IFNAMSIZ);
 
       std::string ip;
       if(ioctl(sock, SIOCGIFADDR, &ifr) < 0) {
