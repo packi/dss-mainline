@@ -210,16 +210,13 @@ namespace dss {
   const char *ModelChangedEvent::UserDefinedAction = "userDefinedActionChanged";
   const char *ModelChangedEvent::TimedEvent = "timedEventChanged";
 
-  const char *ModelChangedEvent::propPathDelay= "/config/webservice-api/model-pusher/delay";
-  const char *ModelChangedEvent::propPathUrl = "/config/webservice-api/model-pusher/url";
-
   boost::shared_ptr<Event> ModelChangedEvent::createEvent(const char *desc)
   {
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
     boost::shared_ptr<Event> pEvent(new Event(desc));
     pEvent->setProperty(EventProperty::Time, "+" +
-                        intToString(propSystem.getIntValue(propPathDelay)));
+                        intToString(propSystem.getIntValue(pp_websvc_apartment_changed_notify_delay)));
     pEvent->setProperty(EventProperty::Unique, "Yes");
     return pEvent;
   }

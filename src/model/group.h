@@ -50,6 +50,7 @@ namespace dss {
     std::map<uint8_t, std::string> m_SceneNames;
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
+    int m_connectedDevices;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
@@ -111,6 +112,10 @@ namespace dss {
 
     /** Published a sensor value to all devices of this zone */
     void sensorPush(dss_dsid_t _sourceID, int _sensorType, double _sensorValue);
+
+    void addConnectedDevice();
+    void removeConnectedDevice();
+    bool hasConnectedDevices() { return (m_connectedDevices > 0); }
   }; // Group
 
 } // namespace dss

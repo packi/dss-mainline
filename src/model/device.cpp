@@ -401,11 +401,11 @@ namespace dss {
   } // setDeviceActiveGroup
 
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
-    if((_groupId < 1) || (_groupId > 7)) {
+    if ((_groupId < GroupIDYellow) || (_groupId > GroupIDStandardMax)) {
       throw std::runtime_error("Invalid joker group value");
     }
     // for standard groups force that only one group is active
-    for (int g = 1; g <= 7; g++) {
+    for (int g = GroupIDYellow; g <= GroupIDStandardMax; g++) {
       if (m_GroupBitmask.test(g-1)) {
         removeFromGroup(g);
       }

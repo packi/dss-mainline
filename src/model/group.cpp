@@ -41,7 +41,8 @@ namespace dss {
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
-    m_SyncPending(false)
+    m_SyncPending(false),
+    m_connectedDevices(0)
   {
   } // ctor
 
@@ -190,6 +191,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
         m_pPropertyNode->createProperty("lastCalledScene")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
+        m_pPropertyNode->createProperty("connectedDevices")
+          ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
         m_pPropertyNode->createProperty("devices");
         m_pPropertyNode->createProperty("scenes");
         m_pPropertyNode->createProperty("SensorHistory/");
@@ -209,5 +212,15 @@ namespace dss {
   } // sensorPush
 
   boost::mutex Group::m_SceneNameMutex;
+
+  void Group::addConnectedDevice() {
+    ++m_connectedDevices;
+  }
+
+  void Group::removeConnectedDevice() {
+    if (m_connectedDevices > 0) {
+      --m_connectedDevices;
+    }
+  }
 
 } // namespace dss

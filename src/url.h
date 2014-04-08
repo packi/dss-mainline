@@ -23,11 +23,13 @@
 #ifndef __URL_H__
 #define __URL_H__
 
+#include "config.h"
 #ifdef HAVE_CURL
 
 #include <curl/curl.h>
 
 #include "base.h"
+#include "logger.h"
 
 namespace dss {
 
@@ -52,11 +54,10 @@ namespace dss {
       size_t m_size;
   };
 
+  // TODO rename to HttpClient
   class URL {
+    __DECL_LOG_CHANNEL__
     public:
-
-      static HashMapStringString emptyHeader;
-      static HashMapStringString emptyForm;
 
       URL(bool _reuse_handle = false);
       ~URL();
