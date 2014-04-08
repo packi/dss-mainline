@@ -111,9 +111,9 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                boost::shared_ptr<URLRequestCallback> cb) :
     m_req(req),
     m_base_url(base),
-    m_url(url), m_type(type),
-    m_cb(cb),
-    m_simple(true)
+    m_url(url),
+    m_type(type),
+    m_cb(cb)
 {
 }
 
@@ -125,11 +125,11 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                boost::shared_ptr<URLRequestCallback> cb) :
     m_req(req),
     m_base_url(base),
-    m_url(url), m_type(POST),
+    m_url(url),
+    m_type(POST),
     m_postdata(postdata),
     m_headers(headers),
-    m_cb(cb),
-    m_simple(false)
+    m_cb(cb)
 {
 }
 
@@ -143,11 +143,11 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                boost::shared_ptr<URLRequestCallback> cb) :
     m_req(req),
     m_base_url(base),
-    m_url(url), m_type(type),
+    m_url(url),
+    m_type(type),
     m_headers(headers),
     m_formpost(formpost),
-    m_cb(cb),
-    m_simple(false)
+    m_cb(cb)
 {
 }
 
@@ -166,17 +166,13 @@ void URLRequestTask::run()
 
     boost::shared_ptr<URLResult> result(new URLResult());
 
-    log("URLRequestTask::run(): sending request to " +
-         m_base_url + m_url, lsDebug);
-    if (m_simple) {
-      code = m_req->request(m_base_url + m_url, m_type, result.get());
+    log("URLRequestTask::run(): sending request to " + m_base_url + m_url,
+        lsDebug);
+    if (m_postdata.empty()) {
+      code = m_req->request(m_base_url + m_url, m_type, m_headers, m_formpost,
+                            result.get());
     } else {
-      if (m_postdata.empty()) {
-        code = m_req->request(m_base_url + m_url, m_type, m_headers,
-                              m_formpost, result.get());
-      } else {
-        code = m_req->request(m_base_url + m_url, m_headers, m_postdata, result.get());
-      }
+      code = m_req->request(m_base_url + m_url, m_headers, m_postdata, result.get());
     }
 
     log("URLRequestTask::run(): request to " +

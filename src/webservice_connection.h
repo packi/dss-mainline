@@ -94,7 +94,6 @@ private:
   boost::shared_ptr<HashMapStringString> m_headers;
   boost::shared_ptr<HashMapStringString> m_formpost;
   boost::shared_ptr<URLRequestCallback> m_cb;
-  bool m_simple;
 };
 
 class WebserviceTreeListener : public PropertyListener {
