@@ -69,10 +69,12 @@ void WebserviceConnection::shutdown() {
 void WebserviceConnection::request(const std::string& url, RequestType type,
                                    boost::shared_ptr<URLRequestCallback> cb)
 {
-    boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url,
-                                                             m_base_url, url,
-                                                             type, cb));
-    addEvent(task);
+  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  req->url = m_base_url + url;
+  req->type = type;
+
+  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
 void WebserviceConnection::request(const std::string& url,
@@ -80,13 +82,14 @@ void WebserviceConnection::request(const std::string& url,
                                  const std::string& postdata,
                                  boost::shared_ptr<URLRequestCallback> cb)
 {
-  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url,
-                                                           m_base_url,
-                                                           url,
-                                                           headers,
-                                                           postdata,
-                                                           cb));
-    addEvent(task);
+  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  req->url = m_base_url + url;
+  req->type = POST;
+  req->headers = headers;
+  req->postdata = postdata;
+
+  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
 
@@ -95,65 +98,29 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
                                 boost::shared_ptr<HashMapStringString> formpost,
                                 boost::shared_ptr<URLRequestCallback> cb)
 {
-    boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, m_base_url,
-                                                             url, type,
-                                                             headers, formpost,
-                                                             cb));
-    addEvent(task);
+  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  req->url = m_base_url + url;
+  req->type = type;
+  req->headers = headers;
+  req->formpost = formpost;
+
+  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
 __DEFINE_LOG_CHANNEL__(URLRequestTask, lsInfo)
 
-URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
-                               const std::string& base,
-                               const std::string& url,
-                               RequestType type,
-                               boost::shared_ptr<URLRequestCallback> cb) :
-    m_client(req),
-    m_base_url(base),
-    m_url(url),
-    m_type(type),
-    m_cb(cb)
-{
-}
-
-URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
-                               const std::string& base,
-                               const std::string& url,
-                               boost::shared_ptr<HashMapStringString> headers,
-                               const std::string& postdata,
-                               boost::shared_ptr<URLRequestCallback> cb) :
-    m_client(req),
-    m_base_url(base),
-    m_url(url),
-    m_type(POST),
-    m_postdata(postdata),
-    m_headers(headers),
-    m_cb(cb)
-{
-}
-
-
-URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
-                               const std::string& base,
-                               const std::string& url,
-                               RequestType type,
-                               boost::shared_ptr<HashMapStringString> headers,
-                               boost::shared_ptr<HashMapStringString> formpost,
-                               boost::shared_ptr<URLRequestCallback> cb) :
-    m_client(req),
-    m_base_url(base),
-    m_url(url),
-    m_type(type),
-    m_headers(headers),
-    m_formpost(formpost),
-    m_cb(cb)
+URLRequestTask::URLRequestTask(boost::shared_ptr<URL> client,
+                               boost::shared_ptr<HttpRequest> req,
+                               boost::shared_ptr<URLRequestCallback> cb)
+  : m_client(client), m_req(req), m_cb(cb)
 {
 }
 
 
 void URLRequestTask::run()
 {
+    boost::shared_ptr<URLResult> result(new URLResult);
     long code;
 
     if (m_client == NULL) {
@@ -161,23 +128,14 @@ void URLRequestTask::run()
     }
 
     if (!webservice_communication_authorized()) {
-      log("not permitted: " + m_url, lsWarning);
+      log("not permitted: " + m_req->url, lsWarning);
     }
 
-    boost::shared_ptr<URLResult> result(new URLResult());
+    log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
 
-    log("URLRequestTask::run(): sending request to " + m_base_url + m_url,
-        lsDebug);
-    if (m_postdata.empty()) {
-      code = m_client->request(m_base_url + m_url, m_type, m_headers, m_formpost,
-                            result.get());
-    } else {
-      code = m_client->request(m_base_url + m_url, m_headers, m_postdata, result.get());
-    }
-
-    log("URLRequestTask::run(): request to " +
-         m_base_url + m_url + " returned with HTTP code " +
-         intToString((int)code), lsDebug);
+    code = m_client->request(*m_req, result.get());
+    log("URLRequestTask::run(): request to " + m_req->url + " returned with HTTP code " +
+        intToString(code), lsDebug);
 
     if (m_cb != NULL) {
       m_cb->result(code, result);

@@ -68,31 +68,14 @@ private:
 class URLRequestTask : public Task {
   __DECL_LOG_CHANNEL__
 public:
-  URLRequestTask(boost::shared_ptr<URL> req,
-                 const std::string& base, const std::string& url,
-                 RequestType type,
-                 boost::shared_ptr<URLRequestCallback> cb);
-  URLRequestTask(boost::shared_ptr<URL> req,
-                 const std::string& base, const std::string& url,
-                 boost::shared_ptr<HashMapStringString> headers,
-                 const std::string& postdata,
-                 boost::shared_ptr<URLRequestCallback> cb);
-  URLRequestTask(boost::shared_ptr<URL> req,
-                 const std::string& base, const std::string& url,
-                 RequestType type,
-                 boost::shared_ptr<HashMapStringString> headers,
-                 boost::shared_ptr<HashMapStringString> formpost,
+  URLRequestTask(boost::shared_ptr<URL> client,
+                 boost::shared_ptr<HttpRequest> req,
                  boost::shared_ptr<URLRequestCallback> cb);
   virtual ~URLRequestTask() {};
   virtual void run();
 private:
   boost::shared_ptr<URL> m_client;
-  std::string m_base_url;
-  std::string m_url;
-  RequestType m_type;
-  std::string m_postdata;
-  boost::shared_ptr<HashMapStringString> m_headers;
-  boost::shared_ptr<HashMapStringString> m_formpost;
+  boost::shared_ptr<HttpRequest> m_req;
   boost::shared_ptr<URLRequestCallback> m_cb;
 };
 
