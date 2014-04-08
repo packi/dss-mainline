@@ -35,6 +35,9 @@ namespace dss {
     POST,
   } RequestType;
 
+  typedef boost::shared_ptr<HashMapStringString> headers_t;
+  typedef boost::shared_ptr<HashMapStringString> formpost_t;
+
   class URLResult {
   public:
       friend class URL;

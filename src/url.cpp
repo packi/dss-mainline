@@ -110,14 +110,15 @@ size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* u
 
 long URL::request(const std::string& url, RequestType type, class URLResult* result)
 {
-  return internalRequest(url, type, std::string(), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
+  return internalRequest(url, type, std::string(), headers_t(), formpost_t(),
+                         result);
 }
 
 long URL::request(const std::string& url,
                   boost::shared_ptr<HashMapStringString> headers,
                   std::string postdata, class URLResult* result)
 {
-  return internalRequest(url, POST, postdata, headers, boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
+  return internalRequest(url, POST, postdata, headers, formpost_t(), result);
 }
 
 long URL::request(const std::string& url, RequestType type,
