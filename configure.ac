@@ -70,6 +70,12 @@ MT_OPTION([http], [enable],
             AC_DEFINE([WITH_HTTP], [1], [ build with HTTP support ])
           ],[])
 
+MT_OPTION([insecure-cookie], [enable],
+          [allow cookies also over HTTP (default: HTTPS only)],
+          [
+            AC_DEFINE([WITH_INSECURE_COOKIE], [1], [ allow insecure cookies ])
+          ],[])
+
 MT_OPTION([bonjour], [disable],
           [build with bonjour support (default: enabled)],
           [

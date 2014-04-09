@@ -219,7 +219,11 @@ namespace dss {
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
     if(!_setCookie.empty()) {
-      sstream << "Set-Cookie: " << _setCookie << "\r\n";
+      sstream << "Set-Cookie: " << _setCookie << "; HttpOnly";
+#ifndef WITH_INSECURE_COOKIE
+      sstream << "; Secure";
+#endif
+      sstream << "\r\n";
     }
     sstream << "\r\n";
     std::string tmp = sstream.str();
