@@ -123,9 +123,6 @@ namespace dss {
     static bool hasInstance();
     static void shutdown();
     void initiateShutdown();
-#ifdef WITH_TESTS
-    static void teardown();
-#endif
     static std::string versionString();
     static std::string readDistroVersion();
     static std::vector<unsigned char> getRandomSalt(unsigned int len);

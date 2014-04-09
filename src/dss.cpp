@@ -399,14 +399,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return sane;
   } // checkDirectoriesExist
 
-#ifdef WITH_TESTS
-  void DSS::teardown() {
-    DSS* instance = m_Instance;
-    m_Instance = NULL;
-    delete instance;
-  }
-#endif
-
   DSS* DSS::m_Instance = NULL;
 
   DSS* DSS::getInstance() {
