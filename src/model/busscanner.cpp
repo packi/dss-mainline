@@ -77,6 +77,7 @@ namespace dss {
         _dsMeter->setHardwareVersion(spec.HardwareVersion);
         _dsMeter->setApiVersion(spec.APIVersion);
         _dsMeter->setPropertyFlags(spec.flags);
+        _dsMeter->setApartmentState(spec.ApartmentState);
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }
