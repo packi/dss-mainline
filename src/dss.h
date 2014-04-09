@@ -52,6 +52,7 @@ namespace dss {
   class Security;
   class Watchdog;
   class BusEventSink;
+  class WebserviceTreeListener;
 
   typedef enum {
     ssInvalid,
@@ -93,6 +94,7 @@ namespace dss {
     std::string m_jsLogDirectory;
     std::string m_savedPropsDirectory;
     CommChannel *m_commChannel;
+    boost::shared_ptr<WebserviceTreeListener> m_pWebserviceTreeListener;
 
     aDSSState m_State;
     bool m_ShutdownFlag;

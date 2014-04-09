@@ -30,13 +30,13 @@
 
 #include "propertysystem.h"
 #include "webservice_connection.h"
+#include "event.h"
 
 namespace dss {
 
 WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
 WebserviceConnection::WebserviceConnection()
-  : m_handle(NULL)
 {
     m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
     if (!endsWith(m_base_url, "/")) {
@@ -106,7 +106,6 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      m_req(req),
                                                      m_base_url(base),
                                                      m_url(url), m_type(type),
-                                                     m_result(NULL),
                                                      m_cb(cb),
                                                      m_simple(true)
 
@@ -124,7 +123,6 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      m_url(url), m_type(POST),
                                                      m_postdata(postdata),
                                                      m_headers(headers),
-                                                     m_result(NULL),
                                                      m_cb(cb),
                                                      m_simple(false)
 
@@ -144,7 +142,6 @@ WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      m_url(url), m_type(type),
                                                      m_headers(headers),
                                                      m_formpost(formpost),
-                                                     m_result(NULL),
                                                      m_cb(cb),
                                                      m_simple(false)
 
@@ -176,6 +173,31 @@ void WebserviceConnection::URLRequestTask::run()
     }
 }
 
+WebserviceTreeListener::WebserviceTreeListener(
+                    PropertyNodePtr _pWebserviceApiEnabledNode) :
+                    m_pWebserviceApiEnabledNode(_pWebserviceApiEnabledNode) {
+  assert(_pWebserviceApiEnabledNode != NULL);
+  m_pWebserviceApiEnabledNode->addListener(this);
 } // namespace dss
+
+void WebserviceTreeListener::propertyChanged(PropertyNodePtr _caller,
+                                        PropertyNodePtr _changedNode) {
+  // initiate connection as soon as webservice got enabled
+  if (_changedNode->getBoolValue() == true) {
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
+      DateTime now;
+      pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+  }
+}
+
+WebserviceTreeListener::~WebserviceTreeListener() {
+  m_pWebserviceApiEnabledNode->removeListener(this);
+}
+
+} // namespace
 
 #endif//HAVE_CURL
