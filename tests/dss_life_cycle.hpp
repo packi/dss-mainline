@@ -56,7 +56,8 @@ public:
   DSSLifeCycle();
   ~DSSLifeCycle();
 protected:
-  DSS *m_incarnation;
+  DSS *m_instance;
+  int m_incarnation;
   std::string m_configFileName;
 };
 

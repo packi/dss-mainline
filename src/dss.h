@@ -72,6 +72,13 @@ namespace dss {
     friend class DSSLifeCycle;
   private:
     static DSS* m_Instance;
+    /**
+     * s_generation - enumerate generation
+     * when destroying recreating instances you might get
+     * the same memory from the heap. so need a serial
+     * number to identify reliably
+     */
+    static int s_InstanceGeneration;
     std::vector<Subsystem*> m_Subsystems;
     time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;

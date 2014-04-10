@@ -72,13 +72,15 @@ DSSLifeCycle::DSSLifeCycle() {
     throw std::runtime_error("DSS::getInstance failed");
   }
 
-  m_incarnation = DSS::getInstance();
+  m_instance = DSS::m_Instance;
+  m_incarnation = DSS::s_InstanceGeneration;
   assert(m_incarnation);
 }
 
 DSSLifeCycle::~DSSLifeCycle() {
   // DSS::getInstance will create a new instance
-  if (m_incarnation != DSS::m_Instance) {
+  if ((m_instance != DSS::m_Instance) ||
+      m_incarnation != DSS::s_InstanceGeneration) {
     log("destructor -- already deleted", lsDebug);
     return;
   }

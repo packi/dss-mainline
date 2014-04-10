@@ -402,10 +402,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   } // checkDirectoriesExist
 
   DSS* DSS::m_Instance = NULL;
+  int DSS::s_InstanceGeneration = 0;
 
   DSS* DSS::getInstance() {
     if (m_Instance == NULL) {
       m_Instance = new DSS();
+      s_InstanceGeneration++;
       log("getInstance: create new -- " +
           intToString(reinterpret_cast<long long int>(m_Instance), true),
           lsInfo);
