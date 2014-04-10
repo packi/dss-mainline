@@ -162,7 +162,6 @@ make
 There are several compile time options that can be passed to cmake:
 
 \li \c -DWITH_DATADIR=path specifies the default location of the data directory.
-\li \c -DWITH_TESTS=[yes|no] include tests in the build.
 \li \c -DCMAKE_BUILD_TYPE=[Release|Debug]
 
 If you're creating backtraces for error reporting, please use \c -DCMAKE_BUILD_TYPE=Debug.

@@ -30,9 +30,6 @@
 #include "src/logger.h"
 #include "src/datetools.h"
 #include "src/backtrace.h"
-#ifdef WITH_TESTS
-#include "tests/tests.h"
-#endif
 
 #include <ctime>
 #include <csignal>
