@@ -269,6 +269,10 @@ bool CommChannel::requestLockedScenes()
 
 std::string CommChannel::sendMessage(const std::string& message)
 {
+    if (!DSS::hasInstance()) {
+      Logger::getInstance()->log("CommChannel::sendMessage  missing instance abort", lsInfo);
+      return "";
+    }
     int dSAPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/communication/sendport");
     CC::CommunicationChannelClient cc(dSAPort);
 
