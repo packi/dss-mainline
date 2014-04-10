@@ -36,6 +36,8 @@
 
 namespace dss {
 
+__DEFINE_LOG_CHANNEL__(CommChannel, lsInfo);
+
 CommChannel* CommChannel::m_instance = NULL;
 
 CommChannel* CommChannel::createInstance()

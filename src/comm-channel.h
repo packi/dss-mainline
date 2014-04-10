@@ -29,11 +29,13 @@
 #include <vector>
 
 #include "messages/messaging.pb.h"
+#include "logger.h"
 
 namespace dss {
 
 class CommChannel : public CC::CommunicationChannelCallback
 {
+  __DECL_LOG_CHANNEL__
 public:
     static CommChannel* createInstance();
     static CommChannel* getInstance();
