@@ -23,6 +23,10 @@ public:
 __DEFINE_LOG_CHANNEL__(LoggerThread, lsInfo);
 
 void LoggerThread::run() {
+  /*
+   * no BOOST_CHECK in here, it's not threadsafe
+   * http://boost.2283326.n4.nabble.com/Is-boost-test-thread-safe-td3471644.html
+   */
   for (int i = 0; i < 2048; i++) {
     /* we want to use a class channel */
     log("logger concurrency test", lsInfo);
