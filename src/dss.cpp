@@ -271,6 +271,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   } // parseProperties
 
   bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
+    log("DSS::initialize", lsInfo);
     m_State = ssCreatingSubsystems;
 
     try {
@@ -284,6 +285,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
 
+    // will start a thread
     m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
     m_Subsystems.push_back(m_pModelMaintenance.get());
 
@@ -402,8 +404,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   DSS* DSS::m_Instance = NULL;
 
   DSS* DSS::getInstance() {
-    if(m_Instance == NULL) {
+    if (m_Instance == NULL) {
       m_Instance = new DSS();
+      log("getInstance: create new -- " +
+          intToString(reinterpret_cast<long long int>(m_Instance), true),
+          lsInfo);
     }
     assert(m_Instance != NULL);
     return m_Instance;
@@ -627,6 +632,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   void DSS::shutdown() {
+    if (!m_Instance) {
+      return;
+    }
+    log("DSS::shutdown " +
+        intToString(reinterpret_cast<long long int>(m_Instance), true),
+        lsInfo);
     DSS::getInstance()->getSecurity().
       loginAsSystemUser("Shutdown needs to be as system user");
     DSS* inst = m_Instance;
