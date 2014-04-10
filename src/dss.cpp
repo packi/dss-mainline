@@ -640,8 +640,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     log("DSS::shutdown " +
         intToString(reinterpret_cast<long long int>(m_Instance), true),
         lsInfo);
-    DSS::getInstance()->getSecurity().
-      loginAsSystemUser("Shutdown needs to be as system user");
+    if (m_Instance->m_pSecurity) {
+      m_Instance->getSecurity().loginAsSystemUser("Shutdown needs to be as system user");
+    }
     DSS* inst = m_Instance;
     m_Instance = NULL;
     delete inst;
