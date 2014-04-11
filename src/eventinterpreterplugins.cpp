@@ -1052,4 +1052,34 @@ namespace dss {
     /* no retval, no error handling, just log entry */
     doCall(type);
   }
+
+  EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
+                                                                               _pInterpreter)
+        : EventInterpreterPlugin("keep_webservice_alive", _pInterpreter)
+  {
+  }
+
+  void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+#ifndef HAVE_CURL
+    return;
+#endif
+
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+    bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
+    if (!enabled) {
+      std::vector<std::string> ids = DSS::getInstance()->getEventRunner().getEventIDs();
+      for (size_t i = 0; i < ids.size(); i++) {
+        const ScheduledEvent se = DSS::getInstance()->getEventRunner().getEvent(ids.at(i));
+        if (se.getEvent()->getName() == _event.getName()) {
+          DSS::getInstance()->getEventRunner().removeEvent(se.getID());
+          break;
+        }
+      }
+      return;
+    }
+
+    boost::shared_ptr<URLRequestCallback> cb;
+    WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+  }
 } // namespace dss

@@ -151,6 +151,14 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
 
   };
+
+  class EventInterpreterPluginKeepWebserviceAlive : public EventInterpreterPlugin {
+  private:
+  public:
+    EventInterpreterPluginKeepWebserviceAlive(EventInterpreter* _pInterpreter);
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

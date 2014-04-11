@@ -26,12 +26,12 @@
 #ifdef HAVE_CURL
 
 #include <string>
-#include <curl/curl.h>
 #include <boost/shared_ptr.hpp>
 
 #include "dss.h"
 #include "taskprocessor.h"
 #include "url.h"
+#include  "propertysystem.h"
 
 namespace dss {
 
@@ -61,7 +61,6 @@ public:
 private:
   static WebserviceConnection *m_instance;
 
-  CURL *m_handle;
   std::string m_base_url;
   boost::shared_ptr<URL> m_url;
 
@@ -92,10 +91,20 @@ private:
     std::string m_postdata;
     boost::shared_ptr<HashMapStringString> m_headers;
     boost::shared_ptr<HashMapStringString> m_formpost;
-    URLResult *m_result;
     boost::shared_ptr<URLRequestCallback> m_cb;
     bool m_simple;
   };
+};
+
+class WebserviceTreeListener : public PropertyListener {
+public:
+  WebserviceTreeListener(PropertyNodePtr _pWebserviceApiEnabledNode);
+  virtual ~WebserviceTreeListener();
+protected:
+  virtual void propertyChanged(PropertyNodePtr _caller,
+                               PropertyNodePtr _changedNode);
+private:
+   PropertyNodePtr m_pWebserviceApiEnabledNode;
 };
 
 } // namespace dss

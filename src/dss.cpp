@@ -364,6 +364,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pWatchdog = boost::shared_ptr<Watchdog>(new Watchdog(this));
     m_Subsystems.push_back(m_pWatchdog.get());
 
+
+    pNode = getPropertySystem().getProperty(pp_websvc_enabled);
+    m_pWebserviceTreeListener.reset(new WebserviceTreeListener(pNode));
     return checkDirectoriesExist();
   } // initialize
 
@@ -442,6 +445,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     plugin = new EventInterpreterPluginSystemState(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new BenchmarkPublisherPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+
+    plugin = new EventInterpreterPluginKeepWebserviceAlive(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
@@ -580,6 +586,15 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       m_State = ssRunning;
       boost::shared_ptr<Event> runningEvent(new Event("running"));
       m_pEventQueue->pushEvent(runningEvent);
+
+
+      if (m_pPropertySystem->getBoolValue(pp_websvc_enabled)) {
+        boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
+        DateTime now;
+        pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+        pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+        m_pEventQueue->pushEvent(pEvent);
+      }
 
       // pass control to the eventrunner
       m_pEventRunner->run();
