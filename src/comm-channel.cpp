@@ -95,12 +95,19 @@ CommChannel::CommChannel()
 
     int dSSPort = DSS::getInstance()->getPropertySystem().getIntValue(
             "/config/communication/receiveport");
-    m_pServer = new CC::CommunicationChannelServer(dSSPort);
-    if (!m_pServer)
-    {
-        pthread_mutex_destroy(&m_mutex);
-        pthread_cond_destroy(&m_condition);
-        throw std::runtime_error("failed to initialize CommunicationChannelServer");
+    try {
+      m_pServer = new CC::CommunicationChannelServer(dSSPort);
+    } catch (CC::Exception e) {
+      pthread_mutex_destroy(&m_mutex);
+      pthread_cond_destroy(&m_condition);
+      throw std::runtime_error(e.getMessage());
+    }
+
+    if (!m_pServer) {
+      // probably std::bad_alloc
+      pthread_mutex_destroy(&m_mutex);
+      pthread_cond_destroy(&m_condition);
+      throw std::runtime_error("Alloc CommChannel failed: OOM");
     }
 
     m_pServer->addCallback(this);

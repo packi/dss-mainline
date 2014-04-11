@@ -24,6 +24,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <libcommchannel/commchannel.h>
+#include <libcommchannel/exceptions.h>
 #include <sys/types.h>
 #include <list>
 #include <vector>

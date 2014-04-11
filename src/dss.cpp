@@ -280,6 +280,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       m_commChannel->suspendUpdateTask();
     } catch (std::runtime_error &err) {
       log("Could not start dSA communication channel: " + std::string(err.what()), lsError);
+    } catch (...) {
+      log("Could not start dSA communication channel: unkown error", lsError);
+      return false;
     }
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
