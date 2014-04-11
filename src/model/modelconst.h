@@ -168,6 +168,8 @@ namespace dss {
   const int SensorIDPrecipitation = 20;
   const int SensorIDRoomTemperatureSetpoint = 50;
   const int SensorIDRoomTemperatureControlVariable = 51;
+  const int SensorIDOutputCurrent16A = 64;
+  const int SensorIDActivePowerVA = 65;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
