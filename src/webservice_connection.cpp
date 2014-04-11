@@ -36,6 +36,8 @@ namespace dss {
 
 WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
+__DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
+
 WebserviceConnection::WebserviceConnection()
 {
     m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
@@ -158,6 +160,9 @@ void WebserviceConnection::URLRequestTask::run()
     }
 
     boost::shared_ptr<URLResult> result(new URLResult());
+
+    log("URLRequestTask::run(): sending request to " +
+         m_base_url + m_url, lsDebug);
     if (m_simple) {
       code = m_req->request(m_base_url + m_url, m_type, result.get());
     } else {
@@ -168,6 +173,11 @@ void WebserviceConnection::URLRequestTask::run()
         code = m_req->request(m_base_url + m_url, m_headers, m_postdata, result.get());
       }
     }
+
+    log("URLRequestTask::run(): request to " +
+         m_base_url + m_url + " returned with HTTP code " +
+         intToString((int)code), lsDebug);
+
     if (m_cb != NULL) {
       m_cb->result(code, result);
     }
