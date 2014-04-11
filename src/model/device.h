@@ -255,7 +255,7 @@ namespace dss {
      * This will cause the \c apartment.xml to be updated. */
     void dirty();
 
-    void fillSensorTable(const int _productId);
+    void fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist);
     bool hasExtendendSceneTable();
     void calculateHWInfo();
     void updateIconPath();
