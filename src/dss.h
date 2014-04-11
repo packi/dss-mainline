@@ -69,6 +69,7 @@ namespace dss {
     */
   class DSS {
     __DECL_LOG_CHANNEL__
+    friend class DSSLifeCycle;
   private:
     static DSS* m_Instance;
     std::vector<Subsystem*> m_Subsystems;

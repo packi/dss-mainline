@@ -226,11 +226,14 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/basetests.cpp \
 	$(top_srcdir)/tests/circuitrequesthandlertest.cpp \
 	$(top_srcdir)/tests/curl_test.cpp \
+	$(top_srcdir)/tests/dss_instance_tests.cpp \
 	$(top_srcdir)/tests/webservice_api_tests.cpp \
 	$(top_srcdir)/tests/datetoolstests.cpp \
 	$(top_srcdir)/tests/deviceinterfacerequesthandlertest.cpp \
 	$(top_srcdir)/tests/devicerequesthandlertest.cpp \
 	$(top_srcdir)/tests/devicetests.cpp \
+	$(top_srcdir)/tests/dss_life_cycle.hpp \
+	$(top_srcdir)/tests/dss_life_cycle.cpp \
 	$(top_srcdir)/tests/eventrequesthandlertest.cpp \
 	$(top_srcdir)/tests/eventtests.cpp \
 	$(top_srcdir)/tests/iconvtests.cpp \
