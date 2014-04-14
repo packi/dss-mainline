@@ -350,6 +350,7 @@ namespace dss {
     typedef std::vector< boost::shared_ptr<EventSubscription> > SubscriptionVector;
     SubscriptionVector m_Subscriptions;
     boost::mutex m_SubscriptionsMutex;
+    bool m_SubscriptionsMutex_locked;
     std::vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;

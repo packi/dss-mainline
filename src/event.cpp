@@ -251,10 +251,14 @@ namespace dss {
     }
     // lock subscriptions until initialization is complete
     m_SubscriptionsMutex.lock();
+    m_SubscriptionsMutex_locked = true;
   } // ctor()
 
   EventInterpreter::~EventInterpreter() {
     scrubVector(m_Plugins);
+    if (m_SubscriptionsMutex_locked) {
+      m_SubscriptionsMutex.unlock();
+    }
   } // dtor
 
   void EventInterpreter::doStart() {
@@ -266,6 +270,7 @@ namespace dss {
 
     if (!DSS::hasInstance()) {
       m_SubscriptionsMutex.unlock();
+      m_SubscriptionsMutex_locked = false;
       return;
     }
 
@@ -319,8 +324,11 @@ namespace dss {
 
     // reload subscriptions
     m_SubscriptionsMutex.unlock();
+    m_SubscriptionsMutex_locked = false;
     loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
     loadStatesFromProperty(subParser->getStatesNode());
+
+    log("initialize -- done", lsInfo);
   } // initialize
 
   EventInterpreter& EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
