@@ -17,6 +17,7 @@
 #include "src/event.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
+#include "tests/dss_life_cycle.hpp"
 
 using namespace dss;
 
@@ -74,6 +75,48 @@ BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
   WebserviceReply resp;
   BOOST_CHECK_NO_THROW(resp = parse_reply(result.content()));
   BOOST_CHECK_EQUAL(resp.code, 9); /* unknown dsid */
+}
+
+class NotifyDone : public WebserviceCallDone {
+public:
+  NotifyDone(boost::mutex &mutex,
+             boost::condition_variable &completion)
+    : m_mutex(mutex)
+    , m_completion(completion)
+  {
+  }
+
+  void done(RestTransferStatus_t status, WebserviceReply reply) {
+    boost::mutex::scoped_lock lock(m_mutex);
+    BOOST_CHECK_EQUAL(status, REST_OK);
+    BOOST_CHECK_EQUAL(reply.code, 9); /* unknown dsid */
+    m_completion.notify_one();
+  }
+private:
+  boost::mutex &m_mutex;
+  boost::condition_variable &m_completion;
+};
+
+BOOST_AUTO_TEST_CASE(test_notifyApartmentChange) {
+  boost::mutex mutex;
+  boost::condition_variable completion;
+  DSSLifeCycle dss_guard;
+
+  boost::mutex::scoped_lock lock(mutex);
+
+  /* TODO clean this up */
+  SystemInfo info;
+  info.collect();
+  DSS::getInstance()->publishDSID();
+
+  /* switch from production to test webservice */
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  propSystem.getProperty(pp_websvc_url_authority)
+    ->setStringValue(websvc_url_authority_test);
+
+  WebserviceApartment::doModelChanged(WebserviceApartment::ApartmentChange,
+                                      WebserviceCallDone_t(new NotifyDone(mutex, completion)));
+  completion.wait(lock);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
