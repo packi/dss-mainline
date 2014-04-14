@@ -90,6 +90,10 @@ public:
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     propSystem.getProperty(pp_websvc_url_authority)
       ->setStringValue(websvc_url_authority_test);
+
+    // TODO: webservice connection fetched original authority, restart it
+    WebserviceConnection::shutdown();
+    WebserviceConnection::getInstance();
   }
 
   DSSLifeCycle m_dss_guard;
