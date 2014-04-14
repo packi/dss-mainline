@@ -271,6 +271,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   } // parseProperties
 
   bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
+    log("DSS::initialize", lsInfo);
     m_State = ssCreatingSubsystems;
 
     try {
@@ -279,11 +280,15 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       m_commChannel->suspendUpdateTask();
     } catch (std::runtime_error &err) {
       log("Could not start dSA communication channel: " + std::string(err.what()), lsError);
+    } catch (...) {
+      log("Could not start dSA communication channel: unkown error", lsError);
+      return false;
     }
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
 
+    // will start a thread
     m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
     m_Subsystems.push_back(m_pModelMaintenance.get());
 
@@ -399,19 +404,16 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return sane;
   } // checkDirectoriesExist
 
-#ifdef WITH_TESTS
-  void DSS::teardown() {
-    DSS* instance = m_Instance;
-    m_Instance = NULL;
-    delete instance;
-  }
-#endif
-
   DSS* DSS::m_Instance = NULL;
+  int DSS::s_InstanceGeneration = 0;
 
   DSS* DSS::getInstance() {
-    if(m_Instance == NULL) {
+    if (m_Instance == NULL) {
       m_Instance = new DSS();
+      s_InstanceGeneration++;
+      log("getInstance: create new -- " +
+          intToString(reinterpret_cast<long long int>(m_Instance), true),
+          lsInfo);
     }
     assert(m_Instance != NULL);
     return m_Instance;
@@ -635,8 +637,15 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   void DSS::shutdown() {
-    DSS::getInstance()->getSecurity().
-      loginAsSystemUser("Shutdown needs to be as system user");
+    if (!m_Instance) {
+      return;
+    }
+    log("DSS::shutdown " +
+        intToString(reinterpret_cast<long long int>(m_Instance), true),
+        lsInfo);
+    if (m_Instance->m_pSecurity) {
+      m_Instance->getSecurity().loginAsSystemUser("Shutdown needs to be as system user");
+    }
     DSS* inst = m_Instance;
     m_Instance = NULL;
     delete inst;

@@ -36,6 +36,8 @@
 
 namespace dss {
 
+__DEFINE_LOG_CHANNEL__(CommChannel, lsInfo);
+
 CommChannel* CommChannel::m_instance = NULL;
 
 CommChannel* CommChannel::createInstance()
@@ -93,12 +95,19 @@ CommChannel::CommChannel()
 
     int dSSPort = DSS::getInstance()->getPropertySystem().getIntValue(
             "/config/communication/receiveport");
-    m_pServer = new CC::CommunicationChannelServer(dSSPort);
-    if (!m_pServer)
-    {
-        pthread_mutex_destroy(&m_mutex);
-        pthread_cond_destroy(&m_condition);
-        throw std::runtime_error("failed to initialize CommunicationChannelServer");
+    try {
+      m_pServer = new CC::CommunicationChannelServer(dSSPort);
+    } catch (CC::Exception e) {
+      pthread_mutex_destroy(&m_mutex);
+      pthread_cond_destroy(&m_condition);
+      throw std::runtime_error(e.getMessage());
+    }
+
+    if (!m_pServer) {
+      // probably std::bad_alloc
+      pthread_mutex_destroy(&m_mutex);
+      pthread_cond_destroy(&m_condition);
+      throw std::runtime_error("Alloc CommChannel failed: OOM");
     }
 
     m_pServer->addCallback(this);
@@ -269,6 +278,10 @@ bool CommChannel::requestLockedScenes()
 
 std::string CommChannel::sendMessage(const std::string& message)
 {
+    if (!DSS::hasInstance()) {
+      Logger::getInstance()->log("CommChannel::sendMessage  missing instance abort", lsInfo);
+      return "";
+    }
     int dSAPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/communication/sendport");
     CC::CommunicationChannelClient cc(dSAPort);
 

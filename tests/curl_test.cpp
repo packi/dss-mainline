@@ -53,8 +53,17 @@ void fetcher_do() {
   URL curl(false);
   std::string url = "http://www.google.com";
 
+  /*
+   * no BOOST_CHECK in here, it's not threadsafe
+   * http://boost.2283326.n4.nabble.com/Is-boost-test-thread-safe-td3471644.html
+   */
+
   for (int i = 0; i < 10; i++) {
-    BOOST_CHECK_EQUAL(curl.request(url, GET, NULL), 200);
+    int ret = curl.request(url, GET, NULL);
+    if (ret != 200) {
+      Logger::getInstance()->log("test_rentrantCalls 200 != "  +
+                                 intToString(ret), lsInfo);
+    }
   }
 }
 
