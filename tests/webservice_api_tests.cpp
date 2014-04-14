@@ -77,6 +77,24 @@ BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
   BOOST_CHECK_EQUAL(resp.code, 9); /* unknown dsid */
 }
 
+class WebserviceFixture {
+public:
+  WebserviceFixture() {
+
+    /* TODO clean this up */
+    SystemInfo info;
+    info.collect();
+    DSS::getInstance()->publishDSID();
+
+    /* switch from production to test webservice */
+    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+    propSystem.getProperty(pp_websvc_url_authority)
+      ->setStringValue(websvc_url_authority_test);
+  }
+
+  DSSLifeCycle m_dss_guard;
+};
+
 class NotifyDone : public WebserviceCallDone {
 public:
   NotifyDone(boost::mutex &mutex,
@@ -97,23 +115,11 @@ private:
   boost::condition_variable &m_completion;
 };
 
-BOOST_AUTO_TEST_CASE(test_notifyApartmentChange) {
+BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
   boost::mutex mutex;
   boost::condition_variable completion;
-  DSSLifeCycle dss_guard;
 
   boost::mutex::scoped_lock lock(mutex);
-
-  /* TODO clean this up */
-  SystemInfo info;
-  info.collect();
-  DSS::getInstance()->publishDSID();
-
-  /* switch from production to test webservice */
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.getProperty(pp_websvc_url_authority)
-    ->setStringValue(websvc_url_authority_test);
-
   WebserviceApartment::doModelChanged(WebserviceApartment::ApartmentChange,
                                       WebserviceCallDone_t(new NotifyDone(mutex, completion)));
   completion.wait(lock);
