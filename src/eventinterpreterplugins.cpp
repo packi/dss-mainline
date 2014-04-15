@@ -964,9 +964,7 @@ namespace dss {
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
-    if (!enabled) {
+    if (!webservice_communication_authorized()) {
       return;
     }
 

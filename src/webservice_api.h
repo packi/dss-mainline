@@ -16,6 +16,12 @@ namespace dss {
 // --------------------------------------------------------------------
 // helper
 
+/**
+ * Did the user authorize cloud service
+ * @return
+ */
+bool webservice_communication_authorized();
+
 struct WebserviceReply {
   int code;
   std::string desc;

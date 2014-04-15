@@ -80,6 +80,16 @@ void StatusReplyChecker::result(long code, boost::shared_ptr<URLResult> result) 
   }
 }
 
+
+/**
+ * Did the user authorize cloud service
+ * @return
+ */
+bool webservice_communication_authorized() {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  return propSystem.getBoolValue(pp_websvc_enabled);
+}
+
 /*
  * Apartment management
  */
@@ -90,6 +100,10 @@ void WebserviceApartment::doModelChanged(ChangeType type,
                                          WebserviceCallDone_t callback) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   std::string url;
+
+  if (!webservice_communication_authorized()) {
+    return;
+  }
 
   url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
   url += "?apartmentChangeType=";

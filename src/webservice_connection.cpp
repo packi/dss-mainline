@@ -29,8 +29,9 @@
 #include <string.h>
 #include <assert.h>
 
-#include "propertysystem.h"
 #include "event.h"
+#include "propertysystem.h"
+#include "webservice_api.h"
 
 namespace dss {
 
@@ -161,6 +162,10 @@ void WebserviceConnection::URLRequestTask::run()
       return;
     }
 
+    if (!webservice_communication_authorized()) {
+      log("not permitted: " + m_url, lsWarning);
+    }
+
     boost::shared_ptr<URLResult> result(new URLResult());
 
     log("URLRequestTask::run(): sending request to " +
@@ -196,7 +201,7 @@ void WebserviceTreeListener::propertyChanged(PropertyNodePtr _caller,
                                         PropertyNodePtr _changedNode) {
   // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
-    if (DSS::hasInstance()) {
+    if (DSS::hasInstance() && DSS::getInstance()->getState() == ssRunning) {
       boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
       DateTime now;
       pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
