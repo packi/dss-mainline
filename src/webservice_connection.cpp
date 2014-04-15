@@ -34,9 +34,9 @@
 
 namespace dss {
 
-WebserviceConnection* WebserviceConnection::m_instance = NULL;
-
 __DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
+
+WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
 WebserviceConnection::WebserviceConnection()
 {
@@ -99,6 +99,8 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
                 m_url, m_base_url, url, type, headers, formpost, cb));
     addEvent(task);
 }
+
+__DEFINE_LOG_CHANNEL__(WebserviceConnection::URLRequestTask, lsInfo)
 
 WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      const std::string& base,
