@@ -32,6 +32,7 @@
 #include "taskprocessor.h"
 #include "url.h"
 #include  "propertysystem.h"
+#include "logger.h"
 
 namespace dss {
 
@@ -43,6 +44,7 @@ public:
 
 class WebserviceConnection : public TaskProcessor {
 public:
+  __DECL_LOG_CHANNEL__
   WebserviceConnection();
   virtual ~WebserviceConnection();
   void request(const std::string& url, RequestType type,
