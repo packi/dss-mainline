@@ -112,10 +112,13 @@ public:
 
   void done(RestTransferStatus_t status, WebserviceReply reply) {
     boost::mutex::scoped_lock lock(m_mutex);
-    BOOST_CHECK_EQUAL(status, REST_OK);
-    BOOST_CHECK_EQUAL(reply.code, 9); /* unknown dsid */
+    this->status = status;
+    this->reply = reply;
     m_completion.notify_one();
   }
+
+  WebserviceReply reply;
+  RestTransferStatus_t status;
 private:
   boost::mutex &m_mutex;
   boost::condition_variable &m_completion;
@@ -125,10 +128,16 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
   boost::mutex mutex;
   boost::condition_variable completion;
 
+  WebserviceCallDone_t cont(new NotifyDone(mutex, completion));
+  NotifyDone *notifyDone = static_cast<NotifyDone*>(cont.get());
+
   boost::mutex::scoped_lock lock(mutex);
   WebserviceApartment::doModelChanged(WebserviceApartment::ApartmentChange,
-                                      WebserviceCallDone_t(new NotifyDone(mutex, completion)));
+                                      cont);
   completion.wait(lock);
+
+  BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
+  BOOST_CHECK_EQUAL(notifyDone->reply.code, 9); /* unknown dsid */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
