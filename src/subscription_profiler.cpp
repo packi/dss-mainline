@@ -314,15 +314,17 @@ namespace dss {
        * http://www.kanzaki.com/docs/ical/rrule.html
        */
       pEvent = boost::shared_ptr<Event>(new Event("reexport_timings"));
+      // 1st min till 29th min
       pEvent->setProperty(EventProperty::ICalStartTime,
-                          now.addMinute(2).toRFC2445IcalDataTime());
-      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;COUNT=27");
+                          now.addMinute(1).toRFC2445IcalDataTime());
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;COUNT=29");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 
       pEvent = boost::shared_ptr<Event>(new Event("reexport_timings"));
+      // 30th min till 30th + 8 * 10 min == 110min
       pEvent->setProperty(EventProperty::ICalStartTime,
                           now.addMinute(30).toRFC2445IcalDataTime());
-      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;INTERVAL=10;COUNT=8");
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;INTERVAL=10;COUNT=9");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 
       pEvent = boost::shared_ptr<Event>(new Event("reexport_timings"));
