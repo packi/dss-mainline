@@ -242,6 +242,7 @@ namespace dss {
     std::reverse(m_subscriptionTimes.begin(), m_subscriptionTimes.end());
 
     timingTree = propFolder->createProperty("timings");
+    timingTree->createProperty("start_time")->setStringValue(m_startTime.toString());
     timingTree->createProperty("updated")->setStringValue(DateTime().toString());
 
     foreach(const SubscriptionTime &subscription, m_subscriptionTimes) {
