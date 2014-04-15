@@ -28,6 +28,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "dss.h"
+#include "logger.h"
 
 namespace dss {
   static void init(void) __attribute__((constructor));
@@ -37,6 +38,7 @@ namespace dss {
 
   static void fini(void) __attribute__((destructor));
   static void fini(void) {
+    dss::Logger::shutdown();
     dss::cleanup_libraries();
   }
 }
