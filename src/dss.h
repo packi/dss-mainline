@@ -121,7 +121,6 @@ namespace dss {
     void setupDirectories();
     bool initSubsystems();
     bool initSecurity();
-    void publishDSID();
   public:
     ~DSS();
     bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);
@@ -165,6 +164,7 @@ namespace dss {
     void setWebrootDirectory(const std::string& _value);
     void setJSLogDirectory(const std::string& _value);
     void setSavedPropsDirectory(const std::string& _value);
+    void publishDSID();
   }; // DSS
 
 }

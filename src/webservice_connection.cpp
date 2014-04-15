@@ -21,22 +21,23 @@
 */
 
 #include "config.h"
-
 #ifdef HAVE_CURL
+
+#include "webservice_connection.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "propertysystem.h"
-#include "webservice_connection.h"
 #include "event.h"
+#include "propertysystem.h"
+#include "webservice_api.h"
 
 namespace dss {
 
-WebserviceConnection* WebserviceConnection::m_instance = NULL;
-
 __DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
+
+WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
 WebserviceConnection::WebserviceConnection()
 {
@@ -100,6 +101,8 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
     addEvent(task);
 }
 
+__DEFINE_LOG_CHANNEL__(WebserviceConnection::URLRequestTask, lsInfo)
+
 WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
                                                      const std::string& base,
                                                      const std::string& url,
@@ -159,6 +162,10 @@ void WebserviceConnection::URLRequestTask::run()
       return;
     }
 
+    if (!webservice_communication_authorized()) {
+      log("not permitted: " + m_url, lsWarning);
+    }
+
     boost::shared_ptr<URLResult> result(new URLResult());
 
     log("URLRequestTask::run(): sending request to " +
@@ -194,7 +201,7 @@ void WebserviceTreeListener::propertyChanged(PropertyNodePtr _caller,
                                         PropertyNodePtr _changedNode) {
   // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
-    if (DSS::hasInstance()) {
+    if (DSS::hasInstance() && DSS::getInstance()->getState() == ssRunning) {
       boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
       DateTime now;
       pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
@@ -210,4 +217,4 @@ WebserviceTreeListener::~WebserviceTreeListener() {
 
 } // namespace
 
-#endif//HAVE_CURL
+#endif //HAVE_CURL

@@ -23,6 +23,7 @@
 #ifndef __DSS_WEBSERVICE_CONNECTION_H__
 #define __DSS_WEBSERVICE_CONNECTION_H__
 
+#include "config.h"
 #ifdef HAVE_CURL
 
 #include <string>
@@ -43,8 +44,8 @@ public:
 };
 
 class WebserviceConnection : public TaskProcessor {
-public:
   __DECL_LOG_CHANNEL__
+public:
   WebserviceConnection();
   virtual ~WebserviceConnection();
   void request(const std::string& url, RequestType type,
@@ -67,6 +68,7 @@ private:
   boost::shared_ptr<URL> m_url;
 
   class URLRequestTask : public Task {
+    __DECL_LOG_CHANNEL__
   public:
     URLRequestTask(boost::shared_ptr<URL> req,
                    const std::string& base, const std::string& url,

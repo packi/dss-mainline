@@ -48,9 +48,7 @@
 #include "src/model/state.h"
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
-#include "src/url.h"
-#include "src/webservice_replies.h"
-#include "src/webservice_connection.h"
+#include "src/webservice_api.h"
 #include "src/subscription_profiler.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -957,76 +955,16 @@ namespace dss {
     }
   }
 
+#ifdef HAVE_CURL
   EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
                                                                                _pInterpreter)
         : EventInterpreterPlugin("apartment_model_change", _pInterpreter)
   {
   }
 
-  class ModelChangeRequestCallback : public URLRequestCallback
-  {
-  public:
-    virtual ~ModelChangeRequestCallback() {};
-    virtual void result(long code, boost::shared_ptr<URLResult> result)
-    {
-      if (code != 200) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                             " HTTP POST failed " + intToString(code), lsError);
-        return;
-      }
-
-      try {
-        ModelChangeResponse resp = parseModelChange(result->content());
-
-        if (resp.code != 0) {
-          Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                     ": " + resp.desc, lsError);
-          return;
-        }
-      } catch (ParseError &ex) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                       " invalid return message " + result->content(), lsError);
-        return;
-      }
-    }
-  };
-
-  void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
-  {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-
-    url += "?apartmentChangeType=";
-    switch (type) {
-    case Apartment:
-        url += "Apartment";
-        break;
-    case TimedEvent:
-        url += "TimedEvent";
-        break;
-    case UDA:
-        url += "UserDefinedAction";
-        break;
-    }
-    url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-
-    Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-            " executeURL: " + url);
-
-    boost::shared_ptr<ModelChangeRequestCallback> mcb(
-                                            new ModelChangeRequestCallback());
-    WebserviceConnection::getInstance()->request(url, POST, mcb);
-  }
-
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-#ifndef HAVE_CURL
-    return;
-#endif
-
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    bool enabled = propSystem.getBoolValue("/config/webservice-api/enabled");
-    if (!enabled) {
+    if (!webservice_communication_authorized()) {
       return;
     }
 
@@ -1035,23 +973,23 @@ namespace dss {
       Logger::getInstance()->log(" name " + it->first + " : " + it->second);
     }
 
-    ChangeType type;
+    WebserviceApartment::ChangeType type;
     /* momentan ist definiert: 1=Apartment, 2=TimedEvent, 3=UDA */
     if (_event.getName() == ModelChangedEvent::Apartment) {
-      type = Apartment;
+      type = WebserviceApartment::ApartmentChange;
     } else if (_event.getName() == ModelChangedEvent::TimedEvent) {
-      type = TimedEvent;
+      type = WebserviceApartment::TimedEventChange;
     } else if (_event.getName() == ModelChangedEvent::UserDefinedAction) {
-      type = UDA;
+      type = WebserviceApartment::UDAChange;
     } else {
-      Logger::getInstance()->log(" unkown ModelChange event " +
-                                 _event.getName(), lsError);
+      log(" unkown ModelChange event " + _event.getName(), lsError);
       return;
     }
 
     /* no retval, no error handling, just log entry */
-    doCall(type);
+    WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
+#endif
 
   EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
                                                                                _pInterpreter)
@@ -1082,4 +1020,5 @@ namespace dss {
     boost::shared_ptr<URLRequestCallback> cb;
     WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
   }
+
 } // namespace dss

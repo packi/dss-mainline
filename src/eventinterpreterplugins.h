@@ -136,21 +136,13 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+#ifdef HAVE_CURL
   class EventInterpreterPluginApartmentChange : public EventInterpreterPlugin {
-  private:
-    typedef enum {
-      Apartment = 1,
-      TimedEvent = 2,
-      UDA = 3
-    } ChangeType;
-
-    void doCall(ChangeType type);
-
   public:
     EventInterpreterPluginApartmentChange(EventInterpreter* _pInterpreter);
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-
   };
+#endif
 
   class EventInterpreterPluginKeepWebserviceAlive : public EventInterpreterPlugin {
   private:
