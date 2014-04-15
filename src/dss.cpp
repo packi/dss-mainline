@@ -132,6 +132,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     // TODO why this setFooDirectoryPath
     setupDirectories();
+    m_pPropertySystem->createProperty("/system/start_time")
+      ->setStringValue(DateTime().toString());
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
     m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
