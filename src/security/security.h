@@ -46,9 +46,7 @@ namespace dss {
       m_pSystemUser(NULL)
     { }
 
-    ~Security() {
-      m_LoggedInUser.release();
-    }
+    ~Security();
 
     bool authenticate(const std::string& _user, const std::string& _password);
     bool authenticate(boost::shared_ptr<Session> _session);

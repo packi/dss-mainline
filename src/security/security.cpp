@@ -73,6 +73,11 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(Security, lsInfo)
 
+  Security::~Security() {
+    m_LoggedInUser.release();
+    delete m_pSystemUser;
+  }
+
   bool Security::authenticate(const std::string& _user, const std::string& _password) {
     signOff();
     assert(m_pPasswordChecker != NULL);
