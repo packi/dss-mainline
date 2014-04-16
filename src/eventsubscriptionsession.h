@@ -50,7 +50,6 @@ namespace dss {
     // blocks if no events are available
   private:
     boost::shared_ptr<Session> m_parentSession;
-    std::deque<Event> m_events;
     boost::shared_ptr<EventCollector> m_pEventCollector;
     void createCollector();
     // name, subscriptionID
