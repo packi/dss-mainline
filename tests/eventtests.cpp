@@ -42,6 +42,11 @@
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/set.h"
+#include "src/dss.h"
+#include "dss_life_cycle.hpp"
+#include "src/eventinterpretersystemplugins.h"
+#include "src/security/security.h"
+#include "src/security/user.h"
 
 using namespace dss;
 
@@ -683,5 +688,47 @@ BOOST_AUTO_TEST_CASE(testEventSourceGetsPassed) {
 
   boost::filesystem::remove(fileName1);
 }
+
+
+static std::string pathSystemUser = "/system/security/users/system";
+
+BOOST_AUTO_TEST_CASE(testSystemTriggerSpeed) {
+  PropertyParser parser;
+  boost::scoped_ptr<DSSLifeCycle> guard;
+  guard.reset(new DSSLifeCycle());
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  PropertyNodePtr prop = propSystem.createProperty("/");
+  BOOST_CHECK_EQUAL(true, parser.loadFromXML(DSS::getInstance()->getDataDirectory() + "/triggers.xml", prop));
+  Security &security = DSS::getInstance()->getSecurity();
+
+  {
+    // set up systemUser
+    //pSecurity.reset(new Security(propSystem.createProperty(pathSecurity)));
+    PropertyNodePtr systemUserNode = propSystem.createProperty(pathSystemUser);
+    security.addSystemRole(systemUserNode);
+
+    /* this will enable loginAsSystemUser */
+    security.setSystemUser(new User(systemUserNode));
+  }
+
+  DSS::getInstance()->getApartment().allocateZone(9492);
+  boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(9492);
+  boost::shared_ptr<Group> group = zone->getGroup(1);
+  boost::shared_ptr<Event> pEvent;
+  pEvent.reset(new Event("callSceneBus", group));
+  pEvent->setProperty("sceneID", intToString(11));
+  pEvent->setProperty("groupID", intToString(1));
+  pEvent->setProperty("zoneID", intToString(9492));
+  pEvent->setProperty("token", "wuafhawepufhasuofhawuopfhweaopfuhaweufhaweufhaweufhesufhweaupfhawufhw");
+
+  boost::shared_ptr<SystemTrigger> trigger(new SystemTrigger());
+
+  BOOST_CHECK_EQUAL(true, trigger->setup(*pEvent.get()));
+
+  for (int i = 0; i < 10; ++i) {
+    trigger->run();
+    BOOST_CHECK(DSS::getInstance()->getEventQueue().popEvent().get());
+  }
+} // testBoolProxy
 
 BOOST_AUTO_TEST_SUITE_END()
