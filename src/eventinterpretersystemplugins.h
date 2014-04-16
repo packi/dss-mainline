@@ -127,7 +127,6 @@ namespace dss {
   };
 
   class EventInterpreterPluginSystemTrigger : 
-                                            public TaskProcessor,
                                             public EventInterpreterPlugin {
     public:
       EventInterpreterPluginSystemTrigger(EventInterpreter* _pInterpreter);

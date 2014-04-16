@@ -1690,7 +1690,7 @@ namespace dss {
       return;
     }
 
-    addEvent(trigger);
+    trigger->run();
   }
 
   EventInterpreterPluginHighlevelEvent::EventInterpreterPluginHighlevelEvent(EventInterpreter* _pInterpreter) : 
