@@ -41,6 +41,7 @@ using boost::asio::ip::tcp;
 BOOST_AUTO_TEST_SUITE(SocketJS)
 
 class TestListener {
+  __DECL_LOG_CHANNEL__
 public:
   TestListener(int _port)
   : m_IOService(),
@@ -69,7 +70,7 @@ public:
       m_Socket->close();
     }
     m_IOServiceThread.join();
-    Logger::getInstance()->log("~TestListener");
+    log("~TestListener", lsDebug);
   }
 
   void setRuns(const int _value) {
@@ -143,6 +144,8 @@ private:
   char m_Data[kMaxDataLength];
   boost::shared_ptr<tcp::socket> m_Socket;
 };
+
+__DEFINE_LOG_CHANNEL__(TestListener, lsInfo)
 
 BOOST_AUTO_TEST_CASE(testTcpSocketSendTo) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
