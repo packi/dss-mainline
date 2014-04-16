@@ -32,6 +32,7 @@
 #include <iomanip>
 
 #include "foreach.h"
+#include <limits>
 
 namespace dss {
 
@@ -141,21 +142,25 @@ namespace dss {
   } // doubleToString
 
   std::string intToString(const long long _int, bool _hex) {
-    std::stringstream sstream;
+    const int max_size = std::numeric_limits<long long>::digits10 + 1 /*sign*/ + 1 /*0-terminator*/;
+    char buffer[max_size] = {0};
     if(_hex) {
-      sstream << std::hex << "0x";
+      sprintf(buffer, "0x%llx", _int);
+    } else {
+      sprintf(buffer, "%lld", _int);
     }
-    sstream << _int;
-    return sstream.str();
+    return std::string(buffer);
   } // intToString
 
   std::string uintToString(unsigned long int _int, bool _hex) {
-    std::stringstream sstream;
+    const int max_size = std::numeric_limits<long int>::digits10 + 1 /*0-terminator*/;
+    char buffer[max_size] = {0};
     if(_hex) {
-      sstream << std::hex << "0x";
+      sprintf(buffer, "0x%lx", _int);
+    } else {
+      sprintf(buffer, "%lu", _int);
     }
-    sstream << _int;
-    return sstream.str();
+    return std::string(buffer);
   } // uintToString
 
   std::string hexEncodeByteArray(const unsigned char *a, unsigned int len) {
