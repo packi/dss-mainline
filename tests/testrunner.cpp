@@ -27,11 +27,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "tests.h"
 #include <cstdio>
 #include <cstring>
-
-#include "src/datetools.h"
 
 namespace dss {
 
@@ -40,5 +37,4 @@ namespace dss {
     printf("Testing...\n");
 
   }
-
 }
