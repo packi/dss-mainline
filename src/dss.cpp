@@ -171,6 +171,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #ifdef HAVE_CURL
     WebserviceConnection::shutdown();
 #endif
+
+    if (m_commChannel) {
+      delete m_commChannel;
+      m_commChannel = NULL;
+    }
   }
 
   void DSS::setupDirectories()
@@ -278,11 +283,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     try {
       m_commChannel = CommChannel::createInstance();
-      m_commChannel->run();
+      m_commChannel->run(); // TODO move this to ::run
       m_commChannel->suspendUpdateTask();
     } catch (std::runtime_error &err) {
+      delete m_commChannel;
       log("Could not start dSA communication channel: " + std::string(err.what()), lsError);
     } catch (...) {
+      delete m_commChannel;
       log("Could not start dSA communication channel: unkown error", lsError);
       return false;
     }
@@ -621,10 +628,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pBonjour->quit();
     m_pBonjour->terminate();
 #endif
-
     if (m_commChannel) {
-      delete m_commChannel;
-      m_commChannel = NULL;
+      m_commChannel->shutdown();
     }
   } // run
 
