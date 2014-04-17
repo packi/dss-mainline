@@ -731,6 +731,19 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
   }
 
+  void init_libraries() {
+    /*
+     * we could implement decentralized approach using linker or compiler features
+     * http://stackoverflow.com/questions/2053029/how-exactly-does-attribute-constructor-work
+     */
+    curl_global_init(CURL_GLOBAL_ALL);
+  }
+
+  void cleanup_libraries() {
+    google::protobuf::ShutdownProtobufLibrary();
+    curl_global_cleanup();
+  }
+
 #ifndef WIN32
   void* DSS::handleSignal(void* arg) {
     sigset_t signal_set;

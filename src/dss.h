@@ -64,6 +64,9 @@ namespace dss {
     ssTerminating
   } aDSSState;
 
+  void init_libraries();
+  void cleanup_libraries();
+
   /** Main class
     *
     */

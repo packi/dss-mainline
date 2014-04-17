@@ -114,6 +114,7 @@ int main (int argc, char* argv[]) {
     return -1;
   }
   platformSpecificStartup();
+  dss::init_libraries();
 
   vector<string> properties;
 
@@ -243,6 +244,7 @@ int main (int argc, char* argv[]) {
     dss::DSS::shutdown();
   }
   dss::Logger::shutdown();
+  dss::cleanup_libraries();
 
   free(tzNameCopy);
 
