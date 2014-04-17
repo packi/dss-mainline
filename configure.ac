@@ -193,6 +193,15 @@ AC_ARG_WITH(distro-version-file,
         fi
     ])
 
+AC_ARG_WITH(dsstests-files,
+    AC_HELP_STRING([--with-dsstests-files=DIR], [read dsstests input files from DIR]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_DSSTEST_FILES], [1], [custom dsstest files directory set])
+            AC_DEFINE_UNQUOTED([WITH_DSSTEST_FILES], ["$withval"], [dsstest files directory])
+        fi
+    ])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC

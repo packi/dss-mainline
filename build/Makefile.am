@@ -105,7 +105,8 @@ dsstests_CXXFLAGS = \
 			$(JS_CFLAGS) \
 			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
-			$(GCOV_CFLAGS)
+			$(GCOV_CFLAGS) \
+			-DTEST_TRIGGERS_PATH="\"$(abs_top_srcdir)/\""
 
 dsstests_LDADD = \
 			libdsscore.a libunix.a libmongoose.a libprotomessages.a \
