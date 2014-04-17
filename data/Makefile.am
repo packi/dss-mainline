@@ -11,7 +11,6 @@ dist_dssjs_DATA = \
 	$(top_srcdir)/data/scripts/solar_computer.js \
 	$(top_srcdir)/data/scripts/system_action.js \
 	$(top_srcdir)/data/scripts/system_conditions.js \
-	$(top_srcdir)/data/scripts/system_trigger.js \
 	$(top_srcdir)/data/scripts/system_register_trigger.js \
 	$(top_srcdir)/data/scripts/http.js \
 	$(top_srcdir)/data/scripts/system_hail.js
