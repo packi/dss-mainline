@@ -125,4 +125,28 @@ void WebserviceApartment::doModelChanged(ChangeType type,
   WebserviceConnection::getInstance()->request(url, POST, mcb);
 }
 
+/*
+ * Access Management
+ */
+
+__DEFINE_LOG_CHANNEL__(WebserviceAccessManagement, lsInfo)
+
+void WebserviceAccessManagement::doNotifyTokenDeleted(const std::string &token,
+                                                      WebserviceCallDone_t callback) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+
+  if (!webservice_communication_authorized()) {
+    return;
+  }
+
+  url += propSystem.getStringValue(pp_websvc_access_mgmt_delete_token_url_path);
+  url += "?dsid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  url += "&token=" + token;
+
+  // webservice is fire and forget, so use shared ptr for life cycle mgmt
+  boost::shared_ptr<StatusReplyChecker> cont(new StatusReplyChecker(callback));
+  WebserviceConnection::getInstance()->request(url, POST, cont);
+}
+
 }

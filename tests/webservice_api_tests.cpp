@@ -13,6 +13,7 @@
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
+#include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
 #include "tests/dss_life_cycle.h"
@@ -136,6 +137,23 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
 
   BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
   BOOST_CHECK_EQUAL(notifyDone->reply.code, 9); /* unknown dsid */
+}
+
+/* Access Management */
+BOOST_FIXTURE_TEST_CASE(test_revokeToken, WebserviceFixture) {
+  boost::mutex mutex;
+  boost::condition_variable completion;
+
+  WebserviceCallDone_t cont(new NotifyDone(mutex, completion));
+  NotifyDone *notifyDone = static_cast<NotifyDone*>(cont.get());
+
+  boost::mutex::scoped_lock lock(mutex);
+  WebserviceAccessManagement::doNotifyTokenDeleted(SessionTokenGenerator::generate(),
+                                                   cont);
+  completion.wait(lock);
+
+  BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
+  BOOST_CHECK_EQUAL(notifyDone->reply.code, 98); /* no access rights for token */
 }
 
 BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixture) {
