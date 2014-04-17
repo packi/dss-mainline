@@ -20,10 +20,6 @@
 
 */
 
-#include "config.h"
-
-#ifdef HAVE_CURL
-
 #include <jsapi.h>
 #include <boost/make_shared.hpp>
 
@@ -363,6 +359,3 @@ namespace dss {
   }
 
 } // namespace
-
-#endif
-

@@ -1,9 +1,6 @@
 #ifndef __WEBSERVICE_API__
 #define __WEBSERVICE_API__
 
-#include "config.h"
-#ifdef HAVE_CURL // No HTTP client otherwise
-
 #include <stdexcept>
 
 #include "logger.h"
@@ -92,7 +89,5 @@ public:
 };
 
 }
-
-#endif // No HTTP client otherwise
 
 #endif

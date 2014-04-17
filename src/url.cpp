@@ -20,10 +20,6 @@
 
 */
 
-#include "config.h"
-
-#ifdef HAVE_CURL
-
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -381,6 +377,3 @@ long URL::downloadFile(std::string url, std::string filename) {
 }
 
 }
-
-#endif//HAVE_CURL
-

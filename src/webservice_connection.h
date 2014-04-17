@@ -23,9 +23,6 @@
 #ifndef __DSS_WEBSERVICE_CONNECTION_H__
 #define __DSS_WEBSERVICE_CONNECTION_H__
 
-#include "config.h"
-#ifdef HAVE_CURL
-
 #include <string>
 #include <boost/shared_ptr.hpp>
 
@@ -112,8 +109,6 @@ private:
 };
 
 } // namespace dss
-
-#endif//HAVE_CURL
 
 #endif//__DSS_WEBSERVICE_CONNECTION_H__
 

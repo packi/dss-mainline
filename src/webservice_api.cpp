@@ -1,5 +1,4 @@
 #include "webservice_api.h"
-#ifdef HAVE_CURL
 
 #include <json/json.h>
 #include <stdio.h>
@@ -126,5 +125,3 @@ void WebserviceApartment::doModelChanged(ChangeType type,
 }
 
 }
-
-#endif // ifdef HAVE_CURL

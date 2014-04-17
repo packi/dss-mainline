@@ -167,10 +167,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pModelMaintenance.reset();
 
     m_pApartment.reset();
-
-#ifdef HAVE_CURL
     WebserviceConnection::shutdown();
-#endif
 
     if (m_commChannel) {
       delete m_commChannel;
@@ -350,9 +347,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     // options override config.xml
     parseProperties(_properties);
 
-#ifdef HAVE_CURL
     WebserviceConnection::getInstance();
-#endif
+
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly
     PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");
@@ -449,17 +445,14 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginExecutionDeniedDigest(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-#ifdef HAVE_CURL
     plugin = new EventInterpreterPluginApartmentChange(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-#endif
     plugin = new EventInterpreterPluginSystemEventLog(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginSystemState(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new BenchmarkPublisherPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-
     plugin = new EventInterpreterPluginKeepWebserviceAlive(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 

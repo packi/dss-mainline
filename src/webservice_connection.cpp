@@ -20,9 +20,6 @@
 
 */
 
-#include "config.h"
-#ifdef HAVE_CURL
-
 #include "webservice_connection.h"
 
 #include <stdlib.h>
@@ -216,5 +213,3 @@ WebserviceTreeListener::~WebserviceTreeListener() {
 }
 
 } // namespace
-
-#endif //HAVE_CURL

@@ -23,8 +23,6 @@
 #ifndef __DSS_JSWEBSERVICE_H__
 #define __DSS_JSWEBSERVICE_H__
 
-#ifdef HAVE_CURL
-
 namespace dss {
 
 class WebserviceConnectionScriptContextExtension : public ScriptExtension {
@@ -37,6 +35,4 @@ public:
 
 } // namespace
 
-#endif
-
-#endif//__DSS_JSWEBSERVICE_H__
+#endif //__DSS_JSWEBSERVICE_H__

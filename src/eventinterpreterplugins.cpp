@@ -36,10 +36,8 @@
 #include "src/scripting/jsproperty.h"
 #include "src/scripting/jssocket.h"
 #include "src/scripting/jslogger.h"
-#if HAVE_CURL
-  #include "src/scripting/jscurl.h"
-  #include "src/scripting/jswebservice.h"
-#endif
+#include "src/scripting/jscurl.h"
+#include "src/scripting/jswebservice.h"
 #include "src/foreach.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
@@ -534,13 +532,11 @@ namespace dss {
       ext = new SocketScriptContextExtension();
       m_pEnvironment->addExtension(ext);
 
-#if HAVE_CURL
       ext = new CurlScriptContextExtension();
       m_pEnvironment->addExtension(ext);
 
       ext = new WebserviceConnectionScriptContextExtension();
       m_pEnvironment->addExtension(ext);
-#endif
 
       ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
       m_pEnvironment->addExtension(ext);
@@ -955,7 +951,6 @@ namespace dss {
     }
   }
 
-#ifdef HAVE_CURL
   EventInterpreterPluginApartmentChange::EventInterpreterPluginApartmentChange(EventInterpreter*
                                                                                _pInterpreter)
         : EventInterpreterPlugin("apartment_model_change", _pInterpreter)
@@ -989,7 +984,6 @@ namespace dss {
     /* no retval, no error handling, just log entry */
     WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
-#endif
 
   EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
                                                                                _pInterpreter)
@@ -999,10 +993,6 @@ namespace dss {
 
   void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-#ifndef HAVE_CURL
-    return;
-#endif
-
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
     if (!enabled) {
