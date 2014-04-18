@@ -164,6 +164,11 @@ BOOST_FIXTURE_TEST_CASE(testLoggingInSetsRightUser, FixtureTestUserTest) {
   BOOST_CHECK(Security::getCurrentlyLoggedInUser()->getName() == "testuser");
 }
 
+BOOST_AUTO_TEST_CASE(testGlobalCurrentlyLoggedInUserFreed) {
+  // TODO since it's TLS, test from other thread
+  BOOST_CHECK(Security::getCurrentlyLoggedInUser() == NULL);
+}
+
 class OtherThread {
 public:
   void run() {

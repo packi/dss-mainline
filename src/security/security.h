@@ -90,6 +90,13 @@ namespace dss {
     bool enableToken(const std::string& _token, User* _pUser);
     bool revokeToken(const std::string& _token);
   private:
+    /**
+     * HACK! Instead of
+     * DSS::getInstance()->getSecurity()->getCurrentlyLoggedInUser() or
+     * Security::getInstance()->getCurrentlyLoggedInUser() we do
+     * Security::getCurrentlyLoggedInUser()
+     * ... but manage it from DSS::getInstance()->getSecurity()
+     */
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
     boost::shared_ptr<SecurityTreeListener> m_pTreeListener;

@@ -74,6 +74,7 @@ namespace dss {
   __DEFINE_LOG_CHANNEL__(Security, lsInfo)
 
   Security::~Security() {
+    m_LoggedInUser.reset(); /* CAUTION: m_LoggedInUser is static */
     delete m_pSystemUser;
   }
 
