@@ -153,11 +153,13 @@ namespace dss {
     //
     const int max_size = std::numeric_limits<long long>::digits10 + 3;
     char buffer[max_size] = { 0 };
+    int n;
     if (_hex) {
-      sprintf(buffer, "0x%llx", _int);
+      n = snprintf(buffer, max_size, "0x%llx", _int);
     } else {
-      sprintf(buffer, "%lld", _int);
+      n = snprintf(buffer, max_size, "%lld", _int);
     }
+    assert(n < max_size);
     return std::string(buffer);
   } // intToString
 
@@ -165,11 +167,13 @@ namespace dss {
     // +2 for '\0' terminator and upper bound
     const int max_size = std::numeric_limits<long long unsigned>::digits10 + 2;
     char buffer[max_size] = { 0 };
+    int n;
     if (_hex) {
-      sprintf(buffer, "0x%llx", _int);
+      n = snprintf(buffer, max_size, "0x%llx", _int);
     } else {
-      sprintf(buffer, "%llu", _int);
+      n = snprintf(buffer, max_size, "%llu", _int);
     }
+    assert(n < max_size);
     return std::string(buffer);
   } // uintToString
 
