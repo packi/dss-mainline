@@ -142,9 +142,10 @@ namespace dss {
   } // doubleToString
 
   std::string intToString(const long long _int, bool _hex) {
-    const int max_size = std::numeric_limits<long long>::digits10 + 1 /*sign*/ + 1 /*0-terminator*/;
-    char buffer[max_size] = {0};
-    if(_hex) {
+    // +2 for sign and '\0' terminator
+    const int max_size = std::numeric_limits<long long>::digits10 + 2;
+    char buffer[max_size] = { 0 };
+    if (_hex) {
       sprintf(buffer, "0x%llx", _int);
     } else {
       sprintf(buffer, "%lld", _int);
@@ -153,9 +154,10 @@ namespace dss {
   } // intToString
 
   std::string uintToString(unsigned long int _int, bool _hex) {
-    const int max_size = std::numeric_limits<long int>::digits10 + 1 /*0-terminator*/;
-    char buffer[max_size] = {0};
-    if(_hex) {
+    // +1 for '\0' terminator
+    const int max_size = std::numeric_limits<long int>::digits10 + 1;
+    char buffer[max_size] = { 0 };
+    if (_hex) {
       sprintf(buffer, "0x%lx", _int);
     } else {
       sprintf(buffer, "%lu", _int);
