@@ -161,14 +161,14 @@ namespace dss {
     return std::string(buffer);
   } // intToString
 
-  std::string uintToString(unsigned long int _int, bool _hex) {
+  std::string uintToString(long long unsigned int _int, bool _hex) {
     // +2 for '\0' terminator and upper bound
     const int max_size = std::numeric_limits<long long unsigned>::digits10 + 2;
     char buffer[max_size] = { 0 };
     if (_hex) {
-      sprintf(buffer, "0x%lx", _int);
+      sprintf(buffer, "0x%llx", _int);
     } else {
-      sprintf(buffer, "%lu", _int);
+      sprintf(buffer, "%llu", _int);
     }
     return std::string(buffer);
   } // uintToString

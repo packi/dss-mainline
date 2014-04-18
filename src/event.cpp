@@ -1075,7 +1075,7 @@ namespace dss {
                                     m_Schedule(_pSchedule)
                                  {
     m_EventID = uintToString(_counterID) + "-" +
-                uintToString(static_cast<long unsigned int>(DateTime().secondsSinceEpoch())) + '_' + _pEvt->getName();
+                uintToString(static_cast<long long unsigned>(DateTime().secondsSinceEpoch())) + '_' + _pEvt->getName();
   } // ScheduledEvent
 
   //================================================== External consts
