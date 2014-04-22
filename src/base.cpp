@@ -142,8 +142,16 @@ namespace dss {
   } // doubleToString
 
   std::string intToString(const long long _int, bool _hex) {
-    // +2 for sign and '\0' terminator
-    const int max_size = std::numeric_limits<long long>::digits10 + 2;
+    //
+    // http://en.cppreference.com/w/cpp/types/numeric_limits/digits10
+    // ... any number with this many decimal digits can be converted to a value
+    // of type T and back to decimal form, without change due to rounding or
+    // overflow.
+    // It's a lower bound, the type may also hold numbers with one digit more
+    // but not all of them
+    // +3 for sign, '\0' terminator and upper bound
+    //
+    const int max_size = std::numeric_limits<long long>::digits10 + 3;
     char buffer[max_size] = { 0 };
     if (_hex) {
       sprintf(buffer, "0x%llx", _int);
@@ -154,8 +162,8 @@ namespace dss {
   } // intToString
 
   std::string uintToString(unsigned long int _int, bool _hex) {
-    // +1 for '\0' terminator
-    const int max_size = std::numeric_limits<long int>::digits10 + 1;
+    // +2 for '\0' terminator and upper bound
+    const int max_size = std::numeric_limits<long long unsigned>::digits10 + 2;
     char buffer[max_size] = { 0 };
     if (_hex) {
       sprintf(buffer, "0x%lx", _int);
