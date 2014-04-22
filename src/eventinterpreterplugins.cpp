@@ -770,7 +770,7 @@ namespace dss {
     }
 
     char mailText[PATH_MAX];
-    strncpy(mailText, m_mailq_dir.c_str(), (m_mailq_dir.length() < PATH_MAX) ? m_mailq_dir.length() : PATH_MAX);
+    strncpy(mailText, m_mailq_dir.c_str(), ((m_mailq_dir.length() + 1) < PATH_MAX) ? m_mailq_dir.length() + 1 : PATH_MAX);
     mailText[PATH_MAX-1] = '\0';
     strcat(mailText, "/mailXXXXXX");
 
@@ -778,8 +778,8 @@ namespace dss {
     int mailFile = mkstemp((char *) mailText);
     umask(prevUmask);
     if (mailFile < 0) {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
-          intToString(errno) + "]", lsFatal);
+      Logger::getInstance()->log(std::string("EventInterpreterPluginSendmail: generating temporary file ") + mailText + " failed [" +
+          intToString(errno) + "]: " + strerror(errno), lsFatal);
       return;
     }
     FILE* mailStream = fdopen(mailFile, "w");
