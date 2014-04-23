@@ -93,6 +93,31 @@ BOOST_FIXTURE_TEST_CASE(testSimpleEvent, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 } // testSimpleEvent
 
+BOOST_FIXTURE_TEST_CASE(testScheduledEvent, NonRunningFixture) {
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+  pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY");
+  m_pQueue->pushEvent(pEvent);
+
+  m_pEventInterpreter->executePendingEvent();
+  for (int i = 0; i < 15; i++) {
+    // somehow more like ever other sec
+    sleepMS(330);
+    m_pRunner->raisePendingEvents();
+    m_pEventInterpreter->executePendingEvent();
+  }
+  BOOST_CHECK_GE(m_pEventInterpreter->getEventsProcessed(), 3);
+  int old = m_pEventInterpreter->getEventsProcessed();
+
+  m_pRunner->removeEventByName("my_event");
+  for (int i = 0; i < 10; i++) {
+    sleepMS(500);
+    m_pRunner->raisePendingEvents();
+    m_pEventInterpreter->executePendingEvent();
+  }
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), old);
+}
+
 BOOST_FIXTURE_TEST_CASE(testSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);

@@ -308,6 +308,7 @@ namespace dss {
   class EventRunner : public PropertyListener {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
+    typedef boost::ptr_vector<ScheduledEvent> m_ScheduledEvents_t;
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     Subsystem* m_Subsystem;
@@ -327,6 +328,7 @@ namespace dss {
     bool raisePendingEvents();
 
     void removeEvent(const std::string& _eventID);
+    void removeEventByName(const std::string& _eventName);
 
     void run();
     void shutdown();

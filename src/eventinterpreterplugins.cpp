@@ -996,14 +996,7 @@ namespace dss {
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
     if (!enabled) {
-      std::vector<std::string> ids = DSS::getInstance()->getEventRunner().getEventIDs();
-      for (size_t i = 0; i < ids.size(); i++) {
-        const ScheduledEvent se = DSS::getInstance()->getEventRunner().getEvent(ids.at(i));
-        if (se.getEvent()->getName() == _event.getName()) {
-          DSS::getInstance()->getEventRunner().removeEvent(se.getID());
-          break;
-        }
-      }
+      DSS::getInstance()->getEventRunner().removeEventByName(_event.getName());
       return;
     }
 

@@ -784,6 +784,19 @@ namespace dss {
     }
   } // removeEvent
 
+  void EventRunner::removeEventByName(const std::string& _eventName) {
+    boost::mutex::scoped_lock lock(m_EventsMutex);
+    m_ScheduledEvents_t::iterator it = m_ScheduledEvents.begin();
+    while (it != m_ScheduledEvents.end()) {
+      if (it->getEvent()->getName() == _eventName) {
+        // TODO also remove event from pending queue
+        it = m_ScheduledEvents.erase(it);
+      } else {
+        it++;
+      }
+    }
+  }
+
   void EventRunner::removeEventInternal(const std::string& _eventID) {
     boost::mutex::scoped_lock lock(m_EventsMutex);
     boost::ptr_vector<ScheduledEvent>::iterator it;
