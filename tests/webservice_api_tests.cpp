@@ -17,7 +17,7 @@
 #include "src/event.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
-#include "tests/dss_life_cycle.hpp"
+#include "tests/dss_life_cycle.h"
 
 using namespace dss;
 

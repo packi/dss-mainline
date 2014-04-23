@@ -20,7 +20,7 @@
 
 */
 
-#include "dss_life_cycle.hpp"
+#include "dss_life_cycle.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>

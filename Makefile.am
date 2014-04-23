@@ -11,7 +11,8 @@ EXTRA_DIST = \
 	$(top_srcdir)/doc/doc.css \
 	$(top_srcdir)/doc/images/block.eps \
 	$(top_srcdir)/doc/images/block.png \
-	$(top_srcdir)/doc/images/digitalSTROM.png
+	$(top_srcdir)/doc/images/digitalSTROM.png \
+	$(top_srcdir)/data/triggers.xml
 
 if HAVE_DOXYGEN
 doxygen-doc:
