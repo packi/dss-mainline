@@ -322,7 +322,6 @@ namespace dss {
     void addEvent(ScheduledEvent* _scheduledEvent);
 
     size_t getSize() const;
-    std::vector<std::string> getEventIDs() const;
     const ScheduledEvent& getEvent(const std::string& _eventID) const;
 
     bool raisePendingEvents();

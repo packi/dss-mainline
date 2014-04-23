@@ -822,15 +822,6 @@ namespace dss {
     throw std::runtime_error("Event with id '" + _eventID + "' not found");
   } // getEvent
 
-  std::vector<std::string> EventRunner::getEventIDs() const {
-    std::vector<std::string> ids;
-    boost::mutex::scoped_lock lock(m_EventsMutex);
-    for (size_t i = 0; i < m_ScheduledEvents.size(); i++) {
-      ids.push_back(m_ScheduledEvents.at(i).getID());
-    }
-    return ids;
-  }
-
   void EventRunner::addEvent(ScheduledEvent* _scheduledEvent) {
     std::string id = _scheduledEvent->getID();
 
