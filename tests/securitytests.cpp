@@ -86,6 +86,25 @@ BOOST_AUTO_TEST_CASE(testSystemUserNotSet) {
   BOOST_CHECK(security.getCurrentlyLoggedInUser() == NULL);
 }
 
+struct Foo {
+  Foo() { ct++; }
+  ~Foo() { ct--; }
+  static int ct;
+};
+
+int Foo::ct;
+
+/* thread_specific_ptr is used for m_LoggedInUser, kick once it's gone */
+BOOST_AUTO_TEST_CASE(test_thread_specific_ptr) {
+  boost::thread_specific_ptr<Foo> bar;
+  bar.reset(new Foo());
+  BOOST_CHECK_EQUAL(Foo::ct, 1);
+  bar.reset(new Foo());
+  BOOST_CHECK_EQUAL(Foo::ct, 1);
+  bar.reset(NULL);
+  BOOST_CHECK_EQUAL(Foo::ct, 0);
+}
+
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
@@ -332,4 +351,5 @@ BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
   boost::filesystem::remove_all(fileName);
   // TODO explicit saveToXML
 }
+
 BOOST_AUTO_TEST_SUITE_END()

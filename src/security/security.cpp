@@ -74,7 +74,6 @@ namespace dss {
   __DEFINE_LOG_CHANNEL__(Security, lsInfo)
 
   Security::~Security() {
-    m_LoggedInUser.release();
     delete m_pSystemUser;
   }
 
@@ -95,11 +94,7 @@ namespace dss {
     bool result = false;
     signOff();
     if(_session != NULL) {
-      if(_session->getUser() != NULL) {
-        User* u = m_LoggedInUser.release();
-        if (NULL != u) {
-          delete u;
-        }
+      if (_session->getUser() != NULL) {
         m_LoggedInUser.reset(new User(*_session->getUser()));
         result = true;
       }
@@ -110,11 +105,7 @@ namespace dss {
   bool Security::impersonate(const std::string& _user) {
     signOff();
     PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + _user);
-    if(pUserNode != NULL) {
-      User* u = m_LoggedInUser.release();
-      if (NULL != u) {
-        delete u;
-      }
+    if (pUserNode != NULL) {
       m_LoggedInUser.reset(new User(pUserNode));
       return true;
     }
@@ -128,11 +119,7 @@ namespace dss {
       PropertyNodePtr pUserNameNode = pTokenNode->getProperty("user");
       if(pUserNameNode != NULL) {
         PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + pUserNameNode->getStringValue());
-        if(pUserNode != NULL) {
-          User* u = m_LoggedInUser.release();
-          if (NULL != u) {
-            delete u;
-          }
+        if (pUserNode != NULL) {
           m_LoggedInUser.reset(new User(pUserNode));
           m_LoggedInUser->setToken(_applicationToken);
           return true;
@@ -166,19 +153,12 @@ namespace dss {
   }
 
   bool Security::signIn(User* _pUser) {
-    User* u = m_LoggedInUser.release();
-    if (NULL != u) {
-      delete u;
-    }
     m_LoggedInUser.reset(new User(*_pUser));
     return true;
   } // signIn
 
   void Security::signOff() {
-    User* u = m_LoggedInUser.release();
-    if (NULL != u) {
-      delete u;
-    }
+    m_LoggedInUser.reset(NULL);
   } // signOff
 
   bool Security::loadFromXML() {
@@ -189,10 +169,6 @@ namespace dss {
   void Security::loginAsSystemUser(const std::string& _reason) {
     if(m_pSystemUser != NULL) {
       Logger::getInstance()->log("Logged in as system user (" + _reason + ")", lsInfo);
-      User* u = m_LoggedInUser.release();
-      if (NULL != u) {
-        delete u;
-      }
       m_LoggedInUser.reset(new User(*m_pSystemUser));
     } else {
       Logger::getInstance()->log("Failed to login as system-user (" + _reason + ")", lsWarning);
