@@ -26,7 +26,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "tests/dss_life_cycle.hpp"
+#include "tests/dss_life_cycle.h"
 #include "propertysystem.h"
 
 using namespace dss;
