@@ -27,18 +27,18 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "tests.h"
-#include <cstdio>
-#include <cstring>
-
-#include "src/datetools.h"
+#include "dss.h"
+#include "logger.h"
 
 namespace dss {
-
-  static void _init(void) __attribute__ ((constructor));
-  static void _init(void) {
-    printf("Testing...\n");
-
+  static void init(void) __attribute__((constructor));
+  static void init(void) {
+    dss::init_libraries();
   }
 
+  static void fini(void) __attribute__((destructor));
+  static void fini(void) {
+    dss::Logger::shutdown();
+    dss::cleanup_libraries();
+  }
 }

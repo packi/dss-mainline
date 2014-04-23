@@ -45,6 +45,7 @@ public:
     virtual void messageReceived(boost::shared_ptr<CC::CommunicationData> comm);
 
     void run();
+    void shutdown();
     bool isSceneLocked(uint32_t scene);
     bool requestLockedScenes();
     void suspendUpdateTask();
@@ -56,7 +57,6 @@ private:
     CommChannel();
     void lockMessageList();
     void unlockMessageList();
-    void shutdown();
     std::string sendMessage(const std::string& message);
     void sendWithType(dsmsg::Type msgtype);
 
