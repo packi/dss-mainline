@@ -1015,6 +1015,12 @@ namespace dss {
   void EventInterpreterPluginKeepWebserviceAlive::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
+    subscription.reset(new EventSubscription("running",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
     subscription.reset(new EventSubscription("keepWebserviceAlive",
                                              getName(),
                                              getEventInterpreter(),
@@ -1024,6 +1030,16 @@ namespace dss {
 
   void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
+    if (_event.getName() == "running") {
+      if (webservice_communication_authorized()) {
+        boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
+        pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+        pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        return;
+      }
+    }
+
     if (!webservice_communication_authorized()) {
       log("!webservice_communication_authorized", lsWarning);
       return;

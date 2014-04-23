@@ -595,15 +595,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       boost::shared_ptr<Event> runningEvent(new Event("running"));
       m_pEventQueue->pushEvent(runningEvent);
 
-
-      if (m_pPropertySystem->getBoolValue(pp_websvc_enabled)) {
-        boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
-        DateTime now;
-        pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
-        pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
-        m_pEventQueue->pushEvent(pEvent);
-      }
-
       // pass control to the eventrunner
       m_pEventRunner->run();
     }
