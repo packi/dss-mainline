@@ -142,14 +142,14 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
-  class EventInterpreterPluginKeepWebserviceAlive : public EventInterpreterPlugin,
-                                                    private PropertyListener {
+  class EventInterpreterWebservicePlugin : public EventInterpreterPlugin,
+                                           private PropertyListener {
   private:
     virtual void propertyChanged(PropertyNodePtr _caller,
                                  PropertyNodePtr _changedNode);
   public:
-    EventInterpreterPluginKeepWebserviceAlive(EventInterpreter* _pInterpreter);
-    virtual ~EventInterpreterPluginKeepWebserviceAlive();
+    EventInterpreterWebservicePlugin(EventInterpreter* _pInterpreter);
+    virtual ~EventInterpreterWebservicePlugin();
     virtual void subscribe();
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   private:

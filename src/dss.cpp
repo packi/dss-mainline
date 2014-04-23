@@ -455,7 +455,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new BenchmarkPublisherPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new EventInterpreterPluginKeepWebserviceAlive(m_pEventInterpreter.get());
+    plugin = new EventInterpreterWebservicePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());

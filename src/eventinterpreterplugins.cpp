@@ -985,20 +985,20 @@ namespace dss {
     WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
 
-  EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
-                                                                               _pInterpreter)
-        : EventInterpreterPlugin("keep_webservice_alive", _pInterpreter)
+  EventInterpreterWebservicePlugin::EventInterpreterWebservicePlugin(EventInterpreter*
+                                                                     _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterWebservicePlugin", _pInterpreter)
   {
     websvcEnabledNode =
       DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
     websvcEnabledNode ->addListener(this);
   }
 
-  EventInterpreterPluginKeepWebserviceAlive::~EventInterpreterPluginKeepWebserviceAlive() {
+  EventInterpreterWebservicePlugin::~EventInterpreterWebservicePlugin() {
     websvcEnabledNode->removeListener(this);
   }
 
-  void EventInterpreterPluginKeepWebserviceAlive::propertyChanged(PropertyNodePtr _caller,
+  void EventInterpreterWebservicePlugin::propertyChanged(PropertyNodePtr _caller,
                                                                   PropertyNodePtr _changedNode) {
     // initiate connection as soon as webservice got enabled
     if (_changedNode->getBoolValue() == true) {
@@ -1012,7 +1012,7 @@ namespace dss {
     }
   }
 
-  void EventInterpreterPluginKeepWebserviceAlive::subscribe() {
+  void EventInterpreterWebservicePlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
     subscription.reset(new EventSubscription("running",
@@ -1028,7 +1028,7 @@ namespace dss {
     getEventInterpreter().subscribe(subscription);
   }
 
-  void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
+  void EventInterpreterWebservicePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
     if (_event.getName() == "running") {
       if (webservice_communication_authorized()) {
