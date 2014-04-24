@@ -1012,6 +1012,16 @@ namespace dss {
     }
   }
 
+  void EventInterpreterPluginKeepWebserviceAlive::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription("keepWebserviceAlive",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
   void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
     if (!webservice_communication_authorized()) {

@@ -150,6 +150,7 @@ namespace dss {
   public:
     EventInterpreterPluginKeepWebserviceAlive(EventInterpreter* _pInterpreter);
     virtual ~EventInterpreterPluginKeepWebserviceAlive();
+    virtual void subscribe();
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   private:
     /** do not call DSS::getInstance() in destructor */
