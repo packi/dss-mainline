@@ -373,10 +373,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     m_pWatchdog = boost::shared_ptr<Watchdog>(new Watchdog(this));
     m_Subsystems.push_back(m_pWatchdog.get());
-
-
-    pNode = getPropertySystem().getProperty(pp_websvc_enabled);
-    m_pWebserviceTreeListener.reset(new WebserviceTreeListener(pNode));
     return checkDirectoriesExist();
   } // initialize
 

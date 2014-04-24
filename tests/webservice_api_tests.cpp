@@ -8,7 +8,8 @@
 #include <curl/curl.h>
 #include <iostream>
 
-#include "src/http_client.h"
+#include "eventinterpreterplugins.h"
+#include "http_client.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
@@ -135,6 +136,19 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
 
   BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
   BOOST_CHECK_EQUAL(notifyDone->reply.code, 9); /* unknown dsid */
+}
+
+BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixture) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+
+  // also starts event runner et. al
+  m_dss_guard.initPlugins();
+
+  // check keep alive ical is scheduled
+  propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(true);
+  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 1);
+  propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
+  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -79,17 +79,6 @@ private:
   boost::shared_ptr<URLRequestCallback> m_cb;
 };
 
-class WebserviceTreeListener : public PropertyListener {
-public:
-  WebserviceTreeListener(PropertyNodePtr _pWebserviceApiEnabledNode);
-  virtual ~WebserviceTreeListener();
-protected:
-  virtual void propertyChanged(PropertyNodePtr _caller,
-                               PropertyNodePtr _changedNode);
-private:
-   PropertyNodePtr m_pWebserviceApiEnabledNode;
-};
-
 } // namespace dss
 
 #endif//__DSS_WEBSERVICE_CONNECTION_H__

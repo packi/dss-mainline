@@ -989,14 +989,33 @@ namespace dss {
                                                                                _pInterpreter)
         : EventInterpreterPlugin("keep_webservice_alive", _pInterpreter)
   {
+    websvcEnabledNode =
+      DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
+    websvcEnabledNode ->addListener(this);
+  }
+
+  EventInterpreterPluginKeepWebserviceAlive::~EventInterpreterPluginKeepWebserviceAlive() {
+    websvcEnabledNode->removeListener(this);
+  }
+
+  void EventInterpreterPluginKeepWebserviceAlive::propertyChanged(PropertyNodePtr _caller,
+                                                                  PropertyNodePtr _changedNode) {
+    // initiate connection as soon as webservice got enabled
+    if (_changedNode->getBoolValue() == true) {
+      boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
+      DateTime now;
+      pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    } else {
+      DSS::getInstance()->getEventRunner().removeEventByName("keepWebserviceAlive");
+    }
   }
 
   void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
-    if (!enabled) {
-      DSS::getInstance()->getEventRunner().removeEventByName(_event.getName());
+    if (!webservice_communication_authorized()) {
+      log("!webservice_communication_authorized", lsWarning);
       return;
     }
 

@@ -92,4 +92,8 @@ DSSLifeCycle::~DSSLifeCycle() {
   log("destructor - done", lsDebug);
 }
 
+void DSSLifeCycle::initPlugins() {
+  DSS::getInstance()->addDefaultInterpreterPlugins();
+}
+
 }

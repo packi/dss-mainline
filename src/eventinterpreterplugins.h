@@ -142,11 +142,18 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
-  class EventInterpreterPluginKeepWebserviceAlive : public EventInterpreterPlugin {
+  class EventInterpreterPluginKeepWebserviceAlive : public EventInterpreterPlugin,
+                                                    private PropertyListener {
   private:
+    virtual void propertyChanged(PropertyNodePtr _caller,
+                                 PropertyNodePtr _changedNode);
   public:
     EventInterpreterPluginKeepWebserviceAlive(EventInterpreter* _pInterpreter);
+    virtual ~EventInterpreterPluginKeepWebserviceAlive();
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  private:
+    /** do not call DSS::getInstance() in destructor */
+    PropertyNodePtr websvcEnabledNode;
   };
 
 } // namespace dss
