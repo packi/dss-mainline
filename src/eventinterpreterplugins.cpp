@@ -29,6 +29,7 @@
 #include "businterface.h"
 #include "setbuilder.h"
 #include "dss.h"
+#include "security/security.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsmodel.h"
 #include "src/scripting/jsevent.h"
@@ -1029,6 +1030,12 @@ namespace dss {
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription(EventName::ApplicationTokenDeleted,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
   }
 
   void EventInterpreterWebservicePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1051,6 +1058,14 @@ namespace dss {
     if (_event.getName() == EventName::WebserviceKeepAlive) {
       boost::shared_ptr<URLRequestCallback> cb;
       WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+    } else if (_event.getName() == EventName::ApplicationTokenDeleted) {
+      if (!_event.hasPropertySet(EventProperty::ApplicationToken)) {
+        log("Invalid token deleted event missing token", lsWarning);
+        return;
+      }
+      std::string token = _event.getPropertyByName(EventProperty::ApplicationToken);
+      WebserviceAccessManagement::doNotifyTokenDeleted(token, WebserviceCallDone_t());
+      return;
     }
   }
 

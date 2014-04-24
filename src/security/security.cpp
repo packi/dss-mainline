@@ -22,10 +22,11 @@
 
 #include "security.h"
 
+#include "src/dss.h"
+#include "src/event.h"
 #include "src/hasher.h"
-#include "src/propertysystem.h"
 #include "src/logger.h"
-
+#include "src/propertysystem.h"
 #include "src/security/user.h"
 #include "src/session.h"
 
@@ -225,6 +226,10 @@ namespace dss {
       if(m_pTreeListener != NULL) {
         m_pTreeListener->writeXML();
       }
+
+      boost::shared_ptr<Event> pEvent(new Event(EventName::ApplicationTokenDeleted));
+      pEvent->setProperty(EventProperty::ApplicationToken, _token);
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       return true;
     }
     return false;
