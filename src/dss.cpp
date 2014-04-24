@@ -120,6 +120,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
   __DEFINE_LOG_CHANNEL__(DSS, lsInfo);
 
+  bool DSS::s_shutdown;
+
   DSS::DSS()
   : m_commChannel(NULL)
   {
@@ -409,6 +411,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   int DSS::s_InstanceGeneration = 0;
 
   DSS* DSS::getInstance() {
+    if (s_shutdown) {
+      assert(false);
+    }
+
     if (m_Instance == NULL) {
       m_Instance = new DSS();
       s_InstanceGeneration++;
@@ -646,7 +652,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     }
     DSS* inst = m_Instance;
     m_Instance = NULL;
+    s_shutdown = true;
     delete inst;
+    s_shutdown = false;
   } // shutdown
 
   int DSS::loadConfigDir(const std::string& _configDir) {
