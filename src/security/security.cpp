@@ -221,9 +221,9 @@ namespace dss {
   bool Security::revokeToken(const std::string& _token) {
     PropertyNodePtr pTokens = m_pRootNode->createProperty("applicationTokens/enabled");
     PropertyNodePtr pToken = m_pRootNode->getProperty("applicationTokens/enabled/" + _token);
-    if(pToken != NULL) {
+    if (pToken != NULL) {
       pTokens->removeChild(pToken);
-      if(m_pTreeListener != NULL) {
+      if (m_pTreeListener != NULL) {
         m_pTreeListener->writeXML();
       }
 
