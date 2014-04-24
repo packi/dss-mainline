@@ -51,6 +51,7 @@ namespace dss {
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
+    __DECL_LOG_CHANNEL__
   private:
     boost::shared_ptr<ScriptEnvironment> m_pEnvironment;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
@@ -145,6 +146,7 @@ namespace dss {
   class EventInterpreterWebservicePlugin : public EventInterpreterPlugin,
                                            private PropertyListener {
   private:
+    __DECL_LOG_CHANNEL__
     virtual void propertyChanged(PropertyNodePtr _caller,
                                  PropertyNodePtr _changedNode);
   public:

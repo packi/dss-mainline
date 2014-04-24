@@ -268,6 +268,8 @@ namespace dss {
 
   //================================================== EventInterpreterPluginJavascript
 
+  __DEFINE_LOG_CHANNEL__(EventInterpreterPluginJavascript, lsInfo);
+
   EventInterpreterPluginJavascript::EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("javascript", _pInterpreter)
   { } // ctor
@@ -291,7 +293,7 @@ namespace dss {
       (*ipScriptContextWrapper)->get()->detachWrapper();
       ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
     }
-    log("All scripts Terminated");
+    log("All scripts Terminated", lsInfo);
   }
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
@@ -990,6 +992,8 @@ namespace dss {
     std::string WebserviceKeepAlive = "keepWebserviceAlive";
   }
 
+  __DEFINE_LOG_CHANNEL__(EventInterpreterWebservicePlugin, lsInfo);
+
   EventInterpreterWebservicePlugin::EventInterpreterWebservicePlugin(EventInterpreter*
                                                                      _pInterpreter)
     : EventInterpreterPlugin("EventInterpreterWebservicePlugin", _pInterpreter)
@@ -1040,6 +1044,7 @@ namespace dss {
 
   void EventInterpreterWebservicePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
+    log("handle: " + _event.getName(), lsDebug);
     if (_event.getName() == "running") {
       if (webservice_communication_authorized()) {
         boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
