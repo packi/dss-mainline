@@ -985,6 +985,10 @@ namespace dss {
     WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
 
+  namespace EventName {
+    std::string WebserviceKeepAlive = "keepWebserviceAlive";
+  }
+
   EventInterpreterWebservicePlugin::EventInterpreterWebservicePlugin(EventInterpreter*
                                                                      _pInterpreter)
     : EventInterpreterPlugin("EventInterpreterWebservicePlugin", _pInterpreter)
@@ -1002,13 +1006,12 @@ namespace dss {
                                                                   PropertyNodePtr _changedNode) {
     // initiate connection as soon as webservice got enabled
     if (_changedNode->getBoolValue() == true) {
-      boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
-      DateTime now;
-      pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
+      boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
+      pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
     } else {
-      DSS::getInstance()->getEventRunner().removeEventByName("keepWebserviceAlive");
+      DSS::getInstance()->getEventRunner().removeEventByName(EventName::WebserviceKeepAlive);
     }
   }
 
@@ -1021,7 +1024,7 @@ namespace dss {
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
 
-    subscription.reset(new EventSubscription("keepWebserviceAlive",
+    subscription.reset(new EventSubscription(EventName::WebserviceKeepAlive,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1032,7 +1035,7 @@ namespace dss {
   {
     if (_event.getName() == "running") {
       if (webservice_communication_authorized()) {
-        boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
+        boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
         pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
         pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -1045,8 +1048,10 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<URLRequestCallback> cb;
-    WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+    if (_event.getName() == EventName::WebserviceKeepAlive) {
+      boost::shared_ptr<URLRequestCallback> cb;
+      WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+    }
   }
 
 } // namespace dss

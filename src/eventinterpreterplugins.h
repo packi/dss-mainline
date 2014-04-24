@@ -148,6 +148,7 @@ namespace dss {
     virtual void propertyChanged(PropertyNodePtr _caller,
                                  PropertyNodePtr _changedNode);
   public:
+    static std::string ConnectionKeepAlive;
     EventInterpreterWebservicePlugin(EventInterpreter* _pInterpreter);
     virtual ~EventInterpreterWebservicePlugin();
     virtual void subscribe();
