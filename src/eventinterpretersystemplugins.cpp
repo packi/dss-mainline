@@ -1235,8 +1235,8 @@ namespace dss {
     }
     
     dss_dsid_t dsid = m_evtSrcDSID;
-    std::string eventName = m_properties.get(ss_sensorEvent);;
-    int eventIndex = strToIntDef(m_properties.get(ss_sensorIndex), -1);
+    std::string eventName = m_properties.get(ss_sensorEvent);
+    std::string eventIndex = m_properties.get(ss_sensorIndex);
 
     PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsid);
     if (triggerDSID == NULL) {
@@ -1265,16 +1265,11 @@ namespace dss {
       return false;
     }
 
-    int iEventId;
-    try {
-      iEventId = triggerEventId->getIntegerValue();
-    } catch (PropertyTypeMismatch& e){
-      return false;
-    }
-    if ((iEventId == eventIndex) || (iEventId == -1)) {
+    std::string iEventId = triggerEventId->getAsString();
+    if ((iEventId == eventIndex) || (iEventId == "-1")) {
       Logger::getInstance()->log("SystemTrigger::"
               "checkDeviceSensor:: Match: SensorEvent dSID: " + sDSID +
-              " EventId: " + intToString(iEventId));
+              " EventId: " + iEventId);
       return true;
     }
 
