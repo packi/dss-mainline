@@ -129,6 +129,7 @@ namespace dss {
     boost::mutex m_mutex;
     typedef std::vector<SubscriptionTime> subscriptionTimes_t;
     std::vector<SubscriptionTime> m_subscriptionTimes;
+    DateTime m_startTime;
   };
 
   class BenchmarkPublisherPlugin : public EventInterpreterPlugin {

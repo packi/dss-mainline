@@ -132,6 +132,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     // TODO why this setFooDirectoryPath
     setupDirectories();
+    m_pPropertySystem->createProperty("/system/start_time")
+      ->setStringValue(DateTime().toString());
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
     m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
@@ -165,10 +167,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pModelMaintenance.reset();
 
     m_pApartment.reset();
-
-#ifdef HAVE_CURL
     WebserviceConnection::shutdown();
-#endif
+
+    if (m_commChannel) {
+      delete m_commChannel;
+      m_commChannel = NULL;
+    }
   }
 
   void DSS::setupDirectories()
@@ -271,19 +275,26 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   } // parseProperties
 
   bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
+    log("DSS::initialize", lsInfo);
     m_State = ssCreatingSubsystems;
 
     try {
       m_commChannel = CommChannel::createInstance();
-      m_commChannel->run();
+      m_commChannel->run(); // TODO move this to ::run
       m_commChannel->suspendUpdateTask();
     } catch (std::runtime_error &err) {
+      delete m_commChannel;
       log("Could not start dSA communication channel: " + std::string(err.what()), lsError);
+    } catch (...) {
+      delete m_commChannel;
+      log("Could not start dSA communication channel: unkown error", lsError);
+      return false;
     }
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
 
+    // will start a thread
     m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
     m_Subsystems.push_back(m_pModelMaintenance.get());
 
@@ -336,9 +347,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     // options override config.xml
     parseProperties(_properties);
 
-#ifdef HAVE_CURL
     WebserviceConnection::getInstance();
-#endif
+
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly
     PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");
@@ -399,19 +409,16 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return sane;
   } // checkDirectoriesExist
 
-#ifdef WITH_TESTS
-  void DSS::teardown() {
-    DSS* instance = m_Instance;
-    m_Instance = NULL;
-    delete instance;
-  }
-#endif
-
   DSS* DSS::m_Instance = NULL;
+  int DSS::s_InstanceGeneration = 0;
 
   DSS* DSS::getInstance() {
-    if(m_Instance == NULL) {
+    if (m_Instance == NULL) {
       m_Instance = new DSS();
+      s_InstanceGeneration++;
+      log("getInstance: create new -- " +
+          intToString(reinterpret_cast<long long int>(m_Instance), true),
+          lsInfo);
     }
     assert(m_Instance != NULL);
     return m_Instance;
@@ -446,7 +453,6 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new BenchmarkPublisherPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-
     plugin = new EventInterpreterPluginKeepWebserviceAlive(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
@@ -615,10 +621,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pBonjour->quit();
     m_pBonjour->terminate();
 #endif
-
     if (m_commChannel) {
-      delete m_commChannel;
-      m_commChannel = NULL;
+      m_commChannel->shutdown();
     }
   } // run
 
@@ -635,8 +639,15 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   void DSS::shutdown() {
-    DSS::getInstance()->getSecurity().
-      loginAsSystemUser("Shutdown needs to be as system user");
+    if (!m_Instance) {
+      return;
+    }
+    log("DSS::shutdown " +
+        intToString(reinterpret_cast<long long int>(m_Instance), true),
+        lsInfo);
+    if (m_Instance->m_pSecurity) {
+      m_Instance->getSecurity().loginAsSystemUser("Shutdown needs to be as system user");
+    }
     DSS* inst = m_Instance;
     m_Instance = NULL;
     delete inst;
@@ -716,6 +727,19 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #else
 #error missing random genarator on platform
 #endif
+  }
+
+  void init_libraries() {
+    /*
+     * we could implement decentralized approach using linker or compiler features
+     * http://stackoverflow.com/questions/2053029/how-exactly-does-attribute-constructor-work
+     */
+    curl_global_init(CURL_GLOBAL_ALL);
+  }
+
+  void cleanup_libraries() {
+    google::protobuf::ShutdownProtobufLibrary();
+    curl_global_cleanup();
   }
 
 #ifndef WIN32

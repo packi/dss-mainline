@@ -30,9 +30,6 @@
 #include "src/logger.h"
 #include "src/datetools.h"
 #include "src/backtrace.h"
-#ifdef WITH_TESTS
-#include "tests/tests.h"
-#endif
 
 #include <ctime>
 #include <csignal>
@@ -117,6 +114,7 @@ int main (int argc, char* argv[]) {
     return -1;
   }
   platformSpecificStartup();
+  dss::init_libraries();
 
   vector<string> properties;
 
@@ -246,6 +244,7 @@ int main (int argc, char* argv[]) {
     dss::DSS::shutdown();
   }
   dss::Logger::shutdown();
+  dss::cleanup_libraries();
 
   free(tzNameCopy);
 

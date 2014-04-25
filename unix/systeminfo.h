@@ -23,8 +23,11 @@
 #ifndef SYSTEMINFO_H_
 #define SYSTEMINFO_H_
 
+#include "src/logger.h"
+
 namespace dss {
   class SystemInfo {
+  __DECL_LOG_CHANNEL__
   public:
     void collect();
   private:

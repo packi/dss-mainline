@@ -389,13 +389,13 @@ namespace dss {
       int lastMatch = -1;
       int numItem = 0;
       boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-      for(PropertyList::iterator it = m_ChildNodes.begin();
-           it != m_ChildNodes.end(); it++) {
+      PropertyList::iterator it = m_ChildNodes.begin();
+      PropertyList::iterator end = m_ChildNodes.end();
+      for(; it != end; it++) {
         numItem++;
-        PropertyNodePtr cur = *it;
-        if(cur->m_Name == propName) {
-          if(cur->m_Index == index) {
-            return cur;
+        if((*it)->m_Name == propName) {
+          if((*it)->m_Index == index) {
+            return (*it);
           }
           lastMatch = numItem - 1;
         }

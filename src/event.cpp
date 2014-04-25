@@ -251,10 +251,14 @@ namespace dss {
     }
     // lock subscriptions until initialization is complete
     m_SubscriptionsMutex.lock();
+    m_SubscriptionsMutex_locked = true;
   } // ctor()
 
   EventInterpreter::~EventInterpreter() {
     scrubVector(m_Plugins);
+    if (m_SubscriptionsMutex_locked) {
+      m_SubscriptionsMutex.unlock();
+    }
   } // dtor
 
   void EventInterpreter::doStart() {
@@ -266,6 +270,7 @@ namespace dss {
 
     if (!DSS::hasInstance()) {
       m_SubscriptionsMutex.unlock();
+      m_SubscriptionsMutex_locked = false;
       return;
     }
 
@@ -319,8 +324,11 @@ namespace dss {
 
     // reload subscriptions
     m_SubscriptionsMutex.unlock();
+    m_SubscriptionsMutex_locked = false;
     loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
     loadStatesFromProperty(subParser->getStatesNode());
+
+    log("initialize -- done", lsInfo);
   } // initialize
 
   EventInterpreter& EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
@@ -549,27 +557,18 @@ namespace dss {
         return;
       }
 
-      boost::shared_ptr<SubscriptionOptions> opts;
-      bool hadOpts = false;
-
+      boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions);
       EventInterpreterPlugin* plugin = getPluginByName(handlerName);
-      if(plugin == NULL) {
+      if (plugin == NULL) {
         log(std::string("loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
         log(       "loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
-      } else {
-        opts = plugin->createOptionsFromProperty(_node);
-        hadOpts = true;
       }
+
       try {
-        if(opts == NULL) {
-          opts.reset(new SubscriptionOptions());
-        }
         opts->loadParameterFromProperty(_node->getPropertyByName("parameter"));
       } catch(std::runtime_error& e) {
-        // only delete options created in the try-part...
-        if(!hadOpts) {
-          opts.reset();
-        }
+        log("FAILED: loadParameterFromProperty", lsInfo);
+        opts.reset();
       }
 
       boost::shared_ptr<EventSubscription> subscription(
@@ -1013,10 +1012,6 @@ namespace dss {
     m_pInterpreter(_interpreter)
   { } // ctor
 
-  boost::shared_ptr<SubscriptionOptions> EventInterpreterPlugin::createOptionsFromProperty(PropertyNodePtr _node) {
-    return boost::shared_ptr<SubscriptionOptions>();
-  } // createOptionsFromXML
-
   void EventInterpreterPlugin::log(const std::string& _message, aLogSeverity _severity) {
     m_pInterpreter->log(_message, _severity);
   }
@@ -1067,7 +1062,7 @@ namespace dss {
                                     m_Schedule(_pSchedule)
                                  {
     m_EventID = uintToString(_counterID) + "-" +
-                uintToString(static_cast<long unsigned int>(DateTime().secondsSinceEpoch())) + '_' + _pEvt->getName();
+                uintToString(static_cast<long long unsigned>(DateTime().secondsSinceEpoch())) + '_' + _pEvt->getName();
   } // ScheduledEvent
 
   //================================================== External consts

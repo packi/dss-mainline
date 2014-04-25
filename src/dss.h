@@ -64,13 +64,24 @@ namespace dss {
     ssTerminating
   } aDSSState;
 
+  void init_libraries();
+  void cleanup_libraries();
+
   /** Main class
     *
     */
   class DSS {
     __DECL_LOG_CHANNEL__
+    friend class DSSLifeCycle;
   private:
     static DSS* m_Instance;
+    /**
+     * s_generation - enumerate generation
+     * when destroying recreating instances you might get
+     * the same memory from the heap. so need a serial
+     * number to identify reliably
+     */
+    static int s_InstanceGeneration;
     std::vector<Subsystem*> m_Subsystems;
     time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;
@@ -113,7 +124,6 @@ namespace dss {
     void setupDirectories();
     bool initSubsystems();
     bool initSecurity();
-    void publishDSID();
   public:
     ~DSS();
     bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);
@@ -123,9 +133,6 @@ namespace dss {
     static bool hasInstance();
     static void shutdown();
     void initiateShutdown();
-#ifdef WITH_TESTS
-    static void teardown();
-#endif
     static std::string versionString();
     static std::string readDistroVersion();
     static std::vector<unsigned char> getRandomSalt(unsigned int len);
@@ -160,6 +167,7 @@ namespace dss {
     void setWebrootDirectory(const std::string& _value);
     void setJSLogDirectory(const std::string& _value);
     void setSavedPropsDirectory(const std::string& _value);
+    void publishDSID();
   }; // DSS
 
 }

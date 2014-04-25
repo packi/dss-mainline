@@ -36,10 +36,8 @@
 #include "src/scripting/jsproperty.h"
 #include "src/scripting/jssocket.h"
 #include "src/scripting/jslogger.h"
-#if HAVE_CURL
-  #include "src/scripting/jscurl.h"
-  #include "src/scripting/jswebservice.h"
-#endif
+#include "src/scripting/jscurl.h"
+#include "src/scripting/jswebservice.h"
 #include "src/foreach.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
@@ -48,9 +46,7 @@
 #include "src/model/state.h"
 #include "src/model/apartment.h"
 #include "src/internaleventrelaytarget.h"
-#include "src/url.h"
-#include "src/webservice_replies.h"
-#include "src/webservice_connection.h"
+#include "src/webservice_api.h"
 #include "src/subscription_profiler.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -536,13 +532,11 @@ namespace dss {
       ext = new SocketScriptContextExtension();
       m_pEnvironment->addExtension(ext);
 
-#if HAVE_CURL
       ext = new CurlScriptContextExtension();
       m_pEnvironment->addExtension(ext);
 
       ext = new WebserviceConnectionScriptContextExtension();
       m_pEnvironment->addExtension(ext);
-#endif
 
       ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
       m_pEnvironment->addExtension(ext);
@@ -772,7 +766,7 @@ namespace dss {
     }
 
     char mailText[PATH_MAX];
-    strncpy(mailText, m_mailq_dir.c_str(), (m_mailq_dir.length() < PATH_MAX) ? m_mailq_dir.length() : PATH_MAX);
+    strncpy(mailText, m_mailq_dir.c_str(), ((m_mailq_dir.length() + 1) < PATH_MAX) ? m_mailq_dir.length() + 1 : PATH_MAX);
     mailText[PATH_MAX-1] = '\0';
     strcat(mailText, "/mailXXXXXX");
 
@@ -780,8 +774,8 @@ namespace dss {
     int mailFile = mkstemp((char *) mailText);
     umask(prevUmask);
     if (mailFile < 0) {
-      Logger::getInstance()->log("EventInterpreterPluginSendmail: generating temporary file failed [" +
-          intToString(errno) + "]", lsFatal);
+      Logger::getInstance()->log(std::string("EventInterpreterPluginSendmail: generating temporary file ") + mailText + " failed [" +
+          intToString(errno) + "]: " + strerror(errno), lsFatal);
       return;
     }
     FILE* mailStream = fdopen(mailFile, "w");
@@ -963,70 +957,9 @@ namespace dss {
   {
   }
 
-  class ModelChangeRequestCallback : public URLRequestCallback
-  {
-  public:
-    virtual ~ModelChangeRequestCallback() {};
-    virtual void result(long code, boost::shared_ptr<URLResult> result)
-    {
-      if (code != 200) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                             " HTTP POST failed " + intToString(code), lsError);
-        return;
-      }
-
-      try {
-        ModelChangeResponse resp = parseModelChange(result->content());
-
-        if (resp.code != 0) {
-          Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                                     ": " + resp.desc, lsError);
-          return;
-        }
-      } catch (ParseError &ex) {
-        Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-                       " invalid return message " + result->content(), lsError);
-        return;
-      }
-    }
-  };
-
-  void EventInterpreterPluginApartmentChange::doCall(ChangeType type)
-  {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    std::string url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-
-    url += "?apartmentChangeType=";
-    switch (type) {
-    case Apartment:
-        url += "Apartment";
-        break;
-    case TimedEvent:
-        url += "TimedEvent";
-        break;
-    case UDA:
-        url += "UserDefinedAction";
-        break;
-    }
-    url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-
-    Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
-            " executeURL: " + url);
-
-    boost::shared_ptr<ModelChangeRequestCallback> mcb(
-                                            new ModelChangeRequestCallback());
-    WebserviceConnection::getInstance()->request(url, POST, mcb);
-  }
-
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-#ifndef HAVE_CURL
-    return;
-#endif
-
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    bool enabled = propSystem.getBoolValue("/config/webservice-api/enabled");
-    if (!enabled) {
+    if (!webservice_communication_authorized()) {
       return;
     }
 
@@ -1035,22 +968,21 @@ namespace dss {
       Logger::getInstance()->log(" name " + it->first + " : " + it->second);
     }
 
-    ChangeType type;
+    WebserviceApartment::ChangeType type;
     /* momentan ist definiert: 1=Apartment, 2=TimedEvent, 3=UDA */
     if (_event.getName() == ModelChangedEvent::Apartment) {
-      type = Apartment;
+      type = WebserviceApartment::ApartmentChange;
     } else if (_event.getName() == ModelChangedEvent::TimedEvent) {
-      type = TimedEvent;
+      type = WebserviceApartment::TimedEventChange;
     } else if (_event.getName() == ModelChangedEvent::UserDefinedAction) {
-      type = UDA;
+      type = WebserviceApartment::UDAChange;
     } else {
-      Logger::getInstance()->log(" unkown ModelChange event " +
-                                 _event.getName(), lsError);
+      log(" unkown ModelChange event " + _event.getName(), lsError);
       return;
     }
 
     /* no retval, no error handling, just log entry */
-    doCall(type);
+    WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
 
   EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
@@ -1061,10 +993,6 @@ namespace dss {
 
   void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-#ifndef HAVE_CURL
-    return;
-#endif
-
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
     if (!enabled) {
@@ -1082,4 +1010,5 @@ namespace dss {
     boost::shared_ptr<URLRequestCallback> cb;
     WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
   }
+
 } // namespace dss

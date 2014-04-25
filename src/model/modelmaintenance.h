@@ -165,6 +165,7 @@ namespace dss {
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
     void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
+    void setApartmentState();
     void readOutPendingMeter();
 
     void readConfiguration();

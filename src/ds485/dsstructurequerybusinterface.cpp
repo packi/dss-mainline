@@ -87,6 +87,10 @@ namespace dss {
     ret = dSMProperties_get_flags(m_DSMApiHandle, dsid, &flags);
     DSBusInterface::checkResultCode(ret);
     result.flags = std::bitset<8>(flags);
+
+    ret = dSMProperties_get_apartment_state(m_DSMApiHandle, dsid,
+                                            &result.ApartmentState);
+    DSBusInterface::checkResultCode(ret);
     return result;
   } // getDSMeterSpec
 

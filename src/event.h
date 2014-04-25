@@ -271,8 +271,6 @@ namespace dss {
     const std::string& getName() const { return m_Name; }
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
-    virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromProperty(PropertyNodePtr _node);
-
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   }; // EventInterpreterPlugin
 
@@ -350,6 +348,7 @@ namespace dss {
     typedef std::vector< boost::shared_ptr<EventSubscription> > SubscriptionVector;
     SubscriptionVector m_Subscriptions;
     boost::mutex m_SubscriptionsMutex;
+    bool m_SubscriptionsMutex_locked;
     std::vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;

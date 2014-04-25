@@ -1,7 +1,9 @@
 /*
     Copyright (c) 2012 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2014 digitalSTROM.org, Zurich, Switzerland
 
     Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+    Author: Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -20,17 +22,13 @@
 
 */
 
-#include "config.h"
-
-#ifdef HAVE_CURL
-
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "foreach.h"
 #include "logger.h"
-#include "url.h"
+#include "http_client.h"
 #include "base.h"
 
 #define CURL_DEEP_DEBUG 0
@@ -40,13 +38,33 @@
 
 namespace dss {
 
+/*
+ * TODO URLResult, could probably be replaced by a std::string
+ * http://codereview.stackexchange.com/questions/14389/tiny-curl-c-wrapper
+ */
+class URLResult {
+public:
+    friend class HttpClient;
+    URLResult() : m_memory(NULL), m_size(0) {}
+    virtual ~URLResult();
+
+    void reset();
+    void *grow_tail(size_t increase);
+    const char* content();
+
+private:
+    static size_t appendCallback(void* contents, size_t size, size_t nmemb, void* userp);
+    char* m_memory;
+    size_t m_size;
+};
+
 /**
  * TODO drop _reuse_handle, and reuse by default
  * follow RAII principle
  */
-URL::URL(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
+HttpClient::HttpClient(bool _reuse_handle) : m_reuse_handle(_reuse_handle),
                                m_curl_handle(NULL) {}
-URL::~URL()
+HttpClient::~HttpClient()
 {
   if (m_curl_handle) {
       curl_easy_cleanup(m_curl_handle);
@@ -104,32 +122,38 @@ size_t URLResult::appendCallback(void* contents, size_t size, size_t nmemb, void
   return realsize;
 }
 
-__DEFINE_LOG_CHANNEL__(URL, lsInfo)
+__DEFINE_LOG_CHANNEL__(HttpClient, lsInfo)
 
-size_t URL::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp)
+size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp)
 {
   /* throw it away */
   return size * nmemb;
 }
 
-long URL::request(const std::string& url, RequestType type, class URLResult* result)
+long HttpClient::request(const std::string& url, RequestType type, std::string *result)
 {
-  return internalRequest(url, type, std::string(), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
+  return internalRequest(url, type, std::string(), headers_t(), formpost_t(),
+                         result);
 }
 
-long URL::request(const std::string& url,
+long HttpClient::request(const std::string& url,
                   boost::shared_ptr<HashMapStringString> headers,
-                  std::string postdata, class URLResult* result)
+                  std::string postdata, std::string *result)
 {
-  return internalRequest(url, POST, postdata, headers, boost::shared_ptr<HashMapStringString>(new HashMapStringString()), result);
+  return internalRequest(url, POST, postdata, headers, formpost_t(), result);
 }
 
-long URL::request(const std::string& url, RequestType type,
+long HttpClient::request(const std::string& url, RequestType type,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
-                  URLResult* result)
+                  std::string *result)
 {
   return internalRequest(url, type, std::string(), headers, formpost, result);
+}
+
+long HttpClient::request(const HttpRequest &req, std::string *result) {
+  return internalRequest(req.url, req.type, req.postdata, req.headers,
+                         req.formpost, result);
 }
 
 #if CURL_DEEP_DEBUG
@@ -229,13 +253,14 @@ static int my_trace(CURL *handle, curl_infotype type,
 struct data config;
 #endif
 
-long URL::internalRequest(const std::string& url, RequestType type,
+long HttpClient::internalRequest(const std::string& url, RequestType type,
                   std::string postdata,
                   boost::shared_ptr<HashMapStringString> headers,
                   boost::shared_ptr<HashMapStringString> formpost,
-                  URLResult* result)
+                  std::string *result)
 {
   CURLcode res;
+  URLResult outputCollector;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   struct curl_slist *cheaders = NULL;
   struct curl_httppost *formpost_start = NULL;
@@ -261,7 +286,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
 
   HashMapStringString::iterator it;
 
-  if (!headers->empty()) {
+  if (headers.get() && !headers->empty()) {
     for (it = headers->begin(); it != headers->end(); it++) {
       cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
     }
@@ -277,28 +302,28 @@ long URL::internalRequest(const std::string& url, RequestType type,
     curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
     if (!postdata.empty()) {
       curl_easy_setopt(m_curl_handle, CURLOPT_COPYPOSTFIELDS, postdata.c_str());
-    } else {
+    } else if (formpost.get() && !formpost->empty()) {
       for (it = formpost->begin(); it != formpost->end(); it++) {
         curl_formadd(&formpost_start, &formpost_end,
                      CURLFORM_COPYNAME, it->first.c_str(),
                      CURLFORM_COPYCONTENTS, it->second.c_str(),
                      CURLFORM_END);
       }
-
-      /* must be set even if it's null */
       curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, formpost_start);
+    } else {
+      // empty post is valid request, but not without this call
+      curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, NULL);
     }
     break;
   }
 
   if (result != NULL) {
     /* send all data to this function  */
-    result->reset();
     curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URLResult::appendCallback);
-    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, (void *)result);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, &outputCollector);
   } else {
     /* suppress output to stdout */
-    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URL::writeCallbackMute);
+    curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient::writeCallbackMute);
   }
   curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
@@ -314,6 +339,10 @@ long URL::internalRequest(const std::string& url, RequestType type,
     return http_code;
   }
 
+  if (result != NULL) {
+    *result = outputCollector.content();
+  }
+
   if (cheaders) {
     curl_slist_free_all(cheaders);
   }
@@ -324,7 +353,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
 
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
   log("return code: " + intToString(http_code), lsDebug);
-    
+
   if (!m_reuse_handle) {
     curl_easy_cleanup(m_curl_handle);
     m_curl_handle = NULL;
@@ -332,7 +361,7 @@ long URL::internalRequest(const std::string& url, RequestType type,
   return http_code;
 }
 
-long URL::downloadFile(std::string url, std::string filename) {
+long HttpClient::downloadFile(std::string url, std::string filename) {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   long http_code = -1;
@@ -381,6 +410,3 @@ long URL::downloadFile(std::string url, std::string filename) {
 }
 
 }
-
-#endif//HAVE_CURL
-

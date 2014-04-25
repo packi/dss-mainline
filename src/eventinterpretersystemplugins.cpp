@@ -23,12 +23,14 @@
 #include "config.h"
 
 #include <signal.h>
+#include <set>
 
 #include "eventinterpretersystemplugins.h"
 #include "internaleventrelaytarget.h"
 #include "logger.h"
 #include "base.h"
 #include "dss.h"
+#include "http_client.h"
 #include "model/set.h"
 #include "model/zone.h"
 #include "model/group.h"
@@ -41,12 +43,6 @@
 #include "systemcondition.h"
 #include "security/security.h"
 #include "util.h"
-
-#ifdef HAVE_CURL
-#include "url.h"
-#endif
-
-#include <set>
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500
@@ -544,11 +540,6 @@ namespace dss {
   }
 
   void SystemEventActionExecute::executeURL(PropertyNodePtr _actionNode) {
-#ifndef HAVE_CURL
-    Logger::getInstance()->log("SystemEventActionExecute:"
-            "executeURL: dSS was compiled without cURL support, "
-            "ignoring request", lsWarning);
-#else
     PropertyNodePtr oUrlNode =  _actionNode->getPropertyByName("url");
     if (oUrlNode == NULL) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -566,15 +557,14 @@ namespace dss {
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: " + oUrl);
 
-    boost::shared_ptr<URL> url(new URL());
-    long code = url->request(oUrl);
+    boost::shared_ptr<HttpClient> url(new HttpClient());
+    long code = url->request(oUrl, GET, NULL);
     std::ostringstream out;
     out << code;
 
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: request to " + oUrl + " returned HTTP code " +
             out.str());
-#endif
   }
 
   void SystemEventActionExecute::executeStateChange(PropertyNodePtr _actionNode) {
@@ -976,6 +966,20 @@ namespace dss {
 
   }
 
+  static const std::string ss_originDeviceID = "originDeviceID";
+  static const std::string ss_zone = "zone";
+  static const std::string ss_group = "group";
+  static const std::string ss_scene = "scene";
+  static const std::string ss_sceneID = "sceneID";
+  static const std::string ss_dsid = "dsid";
+  static const std::string ss_forced = "forced";
+  static const std::string ss_sensorEvent = "sensorEvent";
+  static const std::string ss_sensorIndex = "sensorIndex";
+  static const std::string ss_eventid = "eventid";
+  static const std::string ss_evt = "evt";
+  static const std::string ss_triggers = "triggers";
+  static const std::string ss_type = "type";
+
   SystemTrigger::SystemTrigger()
     : SystemEvent(),
       m_evtSrcIsGroup(false),
@@ -997,53 +1001,63 @@ namespace dss {
       return false;
     }
 
-    std::string zone = intToString(m_evtSrcZone);
-    std::string group = intToString(m_evtSrcGroup);
-    std::string scene = m_properties.get("sceneID");
+    int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
     dss_dsid_t originDevice;
-    if (m_properties.has("originDeviceID")) {
-      originDevice = dss_dsid_t::fromString(m_properties.get("originDeviceID"));
+    if (m_properties.has(ss_originDeviceID)) {
+      originDevice = dss_dsid_t::fromString(m_properties.get(ss_originDeviceID));
     }
-    std::string forced;
-    if (m_properties.has("forced")) {
-      forced = m_properties.get("forced");
-    }
-
-    if (zone.empty() && group.empty() && scene.empty()) {
-      return false;
+    bool forced;
+    if (m_properties.has(ss_forced)) {
+      std::string sForced = m_properties.get(ss_forced);
+      forced = (sForced == "true");
     }
 
-    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName("zone");
+    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
     if (triggerZone == NULL) {
       return false;
     }
 
-    std::string iZone = triggerZone->getAsString();
-    if ((strToIntDef(iZone, -1) >= 0) && (iZone != zone)) {
+    int iZone;
+    try {
+      iZone = triggerZone->getIntegerValue();
+      if (iZone != m_evtSrcZone) {
+        return false;
+      }
+    } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName("group");
+    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
     if (triggerGroup == NULL) {
       return false;
     }
 
-    std::string iGroup = triggerGroup->getAsString();
-    if ((strToIntDef(iGroup, -1) >= 0) && (iGroup != group)) {
+    int iGroup;
+    try {
+      iGroup = triggerGroup->getIntegerValue();
+      if (iGroup != m_evtSrcGroup) {
+        return false;
+      }
+    } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName("scene");
+    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
     if (triggerScene == NULL) {
       return false;
     }
-    
-    std::string iScene = triggerScene->getAsString();
-    if ((strToIntDef(iScene, -1) >= 0) && (iScene != scene)) {
-        return false;
+
+    int iScene;
+    try {
+      iScene = triggerScene->getIntegerValue();
+      if (iScene != scene) {
+          return false;
+      }
+    } catch (PropertyTypeMismatch& e){
+      return false;
     }
     
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsid);
     std::string iDevice;
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
@@ -1053,13 +1067,17 @@ namespace dss {
       }
     }
 
-    PropertyNodePtr forcedFlag = _triggerProp->getPropertyByName("forced");
+    PropertyNodePtr forcedFlag = _triggerProp->getPropertyByName(ss_forced);
     if (forcedFlag) {
-      std::string iForced = forcedFlag->getAsString();
-      if (forced.compare("true") && iForced.compare("false")) {
-        return false;
-      }
-      if (forced.compare("false") && iForced.compare("true")) {
+      try {
+        bool iForced = forcedFlag->getBoolValue();
+        if (forced == true && iForced == false) {
+          return false;
+        }
+        if (forced == false && iForced == true) {
+          return false;
+        }
+      } catch (PropertyTypeMismatch& e){
         return false;
       }
     }
@@ -1068,8 +1086,8 @@ namespace dss {
     Logger::getInstance()->log("SystemTrigger::"
             "checkSceneZone: *** Match: CallScene" +
             bus +
-            " Zone: " + iZone + ", Group: " + iGroup + ", Scene: " +
-            iScene + ", Origin: " + iDevice);
+            " Zone: " + intToString(iZone) + ", Group: " + intToString(iGroup) + ", Scene: " +
+            intToString(iScene) + ", Origin: " + iDevice);
 
     return true;
   }
@@ -1083,49 +1101,58 @@ namespace dss {
       return false;
     }
 
-    std::string zone = intToString(m_evtSrcZone);
-    std::string group = intToString(m_evtSrcGroup);
-    std::string scene = m_properties.get("sceneID");
+    int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
     dss_dsid_t originDevice;
-    if (m_properties.has("originDeviceID")) {
-      originDevice = dss_dsid_t::fromString(m_properties.get("originDeviceID"));
+    if (m_properties.has(ss_originDeviceID)) {
+      originDevice = dss_dsid_t::fromString(m_properties.get(ss_originDeviceID));
     }
 
-    if (zone.empty() && group.empty() && scene.empty()) {
-      return false;
-    }
-
-    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName("zone");
+    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
     if (triggerZone == NULL) {
       return false;
     }
 
-    std::string iZone = triggerZone->getAsString();
-    if ((strToIntDef(iZone, -1) >= 0) && (iZone != zone)) {
+    int iZone;
+    try {
+      iZone = triggerZone->getIntegerValue();
+      if (iZone != m_evtSrcZone) {
+        return false;
+      }
+    } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName("group");
+    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
     if (triggerGroup == NULL) {
       return false;
     }
 
-    std::string iGroup = triggerGroup->getAsString();
-    if ((strToIntDef(iGroup, -1) >= 0) && (iGroup != group)) {
+    int iGroup;
+    try {
+      iGroup = triggerGroup->getIntegerValue();
+      if (iGroup != m_evtSrcGroup) {
+        return false;
+      }
+    } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName("scene");
+    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
     if (triggerScene == NULL) {
       return false;
     }
 
-    std::string iScene = triggerScene->getAsString();
-    if ((strToIntDef(iScene, -1) >= 0) && (iScene != scene)) {
-        return false;
+    int iScene;
+    try {
+      iScene = triggerScene->getIntegerValue();
+      if (iScene != scene) {
+          return false;
+      }
+    } catch (PropertyTypeMismatch& e){
+      return false;
     }
 
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsid);
     std::string iDevice;
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
@@ -1136,9 +1163,9 @@ namespace dss {
     }
 
     Logger::getInstance()->log("SystemTrigger::"
-            "checkUndoSceneZone: *** Match: UndoScene Zone: " + iZone +
-            ", Group: " + iGroup + ", Scene: " +
-            iScene + ", Origin: " + iDevice);
+            "checkUndoSceneZone: *** Match: UndoScene Zone: " + intToString(iZone) +
+            ", Group: " + intToString(iGroup) + ", Scene: " +
+            intToString(iScene) + ", Origin: " + iDevice);
 
     return true;
   }
@@ -1153,29 +1180,38 @@ namespace dss {
     }
 
     dss_dsid_t dsid = m_evtSrcDSID;
-    std::string scene = m_properties.get("sceneID");;
+    int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
 
-    if ((scene.empty()) || (dsid == NullDSID)) {
+    if (dsid == NullDSID) {
       return false;
     }
 
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsid);
     if (triggerDSID == NULL) {
       return false;
     }
 
-    PropertyNodePtr triggerSCENE = _triggerProp->getPropertyByName("scene");
+    PropertyNodePtr triggerSCENE = _triggerProp->getPropertyByName(ss_scene);
     if (triggerSCENE == NULL) {
       return false;
     }
 
     std::string sDSID = triggerDSID->getStringValue();
-    std::string iSCENE = triggerSCENE->getAsString();
+
+    int iScene;
+    try {
+      iScene = triggerSCENE->getIntegerValue();
+      if (iScene != scene) {
+          return false;
+      }
+    } catch (PropertyTypeMismatch& e){
+      return false;
+    }
     if ((sDSID == "-1") || (sDSID == dsid.toString())) {
-      if ((iSCENE == scene) || (iSCENE == "-1")) {
+      if ((iScene == scene) || (iScene == -1)) {
         Logger::getInstance()->log("SystemTrigger::"
                 "checkDeviceScene: Match: DeviceScene dSID:" + sDSID +
-                ", Scene: " + iSCENE);
+                ", Scene: " + intToString(iScene));
         return true;
       }
     }
@@ -1183,17 +1219,16 @@ namespace dss {
     return false;
   }
 
-
   bool SystemTrigger::checkDeviceSensor(PropertyNodePtr _triggerProp) {
     if (m_evtName != "deviceSensorEvent") {
       return false;
     }
     
     dss_dsid_t dsid = m_evtSrcDSID;
-    std::string eventName = m_properties.get("sensorEvent");;
-    std::string eventIndex = m_properties.get("sensorIndex");
+    std::string eventName = m_properties.get(ss_sensorEvent);
+    std::string eventIndex = m_properties.get(ss_sensorIndex);
 
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsid");
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsid);
     if (triggerDSID == NULL) {
       return false;
     }
@@ -1203,8 +1238,8 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr triggerEventId = _triggerProp->getPropertyByName("eventid");
-    PropertyNodePtr triggerName = _triggerProp->getPropertyByName("evt");
+    PropertyNodePtr triggerEventId = _triggerProp->getPropertyByName(ss_eventid);
+    PropertyNodePtr triggerName = _triggerProp->getPropertyByName(ss_evt);
 
     if (triggerEventId == NULL) {
       if (triggerName == NULL) {
@@ -1445,7 +1480,7 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr appTrigger = appProperty->getPropertyByName("triggers");
+    PropertyNodePtr appTrigger = appProperty->getPropertyByName(ss_triggers);
     if (appTrigger == NULL) {
       return false;
     }
@@ -1456,7 +1491,7 @@ namespace dss {
         continue;
       }
 
-      PropertyNodePtr triggerType = triggerProp->getPropertyByName("type");
+      PropertyNodePtr triggerType = triggerProp->getPropertyByName(ss_type);
       if (triggerType == NULL) {
         continue;
       }
@@ -1690,7 +1725,7 @@ namespace dss {
       return;
     }
 
-    addEvent(trigger);
+    trigger->run();
   }
 
   EventInterpreterPluginHighlevelEvent::EventInterpreterPluginHighlevelEvent(EventInterpreter* _pInterpreter) : 

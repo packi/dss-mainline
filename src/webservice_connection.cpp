@@ -20,29 +20,29 @@
 
 */
 
-#include "config.h"
-
-#ifdef HAVE_CURL
+#include "webservice_connection.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "propertysystem.h"
-#include "webservice_connection.h"
 #include "event.h"
+#include "propertysystem.h"
+#include "webservice_api.h"
 
 namespace dss {
+
+__DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
 
 WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
 WebserviceConnection::WebserviceConnection()
 {
-    m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
-    if (!endsWith(m_base_url, "/")) {
-      m_base_url = m_base_url + "/";
-    }
-    m_url = boost::shared_ptr<URL>(new URL(true));
+  m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
+  if (!endsWith(m_base_url, "/")) {
+    m_base_url = m_base_url + "/";
+  }
+  m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
 }
 
 WebserviceConnection::~WebserviceConnection()
@@ -69,10 +69,12 @@ void WebserviceConnection::shutdown() {
 void WebserviceConnection::request(const std::string& url, RequestType type,
                                    boost::shared_ptr<URLRequestCallback> cb)
 {
-    boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
-            new WebserviceConnection::URLRequestTask(
-                m_url, m_base_url, url, type, cb));
-    addEvent(task);
+  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  req->url = m_base_url + url;
+  req->type = type;
+
+  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
 void WebserviceConnection::request(const std::string& url,
@@ -80,97 +82,64 @@ void WebserviceConnection::request(const std::string& url,
                                  const std::string& postdata,
                                  boost::shared_ptr<URLRequestCallback> cb)
 {
-    boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
-            new WebserviceConnection::URLRequestTask(
-                m_url, m_base_url, url, headers, postdata, cb));
-    addEvent(task);
+  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  req->url = m_base_url + url;
+  req->type = POST;
+  req->headers = headers;
+  req->postdata = postdata;
+
+  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
 
 void WebserviceConnection::request(const std::string& url, RequestType type,
                                 boost::shared_ptr<HashMapStringString> headers,
                                 boost::shared_ptr<HashMapStringString> formpost,
-                                   boost::shared_ptr<URLRequestCallback> cb)
+                                boost::shared_ptr<URLRequestCallback> cb)
 {
-    boost::shared_ptr<WebserviceConnection::URLRequestTask>task(
-            new WebserviceConnection::URLRequestTask(
-                m_url, m_base_url, url, type, headers, formpost, cb));
-    addEvent(task);
+  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  req->url = m_base_url + url;
+  req->type = type;
+  req->headers = headers;
+  req->formpost = formpost;
+
+  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
-WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
-                                                     const std::string& base,
-                                                     const std::string& url,
-                                                     RequestType type,
-                                    boost::shared_ptr<URLRequestCallback> cb) :
-                                                     m_req(req),
-                                                     m_base_url(base),
-                                                     m_url(url), m_type(type),
-                                                     m_cb(cb),
-                                                     m_simple(true)
+__DEFINE_LOG_CHANNEL__(URLRequestTask, lsInfo)
 
-{
-}
-
-WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
-                                                     const std::string& base,
-                                                     const std::string& url,
-                               boost::shared_ptr<HashMapStringString> headers,
-                                                     const std::string& postdata,
-                                    boost::shared_ptr<URLRequestCallback> cb) :
-                                                     m_req(req),
-                                                     m_base_url(base),
-                                                     m_url(url), m_type(POST),
-                                                     m_postdata(postdata),
-                                                     m_headers(headers),
-                                                     m_cb(cb),
-                                                     m_simple(false)
-
+URLRequestTask::URLRequestTask(boost::shared_ptr<HttpClient> client,
+                               boost::shared_ptr<HttpRequest> req,
+                               boost::shared_ptr<URLRequestCallback> cb)
+  : m_client(client), m_req(req), m_cb(cb)
 {
 }
 
 
-WebserviceConnection::URLRequestTask::URLRequestTask(boost::shared_ptr<URL> req,
-                                                     const std::string& base,
-                                                     const std::string& url,
-                                                     RequestType type,
-                               boost::shared_ptr<HashMapStringString> headers,
-                               boost::shared_ptr<HashMapStringString> formpost,
-                                    boost::shared_ptr<URLRequestCallback> cb) :
-                                                     m_req(req),
-                                                     m_base_url(base),
-                                                     m_url(url), m_type(type),
-                                                     m_headers(headers),
-                                                     m_formpost(formpost),
-                                                     m_cb(cb),
-                                                     m_simple(false)
-
+void URLRequestTask::run()
 {
-}
+  std::string result;
+  long code;
 
+  if (m_client == NULL) {
+    return;
+  }
 
-void WebserviceConnection::URLRequestTask::run()
-{
-    long code;
+  if (!webservice_communication_authorized()) {
+    log("not permitted: " + m_req->url, lsWarning);
+  }
 
-    if (m_req == NULL) {
-      return;
-    }
+  log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
 
-    boost::shared_ptr<URLResult> result(new URLResult());
-    if (m_simple) {
-      code = m_req->request(m_base_url + m_url, m_type, result.get());
-    } else {
-      if (m_postdata.empty()) {
-        code = m_req->request(m_base_url + m_url, m_type, m_headers,
-                              m_formpost, result.get());
-      } else {
-        code = m_req->request(m_base_url + m_url, m_headers, m_postdata, result.get());
-      }
-    }
-    if (m_cb != NULL) {
-      m_cb->result(code, result);
-    }
+  code = m_client->request(*m_req, &result);
+  log("URLRequestTask::run(): request to " + m_req->url + " returned with HTTP code " +
+      intToString(code), lsDebug);
+
+  if (m_cb != NULL) {
+    m_cb->result(code, result);
+  }
 }
 
 WebserviceTreeListener::WebserviceTreeListener(
@@ -184,7 +153,7 @@ void WebserviceTreeListener::propertyChanged(PropertyNodePtr _caller,
                                         PropertyNodePtr _changedNode) {
   // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
-    if (DSS::hasInstance()) {
+    if (DSS::hasInstance() && DSS::getInstance()->getState() == ssRunning) {
       boost::shared_ptr<Event> pEvent(new Event("keepWebserviceAlive"));
       DateTime now;
       pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
@@ -199,5 +168,3 @@ WebserviceTreeListener::~WebserviceTreeListener() {
 }
 
 } // namespace
-
-#endif//HAVE_CURL

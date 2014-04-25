@@ -20,10 +20,6 @@
 
 */
 
-#include "config.h"
-
-#ifdef HAVE_CURL
-
 #include <jsapi.h>
 #include <boost/make_shared.hpp>
 
@@ -71,7 +67,7 @@ namespace dss {
           delete m_pRunAsUser;
         }
     }
-    virtual void result(long code, boost::shared_ptr<URLResult> result) {
+    virtual void result(long code, const std::string &result) {
       if (code != 200) {
         Logger::getInstance()->log(std::string(__PRETTY_FUNCTION__) +
             " HTTP request failed " + intToString(code), lsError);
@@ -99,7 +95,7 @@ namespace dss {
           m_pScriptObject.reset(new ScriptObject(m_pFunctionObject, *getContext()));
           ScriptFunctionParameterList list(*m_pContext);
           list.add<int>((int)code);
-          list.add<std::string>(result->content());
+          list.add<std::string>(result);
 
           try {
             m_pScriptObject->callFunctionByReference<void>(m_Function, list);
@@ -363,6 +359,3 @@ namespace dss {
   }
 
 } // namespace
-
-#endif
-

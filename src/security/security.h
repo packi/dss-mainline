@@ -46,9 +46,7 @@ namespace dss {
       m_pSystemUser(NULL)
     { }
 
-    ~Security() {
-      m_LoggedInUser.release();
-    }
+    ~Security();
 
     bool authenticate(const std::string& _user, const std::string& _password);
     bool authenticate(boost::shared_ptr<Session> _session);
@@ -92,6 +90,13 @@ namespace dss {
     bool enableToken(const std::string& _token, User* _pUser);
     bool revokeToken(const std::string& _token);
   private:
+    /**
+     * HACK! Instead of
+     * DSS::getInstance()->getSecurity()->getCurrentlyLoggedInUser() or
+     * Security::getInstance()->getCurrentlyLoggedInUser() we do
+     * Security::getCurrentlyLoggedInUser()
+     * ... but manage it from DSS::getInstance()->getSecurity()
+     */
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
     boost::shared_ptr<SecurityTreeListener> m_pTreeListener;

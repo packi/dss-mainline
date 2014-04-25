@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/tuple/tuple.hpp>
+#include <limits>
 
 #include "src/base.h"
 #include "src/datetools.h"
@@ -108,6 +109,10 @@ BOOST_AUTO_TEST_CASE(testStrToDouble) {
 BOOST_AUTO_TEST_CASE(testUintToString) {
   BOOST_CHECK_EQUAL("0", uintToString(0));
   BOOST_CHECK_EQUAL("2222", uintToString(2222));
+  intToString(std::numeric_limits<long long int>::max());
+  intToString(std::numeric_limits<long long int>::min());
+  uintToString(std::numeric_limits<long long unsigned>::max());
+  uintToString(std::numeric_limits<long long unsigned>::min());
 } // testUintToString
 
 BOOST_AUTO_TEST_CASE(testUnsignedLongIntToHexString) {

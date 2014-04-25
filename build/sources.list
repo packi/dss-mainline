@@ -6,14 +6,12 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/bonjour.cpp \
 	$(top_srcdir)/src/bonjour.h \
 	$(top_srcdir)/src/businterface.h \
-	$(top_srcdir)/src/webservice_replies.cpp \
-	$(top_srcdir)/src/webservice_replies.h \
 	$(top_srcdir)/src/comm-channel.cpp \
 	$(top_srcdir)/src/comm-channel.h \
 	$(top_srcdir)/src/datetools.cpp \
 	$(top_srcdir)/src/datetools.h \
-	$(top_srcdir)/src/defaultbuseventsink.h \
 	$(top_srcdir)/src/defaultbuseventsink.cpp \
+	$(top_srcdir)/src/defaultbuseventsink.h \
 	$(top_srcdir)/src/ds485/dsactionrequest.cpp \
 	$(top_srcdir)/src/ds485/dsactionrequest.h \
 	$(top_srcdir)/src/ds485/dsbusinterface.cpp \
@@ -32,8 +30,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/ds485types.h \
 	$(top_srcdir)/src/dsidhelper.h \
 	$(top_srcdir)/src/dss.cpp \
-	$(top_srcdir)/src/dss.h \
 	$(top_srcdir)/src/dssfwd.h \
+	$(top_srcdir)/src/dss.h \
 	$(top_srcdir)/src/eventcollector.cpp \
 	$(top_srcdir)/src/eventcollector.h \
 	$(top_srcdir)/src/event.cpp \
@@ -49,11 +47,11 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/foreach.h \
 	$(top_srcdir)/src/hasher.cpp \
 	$(top_srcdir)/src/hasher.h \
+	$(top_srcdir)/src/http_client.cpp \
+	$(top_srcdir)/src/http_client.h \
 	$(top_srcdir)/src/internaleventrelaytarget.h \
 	$(top_srcdir)/src/logger.cpp \
 	$(top_srcdir)/src/logger.h \
-	$(top_srcdir)/src/subscription_profiler.h \
-	$(top_srcdir)/src/subscription_profiler.cpp \
 	$(top_srcdir)/src/metering/metering.cpp \
 	$(top_srcdir)/src/metering/metering.h \
 	$(top_srcdir)/src/model/addressablemodelitem.cpp \
@@ -98,18 +96,16 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/mutex.h \
 	$(top_srcdir)/src/propertyquery.cpp \
 	$(top_srcdir)/src/propertyquery.h \
-	$(top_srcdir)/src/propertysystem.cpp \
-	$(top_srcdir)/src/propertysystem.h \
 	$(top_srcdir)/src/propertysystem_common_paths.cpp \
 	$(top_srcdir)/src/propertysystem_common_paths.h \
+	$(top_srcdir)/src/propertysystem.cpp \
+	$(top_srcdir)/src/propertysystem.h \
 	$(top_srcdir)/src/sceneaccess.cpp \
 	$(top_srcdir)/src/sceneaccess.h \
 	$(top_srcdir)/src/scripting/jscurl-constants.h \
 	$(top_srcdir)/src/scripting/jscurl.cpp \
 	$(top_srcdir)/src/scripting/jscurl.h \
 	$(top_srcdir)/src/scripting/jscurl-options.h \
-	$(top_srcdir)/src/scripting/jswebservice.h \
-	$(top_srcdir)/src/scripting/jswebservice.cpp \
 	$(top_srcdir)/src/scripting/jsevent.cpp \
 	$(top_srcdir)/src/scripting/jsevent.h \
 	$(top_srcdir)/src/scripting/jshandler.cpp \
@@ -124,6 +120,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/scripting/jsproperty.h \
 	$(top_srcdir)/src/scripting/jssocket.cpp \
 	$(top_srcdir)/src/scripting/jssocket.h \
+	$(top_srcdir)/src/scripting/jswebservice.cpp \
+	$(top_srcdir)/src/scripting/jswebservice.h \
 	$(top_srcdir)/src/scripting/scriptobject.cpp \
 	$(top_srcdir)/src/scripting/scriptobject.h \
 	$(top_srcdir)/src/security/privilege.cpp \
@@ -146,6 +144,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/structuremanipulator.h \
 	$(top_srcdir)/src/subscription.cpp \
 	$(top_srcdir)/src/subscription.h \
+	$(top_srcdir)/src/subscription_profiler.cpp \
+	$(top_srcdir)/src/subscription_profiler.h \
 	$(top_srcdir)/src/subsystem.cpp \
 	$(top_srcdir)/src/subsystem.h \
 	$(top_srcdir)/src/syncevent.cpp \
@@ -155,15 +155,10 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/taskprocessor.cpp \
 	$(top_srcdir)/src/taskprocessor.h \
 	$(top_srcdir)/src/thread.h \
-	$(top_srcdir)/src/url.cpp \
-	$(top_srcdir)/src/url.h \
 	$(top_srcdir)/src/util.cpp \
 	$(top_srcdir)/src/util.h \
 	$(top_srcdir)/src/watchdog.cpp \
 	$(top_srcdir)/src/watchdog.h \
-	$(top_srcdir)/src/watchdog.h \
-	$(top_srcdir)/src/webservice_connection.h \
-	$(top_srcdir)/src/webservice_connection.cpp \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.cpp \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.h \
 	$(top_srcdir)/src/web/handler/circuitrequesthandler.cpp \
@@ -196,6 +191,10 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/web/restfulapiwriter.h \
 	$(top_srcdir)/src/web/restful.cpp \
 	$(top_srcdir)/src/web/restful.h \
+	$(top_srcdir)/src/webservice_api.cpp \
+	$(top_srcdir)/src/webservice_api.h \
+	$(top_srcdir)/src/webservice_connection.cpp \
+	$(top_srcdir)/src/webservice_connection.h \
 	$(top_srcdir)/src/web/webrequests.cpp \
 	$(top_srcdir)/src/web/webrequests.h \
 	$(top_srcdir)/src/web/webserverapi.cpp \
@@ -212,25 +211,17 @@ libunix_a_SOURCES = \
 	$(top_srcdir)/unix/systeminfo.h \
 	$(top_srcdir)/unix/thread.cpp
 
-libwebservices_a_SOURCES = \
-	$(top_srcdir)/webservices/gs-locks.cpp \
-	$(top_srcdir)/webservices/gs-locks.h \
-	$(top_srcdir)/webservices/model_soap.cpp \
-	$(top_srcdir)/webservices/model_soap.h \
-	$(top_srcdir)/webservices/soapdssSSLObject.cpp \
-	$(top_srcdir)/webservices/soapdssSSLObject.h \
-	$(top_srcdir)/webservices/webservices.cpp \
-	$(top_srcdir)/webservices/webservices.h
-
 dsstests_SOURCES = \
 	$(top_srcdir)/tests/basetests.cpp \
 	$(top_srcdir)/tests/circuitrequesthandlertest.cpp \
 	$(top_srcdir)/tests/curl_test.cpp \
-	$(top_srcdir)/tests/webservice_api_tests.cpp \
 	$(top_srcdir)/tests/datetoolstests.cpp \
 	$(top_srcdir)/tests/deviceinterfacerequesthandlertest.cpp \
 	$(top_srcdir)/tests/devicerequesthandlertest.cpp \
 	$(top_srcdir)/tests/devicetests.cpp \
+	$(top_srcdir)/tests/dss_instance_tests.cpp \
+	$(top_srcdir)/tests/dss_life_cycle.cpp \
+	$(top_srcdir)/tests/dss_life_cycle.h \
 	$(top_srcdir)/tests/eventrequesthandlertest.cpp \
 	$(top_srcdir)/tests/eventtests.cpp \
 	$(top_srcdir)/tests/iconvtests.cpp \
@@ -247,10 +238,6 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/scriptstest.cpp \
 	$(top_srcdir)/tests/securitytests.cpp \
 	$(top_srcdir)/tests/testrunner.cpp \
-	$(top_srcdir)/tests/tests.cpp \
-	$(top_srcdir)/tests/tests.h \
-	$(top_srcdir)/tests/webfixture.h
-
-dsstests_stackprotect_SOURCES = \
-	$(top_srcdir)/tests/stackprotect.c
+	$(top_srcdir)/tests/webfixture.h \
+	$(top_srcdir)/tests/webservice_api_tests.cpp
 
