@@ -53,7 +53,7 @@
 #include "busscanner.h"
 #include "scenehelper.h"
 #include "src/ds485/dsdevicebusinterface.h"
-#include "url.h"
+#include "http_client.h"
 #include "boost/filesystem.hpp"
 #include "util.h"
 

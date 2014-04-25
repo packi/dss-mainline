@@ -27,10 +27,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "dss.h"
-#include "taskprocessor.h"
-#include "url.h"
-#include  "propertysystem.h"
+#include "http_client.h"
 #include "logger.h"
+#include "propertysystem.h"
+#include "taskprocessor.h"
 
 namespace dss {
 

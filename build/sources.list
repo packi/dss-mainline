@@ -47,6 +47,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/foreach.h \
 	$(top_srcdir)/src/hasher.cpp \
 	$(top_srcdir)/src/hasher.h \
+	$(top_srcdir)/src/http_client.cpp \
+	$(top_srcdir)/src/http_client.h \
 	$(top_srcdir)/src/internaleventrelaytarget.h \
 	$(top_srcdir)/src/logger.cpp \
 	$(top_srcdir)/src/logger.h \
@@ -153,8 +155,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/taskprocessor.cpp \
 	$(top_srcdir)/src/taskprocessor.h \
 	$(top_srcdir)/src/thread.h \
-	$(top_srcdir)/src/url.cpp \
-	$(top_srcdir)/src/url.h \
 	$(top_srcdir)/src/util.cpp \
 	$(top_srcdir)/src/util.h \
 	$(top_srcdir)/src/watchdog.cpp \

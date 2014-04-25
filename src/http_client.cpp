@@ -1,7 +1,9 @@
 /*
     Copyright (c) 2012 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2014 digitalSTROM.org, Zurich, Switzerland
 
     Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+    Author: Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -26,7 +28,7 @@
 
 #include "foreach.h"
 #include "logger.h"
-#include "url.h"
+#include "http_client.h"
 #include "base.h"
 
 #define CURL_DEEP_DEBUG 0
@@ -351,7 +353,7 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
 
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
   log("return code: " + intToString(http_code), lsDebug);
-    
+
   if (!m_reuse_handle) {
     curl_easy_cleanup(m_curl_handle);
     m_curl_handle = NULL;

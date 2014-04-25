@@ -8,7 +8,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
 
-#include "src/url.h"
+#include "http_client.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"

@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "logger.h"
-#include "url.h"
+#include "http_client.h"
 #include "webservice_connection.h" // URLRequestCallback
 
 namespace dss {

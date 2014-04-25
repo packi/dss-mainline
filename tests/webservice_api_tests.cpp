@@ -8,7 +8,7 @@
 #include <curl/curl.h>
 #include <iostream>
 
-#include "src/url.h"
+#include "src/http_client.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
