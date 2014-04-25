@@ -23,9 +23,6 @@
 #ifndef __URL_H__
 #define __URL_H__
 
-#include "config.h"
-#ifdef HAVE_CURL
-
 #include <curl/curl.h>
 
 #include "base.h"
@@ -90,7 +87,5 @@ namespace dss {
       CURL *m_curl_handle;
   };
 };
-
-#endif//HAVE_CURL
 
 #endif//__URL_H__

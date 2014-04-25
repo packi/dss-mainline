@@ -8,9 +8,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
 
-#include "config.h"
-#ifdef HAVE_CURL
-
 #include "src/url.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
@@ -82,5 +79,3 @@ BOOST_AUTO_TEST_CASE(test_rentrantCalls) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif

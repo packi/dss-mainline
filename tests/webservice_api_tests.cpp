@@ -1,9 +1,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 
-#include "config.h"
-#ifdef HAVE_CURL // without CURL no HTTP client, no WebService
-
 #include <boost/test/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/locks.hpp>
@@ -141,5 +138,3 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif // HAVE_CURL

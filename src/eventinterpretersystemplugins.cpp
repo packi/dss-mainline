@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <signal.h>
+#include <set>
 
 #include "eventinterpretersystemplugins.h"
 #include "internaleventrelaytarget.h"
@@ -40,13 +41,8 @@
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
-#include "util.h"
-
-#ifdef HAVE_CURL
 #include "url.h"
-#endif
-
-#include <set>
+#include "util.h"
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500
@@ -544,11 +540,6 @@ namespace dss {
   }
 
   void SystemEventActionExecute::executeURL(PropertyNodePtr _actionNode) {
-#ifndef HAVE_CURL
-    Logger::getInstance()->log("SystemEventActionExecute:"
-            "executeURL: dSS was compiled without cURL support, "
-            "ignoring request", lsWarning);
-#else
     PropertyNodePtr oUrlNode =  _actionNode->getPropertyByName("url");
     if (oUrlNode == NULL) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -574,7 +565,6 @@ namespace dss {
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: request to " + oUrl + " returned HTTP code " +
             out.str());
-#endif
   }
 
   void SystemEventActionExecute::executeStateChange(PropertyNodePtr _actionNode) {
