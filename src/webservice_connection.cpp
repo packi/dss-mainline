@@ -38,11 +38,11 @@ WebserviceConnection* WebserviceConnection::m_instance = NULL;
 
 WebserviceConnection::WebserviceConnection()
 {
-    m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
-    if (!endsWith(m_base_url, "/")) {
-      m_base_url = m_base_url + "/";
-    }
-    m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
+  m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
+  if (!endsWith(m_base_url, "/")) {
+    m_base_url = m_base_url + "/";
+  }
+  m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
 }
 
 WebserviceConnection::~WebserviceConnection()
@@ -120,26 +120,26 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<HttpClient> client,
 
 void URLRequestTask::run()
 {
-    std::string result;
-    long code;
+  std::string result;
+  long code;
 
-    if (m_client == NULL) {
-      return;
-    }
+  if (m_client == NULL) {
+    return;
+  }
 
-    if (!webservice_communication_authorized()) {
-      log("not permitted: " + m_req->url, lsWarning);
-    }
+  if (!webservice_communication_authorized()) {
+    log("not permitted: " + m_req->url, lsWarning);
+  }
 
-    log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
+  log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
 
-    code = m_client->request(*m_req, &result);
-    log("URLRequestTask::run(): request to " + m_req->url + " returned with HTTP code " +
-        intToString(code), lsDebug);
+  code = m_client->request(*m_req, &result);
+  log("URLRequestTask::run(): request to " + m_req->url + " returned with HTTP code " +
+      intToString(code), lsDebug);
 
-    if (m_cb != NULL) {
-      m_cb->result(code, result);
-    }
+  if (m_cb != NULL) {
+    m_cb->result(code, result);
+  }
 }
 
 WebserviceTreeListener::WebserviceTreeListener(
