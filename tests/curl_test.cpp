@@ -8,7 +8,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
 
-#include "src/url.h"
+#include "http_client.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
@@ -19,9 +19,9 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(CurlTest)
 
 BOOST_AUTO_TEST_CASE(curlTest) {
-    URLResult result;
-    boost::shared_ptr<URL> curl(new URL());
+    boost::shared_ptr<HttpClient> curl(new HttpClient());
     std::string url = "http://www.digitalstrom.com";
+    std::string result;
 
     BOOST_CHECK_EQUAL(curl->request(url, GET, &result), 200);
     BOOST_CHECK_EQUAL(curl->request(url, POST, NULL), 200);
@@ -36,9 +36,9 @@ BOOST_AUTO_TEST_CASE(curlTest) {
 }
 
 BOOST_AUTO_TEST_CASE(curlTestReuseHandle) {
-    URLResult result;
-    URL curl(true);
+    HttpClient curl(true);
     std::string url = "http://www.digitalstrom.com";
+    std::string result;
 
     for (int i = 0; i < 20; i++) {
       BOOST_CHECK_EQUAL(curl.request(url, GET, &result), 200);
@@ -46,8 +46,38 @@ BOOST_AUTO_TEST_CASE(curlTestReuseHandle) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_emptyHeaderMaps) {
+  std::string url = "http://www.digitalstrom.com";
+  boost::shared_ptr<HashMapStringString> headers;
+  HttpClient curl(true);
+
+  /* does it crash, is the test */
+  BOOST_CHECK_EQUAL(curl.request(url, headers, std::string(), NULL), 200);
+}
+
+BOOST_AUTO_TEST_CASE(test_emptyHeaderAndFormPostMaps) {
+  std::string url = "http://www.digitalstrom.com";
+  boost::shared_ptr<HashMapStringString> headers;
+  boost::shared_ptr<HashMapStringString> formpost;
+  HttpClient curl(true);
+
+  /* does it crash, is the test */
+  BOOST_CHECK_EQUAL(curl.request(url, POST, headers, formpost, NULL), 200);
+}
+
+BOOST_AUTO_TEST_CASE(test_URLRequestStruct) {
+  HttpRequest req;
+  req.url = "http://www.digitalstrom.com";
+  req.type = POST;
+  HttpClient curl(true);
+  std::string result;
+
+  /* does it crash, is the test */
+  BOOST_CHECK_EQUAL(curl.request(req, &result), 200);
+}
+
 void fetcher_do() {
-  URL curl(false);
+  HttpClient curl(false);
   std::string url = "http://www.google.com";
 
   /*

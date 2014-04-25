@@ -27,17 +27,17 @@
 #include <boost/shared_ptr.hpp>
 
 #include "dss.h"
-#include "taskprocessor.h"
-#include "url.h"
-#include  "propertysystem.h"
+#include "http_client.h"
 #include "logger.h"
+#include "propertysystem.h"
+#include "taskprocessor.h"
 
 namespace dss {
 
 class URLRequestCallback
 {
 public:
-  virtual void result(long code, boost::shared_ptr<URLResult> res) = 0;
+  virtual void result(long code, const std::string &res) = 0;
 };
 
 class WebserviceConnection : public TaskProcessor {
@@ -62,39 +62,21 @@ private:
   static WebserviceConnection *m_instance;
 
   std::string m_base_url;
-  boost::shared_ptr<URL> m_url;
+  boost::shared_ptr<HttpClient> m_url;
+};
 
-  class URLRequestTask : public Task {
-    __DECL_LOG_CHANNEL__
-  public:
-    URLRequestTask(boost::shared_ptr<URL> req,
-                   const std::string& base, const std::string& url,
-                   RequestType type,
-                   boost::shared_ptr<URLRequestCallback> cb);
-    URLRequestTask(boost::shared_ptr<URL> req,
-                   const std::string& base, const std::string& url,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   const std::string& postdata,
-                   boost::shared_ptr<URLRequestCallback> cb);
-    URLRequestTask(boost::shared_ptr<URL> req, 
-                   const std::string& base, const std::string& url,
-                   RequestType type,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   boost::shared_ptr<HashMapStringString> formpost,
-                   boost::shared_ptr<URLRequestCallback> cb);
-    virtual ~URLRequestTask() {};
-    virtual void run();
-  private:
-    boost::shared_ptr<URL> m_req;
-    std::string m_base_url;
-    std::string m_url;
-    RequestType m_type;
-    std::string m_postdata;
-    boost::shared_ptr<HashMapStringString> m_headers;
-    boost::shared_ptr<HashMapStringString> m_formpost;
-    boost::shared_ptr<URLRequestCallback> m_cb;
-    bool m_simple;
-  };
+class URLRequestTask : public Task {
+  __DECL_LOG_CHANNEL__
+public:
+  URLRequestTask(boost::shared_ptr<HttpClient> client,
+                 boost::shared_ptr<HttpRequest> req,
+                 boost::shared_ptr<URLRequestCallback> cb);
+  virtual ~URLRequestTask() {};
+  virtual void run();
+private:
+  boost::shared_ptr<HttpClient> m_client;
+  boost::shared_ptr<HttpRequest> m_req;
+  boost::shared_ptr<URLRequestCallback> m_cb;
 };
 
 class WebserviceTreeListener : public PropertyListener {
@@ -111,4 +93,3 @@ private:
 } // namespace dss
 
 #endif//__DSS_WEBSERVICE_CONNECTION_H__
-

@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "base.h"
 #include "dss.h"
+#include "http_client.h"
 #include "model/set.h"
 #include "model/zone.h"
 #include "model/group.h"
@@ -41,7 +42,6 @@
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
-#include "url.h"
 #include "util.h"
 
 // durations to wait after each action (in milliseconds)
@@ -557,8 +557,8 @@ namespace dss {
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: " + oUrl);
 
-    boost::shared_ptr<URL> url(new URL());
-    long code = url->request(oUrl);
+    boost::shared_ptr<HttpClient> url(new HttpClient());
+    long code = url->request(oUrl, GET, NULL);
     std::ostringstream out;
     out << code;
 

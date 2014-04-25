@@ -1,7 +1,9 @@
 /*
     Copyright (c) 2012 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2014 digitalSTROM.org, Zurich, Switzerland
 
     Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+    Author: Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -35,41 +37,46 @@ namespace dss {
     POST,
   } RequestType;
 
-  class URLResult {
-  public:
-      friend class URL;
-      URLResult() : m_memory(NULL), m_size(0) {}
-      virtual ~URLResult();
+  typedef boost::shared_ptr<HashMapStringString> headers_t;
+  typedef boost::shared_ptr<HashMapStringString> formpost_t;
 
-      void reset();
-      void *grow_tail(size_t increase);
-      const char* content();
-
-  private:
-      static size_t appendCallback(void* contents, size_t size, size_t nmemb, void* userp);
-      char* m_memory;
-      size_t m_size;
+  /**
+   * HttpRequest - Combine all data describing an HTTP request
+   * @url: http://www.something.org/path/to/something?query1=foo&query2=bar
+   * @type: POST|GET
+   * @header: will be unrolled as 'tag: value' form
+   * @formpost: will be unrolled as 'tag: value' form
+   * @postdata: preformatted postdata, has precedence over formpost
+   */
+  struct HttpRequest {
+    std::string url;
+    RequestType type;
+    headers_t headers;
+    formpost_t formpost;
+    std::string postdata;
   };
 
   // TODO rename to HttpClient
-  class URL {
+  class HttpClient {
     __DECL_LOG_CHANNEL__
     public:
 
-      URL(bool _reuse_handle = false);
-      ~URL();
+      HttpClient(bool _reuse_handle = false);
+      ~HttpClient();
 
-      long request(const std::string& url, RequestType type = GET,
-                   URLResult* result = NULL);
+      long request(const std::string& url, RequestType type,
+                   std::string *result);
 
       long request(const std::string& url,
                    boost::shared_ptr<HashMapStringString> headers,
-                   std::string postdata, URLResult* result);
+                   std::string postdata, std::string *result);
 
       long request(const std::string& url, RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
-                   URLResult* result);
+                   std::string *result);
+
+      long request(const HttpRequest &req, std::string *result);
 
       long downloadFile(std::string url, std::string filename);
 
@@ -80,7 +87,7 @@ namespace dss {
                    std::string postdata,
                    boost::shared_ptr<HashMapStringString> headers,
                    boost::shared_ptr<HashMapStringString> formpost,
-                   URLResult* result);
+                   std::string *result);
 
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
       bool m_reuse_handle;

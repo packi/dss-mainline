@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "logger.h"
-#include "url.h"
+#include "http_client.h"
 #include "webservice_connection.h" // URLRequestCallback
 
 namespace dss {
@@ -63,7 +63,7 @@ public:
    */
   StatusReplyChecker(WebserviceCallDone_t callback) : m_callback(callback) {};
   virtual ~StatusReplyChecker() {};
-  virtual void result(long code, boost::shared_ptr<URLResult> result);
+  virtual void result(long code, const std::string &result);
 private:
   WebserviceCallDone_t m_callback;
 };
