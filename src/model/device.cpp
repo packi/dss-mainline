@@ -296,7 +296,6 @@ namespace dss {
 
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
-    fillSensorTable(_value);
     if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
@@ -328,26 +327,60 @@ namespace dss {
     updateIconPath();
   } // setVendorID
 
-  void Device::fillSensorTable(const int _productId) {
-    if(m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
+  void Device::fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist) {
+    DeviceSensorSpec_t sensorInputReserved1 = { 0x3d, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInputReserved2 = { 0x3e, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput04 = { SensorIDActivePower, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput05 = { SensorIDOutputCurrent, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput06 = { SensorIDElectricMeter, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput64 = { SensorIDOutputCurrent16A, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput65 = { SensorIDActivePowerVA, 0, 0, 0 };
+    DeviceClasses_t deviceClass = getDeviceClass();
+    int devType = (deviceClass << 16) | m_ProductID;
 
-      if(m_pApartment->getDeviceBusInterface() != NULL) {
-        if (!m_pPropertyNode->getProperty("sensorTable")) {
-          if ((_productId == ProductID_KL_200) ||
-              (_productId == ProductID_KL_201) ||
-              (_productId == ProductID_KL_210)) {
-            m_pPropertyNode->createProperty("sensorTable/sensor0")->setIntegerValue(0x3d);
-            m_pPropertyNode->createProperty("sensorTable/sensor1")->setIntegerValue(0x3e);
-            m_pPropertyNode->createProperty("sensorTable/sensor2")->setIntegerValue(0x04);
-            m_pPropertyNode->createProperty("sensorTable/sensor3")->setIntegerValue(0x05);
-            m_pPropertyNode->createProperty("sensorTable/sensor4")->setIntegerValue(0x06);
-            m_pPropertyNode->createProperty("sensorTable/sensor5")->setIntegerValue(0x40);
-          }
-        }
-      }
+    /* common */
+    _slist.push_back(sensorInputReserved1);
+    _slist.push_back(sensorInputReserved2);
+    _slist.push_back(sensorInput04);
+    _slist.push_back(sensorInput05);
+    _slist.push_back(sensorInput06);
+
+    switch (devType) {
+      /* KM, SDM, TKM type with output */
+      case 0x100c8:
+      case 0x104d2:
+      case 0x108c8:
+      case 0x300c8:
+      case 0x600c8:
+      case 0x608c8:
+      case 0x700c8:
+      case 0x704c8:
+      case 0x704d2:
+        break;
+      /* SDS200 with add. PowerVA sensor */
+      case 0x118c8:
+      case 0x118c9:
+      case 0x118ca:
+        _slist.push_back(sensorInput65);
+        break;
+      /* KL types */
+      case 0x10cc8:
+      case 0x20cc8:
+      case 0x20cd2:
+      case 0x20cdc:
+      case 0x80cc8:
+      case 0x814c8:
+      case 0x814c9:
+      case 0x814ca:
+        _slist.push_back(sensorInput64);
+        _slist.push_back(sensorInput65);
+        break;
+      /* all others - like TKM without output */
+      default:
+        _slist.clear();
+        break;
     }
-  }
+  } // fillSensorTable
 
   void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex,
                                uint8_t _value) {
@@ -1775,8 +1808,14 @@ namespace dss {
     m_sensorInputCount = 0;
     m_sensorInputs.clear();
 
-    for (std::vector<DeviceSensorSpec_t>::const_iterator it = _sensorInputs.begin();
-        it != _sensorInputs.end();
+    // fill in "standard" sensors if sensor table has not been read from device or is empty
+    std::vector<DeviceSensorSpec_t> _slist = _sensorInputs;
+    if (_slist.empty()) {
+      fillSensorTable(_slist);
+    }
+
+    for (std::vector<DeviceSensorSpec_t>::const_iterator it = _slist.begin();
+        it != _slist.end();
         ++it) {
       boost::shared_ptr<DeviceSensor_t> binput(new DeviceSensor_t());
       binput->m_sensorIndex = m_sensorInputCount;
