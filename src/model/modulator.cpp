@@ -53,7 +53,8 @@ namespace dss {
     m_DatamoderModificationCount(0),
     m_BinaryInputEventCount(_dsid.toString()),
     m_dSMPropertyFlags(0),
-    m_IgnoreActionsFromNewDevices(false)
+    m_IgnoreActionsFromNewDevices(false),
+    m_ApartmentState(DSM_APARTMENT_STATE_UNKNOWN)
   {
     publishToPropertyTree();
   } // ctor

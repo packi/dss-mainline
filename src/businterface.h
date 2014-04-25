@@ -48,6 +48,7 @@ namespace dss {
     uint16_t APIVersion;
     std::string Name;
     std::bitset<8> flags;
+    uint8_t ApartmentState;
   } DSMeterSpec_t;
 
   typedef struct {

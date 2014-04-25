@@ -610,6 +610,87 @@ namespace dss {
     }
   } // handleModelEvents
 
+  void ModelMaintenance::setApartmentState() {
+    if (!DSS::hasInstance()) {
+      return;
+    }
+
+    // logic discussed with mtr:
+    //
+    // if dSMs do not return the same state, then go with whatever is in
+    // the dSS
+    //
+    // dSMs that report "unknown" do not fall into consideration
+    //
+    // if all dSMs have the same state set (either present or absent but
+    // not unknown), then this state shall be set in the dSS
+    //
+    // if neither the dSMs nor the dSS have a valid known state, we will use
+    // "present" as default as defined by our PO. this case is extremely rare.
+
+    // start with whatever state was saved in the dSS
+    uint8_t dssaptstate = DSM_APARTMENT_STATE_UNKNOWN;
+    PropertyNodePtr pNode =
+        DSS::getInstance()->getPropertySystem().getProperty(
+                                                "/usr/states/presence");
+    if (pNode != NULL) {
+      PropertyNodePtr valueNode = pNode->getPropertyByName("value");
+      std::string val = valueNode->getAsString();
+      if (val == "present") {
+        dssaptstate = DSM_APARTMENT_STATE_PRESENT;
+      } else if (val == "absent") {
+        dssaptstate = DSM_APARTMENT_STATE_ABSENT;
+      }
+    }
+
+    uint8_t lastdsmaptstate = DSM_APARTMENT_STATE_UNKNOWN;
+    boost::shared_ptr<DSMeter> pDSMeter;
+    for (size_t i = 0; i < m_pApartment->getDSMeters().size(); i++) {
+      pDSMeter = m_pApartment->getDSMeters().at(i);
+      if (pDSMeter->isPresent() && pDSMeter->isValid()) {
+        uint8_t dsmaptstate = pDSMeter->getApartmentState();
+
+        // dSMs that do not know their state will be ignored
+        if (dsmaptstate == DSM_APARTMENT_STATE_UNKNOWN) {
+          continue;
+        }
+
+        // remember last state in order to be able to compare the dSMs
+        if (lastdsmaptstate == DSM_APARTMENT_STATE_UNKNOWN) {
+          lastdsmaptstate = dsmaptstate;
+        }
+
+        // if dSMs disagree go with the dSS state
+        if (lastdsmaptstate != dsmaptstate) {
+          lastdsmaptstate = DSM_APARTMENT_STATE_UNKNOWN;
+          break;
+        }
+      }
+    }
+
+    // result from the dSMs was conclusive
+    if (lastdsmaptstate != DSM_APARTMENT_STATE_UNKNOWN) {
+      dssaptstate = lastdsmaptstate;
+    }
+
+    // dSS state is still not known and dSMs were inconclusive:
+    // use present as default as defined by the PO
+    if (dssaptstate == DSM_APARTMENT_STATE_UNKNOWN) {
+      dssaptstate = DSM_APARTMENT_STATE_PRESENT;
+    }
+
+    std::string strstate;
+    if (dssaptstate == DSM_APARTMENT_STATE_PRESENT) {
+      strstate = "present";
+    } else if (dssaptstate == DSM_APARTMENT_STATE_ABSENT) {
+      strstate = "absent";
+    }
+
+    DSS::getInstance()->getPropertySystem().setStringValue(
+                                  "/usr/states/presence/value", strstate);
+    log("setApartmentState: apartment state set to " + strstate, lsDebug);
+  }
+
   void ModelMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
     foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
@@ -639,6 +720,7 @@ namespace dss {
         addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       }
 
+      setApartmentState();
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);

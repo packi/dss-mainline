@@ -41,6 +41,12 @@ namespace dss {
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Apartment;
 
+  enum {
+    DSM_APARTMENT_STATE_PRESENT = 0,
+    DSM_APARTMENT_STATE_ABSENT  = 1,
+    DSM_APARTMENT_STATE_UNKNOWN = 2
+  };
+
   /** Represents a DSMeter */
   class DSMeter : public DeviceContainer,
                   public PhysicalModelItem {
@@ -69,6 +75,7 @@ namespace dss {
     PersistentCounter m_BinaryInputEventCount;
     std::bitset<8> m_dSMPropertyFlags;
     bool m_IgnoreActionsFromNewDevices;
+    uint8_t m_ApartmentState;
   private:
     void publishToPropertyTree();
   public:
@@ -144,6 +151,8 @@ namespace dss {
 
     std::string getEnergyMeterValueWhAsString() const { return intToString(m_EnergyMeterValueWh); }
     std::string getEnergyMeterValueAsString() const { return intToString(m_EnergyMeterValue); }
+    void setApartmentState(uint8_t _state) { m_ApartmentState = _state; }
+    uint8_t getApartmentState() const { return m_ApartmentState; }
   }; // DSMeter
 
 
