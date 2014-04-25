@@ -557,27 +557,18 @@ namespace dss {
         return;
       }
 
-      boost::shared_ptr<SubscriptionOptions> opts;
-      bool hadOpts = false;
-
+      boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions);
       EventInterpreterPlugin* plugin = getPluginByName(handlerName);
-      if(plugin == NULL) {
+      if (plugin == NULL) {
         log(std::string("loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
         log(       "loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
-      } else {
-        opts = plugin->createOptionsFromProperty(_node);
-        hadOpts = true;
       }
+
       try {
-        if(opts == NULL) {
-          opts.reset(new SubscriptionOptions());
-        }
         opts->loadParameterFromProperty(_node->getPropertyByName("parameter"));
       } catch(std::runtime_error& e) {
-        // only delete options created in the try-part...
-        if(!hadOpts) {
-          opts.reset();
-        }
+        log("FAILED: loadParameterFromProperty", lsInfo);
+        opts.reset();
       }
 
       boost::shared_ptr<EventSubscription> subscription(
@@ -1020,10 +1011,6 @@ namespace dss {
   : m_Name(_name),
     m_pInterpreter(_interpreter)
   { } // ctor
-
-  boost::shared_ptr<SubscriptionOptions> EventInterpreterPlugin::createOptionsFromProperty(PropertyNodePtr _node) {
-    return boost::shared_ptr<SubscriptionOptions>();
-  } // createOptionsFromXML
 
   void EventInterpreterPlugin::log(const std::string& _message, aLogSeverity _severity) {
     m_pInterpreter->log(_message, _severity);
