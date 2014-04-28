@@ -55,6 +55,7 @@ class DSSLifeCycle {
 public:
   DSSLifeCycle();
   ~DSSLifeCycle();
+  void initPlugins();
 protected:
   DSS *m_instance;
   int m_incarnation;

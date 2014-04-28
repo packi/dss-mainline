@@ -22,10 +22,11 @@
 
 #include "security.h"
 
+#include "src/dss.h"
+#include "src/event.h"
 #include "src/hasher.h"
-#include "src/propertysystem.h"
 #include "src/logger.h"
-
+#include "src/propertysystem.h"
 #include "src/security/user.h"
 #include "src/session.h"
 
@@ -220,11 +221,15 @@ namespace dss {
   bool Security::revokeToken(const std::string& _token) {
     PropertyNodePtr pTokens = m_pRootNode->createProperty("applicationTokens/enabled");
     PropertyNodePtr pToken = m_pRootNode->getProperty("applicationTokens/enabled/" + _token);
-    if(pToken != NULL) {
+    if (pToken != NULL) {
       pTokens->removeChild(pToken);
-      if(m_pTreeListener != NULL) {
+      if (m_pTreeListener != NULL) {
         m_pTreeListener->writeXML();
       }
+
+      boost::shared_ptr<Event> pEvent(new Event(EventName::ApplicationTokenDeleted));
+      pEvent->setProperty(EventProperty::ApplicationToken, _token);
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       return true;
     }
     return false;

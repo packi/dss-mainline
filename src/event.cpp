@@ -43,7 +43,6 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/thread/locks.hpp>
 
 using std::set;
 
@@ -327,6 +326,10 @@ namespace dss {
     m_SubscriptionsMutex_locked = false;
     loadSubscriptionsFromProperty(subParser->getSubscriptionNode());
     loadStatesFromProperty(subParser->getStatesNode());
+
+    foreach(EventInterpreterPlugin *handler, m_Plugins) {
+      handler->subscribe();
+    }
 
     log("initialize -- done", lsInfo);
   } // initialize
@@ -784,6 +787,19 @@ namespace dss {
     }
   } // removeEvent
 
+  void EventRunner::removeEventByName(const std::string& _eventName) {
+    boost::mutex::scoped_lock lock(m_EventsMutex);
+    m_ScheduledEvents_t::iterator it = m_ScheduledEvents.begin();
+    while (it != m_ScheduledEvents.end()) {
+      if (it->getEvent()->getName() == _eventName) {
+        // TODO also remove event from pending queue
+        it = m_ScheduledEvents.erase(it);
+      } else {
+        it++;
+      }
+    }
+  }
+
   void EventRunner::removeEventInternal(const std::string& _eventID) {
     boost::mutex::scoped_lock lock(m_EventsMutex);
     boost::ptr_vector<ScheduledEvent>::iterator it;
@@ -808,15 +824,6 @@ namespace dss {
     }
     throw std::runtime_error("Event with id '" + _eventID + "' not found");
   } // getEvent
-
-  std::vector<std::string> EventRunner::getEventIDs() const {
-    std::vector<std::string> ids;
-    boost::mutex::scoped_lock lock(m_EventsMutex);
-    for (size_t i = 0; i < m_ScheduledEvents.size(); i++) {
-      ids.push_back(m_ScheduledEvents.at(i).getID());
-    }
-    return ids;
-  }
 
   void EventRunner::addEvent(ScheduledEvent* _scheduledEvent) {
     std::string id = _scheduledEvent->getID();

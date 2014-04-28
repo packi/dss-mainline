@@ -88,6 +88,20 @@ public:
   static void doModelChanged(ChangeType type, WebserviceCallDone_t callback);
 };
 
+class WebserviceAccessManagement {
+  __DECL_LOG_CHANNEL__
+public:
+  /**
+   * Asynchronously notifies the cloud about removed application token
+   * if you want to retry the request in case of network failure you can pass
+   * request_done callback argument
+   * @token: token to be deleted
+   * @callback: provides network and server status
+   */
+  static void doNotifyTokenDeleted(const std::string &token,
+                                   WebserviceCallDone_t callback);
+};
+
 }
 
 #endif

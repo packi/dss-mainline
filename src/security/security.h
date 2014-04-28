@@ -38,6 +38,14 @@ namespace dss {
   class PasswordChecker;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
+  namespace EventName {
+    static std::string ApplicationTokenDeleted = "ApplicationTokenDeleted";
+  }
+
+  namespace EventProperty {
+    static std::string ApplicationToken = "ApplicationToken";
+  }
+
   class Security {
     __DECL_LOG_CHANNEL__
   public:

@@ -269,6 +269,11 @@ namespace dss {
     virtual ~EventInterpreterPlugin() {}
 
     const std::string& getName() const { return m_Name; }
+    /**
+     * Subscribe to given events.
+     * Fallback when subscribtions.xml makes no sense
+     */
+    virtual void subscribe() {};
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
@@ -308,6 +313,7 @@ namespace dss {
   class EventRunner : public PropertyListener {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
+    typedef boost::ptr_vector<ScheduledEvent> m_ScheduledEvents_t;
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     Subsystem* m_Subsystem;
@@ -321,12 +327,12 @@ namespace dss {
     void addEvent(ScheduledEvent* _scheduledEvent);
 
     size_t getSize() const;
-    std::vector<std::string> getEventIDs() const;
     const ScheduledEvent& getEvent(const std::string& _eventID) const;
 
     bool raisePendingEvents();
 
     void removeEvent(const std::string& _eventID);
+    void removeEventByName(const std::string& _eventName);
 
     void run();
     void shutdown();

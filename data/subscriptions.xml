@@ -47,9 +47,6 @@
   </subscription>
   <subscription event-name="timedEventChanged" handler-name="apartment_model_change">
   </subscription>
-  <subscription event-name="keepWebserviceAlive" handler-name="keep_webservice_alive">
-  </subscription>
-
 
   <!-- Export Subscription Timings to PropertyTree -->
   <subscription event-name="running" handler-name="subscription_benchmark_uploader"/>
