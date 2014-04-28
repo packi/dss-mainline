@@ -37,6 +37,7 @@
 #include "src/security/privilege.h"
 #include "src/security/security.h"
 #include "dss.h"
+#include "tests/dss_life_cycle.h"
 
 using namespace dss;
 
@@ -311,6 +312,7 @@ BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
+  DSSLifeCycle guard; /* event queue */
 
   std::string applicationToken = "fake-token-123467890";
 

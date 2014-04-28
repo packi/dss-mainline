@@ -93,6 +93,31 @@ BOOST_FIXTURE_TEST_CASE(testSimpleEvent, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 } // testSimpleEvent
 
+BOOST_FIXTURE_TEST_CASE(testScheduledEvent, NonRunningFixture) {
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+  pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY");
+  m_pQueue->pushEvent(pEvent);
+
+  m_pEventInterpreter->executePendingEvent();
+  for (int i = 0; i < 15; i++) {
+    // somehow more like ever other sec
+    sleepMS(330);
+    m_pRunner->raisePendingEvents();
+    m_pEventInterpreter->executePendingEvent();
+  }
+  BOOST_CHECK_GE(m_pEventInterpreter->getEventsProcessed(), 3);
+  int old = m_pEventInterpreter->getEventsProcessed();
+
+  m_pRunner->removeEventByName("my_event");
+  for (int i = 0; i < 10; i++) {
+    sleepMS(500);
+    m_pRunner->raisePendingEvents();
+    m_pEventInterpreter->executePendingEvent();
+  }
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), old);
+}
+
 BOOST_FIXTURE_TEST_CASE(testSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
@@ -351,7 +376,7 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
   queue.setEventRunner(&runner);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
-  pEvent->setProperty("time", "+2");
+  pEvent->setProperty("time", "+5");
 
   queue.pushEvent(pEvent);
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
@@ -359,16 +384,11 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
   boost::shared_ptr<Event> pEvent2(new Event("my_event"));
   pEvent2->setProperty("unique", "yes");
   pEvent2->setProperty("time", "+2");
-
   queue.pushEvent(pEvent2);
 
-  std::vector<std::string> ids = runner.getEventIDs();
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
-  BOOST_CHECK_EQUAL(ids.size(), 1);
-
-  const ScheduledEvent& eventFromQueue = runner.getEvent(ids.at(0));
-  BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->hasPropertySet("time"), true);
-  BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->getPropertyByName("time"), "+2");
+  BOOST_CHECK_EQUAL(pEvent->hasPropertySet("time"), true);
+  BOOST_CHECK_EQUAL(pEvent->getPropertyByName("time"), "+2");
 } // testUniqueEventsOverwritesTimeProperty
 
 BOOST_AUTO_TEST_CASE(testRemoveAndGetEvents) {
@@ -378,29 +398,21 @@ BOOST_AUTO_TEST_CASE(testRemoveAndGetEvents) {
   interpreter.initialize();
   queue.setEventRunner(&runner);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent(new Event("my_event1"));
   pEvent->setProperty("time", "+2");
-
   queue.pushEvent(pEvent);
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent2(new Event("my_event2"));
   pEvent2->setProperty("time", "+4");
-
   queue.pushEvent(pEvent2);
 
-  std::vector<std::string> ids = runner.getEventIDs();
   BOOST_CHECK_EQUAL(runner.getSize(), 2);
-  BOOST_CHECK_EQUAL(ids.size(), 2);
-
-  const ScheduledEvent& eventFromQueue = runner.getEvent(ids.at(0));
-  BOOST_CHECK_EQUAL(eventFromQueue.getID(), ids.at(0));
-  BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->hasPropertySet("time"), true);
   BOOST_CHECK_THROW(runner.getEvent("idontexist"), std::runtime_error);
 
-  runner.removeEvent(ids.at(1));
+  runner.removeEventByName("my_event1");
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
-  runner.removeEvent(ids.at(0));
+  runner.removeEventByName("my_event2");
   BOOST_CHECK_EQUAL(runner.getSize(), 0);
 } // testUniqueEventsOverwritesTimeProperty
 

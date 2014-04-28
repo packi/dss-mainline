@@ -109,6 +109,10 @@ namespace dss {
 
     aDSSState m_State;
     bool m_ShutdownFlag;
+    /**
+     * will trigger an error if a destructor calls getInstance
+     */
+    static bool s_shutdown;
 
     /// Private constructor for singleton
     DSS();

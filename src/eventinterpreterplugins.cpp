@@ -29,6 +29,7 @@
 #include "businterface.h"
 #include "setbuilder.h"
 #include "dss.h"
+#include "security/security.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsmodel.h"
 #include "src/scripting/jsevent.h"
@@ -267,6 +268,8 @@ namespace dss {
 
   //================================================== EventInterpreterPluginJavascript
 
+  __DEFINE_LOG_CHANNEL__(EventInterpreterPluginJavascript, lsInfo);
+
   EventInterpreterPluginJavascript::EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("javascript", _pInterpreter)
   { } // ctor
@@ -290,7 +293,7 @@ namespace dss {
       (*ipScriptContextWrapper)->get()->detachWrapper();
       ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
     }
-    log("All scripts Terminated");
+    log("All scripts Terminated", lsInfo);
   }
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
@@ -985,30 +988,90 @@ namespace dss {
     WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
   }
 
-  EventInterpreterPluginKeepWebserviceAlive::EventInterpreterPluginKeepWebserviceAlive(EventInterpreter*
-                                                                               _pInterpreter)
-        : EventInterpreterPlugin("keep_webservice_alive", _pInterpreter)
-  {
+  namespace EventName {
+    std::string WebserviceKeepAlive = "keepWebserviceAlive";
   }
 
-  void EventInterpreterPluginKeepWebserviceAlive::handleEvent(Event& _event, const EventSubscription& _subscription)
+  __DEFINE_LOG_CHANNEL__(EventInterpreterWebservicePlugin, lsInfo);
+
+  EventInterpreterWebservicePlugin::EventInterpreterWebservicePlugin(EventInterpreter*
+                                                                     _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterWebservicePlugin", _pInterpreter)
   {
-    PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    bool enabled = propSystem.getBoolValue(pp_websvc_enabled);
-    if (!enabled) {
-      std::vector<std::string> ids = DSS::getInstance()->getEventRunner().getEventIDs();
-      for (size_t i = 0; i < ids.size(); i++) {
-        const ScheduledEvent se = DSS::getInstance()->getEventRunner().getEvent(ids.at(i));
-        if (se.getEvent()->getName() == _event.getName()) {
-          DSS::getInstance()->getEventRunner().removeEvent(se.getID());
-          break;
-        }
+    websvcEnabledNode =
+      DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
+    websvcEnabledNode ->addListener(this);
+  }
+
+  EventInterpreterWebservicePlugin::~EventInterpreterWebservicePlugin() {
+    websvcEnabledNode->removeListener(this);
+  }
+
+  void EventInterpreterWebservicePlugin::propertyChanged(PropertyNodePtr _caller,
+                                                                  PropertyNodePtr _changedNode) {
+    // initiate connection as soon as webservice got enabled
+    if (_changedNode->getBoolValue() == true) {
+      boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
+      pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    } else {
+      DSS::getInstance()->getEventRunner().removeEventByName(EventName::WebserviceKeepAlive);
+    }
+  }
+
+  void EventInterpreterWebservicePlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription("running",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription(EventName::WebserviceKeepAlive,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription(EventName::ApplicationTokenDeleted,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterWebservicePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+    if (_event.getName() == "running") {
+      if (webservice_communication_authorized()) {
+        boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
+        pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+        pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        return;
       }
+    }
+
+    if (!webservice_communication_authorized()) {
+      log("!webservice_communication_authorized", lsWarning);
       return;
     }
 
-    boost::shared_ptr<URLRequestCallback> cb;
-    WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+    if (_event.getName() == EventName::WebserviceKeepAlive) {
+      boost::shared_ptr<URLRequestCallback> cb;
+      WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+    } else if (_event.getName() == EventName::ApplicationTokenDeleted) {
+      if (!_event.hasPropertySet(EventProperty::ApplicationToken)) {
+        log("Invalid token deleted event missing token", lsWarning);
+        return;
+      }
+      std::string token = _event.getPropertyByName(EventProperty::ApplicationToken);
+      WebserviceAccessManagement::doNotifyTokenDeleted(token, WebserviceCallDone_t());
+      return;
+    }
   }
 
 } // namespace dss
