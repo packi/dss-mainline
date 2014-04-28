@@ -30,6 +30,7 @@
 #include "src/model/modelconst.h"
 #include "src/model/device.h"
 #include "src/model/group.h"
+#include "src/model/modulator.h"
 
 #include "dsbusinterface.h"
 
@@ -88,9 +89,13 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     result.flags = std::bitset<8>(flags);
 
-    ret = dSMProperties_get_apartment_state(m_DSMApiHandle, dsid,
-                                            &result.ApartmentState);
-    DSBusInterface::checkResultCode(ret);
+    try {
+      ret = dSMProperties_get_apartment_state(m_DSMApiHandle, dsid,
+                                              &result.ApartmentState);
+      DSBusInterface::checkResultCode(ret);
+    } catch (BusApiError& e) {
+      result.ApartmentState = DSM_APARTMENT_STATE_UNKNOWN;
+    }
     return result;
   } // getDSMeterSpec
 
