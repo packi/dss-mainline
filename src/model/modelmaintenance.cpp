@@ -627,6 +627,12 @@ namespace dss {
     //
     // if neither the dSMs nor the dSS have a valid known state, we will use
     // "present" as default as defined by our PO. this case is extremely rare.
+    //
+    // "as defined above, the dSS keeps the last known state persistent and will
+    // set this state when starting up. So the dSS can always provide a state,
+    // even after a 3h break down.  We neither need another default state
+    // (except for the very first dSS startup where it should be present) nor a
+    // timeout."
 
     // start with whatever state was saved in the dSS
     uint8_t dssaptstate = DSM_APARTMENT_STATE_UNKNOWN;
