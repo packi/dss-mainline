@@ -1,9 +1,8 @@
 /*
-    Copyright (c) 2012 digitalSTROM.org, Zurich, Switzerland
-    Copyright (c) 2014 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2012, 2014 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
-    Author: Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>
+    Authors: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+             Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
