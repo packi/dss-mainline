@@ -100,29 +100,29 @@ void WebserviceApartment::doModelChanged(ChangeType type,
                                          WebserviceCallDone_t callback) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   std::string url;
+  std::string params;
 
   if (!webservice_communication_authorized()) {
     return;
   }
 
   url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-  url += "?apartmentChangeType=";
+  params = "apartmentChangeType=";
   switch (type) {
   case ApartmentChange:
-      url += "Apartment";
+      params += "Apartment";
       break;
   case TimedEventChange:
-      url += "TimedEvent";
+      params += "TimedEvent";
       break;
   case UDAChange:
-      url += "UserDefinedAction";
+      params += "UserDefinedAction";
       break;
   }
-  url += "&dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
 
-  log("execute: " + url, lsDebug);
+  log("execute: " + url + "?" + params, lsDebug);
   boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(url, POST, mcb);
+  WebserviceConnection::getInstance()->request(url, params, POST, mcb, true);
 }
 
 /*
@@ -135,18 +135,19 @@ void WebserviceAccessManagement::doNotifyTokenDeleted(const std::string &token,
                                                       WebserviceCallDone_t callback) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   std::string url;
+  std::string params;
 
   if (!webservice_communication_authorized()) {
     return;
   }
 
   url += propSystem.getStringValue(pp_websvc_access_mgmt_delete_token_url_path);
-  url += "?dsid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-  url += "&token=" + token;
+  params = "dsid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  params += "&token=" + token;
 
   // webservice is fire and forget, so use shared ptr for life cycle mgmt
   boost::shared_ptr<StatusReplyChecker> cont(new StatusReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(url, POST, cont);
+  WebserviceConnection::getInstance()->request(url, params, POST, cont, false);
 }
 
 }
