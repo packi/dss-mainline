@@ -1181,8 +1181,7 @@ namespace dss {
       for (size_t i = 0; i < channels->size(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
         chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
-        //chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
-        chanObj->addProperty("value", 50);
+        chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
         channelsObj->addElement("", chanObj);
       }
 
