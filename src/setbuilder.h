@@ -48,7 +48,7 @@ namespace dss {
     void skipWhitespace(unsigned int& _index);
     std::string readParameter(unsigned int& _index);
     int readInt(unsigned int& _index);
-    dss_dsid_t readDSID(unsigned int& _index);
+    dsuid_t readDSID(unsigned int& _index);
     std::string readString(unsigned int& _index);
     Set parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Group> _context);
   public:

@@ -147,24 +147,26 @@ namespace dss {
     }
   } // addDefaultGroupsToZone
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) const {
+  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) const {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if(dev->getDSID() == _dsid) {
+      dsuid_t dev_dsid = dev->getDSID();
+      if(IsEqualDsuid(dev_dsid,  _dsid)) {
         return dev;
       }
     }
-    throw ItemNotFoundException(_dsid.toString());
+    throw ItemNotFoundException(dsuid2str(_dsid));
   } // getDeviceByShortAddress const
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) {
+  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if(dev->getDSID() == _dsid) {
+      dsuid_t dev_dsid = dev->getDSID();
+      if(IsEqualDsuid(dev_dsid, _dsid)) {
         return dev;
       }
     }
-    throw ItemNotFoundException(_dsid.toString());
+    throw ItemNotFoundException(dsuid2str(_dsid));
   } // getDeviceByShortAddress
 
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
@@ -223,14 +225,15 @@ namespace dss {
     throw ItemNotFoundException(_modName);
   } // getDSMeter(name)
 
-  boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dss_dsid_t _dsid) {
+  boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dsuid_t _dsid) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
-      if(dsMeter->getDSID() == _dsid) {
+      dsuid_t tmp_dsid = dsMeter->getDSID();
+      if(IsEqualDsuid(tmp_dsid, _dsid)) {
         return dsMeter;
       }
     }
-    throw ItemNotFoundException(_dsid.toString());
+    throw ItemNotFoundException(dsuid2str(_dsid));
   } // getDSMeterByDSID
 
   std::vector<boost::shared_ptr<DSMeter> > Apartment::getDSMeters() {
@@ -256,12 +259,13 @@ namespace dss {
     throw ItemNotFoundException(intToString(_id));
   } // getGroup(id)
 
-  boost::shared_ptr<Device> Apartment::allocateDevice(const dss_dsid_t _dsid) {
+  boost::shared_ptr<Device> Apartment::allocateDevice(const dsuid_t _dsid) {
     AssertLocked lock(this);
     boost::shared_ptr<Device> pResult;
     // search for existing device
     foreach(boost::shared_ptr<Device> device, m_Devices) {
-      if(device->getDSID() == _dsid) {
+      dsuid_t tmp_dsid = device->getDSID();
+      if(IsEqualDsuid(tmp_dsid, _dsid)) {
         pResult = device;
         break;
       }
@@ -278,10 +282,11 @@ namespace dss {
     return pResult;
   } // allocateDevice
 
-  boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dss_dsid_t _dsid) {
+  boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dsuid_t _dsid) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
-      if((dsMeter)->getDSID() == _dsid) {
+      dsuid_t tmp_dsid = dsMeter->getDSID();
+      if(IsEqualDsuid(tmp_dsid, _dsid)) {
         return dsMeter;
       }
     }
@@ -338,7 +343,7 @@ namespace dss {
     }
   } // removeZone
 
-  void Apartment::removeDevice(dss_dsid_t _device) {
+  void Apartment::removeDevice(dsuid_t _device) {
     AssertLocked lock(this);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
@@ -346,7 +351,8 @@ namespace dss {
     for(std::vector<boost::shared_ptr<Device> >::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
         ipDevice != e; ++ipDevice) {
       boost::shared_ptr<Device> pDevice = *ipDevice;
-      if(pDevice->getDSID() == _device) {
+      dsuid_t tmp_dsid = pDevice->getDSID();
+      if(IsEqualDsuid(tmp_dsid, _device)) {
         // Remove from zone
         int zoneID = pDevice->getZoneID();
         DeviceReference devRef = DeviceReference(pDevice, this);
@@ -391,7 +397,7 @@ namespace dss {
     }
   } // removeDevice
 
-  void Apartment::removeDSMeter(dss_dsid_t _dsMeter) {
+  void Apartment::removeDSMeter(dsuid_t _dsMeter) {
     AssertLocked lock(this);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
@@ -399,7 +405,8 @@ namespace dss {
     for(std::vector<boost::shared_ptr<DSMeter> >::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
         ipDSMeter != e; ++ipDSMeter) {
       boost::shared_ptr<DSMeter> pDSMeter = *ipDSMeter;
-      if(pDSMeter->getDSID() == _dsMeter) {
+      dsuid_t tmp_dsid = pDSMeter->getDSID();
+      if(IsEqualDsuid(tmp_dsid, _dsMeter)) {
         m_DSMeters.erase(ipDSMeter);
         return;
       }

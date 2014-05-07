@@ -23,6 +23,7 @@
 #ifndef DSACTIONREQUEST_H_
 #define DSACTIONREQUEST_H_
 
+#include <digitalSTROM/ds.h>
 #include "src/businterface.h"
 
 #include "dsbusinterfaceobj.h"
@@ -35,7 +36,7 @@ namespace dss {
     DSActionRequest()
     : DSBusInterfaceObj(), m_pBusEventSink(NULL)
     {
-      SetBroadcastId(m_BroadcastDSID);
+      SetBroadcastDsuid(m_BroadcastDSID);
     }
 
     virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token, const bool _force);
@@ -49,7 +50,7 @@ namespace dss {
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token);
     void setBusEventSink(BusEventSink* _eventSink);
   private:
-    dsid_t m_BroadcastDSID;
+    dsuid_t m_BroadcastDSID;
     BusEventSink* m_pBusEventSink;
   }; // DSActionRequest
 

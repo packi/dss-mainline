@@ -459,7 +459,7 @@ namespace dss {
         throw std::invalid_argument("missing device dsid parameter");
       }
 
-      dss_dsid_t deviceDSID = dss_dsid_t::fromString(dsidStr);
+      dsuid_t deviceDSID = str2dsuid(dsidStr);
       boost::shared_ptr<Device> result;
       result = getDSS().getApartment().getDeviceByDSID(deviceDSID);
       if (result == NULL) {

@@ -25,9 +25,11 @@
 #include "modelpersistence.h"
 
 #include <stdexcept>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/foreach.h"
 #include "src/base.h"
+#include "src/backtrace.h"
 #include "src/propertysystem.h"
 #include "src/ds485types.h"
 #include "src/model/apartment.h"
@@ -53,6 +55,7 @@ namespace dss {
 
   void ModelPersistence::parseDevice(const char *_name, const char **_attrs) {
     const char *dsid = NULL;
+    const char *dsuid = NULL;
     const char *present = NULL;
     const char *fs = NULL;
     const char *lastmeter = NULL;
@@ -79,6 +82,8 @@ namespace dss {
     {
       if (strcmp(_attrs[i], "dsid") == 0) {
         dsid = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "dsuid") == 0) {
+        dsuid = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "isPresent") == 0) {
         present = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "firstSeen") == 0) {
@@ -118,11 +123,29 @@ namespace dss {
 
     m_tempDevice.reset();
 
-    if (dsid == NULL) {
-      return;
+    dsuid_t _dsuid;
+    if (dsuid == NULL) {
+      if (dsid == NULL) {
+        return;
+      }
+      dsid_t _dsid;
+      try {
+        _dsid = str2dsid(dsid);
+        _dsuid = dsuid_from_dsid(&_dsid);
+      } catch (std::runtime_error &ex) {
+        Logger::getInstance()->log("ModelPersistence: could not convert dSID to dSUID for device " + std::string(dsid) + ": " + ex.what(), lsError);
+        return;
+      }
+    } else {
+      try {
+        _dsuid = str2dsuid(dsuid);
+      } catch (std::runtime_error &ex) {
+        Logger::getInstance()->log("ModelPersistence: could not convert dSID to dSUID for device " + std::string(dsid) + ": " + ex.what(), lsError);
+        return;
+      }
     }
 
-    m_tempDevice = m_Apartment.allocateDevice(dss_dsid_t::fromString(dsid));
+    m_tempDevice = m_Apartment.allocateDevice(_dsuid);
     bool isPresent = false;
     if (present != NULL) {
       try {
@@ -151,9 +174,20 @@ namespace dss {
       }
     }
 
-    dss_dsid_t lastKnownDsMeter = NullDSID;
+    dsuid_t lastKnownDsMeter;
+    SetNullDsuid(lastKnownDsMeter);
+
     if (lastmeter != NULL) {
-      lastKnownDsMeter = dss_dsid_t::fromString(lastmeter);
+      try {
+        lastKnownDsMeter = str2dsuid(lastmeter);
+      } catch (std::runtime_error&) {
+        try {
+          dsid_t lm = str2dsid(lastmeter);
+          lastKnownDsMeter = dsuid_from_dsid(&lm);
+        } catch (std::runtime_error &ex) {
+          Logger::getInstance()->log("ModelPersistence: could not convert dSID to dSUID for meter " + std::string(dsid) + ": " + ex.what(), lsError);
+        }
+      }
     }
 
     int lastKnownZoneID = 0;
@@ -248,8 +282,19 @@ namespace dss {
       return;
     }
 
-    dss_dsid_t dsid = dss_dsid_t::fromString(id);
-    m_tempMeter = m_Apartment.allocateDSMeter(dsid);
+    dsuid_t dsuid;
+    try {
+      dsuid = str2dsuid(id);
+    } catch (std::runtime_error&) {
+      try {
+        dsid_t dsid = str2dsid(id);
+        dsuid = dsuid_from_dsid(&dsid);
+      } catch (std::runtime_error &ex) {
+        Logger::getInstance()->log("ModelPersistence: could not convert dSID to dSUID for meter " + std::string(id) + ": " + ex.what(), lsError);
+        return;
+      }
+    }
+    m_tempMeter = m_Apartment.allocateDSMeter(dsuid);
   }
 
   void ModelPersistence::parseZone(const char *_name, const char **_attrs) {
@@ -467,6 +512,7 @@ namespace dss {
       Logger::getInstance()->log(std::string("ModelPersistence::"
               "readConfigurationFromXML: element start handler caught "
               "exception: ") + ex.what() + " Will abort parsing!", lsError);
+      Backtrace::logBacktrace();
     } catch (...) {
       m_forceStop = true;
       Logger::getInstance()->log("ModelPersistence::readConfigurationFromXML: "
@@ -605,16 +651,16 @@ namespace dss {
   } // readConfigurationFromXML
 
   void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
-    _ofs << doIndent(_indent) << "<device dsid=\""
-         << _pDevice->getDSID().toString() << "\""
+    _ofs << doIndent(_indent) << "<device dsuid=\""
+         << dsuid2str(_pDevice->getDSID()) << "\""
          << " isPresent=\"" << (_pDevice->isPresent() ? "1" : "0") << "\""
          << " firstSeen=\""
          << intToString(_pDevice->getFirstSeen().secondsSinceEpoch()) << "\""
          << " inactiveSince=\""
          << _pDevice->getInactiveSince().toString() << "\"";
 
-    if(_pDevice->getLastKnownDSMeterDSID() != NullDSID) {
-      _ofs <<  " lastKnownDSMeter=\"" << _pDevice->getLastKnownDSMeterDSID().toString() << "\"";
+    if(IsNullDsuid(_pDevice->getLastKnownDSMeterDSID())) {
+      _ofs <<  " lastKnownDSMeter=\"" << dsuid2str(_pDevice->getLastKnownDSMeterDSID()) << "\"";
     }
     if(_pDevice->getLastKnownZoneID() != 0) {
       _ofs << " lastKnownZoneID=\"" << intToString(_pDevice->getLastKnownZoneID()) << "\"";
@@ -702,7 +748,7 @@ namespace dss {
   } // zoneToXML
 
  void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, std::ofstream& _ofs, const int _indent) {
-   _ofs <<  doIndent(_indent) << "<dsMeter id=\"" + _pDSMeter->getDSID().toString() << "\">" << std::endl;
+   _ofs <<  doIndent(_indent) << "<dsMeter id=\"" + dsuid2str(_pDSMeter->getDSID()) << "\">" << std::endl;
     if(!_pDSMeter->getName().empty()) {
       _ofs << doIndent(_indent + 1) << "<name>" + XMLStringEscape(_pDSMeter->getName()) << "</name>" << std::endl;
     }

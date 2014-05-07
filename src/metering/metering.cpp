@@ -125,7 +125,7 @@ namespace dss {
     if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
       bool tunePowerMaxSetting = false;
       int rrdMatchCount = 0;
-      std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + ".rrd";
+      std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());

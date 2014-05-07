@@ -361,8 +361,9 @@ namespace dss {
         } else if (raiseLocation == erlDevice) {
           boost::shared_ptr<const DeviceReference> device = _event.getRaisedAtDevice();
           try {
-            source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
-            source.setProperty("dsid", device->getDSID().toString());
+            source.setProperty("set", "dsuid(" + dsuid2str(device->getDSID()) + ")");
+            source.setProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
+            source.setProperty("dsuid", dsuid2str(device->getDSID()));
             source.setProperty("zoneID", device->getDevice()->getZoneID());
           } catch(ItemNotFoundException& e) {
           }
@@ -373,8 +374,9 @@ namespace dss {
           boost::shared_ptr<const State> state = _event.getRaisedAtState();
           if (state->getType() == StateType_Device) {
             boost::shared_ptr<Device> device = state->getProviderDevice();
-            source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
-            source.setProperty("dsid", device->getDSID().toString());
+            source.setProperty("set", "dsuid(" + dsuid2str(device->getDSID()) + ")");
+            source.setProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
+            source.setProperty("dsid", dsuid2str(device->getDSID()));
             source.setProperty("zoneID", device->getZoneID());
             source.setProperty("isApartment", false);
             source.setProperty("isGroup", false);

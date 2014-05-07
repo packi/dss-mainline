@@ -26,56 +26,23 @@
 #include <stdint.h>
 #include <string>
 #include <sstream>
+#include <digitalSTROM/ds.h>
 
 namespace dss {
 
-  /** Bus id of a device */
-  typedef uint16_t devid_t;
+/** Bus id of a device */
+typedef uint16_t devid_t;
 
   const devid_t ShortAddressStaleDevice = 0xFFFF;
 
-  /** DSID of a device/dsMeter */
-
-  typedef struct dsid{
-    uint64_t upper;
-    uint32_t lower;
-
-    dsid()
-    : upper(0), lower(0) {}
-
-    dsid(uint64_t _upper, uint32_t _lower)
-    : upper(_upper), lower(_lower) {}
-
-    bool operator==(const dsid& _other) const {
-      return (upper == _other.upper) && (lower == _other.lower);
-    }
-
-    bool operator!=(const dsid& _other) const {
-      return !(_other == *this);
-    }
-
-    dsid& operator=(const dsid& _other) {
-      upper = _other.upper;
-      lower = _other.lower;
-      return *this;
-    }
-
-    std::string toString() const;
-    static dsid fromString(const std::string& _string);
-  } dss_dsid_t;
-
-
-  extern const dss_dsid_t NullDSID;
-
-  typedef enum  {
-    Click,
-    Touch,
-    TouchEnd,
-    ShortClick,
-    DoubleClick,
-    ProgrammClick
-  } ButtonPressKind;
-
+  std::string dsuid2str(dsuid_t dsuid);
+  dsuid_t str2dsuid(std::string dsuid_str);
+  dsid_t str2dsid(std::string dsid_str);
+  std::string dsid2str(dsid_t dsid);
+  uint32_t dsuid2serial(dsuid_t dsuid);
+  bool IsEvenDsuid(dsuid_t dsuid);
+  dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid);
+  dsid_t dsuid_to_dsid(dsuid_t dsuid);
 }
 
-#endif
+#endif//__DSS_DSUID_H__

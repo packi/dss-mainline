@@ -58,7 +58,7 @@ namespace dss {
       bool m_evtSrcIsDevice;
       int m_evtSrcZone;
       int m_evtSrcGroup;
-      dss_dsid_t m_evtSrcDSID;
+      dsuid_t m_evtSrcDSID;
 
       bool checkSceneZone(PropertyNodePtr _triggerProp);
       bool checkUndoSceneZone(PropertyNodePtr _triggerProp);

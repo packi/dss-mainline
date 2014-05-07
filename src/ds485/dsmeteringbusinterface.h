@@ -34,14 +34,14 @@ namespace dss {
     DSMeteringBusInterface()
     : DSBusInterfaceObj()
     {
-      SetBroadcastId(m_BroadcastDSID);
+      SetBroadcastDsuid(m_BroadcastDSID);
     }
 
     virtual void requestMeterData();
-    virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID);
-    virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID);
+    virtual unsigned long getPowerConsumption(const dsuid_t& _dsMeterID);
+    virtual unsigned long getEnergyMeterValue(const dsuid_t& _dsMeterID);
   private:
-    dsid_t m_BroadcastDSID;
+    dsuid_t m_BroadcastDSID;
   }; // DSMeteringBusInterface
 
 } // namespace dss

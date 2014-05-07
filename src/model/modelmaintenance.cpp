@@ -95,7 +95,7 @@ namespace dss {
         PropertyNode* deviceNode =
           _changedNode->getParentNode()->getParentNode();
         boost::shared_ptr<Device> dev =
-          m_pApartment->getDeviceByDSID(dss_dsid_t::fromString(deviceNode->getName()));
+          m_pApartment->getDeviceByDSID(str2dsuid(deviceNode->getName()));
         bool value = _changedNode->getBoolValue();
         if(DSS::hasInstance()) {
           StructureModifyingBusInterface* pInterface;
@@ -112,7 +112,7 @@ namespace dss {
         PropertyNode* deviceNode =
           _changedNode->getParentNode()->getParentNode();
         boost::shared_ptr<Device> dev =
-          m_pApartment->getDeviceByDSID(dss_dsid_t::fromString(deviceNode->getName()));
+          m_pApartment->getDeviceByDSID(str2dsuid(deviceNode->getName()));
         bool value = _changedNode->getBoolValue();
         if(DSS::hasInstance()) {
           StructureModifyingBusInterface* pInterface;
@@ -228,10 +228,10 @@ namespace dss {
           boost::shared_ptr<DSMeter> dsMeter;
           try{
              dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
-             log ("dSM already known: " + spec.DSID.toString());
+             log ("dSM already known: " + dsuid2str(spec.DSID));
           } catch(ItemNotFoundException& e) {
              dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
-             log ("Discovered new dSM: " + spec.DSID.toString(), lsWarning);
+             log ("Discovered new dSM: " + dsuid2str(spec.DSID), lsWarning);
           }
 
           try {
@@ -309,8 +309,9 @@ namespace dss {
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
           boost::shared_ptr<Group> group = zone->getGroup(groupID);
-          dss_dsid_t originDSID;
-          if ((mEvent->getSource() != NullDSID) && (originDeviceID != 0)) {
+          dsuid_t originDSID;
+          dsuid_t evtDSID = mEvent->getSource();
+          if (!IsNullDsuid(evtDSID) && (originDeviceID != 0)) {
             DeviceReference devRef = m_pApartment->getDevices().getByBusID(originDeviceID, mEvent->getSource());
             originDSID = devRef.getDSID();
           }
@@ -322,7 +323,7 @@ namespace dss {
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSID", originDSID.toString());
+              pEvent->setProperty("originDSID", dsuid2str(originDSID));
               pEvent->setProperty("callOrigin", intToString(callOrigin));
               pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
@@ -339,7 +340,7 @@ namespace dss {
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSID", originDSID.toString());
+              pEvent->setProperty("originDSID", dsuid2str(originDSID));
               pEvent->setProperty("callOrigin", intToString(callOrigin));
               pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
@@ -389,10 +390,10 @@ namespace dss {
 
         } catch(ItemNotFoundException& e) {
           log("handleDeferredModelEvents: Could not find device with dsid "
-              + bEvent->getSource().toString(), lsError);
+              + dsuid2str(bEvent->getSource()), lsError);
         } catch(SecurityException& e) {
           log("handleDeferredModelEvents: security error accessing device with dsid "
-              + bEvent->getSource().toString(), lsError);
+              + dsuid2str(bEvent->getSource()), lsError);
         }
         continue;
       }
@@ -523,7 +524,7 @@ namespace dss {
           log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
         } else {
           assert(pEventWithDSID != NULL);
-          dss_dsid_t meterID = pEventWithDSID->getDSID();
+          dsuid_t meterID = pEventWithDSID->getDSID();
           try{
             boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(meterID);
             mod->setIsConnected(true);
@@ -543,7 +544,7 @@ namespace dss {
           log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");
         } else {
           assert(pEventWithDSID != NULL);
-          dss_dsid_t meterID = pEventWithDSID->getDSID();
+          dsuid_t meterID = pEventWithDSID->getDSID();
           unsigned int power = event.getParameter(0);
           unsigned int energy = event.getParameter(1);
           try {
@@ -769,22 +770,22 @@ namespace dss {
     m_ModelEventsMutex.unlock();
   } // eraseModelEventsFromQueue
 
-  void ModelMaintenance::dsMeterReady(const dss_dsid_t& _dsMeterBusID) {
-    log("Scanning dSM: " + _dsMeterBusID.toString(), lsInfo);
+  void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
+    log("Scanning dSM: " + dsuid2str(_dsMeterBusID), lsInfo);
     try {
 
       boost::shared_ptr<DSMeter> mod;
       try {
         mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
       } catch(ItemNotFoundException& e) {
-        log("Error scanning dSM: " + _dsMeterBusID.toString() + " not found in data model", lsError);
+        log("Error scanning dSM: " + dsuid2str(_dsMeterBusID) + " not found in data model", lsError);
         return; // nothing we could do here ...
       }
 
       try {
         BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if (!scanner.scanDSMeter(mod)) {
-          log("Error scanning dSM: " + _dsMeterBusID.toString() + ", data model incomplete", lsError);
+          log("Error scanning dSM: " + dsuid2str(_dsMeterBusID) + ", data model incomplete", lsError);
           return;
         }
 
@@ -797,7 +798,7 @@ namespace dss {
         if (mod->hasPendingEvents()) {
           scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device> ());
         } else {
-          log(std::string("Event counter match on dSM " + _dsMeterBusID.toString()), lsDebug);
+          log(std::string("Event counter match on dSM ") + dsuid2str(_dsMeterBusID), lsDebug);
         }
 
         // additionally set all previously connected device to valid now
@@ -807,16 +808,16 @@ namespace dss {
         }
 
         boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
-        dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
+        dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
         raiseEvent(dsMeterReadyEvent);
 
       } catch(BusApiError& e) {
-        log(std::string("Bus error scanning dSM " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
+        log(std::string("Bus error scanning dSM " + dsuid2str(_dsMeterBusID) + " : ") + e.what(), lsFatal);
         ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, _dsMeterBusID);
         addModelEvent(pEvent);
       }
     } catch(ItemNotFoundException& e) {
-      log("dsMeterReady " + _dsMeterBusID.toString() + ": item not found: " + std::string(e.what()), lsError);
+      log("dsMeterReady " + dsuid2str(_dsMeterBusID) + ": item not found: " + std::string(e.what()), lsError);
     }
   } // dsMeterReady
 
@@ -883,7 +884,7 @@ namespace dss {
     }
   };
 
-  void ModelMaintenance::onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token) {
+  void ModelMaintenance::onGroupCallScene(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
         log("onGroupCallScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -924,12 +925,12 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         pEvent->setProperty("token", _token);
-        dss_dsid_t originDSID;
-        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+        dsuid_t originDSID;
+        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSID = devRef.getDSID();
         }
-        pEvent->setProperty("originDSID", originDSID.toString());
+        pEvent->setProperty("originDSID", dsuid2str(originDSID));
         if (_forced) {
           pEvent->setProperty("forced", "true");
         }
@@ -943,7 +944,7 @@ namespace dss {
     }
   } // onGroupCallScene
 
-  void ModelMaintenance::onGroupUndoScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, callOrigin_t _origin, const std::string _token) {
+  void ModelMaintenance::onGroupUndoScene(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, callOrigin_t _origin, const std::string _token) {
     try {
       if(_sceneID < -1 || _sceneID > MaxSceneNumber) {
         log("onGroupUndoScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
@@ -991,13 +992,13 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        dss_dsid_t originDSID;
-        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+        dsuid_t originDSID;
+        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSID = devRef.getDSID();
         }
         pEvent->setProperty("callOrigin", intToString(_origin));
-        pEvent->setProperty("originDSID", originDSID.toString());
+        pEvent->setProperty("originDSID", dsuid2str(originDSID));
         pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
@@ -1008,7 +1009,7 @@ namespace dss {
     }
   } // onGroupUndoScene
 
-  void ModelMaintenance::onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token) {
+  void ModelMaintenance::onGroupCallSceneFiltered(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token) {
     // Filter Strategy:
     // Check for Source != 0 and per Zone and Group
     // - delayed On-Scene processing, for Scene1/Scene2/Scene3/Scene4
@@ -1018,7 +1019,7 @@ namespace dss {
 
     if (SceneHelper::isMultiTipSequence(_sceneID)) {
       // do not filter calls from myself
-      if (_source == NullDSID) {
+      if (IsNullDsuid(_source)) {
         passThrough = true;
       }
       // do not filter calls to broadcast
@@ -1034,7 +1035,7 @@ namespace dss {
     }
 
     if (passThrough) {
-      log("CallSceneFilter: pass through, from source " + _source.toString() +
+      log("CallSceneFilter: pass through, from source " + dsuid2str(_source) +
           ": Zone=" + intToString(_zoneID) +
           ", Gruppe=" + intToString(_groupID) +
           ", OriginDevice=" + intToString(_originDeviceID) +
@@ -1045,7 +1046,8 @@ namespace dss {
       // flush all pending events from same origin
       foreach(boost::shared_ptr<ModelDeferredEvent> evt, m_DeferredEvents) {
         boost::shared_ptr<ModelDeferredSceneEvent> pEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
-        if ((pEvent != NULL) && (pEvent->getSource() == _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
+        dsuid_t tmp_dsuid = pEvent->getSource();
+        if ((pEvent != NULL) && IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
           pEvent->clearTimestamp();
         }
       }
@@ -1062,7 +1064,8 @@ namespace dss {
         continue;
       }
       if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
-        if ((pEvent->getSource() == _source) && ((pEvent->getOriginDeviceID() == _originDeviceID) || (_originDeviceID == 0))) {
+        dsuid_t tmp_dsuid = pEvent->getSource();
+        if (IsEqualDsuid(tmp_dsuid, _source) && ((pEvent->getOriginDeviceID() == _originDeviceID) || (_originDeviceID == 0))) {
           // dimming, adjust the old event's timestamp to keep it active
           if (SceneHelper::isDimSequence(_sceneID) && ((pEvent->getSceneID() == _sceneID) || (_sceneID == SceneDimArea))) {
             pEvent->setTimestamp();
@@ -1146,7 +1149,7 @@ namespace dss {
       }
     }
 
-    log("CallSceneFilter: deferred processing, from source " + _source.toString() +
+    log("CallSceneFilter: deferred processing, from source " + dsuid2str(_source) +
         ": Zone=" + intToString(_zoneID) +
         ", Group=" + intToString(_groupID) +
         ", OriginDevice=" + intToString(_originDeviceID) +
@@ -1158,7 +1161,7 @@ namespace dss {
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
 
-  void ModelMaintenance::onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token) {
+  void ModelMaintenance::onGroupBlink(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token) {
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
@@ -1168,13 +1171,13 @@ namespace dss {
         pEvent.reset(new Event("blink", group));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        dss_dsid_t originDSID;
-        if ((_source != NullDSID) && (_originDeviceID != 0)) {
+        dsuid_t originDSID;
+        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSID = devRef.getDSID();
         }
         pEvent->setProperty("callOrigin", intToString(_origin));
-        pEvent->setProperty("originDSID", originDSID.toString());
+        pEvent->setProperty("originDSID", dsuid2str(originDSID));
         pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
@@ -1185,7 +1188,7 @@ namespace dss {
     }
   } // onGroupBlink
 
-  void ModelMaintenance::onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType) {
+  void ModelMaintenance::onDeviceActionFiltered(dsuid_t _source, const int _deviceID, const int _buttonNr, const int _clickType) {
 
     // Filter Strategy:
     // Check for Source != 0 and per DeviceID
@@ -1195,7 +1198,7 @@ namespace dss {
     bool passThrough = false;
 
     // do not filter calls from myself
-    if (_source == NullDSID) {
+    if (IsNullDsuid(_source)) {
       passThrough = true;
     }
 
@@ -1210,7 +1213,7 @@ namespace dss {
     }
 
     if (passThrough) {
-      log("DeviceActionFilter: pass through, from source " + _source.toString() +
+      log("DeviceActionFilter: pass through, from source " + dsuid2str(_source) +
           ": deviceID=" + intToString(_deviceID) +
           ": buttonIndex=" + intToString(_buttonNr) +
           ", clickType=" + intToString(_clickType), lsDebug);
@@ -1226,7 +1229,8 @@ namespace dss {
       if (pEvent == NULL) {
         continue;
       }
-      if ((pEvent->getDeviceID() == _deviceID) && (pEvent->getButtonIndex() == _buttonNr) && (pEvent->getSource() == _source)) {
+      dsuid_t tmp_dsuid = pEvent->getSource();
+      if ((pEvent->getDeviceID() == _deviceID) && (pEvent->getButtonIndex() == _buttonNr) && IsEqualDsuid(tmp_dsuid, _source)) {
         // holding, adjust the old event's timestamp to keep it active
         if ((_clickType == ClickTypeHR) &&
             ((pEvent->getClickType() == ClickTypeHS) || (pEvent->getClickType() == ClickTypeHR))) {
@@ -1277,7 +1281,7 @@ namespace dss {
       }
     }
 
-    log("DeviceActionFilter: deferred processing, from source " + _source.toString() + "/" + intToString(_deviceID) +
+    log("DeviceActionFilter: deferred processing, from source " + dsuid2str(_source) + "/" + intToString(_deviceID) +
         ": buttonIndex=" + intToString(_buttonNr) +
         ", clickType=" + intToString(_clickType), lsDebug);
 
@@ -1285,10 +1289,10 @@ namespace dss {
     m_DeferredEvents.push_back(mEvent);
   } // onDeviceActionFiltered
 
-  void ModelMaintenance::onDeviceNameChanged(dss_dsid_t _meterID,
+  void ModelMaintenance::onDeviceNameChanged(dsuid_t _meterID,
                                              const devid_t _deviceID,
                                              const std::string& _name) {
-    log("Device name changed on the bus. Meter: " + _meterID.toString() +
+    log("Device name changed on the bus. Meter: " + dsuid2str(_meterID) +
         " bus-id: " + intToString(_deviceID), lsInfo);
     try {
       boost::shared_ptr<DSMeter> pMeter =
@@ -1300,10 +1304,10 @@ namespace dss {
     }
   } // onDeviceNameChanged
 
-  void ModelMaintenance::onDsmNameChanged(dss_dsid_t _meterID,
+  void ModelMaintenance::onDsmNameChanged(dsuid_t _meterID,
                                           const std::string& _name)
   {
-      log("dSM name changed on the bus. Meter: " + _meterID.toString(), lsInfo);
+      log("dSM name changed on the bus. Meter: " + dsuid2str(_meterID), lsInfo);
       try {
         boost::shared_ptr<DSMeter> pMeter =
           m_pApartment->getDSMeterByDSID(_meterID);
@@ -1314,10 +1318,10 @@ namespace dss {
       }
   }
 
-  void ModelMaintenance::onDsmFlagsChanged(dss_dsid_t _meterID,
+  void ModelMaintenance::onDsmFlagsChanged(dsuid_t _meterID,
                                           const std::bitset<8> _flags)
   {
-      log("dSM flags changed on the bus. Meter: " + _meterID.toString(), lsInfo);
+      log("dSM flags changed on the bus. Meter: " + dsuid2str(_meterID), lsInfo);
       try {
         boost::shared_ptr<DSMeter> pMeter =
           m_pApartment->getDSMeterByDSID(_meterID);
@@ -1328,15 +1332,15 @@ namespace dss {
       }
   }
 
-  void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token) {
+  void ModelMaintenance::onDeviceCallScene(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
-        log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
+        log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
         return;
       }
       boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
       try {
-        log("OnDeviceCallScene: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
+        log("OnDeviceCallScene: dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice()->setLastCalledScene(_sceneID & 0x00ff);
@@ -1351,18 +1355,18 @@ namespace dss {
         }
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
-        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString() + "' scene:" + intToString(_sceneID), lsError);
+        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + dsuid2str(_dsMeterID) + "' scene:" + intToString(_sceneID), lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
+      log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + dsuid2str(_dsMeterID) + "'", lsError);
     }
   } // onDeviceCallScene
 
-  void ModelMaintenance::onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token) {
+  void ModelMaintenance::onDeviceBlink(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token) {
     try {
       boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
       try {
-        log("OnDeviceBlink: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID));
+        log("OnDeviceBlink: dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID));
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
         boost::shared_ptr<Event> event(new Event("blink", pDevRev));
@@ -1370,17 +1374,17 @@ namespace dss {
         event->setProperty("originToken", _token);
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
-        log("OnDeviceBlink: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString(), lsError);
+        log("OnDeviceBlink: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + dsuid2str(_dsMeterID), lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("OnDeviceBlink: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
+      log("OnDeviceBlink: Could not find dsMeter with bus-id '" + dsuid2str(_dsMeterID) + "'", lsError);
     }
   } // onDeviceBlink
 
-  void ModelMaintenance::onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType) {
+  void ModelMaintenance::onDeviceActionEvent(const dsuid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType) {
     try {
       boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
-      log("onDeviceActionEvent: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) +
+      log("onDeviceActionEvent: dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID) +
           "' button: " + intToString(_buttonNr) + ", click: " + intToString(_clickType));
       try {
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
@@ -1390,18 +1394,18 @@ namespace dss {
         event->setProperty("buttonIndex", intToString(_buttonNr));
         raiseEvent(event);
       } catch(ItemNotFoundException& e) {
-        log("onDeviceActionEvent: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString(), lsError);
+        log("onDeviceActionEvent: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + dsuid2str(_dsMeterID), lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("onDeviceActionEvent: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
+      log("onDeviceActionEvent: Could not find dsMeter with bus-id '" + dsuid2str(_dsMeterID) + "'", lsError);
     }
   } // onDeviceActionEvent
 
-  void ModelMaintenance::onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
+  void ModelMaintenance::onAddDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("Device discovered:");
     try {
       DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
-      log("  DSID   : " +  devRef.getDSID().toString());
+      log("  DSID   : " +  dsuid2str(devRef.getDSID()));
       {
         boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
         boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
@@ -1411,18 +1415,18 @@ namespace dss {
         }
       }
     } catch(ItemNotFoundException& e) {}
-    log("  DSMeter: " +  _dsMeterID.toString());
+    log("  DSMeter: " +  dsuid2str(_dsMeterID));
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
 
     rescanDevice(_dsMeterID, _devID);
   } // onAddDevice
 
-  void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
+  void ModelMaintenance::onRemoveDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("Device disappeared:");
     try {
       DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
-      log("  DSID   : " +  devRef.getDSID().toString());
+      log("  DSID   : " +  dsuid2str(devRef.getDSID()));
       {
         boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
         boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
@@ -1432,7 +1436,7 @@ namespace dss {
         }
       }
     } catch(ItemNotFoundException& e) {}
-    log("  DSMeter: " +  _dsMeterID.toString());
+    log("  DSMeter: " +  dsuid2str(_dsMeterID));
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
 
@@ -1445,14 +1449,14 @@ namespace dss {
       addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
     } catch(ItemNotFoundException& e) {
-      log("Removed device " + _dsMeterID.toString() + " is not known to us");
+      log("Removed device " + dsuid2str(_dsMeterID) + " is not known to us");
     }
   } // onRemoveDevice
 
-  void ModelMaintenance::onJoinedDSMeter(const dss_dsid_t& _dSMeterID) {
+  void ModelMaintenance::onJoinedDSMeter(const dsuid_t& _dSMeterID) {
     boost::shared_ptr<DSMeter> meter;
 
-    log("onJoinedDSMeter: dSM Connected: " + _dSMeterID.toString());
+    log("onJoinedDSMeter: dSM Connected: " + dsuid2str(_dSMeterID));
     try {
       meter = m_pApartment->getDSMeterByDSID(_dSMeterID);
     } catch (ItemNotFoundException& e) {
@@ -1474,8 +1478,8 @@ namespace dss {
     }
   } // onJoinedDSMeter
 
-  void ModelMaintenance::onLostDSMeter(const dss_dsid_t& _dSMeterID) {
-    log("dSM disconnected: " + _dSMeterID.toString());
+  void ModelMaintenance::onLostDSMeter(const dsuid_t& _dSMeterID) {
+    log("dSM disconnected: " + dsuid2str(_dSMeterID));
     try {
       boost::shared_ptr<DSMeter> meter =
                               m_pApartment->getDSMeterByDSID(_dSMeterID);
@@ -1487,11 +1491,11 @@ namespace dss {
         devices[i].getDevice()->setIsConnected(false);
       }
     } catch(ItemNotFoundException& e) {
-      log("Lost dSM " + _dSMeterID.toString() + " was not in our list");
+      log("Lost dSM " + dsuid2str(_dSMeterID) + " was not in our list");
     }
   }
 
-  void ModelMaintenance::onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID,
+  void ModelMaintenance::onDeviceConfigChanged(const dsuid_t& _dsMeterID, int _deviceID,
                                                int _configClass, int _configIndex, int _value) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
@@ -1535,7 +1539,7 @@ namespace dss {
     }
   } // onDeviceConfigChanged
 
-  void ModelMaintenance::onSensorEvent(dss_dsid_t _meterID,
+  void ModelMaintenance::onSensorEvent(dsuid_t _meterID,
                                        const devid_t _deviceID,
                                        const int& _eventIndex) {
     try {
@@ -1558,7 +1562,7 @@ namespace dss {
     }
   } // onSensorEvent
 
-  void ModelMaintenance::onBinaryInputEvent(dss_dsid_t _meterID,
+  void ModelMaintenance::onBinaryInputEvent(dsuid_t _meterID,
       const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
@@ -1598,7 +1602,7 @@ namespace dss {
     }
   } // onBinaryInputEvent
 
-  void ModelMaintenance::onSensorValue(dss_dsid_t _meterID,
+  void ModelMaintenance::onSensorValue(dsuid_t _meterID,
                                        const devid_t _deviceID,
                                        const int& _sensorIndex,
                                        const int& _sensorValue) {
@@ -1667,7 +1671,7 @@ namespace dss {
     }
   } // onSensorValue
 
-  void ModelMaintenance::onEANReady(dss_dsid_t _dsMeterID,
+  void ModelMaintenance::onEANReady(dsuid_t _dsMeterID,
                                         const devid_t _deviceID,
                                         const DeviceOEMState_t _state,
                                         const DeviceOEMInetState_t _iNetState,
@@ -1696,7 +1700,7 @@ namespace dss {
     }
   } // onEANReady
 
-  void ModelMaintenance::onOEMDataReady(dss_dsid_t _dsMeterID,
+  void ModelMaintenance::onOEMDataReady(dsuid_t _dsMeterID,
                                              const devid_t _deviceID,
                                              const DeviceOEMState_t _state,
                                              const std::string& _productName,
@@ -1717,7 +1721,7 @@ namespace dss {
     }
   } // onEANReady
 
-  void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+  void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner
       scanner(
         *m_pStructureQueryBusInterface,

@@ -23,7 +23,7 @@
 #include "systemrequesthandler.h"
 
 #include <locale>
-
+#include <digitalSTROM/dsuid/dsuid.h>
 #include <boost/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 
@@ -39,6 +39,7 @@
 #include "src/stringconverter.h"
 
 #include "src/propertysystem.h"
+#include "src/ds485types.h"
 #include "util.h"
 #include <sstream>
 
@@ -52,18 +53,28 @@ namespace dss {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("version", DSS::getInstance()->versionString());
       return success(resultObj);
-    } else if (_request.getMethod() == "getDSID") {
-      std::string dsid;
-      DSS::getInstance()->getSecurity().loginAsSystemUser("dSID call needs system rights");
+    } else if ((_request.getMethod() == "getDSID") ||
+               (_request.getMethod() == "getDSUID")) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser("dSUID call needs system rights");
+
+      std::string dsuidStr;
+      std::string dsidStr;
 
       PropertyNodePtr dsidNode =
           DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid);
       if (dsidNode != NULL) {
-        dsid = dsidNode->getAsString();
+        dsuidStr = dsidNode->getAsString();
+      }
+
+      dsuid_t dsuid = str2dsuid(dsuidStr);
+      dsid_t dsid;
+      if (dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
+        dsidStr = dsid2str(dsid);
       }
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("dSID", dsid);
+      resultObj->addProperty("dSUID", dsuidStr);
+      resultObj->addProperty("dSID", dsidStr);
       return success(resultObj);
     } else if (_request.getMethod() == "time") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

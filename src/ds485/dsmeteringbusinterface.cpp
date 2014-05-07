@@ -30,16 +30,14 @@ namespace dss {
 
   //================================================== DSMeteringBusInterface
 
-  unsigned long DSMeteringBusInterface::getPowerConsumption(const dss_dsid_t& _dsMeterID) {
+  unsigned long DSMeteringBusInterface::getPowerConsumption(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     uint32_t power;
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
 
-    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, dsmDSID, &power, NULL);
+    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, _dsMeterID, &power, NULL);
     DSBusInterface::checkResultCode(ret);
 
     return power;
@@ -54,16 +52,14 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // requestPowerConsumption
 
-  unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
+  unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     uint32_t energy;
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
 
-    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, dsmDSID, NULL, &energy);
+    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, _dsMeterID, NULL, &energy);
     DSBusInterface::checkResultCode(ret);
 
     return energy;

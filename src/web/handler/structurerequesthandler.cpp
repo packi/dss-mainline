@@ -21,7 +21,7 @@
 */
 
 #include "structurerequesthandler.h"
-
+#include <digitalSTROM/dsuid/dsuid.h>
 #include "src/web/json.h"
 
 #include "src/businterface.h"
@@ -38,6 +38,7 @@
 #include "src/model/modelmaintenance.h"
 #include "src/model/modelconst.h"
 #include "src/stringconverter.h"
+#include "src/ds485types.h"
 
 #include "foreach.h"
 #include "jsonhelper.h"
@@ -66,75 +67,82 @@ namespace dss {
   boost::shared_ptr<JSONObject> StructureRequestHandler::zoneAddDevice(const RestfulRequest& _request) {
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     std::string deviceIDStr = _request.getParameter("deviceID");
-    if(!deviceIDStr.empty()) {
-      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
+    std::string dsuidStr = _request.getParameter("dsuid");
 
-      boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
-      if(!dev->isPresent()) {
-        return failure("cannot add nonexisting device to a zone");
-      }
+    if (dsuidStr.empty() && deviceIDStr.empty()) {
+      return failure("Missing parameter 'dsuid'");
+    }
 
-      std::string zoneIDStr = _request.getParameter("zone");
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    dsuid_t dsuid;
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(deviceIDStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } else {
+      dsuid = str2dsuid(dsuidStr);
+    }
+    
+    boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+    if(!dev->isPresent()) {
+      return failure("cannot add nonexisting device to a zone");
+    }
 
-      if(!zoneIDStr.empty()) {
+    std::string zoneIDStr = _request.getParameter("zone");
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+
+    if(!zoneIDStr.empty()) {
+      try {
+        int zoneID = strToInt(zoneIDStr);
+        if (zoneID < 1) {
+          return failure("Could not move device: invalid zone id given!");
+        }
+        DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
+        if (dev->getZoneID() == zoneID) {
+          return failure("Device is already in zone " + zoneIDStr);
+        }
         try {
-          int zoneID = strToInt(zoneIDStr);
-          if (zoneID < 1) {
-            return failure("Could not move device: invalid zone id given!");
-          }
-          DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
-          if (dev->getZoneID() == zoneID) {
-            return failure("Device is already in zone " + zoneIDStr);
-          }
-          try {
-            std::vector<boost::shared_ptr<Device> > movedDevices;
-            boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
-            manipulator.addDeviceToZone(dev, zone);
-            movedDevices.push_back(dev);
-            if (dev->is2WayMaster()) {
-              dss_dsid_t next = dev->getDSID();
-              next.lower++;
-              try {
-                boost::shared_ptr<Device> pPartnerDevice;
+          std::vector<boost::shared_ptr<Device> > movedDevices;
+          boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
+          manipulator.addDeviceToZone(dev, zone);
+          movedDevices.push_back(dev);
+          if (dev->is2WayMaster()) {
+            dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
+            try {
+              boost::shared_ptr<Device> pPartnerDevice;
 
-                pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-                manipulator.addDeviceToZone(pPartnerDevice, zone);
-              } catch(std::runtime_error& e) {
-                return failure("Could not find partner device with dsid '" + next.toString() + "'");
-              }
-            } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
-              uint16_t serialNr = dev->getOemSerialNumber();
-              if ((serialNr > 0) & !dev->getOemIsIndependent()) {
-                std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
-                foreach (const boost::shared_ptr<Device>& device, devices) {
-                  if (dev->isOemCoupledWith(device)) {
-                    manipulator.addDeviceToZone(device, zone);
-                    movedDevices.push_back(device);
-                  }
+              pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+              manipulator.addDeviceToZone(pPartnerDevice, zone);
+            } catch(std::runtime_error& e) {
+              return failure("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
+            }
+          } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
+            uint16_t serialNr = dev->getOemSerialNumber();
+            if ((serialNr > 0) & !dev->getOemIsIndependent()) {
+              std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
+              foreach (const boost::shared_ptr<Device>& device, devices) {
+                if (dev->isOemCoupledWith(device)) {
+                  manipulator.addDeviceToZone(device, zone);
+                  movedDevices.push_back(device);
                 }
               }
             }
-
-            boost::shared_ptr<JSONArrayBase> moved(new JSONArrayBase());
-            foreach (const boost::shared_ptr<Device>& device, movedDevices) {
-              const DeviceReference d(device, &m_Apartment);
-              moved->addElement("", toJSON(d));
-            }
-            resultObj->addElement("movedDevices", moved);
-          } catch(ItemNotFoundException&) {
-            return failure("Could not find zone");
           }
-        } catch(std::runtime_error& err) {
-          return failure(err.what());
-        }
-      } else {
-        return failure("Need parameter 'zone'");
-      }
-      return success(resultObj);
-    }
 
-    return failure("Need parameter deviceID");
+          boost::shared_ptr<JSONArrayBase> moved(new JSONArrayBase());
+          foreach (const boost::shared_ptr<Device>& device, movedDevices) {
+            const DeviceReference d(device, &m_Apartment);
+            moved->addElement("", toJSON(d));
+          }
+          resultObj->addElement("movedDevices", moved);
+        } catch(ItemNotFoundException&) {
+          return failure("Could not find zone");
+        }
+      } catch(std::runtime_error& err) {
+        return failure(err.what());
+      }
+    } else {
+      return failure("Need parameter 'zone'");
+    }
+    return success(resultObj);
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::addZone(const RestfulRequest& _request) {
@@ -181,44 +189,52 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::removeDevice(const RestfulRequest& _request) {
     std::string deviceIDStr = _request.getParameter("deviceID");
-    if(!deviceIDStr.empty()) {
-      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
+    std::string dsuidStr = _request.getParameter("dsuid");
 
-      boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
-      if(dev->isPresent()) {
-        return failure("Cannot remove present device");
-      }
-
-      boost::shared_ptr<Device> pPartnerDevice;
-      if (dev->is2WayMaster()) {
-        dss_dsid_t next = dev->getDSID();
-        next.lower++;
-        try {
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-        } catch(std::runtime_error& e) {
-          Logger::getInstance()->log("Could not find partner device with dsid '" + next.toString() + "'");
-        }
-      }
-      StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-      try {
-        manipulator.removeDeviceFromDSMeter(dev);
-        if (pPartnerDevice != NULL) {
-         manipulator.removeDeviceFromDSMeter(pPartnerDevice);
-        }
-      } catch (std::runtime_error& e) {
-        Logger::getInstance()->log(std::string("Could not remove device from "
-                                   "dSM: ") + e.what(), lsError);
-      }
-      m_Apartment.removeDevice(deviceID);
-      if (pPartnerDevice != NULL) {
-        Logger::getInstance()->log("Also removing partner device " + pPartnerDevice->getDSID().toString() + "'");
-        m_Apartment.removeDevice(pPartnerDevice->getDSID());
-      }
-      m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-      return success();
+    if (dsuidStr.empty() && deviceIDStr.empty()) {
+      return failure("Missing parameter 'dsuid'");
     }
 
-    return failure("Missing deviceID");
+    dsuid_t dsuid;
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(deviceIDStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } else {
+      dsuid = str2dsuid(dsuidStr);
+    }
+
+    boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+    if(dev->isPresent()) {
+      return failure("Cannot remove present device");
+    }
+
+    boost::shared_ptr<Device> pPartnerDevice;
+    if (dev->is2WayMaster()) {
+      dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
+      try {
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+      } catch(std::runtime_error& e) {
+        Logger::getInstance()->log("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
+      }
+    }
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    try {
+      manipulator.removeDeviceFromDSMeter(dev);
+      if (pPartnerDevice != NULL) {
+       manipulator.removeDeviceFromDSMeter(pPartnerDevice);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log(std::string("Could not remove device from "
+                                 "dSM: ") + e.what(), lsError);
+    }
+    m_Apartment.removeDevice(dsuid);
+    if (pPartnerDevice != NULL) {
+      Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
+      m_Apartment.removeDevice(pPartnerDevice->getDSID());
+    }
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return success();
+    
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::persistSet(const RestfulRequest& _request) {
@@ -389,16 +405,24 @@ namespace dss {
     boost::shared_ptr<Device> dev;
     boost::shared_ptr<Group> gr;
 
-    if(_request.hasParameter("deviceID")) {
-      std::string deviceIDStr = _request.getParameter("deviceID");
-      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
-      dev = m_Apartment.getDeviceByDSID(deviceID);
-      if(!dev->isPresent()) {
-        return failure("Cannot modify inactive device");
-      }
+    std::string deviceIDStr = _request.getParameter("deviceID");
+    std::string dsuidStr = _request.getParameter("dsuid");
+
+    if (dsuidStr.empty() && deviceIDStr.empty()) {
+      return failure("Missing parameter 'dsuid'");
     }
-    if(!dev) {
-      return failure("Invalid value for parameter deviceID : '" + _request.getParameter("deviceID") + "'");
+
+    dsuid_t dsuid;
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(deviceIDStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } else {
+      dsuid = str2dsuid(dsuidStr);
+    }
+    
+    dev = m_Apartment.getDeviceByDSID(dsuid);
+    if(!dev->isPresent()) {
+      return failure("Cannot modify inactive device");
     }
 
     if(_request.hasParameter("groupID")) {
@@ -439,15 +463,14 @@ namespace dss {
     modifiedDevices.push_back(dev);
 
     if (dev->is2WayMaster()) {
-      dss_dsid_t next = dev->getDSID();
-      next.lower++;
+      dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
       try {
         boost::shared_ptr<Device> pPartnerDevice;
 
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
         manipulator.deviceAddToGroup(pPartnerDevice, gr);
       } catch(std::runtime_error& e) {
-        return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        return failure("Could not find partner device with dSUID '" + dsuid2str(next) + "'");
       }
     }
     if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
@@ -483,16 +506,24 @@ namespace dss {
     boost::shared_ptr<Device> dev;
     boost::shared_ptr<Group> gr;
 
-    if(_request.hasParameter("deviceID")) {
-      std::string deviceIDStr = _request.getParameter("deviceID");
-      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
-      dev = m_Apartment.getDeviceByDSID(deviceID);
-      if(!dev->isPresent()) {
-        return failure("Cannot modify inactive device");
-      }
+    std::string deviceIDStr = _request.getParameter("deviceID");
+    std::string dsuidStr = _request.getParameter("dsuid");
+
+    if (dsuidStr.empty() && deviceIDStr.empty()) {
+      return failure("Missing parameter 'dsuid'");
     }
-    if(!dev) {
-      return failure("Invalid value for parameter deviceID : '" + _request.getParameter("deviceID") + "'");
+
+    dsuid_t dsuid;
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(deviceIDStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } else {
+      dsuid = str2dsuid(dsuidStr);
+    }
+
+    dev = m_Apartment.getDeviceByDSID(dsuid);
+    if(!dev->isPresent()) {
+      return failure("Cannot modify inactive device");
     }
 
     if(_request.hasParameter("groupID")) {
@@ -516,15 +547,14 @@ namespace dss {
     modifiedDevices.push_back(dev);
 
     if (dev->is2WayMaster()) {
-      dss_dsid_t next = dev->getDSID();
-      next.lower++;
+      dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
       try {
         boost::shared_ptr<Device> pPartnerDevice;
 
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
         manipulator.deviceRemoveFromGroup(pPartnerDevice, gr);
       } catch(std::runtime_error& e) {
-        return failure("Could not find partner device with dsid '" + next.toString() + "'");
+        return failure("Could not find partner device with dSUID '" + dsuid2str(next) + "'");
       }
     }
     if (dev->getOemInfoState() == DEVICE_OEM_VALID) {

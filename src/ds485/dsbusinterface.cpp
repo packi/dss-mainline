@@ -33,7 +33,6 @@
 #include "src/logger.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"
-#include "src/dsidhelper.h"
 #include "src/sceneaccess.h"
 
 #include "src/model/modelevent.h"
@@ -223,12 +222,12 @@ namespace dss {
       }
 
       // read out own dsid
-      dsid_t ownDSID;
-      int ret = DsmApiGetOwnDSID(m_dsmApiHandle, &ownDSID);
+      dsuid_t ownDSID;
+      int ret = DsmApiGetOwnDSUID(m_dsmApiHandle, &ownDSID);
       DSBusInterface::checkResultCode(ret);
 
       log("Successfully connected to " + m_connectionURI +
-          " [ " + dsid_helper::toString(ownDSID) + "]");
+          " [ " + dsuid2str(ownDSID) + "]");
 
       m_pActionRequestInterface->setDSMApiHandle(m_dsmApiHandle);
       m_pDeviceBusInterface->setDSMApiHandle(m_dsmApiHandle);
@@ -460,11 +459,11 @@ namespace dss {
     }
   }
 
-  void DSBusInterface::busChangeCallback(void* _userData, dsid_t *_id, int _flag) {
+  void DSBusInterface::busChangeCallback(void* _userData, dsuid_t *_id, int _flag) {
     static_cast<DSBusInterface*>(_userData)->handleBusChange(_id, _flag);
   }
 
-  void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
+  void DSBusInterface::handleBusChange(dsuid_t *_id, int _flag) {
     loginFromCallback();
     ModelEvent::EventType eventType;
 
@@ -472,58 +471,50 @@ namespace dss {
       return;
     }
 
-    dss_dsid_t dSMeterID;
-    dsid_helper::toDssDsid(*_id, dSMeterID);
-
     if(_flag) {
       eventType = ModelEvent::etLostDSMeter;
     } else	{
       eventType = ModelEvent::etDS485DeviceDiscovered;
     }
 
-    m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType,
-                                                              dSMeterID));
+    m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
   }
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
-                                                           dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
-                                                           uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
+                                                           dsuid_t _sourceDSMeterID, dsuid_t _destinationDSMeterID,
+                                                           uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint16_t _productID, uint16_t _functionID, uint16_t _version, dsuid_t _deviceDSID) {
     static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _sourceDSMeterID, _deviceID,
                                                                          _zoneID, _vendorID, _deviceDSID);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID,
-                                                   uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
+  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsuid_t _dsMeterID, uint16_t _deviceID,
+                                                   uint16_t _zoneID, uint16_t _vendorID, dsuid_t _deviceDSID) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etLostDevice,
-                                                dsMeterID);
+                                                _dsMeterID);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_deviceID);
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
   void DSBusInterface::eventDevicePresenceCallback(uint8_t _errorCode, void* _userData,
-                                                   dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
+                                                   dsuid_t _sourceDSMeterID, dsuid_t _destinationDSMeterID,
                                                    uint16_t _deviceID, uint8_t _present) {
     static_cast<DSBusInterface*>(_userData)->eventDevicePresence(_errorCode, _sourceDSMeterID, _deviceID,
                                                                  _present);
   }
 
-  void DSBusInterface::eventDevicePresence(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID,
+  void DSBusInterface::eventDevicePresence(uint8_t _errorCode, dsuid_t _dsMeterID, uint16_t _deviceID,
                                            uint8_t _present) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
     ModelEvent* pEvent;
 
     if (_present == 0) {
-      pEvent = new ModelEventWithDSID(ModelEvent::etLostDevice,  dsMeterID);
+      pEvent = new ModelEventWithDSID(ModelEvent::etLostDevice,  _dsMeterID);
     } else {
-      pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice,  dsMeterID);
+      pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice,  _dsMeterID);
     }
     pEvent->addParameter(0);
     pEvent->addParameter(_deviceID);
@@ -531,20 +522,18 @@ namespace dss {
   }
 
   void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData,
-                                                          dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
-                                                          uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
+                                                          dsuid_t _sourceDSMeterID, dsuid_t _destinationDSMeterID,
+                                                          uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint16_t _productID, uint16_t _functionID, uint16_t _version, dsuid_t _deviceDSID) {
     static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _sourceDSMeterID, _deviceID,
                                                                         _zoneID, _vendorID, _deviceDSID);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
-                                                  uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
+  void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, dsuid_t _dsMeterID,
+                                                  uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, dsuid_t _deviceDSID) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice,
-                                                dsMeterID);
+                                                _dsMeterID);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_deviceID);
     m_pModelMaintenance->addModelEvent(pEvent);
@@ -552,40 +541,36 @@ namespace dss {
 
   void DSBusInterface::eventDataModelChangedCallback(uint8_t _errorCode,
                                                      void* _userData,
-                                                     dsid_t _sourceID,
-                                                     dsid_t _destinationID,
+                                                     dsuid_t _sourceID,
+                                                     dsuid_t _destinationID,
                                                      uint16_t _shortAddress) {
     static_cast<DSBusInterface*>(_userData)->eventDataModelChanged(_sourceID, _shortAddress);
   }
 
-  void DSBusInterface::eventDataModelChanged(dsid_t _dsMeterID, uint16_t _shortAddress) {
+  void DSBusInterface::eventDataModelChanged(dsuid_t _dsMeterID, uint16_t _shortAddress) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged,
-                                                dsMeterID);
+                                                _dsMeterID);
     pEvent->addParameter(_shortAddress);
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
   void DSBusInterface::deviceConfigSetCallback(uint8_t _errorCode, void* _userData,
-                                               dsid_t _sourceID, dsid_t _destinationID,
+                                               dsuid_t _sourceID, dsuid_t _destinationID,
                                                uint16_t _deviceID, uint8_t _configClass,
                                                uint8_t _configIndex, uint8_t _value) {
     static_cast<DSBusInterface*>(_userData)->deviceConfigSet(_destinationID, _deviceID,
                                                              _configClass, _configIndex, _value);
   } // deviceConfigSetCallback
 
-  void DSBusInterface::deviceConfigSet(dsid_t _dsMeterID, uint16_t _deviceID,
+  void DSBusInterface::deviceConfigSet(dsuid_t _dsMeterID, uint16_t _deviceID,
                                        uint8_t _configClass, uint8_t _configIndex,
                                        uint8_t _value) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
-                                                dsMeterID);
+                                                _dsMeterID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_configClass);
     pEvent->addParameter(_configIndex);
@@ -594,89 +579,81 @@ namespace dss {
   } // deviceConfigSet
 
 
-  void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
+  void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsuid_t _sourceID,
                                           uint16_t _zoneID, uint8_t _groupID,
                                           uint16_t _originDeviceId, uint8_t _sceneID,
                                           bool _forced) {
     loginFromCallback();
     if(m_pBusEventSink != NULL) {
-      dss_dsid_t dsMeterID;
-      dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, coDsmApi, "", _forced);
+      m_pBusEventSink->onGroupCallScene(this, _sourceID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, coDsmApi, "", _forced);
     }
   }
 
-  void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+  void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
+                                                  dsuid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _originDeviceId, _sceneID, false);
   }
 
-  void DSBusInterface::handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+  void DSBusInterface::handleBusCallSceneForcedCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
+                                                  dsuid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _originDeviceId, _sceneID, true);
   }
 
-  void DSBusInterface::handleBusBlink(uint8_t _errorCode, dsid_t _sourceID,
+  void DSBusInterface::handleBusBlink(uint8_t _errorCode, dsuid_t _sourceID,
                                           uint16_t _zoneID, uint8_t _groupID,
                                           uint16_t _originDeviceId) {
     loginFromCallback();
     if(m_pBusEventSink != NULL) {
-      dss_dsid_t dsMeterID;
-      dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupBlink(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, coDsmApi, "");
+      m_pBusEventSink->onGroupBlink(this, _sourceID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, coDsmApi, "");
     }
   }
 
-  void DSBusInterface::handleBusBlinkCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+  void DSBusInterface::handleBusBlinkCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
+                                                  dsuid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId) {
     static_cast<DSBusInterface*>(_userData)->handleBusBlink(_errorCode, _sourceID, _zoneID, _groupID,
                                                             _originDeviceId);
   }
 
-  void DSBusInterface::handleBusUndoScene(uint8_t _errorCode, dsid_t _sourceID,
+  void DSBusInterface::handleBusUndoScene(uint8_t _errorCode, dsuid_t _sourceID,
                                           uint16_t _zoneID, uint8_t _groupID,
                                           uint16_t _originDeviceId, uint8_t _sceneID,
                                           bool _explicit) {
     loginFromCallback();
     if(m_pBusEventSink != NULL) {
-      dss_dsid_t dsMeterID;
-      dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, _explicit, coDsmApi, "");
+      m_pBusEventSink->onGroupUndoScene(this, _sourceID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, _explicit, coDsmApi, "");
     }
   }
 
-  void DSBusInterface::handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+  void DSBusInterface::handleBusUndoSceneCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
+                                                  dsuid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint16_t _originDeviceId) {
     static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _originDeviceId, 255, false);
   }
 
-  void DSBusInterface::handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
-                                                        dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+  void DSBusInterface::handleBusUndoSceneNumberCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
+                                                        dsuid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                         uint16_t _originDeviceId, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusUndoScene(_errorCode, _sourceID, _zoneID, _groupID,
                                                                 _originDeviceId, _sceneID, true);
   }
 
-  void DSBusInterface::handleDeviceSetName(dsid_t _destinationID,
+  void DSBusInterface::handleDeviceSetName(dsuid_t _destinationID,
                                            uint16_t _deviceID,
                                            std::string _name) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_destinationID, dsMeterID);
-    m_pModelMaintenance->onDeviceNameChanged(dsMeterID, _deviceID, _name);
+    m_pModelMaintenance->onDeviceNameChanged(_destinationID, _deviceID, _name);
   } // handleDeviceSetName
 
   void DSBusInterface::handleDeviceSetNameCallback(uint8_t _errorCode,
                                                    void* _userData,
-                                                   dsid_t _sourceID,
-                                                   dsid_t _destinationID,
+                                                   dsuid_t _sourceID,
+                                                   dsuid_t _destinationID,
                                                    uint16_t _deviceID,
                                                    const uint8_t* _name) {
     const char* name = reinterpret_cast<const char*>(_name);
@@ -689,18 +666,16 @@ namespace dss {
                                                                  nameStr);
   } // handleDeviceSetNameCallback
 
-  void DSBusInterface::handleDsmSetName(dsid_t _destinationID,
+  void DSBusInterface::handleDsmSetName(dsuid_t _destinationID,
                                         std::string _name) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_destinationID, dsMeterID);
-    m_pModelMaintenance->onDsmNameChanged(dsMeterID, _name);
+    m_pModelMaintenance->onDsmNameChanged(_destinationID, _name);
   } //handleDsmSetName
 
   void DSBusInterface::handleDsmSetNameCallback(uint8_t _errorCode,
                                                 void *_userData,
-                                                dsid_t _sourceID,
-                                                dsid_t _destinationID,
+                                                dsuid_t _sourceID,
+                                                dsuid_t _destinationID,
                                                 const uint8_t *_name) {
     const char* name = reinterpret_cast<const char*>(_name);
     std::string nameStr;
@@ -711,15 +686,14 @@ namespace dss {
                                                               nameStr);
   } // handleDsmSetNameCallback
 
-  void DSBusInterface::handleDeviceLocalAction(dsid_t _dsMeterID, uint16_t _deviceID, uint8_t _state) {
+  void DSBusInterface::handleDeviceLocalAction(dsuid_t _dsMeterID, uint16_t _deviceID, uint8_t _state) {
     loginFromCallback();
-    dss_dsid_t dsmDSID;
+    dsuid_t dsmDSID;
     if (_state > 2) {
       // invalid device local action value
       return;
     }
-    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDeviceLocal, dsmDSID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDeviceLocal, _dsMeterID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(0); // originDeviceID
     if (_state == 0) {
@@ -737,18 +711,16 @@ namespace dss {
   }
 
   void DSBusInterface::handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,
-                                                       dsid_t _sourceID, dsid_t _destinationID,
+                                                       dsuid_t _sourceID, dsuid_t _destinationID,
                                                        uint16_t _deviceID, uint16_t _zoneID,
                                                        uint8_t _state) {
     static_cast<DSBusInterface*>(_userData)->handleDeviceLocalAction(_sourceID, _deviceID, _state);
   }
 
-  void DSBusInterface::handleDeviceAction(dsid_t _dsMeterID, uint16_t _deviceID,
+  void DSBusInterface::handleDeviceAction(dsuid_t _dsMeterID, uint16_t _deviceID,
                                           uint8_t _buttonNr, uint8_t _clickType) {
     loginFromCallback();
-    dss_dsid_t dsmDSID;
-    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etButtonClickDevice, dsmDSID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etButtonClickDevice, _dsMeterID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_buttonNr);
     pEvent->addParameter(_clickType);
@@ -756,59 +728,53 @@ namespace dss {
   }
 
   void DSBusInterface::handleDeviceActionCallback(uint8_t _errorCode, void* _userData,
-                                                       dsid_t _sourceID, dsid_t _destinationID,
+                                                       dsuid_t _sourceID, dsuid_t _destinationID,
                                                        uint16_t _deviceID, uint16_t _zoneID, uint8_t _groupID,
                                                        uint8_t _buttonNr, uint8_t _clickType) {
     static_cast<DSBusInterface*>(_userData)->handleDeviceAction(_sourceID, _deviceID, _buttonNr, _clickType);
   }
 
-  void DSBusInterface::handleDeviceCallScene(dsid_t _dsMeterID, uint16_t _deviceID,
+  void DSBusInterface::handleDeviceCallScene(dsuid_t _dsMeterID, uint16_t _deviceID,
                                              uint8_t _sceneID, bool _forced) {
     loginFromCallback();
-    dss_dsid_t dsmDSID;
-    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    m_pBusEventSink->onDeviceCallScene(this, dsmDSID, _deviceID, 0, SAC_MANUAL, _sceneID, coDsmApi, "", _forced);
+    m_pBusEventSink->onDeviceCallScene(this, _dsMeterID, _deviceID, 0, SAC_MANUAL, _sceneID, coDsmApi, "", _forced);
   }
 
   void DSBusInterface::handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
-                                                     dsid_t _sourceID, dsid_t _destinationID,
+                                                     dsuid_t _sourceID, dsuid_t _destinationID,
                                                      uint16_t _deviceID, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID, false);
   }
 
   void DSBusInterface::handleDeviceCallSceneForcedCallback(uint8_t _errorCode, void* _userData,
-                                                     dsid_t _sourceID, dsid_t _destinationID,
+                                                     dsuid_t _sourceID, dsuid_t _destinationID,
                                                      uint16_t _deviceID, uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID, true);
   }
 
-  void DSBusInterface::handleDeviceBlink(dsid_t _dsMeterID, uint16_t _deviceID) {
+  void DSBusInterface::handleDeviceBlink(dsuid_t _dsMeterID, uint16_t _deviceID) {
     loginFromCallback();
-    dss_dsid_t dsmDSID;
-    dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    m_pBusEventSink->onDeviceBlink(this, dsmDSID, _deviceID, 0, SAC_MANUAL, coDsmApi, "");
+    m_pBusEventSink->onDeviceBlink(this, _dsMeterID, _deviceID, 0, SAC_MANUAL, coDsmApi, "");
   }
 
   void DSBusInterface::handleDeviceBlinkCallback(uint8_t _errorCode, void* _userData,
-                                                 dsid_t _sourceID, dsid_t _destinationID,
+                                                 dsuid_t _sourceID, dsuid_t _destinationID,
                                                  uint16_t _deviceID) {
     static_cast<DSBusInterface*>(_userData)->handleDeviceBlink(_destinationID, _deviceID);
   }
 
 
   void DSBusInterface::handleCircuitEnergyData(uint8_t _errorCode,
-                                               dsid_t _sourceID, dsid_t _destinationID,
+                                               dsuid_t _sourceID, dsuid_t _destinationID,
                                                uint32_t _powerW, uint32_t _energyWs) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_sourceID, dsMeterID);
-    m_pBusEventSink->onMeteringEvent(this, dsMeterID, _powerW, _energyWs);
+    m_pBusEventSink->onMeteringEvent(this, _sourceID, _powerW, _energyWs);
   } // handleCircuitEnergyData
 
   void DSBusInterface::handleCircuitEnergyDataCallback(uint8_t _errorCode,
                                                 void* _userData,
-                                                dsid_t _sourceID,
-                                                dsid_t _destinationID,
+                                                dsuid_t _sourceID,
+                                                dsuid_t _destinationID,
                                                 uint32_t _powerW,
                                                 uint32_t _energyWs) {
     if (_errorCode == 0) {
@@ -820,14 +786,12 @@ namespace dss {
   } // handleCircuitEnergyDataCallback
 
   void DSBusInterface::handleSensorEvent(uint8_t _errorCode,
-                                         dsid_t _sourceID,
-                                         dsid_t _destinationID,
+                                         dsuid_t _sourceID,
+                                         dsuid_t _destinationID,
                                          uint16_t _deviceID,
                                          uint8_t _eventIndex) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_sourceID, dsMeterID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorEvent, dsMeterID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorEvent, _sourceID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_eventIndex);
     m_pModelMaintenance->addModelEvent(pEvent);
@@ -835,8 +799,8 @@ namespace dss {
 
   void DSBusInterface::handleSensorEventCallback(uint8_t _errorCode,
                                                  void* _userData,
-                                                 dsid_t _sourceID,
-                                                 dsid_t _destinationID,
+                                                 dsuid_t _sourceID,
+                                                 dsuid_t _destinationID,
                                                  uint16_t _deviceID,
                                                  uint8_t _eventIndex) {
     if (_errorCode == 0) {
@@ -847,12 +811,10 @@ namespace dss {
   }
 
   void DSBusInterface::handleBinaryInputEvent(uint8_t _errorCode,
-      dsid_t _sourceID, dsid_t _destinationID,
+      dsuid_t _sourceID, dsuid_t _destinationID,
       uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_sourceID, dsMeterID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceBinaryStateEvent, dsMeterID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceBinaryStateEvent, _sourceID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_eventIndex);
     pEvent->addParameter(_eventType);
@@ -861,7 +823,7 @@ namespace dss {
   } // handleSensorEvent
 
   void DSBusInterface::handleBinaryInputEventCallback(uint8_t _errorCode, void* _userData,
-      dsid_t _sourceID, dsid_t _destinationID,
+      dsuid_t _sourceID, dsuid_t _destinationID,
       uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state) {
     if (_errorCode == 0) {
       static_cast<DSBusInterface*>(_userData)->
@@ -871,15 +833,13 @@ namespace dss {
   }
 
   void DSBusInterface::handleSensorValueEvent(uint8_t _errorCode,
-                                              dsid_t _sourceID,
-                                              dsid_t _destinationID,
+                                              dsuid_t _sourceID,
+                                              dsuid_t _destinationID,
                                               uint16_t _deviceID,
                                               uint8_t _sensorIndex,
                                               uint16_t _sensorValue) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_sourceID, dsMeterID);
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorValue, dsMeterID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorValue, _sourceID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_sensorIndex);
     pEvent->addParameter(_sensorValue);
@@ -888,8 +848,8 @@ namespace dss {
 
   void DSBusInterface::handleSensorValueCallback(uint8_t _errorCode,
                                                  void* _userData,
-                                                 dsid_t _sourceID,
-                                                 dsid_t _destinationID,
+                                                 dsuid_t _sourceID,
+                                                 dsuid_t _destinationID,
                                                  uint16_t _deviceID,
                                                  uint8_t _sensorIndex,
                                                  uint16_t _sensorValue) {
@@ -921,18 +881,16 @@ namespace dss {
     return m_pActionRequestInterface.get();
   } // getActionRequestInterface
 
-  void DSBusInterface::handleDsmSetFlags(dsid_t _destinationID,
+  void DSBusInterface::handleDsmSetFlags(dsuid_t _destinationID,
                                          std::bitset<8> _flags) {
     loginFromCallback();
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_destinationID, dsMeterID);
-    m_pModelMaintenance->onDsmFlagsChanged(dsMeterID, _flags);
+    m_pModelMaintenance->onDsmFlagsChanged(_destinationID, _flags);
   } //handleDsmSetName
 
   void DSBusInterface::handleDsmSetFlagsCallback(uint8_t _errorCode,
                                                 void *_userData,
-                                                dsid_t _sourceID,
-                                                dsid_t _destinationID,
+                                                dsuid_t _sourceID,
+                                                dsuid_t _destinationID,
                                                 uint8_t _flags) {
 
     static_cast<DSBusInterface*>(_userData)->handleDsmSetFlags(_destinationID,

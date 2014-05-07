@@ -38,7 +38,7 @@ namespace dss {
     virtual ~DefaultBusEventSink() {};
 
     virtual void onGroupCallScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _originDeviceId,
@@ -48,7 +48,7 @@ namespace dss {
                                   const std::string _token,
                                   const bool _force);
     virtual void onGroupUndoScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _originDeviceId,
@@ -58,7 +58,7 @@ namespace dss {
                                   const callOrigin_t _origin,
                                   const std::string _token);
     virtual void onGroupBlink(BusInterface* _source,
-                              const dss_dsid_t& _dsMeterID,
+                              const dsuid_t& _dsMeterID,
                               const int _zoneID,
                               const int _groupID,
                               const int _originDeviceId,
@@ -66,7 +66,7 @@ namespace dss {
                               const callOrigin_t _origin,
                               const std::string _token);
     virtual void onDeviceCallScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
@@ -75,14 +75,14 @@ namespace dss {
                                   const std::string _token,
                                   const bool _force);
     virtual void onDeviceBlink(BusInterface* _source,
-                               const dss_dsid_t& _dsMeterID,
+                               const dsuid_t& _dsMeterID,
                                const int _deviceID,
                                const int _originDeviceId,
                                const SceneAccessCategory _category,
                                const callOrigin_t _origin,
                                const std::string _token);
     virtual void onDeviceUndoScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
@@ -91,7 +91,7 @@ namespace dss {
                                   const callOrigin_t _origin,
                                   const std::string _token);
     virtual void onMeteringEvent(BusInterface* _source,
-                                 const dss_dsid_t& _dsMeterID,
+                                 const dsuid_t& _dsMeterID,
                                  const unsigned int _powerW,
                                  const unsigned int _energyWs);
   private:

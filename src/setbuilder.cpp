@@ -25,6 +25,7 @@
 #include <vector>
 #include <stdexcept>
 #include <cassert>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "base.h"
 #include "src/model/set.h"
@@ -65,8 +66,17 @@ namespace dss {
     return strToInt(trim(readParameter(_index)));
   } // readInt
 
-  dss_dsid_t SetBuilder::readDSID(unsigned int& _index) {
-    return dss_dsid_t::fromString(trim(readParameter(_index)));
+  dsuid_t SetBuilder::readDSID(unsigned int& _index) {
+      std::string id = trim(readParameter(_index));
+      dsuid_t dsuid;
+      if (id.length() <= 24) {
+        dsid_t dsid = str2dsid(id);
+        dsuid = dsuid_from_dsid(&dsid);
+      } else {
+        dsuid = str2dsuid(id);
+      }
+
+    return dsuid;
   } // readDSID
 
   std::string SetBuilder::readString(unsigned int& _index) {
@@ -91,8 +101,11 @@ namespace dss {
     Set result;
 
     if(_functionName == "dsid") {
-      dss_dsid_t dsid = readDSID(_index);
-      result.addDevice(_set.getByDSID(dsid));
+      dsuid_t dsuid = readDSID(_index);
+      result.addDevice(_set.getByDSID(dsuid));
+    } else if (_functionName == "dsuid") {
+      dsuid_t dsuid = readDSID(_index);
+      result.addDevice(_set.getByDSID(dsuid));
     } else if(_functionName == "zone") {
       if(m_SetDescription[_index] == '\'') {
         std::string zoneName = readString(_index);
@@ -133,8 +146,8 @@ namespace dss {
           std::string name = readString(_index);
           result.addDevice(m_Apartment.getDeviceByName(name));
         } else {
-          dss_dsid_t dsid = readDSID(_index);
-          result.addDevice(m_Apartment.getDeviceByDSID(dsid));
+          dsuid_t dsuid = readDSID(_index);
+          result.addDevice(m_Apartment.getDeviceByDSID(dsuid));
         }
       } while(m_SetDescription[_index] == ',');
     }
@@ -282,21 +295,27 @@ namespace dss {
       for(size_t i = 0; i < dsids.size(); i++) {
         std::string strId = dsids.at(i);
         if(strId.empty()) {
-          throw std::runtime_error("Invalid dsid in description: " + strId);
+          throw std::runtime_error("Invalid dsuid in description: " + strId);
         }
 
-        dss_dsid_t dsid;
+        dsuid_t dsuid;
         try {
-          dsid = dss_dsid_t::fromString(strId);
+          // support both, dsid and dsuid
+          if (strId.length() <= 24) {
+            dsid_t dsid = str2dsid(strId);
+            dsuid = dsuid_from_dsid(&dsid);
+          } else {
+            dsuid = str2dsuid(strId);
+          }
         } catch(std::invalid_argument&) {
-          throw std::runtime_error("Invalid dsid in description: " + strId);
+          throw std::runtime_error("Invalid dsuid in description: " + strId);
         }
 
         try {
-          boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+          boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsuid);
           result.push_back(dsMeter);
         } catch (std::runtime_error&) {
-          throw std::runtime_error("Could not find dsMeter with given dsid.");
+          throw std::runtime_error("Could not find dsMeter with given dsuid.");
         }
 
       }

@@ -314,7 +314,7 @@ namespace dss {
         return device;
       }
 
-      dss_dsid_t deviceDSID = dss_dsid_t::fromString(dsidStr);
+      dsuid_t deviceDSID = str2dsuid(dsidStr);
 
       if (DSS::hasInstance()) {
         device = DSS::getInstance()->getApartment().getDeviceByDSID(deviceDSID);
@@ -1004,9 +1004,9 @@ namespace dss {
     }
 
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
-    dss_dsid_t originDSID;
+    dsuid_t originDSID;
     if (m_properties.has(ss_originDSID)) {
-      originDSID = dss_dsid_t::fromString(m_properties.get(ss_originDSID));
+      originDSID = str2dsuid(m_properties.get(ss_originDSID));
     }
     bool forced;
     if (m_properties.has(ss_forced)) {
@@ -1064,7 +1064,7 @@ namespace dss {
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
       if (!iDevice.empty() && (iDevice != "-1") &&
-         (iDevice != originDSID.toString())) {
+         (iDevice != dsuid2str(originDSID))) {
         return false;
       }
     }
@@ -1104,9 +1104,9 @@ namespace dss {
     }
 
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
-    dss_dsid_t originDSID;
+    dsuid_t originDSID;
     if (m_properties.has(ss_originDSID)) {
-      originDSID = dss_dsid_t::fromString(m_properties.get(ss_originDSID));
+      originDSID = str2dsuid(m_properties.get(ss_originDSID));
     }
 
     PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
@@ -1159,7 +1159,7 @@ namespace dss {
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
       if (!iDevice.empty() && (iDevice != "-1") &&
-         (iDevice != originDSID.toString())) {
+         (iDevice != dsuid2str(originDSID))) {
         return false;
       }
     }
@@ -1181,10 +1181,10 @@ namespace dss {
       return false;
     }
 
-    dss_dsid_t dsid = m_evtSrcDSID;
+    dsuid_t dsid = m_evtSrcDSID;
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
 
-    if (dsid == NullDSID) {
+    if (IsNullDsuid(dsid)) {
       return false;
     }
 
@@ -1209,7 +1209,7 @@ namespace dss {
     } catch (PropertyTypeMismatch& e){
       return false;
     }
-    if ((sDSID == "-1") || (sDSID == dsid.toString())) {
+    if ((sDSID == "-1") || (sDSID == dsuid2str(dsid))) {
       if ((iScene == scene) || (iScene == -1)) {
         Logger::getInstance()->log("SystemTrigger::"
                 "checkDeviceScene: Match: DeviceScene dSID:" + sDSID +
@@ -1226,7 +1226,7 @@ namespace dss {
       return false;
     }
     
-    dss_dsid_t dsid = m_evtSrcDSID;
+    dsuid_t dsid = m_evtSrcDSID;
     std::string eventName = m_properties.get(ss_sensorEvent);
     std::string eventIndex = m_properties.get(ss_sensorIndex);
 
@@ -1236,7 +1236,7 @@ namespace dss {
     }
 
     std::string sDSID = triggerDSID->getStringValue();
-    if (!((sDSID == "-1") || (sDSID == dsid.toString()))) {
+    if (!((sDSID == "-1") || (sDSID == dsuid2str(dsid)))) {
       return false;
     }
 
@@ -1273,7 +1273,7 @@ namespace dss {
       return false;
     }
 
-    dss_dsid_t dsid = m_evtSrcDSID;
+    dsuid_t dsid = m_evtSrcDSID;
     std::string eventIndex = m_properties.get("inputIndex");
     std::string eventType = m_properties.get("inputType");
     std::string eventState = m_properties.get("inputState");
@@ -1299,7 +1299,7 @@ namespace dss {
 
     if (triggerDSID) {
       sDSID = triggerDSID->getStringValue();
-      if (!((sDSID == "-1") || (sDSID == dsid.toString()))) {
+      if (!((sDSID == "-1") || (sDSID == dsuid2str(dsid)))) {
         return false;
       }
       if (triggerIndex) {
@@ -1334,11 +1334,11 @@ namespace dss {
       return false;
     }
 
-    dss_dsid_t dsid = m_evtSrcDSID;
+    dsuid_t dsid = m_evtSrcDSID;
     std::string clickType = m_properties.get("clickType");
     std::string buttonIndex = m_properties.get("buttonIndex");
 
-    if (dsid == NullDSID) {
+    if (IsNullDsuid(dsid)) {
       return false;
     }
 
@@ -1365,7 +1365,7 @@ namespace dss {
 
     std::string sDSID = triggerDSID->getAsString();
     std::string iMSG = triggerMSG->getAsString();
-    if ((sDSID == "-1") || (sDSID == dsid.toString())) {
+    if ((sDSID == "-1") || (sDSID == dsuid2str(dsid))) {
       if ((iMSG == clickType) || (iMSG == "-1")) {
         if ((buttonIndex == iButtonIndexID) || (iButtonIndexID == "-1")) {
           Logger::getInstance()->log("SystemTrigger::"
@@ -1830,7 +1830,7 @@ namespace dss {
       try {
         boost::shared_ptr<Device> device =
             DSS::getInstance()->getApartment().getDeviceByDSID(
-                                dss_dsid_t::fromString(_origin_dsid));
+                                str2dsuid(_origin_dsid));
         if (device && (!device->getName().empty())) {
             devName = device->getName();
         }
@@ -1922,7 +1922,7 @@ namespace dss {
                                       std::string _token) {
     std::string zoneName = getZoneName(_zone);
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
     std::string origName = getDeviceName(_origin_dsid);
     std::string sceneName = getSceneName(_scene_id);
 
@@ -1962,7 +1962,7 @@ namespace dss {
                                       std::string _origin_token) {
     std::string zoneName = getZoneName(_zone);
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
     std::string origName = getDeviceName(_origin_dsid);
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;CallOrigin;originToken');
     _logger->logln(";DeviceBlink;;" + zoneName + ";" + devName + ";;" +
@@ -1983,14 +1983,14 @@ namespace dss {
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     _logger->logln(";UndoScene;" + sceneName + ";" + zoneName + ";" +
                    groupName + ";" + devName + ";" +
-                   getCallOrigin(_call_origin) + ';' + _origin_token);
+                   getCallOrigin(_call_origin) + ";" + _origin_token);
   }
 
   void SystemEventLog::logDeviceButtonClick(
                                 boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device) {
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
     std::string keynum;
     if (m_properties.has("buttonIndex")) {
       keynum = m_properties.get("buttonIndex");
@@ -2020,7 +2020,7 @@ namespace dss {
                                 boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device) {
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
 
     std::string index;
     if (m_properties.has("inputIndex")) {
@@ -2046,7 +2046,7 @@ namespace dss {
                                     boost::shared_ptr<ScriptLogger> _logger,
                                     boost::shared_ptr<const Device> _device) {
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
 
     std::string sensorEvent;
     if (m_properties.has("sensorEvent")) {
@@ -2062,7 +2062,7 @@ namespace dss {
                                     boost::shared_ptr<const Device> _device,
                                     boost::shared_ptr<Zone> _zone) {
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
     std::string zoneName = getZoneName(_zone);
 
     std::string sensorIndex;
@@ -2131,7 +2131,7 @@ namespace dss {
                                     boost::shared_ptr<const Device> _device) {
 
     std::string devName = _device->getName() + ";" +
-                          _device->getDSID().toString();
+                          dsuid2str(_device->getDSID());
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state +
                    ";;;;" + devName + ";");
@@ -2225,7 +2225,7 @@ namespace dss {
       if (callOrigin == coUnknown) {
         // DeviceLocal Action Event
         logDeviceLocalScene(_logger, sceneId,
-                        m_raisedAtDevice->getDevice()->getDSID().toString(),
+                        dsuid2str(m_raisedAtDevice->getDevice()->getDSID()),
                         callOrigin);
       } else {
         // Device Action Request
@@ -2720,7 +2720,7 @@ namespace dss {
       if (m_raisedAtState->getType() == StateType_Device) {
         boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
         *zoneId = device->getZoneID();
-        originDSID = device->getDSID().toString();
+        originDSID = dsuid2str(device->getDSID());
       } else if (m_raisedAtState->getType() == StateType_Group) {
         boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
         *zoneId = group->getZoneID();
@@ -2728,7 +2728,7 @@ namespace dss {
       }
     } else if ((m_evtRaiseLocation == erlDevice) &&
                (m_raisedAtDevice != NULL)) {
-      originDSID = m_raisedAtDevice->getDSID().toString();
+      originDSID = dsuid2str(m_raisedAtDevice->getDSID());
     }
 
     return originDSID;
@@ -2877,10 +2877,7 @@ namespace dss {
 
     originDSID = getData(&zoneId, &groupId, &sceneId, &callOrigin);
 
-    dss_dsid_t dsid = dsid::fromString(originDSID);
-    dsid_t dsmapi_dsid;
-    dsid_helper::toDsmapiDsid(dsid, dsmapi_dsid);
-
+    dsuid_t dsuid = str2dsuid(originDSID);
     if ((groupId == 0) && (sceneId == ScenePanic)) {
       try {
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
@@ -2888,7 +2885,7 @@ namespace dss {
 
         // #2561: auto-reset fire if panic was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
-        if (!IsNullId(dsmapi_dsid) && (callOrigin == coDsmApi) &&
+        if (!IsNullDsuid(dsuid) && (callOrigin == coDsmApi) &&
             (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {
@@ -2904,7 +2901,7 @@ namespace dss {
 
         // #2561: auto-reset panic if fire was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
-        if (!IsNullId(dsmapi_dsid) && (callOrigin == coDsmApi)
+        if (!IsNullDsuid(dsuid) && (callOrigin == coDsmApi)
             && (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {

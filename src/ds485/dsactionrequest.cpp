@@ -51,17 +51,17 @@ namespace dss {
       }
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        m_pBusEventSink->onGroupCallScene(NULL, NullDSID, pGroup->getZoneID(),
+        dsuid_t nullid;
+        SetNullDsuid(nullid);
+        m_pBusEventSink->onGroupCallScene(NULL, nullid, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           _scene, _origin, _token, _force);
       }
     } else if(pDevice)  {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
       if(_force) {
-        ret = DeviceActionRequest_action_force_call_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _scene);
+        ret = DeviceActionRequest_action_force_call_scene(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _scene);
       } else {
-        ret = DeviceActionRequest_action_call_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _scene);
+        ret = DeviceActionRequest_action_call_scene(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _scene);
       }
       DSBusInterface::checkResultCode(ret);
       if (m_pBusEventSink) {
@@ -87,9 +87,7 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_save_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_save_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _scene);
+      ret = DeviceActionRequest_action_save_scene(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _scene);
       DSBusInterface::checkResultCode(ret);
     }
   }
@@ -108,9 +106,7 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_opc_inc(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _channel);
+      ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _channel);
       DSBusInterface::checkResultCode(ret);
     }
   }
@@ -128,9 +124,7 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_opc_dec(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _channel);
+      ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _channel);
       DSBusInterface::checkResultCode(ret);
     }
   }
@@ -148,9 +142,7 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_opc_stop(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _channel);
+      ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _channel);
       DSBusInterface::checkResultCode(ret);
     }
   }
@@ -169,14 +161,14 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_undo_scene_number(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        m_pBusEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
+        dsuid_t nullid;
+        SetNullDsuid(nullid);
+        m_pBusEventSink->onGroupUndoScene(NULL, nullid, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           _scene, true, _origin, _token);
       }
     } else if(pDevice)  {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_undo_scene_number(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _scene);
+      ret = DeviceActionRequest_action_undo_scene_number(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _scene);
       DSBusInterface::checkResultCode(ret);
       if (m_pBusEventSink) {
         m_pBusEventSink->onDeviceUndoScene(NULL, pDevice->getDSMeterDSID(),
@@ -201,14 +193,14 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_undo_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        m_pBusEventSink->onGroupUndoScene(NULL, NullDSID, pGroup->getZoneID(),
+        dsuid_t nullid;
+        SetNullDsuid(nullid);
+        m_pBusEventSink->onGroupUndoScene(NULL, nullid, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           -1, false, _origin, _token);
       }
     } else if(pDevice)  {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_undo_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress());
+      ret = DeviceActionRequest_action_undo_scene(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress());
       DSBusInterface::checkResultCode(ret);
       if (m_pBusEventSink) {
         m_pBusEventSink->onDeviceUndoScene(NULL, pDevice->getDSMeterDSID(),
@@ -230,17 +222,17 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_blink(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0);
+      ret = ZoneGroupActionRequest_action_blink(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _origin);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        m_pBusEventSink->onGroupBlink(NULL, NullDSID, pGroup->getZoneID(),
+        dsuid_t nullid;
+        SetNullDsuid(nullid);
+        m_pBusEventSink->onGroupBlink(NULL, nullid, pGroup->getZoneID(),
                                       pGroup->getID(), 0, _category, _origin,
                                       _token);
       }
     } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_blink(m_DSMApiHandle, dsid, pDevice->getShortAddress());
+      ret = DeviceActionRequest_action_blink(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress());
       DSBusInterface::checkResultCode(ret);
       if (m_pBusEventSink) {
         m_pBusEventSink->onDeviceBlink(NULL, pDevice->getDSMeterDSID(),
@@ -264,9 +256,7 @@ namespace dss {
       ret = ZoneGroupActionRequest_action_set_outval(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _value);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _value);
+      ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _value);
       DSBusInterface::checkResultCode(ret);
     }
   }

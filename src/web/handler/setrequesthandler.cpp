@@ -87,7 +87,7 @@ namespace dss {
           additionalPart = ".";
         }
         if(!_request.getParameter("dsid").empty()) {
-          additionalPart += "dsid(" + _request.getParameter("dsid") + ")";
+          additionalPart += "dsud(" + _request.getParameter("dsid") + ")";
         } else {
           return failure("Missing parameter dsid");
         }
@@ -95,6 +95,21 @@ namespace dss {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
+      } else if(_request.getMethod() == "byDSUID") {
+        std::string additionalPart;
+        if(self != ".") {
+          additionalPart = ".";
+        }
+        if(!_request.getParameter("dsuid").empty()) {
+          additionalPart += "dsuid(" + _request.getParameter("dsuid") + ")";
+        } else {
+          return failure("Missing parameter dsuid");
+        }
+
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("self", self + additionalPart);
+        return success(resultObj);
+
       } else if(_request.getMethod() == "getDevices") {
         SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, boost::shared_ptr<Zone>());

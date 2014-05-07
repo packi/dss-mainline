@@ -200,12 +200,12 @@ namespace dss {
     }
   } // publishToPropertyTree
 
-  void Group::sensorPush(dss_dsid_t _sourceID, int _sensorType, double _sensorValue) {
+  void Group::sensorPush(dsuid_t _sourceID, int _sensorType, double _sensorValue) {
     if (m_pPropertyNode != NULL) {
       PropertyNodePtr node = m_pPropertyNode->createProperty("SensorHistory/SensorType" +
         intToString(_sensorType));
       node->createProperty("value")->setFloatingValue(_sensorValue);
-      node->createProperty("dsid")->setStringValue(_sourceID.toString());
+      node->createProperty("dsid")->setStringValue(dsuid2str(_sourceID));
       DateTime now;
       node->createProperty("timestamp")->setStringValue(now.toString());
     }

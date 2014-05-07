@@ -23,6 +23,8 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <digitalSTROM/ds.h>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "webfixture.h"
 
@@ -38,7 +40,8 @@ BOOST_AUTO_TEST_SUITE(WebCircuit)
 class Fixture : public WebFixture {
 public:
   Fixture() {
-    m_ValidDSID = dss_dsid_t(0, 1);
+    SetNullDsuid(m_ValidDSID);
+    m_ValidDSID.id[DSUID_SIZE-1] = 1;
     m_ValidName = "mod";
 
     m_pApartment.reset(new Apartment(NULL));
@@ -50,7 +53,7 @@ protected:
   boost::shared_ptr<Apartment> m_pApartment;
   boost::shared_ptr<CircuitRequestHandler> m_pHandler;
   std::string m_Params;
-  dss_dsid_t m_ValidDSID;
+  dsuid_t m_ValidDSID;
   std::string m_ValidName;
 }; // Fixture
 
@@ -68,20 +71,20 @@ BOOST_FIXTURE_TEST_CASE(testInvalidID, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testInvalidFunctionValidID, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   RestfulRequest req("circuit/asdf", m_Params);
   BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(testValidID, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   RestfulRequest req("circuit/getName", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitGetName, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   RestfulRequest req("circuit/getName", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result = getResultObject(response);
@@ -89,7 +92,7 @@ BOOST_FIXTURE_TEST_CASE(testCircuitGetName, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitSetNameMissingNewName, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   RestfulRequest req("circuit/setName", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
@@ -97,7 +100,7 @@ BOOST_FIXTURE_TEST_CASE(testCircuitSetNameMissingNewName, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testCircuitSetName, Fixture) {
   const std::string& kNewName = "renamed";
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   m_Params += "&newName=" + urlEncode(kNewName);
   RestfulRequest req("circuit/setName", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -111,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE(testCircuitSetName, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   RestfulRequest req("circuit/rescan", m_Params);
   m_pApartment->getDSMeterByDSID(m_ValidDSID)->setIsValid(true);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -121,7 +124,7 @@ BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   const long unsigned int kConsumption = 77;
   const long unsigned int kNullConsumption = 0;
 
@@ -140,7 +143,7 @@ BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
-  m_Params += "&id=" + urlEncode(m_ValidDSID.toString());
+  m_Params += "&id=" + urlEncode(dsuid2str(m_ValidDSID));
   const long long unsigned int kMeterValue = 8888888;
   m_pApartment->getDSMeterByDSID(m_ValidDSID)->initializeEnergyMeterValue(kMeterValue);
   RestfulRequest req("circuit/getEnergyMeterValue", m_Params);

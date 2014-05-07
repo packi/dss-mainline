@@ -22,6 +22,7 @@
 
 #include "device.h"
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -42,15 +43,17 @@ namespace dss {
 
   //================================================== Device
 
-  Device::Device(dss_dsid_t _dsid, Apartment* _pApartment)
+  Device::Device(dsuid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
     m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
     m_LastKnownShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_LastKnownZoneID(0),
-    m_DSMeterDSID(NullDSID),
-    m_LastKnownMeterDSID(NullDSID),
+    m_DSMeterDSID(),
+    m_LastKnownMeterDSID(),
+    m_DSMeterDSIDstr(),
+    m_LastKnownMeterDSIDstr(),
     m_FunctionID(0),
     m_ProductID(0),
     m_VendorID(0),
@@ -89,7 +92,14 @@ namespace dss {
     m_sensorInputCount(0),
     m_outputChannelCount(0),
     m_AKMInputProperty()
-    { } // ctor
+    {
+      SetNullDsuid(m_DSMeterDSID);
+      SetNullDsuid(m_LastKnownMeterDSID);
+      m_DSMeterDSIDstr = dsid2str(dsuid_to_dsid(m_DSMeterDSID));
+      m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
+      m_LastKnownMeterDSIDstr = dsid2str(dsuid_to_dsid(m_LastKnownMeterDSID));
+      m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
+    } // ctor
 
   Device::~Device() {
     removeFromPropertyTree();
@@ -97,8 +107,8 @@ namespace dss {
 
   void Device::removeFromPropertyTree() {
     if(m_pPropertyNode != NULL) {
-      if ((m_DSMeterDSID != NullDSID) && (m_DSID != NullDSID)) {
-        std::string devicePath = "devices/" + m_DSID.toString();
+      if ((!IsNullDsuid(m_DSMeterDSID)) && (!IsNullDsuid(m_DSID))) {
+        std::string devicePath = "devices/" + dsuid2str(m_DSID);
         PropertyNodePtr dev = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
         dev->alias(PropertyNodePtr());
         dev->getParentNode()->removeChild(dev);
@@ -110,7 +120,7 @@ namespace dss {
             int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
             std::string gPath = "zones/zone" + intToString(zid) +
                 "/groups/group" + intToString(g) + "/devices/" +
-                m_DSID.toString();
+                dsuid2str(m_DSID);
             PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
             if (gnode != NULL) {
               gnode->alias(PropertyNodePtr());
@@ -144,14 +154,18 @@ namespace dss {
   void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
-        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + m_DSID.toString());
-        m_pPropertyNode->createProperty("dSID")->setStringValue(m_DSID.toString());
+        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + dsuid2str(m_DSID));
+        m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
+        m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
         m_pPropertyNode->createProperty("present")
           ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
         m_pPropertyNode->createProperty("DSMeterDSID")
-          ->linkToProxy(PropertyProxyMemberFunction<dss_dsid_t, std::string, false>(m_DSMeterDSID, &dss_dsid_t::toString));
+          ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSIDstr, false));
+        m_pPropertyNode->createProperty("DSMeterDSUID")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSUIDstr, false));
+
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         m_pPropertyNode->createProperty("functionID")
           ->linkToProxy(PropertyProxyReference<int>(m_FunctionID, false));
@@ -196,7 +210,9 @@ namespace dss {
         m_pPropertyNode->createProperty("lastKnownShortAddress")
           ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_LastKnownShortAddress, false));
         m_pPropertyNode->createProperty("lastKnownMeterDSID")
-          ->linkToProxy(PropertyProxyMemberFunction<dss_dsid_t, std::string, false>(m_LastKnownMeterDSID, &dss_dsid_t::toString));
+          ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSIDstr, false));
+        m_pPropertyNode->createProperty("lastKnownMeterDSUID")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSUIDstr, false));
         m_pPropertyNode->createProperty("firstSeen")
           ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_FirstSeen, &DateTime::toString));
         m_pPropertyNode->createProperty("lastDiscovered")
@@ -237,9 +253,9 @@ namespace dss {
           std::string basePath = "zones/zone" + intToString(m_ZoneID) +
                                  "/devices";
           if(m_pAliasNode == NULL) {
-            PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + m_DSID.toString());
+            PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
             if ((node == NULL) || ((node != NULL) && (node->size() == 0))) {
-              m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + m_DSID.toString());
+              m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + dsuid2str(m_DSID));
               m_pAliasNode->alias(m_pPropertyNode);
             }
           } else {
@@ -254,7 +270,7 @@ namespace dss {
           if (m_GroupBitmask.test(g-1)) {
             std::string gPath = "zones/zone" + intToString(m_ZoneID) +
                                 "/groups/group" + intToString(g) + "/devices/" +
-                                m_DSID.toString();
+                                dsuid2str(m_DSID);
             PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
             if (gnode) {
               gnode->alias(m_pPropertyNode);
@@ -264,7 +280,7 @@ namespace dss {
           }
         }
 
-        if (m_DSMeterDSID != NullDSID) {
+        if (!IsNullDsuid(m_DSMeterDSID)) {
           setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
         }
       }
@@ -737,15 +753,6 @@ namespace dss {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex);
   } // getDeviceSensorValue
 
-  uint8_t Device::getDeviceSensorType(const int _sensorIndex) {
-    if (getRevisionID() > 0x0321) {
-      uint16_t value = getDeviceConfigWord(CfgClassDevice, CfgDevice_SensorParameter + _sensorIndex * 2);
-      return (value & 0xFF00) >> 8;
-    } else {
-      return m_pApartment->getDeviceBusInterface()->getSensorType(*this, _sensorIndex);
-    }
-  } // getDeviceSensorType
-
   unsigned long Device::getPowerConsumption() {
     return m_Consumption;
   } // getPowerConsumption
@@ -785,7 +792,7 @@ namespace dss {
   } // dirty
 
   bool Device::operator==(const Device& _other) const {
-    return _other.m_DSID == m_DSID;
+    return IsEqualDsuid(_other.m_DSID, m_DSID);
   } // operator==
 
   devid_t Device::getShortAddress() const {
@@ -807,36 +814,38 @@ namespace dss {
     m_LastKnownShortAddress = _shortAddress;
   } // setLastKnownShortAddress
 
-  dss_dsid_t Device::getDSID() const {
+  dsuid_t Device::getDSID() const {
     return m_DSID;
   } // getDSID;
 
-  dss_dsid_t Device::getDSMeterDSID() const {
+  dsuid_t Device::getDSMeterDSID() const {
     return m_DSMeterDSID;
   } // getDSMeterID
 
-  void Device::setLastKnownDSMeterDSID(const dss_dsid_t& _value) {
+  void Device::setLastKnownDSMeterDSID(const dsuid_t& _value) {
     m_LastKnownMeterDSID = _value;
   } // setLastKnownDSMeterDSID
 
-  const dss_dsid_t& Device::getLastKnownDSMeterDSID() const {
+  const dsuid_t& Device::getLastKnownDSMeterDSID() const {
     return m_LastKnownMeterDSID;
   } // getLastKnownDSMeterDSID
 
   void Device::setDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     PropertyNodePtr alias;
-    std::string devicePath = "devices/" + m_DSID.toString();
-    if((m_pPropertyNode != NULL) && (m_DSMeterDSID != NullDSID)) {
+    std::string devicePath = "devices/" + dsuid2str(m_DSID);
+    if((m_pPropertyNode != NULL) && (!IsNullDsuid(m_DSMeterDSID))) {
       alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
     }
     m_DSMeterDSID = _dsMeter->getDSID();
+    m_DSMeterDSIDstr = dsuid2str(_dsMeter->getDSID());
     m_LastKnownMeterDSID = _dsMeter->getDSID();
+    m_LastKnownMeterDSIDstr = dsuid2str(_dsMeter->getDSID());
     if(m_pPropertyNode != NULL) {
       PropertyNodePtr target = _dsMeter->getPropertyNode()->createProperty("devices");
       if(alias != NULL) {
         target->addChild(alias);
       } else {
-        alias = target->createProperty(m_DSID.toString());
+        alias = target->createProperty(dsuid2str(m_DSID));
         alias->alias(m_pPropertyNode);
       }
     }
@@ -856,15 +865,15 @@ namespace dss {
         std::string basePath = "zones/zone" + intToString(m_ZoneID) +
                                "/devices";
         if(m_pAliasNode == NULL) {
-          PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + m_DSID.toString());
+          PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
           if(node != NULL) {
-            Logger::getInstance()->log("Device::setZoneID: Target node for device " + m_DSID.toString() + " already exists", lsError);
+            Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
             if(node->size() > 0) {
-              Logger::getInstance()->log("Device::setZoneID: Target node for device " + m_DSID.toString() + " has children", lsFatal);
+              Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
               return;
             }
           }
-          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + m_DSID.toString());
+          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + dsuid2str(m_DSID));
 
           m_pAliasNode->alias(m_pPropertyNode);
         } else {
@@ -902,7 +911,7 @@ namespace dss {
         m_Groups.push_back(_groupID);
         if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // create alias in group list
-          std::string gPath = "zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(_groupID) + "/devices/"  +  m_DSID.toString();
+          std::string gPath = "zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
           if (gnode) {
             gnode->alias(m_pPropertyNode);
@@ -912,7 +921,7 @@ namespace dss {
           gsubnode->createProperty("id")->setIntegerValue(_groupID);
         }
       } else {
-        Logger::getInstance()->log("Device " + m_DSID.toString() + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
+        Logger::getInstance()->log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
       }
     } else {
       Logger::getInstance()->log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
@@ -929,7 +938,7 @@ namespace dss {
         if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // remove alias in group list
           int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-          std::string gPath = "zones/zone" + intToString(zid) + "/groups/group" + intToString(_groupID) + "/devices/"  +  m_DSID.toString();
+          std::string gPath = "zones/zone" + intToString(zid) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
           if (gnode) {
             gnode->getParentNode()->removeChild(gnode);
@@ -1206,7 +1215,7 @@ namespace dss {
               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
               (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
-               ((m_DSID.lower % 2) == false)))); // even dSID
+               IsEvenDsuid(m_DSID)))); // even dSID
   }
 
   bool Device::is2WaySlave() const {
@@ -1219,7 +1228,7 @@ namespace dss {
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
             ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
-            ((m_DSID.lower % 2) == true))); // odd dSID
+            !IsEvenDsuid(m_DSID))); // odd dSID
   }
 
   bool Device::hasMultibuttons() const {
@@ -1944,6 +1953,9 @@ namespace dss {
 
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
   {
+    dsuid_t tmp_dev = _otherDev->getDSID();
+    dsuid_t tmp_meter = _otherDev->getDSMeterDSID();
+
     return ((m_OemState == DEVICE_OEM_VALID) &&
             !m_OemIsIndependent &&
             (m_OemSerialNumber > 0) &&
@@ -1951,8 +1963,8 @@ namespace dss {
             _otherDev->isPresent() &&
             !_otherDev->getOemIsIndependent() &&
             (_otherDev->getOemInfoState() == DEVICE_OEM_VALID) &&
-            (_otherDev->getDSID() != m_DSID) &&
-            (_otherDev->getDSMeterDSID() == m_DSMeterDSID) &&
+            (!IsEqualDsuid(tmp_dev, m_DSID)) &&
+            (!IsEqualDsuid(tmp_meter, m_DSMeterDSID)) &&
             (_otherDev->getOemEan() == m_OemEanNumber) &&
             (_otherDev->getOemSerialNumber() == m_OemSerialNumber));
   }

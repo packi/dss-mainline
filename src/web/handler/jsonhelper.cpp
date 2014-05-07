@@ -44,7 +44,8 @@ namespace dss {
     DateTime tmp_date;
 
     boost::shared_ptr<JSONObject> result(new JSONObject());
-    result->addProperty("id", _device.getDSID().toString());
+    result->addProperty("id", dsid2str(dsuid_to_dsid(_device.getDSID())));
+    result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
     result->addProperty("name", _device.getName());
     result->addProperty("functionID", _device.getFunctionID());
@@ -60,7 +61,8 @@ namespace dss {
     result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     if(_device.getDevice()->isPresent()) {
-      result->addProperty("meterDSID", _device.getDevice()->getDSMeterDSID().toString());
+      result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getDSMeterDSID())));
+      result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -69,7 +71,7 @@ namespace dss {
       result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getShortAddress());
     } else {
-      result->addProperty("meterDSID", _device.getDevice()->getLastKnownDSMeterDSID().toString());
+      result->addProperty("meterDSID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -158,7 +160,7 @@ namespace dss {
         // do not render "slave" devices
         continue;
       }
-      devicesArr->add(devices[iDevice].getDSID().toString());
+      devicesArr->add(dsuid2str(devices[iDevice].getDSID()));
     }
     return result;
   } // toJSON(Group)

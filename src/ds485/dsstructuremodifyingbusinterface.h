@@ -35,33 +35,33 @@ namespace dss {
     DSStructureModifyingBusInterface()
     : DSBusInterfaceObj()
     {
-      SetBroadcastId(m_BroadcastDSID);
+      SetBroadcastDsuid(m_BroadcastDSID);
     }
 
-    virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    virtual void removeZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
+    virtual void createZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual void removeZone(const dsuid_t& _dsMeterID, const int _zoneID);
 
-    virtual void addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID);
-    virtual void removeDeviceFromDSMeters(const dss_dsid_t& _DeviceDSID);
+    virtual void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID);
+    virtual void removeDeviceFromDSMeters(const dsuid_t& _DeviceDSID);
 
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name);
-    virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name);
-    virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name);
+    virtual void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name);
+    virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name);
 
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name);
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID);
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
 
-    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue);
+    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue);
 
-    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
-    virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
+    virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
+    virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
 private:
-    dsid_t m_BroadcastDSID;
+    dsuid_t m_BroadcastDSID;
   }; // DSStructureModifyingBusInterface
 
 } // namespace dss

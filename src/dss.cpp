@@ -821,11 +821,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         if (macNode != NULL) {
             std::string mac = macNode->getAsString();
             mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
-            dsid_t d;
-            DsmApiGetEthernetDSID(mac.c_str(), &d);
-            dss_dsid_t D;
-            dsid_helper::toDssDsid(d, D);
-            dsid = D.toString();
+            dsuid_t d;
+            DsmApiGetEthernetDSUID(mac.c_str(), &d);
+            dsid = dsuid2str(d);
         }
     }
 

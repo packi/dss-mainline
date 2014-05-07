@@ -50,12 +50,9 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
     uint8_t retVal;
 
-    int ret = DeviceConfig_get_sync_8(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceConfig_get_sync_8(m_DSMApiHandle, _device.getDSMeterDSID(),
                                       _device.getShortAddress(),
                                       _configClass,
                                       _configIndex,
@@ -74,12 +71,9 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
     uint16_t retVal;
 
-    int ret = DeviceConfig_get_sync_16(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceConfig_get_sync_16(m_DSMApiHandle, _device.getDSMeterDSID(),
                                        _device.getShortAddress(),
                                        _configClass,
                                        _configIndex,
@@ -100,10 +94,7 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceConfig_set(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceConfig_set(m_DSMApiHandle, _device.getDSMeterDSID(),
                                _device.getShortAddress(), _configClass,
                                _configIndex, _value);
     DSBusInterface::checkResultCode(ret);
@@ -116,10 +107,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceProperties_set_button_active_group(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceProperties_set_button_active_group(m_DSMApiHandle,
+                                          _device.getDSMeterDSID(),
                                           _device.getShortAddress(), _groupID);
     DSBusInterface::checkResultCode(ret);
   } // setDeviceButtonActiveGroup
@@ -132,15 +121,13 @@ namespace dss {
     }
 
     int ret;
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
     if(_modeId) {
       ret = DeviceActionRequest_action_programming_mode_on(m_DSMApiHandle,
-          dsmDSID, _device.getShortAddress());
+                _device.getDSMeterDSID(), _device.getShortAddress());
     } else {
       ret = DeviceActionRequest_action_programming_mode_off(m_DSMApiHandle,
-          dsmDSID, _device.getShortAddress());
+          _device.getDSMeterDSID(), _device.getShortAddress());
     }
     DSBusInterface::checkResultCode(ret);
   } // setDeviceProgMode
@@ -152,10 +139,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle,
+                                                    _device.getDSMeterDSID(),
                                                     _device.getShortAddress(),
                                                     _value);
     DSBusInterface::checkResultCode(ret);
@@ -164,33 +149,17 @@ namespace dss {
   uint32_t DSDeviceBusInterface::getSensorValue(const Device& _device,
                                                      const int _sensorIndex) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
     uint16_t retVal;
 
-    int ret = DeviceSensor_get_value_sync(m_DSMApiHandle, dsmDSID,
-        _device.getShortAddress(), _sensorIndex,
-        kDSM_API_TIMEOUT, &retVal);
-
+    int ret = DeviceSensor_get_value_sync(m_DSMApiHandle,
+                                          _device.getDSMeterDSID(),
+                                          _device.getShortAddress(),
+                                          _sensorIndex, kDSM_API_TIMEOUT,
+                                          &retVal);
     DSBusInterface::checkResultCode(ret);
     _device.setSensorValue(_sensorIndex, retVal);
     return retVal;
   } // getSensorValue
-
-  uint8_t DSDeviceBusInterface::getSensorType(const Device& _device,
-                                              const int _sensorIndex) {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-    uint8_t present, type, last;
-
-    int ret = DeviceSensor_get_type_sync(m_DSMApiHandle, dsmDSID,
-        _device.getShortAddress(), _sensorIndex,
-        kDSM_API_TIMEOUT, &present, &type, &last);
-
-    DSBusInterface::checkResultCode(ret);
-    return type;
-  } // getSensorType
 
   void DSDeviceBusInterface::addGroup(const Device& _device, const int _groupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -198,10 +167,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle,
+                                              _device.getDSMeterDSID(),
                                               _device.getShortAddress(),
                                               _groupID);
     if(ret == ERROR_WRONG_PARAMETER) {
@@ -217,10 +184,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle,
+                                                 _device.getDSMeterDSID(),
                                                  _device.getShortAddress(),
                                                  _groupID);
     if(ret == ERROR_WRONG_PARAMETER) {
@@ -235,10 +200,11 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       return;
     }
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
-    int ret = DeviceProperties_set_locked_flag(m_DSMApiHandle, dsmDSID, _device.getShortAddress(), _lock);
+    int ret = DeviceProperties_set_locked_flag(m_DSMApiHandle,
+                                               _device.getDSMeterDSID(),
+                                               _device.getShortAddress(),
+                                               _lock);
     DSBusInterface::checkResultCode(ret);
   } // lockOrUnlockDevice
 
@@ -248,13 +214,11 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
     uint8_t downstream;
     uint16_t upstream;
 
-    int ret = TestTransmissionQuality_get_sync(m_DSMApiHandle, dsmDSID,
+    int ret = TestTransmissionQuality_get_sync(m_DSMApiHandle,
+                                               _device.getDSMeterDSID(),
                                                _device.getShortAddress(),
                                                kDSM_API_TIMEOUT,
                                                &downstream, &upstream);
@@ -270,10 +234,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle,
+                                                 _device.getDSMeterDSID(),
                                                  _device.getShortAddress(),
                                                  _channel);
     DSBusInterface::checkResultCode(ret);
@@ -286,10 +248,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle,
+                                                 _device.getDSMeterDSID(),
                                                  _device.getShortAddress(),
                                                  _channel);
     DSBusInterface::checkResultCode(ret);
@@ -302,10 +262,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle,
+                                                  _device.getDSMeterDSID(),
                                                   _device.getShortAddress(),
                                                   _channel);
     DSBusInterface::checkResultCode(ret);
@@ -319,14 +277,13 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");;
     }
 
-    dsid_t dsmDSID;
     uint16_t out = 0;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
-    int ret = DeviceOPCConfig_get_current_sync(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceOPCConfig_get_current_sync(m_DSMApiHandle,
+                                               _device.getDSMeterDSID(),
                                                _device.getShortAddress(),
-                                                _channel, 2*kDSM_API_TIMEOUT,
-                                                &out);
+                                               _channel, 2*kDSM_API_TIMEOUT,
+                                               &out);
     DSBusInterface::checkResultCode(ret);
     return out;
   } // getDeviceOutputChannelValue
@@ -339,16 +296,16 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
     int ret;
 
     if (_applyNow) {
-      ret = DeviceOPCConfig_set_current_and_apply(m_DSMApiHandle, dsmDSID,
+      ret = DeviceOPCConfig_set_current_and_apply(m_DSMApiHandle,
+                                                  _device.getDSMeterDSID(),
                                                   _device.getShortAddress(),
                                                   _channel, _size, _value);
     } else {
-      ret = DeviceOPCConfig_set_current(m_DSMApiHandle, dsmDSID,
+      ret = DeviceOPCConfig_set_current(m_DSMApiHandle,
+                                        _device.getDSMeterDSID(),
                                         _device.getShortAddress(),
                                         _channel, _size, _value);
     }
@@ -364,14 +321,13 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    dsid_t dsmDSID;
     uint16_t out = 0;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
-    int ret = DeviceOPCConfig_get_scene_sync(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceOPCConfig_get_scene_sync(m_DSMApiHandle,
+                                             _device.getDSMeterDSID(),
                                              _device.getShortAddress(),
-                                             _channel, _scene, 2*kDSM_API_TIMEOUT,
-                                              &out);
+                                             _channel, _scene,
+                                             2*kDSM_API_TIMEOUT, &out);
     DSBusInterface::checkResultCode(ret);
     return out;
   } // getDeviceOutputChannelSceneValue
@@ -387,9 +343,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-    int ret = DeviceOPCConfig_set_scene(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceOPCConfig_set_scene(m_DSMApiHandle,
+                                        _device.getDSMeterDSID(),
                                         _device.getShortAddress(),
                                         _channel, _size, _scene, _value);
     DSBusInterface::checkResultCode(ret);
@@ -403,11 +358,10 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    dsid_t dsmDSID;
     uint16_t out = 0;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
-    int ret = DeviceOPCConfig_get_scene_config_sync(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceOPCConfig_get_scene_config_sync(m_DSMApiHandle,
+                                                    _device.getDSMeterDSID(),
                                                     _device.getShortAddress(),
                                                     _scene,
                                                     2*kDSM_API_TIMEOUT, &out);
@@ -424,9 +378,8 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-    int ret = DeviceOPCConfig_set_scene_config(m_DSMApiHandle, dsmDSID,
+    int ret = DeviceOPCConfig_set_scene_config(m_DSMApiHandle,
+                                               _device.getDSMeterDSID(),
                                                _device.getShortAddress(),
                                                _scene, _value);
     DSBusInterface::checkResultCode(ret);
@@ -441,11 +394,10 @@ namespace dss {
       return;
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-    int ret = DeviceOPCConfig_set_dc_flags(m_DSMApiHandle, dsmDSID,
-                                            _device.getShortAddress(),
-                                            _scene, _value);
+    int ret = DeviceOPCConfig_set_dc_flags(m_DSMApiHandle,
+                                           _device.getDSMeterDSID(),
+                                           _device.getShortAddress(),
+                                           _scene, _value);
     DSBusInterface::checkResultCode(ret);
   }
 
@@ -457,14 +409,13 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    dsid_t dsmDSID;
     uint16_t out = 0;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
-    int ret = DeviceOPCConfig_get_dc_flags_sync(m_DSMApiHandle, dsmDSID,
-                                                    _device.getShortAddress(),
-                                                    _scene,
-                                                    2*kDSM_API_TIMEOUT, &out);
+    int ret = DeviceOPCConfig_get_dc_flags_sync(m_DSMApiHandle,
+                                                _device.getDSMeterDSID(),
+                                                _device.getShortAddress(),
+                                                _scene,
+                                                2*kDSM_API_TIMEOUT, &out);
     DSBusInterface::checkResultCode(ret);
     return out;
   }
@@ -487,7 +438,7 @@ namespace dss {
     }
   }
 
-  uint16_t DSDeviceBusInterface::OEMDataReader::getDeviceConfigWord(const dsid_t& _dsm,
+  uint16_t DSDeviceBusInterface::OEMDataReader::getDeviceConfigWord(const dsuid_t& _dsm,
                                                                             dev_t _device,
                                                                             uint8_t _configClass,
                                                                             uint8_t _configIndex) const
@@ -509,7 +460,7 @@ namespace dss {
     return retVal;
   }
 
-  uint8_t DSDeviceBusInterface::OEMDataReader::getDeviceConfig(const dsid_t& _dsm,
+  uint8_t DSDeviceBusInterface::OEMDataReader::getDeviceConfig(const dsuid_t& _dsm,
                                                                       dev_t _device,
                                                                       uint8_t _configClass,
                                                                       uint8_t _configIndex) const
@@ -540,8 +491,6 @@ namespace dss {
     bool isConfigLocked = false;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
-    dsid_t dsmId;
-    dsid_helper::toDsmapiDsid(m_dsmId, dsmId);
 
     m_dsmApiHandle = DsmApiInitialize();
     if (!m_dsmApiHandle) {
@@ -555,7 +504,7 @@ namespace dss {
 
     try {
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
-      uint16_t result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2e);
+      uint16_t result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
       deviceInetState = (DeviceOEMInetState_t)(result >> 12);
 
       if (deviceInetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED) {
@@ -565,15 +514,15 @@ namespace dss {
         // EAN programmed
         ean |= ((long long unsigned int)(result & 0xFFF) << 32);
 
-        result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2a);
+        result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2a);
         ean |= result;
 
-        result = getDeviceConfigWord(dsmId, m_deviceAdress, 3, 0x2c);
+        result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2c);
         ean |= ((long long unsigned int)result << 16);
 
-        serialNumber = getDeviceConfigWord(dsmId, m_deviceAdress, 1, 0x1c);
+        serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
 
-        partNumber = getDeviceConfig(dsmId, m_deviceAdress, 1, 0x1e);
+        partNumber = getDeviceConfig(m_dsmId, m_deviceAdress, 1, 0x1e);
         isIndependent = (partNumber & 0x80);
         partNumber &= 0x7F;
 
@@ -582,7 +531,7 @@ namespace dss {
 
       if (m_revisionID >= 0x357) {
         if (std::bitset<8>(
-                    getDeviceConfig(dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
+                getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
           isConfigLocked = true;
         }
       }

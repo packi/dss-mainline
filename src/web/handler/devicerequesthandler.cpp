@@ -25,6 +25,7 @@
 
 #include <boost/bind.hpp>
 #include <limits.h>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/model/apartment.h"
 #include "src/model/device.h"
@@ -34,7 +35,7 @@
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
-
+#include "src/ds485types.h"
 #include "src/web/json.h"
 #include "jsonhelper.h"
 #include "foreach.h"
@@ -103,18 +104,25 @@ namespace dss {
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByDSID(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result;
-    std::string deviceDSIDString = _request.getParameter("dsid");
-    if(!deviceDSIDString.empty()) {
-      try {
-        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
-        try {
-          result = m_Apartment.getDeviceByDSID(deviceDSID);
-        } catch(std::runtime_error& e) {
-          throw DeviceNotFoundException("Could not find device with dsid '" + deviceDSIDString + "'");
-        }
-      } catch(std::invalid_argument& e) {
-        throw DeviceNotFoundException("Could not parse dsid '" + deviceDSIDString + "'");
-      }
+    std::string dsidStr = _request.getParameter("dsid");
+    std::string dsuidStr = _request.getParameter("dsuid");
+    if (dsidStr.empty() && dsuidStr.empty()) {
+      throw std::runtime_error("missing parameter 'dsuid'");
+    }
+
+    dsuid_t dsuid;
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(dsidStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } else {
+      dsuid = str2dsuid(dsidStr);
+    }
+
+    try {
+      result = m_Apartment.getDeviceByDSID(dsuid);
+    } catch(std::runtime_error& e) {
+      throw DeviceNotFoundException("Could not find device with dsuid '" +
+                                    dsuid2str(dsuid) + "'");
     }
     return result;
   } // getDeviceByDSID
@@ -194,8 +202,7 @@ namespace dss {
         }
 
         if (pDevice->is2WayMaster()) {
-          dss_dsid_t next = pDevice->getDSID();
-          next.lower++;
+          dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
           try {
             boost::shared_ptr<Device> pPartnerDevice;
             pPartnerDevice = m_Apartment.getDeviceByDSID(next);
@@ -209,7 +216,7 @@ namespace dss {
               }
             }
           } catch(std::runtime_error& e) {
-            return failure("Could not find partner device with dsid '" + next.toString() + "'");
+            return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
           }
         }
         return success();
@@ -344,8 +351,7 @@ namespace dss {
       }
 
       if (pDevice->is2WayMaster()) {
-        dss_dsid_t next = pDevice->getDSID();
-        next.lower++;
+        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
@@ -370,7 +376,7 @@ namespace dss {
             modifiedDevices.push_back(pPartnerDevice);
           }
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
 
@@ -400,14 +406,13 @@ namespace dss {
           return success();
         }
 
-        dss_dsid_t next = pDevice->getDSID();
-        next.lower++;
+        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonID(value);
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
       return success();
@@ -427,14 +432,13 @@ namespace dss {
         return failure("This device does not support button pairing");
       }
 
-      dss_dsid_t next = pDevice->getDSID();
-      next.lower++;
+      dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
       boost::shared_ptr<Device> pPartnerDevice;
 
       try {
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
       } catch(std::runtime_error& e) {
-        throw DeviceNotFoundException("Could not find partner device with dsid '" + next.toString() + "'");
+        throw DeviceNotFoundException("Could not find partner device with dsid '" + dsuid2str(next) + "'");
       }
 
       bool wasSlave = pPartnerDevice->is2WaySlave();
@@ -530,7 +534,8 @@ namespace dss {
       resultObj->addElement("device", toJSON(dr));
 
       boost::shared_ptr<JSONObject> master(new JSONObject());
-      master->addProperty("dsid", pDevice->getDSID().toString());
+      master->addProperty("dsid", dsid2str(dsuid_to_dsid(pDevice->getDSID())));
+      master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
       master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
       resultObj->addElement("update", master);
 
@@ -580,14 +585,13 @@ namespace dss {
           return success();
         }
 
-        dss_dsid_t next = pDevice->getDSID();
-        next.lower++;
+        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonActiveGroup(value);
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
       return success();
@@ -941,7 +945,8 @@ namespace dss {
       if((id < 0) || (id > 255)) {
         return failure("Invalid or missing parameter 'sensorIndex'");
       }
-      int value = pDevice->getDeviceSensorType(id);
+      boost::shared_ptr<DeviceSensor_t> sensor = pDevice->getSensor(id);
+      int value = sensor->m_sensorType;
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("sensorIndex", id);
       resultObj->addProperty("sensorType", value);

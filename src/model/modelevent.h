@@ -91,19 +91,19 @@ namespace dss {
   // TODO: use boost::any for values and remove this class
   class ModelEventWithDSID : public ModelEvent {
   public:
-    ModelEventWithDSID(EventType _type, const dss_dsid_t& _dsid) 
+    ModelEventWithDSID(EventType _type, const dsuid_t& _dsid) 
     : ModelEvent(_type),
       m_DSID(_dsid)
     { }
     
-    const dss_dsid_t& getDSID() { return m_DSID; }
+    const dsuid_t& getDSID() { return m_DSID; }
   private:
-    dss_dsid_t m_DSID;
+    dsuid_t m_DSID;
   }; // ModelEventWithDSID
 
   class ModelEventWithStrings : public ModelEventWithDSID {
   public:
-    ModelEventWithStrings(EventType _type, const dss_dsid_t& _dsid)
+    ModelEventWithStrings(EventType _type, const dsuid_t& _dsid)
       : ModelEventWithDSID(_type, _dsid)
     { }
 

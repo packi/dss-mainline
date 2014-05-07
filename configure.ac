@@ -452,6 +452,16 @@ PKG_CHECK_MODULES([LIBCOMMCHANNEL], [libcommchannel], [],
         AC_MSG_ERROR([$LIBCOMMCHANNEL_PKG_ERRORS])
     ])
 
+PKG_CHECK_MODULES([LIBDSUID], [libdsuid], [],
+    [
+        echo
+        echo "Get libdsuid from"
+        echo "      http://gitorious.digitalstrom.org/ds485-stack/libdsuid"
+        echo
+        AC_MSG_ERROR([$LIBDSUID_PKG_ERRORS])
+    ])
+
+
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [data directory])

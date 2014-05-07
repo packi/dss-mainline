@@ -23,6 +23,8 @@
 
 #include "zonerequesthandler.h"
 
+#include <digitalSTROM/dsuid/dsuid.h>
+
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/set.h"
@@ -220,14 +222,21 @@ namespace dss {
           if(pGroup == NULL) {
             return failure("Need group to work");
           }
-          dss_dsid_t sourceID;
+          dsuid_t sourceID;
           std::string deviceIDStr = _request.getParameter("sourceDSID");
-          if(!deviceIDStr.empty()) {
-            sourceID = dsid::fromString(deviceIDStr);
+          std::string dsuidStr = _request.getParameter("sourceDSUID");
+
+          if (deviceIDStr.empty() && dsuidStr.empty()) {
+            return failure("Missing parameter 'sourceDSUID'");
           }
-          else {
-            return failure("Need valid parameter 'sourceDSID'");
+         
+          if (dsuidStr.empty()) {
+            dsid_t dsid = str2dsid(deviceIDStr);
+            sourceID = dsuid_from_dsid(&dsid);
+          } else {
+            sourceID = str2dsuid(dsuidStr);
           }
+ 
           int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
           std::string sensorValueString = _request.getParameter("sensorValue");
           if(sensorType == -1 || sensorValueString.length() == 0) {

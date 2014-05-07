@@ -50,7 +50,8 @@ libdsscore_a_CXXFLAGS = \
 			$(EXPAT_CFLAGS) \
 			$(GCOV_CFLAGS) \
 			$(LIBPROTOBUF_CFLAGS) \
-			$(LIBCOMMCHANNEL_CFLAGS)
+			$(LIBCOMMCHANNEL_CFLAGS) \
+			$(LIBDSUID_CFLAGS)
 
 libunix_a_CXXFLAGS = \
 			-I$(top_srcdir) \
@@ -58,7 +59,8 @@ libunix_a_CXXFLAGS = \
 			$(BOOST_CPPFLAGS) \
 			$(GCOV_CFLAGS) \
             $(LIBPROTOBUF_CFLAGS) \
-            $(LIBCOMMCHANNEL_CFLAGS)
+			$(LIBCOMMCHANNEL_CFLAGS) \
+			$(LIBDSUID_CFLAGS)
 
 
 dss_SOURCES = $(top_srcdir)/main.cpp
@@ -70,7 +72,8 @@ dss_CXXFLAGS = \
 			$(LIBXML2_CFLAGS) \
 			$(GCOV_CFLAGS) \
             $(LIBPROTOBUF_CFLAGS) \
-            $(LIBCOMMCHANNEL_CFLAGS)
+            $(LIBCOMMCHANNEL_CFLAGS) \
+			$(LIBDSUID_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
@@ -92,7 +95,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(LIBTCMALLOC_LIBS) \
 			$(JSONC_LIBS) \
 			$(LIBPROTOBUF_LIBS) \
-			$(LIBCOMMCHANNEL_LIBS)
+			$(LIBCOMMCHANNEL_LIBS) \
+			$(LIBDSUID_LIBS)
 
 dsstests_CXXFLAGS = \
 			-I$(top_srcdir) \
@@ -125,7 +129,8 @@ dsstests_LDADD = \
 			$(LIBTCMALLOC_LIBS) \
 			$(JSONC_LIBS) \
 			$(LIBPROTOBUF_LIBS) \
-			$(LIBCOMMCHANNEL_LIBS)
+			$(LIBCOMMCHANNEL_LIBS) \
+			$(LIBDSUID_LIBS)
 
 build_info.h:
 	$(top_srcdir)/tools/dss_gen_version_unix.sh $(top_srcdir) .

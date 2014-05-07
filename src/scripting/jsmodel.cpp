@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -174,18 +175,24 @@ namespace dss {
 
       if(ext != NULL) {
         if(argc >= 1) {
-          dss_dsid_t dsid = NullDSID;
+          dsuid_t dsuid;
           try {
-            dsid =  dss_dsid_t::fromString(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+            std::string id = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+            if (id.length() <= 24) {
+              dsid_t dsid = str2dsid(id);
+              dsuid = dsuid_from_dsid(&dsid);
+            } else {
+              dsuid =  str2dsuid(id);
+            }
           } catch(ScriptException& e) {
-            JS_ReportError(cx, "Error converting dsid string to dsid");
+            JS_ReportError(cx, "Error converting dsuid string to dsuid");
             return JS_FALSE;
           } catch(std::invalid_argument& e) {
-            JS_ReportError(cx, "Error converting dsid string to dsid");
+            JS_ReportError(cx, "Error converting dsuid string to dsuid");
             return JS_FALSE;
           }
           try {
-            boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByDSID(dsid);
+            boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByDSID(dsuid);
             JSObject* obj = ext->createJSMeter(*ctx, meter);
             JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
           } catch(ItemNotFoundException& e) {
@@ -503,6 +510,7 @@ namespace dss {
     JS_FS("setName", global_set_name, 1, 0),
     JS_FS("getDevices", global_get_devices, 0, 0),
     JS_FS("getDSMeterByDSID", global_get_dsmeterbydsid, 1, 0),
+    JS_FS("getDSMeterByDSUID", global_get_dsmeterbydsid, 1, 0),
     JS_FS("getConsumption", global_getConsumption, 0, 0),
     JS_FS("getEnergyMeterValue", global_getEnergyMeterValue, 0, 0),
     JS_FS("getDSMeters", global_getDSMeters, 0, 0),
@@ -733,11 +741,16 @@ namespace dss {
           return JS_FALSE;
         }
 
-        dss_dsid_t meterDSID;
+        dsuid_t meterDSID;
         try {
-          meterDSID = dss_dsid_t::fromString(dsmeterID);
+          if (dsmeterID.length() <= 24) {
+            dsid_t dsid = str2dsid(dsmeterID);
+            meterDSID = dsuid_from_dsid(&dsid);
+          } else {
+            meterDSID = str2dsuid(dsmeterID);
+          }
         } catch(std::invalid_argument& ex) {
-          JS_ReportError(cx, "Convert dsid parameter: %s", ex.what());
+          JS_ReportError(cx, "Convert dsuid parameter: %s", ex.what());
           return JS_FALSE;
         }
 
@@ -768,17 +781,24 @@ namespace dss {
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       if(ext != NULL && set != NULL && argc >= 1) {
         try {
-          std::string dsid = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-          DeviceReference result = set->getByDSID(dss_dsid_t::fromString(dsid));
+          std::string dsidStr = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          dsuid_t dsuid;
+          if (dsidStr.length() <= 24) {
+            dsid_t dsid = str2dsid(dsidStr);
+            dsuid = dsuid_from_dsid(&dsid);
+          } else {
+            dsuid = str2dsuid(dsidStr);
+          }
+          DeviceReference result = set->getByDSID(dsuid);
           JSObject* resultObj = ext->createJSDevice(*ctx, result);
           JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
           return JS_TRUE;
         } catch(ScriptException& ex) {
           JS_ReportError(cx, ex.what());
         } catch(std::invalid_argument&) {
-          JS_ReportError(cx, "set.byDSID: Could not parse dsid");
+          JS_ReportError(cx, "set.byDSUID: Could not parse dsuid");
         } catch(ItemNotFoundException&) {
-          JS_ReportError(cx, "set.byDSID: Device with dsid not found");
+          JS_ReportError(cx, "set.byDSUID: Device with dsuid not found");
         }
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_FALSE;
@@ -922,7 +942,13 @@ namespace dss {
       if((ext != NULL) && (set != NULL) && (argc >= 1)) {
         try {
           std::string dsmeterID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-          dss_dsid_t meterDSID = dss_dsid_t::fromString(dsmeterID);
+          dsuid_t meterDSID;
+          if (dsmeterID.length() <= 24) {
+            dsid_t dsid = str2dsid(dsmeterID);
+            meterDSID = dsuid_from_dsid(&dsid);
+          } else {
+            meterDSID = str2dsuid(dsmeterID);
+          }
           Set result = set->getByDSMeter(meterDSID);
           JSObject* resultObj = ext->createJSSet(*ctx, result);
           JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
@@ -1034,6 +1060,7 @@ namespace dss {
     JS_FS("remove", set_remove, 1, 0),
     JS_FS("perform", set_perform, 1, 0),
     JS_FS("byName", set_by_name, 1, 0),
+    JS_FS("byDSUID", set_by_dsid, 1, 0),
     JS_FS("byDSID", set_by_dsid, 1, 0),
     JS_FS("byFunctionID", set_by_functionid, 1, 0),
     JS_FS("byZone", set_by_zone, 1, 0),
@@ -1753,7 +1780,8 @@ namespace dss {
           }
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
-            int retValue = pDev->getDeviceSensorType(sensorIndex);
+            boost::shared_ptr<DeviceSensor_t> sensor = pDev->getSensor(sensorIndex);
+            int retValue = sensor->m_sensorType;
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             JS_ResumeRequest(cx, ref);
             return JS_TRUE;
@@ -1839,35 +1867,46 @@ namespace dss {
         case 1:
           {
             // make a local reference so the std::string does not go out of scope
-            std::string tmp = dev->getDSID().toString();
+            std::string tmp = dsuid2str(dev->getDSID());
             JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
           }
           return JS_TRUE;
         case 2:
-          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice()->getName().c_str())));
-          return JS_TRUE;
-        case 3:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getZoneID()));
-          return JS_TRUE;
-        case 4:
           {
-            std::string tmp = dev->getDevice()->getDSMeterDSID().toString();
+            dsid_t dsid;
+            dsuid_t dsuid = dev->getDSID();
+            dsuid_to_dsid(&dsuid, &dsid);
+            // make a local reference so the std::string does not go out of scope
+            std::string tmp = dsid2str(dsid);
             JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
           }
           return JS_TRUE;
+
+        case 3:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice()->getName().c_str())));
+          return JS_TRUE;
+        case 4:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getZoneID()));
+          return JS_TRUE;
         case 5:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getFunctionID()));
+          {
+            std::string tmp = dsuid2str(dev->getDevice()->getDSMeterDSID());
+            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
+          }
           return JS_TRUE;
         case 6:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getLastCalledScene()));
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getFunctionID()));
           return JS_TRUE;
         case 7:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getRevisionID()));
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getLastCalledScene()));
           return JS_TRUE;
         case 8:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getProductID()));
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getRevisionID()));
           return JS_TRUE;
         case 9:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getProductID()));
+          return JS_TRUE;
+        case 10:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->isPresent()));
           return JS_TRUE;
       }
@@ -1891,15 +1930,16 @@ namespace dss {
 
   static JSPropertySpec dev_properties[] = {
     {"className", 0, 0, dev_JSGet, NULL},
-    {"dsid", 1, 0, dev_JSGet, NULL},
-    {"name", 2, 0, dev_JSGet, NULL},
-    {"zoneID", 3, 0, dev_JSGet, NULL},
-    {"circuitID", 4, 0, dev_JSGet, NULL},
-    {"functionID", 5, 0, dev_JSGet, NULL},
-    {"lastCalledScene", 6, 0, dev_JSGet, NULL},
-    {"revisionID", 7, 0, dev_JSGet, NULL},
-    {"productID", 8, 0, dev_JSGet, NULL},
-    {"isPresent", 9, 0, dev_JSGet, NULL},
+    {"dsuid", 1, 0, dev_JSGet, NULL},
+    {"dsid", 2, 0, dev_JSGet, NULL},
+    {"name", 3, 0, dev_JSGet, NULL},
+    {"zoneID", 4, 0, dev_JSGet, NULL},
+    {"circuitID", 5, 0, dev_JSGet, NULL},
+    {"functionID", 6, 0, dev_JSGet, NULL},
+    {"lastCalledScene", 7, 0, dev_JSGet, NULL},
+    {"revisionID", 8, 0, dev_JSGet, NULL},
+    {"productID", 9, 0, dev_JSGet, NULL},
+    {"isPresent", 10, 0, dev_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
@@ -1951,14 +1991,24 @@ namespace dss {
         case 1:
           {
             // make a local reference so the std::string does not go out of scope
-            std::string tmp = meter->getDSID().toString();
+            std::string tmp = dsuid2str(meter->getDSID());
             JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
           }
           return JS_TRUE;
         case 2:
-          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, meter->getName().c_str())));
+          {
+            dsid_t dsid;
+            dsuid_t dsuid = meter->getDSID();
+            dsuid_to_dsid(&dsuid, &dsid);
+            // make a local reference so the std::string does not go out of scope
+            std::string tmp = dsid2str(dsid);
+            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
+          }
           return JS_TRUE;
         case 3:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, meter->getName().c_str())));
+          return JS_TRUE;
+        case 4:
           JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(meter->isPresent()));
           return JS_TRUE;
       }
@@ -1968,9 +2018,10 @@ namespace dss {
 
   static JSPropertySpec dsmeter_properties[] = {
     {"className", 0, 0, dsmeter_JSGet, NULL},
-    {"dsid", 1, 0, dsmeter_JSGet, NULL},
-    {"name", 2, 0, dsmeter_JSGet, NULL},
-    {"present", 3, 0, dsmeter_JSGet, NULL},
+    {"dsuid", 1, 0, dsmeter_JSGet, NULL},
+    {"dsid", 2, 0, dsmeter_JSGet, NULL},
+    {"name", 3, 0, dsmeter_JSGet, NULL},
+    {"present", 4, 0, dsmeter_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
@@ -2457,14 +2508,19 @@ namespace dss {
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       uint8_t groupID;
-      dss_dsid_t sourceDSID;
+      dsuid_t sourceDSID;
       uint8_t sensorType;
       uint16_t sensorValue;
       if (pZone != NULL && argc >= 4) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
-          sourceDSID = dsid::fromString(sDSID);
+          if (sDSID.length() <= 24) {
+            dsid_t dsid = str2dsid(sDSID);
+            sourceDSID = dsuid_from_dsid(&dsid);
+          } else {
+            sourceDSID = str2dsuid(sDSID);
+          }
           sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
           sensorValue = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[3]);
         } catch(ScriptException& e) {
@@ -2511,14 +2567,19 @@ namespace dss {
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       uint8_t groupID;
-      dss_dsid_t sourceDSID;
+      dsuid_t sourceDSID;
       uint8_t sensorType;
       double sensorValue;
       if (pZone != NULL && argc >= 4) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
-          sourceDSID = dsid::fromString(sDSID);
+          if (sDSID.length() <= 24) {
+            dsid_t dsid = str2dsid(sDSID);
+            sourceDSID = dsuid_from_dsid(&dsid);
+          } else {
+            sourceDSID = str2dsuid(sDSID);
+          }
           sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());

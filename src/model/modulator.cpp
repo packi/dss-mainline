@@ -22,6 +22,7 @@
 
 #include "modulator.h"
 
+#include <digitalSTROM/dsuid/dsuid.h>
 #include "src/dss.h"
 #include "src/logger.h"
 #include "src/businterface.h"
@@ -34,7 +35,7 @@ namespace dss {
 
   //================================================== DSMeter
 
-  DSMeter::DSMeter(const dss_dsid_t _dsid, Apartment* _pApartment)
+  DSMeter::DSMeter(const dsuid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
@@ -51,7 +52,7 @@ namespace dss {
     m_pApartment(_pApartment),
     m_DatamodelHash(0),
     m_DatamoderModificationCount(0),
-    m_BinaryInputEventCount(_dsid.toString()),
+    m_BinaryInputEventCount(dsuid2str(_dsid)),
     m_dSMPropertyFlags(0),
     m_IgnoreActionsFromNewDevices(false),
     m_ApartmentState(DSM_APARTMENT_STATE_UNKNOWN)
@@ -63,8 +64,9 @@ namespace dss {
     assert(m_pPropertyNode == NULL);
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
       m_pPropertyNode =
-        m_pApartment->getPropertyNode()->createProperty("dSMeters/" + m_DSID.toString());
-      m_pPropertyNode->createProperty("dSID")->setStringValue(m_DSID.toString());
+        m_pApartment->getPropertyNode()->createProperty("dSMeters/" + dsuid2str(m_DSID));
+      m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
+      m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
@@ -107,7 +109,7 @@ namespace dss {
       m_ConnectedDevices.push_back(_device);
     } else {
       Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " +
-                                 m_DSID.toString() + " device: " + _device.getDSID().toString(), lsFatal);
+                                 dsuid2str(m_DSID) + " device: " + dsuid2str(_device.getDSID()), lsFatal);
     }
   } // addDevice
 
@@ -117,11 +119,11 @@ namespace dss {
       m_ConnectedDevices.erase(pos);
     } else {
       Logger::getInstance()->log("DSMeter::removeDevice: not found, dSM: " +
-          m_DSID.toString() + " device: " + _device.getDSID().toString(), lsInfo);
+          dsuid2str(m_DSID) + " device: " + dsuid2str(_device.getDSID()), lsInfo);
     }
   } // removeDevice
 
-  dss_dsid_t DSMeter::getDSID() const {
+  dsuid_t DSMeter::getDSID() const {
     return m_DSID;
   } // getDSID
 
