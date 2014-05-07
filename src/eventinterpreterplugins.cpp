@@ -35,7 +35,6 @@
 #include "src/scripting/jsevent.h"
 #include "src/scripting/jsmetering.h"
 #include "src/scripting/jsproperty.h"
-#include "src/scripting/jssocket.h"
 #include "src/scripting/jslogger.h"
 #include "src/scripting/jscurl.h"
 #include "src/scripting/jswebservice.h"
@@ -530,9 +529,6 @@ namespace dss {
 
       ext = new MeteringScriptExtension(DSS::getInstance()->getApartment(),
                                         DSS::getInstance()->getMetering());
-      m_pEnvironment->addExtension(ext);
-
-      ext = new SocketScriptContextExtension();
       m_pEnvironment->addExtension(ext);
 
       ext = new CurlScriptContextExtension();
