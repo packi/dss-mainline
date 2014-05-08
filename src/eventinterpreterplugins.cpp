@@ -1062,7 +1062,7 @@ namespace dss {
 
     if (_event.getName() == EventName::WebserviceKeepAlive) {
       boost::shared_ptr<URLRequestCallback> cb;
-      WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", GET, cb);
+      WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", "", GET, cb, false);
     } else if (_event.getName() == EventName::ApplicationTokenDeleted) {
       if (!_event.hasPropertySet(EventProperty::ApplicationToken)) {
         log("Invalid token deleted event missing token", lsWarning);

@@ -118,7 +118,9 @@ namespace dss {
     JSObject *jsCallback = NULL;
     jsval functionVal = JSVAL_NULL;
     std::string url;
+    std::string params;
     std::string req = "GET";
+    bool authenticated = false;
 
     /* for some reason JS_ConvertArguments() ALWAYS returned false so had to
      * avoid using it */
@@ -139,7 +141,17 @@ namespace dss {
 
     if (argc >= 2) {
       if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[1])) {
-        req = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+        params = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+      } else {
+        JS_ReportError(cx, "simplerequest(): invalid 'parameters' parameter",
+                       lsError);
+        return JS_FALSE;
+      }
+    }
+
+    if (argc >= 3) {
+      if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[2])) {
+        req = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
       }
     }
 
@@ -153,16 +165,26 @@ namespace dss {
       return JS_FALSE;
     }
 
-    if (argc >= 3) {
-      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[2])) {
-        if (!JS_ObjectIsCallable(cx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[2]))) {
+    if (argc >= 4) {
+      if (JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[3])) {
+        authenticated = ctx->convertTo<bool>(JS_ARGV(cx, vp)[3]);
+      } else {
+        JS_ReportError(cx, "simplerequest(): invalid 'authenticated' parameter",
+                       lsError);
+        return JS_FALSE;
+      }
+    }
+
+    if (argc >= 5) {
+      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[4])) {
+        if (!JS_ObjectIsCallable(cx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[4]))) {
           JS_ReportError(cx, "simplerequest(): invalid callback parameter",
                          lsError);
           return JS_FALSE;
         }
 
-        jsCallback = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[2]);
-        functionVal = JS_ARGV(cx, vp)[2];
+        jsCallback = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[4]);
+        functionVal = JS_ARGV(cx, vp)[4];
       } else {
         JS_ReportError(cx, "simplerequest(): invalid callback parameter",
                        lsError);
@@ -175,7 +197,8 @@ namespace dss {
     boost::shared_ptr<WebserviceRequestCallback> mcb(
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
-    WebserviceConnection::getInstance()->request(url, reqtype, mcb);
+    WebserviceConnection::getInstance()->request(url, params, reqtype, mcb,
+                                                 authenticated);
 
     return JS_TRUE;
   }
@@ -187,9 +210,11 @@ namespace dss {
     JSObject *jsCallback = NULL;
     jsval functionVal = JSVAL_NULL;
     std::string url;
+    std::string params;
     std::string req = "GET";
     HashMapStringString headers;
     std::string formdata;
+    bool authenticated = false;
 
     /* for some reason JS_ConvertArguments() ALWAYS returned false so had to
      * avoid using it */
@@ -209,7 +234,17 @@ namespace dss {
 
     if (argc >= 2) {
       if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[1])) {
-        req = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+        params = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+      } else {
+        JS_ReportError(cx, "request(): invalid 'parameters' parameter",
+                       lsError);
+        return JS_FALSE;
+      }
+    }
+
+    if (argc >= 3) {
+      if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[2])) {
+        req = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
       }
     }
 
@@ -218,15 +253,15 @@ namespace dss {
     } else if (req == "POST") {
       reqtype = POST;
     } else {
-      JS_ReportError(cx, "simplerequest(): request type must be 'GET' or "
+      JS_ReportError(cx, "request(): request type must be 'GET' or "
                      "'POST", lsError);
       return JS_FALSE;
     }
 
     // headers hashmap, may be null
-    if ((argc >= 3) && (!JSVAL_IS_NULL(JS_ARGV(cx, vp)[2]))) {
-      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[2])) {
-        JSObject *obj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[2]);
+    if ((argc >= 4) && (!JSVAL_IS_NULL(JS_ARGV(cx, vp)[3]))) {
+      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[3])) {
+        JSObject *obj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[3]);
         JSIdArray *ids = JS_Enumerate(cx, obj);
         if (ids) {
           for (jsint i = 0; i < ids->length; i++) {
@@ -269,32 +304,42 @@ namespace dss {
         }
         JS_DestroyIdArray(cx, ids);
       } else {
-        JS_ReportError(cx, "simplerequest(): invalid headers parameter",
+        JS_ReportError(cx, "request(): invalid headers parameter",
                        lsError);
         return JS_FALSE;
       }
     }
 
     // formpost data, string, may be empty/null
-    if ((argc >= 4) && (!JSVAL_IS_NULL(JS_ARGV(cx, vp)[3]))) {
-      if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[3])) {
-        formdata = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
+    if ((argc >= 5) && (!JSVAL_IS_NULL(JS_ARGV(cx, vp)[4]))) {
+      if (JSVAL_IS_STRING(JS_ARGV(cx, vp)[4])) {
+        formdata = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[4]);
+      }
+    }
+
+    if (argc >= 6) {
+      if (JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[5])) {
+        authenticated = ctx->convertTo<bool>(JS_ARGV(cx, vp)[5]);
+      } else {
+        JS_ReportError(cx, "request(): invalid 'authenticated' parameter",
+                       lsError);
+        return JS_FALSE;
       }
     }
 
     // callback
-    if (argc >= 5) {
-      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[4])) {
-        if (!JS_ObjectIsCallable(cx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[4]))) {
-          JS_ReportError(cx, "simplerequest(): invalid callback parameter",
+    if (argc >= 7) {
+      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[6])) {
+        if (!JS_ObjectIsCallable(cx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[6]))) {
+          JS_ReportError(cx, "request(): invalid callback parameter",
                          lsError);
           return JS_FALSE;
         }
 
-        jsCallback = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[4]);
-        functionVal = JS_ARGV(cx, vp)[4];
+        jsCallback = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[6]);
+        functionVal = JS_ARGV(cx, vp)[6];
       } else {
-        JS_ReportError(cx, "simplerequest(): invalid callback parameter",
+        JS_ReportError(cx, "request(): invalid callback parameter",
                        lsError);
         return JS_FALSE;
       }
@@ -306,13 +351,14 @@ namespace dss {
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
     if (reqtype == POST) {
-      WebserviceConnection::getInstance()->request(url, 
-        boost::make_shared<HashMapStringString>(headers), formdata, mcb);
+      WebserviceConnection::getInstance()->request(url, params,
+        boost::make_shared<HashMapStringString>(headers), formdata, mcb,
+        authenticated);
     } else {
-      WebserviceConnection::getInstance()->request(url, reqtype,
+      WebserviceConnection::getInstance()->request(url, params, reqtype,
           boost::make_shared<HashMapStringString>(headers),
           boost::shared_ptr<HashMapStringString>(new HashMapStringString()),
-          mcb);
+          mcb, authenticated);
     }
 
     return JS_TRUE;

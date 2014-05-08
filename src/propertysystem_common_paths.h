@@ -38,6 +38,7 @@ extern const char *pp_websvc_url_authority;
 extern const char *pp_websvc_access_mgmt_delete_token_url_path;
 extern const char *pp_websvc_apartment_changed_url_path;
 extern const char *pp_websvc_apartment_changed_notify_delay;
+extern const char *pp_websvc_rc_osptoken;
 
 void setupCommonProperties(PropertySystem &propSystem);
 

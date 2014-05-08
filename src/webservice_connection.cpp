@@ -43,6 +43,14 @@ WebserviceConnection::WebserviceConnection()
     m_base_url = m_base_url + "/";
   }
   m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
+
+  std::string dss_dsid = DSS::getInstance()->getPropertySystem().getStringValue(pp_sysinfo_dsid);
+
+  std::string osptoken =  DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_rc_osptoken);
+
+  if (!dss_dsid.empty() && !osptoken.empty()) {
+    m_default_webservice_param = "dssid=" + dss_dsid + "&token=" + osptoken;
+  }
 }
 
 WebserviceConnection::~WebserviceConnection()
@@ -66,11 +74,36 @@ void WebserviceConnection::shutdown() {
   }
 }
 
-void WebserviceConnection::request(const std::string& url, RequestType type,
-                                   boost::shared_ptr<URLRequestCallback> cb)
+std::string WebserviceConnection::constructURL(const std::string& url,
+                                               const std::string& parameters,
+                                               bool authenticated)
+{
+  std::string ret = m_base_url + url;
+  bool auth = authenticated && (!m_default_webservice_param.empty());
+
+  if (auth) {
+    if (parameters.empty()) {
+      ret = ret + "?" + m_default_webservice_param;
+    } else {
+      ret = ret + "?" + parameters + "&" + m_default_webservice_param;
+    }
+  } else {
+    if (!parameters.empty()) {
+      ret = ret + "?" + parameters;
+    }
+  }
+
+  return ret;
+}
+
+void WebserviceConnection::request(const std::string& url,
+                                   const std::string& parameters,
+                                   RequestType type,
+                                   boost::shared_ptr<URLRequestCallback> cb,
+                                   bool authenticated)
 {
   boost::shared_ptr<HttpRequest> req(new HttpRequest);
-  req->url = m_base_url + url;
+  req->url = constructURL(url, parameters, authenticated);
   req->type = type;
 
   boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
@@ -78,12 +111,14 @@ void WebserviceConnection::request(const std::string& url, RequestType type,
 }
 
 void WebserviceConnection::request(const std::string& url,
+                                 const std::string &parameters,
                                  boost::shared_ptr<HashMapStringString> headers,
                                  const std::string& postdata,
-                                 boost::shared_ptr<URLRequestCallback> cb)
+                                 boost::shared_ptr<URLRequestCallback> cb,
+                                 bool authenticated)
 {
   boost::shared_ptr<HttpRequest> req(new HttpRequest);
-  req->url = m_base_url + url;
+  req->url = constructURL(url, parameters, authenticated);
   req->type = POST;
   req->headers = headers;
   req->postdata = postdata;
@@ -93,13 +128,16 @@ void WebserviceConnection::request(const std::string& url,
 }
 
 
-void WebserviceConnection::request(const std::string& url, RequestType type,
+void WebserviceConnection::request(const std::string& url,
+                                const std::string& parameters,
+                                RequestType type,
                                 boost::shared_ptr<HashMapStringString> headers,
                                 boost::shared_ptr<HashMapStringString> formpost,
-                                boost::shared_ptr<URLRequestCallback> cb)
+                                boost::shared_ptr<URLRequestCallback> cb,
+                                bool authenticated)
 {
   boost::shared_ptr<HttpRequest> req(new HttpRequest);
-  req->url = m_base_url + url;
+  req->url = constructURL(url, parameters, authenticated);
   req->type = type;
   req->headers = headers;
   req->formpost = formpost;
