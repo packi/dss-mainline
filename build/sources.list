@@ -118,8 +118,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/scripting/jsmodel.h \
 	$(top_srcdir)/src/scripting/jsproperty.cpp \
 	$(top_srcdir)/src/scripting/jsproperty.h \
-	$(top_srcdir)/src/scripting/jssocket.cpp \
-	$(top_srcdir)/src/scripting/jssocket.h \
 	$(top_srcdir)/src/scripting/jswebservice.cpp \
 	$(top_srcdir)/src/scripting/jswebservice.h \
 	$(top_srcdir)/src/scripting/scriptobject.cpp \
@@ -228,7 +226,6 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/jshandlertests.cpp \
 	$(top_srcdir)/tests/jsloggertests.cpp \
 	$(top_srcdir)/tests/jsontests.cpp \
-	$(top_srcdir)/tests/jssockettests.cpp \
 	$(top_srcdir)/tests/loggertests.cpp \
 	$(top_srcdir)/tests/meteringtests.cpp \
 	$(top_srcdir)/tests/modeljstests.cpp \
