@@ -45,16 +45,24 @@ class WebserviceConnection : public TaskProcessor {
 public:
   WebserviceConnection();
   virtual ~WebserviceConnection();
-  void request(const std::string& url, RequestType type,
-               boost::shared_ptr<URLRequestCallback> cb);
   void request(const std::string& url,
+               const std::string &parameters,
+               RequestType type,
+               boost::shared_ptr<URLRequestCallback> cb,
+               bool authenticated = false);
+  void request(const std::string& url,
+               const std::string &parameters,
                boost::shared_ptr<HashMapStringString> headers,
                const std::string& postdata,
-               boost::shared_ptr<URLRequestCallback> cb);
-  void request(const std::string& url, RequestType type,
+               boost::shared_ptr<URLRequestCallback> cb,
+               bool authenticated = false);
+  void request(const std::string& url,
+               const std::string &parameters,
+               RequestType type,
                boost::shared_ptr<HashMapStringString> headers,
                boost::shared_ptr<HashMapStringString> formpost,
-               boost::shared_ptr<URLRequestCallback> cb);
+               boost::shared_ptr<URLRequestCallback> cb,
+               bool authenticated = false);
   static WebserviceConnection *getInstance();
   static void shutdown();
 
@@ -63,6 +71,10 @@ private:
 
   std::string m_base_url;
   boost::shared_ptr<HttpClient> m_url;
+  std::string m_default_webservice_param;
+
+  std::string constructURL(const std::string& url,
+                           const std::string& parameters, bool authenticated);
 };
 
 class URLRequestTask : public Task {

@@ -46,6 +46,7 @@ const char *pp_websvc_url_authority = "/config/webservice-api/base-url";
 const char *pp_websvc_apartment_changed_url_path = "/config/webservice-api/model-pusher/url";
 const char *pp_websvc_apartment_changed_notify_delay = "/config/webservice-api/model-pusher/delay";
 const char *pp_websvc_access_mgmt_delete_token_url_path = "/config/webservice-api/account_mgmt/url";
+const char *pp_websvc_rc_osptoken = "/scripts/system-addon-remote-connectivity/OSPToken";
 
 void setupCommonProperties(PropertySystem &propSystem) {
   propSystem.createProperty(pp_sysinfo_dss_version)->setStringValue(DSS_VERSION);
