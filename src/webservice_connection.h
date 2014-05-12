@@ -71,7 +71,6 @@ private:
 
   std::string m_base_url;
   boost::shared_ptr<HttpClient> m_url;
-  std::string m_default_webservice_param;
 
   std::string constructURL(const std::string& url,
                            const std::string& parameters, bool authenticated);
