@@ -171,6 +171,7 @@ void URLRequestTask::run()
 
   if (!webservice_communication_authorized()) {
     log("not permitted: " + m_req->url, lsWarning);
+    return;
   }
 
   log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
