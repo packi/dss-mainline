@@ -43,14 +43,6 @@ WebserviceConnection::WebserviceConnection()
     m_base_url = m_base_url + "/";
   }
   m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
-
-  std::string dss_dsid = DSS::getInstance()->getPropertySystem().getStringValue(pp_sysinfo_dsid);
-
-  std::string osptoken =  DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_rc_osptoken);
-
-  if (!dss_dsid.empty() && !osptoken.empty()) {
-    m_default_webservice_param = "dssid=" + dss_dsid + "&token=" + osptoken;
-  }
 }
 
 WebserviceConnection::~WebserviceConnection()
@@ -78,14 +70,26 @@ std::string WebserviceConnection::constructURL(const std::string& url,
                                                const std::string& parameters,
                                                bool authenticated)
 {
+  std::string default_webservice_param;
+  if (authenticated) {
+    std::string osptoken =  DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_rc_osptoken);
+
+    if (!osptoken.empty()) {
+      default_webservice_param = "token=" + osptoken;
+    } else {
+      log("authentication parameters enabled, but token could not be "
+          "fetched!", lsError);
+    }
+  }
+
   std::string ret = m_base_url + url;
-  bool auth = authenticated && (!m_default_webservice_param.empty());
+  bool auth = authenticated && (!default_webservice_param.empty());
 
   if (auth) {
     if (parameters.empty()) {
-      ret = ret + "?" + m_default_webservice_param;
+      ret = ret + "?" + default_webservice_param;
     } else {
-      ret = ret + "?" + parameters + "&" + m_default_webservice_param;
+      ret = ret + "?" + parameters + "&" + default_webservice_param;
     }
   } else {
     if (!parameters.empty()) {
@@ -167,6 +171,7 @@ void URLRequestTask::run()
 
   if (!webservice_communication_authorized()) {
     log("not permitted: " + m_req->url, lsWarning);
+    return;
   }
 
   log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
