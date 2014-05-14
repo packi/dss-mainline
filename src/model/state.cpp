@@ -199,6 +199,16 @@ namespace dss {
   } // setPersistence
 
   std::string State::toString() const {
+    if (!m_values.empty()) {
+      std::list<std::string>::const_iterator item;
+      int index = 0;
+      for (item = m_values.begin(); item != m_values.end(); item++, index++) {
+        if ((int) m_state == index) {
+          return *item;
+        }
+      }
+      return std::string("invalid");
+    }
     switch(m_state) {
     case State_Unknown:
       return std::string("unknown");
@@ -254,7 +264,7 @@ namespace dss {
       case 1: setState(_origin, State_Active); break;
       case 2: setState(_origin, State_Inactive); break;
       case 3: setState(_origin, State_Unknown); break;
-      default: break;
+      default: setState(_origin, (eState) _state); break;
     }
   }
 
@@ -265,7 +275,19 @@ namespace dss {
       setState(_origin, State_Inactive);
     } else if (_state == "unknown") {
       setState(_origin, State_Unknown);
+    } else if (m_values.size() > 0) {
+      std::list<std::string>::iterator item;
+      int index = 0;
+      for (item = m_values.begin(); item != m_values.end(); item++, index++) {
+        if (_state == *item) {
+          setState(_origin, index);
+        }
+      }
     }
+  }
+
+  void State::setValueRange(std::list<std::string> _values) {
+    m_values = _values;
   }
 
 } // namespace dss
