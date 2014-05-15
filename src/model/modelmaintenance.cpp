@@ -636,17 +636,17 @@ namespace dss {
 
     // start with whatever state was saved in the dSS
     uint8_t dssaptstate = DSM_APARTMENT_STATE_UNKNOWN;
-    PropertyNodePtr pNode =
-        DSS::getInstance()->getPropertySystem().getProperty(
-                                                "/usr/states/presence");
-    if (pNode != NULL) {
-      PropertyNodePtr valueNode = pNode->getPropertyByName("value");
-      std::string val = valueNode->getAsString();
-      if (val == "present") {
-        dssaptstate = DSM_APARTMENT_STATE_PRESENT;
-      } else if (val == "absent") {
-        dssaptstate = DSM_APARTMENT_STATE_ABSENT;
-      }
+    boost::shared_ptr<State> state;
+    try {
+      state = m_pApartment->getState(StateType_Service, "presence");
+    } catch (ItemNotFoundException &ex) {
+      log("setApartmentState: error accessing apartment presence state", lsError);
+      return;
+    }
+    if (state->getState() == State_Active) {
+      dssaptstate = DSM_APARTMENT_STATE_PRESENT;
+    } else if (state->getState() == State_Inactive) {
+      dssaptstate = DSM_APARTMENT_STATE_ABSENT;
     }
 
     uint8_t lastdsmaptstate = DSM_APARTMENT_STATE_UNKNOWN;
@@ -692,9 +692,8 @@ namespace dss {
       strstate = "absent";
     }
 
-    DSS::getInstance()->getPropertySystem().setStringValue(
-                                  "/usr/states/presence/value", strstate);
     log("setApartmentState: apartment state set to " + strstate, lsDebug);
+    state->setState(coSystem, strstate);
   }
 
   void ModelMaintenance::readOutPendingMeter() {
