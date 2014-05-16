@@ -176,7 +176,8 @@ namespace dss {
     }
 
     if (argc >= 5) {
-      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[4])) {
+      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[4]) &&
+          !JSVAL_IS_NULL(JS_ARGV(cx, vp)[4])) {
         if (!JS_ObjectIsCallable(cx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[4]))) {
           JS_ReportError(cx, "simplerequest(): invalid callback parameter",
                          lsError);
@@ -329,7 +330,8 @@ namespace dss {
 
     // callback
     if (argc >= 7) {
-      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[6])) {
+      if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[6]) &&
+          !JSVAL_IS_NULL(JS_ARGV(cx, vp)[6])) {
         if (!JS_ObjectIsCallable(cx, JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[6]))) {
           JS_ReportError(cx, "request(): invalid callback parameter",
                          lsError);
