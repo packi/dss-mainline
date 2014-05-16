@@ -95,10 +95,6 @@ namespace dss {
 
       switch(_resultCode) {
 
-        default:
-          message = "unknown error";
-          break;
-
         // libdsm errors
         case ERROR_WRONG_PARAMETER:
           message = "wrong parameter";
@@ -174,52 +170,8 @@ namespace dss {
           message = "programming mode disabled";
           break;
 #endif
-
-        // ds485d errors
-        case ERROR_RESPONSE_TIMEOUT:
-          message = "response timeout";
-          break;
-        case ERROR_SYNC_RESPONSE_TIMEOUT:
-          message = "device response timeout";
-          break;
-        case ERROR_INVALID_HANDLE:
-          message = "invalid handle";
-          break;
-        case ERROR_INVALID_CONNSPEC:
-          message = "invalid connection spec";
-          break;
-        case ERROR_NO_PORT_FOUND:
-          message = "no port found";
-          break;
-        case ERROR_INVALID_ADDRESS:
-          message = "invalid address";
-          break;
-        case ERROR_CREATE_SOCKET:
-          message = "error while creating the socket";
-          break;
-        case ERROR_SOCKET_OPTIONS:
-          message = "error while setting socket options";
-          break;
-        case ERROR_SOCKET_CONNECT:
-          message = "error during socket connect";
-          break;
-        case ERROR_SOCKET_FULL:
-          message = "socket full";
-          break;
-        case ERROR_SOCKET_FAILED:
-          message = "socket failed";
-          break;
-        case ERROR_SOCKET_VANISHED:
-          message = "socket vanished";
-          break;
-        case ERROR_SOCKET_UNKNOWN:
-          message = "request can't be executed";
-          break;
-        case ERROR_INVALID_FD:
-          message = "invalid file descriptor";
-          break;
-        case ERROR_INVALID_PARAMETER:
-          message = "invalid parameter";
+        default:
+          message = ds485c_strerror(_resultCode);
           break;
       }
       throw BusApiError(msgprefix + message);
