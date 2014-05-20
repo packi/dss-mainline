@@ -71,6 +71,9 @@ namespace dss {
     /** State provider is a group */
     boost::shared_ptr<Group> m_providerGroup;
 
+    /** Custom values for a state */
+    std::list<std::string> m_values;
+
   private:
     void save();
     void load();
@@ -82,8 +85,7 @@ namespace dss {
     State(const std::string& _name, eState _state);
     State(boost::shared_ptr<Device>_device, int _inputIndex);
     State(boost::shared_ptr<Group> _group);
-    State(eStateType _type, const std::string& _name,
-          const std::string& _identifier);
+    State(eStateType _type, const std::string& _name, const std::string& _identifier);
 
     virtual ~State();
 
@@ -97,6 +99,8 @@ namespace dss {
 
     bool getPersistence() const;
     void setPersistence(bool _persistent);
+
+    void setValueRange(const std::list<std::string> _values);
 
     eStateType getType() const { return m_type; }
     PropertyNodePtr getPropertyNode() const { return m_pPropertyNode; }
