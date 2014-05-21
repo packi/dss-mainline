@@ -227,9 +227,9 @@ namespace dss {
                                        bool _trimEntries) {
     std::vector<std::string> result;
     std::string curString = _source;
-    std::string::size_type delimPos = 0, skip = 0;
+    std::string::size_type delimPos = 0, startField = 0, skip = 0;
 
-    while (!curString.empty()) {
+    while (startField < curString.size()) {
       delimPos = curString.find(_delimiter, skip);
 
       if ((delimPos > 0) && (delimPos != std::string::npos)) {
@@ -243,22 +243,21 @@ namespace dss {
 
       if (delimPos != std::string::npos) {
         if (_trimEntries) {
-          result.push_back(trim(curString.substr(0, delimPos)));
+          result.push_back(trim(curString.substr(startField, delimPos - startField)));
         } else {
-          result.push_back(curString.substr(0, delimPos));
+          result.push_back(curString.substr(startField, delimPos - startField));
         }
-        curString = curString.substr(delimPos + 1);
-        skip = 0;
-        if (curString.size() == 0) {
+        skip = startField = delimPos + 1;
+        if (curString.size() - skip == 0) {
           // in case of trailing delimiter, but no actual field data, we add an
           // empty string. not sure why we need this, probably nobody does
           result.push_back("");
         }
       } else {
         if (_trimEntries) {
-          result.push_back(trim(curString));
+          result.push_back(trim(curString.substr(startField)));
         } else {
-          result.push_back(curString);
+          result.push_back(curString.substr(startField));
         }
         break;
       }
