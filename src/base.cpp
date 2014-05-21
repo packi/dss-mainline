@@ -250,18 +250,15 @@ namespace dss {
         curString = curString.substr(delimPos + 1);
         skip = 0;
         if (curString.size() == 0) {
+          // in case of trailing delimiter, but no actual field data, we add an
+          // empty string. not sure why we need this, probably nobody does
           result.push_back("");
         }
-      }
-      if (delimPos == std::string::npos) {
-        if (curString.size() > 0) {
-          if (_trimEntries) {
-            result.push_back(trim(curString));
-          } else {
-            result.push_back(curString);
-          }
+      } else {
+        if (_trimEntries) {
+          result.push_back(trim(curString));
         } else {
-          result.push_back("");
+          result.push_back(curString);
         }
         break;
       }
