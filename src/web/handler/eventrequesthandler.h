@@ -50,10 +50,6 @@ namespace dss {
     EventInterpreter& m_EventInterpreter;
     boost::mutex m_Mutex; // locking what?
 
-    // make use of the dataMap in the new session object (cookie stuff)
-
-    EventSubscriptionSessionByTokenID m_SessionByTokenID;
-
     int validateArgs(boost::shared_ptr<Session> _session, const std::string &name,
                      const std::string &tokenStr);
     boost::shared_ptr<JSONObject> raise(const RestfulRequest& _request);
