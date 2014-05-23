@@ -54,6 +54,8 @@ namespace dss {
 
     EventSubscriptionSessionByTokenID m_SessionByTokenID;
 
+    int validateArgs(boost::shared_ptr<Session> _session, const std::string &name,
+                     const std::string &tokenStr);
     boost::shared_ptr<JSONObject> raise(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);

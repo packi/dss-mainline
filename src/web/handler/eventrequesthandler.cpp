@@ -85,6 +85,28 @@ namespace dss {
     return success();
   }
 
+  int EventRequestHandler::validateArgs(boost::shared_ptr<Session> _session,
+                                     const std::string &name,
+                                     const std::string &subscribtionID) {
+    int token;
+    if (_session == NULL) {
+      throw std::runtime_error("Invalid session");
+    }
+    if (name.empty()) {
+      throw std::runtime_error("Missing event name");
+    }
+    if (subscribtionID.empty()) {
+      throw std::runtime_error("Missing event subscription id");
+    }
+    try {
+      token = strToInt(subscribtionID);
+    }
+    catch (std::invalid_argument& err) {
+      throw std::runtime_error(std::string("Invalid event subscription id ") + subscribtionID);
+    }
+    return token;
+  }
+
   // name=EventName&sid=EventSubscriptionID
   boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
@@ -92,22 +114,10 @@ namespace dss {
     std::string tokenStr = _request.getParameter("subscriptionID");
     int token;
 
-    if(_session == NULL) {
-      return failure("Invalid session!");
-    }
-
-    if(name.empty()) {
-      return failure("Missing event name!");
-    }
-
-    if(tokenStr.empty()) {
-      return failure("Missing event subscription id!");
-    }
-    try{
-     token = strToInt(tokenStr);
-    }
-    catch(std::invalid_argument& err) {
-      return failure("Could not parse event subscription id!");
+    try {
+      token = validateArgs(_session, name, tokenStr);
+    } catch (std::runtime_error e) {
+      return failure(e.what());
     }
 
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
@@ -150,22 +160,10 @@ namespace dss {
     std::string subscribtionID = _request.getParameter("subscriptionID");
     int token;
 
-    if(_session == NULL) {
-      return failure("Invalid session!");
-    }
-
-    if(name.empty()) {
-      return failure("Missing event name!");
-    }
-
-    if(subscribtionID.empty()) {
-      return failure("Missing event subscription id!");
-    }
-
     try {
-     token = strToInt(subscribtionID);
-    } catch(std::invalid_argument& err) {
-      return failure("Could not parse event subscription id!");
+      token = validateArgs(_session, name, subscribtionID);
+    } catch (std::runtime_error e) {
+      return failure(e.what());
     }
 
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
@@ -327,18 +325,10 @@ namespace dss {
     int timeout = 0;
     int token;
 
-    if(_session == NULL) {
-      return failure("Invalid session!");
-    }
-
-    if(tokenStr.empty()) {
-      return failure("Missing event subscription id!");
-    }
-
     try {
-      token = strToInt(tokenStr);
-    } catch(std::invalid_argument& err) {
-      return failure("Could not parse subscription id!");
+      token = validateArgs(_session, "sentinel", tokenStr);
+    } catch (std::runtime_error e) {
+      return failure(e.what());
     }
 
     if(!timeoutStr.empty()) {
