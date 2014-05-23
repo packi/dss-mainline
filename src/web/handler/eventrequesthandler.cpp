@@ -119,10 +119,8 @@ namespace dss {
       return failure(e.what());
     }
 
+    boost::mutex::scoped_lock lock(m_Mutex);
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-
-    m_eventsMutex.lock();
-
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
 
     if ((a == NULL) || (a->empty())) {
@@ -146,9 +144,6 @@ namespace dss {
     }
 
     (*eventSessions)[token]->subscribe(name);
-
-    m_eventsMutex.unlock();
-
     return success();
   }
 
@@ -180,37 +175,29 @@ namespace dss {
       }
     }
 
-    m_eventsMutex.lock();
-
+    boost::mutex::scoped_lock lock(m_Mutex);
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if(entry == eventSessions->end()){
-      m_eventsMutex.unlock();
+    if (entry == eventSessions->end()){
       return failure(std::string(__func__) + " subscriptionId" + subscribtionID + " not found!");
     }
 
     try {
       (*eventSessions)[token]->unsubscribe(name);
     } catch (std::exception& e) {
-      m_eventsMutex.unlock();
       return failure(e.what());
     }
 
     eventSessions->erase(entry);
-
-    m_eventsMutex.unlock();
-
     return success();
   }
 
   boost::shared_ptr<EventSubscriptionSession> EventRequestHandler::getSubscriptionSession(int _token, boost::shared_ptr<Session> _session) {
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
 
-    m_eventsMutex.lock();
-
+    boost::mutex::scoped_lock lock(m_Mutex);
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
 
     if ((a == NULL) || (a->empty())) {
-      m_eventsMutex.unlock();
       throw std::runtime_error("Invalid session!");
     } else {
       try {
@@ -223,13 +210,10 @@ namespace dss {
 
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(_token);
     if (entry == eventSessions->end()) {
-      m_eventsMutex.unlock();
       throw std::runtime_error("Subscription id not found!");
     }
 
     boost::shared_ptr<EventSubscriptionSession> result = (*eventSessions)[_token];
-    m_eventsMutex.unlock();
-
     return result;
   } // getSubscriptionSession
 

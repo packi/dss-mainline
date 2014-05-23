@@ -24,14 +24,14 @@
 #ifndef EVENTREQUESTHANDLER_H_
 #define EVENTREQUESTHANDLER_H_
 
-#include "src/web/webrequests.h"
-#include "src/session.h"
-#include "src/mutex.h"
-
 #include <deque>
 #include <map>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/thread/mutex.hpp>
+
+#include "src/web/webrequests.h"
+#include "src/session.h"
 
 namespace dss {
 
@@ -48,7 +48,7 @@ namespace dss {
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     EventInterpreter& m_EventInterpreter;
-    Mutex m_eventsMutex;
+    boost::mutex m_Mutex; // locking what?
 
     // make use of the dataMap in the new session object (cookie stuff)
 
