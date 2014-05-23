@@ -107,7 +107,9 @@ namespace dss {
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  boost::shared_ptr<JSONObject>
+    EventRequestHandler::subscribe(const RestfulRequest& _request,
+                                   boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string tokenStr = _request.getParameter("subscriptionID");
@@ -123,9 +125,9 @@ namespace dss {
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
 
-    if ((a == NULL) || (a->empty())) {
+    if ((a == NULL) || a->empty()) {
       boost::shared_ptr<boost::any> b(new boost::any());
-      eventSessions = boost::shared_ptr<EventSubscriptionSessionByTokenID>(new EventSubscriptionSessionByTokenID());
+      eventSessions.reset(new EventSubscriptionSessionByTokenID());
       *b = eventSessions;
       _session->addData(std::string("eventSubscriptionIDs"), b);
     } else {
@@ -161,10 +163,9 @@ namespace dss {
     }
 
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
 
-    if ((a == NULL) || (a->empty())) {
+    if ((a == NULL) || a->empty()) {
       return failure("Invalid session!");
     } else {
       try {
@@ -191,13 +192,14 @@ namespace dss {
     return success();
   }
 
-  boost::shared_ptr<EventSubscriptionSession> EventRequestHandler::getSubscriptionSession(int _token, boost::shared_ptr<Session> _session) {
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-
+  boost::shared_ptr<EventSubscriptionSession>
+    EventRequestHandler::getSubscriptionSession(int _token,
+                                                boost::shared_ptr<Session> _session) {
     boost::mutex::scoped_lock lock(m_Mutex);
+    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
 
-    if ((a == NULL) || (a->empty())) {
+    if ((a == NULL) || a->empty()) {
       throw std::runtime_error("Invalid session!");
     } else {
       try {
@@ -215,7 +217,7 @@ namespace dss {
 
     boost::shared_ptr<EventSubscriptionSession> result = (*eventSessions)[_token];
     return result;
-  } // getSubscriptionSession
+  }
 
   boost::shared_ptr<JSONObject> EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
     boost::shared_ptr<JSONObject> result(new JSONObject());
