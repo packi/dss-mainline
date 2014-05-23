@@ -2793,41 +2793,19 @@ namespace dss {
           return JS_FALSE;
         }
         try {
-
-          eState svalue = State_Unknown;
-          if (argc >= 1) {
-            if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
-              std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-              if (value == "active") {
-                svalue = State_Active;
-              } else if (value == "inactive") {
-                svalue = State_Inactive;
-              } else if (value == "unknown") {
-                svalue = State_Unknown;
-              } else {
-                JS_ReportError(cx, "Invalid state value");
-                JS_SET_RVAL(cx, vp, JSVAL_NULL);
-                return JS_FALSE;
-              }
-            } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
-              int value = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-              switch (value) {
-              case 1: svalue = State_Active; break;
-              case 2: svalue = State_Inactive; break;
-              case 3: svalue = State_Unknown; break;
-              default:
-                JS_ReportError(cx, "Invalid state value");
-                JS_SET_RVAL(cx, vp, JSVAL_NULL);
-                return JS_FALSE;
-              }
-            }
-          }
           callOrigin_t origin = coJSScripting;
           if (argc >= 2) {
             origin = (callOrigin_t) ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
           }
-          pState->setState(origin, svalue);
-
+          if (argc >= 1) {
+            if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[0])) {
+              std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+              pState->setState(origin, value);
+            } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
+              eState svalue = (eState) ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+              pState->setState(origin, svalue);
+            }
+          }
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
           return JS_FALSE;

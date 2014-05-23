@@ -746,7 +746,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     /* wait for any and all signals */
     sigfillset(&signal_set);
-    sigdelset(&signal_set, SIGUSR2); /* tcmalloc dump profile */
+    sigdelset(&signal_set, SIGUSR2); /* gperftools dump profile */
+    sigdelset(&signal_set, SIGPROF); /* gperftools cpu profiler trigger */
 
     for (;;) {
       sigwait(&signal_set, &sig);

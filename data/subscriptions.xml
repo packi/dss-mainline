@@ -161,26 +161,6 @@
   </subscription>
 
   <!-- State Definitions -->
-  <state name="presence">
-    <property name="value" type="string"></property>
-    <property name="persistent" type="boolean">true</property>
-    <property name="valuerange">
-        <property name="absent" type="string">absent</property>
-        <property name="present" type="string">present</property>
-    </property>
-    <property name="script_id" type="string">system_state</property>
-  </state>
-
-  <state name="hibernation">
-    <property name="value" type="string"></property>
-    <property name="persistent" type="boolean">true</property>
-    <property name="valuerange">
-        <property name="awake" type="string">awake</property>
-        <property name="sleeping" type="string">sleeping</property>
-    </property>
-    <property name="script_id" type="string">system_state</property>
-  </state>
-
   <state name="daynight">
     <property name="value" type="boolean">false</property>
     <property name="script_id" type="string">solar_computer</property>
