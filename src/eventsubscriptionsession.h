@@ -34,13 +34,12 @@
 
 namespace dss {
 
-  class Session;
   class EventCollector;
   class JSONObject;
 
   class EventSubscriptionSession {
   public:
-    EventSubscriptionSession(EventInterpreter& _eventInterpreter, boost::shared_ptr<Session> _parentSession);
+    EventSubscriptionSession(EventInterpreter& _eventInterpreter);
 
     std::string subscribe(const std::string& _eventName);
     void unsubscribe(const std::string& _eventName);
@@ -49,7 +48,6 @@ namespace dss {
     bool waitForEvent(const int _timeoutMS);
     // blocks if no events are available
   private:
-    boost::shared_ptr<Session> m_parentSession;
     boost::shared_ptr<EventCollector> m_pEventCollector;
     void createCollector();
     // name, subscriptionID

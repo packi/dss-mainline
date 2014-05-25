@@ -30,10 +30,8 @@
 
 namespace dss {
 
-  EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
-                                                     boost::shared_ptr<Session> _parentSession)
-  : m_parentSession(_parentSession),
-    m_EventInterpreter(_eventInterpreter)
+  EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter)
+  : m_EventInterpreter(_eventInterpreter)
   { }
 
   std::string EventSubscriptionSession::subscribe(const std::string& _eventName) {
