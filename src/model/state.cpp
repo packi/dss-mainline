@@ -123,10 +123,18 @@ namespace dss {
       m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(basepath + m_name);
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyReference<std::string>(m_name, false));
+
       m_pPropertyNode->createProperty("value")
         ->linkToProxy(PropertyProxyReference<int>((int &) m_state, false));
       m_pPropertyNode->createProperty("state")
         ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
+
+      // #5870 - keep compatibility for "presence" and "hibernation"
+      if (m_name == "presence" || m_name == "hibernation") {
+        m_pPropertyNode->removeChild(m_pPropertyNode->getPropertyByName("value"));
+        m_pPropertyNode->createProperty("value")
+          ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
+      }
 
       if (m_providerDev != NULL) {
         PropertyNodePtr devNode = m_providerDev->getPropertyNode();
