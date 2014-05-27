@@ -436,6 +436,59 @@ namespace dss {
     return _connection;
   } // jsonHandler
 
+  void *WebServer::logDownloadHandler(struct mg_connection* _connection,
+                                      RestfulRequest &request,
+                                      const std::string &trustedSetCookie,
+                                      boost::shared_ptr<Session> _session) {
+    std::string result, setCookieHeader = trustedSetCookie;
+    static std::string logFileDirectory = "/var/log/collection";
+
+    try {
+      if (_session == NULL) {
+        throw SecurityException("not logged in");
+      }
+
+      std::string logCollectionBasePath =
+          DSS::getInstance()->getPropertySystem().getStringValue(
+                            "/config/subsystems/Apartment/logCollectionBasePath");
+
+      if (!fs::exists(logCollectionBasePath) || !fs::is_directory(logCollectionBasePath)) {
+        throw std::runtime_error("Log File directory does not exist.");
+      }
+
+      fs::directory_iterator path_it(logCollectionBasePath);
+      fs::directory_iterator end_it;
+      bool fileFound = false;
+      for (; path_it != end_it; ++path_it) {
+        const fs::path &file_path = path_it->path();
+        if (file_path.extension() != ".gz") {
+          continue;
+        }
+        fileFound = true;
+        log("Sending File: " + file_path.string());
+        FILE *fp = fopen(file_path.c_str(), "r");
+        if (fp != NULL)
+        {
+          emitHTTPHeader(_connection, 200, fs::file_size(file_path), "application/x-gzip",
+                         setCookieHeader, fs::basename(file_path));
+          mg_send_file(_connection, fp, fs::file_size(file_path));
+          fclose(fp);
+        }
+      }
+      if (!fileFound) {
+        emitHTTPTextPacket(_connection, 404, setCookieHeader, "File not found");
+      }
+    } catch(SecurityException& e) {
+      emitHTTPTextPacket(_connection, 500, setCookieHeader, e.what());
+    } catch(std::runtime_error& e) {
+      emitHTTPTextPacket(_connection, 500, setCookieHeader, e.what());
+    } catch(std::invalid_argument& e) {
+      emitHTTPTextPacket(_connection, 500, setCookieHeader, e.what());
+    }
+
+    return _connection;
+  } // logDownloadHandler
+
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
                                const std::string &setCookieHeader,
@@ -588,7 +641,7 @@ namespace dss {
     std::string toplevel = uri_path.substr(0, offset);
     std::string sublevel = uri_path.substr(offset);
 
-    if (toplevel != "/browse" && toplevel != "/json" && toplevel != "/icons") {
+    if (toplevel != "/browse" && toplevel != "/json" && toplevel != "/icons" && toplevel != "/getLatestLogs") {
       // quit early, not our request
       return NULL;
     }
@@ -660,6 +713,8 @@ namespace dss {
       return self.jsonHandler(_connection, request, trustedLoginCookie, session);
     } else if (toplevel == "/icons") {
       return self.iconHandler(_connection, request, trustedLoginCookie, session);
+    } else if (toplevel == "/getLatestLogs") {
+      return self.logDownloadHandler(_connection, request, trustedLoginCookie, session);
     }
 
     return NULL;

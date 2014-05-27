@@ -188,6 +188,10 @@ namespace dss {
           DSS::getInstance()->getPropertySystem().getStringValue(
               "/config/datadirectory") + "images/", true, false);
 
+      DSS::getInstance()->getPropertySystem().setStringValue(
+          getConfigPropertyBasePath() + "logCollectionBasePath",
+          "/var/log/collection/", true, false);
+
       checkConfigFile(filename);
 
       m_pStructureQueryBusInterface = DSS::getInstance()->getBusInterface().getStructureQueryBusInterface();
