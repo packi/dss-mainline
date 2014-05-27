@@ -446,54 +446,6 @@ namespace dss {
     return _connection;
   } // jsonHandler
 
-  void *WebServer::downloadHandler(struct mg_connection* _connection,
-                                  const struct mg_request_info* _info) {
-    try {
-      const std::string kURLID = "/download/";
-      std::string uri = _info->uri;
-
-      std::string givenFileName = uri.substr(uri.find(kURLID) + kURLID.size());
-
-      log("Processing call to download/" + givenFileName);
-
-      // TODO: make the files-node readonly as this might pose a security threat
-      //     (you could download any file on the disk if you add it as a subnode
-      //      of files)
-      PropertyNodePtr filesNode = getDSS().getPropertySystem().getProperty(
-                                    getConfigPropertyBasePath() + "files");
-      std::string fileName;
-      if(filesNode != NULL) {
-        PropertyNodePtr fileNode = filesNode->getProperty(givenFileName);
-        if(fileNode != NULL) {
-          fileName = fileNode->getStringValue();
-        }
-      }
-      log("Using local file: " + fileName);
-      if (boost::filesystem::exists(fileName)) {
-        FILE *fp = fopen(fileName.c_str(), "r");
-        if (fp != NULL)
-        {
-            mg_send_file(_connection, fp, fs::file_size(fileName));
-            fclose(fp);
-        }
-      }
-    } catch(SecurityException& e) {
-      emitHTTPHeader(403, _connection);
-      mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
-      mg_printf(_connection, e.what());
-      mg_printf(_connection, "</body></html>");
-      return _connection;
-    } catch(...) {
-      emitHTTPHeader(500, _connection);
-      mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
-      mg_printf(_connection, "Error processing request");
-      mg_printf(_connection, "</body></html>");
-      return _connection;
-    }
-
-    return _connection;
-  } // downloadHandler
-
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
                                HashMapStringString _parameter,
@@ -724,8 +676,6 @@ namespace dss {
     } else if (uri.find("/icons/") == 0) {
       return self.iconHandler(_connection, _info, paramMap, cookies,
                               injectedCookies, session);
-    } else if (uri.find("/download/") == 0) {
-      return self.downloadHandler(_connection, _info);
     }
 
     return NULL;
