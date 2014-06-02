@@ -74,13 +74,9 @@ namespace dss {
                       HashMapStringString _cookies,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
-    void *downloadHandler(struct mg_connection* _connection,
-                          const struct mg_request_info* _info);
     static void *httpRequestCallback(enum mg_event event, 
                                      struct mg_connection* _connection,
                                      const struct mg_request_info* _info);
-
-    static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");
 
   protected:
     virtual void doStart();
