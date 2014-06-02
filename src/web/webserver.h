@@ -46,11 +46,6 @@ namespace dss {
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
-  void emitHTTPHeader(int _code, struct mg_connection* _connection, int length,
-                      const std::string& _contentType = "text/html",
-                      const std::string& _setCookie = "");
-
-
   class WebServer : public Subsystem {
   private:
     struct mg_context* m_mgContext;

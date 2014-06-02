@@ -76,6 +76,71 @@ namespace fs = boost::filesystem;
 
 namespace dss {
 
+  const char* httpCodeToMessage(const int _code) {
+    if(_code == 400) {
+      return "Bad Request";
+    } else if(_code == 401) {
+      return "Unauthorized\r\nWWW-Authenticate: Basic realm=\"dSS\"";
+    } else if(_code == 403) {
+      return "Forbidden";
+    } else if(_code == 500) {
+      return "Internal Server Error";
+    } else {
+      return "OK";
+    }
+  }
+
+  std::string strprintf_HTTPHeader(int _code, int length,
+                                   const std::string& _contentType,
+                                   const std::string& _setCookie) {
+    std::ostringstream sstream;
+    sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
+    sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
+    if(!_setCookie.empty()) {
+      sstream << "Set-Cookie: " << _setCookie << "; HttpOnly";
+#ifndef WITH_INSECURE_COOKIE
+      sstream << "; Secure";
+#endif
+      sstream << "\r\n";
+    }
+    sstream << "Content-Length: " << intToString(length) << "\r\n";
+    sstream << "\r\n";
+    std::string header = sstream.str();
+    return header;
+  }
+
+  void emitHTTPHeader(struct mg_connection* _connection, int _code, int length,
+                      const std::string& _contentType,
+                      const std::string& _setCookie = "") {
+    std::string tmp = strprintf_HTTPHeader(_code, length, _contentType,
+                                           _setCookie);
+    mg_write(_connection, tmp.c_str(), tmp.length());
+  }
+
+  void emitHTTPPacket(struct mg_connection* _connection, int _code,
+                      const std::string& _contentType,
+                      const std::string& _setCookie,
+                      const std::string& content) {
+    std::string packet = strprintf_HTTPHeader(_code, content.length(),
+                                              _contentType, _setCookie);
+    packet += content;
+    mg_write(_connection, packet.c_str(), packet.length());
+  }
+
+  void emitHTTPJsonPacket(struct mg_connection* _connection, int _code,
+                          const std::string& _setCookie,
+                          const std::string& content) {
+    return emitHTTPPacket(_connection, _code, "application/json", _setCookie,
+                          content);
+  }
+
+  void emitHTTPTextPacket(struct mg_connection* _connection, int _code,
+                         const std::string& _setCookie,
+                         const std::string& content) {
+    return emitHTTPPacket(_connection, _code, "text/html", _setCookie,
+                          content);
+  }
+
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
@@ -199,39 +264,6 @@ namespace dss {
   } // setupAPI
 
   void WebServer::doStart() { } // start
-
-  const char* httpCodeToMessage(const int _code) {
-    if(_code == 400) {
-      return "Bad Request";
-    } else if(_code == 401) {
-      return "Unauthorized\r\nWWW-Authenticate: Basic realm=\"dSS\"";
-    } else if(_code == 403) {
-      return "Forbidden";
-    } else if(_code == 500) {
-      return "Internal Server Error";
-    } else {
-      return "OK";
-    }
-  }
-
-  void emitHTTPHeader(int _code, struct mg_connection* _connection, int length,
-                      const std::string& _contentType,
-                      const std::string& _setCookie) {
-    std::ostringstream sstream;
-    sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
-    sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
-    if(!_setCookie.empty()) {
-      sstream << "Set-Cookie: " << _setCookie << "; HttpOnly";
-#ifndef WITH_INSECURE_COOKIE
-      sstream << "; Secure";
-#endif
-      sstream << "\r\n";
-    }
-    sstream << "Content-Length: " << intToString(length) << "\r\n";
-    sstream << "\r\n";
-    std::string tmp = sstream.str();
-    mg_write(_connection, tmp.c_str(), tmp.length());
-  }
 
   HashMapStringString parseParameter(const char* _params) {
     HashMapStringString result;
@@ -413,32 +445,28 @@ namespace dss {
           cookies = generateCookieString(response.getCookies());
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
-        emitHTTPHeader(200, _connection, result.length(), "application/json", cookies);
-        mg_write(_connection, result.c_str(), result.length());
+        emitHTTPJsonPacket(_connection, 200, cookies, result);
       } catch(SecurityException& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
-        emitHTTPHeader(403, _connection, result.length(), "application/json");
-        mg_write(_connection, result.c_str(), result.length());
+        emitHTTPJsonPacket(_connection, 403, "", result);;
       } catch(std::runtime_error& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPHeader(500, _connection, result.length(), "application/json");
-        mg_write(_connection, result.c_str(), result.length());
+        emitHTTPJsonPacket(_connection, 500, "", result);
       } catch(std::invalid_argument& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPHeader(500, _connection, result.length(), "application/json");
-        mg_write(_connection, result.c_str(), result.length());
+        emitHTTPJsonPacket(_connection, 500, "", result);
       }
     } else {
       log("Unknown function '" + method + "'", lsError);
@@ -447,8 +475,7 @@ namespace dss {
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
       sstream << "}";
       result = sstream.str();
-      emitHTTPHeader(404, _connection, result.length(), "application/json");
-      mg_write(_connection, result.c_str(), result.length());
+      emitHTTPJsonPacket(_connection, 404, "", result);
     }
     return _connection;
   } // jsonHandler
@@ -507,7 +534,7 @@ namespace dss {
       if (boost::filesystem::exists(icon)) {
         FILE *fp = fopen(icon.c_str(), "r");
         if (fp != NULL) {
-          emitHTTPHeader(200, _connection, fs::file_size(icon), "image/png");
+          emitHTTPHeader(_connection, 200, fs::file_size(icon), "image/png", "");
           mg_send_file(_connection, fp, fs::file_size(icon));
           fclose(fp);
         } else {
@@ -523,22 +550,19 @@ namespace dss {
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPHeader(500, _connection, result.length(), "application/json");
-      mg_write(_connection, result.c_str(), result.length());
+      emitHTTPJsonPacket(_connection, 500, "", result);
     } catch(std::runtime_error& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPHeader(500, _connection, result.length(), "application/json");
-      mg_write(_connection, result.c_str(), result.length());
+      emitHTTPJsonPacket(_connection, 500, "", result);
     } catch(std::invalid_argument& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPHeader(500, _connection, result.length(), "application/json");
-      mg_write(_connection, result.c_str(), result.length());
+      emitHTTPJsonPacket(_connection, 500, "", result);
     }
 
     return _connection;
@@ -601,8 +625,7 @@ namespace dss {
 
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
-    emitHTTPHeader(200, _connection, tmp.length());
-    mg_write(_connection, tmp.c_str(), tmp.length());
+    emitHTTPTextPacket(_connection, 200, "", tmp);
     return _connection;
   } // httpBrowseProperties
 
