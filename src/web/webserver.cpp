@@ -214,7 +214,9 @@ namespace dss {
     }
   }
 
-  void WebServer::emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType, const std::string& _setCookie) {
+  void emitHTTPHeader(int _code, struct mg_connection* _connection,
+                      const std::string& _contentType,
+                      const std::string& _setCookie) {
     std::ostringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
@@ -409,40 +411,44 @@ namespace dss {
         } else {
           cookies = generateCookieString(response.getCookies());
         }
-        emitHTTPHeader(200, _connection, "application/json", cookies);
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
+        emitHTTPHeader(200, _connection, "application/json", cookies);
+        mg_write(_connection, result.c_str(), result.length());
       } catch(SecurityException& e) {
-        emitHTTPHeader(403, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
+        emitHTTPHeader(403, _connection, "application/json");
+        mg_write(_connection, result.c_str(), result.length());
       } catch(std::runtime_error& e) {
-        emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
+        emitHTTPHeader(500, _connection, "application/json");
+        mg_write(_connection, result.c_str(), result.length());
       } catch(std::invalid_argument& e) {
-        emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
+        emitHTTPHeader(500, _connection, "application/json");
+        mg_write(_connection, result.c_str(), result.length());
       }
     } else {
-      emitHTTPHeader(404, _connection, "application/json");
+      log("Unknown function '" + method + "'", lsError);
       std::ostringstream sstream;
       sstream << "{" << "\"ok\"" << ":" << "false" << ",";
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
       sstream << "}";
       result = sstream.str();
-      log("Unknown function '" + method + "'", lsError);
+      emitHTTPHeader(404, _connection, "application/json");
+      mg_write(_connection, result.c_str(), result.length());
     }
-    mg_write(_connection, result.c_str(), result.length());
     return _connection;
   } // jsonHandler
 
@@ -512,25 +518,25 @@ namespace dss {
                                  dsidStr + " not found");
       }
     } catch(SecurityException& e) {
-      emitHTTPHeader(500, _connection, "application/json");
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
+      emitHTTPHeader(500, _connection, "application/json");
       mg_write(_connection, result.c_str(), result.length());
     } catch(std::runtime_error& e) {
-      emitHTTPHeader(500, _connection, "application/json");
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
+      emitHTTPHeader(500, _connection, "application/json");
       mg_write(_connection, result.c_str(), result.length());
     } catch(std::invalid_argument& e) {
-      emitHTTPHeader(500, _connection, "application/json");
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
+      emitHTTPHeader(500, _connection, "application/json");
       mg_write(_connection, result.c_str(), result.length());
     }
 
@@ -539,8 +545,6 @@ namespace dss {
 
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
-    emitHTTPHeader(200, _connection);
-
     const std::string urlid = "/browse";
     std::string uri = _info->uri;
     HashMapStringString paramMap = parseParameter(_info->query_string);
@@ -549,9 +553,9 @@ namespace dss {
     if(path.empty()) {
       path = "/";
     }
-    mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
 
     std::ostringstream stream;
+    stream << "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>";
     stream << "<h1>" << path << "</h1>";
     stream << "<ul>";
     PropertyNodePtr node;
@@ -596,6 +600,7 @@ namespace dss {
 
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
+    emitHTTPHeader(200, _connection);
     mg_write(_connection, tmp.c_str(), tmp.length());
     return _connection;
   } // httpBrowseProperties
