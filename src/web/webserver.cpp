@@ -76,7 +76,7 @@ namespace fs = boost::filesystem;
 
 namespace dss {
 
-  const char* httpCodeToMessage(const int _code) {
+  static const char* httpCodeToMessage(const int _code) {
     if(_code == 400) {
       return "Bad Request";
     } else if(_code == 401) {
@@ -90,9 +90,9 @@ namespace dss {
     }
   }
 
-  std::string strprintf_HTTPHeader(int _code, int length,
-                                   const std::string& _contentType,
-                                   const std::string& _setCookie) {
+  static std::string strprintf_HTTPHeader(int _code, int length,
+                                          const std::string& _contentType,
+                                          const std::string& _setCookie) {
     std::ostringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
@@ -109,34 +109,34 @@ namespace dss {
     return header;
   }
 
-  void emitHTTPHeader(struct mg_connection* _connection, int _code, int length,
-                      const std::string& _contentType,
-                      const std::string& _setCookie = "") {
+  static void emitHTTPHeader(struct mg_connection* _connection, int _code, int length,
+                             const std::string& _contentType,
+                             const std::string& _setCookie = "") {
     std::string tmp = strprintf_HTTPHeader(_code, length, _contentType,
                                            _setCookie);
     mg_write(_connection, tmp.c_str(), tmp.length());
   }
 
-  void emitHTTPPacket(struct mg_connection* _connection, int _code,
-                      const std::string& _contentType,
-                      const std::string& _setCookie,
-                      const std::string& content) {
+  static void emitHTTPPacket(struct mg_connection* _connection, int _code,
+                             const std::string& _contentType,
+                             const std::string& _setCookie,
+                             const std::string& content) {
     std::string packet = strprintf_HTTPHeader(_code, content.length(),
                                               _contentType, _setCookie);
     packet += content;
     mg_write(_connection, packet.c_str(), packet.length());
   }
 
-  void emitHTTPJsonPacket(struct mg_connection* _connection, int _code,
-                          const std::string& _setCookie,
-                          const std::string& content) {
+  static void emitHTTPJsonPacket(struct mg_connection* _connection, int _code,
+                                 const std::string& _setCookie,
+                                 const std::string& content) {
     return emitHTTPPacket(_connection, _code, "application/json", _setCookie,
                           content);
   }
 
-  void emitHTTPTextPacket(struct mg_connection* _connection, int _code,
-                         const std::string& _setCookie,
-                         const std::string& content) {
+  static void emitHTTPTextPacket(struct mg_connection* _connection, int _code,
+                                 const std::string& _setCookie,
+                                 const std::string& content) {
     return emitHTTPPacket(_connection, _code, "text/html", _setCookie,
                           content);
   }
