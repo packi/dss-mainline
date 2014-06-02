@@ -160,42 +160,6 @@ namespace dss {
     bool hasClass(const std::string& _name);
   }; // RestfulAPI
 
-  class RestfulParameterType {
-  private:
-    std::string m_Name;
-  public:
-    RestfulParameterType(const std::string& _name)
-    : m_Name(_name)
-    { }
-
-    virtual ~RestfulParameterType() {}
-
-    const std::string& getName() { return m_Name; }
-
-    virtual bool checkValue(const std::string& _value) = 0;
-  }; // RestfulParameterType
-
-  class RestfulParameterTypeString : public RestfulParameterType {
-  public:
-    virtual ~RestfulParameterTypeString() {}
-
-    virtual bool checkValue(const std::string& _value) { return true; }
-  }; // RestfulParameterTypeString
-
-  class RestfulParameterTypeInteger : public RestfulParameterType {
-  public:
-    virtual ~RestfulParameterTypeInteger() {}
-
-    virtual bool checkValue(const std::string& _value) {
-      try {
-        strToInt(_value);
-      } catch(const std::invalid_argument& _arg) {
-        return false;
-      }
-      return true;
-    }
-  }; // RestfulParameterTypeInteger
-
   class RestfulRequest {
   public:
     RestfulRequest(const std::string& _request, const HashMapStringString& _parameter)
@@ -248,14 +212,6 @@ namespace dss {
     std::string m_Method;
     HashMapStringString m_Parameter;
     boost::function<bool()> m_ActiveCallback;
-  };
-
-  class Session;
-
-  class RestfulRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
-    virtual ~RestfulRequestHandler() {}; // please the compiler (virtual dtor)
   };
 
 } // namespace dss

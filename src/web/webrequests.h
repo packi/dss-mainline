@@ -35,14 +35,9 @@ namespace dss {
 
   class JSONObject;
   class JSONElement;
+  class RestfulRequest;
+  class Session;
   
-  class WebServerRequestHandler : public RestfulRequestHandler {
-  protected:
-    void log(const std::string& _line, aLogSeverity _severity = lsDebug) {
-      Logger::getInstance()->log("RequestHandler: " + _line, _severity);
-    }
-  }; // WebServerRequestHandler
-
   class WebServerResponse {
   public:
     WebServerResponse(boost::shared_ptr<JSONObject> _response)
@@ -65,15 +60,21 @@ namespace dss {
     HashMapStringString m_Cookies;
   }; // WebServerResponse
 
-  class WebServerRequestHandlerJSON : public WebServerRequestHandler {
+  class WebServerRequestHandlerJSON {
   protected:
     boost::shared_ptr<JSONObject> success();
     boost::shared_ptr<JSONObject> success(boost::shared_ptr<JSONElement> _innerResult);
     boost::shared_ptr<JSONObject> success(const std::string& _message);
     boost::shared_ptr<JSONObject> failure(const std::string& _message = "");
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
+    virtual std::string handleRequest(const RestfulRequest& _request,
+                                      boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request,
+                                                boost::shared_ptr<Session> _session) = 0;
+  protected:
+    void log(const std::string& _line, aLogSeverity _severity = lsDebug) {
+        Logger::getInstance()->log("RequestHandler: " + _line, _severity);
+    }
   }; // WebServerRequestHandlerJSON
 
 
