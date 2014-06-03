@@ -463,7 +463,7 @@ namespace dss {
         emitHTTPJsonPacket(_connection, 500, "", result);
       }
     } else {
-      log("Unknown function '" + method + "'", lsError);
+      log("Unknown function '" + request.getUrlPath() + "'", lsError);
       std::ostringstream sstream;
       sstream << "{" << "\"ok\"" << ":" << "false" << ",";
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";

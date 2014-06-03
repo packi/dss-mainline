@@ -162,10 +162,18 @@ namespace dss {
 
   class RestfulRequest {
   public:
+    /**
+     * @_request -- /json/system/login -- the /system/login part
+     * @_parameter -- the parsed url query string
+     */
     RestfulRequest(const std::string& _request, const HashMapStringString& _parameter)
-    : m_Parameter(_parameter)
+    : m_urlSubPath(_request), m_Parameter(_parameter)
     {
       splitIntoMethodAndClass(_request);
+    }
+
+    const std::string& getUrlPath() const {
+      return m_urlSubPath;
     }
 
     const std::string& getClass() const {
@@ -208,6 +216,7 @@ namespace dss {
       m_Method = _request.substr(pos+1, std::string::npos);
     } // splitIntoMethodAndClass
   private:
+    std::string m_urlSubPath;
     std::string m_Class;
     std::string m_Method;
     HashMapStringString m_Parameter;
