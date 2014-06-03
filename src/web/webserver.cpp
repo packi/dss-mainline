@@ -548,13 +548,10 @@ namespace dss {
   } // iconHandler
 
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                       const struct mg_request_info* _info) {
-    const std::string urlid = "/browse";
-    std::string uri = _info->uri;
-    HashMapStringString paramMap = parseParameter(_info->query_string);
-
-    std::string path = uri.substr(uri.find(urlid) + urlid.size());
-    if(path.empty()) {
+                                        const struct mg_request_info* _info,
+                                        RestfulRequest &request) {
+    std::string path = request.getUrlPath();
+    if (path.empty()) {
       path = "/";
     }
 
@@ -697,7 +694,7 @@ namespace dss {
     }
 
     if (toplevel == "/browse") {
-      return self.httpBrowseProperties(_connection, _info);
+      return self.httpBrowseProperties(_connection, _info, request);
     } else if (toplevel == "/json") {
       return self.jsonHandler(_connection, _info, request, injectedCookies,
                               session);

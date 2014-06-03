@@ -60,7 +60,8 @@ namespace dss {
     void publishJSLogfiles();
   protected:
     void *httpBrowseProperties(struct mg_connection* _connection,
-                               const struct mg_request_info* _info);
+                               const struct mg_request_info* _info,
+                               RestfulRequest &request);
     void *jsonHandler(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
                       RestfulRequest &request,
