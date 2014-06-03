@@ -404,7 +404,6 @@ namespace dss {
   }
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
-                               const struct mg_request_info* _info,
                                RestfulRequest &request,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
@@ -470,7 +469,6 @@ namespace dss {
   } // jsonHandler
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
-                               const struct mg_request_info* _info,
                                RestfulRequest &request,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
@@ -548,7 +546,6 @@ namespace dss {
   } // iconHandler
 
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                        const struct mg_request_info* _info,
                                         RestfulRequest &request) {
     std::string path = request.getUrlPath();
     if (path.empty()) {
@@ -694,13 +691,11 @@ namespace dss {
     }
 
     if (toplevel == "/browse") {
-      return self.httpBrowseProperties(_connection, _info, request);
+      return self.httpBrowseProperties(_connection, request);
     } else if (toplevel == "/json") {
-      return self.jsonHandler(_connection, _info, request, injectedCookies,
-                              session);
+      return self.jsonHandler(_connection, request, injectedCookies, session);
     } else if (toplevel == "/icons") {
-      return self.iconHandler(_connection, _info, request, injectedCookies,
-                              session);
+      return self.iconHandler(_connection, request, injectedCookies, session);
     }
 
     return NULL;

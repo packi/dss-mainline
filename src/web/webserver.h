@@ -60,15 +60,12 @@ namespace dss {
     void publishJSLogfiles();
   protected:
     void *httpBrowseProperties(struct mg_connection* _connection,
-                               const struct mg_request_info* _info,
                                RestfulRequest &request);
     void *jsonHandler(struct mg_connection* _connection,
-                      const struct mg_request_info* _info,
                       RestfulRequest &request,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     void *iconHandler(struct mg_connection* _connection,
-                      const struct mg_request_info* _info,
                       RestfulRequest &request,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
