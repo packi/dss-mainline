@@ -24,6 +24,7 @@
 
 #include "restful.h"
 
+#include "webserver.h"
 #include "src/foreach.h"
 
 namespace dss {
@@ -45,6 +46,14 @@ namespace dss {
     }
     return false;
   } // hasMethod
+
+  RestfulRequest::RestfulRequest(const std::string& _request,
+                                 const std::string& params)
+    : m_urlSubPath(_request)
+  {
+    splitIntoMethodAndClass(_request);
+    m_Parameter = parseParameter(params.c_str());
+  }
 
   /**
    * @_request -- '/system/login'

@@ -632,15 +632,14 @@ namespace dss {
     std::string toplevel = uri_path.substr(0, offset);
     std::string sublevel = uri_path.substr(offset);
 
-    HashMapStringString paramMap = parseParameter(_info->query_string);
-    RestfulRequest request(sublevel, paramMap);
+    RestfulRequest request(sublevel, _info->query_string ?: "");
     const char* cookie = mg_get_header(_connection, "Cookie");
     HashMapStringString cookies = parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
     std::string token = cookies["token"];
-    if(token.empty()) {
-      token = paramMap["token"];
+    if (token.empty()) {
+      token = request.getParameter("token");
     }
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);

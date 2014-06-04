@@ -46,6 +46,7 @@ namespace dss {
 
   HashMapStringString parseCookies(const char* _cookies);
   std::string generateCookieString(HashMapStringString _cookies);
+  HashMapStringString parseParameter(const char* _params);
 
   class WebServer : public Subsystem {
   private:

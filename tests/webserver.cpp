@@ -56,28 +56,69 @@ BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {
 }
 
 BOOST_AUTO_TEST_CASE(testRequestGetClass) {
-  dss::RestfulRequest request("/getDeviceIcon", dss::HashMapStringString());
+  dss::RestfulRequest request("/getDeviceIcon", "");
   BOOST_CHECK(request.getClass() == "getDeviceIcon");
   BOOST_CHECK(request.getUrlPath() == "/getDeviceIcon");
 }
 
 BOOST_AUTO_TEST_CASE(testRequestGetClassMethod) {
-  dss::RestfulRequest req("/class/method", dss::HashMapStringString());
+  dss::RestfulRequest req("/class/method", "");
   BOOST_CHECK_EQUAL(req.getClass(), "class");
   BOOST_CHECK_EQUAL(req.getMethod(), "method");
 
-  req = dss::RestfulRequest("/class", dss::HashMapStringString());
+  req = dss::RestfulRequest("/class", "");
   BOOST_CHECK_EQUAL(req.getClass(), "class");
   fprintf(stderr, "%s\n", req.getMethod().c_str());
   BOOST_CHECK(req.getMethod().empty());
 
-  req = dss::RestfulRequest("/", dss::HashMapStringString());
+  req = dss::RestfulRequest("/", "");
   BOOST_CHECK(req.getClass().empty());
   BOOST_CHECK(req.getMethod().empty());
 
-  req = dss::RestfulRequest("", dss::HashMapStringString());
+  req = dss::RestfulRequest("", "");
   BOOST_CHECK(req.getClass().empty());
   BOOST_CHECK(req.getMethod().empty());
 }
 
+BOOST_AUTO_TEST_CASE(testRestfulParamParser) {
+  std::string params;
+
+  dss::RestfulRequest req("device/bla", "name=");
+  BOOST_CHECK(req.hasParameter("name"));
+  req = dss::RestfulRequest("device/bla", "name=nonexisting");
+  BOOST_CHECK(req.getParameter("name") == "nonexisting");
+  req = dss::RestfulRequest("device/bla", "dsid=");
+  BOOST_CHECK(req.getParameter("dsid").empty());
+  req = dss::RestfulRequest("device/bla",
+                            "dsid=3504175fe0000000ffc000113504175fe0000000ffc00011");
+  BOOST_CHECK(req.getParameter("dsid") ==
+              "3504175fe0000000ffc000113504175fe0000000ffc00011");
+  req = dss::RestfulRequest("circuit/bla", "&id=asdfasdf");
+  BOOST_CHECK(req.getParameter("id") == "asdfasdf");
+
+  params = "dsid=0x12345";
+  params += "&class=469";
+  params += "&index=452";
+  params += "&value=21";
+  req = dss::RestfulRequest("device/setConfig", params);
+  BOOST_CHECK(req.getParameter("class") == "469");
+  BOOST_CHECK(req.getParameter("index") == "452");
+  BOOST_CHECK(req.getParameter("value") == "21");
+
+  params = "foo=bar&token=0x123456789abcdef";
+  req = dss::RestfulRequest("/foo/bar", params);
+  BOOST_CHECK(req.getParameter("token") == "0x123456789abcdef");
+}
+
+BOOST_AUTO_TEST_CASE(testRestfulParamParserComplex) {
+  char params[] = "name=test-addon.config&parameter=actions%3Dtest%3Bvalue%3D%257B%27name%27%253A%27Zeit%252520zum%252520gehen%27%252C%27id%27%253A%270%27%252C%27time%27%253A%257B%27offset%27%253A62100%252C%27timeBase%27%253A%27daily%27%257D%252C%27recurrence%27%253A%257B%27timeArray%27%253A%255B%27MO%27%252C%27WE%27%252C%27TH%27%255D%252C%27recurrenceBase%27%253A%27weekly%27%257D%252C%27actions%27%253A%255B%257B%270%27%253A%255B%257B%257D%252C%257B%257D%252C%257B%257D%252C%257B%257D%252C%257B%257D%255D%252C%27type%27%253A%27zone-blink%27%252C%27zone%27%253A1695%252C%27group%27%253A1%252C%27delay%27%253A0%252C%27category%27%253A%27timer%27%257D%255D%252C%27conditions%27%253A%257B%27enabled%27%253Atrue%252C%27weekdays%27%253Anull%252C%27timeframe%27%253Anull%252C%27zoneState%27%253Anull%252C%27systemState%27%253A%255B%257B%27name%27%253A%27holiday%27%252C%27value%27%253A%27off%27%257D%255D%252C%27addonState%27%253Anull%257D%257D&a=0.8279124496545545&";
+
+  char unencoded_check[] =
+    "actions=test;value=%7B'name'%3A'Zeit%2520zum%2520gehen'%2C'id'%3A'0'%2C'time'%3A%7B'offset'%3A62100%2C'timeBase'%3A'daily'%7D%2C'recurrence'%3A%7B'timeArray'%3A%5B'MO'%2C'WE'%2C'TH'%5D%2C'recurrenceBase'%3A'weekly'%7D%2C'actions'%3A%5B%7B'0'%3A%5B%7B%7D%2C%7B%7D%2C%7B%7D%2C%7B%7D%2C%7B%7D%5D%2C'type'%3A'zone-blink'%2C'zone'%3A1695%2C'group'%3A1%2C'delay'%3A0%2C'category'%3A'timer'%7D%5D%2C'conditions'%3A%7B'enabled'%3Atrue%2C'weekdays'%3Anull%2C'timeframe'%3Anull%2C'zoneState'%3Anull%2C'systemState'%3A%5B%7B'name'%3A'holiday'%2C'value'%3A'off'%7D%5D%2C'addonState'%3Anull%7D%7D";
+
+  dss::RestfulRequest req("/foo/bar", params);
+  BOOST_CHECK(req.getParameter("name") == "test-addon.config");
+  BOOST_CHECK(req.getParameter("parameter") == unencoded_check);
+  BOOST_CHECK(req.getParameter("a") == "0.8279124496545545");
+}
 BOOST_AUTO_TEST_SUITE_END()
