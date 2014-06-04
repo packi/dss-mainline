@@ -45,5 +45,18 @@ namespace dss {
     }
     return false;
   } // hasMethod
-  
+
+  /**
+   * @_request -- '/system/login'
+   * class -> 'system', method -> login everything till EOS
+   */
+  void RestfulRequest::splitIntoMethodAndClass(const std::string& _request) {
+    size_t offset = _request.find('/');
+    if (std::string::npos == offset) {
+      m_Class = _request;
+    } else {
+      m_Class = _request.substr(0, offset);
+      m_Method = _request.substr(offset + 1);
+    }
+  }
 } // namespace dss

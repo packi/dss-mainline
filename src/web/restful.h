@@ -210,11 +210,11 @@ namespace dss {
       m_ActiveCallback = _value;
     }
   private:
-    void splitIntoMethodAndClass(const std::string& _request) {
-      size_t pos = _request.find('/');
-      m_Class = _request.substr(0, pos);
-      m_Method = _request.substr(pos+1, std::string::npos);
-    } // splitIntoMethodAndClass
+    /**
+     * @_request -- '/system/login'
+     * class -> 'system', method -> login everything till EOS
+     */
+    void splitIntoMethodAndClass(const std::string& _request);
   private:
     std::string m_urlSubPath;
     std::string m_Class;

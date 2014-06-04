@@ -492,7 +492,7 @@ namespace dss {
         throw SecurityException("not logged in");
       }
 
-      if (method != "getDeviceIcon") {
+      if (request.getClass() != "getDeviceIcon") {
         throw std::runtime_error("unhandled function");
       }
 

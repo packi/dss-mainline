@@ -51,16 +51,6 @@ BOOST_AUTO_TEST_CASE(testDeclaring) {
     BOOST_CHECK(clsApartment.hasMethod("getName"));
 }
 
-BOOST_AUTO_TEST_CASE(testRestfulRequest) {
-  HashMapStringString params;
-  std::string method = "test/method";
-
-  RestfulRequest req(method, params);
-
-  BOOST_CHECK_EQUAL(req.getClass(), "test");
-  BOOST_CHECK_EQUAL(req.getMethod(), "method");
-}
-
 BOOST_AUTO_TEST_CASE(testRestfulAPIWriter) {
   const std::string fileName = getTempDir() + "api.xml";
   fs::remove(fileName);
