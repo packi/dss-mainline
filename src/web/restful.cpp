@@ -51,11 +51,16 @@ namespace dss {
    * class -> 'system', method -> login everything till EOS
    */
   void RestfulRequest::splitIntoMethodAndClass(const std::string& _request) {
-    size_t offset = _request.find('/');
+    if (_request.empty()) {
+      return;
+    }
+
+    // TODO explicitly ensure leading '/', see toplevel/sublevel split
+    size_t offset = _request.find('/', 1);
     if (std::string::npos == offset) {
-      m_Class = _request;
+      m_Class = _request.substr(1);
     } else {
-      m_Class = _request.substr(0, offset);
+      m_Class = _request.substr(1, offset - 1);
       m_Method = _request.substr(offset + 1);
     }
   }

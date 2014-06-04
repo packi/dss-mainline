@@ -39,6 +39,7 @@ namespace dss {
   class IDeviceInterface;
   class PropertyNode;
   class RestfulAPI;
+  class RestfulRequest;
   class WebServerRequestHandlerJSON;
   class Session;
   class SessionManager;
@@ -62,12 +63,12 @@ namespace dss {
                                const struct mg_request_info* _info);
     void *jsonHandler(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
-                      HashMapStringString _parameter,
+                      RestfulRequest &request,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     void *iconHandler(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
-                      HashMapStringString _parameter,
+                      RestfulRequest &request,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     static void *httpRequestCallback(enum mg_event event, 

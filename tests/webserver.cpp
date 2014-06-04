@@ -43,23 +43,36 @@ BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
   BOOST_CHECK(token == cookies["token"]);
 }
 
+BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {
+  std::string toplevel, sublevel;
+  std::string uri_path = "/json/event/subscribe";
+  size_t offset = uri_path.find('/', 1);
+  if (std::string::npos != offset) {
+    toplevel = uri_path.substr(0, offset);
+    sublevel = uri_path.substr(offset);
+  }
+  BOOST_CHECK(toplevel == "/json");
+  BOOST_CHECK(sublevel == "/event/subscribe");
+}
+
 BOOST_AUTO_TEST_CASE(testRequestGetClass) {
-  const std::string urlid = "/icons/";
-  std::string uri = "/icons/getDeviceIcon";
-  std::string method = uri.substr(uri.find(urlid) + urlid.size());
-  dss::RestfulRequest request(method, dss::HashMapStringString());
+  dss::RestfulRequest request("/getDeviceIcon", dss::HashMapStringString());
   BOOST_CHECK(request.getClass() == "getDeviceIcon");
-  BOOST_CHECK(request.getUrlPath() == "getDeviceIcon");
+  BOOST_CHECK(request.getUrlPath() == "/getDeviceIcon");
 }
 
 BOOST_AUTO_TEST_CASE(testRequestGetClassMethod) {
-  dss::RestfulRequest req("class/method", dss::HashMapStringString());
+  dss::RestfulRequest req("/class/method", dss::HashMapStringString());
   BOOST_CHECK_EQUAL(req.getClass(), "class");
   BOOST_CHECK_EQUAL(req.getMethod(), "method");
 
-  req = dss::RestfulRequest("class", dss::HashMapStringString());
+  req = dss::RestfulRequest("/class", dss::HashMapStringString());
   BOOST_CHECK_EQUAL(req.getClass(), "class");
   fprintf(stderr, "%s\n", req.getMethod().c_str());
+  BOOST_CHECK(req.getMethod().empty());
+
+  req = dss::RestfulRequest("/", dss::HashMapStringString());
+  BOOST_CHECK(req.getClass().empty());
   BOOST_CHECK(req.getMethod().empty());
 
   req = dss::RestfulRequest("", dss::HashMapStringString());

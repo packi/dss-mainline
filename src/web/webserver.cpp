@@ -405,15 +405,10 @@ namespace dss {
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
-                               HashMapStringString _parameter,
+                               RestfulRequest &request,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
-    const std::string urlid = "/json/";
 
-    std::string uri = _info->uri;
-    std::string method = uri.substr(uri.find(urlid) + urlid.size());
-
-    RestfulRequest request(method, _parameter);
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
 
     std::string result;
@@ -476,16 +471,9 @@ namespace dss {
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
-                               HashMapStringString _parameter,
+                               RestfulRequest &request,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
-    const std::string urlid = "/icons/";
-
-    std::string uri = _info->uri;
-    std::string method = uri.substr(uri.find(urlid) + urlid.size());
-
-    RestfulRequest request(method, _parameter);
-
     std::string result;
     try {
       if (_session == NULL) {
@@ -641,7 +629,17 @@ namespace dss {
         self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
     }
 
+    std::string uri_path(_info->uri);
+    size_t offset = uri_path.find('/', 1);
+    if (std::string::npos == offset) {
+        return NULL;
+    }
+    // TODO evtl, move this splitting into RestfulRequest
+    std::string toplevel = uri_path.substr(0, offset);
+    std::string sublevel = uri_path.substr(offset);
+
     HashMapStringString paramMap = parseParameter(_info->query_string);
+    RestfulRequest request(sublevel, paramMap);
     const char* cookie = mg_get_header(_connection, "Cookie");
     HashMapStringString cookies = parseCookies(cookie);
 
@@ -698,14 +696,13 @@ namespace dss {
       self.m_SessionManager->getSecurity()->authenticate(session);
     }
 
-    std::string uri = _info->uri;
-    if (uri.find("/browse/") == 0) {
+    if (toplevel == "/browse") {
       return self.httpBrowseProperties(_connection, _info);
-    } else if (uri.find("/json/") == 0) {
-      return self.jsonHandler(_connection, _info, paramMap, injectedCookies,
+    } else if (toplevel == "/json") {
+      return self.jsonHandler(_connection, _info, request, injectedCookies,
                               session);
-    } else if (uri.find("/icons/") == 0) {
-      return self.iconHandler(_connection, _info, paramMap, injectedCookies,
+    } else if (toplevel == "/icons") {
+      return self.iconHandler(_connection, _info, request, injectedCookies,
                               session);
     }
 
