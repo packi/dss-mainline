@@ -204,13 +204,6 @@ namespace dss {
       splitIntoMethodAndClass(_request);
     }
 
-    RestfulRequest(const std::string& _request, const HashMapStringString& _parameter, const HashMapStringString& _cookies)
-    : m_Parameter(_parameter),
-      m_Cookies(_cookies)
-    {
-      splitIntoMethodAndClass(_request);
-    }
-
     const std::string& getClass() const {
       return m_Class;
     } // getClass
@@ -234,16 +227,6 @@ namespace dss {
       return iEntry != m_Parameter.end();
     } // hasParameter
 
-    const std::string& getCookieValue(const std::string& _name) const {
-      static const std::string& kEmptyString = "";
-      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
-      if(iEntry != m_Parameter.end()) {
-        return iEntry->second;
-      } else {
-        return kEmptyString;
-      }
-    }
-
     bool isActive() const {
       if(m_ActiveCallback) {
         return m_ActiveCallback();
@@ -264,7 +247,6 @@ namespace dss {
     std::string m_Class;
     std::string m_Method;
     HashMapStringString m_Parameter;
-    HashMapStringString m_Cookies;
     boost::function<bool()> m_ActiveCallback;
   };
 

@@ -404,7 +404,6 @@ namespace dss {
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
                                HashMapStringString _parameter,
-                               HashMapStringString _cookies,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
     const std::string urlid = "/json/";
@@ -417,7 +416,7 @@ namespace dss {
     std::string query = (_info->query_string != NULL) ? _info->query_string : "";
     log("JSON request from "+ std::string(inet_ntoa(remote)) + ": " + uri + "?" + query, lsInfo);
 
-    RestfulRequest request(method, _parameter, _cookies);
+    RestfulRequest request(method, _parameter);
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
 
     log("Processing call to " + method);
@@ -483,7 +482,6 @@ namespace dss {
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
                                HashMapStringString _parameter,
-                               HashMapStringString _cookies,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
     const std::string urlid = "/icons/";
@@ -491,7 +489,7 @@ namespace dss {
     std::string uri = _info->uri;
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
-    RestfulRequest request(method, _parameter, _cookies);
+    RestfulRequest request(method, _parameter);
 
     log("Processing call to " + method);
 
@@ -700,11 +698,11 @@ namespace dss {
     if (uri.find("/browse/") == 0) {
       return self.httpBrowseProperties(_connection, _info);
     } else if (uri.find("/json/") == 0) {
-      return self.jsonHandler(_connection, _info, paramMap, cookies,
-                              injectedCookies, session);
+      return self.jsonHandler(_connection, _info, paramMap, injectedCookies,
+                              session);
     } else if (uri.find("/icons/") == 0) {
-      return self.iconHandler(_connection, _info, paramMap, cookies,
-                              injectedCookies, session);
+      return self.iconHandler(_connection, _info, paramMap, injectedCookies,
+                              session);
     }
 
     return NULL;
