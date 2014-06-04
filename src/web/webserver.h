@@ -44,7 +44,7 @@ namespace dss {
   class Session;
   class SessionManager;
 
-  HashMapStringString parseCookies(const char* _cookies);
+  std::string extractToken(const char * _cookie);
   std::string generateCookieString(HashMapStringString _cookies);
 
   class WebServer : public Subsystem {

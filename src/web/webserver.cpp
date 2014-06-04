@@ -310,47 +310,22 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  HashMapStringString parseCookies(const char* _cookies) {
-      HashMapStringString result;
+  std::string extractToken(const char *_cookie) {
+    if (!_cookie) {
+      return "";
+    }
 
-      if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
-        return result;
-      }
+    std::string cookie_s(_cookie);
+    size_t start = cookie_s.find("token=");
+    if (std::string::npos == start) {
+      return "";
+    }
+    start += strlen("token=");
 
-      std::string c = _cookies;
-      std::string pairStr;
-      size_t semi = std::string::npos;
-
-      do {
-        semi = c.find(';');
-        if (semi != std::string::npos) {
-          pairStr = c.substr(0, semi);
-          c = c.substr(semi+1);
-        } else {
-          pairStr = c;
-        }
-
-        size_t eq = pairStr.find('=');
-        if (eq == std::string::npos) {
-          continue;
-        }
-
-        std::string key = pairStr.substr(0, eq);
-        std::string value = pairStr.substr(eq+1);
-
-        key.erase(remove_if(key.begin(), key.end(), isspace), key.end());
-
-        if (key.empty()) {
-          continue;
-        }
-
-        result[key] = value;
-
-
-      } while (semi != std::string::npos);
-
-
-      return result;
+    size_t end = cookie_s.find(';', start);
+    return (end == std::string::npos) ?
+      cookie_s.substr(start) :
+      cookie_s.substr(start, end - start);
   }
 
   std::string generateCookieString(HashMapStringString _cookies) {
@@ -617,11 +592,9 @@ namespace dss {
     }
 
     RestfulRequest request(sublevel, _info->query_string ?: "");
-    const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapStringString cookies = parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
-    std::string token = cookies["token"];
+    std::string token = extractToken(mg_get_header(_connection, "Cookie"));
     if (token.empty()) {
       token = request.getParameter("token");
     }

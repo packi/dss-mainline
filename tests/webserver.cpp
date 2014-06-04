@@ -38,9 +38,7 @@ BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
   response.setCookie("token", token);
 
   std::string cookie_string = dss::generateCookieString(response.getCookies());
-  dss::HashMapStringString cookies = dss::parseCookies(cookie_string.c_str());
-
-  BOOST_CHECK(token == cookies["token"]);
+  BOOST_CHECK_EQUAL(dss::extractToken(cookie_string.c_str()), token);
 }
 
 BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {
