@@ -328,7 +328,7 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  HashMapStringString WebServer::parseCookies(const char* _cookies) {
+  HashMapStringString parseCookies(const char* _cookies) {
       HashMapStringString result;
 
       if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
@@ -371,7 +371,7 @@ namespace dss {
       return result;
   }
 
-  std::string WebServer::generateCookieString(HashMapStringString _cookies) {
+  std::string generateCookieString(HashMapStringString _cookies) {
     std::string result = "";
 
     HashMapStringString::iterator i;
@@ -640,7 +640,7 @@ namespace dss {
 
     HashMapStringString paramMap = parseParameter(_info->query_string);
     const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapStringString cookies = self.parseCookies(cookie);
+    HashMapStringString cookies = parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
     std::string token = cookies["token"];

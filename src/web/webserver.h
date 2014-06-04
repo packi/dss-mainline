@@ -23,7 +23,7 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
-#include <mongoose/mongoose.h>
+#include <external/mongoose/mongoose.h>
 
 #include "src/base.h"
 #include "src/subsystem.h"
@@ -46,6 +46,9 @@ namespace dss {
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
+  HashMapStringString parseCookies(const char* _cookies);
+  std::string generateCookieString(HashMapStringString _cookies);
+
   class WebServer : public Subsystem {
   private:
     struct mg_context* m_mgContext;
@@ -57,8 +60,6 @@ namespace dss {
     void setupAPI();
     void instantiateHandlers();
     void publishJSLogfiles();
-    HashMapStringString parseCookies(const char* _cookies);
-    std::string generateCookieString(HashMapStringString _cookies);
   protected:
     void *httpBrowseProperties(struct mg_connection* _connection,
                                const struct mg_request_info* _info);
