@@ -267,26 +267,6 @@ namespace dss {
 
   void WebServer::doStart() { } // start
 
-  HashMapStringString parseParameter(const char* _params) {
-    HashMapStringString result;
-    if(_params != NULL) {
-      std::vector<std::string> paramList = splitString(_params, '&');
-      for(std::vector<std::string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
-        std::string key;
-        std::string value;
-        boost::tie(key, value) = splitIntoKeyValue(*iParam);
-        if(key.empty()) {
-          result[*iParam] = "";
-        } else if(value.empty()) {
-          result[urlDecode(key)] = "";
-        } else {
-          result[urlDecode(key)] = urlDecode(value);
-        }
-      }
-    }
-    return result;
-  } // parseParameter
-
   const char* kHandlerApartment = "apartment";
   const char* kHandlerZone = "zone";
   const char* kHandlerDevice = "device";

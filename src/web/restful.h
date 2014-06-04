@@ -186,20 +186,11 @@ namespace dss {
       return m_Method;
     } // getMethod
 
-    const std::string& getParameter(const std::string& _name) const {
-      static const std::string& kEmptyString = "";
-      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
-      if(iEntry != m_Parameter.end()) {
-        return iEntry->second;
-      } else {
-        return kEmptyString;
-      }
-    } // getParameter
+    const std::string getParameter(const std::string& _name) const;
 
     bool hasParameter(const std::string& _name) const {
-      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
-      return iEntry != m_Parameter.end();
-    } // hasParameter
+      return (m_queryString.find("&" + _name + "=") != std::string::npos);
+    }
 
     bool isActive() const {
       if(m_ActiveCallback) {
@@ -219,9 +210,9 @@ namespace dss {
     void splitIntoMethodAndClass(const std::string& _request);
   private:
     std::string m_urlSubPath;
+    std::string m_queryString;
     std::string m_Class;
     std::string m_Method;
-    HashMapStringString m_Parameter;
     boost::function<bool()> m_ActiveCallback;
   };
 

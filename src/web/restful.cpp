@@ -49,10 +49,29 @@ namespace dss {
 
   RestfulRequest::RestfulRequest(const std::string& _request,
                                  const std::string& params)
-    : m_urlSubPath(_request)
+    : m_urlSubPath(_request), m_queryString("&" + params)
   {
     splitIntoMethodAndClass(_request);
-    m_Parameter = parseParameter(params.c_str());
+  }
+
+  const std::string RestfulRequest::getParameter(const std::string& _name) const {
+    static const std::string& kEmptyString = "";
+    size_t end, offset;
+    std::string tmp;
+
+    // we added leading "&" upon init
+    offset = m_queryString.find("&" + _name + "=");
+    if (offset == std::string::npos) {
+      return kEmptyString;
+    }
+
+    offset += _name.length() + 2;
+    end = m_queryString.find('&', offset);
+    tmp = (end == std::string::npos) ?
+      m_queryString.substr(offset) :
+      m_queryString.substr(offset, end - offset);
+
+    return urlDecode(tmp);
   }
 
   /**

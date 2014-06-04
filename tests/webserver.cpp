@@ -80,10 +80,31 @@ BOOST_AUTO_TEST_CASE(testRequestGetClassMethod) {
   BOOST_CHECK(req.getMethod().empty());
 }
 
+BOOST_AUTO_TEST_CASE(testRequestHasParams) {
+  dss::RestfulRequest req("/url", "foo=1&bar=2");
+  BOOST_CHECK(req.hasParameter("foo"));
+  BOOST_CHECK(req.hasParameter("bar"));
+  BOOST_CHECK(!req.hasParameter("gro"));
+
+  req = dss::RestfulRequest("/url", "foo=&bar=");
+  BOOST_CHECK(req.hasParameter("foo"));
+  BOOST_CHECK(req.hasParameter("bar"));
+  BOOST_CHECK(!req.hasParameter("gro"));
+
+  req = dss::RestfulRequest("/url", "ana=b&a=bar");
+  BOOST_CHECK(req.hasParameter("a"));
+  BOOST_CHECK(req.hasParameter("ana"));
+  BOOST_CHECK(!req.hasParameter("na"));
+}
+
 BOOST_AUTO_TEST_CASE(testRestfulParamParser) {
   std::string params;
 
-  dss::RestfulRequest req("device/bla", "name=");
+  params = "ana=b&a=bar";
+  dss::RestfulRequest req("device/setConfig", params);
+  BOOST_CHECK(req.getParameter("a") == "bar");
+
+  req = dss::RestfulRequest("device/bla", "name=");
   BOOST_CHECK(req.hasParameter("name"));
   req = dss::RestfulRequest("device/bla", "name=nonexisting");
   BOOST_CHECK(req.getParameter("name") == "nonexisting");
