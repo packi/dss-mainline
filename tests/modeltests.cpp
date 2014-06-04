@@ -880,7 +880,7 @@ public:
 
 class DummyActionRequestInterface : public ActionRequestInterface {
 public:
-  virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) {
+  virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     m_Log += "callScene(";
@@ -891,24 +891,24 @@ public:
     }
     m_Log += "," + intToString(scene) + ")";
   }
-  virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const std::string _token) {
+  virtual void saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t scene, const std::string _token) {
   }
-  virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) {
+  virtual void undoScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) {
   }
-  virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) {
+  virtual void undoSceneLast(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) {
   }
-  virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) {
+  virtual void blink(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) {
   }
-  virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
-  }
-
-  virtual void increaseOutputChannelValue(AddressableModelItem*, uint16_t, SceneAccessCategory, uint8_t, std::string) {
+  virtual void setValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
   }
 
-  virtual void decreaseOutputChannelValue(AddressableModelItem*, uint16_t, SceneAccessCategory, uint8_t, std::string) {
+  virtual void increaseOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
   }
 
-  virtual void stopOutputChannelValue(AddressableModelItem*, uint16_t, SceneAccessCategory, uint8_t, std::string) {
+  virtual void decreaseOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
+  }
+
+  virtual void stopOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
   }
 
   std::string getLog() {

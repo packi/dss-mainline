@@ -602,7 +602,7 @@ namespace dss {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, "", _forced);
+      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, coDsmApi, "", _forced);
     }
   }
 
@@ -627,7 +627,7 @@ namespace dss {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupBlink(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, "");
+      m_pBusEventSink->onGroupBlink(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, coDsmApi, "");
     }
   }
 
@@ -646,7 +646,7 @@ namespace dss {
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
-      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, _explicit, "");
+      m_pBusEventSink->onGroupUndoScene(this, dsMeterID, _zoneID, _groupID, _originDeviceId, SAC_MANUAL, _sceneID, _explicit, coDsmApi, "");
     }
   }
 
@@ -721,13 +721,18 @@ namespace dss {
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDeviceLocal, dsmDSID);
     pEvent->addParameter(_deviceID);
+    pEvent->addParameter(0); // originDeviceID
     if (_state == 0) {
-      pEvent->addParameter(SceneLocalOff);
+      pEvent->addParameter(SceneLocalOff); // sceneID
     } else if (_state == 1) {
       pEvent->addParameter(SceneLocalOn);
     } else if (_state == 2) {
       pEvent->addParameter(SceneStop);
+    } else {
+      pEvent->addParameter(-1);
     }
+    pEvent->addParameter(coDsmApi); // origin
+    pEvent->addParameter(false); // force
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
@@ -762,7 +767,7 @@ namespace dss {
     loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    m_pBusEventSink->onDeviceCallScene(this, dsmDSID, _deviceID, 0, SAC_MANUAL, _sceneID, "", _forced);
+    m_pBusEventSink->onDeviceCallScene(this, dsmDSID, _deviceID, 0, SAC_MANUAL, _sceneID, coDsmApi, "", _forced);
   }
 
   void DSBusInterface::handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
@@ -781,7 +786,7 @@ namespace dss {
     loginFromCallback();
     dss_dsid_t dsmDSID;
     dsid_helper::toDssDsid(_dsMeterID, dsmDSID);
-    m_pBusEventSink->onDeviceBlink(this, dsmDSID, _deviceID, 0, SAC_MANUAL, "");
+    m_pBusEventSink->onDeviceBlink(this, dsmDSID, _deviceID, 0, SAC_MANUAL, coDsmApi, "");
   }
 
   void DSBusInterface::handleDeviceBlinkCallback(uint8_t _errorCode, void* _userData,
