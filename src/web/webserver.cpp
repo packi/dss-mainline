@@ -413,15 +413,8 @@ namespace dss {
     std::string uri = _info->uri;
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
-    struct in_addr remote;
-    remote.s_addr = htonl(_info->remote_ip);
-    std::string query = (_info->query_string != NULL) ? _info->query_string : "";
-    log("JSON request from "+ std::string(inet_ntoa(remote)) + ": " + uri + "?" + query, lsInfo);
-
     RestfulRequest request(method, _parameter);
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
-
-    log("Processing call to " + method);
 
     std::string result;
     if(m_Handlers[request.getClass()] != NULL) {
@@ -492,8 +485,6 @@ namespace dss {
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
     RestfulRequest request(method, _parameter);
-
-    log("Processing call to " + method);
 
     std::string result;
     try {
@@ -632,13 +623,23 @@ namespace dss {
   void *WebServer::httpRequestCallback(enum mg_event event,
                                        struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
-    if (event != MG_NEW_REQUEST) {
+    if (event != MG_NEW_REQUEST || !_info->uri || !_info->remote_ip) {
       return NULL;
     }
-    std::string uri = _info->uri;
 
     WebServer& self = DSS::getInstance()->getWebServer();
     self.m_SessionManager->getSecurity()->signOff();
+
+    {
+        struct in_addr remote;
+        remote.s_addr = htonl(_info->remote_ip);
+        std::string remote_s(std::string(inet_ntoa(remote)));
+        std::string uri_path(_info->uri);
+        if (_info->query_string) {
+            uri_path += "?" + std::string(_info->query_string);
+        }
+        self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
+    }
 
     HashMapStringString paramMap = parseParameter(_info->query_string);
     const char* cookie = mg_get_header(_connection, "Cookie");
@@ -697,6 +698,7 @@ namespace dss {
       self.m_SessionManager->getSecurity()->authenticate(session);
     }
 
+    std::string uri = _info->uri;
     if (uri.find("/browse/") == 0) {
       return self.httpBrowseProperties(_connection, _info);
     } else if (uri.find("/json/") == 0) {
