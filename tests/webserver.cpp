@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "src/base.h"
+#include "src/sessionmanager.h"
 #include "src/web/json.h"
 #include "src/web/webserver.h"
 #include "src/web/webrequests.h"

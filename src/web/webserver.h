@@ -23,16 +23,13 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
+#include <string>
+#include <boost/shared_ptr.hpp>
+
 #include <external/mongoose/mongoose.h>
 
 #include "src/base.h"
 #include "src/subsystem.h"
-#include "src/session.h"
-#include "src/sessionmanager.h"
-
-#include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #define WEB_SESSION_TIMEOUT_MINUTES 3
 #define WEB_SESSION_LIMIT 30
@@ -43,8 +40,8 @@ namespace dss {
   class PropertyNode;
   class RestfulAPI;
   class WebServerRequestHandlerJSON;
-
-  typedef boost::ptr_map<const int, Session> SessionByID;
+  class Session;
+  class SessionManager;
 
   HashMapStringString parseCookies(const char* _cookies);
   std::string generateCookieString(HashMapStringString _cookies);

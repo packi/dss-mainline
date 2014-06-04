@@ -44,6 +44,8 @@
 #include "src/foreach.h"
 
 #include "src/security/security.h"
+#include "src/session.h"
+#include "src/sessionmanager.h"
 
 #include "src/web/restful.h"
 #include "src/web/restfulapiwriter.h"
