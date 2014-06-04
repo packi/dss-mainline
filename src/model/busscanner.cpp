@@ -62,7 +62,7 @@ namespace dss {
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
-      log(std::string("scanDSMeter: getDSMeterHash") + e.what(), lsFatal);
+      log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsFatal);
       return false;
     }
 
