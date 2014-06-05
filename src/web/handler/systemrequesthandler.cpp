@@ -76,7 +76,6 @@ namespace dss {
         resultObj->addProperty("token", _session->getID());
 
         WebServerResponse response(success(resultObj));
-        response.setCookie("path", "/");
         response.setCookie("token", _session->getID());
         return response;
       } else {
@@ -111,7 +110,6 @@ namespace dss {
           resultObj->addProperty("token", token);
 
           WebServerResponse response(success(resultObj));
-          response.setCookie("path", "/");
           response.setCookie("token", token);
           return response;
         } else {
@@ -149,7 +147,6 @@ namespace dss {
         resultObj->addProperty("token", token);
 
         WebServerResponse response(success(resultObj));
-        response.setCookie("path", "/");
         response.setCookie("token", token);
         return response;
       } else {
@@ -162,7 +159,6 @@ namespace dss {
         m_pSessionManager->removeSession(_session->getID());
       }
       WebServerResponse response(success());
-      response.setCookie("path", "/");
       response.setCookie("token", "");
       return response;
     } else if(_request.getMethod() == "loggedInUser") {

@@ -333,34 +333,8 @@ namespace dss {
       cookie_s.substr(start, end - start);
   }
 
-  std::string generateCookieString(HashMapStringString _cookies) {
-    std::string result = "";
-
-    HashMapStringString::iterator i;
-    std::string path;
-
-    for (i = _cookies.begin(); i != _cookies.end(); i++) {
-      if (i->first == "path") {
-        path = i->second;
-        continue;
-      }
-
-      if (!result.empty()) {
-        result = result + "; ";
-      }
-
-      result = result + i->first + "=" + (i->second);
-    }
-
-    if (!path.empty()) {
-      if (!result.empty()) {
-        result = result + "; ";
-      }
-
-      result = result + "path=" + path;
-    }
-
-    return result;
+  std::string generateCookieString(const std::string& token) {
+    return "token=" + token + "; path=/";
   }
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
@@ -387,10 +361,11 @@ namespace dss {
           }
         }
         std::string cookies;
-        if(response.getCookies().empty()) {
-          cookies = generateCookieString(_injectedCookies);
-        } else {
-          cookies = generateCookieString(response.getCookies());
+        if (response.getCookies().empty()) {
+          cookies = generateCookieString(_injectedCookies["token"]);
+        } else if (_injectedCookies.find("token") != _injectedCookies.end()) {
+          // we only add tokens, so it must be token
+          cookies = generateCookieString(response.getCookies().find("token")->second);
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 200, cookies, result);

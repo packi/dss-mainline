@@ -30,24 +30,17 @@
 BOOST_AUTO_TEST_SUITE(Webserver)
 
 BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
-  boost::shared_ptr<dss::JSONObject> foo(new dss::JSONObject());
-  dss::WebServerResponse response(foo);
-
   const char set_cookie_str[] =
     "token=4a9b442b2554e794a126f761b953c3b88b5d67d1f665a7e1590b8df67b9c6846; path=/";
   const char static_token[] =
     "4a9b442b2554e794a126f761b953c3b88b5d67d1f665a7e1590b8df67b9c6846";
-  response.setCookie("path", "/");
-  response.setCookie("token", static_token);
-  std::string cookie_string = dss::generateCookieString(response.getCookies());
+  std::string cookie_string = dss::generateCookieString(static_token);
   BOOST_CHECK_EQUAL(cookie_string, set_cookie_str);
   BOOST_CHECK_EQUAL(dss::extractToken(cookie_string.c_str()), static_token);
 
   // also check current token generator
   std::string token = dss::SessionTokenGenerator::generate();
-  response.setCookie("path", "/");
-  response.setCookie("token", token);
-  cookie_string = dss::generateCookieString(response.getCookies());
+  cookie_string = dss::generateCookieString(token);
   BOOST_CHECK_EQUAL(dss::extractToken(cookie_string.c_str()), token);
 
   const char static firefox_token[] =
