@@ -62,7 +62,7 @@ namespace dss {
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
-      log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsFatal);
+      log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsWarning);
       return false;
     }
 
@@ -90,7 +90,7 @@ namespace dss {
           return true;
         }
       } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting dSMSpecs", lsFatal);
+        log("scanDSMeter: Error getting dSMSpecs", lsWarning);
         return false;
       }
 
@@ -98,7 +98,7 @@ namespace dss {
       try {
         zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
       } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting ZoneIDs", lsFatal);
+        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
         return false;
       }
 
@@ -142,7 +142,7 @@ namespace dss {
         }
       }
     } catch(BusApiError& e) {
-      log("scanZone: Error getDevicesInZone: " + std::string(e.what()), lsFatal);
+      log("scanZone: Error getDevicesInZone: " + std::string(e.what()), lsWarning);
     }
 
     return (scanGroupsOfZone(_dsMeter, _zone) && scanStatusOfZone(_dsMeter, _zone));
@@ -337,7 +337,7 @@ namespace dss {
     try {
       groups = m_Interface.getGroups(_dsMeter->getDSID(), _zone->getID());
     } catch (BusApiError& e) {
-      log("scanDSMeter: Error getting getGroups", lsFatal);
+      log("scanDSMeter: Error getting getGroups", lsWarning);
       return false;
     }
 
