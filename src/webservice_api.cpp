@@ -107,7 +107,8 @@ void WebserviceApartment::doModelChanged(ChangeType type,
   }
 
   url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-  params = "apartmentChangeType=";
+  params = "dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  params += "&apartmentChangeType=";
   switch (type) {
   case ApartmentChange:
       params += "Apartment";
