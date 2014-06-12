@@ -31,6 +31,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <curl/curl.h>
+
 #include "foreach.h"
 #include <limits>
 
@@ -304,6 +306,29 @@ namespace dss {
     }
     return result;
   } // urlDecode
+
+  /**
+   * http://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_reserved_characters
+   * mongoose url_encode does not escape "$,;()";
+   */
+  std::string urlEncode(const std::string& _in) {
+    static CURL *handle = NULL;
+    char *escaped;
+
+    if (handle == NULL) {
+      handle = curl_easy_init();
+      if (!handle) {
+        throw std::bad_alloc();
+      }
+    }
+    escaped = curl_easy_escape(handle, _in.c_str(), _in.length());
+    if (!escaped) {
+      throw std::bad_alloc();
+    }
+    std::string ret = escaped;
+    curl_free(escaped);
+    return ret;
+  }
 
   std::string truncateUTF8String(const std::string& _in, int _maxBytes) {
     assert(_maxBytes >= 0);
