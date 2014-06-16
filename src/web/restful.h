@@ -160,88 +160,36 @@ namespace dss {
     bool hasClass(const std::string& _name);
   }; // RestfulAPI
 
-  class RestfulParameterType {
-  private:
-    std::string m_Name;
-  public:
-    RestfulParameterType(const std::string& _name)
-    : m_Name(_name)
-    { }
-
-    virtual ~RestfulParameterType() {}
-
-    const std::string& getName() { return m_Name; }
-
-    virtual bool checkValue(const std::string& _value) = 0;
-  }; // RestfulParameterType
-
-  class RestfulParameterTypeString : public RestfulParameterType {
-  public:
-    virtual ~RestfulParameterTypeString() {}
-
-    virtual bool checkValue(const std::string& _value) { return true; }
-  }; // RestfulParameterTypeString
-
-  class RestfulParameterTypeInteger : public RestfulParameterType {
-  public:
-    virtual ~RestfulParameterTypeInteger() {}
-
-    virtual bool checkValue(const std::string& _value) {
-      try {
-        strToInt(_value);
-      } catch(const std::invalid_argument& _arg) {
-        return false;
-      }
-      return true;
-    }
-  }; // RestfulParameterTypeInteger
-
   class RestfulRequest {
   public:
-    RestfulRequest(const std::string& _request, const HashMapStringString& _parameter)
-    : m_Parameter(_parameter)
-    {
-      splitIntoMethodAndClass(_request);
+    /**
+     * @_request -- in '/json/system/login' -- the '/system/login' part
+     * @_parameter -- the query part of the url
+     */
+    RestfulRequest(const std::string& _request, const std::string& params);
+
+    const std::string& getUrlPath() const {
+      return m_urlSubPath;
     }
 
-    RestfulRequest(const std::string& _request, const HashMapStringString& _parameter, const HashMapStringString& _cookies)
-    : m_Parameter(_parameter),
-      m_Cookies(_cookies)
-    {
-      splitIntoMethodAndClass(_request);
-    }
-
+    /**
+     * @ret /[json|icon|browse]/class/method
+     */
     const std::string& getClass() const {
       return m_Class;
     } // getClass
 
+    /**
+     * @ret /[json|icon|browse]/class/method
+     */
     const std::string& getMethod() const {
       return m_Method;
     } // getMethod
 
-    const std::string& getParameter(const std::string& _name) const {
-      static const std::string& kEmptyString = "";
-      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
-      if(iEntry != m_Parameter.end()) {
-        return iEntry->second;
-      } else {
-        return kEmptyString;
-      }
-    } // getParameter
+    const std::string getParameter(const std::string& _name) const;
 
     bool hasParameter(const std::string& _name) const {
-      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
-      return iEntry != m_Parameter.end();
-    } // hasParameter
-
-    const std::string& getCookieValue(const std::string& _name) const {
-      static const std::string& kEmptyString = "";
-      HashMapStringString::const_iterator iEntry = m_Parameter.find(_name);
-      if(iEntry != m_Parameter.end()) {
-        return iEntry->second;
-      } else {
-        return kEmptyString;
-      }
+      return (m_queryString.find("&" + _name + "=") != std::string::npos);
     }
 
     bool isActive() const {
@@ -255,25 +203,17 @@ namespace dss {
       m_ActiveCallback = _value;
     }
   private:
-    void splitIntoMethodAndClass(const std::string& _request) {
-      size_t pos = _request.find('/');
-      m_Class = _request.substr(0, pos);
-      m_Method = _request.substr(pos+1, std::string::npos);
-    } // splitIntoMethodAndClass
+    /**
+     * @_request -- '/system/login'
+     * class -> 'system', method -> login everything till EOS
+     */
+    void splitIntoMethodAndClass(const std::string& _request);
   private:
+    std::string m_urlSubPath;
+    std::string m_queryString;
     std::string m_Class;
     std::string m_Method;
-    HashMapStringString m_Parameter;
-    HashMapStringString m_Cookies;
     boost::function<bool()> m_ActiveCallback;
-  };
-
-  class Session;
-
-  class RestfulRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
-    virtual ~RestfulRequestHandler() {}; // please the compiler (virtual dtor)
   };
 
 } // namespace dss

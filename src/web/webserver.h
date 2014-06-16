@@ -23,16 +23,13 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
-#include <mongoose/mongoose.h>
+#include <string>
+#include <boost/shared_ptr.hpp>
+
+#include <external/mongoose/mongoose.h>
 
 #include "src/base.h"
 #include "src/subsystem.h"
-#include "src/session.h"
-#include "src/sessionmanager.h"
-
-#include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #define WEB_SESSION_TIMEOUT_MINUTES 3
 #define WEB_SESSION_LIMIT 30
@@ -42,9 +39,13 @@ namespace dss {
   class IDeviceInterface;
   class PropertyNode;
   class RestfulAPI;
+  class RestfulRequest;
   class WebServerRequestHandlerJSON;
+  class Session;
+  class SessionManager;
 
-  typedef boost::ptr_map<const int, Session> SessionByID;
+  HashMapStringString parseCookies(const char* _cookies);
+  std::string generateCookieString(HashMapStringString _cookies);
 
   class WebServer : public Subsystem {
   private:
@@ -57,21 +58,15 @@ namespace dss {
     void setupAPI();
     void instantiateHandlers();
     void publishJSLogfiles();
-    HashMapStringString parseCookies(const char* _cookies);
-    std::string generateCookieString(HashMapStringString _cookies);
   protected:
     void *httpBrowseProperties(struct mg_connection* _connection,
-                               const struct mg_request_info* _info);
+                               RestfulRequest &request);
     void *jsonHandler(struct mg_connection* _connection,
-                      const struct mg_request_info* _info,
-                      HashMapStringString _parameter,
-                      HashMapStringString _cookies,
+                      RestfulRequest &request,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     void *iconHandler(struct mg_connection* _connection,
-                      const struct mg_request_info* _info,
-                      HashMapStringString _parameter,
-                      HashMapStringString _cookies,
+                      RestfulRequest &request,
                       HashMapStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     static void *httpRequestCallback(enum mg_event event, 

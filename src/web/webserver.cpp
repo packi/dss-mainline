@@ -44,6 +44,8 @@
 #include "src/foreach.h"
 
 #include "src/security/security.h"
+#include "src/session.h"
+#include "src/sessionmanager.h"
 
 #include "src/web/restful.h"
 #include "src/web/restfulapiwriter.h"
@@ -265,26 +267,6 @@ namespace dss {
 
   void WebServer::doStart() { } // start
 
-  HashMapStringString parseParameter(const char* _params) {
-    HashMapStringString result;
-    if(_params != NULL) {
-      std::vector<std::string> paramList = splitString(_params, '&');
-      for(std::vector<std::string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
-        std::string key;
-        std::string value;
-        boost::tie(key, value) = splitIntoKeyValue(*iParam);
-        if(key.empty()) {
-          result[*iParam] = "";
-        } else if(value.empty()) {
-          result[urlDecode(key)] = "";
-        } else {
-          result[urlDecode(key)] = urlDecode(value);
-        }
-      }
-    }
-    return result;
-  } // parseParameter
-
   const char* kHandlerApartment = "apartment";
   const char* kHandlerZone = "zone";
   const char* kHandlerDevice = "device";
@@ -328,7 +310,7 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  HashMapStringString WebServer::parseCookies(const char* _cookies) {
+  HashMapStringString parseCookies(const char* _cookies) {
       HashMapStringString result;
 
       if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
@@ -371,7 +353,7 @@ namespace dss {
       return result;
   }
 
-  std::string WebServer::generateCookieString(HashMapStringString _cookies) {
+  std::string generateCookieString(HashMapStringString _cookies) {
     std::string result = "";
 
     HashMapStringString::iterator i;
@@ -402,25 +384,11 @@ namespace dss {
   }
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
-                               const struct mg_request_info* _info,
-                               HashMapStringString _parameter,
-                               HashMapStringString _cookies,
+                               RestfulRequest &request,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
-    const std::string urlid = "/json/";
 
-    std::string uri = _info->uri;
-    std::string method = uri.substr(uri.find(urlid) + urlid.size());
-
-    struct in_addr remote;
-    remote.s_addr = htonl(_info->remote_ip);
-    std::string query = (_info->query_string != NULL) ? _info->query_string : "";
-    log("JSON request from "+ std::string(inet_ntoa(remote)) + ": " + uri + "?" + query, lsInfo);
-
-    RestfulRequest request(method, _parameter, _cookies);
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
-
-    log("Processing call to " + method);
 
     std::string result;
     if(m_Handlers[request.getClass()] != NULL) {
@@ -469,7 +437,7 @@ namespace dss {
         emitHTTPJsonPacket(_connection, 500, "", result);
       }
     } else {
-      log("Unknown function '" + method + "'", lsError);
+      log("Unknown function '" + request.getUrlPath() + "'", lsError);
       std::ostringstream sstream;
       sstream << "{" << "\"ok\"" << ":" << "false" << ",";
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
@@ -481,27 +449,16 @@ namespace dss {
   } // jsonHandler
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
-                               const struct mg_request_info* _info,
-                               HashMapStringString _parameter,
-                               HashMapStringString _cookies,
+                               RestfulRequest &request,
                                HashMapStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
-    const std::string urlid = "/icons/";
-
-    std::string uri = _info->uri;
-    std::string method = uri.substr(uri.find(urlid) + urlid.size());
-
-    RestfulRequest request(method, _parameter, _cookies);
-
-    log("Processing call to " + method);
-
     std::string result;
     try {
       if (_session == NULL) {
         throw SecurityException("not logged in");
       }
 
-      if (method != "getDeviceIcon") {
+      if (request.getClass() != "getDeviceIcon") {
         throw std::runtime_error("unhandled function");
       }
 
@@ -569,13 +526,9 @@ namespace dss {
   } // iconHandler
 
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                       const struct mg_request_info* _info) {
-    const std::string urlid = "/browse";
-    std::string uri = _info->uri;
-    HashMapStringString paramMap = parseParameter(_info->query_string);
-
-    std::string path = uri.substr(uri.find(urlid) + urlid.size());
-    if(path.empty()) {
+                                        RestfulRequest &request) {
+    std::string path = request.getUrlPath();
+    if (path.empty()) {
       path = "/";
     }
 
@@ -632,22 +585,45 @@ namespace dss {
   void *WebServer::httpRequestCallback(enum mg_event event,
                                        struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
-    if (event != MG_NEW_REQUEST) {
+    if (event != MG_NEW_REQUEST || !_info->uri || !_info->remote_ip) {
       return NULL;
     }
-    std::string uri = _info->uri;
+
+    std::string uri_path(_info->uri);
+    size_t offset = uri_path.find('/', 1);
+    if (std::string::npos == offset) {
+        return NULL;
+    }
+    std::string toplevel = uri_path.substr(0, offset);
+    std::string sublevel = uri_path.substr(offset);
+
+    if (toplevel != "/browse" && toplevel != "/json" && toplevel != "/icons") {
+      // quit early, not our request
+      return NULL;
+    }
 
     WebServer& self = DSS::getInstance()->getWebServer();
-    self.m_SessionManager->getSecurity()->signOff();
+    self.m_SessionManager->getSecurity()->signOff(); // protect log call below
 
-    HashMapStringString paramMap = parseParameter(_info->query_string);
+    {
+        struct in_addr remote;
+        remote.s_addr = htonl(_info->remote_ip);
+        std::string remote_s(std::string(inet_ntoa(remote)));
+        std::string uri_path(_info->uri);
+        if (_info->query_string) {
+            uri_path += "?" + std::string(_info->query_string);
+        }
+        self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
+    }
+
+    RestfulRequest request(sublevel, _info->query_string ?: "");
     const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapStringString cookies = self.parseCookies(cookie);
+    HashMapStringString cookies = parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
     std::string token = cookies["token"];
-    if(token.empty()) {
-      token = paramMap["token"];
+    if (token.empty()) {
+      token = request.getParameter("token");
     }
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
@@ -697,14 +673,12 @@ namespace dss {
       self.m_SessionManager->getSecurity()->authenticate(session);
     }
 
-    if (uri.find("/browse/") == 0) {
-      return self.httpBrowseProperties(_connection, _info);
-    } else if (uri.find("/json/") == 0) {
-      return self.jsonHandler(_connection, _info, paramMap, cookies,
-                              injectedCookies, session);
-    } else if (uri.find("/icons/") == 0) {
-      return self.iconHandler(_connection, _info, paramMap, cookies,
-                              injectedCookies, session);
+    if (toplevel == "/browse") {
+      return self.httpBrowseProperties(_connection, request);
+    } else if (toplevel == "/json") {
+      return self.jsonHandler(_connection, request, injectedCookies, session);
+    } else if (toplevel == "/icons") {
+      return self.iconHandler(_connection, request, injectedCookies, session);
     }
 
     return NULL;

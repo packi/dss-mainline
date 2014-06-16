@@ -85,6 +85,7 @@ namespace dss {
   std::string join(const std::vector<std::string>& _strings, const std::string& _delimiter);
 
   std::string urlDecode(const std::string& _in);
+  std::string urlEncode(const std::string& _in);
 
   std::string truncateUTF8String(const std::string& _in, int _maxBytes);
 
