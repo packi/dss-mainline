@@ -2412,10 +2412,16 @@ namespace dss {
       deviceBinaryInputEvent(logger);
     } else if (m_evtName == "deviceSensorEvent") {
       deviceSensorEvent(logger);
-    } else if (m_evtName == "deviceSensorValue") {
-      deviceSensorValue(logger);
     } else if (m_evtName == "stateChange") {
       stateChange(logger);
+    } else if (m_evtName == "deviceSensorValue") {
+      logger.reset(new ScriptLogger(
+          DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
+      if (logger == NULL) {
+        Logger::getInstance()->log("SystemEventLog::run(): could not init logger!");
+        return;
+      }
+      deviceSensorValue(logger);
     }
   }
 
