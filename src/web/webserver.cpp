@@ -589,8 +589,21 @@ namespace dss {
       return NULL;
     }
 
+    std::string uri_path(_info->uri);
+    size_t offset = uri_path.find('/', 1);
+    if (std::string::npos == offset) {
+        return NULL;
+    }
+    std::string toplevel = uri_path.substr(0, offset);
+    std::string sublevel = uri_path.substr(offset);
+
+    if (toplevel != "/browse" && toplevel != "/json" && toplevel != "/icons") {
+      // quit early, not our request
+      return NULL;
+    }
+
     WebServer& self = DSS::getInstance()->getWebServer();
-    self.m_SessionManager->getSecurity()->signOff();
+    self.m_SessionManager->getSecurity()->signOff(); // protect log call below
 
     {
         struct in_addr remote;
@@ -602,15 +615,6 @@ namespace dss {
         }
         self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
     }
-
-    std::string uri_path(_info->uri);
-    size_t offset = uri_path.find('/', 1);
-    if (std::string::npos == offset) {
-        return NULL;
-    }
-    // TODO evtl, move this splitting into RestfulRequest
-    std::string toplevel = uri_path.substr(0, offset);
-    std::string sublevel = uri_path.substr(offset);
 
     RestfulRequest request(sublevel, _info->query_string ?: "");
     const char* cookie = mg_get_header(_connection, "Cookie");
