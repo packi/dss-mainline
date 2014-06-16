@@ -164,6 +164,7 @@ namespace dss {
   private:
     bool handleModelEvents();
     bool handleDeferredModelEvents();
+    void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
     void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
