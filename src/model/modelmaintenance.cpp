@@ -265,6 +265,27 @@ namespace dss {
     }
   } // writeConfiguration
 
+  void ModelMaintenance::handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID) {
+    std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
+    if (_zoneID == 0) {
+      zonesToUpdate = m_pApartment->getZones();
+    } else {
+      zonesToUpdate.push_back(m_pApartment->getZone(_zoneID));
+    }
+    foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
+      if (_groupID == 0) {
+        foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
+          pGroup->setOnState(_origin, _sceneID);
+        }
+      } else {
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+        if(pGroup != NULL) {
+          pGroup->setOnState(_origin, _sceneID);
+        }
+      }
+    }
+  }
+
   bool ModelMaintenance::handleDeferredModelEvents() {
     if (m_DeferredEvents.empty()) {
       return false;
@@ -307,6 +328,7 @@ namespace dss {
               if (mEvent->getForcedFlag()) {
                 pEvent->setProperty("forced", "true");
               }
+              handleDeferredModelStateChanges(callOrigin, zoneID, groupID, sceneID);
               raiseEvent(pEvent);
             }
             // finished deferred processing of this event
@@ -323,6 +345,7 @@ namespace dss {
               if (mEvent->getForcedFlag()) {
                 pEvent->setProperty("forced", "true");
               }
+              handleDeferredModelStateChanges(callOrigin, zoneID, groupID, sceneID);
               raiseEvent(pEvent);
               mEvent->setCalled();
             }
@@ -874,28 +897,27 @@ namespace dss {
           Set s = zone->getDevices().getByGroup(_groupID);
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
           s.perform(act);
+        }
 
-          std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
-          if(_zoneID == 0) {
-            zonesToUpdate = m_pApartment->getZones();
+        std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
+        if(_zoneID == 0) {
+          zonesToUpdate = m_pApartment->getZones();
+        } else {
+          zonesToUpdate.push_back(m_pApartment->getZone(_zoneID));
+        }
+        foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
+          if(_groupID == 0) {
+            foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
+              pGroup->setLastCalledScene(_sceneID & 0x00ff);
+            }
           } else {
-            zonesToUpdate.push_back(zone);
-          }
-          foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
-            if(_groupID == 0) {
-              foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
-                pGroup->setLastCalledScene(_sceneID & 0x00ff);
-                pGroup->setOnState(_origin, _sceneID);
-              }
-            } else {
-              boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-              if(pGroup != NULL) {
-                pGroup->setLastCalledScene(_sceneID & 0x00ff);
-                pGroup->setOnState(_origin, _sceneID);
-              }
+            boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+            if(pGroup != NULL) {
+              pGroup->setLastCalledScene(_sceneID & 0x00ff);
             }
           }
         }
+
         boost::shared_ptr<Event> pEvent;
         pEvent.reset(new Event("callSceneBus", group));
         pEvent->setProperty("sceneID", intToString(_sceneID));
