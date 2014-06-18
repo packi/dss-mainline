@@ -46,6 +46,7 @@ namespace dss {
 
   std::string extractToken(const char * _cookie);
   std::string generateCookieString(const std::string &token);
+  std::string generateRevokeCookieString();
 
   class WebServer : public Subsystem {
   private:

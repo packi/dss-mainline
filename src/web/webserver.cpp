@@ -337,6 +337,14 @@ namespace dss {
     return "token=" + token + "; path=/";
   }
 
+  /**
+   * emit 'Set-Cookie' header with same name but 'expires' in the past
+   * http://tools.ietf.org/html/rfc6265#section-4.1.2
+   */
+  std::string generateRevokeCookieString() {
+    return "token=; path=/; expires=Wed, 29 April 1970 12:00:00 GMT";
+  }
+
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
                                bool emitTrustedLoginToken,
@@ -362,7 +370,7 @@ namespace dss {
         }
         std::string cookies;
         if (response.isRevokeSessionToken()) {
-          cookies = generateCookieString("");
+          cookies = generateRevokeCookieString();
         } else if (response.isPublishSessionToken()) {
           // CAUTION: the session is new, the _session argument
           // of this function is NULL

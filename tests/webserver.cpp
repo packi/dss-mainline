@@ -50,6 +50,11 @@ BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
   // revoke cookie string
   cookie_string = dss::generateCookieString("");
   BOOST_CHECK_EQUAL(cookie_string, "token=; path=/");
+
+  const char static_revoke_cookie[] =
+    "token=; path=/; expires=Wed, 29 April 1970 12:00:00 GMT";
+  cookie_string = dss::generateRevokeCookieString();
+  BOOST_CHECK_EQUAL(cookie_string, static_revoke_cookie);
 }
 
 BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {
