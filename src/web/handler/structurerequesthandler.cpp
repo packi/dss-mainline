@@ -445,17 +445,15 @@ namespace dss {
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     if (((dev->getDeviceType() == DEVICE_TYPE_AKM) ||
-        ((dev->getDeviceType() == DEVICE_TYPE_TKM) && !dev->hasOutput())) &&
-        (dev->getGroupsCount() > 1)) {
+         ((dev->getDeviceType() == DEVICE_TYPE_TKM) && !dev->hasOutput()))
+        && (dev->getGroupsCount() > 1)) {
       for (int g = 0; g < dev->getGroupsCount(); g++) {
         boost::shared_ptr<Group> oldGroup = dev->getGroupByIndex(g);
-
-        if ((oldGroup != NULL) && (oldGroup->getID() >= GroupIDAppUserMin)) {
+        if ((oldGroup != NULL) && (oldGroup->getID() >= GroupIDAppUserMin) && (oldGroup->getID() <= GroupIDAppUserMax)) {
           manipulator.deviceRemoveFromGroup(dev, oldGroup);
         }
       }
     }
-
     manipulator.deviceAddToGroup(dev, gr);
 
     std::vector<boost::shared_ptr<Device> > modifiedDevices;
@@ -466,8 +464,16 @@ namespace dss {
       try {
         boost::shared_ptr<Device> pPartnerDevice;
 
+        // Remove slave/partner device from all other user groups
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+        for (int g = 0; g < pPartnerDevice->getGroupsCount(); g++) {
+          boost::shared_ptr<Group> oldGroup = pPartnerDevice->getGroupByIndex(g);
+          if ((oldGroup != NULL) && (oldGroup->getID() >= GroupIDAppUserMin) && (oldGroup->getID() <= GroupIDAppUserMax)) {
+            manipulator.deviceRemoveFromGroup(pPartnerDevice, oldGroup);
+          }
+        }
         manipulator.deviceAddToGroup(pPartnerDevice, gr);
+
       } catch(std::runtime_error& e) {
         return failure("Could not find partner device with dSUID '" + dsuid2str(next) + "'");
       }
@@ -478,6 +484,13 @@ namespace dss {
         std::vector<boost::shared_ptr<Device> > devices = m_Apartment.getDevicesVector();
         foreach (const boost::shared_ptr<Device>& device, devices) {
           if (dev->isOemCoupledWith(device)) {
+            // Remove coupled OEM devices from all other user groups as well
+            for (int g = 0; g < device->getGroupsCount(); g++) {
+              boost::shared_ptr<Group> oldGroup = device->getGroupByIndex(g);
+              if ((oldGroup != NULL) && (oldGroup->getID() >= GroupIDAppUserMin) && (oldGroup->getID() <= GroupIDAppUserMax)) {
+                manipulator.deviceRemoveFromGroup(device, oldGroup);
+              }
+            }
             manipulator.deviceAddToGroup(device, gr);
             modifiedDevices.push_back(device);
           }
