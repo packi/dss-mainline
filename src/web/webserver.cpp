@@ -339,7 +339,7 @@ namespace dss {
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               HashMapStringString _injectedCookies,
+                               bool emitTrustedLoginToken,
                                boost::shared_ptr<Session> _session) {
 
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
@@ -361,11 +361,11 @@ namespace dss {
           }
         }
         std::string cookies;
-        if (response.getCookies().empty()) {
-          cookies = generateCookieString(_injectedCookies["token"]);
-        } else if (_injectedCookies.find("token") != _injectedCookies.end()) {
+        if (!response.getCookies().empty()) {
           // we only add tokens, so it must be token
           cookies = generateCookieString(response.getCookies().find("token")->second);
+        } else if (emitTrustedLoginToken) {
+          cookies = generateCookieString(_session->getID());
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 200, cookies, result);
@@ -405,7 +405,7 @@ namespace dss {
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               HashMapStringString _injectedCookies,
+                               bool emitTrustedLoginToken,
                                boost::shared_ptr<Session> _session) {
     std::string result;
     try {
@@ -581,7 +581,7 @@ namespace dss {
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
-    HashMapStringString injectedCookies;
+    bool emitTrustedLoginToken = false;
 
     // if we're coming from a trusted port, impersonate that user and start
     // a new session on his behalf
@@ -611,11 +611,8 @@ namespace dss {
             }
             self.log("Registered new JSON session for trusted port (" + newToken + ")");
             session = self.m_SessionManager->getSession(newToken);
-            injectedCookies["path"] = "/";
-            injectedCookies["token"] = newToken;
-            if (session != NULL) {
-              session->inheritUserFromSecurity();
-            }
+            session->inheritUserFromSecurity();
+            emitTrustedLoginToken = true;
           }
         }
       }
@@ -629,9 +626,9 @@ namespace dss {
     if (toplevel == "/browse") {
       return self.httpBrowseProperties(_connection, request);
     } else if (toplevel == "/json") {
-      return self.jsonHandler(_connection, request, injectedCookies, session);
+      return self.jsonHandler(_connection, request, emitTrustedLoginToken, session);
     } else if (toplevel == "/icons") {
-      return self.iconHandler(_connection, request, injectedCookies, session);
+      return self.iconHandler(_connection, request, emitTrustedLoginToken, session);
     }
 
     return NULL;

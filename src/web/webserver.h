@@ -63,11 +63,11 @@ namespace dss {
                                RestfulRequest &request);
     void *jsonHandler(struct mg_connection* _connection,
                       RestfulRequest &request,
-                      HashMapStringString _injectedCookies,
+                      bool emitTrustedLoginToken,
                       boost::shared_ptr<Session> _session);
     void *iconHandler(struct mg_connection* _connection,
                       RestfulRequest &request,
-                      HashMapStringString _injectedCookies,
+                      bool emitTrustedLoginToken,
                       boost::shared_ptr<Session> _session);
     static void *httpRequestCallback(enum mg_event event, 
                                      struct mg_connection* _connection,
