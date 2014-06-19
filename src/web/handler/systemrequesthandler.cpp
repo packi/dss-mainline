@@ -76,7 +76,7 @@ namespace dss {
         resultObj->addProperty("token", _session->getID());
 
         WebServerResponse response(success(resultObj));
-        response.setCookie("token", _session->getID());
+        response.setPublishSessionToken(_session->getID());
         return response;
       } else {
         std::string userRaw = _request.getParameter("user");
@@ -110,7 +110,7 @@ namespace dss {
           resultObj->addProperty("token", token);
 
           WebServerResponse response(success(resultObj));
-          response.setCookie("token", token);
+          response.setPublishSessionToken(token);
           return response;
         } else {
           log("Authentication failed for user '" + user + "'", lsError);
@@ -147,7 +147,7 @@ namespace dss {
         resultObj->addProperty("token", token);
 
         WebServerResponse response(success(resultObj));
-        response.setCookie("token", token);
+        response.setPublishSessionToken(token);
         return response;
       } else {
         log("Application-Authentication failed", lsError);
@@ -159,7 +159,7 @@ namespace dss {
         m_pSessionManager->removeSession(_session->getID());
       }
       WebServerResponse response(success());
-      response.setCookie("token", "");
+      response.setRevokeSessionToken();
       return response;
     } else if(_request.getMethod() == "loggedInUser") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

@@ -46,6 +46,10 @@ BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
   const char static firefox_token[] =
 	  "csrftoken=ArERl0K0L; compact_display_state=true; token=ccf67fe364c";
   BOOST_CHECK_EQUAL(dss::extractToken(firefox_token), "ccf67fe364c");
+
+  // revoke cookie string
+  cookie_string = dss::generateCookieString("");
+  BOOST_CHECK_EQUAL(cookie_string, "token=; path=/");
 }
 
 BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {

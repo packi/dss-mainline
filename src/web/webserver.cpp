@@ -361,9 +361,12 @@ namespace dss {
           }
         }
         std::string cookies;
-        if (!response.getCookies().empty()) {
-          // we only add tokens, so it must be token
-          cookies = generateCookieString(response.getCookies().find("token")->second);
+        if (response.isRevokeSessionToken()) {
+          cookies = generateCookieString("");
+        } else if (response.isPublishSessionToken()) {
+          // CAUTION: the session is new, the _session argument
+          // of this function is NULL
+          cookies = generateCookieString(response.getNewSessionToken());
         } else if (emitTrustedLoginToken) {
           cookies = generateCookieString(_session->getID());
         }
