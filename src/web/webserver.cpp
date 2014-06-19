@@ -310,17 +310,22 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
+  /**
+   * extractToken
+   * http://tools.ietf.org/html/rfc6265#section-4.1.1
+   */
   std::string extractToken(const char *_cookie) {
     if (!_cookie) {
       return "";
     }
 
-    std::string cookie_s(_cookie);
-    size_t start = cookie_s.find("token=");
+    // according spec there has to be a space
+    std::string cookie_s = "; " + std::string(_cookie);
+    size_t start = cookie_s.find("; token=");
     if (std::string::npos == start) {
       return "";
     }
-    start += strlen("token=");
+    start += strlen("; token=");
 
     size_t end = cookie_s.find(';', start);
     return (end == std::string::npos) ?
