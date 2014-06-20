@@ -57,6 +57,20 @@ BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
   BOOST_CHECK_EQUAL(cookie_string, static_revoke_cookie);
 }
 
+BOOST_AUTO_TEST_CASE(testExtractTrustedUser) {
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser(NULL), "");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"foo"), "");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"foo\""), "foo");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"\""), "");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"dssadmin\""), "dssadmin");
+  static char double_suffix[] = "Digest fusername=\"bar\", username=\"match\"";
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser(double_suffix), "match");
+  static char queer_value[] = "Digest qpop=\"username=\", username=\"match\"";
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser(queer_value), "match");
+  // this fails: since we are not really parsing the string
+  // static char queer_value[] = "Digest qpop=\" username=\", username=\"match\"";
+}
+
 BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {
   std::string toplevel, sublevel;
   std::string uri_path = "/json/event/subscribe";

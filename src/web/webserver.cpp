@@ -345,6 +345,32 @@ namespace dss {
     return "token=; path=/; expires=Wed, 29 April 1970 12:00:00 GMT";
   }
 
+  /**
+   * extractAuthenticatedUser
+   * http://tools.ietf.org/html/rfc2617
+   */
+  std::string extractAuthenticatedUser(const char *_header) {
+    if (!_header) {
+      return "";
+    }
+
+    // header:= Digest SP [user | qopc | etc]+ comma separated
+    // user:= "username" "=" quoted-string
+    static const char key[] = " username=\"";
+
+    std::string header_s(_header);
+    size_t start = header_s.find(key);
+    if (std::string::npos == start) {
+      return "";
+    }
+    start += strlen(key);
+    size_t end = header_s.find("\"", start);
+    if (std::string::npos == end) {
+      return "";
+    }
+    return header_s.substr(start, end - start);
+  }
+
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
                                bool emitTrustedLoginToken,
@@ -594,37 +620,30 @@ namespace dss {
     }
     bool emitTrustedLoginToken = false;
 
-    // if we're coming from a trusted port, impersonate that user and start
-    // a new session on his behalf
-    if(((session == NULL) || (session->getUser() == NULL)) &&
-            (_info->local_port == self.m_TrustedPort)) {
-      const char* digestCString = mg_get_header(_connection, "Authorization");
-      if(digestCString > 0) {
-        std::string digest = digestCString;
-        const std::string userNamePrefix = "username=\"";
-        std::string::size_type userNamePos = digest.find(userNamePrefix);
-        std::string::size_type userNameEnd =
-          digest.find("\"", userNamePos + userNamePrefix.size() - 1);
-        if((userNamePos != std::string::npos) &&
-           (userNameEnd != std::string::npos)) {
-          std::string userName = digest.substr(userNamePos + userNamePrefix.size(),
-                                               userNameEnd - userNamePos - 1);
-          self.log("Logging-in from a trusted port as '" + userName + "'");
-          if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
-            self.log("Unknown user", lsInfo);
+    // lighttpd is proxying to our trusted port. We trust that it
+    // properly authenticated the user and just filter the HTTP
+    // Authorization header for the username
+    if (((session == NULL) || (session->getUser() == NULL)) &&
+        (_info->local_port == self.m_TrustedPort)) {
+      const char *auth_header = mg_get_header(_connection, "Authorization");
+      std::string userName = extractAuthenticatedUser(auth_header);
+
+      if (!userName.empty()) {
+        self.log("Logging-in from a trusted port as '" + userName + "'");
+        if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
+          self.log("Unknown user", lsInfo);
+          return NULL;
+        }
+        if (session == NULL) {
+          std::string newToken = self.m_SessionManager->registerSession();
+          if (newToken.empty()) {
+            self.log("Session limit reached", lsError);
             return NULL;
           }
-          if (session == NULL) {
-            std::string newToken = self.m_SessionManager->registerSession();
-            if (newToken.empty()) {
-              self.log("Session limit reached", lsError);
-              return NULL;
-            }
-            self.log("Registered new JSON session for trusted port (" + newToken + ")");
-            session = self.m_SessionManager->getSession(newToken);
-            session->inheritUserFromSecurity();
-            emitTrustedLoginToken = true;
-          }
+          self.log("Registered new JSON session for trusted port (" + newToken + ")");
+          session = self.m_SessionManager->getSession(newToken);
+          session->inheritUserFromSecurity();
+          emitTrustedLoginToken = true;
         }
       }
     }

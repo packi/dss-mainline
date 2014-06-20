@@ -44,7 +44,8 @@ namespace dss {
   class Session;
   class SessionManager;
 
-  std::string extractToken(const char * _cookie);
+  std::string extractToken(const char *_cookie);
+  std::string extractAuthenticatedUser(const char *_header);
   std::string generateCookieString(const std::string &token);
   std::string generateRevokeCookieString();
 
