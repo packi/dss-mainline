@@ -56,26 +56,6 @@ BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(apartmentChangeTest) {
-  boost::shared_ptr<HttpClient> curl(new HttpClient());
-  std::string result;
-  std::string url;
-
-  PropertySystem propSystem;
-  setupCommonProperties(propSystem);
-
-  //std::string url("https://testdsservices.aizo.com/internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
-  url = websvc_url_authority_test;
-  url += propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-  url += "?apartmentChangeType=Apartment";
-  url += "&dssid=3504175feff28d2044084179";
-
-  BOOST_CHECK_EQUAL(curl->request(url, POST, &result), 200);
-  WebserviceReply resp;
-  BOOST_CHECK_NO_THROW(resp = parse_reply(result.c_str()));
-  BOOST_CHECK_EQUAL(resp.code, 9); /* unknown dsid */
-}
-
 class WebserviceFixture {
 public:
   WebserviceFixture() {

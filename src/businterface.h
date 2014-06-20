@@ -32,6 +32,7 @@
 #include <bitset>
 #include <boost/shared_ptr.hpp>
 #include "sceneaccess.h"
+#include "model/deviceinterface.h"
 
 namespace dss {
 
@@ -260,15 +261,15 @@ namespace dss {
 
   class ActionRequestInterface {
   public:
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) = 0;
-    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t _origin, const uint16_t scene, const std::string _token) = 0;
-    virtual void undoScene(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) = 0;
-    virtual void undoSceneLast(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
-    virtual void blink(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
-    virtual void setValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) = 0;
-    virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
-    virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
-    virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const uint16_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) = 0;
+    virtual void saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t scene, const std::string _token) = 0;
+    virtual void undoScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) = 0;
+    virtual void undoSceneLast(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
+    virtual void blink(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;
+    virtual void setValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) = 0;
+    virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
   }; // ActionRequestInterface
 
 
@@ -295,6 +296,7 @@ namespace dss {
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
+                                  const callOrigin_t _origin,
                                   const std::string _token,
                                   const bool _force) = 0;
     virtual void onGroupUndoScene(BusInterface* _source,
@@ -305,6 +307,7 @@ namespace dss {
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
                                   const bool _explicit,
+                                  const callOrigin_t _origin,
                                   const std::string _token) = 0;
     virtual void onGroupBlink(BusInterface* _source,
                               const dss_dsid_t& _dsMeterID,
@@ -312,6 +315,7 @@ namespace dss {
                               const int _groupID,
                               const int _originDeviceId,
                               const SceneAccessCategory _category,
+                              const callOrigin_t _origin,
                               const std::string _token) = 0;
     virtual void onDeviceCallScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
@@ -319,6 +323,7 @@ namespace dss {
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
+                                  const callOrigin_t _origin,
                                   const std::string _token,
                                   const bool _force) = 0;
     virtual void onDeviceBlink(BusInterface* _source,
@@ -326,6 +331,7 @@ namespace dss {
                                const int _deviceID,
                                const int _originDeviceId,
                                const SceneAccessCategory _category,
+                               const callOrigin_t _origin,
                                const std::string _token) = 0;
     virtual void onDeviceUndoScene(BusInterface* _source,
                                   const dss_dsid_t& _dsMeterID,
@@ -334,6 +340,7 @@ namespace dss {
                                   const SceneAccessCategory _category,
                                   const int _sceneID,
                                   const bool _explicit,
+                                  const callOrigin_t _origin,
                                   const std::string _token) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,

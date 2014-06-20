@@ -42,6 +42,7 @@
 #include "propertysystem.h"
 #include "systemcondition.h"
 #include "security/security.h"
+#include "src/dsidhelper.h"
 #include "util.h"
 
 // durations to wait after each action (in milliseconds)
@@ -966,7 +967,8 @@ namespace dss {
 
   }
 
-  static const std::string ss_originDeviceID = "originDeviceID";
+  static const std::string ss_callOrigin = "callOrigin";
+  static const std::string ss_originDSID = "originDSID";
   static const std::string ss_zone = "zone";
   static const std::string ss_group = "group";
   static const std::string ss_scene = "scene";
@@ -1002,9 +1004,9 @@ namespace dss {
     }
 
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
-    dss_dsid_t originDevice;
-    if (m_properties.has(ss_originDeviceID)) {
-      originDevice = dss_dsid_t::fromString(m_properties.get(ss_originDeviceID));
+    dss_dsid_t originDSID;
+    if (m_properties.has(ss_originDSID)) {
+      originDSID = dss_dsid_t::fromString(m_properties.get(ss_originDSID));
     }
     bool forced;
     if (m_properties.has(ss_forced)) {
@@ -1062,7 +1064,7 @@ namespace dss {
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
       if (!iDevice.empty() && (iDevice != "-1") &&
-         (iDevice != originDevice.toString())) {
+         (iDevice != originDSID.toString())) {
         return false;
       }
     }
@@ -1102,9 +1104,9 @@ namespace dss {
     }
 
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
-    dss_dsid_t originDevice;
-    if (m_properties.has(ss_originDeviceID)) {
-      originDevice = dss_dsid_t::fromString(m_properties.get(ss_originDeviceID));
+    dss_dsid_t originDSID;
+    if (m_properties.has(ss_originDSID)) {
+      originDSID = dss_dsid_t::fromString(m_properties.get(ss_originDSID));
     }
 
     PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
@@ -1157,7 +1159,7 @@ namespace dss {
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
       if (!iDevice.empty() && (iDevice != "-1") &&
-         (iDevice != originDevice.toString())) {
+         (iDevice != originDSID.toString())) {
         return false;
       }
     }
@@ -1821,43 +1823,45 @@ namespace dss {
     return sceneName;
   }
 
-  std::string SystemEventLog::getDeviceName(std::string _origin_device_id) {
+  std::string SystemEventLog::getDeviceName(std::string _origin_dsid) {
     std::string devName = "Unknown";
 
-    if (!_origin_device_id.empty()) {
-      dss_dsid_t dsid = dsid::fromString(_origin_device_id);
-      if ((dsid.upper == 0) && (dsid.lower < 16)) {
-        if (dsid.lower == 0) {
-            devName = "(unspecified)";
-        } else if (dsid.lower == 1) {
-            devName = "Scripting";
-        } else if (dsid.lower == 2) {
-            devName = "JSON";
-        } else if (dsid.lower == 4) {
-            devName = "Bus-Handler";
-        } else if (dsid.lower == 6) {
-            devName = "Test";
-        } else if (dsid.lower == 7) {
-            devName = "System";
-        } else {
-            devName = "";
+    if (!_origin_dsid.empty()) {
+      try {
+        boost::shared_ptr<Device> device =
+            DSS::getInstance()->getApartment().getDeviceByDSID(
+                                dss_dsid_t::fromString(_origin_dsid));
+        if (device && (!device->getName().empty())) {
+            devName = device->getName();
         }
-        devName += ";" + _origin_device_id;
-      } else {
-        try {
-          boost::shared_ptr<Device> device =
-              DSS::getInstance()->getApartment().getDeviceByDSID(
-                                  dss_dsid_t::fromString(_origin_device_id));
-          if (device && (!device->getName().empty())) {
-              devName = device->getName();
-          } else {
-              devName = "Unknown";
-          }
-          devName += ";" + _origin_device_id;
-        } catch (ItemNotFoundException &ex) {};
-      }
+      } catch (ItemNotFoundException &ex) {};
     }
+
+    devName += ";" + _origin_dsid;
     return devName;
+  }
+
+  std::string SystemEventLog::getCallOrigin(callOrigin_t _call_origin) {
+    switch (_call_origin) {
+      case coJSScripting:
+        return "Scripting";
+      case coJSON:
+        return "JSON";
+      case coSubscription:
+        return "Bus-Handler";
+      case coTest:
+        return "Test";
+      case coSystem:
+        return "System";
+      case coSystemBinaryInput:
+        return "System-Binary-Input";
+      case coDsmApi:
+        return "dSM-API";
+      case coUnknown:
+        return "(unspecified)";
+      default:
+        return intToString(_call_origin);
+    }
   }
 
   void SystemEventLog::logLastScene(boost::shared_ptr<ScriptLogger> _logger,
@@ -1877,53 +1881,61 @@ namespace dss {
                                          boost::shared_ptr<Zone> _zone,
                                          int _group_id, int _scene_id,
                                          bool _is_forced,
-                                         std::string _origin_device_id,
+                                         std::string _origin_dsid,
+                                         callOrigin_t _call_origin,
                                          std::string _origin_token) {
     std::string zoneName = getZoneName(_zone);
     std::string groupName = getGroupName(_zone->getGroup(_group_id));
     std::string sceneName = getSceneName(_scene_id);
-    std::string devName = getDeviceName(_origin_device_id);
+    std::string devName = getDeviceName(_origin_dsid);
     if (_is_forced) {
-      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;CallOrigin;originToken');
       _logger->logln(";CallSceneForced;" + sceneName + ";" + zoneName + ";" +
-                     groupName + ";" + devName + ";" + _origin_token);
+                     groupName + ";" + devName + ";" +
+                     getCallOrigin(_call_origin) + ";" + _origin_token);
     } else {
-      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;CallOrigin;originToken');
       _logger->logln(";CallScene;" + sceneName + ";" + zoneName + ";" +
-                     groupName + ";" + devName +";" + _origin_token);
+                     groupName + ";" + devName +";" +
+                     getCallOrigin(_call_origin) + ";" + _origin_token);
     }
   }
 
   void SystemEventLog::logDeviceLocalScene(
                                         boost::shared_ptr<ScriptLogger> _logger,
                                         int _scene_id,
-                                        std::string _origin_device_id) {
-    std::string devName = getDeviceName(_origin_device_id);
+                                        std::string _origin_dsid,
+                                        callOrigin_t _call_origin) {
+    std::string devName = getDeviceName(_origin_dsid);
     std::string sceneName = getSceneName(_scene_id);
-    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";Device;" + sceneName + ";;;;;" + devName + ";");
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;CallOrigin;originToken');
+    _logger->logln(";Device;" + sceneName + ";;;;;" + devName + ";" +
+                   getCallOrigin(_call_origin) + ";");
   }
 
   void SystemEventLog::logDeviceScene(boost::shared_ptr<ScriptLogger> _logger,
                                       boost::shared_ptr<const Device> _device,
                                       boost::shared_ptr<Zone> _zone,
                                       int _scene_id, bool _is_forced,
-                                      std::string _origin_device_id,
+                                      std::string _origin_dsid,
+                                      callOrigin_t _call_origin,
                                       std::string _token) {
     std::string zoneName = getZoneName(_zone);
     std::string devName = _device->getName() + ";" +
                           _device->getDSID().toString();
-    std::string origName = getDeviceName(_origin_device_id);
+    std::string origName = getDeviceName(_origin_dsid);
     std::string sceneName = getSceneName(_scene_id);
 
     if (_is_forced) {
-      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;originToken');
-      _logger->logln(";DeviceSceneForced;" + sceneName + ";" + zoneName + ";"
-                     + devName + ";" + origName + ";" + _token);
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;CallOrigin;originToken');
+      _logger->logln(";DeviceSceneForced;" + sceneName + ";" + zoneName + ";" +
+                     devName + ";" + origName + ";" +
+                     getCallOrigin(_call_origin) + ";" + _token);
     } else {
-      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;originToken');
+      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;CallOrigin;originToken');
       _logger->logln(";DeviceScene;" + sceneName + ";" + zoneName + ";" +
-                     devName + ";" + origName + ";" + _token);
+                     devName + ";" + origName + ";" +
+                     getCallOrigin(_call_origin) + ";" + _token);
     }
   }
 
@@ -1931,43 +1943,47 @@ namespace dss {
                                         boost::shared_ptr<ScriptLogger> _logger,
                                         boost::shared_ptr<Zone> _zone,
                                         int _group_id,
-                                        std::string _origin_device_id,
+                                        std::string _origin_dsid,
+                                        callOrigin_t _call_origin,
                                         std::string _origin_token) {
     std::string zoneName = getZoneName(_zone);
     std::string groupName = getGroupName(_zone->getGroup(_group_id));
-    std::string devName = getDeviceName(_origin_device_id);
-    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    std::string devName = getDeviceName(_origin_dsid);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;CallOrigin;originToken');
     _logger->logln(";Blink;;" + zoneName + ";" + groupName + ";" + devName + 
-                   ";;" + _origin_token);
+                   ";;" + getCallOrigin(_call_origin) + ";" +_origin_token);
   }
 
   void SystemEventLog::logDeviceBlink(boost::shared_ptr<ScriptLogger> _logger,
                                       boost::shared_ptr<const Device> _device,
                                       boost::shared_ptr<Zone> _zone,
-                                      std::string _origin_device_id,
+                                      std::string _origin_dsid,
+                                      callOrigin_t _call_origin,
                                       std::string _origin_token) {
     std::string zoneName = getZoneName(_zone);
     std::string devName = _device->getName() + ";" +
                           _device->getDSID().toString();
-    std::string origName = getDeviceName(_origin_device_id);
-    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;originToken');
+    std::string origName = getDeviceName(_origin_dsid);
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;CallOrigin;originToken');
     _logger->logln(";DeviceBlink;;" + zoneName + ";" + devName + ";;" +
-                   origName + ";" + _origin_token);
+                   origName + ";" + getCallOrigin(_call_origin) + ";" + _origin_token);
   }
 
   void SystemEventLog::logZoneGroupUndo(boost::shared_ptr<ScriptLogger> _logger,
                                         boost::shared_ptr<Zone> _zone,
                                         int _group_id, int _scene_id,
-                                        std::string _origin_device_id,
+                                        std::string _origin_dsid,
+                                        callOrigin_t _call_origin,
                                         std::string _origin_token) {
     std::string zoneName = getZoneName(_zone);
     std::string groupName = getGroupName(_zone->getGroup(_group_id));
-    std::string devName = getDeviceName(_origin_device_id);
+    std::string devName = getDeviceName(_origin_dsid);
     std::string sceneName = getSceneName(_scene_id);
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     _logger->logln(";UndoScene;" + sceneName + ";" + zoneName + ";" +
-                   groupName + ";" + devName + ";" + _origin_token);
+                   groupName + ";" + devName + ";" +
+                   getCallOrigin(_call_origin) + ';' + _origin_token);
   }
 
   void SystemEventLog::logDeviceButtonClick(
@@ -2088,9 +2104,9 @@ namespace dss {
                                     boost::shared_ptr<ScriptLogger> _logger,
                                     std::string _statename, std::string _state,
                                     std::string _value,
-                                    std::string _origin_device_id) {
+                                    std::string _origin_dsid) {
 
-    std::string origName = getDeviceName(_origin_device_id);
+    std::string origName = getDeviceName(_origin_dsid);
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     _logger->logln(";StateAddonScript;" + _statename + ";" + _value + ";" +
                    _state + ";;;;;" + origName + ";");
@@ -2100,9 +2116,9 @@ namespace dss {
                                     boost::shared_ptr<ScriptLogger> _logger,
                                     std::string _statename, std::string _state,
                                     std::string _value,
-                                    std::string _origin_device_id) {
+                                    std::string _origin_dsid) {
 
-    std::string origName = getDeviceName(_origin_device_id);
+    std::string origName = getDeviceName(_origin_dsid);
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken'');
     _logger->logln(";StateApartment;" + _statename + ";" + _value + ";" +
                    _state  + ";;;;;" + origName + ";");
@@ -2181,9 +2197,14 @@ namespace dss {
       token = m_properties.get("originToken");
     }
 
-    std::string originDeviceId;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceId = m_properties.get("originDeviceID");
+    std::string originDSID;
+    if (m_properties.has(ss_originDSID)) {
+      originDSID = m_properties.get(ss_originDSID);
+    }
+
+    callOrigin_t callOrigin = coUnknown;
+    if (m_properties.has(ss_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
     }
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
@@ -2195,24 +2216,24 @@ namespace dss {
             DSS::getInstance()->getApartment().getZone(zoneId);
 
         logZoneGroupScene(_logger, zone, groupId, sceneId, isForced,
-                          originDeviceId, token);
+                          originDSID, callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     } else if ((m_evtRaiseLocation == erlDevice) &&
                (m_raisedAtDevice != NULL)) {
       zoneId = m_raisedAtDevice->getDevice()->getZoneID();
 
-      dss_dsid_t dsid = dsid::fromString(originDeviceId);
-      if ((dsid.upper == 0) && (dsid.lower == 0)) {
+      if (callOrigin == coUnknown) {
         // DeviceLocal Action Event
         logDeviceLocalScene(_logger, sceneId,
-                        m_raisedAtDevice->getDevice()->getDSID().toString());
+                        m_raisedAtDevice->getDevice()->getDSID().toString(),
+                        callOrigin);
       } else {
         // Device Action Request
         try {
           boost::shared_ptr<Zone> zone =
               DSS::getInstance()->getApartment().getZone(zoneId);
           logDeviceScene(_logger, m_raisedAtDevice->getDevice(), zone, sceneId,
-                         isForced, originDeviceId, token);
+                         isForced, originDSID, callOrigin, token);
         } catch (ItemNotFoundException &ex) {}
       }
     }
@@ -2225,9 +2246,14 @@ namespace dss {
       token = m_properties.get("originToken");
     }
 
-    std::string originDeviceId;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceId = m_properties.get("originDeviceID");
+    std::string originDSID;
+    if (m_properties.has(ss_originDSID)) {
+      originDSID = m_properties.get(ss_originDSID);
+    }
+
+    callOrigin_t callOrigin;
+    if (m_properties.has(ss_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
     }
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
@@ -2236,7 +2262,7 @@ namespace dss {
       try {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
-        logZoneGroupBlink(_logger, zone, groupId, originDeviceId, token);
+        logZoneGroupBlink(_logger, zone, groupId, originDSID, callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     } else if ((m_evtRaiseLocation == erlDevice) &&
                (m_raisedAtDevice != NULL)) {
@@ -2245,7 +2271,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
         logDeviceBlink(_logger, m_raisedAtDevice->getDevice(), zone,
-                       originDeviceId, token);
+                       originDSID, callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     }
   }
@@ -2261,9 +2287,14 @@ namespace dss {
       token = m_properties.get("originToken");
     }
 
-    std::string originDeviceId;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceId = m_properties.get("originDeviceID");
+    std::string originDSID;
+    if (m_properties.has(ss_originDSID)) {
+      originDSID = m_properties.get(ss_originDSID);
+    }
+
+    callOrigin_t callOrigin = coUnknown;
+    if (m_properties.has(ss_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
     }
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
@@ -2272,8 +2303,8 @@ namespace dss {
       try {
         boost::shared_ptr<Zone> zone =
                             DSS::getInstance()->getApartment().getZone(zoneId);
-        logZoneGroupUndo(_logger, zone, groupId, sceneId, originDeviceId,
-                         token);
+        logZoneGroupUndo(_logger, zone, groupId, sceneId, originDSID,
+                         callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     }
   }
@@ -2326,17 +2357,17 @@ namespace dss {
       value = m_properties.get("value");
     }
 
-    std::string originDeviceId;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceId = m_properties.get("originDeviceID");
+    std::string originDSID;
+    if (m_properties.has("originDSID")) {
+      originDSID = m_properties.get("originDSID");
     }
 
     if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
       if (m_raisedAtState->getType() == StateType_Script) {
-        logStateChangeScript(_logger, statename, state, value, originDeviceId);
+        logStateChangeScript(_logger, statename, state, value, originDSID);
       } else if (m_raisedAtState->getType() == StateType_Service) {
         logStateChangeApartment(_logger, statename, state, value,
-                                originDeviceId);
+                                originDSID);
       } else if (m_raisedAtState->getType() == StateType_Device) {
         boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
         logStateChangeDevice(_logger, statename, state, value, device);
@@ -2381,10 +2412,16 @@ namespace dss {
       deviceBinaryInputEvent(logger);
     } else if (m_evtName == "deviceSensorEvent") {
       deviceSensorEvent(logger);
-    } else if (m_evtName == "deviceSensorValue") {
-      deviceSensorValue(logger);
     } else if (m_evtName == "stateChange") {
       stateChange(logger);
+    } else if (m_evtName == "deviceSensorValue") {
+      logger.reset(new ScriptLogger(
+          DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
+      if (logger == NULL) {
+        Logger::getInstance()->log("SystemEventLog::run(): could not init logger!");
+        return;
+      }
+      deviceSensorValue(logger);
     }
   }
 
@@ -2651,11 +2688,16 @@ namespace dss {
     DSS::getInstance()->getEventQueue().pushEvent(event);
   }
 
-  std::string SystemState::getData(int *zoneId, int *groupId, int *sceneId) {
-    std::string originDeviceId;
+    std::string SystemState::getData(int *zoneId, int *groupId, int *sceneId, callOrigin_t *callOrigin) {
+    std::string originDSID;
+
+    *callOrigin = coUnknown;
+    if (m_properties.has(ss_callOrigin)) {
+        *callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
+    }
 
     if (!zoneId || !groupId || !sceneId) {
-      return originDeviceId;
+      return originDSID;
     }
 
     *zoneId = -1;
@@ -2666,22 +2708,19 @@ namespace dss {
         *sceneId = strToIntDef(m_properties.get("sceneID"), -1);
     }
 
-    if (m_properties.has("originDeviceID")) {
-      originDeviceId = m_properties.get("originDeviceID");
+    if (m_properties.has(ss_originDSID)) {
+      originDSID = m_properties.get(ss_originDSID);
     }
 
     if (((m_evtRaiseLocation == erlGroup) ||
          (m_evtRaiseLocation == erlApartment)) && (m_raisedAtGroup != NULL)) {
         *zoneId = m_raisedAtGroup->getZoneID();
         *groupId = m_raisedAtGroup->getID();
-        if (m_properties.has("originDeviceID")) {
-          originDeviceId = m_properties.get("originDeviceID");
-        }
     } else if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
       if (m_raisedAtState->getType() == StateType_Device) {
         boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
         *zoneId = device->getZoneID();
-        originDeviceId = device->getDSID().toString();
+        originDSID = device->getDSID().toString();
       } else if (m_raisedAtState->getType() == StateType_Group) {
         boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
         *zoneId = group->getZoneID();
@@ -2689,22 +2728,21 @@ namespace dss {
       }
     } else if ((m_evtRaiseLocation == erlDevice) &&
                (m_raisedAtDevice != NULL)) {
-      originDeviceId = m_raisedAtDevice->getDSID().toString();
+      originDSID = m_raisedAtDevice->getDSID().toString();
     }
 
-    return originDeviceId;
+    return originDSID;
   }
 
   void SystemState::callscene() {
     int zoneId = -1;
     int groupId = -1;
     int sceneId = -1;
+    callOrigin_t callOrigin = coUnknown;
 
-    std::string originDeviceId = getData(&zoneId, &groupId, &sceneId);
+    getData(&zoneId, &groupId, &sceneId, &callOrigin);
 
-    dss_dsid_t dsid = dsid::fromString(originDeviceId);
-
-    if ((dsid.upper == 0) && (dsid.lower  == coSystem)) {
+    if (callOrigin == coSystem) {
         // ignore scene calls originated by server generated system level events
         //  e.g. scene calls issued by state changes
         return;
@@ -2833,10 +2871,15 @@ namespace dss {
     int zoneId = -1;
     int groupId = -1;
     int sceneId = -1;
-    std::string originDeviceId;
+    callOrigin_t callOrigin = coUnknown;
+    std::string originDSID;
     boost::shared_ptr<State> state;
 
-    originDeviceId = getData(&zoneId, &groupId, &sceneId);
+    originDSID = getData(&zoneId, &groupId, &sceneId, &callOrigin);
+
+    dss_dsid_t dsid = dsid::fromString(originDSID);
+    dsid_t dsmapi_dsid;
+    dsid_helper::toDsmapiDsid(dsid, dsmapi_dsid);
 
     if ((groupId == 0) && (sceneId == ScenePanic)) {
       try {
@@ -2845,14 +2888,14 @@ namespace dss {
 
         // #2561: auto-reset fire if panic was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
-        dss_dsid_t dsid = dsid::fromString(originDeviceId);
-        if (((dsid.lower >= 16) || (dsid.upper != 0)) && (state->getState() == State_Active)) {
+        if (!IsNullId(dsmapi_dsid) && (callOrigin == coDsmApi) &&
+            (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {
             boost::shared_ptr<Group> g = z->getGroup(0);
             g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
           }
-        } // originDeviceId >= 16 && state == active
+        } // valid dSID && dSM API origin && state == active
       } catch (ItemNotFoundException &ex) {}
     } else if ((groupId == 0) && (sceneId == SceneFire)) {
       try {
@@ -2861,14 +2904,14 @@ namespace dss {
 
         // #2561: auto-reset panic if fire was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
-        dss_dsid_t dsid = dsid::fromString(originDeviceId);
-        if (((dsid.lower >= 16) || (dsid.upper != 0)) && (state->getState() == State_Active)) {
+        if (!IsNullId(dsmapi_dsid) && (callOrigin == coDsmApi)
+            && (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {
             boost::shared_ptr<Group> g = z->getGroup(0);
             g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
           }
-        } // originDeviceId >= 16 && state == active
+        } // valid dSID && dSM API origin && state == active
       } catch (ItemNotFoundException &ex) {}
     } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
       try {
@@ -3061,8 +3104,9 @@ namespace dss {
     int zoneId;
     int groupId;
     int sceneId;
+    callOrigin_t callOrigin = coUnknown;
 
-    std::string originDeviceId = getData(&zoneId, &groupId, &sceneId);
+    getData(&zoneId, &groupId, &sceneId, &callOrigin);
 
     groupId = 0;
     size_t groupName = statename.find(".group");
@@ -3072,8 +3116,7 @@ namespace dss {
     }
     boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
 
-    dss_dsid_t dsid = dsid::fromString(originDeviceId);
-    if ((dsid.upper == 0) && (dsid.lower == coSystem)) {
+    if (callOrigin == coSystem) {
       // ignore state change originated by server generated system level events,
       // e.g. scene calls issued by state changes, to avoid loops
       return;

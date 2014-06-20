@@ -29,6 +29,7 @@
 #include <pthread.h>
 #include "src/ds485types.h"
 #include "scripting/jslogger.h"
+#include "model/deviceinterface.h"
 
 namespace dss {
   class Device;
@@ -154,35 +155,42 @@ namespace dss {
       std::string getGroupName(boost::shared_ptr<Group> _group);
       std::string getSceneName(int _scene_id);
       std::string getDeviceName(std::string _orgin_device_id);
+      std::string getCallOrigin(callOrigin_t _call_origin);
       void logDeviceLocalScene(boost::shared_ptr<ScriptLogger> _logger,
-                               int _scene_id, std::string _origin_device_id);
+                               int _scene_id, std::string _origin_dsid,
+                               callOrigin_t _call_origin);
       void logZoneGroupScene(boost::shared_ptr<ScriptLogger> _logger,
                              boost::shared_ptr<Zone> _zone,
                              int _group_id, int _scene_id,
-                             bool _is_forced, std::string _origin_device_id,
+                             bool _is_forced, std::string _origin_dsid,
+                             callOrigin_t _call_origin,
                              std::string _origin_token);
       void logDeviceScene(boost::shared_ptr<ScriptLogger> _logger,
                           boost::shared_ptr<const Device> _device,
                           boost::shared_ptr<Zone> _zone,
                           int scene_id, bool _is_forced,
-                          std::string _origin_device_id,
+                          std::string _origin_dsid,
+                          callOrigin_t _call_origin,
                           std::string _token);
       void logLastScene(boost::shared_ptr<ScriptLogger> _logger,
                         boost::shared_ptr<Zone> _zone,
                         boost::shared_ptr<Group> _group, int _scene_id);
       void logZoneGroupBlink(boost::shared_ptr<ScriptLogger> _logger,
                              boost::shared_ptr<Zone> _zone,
-                             int _group_id, std::string _origin_device_id,
+                             int _group_id, std::string _origin_dsid,
+                             callOrigin_t _call_origin,
                              std::string _origin_token);
       void logDeviceBlink(boost::shared_ptr<ScriptLogger> _logger,
                           boost::shared_ptr<const Device> _device,
                           boost::shared_ptr<Zone> _zone,
                           std::string _origin_device_id,
+                          callOrigin_t _call_origin,
                           std::string _token);
       void logZoneGroupUndo(boost::shared_ptr<ScriptLogger> _logger,
                             boost::shared_ptr<Zone> _zone,
                             int _group_id, int _scene_id,
-                            std::string _origin_device_id,
+                            std::string _origin_dsid,
+                            callOrigin_t _call_origin,
                             std::string _origin_token);
       void logDeviceButtonClick(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device);
@@ -253,7 +261,8 @@ namespace dss {
       boost::shared_ptr<State> registerState(std::string _name,
                                              bool _persistent);
       boost::shared_ptr<State> getOrRegisterState(std::string _name);
-      std::string getData(int *zoneId, int *groupId, int *sceneId);
+      std::string getData(int *zoneId, int *groupId, int *sceneId,
+                          callOrigin_t *callOrigin);
 
       void bootstrap();
       void startup();

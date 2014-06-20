@@ -43,6 +43,7 @@ namespace dss {
                                 const int _originDeviceId,
                                 const SceneAccessCategory _category,
                                 const int _sceneID,
+                                const callOrigin_t _origin,
                                 const std::string _token,
                                 const bool _force) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneGroup, _dsMeterID);
@@ -50,8 +51,9 @@ namespace dss {
     pEvent->addParameter(_groupID);
     pEvent->addParameter(_originDeviceId);
     pEvent->addParameter(_sceneID);
-    pEvent->setSingleStringParameter(_token);
+    pEvent->addParameter(_origin);
     pEvent->addParameter(_force);
+    pEvent->setSingleStringParameter(_token);
     m_pModelMaintenance->addModelEvent(pEvent);
   } // onGroupCallScene
 
@@ -63,6 +65,7 @@ namespace dss {
                                 const SceneAccessCategory _category,
                                 const int _sceneID,
                                 const bool _explicit,
+                                const callOrigin_t _origin,
                                 const std::string _token) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etUndoSceneGroup, _dsMeterID);
     pEvent->addParameter(_zoneID);
@@ -70,7 +73,10 @@ namespace dss {
     pEvent->addParameter(_originDeviceId);
     if (_explicit) {
       pEvent->addParameter(_sceneID);
+    } else {
+      pEvent->addParameter(-1);
     }
+    pEvent->addParameter(_origin);
     pEvent->setSingleStringParameter(_token);
     m_pModelMaintenance->addModelEvent(pEvent);
   } // onGroupUndoScene
@@ -81,11 +87,13 @@ namespace dss {
                             const int _groupID,
                             const int _originDeviceId,
                             const SceneAccessCategory _category,
+                            const callOrigin_t _origin,
                             const std::string _token) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etBlinkGroup, _dsMeterID);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_groupID);
     pEvent->addParameter(_originDeviceId);
+    pEvent->addParameter(_origin);
     pEvent->setSingleStringParameter(_token);
     m_pModelMaintenance->addModelEvent(pEvent);
   } // onGroupCallScene
@@ -96,12 +104,14 @@ namespace dss {
                                 const int _originDeviceId,
                                 const SceneAccessCategory _category,
                                 const int _sceneID,
+                                const callOrigin_t _origin,
                                 const std::string _token,
                                 const bool _force) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, _dsMeterID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_originDeviceId);
     pEvent->addParameter(_sceneID);
+    pEvent->addParameter(_origin);
     pEvent->addParameter(_force);
     pEvent->setSingleStringParameter(_token);
     m_pModelMaintenance->addModelEvent(pEvent);
@@ -114,12 +124,14 @@ namespace dss {
                                 const SceneAccessCategory _category,
                                 const int _sceneID,
                                 const bool _explicit,
+                                const callOrigin_t _origin,
                                 const std::string _token) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etUndoSceneDevice, _dsMeterID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_sceneID);
     pEvent->addParameter(_explicit);
     pEvent->addParameter(_originDeviceId);
+    pEvent->addParameter(_origin);
     pEvent->setSingleStringParameter(_token);
     m_pModelMaintenance->addModelEvent(pEvent);
   } // onDeviceUndoScene
@@ -129,10 +141,12 @@ namespace dss {
                              const int _deviceID,
                              const int _originDeviceId,
                              const SceneAccessCategory _category,
+                             const callOrigin_t _origin,
                              const std::string _token) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etBlinkDevice, _dsMeterID);
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_originDeviceId);
+    pEvent->addParameter(_origin);
     pEvent->setSingleStringParameter(_token);
     m_pModelMaintenance->addModelEvent(pEvent);
   } // onDeviceCallScene

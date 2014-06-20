@@ -64,6 +64,13 @@ BOOST_AUTO_TEST_CASE(testUrlDecode) {
                        urlDecode("sourceid=1&schedule=FREQ%3DMINUTELY%3BINTERVAL%3D1&start=20080520T080000Z"));
 } // teturlDecode
 
+BOOST_AUTO_TEST_CASE(testUrlEncodeDecode) {
+  const char escape[] = "!#$%&'()*+,/:;=?@[]";
+  const char url_encoded[] = "%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D";
+  BOOST_CHECK(dss::urlEncode(escape) == url_encoded);
+  BOOST_CHECK(dss::urlDecode(url_encoded) == escape);
+}
+
 BOOST_AUTO_TEST_CASE(testStrToInt) {
   BOOST_CHECK_EQUAL(1, strToInt("1"));
   BOOST_CHECK_EQUAL(1, strToInt("0x1"));

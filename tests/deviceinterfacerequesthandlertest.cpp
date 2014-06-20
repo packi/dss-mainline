@@ -123,27 +123,30 @@ class Fixture : public WebFixture {
 public:
 
   void testFunction(const std::string& _functionName) {
-    HashMapStringString empty;
-    testFunction(_functionName, _functionName, empty);
+    testFunctionDo(_functionName, _functionName, "");
   }
 
   void testFunction(const std::string& _functionName, const std::string& _paramName, const std::string& _paramValue) {
-    HashMapStringString params;
-    params[_paramName] = _paramValue;
-    testFunction(_functionName, _functionName + "(" + _paramValue + ")", params);
+    std::string params = urlEncode(_paramName) + "=" + urlEncode(_paramValue);
+    testFunctionDo(_functionName, _functionName + "(" + _paramValue + ")", params);
   }
 
-  void testFunction(const std::string& _functionName, const std::string& _paramName, const std::string& _paramValue, const std::string& _resultingFunctionName) {
-    HashMapStringString params;
-    params[_paramName] = _paramValue;
-    testFunction(_functionName, _resultingFunctionName, params);
+  void testFunction(const std::string& _functionName,
+                    const std::string& _paramName,
+                    const std::string& _paramValue,
+                    const std::string& _resultingFunctionName) {
+    std::string params = urlEncode(_paramName) + "=" + urlEncode(_paramValue);
+    testFunctionDo(_functionName, _resultingFunctionName, params);
   }
 private:
-  void testFunction(const std::string& _functionName, const std::string& _functionNameWithParams, const HashMapStringString& _params) {
+  void testFunctionDo(const std::string& _functionName,
+                      const std::string& _functionNameWithParams,
+                      const std::string& _params) {
     boost::shared_ptr<DeviceInterfaceDummy> dummy(new DeviceInterfaceDummy);
     boost::shared_ptr<Session> dummySession(new Session("dummy"));
     RestfulRequest req("bla/" + _functionName, _params);
-    WebServerResponse response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession);
+    WebServerResponse response =
+      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession);
     BOOST_CHECK_EQUAL(dummy->getNumberOfCalls(), 1);
     BOOST_CHECK_EQUAL(dummy->getLastFunction(), _functionNameWithParams);
     testOkIs(response, true);

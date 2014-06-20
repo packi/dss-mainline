@@ -24,6 +24,7 @@
 
 #include "restful.h"
 
+#include "webserver.h"
 #include "src/foreach.h"
 
 namespace dss {
@@ -45,5 +46,50 @@ namespace dss {
     }
     return false;
   } // hasMethod
-  
+
+  RestfulRequest::RestfulRequest(const std::string& _request,
+                                 const std::string& params)
+    : m_urlSubPath(_request), m_queryString("&" + params)
+  {
+    splitIntoMethodAndClass(_request);
+  }
+
+  const std::string RestfulRequest::getParameter(const std::string& _name) const {
+    static const std::string& kEmptyString = "";
+    size_t end, offset;
+    std::string tmp;
+
+    // we added leading "&" upon init
+    offset = m_queryString.find("&" + _name + "=");
+    if (offset == std::string::npos) {
+      return kEmptyString;
+    }
+
+    offset += _name.length() + 2;
+    end = m_queryString.find('&', offset);
+    tmp = (end == std::string::npos) ?
+      m_queryString.substr(offset) :
+      m_queryString.substr(offset, end - offset);
+
+    return urlDecode(tmp);
+  }
+
+  /**
+   * @_request -- '/system/login'
+   * class -> 'system', method -> login everything till EOS
+   */
+  void RestfulRequest::splitIntoMethodAndClass(const std::string& _request) {
+    if (_request.empty()) {
+      return;
+    }
+
+    // TODO explicitly ensure leading '/', see toplevel/sublevel split
+    size_t offset = _request.find('/', 1);
+    if (std::string::npos == offset) {
+      m_Class = _request.substr(1);
+    } else {
+      m_Class = _request.substr(1, offset - 1);
+      m_Method = _request.substr(offset + 1);
+    }
+  }
 } // namespace dss
