@@ -1766,45 +1766,22 @@ namespace dss {
     m_serialNumber = _device->getOemSerialNumber();
   }
 
-  void ModelMaintenance::OEMWebQuery::run()
+  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dss_dsid_t dsmId, devid_t deviceAddress)
+    : m_dsmId(dsmId)
+    , m_deviceAddress(deviceAddress)
   {
-    std::string oemWebservice;
-    boost::filesystem::path iconBasePath;
-    PropertySystem propSys = DSS::getInstance()->getPropertySystem();
-    if(DSS::hasInstance()) {
-      DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
-      oemWebservice = propSys.getStringValue(
-              "/config/webservice-api/base-url");
-      iconBasePath = propSys.getStringValue(
-              "/config/subsystems/Apartment/iconBasePath");
-    } else {
-      return;
-    }
-    HttpClient url;
-    std::string result;
-    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+  }
+
+  void ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::result(long code, const std::string &result)
+  {
+    std::string productURL;
     std::string productName;
     boost::filesystem::path iconFile;
-    std::string productURL;
     std::string defaultName;
+    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
 
-    std::string mac = propSys.getStringValue("/system/host/interfaces/eth0/mac");
-    std::string country = propSys.getStringValue("/config/geodata/country");
-    std::string language = propSys.getStringValue("/system/language/locale");
-
-    std::string eanURL = oemWebservice +
-                         "/public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData" +
-                         "?ean=" + m_EAN +
-                         "&partNr=" + intToString(m_partNumber) +
-                         "&oemSerialNumber=" + intToString(m_serialNumber) +
-                         "&macAddress=" + mac +
-                         "&countryCode=" + country +
-                         "&languageCode=" + language;
-
-    Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
-    long res = url.request(eanURL, GET, &result);
-    if (res == 200) {
-      Logger::getInstance()->log(std::string("OEMWebQuery::run: result: ") + result);
+    if (code == 200) {
+      Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: result: ") + result);
       struct json_tokener* tok;
 
       tok = json_tokener_new();
@@ -1823,11 +1800,11 @@ namespace dss {
           if (obj != NULL) {
             errorMessage = json_object_get_string(obj);
           }
-          Logger::getInstance()->log(std::string("OEMWebQuery::run: JSON-ERROR: ") + errorMessage, lsError);
+          Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: JSON-ERROR: ") + errorMessage, lsError);
         } else {
           json_object* result = json_object_object_get(json_request, "Response");
           if (result == NULL) {
-            Logger::getInstance()->log(std::string("OEMWebQuery::run: no 'result' object in response"), lsError);
+            Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'result' object in response"), lsError);
           } else {
             obj = json_object_object_get(result, "ArticleName");
             if (obj != NULL) {
@@ -1857,11 +1834,24 @@ namespace dss {
       state = DEVICE_OEM_VALID;
       iconFile = remoteIconPath.filename();
       if (!remoteIconPath.empty()) {
+        HttpClient url;
+        long res;
         std::string iconURL = remoteIconPath.string();
+
+        boost::filesystem::path iconBasePath;
+        PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+        if (DSS::hasInstance()) {
+          DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
+          iconBasePath = propSys.getStringValue(
+                  "/config/subsystems/Apartment/iconBasePath");
+        } else {
+          return;
+        }
+
         boost::filesystem::path iconPath = iconBasePath / iconFile;
         res = url.downloadFile(iconURL, iconPath.string());
         if (res != 200) {
-          Logger::getInstance()->log("OEMWebQuery::run: could not download OEM "
+          Logger::getInstance()->log("OEMWebQueryCallback::result: could not download OEM "
               "icon from: " + iconURL + std::string("; error: ") + intToString(res), lsWarning);
           iconFile.clear();
           try {
@@ -1869,18 +1859,18 @@ namespace dss {
               boost::filesystem::remove(iconPath);
             }
           } catch (boost::filesystem::filesystem_error& e) {
-            Logger::getInstance()->log("OEMWebQuery::run: cannot delete "
+            Logger::getInstance()->log("OEMWebQueryCallback::result: cannot delete "
                 "(incomplete) icon: " + std::string(e.what()), lsWarning);
           }
         }
       }
     } else {
-      Logger::getInstance()->log("OEMWebQuery::run: could not download OEM "
-          "data from: " + eanURL, lsWarning);
+      Logger::getInstance()->log("OEMWebQueryCallback::result: could not download OEM "
+          "data. Error: " + intToString(code) + "Message: " + result, lsWarning);
     }
 
     ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);
-    pEvent->addParameter(m_deviceAdress);
+    pEvent->addParameter(m_deviceAddress);
     pEvent->addParameter(state);
     pEvent->addStringParameter(productName);
     pEvent->addStringParameter(iconFile.string());
@@ -1889,6 +1879,24 @@ namespace dss {
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     }
+  }
+
+  void ModelMaintenance::OEMWebQuery::run()
+  {
+    PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+    std::string mac = propSys.getStringValue("/system/host/interfaces/eth0/mac");
+    std::string country = propSys.getStringValue("/config/geodata/country");
+    std::string language = propSys.getStringValue("/system/language/locale");
+
+    std::string parameters = "ean=" + m_EAN +
+                             "&partNr=" + intToString(m_partNumber) +
+                             "&oemSerialNumber=" + intToString(m_serialNumber) +
+                             "&macAddress=" + mac +
+                             "&countryCode=" + country +
+                             "&languageCode=" + language;
+
+    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_dsmId, m_deviceAdress));
+    WebserviceConnection::getInstance()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
   }
 
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
