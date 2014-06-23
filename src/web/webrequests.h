@@ -41,24 +41,33 @@ namespace dss {
   class WebServerResponse {
   public:
     WebServerResponse(boost::shared_ptr<JSONObject> _response)
-    : m_Response(_response)
+    : m_Response(_response), m_revokeCookie(false)
     { }
-
-    void setCookie(const std::string& _key, const std::string& _value) {
-      m_Cookies[_key] = _value;
-    }
-
-    const HashMapStringString& getCookies() const {
-      return m_Cookies;
-    }
 
     boost::shared_ptr<JSONObject> getResponse() {
       return m_Response;
     }
+    void setRevokeSessionToken() {
+      m_newSessionToken.clear();
+      m_revokeCookie = true;
+    }
+    bool isRevokeSessionToken() const {
+      return m_revokeCookie;
+    }
+    void setPublishSessionToken(const std::string &token) {
+      m_newSessionToken = token;
+    }
+    bool isPublishSessionToken() const {
+      return !m_newSessionToken.empty();
+    }
+    const std::string &getNewSessionToken() const {
+      return m_newSessionToken;
+    }
   private:
     boost::shared_ptr<JSONObject> m_Response;
-    HashMapStringString m_Cookies;
-  }; // WebServerResponse
+    std::string m_newSessionToken;
+    bool m_revokeCookie;
+  };
 
   class WebServerRequestHandlerJSON {
   protected:

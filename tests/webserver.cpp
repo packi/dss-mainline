@@ -30,17 +30,45 @@
 BOOST_AUTO_TEST_SUITE(Webserver)
 
 BOOST_AUTO_TEST_CASE(testCookieGenarateParse) {
-  boost::shared_ptr<dss::JSONObject> foo(new dss::JSONObject());
+  const char set_cookie_str[] =
+    "token=4a9b442b2554e794a126f761b953c3b88b5d67d1f665a7e1590b8df67b9c6846; path=/";
+  const char static_token[] =
+    "4a9b442b2554e794a126f761b953c3b88b5d67d1f665a7e1590b8df67b9c6846";
+  std::string cookie_string = dss::generateCookieString(static_token);
+  BOOST_CHECK_EQUAL(cookie_string, set_cookie_str);
+  BOOST_CHECK_EQUAL(dss::extractToken(cookie_string.c_str()), static_token);
+
+  // also check current token generator
   std::string token = dss::SessionTokenGenerator::generate();
+  cookie_string = dss::generateCookieString(token);
+  BOOST_CHECK_EQUAL(dss::extractToken(cookie_string.c_str()), token);
 
-  dss::WebServerResponse response(foo);
-  response.setCookie("path", "/");
-  response.setCookie("token", token);
+  const char static firefox_token[] =
+	  "csrftoken=ArERl0K0L; compact_display_state=true; token=ccf67fe364c";
+  BOOST_CHECK_EQUAL(dss::extractToken(firefox_token), "ccf67fe364c");
 
-  std::string cookie_string = dss::generateCookieString(response.getCookies());
-  dss::HashMapStringString cookies = dss::parseCookies(cookie_string.c_str());
+  // revoke cookie string
+  cookie_string = dss::generateCookieString("");
+  BOOST_CHECK_EQUAL(cookie_string, "token=; path=/");
 
-  BOOST_CHECK(token == cookies["token"]);
+  const char static_revoke_cookie[] =
+    "token=; path=/; expires=Wed, 29 April 1970 12:00:00 GMT";
+  cookie_string = dss::generateRevokeCookieString();
+  BOOST_CHECK_EQUAL(cookie_string, static_revoke_cookie);
+}
+
+BOOST_AUTO_TEST_CASE(testExtractTrustedUser) {
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser(NULL), "");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"foo"), "");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"foo\""), "foo");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"\""), "");
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser("Digest username=\"dssadmin\""), "dssadmin");
+  static char double_suffix[] = "Digest fusername=\"bar\", username=\"match\"";
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser(double_suffix), "match");
+  static char queer_value[] = "Digest qpop=\"username=\", username=\"match\"";
+  BOOST_CHECK_EQUAL(dss::extractAuthenticatedUser(queer_value), "match");
+  // this fails: since we are not really parsing the string
+  // static char queer_value[] = "Digest qpop=\" username=\", username=\"match\"";
 }
 
 BOOST_AUTO_TEST_CASE(testUriToplevelSplit) {

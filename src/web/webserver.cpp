@@ -310,82 +310,70 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  HashMapStringString parseCookies(const char* _cookies) {
-      HashMapStringString result;
+  /**
+   * extractToken
+   * http://tools.ietf.org/html/rfc6265#section-4.1.1
+   */
+  std::string extractToken(const char *_cookie) {
+    if (!_cookie) {
+      return "";
+    }
 
-      if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
-        return result;
-      }
+    // according spec there has to be a space
+    std::string cookie_s = "; " + std::string(_cookie);
+    size_t start = cookie_s.find("; token=");
+    if (std::string::npos == start) {
+      return "";
+    }
+    start += strlen("; token=");
 
-      std::string c = _cookies;
-      std::string pairStr;
-      size_t semi = std::string::npos;
-
-      do {
-        semi = c.find(';');
-        if (semi != std::string::npos) {
-          pairStr = c.substr(0, semi);
-          c = c.substr(semi+1);
-        } else {
-          pairStr = c;
-        }
-
-        size_t eq = pairStr.find('=');
-        if (eq == std::string::npos) {
-          continue;
-        }
-
-        std::string key = pairStr.substr(0, eq);
-        std::string value = pairStr.substr(eq+1);
-
-        key.erase(remove_if(key.begin(), key.end(), isspace), key.end());
-
-        if (key.empty()) {
-          continue;
-        }
-
-        result[key] = value;
-
-
-      } while (semi != std::string::npos);
-
-
-      return result;
+    size_t end = cookie_s.find(';', start);
+    return (end == std::string::npos) ?
+      cookie_s.substr(start) :
+      cookie_s.substr(start, end - start);
   }
 
-  std::string generateCookieString(HashMapStringString _cookies) {
-    std::string result = "";
+  std::string generateCookieString(const std::string& token) {
+    return "token=" + token + "; path=/";
+  }
 
-    HashMapStringString::iterator i;
-    std::string path;
+  /**
+   * emit 'Set-Cookie' header with same name but 'expires' in the past
+   * http://tools.ietf.org/html/rfc6265#section-4.1.2
+   */
+  std::string generateRevokeCookieString() {
+    return "token=; path=/; expires=Wed, 29 April 1970 12:00:00 GMT";
+  }
 
-    for (i = _cookies.begin(); i != _cookies.end(); i++) {
-      if (i->first == "path") {
-        path = i->second;
-        continue;
-      }
-
-      if (!result.empty()) {
-        result = result + "; ";
-      }
-
-      result = result + i->first + "=" + (i->second);
+  /**
+   * extractAuthenticatedUser
+   * http://tools.ietf.org/html/rfc2617
+   */
+  std::string extractAuthenticatedUser(const char *_header) {
+    if (!_header) {
+      return "";
     }
 
-    if (!path.empty()) {
-      if (!result.empty()) {
-        result = result + "; ";
-      }
+    // header:= Digest SP [user | qopc | etc]+ comma separated
+    // user:= "username" "=" quoted-string
+    static const char key[] = " username=\"";
 
-      result = result + "path=" + path;
+    std::string header_s(_header);
+    size_t start = header_s.find(key);
+    if (std::string::npos == start) {
+      return "";
     }
-
-    return result;
+    start += strlen(key);
+    size_t end = header_s.find("\"", start);
+    if (std::string::npos == end) {
+      return "";
+    }
+    return header_s.substr(start, end - start);
   }
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               HashMapStringString _injectedCookies,
+                               bool emitTrustedLoginToken,
                                boost::shared_ptr<Session> _session) {
 
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
@@ -407,10 +395,14 @@ namespace dss {
           }
         }
         std::string cookies;
-        if(response.getCookies().empty()) {
-          cookies = generateCookieString(_injectedCookies);
-        } else {
-          cookies = generateCookieString(response.getCookies());
+        if (response.isRevokeSessionToken()) {
+          cookies = generateRevokeCookieString();
+        } else if (response.isPublishSessionToken()) {
+          // CAUTION: the session is new, the _session argument
+          // of this function is NULL
+          cookies = generateCookieString(response.getNewSessionToken());
+        } else if (emitTrustedLoginToken) {
+          cookies = generateCookieString(_session->getID());
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 200, cookies, result);
@@ -450,7 +442,7 @@ namespace dss {
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               HashMapStringString _injectedCookies,
+                               bool emitTrustedLoginToken,
                                boost::shared_ptr<Session> _session) {
     std::string result;
     try {
@@ -617,53 +609,41 @@ namespace dss {
     }
 
     RestfulRequest request(sublevel, _info->query_string ?: "");
-    const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapStringString cookies = parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
-    std::string token = cookies["token"];
+    std::string token = extractToken(mg_get_header(_connection, "Cookie"));
     if (token.empty()) {
       token = request.getParameter("token");
     }
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
-    HashMapStringString injectedCookies;
+    bool emitTrustedLoginToken = false;
 
-    // if we're coming from a trusted port, impersonate that user and start
-    // a new session on his behalf
-    if(((session == NULL) || (session->getUser() == NULL)) &&
-            (_info->local_port == self.m_TrustedPort)) {
-      const char* digestCString = mg_get_header(_connection, "Authorization");
-      if(digestCString > 0) {
-        std::string digest = digestCString;
-        const std::string userNamePrefix = "username=\"";
-        std::string::size_type userNamePos = digest.find(userNamePrefix);
-        std::string::size_type userNameEnd =
-          digest.find("\"", userNamePos + userNamePrefix.size() - 1);
-        if((userNamePos != std::string::npos) &&
-           (userNameEnd != std::string::npos)) {
-          std::string userName = digest.substr(userNamePos + userNamePrefix.size(),
-                                               userNameEnd - userNamePos - 1);
-          self.log("Logging-in from a trusted port as '" + userName + "'");
-          if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
-            self.log("Unknown user", lsInfo);
+    // lighttpd is proxying to our trusted port. We trust that it
+    // properly authenticated the user and just filter the HTTP
+    // Authorization header for the username
+    if (((session == NULL) || (session->getUser() == NULL)) &&
+        (_info->local_port == self.m_TrustedPort)) {
+      const char *auth_header = mg_get_header(_connection, "Authorization");
+      std::string userName = extractAuthenticatedUser(auth_header);
+
+      if (!userName.empty()) {
+        self.log("Logging-in from a trusted port as '" + userName + "'");
+        if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
+          self.log("Unknown user", lsInfo);
+          return NULL;
+        }
+        if (session == NULL) {
+          std::string newToken = self.m_SessionManager->registerSession();
+          if (newToken.empty()) {
+            self.log("Session limit reached", lsError);
             return NULL;
           }
-          if (session == NULL) {
-            std::string newToken = self.m_SessionManager->registerSession();
-            if (newToken.empty()) {
-              self.log("Session limit reached", lsError);
-              return NULL;
-            }
-            self.log("Registered new JSON session for trusted port (" + newToken + ")");
-            session = self.m_SessionManager->getSession(newToken);
-            injectedCookies["path"] = "/";
-            injectedCookies["token"] = newToken;
-            if (session != NULL) {
-              session->inheritUserFromSecurity();
-            }
-          }
+          self.log("Registered new JSON session for trusted port (" + newToken + ")");
+          session = self.m_SessionManager->getSession(newToken);
+          session->inheritUserFromSecurity();
+          emitTrustedLoginToken = true;
         }
       }
     }
@@ -676,9 +656,9 @@ namespace dss {
     if (toplevel == "/browse") {
       return self.httpBrowseProperties(_connection, request);
     } else if (toplevel == "/json") {
-      return self.jsonHandler(_connection, request, injectedCookies, session);
+      return self.jsonHandler(_connection, request, emitTrustedLoginToken, session);
     } else if (toplevel == "/icons") {
-      return self.iconHandler(_connection, request, injectedCookies, session);
+      return self.iconHandler(_connection, request, emitTrustedLoginToken, session);
     }
 
     return NULL;
