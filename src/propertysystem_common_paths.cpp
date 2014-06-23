@@ -73,7 +73,7 @@ void setupCommonProperties(PropertySystem &propSystem) {
       ->setStringValue("https://testdsservices.aizo.com/");
 #endif
   propSystem.createProperty(pp_websvc_apartment_changed_url_path)
-    ->setStringValue("internal/dss/v1_0/DSSApartment/ApartmentHasChanged");
+    ->setStringValue("internal/dss/v1_1/DSSApartment/ApartmentHasChanged");
   propSystem.createProperty(pp_websvc_apartment_changed_notify_delay)
     ->setIntegerValue(30);
   propSystem.createProperty(pp_websvc_access_mgmt_delete_token_url_path)
