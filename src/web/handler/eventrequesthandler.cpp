@@ -122,31 +122,9 @@ namespace dss {
     }
 
     boost::mutex::scoped_lock lock(m_Mutex);
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if ((a == NULL) || a->empty()) {
-      boost::shared_ptr<boost::any> b(new boost::any());
-      eventSessions.reset(new EventSubscriptionSessionByTokenID());
-      *b = eventSessions;
-      _session->addData(std::string("eventSubscriptionIDs"), b);
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(0);
-      }
-    }
-
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if (entry == eventSessions->end()) {
-      boost::shared_ptr<EventSubscriptionSession> sub;
-      sub.reset(new EventSubscriptionSession(m_EventInterpreter, token));
-      (*eventSessions)[token] = sub;
-    }
-
-    (*eventSessions)[token]->subscribe(name);
+    boost::shared_ptr<EventSubscriptionSession> subscription =
+      _session->createEventSubscription(m_EventInterpreter, token);
+    subscription->subscribe(name);
     return success();
   }
 
@@ -163,62 +141,20 @@ namespace dss {
       return failure(e.what());
     }
 
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if ((a == NULL) || a->empty()) {
-      return failure("Invalid session!");
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(0);
-      }
-    }
-
     boost::mutex::scoped_lock lock(m_Mutex);
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if (entry == eventSessions->end()){
-      return failure(std::string(__func__) + " subscriptionId" + subscribtionID + " not found!");
-    }
-
+    boost::shared_ptr<EventSubscriptionSession> sub;
     try {
-      (*eventSessions)[token]->unsubscribe(name);
+      sub = _session->getEventSubscription(token);
+      sub->unsubscribe(name);
     } catch (std::exception& e) {
+      // TODO still erase the subscription
       return failure(e.what());
     }
 
-    eventSessions->erase(entry);
+    _session->deleteEventSubscription(sub);
     return success();
   }
 
-  boost::shared_ptr<EventSubscriptionSession>
-    EventRequestHandler::getSubscriptionSession(int _token,
-                                                boost::shared_ptr<Session> _session) {
-    boost::mutex::scoped_lock lock(m_Mutex);
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if ((a == NULL) || a->empty()) {
-      throw std::runtime_error("Invalid session!");
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(false);
-      }
-    }
-
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(_token);
-    if (entry == eventSessions->end()) {
-      throw std::runtime_error("Subscription id not found!");
-    }
-
-    boost::shared_ptr<EventSubscriptionSession> result = (*eventSessions)[_token];
-    return result;
-  }
 
   boost::shared_ptr<JSONObject> EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
     boost::shared_ptr<JSONObject> result(new JSONObject());
@@ -325,9 +261,10 @@ namespace dss {
       }
     }
 
+    boost::mutex::scoped_lock lock(m_Mutex);
     boost::shared_ptr<EventSubscriptionSession> subscriptionSession;
     try {
-      subscriptionSession = getSubscriptionSession(token, _session);
+      subscriptionSession = _session->getEventSubscription(token);
     } catch (std::runtime_error& e) {
       return failure(e.what());
     }

@@ -40,8 +40,6 @@ namespace dss {
   class EventCollector;
   class EventSubscriptionSession;
 
-  typedef std::map<const int, boost::shared_ptr<EventSubscriptionSession> > EventSubscriptionSessionByTokenID;
-
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
     EventRequestHandler(EventInterpreter& _queue);
@@ -57,7 +55,6 @@ namespace dss {
     boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> get(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession);
-    boost::shared_ptr<EventSubscriptionSession> getSubscriptionSession(int _token, boost::shared_ptr<Session> _session);
   }; // StructureRequestHandler
 
 } // namespace dss
