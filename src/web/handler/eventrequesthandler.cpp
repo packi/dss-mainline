@@ -142,7 +142,7 @@ namespace dss {
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
     if (entry == eventSessions->end()) {
       boost::shared_ptr<EventSubscriptionSession> sub;
-      sub.reset(new EventSubscriptionSession(m_EventInterpreter));
+      sub.reset(new EventSubscriptionSession(m_EventInterpreter, token));
       (*eventSessions)[token] = sub;
     }
 

@@ -39,22 +39,49 @@ namespace dss {
 
   class EventSubscriptionSession {
   public:
-    EventSubscriptionSession(EventInterpreter& _eventInterpreter);
+    EventSubscriptionSession(EventInterpreter& _eventInterpreter,
+                             int subscription_id);
 
     std::string subscribe(const std::string& _eventName);
     void unsubscribe(const std::string& _eventName);
     Event popEvent();
     bool hasEvent();
+    /**
+     * blocks if no events are available
+     */
     bool waitForEvent(const int _timeoutMS);
-    // blocks if no events are available
+    int subscriptionId() const { return m_subscription_id; }
   private:
     boost::shared_ptr<EventCollector> m_pEventCollector;
     void createCollector();
     // name, subscriptionID
     std::map<std::string, std::string> m_subscriptionMap;
     EventInterpreter& m_EventInterpreter;
+    int m_subscription_id;
   };
 
+  typedef boost::shared_ptr<EventSubscriptionSession> EventSubscriptionSession_t;
+
+  inline bool operator==(const EventSubscriptionSession &lhs,
+                         const EventSubscriptionSession &rhs) {
+    return lhs.subscriptionId() == rhs.subscriptionId();
+  }
+
+  inline bool operator==(const EventSubscriptionSession_t &lhs,
+                         const EventSubscriptionSession_t &rhs) {
+    return *lhs == *rhs;
+  }
+
+  class EventSubscriptionSessionSelectById {
+  public:
+    EventSubscriptionSessionSelectById(int subscription_id) :
+      m_subscription_id(subscription_id) {}
+    bool operator()(const boost::shared_ptr<EventSubscriptionSession> &lhs) {
+      return lhs->subscriptionId() == m_subscription_id;
+    }
+  private:
+    int m_subscription_id;
+  };
 };
 
 #endif
