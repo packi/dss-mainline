@@ -1793,13 +1793,13 @@ namespace dss {
     std::string language = propSys.getStringValue("/system/language/locale");
 
     std::string eanURL = oemWebservice +
-                         "/public/MaterialMaster/v1_0/oemservice/GetArticleData" +
-                         "?EAN=" + m_EAN +
-                         "&PartNr=" + intToString(m_partNumber) +
-                         "&OEMSerialNumber=" + intToString(m_serialNumber) +
-                         "&MACAddress=" + mac +
-                         "&CountryCode=" + country +
-                         "&LanguageCode=" + language;
+                         "/public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData" +
+                         "?ean=" + m_EAN +
+                         "&partNr=" + intToString(m_partNumber) +
+                         "&oemSerialNumber=" + intToString(m_serialNumber) +
+                         "&macAddress=" + mac +
+                         "&countryCode=" + country +
+                         "&languageCode=" + language;
 
     Logger::getInstance()->log(std::string("OEMWebQuery::run: URL: ") + eanURL);
     long res = url.request(eanURL, GET, &result);
