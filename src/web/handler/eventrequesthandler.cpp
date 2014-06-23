@@ -147,7 +147,7 @@ namespace dss {
   boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
-    std::string tokenStr = _request.getParameter("subscriptionID");
+    std::string subscribtionID = _request.getParameter("subscriptionID");
     int token;
 
     if(_session == NULL) {
@@ -158,12 +158,12 @@ namespace dss {
       return failure("Missing event name!");
     }
 
-    if(tokenStr.empty()) {
+    if(subscribtionID.empty()) {
       return failure("Missing event subscription id!");
     }
 
     try {
-     token = strToInt(tokenStr);
+     token = strToInt(subscribtionID);
     } catch(std::invalid_argument& err) {
       return failure("Could not parse event subscription id!");
     }
@@ -188,7 +188,7 @@ namespace dss {
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
     if(entry == eventSessions->end()){
       m_eventsMutex.unlock();
-      return failure("Token not found!");
+      return failure(std::string(__func__) + " subscriptionId" + subscribtionID + " not found!");
     }
 
     try {
