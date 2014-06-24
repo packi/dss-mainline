@@ -77,32 +77,6 @@ namespace dss {
     m_IsApplicationSession = true;
   }
 
-  void Session::addData(const std::string& _key, boost::shared_ptr<boost::any> _value) {
-    m_DataMapMutex.lock();
-    dataMap[_key] = _value;
-    m_DataMapMutex.unlock();
-  }
-
-  boost::shared_ptr<boost::any> Session::getData(const std::string& _key) {
-    m_DataMapMutex.lock();
-    boost::shared_ptr<boost::any> rv = dataMap[_key];
-    m_DataMapMutex.unlock();
-    return rv;
-  }
-
-  bool Session::removeData(const std::string& _key) {
-    bool result = false;
-    m_DataMapMutex.lock();
-    std::map<std::string, boost::shared_ptr<boost::any> >::iterator i = dataMap.find(_key);
-    if(i != dataMap.end()) {
-      dataMap.erase(i);
-      result = true;
-    }
-
-    m_DataMapMutex.unlock();
-    return result;
-  }
-
   const std::string& Session::getID() const {
     return m_Token;
   }
@@ -122,4 +96,40 @@ namespace dss {
     }
   }
 
+  /**
+   * getEventSubscription
+   * @subscription_id
+   * @ret subscription std::runtime_error if not found
+   */
+  boost::shared_ptr<EventSubscriptionSession>
+    Session::getEventSubscription(int _token)
+  {
+    subscriptions_t::iterator item = std::find_if(m_subscriptions.begin(), m_subscriptions.end(),
+                                                  EventSubscriptionSessionSelectById(_token));
+    if (item == m_subscriptions.end()) {
+        throw std::runtime_error(" Token " + intToString(_token) + " not found!");
+    }
+    return *item;
+  }
+
+  boost::shared_ptr<EventSubscriptionSession>
+    Session::createEventSubscription(EventInterpreter &interp, int _token)
+  {
+    subscriptions_t::iterator item = std::find_if(m_subscriptions.begin(), m_subscriptions.end(),
+                                                  EventSubscriptionSessionSelectById(_token));
+    if (item != m_subscriptions.end()) {
+      return *item;
+    } else {
+      boost::shared_ptr<EventSubscriptionSession> elt;
+      elt.reset(new EventSubscriptionSession(interp, _token));
+      m_subscriptions.push_back(elt);
+      return elt;
+    }
+  }
+
+  void Session::deleteEventSubscription(boost::shared_ptr<EventSubscriptionSession> subs) {
+    m_subscriptions.erase(std::remove(m_subscriptions.begin(),
+                                      m_subscriptions.end(), subs),
+                          m_subscriptions.end());
+  }
 } // namespace dss

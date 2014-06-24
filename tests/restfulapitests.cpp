@@ -26,6 +26,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include "src/event.h"
+#include "src/eventsubscriptionsession.h"
 #include "src/web/restful.h"
 #include "src/web/webserverapi.h"
 #include "src/web/restfulapiwriter.h"
@@ -59,6 +61,56 @@ BOOST_AUTO_TEST_CASE(testRestfulAPIWriter) {
 
   BOOST_CHECK(fs::exists(fileName));
   fs::remove(fileName);
+}
+
+BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribe) {
+  dss::EventInterpreter interp(NULL);
+
+  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, 0x7f));
+  std::vector<dss::EventSubscriptionSession_t> coll;
+
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
+  coll.push_back(subs);
+  coll.push_back(subs2);
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) != coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs2) != coll.end());
+
+  coll.erase(std::remove(coll.begin(), coll.end(), subs), coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs2) == coll.end());
+
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.erase(std::remove(coll.begin(), coll.end(), subs), coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
+  BOOST_CHECK(coll.empty());
+}
+
+BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribeByTokenId) {
+  dss::EventInterpreter interp(NULL);
+
+  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs3(new dss::EventSubscriptionSession(interp, 0x17));
+  std::vector<dss::EventSubscriptionSession_t> coll;
+
+  coll.push_back(subs);
+  coll.push_back(subs2);
+  coll.erase(std::remove_if(coll.begin(), coll.end(),
+                            dss::EventSubscriptionSessionSelectById(0x7f)), coll.end());
+  BOOST_CHECK(coll.empty());
+
+  coll.push_back(subs);
+  coll.push_back(subs2);
+  coll.push_back(subs3);
+  coll.erase(std::remove_if(coll.begin(), coll.end(),
+                            dss::EventSubscriptionSessionSelectById(0x7f)), coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs3) != coll.end());
+  BOOST_CHECK(coll.size() == 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

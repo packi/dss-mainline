@@ -30,10 +30,14 @@
 
 namespace dss {
 
+  /**
+   * @_eventInterpreter
+   * @subscribtion_id -- provided by client!!
+   */
   EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
-                                                     boost::shared_ptr<Session> _parentSession)
-  : m_parentSession(_parentSession),
-    m_EventInterpreter(_eventInterpreter)
+                                                     int subscription_id)
+  : m_EventInterpreter(_eventInterpreter),
+    m_subscription_id(subscription_id)
   { }
 
   std::string EventSubscriptionSession::subscribe(const std::string& _eventName) {
