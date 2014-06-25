@@ -24,6 +24,7 @@
 #include "metering.h"
 
 #include <boost/filesystem.hpp>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -126,6 +127,19 @@ namespace dss {
       bool tunePowerMaxSetting = false;
       int rrdMatchCount = 0;
       std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
+
+      if (!boost::filesystem::exists(fileName)) {
+        dsuid_t dsuid = _pMeter->getDSID();
+        dsid_t dsid;
+        if (dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
+          std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
+                                ".rrd";
+          if (boost::filesystem::exists(oldFile)) {
+            boost::filesystem::rename(oldFile, fileName);
+            log("Migrated metering data from " + oldFile + " to " + fileName);
+          }
+        }
+      }
 
       rrd_clear_error();
       rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
