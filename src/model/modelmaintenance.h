@@ -34,6 +34,7 @@
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
+#include "../webservice_connection.h"
 
 namespace dss {
   class Apartment;
@@ -119,9 +120,20 @@ namespace dss {
   public:
     class OEMWebQuery : public Task {
     public:
+      class OEMWebQueryCallback : public URLRequestCallback {
+      public:
+        OEMWebQueryCallback(dss_dsid_t dsmId, devid_t deviceAddress);
+        virtual ~OEMWebQueryCallback() {}
+        virtual void result(long code, const std::string &result);
+      private:
+        dss_dsid_t m_dsmId;
+        devid_t m_deviceAddress;
+      };
+
       OEMWebQuery(boost::shared_ptr<Device> _device);
       virtual ~OEMWebQuery() {}
       virtual void run();
+
     private:
       std::string m_EAN;
       uint16_t m_partNumber;
