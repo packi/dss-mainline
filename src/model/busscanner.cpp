@@ -82,7 +82,7 @@ namespace dss {
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }
-        if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+        if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
           log("scanDSMeter: dSMeter is incompatible", lsWarning);
           _dsMeter->setDatamodelHash(hash.Hash);
           _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
