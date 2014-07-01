@@ -44,7 +44,7 @@ dsuid_t str2dsuid(std::string dsuid_str)
 {
   dsuid_t dsuid;
 
-  if (dsuid_from_string(dsuid_str.c_str(), &dsuid) != 0)
+  if (dsuid_from_string(dsuid_str.c_str(), &dsuid) != DSUID_RC_OK)
   {
     throw std::runtime_error("can not convert from string, invalid dSUID");
   }
@@ -84,7 +84,7 @@ std::string dsid2str(dsid_t dsid) {
 
 uint32_t dsuid2serial(dsuid_t dsuid) {
   uint32_t serial = 0;
-  if (dsuid_get_serial_number(&dsuid, &serial) != 0) {
+  if (dsuid_get_serial_number(&dsuid, &serial) != DSUID_RC_OK) {
     throw std::runtime_error("could not extract serial number from dSUID" +
                               dsuid2str(dsuid));
   }
@@ -93,7 +93,7 @@ uint32_t dsuid2serial(dsuid_t dsuid) {
 
 bool IsEvenDsuid(dsuid_t dsuid) {
   uint32_t serial = 0;
-  if (dsuid_get_serial_number(&dsuid, &serial) != 0) {
+  if (dsuid_get_serial_number(&dsuid, &serial) != DSUID_RC_OK) {
     throw std::runtime_error("could not extract serial number from dSUID" +
                               dsuid2str(dsuid));
   }
@@ -104,7 +104,7 @@ bool IsEvenDsuid(dsuid_t dsuid) {
 
 dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid) {
   dsuid_t out;
-  if (dsuid_get_next_dsuid(&dsuid, &out) != 0) {
+  if (dsuid_get_next_dsuid(&dsuid, &out) != DSUID_RC_OK) {
     throw std::runtime_error("could not retrieve next dSUID from " +
                               dsuid2str(dsuid));
   }
@@ -113,7 +113,9 @@ dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid) {
 
 dsid_t dsuid_to_dsid(dsuid_t dsuid) {
     dsid_t dsid;
-    ::dsuid_to_dsid(&dsuid, &dsid);
+    if (::dsuid_to_dsid(&dsuid, &dsid) != DSUID_RC_OK) {
+      throw std::runtime_error("could not convert dSUID to dSID");
+    }
     return dsid;
 }
 
