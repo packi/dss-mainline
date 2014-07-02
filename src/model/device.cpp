@@ -1224,27 +1224,43 @@ namespace dss {
   }
 
   bool Device::is2WayMaster() const {
-    return (getFeatures().pairing &&
-             ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
-              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
-              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
-              (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
-              (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
-                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
-               IsEvenDsuid(m_DSID)))); // even dSID
+    bool ret = false;
+
+    try {
+      ret = (getFeatures().pairing &&
+            ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
+             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
+             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
+             (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
+              IsEvenDsuid(m_DSID)))); // even dSID
+    } catch (std::runtime_error &err) {
+      Logger::getInstance()->log(err.what());
+    }
+
+    return ret;
   }
 
   bool Device::is2WaySlave() const {
+    bool ret = false;
+
     if (!hasInput()) {
-      return false;
+      return ret;
     }
 
-    return ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
-            (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
-            ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
-            !IsEvenDsuid(m_DSID))); // odd dSID
+    try {
+      ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
+             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
+             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
+             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
+             ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
+             !IsEvenDsuid(m_DSID))); // odd dSID
+    } catch (std::runtime_error &err) {
+      Logger::getInstance()->log(err.what());
+    }
+
+    return ret;
   }
 
   bool Device::hasMultibuttons() const {
