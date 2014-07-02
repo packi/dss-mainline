@@ -92,7 +92,11 @@ namespace dss {
       std::vector<boost::shared_ptr<DSMeter> > dsMeters = ext->getApartment().getDSMeters();
       foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
         ScriptObject objEnergy(*ctx, NULL);
-        objEnergy.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        try {
+          objEnergy.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
         objEnergy.setProperty<std::string>("dsuid", dsuid2str(dsMeter->getDSID()));
         objEnergy.setProperty<std::string>("type", "energy");
         jsval childJSVal = OBJECT_TO_JSVAL(objEnergy.getJSObject());
@@ -102,7 +106,12 @@ namespace dss {
         }
         iMeter++;
         ScriptObject objEnergyDelta(*ctx, NULL);
-        objEnergyDelta.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        try {
+          objEnergyDelta.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+
         objEnergyDelta.setProperty<std::string>("dsuid", dsuid2str(dsMeter->getDSID()));
         objEnergyDelta.setProperty<std::string>("type", "energyDelta");
         childJSVal = OBJECT_TO_JSVAL(objEnergyDelta.getJSObject());
@@ -112,7 +121,12 @@ namespace dss {
         }
         iMeter++;
         ScriptObject objConsumption(*ctx, NULL);
-        objConsumption.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        try {
+          objConsumption.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+
         objConsumption.setProperty<std::string>("dsuid", dsuid2str(dsMeter->getDSID()));
         objConsumption.setProperty<std::string>("type", "consumption");
         childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());

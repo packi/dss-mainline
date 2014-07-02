@@ -534,7 +534,12 @@ namespace dss {
       resultObj->addElement("device", toJSON(dr));
 
       boost::shared_ptr<JSONObject> master(new JSONObject());
-      master->addProperty("dsid", dsid2str(dsuid_to_dsid(pDevice->getDSID())));
+      try {
+        master->addProperty("dsid", dsid2str(dsuid_to_dsid(pDevice->getDSID())));
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+      }
+
       master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
       master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
       resultObj->addElement("update", master);

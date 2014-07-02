@@ -131,7 +131,7 @@ namespace dss {
       if (!boost::filesystem::exists(fileName)) {
         dsuid_t dsuid = _pMeter->getDSID();
         dsid_t dsid;
-        if (dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
+        if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
           std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
                                 ".rrd";
           if (boost::filesystem::exists(oldFile)) {

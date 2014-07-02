@@ -362,7 +362,11 @@ namespace dss {
           boost::shared_ptr<const DeviceReference> device = _event.getRaisedAtDevice();
           try {
             source.setProperty("set", "dsuid(" + dsuid2str(device->getDSID()) + ")");
+            try {
             source.setProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
+            } catch (std::runtime_error &err) {
+              Logger::getInstance()->log(err.what());
+            }
             source.setProperty("dsuid", dsuid2str(device->getDSID()));
             source.setProperty("zoneID", device->getDevice()->getZoneID());
           } catch(ItemNotFoundException& e) {
@@ -375,7 +379,12 @@ namespace dss {
           if (state->getType() == StateType_Device) {
             boost::shared_ptr<Device> device = state->getProviderDevice();
             source.setProperty("set", "dsuid(" + dsuid2str(device->getDSID()) + ")");
-            source.setProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
+            try {
+              source.setProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
+            } catch (std::runtime_error &err) {
+              Logger::getInstance()->log(err.what());
+            }
+
             source.setProperty("dsid", dsuid2str(device->getDSID()));
             source.setProperty("zoneID", device->getZoneID());
             source.setProperty("isApartment", false);

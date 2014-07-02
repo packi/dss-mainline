@@ -179,7 +179,11 @@ namespace dss {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
-          circuit->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+          try {
+            circuit->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+          } catch (std::runtime_error &err) {
+            Logger::getInstance()->log(err.what());
+          }
           circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("armSwVersion", dsMeter->getArmSoftwareVersion());

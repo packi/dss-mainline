@@ -95,10 +95,12 @@ namespace dss {
     {
       SetNullDsuid(m_DSMeterDSID);
       SetNullDsuid(m_LastKnownMeterDSID);
-      m_DSMeterDSIDstr = dsid2str(dsuid_to_dsid(m_DSMeterDSID));
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
-      m_LastKnownMeterDSIDstr = dsid2str(dsuid_to_dsid(m_LastKnownMeterDSID));
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
+      try {
+        m_DSMeterDSIDstr = dsid2str(dsuid_to_dsid(m_DSMeterDSID));
+        m_LastKnownMeterDSIDstr = dsid2str(dsuid_to_dsid(m_LastKnownMeterDSID));
+      } catch (std::runtime_error &ex) {}
     } // ctor
 
   Device::~Device() {
@@ -155,14 +157,20 @@ namespace dss {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + dsuid2str(m_DSID));
-        m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
+        try {
+          m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
+        } catch (std::runtime_error &ex) {
+          Logger::getInstance()->log(ex.what());
+        }
         m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
         m_pPropertyNode->createProperty("present")
           ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-        m_pPropertyNode->createProperty("DSMeterDSID")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSIDstr, false));
+        if (!m_DSMeterDSIDstr.empty()) {
+          m_pPropertyNode->createProperty("DSMeterDSID")
+            ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSIDstr, false));
+        }
         m_pPropertyNode->createProperty("DSMeterDSUID")
           ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSUIDstr, false));
 
@@ -209,8 +217,10 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_ShortAddress, false));
         m_pPropertyNode->createProperty("lastKnownShortAddress")
           ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_LastKnownShortAddress, false));
-        m_pPropertyNode->createProperty("lastKnownMeterDSID")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSIDstr, false));
+        if (!m_LastKnownMeterDSIDstr.empty()) {
+          m_pPropertyNode->createProperty("lastKnownMeterDSID")
+            ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSIDstr, false));
+        }
         m_pPropertyNode->createProperty("lastKnownMeterDSUID")
           ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSUIDstr, false));
         m_pPropertyNode->createProperty("firstSeen")
@@ -837,9 +847,15 @@ namespace dss {
       alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
     }
     m_DSMeterDSID = _dsMeter->getDSID();
-    m_DSMeterDSIDstr = dsuid2str(_dsMeter->getDSID());
-    m_LastKnownMeterDSID = _dsMeter->getDSID();
-    m_LastKnownMeterDSIDstr = dsuid2str(_dsMeter->getDSID());
+    m_DSMeterDSUIDstr = dsuid2str(_dsMeter->getDSID());
+    m_LastKnownMeterDSUIDstr = dsuid2str(_dsMeter->getDSID());
+    try {
+      m_DSMeterDSIDstr = dsid2str(dsuid_to_dsid(m_DSMeterDSID));
+      m_LastKnownMeterDSIDstr = dsid2str(dsuid_to_dsid(m_LastKnownMeterDSID));
+    } catch (std::runtime_error &ex) {
+      Logger::getInstance()->log(ex.what());
+    }
+
     if(m_pPropertyNode != NULL) {
       PropertyNodePtr target = _dsMeter->getPropertyNode()->createProperty("devices");
       if(alias != NULL) {

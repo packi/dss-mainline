@@ -44,7 +44,11 @@ namespace dss {
     DateTime tmp_date;
 
     boost::shared_ptr<JSONObject> result(new JSONObject());
-    result->addProperty("id", dsid2str(dsuid_to_dsid(_device.getDSID())));
+    try {
+      result->addProperty("id", dsid2str(dsuid_to_dsid(_device.getDSID())));
+    } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+    }
     result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
     result->addProperty("name", _device.getName());
@@ -61,7 +65,11 @@ namespace dss {
     result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     if(_device.getDevice()->isPresent()) {
-      result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getDSMeterDSID())));
+      try {
+        result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getDSMeterDSID())));
+      } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+      }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
       try {

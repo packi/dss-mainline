@@ -65,7 +65,12 @@ namespace dss {
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
       m_pPropertyNode =
         m_pApartment->getPropertyNode()->createProperty("dSMeters/" + dsuid2str(m_DSID));
+      try {
       m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+      }
+
       m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));

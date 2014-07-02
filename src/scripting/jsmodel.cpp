@@ -1872,41 +1872,30 @@ namespace dss {
           }
           return JS_TRUE;
         case 2:
-          {
-            dsid_t dsid;
-            dsuid_t dsuid = dev->getDSID();
-            dsuid_to_dsid(&dsuid, &dsid);
-            // make a local reference so the std::string does not go out of scope
-            std::string tmp = dsid2str(dsid);
-            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
-          }
-          return JS_TRUE;
-
-        case 3:
           JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice()->getName().c_str())));
           return JS_TRUE;
-        case 4:
+        case 3:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getZoneID()));
           return JS_TRUE;
-        case 5:
+        case 4:
           {
             std::string tmp = dsuid2str(dev->getDevice()->getDSMeterDSID());
             JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
           }
           return JS_TRUE;
-        case 6:
+        case 5:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getFunctionID()));
           return JS_TRUE;
-        case 7:
+        case 6:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getLastCalledScene()));
           return JS_TRUE;
-        case 8:
+        case 7:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getRevisionID()));
           return JS_TRUE;
-        case 9:
+        case 8:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->getProductID()));
           return JS_TRUE;
-        case 10:
+        case 9:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->isPresent()));
           return JS_TRUE;
       }
@@ -1931,15 +1920,14 @@ namespace dss {
   static JSPropertySpec dev_properties[] = {
     {"className", 0, 0, dev_JSGet, NULL},
     {"dsuid", 1, 0, dev_JSGet, NULL},
-    {"dsid", 2, 0, dev_JSGet, NULL},
-    {"name", 3, 0, dev_JSGet, NULL},
-    {"zoneID", 4, 0, dev_JSGet, NULL},
-    {"circuitID", 5, 0, dev_JSGet, NULL},
-    {"functionID", 6, 0, dev_JSGet, NULL},
-    {"lastCalledScene", 7, 0, dev_JSGet, NULL},
-    {"revisionID", 8, 0, dev_JSGet, NULL},
-    {"productID", 9, 0, dev_JSGet, NULL},
-    {"isPresent", 10, 0, dev_JSGet, NULL},
+    {"name", 2, 0, dev_JSGet, NULL},
+    {"zoneID", 3, 0, dev_JSGet, NULL},
+    {"circuitID", 4, 0, dev_JSGet, NULL},
+    {"functionID", 5, 0, dev_JSGet, NULL},
+    {"lastCalledScene", 6, 0, dev_JSGet, NULL},
+    {"revisionID", 7, 0, dev_JSGet, NULL},
+    {"productID", 8, 0, dev_JSGet, NULL},
+    {"isPresent", 9, 0, dev_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
@@ -1996,19 +1984,9 @@ namespace dss {
           }
           return JS_TRUE;
         case 2:
-          {
-            dsid_t dsid;
-            dsuid_t dsuid = meter->getDSID();
-            dsuid_to_dsid(&dsuid, &dsid);
-            // make a local reference so the std::string does not go out of scope
-            std::string tmp = dsid2str(dsid);
-            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
-          }
-          return JS_TRUE;
-        case 3:
           JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, meter->getName().c_str())));
           return JS_TRUE;
-        case 4:
+        case 3:
           JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(meter->isPresent()));
           return JS_TRUE;
       }
@@ -2019,9 +1997,8 @@ namespace dss {
   static JSPropertySpec dsmeter_properties[] = {
     {"className", 0, 0, dsmeter_JSGet, NULL},
     {"dsuid", 1, 0, dsmeter_JSGet, NULL},
-    {"dsid", 2, 0, dsmeter_JSGet, NULL},
-    {"name", 3, 0, dsmeter_JSGet, NULL},
-    {"present", 4, 0, dsmeter_JSGet, NULL},
+    {"name", 2, 0, dsmeter_JSGet, NULL},
+    {"present", 3, 0, dsmeter_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 

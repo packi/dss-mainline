@@ -74,17 +74,32 @@ namespace dss {
       boost::shared_ptr<JSONObject> energyEntry(new JSONObject());
       series->addElement("", energyEntry);
       energyEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
-      energyEntry->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      try {
+        energyEntry->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+      }
+
       energyEntry->addProperty("type", "energy");
       boost::shared_ptr<JSONObject> energyDeltaEntry(new JSONObject());
       series->addElement("", energyDeltaEntry);
       energyDeltaEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
+      try {
       energyDeltaEntry->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+      }
+
       energyDeltaEntry->addProperty("type", "energyDelta");
       boost::shared_ptr<JSONObject> consumptionEntry(new JSONObject());
       series->addElement("", consumptionEntry);
       consumptionEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
-      consumptionEntry->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      try {
+        consumptionEntry->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+      }
+
       consumptionEntry->addProperty("type", "consumption");
     }
     return success(resultObj);
@@ -280,14 +295,23 @@ namespace dss {
       std::string dsuid = dsuid2str(dsMeter->getDSID());
       if (aggregateMeterValues) {
         aggregatedValue += value;
-        boost::shared_ptr<JSONValue<std::string> > dsidVal(new JSONValue<std::string>(dsid2str(dsuid_to_dsid(dsMeter->getDSID()))));
-        boost::shared_ptr<JSONValue<std::string> > dsuidVal(new JSONValue<std::string>(dsuid));
+        try {
+          boost::shared_ptr<JSONValue<std::string> > dsidVal(new JSONValue<std::string>(dsid2str(dsuid_to_dsid(dsMeter->getDSID()))));
         dsidSet->addElement("", dsidVal);
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+        boost::shared_ptr<JSONValue<std::string> > dsuidVal(new JSONValue<std::string>(dsuid));
         dsuidSet->addElement("", dsuidVal);
       } else {
         try {
           boost::shared_ptr<JSONObject> modulator(new JSONObject());
-          modulator->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+          try {
+            modulator->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+
           modulator->addProperty("dSUID", dsuid);
           modulator->addProperty("value", value);
           modulator->addProperty("date", lastUpdateAll.toString());
