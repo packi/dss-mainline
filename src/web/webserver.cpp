@@ -40,6 +40,7 @@
 
 #include "src/logger.h"
 #include "src/dss.h"
+#include "src/ds485types.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"
 
@@ -454,21 +455,28 @@ namespace dss {
         throw std::runtime_error("unhandled function");
       }
 
+      std::string dsuidStr = request.getParameter("dsuid");
       std::string dsidStr = request.getParameter("dsid");
-      if (dsidStr.empty()) {
-        throw std::invalid_argument("missing device dsid parameter");
+      if (dsuidStr.empty() && dsidStr.empty()) {
+        throw std::invalid_argument("missing device dsuid parameter");
       }
 
-      dsuid_t deviceDSID = str2dsuid(dsidStr);
+      dsuid_t deviceDSUID;
       boost::shared_ptr<Device> result;
-      result = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+      if (!dsuidStr.empty()) {
+        deviceDSUID = str2dsuid(dsuidStr);
+      } else if (!dsidStr.empty()) {
+        dsid_t deviceDSID = str2dsid(dsidStr);
+        deviceDSUID = dsuid_from_dsid(deviceDSID);
+      }
+      result = getDSS().getApartment().getDeviceByDSID(deviceDSUID);
       if (result == NULL) {
-        throw std::runtime_error("device with id " + dsidStr + " not found");
+        throw std::runtime_error("device with id " + dsuid2str(deviceDSUID) + " not found");
       }
 
       std::string icon = result->getIconPath();
       if (icon.empty()) {
-        throw std::runtime_error("icon for device " + dsidStr + " not found");
+        throw std::runtime_error("icon for device " + dsuid2str(deviceDSUID) + " not found");
       }
 
       std::string iconBasePath =
@@ -487,12 +495,10 @@ namespace dss {
           mg_send_file(_connection, fp, fs::file_size(icon));
           fclose(fp);
         } else {
-          throw std::runtime_error("icon file " + icon + " for device " +
-                                   dsidStr + " not found");
+          throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
         }
       } else {
-        throw std::runtime_error("icon file " + icon + " for device " +
-                                 dsidStr + " not found");
+        throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
       }
     } catch(SecurityException& e) {
       JSONObject resultObj;
