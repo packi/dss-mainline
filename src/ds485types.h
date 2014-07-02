@@ -43,6 +43,7 @@ typedef uint16_t devid_t;
   bool IsEvenDsuid(dsuid_t dsuid);
   dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid);
   dsid_t dsuid_to_dsid(dsuid_t dsuid);
+  dsuid_t dsuid_from_dsid(const dsid_t& dsid);
 }
 
 #endif//__DSS_DSUID_H__
