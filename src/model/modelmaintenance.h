@@ -122,11 +122,11 @@ namespace dss {
     public:
       class OEMWebQueryCallback : public URLRequestCallback {
       public:
-        OEMWebQueryCallback(dss_dsid_t dsmId, devid_t deviceAddress);
+        OEMWebQueryCallback(dsuid_t dsmId, devid_t deviceAddress);
         virtual ~OEMWebQueryCallback() {}
         virtual void result(long code, const std::string &result);
       private:
-        dss_dsid_t m_dsmId;
+        dsuid_t m_dsmId;
         devid_t m_deviceAddress;
       };
 

@@ -1770,7 +1770,7 @@ namespace dss {
     m_serialNumber = _device->getOemSerialNumber();
   }
 
-  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dss_dsid_t dsmId, devid_t deviceAddress)
+  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dsuid_t dsmId, devid_t deviceAddress)
     : m_dsmId(dsmId)
     , m_deviceAddress(deviceAddress)
   {

@@ -688,7 +688,6 @@ namespace dss {
 
   void DSBusInterface::handleDeviceLocalAction(dsuid_t _dsMeterID, uint16_t _deviceID, uint8_t _state) {
     loginFromCallback();
-    dsuid_t dsmDSID;
     if (_state > 2) {
       // invalid device local action value
       return;
