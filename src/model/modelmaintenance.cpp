@@ -898,23 +898,23 @@ namespace dss {
           Set s = zone->getDevices().getByGroup(_groupID);
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
           s.perform(act);
-        }
 
-        std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
-        if(_zoneID == 0) {
-          zonesToUpdate = m_pApartment->getZones();
-        } else {
-          zonesToUpdate.push_back(m_pApartment->getZone(_zoneID));
-        }
-        foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
-          if(_groupID == 0) {
-            foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
-              pGroup->setLastCalledScene(_sceneID & 0x00ff);
-            }
+          std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
+          if(_zoneID == 0) {
+            zonesToUpdate = m_pApartment->getZones();
           } else {
-            boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-            if(pGroup != NULL) {
-              pGroup->setLastCalledScene(_sceneID & 0x00ff);
+            zonesToUpdate.push_back(m_pApartment->getZone(_zoneID));
+          }
+          foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
+            if(_groupID == 0) {
+              foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
+                pGroup->setLastCalledScene(_sceneID & 0x00ff);
+              }
+            } else {
+              boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+              if(pGroup != NULL) {
+                pGroup->setLastCalledScene(_sceneID & 0x00ff);
+              }
             }
           }
         }
