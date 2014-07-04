@@ -374,12 +374,11 @@ namespace dss {
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               bool emitTrustedLoginToken,
+                               const std::string &trustedSetCookie,
                                boost::shared_ptr<Session> _session) {
+    std::string result, setCookieHeader = trustedSetCookie;
 
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
-
-    std::string result;
     if(m_Handlers[request.getClass()] != NULL) {
       try {
         if ((_session == NULL) && (request.getClass() != kHandlerSystem)) {
@@ -395,39 +394,38 @@ namespace dss {
             result = callback + "(" + response.getResponse()->toString() + ")";
           }
         }
-        std::string cookies;
         if (response.isRevokeSessionToken()) {
-          cookies = generateRevokeCookieString();
+          setCookieHeader = generateRevokeCookieString();
         } else if (response.isPublishSessionToken()) {
           // CAUTION: the session is new, the _session argument
           // of this function is NULL
-          cookies = generateCookieString(response.getNewSessionToken());
-        } else if (emitTrustedLoginToken) {
-          cookies = generateCookieString(_session->getID());
+          setCookieHeader = generateCookieString(response.getNewSessionToken());
+          // NOTE, this way we might override the trusted login session
+          // IGNORE, it doesn't happen and if so, we don't care either
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 200, cookies, result);
+        emitHTTPJsonPacket(_connection, 200, setCookieHeader, result);
       } catch(SecurityException& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 403, "", result);;
+        emitHTTPJsonPacket(_connection, 403, setCookieHeader, result);;
       } catch(std::runtime_error& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 500, "", result);
+        emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
       } catch(std::invalid_argument& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 500, "", result);
+        emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
       }
     } else {
       log("Unknown function '" + request.getUrlPath() + "'", lsError);
@@ -436,14 +434,14 @@ namespace dss {
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
       sstream << "}";
       result = sstream.str();
-      emitHTTPJsonPacket(_connection, 404, "", result);
+      emitHTTPJsonPacket(_connection, 404, setCookieHeader, result);
     }
     return _connection;
   } // jsonHandler
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               bool emitTrustedLoginToken,
+                               const std::string &setCookieHeader,
                                boost::shared_ptr<Session> _session) {
     std::string result;
     try {
@@ -491,7 +489,8 @@ namespace dss {
       if (boost::filesystem::exists(icon)) {
         FILE *fp = fopen(icon.c_str(), "r");
         if (fp != NULL) {
-          emitHTTPHeader(_connection, 200, fs::file_size(icon), "image/png", "");
+          emitHTTPHeader(_connection, 200, fs::file_size(icon), "image/png",
+                         setCookieHeader);
           mg_send_file(_connection, fp, fs::file_size(icon));
           fclose(fp);
         } else {
@@ -505,26 +504,27 @@ namespace dss {
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPJsonPacket(_connection, 500, "", result);
+      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     } catch(std::runtime_error& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPJsonPacket(_connection, 500, "", result);
+      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     } catch(std::invalid_argument& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPJsonPacket(_connection, 500, "", result);
+      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     }
 
     return _connection;
   } // iconHandler
 
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                        RestfulRequest &request) {
+                                        RestfulRequest &request,
+                                        const std::string &trustedSetCookie) {
     std::string path = request.getUrlPath();
     if (path.empty()) {
       path = "/";
@@ -576,13 +576,15 @@ namespace dss {
 
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
-    emitHTTPTextPacket(_connection, 200, "", tmp);
+    emitHTTPTextPacket(_connection, 200, trustedSetCookie, tmp);
     return _connection;
   } // httpBrowseProperties
 
   void *WebServer::httpRequestCallback(enum mg_event event,
                                        struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
+    std::string trustedLoginCookie;
+
     if (event != MG_NEW_REQUEST || !_info->uri || !_info->remote_ip) {
       return NULL;
     }
@@ -624,7 +626,6 @@ namespace dss {
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
-    bool emitTrustedLoginToken = false;
 
     // lighttpd is proxying to our trusted port. We trust that it
     // properly authenticated the user and just filter the HTTP
@@ -649,7 +650,9 @@ namespace dss {
           self.log("Registered new JSON session for trusted port (" + newToken + ")");
           session = self.m_SessionManager->getSession(newToken);
           session->inheritUserFromSecurity();
-          emitTrustedLoginToken = true;
+
+          // this is the first call, piggy back the set-cookie header
+          trustedLoginCookie = generateCookieString(session->getID());
         }
       }
     }
@@ -660,11 +663,11 @@ namespace dss {
     }
 
     if (toplevel == "/browse") {
-      return self.httpBrowseProperties(_connection, request);
+      return self.httpBrowseProperties(_connection, request, trustedLoginCookie);
     } else if (toplevel == "/json") {
-      return self.jsonHandler(_connection, request, emitTrustedLoginToken, session);
+      return self.jsonHandler(_connection, request, trustedLoginCookie, session);
     } else if (toplevel == "/icons") {
-      return self.iconHandler(_connection, request, emitTrustedLoginToken, session);
+      return self.iconHandler(_connection, request, trustedLoginCookie, session);
     }
 
     return NULL;
