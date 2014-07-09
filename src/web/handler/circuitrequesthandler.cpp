@@ -54,11 +54,15 @@ namespace dss {
     }
 
     dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(idString);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(idString);
+    try {
+      if (dsuidStr.empty()) {
+          dsid_t dsid = str2dsid(idString);
+          dsuid = dsuid_from_dsid(&dsid);
+      } else {
+        dsuid = str2dsuid(dsuidStr);
+      }
+    } catch(std::runtime_error& e) {
+      return failure(e.what());
     }
 
     try {

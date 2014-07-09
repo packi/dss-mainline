@@ -847,6 +847,7 @@ namespace dss {
       alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
     }
     m_DSMeterDSID = _dsMeter->getDSID();
+    m_LastKnownMeterDSID = _dsMeter->getDSID();
     m_DSMeterDSUIDstr = dsuid2str(_dsMeter->getDSID());
     m_LastKnownMeterDSUIDstr = dsuid2str(_dsMeter->getDSID());
     try {
