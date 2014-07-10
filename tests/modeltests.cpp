@@ -169,9 +169,11 @@ BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
 
   dsuid_t dsuid1, nullid, dsmeterDSID;
 
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(nullid);
+  SetNullDsuid(dsmeterDSID);
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsmeterDSID.id[DSUID_SIZE - 1] = 10;
-  SetNullDsuid(nullid);
   
   boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsmeterDSID);
 
@@ -377,6 +379,10 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3, dsuid4;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
+  SetNullDsuid(dsuid3);
+  SetNullDsuid(dsuid4);
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;
   dsuid3.id[DSUID_SIZE - 1] = 3;
@@ -404,19 +410,19 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1)", apt.getZone(0));
+  builderTest = builder.buildSet("dsid("+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow.dsid(1)", apt.getZone(0));
+  builderTest = builder.buildSet("yellow.dsid("+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1).yellow", apt.getZone(0));
+  builderTest = builder.buildSet("dsid("+dsuid2str(dsuid1)+").yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow.yellow.yellow.yellow.yellow.yellow.dsid(1)", apt.getZone(0));
+  builderTest = builder.buildSet("yellow.yellow.yellow.yellow.yellow.yellow.dsid("+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
@@ -430,54 +436,54 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid( 1)", apt.getZone(0));
+  builderTest = builder.buildSet("dsid( "+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid( 1 )", apt.getZone(0));
+  builderTest = builder.buildSet("dsid( "+dsuid2str(dsuid1)+" )", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1 )", apt.getZone(0));
+  builderTest = builder.buildSet("dsid("+dsuid2str(dsuid1)+" )", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet(" dsid(1 ) ", apt.getZone(0));
+  builderTest = builder.buildSet(" dsid("+dsuid2str(dsuid1)+" ) ", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow .dsid(1)", apt.getZone(0));
+  builderTest = builder.buildSet("yellow .dsid("+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow. dsid(1)", apt.getZone(0));
+  builderTest = builder.buildSet("yellow. dsid("+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow . dsid(1)", apt.getZone(0));
+  builderTest = builder.buildSet("yellow . dsid("+dsuid2str(dsuid1)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1) .yellow", apt.getZone(0));
+  builderTest = builder.buildSet("dsid("+dsuid2str(dsuid1)+") .yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1). yellow", apt.getZone(0));
+  builderTest = builder.buildSet("dsid("+dsuid2str(dsuid1)+"). yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1) . yellow", apt.getZone(0));
+  builderTest = builder.buildSet("dsid("+dsuid2str(dsuid1)+") . yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow .yellow. yellow . yellow  .yellow.  yellow \n.dsid(\t1)    ", apt.getZone(0));
+  builderTest = builder.buildSet("yellow .yellow. yellow . yellow  .yellow.  yellow \n.dsid(\t"+dsuid2str(dsuid1)+")    ", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("group(0).remove(dsid(1))", apt.getZone(0));
+  builderTest = builder.buildSet("group(0).remove(dsid("+dsuid2str(dsuid1)+"))", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("remove(dsid(1))", apt.getZone(0));
+  builderTest = builder.buildSet("remove(dsid("+dsuid2str(dsuid1)+"))", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
   builderTest = builder.buildSet("remove(yellow)", apt.getZone(0));
@@ -486,22 +492,22 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   builderTest = builder.buildSet("group('broadcast')", apt.getZone(0));
   BOOST_CHECK_EQUAL(4, builderTest.length());
 
-  builderTest = builder.buildSet("group('broadcast').remove(dsid(1))", apt.getZone(0));
+  builderTest = builder.buildSet("group('broadcast').remove(dsid("+dsuid2str(dsuid1)+"))", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("empty().addDevices(1,2,3)", apt.getZone(0));
+  builderTest = builder.buildSet("empty().addDevices("+dsuid2str(dsuid1)+","+dsuid2str(dsuid2)+","+dsuid2str(dsuid3)+")", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("addDevices(1)", boost::shared_ptr<Zone>());
+  builderTest = builder.buildSet("addDevices("+dsuid2str(dsuid1)+")", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("addDevices(1,2)", boost::shared_ptr<Zone>());
+  builderTest = builder.buildSet("addDevices("+dsuid2str(dsuid1)+","+dsuid2str(dsuid2)+")", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(2, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(1).getDevice());
 
-  builderTest = builder.buildSet("addDevices(1,2,3)", boost::shared_ptr<Zone>());
+  builderTest = builder.buildSet("addDevices("+dsuid2str(dsuid1)+","+dsuid2str(dsuid2)+","+dsuid2str(dsuid3)+")", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(3, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(1).getDevice());
@@ -579,6 +585,10 @@ BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3, dsuid4;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
+  SetNullDsuid(dsuid3);
+  SetNullDsuid(dsuid4);
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;
   dsuid3.id[DSUID_SIZE - 1] = 3;
@@ -594,21 +604,21 @@ BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
   meters = builder.buildSet(".meters(all)");
   BOOST_CHECK_EQUAL(4, meters.size());
 
-  meters = builder.buildSet(".meters(1)");
+  meters = builder.buildSet(".meters("+dsuid2str(dsuid1)+")");
   BOOST_CHECK_EQUAL(1, meters.size());
 
-  meters = builder.buildSet(".meters(1,2)");
+  meters = builder.buildSet(".meters("+dsuid2str(dsuid1)+","+dsuid2str(dsuid2)+")");
   BOOST_CHECK_EQUAL(2, meters.size());
 
-  meters = builder.buildSet(".meters(1,2,3)");
+  meters = builder.buildSet(".meters("+dsuid2str(dsuid1)+","+dsuid2str(dsuid2)+","+dsuid2str(dsuid3)+")");
   BOOST_CHECK_EQUAL(3, meters.size());
 
-  meters = builder.buildSet(".meters(1,2,3,4)");
+  meters = builder.buildSet(".meters("+dsuid2str(dsuid1)+","+dsuid2str(dsuid2)+","+dsuid2str(dsuid3)+","+dsuid2str(dsuid4)+")");
   BOOST_CHECK_EQUAL(4, meters.size());
 
   BOOST_CHECK_THROW(builder.buildSet(""), std::runtime_error);
-  BOOST_CHECK_THROW(builder.buildSet(".meters(1,)"), std::runtime_error);
-  BOOST_CHECK_THROW(builder.buildSet(".meters(,1)"), std::runtime_error);
+  BOOST_CHECK_THROW(builder.buildSet(".meters("+dsuid2str(dsuid1)+",)"), std::runtime_error);
+  BOOST_CHECK_THROW(builder.buildSet(".meters(,"+dsuid2str(dsuid1)+")"), std::runtime_error);
   BOOST_CHECK_THROW(builder.buildSet(".meters(7)"), std::runtime_error);
 }
 
@@ -1099,6 +1109,10 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3, meter1DSID;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
+  SetNullDsuid(dsuid3);
+  SetNullDsuid(meter1DSID);
   meter1DSID.id[DSUID_SIZE - 1] = 10;
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;

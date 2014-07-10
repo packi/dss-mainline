@@ -74,6 +74,9 @@ BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
+  SetNullDsuid(dsuid3);
   dsuid1.id[DSUID_SIZE - 1] = 10;
   dsuid2.id[DSUID_SIZE - 1] = 1;
   dsuid3.id[DSUID_SIZE - 1] = 2;
@@ -126,7 +129,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   length = ctx->evaluate<int>("getDevices().byGroup('asdf').length()");
   BOOST_CHECK_EQUAL(0, length);
 
-  length = ctx->evaluate<int>("getDevices().byDSMeter('a').length()");
+  length = ctx->evaluate<int>("getDevices().byDSMeter('"+dsuid2str(dsuid1)+"').length()");
   BOOST_CHECK_EQUAL(2, length);
 
   length = ctx->evaluate<int>("getDevices().byPresence(false).length()");
@@ -144,7 +147,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   std::string name = ctx->evaluate<std::string>("getDevices().byName('dev1').name");
   BOOST_CHECK_EQUAL("dev1", name);
 
-  name = ctx->evaluate<std::string>("getDevices().byDSID('2').name");
+  name = ctx->evaluate<std::string>("getDevices().byDSID('"+dsuid2str(dsuid3)+"').name");
   BOOST_CHECK_EQUAL("dev2", name);
 
   length = ctx->evaluate<int>("getDevices().byFunctionID(1).length()");
@@ -227,6 +230,8 @@ BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
   dsuid1.id[DSUID_SIZE - 1] = 0xa;
   dsuid2.id[DSUID_SIZE - 1] = 0xb;
 
@@ -241,10 +246,10 @@ BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  std::string name = ctx->evaluate<std::string>("getDSMeterByDSID('a').name");
+  std::string name = ctx->evaluate<std::string>("getDSMeterByDSID('"+dsuid2str(dsuid1)+"').name");
   BOOST_CHECK_EQUAL(name, meter1->getName());
 
-  name = ctx->evaluate<std::string>("getDSMeterByDSID('b').name");
+  name = ctx->evaluate<std::string>("getDSMeterByDSID('"+dsuid2str(dsuid2)+"').name");
   BOOST_CHECK_EQUAL(name, meter2->getName());
 
   ctx->evaluate<void>("getDSMeterByDSID('123')");
@@ -956,6 +961,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
@@ -967,7 +973,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getValues('13',"
+  int num = ctx->evaluate<int>("Metering.getValues('"+dsuid2str(dsuid1)+"',"
                                "                   'consumption',"
                                "                   1).length");
   BOOST_CHECK_EQUAL(num, 599);
@@ -977,6 +983,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
@@ -988,7 +995,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getValues('13',"
+  int num = ctx->evaluate<int>("Metering.getValues('"+dsuid2str(dsuid1)+"',"
                                "                   'energy',"
                                "                   1,"
                                "                   'Ws').length");
@@ -999,6 +1006,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
@@ -1010,7 +1018,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getValues('13',"
+  int num = ctx->evaluate<int>("Metering.getValues('"+dsuid2str(dsuid1)+"',"
                                "                   'energy',"
                                "                   1,"
                                "                   'Wh',"
@@ -1024,6 +1032,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   Apartment apt(NULL);
   
   dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);

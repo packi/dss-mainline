@@ -115,7 +115,7 @@ namespace dss {
       dsid_t dsid = str2dsid(dsidStr);
       dsuid = dsuid_from_dsid(&dsid);
     } else {
-      dsuid = str2dsuid(dsidStr);
+      dsuid = str2dsuid(dsuidStr);
     }
 
     try {
@@ -147,6 +147,8 @@ namespace dss {
     try {
       pDevice = getDeviceFromRequest(_request);
     } catch(DeviceNotFoundException& ex) {
+      return failure(ex.what());
+    } catch(std::runtime_error& ex) {
       return failure(ex.what());
     }
     assert(pDevice != NULL);
