@@ -79,7 +79,12 @@ namespace dss {
       result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getShortAddress());
     } else {
-      result->addProperty("meterDSID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
+      try {
+        result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID())));
+      } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+      }
+      result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
