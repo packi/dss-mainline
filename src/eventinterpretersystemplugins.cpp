@@ -3090,6 +3090,22 @@ namespace dss {
       stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
     }
+
+    // zone thermostat
+    if (devInput->m_inputType == BinaryInputIDRoomThermostat) {
+      int zone = pDev->getZoneID();
+      boost::shared_ptr<Zone> pZone = DSS::getInstance()->getApartment().getZone(zone);
+      boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDHeating);
+      if (m_properties.has("value")) {
+        std::string val = m_properties.get("value");
+        int iVal = strToIntDef(val, -1);
+        int sceneID = SceneOff;
+        if (iVal == 1) {
+          sceneID = Scene1;
+        }
+        pGroup->callScene(coSystemBinaryInput, SAC_MANUAL, sceneID, "", false);
+      }
+    }
   }
 
   void SystemState::stateApartment() {

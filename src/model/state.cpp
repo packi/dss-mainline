@@ -96,6 +96,9 @@ namespace dss {
       case GroupIDYellow:
         logicalName = "light";
         break;
+      case GroupIDHeating:
+        logicalName = "heating";
+        break;
       default:
         break;
     }

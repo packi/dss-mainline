@@ -298,7 +298,7 @@ namespace dss {
       SceneHelper::SceneOnState ret = SceneHelper::DontCare;
 
     // other groups not yet supported
-    if (_groupID != GroupIDYellow) {
+    if ((_groupID != GroupIDYellow) && (_groupID != GroupIDHeating)) {
       return ret;
     }
 
