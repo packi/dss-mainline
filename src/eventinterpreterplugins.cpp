@@ -45,9 +45,11 @@
 #include "src/model/device.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
+#include "src/model/modelmaintenance.h"
 #include "src/internaleventrelaytarget.h"
 #include "src/webservice_api.h"
 #include "src/subscription_profiler.h"
+#include "src/sensor_monitor.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -1081,4 +1083,35 @@ namespace dss {
     }
   }
 
+  EventInterpreterSensorMonitorPlugin::EventInterpreterSensorMonitorPlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterSensorMonitorPlugin", _pInterpreter) {}
+
+  __DEFINE_LOG_CHANNEL__(EventInterpreterSensorMonitorPlugin, lsInfo);
+
+  void EventInterpreterSensorMonitorPlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription("model_ready",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription("check_sensor_values",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterSensorMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<SensorMonitorTask> task(new SensorMonitorTask(&(DSS::getInstance()->getApartment())));
+      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
+      pTP->addEvent(task);
+    }
+  }
 } // namespace dss

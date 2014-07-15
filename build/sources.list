@@ -102,6 +102,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/propertysystem.h \
 	$(top_srcdir)/src/sceneaccess.cpp \
 	$(top_srcdir)/src/sceneaccess.h \
+	$(top_srcdir)/src/sensor_monitor.h \
+	$(top_srcdir)/src/sensor_monitor.cpp \
 	$(top_srcdir)/src/scripting/jscurl-constants.h \
 	$(top_srcdir)/src/scripting/jscurl.cpp \
 	$(top_srcdir)/src/scripting/jscurl.h \

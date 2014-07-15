@@ -1867,6 +1867,7 @@ namespace dss {
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
       binput->m_sensorValue = 0;
       binput->m_sensorValueTS = DateTime::NullDate;
+      binput->m_sensorValueValidity = false;
       m_sensorInputs.push_back(binput);
 
       if (m_pPropertyNode != NULL) {
@@ -1891,6 +1892,9 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorPushConversionFlag));
         entry->createProperty("broadcast")
                 ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorBroadcastFlag));
+        entry->createProperty("valid")
+                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorValueValidity));
+
       }
 
       m_sensorInputCount ++;
@@ -1982,7 +1986,31 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
+    m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
+
+  const void Device::setSensorDataValidity(int _sensorIndex, bool _valid) const {
+    if (_sensorIndex >= getSensorCount()) {
+      throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
+    }
+    m_sensorInputs[_sensorIndex]->m_sensorValueValidity = _valid;
+  }
+
+  bool Device::isSensorDataValid(int _sensorIndex) const {
+    if (_sensorIndex >= getSensorCount()) {
+      throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
+    }
+
+    if (!this->isPresent() || !this->isValid()) {
+      return true;
+    }
+
+    if (m_sensorInputs[_sensorIndex]->m_sensorPollInterval == 0) {
+      return true;
+    }
+
+    return m_sensorInputs[_sensorIndex]->m_sensorValueValidity;
+  };
 
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
   {
