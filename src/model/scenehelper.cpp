@@ -439,6 +439,8 @@ namespace dss {
     case SensorIDRoomTemperatureControlVariable:
       convertedSensorValue = (double) ((_sensorValue - 100) /* * 0.1 / 4 */ );
       break;
+    case SensorIDCO2Concentration:
+      /* TODO */
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
     default:

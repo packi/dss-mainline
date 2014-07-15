@@ -166,6 +166,7 @@ namespace dss {
   const int SensorIDWindSpeed = 18;
   const int SensorIDWindDirection = 19;
   const int SensorIDPrecipitation = 20;
+  const int SensorIDCO2Concentration = 21;
   const int SensorIDRoomTemperatureSetpoint = 50;
   const int SensorIDRoomTemperatureControlVariable = 51;
   const int SensorIDOutputCurrent16A = 64;

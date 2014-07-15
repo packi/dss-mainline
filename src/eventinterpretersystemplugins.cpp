@@ -44,6 +44,7 @@
 #include "security/security.h"
 #include "src/dsidhelper.h"
 #include "util.h"
+#include "structuremanipulator.h"
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500
@@ -3197,6 +3198,122 @@ namespace dss {
       }
     } catch(ItemNotFoundException& ex) {
       Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
+    }
+  }
+
+
+  EventInterpreterPluginSystemZoneSensorForward::EventInterpreterPluginSystemZoneSensorForward(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("system_zonesensor_forward", _pInterpreter)
+  { }
+
+  EventInterpreterPluginSystemZoneSensorForward::~EventInterpreterPluginSystemZoneSensorForward()
+  { }
+
+  void EventInterpreterPluginSystemZoneSensorForward::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription("deviceSensorValue",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterPluginSystemZoneSensorForward::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    Logger::getInstance()->log("EventInterpreterPluginSystemZoneSensorForward::"
+            "handleEvent: processing event \'" + _event.getName() + "\'",
+            lsDebug);
+
+    boost::shared_ptr<SystemZoneSensorForward> handler(new SystemZoneSensorForward());
+
+    if (!handler->setup(_event)) {
+      Logger::getInstance()->log("EventInterpreterPluginSystemZoneSensorForward::"
+              "handleEvent: could not setup event data!");
+      return;
+    }
+
+    addEvent(handler);
+  }
+
+
+  SystemZoneSensorForward::SystemZoneSensorForward() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
+  }
+
+  SystemZoneSensorForward::~SystemZoneSensorForward() {
+  }
+
+  void SystemZoneSensorForward::run() {
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser(
+        "SystemZoneSensorForward needs system rights");
+    } else {
+      return;
+    }
+
+    if (m_evtName == "deviceSensorValue") {
+      deviceSensorValue();
+    }
+  }
+
+  bool SystemZoneSensorForward::setup(Event& _event) {
+    m_evtName = _event.getName();
+    m_evtRaiseLocation = _event.getRaiseLocation();
+    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+    m_raisedAtDevice = _event.getRaisedAtDevice();
+    m_raisedAtState = _event.getRaisedAtState();
+    return SystemEvent::setup(_event);
+  }
+
+  void SystemZoneSensorForward::deviceSensorValue() {
+    if (m_raisedAtDevice != NULL) {
+      int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
+      try {
+        boost::shared_ptr<Zone> zone =
+            DSS::getInstance()->getApartment().getZone(zoneId);
+        boost::shared_ptr<const Device> pDevice = m_raisedAtDevice->getDevice();
+
+        boost::shared_ptr<Group> pGroup = zone->getGroup(0);
+
+        std::string sensorIndex;
+        if (m_properties.has("sensorIndex")) {
+          sensorIndex = m_properties.get("sensorIndex");
+        }
+
+        uint8_t sensorType = 255;
+        if (m_properties.has("sensorType")) {
+          sensorType = strToInt(m_properties.get("sensorType"));
+        } else {
+          try {
+            boost::shared_ptr<DeviceSensor_t> pSensor = pDevice->getSensor(strToInt(sensorIndex));
+            sensorType = pSensor->m_sensorType;
+          } catch (ItemNotFoundException& ex) {}
+        }
+
+        std::string sensorValue;
+        if (m_properties.has("sensorValue")) {
+          sensorValue = m_properties.get("sensorValue");
+        }
+
+        std::string sensorValueFloat;
+        if (m_properties.has("sensorValueFloat")) {
+          sensorValueFloat = m_properties.get("sensorValueFloat");
+        }
+
+        std::string typeName;
+        SceneHelper::sensorName(sensorType, typeName);
+
+        if (sensorType == SensorIDBrightnessIndoors ||
+            sensorType == SensorIDHumidityIndoors ||
+            sensorType == SensorIDCO2Concentration) {
+          DSS::getInstance()->getApartment();
+          Apartment& apartment = DSS::getInstance()->getApartment();
+          StructureManipulator manipulator(
+              *(apartment.getBusInterface()->getStructureModifyingBusInterface()),
+              *(apartment.getBusInterface()->getStructureQueryBusInterface()),
+              apartment);
+          manipulator.sensorPush(pGroup, m_raisedAtDevice->getDSID(), sensorType, strToInt(sensorValue));
+        }
+      } catch (ItemNotFoundException &ex) {}
     }
   }
 
