@@ -275,6 +275,33 @@ namespace dss {
       void stateApartment();
   };
 
+  class EventInterpreterPluginSystemZoneSensorForward :
+                                            public TaskProcessor,
+                                            public EventInterpreterPlugin {
+    public:
+      EventInterpreterPluginSystemZoneSensorForward(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterPluginSystemZoneSensorForward();
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
+  class SystemZoneSensorForward : public SystemEvent {
+    public:
+      SystemZoneSensorForward();
+      virtual ~SystemZoneSensorForward();
+      virtual void run();
+      virtual bool setup(Event& _event);
+    private:
+      void deviceSensorValue();
+
+      std::string m_evtName;
+
+      EventRaiseLocation m_evtRaiseLocation;
+      boost::shared_ptr<const Group> m_raisedAtGroup;
+      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
+      boost::shared_ptr<const State> m_raisedAtState;
+  };
+
 }; // namespace
 
 #endif
