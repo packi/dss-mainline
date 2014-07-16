@@ -2541,7 +2541,8 @@ namespace dss {
         boost::shared_ptr<DeviceBinaryInput_t> input = bInputs.at(j);
 
         // motion
-        if ((input->m_inputType == 5) || (input->m_inputType == 7)) {
+        if ((input->m_inputType == BinaryInputIDMovement) ||
+            (input->m_inputType == BinaryInputIDSmokeDetector)) {
           std::string stateName;
           if (input->m_targetGroupId >= 16) {
             stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
@@ -2553,7 +2554,8 @@ namespace dss {
         }
 
         // presence
-        if ((input->m_inputType == 1) || (input->m_inputType == 3)) {
+        if ((input->m_inputType == BinaryInputIDPresence) ||
+            (input->m_inputType == BinaryInputIDPresenceInDarkness)) {
           std::string stateName;
           if (input->m_targetGroupId >= 16) {
             stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
@@ -2566,7 +2568,7 @@ namespace dss {
         }
 
         // wind monitor
-        if (input->m_inputType == 8) {
+        if (input->m_inputType == BinaryInputIDWindDetector) {
           std::string stateName = "wind";
           if (input->m_targetGroupId >= 16) {
             stateName = stateName + ".group" +
@@ -2576,7 +2578,7 @@ namespace dss {
         }
 
         // rain monitor
-        if (input->m_inputType == 9) {
+        if (input->m_inputType == BinaryInputIDRainDetector) {
           std::string stateName = "rain";
           if (input->m_targetGroupId >= 16) {
             stateName = stateName + ".group" +
@@ -3021,7 +3023,8 @@ namespace dss {
     }
 
     // motion
-    if ((devInput->m_inputType == 5) || (devInput->m_inputType == 6)) {
+    if ((devInput->m_inputType == BinaryInputIDMovement) ||
+        (devInput->m_inputType == BinaryInputIDMovementInDarkness)) {
       if (devInput->m_targetGroupId >= 16) {
         // create state for a user group if it does not exist (new group?)
         statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".motion";
@@ -3035,7 +3038,8 @@ namespace dss {
     }
 
     // presence
-    if ((devInput->m_inputType == 1) || (devInput->m_inputType == 3)) {
+    if ((devInput->m_inputType == BinaryInputIDPresence) ||
+        (devInput->m_inputType == BinaryInputIDPresenceInDarkness)) {
       if (devInput->m_targetGroupId >= 16) {
         // create state for a user group if it does not exist (new group?)
         statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".presence";
@@ -3049,7 +3053,7 @@ namespace dss {
     }
 
     // smoke detector
-    if (devInput->m_inputType == 7) {
+    if (devInput->m_inputType == BinaryInputIDSmokeDetector) {
       try {
         boost::shared_ptr<State> state =
             DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
@@ -3064,7 +3068,7 @@ namespace dss {
     }
 
     // wind monitor
-    if (devInput->m_inputType == 8) {
+    if (devInput->m_inputType == BinaryInputIDWindDetector) {
       statename = "wind";
       // create state for a user group if it does not exist (new group?)
       if (devInput->m_targetGroupId >= 16) {
@@ -3076,7 +3080,7 @@ namespace dss {
     }
 
     // rain monitor
-    if (devInput->m_inputType == 9) {
+    if (devInput->m_inputType == BinaryInputIDRainDetector) {
       statename = "rain";
       // create state for a user group if it does not exist (new group?)
       if (devInput->m_targetGroupId >= 16) {
