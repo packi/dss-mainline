@@ -68,6 +68,15 @@ namespace dss {
       try {
         m_pApartment->allocateState(state);
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
+    } else if (m_GroupID == GroupIDHeating) {
+      // zone.123.heating
+      boost::shared_ptr<Group> me =
+          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<State> state(new State(me));
+
+      try {
+        m_pApartment->allocateState(state);
+      } catch (ItemDuplicateException& ex) {} // we only care that it exists
     }
   } // getID
 
@@ -137,6 +146,13 @@ namespace dss {
                                                                 ".light");
         state->setState(_origin, _on == true ? 1 : 2);
       } catch (ItemNotFoundException& ex) {} // should never happen
+    } else if (m_GroupID == GroupIDHeating) {
+      try {
+        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
+                                               intToString(getZoneID()) +
+                                                                ".heating");
+        state->setState(_origin, _on == true ? 1 : 2);
+      } catch (ItemNotFoundException& ex) {} // should never happen
     }
   }
 
@@ -154,6 +170,16 @@ namespace dss {
           state->setState(_origin, isOn == SceneHelper::True ? 1 : 2);
         } catch (ItemNotFoundException& ex) {} // should never happen
       }
+    } else if (m_GroupID == GroupIDHeating) {
+      SceneHelper::SceneOnState isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
+      if (isOn != SceneHelper::DontCare) {
+        try {
+          boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
+                                                 intToString(getZoneID()) +
+                                                                ".heating");
+          state->setState(_origin, isOn == SceneHelper::True ? 1 : 2);
+        } catch (ItemNotFoundException& ex) {} // should never happen
+      }
     }
   }
 
@@ -168,6 +194,13 @@ namespace dss {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
+        return state->getState();
+      } catch (ItemNotFoundException& ex) {} // should never happen
+    } else if (m_GroupID == GroupIDHeating) {
+      try {
+        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
+                                               intToString(getZoneID()) +
+                                                                ".heating");
         return state->getState();
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
