@@ -327,9 +327,11 @@ namespace dss {
       if (!isDefaultGroup(newGroupId)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
-
       if (m_pStructureBusInterface == NULL) {
           return failure("No handle to bus interface");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_SW) {
+          return failure("Device is not joker device");
       }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
