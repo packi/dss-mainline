@@ -309,11 +309,11 @@ namespace dss {
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
           boost::shared_ptr<Group> group = zone->getGroup(groupID);
-          dsuid_t originDSID;
+          dsuid_t originDSUID;
           dsuid_t evtDSID = mEvent->getSource();
           if (!IsNullDsuid(evtDSID) && (originDeviceID != 0)) {
             DeviceReference devRef = m_pApartment->getDevices().getByBusID(originDeviceID, mEvent->getSource());
-            originDSID = devRef.getDSID();
+            originDSUID = devRef.getDSID();
           }
 
           if (mEvent->isDue()) {
@@ -323,7 +323,7 @@ namespace dss {
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSID", dsuid2str(originDSID));
+              pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
               pEvent->setProperty("callOrigin", intToString(callOrigin));
               pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
@@ -340,7 +340,7 @@ namespace dss {
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSID", dsuid2str(originDSID));
+              pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
               pEvent->setProperty("callOrigin", intToString(callOrigin));
               pEvent->setProperty("originToken", originToken);
               if (mEvent->getForcedFlag()) {
@@ -925,12 +925,12 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         pEvent->setProperty("token", _token);
-        dsuid_t originDSID;
+        dsuid_t originDSUID;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
-          originDSID = devRef.getDSID();
+          originDSUID = devRef.getDSID();
         }
-        pEvent->setProperty("originDSID", dsuid2str(originDSID));
+        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
         if (_forced) {
           pEvent->setProperty("forced", "true");
         }
@@ -992,13 +992,13 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        dsuid_t originDSID;
+        dsuid_t originDSUID;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
-          originDSID = devRef.getDSID();
+          originDSUID = devRef.getDSID();
         }
         pEvent->setProperty("callOrigin", intToString(_origin));
-        pEvent->setProperty("originDSID", dsuid2str(originDSID));
+        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
         pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
@@ -1171,13 +1171,13 @@ namespace dss {
         pEvent.reset(new Event("blink", group));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        dsuid_t originDSID;
+        dsuid_t originDSUID;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
-          originDSID = devRef.getDSID();
+          originDSUID = devRef.getDSID();
         }
         pEvent->setProperty("callOrigin", intToString(_origin));
-        pEvent->setProperty("originDSID", dsuid2str(originDSID));
+        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
         pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
