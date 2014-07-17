@@ -172,6 +172,19 @@ namespace dss {
   const int SensorIDOutputCurrent16A = 64;
   const int SensorIDActivePowerVA = 65;
 
+  // BinaryInput Type IDs
+  const int BinaryInputIDPresence = 1;
+  const int BinaryInputIDRoomBrightness = 2;
+  const int BinaryInputIDPresenceInDarkness = 3;
+  const int BinaryInputIDTwilightExternal = 4;
+  const int BinaryInputIDMovement = 5;
+  const int BinaryInputIDMovementInDarkness = 6;
+  const int BinaryInputIDSmokeDetector = 7;
+  const int BinaryInputIDWindDetector = 8;
+  const int BinaryInputIDRainDetector = 9;
+  const int BinaryInputIDSun = 10;
+  const int BinaryInputIDRoomThermostat = 11;
+
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
   const uint8_t ClickType2T = 0x01;     // Tipp 2
