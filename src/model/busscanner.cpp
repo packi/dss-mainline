@@ -359,9 +359,7 @@ namespace dss {
       boost::shared_ptr<Group> pGroup;
       boost::shared_ptr<Group> groupOnZone;
 
-      if ((group.GroupID <= GroupIDStandardMax) ||
-          (group.GroupID >= GroupIDControlGroupStart)) {
-
+      if (isDefaultGroup(group.GroupID)) {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
@@ -389,8 +387,7 @@ namespace dss {
         pGroup->setLastCalledScene(SceneOff);
         pGroup->setIsValid(true);
 
-      } else if (group.GroupID <= GroupIDAppUserMax) {
-
+      } else if (isAppUserGroup(group.GroupID)) {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");

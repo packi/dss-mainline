@@ -322,9 +322,9 @@ namespace dss {
       resultObj->addProperty("value", value);
 
       return success(resultObj);
-    } else if(_request.getMethod() == "setJokerGroup") {
+    } else if (_request.getMethod() == "setJokerGroup") {
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
-      if((newGroupId  < 1) || (newGroupId > 8)) {
+      if (!isDefaultGroup(newGroupId)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
       boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);

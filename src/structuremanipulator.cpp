@@ -335,11 +335,11 @@ namespace dss {
     }
     boost::shared_ptr<Group> pGroup;
 
-    if (_groupNumber <= 15) {
+    if (isDefaultGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
-    if (_groupNumber <= 23) {
+    if (isAppUserGroup(_groupNumber)) {
       if (_zone->getID() != 0) {
         throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
       }
@@ -401,11 +401,11 @@ namespace dss {
     }
     boost::shared_ptr<Group> pGroup;
 
-    if (_groupNumber <= 15) {
+    if (isDefaultGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
-    if (_groupNumber <= 23) {
+    if (isAppUserGroup(_groupNumber)) {
       if (_zone->getID() != 0) {
         throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
       }
@@ -465,11 +465,11 @@ namespace dss {
 
   void StructureManipulator::groupSetName(boost::shared_ptr<Group> _group,
                                           const std::string& _name) {
-    if (_group->getID() <= 15) {
+    if (isDefaultGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (_group->getID() <= 23) {
+    if (isAppUserGroup(_group->getID())) {
       _group->setName(_name);
       try {
         boost::shared_ptr<Group> pGroup;
@@ -505,11 +505,11 @@ namespace dss {
 
   void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
                                                 const int _standardGroupNumber) {
-    if (_group->getID() <= 15) {
+    if (isDefaultGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (_group->getID() <= 23) {
+    if (isAppUserGroup(_group->getID())) {
       _group->setStandardGroupID(_standardGroupNumber);
       try {
         boost::shared_ptr<Group> pGroup;
@@ -557,7 +557,7 @@ namespace dss {
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->addToGroup(_group->getID());
 
-    if (_group->getID() >= 16) {
+    if (isAppUserGroup(_group->getID())) {
       if ((_device->getDeviceType() == DEVICE_TYPE_AKM) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
         _device->setDeviceBinaryInputTarget(0, 0, _group->getID());

@@ -701,7 +701,7 @@ namespace dss {
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
-    if ((_pGroup->getID() > GroupIDStandardMax) && (_pGroup->getID() < GroupIDControlGroupStart)) {
+    if (isAppUserGroup(_pGroup->getID())) {
       if (!_pGroup->getName().empty()) {
         _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pGroup->getName()) << "</name>" << std::endl;
       }
@@ -733,7 +733,7 @@ namespace dss {
     if (_pZone->getID() == 0) {
       // store unique "apartment user-groups" in zone 0
       foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-        if (pGroup->getID() >= GroupIDAppUserMin && pGroup->getID() <= GroupIDAppUserMax) {
+        if (isAppUserGroup(pGroup->getID())) {
           groupToXML(pGroup, _ofs, _indent + 2);
         }
       }

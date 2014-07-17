@@ -224,9 +224,23 @@ namespace dss {
   const int GroupIDAppUserMin = 16;
   const int GroupIDAppUserMax = 23;
   const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
-  const int GroupIDControlGroupStart = 48;
+  const int GroupIDControlGroupMin = 48;
   const int GroupIDControlTemperature = 48;
+  const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
+
+  inline bool isDefaultGroup(int groupId) {
+    return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
+        (groupId == GroupIDControlTemperature);
+  }
+
+  inline bool isAppUserGroup(int groupId) {
+    return (groupId >= GroupIDAppUserMin && groupId <= GroupIDAppUserMax);
+  }
+
+  inline bool isControlGroup(int groupId) {
+    return (groupId >= GroupIDControlGroupMin && groupId <= GroupIDControlGroupMax);
+  }
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
 
@@ -257,6 +271,13 @@ namespace dss {
 
   const uint8_t MinimumOutputChannelID = 1;
   const uint8_t MaximumOutputChannelID = 10;
+
+  // function id numbers
+  #define Fid_105_Mask_NumButtons 0x03
+  #define Fid_105_Mask_VariableStandardGroup 0x04
+  #define Fid_105_Mask_ExtraHardware 0x08
+  #define Fid_105_Mask_OutputPresent 0x10
+  #define Fid_105_Mask_VariableRamptime 0x20
 
 } // namespace dss
 #endif
