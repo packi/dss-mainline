@@ -333,7 +333,7 @@ namespace dss {
 
       /* check if device is also in a colored user group */
       bool deviceGroupModified = false;
-      for (int g = 16; g <= 23; g++) {
+      for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
         if (pDevice->getGroupBitmask().test(g-1)) {
           boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
           if (pGroup->getStandardGroupID() != newGroupId) {
@@ -360,7 +360,7 @@ namespace dss {
           pPartnerDevice->setDeviceJokerGroup(newGroupId);
 
           deviceGroupModified = false;
-          for (int g = 16; g <= 23; g++) {
+          for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
             if (pPartnerDevice->getGroupBitmask().test(g-1)) {
               boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
               if (pGroup->getStandardGroupID() != newGroupId) {
