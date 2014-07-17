@@ -2542,7 +2542,7 @@ namespace dss {
 
         // motion
         if ((input->m_inputType == BinaryInputIDMovement) ||
-            (input->m_inputType == BinaryInputIDSmokeDetector)) {
+            (input->m_inputType == BinaryInputIDMovementInDarkness)) {
           std::string stateName;
           if (input->m_targetGroupId >= 16) {
             stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
