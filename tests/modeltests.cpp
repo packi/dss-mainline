@@ -1053,7 +1053,7 @@ private:
 BOOST_AUTO_TEST_CASE(testPersistSet) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1, dsuid2, dsuid3, dsuid4, meter1DSID;
+  dsuid_t dsuid1, dsuid2, dsuid3, meter1DSID;
   meter1DSID.id[DSUID_SIZE - 1] = 10;
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;
