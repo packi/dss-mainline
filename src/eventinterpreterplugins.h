@@ -160,6 +160,15 @@ namespace dss {
     PropertyNodePtr websvcEnabledNode;
   };
 
+  class EventInterpreterSensorMonitorPlugin : public EventInterpreterPlugin {
+    private:
+      __DECL_LOG_CHANNEL__
+    public:
+      EventInterpreterSensorMonitorPlugin(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterSensorMonitorPlugin() {};
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

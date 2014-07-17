@@ -140,6 +140,16 @@ namespace dss {
       binaryInputArr->addElement("", element);
     }
 
+    // check if device has invalid sensor values
+    uint8_t sensorCount = _device.getDevice()->getSensorCount();
+    bool sensorFlag = true;
+    for (uint8_t s = 0; s < sensorCount; s++) {
+      if (!_device.getDevice()->isSensorDataValid(s)) {
+        sensorFlag = false;
+        break;
+      }
+    }
+    result->addProperty("sensorDataValid", sensorFlag);
     return result;
   } // toJSON(DeviceReference)
 

@@ -460,6 +460,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     plugin = new EventInterpreterPluginSystemZoneSensorForward(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
+    plugin = new EventInterpreterSensorMonitorPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
     m_pEventQueue->setEventRunner(m_pEventRunner.get());

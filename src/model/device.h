@@ -134,6 +134,7 @@ namespace dss {
     int m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
+    bool m_sensorValueValidity;
     unsigned int m_sensorValue;
     DateTime m_sensorValueTS;
   } DeviceSensor_t;
@@ -588,6 +589,8 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
+    const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
+    bool isSensorDataValid(int _sensorIndex) const;
 
     void setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels);
     const int getOutputChannelCount() const;
