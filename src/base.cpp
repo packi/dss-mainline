@@ -227,10 +227,10 @@ namespace dss {
                                        bool _trimEntries) {
     std::vector<std::string> result;
     std::string curString = _source;
+    std::string::size_type delimPos = 0, skip = 0;
 
-    std::string::size_type skip = 0;
     while (!curString.empty()) {
-      std::string::size_type delimPos = curString.find(_delimiter, skip);
+      delimPos = curString.find(_delimiter, skip);
       bool previousCharIsEscape = false;
       if ((delimPos > 0) && (delimPos != std::string::npos)) {
         previousCharIsEscape = (curString.at(delimPos - 1) == '\\');
@@ -241,7 +241,7 @@ namespace dss {
         } else {
           result.push_back(curString.substr(0, delimPos));
         }
-        curString = curString.substr(delimPos+1, std::string::npos);
+        curString = curString.substr(delimPos + 1);
         skip = 0;
         if (curString.size() == 0) {
           result.push_back("");
