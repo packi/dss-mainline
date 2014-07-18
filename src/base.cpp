@@ -231,11 +231,17 @@ namespace dss {
 
     while (!curString.empty()) {
       delimPos = curString.find(_delimiter, skip);
-      bool previousCharIsEscape = false;
+
       if ((delimPos > 0) && (delimPos != std::string::npos)) {
-        previousCharIsEscape = (curString.at(delimPos - 1) == '\\');
+        if (curString.at(delimPos - 1) == '\\') {
+          // remove escape character
+          curString.erase(delimPos - 1, 1);
+          skip = delimPos;
+          continue;
+        }
       }
-      if ((delimPos != std::string::npos) && !previousCharIsEscape) {
+
+      if (delimPos != std::string::npos) {
         if (_trimEntries) {
           result.push_back(trim(curString.substr(0, delimPos)));
         } else {
@@ -245,17 +251,6 @@ namespace dss {
         skip = 0;
         if (curString.size() == 0) {
           result.push_back("");
-        }
-      } else {
-        // remove escape character
-        if (delimPos != std::string::npos) {
-          if ((delimPos >= 1) && previousCharIsEscape) {
-            curString.erase(delimPos - 1, 1);
-            delimPos--;
-          }
-          if (delimPos < curString.size()) {
-            skip = delimPos + 1;
-          }
         }
       }
       if (delimPos == std::string::npos) {
