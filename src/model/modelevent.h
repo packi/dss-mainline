@@ -53,6 +53,7 @@ namespace dss {
                     etBusReady, /**< The bus transitioned into ready state */
                     etMeteringValues, /**< Metering values arrived */
                     etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
+                    etZoneSensorValue, /**< A zone sensor value has changed */
                     etDeviceSensorEvent, /**< A device has sent a sensor event */
                     etDeviceSensorValue, /**< A device has sent a new sensor value */
                     etDeviceBinaryStateEvent, /**< A device has sent a new binary input state */
