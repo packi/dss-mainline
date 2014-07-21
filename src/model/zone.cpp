@@ -211,4 +211,53 @@ namespace dss {
     }
   } // removeFromPropertyTree
 
+  bool Zone::isAllowedSensorType(int _sensorType) {
+    switch (_sensorType) {
+      case SensorIDTemperatureIndoors:
+      case SensorIDBrightnessIndoors:
+      case SensorIDHumidityIndoors:
+      case SensorIDCO2Concentration:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void Zone::assignSensor(boost::shared_ptr<const Device> _device,
+                          int _sensorType) {
+    const boost::shared_ptr<DeviceSensor_t> sensor =
+                                       _device->getSensorByType(_sensorType);
+
+    if (!isAllowedSensorType(sensor->m_sensorType)) {
+      throw std::runtime_error("Assignment of sensor type " + intToString(sensor->m_sensorType) + " is not allowed!");
+    }
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> ms = m_MainSensors.at(i);
+      if (ms && (ms->m_sensorType == sensor->m_sensorType)) {
+        ms->m_DSUID = _device->getDSID();
+        ms->m_sensorIndex = sensor->m_sensorIndex;
+        return;
+      }
+    }
+
+    boost::shared_ptr<MainZoneSensor_t> ms(new MainZoneSensor_t());
+    ms->m_DSUID = _device->getDSID();
+    ms->m_sensorIndex = sensor->m_sensorIndex;
+    ms->m_sensorType = sensor->m_sensorType;
+    m_MainSensors.push_back(ms);
+  }
+
+  void Zone::removeSensorAssignment(int _sensorType) {
+    if (!isAllowedSensorType(_sensorType)) {
+      return;
+    }
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      if (m_MainSensors.at(i)->m_sensorType == _sensorType) {
+        m_MainSensors.at(i).reset();
+        return;
+      }
+    }
+  }
 } // namespace dss

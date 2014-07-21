@@ -43,6 +43,12 @@ namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
+  typedef struct {
+    dsuid_t m_DSUID;
+    int m_sensorType;
+    int m_sensorIndex;
+  } MainZoneSensor_t;
+
     /** Represents a Zone.
    * A Zone houses multiple devices. It can span over multiple dsMeters.
    */
@@ -55,6 +61,7 @@ namespace dss {
     DeviceVector m_Devices;
     std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Group> > m_Groups;
+    std::vector<boost::shared_ptr<MainZoneSensor_t> > m_MainSensors;
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
   public:
@@ -108,10 +115,15 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
 
+    void assignSensor(boost::shared_ptr<const Device> _device,
+                      int _sensorType);
+    void removeSensorAssignment(int _sensorType);
+
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
+    bool isAllowedSensorType(int _sensorType);
   }; // Zone
 
 

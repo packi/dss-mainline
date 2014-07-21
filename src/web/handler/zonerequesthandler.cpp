@@ -218,6 +218,33 @@ namespace dss {
             }
           }
           return success(resultObj);
+        } else if(_request.getMethod() == "addSensor") {
+          if (pZone->getID() == 0) {
+            return failure("Not allowed to assign sensor for zone 0");
+          }
+          std::string dsuidStr = _request.getParameter("dsuid");
+          if (dsuidStr.empty()) {
+            return failure("Missing parameter 'dsuid'");
+          }
+          dsuid_t dsuid = str2dsuid(dsuidStr);
+
+          int type = strToIntDef(_request.getParameter("sensorType"), -1);
+          if (type < 0) {
+            return failure("Missing or invalid parameter 'sensorType'");
+          }
+          boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(dsuid);
+          pZone->assignSensor(dev, type);
+          return success();
+        } else if(_request.getMethod() == "removeSensor") {
+          if (pZone->getID() == 0) {
+            return success();
+          }
+          int type = strToIntDef(_request.getParameter("sensorType"), -1);
+          if (type < 0) {
+            return failure("Missing or invalid parameter 'sensorType'");
+          }
+          pZone->removeSensorAssignment(type);
+          return success();
         } else {
           throw std::runtime_error("Unhandled function");
         }
