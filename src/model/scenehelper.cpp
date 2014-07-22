@@ -492,7 +492,8 @@ namespace dss {
     return convertedSensorValue;
   } // sensorToSystem
 
-  void SceneHelper::sensorName(const int _sensorType, std::string& _name) {
+  std::string SceneHelper::sensorName(const int _sensorType) {
+    std::string _name;
     switch(_sensorType) {
       case SensorIDActivePower:
         _name = "Active Power"; break;
@@ -533,6 +534,7 @@ namespace dss {
     default:
       break;
     }
+    return _name;
   } // sensorName
 
 }
