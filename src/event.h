@@ -88,7 +88,7 @@ namespace dss {
     erlState
   } EventRaiseLocation;
 
-  class Event {
+  class Event : public boost::enable_shared_from_this<Event> {
   private:
     std::string m_Name;
     std::string m_Location;
@@ -135,6 +135,9 @@ namespace dss {
     void applyProperties(const Properties& _others);
     /** Checks whether _other and this are the same regarding uniqueness */
     bool isReplacementFor(const Event& _other);
+    boost::shared_ptr<Event> getptr() {
+      return shared_from_this();
+    };
   }; // Event
 
   //-------------------------------------------------- Events
