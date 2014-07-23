@@ -597,7 +597,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     if (!m_ShutdownFlag) {
       m_State = ssRunning;
-      boost::shared_ptr<Event> runningEvent(new Event("running"));
+      boost::shared_ptr<Event> runningEvent(new Event(EventName::Running));
       m_pEventQueue->pushEvent(runningEvent);
 
       // pass control to the eventrunner

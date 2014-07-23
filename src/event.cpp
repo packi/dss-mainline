@@ -49,6 +49,10 @@ using std::set;
 namespace dss {
   const std::string empty_string("");
 
+  namespace EventName {
+    const std::string Running = "running";
+  }
+
   namespace EventProperty {
     const char* Name = "name";
     const char* Location = "location";

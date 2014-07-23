@@ -43,6 +43,10 @@ namespace dss {
 
   //================================================== Constants
 
+  namespace EventName {
+    extern const std::string Running;
+  }
+
   namespace EventProperty {
     extern const char* Name;
     extern const char* Location;

@@ -3235,7 +3235,7 @@ namespace dss {
     }
 
     try {
-      if (m_evtName == "running") {
+      if (m_evtName == EventName::Running) {
         bootstrap();
       } else if (m_evtName == "model_ready") {
         startup();
