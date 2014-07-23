@@ -50,8 +50,11 @@ namespace dss {
   const std::string empty_string("");
 
   namespace EventName {
+    const std::string CallScene = "callScene";
+    const std::string CallSceneBus = "callSceneBus";
     const std::string DeviceSensorValue = "deviceSensorValue";
     const std::string Running = "running";
+    const std::string UndoScene = "undoScene";
     const std::string ZoneSensorValue = "zoneSensorValue";
   }
 

@@ -996,7 +996,8 @@ namespace dss {
   }
 
   bool SystemTrigger::checkSceneZone(PropertyNodePtr _triggerProp) {
-    if (!((m_evtName == "callScene") || (m_evtName == "callSceneBus"))) {
+    if (!((m_evtName == EventName::CallScene) ||
+          (m_evtName == EventName::CallSceneBus))) {
       return false;
     }
 
@@ -1085,7 +1086,7 @@ namespace dss {
       }
     }
 
-    std::string bus = ((m_evtName == "callSceneBus") ? "Bus" : "");
+    std::string bus = ((m_evtName == EventName::CallSceneBus) ? "Bus" : "");
     Logger::getInstance()->log("SystemTrigger::"
             "checkSceneZone: *** Match: CallScene" +
             bus +
@@ -1096,7 +1097,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkUndoSceneZone(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "undoScene") {
+    if (m_evtName != EventName::UndoScene) {
       return false;
     }
 
@@ -1174,7 +1175,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkDeviceScene(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "callScene") {
+    if (m_evtName != EventName::CallScene) {
       return false;
     }
 
@@ -1501,7 +1502,7 @@ namespace dss {
 
       std::string triggerValue = triggerType->getAsString();
 
-      if (m_evtName == "callScene") {
+      if (m_evtName == EventName::CallScene) {
         if (triggerValue == "zone-scene") {
           if (checkSceneZone(triggerProp)) {
             return true;
@@ -1512,14 +1513,14 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "callSceneBus") {
+      } else if (m_evtName == EventName::CallSceneBus) {
         if (triggerValue == "bus-zone-scene") {
           if (checkSceneZone(triggerProp)) {
             return true;
           }
         }
 
-      } else if (m_evtName == "undoScene") {
+      } else if (m_evtName == EventName::UndoScene) {
         if (triggerValue == "undo-zone-scene") {
           if (checkUndoSceneZone(triggerProp)) {
             return true;
@@ -2432,11 +2433,11 @@ namespace dss {
 
     if (m_evtName == "model_ready") {
       model_ready(logger);
-    } else if (m_evtName == "callScene") {
+    } else if (m_evtName == EventName::CallScene) {
       callScene(logger);
     } else if (m_evtName == "blink") {
       blink(logger);
-    } else if (m_evtName == "undoScene") {
+    } else if (m_evtName == EventName::UndoScene) {
       undoScene(logger);
     } else if (m_evtName == "buttonClick") {
       buttonClick(logger);
@@ -3239,11 +3240,11 @@ namespace dss {
         bootstrap();
       } else if (m_evtName == "model_ready") {
         startup();
-      } else if (m_evtName == "callScene") {
+      } else if (m_evtName == EventName::CallScene) {
         if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
           callscene();
         }
-      } else if (m_evtName == "undoScene") {
+      } else if (m_evtName == EventName::UndoScene) {
         undoscene();
       } else if (m_evtName == "stateChange") {
         if (m_evtRaiseLocation) {

@@ -320,7 +320,7 @@ namespace dss {
           if (mEvent->isDue()) {
             if (! (mEvent->isCalled())) {
               boost::shared_ptr<Event> pEvent;
-              pEvent.reset(new Event("callScene", group));
+              pEvent.reset(new Event(EventName::CallScene, group));
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
@@ -337,7 +337,7 @@ namespace dss {
           } else if (SceneHelper::isDimSequence(sceneID)) {
             if (! (mEvent->isCalled())) {
               boost::shared_ptr<Event> pEvent;
-              pEvent.reset(new Event("callScene", group));
+              pEvent.reset(new Event(EventName::CallScene, group));
               pEvent->setProperty("sceneID", intToString(sceneID));
               pEvent->setProperty("groupID", intToString(groupID));
               pEvent->setProperty("zoneID", intToString(zoneID));
@@ -934,7 +934,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event("callSceneBus", group));
+        pEvent.reset(new Event(EventName::CallSceneBus, group));
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
@@ -1002,7 +1002,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event("undoScene", group));
+        pEvent.reset(new Event(EventName::UndoScene, group));
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
@@ -1360,7 +1360,7 @@ namespace dss {
           devRef.getDevice()->setLastCalledScene(_sceneID & 0x00ff);
         }
         boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
-        boost::shared_ptr<Event> event(new Event("callScene", pDevRev));
+        boost::shared_ptr<Event> event(new Event(EventName::CallScene, pDevRev));
         event->setProperty("sceneID", intToString(_sceneID));
         event->setProperty("callOrigin", intToString(_origin));
         event->setProperty("originToken", _token);
