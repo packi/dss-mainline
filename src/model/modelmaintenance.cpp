@@ -1794,39 +1794,36 @@ namespace dss {
       boost::filesystem::path remoteIconPath;
       if (tok->err == json_tokener_success) {
         int resultCode = 99;
-        json_object* obj = json_object_object_get(json_request, "ReturnCode");
-        if (obj != NULL) {
+        json_object* obj;
+        if (json_object_object_get_ex(json_request, "ReturnCode", &obj)) {
           resultCode = json_object_get_int(obj);
         }
         if (resultCode != 0) {
           std::string errorMessage;
-          obj = json_object_object_get(json_request, "ReturnMessage");
-          if (obj != NULL) {
+          if (json_object_object_get_ex(json_request, "ReturnMessage", &obj)) {
             errorMessage = json_object_get_string(obj);
           }
           Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: JSON-ERROR: ") + errorMessage, lsError);
         } else {
-          json_object* result = json_object_object_get(json_request, "Response");
-          if (result == NULL) {
+          json_object *result;
+          if (json_object_object_get_ex(json_request, "Response", &result)) {
             Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'result' object in response"), lsError);
           } else {
-            obj = json_object_object_get(result, "ArticleName");
-            if (obj != NULL) {
+            if (json_object_object_get_ex(result, "ArticleName", &obj)) {
               productName = json_object_get_string(obj);
             }
 
-            obj = json_object_object_get(result, "ArticleIcon");
-            if (obj != NULL) {
+            if (json_object_object_get_ex(result, "ArticleIcon", &obj)) {
               remoteIconPath = json_object_get_string(obj);
             }
 
-            obj = json_object_object_get(result, "ArticleDescriptionForCustomer");
-            if (obj != NULL) {
+            if (json_object_object_get_ex(result,
+                                          "ArticleDescriptionForCustomer",
+                                          &obj)) {
               productURL = json_object_get_string(obj);
             }
 
-            obj = json_object_object_get(result, "DefaultName");
-            if (obj != NULL) {
+            if (json_object_object_get_ex(result, "DefaultName", &obj)) {
               defaultName = json_object_get_string(obj);
             }
           }
