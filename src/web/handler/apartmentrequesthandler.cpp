@@ -105,7 +105,7 @@ namespace dss {
       dsid_t dsid = str2dsid(dsidStr);
       meterID = dsuid_from_dsid(&dsid);
     } else {
-      meterID = str2dsuid(dsidStr);
+      meterID = str2dsuid(dsuidStr);
     }
 
     boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
