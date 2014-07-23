@@ -554,7 +554,13 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
+
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
+
+    // Devices that have a configurable standard group, group bitmask is adjusted by the dSM,
+    if (isDefaultGroup(_group->getID()) && ((_device->getFunctionID() & Fid_105_Mask_VariableStandardGroup) > 0)) {
+      _device->resetGroups();
+    }
     _device->addToGroup(_group->getID());
 
     if (isAppUserGroup(_group->getID())) {
