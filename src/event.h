@@ -107,7 +107,6 @@ namespace dss {
     void reset();
   public:
     Event(const std::string& _name, boost::shared_ptr<Group> _context);
-    Event(const std::string& _name, boost::shared_ptr<Zone> _context);
     Event(const std::string& _name, boost::shared_ptr<State> _state);
     Event(const std::string& _name, boost::shared_ptr<DeviceReference> _ref);
     Event(const std::string& _name);

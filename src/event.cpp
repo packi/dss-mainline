@@ -80,14 +80,6 @@ namespace dss {
     reset();
   } // ctor
 
-  Event::Event(const std::string& _name, boost::shared_ptr<Zone> _zone)
-  : m_Name(_name),
-    m_RaiseLocation(erlGroup),
-    m_RaisedAtGroup(_zone->getGroup(GroupIDBroadcast))
-  {
-    reset();
-  } // ctor
-
   Event::Event(const std::string& _name, boost::shared_ptr<Group> _group)
   : m_Name(_name),
     m_RaiseLocation(erlGroup),
