@@ -322,9 +322,9 @@ namespace dss {
       resultObj->addProperty("value", value);
 
       return success(resultObj);
-    } else if(_request.getMethod() == "setJokerGroup") {
+    } else if (_request.getMethod() == "setJokerGroup") {
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
-      if((newGroupId  < 1) || (newGroupId > 8)) {
+      if (!isDefaultGroup(newGroupId)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
       boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
@@ -333,7 +333,7 @@ namespace dss {
 
       /* check if device is also in a colored user group */
       bool deviceGroupModified = false;
-      for (int g = 16; g <= 23; g++) {
+      for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
         if (pDevice->getGroupBitmask().test(g-1)) {
           boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
           if (pGroup->getStandardGroupID() != newGroupId) {
@@ -360,7 +360,7 @@ namespace dss {
           pPartnerDevice->setDeviceJokerGroup(newGroupId);
 
           deviceGroupModified = false;
-          for (int g = 16; g <= 23; g++) {
+          for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
             if (pPartnerDevice->getGroupBitmask().test(g-1)) {
               boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
               if (pGroup->getStandardGroupID() != newGroupId) {
@@ -395,6 +395,42 @@ namespace dss {
         resultObj->addProperty("action", "none");
       }
       return success(resultObj);
+    } else if(_request.getMethod() == "setHeatingGroup") {
+      int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
+      if (!isDefaultGroup(newGroupId)) {
+        return failure("Invalid or missing parameter 'groupID'");
+      }
+
+      if ((pDevice->getDeviceClass() == DEVICE_CLASS_BL) &&
+          (pDevice->getDeviceType() == DEVICE_TYPE_KM) &&
+          (pDevice->getProductID() / 100 == 2)) {
+          switch (newGroupId) {
+          case GroupIDHeating:
+          case GroupIDCooling:
+          case GroupIDVentilation:
+          case GroupIDControlTemperature:
+            break;
+          default:
+            return failure("Invalid group for this device");
+          }
+      } else {
+        return failure("Cannot change group for this device");
+      }
+
+      boost::shared_ptr<Group> newGroup = m_Apartment.getZone(pDevice->getZoneID())->getGroup(newGroupId);
+      StructureManipulator manipulator(*m_pStructureBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       m_Apartment);
+      manipulator.deviceAddToGroup(pDevice, newGroup);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      const DeviceReference d(pDevice, &m_Apartment);
+      modified->addElement("", toJSON(d));
+      resultObj->addProperty("action", "update");
+      resultObj->addElement("devices", modified);
+      return success(resultObj);
+
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
       if((value  < 0) || (value > 15)) {

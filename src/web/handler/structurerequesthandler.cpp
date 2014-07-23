@@ -45,8 +45,7 @@
 #include "foreach.h"
 #include "util.h"
 
-#define MIN_APP_USER_GROUP_ID   16  // minimum allowed apartment user group id
-#define MAX_APP_USER_GROUP_ID   23
+/* TODO use const in src/model/modelconst */
 #define MIN_USER_GROUP_ID       24  // minimum allowed user group id
 #define MAX_USER_GROUP_ID       31
 
@@ -364,7 +363,7 @@ namespace dss {
         return failure("Apartment user groups only allowed in Zone 0");
       }
       // find a group slot with unassigned state machine id
-      for (groupID = MIN_APP_USER_GROUP_ID; groupID <= MAX_APP_USER_GROUP_ID; groupID ++) {
+      for (groupID = GroupIDAppUserMin; groupID <= GroupIDAppUserMax; groupID++) {
         pGroup = zone->getGroup(groupID);
         if (pGroup->getStandardGroupID() == 0) {
           break;
