@@ -130,7 +130,7 @@ namespace dss {
     boost::shared_ptr<JSONArrayBase> binaryInputArr(new JSONArrayBase());
     result->addElement("binaryInputs", binaryInputArr);
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
-    result->addProperty("binaryInputCount", binaryInputs.size());
+    result->addProperty("binaryInputCount", (int)binaryInputs.size());
     result->addProperty("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
     for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       boost::shared_ptr<JSONObject> element(new JSONObject());
