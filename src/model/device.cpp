@@ -1824,6 +1824,13 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputId));
         entry->createProperty("inputIndex")
                 ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputIndex));
+        PropertyNodePtr stateNode = m_binaryInputStates[m_binaryInputCount]
+                ->getPropertyNode();
+        PropertyNodePtr stateValueNode = stateNode->getProperty("value");
+        if (stateValueNode != NULL) {
+          PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
+          stateValueAlias->alias(stateValueNode);
+        }
       }
 
       m_binaryInputCount ++;
