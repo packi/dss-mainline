@@ -1,6 +1,8 @@
 bin_PROGRAMS = dss
 
-noinst_PROGRAMS = dsstests
+TESTS = dsstests
+
+check_PROGRAMS = dsstests
 
 EXTRA_DIST =	$(top_srcdir)/src/messages/messaging.proto \
 				$(top_srcdir)/src/messages/device-scene-table-update.proto
