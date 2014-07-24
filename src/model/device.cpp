@@ -431,6 +431,40 @@ namespace dss {
     }
   } // setDeviceConfig
 
+  void Device::setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex,
+                                 uint16_t _value)
+  {
+    /*
+     * webroot/js/dss/dss-setup-interface/dSS/util/Util.js: dSS.util.decode16
+     * -- used to configure lamella time(uint16_t) for KLEMME-GR using
+     *  2x setDeviceConfig
+     */
+    if (m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() == NULL) {
+      throw std::runtime_error("DeviceBusInterface missing");
+    }
+    if (m_pApartment->getModelMaintenance()) {
+      throw std::runtime_error("ModelMaintenance missing");
+    }
+    DeviceBusInterface *shorty = m_pApartment->getDeviceBusInterface();
+
+    uint8_t low = (_value & 0x000000ff);
+    uint8_t high = (_value & 0x0000ff00) >> 8;
+
+    shorty->setDeviceConfig(*this, _configClass, _configIndex, low);
+    shorty->setDeviceConfig(*this, _configClass, _configIndex + 1, high);
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
+                                                m_DSMeterDSID);
+    pEvent->addParameter(m_ShortAddress);
+    pEvent->addParameter(_configClass);
+    pEvent->addParameter(_configIndex);
+    pEvent->addParameter(_value);
+    m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+  }
+
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
     setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
