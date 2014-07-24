@@ -377,9 +377,12 @@ MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
 
 MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
-PKG_CHECK_MODULES([JSONC], [json], [],
+PKG_CHECK_MODULES([JSONC], [json-c], [],
     [
-        AC_MSG_ERROR([$JSON_PKG_ERRORS])
+        PKG_CHECK_MODULES([JSONC], [json], [],
+        [
+            AC_MSG_ERROR([$JSON_PKG_ERRORS])
+        ])
     ])
 
 PKG_CHECK_MODULES([CURL], [libcurl],
