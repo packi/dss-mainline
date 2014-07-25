@@ -1260,6 +1260,146 @@ namespace dss {
       }
 
       return success();
+
+    } else if (_request.getMethod() == "setValveTimerMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+
+      unsigned int protTimer;
+      if (_request.getParameter("valveProtectionTimer", protTimer)) {
+        if (protTimer > std::numeric_limits<uint16_t>::max()) {
+          return failure("valveProtectionTimer too large");
+        }
+        conf.setValveProtectionTimer(protTimer);
+      };
+
+      int emergencyValue;
+      if (_request.getParameter("emergencyValue", emergencyValue)) {
+        if (emergencyValue < -100 || emergencyValue > 100) {
+          return failure("emergencyValue out of [-100:100] range");
+        }
+        conf.setEmergencySetPoint(emergencyValue);
+      };
+
+      unsigned int emergencyTimer;
+      if (_request.getParameter("emergencyTimer", emergencyTimer)) {
+        if (protTimer > std::numeric_limits<uint8_t>::max()) {
+          return failure("emergencyTimer too big");
+        }
+        conf.setEmergencyTimer(emergencyTimer);
+      };
+
+      return success();
+
+    } else if (_request.getMethod() == "getValveTimerMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("valveProtectionTimer",
+                             conf.getValveProtectionTimer());
+      resultObj->addProperty("emergencyValue", conf.getEmergencySetPoint());
+      resultObj->addProperty("emergencyTimer", conf.getEmergencyTimer());
+      return success(resultObj);
+
+    } else if (_request.getMethod() == "setValvePwmMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+
+      unsigned pwmPeriod;
+      if (_request.getParameter("pwmPeriod", pwmPeriod)) {
+        if (pwmPeriod > std::numeric_limits<uint16_t>::max()) {
+          return failure("valveProtectionTimer too large");
+        }
+        conf.setPwmPeriod(pwmPeriod);
+      };
+      int value;
+      if (_request.getParameter("pwmMinX", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMinX out of [0:100] range");
+        }
+        conf.setPwmMinX(value);
+      };
+      if (_request.getParameter("pwmMaxX", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMaxX out of [0:100] range");
+        }
+        conf.setPwmMaxX(value);
+      };
+      if (_request.getParameter("pwmMinY", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMinY out of [0:100] range");
+        }
+        conf.setPwmMinY(value);
+      };
+      if (_request.getParameter("pwmMaxY", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMaxY out of [0:100] range");
+        }
+        conf.setPwmMaxY(value);
+      };
+      unsigned int config;
+      if (_request.getParameter("pwmConfig", config)) {
+        conf.setPwmMaxY(value);
+      };
+      int offset;
+      if (_request.getParameter("pwmOffset", offset)) {
+        if (offset < -100 || offset > 100) {
+          return failure("PWM offset out of [-100:100] range");
+        }
+        conf.setPwmOffset(offset);
+      };
+
+      return success();
+
+    } else if (_request.getMethod() == "getValvePwmMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("pwmPeriod", conf.getPwmPeriod());
+      resultObj->addProperty("pwmMinX", conf.getPwmMinX());
+      resultObj->addProperty("pwmMaxX", conf.getPwmMaxX());
+      resultObj->addProperty("pwmMinY", conf.getPwmMinY());
+      resultObj->addProperty("pwmMaxY", conf.getPwmMaxY());
+      resultObj->addProperty("pwmConfig", conf.getPwmConfig());
+      resultObj->addProperty("pwmOffset", conf.getPwmOffset());
+      return success(resultObj);
+
     } else {
       throw std::runtime_error("Unhandled function");
     }
