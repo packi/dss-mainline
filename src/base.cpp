@@ -222,48 +222,42 @@ namespace dss {
     return result;
   } // dateFromISOString
 
-  std::vector<std::string> splitString(const std::string& _source, const char _delimiter, bool _trimEntries) {
+  std::vector<std::string> splitString(const std::string& _source,
+                                       const char _delimiter,
+                                       bool _trimEntries) {
     std::vector<std::string> result;
     std::string curString = _source;
-    std::string::size_type skip = 0;
-    while(!curString.empty()) {
-      std::string::size_type delimPos = curString.find(_delimiter, skip);
-      bool previousCharIsEscape = false;
-      if((delimPos > 0) && (delimPos != std::string::npos)) {
-        previousCharIsEscape = (curString.at(delimPos - 1) == '\\');
-      }
-      if((delimPos != std::string::npos) && !previousCharIsEscape) {
-        if(_trimEntries) {
-          result.push_back(trim(curString.substr(0, delimPos)));
-        } else {
-          result.push_back(curString.substr(0, delimPos));
+    std::string::size_type delimPos = 0, startField = 0, skip = 0;
+
+    while (startField < curString.size()) {
+      delimPos = curString.find(_delimiter, skip);
+
+      if ((delimPos > 0) && (delimPos != std::string::npos)) {
+        if (curString.at(delimPos - 1) == '\\') {
+          // remove escape character
+          curString.erase(delimPos - 1, 1);
+          skip = delimPos;
+          continue;
         }
-        curString = curString.substr(delimPos+1, std::string::npos);
-        skip = 0;
-        if(curString.size() == 0) {
+      }
+
+      if (delimPos != std::string::npos) {
+        if (_trimEntries) {
+          result.push_back(trim(curString.substr(startField, delimPos - startField)));
+        } else {
+          result.push_back(curString.substr(startField, delimPos - startField));
+        }
+        skip = startField = delimPos + 1;
+        if (curString.size() - skip == 0) {
+          // in case of trailing delimiter, but no actual field data, we add an
+          // empty string. not sure why we need this, probably nobody does
           result.push_back("");
         }
       } else {
-        // remove escape character
-        if(delimPos != std::string::npos) {
-          if((delimPos >= 1) && previousCharIsEscape) {
-            curString.erase(delimPos - 1, 1);
-            delimPos--;
-          }
-          if (delimPos < curString.size()) {
-            skip = delimPos + 1;
-          }
-        }
-      }
-      if(delimPos == std::string::npos) {
-        if(curString.size() > 0) {
-          if(_trimEntries) {
-            result.push_back(trim(curString));
-          } else {
-            result.push_back(curString);
-          }
+        if (_trimEntries) {
+          result.push_back(trim(curString.substr(startField)));
         } else {
-          result.push_back("");
+          result.push_back(curString.substr(startField));
         }
         break;
       }
