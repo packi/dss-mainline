@@ -602,6 +602,35 @@ namespace dss {
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
 
+  class DeviceBank3_BL {
+  public:
+    DeviceBank3_BL(boost::shared_ptr<Device> device);
+
+    void setValveProtectionTimer(uint16_t timeout);
+    uint16_t getValveProtectionTimer();
+    void setEmergencySetPoint(int8_t set_point);
+    int8_t getEmergencySetPoint();
+    void setEmergencyTimer(int16_t timeout);
+    uint16_t getEmergencyTimer();
+
+    void setPwmPeriod(uint16_t pwmPeriod);
+    uint16_t getPwmPeriod();
+    void setPwmMinX(int8_t set_point);
+    int8_t getPwmMinX();
+    void setPwmMaxX(int8_t set_point);
+    int8_t getPwmMaxX();
+    void setPwmMinY(int8_t set_point);
+    int8_t getPwmMinY();
+    void setPwmMaxY(int8_t set_point);
+    int8_t getPwmMaxY();
+    void setPwmConfig(uint8_t config);
+    uint8_t getPwmConfig();
+    void setPwmOffset(int8_t config);
+    int8_t getPwmOffset();
+
+  private:
+    boost::shared_ptr<Device> m_device;
+  };
 } // namespace dss
 
 #endif // DEVICE_H
