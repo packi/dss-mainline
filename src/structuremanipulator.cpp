@@ -632,25 +632,25 @@ namespace dss {
   } // sensorPush
 
   bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
-                                           boost::shared_ptr<Zone> &pZone,
-                                           int newGroupId) {
+                                           boost::shared_ptr<Group> newGroup) {
     bool modified = false;
     int oldGroupId = device->getJokerGroup();
-    if (oldGroupId != newGroupId) {
-      device->setDeviceJokerGroup(newGroupId);
+    if (oldGroupId != newGroup->getID()) {
+      device->setDeviceJokerGroup(newGroup->getID());
       modified = true;
     }
 
     /* check if device is also in a colored user group */
+    boost::shared_ptr<Zone> pZone = m_Apartment.getZone(newGroup->getZoneID());
     for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
       if (!device->getGroupBitmask().test(g - 1)) {
         continue;
       }
-      boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
-      if (pGroup->getStandardGroupID() == newGroupId) {
+      boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
+      if (itGroup->getStandardGroupID() == newGroup->getID()) {
         continue;
       }
-      deviceRemoveFromGroup(device, pGroup);
+      deviceRemoveFromGroup(device, newGroup);
       modified = true;
     }
 

@@ -333,12 +333,12 @@ namespace dss {
       }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
-      boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
+      boost::shared_ptr<Group> group = m_Apartment.getZone(0)->getGroup(newGroupId);
       StructureManipulator manipulator(*m_pStructureBusInterface,
                                        *m_pStructureQueryBusInterface,
                                        m_Apartment);
 
-      if (manipulator.setJokerGroup(pDevice, pZone, newGroupId)) {
+      if (manipulator.setJokerGroup(pDevice, group)) {
         modifiedDevices.push_back(pDevice);
       }
 
@@ -352,7 +352,7 @@ namespace dss {
                          dsuid2str(next) + "'");
         }
 
-        if (manipulator.setJokerGroup(pPartnerDevice, pZone, newGroupId)) {
+        if (manipulator.setJokerGroup(pPartnerDevice, group)) {
           modifiedDevices.push_back(pPartnerDevice);
         }
       }

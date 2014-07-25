@@ -76,9 +76,7 @@ namespace dss {
      * @ret device moved
      */
     bool setJokerGroup(boost::shared_ptr<Device> device,
-                       boost::shared_ptr<Zone> &pZone,
-                       int newGroupId);
-
+                       boost::shared_ptr<Group> pGroup);
 }; // StructureManipulator
 
 
