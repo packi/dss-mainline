@@ -431,6 +431,40 @@ namespace dss {
     }
   } // setDeviceConfig
 
+  void Device::setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex,
+                                 uint16_t _value)
+  {
+    /*
+     * webroot/js/dss/dss-setup-interface/dSS/util/Util.js: dSS.util.decode16
+     * -- used to configure lamella time(uint16_t) for KLEMME-GR using
+     *  2x setDeviceConfig
+     */
+    if (m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if(m_pApartment->getDeviceBusInterface() == NULL) {
+      throw std::runtime_error("DeviceBusInterface missing");
+    }
+    if (m_pApartment->getModelMaintenance()) {
+      throw std::runtime_error("ModelMaintenance missing");
+    }
+    DeviceBusInterface *shorty = m_pApartment->getDeviceBusInterface();
+
+    uint8_t low = (_value & 0x000000ff);
+    uint8_t high = (_value & 0x0000ff00) >> 8;
+
+    shorty->setDeviceConfig(*this, _configClass, _configIndex, low);
+    shorty->setDeviceConfig(*this, _configClass, _configIndex + 1, high);
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
+                                                m_DSMeterDSID);
+    pEvent->addParameter(m_ShortAddress);
+    pEvent->addParameter(_configClass);
+    pEvent->addParameter(_configIndex);
+    pEvent->addParameter(_value);
+    m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+  }
+
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
     setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
@@ -2048,5 +2082,96 @@ namespace dss {
   void Device::setConfigLock(bool _lockConfig) {
     boost::mutex::scoped_lock lock(m_deviceMutex);
     m_IsConfigLocked = _lockConfig;
+  }
+
+  DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
+    : m_device(device) {
+      if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {
+        throw std::runtime_error("Device is not heating device");
+      }
+  }
+
+  void DeviceBank3_BL::setValveProtectionTimer(uint16_t valveProtectionTimer) {
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_BL::VENTIL_TMR,
+                                valveProtectionTimer);
+  }
+  uint16_t DeviceBank3_BL::getValveProtectionTimer() {
+    return m_device->getDeviceConfigWord(CfgClassFunction,
+                                         CfgFunction_BL::VENTIL_TMR);
+  }
+  void DeviceBank3_BL::setEmergencySetPoint(int8_t emergency_sp) {
+    // implicit conversion int8_t to uint8_t
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::EMERGENCY_SP,
+                              emergency_sp);
+  }
+  int8_t DeviceBank3_BL::getEmergencySetPoint() {
+    // implicit conversion uint8_t to int8_t
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::EMERGENCY_SP);
+  }
+  void DeviceBank3_BL::setEmergencyTimer(int16_t emergency_tmr) {
+    m_device->setDeviceConfig16(CfgClassFunction,
+                                CfgFunction_BL::EMERGENCY_TMR, emergency_tmr);
+  }
+  uint16_t DeviceBank3_BL::getEmergencyTimer() {
+    return m_device->getDeviceConfigWord(CfgClassFunction,
+                                         CfgFunction_BL::EMERGENCY_TMR);
+  }
+
+  void DeviceBank3_BL::setPwmPeriod(uint16_t pwmPeriod) {
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_BL::PWM_PERIODLEN,
+                                pwmPeriod);
+  }
+  uint16_t DeviceBank3_BL::getPwmPeriod() {
+    return m_device->getDeviceConfigWord(CfgClassFunction,
+                                         CfgFunction_BL::PWM_PERIODLEN);
+  }
+  void DeviceBank3_BL::setPwmMinX(int8_t set_point) {
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MIN_X,
+                              set_point);
+  }
+  int8_t DeviceBank3_BL::getPwmMinX() {
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::PWM_MIN_X);
+  }
+  void DeviceBank3_BL::setPwmMaxX(int8_t set_point) {
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MAX_X,
+                              set_point);
+  }
+  int8_t DeviceBank3_BL::getPwmMaxX() {
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::PWM_MAX_X);
+  }
+  void DeviceBank3_BL::setPwmMinY(int8_t set_point) {
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MIN_Y,
+                              set_point);
+  }
+  int8_t DeviceBank3_BL::getPwmMinY() {
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::PWM_MIN_Y);
+  }
+  void DeviceBank3_BL::setPwmMaxY(int8_t set_point) {
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MAX_Y,
+                              set_point);
+  }
+  int8_t DeviceBank3_BL::getPwmMaxY() {
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::PWM_MAX_Y);
+  }
+  void DeviceBank3_BL::setPwmConfig(uint8_t config) {
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_CONFIG,
+                              config);
+  }
+  uint8_t DeviceBank3_BL::getPwmConfig() {
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::PWM_CONFIG);
+  }
+  void DeviceBank3_BL::setPwmOffset(int8_t config) {
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_OFFSET_SP,
+                              config);
+  }
+  int8_t DeviceBank3_BL::getPwmOffset() {
+    return m_device->getDeviceConfig(CfgClassFunction,
+                                     CfgFunction_BL::PWM_OFFSET_SP);
   }
 } // namespace dss

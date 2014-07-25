@@ -74,6 +74,38 @@ namespace dss {
     return urlDecode(tmp);
   }
 
+  template <>
+  bool RestfulRequest::getParameter<int>(const std::string& _name,
+                                         int &out) const
+  {
+    std::string tmp = getParameter(_name);
+    if (tmp.empty()) {
+      return false;
+    }
+    try {
+      out = strToInt(tmp);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
+  template <>
+  bool RestfulRequest::getParameter<unsigned int>(const std::string& _name,
+                                                  unsigned int &out) const
+  {
+    std::string tmp = getParameter(_name);
+    if (tmp.empty()) {
+      return false;
+    }
+    try {
+      out = strToUInt(tmp);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
   /**
    * @_request -- '/system/login'
    * class -> 'system', method -> login everything till EOS
