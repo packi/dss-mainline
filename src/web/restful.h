@@ -186,11 +186,14 @@ namespace dss {
       return m_Method;
     } // getMethod
 
-    const std::string getParameter(const std::string& _name) const;
-
     bool hasParameter(const std::string& _name) const {
       return (m_queryString.find("&" + _name + "=") != std::string::npos);
     }
+
+    const std::string getParameter(const std::string& _name) const;
+
+    template <typename T>
+    bool getParameter(const std::string& _name, T &out) const;
 
     bool isActive() const {
       if(m_ActiveCallback) {
