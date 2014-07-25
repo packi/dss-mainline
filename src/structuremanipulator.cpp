@@ -631,4 +631,29 @@ namespace dss {
     _group->sensorPush(_sourceID, _sensorType, _sensorValue);
   } // sensorPush
 
+  bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
+                                           boost::shared_ptr<Zone> &pZone,
+                                           int newGroupId) {
+    bool modified = false;
+    int oldGroupId = device->getJokerGroup();
+    if (oldGroupId != newGroupId) {
+      device->setDeviceJokerGroup(newGroupId);
+      modified = true;
+    }
+
+    /* check if device is also in a colored user group */
+    for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
+      if (!device->getGroupBitmask().test(g - 1)) {
+        continue;
+      }
+      boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
+      if (pGroup->getStandardGroupID() == newGroupId) {
+        continue;
+      }
+      deviceRemoveFromGroup(device, pGroup);
+      modified = true;
+    }
+
+    return modified;
+  }
 } // namespace dss

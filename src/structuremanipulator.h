@@ -71,6 +71,14 @@ namespace dss {
 
     void sensorPush(boost::shared_ptr<Group> _zone, dsuid_t _sourceID, int _sensorType, int _sensorValue);
     void sensorPush(boost::shared_ptr<Group> _zone, dsuid_t _sourceID, int _sensorType, double _sensorValue);
+
+    /**
+     * @ret device moved
+     */
+    bool setJokerGroup(boost::shared_ptr<Device> device,
+                       boost::shared_ptr<Zone> &pZone,
+                       int newGroupId);
+
 }; // StructureManipulator
 
 

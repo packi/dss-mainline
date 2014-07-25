@@ -23,7 +23,6 @@
 
 #include "devicerequesthandler.h"
 
-#include <set> // will be kicked in next patch
 #include <boost/bind.hpp>
 #include <limits.h>
 #include <digitalSTROM/dsuid/dsuid.h>
@@ -333,56 +332,28 @@ namespace dss {
           return failure("No handle to bus interface");
       }
 
-      std::set<boost::shared_ptr<Device> > modifiedDevices;
+      std::vector<boost::shared_ptr<Device> > modifiedDevices;
       boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
       StructureManipulator manipulator(*m_pStructureBusInterface,
                                        *m_pStructureQueryBusInterface,
                                        m_Apartment);
 
-      int oldGroupId = pDevice->getJokerGroup();
-      if (oldGroupId != newGroupId) {
-        pDevice->setDeviceJokerGroup(newGroupId);
-        modifiedDevices.insert(pDevice);
-      }
-
-      /* check if device is also in a colored user group */
-      for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
-        if (!pDevice->getGroupBitmask().test(g - 1)) {
-          continue;
-        }
-        boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
-        if (pGroup->getStandardGroupID() == newGroupId) {
-          continue;
-        }
-        manipulator.deviceRemoveFromGroup(pDevice, pGroup);
-        modifiedDevices.insert(pDevice);
+      if (manipulator.setJokerGroup(pDevice, pZone, newGroupId)) {
+        modifiedDevices.push_back(pDevice);
       }
 
       if (pDevice->is2WayMaster()) {
         dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+        boost::shared_ptr<Device> pPartnerDevice;
         try {
-          boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-
-          int oldGroupId = pPartnerDevice->getJokerGroup();
-          if (oldGroupId != newGroupId) {
-            pPartnerDevice->setDeviceJokerGroup(newGroupId);
-            modifiedDevices.insert(pPartnerDevice);
-          }
-
-          for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
-            if (!pPartnerDevice->getGroupBitmask().test(g - 1)) {
-              continue;
-            }
-            boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
-            if (pGroup->getStandardGroupID() == newGroupId) {
-              continue;
-            }
-            manipulator.deviceRemoveFromGroup(pPartnerDevice, pGroup);
-            modifiedDevices.insert(pPartnerDevice);
-          }
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+          return failure("Could not find partner device with dsid '" +
+                         dsuid2str(next) + "'");
+        }
+
+        if (manipulator.setJokerGroup(pPartnerDevice, pZone, newGroupId)) {
+          modifiedDevices.push_back(pPartnerDevice);
         }
       }
 
