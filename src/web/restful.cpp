@@ -24,28 +24,7 @@
 
 #include "restful.h"
 
-#include "webserver.h"
-#include "src/foreach.h"
-
 namespace dss {
-
-  bool RestfulAPI::hasClass(const std::string& _name) {
-    foreach(RestfulClass& cls, m_Classes) {
-      if(cls.getName() == _name) {
-        return true;
-      }
-    }
-    return false;
-  } // hasClass
-
-  bool RestfulClass::hasMethod(const std::string& _name) {
-    foreach(RestfulMethod& method, m_Methods) {
-      if(method.getName() == _name) {
-        return true;
-      }
-    }
-    return false;
-  } // hasMethod
 
   RestfulRequest::RestfulRequest(const std::string& _request,
                                  const std::string& params)

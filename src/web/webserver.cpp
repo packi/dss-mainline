@@ -49,7 +49,6 @@
 #include "src/sessionmanager.h"
 
 #include "src/web/restful.h"
-#include "src/web/restfulapiwriter.h"
 #include "src/web/webrequests.h"
 
 #include "src/web/handler/systemrequesthandler.h"
@@ -66,7 +65,6 @@
 
 #include "src/businterface.h"
 
-#include "webserverapi.h"
 #include "json.h"
 
 #include "src/model/device.h"
@@ -208,7 +206,6 @@ namespace dss {
     m_SessionManager->setMaxSessionCount(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionLimit"));
 
     publishJSLogfiles();
-    setupAPI();
     instantiateHandlers();
 
     const char *mgOptions[] = {
@@ -260,11 +257,6 @@ namespace dss {
       throw std::runtime_error("Directory for js logfiles does not exist: '" + logDir + "'");
     }
   } // publishJSLogfiles
-
-  void WebServer::setupAPI() {
-    m_pAPI = WebServerAPI::createRestfulAPI();
-    RestfulAPIWriter::writeToXML(*m_pAPI, "doc/json_api.xml");
-  } // setupAPI
 
   void WebServer::doStart() { } // start
 

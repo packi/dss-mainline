@@ -187,8 +187,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/web/handler/zonerequesthandler.h \
 	$(top_srcdir)/src/web/json.cpp \
 	$(top_srcdir)/src/web/json.h \
-	$(top_srcdir)/src/web/restfulapiwriter.cpp \
-	$(top_srcdir)/src/web/restfulapiwriter.h \
 	$(top_srcdir)/src/web/restful.cpp \
 	$(top_srcdir)/src/web/restful.h \
 	$(top_srcdir)/src/webservice_api.cpp \
@@ -197,8 +195,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/webservice_connection.h \
 	$(top_srcdir)/src/web/webrequests.cpp \
 	$(top_srcdir)/src/web/webrequests.h \
-	$(top_srcdir)/src/web/webserverapi.cpp \
-	$(top_srcdir)/src/web/webserverapi.h \
 	$(top_srcdir)/src/web/webserver.cpp \
 	$(top_srcdir)/src/web/webserver.h
 
