@@ -22,46 +22,15 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
 
-#include <boost/filesystem.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "src/event.h"
 #include "src/eventsubscriptionsession.h"
-#include "src/web/restful.h"
-#include "src/web/webserverapi.h"
-#include "src/web/restfulapiwriter.h"
 
 using namespace dss;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(RestfulAPITests)
-
-BOOST_AUTO_TEST_CASE(testDeclaring) {
-    RestfulAPI api;
-    BOOST_CHECK(!api.hasClass("apartment"));
-    
-    RestfulClass& clsApartment = api.addClass("apartment")
-       .withDocumentation("A wrapper for global functions as well as adressing all devices connected to the dSS");
-
-    BOOST_CHECK(api.hasClass("apartment"));
-    BOOST_CHECK(!clsApartment.hasMethod("getName"));
-
-     clsApartment.addMethod("getName")
-      .withDocumentation("Returns the name of the apartment");
-
-    BOOST_CHECK(clsApartment.hasMethod("getName"));
-}
-
-BOOST_AUTO_TEST_CASE(testRestfulAPIWriter) {
-  const std::string fileName = getTempDir() + "api.xml";
-  fs::remove(fileName);
-  WebServerAPI api;
-  RestfulAPIWriter::writeToXML(*api.createRestfulAPI(), fileName);
-
-  BOOST_CHECK(fs::exists(fileName));
-  fs::remove(fileName);
-}
 
 BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribe) {
   dss::EventInterpreter interp(NULL);
