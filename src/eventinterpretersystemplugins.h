@@ -201,6 +201,9 @@ namespace dss {
       void logDeviceSensorValue(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device,
                                 boost::shared_ptr<Zone> _zone);
+      void logZoneSensorValue(boost::shared_ptr<ScriptLogger> _logger,
+                              boost::shared_ptr<Zone> _zone,
+                              int _groupId);
       void logStateChangeScript(boost::shared_ptr<ScriptLogger> _logger,
                                 std::string _statename, std::string _state,
                                 std::string _value,
@@ -226,6 +229,7 @@ namespace dss {
       void deviceBinaryInputEvent(boost::shared_ptr<ScriptLogger> _logger);
       void deviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger);
       void deviceSensorValue(boost::shared_ptr<ScriptLogger> _logger);
+      void zoneSensorValue(boost::shared_ptr<ScriptLogger> _logger);
       void stateChange(boost::shared_ptr<ScriptLogger> _logger);
 
       std::string m_evtName;

@@ -2101,6 +2101,28 @@ namespace dss {
         zoneName + ";;;" + devName + ";");
   }
 
+  void SystemEventLog::logZoneSensorValue(
+      boost::shared_ptr<ScriptLogger> _logger,
+      boost::shared_ptr<Zone> _zone,
+      int _groupId) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_zone->getGroup(_groupId));
+    uint8_t sensorType = strToInt(m_properties.get("sensorType"));
+    std::string sensorValue = m_properties.get("sensorValue");
+    std::string sensorValueFloat = m_properties.get("sensorValueFloat");
+
+    std::string typeName;
+    SceneHelper::sensorName(sensorType, typeName);
+
+    std::string origName = getDeviceName(m_properties.get("originDSID"));
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";ZoneSensorValue;" +
+        typeName + " [" + intToString(sensorType) + "];" +
+        sensorValueFloat + " [" + sensorValue + "];" +
+        zoneName + ";" + groupName + ";" + origName + ";");
+  }
+
   void SystemEventLog::logStateChangeScript(
                                     boost::shared_ptr<ScriptLogger> _logger,
                                     std::string _statename, std::string _state,
@@ -2342,6 +2364,20 @@ namespace dss {
     }
   }
 
+  void SystemEventLog::zoneSensorValue(
+                                    boost::shared_ptr<ScriptLogger> _logger) {
+    if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+      // Zone Sensor Value
+      int zoneId = m_raisedAtGroup->getZoneID();
+      int groupId = m_raisedAtGroup->getID();
+      try {
+        boost::shared_ptr<Zone> zone =
+            DSS::getInstance()->getApartment().getZone(zoneId);
+        logZoneSensorValue(_logger, zone, groupId);
+      } catch (ItemNotFoundException &ex) {}
+    }
+  }
+
   void SystemEventLog::stateChange(boost::shared_ptr<ScriptLogger> _logger) {
     std::string statename;
     if (m_properties.has("statename")) {
@@ -2423,6 +2459,14 @@ namespace dss {
         return;
       }
       deviceSensorValue(logger);
+    } else if (m_evtName == "zoneSensorValue") {
+      logger.reset(new ScriptLogger(
+          DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
+      if (logger == NULL) {
+        Logger::getInstance()->log("SystemEventLog::run(): could not init logger!");
+        return;
+      }
+      zoneSensorValue(logger);
     }
   }
 
