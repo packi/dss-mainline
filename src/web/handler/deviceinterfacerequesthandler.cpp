@@ -33,6 +33,7 @@
 #include "src/model/scenehelper.h"
 #include "src/comm-channel.h"
 #include "src/util.h"
+#include "src/ds485types.h"
 
 namespace dss {
 
@@ -145,6 +146,28 @@ namespace dss {
       std::pair<uint8_t, uint8_t> channel = getOutputChannelIdAndSize(_request.getParameter("channel"));
       _interface->stopOutputChannelValue(coJSON, SceneAccess::stringToCategory(categoryStr), channel.first, sessionToken);
       return success();
+    } else if(_request.getMethod() == "pushSensorValue") {
+      dsuid_t sourceID;
+      std::string deviceIDStr = _request.getParameter("sourceDSID");
+      std::string dsuidStr = _request.getParameter("sourceDSUID");
+      if (deviceIDStr.empty() && dsuidStr.empty()) {
+        SetNullDsuid(sourceID);
+      } else if (dsuidStr.empty()) {
+        dsid_t dsid = str2dsid(deviceIDStr);
+        sourceID = dsuid_from_dsid(dsid);
+      } else {
+        sourceID = str2dsuid(dsuidStr);
+      }
+      int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
+      std::string sensorValueString = _request.getParameter("sensorValue");
+      if(sensorType == -1 || sensorValueString.length() == 0) {
+        return failure("Need valid parameter 'sensorType' and 'sensorValue'");
+      }
+      double sensorValue = ::strtod(sensorValueString.c_str(), 0);
+
+      _interface->pushSensor(coJSON, SceneAccess::stringToCategory(categoryStr),
+          sourceID, sensorType, sensorValue, sessionToken);
+      return success();
     }
     throw std::runtime_error("Unknown function");
   } // handleRequest
@@ -162,7 +185,8 @@ namespace dss {
         || _request.getMethod() == "blink"
         || _request.getMethod() == "increaseOutputChannelValue"
         || _request.getMethod() == "decreaseOutputChannelValue"
-        || _request.getMethod() == "stopOutputChannelValue";
+        || _request.getMethod() == "stopOutputChannelValue"
+        || _request.getMethod() == "pushSensorValue";
   } // isDeviceInterfaceCall
 
 } // namespace dss

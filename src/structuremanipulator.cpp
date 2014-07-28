@@ -614,23 +614,6 @@ namespace dss {
     }
   } // deviceRemoveFromGroup
 
-  void StructureManipulator::sensorPush(boost::shared_ptr<Group> _group, dsuid_t _sourceID, int _sensorType, int _sensorValue) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
-    m_Interface.sensorPush(_group->getZoneID(), _group->getID(), _sourceID, _sensorType, _sensorValue);
-    _group->sensorPush(_sourceID, _sensorType, SceneHelper::sensorToFloat12(_sensorType, _sensorValue));
-  } // sensorPush
-
-  void StructureManipulator::sensorPush(boost::shared_ptr<Group> _group, dsuid_t _sourceID, int _sensorType, double _sensorValue) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
-    int convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValue);
-    m_Interface.sensorPush(_group->getZoneID(), _group->getID(), _sourceID, _sensorType, convertedSensorValue);
-    _group->sensorPush(_sourceID, _sensorType, _sensorValue);
-  } // sensorPush
-
   bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
                                            boost::shared_ptr<Group> newGroup) {
     bool modified = false;

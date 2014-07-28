@@ -159,4 +159,16 @@ namespace dss {
     }
     m_pApartment->getActionRequestInterface()->stopOutputChannelValue(this, _origin, _category, _channel, _token);
   } // stopOutputChannelValue
+
+  void AddressableModelItem::pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, const uint8_t _sensorType, const float _sensorValueFloat, const std::string _token) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: pushSensor blocked", lsDebug);
+      return;
+    }
+    m_pApartment->getActionRequestInterface()->pushSensor(this, _origin, _category, _sourceID, _sensorType, _sensorValueFloat, _token);
+  }
+
 } // namespace dss

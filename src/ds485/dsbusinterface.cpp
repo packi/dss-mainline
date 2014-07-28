@@ -869,21 +869,19 @@ namespace dss {
   void DSBusInterface::handleZoneSensorValueEvent(uint8_t _errorCode,
                                                 dsuid_t _sourceID,
                                                 dsuid_t _destinationID,
-                                                uint16_t _ZoneId,
-                                                uint8_t _GroupId,
+                                                uint16_t _zoneID,
+                                                uint8_t _groupID,
                                                 dsuid_t _dSUID,
                                                 uint8_t _SensorType,
                                                 uint16_t _Value,
                                                 uint8_t _Precision) {
     loginFromCallback();
-    ModelEvent* pEvent = new ModelEventWithStrings(ModelEvent::etZoneSensorValue, _sourceID);
-    pEvent->addParameter(_ZoneId);
-    pEvent->addParameter(_GroupId);
-    pEvent->addParameter(_SensorType);
-    pEvent->addParameter(_Value);
-    pEvent->addParameter(_Precision);
-    pEvent->setSingleStringParameter(dsuid2str(_dSUID));
-    m_pModelMaintenance->addModelEvent(pEvent);
+    if (m_pBusEventSink != NULL) {
+      m_pBusEventSink->onZoneSensorValue(this,
+          _sourceID, dsuid2str(_dSUID),
+          _zoneID, _groupID, _SensorType, _Value, _Precision,
+          SAC_MANUAL, coDsmApi);
+    }
   } // handleZoneSensorValueEvent
 
   void DSBusInterface::handleZoneSensorValueCallback(uint8_t _errorCode,

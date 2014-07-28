@@ -25,6 +25,7 @@
 #define ADDRESSABLEMODELITEM_H
 
 #include <boost/enable_shared_from_this.hpp>
+#include <digitalSTROM/ds.h>
 
 #include "physicalmodelitem.h"
 #include "deviceinterface.h"
@@ -57,6 +58,7 @@ namespace dss {
     virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
     virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
 
+    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, const uint8_t _sensorType, const float _sensorValueFloat, const std::string _token);
   protected:
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;

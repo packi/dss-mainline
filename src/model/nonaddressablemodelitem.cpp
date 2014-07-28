@@ -106,4 +106,11 @@ namespace dss {
     }
   }
 
+  void NonAddressableModelItem::pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, const uint8_t _sensorType, const float _sensorValueFloat, const std::string _token) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
+      item->pushSensor(_origin, _category, _sourceID, _sensorType, _sensorValueFloat, _token);
+    }
+  }
+
 } // namespace dss

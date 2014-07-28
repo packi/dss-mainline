@@ -1693,12 +1693,15 @@ namespace dss {
                                            const int& _precision) {
     try {
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("zoneSensorValue"));
-      pEvent->setProperty("zoneId", intToString(_zoneID));
-      pEvent->setProperty("groupId", intToString(_groupID));
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      boost::shared_ptr<Group> group = zone->getGroup(_groupID);
+
+      double fValue = SceneHelper::sensorToFloat10(_sensorType, _sensorValue);
+      group->sensorPush(_sourceDevice, _sensorType, fValue);
+
+      pEvent.reset(new Event("zoneSensorValue", group));
       pEvent->setProperty("sensorType", intToString(_sensorType));
       pEvent->setProperty("sensorValue", intToString(_sensorValue));
-      double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
       pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
       pEvent->setProperty("originDSID", _sourceDevice);
       raiseEvent(pEvent);

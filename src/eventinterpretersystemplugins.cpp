@@ -3288,16 +3288,12 @@ namespace dss {
     if (m_raisedAtDevice != NULL) {
       int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
       try {
-        boost::shared_ptr<Zone> zone =
-            DSS::getInstance()->getApartment().getZone(zoneId);
+        boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<const Device> pDevice = m_raisedAtDevice->getDevice();
-
         boost::shared_ptr<Group> pGroup = zone->getGroup(0);
 
-        std::string sensorIndex;
-        if (m_properties.has("sensorIndex")) {
-          sensorIndex = m_properties.get("sensorIndex");
-        }
+        std::string sensorIndex = m_properties.get("sensorIndex");
+        float sensorValueFloat = ::strtod(m_properties.get("sensorValueFloat").c_str(), 0);
 
         uint8_t sensorType = 255;
         if (m_properties.has("sensorType")) {
@@ -3309,29 +3305,11 @@ namespace dss {
           } catch (ItemNotFoundException& ex) {}
         }
 
-        std::string sensorValue;
-        if (m_properties.has("sensorValue")) {
-          sensorValue = m_properties.get("sensorValue");
-        }
-
-        std::string sensorValueFloat;
-        if (m_properties.has("sensorValueFloat")) {
-          sensorValueFloat = m_properties.get("sensorValueFloat");
-        }
-
-        std::string typeName;
-        SceneHelper::sensorName(sensorType, typeName);
-
         if (sensorType == SensorIDBrightnessIndoors ||
             sensorType == SensorIDHumidityIndoors ||
             sensorType == SensorIDCO2Concentration) {
-          DSS::getInstance()->getApartment();
-          Apartment& apartment = DSS::getInstance()->getApartment();
-          StructureManipulator manipulator(
-              *(apartment.getBusInterface()->getStructureModifyingBusInterface()),
-              *(apartment.getBusInterface()->getStructureQueryBusInterface()),
-              apartment);
-          manipulator.sensorPush(pGroup, m_raisedAtDevice->getDSID(), sensorType, strToInt(sensorValue));
+          pGroup->pushSensor(coSystem, SAC_MANUAL,
+              m_raisedAtDevice->getDSID(), sensorType, sensorValueFloat, "");
         }
       } catch (ItemNotFoundException &ex) {}
     }

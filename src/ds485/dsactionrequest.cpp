@@ -28,6 +28,7 @@
 
 #include "src/model/group.h"
 #include "src/model/device.h"
+#include "src/model/scenehelper.h"
 
 namespace dss {
 
@@ -260,6 +261,28 @@ namespace dss {
       DSBusInterface::checkResultCode(ret);
     }
   }
+
+  void DSActionRequest::pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    int convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
+
+    int ret = ZoneGroupSensorPush(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(),
+        _sourceID, _sensorType, convertedSensorValue, 1);
+    DSBusInterface::checkBroadcastResultCode(ret);
+
+    if (m_pBusEventSink) {
+      dsuid_t nullid;
+      SetNullDsuid(nullid);
+      m_pBusEventSink->onZoneSensorValue(NULL, nullid, dsuid2str(_sourceID),
+          pGroup->getZoneID(), pGroup->getID(), _sensorType, convertedSensorValue, 1,
+          _category, _origin);
+    }
+  } // pushSensor
 
   void DSActionRequest::setBusEventSink(BusEventSink* _eventSink) {
       m_pBusEventSink = _eventSink;

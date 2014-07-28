@@ -249,9 +249,6 @@ namespace dss {
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
-    /** Send sensoric data downstream to devices */
-    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) = 0;
-
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
 
@@ -269,8 +266,8 @@ namespace dss {
     virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) = 0;
   }; // ActionRequestInterface
-
 
   class MeteringBusInterface {
   public:
@@ -345,6 +342,16 @@ namespace dss {
                                  const dsuid_t& _dsMeterID,
                                  const unsigned int _powerW,
                                  const unsigned int _energyWs) = 0;
+    virtual void onZoneSensorValue(BusInterface* _source,
+                                   const dsuid_t _dsMeterID,
+                                   const std::string& _sourceDevice,
+                                   const int& _zoneID,
+                                   const int& _groupID,
+                                   const int& _sensorType,
+                                   const int& _sensorValue,
+                                   const int& _precision,
+                                   const SceneAccessCategory _category,
+                                   const callOrigin_t _origin) = 0;
     virtual ~BusEventSink() {};
   };
 

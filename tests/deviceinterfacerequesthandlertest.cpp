@@ -82,17 +82,17 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void blink(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token)  {
       functionCalled("blink");
     }
-
     virtual void increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
       functionCalled("increaseOutputChannelValue(" + intToString(_channel) + ")");
     }
-
     virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
       functionCalled("decreaseOutputChannelValue(" + intToString(_channel) + ")");
     }
-
     virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
       functionCalled("stopOutputChannelValue(" + intToString(_channel) + ")");
+    }
+    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
+      functionCalled("pushSensor(" + intToString(_sensorType) + ", " + doubleToString(_sensorValueFloat) + ")");
     }
 
     int getNumberOfCalls() const { return m_NumberOfCalls; }

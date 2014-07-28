@@ -111,7 +111,7 @@ namespace dss {
     eState getState();
 
     /** Published a sensor value to all devices of this zone */
-    void sensorPush(dsuid_t _sourceID, int _sensorType, double _sensorValue);
+    void sensorPush(const std::string& _sourceID, const int _sensorType, const double _sensorValue);
 
     void addConnectedDevice();
     void removeConnectedDevice();
