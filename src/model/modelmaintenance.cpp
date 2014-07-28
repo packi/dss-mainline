@@ -1668,7 +1668,7 @@ namespace dss {
         pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
         pEvent->setProperty("sensorValue", intToString(_sensorValue));
         try {
-          pDev->setSensorValue(_sensorIndex, _sensorValue);
+          pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
 
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
           uint8_t sensorType = pdSensor->m_sensorType;

@@ -1907,6 +1907,7 @@ namespace dss {
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
       binput->m_sensorValue = 0;
+      binput->m_sensorValueFloat = 0;
       binput->m_sensorValueTS = DateTime::NullDate;
       binput->m_sensorValueValidity = false;
       m_sensorInputs.push_back(binput);
@@ -1924,6 +1925,8 @@ namespace dss {
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
         entry->createProperty("value")
+                ->linkToProxy(PropertyProxyReference<int, double>(m_sensorInputs[m_sensorInputCount]->m_sensorValueFloat));
+        entry->createProperty("valueDS")
                 ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
@@ -2026,6 +2029,20 @@ namespace dss {
     }
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
+    m_sensorInputs[_sensorIndex]->m_sensorValueFloat =
+        SceneHelper::sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+    m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
+    m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
+  }
+
+  const void Device::setSensorValue(int _sensorIndex, double _sensorValue) const {
+    if (_sensorIndex >= getSensorCount()) {
+      throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
+    }
+    DateTime now;
+    m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
+    m_sensorInputs[_sensorIndex]->m_sensorValue =
+            SceneHelper::sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
