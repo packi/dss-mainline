@@ -1245,10 +1245,6 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
 
       unsigned int protTimer;
@@ -1284,14 +1280,10 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
+
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("valveProtectionTimer",
-                             conf.getValveProtectionTimer());
+      resultObj->addProperty("valveProtectionTimer", conf.getValveProtectionTimer());
       resultObj->addProperty("emergencyValue", conf.getEmergencySetPoint());
       resultObj->addProperty("emergencyTimer", conf.getEmergencyTimer());
       return success(resultObj);
@@ -1303,10 +1295,6 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
 
       unsigned pwmPeriod;
@@ -1357,11 +1345,8 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
+
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("pwmPeriod", conf.getPwmPeriod());
       resultObj->addProperty("pwmMinX", conf.getPwmMinX());
