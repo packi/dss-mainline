@@ -1341,10 +1341,6 @@ namespace dss {
         }
         conf.setPwmMaxY(value);
       };
-      unsigned int config;
-      if (_request.getParameter("pwmConfig", config)) {
-        conf.setPwmMaxY(value);
-      };
       int offset;
       if (_request.getParameter("pwmOffset", offset)) {
         if (offset < -100 || offset > 100) {
@@ -1352,7 +1348,6 @@ namespace dss {
         }
         conf.setPwmOffset(offset);
       };
-
       return success();
 
     } else if (_request.getMethod() == "getValvePwmMode") {
@@ -1373,8 +1368,108 @@ namespace dss {
       resultObj->addProperty("pwmMaxX", conf.getPwmMaxX());
       resultObj->addProperty("pwmMinY", conf.getPwmMinY());
       resultObj->addProperty("pwmMaxY", conf.getPwmMaxY());
-      resultObj->addProperty("pwmConfig", conf.getPwmConfig());
       resultObj->addProperty("pwmOffset", conf.getPwmOffset());
+      return success(resultObj);
+
+    } else if (_request.getMethod() == "getValvePwmState") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, 4);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("pwmValue", value & 0xff);
+      resultObj->addProperty("pwmPriorityMode", (value >> 8) & 0xff);
+      return success(resultObj);
+
+    } else if (_request.getMethod() == "setValveControlMode") {
+      int value;
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      DeviceValveControlSpec_t config;
+      device->getDeviceValveControl(config);
+
+      if (_request.hasParameter("ctrlClipMinZero")) {
+        if ((value = strToIntDef(_request.getParameter("ctrlClipMinZero"), -1)) >= 0) {
+          switch (value) {
+            case 0: config.ctrlClipMinZero = false; break;
+            case 1: config.ctrlClipMinZero = true; break;
+            default: break;
+          }
+        } else if (_request.getParameter("ctrlClipMinZero") == "true") {
+          config.ctrlClipMinZero = true;
+        }
+      } else if (_request.getParameter("ctrlClipMinZero") == "false") {
+        config.ctrlClipMinZero = false;
+      }
+
+      if (_request.hasParameter("ctrlClipMinLower")) {
+        if ((value = strToIntDef(_request.getParameter("ctrlClipMinLower"), -1)) >= 0) {
+          switch (value) {
+            case 0: config.ctrlClipMinLower = false; break;
+            case 1: config.ctrlClipMinLower = true; break;
+            default: break;
+          }
+        } else if (_request.getParameter("ctrlClipMinLower") == "true") {
+          config.ctrlClipMinLower = true;
+        }
+      } else if (_request.getParameter("ctrlClipMinLower") == "false") {
+        config.ctrlClipMinLower = false;
+      }
+
+      if (_request.hasParameter("ctrlClipMaxHigher")) {
+        if ((value = strToIntDef(_request.getParameter("ctrlClipMaxHigher"), -1)) >= 0) {
+          switch (value) {
+            case 0: config.ctrlClipMaxHigher = false; break;
+            case 1: config.ctrlClipMaxHigher = true; break;
+            default: break;
+          }
+        } else if (_request.getParameter("ctrlClipMaxHigher") == "true") {
+          config.ctrlClipMaxHigher = true;
+        }
+      } else if (_request.getParameter("ctrlClipMaxHigher") == "false") {
+        config.ctrlClipMaxHigher = false;
+      }
+
+      if (_request.hasParameter("ctrlNONC")) {
+        if ((value = strToIntDef(_request.getParameter("ctrlNONC"), -1)) >= 0) {
+          switch (value) {
+            case 0: config.ctrlNONC = false; break;
+            case 1: config.ctrlNONC = true; break;
+            default: break;
+          }
+        } else if (_request.getParameter("ctrlNONC") == "true") {
+          config.ctrlNONC = true;
+        }
+      } else if (_request.getParameter("ctrlNONC") == "false") {
+        config.ctrlNONC = false;
+      }
+
+      device->setDeviceValveControl(config);
+      return success();
+
+    } else if (_request.getMethod() == "getValveControlMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      DeviceValveControlSpec_t config;
+      device->getDeviceValveControl(config);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("ctrlClipMinZero", config.ctrlClipMinZero);
+      resultObj->addProperty("ctrlClipMinLower", config.ctrlClipMinLower);
+      resultObj->addProperty("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
+      resultObj->addProperty("ctrlNONC", config.ctrlNONC);
       return success(resultObj);
 
     } else {

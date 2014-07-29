@@ -740,6 +740,71 @@ namespace dss {
     down = transitionVal2Time(vdown);
   } // getDeviceTransitionTime
 
+  /** Configure climate actuator */
+  void Device::setDeviceValveTimer(DeviceValveTimerSpec_t _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue, _config.emergencyControlValue);
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_EmergencyTimer, _config.emergencyTimer);
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_ProtectionTimer, _config.protectionTimer);
+  } // setDeviceValveTimer
+
+  void Device::getDeviceValveTimer(DeviceValveTimerSpec_t& _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    _config.emergencyControlValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
+    _config.emergencyTimer = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_EmergencyTimer);
+    _config.protectionTimer = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_ProtectionTimer);
+  } // getDeviceValveTimer
+
+  void Device::setDeviceValvePwm(DeviceValvePwmSpec_t _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod, _config.pwmPeriod);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue, _config.pwmMinValue);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue, _config.pwmMaxValue);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX, _config.pwmMinX);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY, _config.pwmMaxY);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset, _config.pwmOffset);
+  } // setDeviceValvePwm
+
+  void Device::getDeviceValvePwm(DeviceValvePwmSpec_t& _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    _config.pwmPeriod = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
+    _config.pwmMinValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
+    _config.pwmMaxValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue);
+    _config.pwmMinX = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX);
+    _config.pwmMaxY = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY);
+    _config.pwmOffset = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+  } // getDeviceValvePwm
+
+  void Device::setDeviceValveControl(DeviceValveControlSpec_t _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    uint8_t value = _config.ctrlClipMinZero ? 1 : 0;
+    value |= _config.ctrlClipMinLower? 2 : 0;
+    value |= _config.ctrlClipMaxHigher ? 4 : 0;
+    value |= _config.ctrlNONC ? 8 : 0;
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig, value);
+  }
+
+  void Device::getDeviceValveControl(DeviceValveControlSpec_t& _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
+    _config.ctrlClipMinZero = ((value & 0x01) == 0x01);
+    _config.ctrlClipMinLower = ((value & 0x02) == 0x02);
+    _config.ctrlClipMaxHigher = ((value & 0x04) == 0x04);
+    _config.ctrlNONC = ((value & 0x08) == 0x08);
+  } // getDeviceValveControl
+
   uint8_t Device::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       return m_pApartment->getDeviceBusInterface()->getDeviceConfig(*this,

@@ -265,6 +265,17 @@ namespace dss {
   const uint8_t CfgFunction_LTTimeoutOff = 0x22;
   const uint8_t CfgFunction_LTTimeoutOn = 0x24;
 
+  const uint8_t CfgFunction_Valve_EmergencyValue = 0x45;
+  const uint8_t CfgFunction_Valve_EmergencyTimer = 0x46;
+  const uint8_t CfgFunction_Valve_PwmPeriod = 0x48;
+  const uint8_t CfgFunction_Valve_PwmMinValue = 0x4a;
+  const uint8_t CfgFunction_Valve_PwmMaxValue = 0x4b;
+  const uint8_t CfgFunction_Valve_PwmMinX = 0x4c;
+  const uint8_t CfgFunction_Valve_PwmMaxY = 0x4d;
+  const uint8_t CfgFunction_Valve_PwmConfig = 0x4e;
+  const uint8_t CfgFunction_Valve_PwmOffset = 0x4f;
+  const uint8_t CfgFunction_Valve_ProtectionTimer = 0x52;
+
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
