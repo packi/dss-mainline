@@ -1043,23 +1043,23 @@ namespace dss {
           if ((buttonNumber < 0) || (buttonNumber > 0xF)) {
             return failure("Invalid or missing parameter 'buttonNumber'");
           }
-	  event.buttonNumber = buttonNumber;
+          event.buttonNumber = buttonNumber;
           int clickType = strToIntDef(_request.getParameter("clickType"), -1);
           if ((clickType < 0) || (clickType > 0xF)) {
             return failure("Invalid or missing parameter 'clickType'");
           }
-	  event.clickType = clickType;
+          event.clickType = clickType;
         } else {
           int sceneDeviceMode = strToIntDef(_request.getParameter("sceneDeviceMode"), -1);
           if ((sceneDeviceMode < 0) || (sceneDeviceMode > 0x3)) {
             return failure("Invalid or missing parameter 'sceneDeviceMode'");
           }
-	  event.sceneDeviceMode = sceneDeviceMode;
+          event.sceneDeviceMode = sceneDeviceMode;
           int sceneID = strToIntDef(_request.getParameter("sceneID"), -1);
           if ((sceneID < 0) || (sceneID > 0x7F)) {
             return failure("Invalid or missing parameter 'sceneID'");
           }
-	  event.sceneID = sceneID;
+          event.sceneID = sceneID;
         }
       } else {
         event.buttonNumber = 0;
