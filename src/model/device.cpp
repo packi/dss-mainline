@@ -408,31 +408,30 @@ namespace dss {
     }
   } // fillSensorTable
 
-  void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex,
-                               uint8_t _value) {
-    if(m_pPropertyNode) {
+  void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value) {
+    if (m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    if(m_pApartment->getDeviceBusInterface() != NULL) {
-      m_pApartment->getDeviceBusInterface()->setDeviceConfig(*this,
-                                                             _configClass,
-                                                             _configIndex,
-                                                             _value);
-
-      if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
-                                                    m_DSMeterDSID);
-        pEvent->addParameter(m_ShortAddress);
-        pEvent->addParameter(_configClass);
-        pEvent->addParameter(_configIndex);
-        pEvent->addParameter(_value);
-        m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
-      }
+    if (m_pApartment->getDeviceBusInterface() == NULL) {
+      throw std::runtime_error("DeviceBusInterface missing");
     }
+    if (m_pApartment->getModelMaintenance() == NULL) {
+      throw std::runtime_error("ModelMaintenance missing");
+    }
+
+    m_pApartment->getDeviceBusInterface()->setDeviceConfig(
+        *this, _configClass, _configIndex, _value);
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
+                                                m_DSMeterDSID);
+    pEvent->addParameter(m_ShortAddress);
+    pEvent->addParameter(_configClass);
+    pEvent->addParameter(_configIndex);
+    pEvent->addParameter(_value);
+    m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
   } // setDeviceConfig
 
-  void Device::setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex,
-                                 uint16_t _value)
+  void Device::setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex, uint16_t _value)
   {
     /*
      * webroot/js/dss/dss-setup-interface/dSS/util/Util.js: dSS.util.decode16
@@ -442,10 +441,10 @@ namespace dss {
     if (m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    if(m_pApartment->getDeviceBusInterface() == NULL) {
+    if (m_pApartment->getDeviceBusInterface() == NULL) {
       throw std::runtime_error("DeviceBusInterface missing");
     }
-    if (m_pApartment->getModelMaintenance()) {
+    if (m_pApartment->getModelMaintenance() == NULL) {
       throw std::runtime_error("ModelMaintenance missing");
     }
     DeviceBusInterface *shorty = m_pApartment->getDeviceBusInterface();
