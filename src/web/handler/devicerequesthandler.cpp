@@ -827,15 +827,15 @@ namespace dss {
       }
       DeviceLedSpec_t config;
       pDevice->getDeviceLedMode(id, config);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("colorSelect"))
         config.colorSelect = strToIntDef(_request.getParameter("colorSelect"), config.colorSelect);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("modeSelect"))
         config.modeSelect = strToIntDef(_request.getParameter("modeSelect"), config.modeSelect);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("dimMode"))
         config.dimMode = strToIntDef(_request.getParameter("dimMode"), config.dimMode);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("rgbMode"))
         config.rgbMode = strToIntDef(_request.getParameter("rgbMode"), config.rgbMode);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("groupColorMode"))
         config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), config.groupColorMode);
       pDevice->setDeviceLedMode(id, config);
       return success();
