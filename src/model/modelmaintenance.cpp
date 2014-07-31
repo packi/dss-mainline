@@ -581,6 +581,19 @@ namespace dss {
           onSensorValue(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
         }
         break;
+      case ModelEvent::etZoneSensorValue:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() < 5) {
+          log("Expected at least 5 parameter for ModelEvent::etZoneSensorValue");
+        } else {
+          onZoneSensorValue(pEventWithDSID->getDSID(), event.getSingleStringParameter(),
+              event.getParameter(0),
+              event.getParameter(1),
+              event.getParameter(2),
+              event.getParameter(3),
+              event.getParameter(4));
+        }
+        break;
       case ModelEvent::etDeviceEANReady:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() != 9) {
@@ -1655,7 +1668,7 @@ namespace dss {
         pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
         pEvent->setProperty("sensorValue", intToString(_sensorValue));
         try {
-          pDev->setSensorValue(_sensorIndex, _sensorValue);
+          pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
 
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
           uint8_t sensorType = pdSensor->m_sensorType;
@@ -1670,6 +1683,32 @@ namespace dss {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   } // onSensorValue
+
+  void ModelMaintenance::onZoneSensorValue(dsuid_t _meterID,
+                                           const std::string& _sourceDevice,
+                                           const int& _zoneID,
+                                           const int& _groupID,
+                                           const int& _sensorType,
+                                           const int& _sensorValue,
+                                           const int& _precision) {
+    try {
+      boost::shared_ptr<Event> pEvent;
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      boost::shared_ptr<Group> group = zone->getGroup(_groupID);
+
+      double fValue = SceneHelper::sensorToFloat10(_sensorType, _sensorValue);
+      group->sensorPush(_sourceDevice, _sensorType, fValue);
+
+      pEvent.reset(new Event("zoneSensorValue", group));
+      pEvent->setProperty("sensorType", intToString(_sensorType));
+      pEvent->setProperty("sensorValue", intToString(_sensorValue));
+      pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
+      pEvent->setProperty("originDSID", _sourceDevice);
+      raiseEvent(pEvent);
+    } catch(ItemNotFoundException& e) {
+      log("onZoneSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onZoneSensorValue
 
   void ModelMaintenance::onEANReady(dsuid_t _dsMeterID,
                                         const devid_t _deviceID,

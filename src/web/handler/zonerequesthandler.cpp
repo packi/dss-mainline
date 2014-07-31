@@ -218,33 +218,6 @@ namespace dss {
             }
           }
           return success(resultObj);
-        } else if(_request.getMethod() == "pushSensorValue") {
-          if(pGroup == NULL) {
-            return failure("Need group to work");
-          }
-          dsuid_t sourceID;
-          std::string deviceIDStr = _request.getParameter("sourceDSID");
-          std::string dsuidStr = _request.getParameter("sourceDSUID");
-
-          if (deviceIDStr.empty() && dsuidStr.empty()) {
-            return failure("Missing parameter 'sourceDSUID'");
-          }
-         
-          if (dsuidStr.empty()) {
-            dsid_t dsid = str2dsid(deviceIDStr);
-            sourceID = dsuid_from_dsid(&dsid);
-          } else {
-            sourceID = str2dsuid(dsuidStr);
-          }
- 
-          int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
-          std::string sensorValueString = _request.getParameter("sensorValue");
-          if(sensorType == -1 || sensorValueString.length() == 0) {
-            return failure("Need valid parameter 'sensorType' and 'sensorValue'");
-          }
-          double sensorValue = ::strtod(sensorValueString.c_str(), 0);
-          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-          manipulator.sensorPush(pGroup, sourceID, sensorType, sensorValue);
         } else {
           throw std::runtime_error("Unhandled function");
         }

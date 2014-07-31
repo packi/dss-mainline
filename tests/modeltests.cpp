@@ -995,14 +995,13 @@ public:
   }
   virtual void setValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token) {
   }
-
   virtual void increaseOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
   }
-
   virtual void decreaseOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
   }
-
   virtual void stopOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
+  }
+  virtual void pushSensor(AddressableModelItem*, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
   }
 
   std::string getLog() {

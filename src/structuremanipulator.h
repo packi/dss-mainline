@@ -69,9 +69,6 @@ namespace dss {
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
     void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
 
-    void sensorPush(boost::shared_ptr<Group> _zone, dsuid_t _sourceID, int _sensorType, int _sensorValue);
-    void sensorPush(boost::shared_ptr<Group> _zone, dsuid_t _sourceID, int _sensorType, double _sensorValue);
-
     /**
      * @ret device moved
      */

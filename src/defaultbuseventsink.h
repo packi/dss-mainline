@@ -94,6 +94,16 @@ namespace dss {
                                  const dsuid_t& _dsMeterID,
                                  const unsigned int _powerW,
                                  const unsigned int _energyWs);
+    virtual void onZoneSensorValue(BusInterface* _source,
+                                   const dsuid_t _dsMeterID,
+                                   const std::string& _sourceDevice,
+                                   const int& _zoneID,
+                                   const int& _groupID,
+                                   const int& _sensorType,
+                                   const int& _sensorValue,
+                                   const int& _precision,
+                                   const SceneAccessCategory _category,
+                                   const callOrigin_t _origin);
   private:
     boost::shared_ptr<Apartment> m_pApartment;
     boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;

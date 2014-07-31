@@ -126,6 +126,7 @@
   <subscription event-name="deviceBinaryInputEvent" handler-name="system_event_log"/>
   <subscription event-name="deviceSensorEvent" handler-name="system_event_log"/>
   <subscription event-name="deviceSensorValue" handler-name="system_event_log"/>
+  <subscription event-name="zoneSensorValue" handler-name="system_event_log"/>
   <subscription event-name="stateChange" handler-name="system_event_log"/>
 
   <!-- System Hail Handler -->

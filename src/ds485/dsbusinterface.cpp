@@ -378,6 +378,13 @@ namespace dss {
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_VALUE,
                         &callback_struct);
 
+      ZoneGroupSensorPush_request_callback_t sensorValueZoneCallback = DSBusInterface::handleZoneSensorValueCallback;
+      callback_struct.function = (void*)sensorValueZoneCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        ZONE_GROUP_SENSOR_PUSH, 0,
+                        &callback_struct);
+
       dSMProperties_set_flags_request_callback_t dSMSetFlagsCallback = DSBusInterface::handleDsmSetFlagsCallback;
       callback_struct.function = (void*)dSMSetFlagsCallback;
       callback_struct.arg = this;
@@ -856,6 +863,42 @@ namespace dss {
       static_cast<DSBusInterface*>(_userData)->
         handleSensorValueEvent(_errorCode, _sourceID, _destinationID,
                                _deviceID, _sensorIndex, _sensorValue);
+    }
+  }
+
+  void DSBusInterface::handleZoneSensorValueEvent(uint8_t _errorCode,
+                                                dsuid_t _sourceID,
+                                                dsuid_t _destinationID,
+                                                uint16_t _zoneID,
+                                                uint8_t _groupID,
+                                                dsuid_t _dSUID,
+                                                uint8_t _SensorType,
+                                                uint16_t _Value,
+                                                uint8_t _Precision) {
+    loginFromCallback();
+    if (m_pBusEventSink != NULL) {
+      m_pBusEventSink->onZoneSensorValue(this,
+          _sourceID, dsuid2str(_dSUID),
+          _zoneID, _groupID, _SensorType, _Value, _Precision,
+          SAC_MANUAL, coDsmApi);
+    }
+  } // handleZoneSensorValueEvent
+
+  void DSBusInterface::handleZoneSensorValueCallback(uint8_t _errorCode,
+      void* _userData,
+      dsuid_t _sourceID,
+      dsuid_t _destinationID,
+      uint16_t _ZoneId,
+      uint8_t _GroupId,
+      dsuid_t _dSUID,
+      uint8_t _SensorType,
+      uint16_t _Value,
+      uint8_t _Precision) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleZoneSensorValueEvent(_errorCode, _sourceID, _destinationID,
+              _ZoneId, _GroupId, _dSUID,
+              _SensorType, _Value, _Precision);
     }
   }
 

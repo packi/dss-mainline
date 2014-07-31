@@ -2488,6 +2488,7 @@ namespace dss {
       dsuid_t sourceDSID;
       uint8_t sensorType;
       uint16_t sensorValue;
+      SceneAccessCategory category = SAC_UNKNOWN;
       if (pZone != NULL && argc >= 4) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
@@ -2500,6 +2501,9 @@ namespace dss {
           }
           sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
           sensorValue = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[3]);
+          if (argc >= 5) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[4]));
+          }
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
@@ -2511,12 +2515,10 @@ namespace dss {
           JS_ReportWarning(cx, "sensor value too large: %d", sensorValue);
         }
 
-        StructureManipulator manipulator(
-            *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
-            *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
-            ext->getApartment());
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        manipulator.sensorPush(pGroup, sourceDSID, sensorType, sensorValue);
+        float sensorValueFloat = SceneHelper::sensorToFloat10(sensorType, sensorValue);
+        pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
+
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       }
@@ -2547,6 +2549,7 @@ namespace dss {
       dsuid_t sourceDSID;
       uint8_t sensorType;
       double sensorValue;
+      SceneAccessCategory category = SAC_UNKNOWN;
       if (pZone != NULL && argc >= 4) {
         try {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
@@ -2573,6 +2576,9 @@ namespace dss {
             std::string svalue = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
             sensorValue = ::strtod(svalue.c_str(), 0);
           }
+          if (argc >= 5) {
+            category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[4]));
+          }
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
@@ -2581,12 +2587,8 @@ namespace dss {
           return JS_FALSE;
         }
 
-        StructureManipulator manipulator(
-            *(ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()),
-            *(ext->getApartment().getBusInterface()->getStructureQueryBusInterface()),
-            ext->getApartment());
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        manipulator.sensorPush(pGroup, sourceDSID, sensorType, sensorValue);
+        pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValue, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;

@@ -195,15 +195,6 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
 
-  void DSStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, uint8_t _groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    int ret = ZoneGroupSensorPush(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sourceID, _sensorType, _sensorValue, 1);
-    DSBusInterface::checkBroadcastResultCode(ret);
-  } // sensorPush
-
   void DSStructureModifyingBusInterface::setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
