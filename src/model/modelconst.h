@@ -206,6 +206,15 @@ namespace dss {
   const uint8_t ClickTypeLS = 0x0e;     // Local-Stop Click
   const uint8_t ClickTypeRES = 0x0f;
 
+  // Color ID"s
+  const int ColorIDYellow = 1;
+  const int ColorIDGray = 2;
+  const int ColorIDBlue = 3;
+  const int ColorIDCyan = 4;
+  const int ColorIDViolet = 5;
+  const int ColorIDRed = 6;
+  const int ColorIDGreen = 7;
+
   // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
@@ -219,7 +228,7 @@ namespace dss {
   const int GroupIDCooling = 9;
   const int GroupIDVentilation = 10;
   const int GroupIDWindow = 11;
-  const int GroupIDReserved2 = 12;
+  const int GroupIDCurtain = 12;
   const int GroupIDReserved3 = 13;
   const int GroupIDReserved4 = 14;
   const int GroupIDReserved5 = 15;
@@ -276,12 +285,20 @@ namespace dss {
   const uint8_t CfgFunction_Valve_PwmOffset = 0x4f;
   const uint8_t CfgFunction_Valve_ProtectionTimer = 0x52;
 
+  const uint8_t CfgRuntime_Shade_Position = 0x02;
+  const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;
+  const uint8_t CfgRuntime_Shade_PositionCurrent = 0x06;
+  const uint8_t CfgRuntime_Valve_PwmValue = 0x04;
+  const uint8_t CfgRuntime_Valve_PwmPriorityMode = 0x05;
+
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
+  const uint16_t ProductID_KM_200 = 0x00C8;
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
-  const uint16_t ProductID_KL_210 = 0x14C8;
+  const uint16_t ProductID_KL_210 = 0x0CD2;
+  const uint16_t ProductID_KL_220 = 0x0CDC;
 
   const uint8_t MinimumOutputChannelID = 1;
   const uint8_t MaximumOutputChannelID = 10;

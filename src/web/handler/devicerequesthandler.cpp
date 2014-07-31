@@ -644,15 +644,67 @@ namespace dss {
       return success(resultObj);
 
     } else if(_request.getMethod() == "getOutputValue") {
-      int offset = strToIntDef(_request.getParameter("offset"), -1);
-      if((offset  < 0) || (offset > 255)) {
-        return failure("Invalid or missing parameter 'offset'");
+      int value;
+      if (_request.hasParameter("type")) {
+        std::string type = _request.getParameter("type");
+
+        // Supported output states for the BL-KM200
+        if ((pDevice->getProductID() == ProductID_KM_200) &&
+            (pDevice->getDeviceClass() == DEVICE_CLASS_BL)) {
+          if (type == "pwmPriorityMode") {
+            value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Valve_PwmPriorityMode);
+          } else if (type == "pwmValue") {
+            value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
+          } else {
+            return failure("Unsupported type parameter for this device");
+          }
+        }
+        // Supported output states for the GR-KL200 und 210
+        else if (((pDevice->getProductID() == ProductID_KL_200) ||
+            (pDevice->getProductID() == ProductID_KL_210)) &&
+            (pDevice->getDeviceClass() == DEVICE_CLASS_GR)) {
+          if (type == "position") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);
+          } if (type == "positionCurrent") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
+          } else {
+            return failure("Unsupported type parameter for this device");
+          }
+        }
+        // Supported output states for the GR-KL220
+        else if ((pDevice->getProductID() == ProductID_KL_220) &&
+            (pDevice->getDeviceClass() == DEVICE_CLASS_GR)) {
+          if (type == "position") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);
+          } else if (type == "angle") {
+            value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Shade_PositionAngle);
+          } if (type == "positionCurrent") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
+          } else {
+            return failure("Unsupported type parameter for this device");
+          }
+        }
+        else {
+          return failure("Unsupported device for a type parameter");
+        }
+
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("value", value);
+        return success(resultObj);
+
+      } else {
+        int offset = strToIntDef(_request.getParameter("offset"), -1);
+        if ((offset  < 0) || (offset > 255)) {
+          return failure("Invalid or missing parameter 'type' or 'offset'");
+        }
+        int value = pDevice->getDeviceOutputValue(offset);
+
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("offset", offset);
+        resultObj->addProperty("value", value);
+        return success(resultObj);
       }
-      int value = pDevice->getDeviceOutputValue(offset);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("offset", offset);
-      resultObj->addProperty("value", value);
-      return success(resultObj);
+
     } else if(_request.getMethod() == "setOutputValue") {
       int offset = strToIntDef(_request.getParameter("offset"), -1);
       if((offset  < 0) || (offset > 255)) {
