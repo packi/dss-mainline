@@ -23,13 +23,14 @@
 #include "busscanner.h"
 
 #include <vector>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/businterface.h"
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
 #include "src/event.h"
 #include "src/dss.h"
-#include "src/dsidhelper.h"
+#include "src/ds485types.h"
 #include "security/security.h"
 
 #include "modulator.h"
@@ -57,7 +58,7 @@ namespace dss {
     _dsMeter->setIsValid(false);
     DSMeterHash_t hash;
 
-    log("scanDSMeter: Start " + _dsMeter->getDSID().toString() , lsInfo);
+    log("scanDSMeter: Start " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
 
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
@@ -81,7 +82,7 @@ namespace dss {
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }
-        if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+        if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
           log("scanDSMeter: dSMeter is incompatible", lsWarning);
           _dsMeter->setDatamodelHash(hash.Hash);
           _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
@@ -134,7 +135,7 @@ namespace dss {
     std::vector<DeviceSpec_t> devices;
     try {
       if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
-        log("scanZone: dSMeter " + _dsMeter->getDSID().toString() + " is incompatible", lsWarning);
+        log("scanZone: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
       } else {
         devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID());
         foreach(DeviceSpec_t& spec, devices) {
@@ -150,7 +151,7 @@ namespace dss {
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
     if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
-      log("scanDeviceOnBus: dSMeter " + _dsMeter->getDSID().toString() + " is incompatible", lsWarning);
+      log("scanDeviceOnBus: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
       return false;
     }
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
@@ -159,7 +160,7 @@ namespace dss {
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
     if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
-      log("scanDeviceOnBus: dSMeter " + _dsMeter->getDSID().toString() + " is incompatible", lsWarning);
+      log("scanDeviceOnBus: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
       return false;
     }
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
@@ -168,8 +169,8 @@ namespace dss {
   } // scanDeviceOnBus
 
   bool BusScanner::initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {
-    log("InitializeDevice: DSID:        " + _spec.DSID.toString());
-    log("InitializeDevice: DSM-DSID:    " + _dsMeter->getDSID().toString());
+    log("InitializeDevice: DSID:        " + dsuid2str(_spec.DSID));
+    log("InitializeDevice: DSM-DSID:    " + dsuid2str(_dsMeter->getDSID()));
     log("InitializeDevice: Address:     " + intToString(_spec.ShortAddress) +
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
@@ -244,7 +245,10 @@ namespace dss {
       }
     }
     if(inputCount > 1) {
-      inputIndex = (uint8_t)(_spec.DSID.lower & 0xff) % inputCount;
+        uint32_t serial;
+        if (dsuid_get_serial_number(&_spec.DSID, &serial) == 0) {
+          inputIndex = (uint8_t)(serial & 0xff) % inputCount;
+        }
     }
     dev->setButtonInputMode(_spec.LTMode);
     dev->setButtonInputCount(inputCount);
@@ -309,7 +313,8 @@ namespace dss {
   void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
       if (_pDevice->getRevisionID() >= 0x0350) {
-        log("scheduleOEMReadout: schedule EAN readout for: " + _pDevice->getDSID().toString());
+        log("scheduleOEMReadout: schedule EAN readout for: " +
+            dsuid2str(_pDevice->getDSID()));
         boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
         std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
         task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader(connURI));
@@ -354,9 +359,7 @@ namespace dss {
       boost::shared_ptr<Group> pGroup;
       boost::shared_ptr<Group> groupOnZone;
 
-      if ((group.GroupID <= GroupIDStandardMax) ||
-          (group.GroupID >= GroupIDControlGroupStart)) {
-
+      if (isDefaultGroup(group.GroupID)) {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
@@ -384,8 +387,7 @@ namespace dss {
         pGroup->setLastCalledScene(SceneOff);
         pGroup->setIsValid(true);
 
-      } else if (group.GroupID <= GroupIDAppUserMax) {
-
+      } else if (isAppUserGroup(group.GroupID)) {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
@@ -528,7 +530,7 @@ namespace dss {
     }
   }
 
-  uint16_t BinaryInputScanner::getDeviceSensorValue(const dsid_t& _dsm,
+  uint16_t BinaryInputScanner::getDeviceSensorValue(const dsuid_t& _dsm,
                             dev_t _device,
                             uint8_t _sensorIndex) const
   {
@@ -546,7 +548,7 @@ namespace dss {
     return retVal;
   }
 
-  uint8_t BinaryInputScanner::getDeviceConfig(const dsid_t& _dsm,
+  uint8_t BinaryInputScanner::getDeviceConfig(const dsuid_t& _dsm,
       dev_t _device,
       uint8_t _configClass,
       uint8_t _configIndex) const
@@ -569,8 +571,8 @@ namespace dss {
   void BinaryInputScanner::run() {
 
     Logger::getInstance()->log("BinaryInputScanner run:"
-        " dsm = " + (m_dsm ? m_dsm->getDSID().toString() : "NULL") +
-        ", dev = " + (m_device ? m_device->getDSID().toString() : "NULL"), lsDebug);
+        " dsm = " + (m_dsm ? dsuid2str(m_dsm->getDSID()) : "NULL") +
+        ", dev = " + (m_device ? dsuid2str(m_device->getDSID()) : "NULL"), lsDebug);
 
     if (DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser("BinaryInputScanner needs system-rights");
@@ -607,15 +609,14 @@ namespace dss {
 
     // send a request to each binary input device to resend its current status
     foreach(boost::shared_ptr<Device> dev, devices) {
-      dsid_t dsmId;
-      dsid_helper::toDsmapiDsid(dev->getDSMeterDSID(), dsmId);
       uint16_t value = 0;
 
       try {
 
-        value = getDeviceSensorValue(dsmId, dev->getShortAddress(), 0x20);
+        value = getDeviceSensorValue(dev->getDSMeterDSID(),
+                                     dev->getShortAddress(), 0x20);
         Logger::getInstance()->log("BinaryInputScanner: device " +
-                  dev->getDSID().toString() + ", state = " + intToString(value), lsDebug);
+                  dsuid2str(dev->getDSID()) + ", state = " + intToString(value), lsDebug);
 
         for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
@@ -631,7 +632,7 @@ namespace dss {
         sleep(5);
 
       } catch (BusApiError& ex) {
-        Logger::getInstance()->log("BinaryInputScanner: device " + dev->getDSID().toString()
+        Logger::getInstance()->log("BinaryInputScanner: device " + dsuid2str(dev->getDSID())
               + " did not respond to input state query", lsWarning);
         for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);

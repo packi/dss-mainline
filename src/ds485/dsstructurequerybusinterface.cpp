@@ -25,7 +25,6 @@
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 
 #include "src/logger.h"
-#include "src/dsidhelper.h"
 
 #include "src/model/modelconst.h"
 #include "src/model/device.h"
@@ -45,7 +44,7 @@ namespace dss {
       return result;
     }
 
-    dsid_t device_list[63]; // TODO: constant for 63?
+    dsuid_t device_list[63]; // TODO: constant for 63?
     int ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
     lock.unlock();
     if(ret < 0) {
@@ -58,25 +57,21 @@ namespace dss {
       if(!DsmApiIsdSM(device_list[i])) {
         continue;
       }
-      dss_dsid_t dsid;
-      dsid_helper::toDssDsid(device_list[i], dsid);
-      result.push_back(getDSMeterSpec(dsid));
+      result.push_back(getDSMeterSpec(device_list[i]));
     }
     return result;
   } // getDSMeters
 
-  DSMeterSpec_t DSStructureQueryBusInterface::getDSMeterSpec(const dss_dsid_t& _dsMeterID) {
+  DSMeterSpec_t DSStructureQueryBusInterface::getDSMeterSpec(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     DSMeterSpec_t result;
     result.DSID = _dsMeterID;
-    dsid_t dsid;
     uint8_t nameBuf[NAME_LEN];
     uint8_t flags;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = dSMInfo(m_DSMApiHandle, dsid, &result.HardwareVersion,
+    int ret = dSMInfo(m_DSMApiHandle, _dsMeterID, &result.HardwareVersion,
                       &result.SoftwareRevisionARM, &result.SoftwareRevisionDSP,
                       &result.APIVersion, NULL, nameBuf);
     DSBusInterface::checkResultCode(ret);
@@ -85,12 +80,12 @@ namespace dss {
     memcpy(nameStr, nameBuf, NAME_LEN);
     result.Name = nameStr;
 
-    ret = dSMProperties_get_flags(m_DSMApiHandle, dsid, &flags);
+    ret = dSMProperties_get_flags(m_DSMApiHandle, _dsMeterID, &flags);
     DSBusInterface::checkResultCode(ret);
     result.flags = std::bitset<8>(flags);
 
     try {
-      ret = dSMProperties_get_apartment_state(m_DSMApiHandle, dsid,
+      ret = dSMProperties_get_apartment_state(m_DSMApiHandle, _dsMeterID,
                                               &result.ApartmentState);
       DSBusInterface::checkResultCode(ret);
     } catch (BusApiError& e) {
@@ -99,7 +94,7 @@ namespace dss {
     return result;
   } // getDSMeterSpec
 
-  int DSStructureQueryBusInterface::getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  int DSStructureQueryBusInterface::getGroupCount(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -108,9 +103,7 @@ namespace dss {
     uint8_t virtualZoneId, numberOfGroups;
     uint8_t name[NAME_LEN];
 
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = ZoneInfo_by_id(m_DSMApiHandle, dsid, _zoneID, &zoneId, &virtualZoneId, &numberOfGroups, name);
+    int ret = ZoneInfo_by_id(m_DSMApiHandle, _dsMeterID, _zoneID, &zoneId, &virtualZoneId, &numberOfGroups, name);
     DSBusInterface::checkResultCode(ret);
 
     // TODO: libdsm:
@@ -119,14 +112,12 @@ namespace dss {
     return numberOfGroups;
   } // getGroupCount
 
-  std::vector<GroupSpec_t> DSStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<GroupSpec_t> DSStructureQueryBusInterface::getGroups(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     std::vector<GroupSpec_t> gresult;
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
 
     int numGroups = getGroupCount(_dsMeterID, _zoneID);
     Logger::getInstance()->log(std::string("DSMeter has ") + intToString(numGroups) + " groups");
@@ -135,7 +126,7 @@ namespace dss {
       GroupSpec_t result;
       uint8_t nameBuf[NAME_LEN];
 
-      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup,
+      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iGroup,
           &result.GroupID, &result.StandardGroupID, &result.NumberOfDevices, nameBuf
 #if DSM_API_VERSION >= 0x106
           , NULL, NULL
@@ -152,7 +143,7 @@ namespace dss {
     return gresult;
   } // getGroups
 
-  std::vector<int> DSStructureQueryBusInterface::getZones(const dss_dsid_t& _dsMeterID) {
+  std::vector<int> DSStructureQueryBusInterface::getZones(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -160,16 +151,14 @@ namespace dss {
     std::vector<int> result;
 
     uint8_t numZones;
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
 
-    int ret = ZoneCount(m_DSMApiHandle, dsid, &numZones);
+    int ret = ZoneCount(m_DSMApiHandle, _dsMeterID, &numZones);
     DSBusInterface::checkResultCode(ret);
     Logger::getInstance()->log(std::string("DSMeter has ") + intToString(numZones) + " zones");
 
     uint16_t zoneId;
     for(int iZone = 0; iZone < numZones; iZone++) {
-      ret = ZoneInfo_by_index(m_DSMApiHandle, dsid, iZone,
+      ret = ZoneInfo_by_index(m_DSMApiHandle, _dsMeterID, iZone,
                               &zoneId, NULL, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
 
@@ -199,21 +188,19 @@ namespace dss {
     return result;
   } // extractGroupIDs
 
-  int DSStructureQueryBusInterface::getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  int DSStructureQueryBusInterface::getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     uint16_t numberOfDevices;
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = ZoneDeviceCount_all(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
+    int ret = ZoneDeviceCount_all(m_DSMApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
     DSBusInterface::checkResultCode(ret);
 
     return numberOfDevices;
   } // getDevicesCountInZone
 
-  void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+  void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     int ret = -1;
     try {
       union {
@@ -241,7 +228,7 @@ namespace dss {
         Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
       } else if (ret == ERROR_WRONG_PARAMETER) {
         Logger::getInstance()->log("DeviceButtonInfo: Device: " +
-                                   _spec.DSID.toString() +
+                                   dsuid2str(_spec.DSID) +
                                    " has no buttons", lsInfo);
       } else {
         Logger::getInstance()->log("Error reading DeviceButtonInfo: " +
@@ -250,7 +237,7 @@ namespace dss {
     }
   } // updateButtonGroupFromMeter
 
-  void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+  void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     if ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0)) {
       try {
         _spec.binaryInputs.clear();
@@ -287,7 +274,7 @@ namespace dss {
     }
   } // updateBinaryInputTableFromMeter
 
-  void DSStructureQueryBusInterface::updateSensorInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+  void DSStructureQueryBusInterface::updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     if (true || ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0))) {
       try {
         _spec.sensorInputs.clear();
@@ -324,7 +311,7 @@ namespace dss {
     }
   } // updateBinaryInputTableFromMeter
 
-  void DSStructureQueryBusInterface::updateOutputChannelTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
+  void DSStructureQueryBusInterface::updateOutputChannelTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     if (true || ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0))) {
       try {
         _spec.outputChannels.clear();
@@ -352,7 +339,7 @@ namespace dss {
     }
   } // updateOutputChannelTableFromMeter
 
-  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -361,52 +348,38 @@ namespace dss {
 
     int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
     Logger::getInstance()->log(std::string("Found ") + intToString(numDevices) + " devices in zone.");
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DeviceSpec_t spec;
       uint8_t locked;
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
-      int ret = DeviceInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iDevice,
+      int ret = DeviceInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iDevice,
           &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
           &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
-          &spec.LTMode, groups, name, &spec.SerialNumber);
+          &spec.LTMode, groups, name, &spec.DSID);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
-      dsid_t devdsid;
-      try {
-        ret = DsmApiGetDeviceDSID(spec.VendorID, spec.ProductID, spec.FunctionID >> 12, spec.Version, spec.SerialNumber, &devdsid);
-        DSBusInterface::checkResultCode(ret);
-      } catch(BusApiError& e) {
-        Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
-            intToString(spec.SerialNumber, true), lsWarning);
-      }
-      dsid_helper::toDssDsid(devdsid, spec.DSID);
-
-      updateButtonGroupFromMeter(dsid, spec);
-      updateBinaryInputTableFromMeter(dsid, spec);
-      updateSensorInputTableFromMeter(dsid, spec);
-      updateOutputChannelTableFromMeter(dsid, spec);
+      updateButtonGroupFromMeter(_dsMeterID, spec);
+      updateBinaryInputTableFromMeter(_dsMeterID, spec);
+      updateSensorInputTableFromMeter(_dsMeterID, spec);
+      updateOutputChannelTableFromMeter(_dsMeterID, spec);
 
       result.push_back(spec);
     }
     return result;
   } // getDevicesInZone
 
-  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     std::vector<DeviceSpec_t> result;
     uint16_t numberOfDevices;
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = ZoneDeviceCount_only_inactive(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
+    int ret = ZoneDeviceCount_only_inactive(m_DSMApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
     DSBusInterface::checkResultCode(ret);
 
     for(int iDevice = 0; iDevice < numberOfDevices; iDevice++) {
@@ -414,85 +387,61 @@ namespace dss {
       uint8_t locked;
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
-      int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, dsid, _zoneID, iDevice,
+      int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, _dsMeterID, _zoneID, iDevice,
           &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
           &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
-          &spec.LTMode, groups, name, &spec.SerialNumber);
+          &spec.LTMode, groups, name, &spec.DSID);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
-      dsid_t devdsid;
-      try {
-        ret = DsmApiGetDeviceDSID(spec.VendorID, spec.ProductID, spec.FunctionID >> 12, spec.Version, spec.SerialNumber, &devdsid);
-        DSBusInterface::checkResultCode(ret);
-      } catch(BusApiError& e) {
-        Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
-            intToString(spec.SerialNumber, true), lsWarning);
-      }
-      dsid_helper::toDssDsid(devdsid, spec.DSID);
 
-      updateButtonGroupFromMeter(dsid, spec);
-      updateBinaryInputTableFromMeter(dsid, spec);
-      updateSensorInputTableFromMeter(dsid, spec);
-      updateOutputChannelTableFromMeter(dsid, spec);
+      updateButtonGroupFromMeter(_dsMeterID, spec);
+      updateBinaryInputTableFromMeter(_dsMeterID, spec);
+      updateSensorInputTableFromMeter(_dsMeterID, spec);
+      updateOutputChannelTableFromMeter(_dsMeterID, spec);
 
       result.push_back(spec);
     }
     return result;
   } // getInactiveDevicesInZone
 
-  DeviceSpec_t DSStructureQueryBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
+  DeviceSpec_t DSStructureQueryBusInterface::deviceGetSpec(devid_t _id, dsuid_t _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     DeviceSpec_t result;
     uint8_t locked;
-    dsid_t dsmDSID;
     uint8_t groups[GROUPS_LEN];
     uint8_t name[NAME_LEN];
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
-    int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
+    int ret = DeviceInfo_by_device_id(m_DSMApiHandle, _dsMeterID, _id,
         &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
         &result.Version, &result.ZoneID, &result.ActiveState, &locked, &result.OutputMode,
-        &result.LTMode, groups, name, &result.SerialNumber);
+        &result.LTMode, groups, name, &result.DSID);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);
     result.Name = std::string(reinterpret_cast<char*>(name));
 
-    dsid_t devdsid;
-    try {
-      ret = DsmApiGetDeviceDSID(result.VendorID, result.ProductID, result.FunctionID >> 12, result.Version, result.SerialNumber, &devdsid);
-      DSBusInterface::checkResultCode(ret);
-    } catch(BusApiError& e) {
-      Logger::getInstance()->log("Error converting DSID for device with serialNumber " +
-          intToString(result.SerialNumber, true), lsWarning);
-    }
-    dsid_helper::toDssDsid(devdsid, result.DSID);
-
-    updateButtonGroupFromMeter(dsmDSID, result);
-    updateBinaryInputTableFromMeter(dsmDSID, result);
-    updateSensorInputTableFromMeter(dsmDSID, result);
-    updateOutputChannelTableFromMeter(dsmDSID, result);
+    updateButtonGroupFromMeter(_dsMeterID, result);
+    updateBinaryInputTableFromMeter(_dsMeterID, result);
+    updateSensorInputTableFromMeter(_dsMeterID, result);
+    updateOutputChannelTableFromMeter(_dsMeterID, result);
 
     return result;
   } // deviceGetSpec
 
-  std::vector<std::pair<int, int> > DSStructureQueryBusInterface::getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<std::pair<int, int> > DSStructureQueryBusInterface::getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
-
     uint8_t groups[7];
     uint8_t scenes[7];
     uint8_t hsize;
-    int ret = ZoneProperties_get_scene_history(m_DSMApiHandle, dsmDSID, (uint16_t) _zoneID, &hsize,
+    int ret = ZoneProperties_get_scene_history(m_DSMApiHandle, _dsMeterID, (uint16_t) _zoneID, &hsize,
         &groups[0], &scenes[0],
         &groups[1], &scenes[1],
         &groups[2], &scenes[2],
@@ -510,19 +459,16 @@ namespace dss {
     return result;
   } // getLastCalledScenes
 
-  std::bitset<7> DSStructureQueryBusInterface::getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  std::bitset<7> DSStructureQueryBusInterface::getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
-
     uint16_t room;
 
     // not adding the area stuf
-    int ret = ZoneProperties_get_room_states(m_DSMApiHandle, dsmDSID,
+    int ret = ZoneProperties_get_room_states(m_DSMApiHandle, _dsMeterID,
                 (uint16_t) _zoneID, &room, NULL, NULL, NULL, NULL);
     if (ret == ERROR_WRONG_MODIFIER) {
       return std::bitset<7>(0);
@@ -531,34 +477,30 @@ namespace dss {
     return std::bitset<7>(room);
   }
 
-  bool DSStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
+  bool DSStructureQueryBusInterface::getEnergyBorder(const dsuid_t& _dsMeterID, int& _lower, int& _upper) {
     // TODO: libdsm
     Logger::getInstance()->log("getEnergyBorder(): not implemented yet", lsInfo);
     return false;
   } // getEnergyBorder
 
-  std::string DSStructureQueryBusInterface::getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
+  std::string DSStructureQueryBusInterface::getSceneName(dsuid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     uint8_t name[20];
-    int ret = ZoneGroupSceneInfo(m_DSMApiHandle, dsmDSID, _group->getZoneID(), _group->getID(), _sceneNumber, name);
+    int ret = ZoneGroupSceneInfo(m_DSMApiHandle, _dsMeterID, _group->getZoneID(), _group->getID(), _sceneNumber, name);
     DSBusInterface::checkResultCode(ret);
     return std::string(reinterpret_cast<char*>(&name));
   }
 
-  DSMeterHash_t DSStructureQueryBusInterface::getDSMeterHash(const dss_dsid_t& _dsMeterID) {
+  DSMeterHash_t DSStructureQueryBusInterface::getDSMeterHash(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     DSMeterHash_t result;
-    dsid_t dsid;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = dSMConfig_get_hash(m_DSMApiHandle, dsid, &result.Hash, &result.ModificationCount, &result.EventCount);
+    int ret = dSMConfig_get_hash(m_DSMApiHandle, _dsMeterID, &result.Hash, &result.ModificationCount, &result.EventCount);
     DSBusInterface::checkResultCode(ret);
 
     return result;

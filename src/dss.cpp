@@ -457,6 +457,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterWebservicePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginSystemZoneSensorForward(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+
+    plugin = new EventInterpreterSensorMonitorPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
@@ -821,11 +826,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         if (macNode != NULL) {
             std::string mac = macNode->getAsString();
             mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
-            dsid_t d;
-            DsmApiGetEthernetDSID(mac.c_str(), &d);
-            dss_dsid_t D;
-            dsid_helper::toDssDsid(d, D);
-            dsid = D.toString();
+            dsuid_t d;
+            DsmApiGetEthernetDSUID(mac.c_str(), &d);
+            dsid = dsuid2str(d);
         }
     }
 

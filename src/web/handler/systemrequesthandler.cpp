@@ -23,7 +23,7 @@
 #include "systemrequesthandler.h"
 
 #include <locale>
-
+#include <digitalSTROM/dsuid/dsuid.h>
 #include <boost/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 
@@ -39,6 +39,7 @@
 #include "src/stringconverter.h"
 
 #include "src/propertysystem.h"
+#include "src/ds485types.h"
 #include "util.h"
 #include <sstream>
 
@@ -52,18 +53,30 @@ namespace dss {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("version", DSS::getInstance()->versionString());
       return success(resultObj);
-    } else if (_request.getMethod() == "getDSID") {
-      std::string dsid;
-      DSS::getInstance()->getSecurity().loginAsSystemUser("dSID call needs system rights");
+    } else if ((_request.getMethod() == "getDSID") ||
+               (_request.getMethod() == "getDSUID")) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser("dSUID call needs system rights");
+
+      std::string dsuidStr;
+      std::string dsidStr;
 
       PropertyNodePtr dsidNode =
           DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid);
       if (dsidNode != NULL) {
-        dsid = dsidNode->getAsString();
+        dsuidStr = dsidNode->getAsString();
+      } else {
+        return failure("could not find dSUID");
       }
 
+      dsuid_t dsuid = str2dsuid(dsuidStr);
+
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("dSID", dsid);
+      resultObj->addProperty("dSUID", dsuidStr);
+      try {
+        resultObj->addProperty("dSID", dsid2str(dsuid_to_dsid(dsuid)));
+      } catch (std::runtime_error &err) {
+        log(err.what());
+      }
       return success(resultObj);
     } else if (_request.getMethod() == "time") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -76,8 +89,7 @@ namespace dss {
         resultObj->addProperty("token", _session->getID());
 
         WebServerResponse response(success(resultObj));
-        response.setCookie("path", "/");
-        response.setCookie("token", _session->getID());
+        response.setPublishSessionToken(_session->getID());
         return response;
       } else {
         std::string userRaw = _request.getParameter("user");
@@ -111,8 +123,7 @@ namespace dss {
           resultObj->addProperty("token", token);
 
           WebServerResponse response(success(resultObj));
-          response.setCookie("path", "/");
-          response.setCookie("token", token);
+          response.setPublishSessionToken(token);
           return response;
         } else {
           log("Authentication failed for user '" + user + "'", lsError);
@@ -149,8 +160,7 @@ namespace dss {
         resultObj->addProperty("token", token);
 
         WebServerResponse response(success(resultObj));
-        response.setCookie("path", "/");
-        response.setCookie("token", token);
+        response.setPublishSessionToken(token);
         return response;
       } else {
         log("Application-Authentication failed", lsError);
@@ -162,8 +172,7 @@ namespace dss {
         m_pSessionManager->removeSession(_session->getID());
       }
       WebServerResponse response(success());
-      response.setCookie("path", "/");
-      response.setCookie("token", "");
+      response.setRevokeSessionToken();
       return response;
     } else if(_request.getMethod() == "loggedInUser") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

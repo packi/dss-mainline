@@ -25,6 +25,7 @@
 
 #include <boost/bind.hpp>
 #include <limits.h>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/model/apartment.h"
 #include "src/model/device.h"
@@ -34,7 +35,7 @@
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
-
+#include "src/ds485types.h"
 #include "src/web/json.h"
 #include "jsonhelper.h"
 #include "foreach.h"
@@ -103,18 +104,25 @@ namespace dss {
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByDSID(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result;
-    std::string deviceDSIDString = _request.getParameter("dsid");
-    if(!deviceDSIDString.empty()) {
-      try {
-        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
-        try {
-          result = m_Apartment.getDeviceByDSID(deviceDSID);
-        } catch(std::runtime_error& e) {
-          throw DeviceNotFoundException("Could not find device with dsid '" + deviceDSIDString + "'");
-        }
-      } catch(std::invalid_argument& e) {
-        throw DeviceNotFoundException("Could not parse dsid '" + deviceDSIDString + "'");
-      }
+    std::string dsidStr = _request.getParameter("dsid");
+    std::string dsuidStr = _request.getParameter("dsuid");
+    if (dsidStr.empty() && dsuidStr.empty()) {
+      throw std::runtime_error("missing parameter 'dsuid'");
+    }
+
+    dsuid_t dsuid;
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(dsidStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } else {
+      dsuid = str2dsuid(dsuidStr);
+    }
+
+    try {
+      result = m_Apartment.getDeviceByDSID(dsuid);
+    } catch(std::runtime_error& e) {
+      throw DeviceNotFoundException("Could not find device with dsuid '" +
+                                    dsuid2str(dsuid) + "'");
     }
     return result;
   } // getDeviceByDSID
@@ -139,6 +147,8 @@ namespace dss {
     try {
       pDevice = getDeviceFromRequest(_request);
     } catch(DeviceNotFoundException& ex) {
+      return failure(ex.what());
+    } catch(std::runtime_error& ex) {
       return failure(ex.what());
     }
     assert(pDevice != NULL);
@@ -194,8 +204,7 @@ namespace dss {
         }
 
         if (pDevice->is2WayMaster()) {
-          dss_dsid_t next = pDevice->getDSID();
-          next.lower++;
+          dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
           try {
             boost::shared_ptr<Device> pPartnerDevice;
             pPartnerDevice = m_Apartment.getDeviceByDSID(next);
@@ -209,7 +218,7 @@ namespace dss {
               }
             }
           } catch(std::runtime_error& e) {
-            return failure("Could not find partner device with dsid '" + next.toString() + "'");
+            return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
           }
         }
         return success();
@@ -313,64 +322,40 @@ namespace dss {
       resultObj->addProperty("value", value);
 
       return success(resultObj);
-    } else if(_request.getMethod() == "setJokerGroup") {
+    } else if (_request.getMethod() == "setJokerGroup") {
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
-      if((newGroupId  < 1) || (newGroupId > 8)) {
+      if (!isDefaultGroup(newGroupId)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
-      boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
-      int oldGroupId = pDevice->getJokerGroup();
-      pDevice->setDeviceJokerGroup(newGroupId);
-
-      /* check if device is also in a colored user group */
-      bool deviceGroupModified = false;
-      for (int g = 16; g <= 23; g++) {
-        if (pDevice->getGroupBitmask().test(g-1)) {
-          boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
-          if (pGroup->getStandardGroupID() != newGroupId) {
-            if (m_pStructureBusInterface != NULL) {
-              StructureManipulator manipulator(*m_pStructureBusInterface,
-                                               *m_pStructureQueryBusInterface,
-                                               m_Apartment);
-              manipulator.deviceRemoveFromGroup(pDevice, pGroup);
-            }
-            deviceGroupModified = true;
-          }
-        }
+      if (m_pStructureBusInterface == NULL) {
+          return failure("No handle to bus interface");
       }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_SW) {
+          return failure("Device is not joker device");
+      }
+
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
-      if ((deviceGroupModified) || (oldGroupId != newGroupId)) {
+      boost::shared_ptr<Group> group = m_Apartment.getZone(0)->getGroup(newGroupId);
+      StructureManipulator manipulator(*m_pStructureBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       m_Apartment);
+
+      if (manipulator.setJokerGroup(pDevice, group)) {
         modifiedDevices.push_back(pDevice);
       }
 
       if (pDevice->is2WayMaster()) {
-        dss_dsid_t next = pDevice->getDSID();
-        next.lower++;
+        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+        boost::shared_ptr<Device> pPartnerDevice;
         try {
-          boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-          pPartnerDevice->setDeviceJokerGroup(newGroupId);
-
-          deviceGroupModified = false;
-          for (int g = 16; g <= 23; g++) {
-            if (pPartnerDevice->getGroupBitmask().test(g-1)) {
-              boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
-              if (pGroup->getStandardGroupID() != newGroupId) {
-                if (m_pStructureBusInterface != NULL) {
-                  StructureManipulator manipulator(*m_pStructureBusInterface,
-                                                   *m_pStructureQueryBusInterface,
-                                                   m_Apartment);
-                  manipulator.deviceRemoveFromGroup(pPartnerDevice, pGroup);
-                }
-                deviceGroupModified = true;
-              }
-            }
-          }
-          if (deviceGroupModified) {
-            modifiedDevices.push_back(pPartnerDevice);
-          }
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          return failure("Could not find partner device with dsid '" +
+                         dsuid2str(next) + "'");
+        }
+
+        if (manipulator.setJokerGroup(pPartnerDevice, group)) {
+          modifiedDevices.push_back(pPartnerDevice);
         }
       }
 
@@ -387,6 +372,42 @@ namespace dss {
         resultObj->addProperty("action", "none");
       }
       return success(resultObj);
+    } else if(_request.getMethod() == "setHeatingGroup") {
+      int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
+      if (!isDefaultGroup(newGroupId)) {
+        return failure("Invalid or missing parameter 'groupID'");
+      }
+
+      if ((pDevice->getDeviceClass() == DEVICE_CLASS_BL) &&
+          (pDevice->getDeviceType() == DEVICE_TYPE_KM) &&
+          (pDevice->getProductID() / 100 == 2)) {
+          switch (newGroupId) {
+          case GroupIDHeating:
+          case GroupIDCooling:
+          case GroupIDVentilation:
+          case GroupIDControlTemperature:
+            break;
+          default:
+            return failure("Invalid group for this device");
+          }
+      } else {
+        return failure("Cannot change group for this device");
+      }
+
+      boost::shared_ptr<Group> newGroup = m_Apartment.getZone(pDevice->getZoneID())->getGroup(newGroupId);
+      StructureManipulator manipulator(*m_pStructureBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       m_Apartment);
+      manipulator.deviceAddToGroup(pDevice, newGroup);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      const DeviceReference d(pDevice, &m_Apartment);
+      modified->addElement("", toJSON(d));
+      resultObj->addProperty("action", "update");
+      resultObj->addElement("devices", modified);
+      return success(resultObj);
+
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
       if((value  < 0) || (value > 15)) {
@@ -400,14 +421,13 @@ namespace dss {
           return success();
         }
 
-        dss_dsid_t next = pDevice->getDSID();
-        next.lower++;
+        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonID(value);
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
       return success();
@@ -427,14 +447,13 @@ namespace dss {
         return failure("This device does not support button pairing");
       }
 
-      dss_dsid_t next = pDevice->getDSID();
-      next.lower++;
+      dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
       boost::shared_ptr<Device> pPartnerDevice;
 
       try {
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
       } catch(std::runtime_error& e) {
-        throw DeviceNotFoundException("Could not find partner device with dsid '" + next.toString() + "'");
+        throw DeviceNotFoundException("Could not find partner device with dsid '" + dsuid2str(next) + "'");
       }
 
       bool wasSlave = pPartnerDevice->is2WaySlave();
@@ -530,7 +549,13 @@ namespace dss {
       resultObj->addElement("device", toJSON(dr));
 
       boost::shared_ptr<JSONObject> master(new JSONObject());
-      master->addProperty("dsid", pDevice->getDSID().toString());
+      try {
+        master->addProperty("dsid", dsid2str(dsuid_to_dsid(pDevice->getDSID())));
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+      }
+
+      master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
       master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
       resultObj->addElement("update", master);
 
@@ -580,14 +605,13 @@ namespace dss {
           return success();
         }
 
-        dss_dsid_t next = pDevice->getDSID();
-        next.lower++;
+        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonActiveGroup(value);
         } catch(std::runtime_error& e) {
-          return failure("Could not find partner device with dsid '" + next.toString() + "'");
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
       return success();
@@ -941,7 +965,8 @@ namespace dss {
       if((id < 0) || (id > 255)) {
         return failure("Invalid or missing parameter 'sensorIndex'");
       }
-      int value = pDevice->getDeviceSensorType(id);
+      boost::shared_ptr<DeviceSensor_t> sensor = pDevice->getSensor(id);
+      int value = sensor->m_sensorType;
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("sensorIndex", id);
       resultObj->addProperty("sensorType", value);
@@ -1212,6 +1237,146 @@ namespace dss {
       }
 
       return success();
+
+    } else if (_request.getMethod() == "setValveTimerMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+
+      unsigned int protTimer;
+      if (_request.getParameter("valveProtectionTimer", protTimer)) {
+        if (protTimer > std::numeric_limits<uint16_t>::max()) {
+          return failure("valveProtectionTimer too large");
+        }
+        conf.setValveProtectionTimer(protTimer);
+      };
+
+      int emergencyValue;
+      if (_request.getParameter("emergencyValue", emergencyValue)) {
+        if (emergencyValue < -100 || emergencyValue > 100) {
+          return failure("emergencyValue out of [-100:100] range");
+        }
+        conf.setEmergencySetPoint(emergencyValue);
+      };
+
+      unsigned int emergencyTimer;
+      if (_request.getParameter("emergencyTimer", emergencyTimer)) {
+        if (protTimer > std::numeric_limits<uint8_t>::max()) {
+          return failure("emergencyTimer too big");
+        }
+        conf.setEmergencyTimer(emergencyTimer);
+      };
+
+      return success();
+
+    } else if (_request.getMethod() == "getValveTimerMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("valveProtectionTimer",
+                             conf.getValveProtectionTimer());
+      resultObj->addProperty("emergencyValue", conf.getEmergencySetPoint());
+      resultObj->addProperty("emergencyTimer", conf.getEmergencyTimer());
+      return success(resultObj);
+
+    } else if (_request.getMethod() == "setValvePwmMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+
+      unsigned pwmPeriod;
+      if (_request.getParameter("pwmPeriod", pwmPeriod)) {
+        if (pwmPeriod > std::numeric_limits<uint16_t>::max()) {
+          return failure("valveProtectionTimer too large");
+        }
+        conf.setPwmPeriod(pwmPeriod);
+      };
+      int value;
+      if (_request.getParameter("pwmMinX", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMinX out of [0:100] range");
+        }
+        conf.setPwmMinX(value);
+      };
+      if (_request.getParameter("pwmMaxX", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMaxX out of [0:100] range");
+        }
+        conf.setPwmMaxX(value);
+      };
+      if (_request.getParameter("pwmMinY", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMinY out of [0:100] range");
+        }
+        conf.setPwmMinY(value);
+      };
+      if (_request.getParameter("pwmMaxY", value)) {
+        if (value < 0  || value > 100) {
+          return failure("pwmMaxY out of [0:100] range");
+        }
+        conf.setPwmMaxY(value);
+      };
+      unsigned int config;
+      if (_request.getParameter("pwmConfig", config)) {
+        conf.setPwmMaxY(value);
+      };
+      int offset;
+      if (_request.getParameter("pwmOffset", offset)) {
+        if (offset < -100 || offset > 100) {
+          return failure("PWM offset out of [-100:100] range");
+        }
+        conf.setPwmOffset(offset);
+      };
+
+      return success();
+
+    } else if (_request.getMethod() == "getValvePwmMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
+        return failure("No heating device");
+      }
+
+      DeviceBank3_BL conf(device);
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("pwmPeriod", conf.getPwmPeriod());
+      resultObj->addProperty("pwmMinX", conf.getPwmMinX());
+      resultObj->addProperty("pwmMaxX", conf.getPwmMaxX());
+      resultObj->addProperty("pwmMinY", conf.getPwmMinY());
+      resultObj->addProperty("pwmMaxY", conf.getPwmMaxY());
+      resultObj->addProperty("pwmConfig", conf.getPwmConfig());
+      resultObj->addProperty("pwmOffset", conf.getPwmOffset());
+      return success(resultObj);
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

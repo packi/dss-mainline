@@ -59,21 +59,21 @@ namespace dss {
     }
 
     boost::shared_ptr<Event> evt(new Event(name));
-    if(!context.empty()) {
+    if (!context.empty()) {
       evt->setContext(context);
     }
-    if(!location.empty()) {
+    if (!location.empty()) {
       evt->setLocation(location);
     }
     std::vector<std::string> params = dss::splitString(parameter, ';');
-    for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
+    for (std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
         iParam != e; ++iParam)
     {
       std::string key;
       std::string value;
       std::string& keyValue = *iParam;
       boost::tie(key, value) = splitIntoKeyValue(keyValue);
-      if(!key.empty() && !value.empty()) {
+      if (!key.empty() && !value.empty()) {
         dss::Logger::getInstance()->log("EventRequestHandler::raise: Got parameter '" + key + "'='" + value + "'");
         evt->setProperty(st.convert(key), st.convert(value));
       } else {
@@ -85,61 +85,46 @@ namespace dss {
     return success();
   }
 
+  int EventRequestHandler::validateArgs(boost::shared_ptr<Session> _session,
+                                     const std::string &name,
+                                     const std::string &subscribtionID) {
+    int token;
+    if (_session == NULL) {
+      throw std::runtime_error("Invalid session");
+    }
+    if (name.empty()) {
+      throw std::runtime_error("Missing event name");
+    }
+    if (subscribtionID.empty()) {
+      throw std::runtime_error("Missing event subscription id");
+    }
+    try {
+      token = strToInt(subscribtionID);
+    } catch (std::invalid_argument& err) {
+      throw std::runtime_error(std::string("Invalid event subscription id ") + subscribtionID);
+    }
+    return token;
+  }
+
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  boost::shared_ptr<JSONObject>
+    EventRequestHandler::subscribe(const RestfulRequest& _request,
+                                   boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string tokenStr = _request.getParameter("subscriptionID");
     int token;
 
-    if(_session == NULL) {
-      return failure("Invalid session!");
+    try {
+      token = validateArgs(_session, name, tokenStr);
+    } catch (std::runtime_error e) {
+      return failure(e.what());
     }
 
-    if(name.empty()) {
-      return failure("Missing event name!");
-    }
-
-    if(tokenStr.empty()) {
-      return failure("Missing event subscription id!");
-    }
-    try{
-     token = strToInt(tokenStr);
-    }
-    catch(std::invalid_argument& err) {
-      return failure("Could not parse event subscription id!");
-    }
-
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-
-    m_eventsMutex.lock();
-
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if((a == NULL) || (a->empty())) {
-      boost::shared_ptr<boost::any> b(new boost::any());
-      eventSessions = boost::shared_ptr<EventSubscriptionSessionByTokenID>(new EventSubscriptionSessionByTokenID());
-      *b = eventSessions;
-      _session->addData(std::string("eventSubscriptionIDs"), b);
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(0);
-      }
-    }
-
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if(entry == eventSessions->end()){
-        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(m_EventInterpreter, _session));
-      (*eventSessions)[token] = session;
-    }
-
-    (*eventSessions)[token]->subscribe(name);
-
-    m_eventsMutex.unlock();
-
+    boost::mutex::scoped_lock lock(m_Mutex);
+    boost::shared_ptr<EventSubscriptionSession> subscription =
+      _session->createEventSubscription(m_EventInterpreter, token);
+    subscription->subscribe(name);
     return success();
   }
 
@@ -147,101 +132,36 @@ namespace dss {
   boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
-    std::string tokenStr = _request.getParameter("subscriptionID");
+    std::string subscribtionID = _request.getParameter("subscriptionID");
     int token;
 
-    if(_session == NULL) {
-      return failure("Invalid session!");
-    }
-
-    if(name.empty()) {
-      return failure("Missing event name!");
-    }
-
-    if(tokenStr.empty()) {
-      return failure("Missing event subscription id!");
-    }
-
     try {
-     token = strToInt(tokenStr);
-    } catch(std::invalid_argument& err) {
-      return failure("Could not parse event subscription id!");
-    }
-
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if((a == NULL) || (a->empty())) {
-      return failure("Invalid session!");
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(0);
-      }
-    }
-
-    m_eventsMutex.lock();
-
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if(entry == eventSessions->end()){
-      m_eventsMutex.unlock();
-      return failure("Token not found!");
-    }
-
-    try {
-      (*eventSessions)[token]->unsubscribe(name);
-    } catch(std::exception& e) {
-      m_eventsMutex.unlock();
+      token = validateArgs(_session, name, subscribtionID);
+    } catch (std::runtime_error e) {
       return failure(e.what());
     }
 
-    eventSessions->erase(entry);
+    boost::mutex::scoped_lock lock(m_Mutex);
+    boost::shared_ptr<EventSubscriptionSession> sub;
+    try {
+      sub = _session->getEventSubscription(token);
+      sub->unsubscribe(name);
+    } catch (std::exception& e) {
+      // TODO still erase the subscription
+      return failure(e.what());
+    }
 
-    m_eventsMutex.unlock();
-
+    _session->deleteEventSubscription(sub);
     return success();
   }
 
-  boost::shared_ptr<EventSubscriptionSession> EventRequestHandler::getSubscriptionSession(int _token, boost::shared_ptr<Session> _session) {
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
-
-    m_eventsMutex.lock();
-
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if((a == NULL) || (a->empty())) {
-      m_eventsMutex.unlock();
-      throw std::runtime_error("Invalid session!");
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(false);
-      }
-    }
-
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(_token);
-    if(entry == eventSessions->end()) {
-      m_eventsMutex.unlock();
-      throw std::runtime_error("Subscription id not found!");
-    }
-
-    boost::shared_ptr<EventSubscriptionSession> result = (*eventSessions)[_token];
-    m_eventsMutex.unlock();
-
-    return result;
-  } // getSubscriptionSession
 
   boost::shared_ptr<JSONObject> EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
     boost::shared_ptr<JSONObject> result(new JSONObject());
     boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);
     result->addElement("events", eventsArray);
 
-    while(_subscriptionSession->hasEvent()) {
+    while (_subscriptionSession->hasEvent()) {
       Event evt = _subscriptionSession->popEvent();
       boost::shared_ptr<JSONObject> evtObj(new JSONObject());
       eventsArray->addElement("event", evtObj);
@@ -251,7 +171,7 @@ namespace dss {
       evtObj->addElement("properties", evtprops);
 
       const dss::HashMapStringString& props =  evt.getProperties().getContainer();
-      for(dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         evtprops->addProperty(iParam->first, iParam->second);
       }
 
@@ -259,7 +179,7 @@ namespace dss {
       evtObj->addElement("source", source);
 
       EventRaiseLocation raiseLocation = evt.getRaiseLocation();
-      if((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
+      if ((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
         if (DSS::hasInstance()) {
           boost::shared_ptr<const Group> group =
               evt.getRaisedAtGroup(DSS::getInstance()->getApartment());
@@ -274,10 +194,10 @@ namespace dss {
       } else if (raiseLocation == erlDevice) {
         boost::shared_ptr<const DeviceReference> device = evt.getRaisedAtDevice();
         try {
-          source->addProperty("set", "dsid(" + device->getDSID().toString() + ")");
-          source->addProperty("dsid", device->getDSID().toString());
+          source->addProperty("set", "dsid(" + dsuid2str(device->getDSID()) + ")");
+          source->addProperty("dsid", dsuid2str(device->getDSID()));
           source->addProperty("zoneID", device->getDevice()->getZoneID());
-        } catch(ItemNotFoundException& e) {
+        } catch (ItemNotFoundException& e) {
         }
         source->addProperty("isApartment", false);
         source->addProperty("isGroup", false);
@@ -286,8 +206,12 @@ namespace dss {
         boost::shared_ptr<const State> state = evt.getRaisedAtState();
         if (state->getType() == StateType_Device) {
           boost::shared_ptr<Device> device = state->getProviderDevice();
-          source->addProperty("set", "dsid(" + device->getDSID().toString() + ")");
-          source->addProperty("dsid", device->getDSID().toString());
+          try {
+            source->addProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
+          } catch (std::runtime_error &err) {
+            Logger::getInstance()->log(err.what());
+          }
+          source->addProperty("dSUID", dsuid2str(device->getDSID()));
           source->addProperty("zoneID", device->getZoneID());
           source->addProperty("isApartment", false);
           source->addProperty("isGroup", false);
@@ -327,32 +251,25 @@ namespace dss {
     int timeout = 0;
     int token;
 
-    if(_session == NULL) {
-      return failure("Invalid session!");
-    }
-
-    if(tokenStr.empty()) {
-      return failure("Missing event subscription id!");
-    }
-
     try {
-      token = strToInt(tokenStr);
-    } catch(std::invalid_argument& err) {
-      return failure("Could not parse subscription id!");
+      token = validateArgs(_session, "sentinel", tokenStr);
+    } catch (std::runtime_error e) {
+      return failure(e.what());
     }
 
-    if(!timeoutStr.empty()) {
+    if (!timeoutStr.empty()) {
       try {
         timeout = strToInt(timeoutStr);
-      } catch(std::invalid_argument& err) {
+      } catch (std::invalid_argument& err) {
         return failure("Could not parse timeout parameter!");
       }
     }
 
+    boost::mutex::scoped_lock lock(m_Mutex);
     boost::shared_ptr<EventSubscriptionSession> subscriptionSession;
     try {
-      subscriptionSession = getSubscriptionSession(token, _session);
-    } catch(std::runtime_error& e) {
+      subscriptionSession = _session->getEventSubscription(token);
+    } catch (std::runtime_error& e) {
       return failure(e.what());
     }
 
@@ -362,18 +279,18 @@ namespace dss {
     bool timedOut = false;
     const int kSocketDisconnectTimeoutMS = 200;
     int timeoutMSLeft = timeout;
-    while(!timedOut && !haveEvents) {
+    while (!timedOut && !haveEvents) {
       // check if we're still connected
-      if(!_request.isActive()) {
+      if (!_request.isActive()) {
         Logger::getInstance()->log("EventRequestHanler::get: connection dropped");
         break;
       }
       // calculate the length of our wait
       int waitTime;
-      if(timeout == -1) {
+      if (timeout == -1) {
         timedOut = true;
         waitTime = -1;
-      } else if(timeout != 0) {
+      } else if (timeout != 0) {
         waitTime = std::min(timeoutMSLeft, kSocketDisconnectTimeoutMS);
         timeoutMSLeft -= waitTime;
         timedOut = (timeoutMSLeft == 0);
@@ -391,13 +308,13 @@ namespace dss {
   }
 
   WebServerResponse EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    if(_request.getMethod() == "raise") {
+    if (_request.getMethod() == "raise") {
       return raise(_request);
-    } else if(_request.getMethod() == "subscribe") {
+    } else if (_request.getMethod() == "subscribe") {
       return subscribe(_request, _session);
-    } else if(_request.getMethod() == "unsubscribe") {
+    } else if (_request.getMethod() == "unsubscribe") {
       return unsubscribe(_request, _session);
-    } else if(_request.getMethod() == "get") {
+    } else if (_request.getMethod() == "get") {
       return get(_request, _session);
     }
     throw std::runtime_error("Unhandled function");

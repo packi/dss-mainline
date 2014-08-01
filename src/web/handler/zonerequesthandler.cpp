@@ -23,6 +23,8 @@
 
 #include "zonerequesthandler.h"
 
+#include <digitalSTROM/dsuid/dsuid.h>
+
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/set.h"
@@ -216,26 +218,6 @@ namespace dss {
             }
           }
           return success(resultObj);
-        } else if(_request.getMethod() == "pushSensorValue") {
-          if(pGroup == NULL) {
-            return failure("Need group to work");
-          }
-          dss_dsid_t sourceID;
-          std::string deviceIDStr = _request.getParameter("sourceDSID");
-          if(!deviceIDStr.empty()) {
-            sourceID = dsid::fromString(deviceIDStr);
-          }
-          else {
-            return failure("Need valid parameter 'sourceDSID'");
-          }
-          int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
-          std::string sensorValueString = _request.getParameter("sensorValue");
-          if(sensorType == -1 || sensorValueString.length() == 0) {
-            return failure("Need valid parameter 'sensorType' and 'sensorValue'");
-          }
-          double sensorValue = ::strtod(sensorValueString.c_str(), 0);
-          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-          manipulator.sensorPush(pGroup, sourceID, sensorType, sensorValue);
         } else {
           throw std::runtime_error("Unhandled function");
         }

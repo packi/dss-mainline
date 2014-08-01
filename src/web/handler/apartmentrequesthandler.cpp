@@ -20,6 +20,7 @@
 
 */
 
+#include <digitalSTROM/dsuid/dsuid.h>
 #include "apartmentrequesthandler.h"
 
 #include "src/foreach.h"
@@ -93,11 +94,19 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeMeter(const RestfulRequest& _request) {
     std::string dsidStr = _request.getParameter("dsid");
-    if(dsidStr.empty()) {
-      return failure("Missing dsid");
+    std::string dsuidStr = _request.getParameter("dsuid");
+    if(dsidStr.empty() && dsuidStr.empty()) {
+      return failure("Missing parameter 'dsuid'");
     }
 
-    dss_dsid_t meterID = dsid::fromString(dsidStr);
+    dsuid_t meterID;
+    
+    if (dsuidStr.empty()) {
+      dsid_t dsid = str2dsid(dsidStr);
+      meterID = dsuid_from_dsid(&dsid);
+    } else {
+      meterID = str2dsuid(dsuidStr);
+    }
 
     boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
 
@@ -170,7 +179,12 @@ namespace dss {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
-          circuit->addProperty("dsid", dsMeter->getDSID().toString());
+          try {
+            circuit->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+          } catch (std::runtime_error &err) {
+            Logger::getInstance()->log(err.what());
+          }
+          circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("armSwVersion", dsMeter->getArmSoftwareVersion());
           circuit->addProperty("dspSwVersion", dsMeter->getDspSoftwareVersion());

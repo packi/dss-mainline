@@ -23,52 +23,106 @@
 #include "ds485types.h"
 
 #include <sstream>
-
-#include "src/base.h"
-#include "src/model/modelconst.h"
+#include <iomanip>
+#include <stdexcept>
+#include <string>
+#include <stdlib.h>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 namespace dss {
 
-  const dss_dsid_t NullDSID(0,0);
-
-  std::string dsid::toString() const {
-    std::stringstream sstream;
-    sstream.fill('0');
-    sstream.width(16);
-    sstream << std::hex << upper;
-    sstream.width(8);
-    sstream << lower;
-    return sstream.str();
+std::string dsuid2str(dsuid_t dsuid)
+{
+  std::ostringstream str;
+  for (int i = 0; i < DSUID_SIZE; ++i) {
+    str << std::hex << std::setw(2) << std::setfill('0') << (int)dsuid.id[i];
   }
-
-  dss_dsid_t dsid::fromString(const std::string& _string) {
-    dss_dsid_t result;
-    std::string remainder = _string;
-    result.upper = 0ll;
-    result.lower = 0;
-
-    // parse the string in 4 Byte chunks
-    if(!remainder.empty()) {
-      int nChar = std::min((int)remainder.size(), 8);
-      int start = remainder.size() - nChar;
-      result.lower = strToUInt("0x" + remainder.substr(start,nChar));
-      remainder.erase(start, nChar);
-    }
-
-    if(!remainder.empty()) {
-      int nChar = std::min((int)remainder.size(), 8);
-      int start = remainder.size() - nChar;
-      result.upper = strToUInt("0x" + remainder.substr(start,nChar));
-      remainder.erase(start, nChar);
-    }
-
-    if(!remainder.empty()) {
-      int nChar = std::min((int)remainder.size(), 8);
-      int start = remainder.size() - nChar;
-      result.upper |= ((uint64_t)strToUInt("0x" + remainder.substr(start,nChar)) << 32);
-      remainder.erase(start, nChar);
-    }
-
-    return result;
-  }
+  return str.str();
 }
+
+dsuid_t str2dsuid(std::string dsuid_str)
+{
+  dsuid_t dsuid;
+
+  if (::dsuid_from_string(dsuid_str.c_str(), &dsuid) != DSUID_RC_OK)
+  {
+    throw std::runtime_error("can not convert from string, invalid dSUID");
+  }
+  return dsuid;
+}
+
+dsid_t str2dsid(std::string dsid_str)
+{
+  dsid_t dsid;
+
+  if (dsid_str.length() != 24) {
+    throw std::runtime_error("can not convert from string, invalid dSID");
+  }
+
+  size_t i = 0;
+  size_t count = 0;
+  while (i < 24) {
+    std::string number = dsid_str.substr(i, 2);
+    dsid.id[count] = (unsigned char)strtol(number.c_str(), NULL, 16);
+    i = i + 2;
+    count++;
+  }
+
+  return dsid;
+}
+
+std::string dsid2str(dsid_t dsid) {
+  std::ostringstream str;
+  for (int i = 0; i < 12; ++i) {
+    str << std::hex
+        << std::setw(2)
+        << std::setfill('0')
+        << (int)dsid.id[i];
+   }
+   return str.str();
+}
+
+uint32_t dsuid2serial(dsuid_t dsuid) {
+  uint32_t serial = 0;
+  if (::dsuid_get_serial_number(&dsuid, &serial) != DSUID_RC_OK) {
+    throw std::runtime_error("could not extract serial number from dSUID" +
+                              dsuid2str(dsuid));
+  }
+  return serial;
+}
+
+bool IsEvenDsuid(dsuid_t dsuid) {
+  uint32_t serial = 0;
+  if (dsuid_get_serial_number(&dsuid, &serial) != DSUID_RC_OK) {
+    throw std::runtime_error("could not extract serial number from dSUID" +
+                              dsuid2str(dsuid));
+  }
+
+  return !(serial % 2);
+}
+
+
+dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid) {
+  dsuid_t out;
+  if (dsuid_get_next_dsuid(&dsuid, &out) != DSUID_RC_OK) {
+    throw std::runtime_error("could not retrieve next dSUID from " +
+                              dsuid2str(dsuid));
+  }
+  return out;
+}
+
+dsid_t dsuid_to_dsid(dsuid_t dsuid) {
+    dsid_t dsid;
+    if (::dsuid_to_dsid(&dsuid, &dsid) != DSUID_RC_OK) {
+      throw std::runtime_error("could not convert dSUID to dSID");
+    }
+    return dsid;
+}
+
+dsuid_t dsuid_from_dsid(const dsid_t& dsid) {
+    dsuid_t dsuid;
+    dsuid = ::dsuid_from_dsid(&dsid);
+    return dsuid;
+}
+
+} // namespace

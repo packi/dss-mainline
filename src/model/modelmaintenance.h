@@ -34,6 +34,7 @@
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
+#include "../webservice_connection.h"
 
 namespace dss {
   class Apartment;
@@ -45,19 +46,19 @@ namespace dss {
   public:
     static const int kModelSceneTimeout = 2;
   private:
-    dss_dsid_t m_Source;
+    dsuid_t m_Source;
     time_t m_Timestamp;
     bool m_IsCalled;
   public:
     /** Constructs a ModelDeferredEvent with timestamp */
-    ModelDeferredEvent(dss_dsid_t _source) : m_Source(_source), m_IsCalled(false)
+    ModelDeferredEvent(dsuid_t _source) : m_Source(_source), m_IsCalled(false)
     {
       setTimestamp();
     }
     virtual ~ModelDeferredEvent() {}
 
-    dss_dsid_t getSource() { return m_Source; }
-    bool isOriginMyself() { return m_Source == NullDSID; }
+    dsuid_t getSource() { return m_Source; }
+    bool isOriginMyself() { return IsNullDsuid(m_Source); }
     bool isDue() { time_t now = time(NULL); return (now - m_Timestamp >= kModelSceneTimeout); }
     bool isCalled() { return m_IsCalled; }
 
@@ -77,7 +78,7 @@ namespace dss {
     std::string m_OriginToken;
   public:
     /** Constructs a ModelDeferredSceneEvent with timestamp */
-    ModelDeferredSceneEvent(dss_dsid_t _source, int _zoneID, int _groupID, int _originDeviceID, int _sceneID, callOrigin_t _origin, bool _forced, std::string _token) :
+    ModelDeferredSceneEvent(dsuid_t _source, int _zoneID, int _groupID, int _originDeviceID, int _sceneID, callOrigin_t _origin, bool _forced, std::string _token) :
       ModelDeferredEvent(_source), m_ZoneID(_zoneID), m_GroupID(_groupID), m_OriginDeviceID(_originDeviceID),
       m_SceneID(_sceneID), m_Origin(_origin), m_forcedFlag(_forced), m_OriginToken(_token)
     {}
@@ -101,7 +102,7 @@ namespace dss {
     int m_HoldTime;
   public:
     /** Constructs a ModelDeferredButtonEvent with timestamp */
-    ModelDeferredButtonEvent(dss_dsid_t _source, int _deviceID, int _buttonIndex, int _clickType) :
+    ModelDeferredButtonEvent(dsuid_t _source, int _deviceID, int _buttonIndex, int _clickType) :
       ModelDeferredEvent(_source),
       m_DeviceID(_deviceID), m_ButtonIndex(_buttonIndex), m_ClickType(_clickType), m_HoldTime(0)
     {}
@@ -119,13 +120,24 @@ namespace dss {
   public:
     class OEMWebQuery : public Task {
     public:
+      class OEMWebQueryCallback : public URLRequestCallback {
+      public:
+        OEMWebQueryCallback(dsuid_t dsmId, devid_t deviceAddress);
+        virtual ~OEMWebQueryCallback() {}
+        virtual void result(long code, const std::string &result);
+      private:
+        dsuid_t m_dsmId;
+        devid_t m_deviceAddress;
+      };
+
       OEMWebQuery(boost::shared_ptr<Device> _device);
       virtual ~OEMWebQuery() {}
       virtual void run();
+
     private:
       std::string m_EAN;
       uint16_t m_partNumber;
-      dss_dsid_t m_dsmId;
+      dsuid_t m_dsmId;
       devid_t m_deviceAdress;
       uint16_t m_serialNumber;
     };
@@ -143,13 +155,13 @@ namespace dss {
     /** Starts the event-processing */
     virtual void execute();
 
-    void onGroupCallScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token);
-    void onGroupUndoScene(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const std::string _token);
+    void onGroupCallScene(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token);
+    void onGroupUndoScene(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const std::string _token);
 
-    void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
+    void onDeviceNameChanged(dsuid_t _meterID, const devid_t _deviceID, 
                              const std::string& _name);
-    void onDsmNameChanged(dss_dsid_t _meterID, const std::string& _name);
-    void onDsmFlagsChanged(dss_dsid_t _meterID, const std::bitset<8> _flags);
+    void onDsmNameChanged(dsuid_t _meterID, const std::string& _name);
+    void onDsmFlagsChanged(dsuid_t _meterID, const std::bitset<8> _flags);
 
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
@@ -166,7 +178,7 @@ namespace dss {
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
-    void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
+    void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void setApartmentState();
     void readOutPendingMeter();
@@ -176,30 +188,31 @@ namespace dss {
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
-    void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
-    void onDeviceBlink(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token);
-    void onDeviceActionEvent(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType);
+    void onDeviceCallScene(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
+    void onDeviceBlink(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token);
+    void onDeviceActionEvent(const dsuid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType);
 
-    void onGroupCallSceneFiltered(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
-    void onDeviceActionFiltered(dss_dsid_t _source, const int _deviceID, const int _buttonNr, const int _clickType);
-    void onGroupBlink(dss_dsid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token);
+    void onGroupCallSceneFiltered(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
+    void onDeviceActionFiltered(dsuid_t _source, const int _deviceID, const int _buttonNr, const int _clickType);
+    void onGroupBlink(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token);
 
-    void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
-    void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
-    void onJoinedDSMeter(const dss_dsid_t& _dsMeterID);
-    void onLostDSMeter(const dss_dsid_t& _dsMeterID);
-    void onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID, 
+    void onAddDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID);
+    void onRemoveDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID);
+    void onJoinedDSMeter(const dsuid_t& _dsMeterID);
+    void onLostDSMeter(const dsuid_t& _dsMeterID);
+    void onDeviceConfigChanged(const dsuid_t& _dsMeterID, int _deviceID, 
                                int _configClass, int _configIndex, int _value);
-    void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
-    void onSensorEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
-    void onBinaryInputEvent(dss_dsid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state);
-    void onSensorValue(dss_dsid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
-    void onEANReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
+    void rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID);
+    void onSensorEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
+    void onBinaryInputEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state);
+    void onSensorValue(dsuid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
+    void onZoneSensorValue(dsuid_t _meterID, const std::string& _sourceDevice, const int& _zoneID, const int& _groupID, const int& _sensorType, const int& _sensorValue, const int& _precision);
+    void onEANReady(dsuid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
                       const unsigned long long _eanNumber,
                       const int _serialNumber, const int _partNumber,
                       const bool _isIndependent, const bool _isConfigLocked);
-    void onOEMDataReady(dss_dsid_t _dsMeterID, const devid_t _deviceID,
+    void onOEMDataReady(dsuid_t _dsMeterID, const devid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
                            const std::string& _defaultName);

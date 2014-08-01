@@ -1,7 +1,7 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2014 digitalSTROM AG, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -20,18 +20,23 @@
 
 */
 
-#ifndef WEBSERVERAPI_H
-#define WEBSERVERAPI_H
+#ifndef __DSS_SENSOR_MONITOR_H__
+#define __DSS_SENSOR_MONITOR_H__
 
-#include <boost/shared_ptr.hpp>
+#include "taskprocessor.h"
+#include "model/apartment.h"
 
 namespace dss {
 
-  class RestfulAPI;
-  
-  class WebServerAPI {
-  public:
-    static boost::shared_ptr<RestfulAPI> createRestfulAPI();
-  };
-}
-#endif // WEBSERVERAPI_H
+class SensorMonitorTask : public Task {
+public:
+  SensorMonitorTask(Apartment* _apartment) : m_Apartment(_apartment) {};
+  virtual ~SensorMonitorTask() {};
+  virtual void run();
+private:
+  Apartment *m_Apartment;
+};
+
+}// namespace
+
+#endif//__DSS_SENSOR_MONITOR_H__

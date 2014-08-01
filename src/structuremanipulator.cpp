@@ -115,7 +115,7 @@ namespace dss {
 
       Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
-        Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + targetDSMeter->getDSID().toString(), lsInfo);
+        Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + dsuid2str(targetDSMeter->getDSID()), lsInfo);
         try {
           removeZoneOnDSMeter(oldZone, targetDSMeter);
         } catch (std::runtime_error &err) {
@@ -154,12 +154,14 @@ namespace dss {
       try {
         dev = m_Apartment.getDeviceByDSID(inactiveDevice.DSID);
       } catch(ItemNotFoundException&) {
-        throw std::runtime_error("Inactive device '" + inactiveDevice.DSID.toString() + "' not known here.");
+        throw std::runtime_error("Inactive device '" + dsuid2str(inactiveDevice.DSID) + "' not known here.");
       }
-      if(dev->getLastKnownDSMeterDSID() != _dsMeter->getDSID()) {
+      dsuid_t tmp_last = dev->getLastKnownDSMeterDSID();
+      dsuid_t tmp_dsm = _dsMeter->getDSID();
+      if (!IsEqualDsuid(tmp_last, tmp_dsm)) {
         m_Interface.removeDeviceFromDSMeter(_dsMeter->getDSID(), inactiveDevice.ShortAddress);
       } else {
-        throw std::runtime_error("Inactive device '" + inactiveDevice.DSID.toString() + "' only known on this meter, can't remove it.");
+        throw std::runtime_error("Inactive device '" + dsuid2str(inactiveDevice.DSID) + "' only known on this meter, can't remove it.");
       }
     }
 
@@ -172,7 +174,7 @@ namespace dss {
     } catch(BusApiError& e) {
       Logger::getInstance()->log("Can't remove zone " +
                                  intToString(_zone->getID()) + " from meter: "
-                                 + _dsMeter->getDSID().toString() + ". '" +
+                                 + dsuid2str(_dsMeter->getDSID()) + ". '" +
                                  e.what() + "'", lsWarning);
     }
   } // removeZoneOnDSMeter
@@ -180,10 +182,8 @@ namespace dss {
   void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
     AssertLocked apartmentLocked(&m_Apartment);
     try {
-      dsid_t broadcastDSID;
-      dss_dsid_t dSSBroadcastDSID;
-      SetBroadcastId(broadcastDSID);
-      dsid_helper::toDssDsid(broadcastDSID, dSSBroadcastDSID);
+      dsuid_t broadcastDSID;
+      SetBroadcastDsuid(broadcastDSID);
 
       std::vector<boost::shared_ptr<const DSMeter> > meters = _zone->getDSMeters();
       for (size_t s = 0; s < meters.size(); s++) {
@@ -193,7 +193,7 @@ namespace dss {
           _zone->removeFromDSMeter(meter);
         }
       }
-      m_Interface.removeZone(dSSBroadcastDSID, _zone->getID());
+      m_Interface.removeZone(broadcastDSID, _zone->getID());
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
       }
@@ -205,18 +205,18 @@ namespace dss {
   } // removeZoneOnDSMeters
 
   void StructureManipulator::removeDeviceFromDSMeter(boost::shared_ptr<Device> _device) {
-    dss_dsid_t dsmDsid = _device->getDSMeterDSID();
-    dss_dsid_t devDsid = _device->getDSID();
+    dsuid_t dsmDsid = _device->getDSMeterDSID();
+    dsuid_t devDsid = _device->getDSID();
     devid_t shortAddr = _device->getShortAddress();
 
-    if (dsmDsid == NullDSID) {
+    if (IsNullDsuid(dsmDsid)) {
       dsmDsid = _device->getLastKnownDSMeterDSID();
     }
     if (shortAddr == ShortAddressStaleDevice) {
       shortAddr = _device->getLastKnownShortAddress();
     }
 
-    if ((dsmDsid == NullDSID) || (shortAddr == ShortAddressStaleDevice)) {
+    if (IsNullDsuid(dsmDsid) || (shortAddr == ShortAddressStaleDevice)) {
       throw std::runtime_error("Not enough data to delete device on dSM");
     }
 
@@ -227,13 +227,15 @@ namespace dss {
     if (dsm->isConnected() == false) {
       Logger::getInstance()->log("StructureManipulator::"
         "removeDevicefromDSMeter: not removing device " +
-        _device->getDSID().toString() + " from dSM " + dsmDsid.toString() +
+        dsuid2str(_device->getDSID()) + " from dSM " +
+        dsuid2str(dsmDsid) +
         ": this dSM is not connected", lsWarning);
       return;
     }
 
     DeviceSpec_t spec = m_QueryInterface.deviceGetSpec(shortAddr, dsmDsid);
-    if (spec.DSID != _device->getDSID()) {
+    dsuid_t tmp_dsid = _device->getDSID();
+    if (!IsEqualDsuid(spec.DSID, tmp_dsid)) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
 
@@ -333,11 +335,11 @@ namespace dss {
     }
     boost::shared_ptr<Group> pGroup;
 
-    if (_groupNumber <= 15) {
+    if (isDefaultGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
-    if (_groupNumber <= 23) {
+    if (isAppUserGroup(_groupNumber)) {
       if (_zone->getID() != 0) {
         throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
       }
@@ -399,11 +401,11 @@ namespace dss {
     }
     boost::shared_ptr<Group> pGroup;
 
-    if (_groupNumber <= 15) {
+    if (isDefaultGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
-    if (_groupNumber <= 23) {
+    if (isAppUserGroup(_groupNumber)) {
       if (_zone->getID() != 0) {
         throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
       }
@@ -463,11 +465,11 @@ namespace dss {
 
   void StructureManipulator::groupSetName(boost::shared_ptr<Group> _group,
                                           const std::string& _name) {
-    if (_group->getID() <= 15) {
+    if (isDefaultGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (_group->getID() <= 23) {
+    if (isAppUserGroup(_group->getID())) {
       _group->setName(_name);
       try {
         boost::shared_ptr<Group> pGroup;
@@ -503,11 +505,11 @@ namespace dss {
 
   void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
                                                 const int _standardGroupNumber) {
-    if (_group->getID() <= 15) {
+    if (isDefaultGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (_group->getID() <= 23) {
+    if (isAppUserGroup(_group->getID())) {
       _group->setStandardGroupID(_standardGroupNumber);
       try {
         boost::shared_ptr<Group> pGroup;
@@ -552,10 +554,16 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
+
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
+
+    // Devices that have a configurable standard group, group bitmask is adjusted by the dSM,
+    if (isDefaultGroup(_group->getID()) && ((_device->getFunctionID() & Fid_105_Mask_VariableStandardGroup) > 0)) {
+      _device->resetGroups();
+    }
     _device->addToGroup(_group->getID());
 
-    if (_group->getID() >= 16) {
+    if (isAppUserGroup(_group->getID())) {
       if ((_device->getDeviceType() == DEVICE_TYPE_AKM) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
         _device->setDeviceBinaryInputTarget(0, 0, _group->getID());
@@ -606,21 +614,29 @@ namespace dss {
     }
   } // deviceRemoveFromGroup
 
-  void StructureManipulator::sensorPush(boost::shared_ptr<Group> _group, dss_dsid_t _sourceID, int _sensorType, int _sensorValue) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
+  bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
+                                           boost::shared_ptr<Group> newGroup) {
+    bool modified = false;
+    int oldGroupId = device->getJokerGroup();
+    if (oldGroupId != newGroup->getID()) {
+      device->setDeviceJokerGroup(newGroup->getID());
+      modified = true;
     }
-    m_Interface.sensorPush(_group->getZoneID(), _group->getID(), _sourceID, _sensorType, _sensorValue);
-    _group->sensorPush(_sourceID, _sensorType, SceneHelper::sensorToFloat12(_sensorType, _sensorValue));
-  } // sensorPush
 
-  void StructureManipulator::sensorPush(boost::shared_ptr<Group> _group, dss_dsid_t _sourceID, int _sensorType, double _sensorValue) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
+    /* check if device is also in a colored user group */
+    boost::shared_ptr<Zone> pZone = m_Apartment.getZone(newGroup->getZoneID());
+    for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
+      if (!device->getGroupBitmask().test(g - 1)) {
+        continue;
+      }
+      boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
+      if (itGroup->getStandardGroupID() == newGroup->getID()) {
+        continue;
+      }
+      deviceRemoveFromGroup(device, newGroup);
+      modified = true;
     }
-    int convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValue);
-    m_Interface.sensorPush(_group->getZoneID(), _group->getID(), _sourceID, _sensorType, convertedSensorValue);
-    _group->sensorPush(_sourceID, _sensorType, _sensorValue);
-  } // sensorPush
 
+    return modified;
+  }
 } // namespace dss

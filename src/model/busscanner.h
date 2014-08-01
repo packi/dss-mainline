@@ -88,10 +88,10 @@ namespace dss {
     virtual void run();
     virtual void setup(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Device> _device);
 
-    uint16_t getDeviceSensorValue(const dsid_t& _dsm,
+    uint16_t getDeviceSensorValue(const dsuid_t& _dsm,
                               dev_t _device,
                               uint8_t _sensorIndex) const;
-    uint8_t getDeviceConfig(const dsid_t& _dsm,
+    uint8_t getDeviceConfig(const dsuid_t& _dsm,
                               dev_t _device,
                               uint8_t _configClass,
                               uint8_t _configIndex) const;

@@ -30,40 +30,19 @@
 
 namespace dss {
 
+    /*
   struct dsid_helper {
-    static void toDsmapiDsid(const dss_dsid_t& dss_dsid, dsid_t& target) {
-      for (int i = 0; i < 8; ++i) {
-        target.id[7-i] = dss_dsid.upper >> i*8 & 0xff;
-      }
-      for (int i = 0; i < 4; ++i) {
-        target.id[11-i] = dss_dsid.lower >> i*8 & 0xff;
-      }
+    static void toDsmapiDsid(const dsuid_t& dss_dsid, dsid_t& target) {
+#warning TODO DSUID: implement mapping
+        SetNullDsud(target);
     }
     
-    static void toDssDsid(const dsid_t& dsid, dss_dsid_t& dss_dsid) {
-      dss_dsid.upper = 0;
-      dss_dsid.lower = 0;
-      
-      for (int i = 0; i < 8; ++i) {
-        dss_dsid.upper |= ((uint64_t)dsid.id[i]) << 8*(7-i);
-      }
-      for (int i = 0; i < 4; ++i) {
-        dss_dsid.lower |= dsid.id[8+i] << 8*(3-i);
-      }
-    }
-
-    static std::string toString(dsid_t& target) {
-      std::ostringstream str;
-      for (int i = 0; i < 12; ++i) {
-        str << std::hex
-            << std::setw(2)
-            << std::setfill('0')
-            << (int)target.id[i]
-            << " ";
-      }
-      return str.str();
+    static void toDssDsid(const dsid_t& dsid, dsuid_t& dss_dsid) {
+#warning TODO DSUID: implement mapping
+        SetNullDsuid(dss_dsid);
     }
   };
+  */
 
 } // namespace dss
 

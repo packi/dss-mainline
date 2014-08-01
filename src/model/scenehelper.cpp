@@ -298,7 +298,7 @@ namespace dss {
       SceneHelper::SceneOnState ret = SceneHelper::DontCare;
 
     // other groups not yet supported
-    if (_groupID != GroupIDYellow) {
+    if ((_groupID != GroupIDYellow) && (_groupID != GroupIDHeating)) {
       return ret;
     }
 
@@ -439,6 +439,8 @@ namespace dss {
     case SensorIDRoomTemperatureControlVariable:
       convertedSensorValue = (double) ((_sensorValue - 100) /* * 0.1 / 4 */ );
       break;
+    case SensorIDCO2Concentration:
+      /* TODO */
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
     default:

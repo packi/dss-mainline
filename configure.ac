@@ -377,9 +377,12 @@ MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
 
 MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
-PKG_CHECK_MODULES([JSONC], [json], [],
+PKG_CHECK_MODULES([JSONC], [json-c], [],
     [
-        AC_MSG_ERROR([$JSON_PKG_ERRORS])
+        PKG_CHECK_MODULES([JSONC], [json], [],
+        [
+            AC_MSG_ERROR([$JSON_PKG_ERRORS])
+        ])
     ])
 
 PKG_CHECK_MODULES([CURL], [libcurl],
@@ -451,6 +454,16 @@ PKG_CHECK_MODULES([LIBCOMMCHANNEL], [libcommchannel], [],
         echo
         AC_MSG_ERROR([$LIBCOMMCHANNEL_PKG_ERRORS])
     ])
+
+PKG_CHECK_MODULES([LIBDSUID], [libdsuid], [],
+    [
+        echo
+        echo "Get libdsuid from"
+        echo "      http://gitorious.digitalstrom.org/ds485-stack/libdsuid"
+        echo
+        AC_MSG_ERROR([$LIBDSUID_PKG_ERRORS])
+    ])
+
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"

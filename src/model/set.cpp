@@ -144,20 +144,22 @@ namespace dss {
     return getByDSMeter(_dsMeter->getDSID());
   } // getByDSMeter
 
-  Set Set::getByDSMeter(const dss_dsid_t& _dsMeterDSID) const {
+  Set Set::getByDSMeter(const dsuid_t& _dsMeterDSID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice()->getDSMeterDSID() == _dsMeterDSID) {
+      dsuid_t tmp_dsid = dev.getDevice()->getDSMeterDSID();
+      if (IsEqualDsuid(tmp_dsid, _dsMeterDSID)) {
         result.addDevice(dev);
       }
     }
     return result;
   } // getByDSMeter
 
-  Set Set::getByLastKnownDSMeter(const dss_dsid_t& _dsMeterDSID) const {
+  Set Set::getByLastKnownDSMeter(const dsuid_t& _dsMeterDSID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice()->getLastKnownDSMeterDSID() == _dsMeterDSID) {
+      dsuid_t tmp_dsid = dev.getDevice()->getLastKnownDSMeterDSID();
+      if (IsEqualDsuid(tmp_dsid, _dsMeterDSID)) {
         result.addDevice(dev);
       }
     }
@@ -218,20 +220,21 @@ namespace dss {
   class ByIDSelector : public IDeviceSelector {
   private:
     const devid_t m_ID;
-    const dss_dsid_t& m_DSMeterID;
+    const dsuid_t& m_DSMeterID;
   public:
-    ByIDSelector(const devid_t _id, const dss_dsid_t& _dsMeterID)
+    ByIDSelector(const devid_t _id, const dsuid_t& _dsMeterID)
     : m_ID(_id), m_DSMeterID(_dsMeterID)
     {}
     virtual ~ByIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      dsuid_t tmp_dsid = _device->getDSMeterDSID();
       return (_device->getShortAddress() == m_ID) &&
-             (_device->getDSMeterDSID() == m_DSMeterID);
+             (IsEqualDsuid(tmp_dsid, m_DSMeterID));
     }
   };
 
-  DeviceReference Set::getByBusID(const devid_t _id, const dss_dsid_t& _dsid) const {
+  DeviceReference Set::getByBusID(const devid_t _id, const dsuid_t& _dsid) const {
     Set resultSet = getSubset(ByIDSelector(_id, _dsid));
     if(resultSet.length() == 0) {
       throw ItemNotFoundException(std::string("with busid ") + intToString(_id));
@@ -245,20 +248,21 @@ namespace dss {
 
   class ByDSIDSelector : public IDeviceSelector {
   private:
-    const dss_dsid_t m_ID;
+    const dsuid_t m_ID;
   public:
-    ByDSIDSelector(const dss_dsid_t _id) : m_ID(_id) {}
+    ByDSIDSelector(const dsuid_t _id) : m_ID(_id) {}
     virtual ~ByDSIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
-      return _device->getDSID() == m_ID;
+      dsuid_t tmp_dsid = _device->getDSID();
+      return IsEqualDsuid(tmp_dsid, m_ID);
     }
   };
 
-  DeviceReference Set::getByDSID(const dss_dsid_t _dsid) const {
+  DeviceReference Set::getByDSID(const dsuid_t _dsid) const {
     Set resultSet = getSubset(ByDSIDSelector(_dsid));
     if(resultSet.length() == 0) {
-      throw ItemNotFoundException("with dsid " + _dsid.toString());
+      throw ItemNotFoundException("with dsid " + dsuid2str(_dsid));
     }
     return resultSet.m_ContainedDevices.front();
   } // getByDSID
@@ -429,7 +433,7 @@ namespace dss {
           workingCopy.removeDevice(ref);
 
           if(OptimizerDebug) {
-            Logger::getInstance()->log("Working with device " + ref.getDSID().toString() + " groups: " + intToString(ref.getDevice()->getGroupsCount()));
+            Logger::getInstance()->log("Working with device " + dsuid2str(ref.getDSID()) + " groups: " + intToString(ref.getDevice()->getGroupsCount()));
           }
 
           bool foundGroup = false;
@@ -463,12 +467,12 @@ namespace dss {
                 unsuitableGroups.push_back(g);
                 groupFits = false;
                 if(OptimizerDebug) {
-                  Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice()->getDSID().toString());
+                  Logger::getInstance()->log("    Original set does _not_ contain device " + dsuid2str(devicesInGroup.get(iDevice).getDevice()->getDSID()));
                 }
                 break;
               }
               if(OptimizerDebug) {
-                Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice()->getDSID().toString());
+                Logger::getInstance()->log("    Original set contains device " + dsuid2str(devicesInGroup.get(iDevice).getDevice()->getDSID()));
               }
             }
             if(groupFits) {

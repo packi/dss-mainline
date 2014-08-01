@@ -26,99 +26,85 @@
 
 #include "dsbusinterface.h"
 
-#include "src/dsidhelper.h"
-
 #define BROADCAST_SLEEP_MICROSECONDS    50000 // 50ms
 
 namespace dss {
 
   //================================================== DSStructureModifyingBusInterface
 
-  void DSStructureModifyingBusInterface::setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
+  void DSStructureModifyingBusInterface::setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = DeviceProperties_set_zone(m_DSMApiHandle, meterDSID, _deviceID, _zoneID);
+    int ret = DeviceProperties_set_zone(m_DSMApiHandle, _dsMeterID, _deviceID, _zoneID);
     DSBusInterface::checkResultCode(ret);
   } // setZoneID
 
-  void DSStructureModifyingBusInterface::createZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  void DSStructureModifyingBusInterface::createZone(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = ZoneModify_add(m_DSMApiHandle, meterDSID, _zoneID);
+    int ret = ZoneModify_add(m_DSMApiHandle, _dsMeterID, _zoneID);
     DSBusInterface::checkResultCode(ret);
   } // createZone
 
-  void DSStructureModifyingBusInterface::removeZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+  void DSStructureModifyingBusInterface::removeZone(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = ZoneModify_remove(m_DSMApiHandle, meterDSID, _zoneID);
+    int ret = ZoneModify_remove(m_DSMApiHandle, _dsMeterID, _zoneID);
 
-    if (IsBroadcastId(meterDSID)) {
+    if (IsBroadcastDsuid(_dsMeterID)) {
       DSBusInterface::checkBroadcastResultCode(ret);
     } else {
       DSBusInterface::checkResultCode(ret);
     }
   } // removeZone
 
-  void DSStructureModifyingBusInterface::addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+  void DSStructureModifyingBusInterface::addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, meterDSID, _deviceID, _groupID);
+    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
     sleep(1); // #2578 prevent dS485 bus flooding with multiple requests
     DSBusInterface::checkResultCode(ret);
   } // addToGroup
 
-  void DSStructureModifyingBusInterface::removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+  void DSStructureModifyingBusInterface::removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, meterDSID, _deviceID, _groupID);
+    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
     DSBusInterface::checkResultCode(ret);
   } // removeFromGroup
 
-  void DSStructureModifyingBusInterface::removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+  void DSStructureModifyingBusInterface::removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    if (IsNullId(meterDSID)) {
+    if (IsNullDsuid(_dsMeterID)) {
       return;
     }
 
-    int ret = CircuitRemoveDevice_by_id(m_DSMApiHandle, meterDSID, _deviceID);
+    int ret = CircuitRemoveDevice_by_id(m_DSMApiHandle, _dsMeterID, _deviceID);
     DSBusInterface::checkResultCode(ret);
   } // removeDeviceFromDSMeter
 
-  void DSStructureModifyingBusInterface::removeDeviceFromDSMeters(const dss_dsid_t& _deviceDSID)
+  void DSStructureModifyingBusInterface::removeDeviceFromDSMeters(const dsuid_t& _deviceDSID)
   {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t broadcastDSID;
-    SetBroadcastId(broadcastDSID);
-    int ret = CircuitRemoveDevice_by_dsid(m_DSMApiHandle, broadcastDSID, _deviceDSID.lower);
+    dsuid_t broadcastDSID;
+    SetBroadcastDsuid(broadcastDSID);
+    int ret = CircuitRemoveDevice_by_dsuid(m_DSMApiHandle, broadcastDSID, _deviceDSID);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeDeviceFromDSMeters
 
@@ -135,7 +121,7 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
   
-  void DSStructureModifyingBusInterface::deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
+  void DSStructureModifyingBusInterface::deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -144,13 +130,11 @@ namespace dss {
     uint8_t name[20];
     strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
     name[19] = '\0';
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
-    int ret = DeviceProperties_set_name(m_DSMApiHandle, meterDSID, _deviceID, name);
+    int ret = DeviceProperties_set_name(m_DSMApiHandle, _meterDSID, _deviceID, name);
     DSBusInterface::checkResultCode(ret);
   } // deviceSetName
 
-  void DSStructureModifyingBusInterface::meterSetName(dss_dsid_t _meterDSID, const std::string& _name) {
+  void DSStructureModifyingBusInterface::meterSetName(dsuid_t _meterDSID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -159,9 +143,7 @@ namespace dss {
     uint8_t name[20];
     strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
     name[19] = '\0';
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
-    int ret = dSMProperties_set_name(m_DSMApiHandle, meterDSID, name);
+    int ret = dSMProperties_set_name(m_DSMApiHandle, _meterDSID, name);
     DSBusInterface::checkResultCode(ret);
   } // meterSetName
 
@@ -213,34 +195,21 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
 
-  void DSStructureModifyingBusInterface::sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+  void DSStructureModifyingBusInterface::setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupSensorPush(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sourceID.lower, _sensorType, _sensorValue, 1);
-    DSBusInterface::checkBroadcastResultCode(ret);
-  } // sensorPush
-
-  void DSStructureModifyingBusInterface::setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = DeviceProperties_set_button_set_local_priority(m_DSMApiHandle, meterDSID, _deviceID, _setsPriority ? 1 : 0);
+    int ret = DeviceProperties_set_button_set_local_priority(m_DSMApiHandle, _dsMeterID, _deviceID, _setsPriority ? 1 : 0);
     DSBusInterface::checkResultCode(ret);
   } // setButtonSetsLocalPriority
 
-  void DSStructureModifyingBusInterface::setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
+  void DSStructureModifyingBusInterface::setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = DeviceProperties_set_button_set_no_coming_home_call(m_DSMApiHandle, meterDSID, _deviceID, _callsPresent ? 0 : 1);
+    int ret = DeviceProperties_set_button_set_no_coming_home_call(m_DSMApiHandle, _dsMeterID, _deviceID, _callsPresent ? 0 : 1);
     DSBusInterface::checkResultCode(ret);
   } // setButtonCallsPresent
 

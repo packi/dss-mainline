@@ -42,7 +42,7 @@ namespace dss {
   class Group;
 
   typedef struct {
-    dss_dsid_t DSID;
+    dsuid_t DSID;
     uint32_t SoftwareRevisionARM;
     uint32_t SoftwareRevisionDSP;
     uint32_t HardwareVersion;
@@ -85,7 +85,7 @@ namespace dss {
     uint8_t OutputMode;
     uint8_t LTMode;
     std::vector<int> Groups;
-    dss_dsid_t DSID;
+    dsuid_t DSID;
     uint8_t ButtonID;
     uint8_t GroupMembership;
     uint8_t ActiveGroup;
@@ -175,7 +175,6 @@ namespace dss {
 
     /** Queries sensor value & type from a device */
     virtual uint32_t getSensorValue(const Device& _device, const int _sensorIndex) = 0;
-    virtual uint8_t getSensorType(const Device& _device, const int _sensorIndex) = 0;
 
     /** add device to a user group */
     virtual void addGroup(const Device& _device, const int _groupId) = 0;
@@ -194,55 +193,55 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters() = 0;
 
     /** Returns the dsMeter-spec for a dsMeter */
-    virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID) = 0;
+    virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID) = 0;
 
     /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
-    virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID) = 0;
+    virtual std::vector<int> getZones(const dsuid_t& _dsMeterID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
-    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
-    virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
-    virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
 
-    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
-    virtual std::bitset<7> getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
-    virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;
+    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual bool getEnergyBorder(const dsuid_t& _dsMeterID, int& _lower, int& _upper) = 0;
 
     /** Returns the function, product and revision id of the device. */
-    virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) = 0;
+    virtual DeviceSpec_t deviceGetSpec(devid_t _id, dsuid_t _dsMeterID) = 0;
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
-    virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) = 0;
+    virtual std::string getSceneName(dsuid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) = 0;
 
     /** returns the hash over the dSMeter's datamodel */
-    virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID) = 0;
+    virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {
   public:
     /** Adds the given device to the specified zone. */
-    virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
+    virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
 
     /** Creates a new Zone on the given dsMeter */
-    virtual void createZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual void createZone(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Removes the zone \a _zoneID on the dsMeter \a _dsMeterID */
-    virtual void removeZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual void removeZone(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Adds a device to a given group */
-    virtual void addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
+    virtual void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
     /** Removes a device from a given group */
-    virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
+    virtual void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
 
     /** Removes the device from the dSM data model **/
-    virtual void removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
-    virtual void removeDeviceFromDSMeters(const dss_dsid_t& _DeviceDSID) = 0;
+    virtual void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID) = 0;
+    virtual void removeDeviceFromDSMeters(const dsuid_t& _DeviceDSID) = 0;
 
     /** Sets the name of a scene */
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) = 0;
-    virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) = 0;
-    virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name) = 0;
+    virtual void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) = 0;
+    virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) = 0;
 
     /** Create and manage user groups */
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
@@ -250,11 +249,8 @@ namespace dss {
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
-    /** Send sensoric data downstream to devices */
-    virtual void sensorPush(uint16_t _zoneID, uint8_t _groupID, dss_dsid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) = 0;
-
-    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
-    virtual void setButtonCallsPresent(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
+    virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
+    virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
@@ -270,8 +266,8 @@ namespace dss {
     virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
+    virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) = 0;
   }; // ActionRequestInterface
-
 
   class MeteringBusInterface {
   public:
@@ -279,10 +275,10 @@ namespace dss {
     virtual void requestMeterData() = 0;
 
     /** Returns the current power-consumption in mW */
-    virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID) = 0;
+    virtual unsigned long getPowerConsumption(const dsuid_t& _dsMeterID) = 0;
 
     /** Returns the meter value in Wh */
-    virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID) = 0;
+    virtual unsigned long getEnergyMeterValue(const dsuid_t& _dsMeterID) = 0;
 
     virtual ~MeteringBusInterface() {}; // please the compiler (virtual dtor)
   }; // MeteringBusInterface
@@ -290,7 +286,7 @@ namespace dss {
   class BusEventSink {
   public:
     virtual void onGroupCallScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _originDeviceId,
@@ -300,7 +296,7 @@ namespace dss {
                                   const std::string _token,
                                   const bool _force) = 0;
     virtual void onGroupUndoScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _originDeviceId,
@@ -310,7 +306,7 @@ namespace dss {
                                   const callOrigin_t _origin,
                                   const std::string _token) = 0;
     virtual void onGroupBlink(BusInterface* _source,
-                              const dss_dsid_t& _dsMeterID,
+                              const dsuid_t& _dsMeterID,
                               const int _zoneID,
                               const int _groupID,
                               const int _originDeviceId,
@@ -318,7 +314,7 @@ namespace dss {
                               const callOrigin_t _origin,
                               const std::string _token) = 0;
     virtual void onDeviceCallScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
@@ -327,14 +323,14 @@ namespace dss {
                                   const std::string _token,
                                   const bool _force) = 0;
     virtual void onDeviceBlink(BusInterface* _source,
-                               const dss_dsid_t& _dsMeterID,
+                               const dsuid_t& _dsMeterID,
                                const int _deviceID,
                                const int _originDeviceId,
                                const SceneAccessCategory _category,
                                const callOrigin_t _origin,
                                const std::string _token) = 0;
     virtual void onDeviceUndoScene(BusInterface* _source,
-                                  const dss_dsid_t& _dsMeterID,
+                                  const dsuid_t& _dsMeterID,
                                   const int _deviceID,
                                   const int _originDeviceId,
                                   const SceneAccessCategory _category,
@@ -343,9 +339,19 @@ namespace dss {
                                   const callOrigin_t _origin,
                                   const std::string _token) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
-                                 const dss_dsid_t& _dsMeterID,
+                                 const dsuid_t& _dsMeterID,
                                  const unsigned int _powerW,
                                  const unsigned int _energyWs) = 0;
+    virtual void onZoneSensorValue(BusInterface* _source,
+                                   const dsuid_t _dsMeterID,
+                                   const std::string& _sourceDevice,
+                                   const int& _zoneID,
+                                   const int& _groupID,
+                                   const int& _sensorType,
+                                   const int& _sensorValue,
+                                   const int& _precision,
+                                   const SceneAccessCategory _category,
+                                   const callOrigin_t _origin) = 0;
     virtual ~BusEventSink() {};
   };
 

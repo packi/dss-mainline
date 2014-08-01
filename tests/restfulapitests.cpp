@@ -22,43 +22,64 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
+
 #include <boost/test/unit_test.hpp>
 
-#include <boost/filesystem.hpp>
-
-#include "src/web/restful.h"
-#include "src/web/webserverapi.h"
-#include "src/web/restfulapiwriter.h"
+#include "src/event.h"
+#include "src/eventsubscriptionsession.h"
 
 using namespace dss;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(RestfulAPITests)
 
-BOOST_AUTO_TEST_CASE(testDeclaring) {
-    RestfulAPI api;
-    BOOST_CHECK(!api.hasClass("apartment"));
-    
-    RestfulClass& clsApartment = api.addClass("apartment")
-       .withDocumentation("A wrapper for global functions as well as adressing all devices connected to the dSS");
+BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribe) {
+  dss::EventInterpreter interp(NULL);
 
-    BOOST_CHECK(api.hasClass("apartment"));
-    BOOST_CHECK(!clsApartment.hasMethod("getName"));
+  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, 0x7f));
+  std::vector<dss::EventSubscriptionSession_t> coll;
 
-     clsApartment.addMethod("getName")
-      .withDocumentation("Returns the name of the apartment");
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
+  coll.push_back(subs);
+  coll.push_back(subs2);
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) != coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs2) != coll.end());
 
-    BOOST_CHECK(clsApartment.hasMethod("getName"));
+  coll.erase(std::remove(coll.begin(), coll.end(), subs), coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs2) == coll.end());
+
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.push_back(subs);
+  coll.erase(std::remove(coll.begin(), coll.end(), subs), coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
+  BOOST_CHECK(coll.empty());
 }
 
-BOOST_AUTO_TEST_CASE(testRestfulAPIWriter) {
-  const std::string fileName = getTempDir() + "api.xml";
-  fs::remove(fileName);
-  WebServerAPI api;
-  RestfulAPIWriter::writeToXML(*api.createRestfulAPI(), fileName);
+BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribeByTokenId) {
+  dss::EventInterpreter interp(NULL);
 
-  BOOST_CHECK(fs::exists(fileName));
-  fs::remove(fileName);
+  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs3(new dss::EventSubscriptionSession(interp, 0x17));
+  std::vector<dss::EventSubscriptionSession_t> coll;
+
+  coll.push_back(subs);
+  coll.push_back(subs2);
+  coll.erase(std::remove_if(coll.begin(), coll.end(),
+                            dss::EventSubscriptionSessionSelectById(0x7f)), coll.end());
+  BOOST_CHECK(coll.empty());
+
+  coll.push_back(subs);
+  coll.push_back(subs2);
+  coll.push_back(subs3);
+  coll.erase(std::remove_if(coll.begin(), coll.end(),
+                            dss::EventSubscriptionSessionSelectById(0x7f)), coll.end());
+  BOOST_CHECK(std::find(coll.begin(), coll.end(), subs3) != coll.end());
+  BOOST_CHECK(coll.size() == 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

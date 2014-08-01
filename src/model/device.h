@@ -134,7 +134,9 @@ namespace dss {
     int m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
+    bool m_sensorValueValidity;
     unsigned int m_sensorValue;
+    double m_sensorValueFloat;
     DateTime m_sensorValueTS;
   } DeviceSensor_t;
 
@@ -186,13 +188,17 @@ namespace dss {
                  public boost::noncopyable {
   private:
     std::string m_Name;
-    dss_dsid_t m_DSID;
+    dsuid_t m_DSID;
     devid_t m_ShortAddress;
     devid_t m_LastKnownShortAddress;
     int m_ZoneID;
     int m_LastKnownZoneID;
-    dss_dsid_t m_DSMeterDSID;
-    dss_dsid_t m_LastKnownMeterDSID;
+    dsuid_t m_DSMeterDSID;
+    dsuid_t m_LastKnownMeterDSID;
+    std::string m_DSMeterDSIDstr; // for proptree publishing
+    std::string m_DSMeterDSUIDstr; // for proptree publishing
+    std::string m_LastKnownMeterDSIDstr; // for proptree publishing
+    std::string m_LastKnownMeterDSUIDstr; // for proptree publishing
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_FunctionID;
@@ -263,7 +269,7 @@ namespace dss {
 
   public:
     /** Creates and initializes a device. */
-    Device(const dss_dsid_t _dsid, Apartment* _pApartment);
+    Device(const dsuid_t _dsid, Apartment* _pApartment);
     virtual ~Device();
 
     /** @copydoc DeviceReference::isOn() */
@@ -271,6 +277,7 @@ namespace dss {
 
     /** Set device configuration values */
     void setDeviceConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value);
+    void setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex, uint16_t _value);
     void setDeviceButtonID(uint8_t _buttonId);
     void setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup);
     void setDeviceJokerGroup(uint8_t _groupId);
@@ -454,12 +461,12 @@ namespace dss {
     devid_t getLastKnownShortAddress() const;
     void setLastKnownShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
-    dss_dsid_t getDSID() const;
+    dsuid_t getDSID() const;
     /** Returns the DSID of the dsMeter the device is connected to */
-    dss_dsid_t getDSMeterDSID() const;
+    dsuid_t getDSMeterDSID() const;
 
-    const dss_dsid_t& getLastKnownDSMeterDSID() const;
-    void setLastKnownDSMeterDSID(const dss_dsid_t& _value);
+    const dsuid_t& getLastKnownDSMeterDSID() const;
+    void setLastKnownDSMeterDSID(const dsuid_t& _value);
     void setDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
 
     /** Returns the zone ID the device resides in. */
@@ -584,6 +591,9 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
+    const void setSensorValue(int _sensorIndex, double _sensorValue) const;
+    const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
+    bool isSensorDataValid(int _sensorIndex) const;
 
     void setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels);
     const int getOutputChannelCount() const;
@@ -594,6 +604,35 @@ namespace dss {
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
 
+  class DeviceBank3_BL {
+  public:
+    DeviceBank3_BL(boost::shared_ptr<Device> device);
+
+    void setValveProtectionTimer(uint16_t timeout);
+    uint16_t getValveProtectionTimer();
+    void setEmergencySetPoint(int8_t set_point);
+    int8_t getEmergencySetPoint();
+    void setEmergencyTimer(int16_t timeout);
+    uint16_t getEmergencyTimer();
+
+    void setPwmPeriod(uint16_t pwmPeriod);
+    uint16_t getPwmPeriod();
+    void setPwmMinX(int8_t set_point);
+    int8_t getPwmMinX();
+    void setPwmMaxX(int8_t set_point);
+    int8_t getPwmMaxX();
+    void setPwmMinY(int8_t set_point);
+    int8_t getPwmMinY();
+    void setPwmMaxY(int8_t set_point);
+    int8_t getPwmMaxY();
+    void setPwmConfig(uint8_t config);
+    uint8_t getPwmConfig();
+    void setPwmOffset(int8_t config);
+    int8_t getPwmOffset();
+
+  private:
+    boost::shared_ptr<Device> m_device;
+  };
 } // namespace dss
 
 #endif // DEVICE_H

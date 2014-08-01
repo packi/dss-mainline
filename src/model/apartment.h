@@ -80,9 +80,9 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Returns a reference to the device with the DSID \a _dsid */
-    boost::shared_ptr<Device> getDeviceByDSID(const dss_dsid_t _dsid) const;
+    boost::shared_ptr<Device> getDeviceByDSID(const dsuid_t _dsid) const;
     /** @copydoc getDeviceByDSID */
-    boost::shared_ptr<Device> getDeviceByDSID(const dss_dsid_t _dsid);
+    boost::shared_ptr<Device> getDeviceByDSID(const dsuid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
     boost::shared_ptr<Device> getDeviceByName(const std::string& _name);
     std::vector<boost::shared_ptr<Device> > getDevicesVector() { return m_Devices; }
@@ -97,7 +97,7 @@ namespace dss {
     /** Returns a DSMeter by name */
     boost::shared_ptr<DSMeter> getDSMeter(const std::string& _modName);
     /** Returns a DSMeter by DSID  */
-    boost::shared_ptr<DSMeter> getDSMeterByDSID(const dss_dsid_t _dsid);
+    boost::shared_ptr<DSMeter> getDSMeterByDSID(const dsuid_t _dsid);
     /** Returns a vector of all dsMeters */
     std::vector<boost::shared_ptr<DSMeter> > getDSMeters();
 
@@ -118,22 +118,22 @@ namespace dss {
                                       const std::string& _stateName) const;
 
     /** Allocates a device and returns a reference to it. */
-    boost::shared_ptr<Device> allocateDevice(const dss_dsid_t _dsid);
+    boost::shared_ptr<Device> allocateDevice(const dsuid_t _dsid);
     /** Allocates a zone and returns a reference to it. Should a zone with
       * the given _zoneID already exist, a reference to the existing zone will
       * be returned.
       * NOTE: Outside code should never call this function
       */
     boost::shared_ptr<Zone> allocateZone(int _zoneID);
-    boost::shared_ptr<DSMeter> allocateDSMeter(const dss_dsid_t _dsid);
+    boost::shared_ptr<DSMeter> allocateDSMeter(const dsuid_t _dsid);
     boost::shared_ptr<State> allocateState(eStateType _type,
                                            const std::string& _name,
                                            const std::string& _scriptId);
     void allocateState(boost::shared_ptr<State> _state);
 
     void removeZone(int _zoneID);
-    void removeDevice(dss_dsid_t _device);
-    void removeDSMeter(dss_dsid_t _dsMeter);
+    void removeDevice(dsuid_t _device);
+    void removeDSMeter(dsuid_t _dsMeter);
     void removeInactiveMeters();
     void removeState(const std::string& _name);
 

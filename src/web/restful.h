@@ -23,142 +23,11 @@
 #ifndef RESTFUL_H_INCLUDED
 #define RESTFUL_H_INCLUDED
 
-#include "src/base.h"
-
-#include <string>
-#include <vector>
-
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
+#include "src/base.h"
+
 namespace dss {
-
-  class RestfulAPI;
-  class RestfulClass;
-  class RestfulMethod;
-  class RestfulParameter;
-
-  class RestfulParameter {
-  private:
-    std::string m_Name;
-    std::string m_TypeName;
-    bool m_Required;
-  public:
-    RestfulParameter(const std::string& _name, const std::string& _typeName, bool _required)
-    : m_Name(_name), m_TypeName(_typeName), m_Required(_required)
-    { }
-
-    const std::string& getName() const { return m_Name; }
-    const std::string& getTypeName() const { return m_TypeName; }
-    bool isRequired() const { return m_Required; }
-  }; // RestfulParameter
-
-  class RestfulMethod {
-  private:
-    std::string m_Name;
-    std::string m_DocumentationShort;
-    std::string m_DocumentationLong;
-    boost::ptr_vector<RestfulParameter> m_Parameter;
-  public:
-    RestfulMethod(const std::string& _name)
-    : m_Name(_name)
-    { }
-
-    RestfulMethod& withParameter(const std::string& _name) {
-      m_Parameter.push_back(new RestfulParameter(_name, "string", false));
-      return *this;
-    }
-    RestfulMethod& withParameter(const std::string& _name, const std::string& _typeName) {
-      m_Parameter.push_back(new RestfulParameter(_name, _typeName, false));
-      return *this;
-    }
-    RestfulMethod& withParameter(const std::string& _name, const std::string& _typeName, bool _required) {
-      m_Parameter.push_back(new RestfulParameter(_name, _typeName, _required));
-      return *this;
-    }
-
-    RestfulMethod& withDocumentation(const std::string& _short, const std::string& _long = "") {
-      m_DocumentationShort = _short;
-      m_DocumentationLong = _long;
-      return *this;
-    }
-
-    bool checkRequest(const std::string& _uri, const Properties& _parameter);
-
-    const std::string& getName() const { return m_Name; }
-    const boost::ptr_vector<RestfulParameter>& getParameter() const { return m_Parameter; }
-    const std::string& getDocumentationShort() const { return m_DocumentationShort; }
-    const std::string& getDocumentationLong() const { return m_DocumentationLong; }
-  }; // RestfulMethod
-
-  class RestfulClass {
-  private:
-    std::string m_Name;
-    boost::ptr_vector<RestfulMethod> m_Methods;
-    boost::ptr_vector<RestfulMethod> m_StaticMethods;
-    boost::ptr_vector<RestfulParameter> m_InstanceParameter;
-    std::string m_DocumentationShort;
-    std::string m_DocumentationLong;
-    //RestfulAPI& m_API;
-  public:
-    RestfulClass(const std::string& _name, RestfulAPI& _api)
-    : m_Name(_name)//, m_API(_api)
-    { }
-
-    RestfulMethod& addMethod(const std::string& _name) {
-      m_Methods.push_back(new RestfulMethod(_name));
-      return m_Methods.back();
-    }
-
-    RestfulMethod& addStaticMethod(const std::string& _name) {
-      m_StaticMethods.push_back(new RestfulMethod(_name));
-      return m_StaticMethods.back();
-    }
-    RestfulClass& inheritFrom(const std::string& _className);
-
-    RestfulClass& withInstanceParameter(const std::string& _name, const std::string _typeName, bool _required = false) {
-      m_InstanceParameter.push_back(new RestfulParameter(_name, _typeName, _required));
-      return *this;
-    }
-
-    RestfulClass& withDocumentation(const std::string& _short, const std::string& _long = "") {
-      m_DocumentationShort = _short;
-      m_DocumentationLong = _long;
-      return *this;
-    }
-
-    RestfulClass& requireOneOf(const std::string& _parameter1, const std::string& _parameter2) {
-      return *this;
-    }
-
-    bool checkRequest(const std::string& _uri, const Properties& _parameter);
-
-    const std::string& getName() const { return m_Name; }
-    const boost::ptr_vector<RestfulParameter>& getInstanceParameter() const { return m_InstanceParameter; }
-    const boost::ptr_vector<RestfulMethod>& getMethods() const { return m_Methods; }
-    const boost::ptr_vector<RestfulMethod>& getStaticMethods() const { return m_StaticMethods; }
-    const std::string& getDocumentationShort() const { return m_DocumentationShort; }
-    const std::string& getDocumentationLong() const { return m_DocumentationLong; }
-    bool hasMethod(const std::string& _name);
-  }; // RestfulClass
-
-  class RestfulAPI {
-  private:
-    boost::ptr_vector<RestfulClass> m_Classes;
-  public:
-    bool checkRequest(const std::string& _uri, const Properties& _parameter);
-
-    RestfulClass& addClass(const std::string& _className) {
-      RestfulClass* result = new RestfulClass(_className, *this);
-      m_Classes.push_back(result);
-      return *result;
-    }
-
-    const boost::ptr_vector<RestfulClass>& getClasses() const { return m_Classes; }
-
-    bool hasClass(const std::string& _name);
-  }; // RestfulAPI
 
   class RestfulRequest {
   public:
@@ -186,11 +55,14 @@ namespace dss {
       return m_Method;
     } // getMethod
 
-    const std::string getParameter(const std::string& _name) const;
-
     bool hasParameter(const std::string& _name) const {
       return (m_queryString.find("&" + _name + "=") != std::string::npos);
     }
+
+    const std::string getParameter(const std::string& _name) const;
+
+    template <typename T>
+    bool getParameter(const std::string& _name, T &out) const;
 
     bool isActive() const {
       if(m_ActiveCallback) {
@@ -215,7 +87,6 @@ namespace dss {
     std::string m_Method;
     boost::function<bool()> m_ActiveCallback;
   };
-
 } // namespace dss
 
 #endif

@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
+#include <digitalSTROM/dsuid/dsuid.h>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -91,7 +92,12 @@ namespace dss {
       std::vector<boost::shared_ptr<DSMeter> > dsMeters = ext->getApartment().getDSMeters();
       foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
         ScriptObject objEnergy(*ctx, NULL);
-        objEnergy.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        try {
+          objEnergy.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+        objEnergy.setProperty<std::string>("dsuid", dsuid2str(dsMeter->getDSID()));
         objEnergy.setProperty<std::string>("type", "energy");
         jsval childJSVal = OBJECT_TO_JSVAL(objEnergy.getJSObject());
         JSBool res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
@@ -100,7 +106,13 @@ namespace dss {
         }
         iMeter++;
         ScriptObject objEnergyDelta(*ctx, NULL);
-        objEnergyDelta.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        try {
+          objEnergyDelta.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+        } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+
+        objEnergyDelta.setProperty<std::string>("dsuid", dsuid2str(dsMeter->getDSID()));
         objEnergyDelta.setProperty<std::string>("type", "energyDelta");
         childJSVal = OBJECT_TO_JSVAL(objEnergyDelta.getJSObject());
         res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
@@ -109,7 +121,13 @@ namespace dss {
         }
         iMeter++;
         ScriptObject objConsumption(*ctx, NULL);
-        objConsumption.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+        try {
+          objConsumption.setProperty<std::string>("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
+      } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+        }
+
+        objConsumption.setProperty<std::string>("dsuid", dsuid2str(dsMeter->getDSID()));
         objConsumption.setProperty<std::string>("type", "consumption");
         childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());
         res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
@@ -200,7 +218,7 @@ namespace dss {
       }
 
       if(argc < 3) {
-        Logger::getInstance()->log("JS: metering_getValues: need three parameters: (dsid, type, resolution)", lsError);
+        Logger::getInstance()->log("JS: metering_getValues: need three parameters: (dsuid, type, resolution)", lsError);
         return JS_FALSE;
       }
       std::string dsid = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
@@ -229,9 +247,9 @@ namespace dss {
       }
       try {
         MeterSetBuilder builder(ext->getApartment());
-        pMeters = builder.buildSet(dsid);
+        pMeters = builder.buildSet(dsid); // setbuilder supports dSID and dSUID
       } catch(std::runtime_error& e) {
-        Logger::getInstance()->log("Couldn't parse parameter 'dsid': '" + std::string(e.what()) + "'", lsWarning);
+        Logger::getInstance()->log("Couldn't parse parameter 'dsuid': '" + std::string(e.what()) + "'", lsWarning);
         JS_SET_RVAL(cx, vp, JSVAL_NULL);
         return JS_TRUE;
       }

@@ -37,7 +37,7 @@ namespace dss {
   {}
 
   void DefaultBusEventSink::onGroupCallScene(BusInterface* _source,
-                                const dss_dsid_t& _dsMeterID,
+                                const dsuid_t& _dsMeterID,
                                 const int _zoneID,
                                 const int _groupID,
                                 const int _originDeviceId,
@@ -58,7 +58,7 @@ namespace dss {
   } // onGroupCallScene
 
   void DefaultBusEventSink::onGroupUndoScene(BusInterface* _source,
-                                const dss_dsid_t& _dsMeterID,
+                                const dsuid_t& _dsMeterID,
                                 const int _zoneID,
                                 const int _groupID,
                                 const int _originDeviceId,
@@ -82,7 +82,7 @@ namespace dss {
   } // onGroupUndoScene
 
   void DefaultBusEventSink::onGroupBlink(BusInterface* _source,
-                            const dss_dsid_t& _dsMeterID,
+                            const dsuid_t& _dsMeterID,
                             const int _zoneID,
                             const int _groupID,
                             const int _originDeviceId,
@@ -99,7 +99,7 @@ namespace dss {
   } // onGroupCallScene
 
   void DefaultBusEventSink::onDeviceCallScene(BusInterface* _source,
-                                const dss_dsid_t& _dsMeterID,
+                                const dsuid_t& _dsMeterID,
                                 const int _deviceID,
                                 const int _originDeviceId,
                                 const SceneAccessCategory _category,
@@ -118,7 +118,7 @@ namespace dss {
   } // onDeviceCallScene
 
   void DefaultBusEventSink::onDeviceUndoScene(BusInterface* _source,
-                                const dss_dsid_t& _dsMeterID,
+                                const dsuid_t& _dsMeterID,
                                 const int _deviceID,
                                 const int _originDeviceId,
                                 const SceneAccessCategory _category,
@@ -137,7 +137,7 @@ namespace dss {
   } // onDeviceUndoScene
 
   void DefaultBusEventSink::onDeviceBlink(BusInterface* _source,
-                             const dss_dsid_t& _dsMeterID,
+                             const dsuid_t& _dsMeterID,
                              const int _deviceID,
                              const int _originDeviceId,
                              const SceneAccessCategory _category,
@@ -152,7 +152,7 @@ namespace dss {
   } // onDeviceCallScene
 
   void DefaultBusEventSink::onMeteringEvent(BusInterface* _source,
-                               const dss_dsid_t& _dsMeterID,
+                               const dsuid_t& _dsMeterID,
                                const unsigned int _powerW,
                                const unsigned int _energyWs) {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etMeteringValues,
@@ -161,4 +161,25 @@ namespace dss {
     pEvent->addParameter(_energyWs);
     m_pModelMaintenance->addModelEvent(pEvent);
   }
+
+  void DefaultBusEventSink::onZoneSensorValue(BusInterface* _source,
+      const dsuid_t _dsMeterID,
+      const std::string& _sourceDevice,
+      const int& _zoneID,
+      const int& _groupID,
+      const int& _sensorType,
+      const int& _sensorValue,
+      const int& _precision,
+      const SceneAccessCategory _category,
+      const callOrigin_t _origin) {
+    ModelEvent* pEvent = new ModelEventWithStrings(ModelEvent::etZoneSensorValue, _dsMeterID);
+    pEvent->addParameter(_zoneID);
+    pEvent->addParameter(_groupID);
+    pEvent->addParameter(_sensorType);
+    pEvent->addParameter(_sensorValue);
+    pEvent->addParameter(_precision);
+    pEvent->setSingleStringParameter(_sourceDevice);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // onZoneSensorValue
+
 } // namespace dss

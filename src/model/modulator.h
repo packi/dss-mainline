@@ -51,7 +51,7 @@ namespace dss {
   class DSMeter : public DeviceContainer,
                   public PhysicalModelItem {
   private:
-    dss_dsid_t m_DSID;
+    dsuid_t m_DSID;
     DeviceVector m_ConnectedDevices;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
@@ -80,12 +80,12 @@ namespace dss {
     void publishToPropertyTree();
   public:
     /** Constructs a dsMeter with the given dsid. */
-    DSMeter(const dss_dsid_t _dsid, Apartment* _pApartment);
+    DSMeter(const dsuid_t _dsid, Apartment* _pApartment);
     virtual ~DSMeter() {};
     virtual Set getDevices() const;
 
     /** Returns the DSID of the DSMeter */
-    dss_dsid_t getDSID() const;
+    dsuid_t getDSID() const;
 
     /** Adds a DeviceReference to the dsMeters devices list */
     void addDevice(const DeviceReference& _device);

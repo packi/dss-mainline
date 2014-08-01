@@ -65,7 +65,7 @@ namespace dss {
     } else {
       // don't warn about multiple additions to zone 0
       if(m_ZoneID != 0) {
-        Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsWarning);
+        Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + dsuid2str(_device.getDSID()), lsWarning);
       }
     }
     _device.getDevice()->setZoneID(m_ZoneID);
@@ -102,7 +102,7 @@ namespace dss {
         for(std::vector<boost::shared_ptr<Group> >::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
             ipGroup != e; ++ipGroup)
         {
-          PropertyNodePtr groupNode = m_pPropertyNode->getProperty("groups/group" + intToString((*ipGroup)->getID()) + "/devices/" + _device.getDSID().toString());
+          PropertyNodePtr groupNode = m_pPropertyNode->getProperty("groups/group" + intToString((*ipGroup)->getID()) + "/devices/" + dsuid2str(_device.getDSID()));
           if(groupNode != NULL) {
             groupNode->getParentNode()->removeChild(groupNode);
           }

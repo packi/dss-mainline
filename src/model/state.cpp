@@ -72,7 +72,7 @@ namespace dss {
   }
 
   State::State(boost::shared_ptr<Device> _device, int _inputIndex) :
-      m_name("dev." + _device->getDSID().toString() + "." + intToString(_inputIndex)),
+      m_name("dev." + dsuid2str(_device->getDSID()) + "." + intToString(_inputIndex)),
       m_IsPersistent(true),
       m_state(State_Invalid),
       m_type(StateType_Device),
@@ -95,6 +95,9 @@ namespace dss {
     switch (_group->getStandardGroupID()) {
       case GroupIDYellow:
         logicalName = "light";
+        break;
+      case GroupIDHeating:
+        logicalName = "heating";
         break;
       default:
         break;
@@ -138,7 +141,7 @@ namespace dss {
 
       if (m_providerDev != NULL) {
         PropertyNodePtr devNode = m_providerDev->getPropertyNode();
-        PropertyNodePtr m_pAliasNode = m_pPropertyNode->createProperty("device/" + m_providerDev->getDSID().toString());
+        PropertyNodePtr m_pAliasNode = m_pPropertyNode->createProperty("device/" + dsuid2str(m_providerDev->getDSID()));
         m_pAliasNode->alias(devNode);
         m_pPropertyNode->createProperty("device/inputIndex")
           ->linkToProxy(PropertyProxyReference<int>(m_providerDevInput, false));

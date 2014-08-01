@@ -44,7 +44,12 @@ namespace dss {
     DateTime tmp_date;
 
     boost::shared_ptr<JSONObject> result(new JSONObject());
-    result->addProperty("id", _device.getDSID().toString());
+    try {
+      result->addProperty("id", dsid2str(dsuid_to_dsid(_device.getDSID())));
+    } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
+    }
+    result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
     result->addProperty("name", _device.getName());
     result->addProperty("functionID", _device.getFunctionID());
@@ -60,7 +65,12 @@ namespace dss {
     result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     if(_device.getDevice()->isPresent()) {
-      result->addProperty("meterDSID", _device.getDevice()->getDSMeterDSID().toString());
+      try {
+        result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getDSMeterDSID())));
+      } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+      }
+      result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -69,7 +79,12 @@ namespace dss {
       result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getShortAddress());
     } else {
-      result->addProperty("meterDSID", _device.getDevice()->getLastKnownDSMeterDSID().toString());
+      try {
+        result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID())));
+      } catch (std::runtime_error &err) {
+          Logger::getInstance()->log(err.what());
+      }
+      result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -115,6 +130,8 @@ namespace dss {
     boost::shared_ptr<JSONArrayBase> binaryInputArr(new JSONArrayBase());
     result->addElement("binaryInputs", binaryInputArr);
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
+    result->addProperty("binaryInputCount", (int)binaryInputs.size());
+    result->addProperty("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
     for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       boost::shared_ptr<JSONObject> element(new JSONObject());
       element->addProperty("targetGroupType", (*it)->m_targetGroupType);
@@ -125,6 +142,16 @@ namespace dss {
       binaryInputArr->addElement("", element);
     }
 
+    // check if device has invalid sensor values
+    uint8_t sensorCount = _device.getDevice()->getSensorCount();
+    bool sensorFlag = true;
+    for (uint8_t s = 0; s < sensorCount; s++) {
+      if (!_device.getDevice()->isSensorDataValid(s)) {
+        sensorFlag = false;
+        break;
+      }
+    }
+    result->addProperty("sensorDataValid", sensorFlag);
     return result;
   } // toJSON(DeviceReference)
 
@@ -158,7 +185,7 @@ namespace dss {
         // do not render "slave" devices
         continue;
       }
-      devicesArr->add(devices[iDevice].getDSID().toString());
+      devicesArr->add(dsuid2str(devices[iDevice].getDSID()));
     }
     return result;
   } // toJSON(Group)

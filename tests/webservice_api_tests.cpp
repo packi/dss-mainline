@@ -21,6 +21,7 @@
 using namespace dss;
 
 static const char *websvc_url_authority_test = "https://testdsservices.aizo.com/";
+static const char *websvc_osp_token_test = "76sdf9786f7d6fsd78f6asd7f6sd78f6sdf896as";
 
 BOOST_AUTO_TEST_SUITE(WebserviceTest)
 
@@ -69,6 +70,8 @@ public:
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
     propSystem.getProperty(pp_websvc_url_authority)
       ->setStringValue(websvc_url_authority_test);
+    propSystem.createProperty(pp_websvc_rc_osptoken)
+      ->setStringValue(websvc_osp_token_test);
 
     // TODO: webservice connection fetched original authority, restart it
     WebserviceConnection::shutdown();
@@ -116,7 +119,7 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
   completion.wait(lock);
 
   BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
-  BOOST_CHECK_EQUAL(notifyDone->reply.code, 9); /* unknown dsid */
+  BOOST_CHECK_EQUAL(notifyDone->reply.code, 98); /* no access rights for token */
 }
 
 /* Access Management */

@@ -48,7 +48,9 @@ BOOST_AUTO_TEST_SUITE(Metering)
 
 BOOST_AUTO_TEST_CASE(seriesSizes) {
   Apartment apt(NULL);
-  boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dss_dsid_t(0,13));
+  dsuid_t dsuid;
+  dsuid.id[DSUID_SIZE - 1] = 13;
+  boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
   pMeters.push_back(pMeter);
   dss::Metering metering(NULL);
@@ -141,7 +143,9 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
 
 BOOST_AUTO_TEST_CASE(seriesRanges) {
   Apartment apt(NULL);
-  boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dss_dsid_t(0,13));
+  dsuid_t dsuid;
+  dsuid.id[DSUID_SIZE - 1] = 13;
+  boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
   pMeters.push_back(pMeter);
   dss::Metering metering(NULL);

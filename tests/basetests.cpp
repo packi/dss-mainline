@@ -193,6 +193,11 @@ BOOST_AUTO_TEST_CASE(testSplitString) {
   BOOST_CHECK_EQUAL(std::string("a"), result[0]);
   BOOST_CHECK_EQUAL(std::string("b"), result[1]);
 
+  result = splitString("a,", ',');
+  BOOST_CHECK_EQUAL((size_t)2, result.size());
+  BOOST_CHECK_EQUAL(std::string("a"), result[0]);
+  BOOST_CHECK_EQUAL(std::string(""), result[1]);
+
   result = splitString("a,b,", ',');
   BOOST_CHECK_EQUAL((size_t)3, result.size());
   BOOST_CHECK_EQUAL(std::string("a"), result[0]);
@@ -228,6 +233,15 @@ BOOST_AUTO_TEST_CASE(testSplitString) {
   BOOST_CHECK_EQUAL(std::string(","), result[0]);
   BOOST_CHECK_EQUAL(std::string(","), result[1]);
 
+  result = splitString("\\,", ',');
+  BOOST_CHECK_EQUAL((size_t)1, result.size());
+  BOOST_CHECK_EQUAL(std::string(","), result[0]);
+
+  // TODO, here the user probably wants to escape the '\' not the ',' delimiter,
+  // hence result should contain 2 elements, [ "\\", "" ]
+  result = splitString("\\\\,", ',');
+  BOOST_CHECK_EQUAL((size_t)1, result.size());
+  BOOST_CHECK_EQUAL(std::string("\\,"), result[0]);
 } // testSplitString
 
 BOOST_AUTO_TEST_CASE(testJoinOneElement) {

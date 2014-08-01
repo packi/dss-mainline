@@ -20,10 +20,12 @@
 
 */
 
+#include <digitalSTROM/dsuid/dsuid.h>
 #include "circuitrequesthandler.h"
 
 #include "src/model/modulator.h"
 #include "src/model/apartment.h"
+#include "src/ds485types.h"
 
 #include "src/web/json.h"
 #include "src/model/modelmaintenance.h"
@@ -46,17 +48,25 @@ namespace dss {
 
   WebServerResponse CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string idString = _request.getParameter("id");
-    if(idString.empty()) {
-      return failure("Missing parameter id");
+    std::string dsuidStr = _request.getParameter("dsuid");
+    if (idString.empty() && dsuidStr.empty()) {
+      return failure("Missing parameter dsuid");
     }
-    dss_dsid_t dsid = NullDSID;
+
+    dsuid_t dsuid;
     try {
-      dsid = dss_dsid_t::fromString(idString);
-    } catch(std::invalid_argument&) {
-      return failure("Could not parse dsid");
+      if (dsuidStr.empty()) {
+          dsid_t dsid = str2dsid(idString);
+          dsuid = dsuid_from_dsid(&dsid);
+      } else {
+        dsuid = str2dsuid(dsuidStr);
+      }
+    } catch(std::runtime_error& e) {
+      return failure(e.what());
     }
+
     try {
-      boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+      boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsuid);
       if(_request.getMethod() == "getName") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("name", dsMeter->getName());
@@ -93,7 +103,7 @@ namespace dss {
         throw std::runtime_error("Unhandled function");
       }
     } catch(ItemNotFoundException&) {
-      return failure("Could not find dSMeter with given dsid");
+      return failure("Could not find dSMeter with given dSUID");
     }
   } // handleRequest
 

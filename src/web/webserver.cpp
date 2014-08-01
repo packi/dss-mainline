@@ -40,6 +40,7 @@
 
 #include "src/logger.h"
 #include "src/dss.h"
+#include "src/ds485types.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"
 
@@ -48,7 +49,6 @@
 #include "src/sessionmanager.h"
 
 #include "src/web/restful.h"
-#include "src/web/restfulapiwriter.h"
 #include "src/web/webrequests.h"
 
 #include "src/web/handler/systemrequesthandler.h"
@@ -65,7 +65,6 @@
 
 #include "src/businterface.h"
 
-#include "webserverapi.h"
 #include "json.h"
 
 #include "src/model/device.h"
@@ -207,7 +206,6 @@ namespace dss {
     m_SessionManager->setMaxSessionCount(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionLimit"));
 
     publishJSLogfiles();
-    setupAPI();
     instantiateHandlers();
 
     const char *mgOptions[] = {
@@ -260,11 +258,6 @@ namespace dss {
     }
   } // publishJSLogfiles
 
-  void WebServer::setupAPI() {
-    m_pAPI = WebServerAPI::createRestfulAPI();
-    RestfulAPIWriter::writeToXML(*m_pAPI, "doc/json_api.xml");
-  } // setupAPI
-
   void WebServer::doStart() { } // start
 
   const char* kHandlerApartment = "apartment";
@@ -310,87 +303,74 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  HashMapStringString parseCookies(const char* _cookies) {
-      HashMapStringString result;
+  /**
+   * extractToken
+   * http://tools.ietf.org/html/rfc6265#section-4.1.1
+   */
+  std::string extractToken(const char *_cookie) {
+    if (!_cookie) {
+      return "";
+    }
 
-      if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
-        return result;
-      }
+    // according spec there has to be a space
+    std::string cookie_s = "; " + std::string(_cookie);
+    size_t start = cookie_s.find("; token=");
+    if (std::string::npos == start) {
+      return "";
+    }
+    start += strlen("; token=");
 
-      std::string c = _cookies;
-      std::string pairStr;
-      size_t semi = std::string::npos;
-
-      do {
-        semi = c.find(';');
-        if (semi != std::string::npos) {
-          pairStr = c.substr(0, semi);
-          c = c.substr(semi+1);
-        } else {
-          pairStr = c;
-        }
-
-        size_t eq = pairStr.find('=');
-        if (eq == std::string::npos) {
-          continue;
-        }
-
-        std::string key = pairStr.substr(0, eq);
-        std::string value = pairStr.substr(eq+1);
-
-        key.erase(remove_if(key.begin(), key.end(), isspace), key.end());
-
-        if (key.empty()) {
-          continue;
-        }
-
-        result[key] = value;
-
-
-      } while (semi != std::string::npos);
-
-
-      return result;
+    size_t end = cookie_s.find(';', start);
+    return (end == std::string::npos) ?
+      cookie_s.substr(start) :
+      cookie_s.substr(start, end - start);
   }
 
-  std::string generateCookieString(HashMapStringString _cookies) {
-    std::string result = "";
+  std::string generateCookieString(const std::string& token) {
+    return "token=" + token + "; path=/";
+  }
 
-    HashMapStringString::iterator i;
-    std::string path;
+  /**
+   * emit 'Set-Cookie' header with same name but 'expires' in the past
+   * http://tools.ietf.org/html/rfc6265#section-4.1.2
+   */
+  std::string generateRevokeCookieString() {
+    return "token=; path=/; expires=Wed, 29 April 1970 12:00:00 GMT";
+  }
 
-    for (i = _cookies.begin(); i != _cookies.end(); i++) {
-      if (i->first == "path") {
-        path = i->second;
-        continue;
-      }
-
-      if (!result.empty()) {
-        result = result + "; ";
-      }
-
-      result = result + i->first + "=" + (i->second);
+  /**
+   * extractAuthenticatedUser
+   * http://tools.ietf.org/html/rfc2617
+   */
+  std::string extractAuthenticatedUser(const char *_header) {
+    if (!_header) {
+      return "";
     }
 
-    if (!path.empty()) {
-      if (!result.empty()) {
-        result = result + "; ";
-      }
+    // header:= Digest SP [user | qopc | etc]+ comma separated
+    // user:= "username" "=" quoted-string
+    static const char key[] = " username=\"";
 
-      result = result + "path=" + path;
+    std::string header_s(_header);
+    size_t start = header_s.find(key);
+    if (std::string::npos == start) {
+      return "";
     }
-
-    return result;
+    start += strlen(key);
+    size_t end = header_s.find("\"", start);
+    if (std::string::npos == end) {
+      return "";
+    }
+    return header_s.substr(start, end - start);
   }
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               HashMapStringString _injectedCookies,
+                               const std::string &trustedSetCookie,
                                boost::shared_ptr<Session> _session) {
+    std::string result, setCookieHeader = trustedSetCookie;
 
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
-
-    std::string result;
     if(m_Handlers[request.getClass()] != NULL) {
       try {
         if ((_session == NULL) && (request.getClass() != kHandlerSystem)) {
@@ -406,35 +386,38 @@ namespace dss {
             result = callback + "(" + response.getResponse()->toString() + ")";
           }
         }
-        std::string cookies;
-        if(response.getCookies().empty()) {
-          cookies = generateCookieString(_injectedCookies);
-        } else {
-          cookies = generateCookieString(response.getCookies());
+        if (response.isRevokeSessionToken()) {
+          setCookieHeader = generateRevokeCookieString();
+        } else if (response.isPublishSessionToken()) {
+          // CAUTION: the session is new, the _session argument
+          // of this function is NULL
+          setCookieHeader = generateCookieString(response.getNewSessionToken());
+          // NOTE, this way we might override the trusted login session
+          // IGNORE, it doesn't happen and if so, we don't care either
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 200, cookies, result);
+        emitHTTPJsonPacket(_connection, 200, setCookieHeader, result);
       } catch(SecurityException& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 403, "", result);;
+        emitHTTPJsonPacket(_connection, 403, setCookieHeader, result);;
       } catch(std::runtime_error& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 500, "", result);
+        emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
       } catch(std::invalid_argument& e) {
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 500, "", result);
+        emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
       }
     } else {
       log("Unknown function '" + request.getUrlPath() + "'", lsError);
@@ -443,14 +426,14 @@ namespace dss {
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
       sstream << "}";
       result = sstream.str();
-      emitHTTPJsonPacket(_connection, 404, "", result);
+      emitHTTPJsonPacket(_connection, 404, setCookieHeader, result);
     }
     return _connection;
   } // jsonHandler
 
   void *WebServer::iconHandler(struct mg_connection* _connection,
                                RestfulRequest &request,
-                               HashMapStringString _injectedCookies,
+                               const std::string &setCookieHeader,
                                boost::shared_ptr<Session> _session) {
     std::string result;
     try {
@@ -462,21 +445,28 @@ namespace dss {
         throw std::runtime_error("unhandled function");
       }
 
+      std::string dsuidStr = request.getParameter("dsuid");
       std::string dsidStr = request.getParameter("dsid");
-      if (dsidStr.empty()) {
-        throw std::invalid_argument("missing device dsid parameter");
+      if (dsuidStr.empty() && dsidStr.empty()) {
+        throw std::invalid_argument("missing device dsuid parameter");
       }
 
-      dss_dsid_t deviceDSID = dss_dsid_t::fromString(dsidStr);
+      dsuid_t deviceDSUID;
       boost::shared_ptr<Device> result;
-      result = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+      if (!dsuidStr.empty()) {
+        deviceDSUID = str2dsuid(dsuidStr);
+      } else if (!dsidStr.empty()) {
+        dsid_t deviceDSID = str2dsid(dsidStr);
+        deviceDSUID = dsuid_from_dsid(deviceDSID);
+      }
+      result = getDSS().getApartment().getDeviceByDSID(deviceDSUID);
       if (result == NULL) {
-        throw std::runtime_error("device with id " + dsidStr + " not found");
+        throw std::runtime_error("device with id " + dsuid2str(deviceDSUID) + " not found");
       }
 
       std::string icon = result->getIconPath();
       if (icon.empty()) {
-        throw std::runtime_error("icon for device " + dsidStr + " not found");
+        throw std::runtime_error("icon for device " + dsuid2str(deviceDSUID) + " not found");
       }
 
       std::string iconBasePath =
@@ -491,42 +481,42 @@ namespace dss {
       if (boost::filesystem::exists(icon)) {
         FILE *fp = fopen(icon.c_str(), "r");
         if (fp != NULL) {
-          emitHTTPHeader(_connection, 200, fs::file_size(icon), "image/png", "");
+          emitHTTPHeader(_connection, 200, fs::file_size(icon), "image/png",
+                         setCookieHeader);
           mg_send_file(_connection, fp, fs::file_size(icon));
           fclose(fp);
         } else {
-          throw std::runtime_error("icon file " + icon + " for device " +
-                                   dsidStr + " not found");
+          throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
         }
       } else {
-        throw std::runtime_error("icon file " + icon + " for device " +
-                                 dsidStr + " not found");
+        throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
       }
     } catch(SecurityException& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPJsonPacket(_connection, 500, "", result);
+      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     } catch(std::runtime_error& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPJsonPacket(_connection, 500, "", result);
+      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     } catch(std::invalid_argument& e) {
       JSONObject resultObj;
       resultObj.addProperty("ok", false);
       resultObj.addProperty("message", e.what());
       result = resultObj.toString();
-      emitHTTPJsonPacket(_connection, 500, "", result);
+      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     }
 
     return _connection;
   } // iconHandler
 
   void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                        RestfulRequest &request) {
+                                        RestfulRequest &request,
+                                        const std::string &trustedSetCookie) {
     std::string path = request.getUrlPath();
     if (path.empty()) {
       path = "/";
@@ -578,13 +568,15 @@ namespace dss {
 
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
-    emitHTTPTextPacket(_connection, 200, "", tmp);
+    emitHTTPTextPacket(_connection, 200, trustedSetCookie, tmp);
     return _connection;
   } // httpBrowseProperties
 
   void *WebServer::httpRequestCallback(enum mg_event event,
                                        struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
+    std::string trustedLoginCookie;
+
     if (event != MG_NEW_REQUEST || !_info->uri || !_info->remote_ip) {
       return NULL;
     }
@@ -617,53 +609,42 @@ namespace dss {
     }
 
     RestfulRequest request(sublevel, _info->query_string ?: "");
-    const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapStringString cookies = parseCookies(cookie);
 
     boost::shared_ptr<Session> session;
-    std::string token = cookies["token"];
+    std::string token = extractToken(mg_get_header(_connection, "Cookie"));
     if (token.empty()) {
       token = request.getParameter("token");
     }
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
-    HashMapStringString injectedCookies;
 
-    // if we're coming from a trusted port, impersonate that user and start
-    // a new session on his behalf
-    if(((session == NULL) || (session->getUser() == NULL)) &&
-            (_info->local_port == self.m_TrustedPort)) {
-      const char* digestCString = mg_get_header(_connection, "Authorization");
-      if(digestCString > 0) {
-        std::string digest = digestCString;
-        const std::string userNamePrefix = "username=\"";
-        std::string::size_type userNamePos = digest.find(userNamePrefix);
-        std::string::size_type userNameEnd =
-          digest.find("\"", userNamePos + userNamePrefix.size() - 1);
-        if((userNamePos != std::string::npos) &&
-           (userNameEnd != std::string::npos)) {
-          std::string userName = digest.substr(userNamePos + userNamePrefix.size(),
-                                               userNameEnd - userNamePos - 1);
-          self.log("Logging-in from a trusted port as '" + userName + "'");
-          if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
-            self.log("Unknown user", lsInfo);
+    // lighttpd is proxying to our trusted port. We trust that it
+    // properly authenticated the user and just filter the HTTP
+    // Authorization header for the username
+    if (((session == NULL) || (session->getUser() == NULL)) &&
+        (_info->local_port == self.m_TrustedPort)) {
+      const char *auth_header = mg_get_header(_connection, "Authorization");
+      std::string userName = extractAuthenticatedUser(auth_header);
+
+      if (!userName.empty()) {
+        self.log("Logging-in from a trusted port as '" + userName + "'");
+        if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
+          self.log("Unknown user", lsInfo);
+          return NULL;
+        }
+        if (session == NULL) {
+          std::string newToken = self.m_SessionManager->registerSession();
+          if (newToken.empty()) {
+            self.log("Session limit reached", lsError);
             return NULL;
           }
-          if (session == NULL) {
-            std::string newToken = self.m_SessionManager->registerSession();
-            if (newToken.empty()) {
-              self.log("Session limit reached", lsError);
-              return NULL;
-            }
-            self.log("Registered new JSON session for trusted port (" + newToken + ")");
-            session = self.m_SessionManager->getSession(newToken);
-            injectedCookies["path"] = "/";
-            injectedCookies["token"] = newToken;
-            if (session != NULL) {
-              session->inheritUserFromSecurity();
-            }
-          }
+          self.log("Registered new JSON session for trusted port (" + newToken + ")");
+          session = self.m_SessionManager->getSession(newToken);
+          session->inheritUserFromSecurity();
+
+          // this is the first call, piggy back the set-cookie header
+          trustedLoginCookie = generateCookieString(session->getID());
         }
       }
     }
@@ -674,11 +655,11 @@ namespace dss {
     }
 
     if (toplevel == "/browse") {
-      return self.httpBrowseProperties(_connection, request);
+      return self.httpBrowseProperties(_connection, request, trustedLoginCookie);
     } else if (toplevel == "/json") {
-      return self.jsonHandler(_connection, request, injectedCookies, session);
+      return self.jsonHandler(_connection, request, trustedLoginCookie, session);
     } else if (toplevel == "/icons") {
-      return self.iconHandler(_connection, request, injectedCookies, session);
+      return self.iconHandler(_connection, request, trustedLoginCookie, session);
     }
 
     return NULL;

@@ -24,14 +24,14 @@
 #ifndef EVENTREQUESTHANDLER_H_
 #define EVENTREQUESTHANDLER_H_
 
-#include "src/web/webrequests.h"
-#include "src/session.h"
-#include "src/mutex.h"
-
 #include <deque>
 #include <map>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/thread/mutex.hpp>
+
+#include "src/web/webrequests.h"
+#include "src/session.h"
 
 namespace dss {
 
@@ -40,26 +40,21 @@ namespace dss {
   class EventCollector;
   class EventSubscriptionSession;
 
-  typedef std::map<const int, boost::shared_ptr<EventSubscriptionSession> > EventSubscriptionSessionByTokenID;
-
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
     EventRequestHandler(EventInterpreter& _queue);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     EventInterpreter& m_EventInterpreter;
-    Mutex m_eventsMutex;
+    boost::mutex m_Mutex; // locking what?
 
-    // make use of the dataMap in the new session object (cookie stuff)
-
-    EventSubscriptionSessionByTokenID m_SessionByTokenID;
-
+    int validateArgs(boost::shared_ptr<Session> _session, const std::string &name,
+                     const std::string &tokenStr);
     boost::shared_ptr<JSONObject> raise(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> get(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession);
-    boost::shared_ptr<EventSubscriptionSession> getSubscriptionSession(int _token, boost::shared_ptr<Session> _session);
   }; // StructureRequestHandler
 
 } // namespace dss

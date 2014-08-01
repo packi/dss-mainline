@@ -35,30 +35,30 @@ namespace dss {
     DSStructureQueryBusInterface()
     : DSBusInterfaceObj()
     {
-      SetBroadcastId(m_BroadcastDSID);
+      SetBroadcastDsuid(m_BroadcastDSID);
     }
 
     virtual std::vector<DSMeterSpec_t> getDSMeters();
-    virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID);
-    virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID);
-    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<GroupSpec_t> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    std::bitset<7> getZoneStates(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper);
-    virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
-    virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
-    virtual DSMeterHash_t getDSMeterHash(const dss_dsid_t& _dsMeterID);
+    virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID);
+    virtual std::vector<int> getZones(const dsuid_t& _dsMeterID);
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID);
+    std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual bool getEnergyBorder(const dsuid_t& _dsMeterID, int& _lower, int& _upper);
+    virtual DeviceSpec_t deviceGetSpec(devid_t _id, dsuid_t _dsMeterID);
+    virtual std::string getSceneName(dsuid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
+    virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID);
   private:
-    int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    void updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
-    void updateBinaryInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
-    void updateSensorInputTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
-    void updateOutputChannelTableFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
+    int getGroupCount(const dsuid_t& _dsMeterID, const int _zoneID);
+    int getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    void updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
+    void updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
+    void updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
+    void updateOutputChannelTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
   private:
-    dss_dsid_t m_BroadcastDSID;
+    dsuid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface
 
 } // namespace dss

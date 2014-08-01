@@ -23,13 +23,14 @@
 #ifndef SESSION_H_INCLUDED
 #define SESSION_H_INCLUDED
 
-#include "datetools.h"
-#include "mutex.h"
-
 #include <string>
 #include <map>
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include "eventsubscriptionsession.h"
+#include "datetools.h"
+#include "mutex.h"
 
 namespace dss {
 
@@ -48,10 +49,10 @@ namespace dss {
     void unuse();
     void touch();
     void markAsApplicationSession();
-    void addData(const std::string& _key, boost::shared_ptr<boost::any> _value);
-    boost::shared_ptr<boost::any> getData(const std::string& _key);
-    bool removeData(const std::string& _key);
-
+    boost::shared_ptr<EventSubscriptionSession> getEventSubscription(int _token);
+    boost::shared_ptr<EventSubscriptionSession>
+      createEventSubscription(EventInterpreter &interp, int _token);
+    void deleteEventSubscription(boost::shared_ptr<EventSubscriptionSession> subs);
     void inheritUserFromSecurity();
     User* getUser() { return m_pUser; }
     bool isApplicationSession() { return m_IsApplicationSession; }
@@ -60,15 +61,13 @@ namespace dss {
     const std::string m_Token;
     Mutex m_UseCountMutex;
     int m_UsageCount;
-
     DateTime m_LastTouched;
-
-    Mutex m_DataMapMutex;
-    std::map<std::string, boost::shared_ptr<boost::any> > dataMap;
-
     int m_SessionTimeoutSec;
     User* m_pUser;
     bool m_IsApplicationSession;
+
+    typedef std::vector<boost::shared_ptr<EventSubscriptionSession> > subscriptions_t;
+    std::vector<boost::shared_ptr<EventSubscriptionSession> > m_subscriptions;
   }; // Session
 
 

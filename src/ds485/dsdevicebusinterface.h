@@ -46,11 +46,11 @@ namespace dss {
       virtual void run();
       virtual void setup(boost::shared_ptr<Device> _device);
 
-      uint16_t getDeviceConfigWord(const dsid_t& _dsm,
+      uint16_t getDeviceConfigWord(const dsuid_t& _dsm,
                                       dev_t _device,
                                       uint8_t _configClass,
                                       uint8_t _configIndex) const;
-      uint8_t getDeviceConfig(const dsid_t& _dsm,
+      uint8_t getDeviceConfig(const dsuid_t& _dsm,
                                 dev_t _device,
                                 uint8_t _configClass,
                                 uint8_t _configIndex) const;
@@ -58,7 +58,7 @@ namespace dss {
       std::string m_busConnection;
       DsmApiHandle_t m_dsmApiHandle;
       devid_t m_deviceAdress;
-      dss_dsid_t m_dsmId;
+      dsuid_t m_dsmId;
       int m_revisionID;
     };
 
@@ -88,8 +88,6 @@ namespace dss {
     virtual void removeGroup(const Device& _device, const int _groupId);
 
     virtual uint32_t getSensorValue(const Device& _device, const int _sensorIndex);
-    virtual uint8_t getSensorType(const Device& _device, const int _sensorIndex);
-
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device);

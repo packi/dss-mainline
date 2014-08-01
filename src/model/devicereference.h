@@ -40,12 +40,12 @@ namespace dss {
    */
   class DeviceReference : public IDeviceInterface {
   private:
-    dss_dsid_t m_DSID;
+    dsuid_t m_DSID;
     const Apartment* m_Apartment;
   public:
     /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
-    DeviceReference(const dss_dsid_t _dsid, const Apartment* _apartment);
+    DeviceReference(const dsuid_t _dsid, const Apartment* _apartment);
     DeviceReference(boost::shared_ptr<const Device> _device, const Apartment* _apartment);
     virtual ~DeviceReference() {};
 
@@ -56,7 +56,7 @@ namespace dss {
     /** @copydoc getDevice() */
     boost::shared_ptr<const Device> getDevice() const;
     /** Returns the DSID of the referenced device */
-    dss_dsid_t getDSID() const;
+    dsuid_t getDSID() const;
 
     /** Returns the function id.
      * @note This will lookup the device */
@@ -67,7 +67,7 @@ namespace dss {
     /** Compares two device references.
      * Device references are considered equal if their DSID match. */
     bool operator==(const DeviceReference& _other) const {
-      return m_DSID == _other.m_DSID;
+      return IsEqualDsuid(m_DSID, _other.m_DSID);
     }
 
     /** Returns the name of the referenced device.
@@ -98,6 +98,8 @@ namespace dss {
     virtual void increaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
     virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
     virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
+
+    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token);
 
     virtual unsigned long getPowerConsumption();
  }; // DeviceReference

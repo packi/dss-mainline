@@ -166,10 +166,24 @@ namespace dss {
   const int SensorIDWindSpeed = 18;
   const int SensorIDWindDirection = 19;
   const int SensorIDPrecipitation = 20;
+  const int SensorIDCO2Concentration = 21;
   const int SensorIDRoomTemperatureSetpoint = 50;
   const int SensorIDRoomTemperatureControlVariable = 51;
   const int SensorIDOutputCurrent16A = 64;
   const int SensorIDActivePowerVA = 65;
+
+  // BinaryInput Type IDs
+  const int BinaryInputIDPresence = 1;
+  const int BinaryInputIDRoomBrightness = 2;
+  const int BinaryInputIDPresenceInDarkness = 3;
+  const int BinaryInputIDTwilightExternal = 4;
+  const int BinaryInputIDMovement = 5;
+  const int BinaryInputIDMovementInDarkness = 6;
+  const int BinaryInputIDSmokeDetector = 7;
+  const int BinaryInputIDWindDetector = 8;
+  const int BinaryInputIDRainDetector = 9;
+  const int BinaryInputIDSun = 10;
+  const int BinaryInputIDRoomThermostat = 11;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
@@ -210,9 +224,23 @@ namespace dss {
   const int GroupIDAppUserMin = 16;
   const int GroupIDAppUserMax = 23;
   const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
-  const int GroupIDControlGroupStart = 48;
+  const int GroupIDControlGroupMin = 48;
   const int GroupIDControlTemperature = 48;
+  const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
+
+  inline bool isDefaultGroup(int groupId) {
+    return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
+        (groupId == GroupIDControlTemperature);
+  }
+
+  inline bool isAppUserGroup(int groupId) {
+    return (groupId >= GroupIDAppUserMin && groupId <= GroupIDAppUserMax);
+  }
+
+  inline bool isControlGroup(int groupId) {
+    return (groupId >= GroupIDControlGroupMin && groupId <= GroupIDControlGroupMax);
+  }
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
 
@@ -243,6 +271,46 @@ namespace dss {
 
   const uint8_t MinimumOutputChannelID = 1;
   const uint8_t MaximumOutputChannelID = 10;
+
+  namespace CfgFunction_BL {
+    enum {
+      OutTable = 0x30, // size 17
+      Free1 = 0x41,
+      SEND_AKM_CMD = 0x42,
+      SW_THR = 0x43,
+      SW_RAMP_THR = 0x44,
+      EMERGENCY_SP = 0x45,
+      EMERGENCY_TMR = 0x46, // size 2
+      PWM_PERIODLEN = 0x48, // size 2
+      // upto vb109
+      PWM_MIN_SP_vb108 = 0x4A,
+      PWM_MAX_SP_vb108 = 0x4B,
+      PWM_LIMITMIN_SP_vb108 = 0x4C,
+      PWM_LIMITMAX_SP_vb108 = 0x4D,
+      PWM_BASEMIN_SP_vb108 = 0x4E,
+      PWM_OFFSET_SP_vb108 = 0x4F,
+      VENTIL_TS_vb108 = 0x50, // size 2
+      // from vb109
+      PWM_MIN_X = 0x4A,
+      PWM_MAX_X = 0x4B,
+      PWM_MIN_Y = 0x4C,
+      PWM_MAX_Y = 0x4D,
+      PWM_CONFIG = 0x4E,
+      PWM_OFFSET_SP = 0x4F,
+      Free2 = 0x50, // size 2
+      // common
+      VENTIL_TMR = 0x52, // size 2
+      pwmPriorityMode = 0x54,
+      pwmLastPM = 0x55,
+    };
+  }
+
+  // function id numbers
+  #define Fid_105_Mask_NumButtons 0x03
+  #define Fid_105_Mask_VariableStandardGroup 0x04
+  #define Fid_105_Mask_ExtraHardware 0x08
+  #define Fid_105_Mask_OutputPresent 0x10
+  #define Fid_105_Mask_VariableRamptime 0x20
 
 } // namespace dss
 #endif

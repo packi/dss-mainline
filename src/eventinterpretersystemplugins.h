@@ -58,7 +58,7 @@ namespace dss {
       bool m_evtSrcIsDevice;
       int m_evtSrcZone;
       int m_evtSrcGroup;
-      dss_dsid_t m_evtSrcDSID;
+      dsuid_t m_evtSrcDSID;
 
       bool checkSceneZone(PropertyNodePtr _triggerProp);
       bool checkUndoSceneZone(PropertyNodePtr _triggerProp);
@@ -201,6 +201,9 @@ namespace dss {
       void logDeviceSensorValue(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device,
                                 boost::shared_ptr<Zone> _zone);
+      void logZoneSensorValue(boost::shared_ptr<ScriptLogger> _logger,
+                              boost::shared_ptr<Zone> _zone,
+                              int _groupId);
       void logStateChangeScript(boost::shared_ptr<ScriptLogger> _logger,
                                 std::string _statename, std::string _state,
                                 std::string _value,
@@ -226,6 +229,7 @@ namespace dss {
       void deviceBinaryInputEvent(boost::shared_ptr<ScriptLogger> _logger);
       void deviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger);
       void deviceSensorValue(boost::shared_ptr<ScriptLogger> _logger);
+      void zoneSensorValue(boost::shared_ptr<ScriptLogger> _logger);
       void stateChange(boost::shared_ptr<ScriptLogger> _logger);
 
       std::string m_evtName;
@@ -273,6 +277,33 @@ namespace dss {
                                    int targetGroupId);
       void stateBinaryinput();
       void stateApartment();
+  };
+
+  class EventInterpreterPluginSystemZoneSensorForward :
+                                            public TaskProcessor,
+                                            public EventInterpreterPlugin {
+    public:
+      EventInterpreterPluginSystemZoneSensorForward(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterPluginSystemZoneSensorForward();
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
+  class SystemZoneSensorForward : public SystemEvent {
+    public:
+      SystemZoneSensorForward();
+      virtual ~SystemZoneSensorForward();
+      virtual void run();
+      virtual bool setup(Event& _event);
+    private:
+      void deviceSensorValue();
+
+      std::string m_evtName;
+
+      EventRaiseLocation m_evtRaiseLocation;
+      boost::shared_ptr<const Group> m_raisedAtGroup;
+      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
+      boost::shared_ptr<const State> m_raisedAtState;
   };
 
 }; // namespace

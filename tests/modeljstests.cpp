@@ -73,9 +73,17 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
+  dsuid_t dsuid1, dsuid2, dsuid3;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
+  SetNullDsuid(dsuid3);
+  dsuid1.id[DSUID_SIZE - 1] = 10;
+  dsuid2.id[DSUID_SIZE - 1] = 1;
+  dsuid3.id[DSUID_SIZE - 1] = 2;
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
+
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid2);
   dev1->setShortAddress(1);
   dev1->setDSMeter(meter);
   dev1->addToGroup(1);
@@ -84,7 +92,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1->setZoneID(1);
   dev1->setName("dev1");
   dev1->setFunctionID(1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid3);
   dev2->setShortAddress(2);
   dev2->setDSMeter(meter);
   dev2->addToGroup(1);
@@ -121,7 +129,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   length = ctx->evaluate<int>("getDevices().byGroup('asdf').length()");
   BOOST_CHECK_EQUAL(0, length);
 
-  length = ctx->evaluate<int>("getDevices().byDSMeter('a').length()");
+  length = ctx->evaluate<int>("getDevices().byDSMeter('"+dsuid2str(dsuid1)+"').length()");
   BOOST_CHECK_EQUAL(2, length);
 
   length = ctx->evaluate<int>("getDevices().byPresence(false).length()");
@@ -139,7 +147,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   std::string name = ctx->evaluate<std::string>("getDevices().byName('dev1').name");
   BOOST_CHECK_EQUAL("dev1", name);
 
-  name = ctx->evaluate<std::string>("getDevices().byDSID('2').name");
+  name = ctx->evaluate<std::string>("getDevices().byDSID('"+dsuid2str(dsuid3)+"').name");
   BOOST_CHECK_EQUAL("dev2", name);
 
   length = ctx->evaluate<int>("getDevices().byFunctionID(1).length()");
@@ -158,12 +166,16 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
   PropertySystem propSys;
   apt.setPropertySystem(&propSys);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
+  dsuid_t dsuid1, dsuid2, dsuid3;
+  dsuid1.id[DSUID_SIZE - 1] = 10;
+  dsuid2.id[DSUID_SIZE - 1] = 1;
+  dsuid3.id[DSUID_SIZE - 1] = 2;
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid2);
   dev1->addTag("dev1");
   dev1->addTag("device");
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid3);
   dev2->addTag("dev2");
   dev2->addTag("device");
 
@@ -189,10 +201,14 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDevices) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
+  dsuid_t dsuid1, dsuid2;
+  dsuid1.id[DSUID_SIZE - 1] = 1;
+  dsuid2.id[DSUID_SIZE - 1] = 2;
+
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
   dev1->setName("dev1");
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid2);
   dev2->setShortAddress(2);
   dev2->setName("dev2");
 
@@ -213,9 +229,15 @@ BOOST_AUTO_TEST_CASE(testDevices) {
 BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dss_dsid_t(0,0xa));
+  dsuid_t dsuid1, dsuid2;
+  SetNullDsuid(dsuid1);
+  SetNullDsuid(dsuid2);
+  dsuid1.id[DSUID_SIZE - 1] = 0xa;
+  dsuid2.id[DSUID_SIZE - 1] = 0xb;
+
+  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dsuid1);
   meter1->setName("meter1");
-  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dss_dsid_t(0,0xb));
+  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dsuid2);
   meter2->setName("meter2");
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -224,10 +246,10 @@ BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  std::string name = ctx->evaluate<std::string>("getDSMeterByDSID('a').name");
+  std::string name = ctx->evaluate<std::string>("getDSMeterByDSID('"+dsuid2str(dsuid1)+"').name");
   BOOST_CHECK_EQUAL(name, meter1->getName());
 
-  name = ctx->evaluate<std::string>("getDSMeterByDSID('b').name");
+  name = ctx->evaluate<std::string>("getDSMeterByDSID('"+dsuid2str(dsuid2)+"').name");
   BOOST_CHECK_EQUAL(name, meter2->getName());
 
   ctx->evaluate<void>("getDSMeterByDSID('123')");
@@ -256,7 +278,10 @@ BOOST_AUTO_TEST_CASE(testSceneConstants) {
 BOOST_AUTO_TEST_CASE(testEvents) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev = apt.allocateDevice(dss_dsid_t(0,1));
+  dsuid_t dsuid1;
+  dsuid1.id[DSUID_SIZE - 1] = 1;
+
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dsuid1);
   dev->setShortAddress(1);
   dev->setName("dev");
 
@@ -387,7 +412,10 @@ BOOST_AUTO_TEST_CASE(testTimedICalEvent) {
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev = apt.allocateDevice(dss_dsid_t(0,1));
+  dsuid_t dsuid1;
+  dsuid1.id[DSUID_SIZE - 1] = 1;
+
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dsuid1);
   dev->setShortAddress(1);
   dev->setName("dev");
 
@@ -877,7 +905,11 @@ BOOST_AUTO_TEST_CASE(testPropertyGetParent) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
   Apartment apt(NULL);
-  apt.allocateDSMeter(dss_dsid_t(0,13));
+
+  dsuid_t dsuid1;
+  dsuid1.id[DSUID_SIZE - 1] = 13;
+
+  apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -892,7 +924,11 @@ BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
   Apartment apt(NULL);
-  apt.allocateDSMeter(dss_dsid_t(0,13));
+  
+  dsuid_t dsuid1;
+  dsuid1.id[DSUID_SIZE - 1] = 13;
+
+  apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -923,7 +959,12 @@ BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   Apartment apt(NULL);
-  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+
+  dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
+  dsuid1.id[DSUID_SIZE - 1] = 13;
+
+  apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -932,7 +973,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getValues('13',"
+  int num = ctx->evaluate<int>("Metering.getValues('"+dsuid2str(dsuid1)+"',"
                                "                   'consumption',"
                                "                   1).length");
   BOOST_CHECK_EQUAL(num, 599);
@@ -940,7 +981,12 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   Apartment apt(NULL);
-  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+
+  dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
+  dsuid1.id[DSUID_SIZE - 1] = 13;
+
+  apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -949,7 +995,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getValues('13',"
+  int num = ctx->evaluate<int>("Metering.getValues('"+dsuid2str(dsuid1)+"',"
                                "                   'energy',"
                                "                   1,"
                                "                   'Ws').length");
@@ -958,7 +1004,12 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   Apartment apt(NULL);
-  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+
+  dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
+  dsuid1.id[DSUID_SIZE - 1] = 13;
+
+  apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -967,7 +1018,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  int num = ctx->evaluate<int>("Metering.getValues('13',"
+  int num = ctx->evaluate<int>("Metering.getValues('"+dsuid2str(dsuid1)+"',"
                                "                   'energy',"
                                "                   1,"
                                "                   'Wh',"
@@ -979,7 +1030,12 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   Apartment apt(NULL);
-  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+  
+  dsuid_t dsuid1;
+  SetNullDsuid(dsuid1);
+  dsuid1.id[DSUID_SIZE - 1] = 13;
+
+  apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
