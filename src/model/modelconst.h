@@ -169,8 +169,11 @@ namespace dss {
   const int SensorIDCO2Concentration = 21;
   const int SensorIDRoomTemperatureSetpoint = 50;
   const int SensorIDRoomTemperatureControlVariable = 51;
+  const int SensorIDReserved1 = 61;
+  const int SensorIDReserved2 = 62;
   const int SensorIDOutputCurrent16A = 64;
   const int SensorIDActivePowerVA = 65;
+  const int SensorIDNotUsed = 253;
 
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;
