@@ -613,9 +613,10 @@ namespace dss {
     boost::shared_ptr<Session> session;
     std::string token = extractToken(mg_get_header(_connection, "Cookie"));
     if (token.empty()) {
+      // ... used when not going through lighttpd
       token = request.getParameter("token");
     }
-    if(!token.empty()) {
+    if (!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
 
