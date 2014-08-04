@@ -53,9 +53,12 @@ namespace dss {
     const std::string CallScene = "callScene";
     const std::string CallSceneBus = "callSceneBus";
     const std::string DeviceSensorValue = "deviceSensorValue";
+    const std::string DeviceStatus = "deviceStatusEvent";
     const std::string Running = "running";
     const std::string UndoScene = "undoScene";
     const std::string ZoneSensorValue = "zoneSensorValue";
+    const std::string StateChange = "stateChange";
+    const std::string HeatingControllerSetup = "HeatingControllerSetup";
   }
 
   namespace EventProperty {

@@ -1411,7 +1411,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkState(PropertyNodePtr _triggerProp) {
-    if ((m_evtName != "addonStateChange") && (m_evtName != "stateChange")) {
+    if (m_evtName != "addonStateChange" && m_evtName != EventName::StateChange) {
       return false;
     }
 
@@ -1555,7 +1555,7 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "stateChange") {
+      } else if (m_evtName == EventName::StateChange) {
         if (triggerValue == "state-change") {
           if (checkState(triggerProp)) {
             return true;
@@ -2445,7 +2445,7 @@ namespace dss {
       deviceBinaryInputEvent(logger);
     } else if (m_evtName == "deviceSensorEvent") {
       deviceSensorEvent(logger);
-    } else if (m_evtName == "stateChange") {
+    } else if (m_evtName == EventName::StateChange) {
       stateChange(logger);
     } else if (m_evtName == EventName::DeviceSensorValue) {
       logger.reset(new ScriptLogger(
@@ -3246,7 +3246,7 @@ namespace dss {
         }
       } else if (m_evtName == EventName::UndoScene) {
         undoscene();
-      } else if (m_evtName == "stateChange") {
+      } else if (m_evtName == EventName::StateChange) {
         if (m_evtRaiseLocation) {
 
         }

@@ -47,9 +47,12 @@ namespace dss {
     extern const std::string CallScene;
     extern const std::string CallSceneBus;
     extern const std::string DeviceSensorValue;
+    extern const std::string DeviceStatus;
     extern const std::string Running;
     extern const std::string UndoScene;
     extern const std::string ZoneSensorValue;
+    extern const std::string StateChange;
+    extern const std::string HeatingControllerSetup;
   }
 
   namespace EventProperty {
