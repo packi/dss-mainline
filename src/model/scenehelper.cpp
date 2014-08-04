@@ -526,9 +526,9 @@ namespace dss {
       case SensorIDPrecipitation:
         _name = "Precipitation"; break;
       case SensorIDRoomTemperatureSetpoint:
-        _name = "Temperature Setpoint"; break;
+        _name = "Nominal Temperature"; break;
       case SensorIDRoomTemperatureControlVariable:
-        _name = "Temperature Control"; break;
+        _name = "Temperature Control Value"; break;
       case 255:
         _name = "Unknown Type"; break;
     default:
