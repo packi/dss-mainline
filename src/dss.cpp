@@ -803,7 +803,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   void DSS::publishDSID() {
-    std::string dsid;
+    std::string dsid, dsuid;
     PropertyNodePtr lastValidIf;
     PropertyNodePtr interfaces =
         getPropertySystem().getProperty(
@@ -826,13 +826,18 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         if (macNode != NULL) {
             std::string mac = macNode->getAsString();
             mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
-            dsuid_t d;
-            DsmApiGetEthernetDSUID(mac.c_str(), &d);
-            dsid = dsuid2str(d);
+            dsuid_t du;
+            dsid_t di;
+            DsmApiGetEthernetDSUID(mac.c_str(), &du);
+            dsuid = dsuid2str(du);
+            di = dsuid_to_dsid(du);
+            dsid = dsid2str(di);
         }
     }
 
     PropertyNodePtr dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsid);
     dsidNode->setStringValue(dsid);
+    dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsuid);
+    dsidNode->setStringValue(dsuid);
   }
 }
