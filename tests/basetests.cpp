@@ -279,12 +279,6 @@ BOOST_AUTO_TEST_CASE(testProperties) {
   BOOST_CHECK_EQUAL(false, props.unset("key"));
 }
 
-BOOST_AUTO_TEST_CASE(testPrettyDate) {
-  std::string asString = "2014-08-05 23:23:32";
-  DateTime parsedObj = DateTime::parsePrettyString(asString);
-  BOOST_CHECK_EQUAL(asString, parsedObj.toPrettyString());
-}
-
 BOOST_AUTO_TEST_CASE(testSplitIntoKeyValue) {
   std::string key;
   std::string value;
