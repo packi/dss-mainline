@@ -21,6 +21,7 @@ ParseError::ParseError(const std::string& _message) : runtime_error( _message )
  */
 WebserviceReply parse_reply(const char* buf) {
   WebserviceReply resp;
+  bool return_code_seen = false;
 
   if (!buf) {
     throw ParseError("buffer is NULL");
@@ -37,6 +38,7 @@ WebserviceReply parse_reply(const char* buf) {
         throw ParseError("invalid type for ReturnCode");
       }
       resp.code = json_object_get_int(val);
+      return_code_seen = true;
     } else if (!strcmp(key, "ReturnMessage")) {
       if (type != json_type_string) {
         throw ParseError("invalid type for ReturnMessage");
@@ -46,6 +48,11 @@ WebserviceReply parse_reply(const char* buf) {
       // ignore, unkown keys
     }
   }
+
+  if (!return_code_seen) {
+    throw ParseError("missing mandatory element: ReturnCode");
+  }
+
   return resp;
 }
 
