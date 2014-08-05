@@ -43,7 +43,7 @@ WebserviceReply parse_reply(const char* buf) {
       }
       resp.desc = json_object_get_string(val);
     } else {
-      throw ParseError("invalid key for message");
+      // ignore, unkown keys
     }
   }
   return resp;
