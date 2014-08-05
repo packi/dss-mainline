@@ -136,7 +136,6 @@ void WebserviceConnection::request(const std::string& url,
                                 const std::string& parameters,
                                 RequestType type,
                                 boost::shared_ptr<HashMapStringString> headers,
-                                boost::shared_ptr<HashMapStringString> formpost,
                                 boost::shared_ptr<URLRequestCallback> cb,
                                 bool authenticated)
 {
@@ -144,7 +143,6 @@ void WebserviceConnection::request(const std::string& url,
   req->url = constructURL(url, parameters, authenticated);
   req->type = type;
   req->headers = headers;
-  req->formpost = formpost;
 
   boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
   addEvent(task);
