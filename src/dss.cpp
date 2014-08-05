@@ -52,6 +52,7 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
+#include "sensor_data_uploader.h"
 #include "subscription_profiler.h"
 #include "defaultbuseventsink.h"
 #ifdef WITH_BONJOUR
@@ -461,6 +462,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
 
     plugin = new EventInterpreterSensorMonitorPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new SensorDataUploadPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
