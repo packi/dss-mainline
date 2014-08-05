@@ -2446,7 +2446,7 @@ namespace dss {
       deviceSensorEvent(logger);
     } else if (m_evtName == "stateChange") {
       stateChange(logger);
-    } else if (m_evtName == "deviceSensorValue") {
+    } else if (m_evtName == EventName::DeviceSensorValue) {
       logger.reset(new ScriptLogger(
           DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
       if (logger == NULL) {
@@ -2454,7 +2454,7 @@ namespace dss {
         return;
       }
       deviceSensorValue(logger);
-    } else if (m_evtName == "zoneSensorValue") {
+    } else if (m_evtName == EventName::ZoneSensorValue) {
       logger.reset(new ScriptLogger(
           DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
       if (logger == NULL) {
@@ -3271,7 +3271,7 @@ namespace dss {
   void EventInterpreterPluginSystemZoneSensorForward::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
-    subscription.reset(new EventSubscription("deviceSensorValue",
+    subscription.reset(new EventSubscription(EventName::DeviceSensorValue,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -3309,7 +3309,7 @@ namespace dss {
       return;
     }
 
-    if (m_evtName == "deviceSensorValue") {
+    if (m_evtName == EventName::DeviceSensorValue) {
       deviceSensorValue();
     }
   }

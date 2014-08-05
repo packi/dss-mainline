@@ -58,6 +58,7 @@
 #include "util.h"
 
 namespace dss {
+
   //=============================================== ApartmentTreeListener
 
   /** Raises a ModelDirty event if something below the apartment node gets changed. */
@@ -1664,7 +1665,7 @@ namespace dss {
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
         boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event("deviceSensorValue", pDevRev));
+        pEvent.reset(new Event(EventName::DeviceSensorValue, pDevRev));
         pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
         pEvent->setProperty("sensorValue", intToString(_sensorValue));
         try {
@@ -1699,7 +1700,7 @@ namespace dss {
       double fValue = SceneHelper::sensorToFloat10(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
-      pEvent.reset(new Event("zoneSensorValue", group));
+      pEvent.reset(new Event(EventName::ZoneSensorValue, group));
       pEvent->setProperty("sensorType", intToString(_sensorType));
       pEvent->setProperty("sensorValue", intToString(_sensorValue));
       pEvent->setProperty("sensorValueFloat", doubleToString(fValue));

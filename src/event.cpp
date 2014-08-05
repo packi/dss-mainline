@@ -50,7 +50,9 @@ namespace dss {
   const std::string empty_string("");
 
   namespace EventName {
+    const std::string DeviceSensorValue = "deviceSensorValue";
     const std::string Running = "running";
+    const std::string ZoneSensorValue = "zoneSensorValue";
   }
 
   namespace EventProperty {

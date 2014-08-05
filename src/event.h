@@ -44,7 +44,9 @@ namespace dss {
   //================================================== Constants
 
   namespace EventName {
+    extern const std::string DeviceSensorValue;
     extern const std::string Running;
+    extern const std::string ZoneSensorValue;
   }
 
   namespace EventProperty {
