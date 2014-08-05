@@ -20,33 +20,33 @@ ParseError::ParseError(const std::string& _message) : runtime_error( _message )
  * @return decodod struct or throw ParseError if failed
  */
 WebserviceReply parse_reply(const char* buf) {
-    WebserviceReply resp;
+  WebserviceReply resp;
 
-    if (!buf) {
-      throw ParseError("buffer is NULL");
-    }
+  if (!buf) {
+    throw ParseError("buffer is NULL");
+  }
 
-    json_object * jobj = json_tokener_parse(buf);
-    if (!jobj) {
-      throw ParseError("invalid JSON");
+  json_object * jobj = json_tokener_parse(buf);
+  if (!jobj) {
+    throw ParseError("invalid JSON");
+  }
+  json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
+    enum json_type type = json_object_get_type(val);
+    if (!strcmp(key, "ReturnCode")) {
+      if (type != json_type_int) {
+        throw ParseError("invalid type for ReturnCode");
+      }
+      resp.code = json_object_get_int(val);
+    } else if (!strcmp(key, "ReturnMessage")) {
+      if (type != json_type_string) {
+        throw ParseError("invalid type for ReturnMessage");
+      }
+      resp.desc = json_object_get_string(val);
+    } else {
+      throw ParseError("invalid key for message");
     }
-    json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
-        enum json_type type = json_object_get_type(val);
-        if (!strcmp(key, "ReturnCode")) {
-            if (type != json_type_int) {
-                throw ParseError("invalid type for ReturnCode");
-            }
-            resp.code = json_object_get_int(val);
-        } else if (!strcmp(key, "ReturnMessage")) {
-            if (type != json_type_string) {
-                throw ParseError("invalid type for ReturnMessage");
-            }
-            resp.desc = json_object_get_string(val);
-        } else {
-            throw ParseError("invalid key for message");
-        }
-    }
-    return resp;
+  }
+  return resp;
 }
 
 __DEFINE_LOG_CHANNEL__(StatusReplyChecker, lsInfo);
