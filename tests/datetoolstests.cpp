@@ -31,20 +31,15 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(DateTools)
 
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
-  DateTime dt;
-  dt.clear();
+  DateTime dt(0);
   dt.setDate(1, January, 2008);
 
+  BOOST_CHECK_EQUAL(dt.getYear(), 2008);
   BOOST_CHECK_EQUAL(dt.getWeekday(), Tuesday);
-
   DateTime dt2 = dt.addDay(1);
-
   BOOST_CHECK_EQUAL(dt2.getWeekday(), Wednesday);
-
   DateTime dt3 = dt2.addDay(-2);
-
   BOOST_CHECK_EQUAL(dt3.getWeekday(), Monday);
-  BOOST_CHECK_EQUAL(dt3.getYear(), 2007);
 } // testSimpleDates
 
 BOOST_AUTO_TEST_CASE(testAddingMonth) {

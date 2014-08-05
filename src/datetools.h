@@ -111,16 +111,6 @@ namespace dss {
     /** Sets the time part without touching the date */
     void setTime(int _hour, int _minute, int _second);
 
-    /** Clears the date part as in setting it to zero */
-    void clearDate();
-    /** Clears the time part as in settin it to zero */
-    void clearTime();
-    /** Clears the date and time part
-      * @see clearDate
-      * @see clearTime
-      */
-    void clear();
-
     /** Normalizes the date/time information */
     void validate();
 

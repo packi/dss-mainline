@@ -193,19 +193,6 @@ namespace dss {
     validate();
   } // setTime
 
-  void DateTime::clearDate() {
-    setDate(1, 0, 1970);
-  } // clearDate
-
-  void DateTime::clearTime() {
-    setTime(0,0,0);
-  } // clearTime
-
-  void DateTime::clear() {
-    DateTime t0(0);
-    m_DateTime = t0.m_DateTime;
-  } // clear
-
   bool DateTime::before(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
