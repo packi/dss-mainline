@@ -255,7 +255,7 @@ namespace dss {
         pEvent.reset(new Event("addonStateChange", shared_from_this()));
         pEvent->setProperty("scriptID", m_serviceName);
       } else {
-        pEvent.reset(new Event("stateChange", shared_from_this()));
+        pEvent.reset(new Event(EventName::StateChange, shared_from_this()));
       }
 
       pEvent->setProperty("statename", m_name);

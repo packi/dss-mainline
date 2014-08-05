@@ -304,7 +304,7 @@ namespace dss {
 
   void BenchmarkPublisherPlugin::handleEvent(Event& _event, const
                                              EventSubscription& _subscription) {
-    if (_event.getName() == "running") {
+    if (_event.getName() == EventName::Running) {
       boost::shared_ptr<Event> pEvent;
       DateTime now;
 

@@ -492,7 +492,8 @@ namespace dss {
     return convertedSensorValue;
   } // sensorToSystem
 
-  void SceneHelper::sensorName(const int _sensorType, std::string& _name) {
+  std::string SceneHelper::sensorName(const int _sensorType) {
+    std::string _name;
     switch(_sensorType) {
       case SensorIDActivePower:
         _name = "Active Power"; break;
@@ -525,14 +526,15 @@ namespace dss {
       case SensorIDPrecipitation:
         _name = "Precipitation"; break;
       case SensorIDRoomTemperatureSetpoint:
-        _name = "Temperature Setpoint"; break;
+        _name = "Nominal Temperature"; break;
       case SensorIDRoomTemperatureControlVariable:
-        _name = "Temperature Control"; break;
+        _name = "Temperature Control Value"; break;
       case 255:
         _name = "Unknown Type"; break;
     default:
       break;
     }
+    return _name;
   } // sensorName
 
 }

@@ -49,6 +49,18 @@ using std::set;
 namespace dss {
   const std::string empty_string("");
 
+  namespace EventName {
+    const std::string CallScene = "callScene";
+    const std::string CallSceneBus = "callSceneBus";
+    const std::string DeviceSensorValue = "deviceSensorValue";
+    const std::string DeviceStatus = "deviceStatusEvent";
+    const std::string Running = "running";
+    const std::string UndoScene = "undoScene";
+    const std::string ZoneSensorValue = "zoneSensorValue";
+    const std::string StateChange = "stateChange";
+    const std::string HeatingControllerSetup = "HeatingControllerSetup";
+  }
+
   namespace EventProperty {
     const char* Name = "name";
     const char* Location = "location";
@@ -64,14 +76,6 @@ namespace dss {
   Event::Event(const std::string& _name)
   : m_Name(_name),
     m_RaiseLocation(erlApartment)
-  {
-    reset();
-  } // ctor
-
-  Event::Event(const std::string& _name, boost::shared_ptr<Zone> _zone)
-  : m_Name(_name),
-    m_RaiseLocation(erlGroup),
-    m_RaisedAtGroup(_zone->getGroup(GroupIDBroadcast))
   {
     reset();
   } // ctor

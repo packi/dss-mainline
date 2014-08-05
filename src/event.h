@@ -43,6 +43,18 @@ namespace dss {
 
   //================================================== Constants
 
+  namespace EventName {
+    extern const std::string CallScene;
+    extern const std::string CallSceneBus;
+    extern const std::string DeviceSensorValue;
+    extern const std::string DeviceStatus;
+    extern const std::string Running;
+    extern const std::string UndoScene;
+    extern const std::string ZoneSensorValue;
+    extern const std::string StateChange;
+    extern const std::string HeatingControllerSetup;
+  }
+
   namespace EventProperty {
     extern const char* Name;
     extern const char* Location;
@@ -95,7 +107,6 @@ namespace dss {
     void reset();
   public:
     Event(const std::string& _name, boost::shared_ptr<Group> _context);
-    Event(const std::string& _name, boost::shared_ptr<Zone> _context);
     Event(const std::string& _name, boost::shared_ptr<State> _state);
     Event(const std::string& _name, boost::shared_ptr<DeviceReference> _ref);
     Event(const std::string& _name);

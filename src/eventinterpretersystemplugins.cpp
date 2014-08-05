@@ -996,7 +996,8 @@ namespace dss {
   }
 
   bool SystemTrigger::checkSceneZone(PropertyNodePtr _triggerProp) {
-    if (!((m_evtName == "callScene") || (m_evtName == "callSceneBus"))) {
+    if (!((m_evtName == EventName::CallScene) ||
+          (m_evtName == EventName::CallSceneBus))) {
       return false;
     }
 
@@ -1085,7 +1086,7 @@ namespace dss {
       }
     }
 
-    std::string bus = ((m_evtName == "callSceneBus") ? "Bus" : "");
+    std::string bus = ((m_evtName == EventName::CallSceneBus) ? "Bus" : "");
     Logger::getInstance()->log("SystemTrigger::"
             "checkSceneZone: *** Match: CallScene" +
             bus +
@@ -1096,7 +1097,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkUndoSceneZone(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "undoScene") {
+    if (m_evtName != EventName::UndoScene) {
       return false;
     }
 
@@ -1174,7 +1175,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkDeviceScene(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "callScene") {
+    if (m_evtName != EventName::CallScene) {
       return false;
     }
 
@@ -1410,7 +1411,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkState(PropertyNodePtr _triggerProp) {
-    if ((m_evtName != "addonStateChange") && (m_evtName != "stateChange")) {
+    if (m_evtName != "addonStateChange" && m_evtName != EventName::StateChange) {
       return false;
     }
 
@@ -1501,7 +1502,7 @@ namespace dss {
 
       std::string triggerValue = triggerType->getAsString();
 
-      if (m_evtName == "callScene") {
+      if (m_evtName == EventName::CallScene) {
         if (triggerValue == "zone-scene") {
           if (checkSceneZone(triggerProp)) {
             return true;
@@ -1512,14 +1513,14 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "callSceneBus") {
+      } else if (m_evtName == EventName::CallSceneBus) {
         if (triggerValue == "bus-zone-scene") {
           if (checkSceneZone(triggerProp)) {
             return true;
           }
         }
 
-      } else if (m_evtName == "undoScene") {
+      } else if (m_evtName == EventName::UndoScene) {
         if (triggerValue == "undo-zone-scene") {
           if (checkUndoSceneZone(triggerProp)) {
             return true;
@@ -1554,7 +1555,7 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "stateChange") {
+      } else if (m_evtName == EventName::StateChange) {
         if (triggerValue == "state-change") {
           if (checkState(triggerProp)) {
             return true;
@@ -2091,12 +2092,9 @@ namespace dss {
       sensorValueFloat = m_properties.get("sensorValueFloat");
     }
 
-    std::string typeName;
-    SceneHelper::sensorName(sensorType, typeName);
-
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";SensorValue;" +
-        typeName + " [" + intToString(sensorType) + '/' + sensorIndex + "];" +
+    _logger->logln(";SensorValue;" + SceneHelper::sensorName(sensorType) +
+        " [" + intToString(sensorType) + '/' + sensorIndex + "];" +
         sensorValueFloat + " [" + sensorValue + "];" +
         zoneName + ";;;" + devName + ";");
   }
@@ -2111,9 +2109,7 @@ namespace dss {
     std::string sensorValue = m_properties.get("sensorValue");
     std::string sensorValueFloat = m_properties.get("sensorValueFloat");
 
-    std::string typeName;
-    SceneHelper::sensorName(sensorType, typeName);
-
+    std::string typeName = SceneHelper::sensorName(sensorType);
     std::string origName = getDeviceName(m_properties.get("originDSID"));
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
@@ -2437,11 +2433,11 @@ namespace dss {
 
     if (m_evtName == "model_ready") {
       model_ready(logger);
-    } else if (m_evtName == "callScene") {
+    } else if (m_evtName == EventName::CallScene) {
       callScene(logger);
     } else if (m_evtName == "blink") {
       blink(logger);
-    } else if (m_evtName == "undoScene") {
+    } else if (m_evtName == EventName::UndoScene) {
       undoScene(logger);
     } else if (m_evtName == "buttonClick") {
       buttonClick(logger);
@@ -2449,9 +2445,9 @@ namespace dss {
       deviceBinaryInputEvent(logger);
     } else if (m_evtName == "deviceSensorEvent") {
       deviceSensorEvent(logger);
-    } else if (m_evtName == "stateChange") {
+    } else if (m_evtName == EventName::StateChange) {
       stateChange(logger);
-    } else if (m_evtName == "deviceSensorValue") {
+    } else if (m_evtName == EventName::DeviceSensorValue) {
       logger.reset(new ScriptLogger(
           DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
       if (logger == NULL) {
@@ -2459,7 +2455,7 @@ namespace dss {
         return;
       }
       deviceSensorValue(logger);
-    } else if (m_evtName == "zoneSensorValue") {
+    } else if (m_evtName == EventName::ZoneSensorValue) {
       logger.reset(new ScriptLogger(
           DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
       if (logger == NULL) {
@@ -3240,17 +3236,17 @@ namespace dss {
     }
 
     try {
-      if (m_evtName == "running") {
+      if (m_evtName == EventName::Running) {
         bootstrap();
       } else if (m_evtName == "model_ready") {
         startup();
-      } else if (m_evtName == "callScene") {
+      } else if (m_evtName == EventName::CallScene) {
         if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
           callscene();
         }
-      } else if (m_evtName == "undoScene") {
+      } else if (m_evtName == EventName::UndoScene) {
         undoscene();
-      } else if (m_evtName == "stateChange") {
+      } else if (m_evtName == EventName::StateChange) {
         if (m_evtRaiseLocation) {
 
         }
@@ -3276,7 +3272,7 @@ namespace dss {
   void EventInterpreterPluginSystemZoneSensorForward::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
-    subscription.reset(new EventSubscription("deviceSensorValue",
+    subscription.reset(new EventSubscription(EventName::DeviceSensorValue,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -3314,7 +3310,7 @@ namespace dss {
       return;
     }
 
-    if (m_evtName == "deviceSensorValue") {
+    if (m_evtName == EventName::DeviceSensorValue) {
       deviceSensorValue();
     }
   }
