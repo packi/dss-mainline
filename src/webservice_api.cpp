@@ -40,6 +40,10 @@ WebserviceReply parse_reply(const char* buf) {
       resp.code = json_object_get_int(val);
       return_code_seen = true;
     } else if (!strcmp(key, "ReturnMessage")) {
+      if (type == json_type_null) {
+        // empty string
+        continue;
+      }
       if (type != json_type_string) {
         throw ParseError("invalid type for ReturnMessage");
       }
