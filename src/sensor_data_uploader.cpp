@@ -20,6 +20,8 @@
 
 #include "sensor_data_uploader.h"
 
+#include <boost/thread/lock_guard.hpp>
+
 #include "event.h"
 #include "foreach.h"
 #include "model/apartment.h"
@@ -229,6 +231,7 @@ enum DSEnum_EventCategory {
   EventCategory_DeviceMetering = 26,
   EventCategory_LogFileData = 27,
   EventCategory_HeatingControllerSetup = 28,
+  EventCategory_Last = 29,
 };
 
 enum DSEnum_EventGroup {
@@ -243,6 +246,28 @@ enum DSEnum_EventSource {
   EventSource_dSHub = 2,
 };
 
+int getSequenceID(int category) {
+  // TODO, should be persistent across reboots
+  static std::vector<int> sequenceID(EventCategory_Last, 0);
+  static boost::mutex m;
+
+  boost::lock_guard<boost::mutex> lock(m);
+  if (category >= EventCategory_Last) {
+    throw std::runtime_error("invalid category" + intToString(category));
+  }
+  return sequenceID[category]++;
+}
+
+void appendCategory(JSONObject &obj, int category)
+{
+  if (category >= EventCategory_Last) {
+    throw std::runtime_error("invalid category" + intToString(category));
+  }
+
+  obj.addProperty("EventCategory", category);
+  obj.addProperty("SequenceID", getSequenceID(category));
+}
+
 // TODO this should be moved to webservice_api
 
 JSONObject toJson(const boost::shared_ptr<Event> &event) {
@@ -252,9 +277,8 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
   if (event->getName() == EventName::DeviceSensorValue) {
     pDeviceRef = event->getRaisedAtDevice();
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Metering);
-    obj.addProperty("EventCategory", EventCategory_DeviceMetering);
+    appendCategory(obj, EventCategory_DeviceMetering);
     obj.addProperty("SensorIndex", event->getPropertyByName("sensorIndex"));
     int sensorType = strToInt(event->getPropertyByName("sensorType"));
     obj.addProperty("SensorType", SceneHelper::sensorName(sensorType));
@@ -262,18 +286,16 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
     obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
   } else if (event->getName() == EventName::ZoneSensorValue) {
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Metering);
-    obj.addProperty("EventCategory", EventCategory_ZoneEvent);
+    appendCategory(obj, EventCategory_ZoneEvent);
     obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
     obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
     obj.addProperty("SensorType", event->getPropertyByName("sensorType"));
     obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
   } else if (event->getName() == EventName::CallScene) {
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Activity);
-    obj.addProperty("EventCategory", EventCategory_ZoneGroupCallScene);
+    appendCategory(obj, EventCategory_ZoneGroupCallScene);
     obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
     obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
     obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
@@ -281,29 +303,27 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
     obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
   } else if (event->getName() == EventName::UndoScene) {
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Activity);
-    obj.addProperty("EventCategory", EventCategory_ZoneGroupUndoScene);
+    appendCategory(obj, EventCategory_ZoneGroupUndoScene);
     obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
     obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
     obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
     obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
   } else if (event->getName() == EventName::StateChange) {
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Activity);
     boost::shared_ptr<const State> pState = event->getRaisedAtState();
     switch (pState->getType()) {
       case StateType_Apartment:
       case StateType_Service:
       case StateType_Script:
-        obj.addProperty("EventCategory", EventCategory_ApartmentEvent);
+        appendCategory(obj, EventCategory_ApartmentEvent);
         break;
       case StateType_Group:
-        obj.addProperty("EventCategory", EventCategory_ZoneStateGroup);
+        appendCategory(obj, EventCategory_ZoneStateGroup);
         break;
       case StateType_Device:
-        obj.addProperty("EventCategory", EventCategory_DeviceState);
+        appendCategory(obj, EventCategory_DeviceState);
         break;
       default:
         break;
@@ -314,17 +334,15 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
   } else if (event->getName() == EventName::DeviceStatus) {
     pDeviceRef = event->getRaisedAtDevice();
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Activity);
-    obj.addProperty("EventCategory", EventCategory_DeviceStatus);
+    appendCategory(obj, EventCategory_DeviceStatus);
     obj.addProperty("StatusIndex", event->getPropertyByName("statusIndex"));
     obj.addProperty("StatusValue", event->getPropertyByName("statusValue"));
     obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
   } else if (event->getName() == EventName::HeatingControllerSetup) {
     obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("SequenceID", "TODO");
     obj.addProperty("EventGroup", EventGroup_Activity);
-    obj.addProperty("EventCategory", EventCategory_HeatingControllerSetup);
+    appendCategory(obj, EventCategory_HeatingControllerSetup);
 
     // TODO: add event data
 
