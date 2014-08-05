@@ -37,7 +37,6 @@ namespace dss {
   } RequestType;
 
   typedef boost::shared_ptr<HashMapStringString> headers_t;
-  typedef boost::shared_ptr<HashMapStringString> formpost_t;
 
   /**
    * HttpRequest - Combine all data describing an HTTP request
@@ -51,11 +50,9 @@ namespace dss {
     std::string url;
     RequestType type;
     headers_t headers;
-    formpost_t formpost;
     std::string postdata;
   };
 
-  // TODO rename to HttpClient
   class HttpClient {
     __DECL_LOG_CHANNEL__
     public:
@@ -72,7 +69,6 @@ namespace dss {
 
       long request(const std::string& url, RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
-                   boost::shared_ptr<HashMapStringString> formpost,
                    std::string *result);
 
       long request(const HttpRequest &req, std::string *result);
@@ -83,9 +79,8 @@ namespace dss {
 
     private:
       long internalRequest(const std::string& url, RequestType type,
-                   std::string postdata,
                    boost::shared_ptr<HashMapStringString> headers,
-                   boost::shared_ptr<HashMapStringString> formpost,
+                   std::string postdata,
                    std::string *result);
 
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);

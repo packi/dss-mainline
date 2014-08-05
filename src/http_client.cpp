@@ -131,28 +131,25 @@ size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, 
 
 long HttpClient::request(const std::string& url, RequestType type, std::string *result)
 {
-  return internalRequest(url, type, std::string(), headers_t(), formpost_t(),
-                         result);
+  return internalRequest(url, type, headers_t(), std::string(), result);
 }
 
 long HttpClient::request(const std::string& url,
                   boost::shared_ptr<HashMapStringString> headers,
                   std::string postdata, std::string *result)
 {
-  return internalRequest(url, POST, postdata, headers, formpost_t(), result);
+  return internalRequest(url, POST, headers, postdata, result);
 }
 
 long HttpClient::request(const std::string& url, RequestType type,
                   boost::shared_ptr<HashMapStringString> headers,
-                  boost::shared_ptr<HashMapStringString> formpost,
                   std::string *result)
 {
-  return internalRequest(url, type, std::string(), headers, formpost, result);
+  return internalRequest(url, type, headers, std::string(), result);
 }
 
 long HttpClient::request(const HttpRequest &req, std::string *result) {
-  return internalRequest(req.url, req.type, req.postdata, req.headers,
-                         req.formpost, result);
+  return internalRequest(req.url, req.type, req.headers, req.postdata, result);
 }
 
 #if CURL_DEEP_DEBUG
@@ -253,17 +250,14 @@ struct data config;
 #endif
 
 long HttpClient::internalRequest(const std::string& url, RequestType type,
-                  std::string postdata,
                   boost::shared_ptr<HashMapStringString> headers,
-                  boost::shared_ptr<HashMapStringString> formpost,
+                  std::string postdata,
                   std::string *result)
 {
   CURLcode res;
   URLResult outputCollector;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   struct curl_slist *cheaders = NULL;
-  struct curl_httppost *formpost_start = NULL;
-  struct curl_httppost *formpost_end = NULL;
   long http_code = -1;
 
   if (!m_curl_handle) {
@@ -301,14 +295,6 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
     curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
     if (!postdata.empty()) {
       curl_easy_setopt(m_curl_handle, CURLOPT_COPYPOSTFIELDS, postdata.c_str());
-    } else if (formpost.get() && !formpost->empty()) {
-      for (it = formpost->begin(); it != formpost->end(); it++) {
-        curl_formadd(&formpost_start, &formpost_end,
-                     CURLFORM_COPYNAME, it->first.c_str(),
-                     CURLFORM_COPYCONTENTS, it->second.c_str(),
-                     CURLFORM_END);
-      }
-      curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, formpost_start);
     } else {
       // empty post is valid request, but not without this call
       curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, NULL);
@@ -344,10 +330,6 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
 
   if (cheaders) {
     curl_slist_free_all(cheaders);
-  }
-
-  if (formpost_start) {
-    curl_formfree(formpost_start);
   }
 
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);

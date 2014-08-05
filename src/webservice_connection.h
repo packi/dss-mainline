@@ -60,7 +60,6 @@ public:
                const std::string &parameters,
                RequestType type,
                boost::shared_ptr<HashMapStringString> headers,
-               boost::shared_ptr<HashMapStringString> formpost,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
   static WebserviceConnection *getInstance();
