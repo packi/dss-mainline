@@ -83,7 +83,7 @@ void StatusReplyChecker::result(long code, const std::string &result) {
       m_callback->done(REST_OK, resp);
     }
   } catch (ParseError &ex) {
-    log(std::string("Invalid return message ") + result, lsError);
+    log(std::string("ParseError: <") + ex.what() + "> " + result, lsError);
     if (m_callback) {
       m_callback->done(JSON_ERROR, WebserviceReply());
     }
