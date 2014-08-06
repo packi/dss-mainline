@@ -49,7 +49,8 @@ namespace dss {
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   typedef enum {
-    vTypeNone = 0, vTypeInteger, vTypeString, vTypeBoolean, vTypeFloating
+    vTypeNone = 0, vTypeInteger, vTypeString, vTypeBoolean, vTypeFloating,
+    vTypeUnsignedInteger
   } aValueType;
 
   const char* getValueTypeAsString(aValueType _value);
@@ -60,6 +61,7 @@ namespace dss {
     union {
       char* pString;
       int integer;
+      uint32_t unsignedinteger;
       bool boolean;
       double floating;
     } actualValue;
@@ -395,6 +397,7 @@ namespace dss {
     union {
       PropertyProxy<bool>* boolProxy;
       PropertyProxy<int>* intProxy;
+      PropertyProxy<uint32_t>* uintProxy;
       PropertyProxy<std::string>* stringProxy;
       PropertyProxy<double>* floatingProxy;
     } m_Proxy;
@@ -449,6 +452,8 @@ namespace dss {
     void setStringValue(const std::string& _value);
     /** Sets the value as integer. */
     void setIntegerValue(const int _value);
+    /** Sets the value as uint32_t. */
+    void setUnsignedIntegerValue(const uint32_t _value);
     /** Sets the value as boolean. */
     void setBooleanValue(const bool _value);
     /** Sets the value as floating. */
@@ -460,6 +465,11 @@ namespace dss {
     /** Returns the integer value.
      * Throws an exception if the value-types don't match. */
     int getIntegerValue();
+
+    /** Returns the integer value.
+     * Throws an exception if the value-types don't match. */
+    uint32_t getUnsignedIntegerValue();
+
     /** Returns the boolean value.
      * Throws an exception if the value-types don't match. */
     bool getBoolValue();
@@ -498,6 +508,8 @@ namespace dss {
     bool linkToProxy(const PropertyProxy<std::string>& _proxy);
     /** @copydoc linkToProxy */
     bool linkToProxy(const PropertyProxy<double>& _proxy);
+    /** @copydoc linkToProxy */
+    bool linkToProxy(const PropertyProxy<uint32_t>& _proxy);
     /** Unlinks from a proxy */
     bool unlinkProxy(bool _recurse = false);
 

@@ -242,6 +242,9 @@ namespace dss {
       case vTypeInteger:
         delete m_Proxy.intProxy;
         break;
+      case vTypeUnsignedInteger:
+        delete m_Proxy.uintProxy;
+        break;
       case vTypeString:
         delete m_Proxy.stringProxy;
         break;
@@ -485,6 +488,27 @@ namespace dss {
     }
   } // setIntegerValue
 
+  void PropertyNode::setUnsignedIntegerValue(const uint32_t _value) {
+    checkWriteAccess();
+    if(m_Aliased) {
+      m_AliasTarget->setUnsignedIntegerValue(_value);
+    } else {
+      if(m_LinkedToProxy) {
+        if(m_PropVal.valueType == vTypeUnsignedInteger) {
+          m_Proxy.uintProxy->setValue(_value);
+        } else {
+          Logger::getInstance()->log("*** setting unsigned integer on a non unsigned integer property", lsError);
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        }
+      } else {
+        clearValue();
+        m_PropVal.actualValue.unsignedinteger = _value;
+      }
+      m_PropVal.valueType = vTypeUnsignedInteger;
+      propertyChanged();
+    }
+  } // setUnsignedIntegerValue
+
   void PropertyNode::setBooleanValue(const bool _value) {
     checkWriteAccess();
     if(m_Aliased) {
@@ -560,6 +584,23 @@ namespace dss {
       }
     }
   } // getIntegerValue
+
+  uint32_t PropertyNode::getUnsignedIntegerValue() {
+    if(m_Aliased) {
+      return m_AliasTarget->getUnsignedIntegerValue();
+    } else {
+      if(m_PropVal.valueType == vTypeUnsignedInteger) {
+        if(m_LinkedToProxy) {
+          return m_Proxy.uintProxy->getValue();
+        } else {
+          return m_PropVal.actualValue.unsignedinteger;
+        }
+      } else {
+ //       std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
+    }
+  } // getUnsignedIntegerValue
 
   bool PropertyNode::getBoolValue() {
     if(m_Aliased) {
@@ -656,6 +697,17 @@ namespace dss {
     return true;
   } // linkToProxy
 
+  bool PropertyNode::linkToProxy(const PropertyProxy<uint32_t>& _proxy) {
+    if(m_LinkedToProxy || m_Aliased) {
+      return false;
+    }
+    m_Proxy.uintProxy = _proxy.clone();
+    m_LinkedToProxy = true;
+    m_PropVal.valueType = vTypeUnsignedInteger;
+    return true;
+  } // linkToProxy
+
+
   bool PropertyNode::linkToProxy(const PropertyProxy<double>& _proxy) {
     if(m_LinkedToProxy || m_Aliased) {
       return false;
@@ -681,6 +733,10 @@ namespace dss {
         case vTypeInteger:
           delete m_Proxy.intProxy;
           m_Proxy.intProxy = NULL;
+          break;
+        case vTypeUnsignedInteger:
+          delete m_Proxy.uintProxy;
+          m_Proxy.uintProxy = NULL;
           break;
         case vTypeBoolean:
           delete m_Proxy.boolProxy;
@@ -724,6 +780,9 @@ namespace dss {
           break;
         case vTypeFloating:
           result = doubleToString(getFloatingValue());
+          break;
+        case vTypeUnsignedInteger:
+          result = uintToString(getUnsignedIntegerValue());
           break;
         case vTypeBoolean:
           if(getBoolValue()) {
@@ -1179,6 +1238,9 @@ namespace dss {
           case vTypeInteger:
             m_currentNode->setIntegerValue(strToInt(m_temporaryValue));
             break;
+          case vTypeUnsignedInteger:
+            m_currentNode->setUnsignedIntegerValue(strToUInt(m_temporaryValue));
+            break;
           case vTypeBoolean:
             m_currentNode->setBooleanValue(m_temporaryValue == "true");
             break;
@@ -1365,6 +1427,9 @@ namespace dss {
       case vTypeInteger:
         return "integer";
         break;
+      case vTypeUnsignedInteger:
+        return "unsignedinteger";
+        break;
       case vTypeString:
         return "string";
         break;
@@ -1384,6 +1449,8 @@ namespace dss {
       return vTypeNone;
     } else if(strVal == "integer") {
       return vTypeInteger;
+    } else if(strVal == "unsignedinteger") {
+      return vTypeUnsignedInteger;
     } else if(strVal == "boolean") {
       return vTypeBoolean;
     } else if(strVal == "string") {
