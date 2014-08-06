@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(testAddingMonth) {
   BOOST_CHECK(!dt.after(dt2));
 } // testAddingMonth
 
-BOOST_AUTO_TEST_CASE(testISODate) {
+BOOST_AUTO_TEST_CASE(testRFC2445) {
   DateTime dt = DateTime::fromISO("20080506T080102");
   BOOST_CHECK_EQUAL(2008, dt.getYear());
   BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
@@ -70,35 +70,42 @@ BOOST_AUTO_TEST_CASE(testISODate) {
   BOOST_CHECK_EQUAL(8, dt.getHour());
   BOOST_CHECK_EQUAL(1, dt.getMinute());
   BOOST_CHECK_EQUAL(2, dt.getSecond());
-} // testISODate
-
-BOOST_AUTO_TEST_CASE(testTooshortISODate) {
+  BOOST_CHECK(dt.toRFC2445IcalDataTime() == "20080506T080102");
+}
+BOOST_AUTO_TEST_CASE(testRFC2445UTC) {
+  DateTime dt = DateTime::fromISO("20080506T080102Z");
+  BOOST_CHECK_EQUAL(2008, dt.getYear());
+  BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
+  BOOST_CHECK_EQUAL(6, dt.getDay());
+  BOOST_CHECK_EQUAL(8, dt.getHour() - dt.getTimezoneOffset() / 3600);
+  BOOST_CHECK_EQUAL(1, dt.getMinute());
+  BOOST_CHECK_EQUAL(2, dt.getSecond());
+}
+BOOST_AUTO_TEST_CASE(testGetDayOfYearZeroBased) {
+  BOOST_CHECK_EQUAL(1, DateTime::fromISO("20090102T100000Z").getDayOfYear());
+}
+BOOST_AUTO_TEST_CASE(testMandate_T_Separator) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506 080102"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506080102"), std::invalid_argument);
+}
+BOOST_AUTO_TEST_CASE(testTooshortRFC2445) {
   BOOST_CHECK_THROW(DateTime::fromISO("20080506T08010"), std::invalid_argument);
-} // testISODate
-
+}
 BOOST_AUTO_TEST_CASE(testMonthOutOfRange) {
   BOOST_CHECK_THROW(DateTime::fromISO("20083006T080102Z"), std::invalid_argument);
-} // testMonthOutOfRange
-
-BOOST_AUTO_TEST_CASE(testMissingTISODate) {
+}
+BOOST_AUTO_TEST_CASE(testMissingTRFC2445) {
   BOOST_CHECK_THROW(DateTime::fromISO("20080506X080102Z"), std::invalid_argument);
-} // testMissingTISODate
-
-BOOST_AUTO_TEST_CASE(testHourOutOfRangeISODate) {
+}
+BOOST_AUTO_TEST_CASE(testHourOutOfRangeRFC2445) {
   BOOST_CHECK_THROW(DateTime::fromISO("20080506T250102Z"), std::invalid_argument);
-} // testHourOutOfRangeISODate
-
-BOOST_AUTO_TEST_CASE(testMinuteOutOfRangeISODate) {
+}
+BOOST_AUTO_TEST_CASE(testMinuteOutOfRangeRFC2445) {
   BOOST_CHECK_THROW(DateTime::fromISO("20080506T086202Z"), std::invalid_argument);
-} // testMinuteOutOfRangeISODate
-
-BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeISODate) {
+}
+BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeRFC2445) {
   BOOST_CHECK_THROW(DateTime::fromISO("20080506T080162Z"), std::invalid_argument);
-} // testSecondOutOfRangeISODate
-
-BOOST_AUTO_TEST_CASE(testGetDayOfYear) {
-  BOOST_CHECK_EQUAL(1, DateTime::fromISO("20090102T100000Z").getDayOfYear()); // zero based
-} // testGetDayOfYear
+}
 
 BOOST_AUTO_TEST_CASE(testSetters) {
   DateTime dt;
