@@ -290,7 +290,7 @@ namespace dss {
 
         for (int i = 0; i < numSensors; i++) {
           uint8_t SensorType;
-          uint8_t SensorPollInterval;
+          uint32_t SensorPollInterval;
           uint8_t SensorBroadcastFlag;
           uint8_t SensorConversionFlag;
           ret = DeviceSensor_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,

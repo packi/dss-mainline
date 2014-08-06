@@ -1940,7 +1940,7 @@ namespace dss {
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
         entry->createProperty("pollinterval")
-                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
+                ->linkToProxy(PropertyProxyReference<uint32_t>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
         entry->createProperty("conversion")
                 ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorPushConversionFlag));
         entry->createProperty("broadcast")

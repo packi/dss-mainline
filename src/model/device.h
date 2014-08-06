@@ -131,7 +131,7 @@ namespace dss {
   typedef struct {
     int m_sensorIndex;       // sensor index
     int m_sensorType;        // type of sensor
-    int m_sensorPollInterval;
+    uint32_t m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
     bool m_sensorValueValidity;
