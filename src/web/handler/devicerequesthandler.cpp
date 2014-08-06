@@ -1419,7 +1419,7 @@ namespace dss {
         return failure("No device for given dsuid");
       }
 
-      uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, 4);
+      uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("pwmValue", value & 0xff);
       resultObj->addProperty("pwmPriorityMode", (value >> 8) & 0xff);
