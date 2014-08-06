@@ -279,7 +279,7 @@ namespace dss {
   const uint8_t CfgFunction_Valve_PwmPeriod = 0x48;
   const uint8_t CfgFunction_Valve_PwmMinValue = 0x4a;
   const uint8_t CfgFunction_Valve_PwmMaxValue = 0x4b;
-  const uint8_t CfgFunction_Valve_PwmMinX = 0x4c;
+  const uint8_t CfgFunction_Valve_PwmMinY = 0x4c;
   const uint8_t CfgFunction_Valve_PwmMaxY = 0x4d;
   const uint8_t CfgFunction_Valve_PwmConfig = 0x4e;
   const uint8_t CfgFunction_Valve_PwmOffset = 0x4f;
@@ -302,39 +302,6 @@ namespace dss {
 
   const uint8_t MinimumOutputChannelID = 1;
   const uint8_t MaximumOutputChannelID = 10;
-
-  namespace CfgFunction_BL {
-    enum {
-      OutTable = 0x30, // size 17
-      Free1 = 0x41,
-      SEND_AKM_CMD = 0x42,
-      SW_THR = 0x43,
-      SW_RAMP_THR = 0x44,
-      EMERGENCY_SP = 0x45,
-      EMERGENCY_TMR = 0x46, // size 2
-      PWM_PERIODLEN = 0x48, // size 2
-      // upto vb109
-      PWM_MIN_SP_vb108 = 0x4A,
-      PWM_MAX_SP_vb108 = 0x4B,
-      PWM_LIMITMIN_SP_vb108 = 0x4C,
-      PWM_LIMITMAX_SP_vb108 = 0x4D,
-      PWM_BASEMIN_SP_vb108 = 0x4E,
-      PWM_OFFSET_SP_vb108 = 0x4F,
-      VENTIL_TS_vb108 = 0x50, // size 2
-      // from vb109
-      PWM_MIN_X = 0x4A,
-      PWM_MAX_X = 0x4B,
-      PWM_MIN_Y = 0x4C,
-      PWM_MAX_Y = 0x4D,
-      PWM_CONFIG = 0x4E,
-      PWM_OFFSET_SP = 0x4F,
-      Free2 = 0x50, // size 2
-      // common
-      VENTIL_TMR = 0x52, // size 2
-      pwmPriorityMode = 0x54,
-      pwmLastPM = 0x55,
-    };
-  }
 
   // function id numbers
   #define Fid_105_Mask_NumButtons 0x03

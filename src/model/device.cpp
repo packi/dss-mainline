@@ -766,7 +766,7 @@ namespace dss {
     setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod, _config.pwmPeriod);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue, _config.pwmMinValue);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue, _config.pwmMaxValue);
-    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX, _config.pwmMinX);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY, _config.pwmMinX);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY, _config.pwmMaxY);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset, _config.pwmOffset);
   } // setDeviceValvePwm
@@ -2182,86 +2182,76 @@ namespace dss {
   }
 
   void DeviceBank3_BL::setValveProtectionTimer(uint16_t valveProtectionTimer) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_BL::VENTIL_TMR,
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_ProtectionTimer,
                                 valveProtectionTimer);
   }
   uint16_t DeviceBank3_BL::getValveProtectionTimer() {
-    return m_device->getDeviceConfigWord(CfgClassFunction,
-                                         CfgFunction_BL::VENTIL_TMR);
+    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_ProtectionTimer);
   }
   void DeviceBank3_BL::setEmergencySetPoint(int8_t emergency_sp) {
     // implicit conversion int8_t to uint8_t
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::EMERGENCY_SP,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue,
                               emergency_sp);
   }
   int8_t DeviceBank3_BL::getEmergencySetPoint() {
     // implicit conversion uint8_t to int8_t
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::EMERGENCY_SP);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
   }
   void DeviceBank3_BL::setEmergencyTimer(int16_t emergency_tmr) {
-    m_device->setDeviceConfig16(CfgClassFunction,
-                                CfgFunction_BL::EMERGENCY_TMR, emergency_tmr);
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_EmergencyTimer,
+                                emergency_tmr);
   }
   uint16_t DeviceBank3_BL::getEmergencyTimer() {
-    return m_device->getDeviceConfigWord(CfgClassFunction,
-                                         CfgFunction_BL::EMERGENCY_TMR);
+    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_EmergencyTimer);
   }
 
   void DeviceBank3_BL::setPwmPeriod(uint16_t pwmPeriod) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_BL::PWM_PERIODLEN,
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod,
                                 pwmPeriod);
   }
   uint16_t DeviceBank3_BL::getPwmPeriod() {
-    return m_device->getDeviceConfigWord(CfgClassFunction,
-                                         CfgFunction_BL::PWM_PERIODLEN);
+    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
   }
   void DeviceBank3_BL::setPwmMinX(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MIN_X,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMinX() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MIN_X);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
   }
   void DeviceBank3_BL::setPwmMaxX(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MAX_X,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMaxX() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MAX_X);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue);
   }
   void DeviceBank3_BL::setPwmMinY(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MIN_Y,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMinY() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MIN_Y);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
   }
   void DeviceBank3_BL::setPwmMaxY(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MAX_Y,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMaxY() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MAX_Y);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY);
   }
   void DeviceBank3_BL::setPwmConfig(uint8_t config) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_CONFIG,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig,
                               config);
   }
   uint8_t DeviceBank3_BL::getPwmConfig() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_CONFIG);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
   }
   void DeviceBank3_BL::setPwmOffset(int8_t config) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_OFFSET_SP,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset,
                               config);
   }
   int8_t DeviceBank3_BL::getPwmOffset() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_OFFSET_SP);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
   }
 } // namespace dss
