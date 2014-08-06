@@ -123,7 +123,11 @@ namespace dss {
         } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[argIndex])) {
           node->setBooleanValue(ctx->convertTo<bool>(JS_ARGV(cx, vp)[argIndex]));
         } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[argIndex])) {
-          node->setIntegerValue(ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
+          if (node->getValueType() == vTypeInteger) {
+            node->setIntegerValue(ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
+          } else if (node->getValueType() == vTypeUnsignedInteger) {
+            node->setUnsignedIntegerValue((uint32_t)ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
+          }
         } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[argIndex])) {
           node->setFloatingValue(ctx->convertTo<double>(JS_ARGV(cx, vp)[argIndex]));
         } else {
@@ -280,6 +284,9 @@ namespace dss {
     switch(node->getValueType()) {
     case vTypeInteger:
       JS_SET_RVAL(cx, vp, INT_TO_JSVAL(node->getIntegerValue()));
+      break;
+    case vTypeUnsignedInteger:
+      JS_SET_RVAL(cx, vp, UINT_TO_JSVAL(node->getUnsignedIntegerValue()));
       break;
     case vTypeString: {
       std::string val = unescapeHTML(node->getStringValue());
