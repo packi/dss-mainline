@@ -776,10 +776,12 @@ namespace dss {
       throw DSSException("Not a climate device");
     }
     _config.pwmPeriod = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
-    _config.pwmMinValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
-    _config.pwmMaxValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue);
-    _config.pwmMinX = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX);
-    _config.pwmMaxY = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY);
+    uint16_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
+    _config.pwmMinValue = value & 0xff; // CfgFunction_Valve_PwmMinValue
+    _config.pwmMaxValue = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxValue
+    value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
+    _config.pwmMinX = value & 0xff; // CfgFunction_Valve_PwmMinY
+    _config.pwmMaxY = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxY
     _config.pwmOffset = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
   } // getDeviceValvePwm
 

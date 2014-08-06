@@ -1397,15 +1397,18 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      DeviceBank3_BL conf(device);
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("pwmPeriod", conf.getPwmPeriod());
-      resultObj->addProperty("pwmMinX", conf.getPwmMinX());
-      resultObj->addProperty("pwmMaxX", conf.getPwmMaxX());
-      resultObj->addProperty("pwmMinY", conf.getPwmMinY());
-      resultObj->addProperty("pwmMaxY", conf.getPwmMaxY());
-      resultObj->addProperty("pwmOffset", conf.getPwmOffset());
+      uint16_t value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
+      resultObj->addProperty("pwmPeriod", value);
+      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
+      resultObj->addProperty("pwmMinX", value & 0xff);
+      resultObj->addProperty("pwmMaxX", (value >> 8) & 0xff);
+      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
+      resultObj->addProperty("pwmMinY", value & 0xff);
+      resultObj->addProperty("pwmMaxY", (value >> 8) & 0xff);
+      value = device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+      resultObj->addProperty("pwmOffset", value);
       return success(resultObj);
 
     } else if (_request.getMethod() == "getValvePwmState") {
