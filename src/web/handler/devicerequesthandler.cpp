@@ -1426,7 +1426,6 @@ namespace dss {
       return success(resultObj);
 
     } else if (_request.getMethod() == "setValveControlMode") {
-      int value;
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -1436,61 +1435,10 @@ namespace dss {
       DeviceValveControlSpec_t config;
       device->getDeviceValveControl(config);
 
-      if (_request.hasParameter("ctrlClipMinZero")) {
-        if ((value = strToIntDef(_request.getParameter("ctrlClipMinZero"), -1)) >= 0) {
-          switch (value) {
-            case 0: config.ctrlClipMinZero = false; break;
-            case 1: config.ctrlClipMinZero = true; break;
-            default: break;
-          }
-        } else if (_request.getParameter("ctrlClipMinZero") == "true") {
-          config.ctrlClipMinZero = true;
-        }
-      } else if (_request.getParameter("ctrlClipMinZero") == "false") {
-        config.ctrlClipMinZero = false;
-      }
-
-      if (_request.hasParameter("ctrlClipMinLower")) {
-        if ((value = strToIntDef(_request.getParameter("ctrlClipMinLower"), -1)) >= 0) {
-          switch (value) {
-            case 0: config.ctrlClipMinLower = false; break;
-            case 1: config.ctrlClipMinLower = true; break;
-            default: break;
-          }
-        } else if (_request.getParameter("ctrlClipMinLower") == "true") {
-          config.ctrlClipMinLower = true;
-        }
-      } else if (_request.getParameter("ctrlClipMinLower") == "false") {
-        config.ctrlClipMinLower = false;
-      }
-
-      if (_request.hasParameter("ctrlClipMaxHigher")) {
-        if ((value = strToIntDef(_request.getParameter("ctrlClipMaxHigher"), -1)) >= 0) {
-          switch (value) {
-            case 0: config.ctrlClipMaxHigher = false; break;
-            case 1: config.ctrlClipMaxHigher = true; break;
-            default: break;
-          }
-        } else if (_request.getParameter("ctrlClipMaxHigher") == "true") {
-          config.ctrlClipMaxHigher = true;
-        }
-      } else if (_request.getParameter("ctrlClipMaxHigher") == "false") {
-        config.ctrlClipMaxHigher = false;
-      }
-
-      if (_request.hasParameter("ctrlNONC")) {
-        if ((value = strToIntDef(_request.getParameter("ctrlNONC"), -1)) >= 0) {
-          switch (value) {
-            case 0: config.ctrlNONC = false; break;
-            case 1: config.ctrlNONC = true; break;
-            default: break;
-          }
-        } else if (_request.getParameter("ctrlNONC") == "true") {
-          config.ctrlNONC = true;
-        }
-      } else if (_request.getParameter("ctrlNONC") == "false") {
-        config.ctrlNONC = false;
-      }
+      _request.getParameter("ctrlClipMinZero", config.ctrlClipMinZero);
+      _request.getParameter("ctrlClipMinLower", config.ctrlClipMinLower);
+      _request.getParameter("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
+      _request.getParameter("ctrlNONC", config.ctrlNONC);
 
       device->setDeviceValveControl(config);
       return success();
