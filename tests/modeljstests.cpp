@@ -458,11 +458,18 @@ BOOST_AUTO_TEST_CASE(testProperties) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("Property.setProperty('/testing', 1)");
-//  BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 1);
-//  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("Property.getProperty('/testing')"), 1);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
 
-//  propSys.setIntValue("/testing", 2);
-//  BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 2);
+  ctx->evaluate<void>("Property.setProperty('/testing', 2)");
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("Property.getProperty('/testing')"), 2);
+
+  /* preserve unsigned integer type */
+  propSys.getProperty("/testing")->setUnsignedIntegerValue(3);
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("Property.getProperty('/testing')"), 3);
+  ctx->evaluate<void>("Property.setProperty('/testing', 4)");
+  BOOST_CHECK_EQUAL(propSys.getProperty("/testing")->getValueType(),
+                    vTypeUnsignedInteger);
 }
 
 BOOST_AUTO_TEST_CASE(testPropertiesStrings) {
