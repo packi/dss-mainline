@@ -68,6 +68,7 @@ namespace dss {
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
     void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
+    void deviceRemoveFromGroups(boost::shared_ptr<Device> device);
 
     /**
      * @ret device moved

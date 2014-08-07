@@ -614,6 +614,17 @@ namespace dss {
     }
   } // deviceRemoveFromGroup
 
+  void StructureManipulator::deviceRemoveFromGroups(boost::shared_ptr<Device> device) {
+    boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
+    for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
+      if (!device->getGroupBitmask().test(g - 1)) {
+        continue;
+      }
+      boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
+      deviceRemoveFromGroup(device, pGroup);
+    }
+  } // deviceRemoveFromGroups
+
   bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
                                            boost::shared_ptr<Group> newGroup) {
     bool modified = false;
