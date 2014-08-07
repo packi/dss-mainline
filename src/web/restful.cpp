@@ -85,6 +85,35 @@ namespace dss {
     }
   }
 
+  template <>
+  bool RestfulRequest::getParameter<bool>(const std::string& _name,
+                                          bool &out) const
+  {
+    std::string tmp = getParameter(_name);
+    if (tmp.empty()) {
+      return false;
+    }
+    try {
+      int value;
+      if ((value = strToIntDef(tmp, -1)) >= 0) {
+        switch (value) {
+          case 0: out = false; break;
+          case 1: out = true; break;
+          default: break;
+        }
+      } else if (tmp == "true") {
+        out = true;
+      } else if (tmp == "false") {
+        out = false;
+      } else {
+        return false;
+      }
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
   /**
    * @_request -- '/system/login'
    * class -> 'system', method -> login everything till EOS

@@ -115,6 +115,28 @@ namespace dss {
   } DeviceSensorEventSpec_t;
 
   typedef struct {
+    uint16_t protectionTimer;
+    uint16_t emergencyTimer;
+    uint8_t emergencyControlValue;
+  } DeviceValveTimerSpec_t;
+
+  typedef struct {
+    uint16_t pwmPeriod;
+    uint8_t pwmMinValue;
+    uint8_t pwmMaxValue;
+    uint8_t pwmMinX;
+    uint8_t pwmMaxY;
+    uint8_t pwmOffset;
+  } DeviceValvePwmSpec_t;
+
+  typedef struct {
+    bool ctrlClipMinZero;
+    bool ctrlClipMinLower;
+    bool ctrlClipMaxHigher;
+    bool ctrlNONC;
+  } DeviceValveControlSpec_t;
+
+  typedef struct {
     bool pairing;       // device supports pairing
     bool syncButtonID;  // sync button ID setting of slave with master
     bool hasOutputAngle;
@@ -327,6 +349,14 @@ namespace dss {
     void setSceneAngle(const int _scene, const int _angle);
     int getSceneAngle(const int _scene);
     void configureAreaMembership(const int _areaScene, const bool _addToArea);
+
+    /** Configure climate actuator */
+    void setDeviceValveTimer(DeviceValveTimerSpec_t _config);
+    void getDeviceValveTimer(DeviceValveTimerSpec_t& _config);
+    void setDeviceValvePwm(DeviceValvePwmSpec_t _config);
+    void getDeviceValvePwm(DeviceValvePwmSpec_t& _config);
+    void setDeviceValveControl(DeviceValveControlSpec_t _config);
+    void getDeviceValveControl(DeviceValveControlSpec_t& _config);
 
     /** Binary input devices */
     void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
