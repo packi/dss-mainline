@@ -563,16 +563,20 @@ namespace dss {
         return success(resultObj);
       }
 
+      StructureManipulator manipulator(*m_pStructureBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       m_Apartment);
+
       if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
         if (m_pStructureBusInterface != NULL) {
-          StructureManipulator manipulator(*m_pStructureBusInterface,
-                                           *m_pStructureQueryBusInterface,
-                                           m_Apartment);
           boost::shared_ptr<Zone> zone = m_Apartment.getZone(
                                                         pDevice->getZoneID());
           manipulator.addDeviceToZone(pPartnerDevice, zone);
         }
       }
+
+      // #3450 - remove slave devices from clusters
+      manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
       if (features.syncButtonID == true) {
         if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
