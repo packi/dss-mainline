@@ -105,6 +105,7 @@ namespace dss {
         }
         node = ext->getProperty(ctx, propName);
         if(node == NULL) {
+          // new node have vTypeNone
           node = ext->createProperty(ctx, propName);
         }
         argIndex = 1;
@@ -122,11 +123,14 @@ namespace dss {
           node->setStringValue(propValue);
         } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[argIndex])) {
           node->setBooleanValue(ctx->convertTo<bool>(JS_ARGV(cx, vp)[argIndex]));
-        } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[argIndex])) {
-          if (node->getValueType() == vTypeInteger) {
-            node->setIntegerValue(ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
-          } else if (node->getValueType() == vTypeUnsignedInteger) {
-            node->setUnsignedIntegerValue((uint32_t)ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]));
+        } else if (JSVAL_IS_INT(JS_ARGV(cx, vp)[argIndex])) {
+          int tmp = ctx->convertTo<int>(JS_ARGV(cx, vp)[argIndex]);
+          if (node->getValueType() == vTypeUnsignedInteger) {
+            // vTypeUnsignedInteger nodes can't be created from
+            // javascript, type can only be preserved
+            node->setUnsignedIntegerValue(static_cast<uint32_t>(tmp));
+          } else {
+            node->setIntegerValue(tmp);
           }
         } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[argIndex])) {
           node->setFloatingValue(ctx->convertTo<double>(JS_ARGV(cx, vp)[argIndex]));
