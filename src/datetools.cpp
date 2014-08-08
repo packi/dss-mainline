@@ -293,69 +293,37 @@ namespace dss {
     return out;
   } // operator<<
 
-  std::string EraseLeadingZeros(const std::string& _string) {
-    std::string result = _string;
-    while((result.size() > 1) && (result.find('0') == 0)) {
-      result.erase(0,1);
-    }
-    return result;
-  }
-
-  DateTime DateTime::fromISO(const std::string& _isoStr) {
-    DateTime result;
-
-    if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 1 /* 'T', 'Z' is optional */) {
-      throw std::invalid_argument("string is shorter than expected YYMMDD'T'HHMMSS[Z]");
-    }
-
-    int year = strToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
-    int month = strToInt(EraseLeadingZeros(_isoStr.substr(4, 2)));
-    if(month > 12 || month == 0) {
-      throw std::invalid_argument("month should be between 1 and 12");
-    }
-    int day = strToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
-
-    if(_isoStr.at(8) != 'T') {
-      throw std::invalid_argument("string should have a 'T' at position 8");
-    }
-
-    int hour = strToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
-    if(hour > 23) {
-      throw std::invalid_argument("hour should be between 0 and 24");
-    }
-    int min = strToInt(EraseLeadingZeros(_isoStr.substr(11,2)));
-    if(min > 59) {
-      throw std::invalid_argument("minute should be between 0 and 59");
-    }
-    int sec = strToInt(EraseLeadingZeros(_isoStr.substr(13, 2)));
-    if(sec > 59) {
-      throw std::invalid_argument("second should be between 0 and 59");
-    }
-
+  DateTime DateTime::fromISO(const std::string& timeString) {
     struct tm tm;
-    memset(&tm, '\0', sizeof(tm));
-    tm.tm_year = year - 1900;
-    tm.tm_mon = month - 1; // month is zero based "*ç"*!
-    tm.tm_mday = day;
-    tm.tm_hour = hour;
-    tm.tm_min = min;
-    tm.tm_sec = sec;
-    tm.tm_isdst = -1;
+    time_t t0;
+    bool utc = *timeString.rbegin() == 'Z';
 
-    // if string ends with "Z" it is in UTC, otherwise it is considered to
-    // be in local time
-    time_t t0 = mktime(&tm);
-    if(_isoStr.at(_isoStr.size()-1) == 'Z') {
+    if (timeString.length() != strlen("19930202T220202") + utc ? 1 : 0) {
+      throw std::invalid_argument("RFC2445: too short " + timeString);
+    }
+
+    char *end = strptime(timeString.c_str(), "%Y%m%dT%H%M%S", &tm);
+    if (!end || (end - timeString.c_str() != strlen("19930202T226202"))) {
+      // strptime %M matches 0-59, so ..T226202 above results in 22:06:20,
+      // the trailing '2' is silently dropped
+      throw std::invalid_argument("RFC2445: invalid " + timeString);
+    }
+
+    tm.tm_isdst = -1;
+    t0 = mktime(&tm);
+    if (t0 == -1) {
+      throw std::invalid_argument("RFC2445: mktime failure" + timeString);
+    }
+
+    if (utc) {
 #if defined(__CYGWIN__)
       t0 += -_timezone;
 #else
       t0 += tm.tm_gmtoff;
 #endif
     }
-
-    DateTime d(t0);
-    return d;
-  } // fromISO
+    return DateTime(t0);
+  }
 
   DateTime DateTime::NullDate(0);
 
