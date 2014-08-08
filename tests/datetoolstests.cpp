@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(testAddingMonth) {
 } // testAddingMonth
 
 BOOST_AUTO_TEST_CASE(testRFC2445) {
-  DateTime dt = DateTime::fromISO("20080506T080102");
+  DateTime dt = DateTime::parseRFC2445("20080506T080102");
   BOOST_CHECK_EQUAL(2008, dt.getYear());
   BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
   BOOST_CHECK_EQUAL(6, dt.getDay());
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(testRFC2445) {
   BOOST_CHECK(dt.toRFC2445IcalDataTime() == "20080506T080102");
 }
 BOOST_AUTO_TEST_CASE(testRFC2445UTC) {
-  DateTime dt = DateTime::fromISO("20080506T080102Z");
+  DateTime dt = DateTime::parseRFC2445("20080506T080102Z");
   BOOST_CHECK_EQUAL(2008, dt.getYear());
   BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
   BOOST_CHECK_EQUAL(6, dt.getDay());
@@ -82,29 +82,29 @@ BOOST_AUTO_TEST_CASE(testRFC2445UTC) {
   BOOST_CHECK_EQUAL(2, dt.getSecond());
 }
 BOOST_AUTO_TEST_CASE(testGetDayOfYearZeroBased) {
-  BOOST_CHECK_EQUAL(1, DateTime::fromISO("20090102T100000Z").getDayOfYear());
+  BOOST_CHECK_EQUAL(1, DateTime::parseRFC2445("20090102T100000Z").getDayOfYear());
 }
 BOOST_AUTO_TEST_CASE(testMandate_T_Separator) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506 080102"), std::invalid_argument);
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506080102"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506 080102"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506080102"), std::invalid_argument);
 }
 BOOST_AUTO_TEST_CASE(testTooshortRFC2445) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506T08010"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506T08010"), std::invalid_argument);
 }
 BOOST_AUTO_TEST_CASE(testMonthOutOfRange) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20083006T080102Z"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20083006T080102Z"), std::invalid_argument);
 }
 BOOST_AUTO_TEST_CASE(testMissingTRFC2445) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506X080102Z"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506X080102Z"), std::invalid_argument);
 }
 BOOST_AUTO_TEST_CASE(testHourOutOfRangeRFC2445) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506T250102Z"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506T250102Z"), std::invalid_argument);
 }
 BOOST_AUTO_TEST_CASE(testMinuteOutOfRangeRFC2445) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506T086202Z"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506T086202Z"), std::invalid_argument);
 }
 BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeRFC2445) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506T080162Z"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::parseRFC2445("20080506T080162Z"), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(testSetters) {
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
 BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
-  DateTime startTime = DateTime::fromISO("20080505T080000Z");
+  DateTime startTime = DateTime::parseRFC2445("20080505T080000Z");
 
   DateTime currentTime;
   DateTime nextSchedule = currentTime.addMinute(2);

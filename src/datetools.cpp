@@ -293,7 +293,7 @@ namespace dss {
     return out;
   } // operator<<
 
-  DateTime DateTime::fromISO(const std::string& timeString) {
+  DateTime DateTime::parseRFC2445(const std::string& timeString) {
     struct tm tm;
     time_t t0;
     bool utc = *timeString.rbegin() == 'Z';

@@ -651,7 +651,7 @@ namespace dss {
           }
         } else {
           try {
-            when = DateTime::fromISO(timeStr);
+            when = DateTime::parseRFC2445(timeStr);
             validDate = true;
           } catch(std::exception& e) {
             log(std::string("scheduleFromEvent: invalid time specified '") + timeStr + "' error: " + e.what(), lsError);

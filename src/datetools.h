@@ -163,17 +163,23 @@ namespace dss {
     operator std::string() const;
     std::string toString() const;
     std::string toRFC2822String() const;
+
+    /**
+     * Parses RFC2445 date-time
+     * @param _isoStr DateTime string formatted as "yyyymmddThhmmss[Z]"
+     * @throw invalid_argument if a malformatted \a _isoStr is provided
+     */
+    static DateTime parseRFC2445(const std::string& _isoStr);
+
+    /**
+     * Emit RFC2445 date-time format
+     */
     std::string toRFC2445IcalDataTime() const;
 
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
     static DateTime NullDate;
 
-   /** Creates an instance from an ISO date.
-     * @param _isoStr DateTime string formatted as "yyyymmddThhmmssZ"
-     * @throw invalid_argument if a malformatted \a _isoStr is provided
-     */
-    static DateTime fromISO(const std::string& _isoStr);
   }; // DateTime
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt);
