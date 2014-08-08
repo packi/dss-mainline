@@ -232,12 +232,6 @@ namespace dss {
     return m_DateTime.tm_gmtoff;
   }
 
-  std::ostream& DateTime::operator<<(std::ostream& out) const {
-    std::string bla = dateToISOString<std::string>(&m_DateTime);
-    out << bla;
-    return out;
-  } // operator<<
-
   DateTime::operator std::string() const {
     return toString();
   } // operator std::string()
@@ -262,11 +256,6 @@ namespace dss {
     strftime(buf, sizeof buf, "%Y%m%dT%H%M%S", &m_DateTime);
     return std::string(buf);
   }
-
-  std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
-    _dt << out;
-    return out;
-  } // operator<<
 
   DateTime DateTime::parseRFC2445(const std::string& timeString) {
     struct tm tm;
@@ -299,6 +288,11 @@ namespace dss {
     }
     return DateTime(t0);
   }
+
+  std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
+    out << _dt.toString();
+    return out;
+  } // operator<<
 
   DateTime DateTime::NullDate(0);
 

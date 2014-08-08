@@ -145,9 +145,9 @@ namespace dss {
     /** Returns the offset in seconds from GMT */
     long int getTimezoneOffset() const;
 
-    std::ostream& operator<<(std::ostream& out) const;
     operator std::string() const;
     std::string toString() const;
+
     std::string toRFC2822String() const;
 
     /**
