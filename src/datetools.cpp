@@ -193,18 +193,6 @@ namespace dss {
     validate();
   } // setTime
 
-  bool DateTime::before(const DateTime& _other) const {
-    struct tm self = m_DateTime;
-    struct tm other = _other.m_DateTime;
-    return difftime(mktime(&self), mktime(&other)) < 0;
-  } // before
-
-  bool DateTime::after(const DateTime& _other) const {
-    struct tm self = m_DateTime;
-    struct tm other = _other.m_DateTime;
-    return difftime(mktime(&self), mktime(&other)) > 0;
-  } // after
-
   bool DateTime::operator==(const DateTime& _other) const {
     return difference(_other) == 0;
   } // operator==
@@ -317,7 +305,7 @@ namespace dss {
   //================================================== StaticSchedule
 
   DateTime StaticSchedule::getNextOccurence(const DateTime& _from) {
-    if(_from.before(m_When) || (_from == m_When)) {
+    if (_from <= m_When) {
       return m_When;
     }
     return DateTime::NullDate;
@@ -325,7 +313,7 @@ namespace dss {
 
   std::vector<DateTime> StaticSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
     std::vector<DateTime> result;
-    if(_from.before(m_When) && _to.after(m_When)) {
+    if (_from < m_When && _to > m_When) {
       result.push_back(m_When);
     }
     return result;
@@ -423,24 +411,23 @@ namespace dss {
     do {
       last = current;
       struct icaltimetype icalTime = icalrecur_iterator_next(it);
-      if(!icaltime_is_null_time(icalTime)) {
+      if (!icaltime_is_null_time(icalTime)) {
         current = DateTime(icaltime_as_timet(icalTime));
       } else {
         break;
       }
-    } while(current.before(_from));
+    } while (current < _from);
 
-    if(last.before(_to)) {
-
+    if (last < _to) {
       do {
         result.push_back(last);
         struct icaltimetype icalTime = icalrecur_iterator_next(it);
-        if(!icaltime_is_null_time(icalTime)) {
+        if (!icaltime_is_null_time(icalTime)) {
           last = DateTime(icaltime_as_timet(icalTime));
         } else {
           break;
         }
-      } while(last.before(_to));
+      } while (last < _to);
     }
 
     icalrecur_iterator_free(it);
@@ -471,15 +458,15 @@ namespace dss {
   DateTime RepeatingSchedule::getNextOccurence(const DateTime& _from)  {
     bool hasEndDate = m_EndingAt != DateTime::NullDate;
 
-    if(_from.before(m_BeginingAt)) {
+    if (_from < m_BeginingAt) {
       return m_BeginingAt;
-    } else if(hasEndDate && _from.after(m_EndingAt)) {
+    } else if (hasEndDate && _from > m_EndingAt) {
       return DateTime::NullDate;
     }
     int intervalInSeconds = getIntervalInSeconds();
     int diffInSeconds = _from.difference(m_BeginingAt);
     int numIntervals = diffInSeconds / intervalInSeconds;
-    if(diffInSeconds % intervalInSeconds != 0) {
+    if (diffInSeconds % intervalInSeconds != 0) {
       numIntervals++;
     }
 
@@ -507,7 +494,7 @@ namespace dss {
 
     int intervalInSeconds = getIntervalInSeconds();
     DateTime currentDate = getNextOccurence(_from);
-    while(currentDate != DateTime::NullDate && (currentDate.before(_to) || currentDate == _to)) {
+    while (currentDate != DateTime::NullDate && (currentDate <= _to)) {
       result.push_back(currentDate);
       currentDate = currentDate.addSeconds(intervalInSeconds);
     }

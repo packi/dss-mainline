@@ -46,16 +46,25 @@ BOOST_AUTO_TEST_CASE(testAddingMonth) {
   DateTime dt;
   DateTime dt2 = dt.addMonth(1);
 
-  assert(dt2.after(dt));
-  assert(!dt2.before(dt));
-  assert(dt.before(dt2));
-  assert(!dt.after(dt2));
+  BOOST_CHECK(dt2 > dt);
+  BOOST_CHECK(!(dt2 < dt));
+  BOOST_CHECK(!(dt2 <= dt));
+  BOOST_CHECK(dt < dt2);
+  BOOST_CHECK(!(dt > dt2));
+  BOOST_CHECK(!(dt >= dt2));
+}
 
-  BOOST_CHECK(dt2.after(dt));
-  BOOST_CHECK(!dt2.before(dt));
-  BOOST_CHECK(dt.before(dt2));
-  BOOST_CHECK(!dt.after(dt2));
-} // testAddingMonth
+BOOST_AUTO_TEST_CASE(testAddingHour) {
+  DateTime dt;
+  DateTime dt2 = dt.addHour(1);
+
+  BOOST_CHECK(dt2 > dt);
+  BOOST_CHECK(!(dt2 < dt));
+  BOOST_CHECK(!(dt2 <= dt));
+  BOOST_CHECK(dt < dt2);
+  BOOST_CHECK(!(dt > dt2));
+  BOOST_CHECK(!(dt >= dt2));
+}
 
 BOOST_AUTO_TEST_CASE(testRFC2445) {
   DateTime dt = DateTime::parseRFC2445("20080506T080102");
@@ -116,21 +125,6 @@ BOOST_AUTO_TEST_CASE(testSetters) {
   other.setTime(3,4,5);
   BOOST_CHECK_EQUAL(dt, other);
 } // testSetters
-
-BOOST_AUTO_TEST_CASE(testAddingComparing) {
-  DateTime dt;
-  DateTime dt2 = dt.addHour(1);
-
-  assert(dt2.after(dt));
-  assert(!dt2.before(dt));
-  assert(dt.before(dt2));
-  assert(!dt.after(dt2));
-
-  BOOST_CHECK(dt2.after(dt));
-  BOOST_CHECK(!dt2.before(dt));
-  BOOST_CHECK(dt.before(dt2));
-  BOOST_CHECK(!dt.after(dt2));
-} // testAddingComparing
 
 BOOST_AUTO_TEST_CASE(testStaticSchedule) {
   DateTime when;

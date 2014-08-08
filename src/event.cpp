@@ -899,7 +899,7 @@ namespace dss {
         m_MonitorNode->createProperty(ipSchedEvt->getID() + "/ticks")->setIntegerValue(nextOccurence.difference(now));
       }
 
-      if(nextOccurence.before(now) || (nextOccurence == now)) {
+      if (nextOccurence <= now) {
         result = true;
         if(m_EventQueue != NULL) {
           boost::shared_ptr<Event> evt = ipSchedEvt->getEvent();

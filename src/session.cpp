@@ -47,7 +47,7 @@ namespace dss {
   }
 
   bool Session::isStillValid() {
-    return isUsed() || m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime());
+    return isUsed() || m_LastTouched.addSeconds(m_SessionTimeoutSec) > DateTime();
   } // isStillValid
 
   bool Session::isUsed() {
