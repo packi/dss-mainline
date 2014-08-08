@@ -218,7 +218,7 @@ namespace dss {
             }
           }
           return success(resultObj);
-        } else if(_request.getMethod() == "addSensor") {
+        } else if(_request.getMethod() == "setSensorSource") {
           if (pZone->getID() == 0) {
             return failure("Not allowed to assign sensor for zone 0");
           }
@@ -233,9 +233,10 @@ namespace dss {
             return failure("Missing or invalid parameter 'sensorType'");
           }
           boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(dsuid);
-          pZone->assignSensor(dev, type);
+          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
+          manipulator.setZoneSensor(pZone, type, dev);
           return success();
-        } else if(_request.getMethod() == "removeSensor") {
+        } else if(_request.getMethod() == "clearSensorSource") {
           if (pZone->getID() == 0) {
             return success();
           }
@@ -243,7 +244,8 @@ namespace dss {
           if (type < 0) {
             return failure("Missing or invalid parameter 'sensorType'");
           }
-          pZone->removeSensorAssignment(type);
+          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
+          manipulator.resetZoneSensor(pZone, type);
           return success();
         } else {
           throw std::runtime_error("Unhandled function");

@@ -214,7 +214,6 @@ namespace dss {
   } // setButtonCallsPresent
 
   void DSStructureModifyingBusInterface::setZoneSensor(
-                                const dsuid_t& _meterDSUID,
                                 const uint16_t _zoneID,
                                 const uint8_t _sensorType,
                                 const dsuid_t& _sensorDSUID) {
@@ -223,10 +222,28 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
 
-    int ret = ZoneProperties_set_zone_sensor(m_DSMApiHandle, _meterDSUID,
+    dsuid_t broadcastDSUID;
+    SetBroadcastDsuid(broadcastDSUID);
+
+    int ret = ZoneProperties_set_zone_sensor(m_DSMApiHandle, broadcastDSUID,
                                              _zoneID, _sensorType,
                                              _sensorDSUID);
-    DSBusInterface::checkResultCode(ret);
+    DSBusInterface::checkBroadcastResultCode(ret);
   }
-  
+
+  void DSStructureModifyingBusInterface::resetZoneSensor(
+                                            const uint16_t _zoneID,
+                                            const uint8_t _sensorType) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsuid_t broadcastDSUID;
+    SetBroadcastDsuid(broadcastDSUID);
+
+    int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, broadcastDSUID,
+                                             _zoneID, _sensorType);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  }
 } // namespace dss

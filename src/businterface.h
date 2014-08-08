@@ -255,10 +255,12 @@ namespace dss {
 
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
-    virtual void setZoneSensor(const dsuid_t& _meterDSUID,
-                               const uint16_t _zoneID,
+    virtual void setZoneSensor(const uint16_t _zoneID,
                                const uint8_t _sensorType,
                                const dsuid_t& _sensorDSUID) = 0;
+
+    virtual void resetZoneSensor(const uint16_t _zoneID,
+                                 const uint8_t _sensorType) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface

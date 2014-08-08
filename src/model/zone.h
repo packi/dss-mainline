@@ -115,9 +115,9 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
 
-    void assignSensor(boost::shared_ptr<const Device> _device,
-                      int _sensorType);
-    void removeSensorAssignment(int _sensorType);
+    void setSensor(boost::shared_ptr<const Device> _device,
+                      uint8_t _sensorType);
+    void resetSensor(uint8_t _sensorType);
 
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }

@@ -223,8 +223,8 @@ namespace dss {
     }
   }
 
-  void Zone::assignSensor(boost::shared_ptr<const Device> _device,
-                          int _sensorType) {
+  void Zone::setSensor(boost::shared_ptr<const Device> _device,
+                          uint8_t _sensorType) {
     const boost::shared_ptr<DeviceSensor_t> sensor =
                                        _device->getSensorByType(_sensorType);
 
@@ -248,7 +248,7 @@ namespace dss {
     m_MainSensors.push_back(ms);
   }
 
-  void Zone::removeSensorAssignment(int _sensorType) {
+  void Zone::resetSensor(uint8_t _sensorType) {
     if (!isAllowedSensorType(_sensorType)) {
       return;
     }
