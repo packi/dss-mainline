@@ -68,11 +68,9 @@ namespace dss {
 
   std::string doubleToString(const double _value);
 
+  /** TODO kick as well */
   template <class t>
   t dateToISOString(const struct tm* _dateTime);
-  struct tm dateFromISOString(const char* _dateTimeAsString);
-
-  extern const char* theISOFormatString;
 
   std::vector<std::string> splitString(const std::string& _source, const char _delimiter, bool _trimEntries = false);
   void replaceAll(std::string& s, const std::string& a, const std::string& b);

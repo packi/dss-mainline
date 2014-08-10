@@ -266,6 +266,7 @@ namespace dss {
       throw std::invalid_argument("RFC2445: too short " + timeString);
     }
 
+    memset(&tm, 0, sizeof(tm));
     char *end = strptime(timeString.c_str(), "%Y%m%dT%H%M%S", &tm);
     if (!end || (end - timeString.c_str() != strlen("19930202T226202"))) {
       // strptime %M matches 0-59, so ..T226202 above results in 22:06:20,
@@ -278,7 +279,6 @@ namespace dss {
     if (t0 == -1) {
       throw std::invalid_argument("RFC2445: mktime failure" + timeString);
     }
-
     if (utc) {
 #if defined(__CYGWIN__)
       t0 += -_timezone;
@@ -287,6 +287,27 @@ namespace dss {
 #endif
     }
     return DateTime(t0);
+  }
+
+  /*
+   * This is no ISO standard
+   * http://www.iso.org/iso/home/search.htm?qt=+date+and+time
+   * To be ISO 8601 suggests to separate date and time with the letter 'T'
+   * also timezone is missing
+   */
+  DateTime DateTime::parsePrettyString(const std::string& timeString) {
+    const char* theISOFormatString = "%Y-%m-%d %H:%M:%S"; // 19
+    struct tm tm;
+
+    memset(&tm, 0, sizeof(tm));
+    if (strptime(timeString.c_str(), theISOFormatString, &tm) == NULL) {
+      throw std::invalid_argument("unknown time format: " + timeString);
+    }
+    tm.tm_isdst = -1;
+    if (mktime(&tm) == -1) {
+      throw std::invalid_argument("mktime");
+    }
+    return DateTime(tm);
   }
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {

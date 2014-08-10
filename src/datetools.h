@@ -162,6 +162,12 @@ namespace dss {
      */
     std::string toRFC2445IcalDataTime() const;
 
+    /**
+     * Parses human readable "2014-08-07 23:33:30" format
+     * @throw invalid_argument if parsing fails
+     */
+    static DateTime parsePrettyString(const std::string& strTime);
+
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
     static DateTime NullDate;

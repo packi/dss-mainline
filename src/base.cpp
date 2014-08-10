@@ -202,25 +202,14 @@ namespace dss {
     return sstream.str();
   }
 
-  const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
-
   template <>
   std::string dateToISOString( const struct tm* _dateTime ) {
+    static const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
     char buf[ 20 ];
     strftime( buf, 20, theISOFormatString, _dateTime );
     std::string result = buf;
     return result;
   } // dateToISOString
-
-
-  struct tm dateFromISOString( const char* _dateTimeAsString ) {
-    struct tm result;
-    memset(&result, '\0', sizeof(result));
-    strptime( _dateTimeAsString, theISOFormatString, &result );
-    result.tm_isdst = -1;
-    mktime(&result);
-    return result;
-  } // dateFromISOString
 
   std::vector<std::string> splitString(const std::string& _source,
                                        const char _delimiter,
