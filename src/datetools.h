@@ -168,6 +168,11 @@ namespace dss {
      */
     static DateTime parsePrettyString(const std::string& strTime);
 
+    /**
+     * Emits human readable "2014-08-07 23:33:30" format
+     */
+    std::string toPrettyString() const;
+
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
     static DateTime NullDate;

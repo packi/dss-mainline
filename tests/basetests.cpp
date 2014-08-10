@@ -280,17 +280,10 @@ BOOST_AUTO_TEST_CASE(testProperties) {
 }
 
 BOOST_AUTO_TEST_CASE(testPrettyDate) {
-  struct tm inst;
-  time_t now;
-  time( &now );
-  localtime_r(&now, &inst);
-  mktime(&inst);
-
-  std::string asString = dateToISOString<std::string>(&inst);
-  DateTime instObj(inst);
+  std::string asString = "2014-08-05 23:23:32";
   DateTime parsedObj = DateTime::parsePrettyString(asString);
-  BOOST_CHECK_EQUAL(instObj, parsedObj);
-} // testISODate
+  BOOST_CHECK_EQUAL(asString, parsedObj.toPrettyString());
+}
 
 BOOST_AUTO_TEST_CASE(testSplitIntoKeyValue) {
   std::string key;

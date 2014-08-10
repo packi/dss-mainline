@@ -237,8 +237,8 @@ namespace dss {
   } // operator std::string()
 
   std::string DateTime::toString() const {
-    return dateToISOString<std::string>(&m_DateTime);
-  } // toString
+    return toPrettyString();
+  }
 
   std::string DateTime::toRFC2822String() const {
     static const char* theRFC2822FormatString = "%a, %d %b %Y %T %z";
@@ -308,6 +308,12 @@ namespace dss {
       throw std::invalid_argument("mktime");
     }
     return DateTime(tm);
+  }
+
+  std::string DateTime::toPrettyString() const {
+    char buf[20];
+    strftime(buf, 20, "%Y-%m-%d %H:%M:%S", &m_DateTime);
+    return std::string(buf);
   }
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {

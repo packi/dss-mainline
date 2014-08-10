@@ -202,15 +202,6 @@ namespace dss {
     return sstream.str();
   }
 
-  template <>
-  std::string dateToISOString( const struct tm* _dateTime ) {
-    static const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
-    char buf[ 20 ];
-    strftime( buf, 20, theISOFormatString, _dateTime );
-    std::string result = buf;
-    return result;
-  } // dateToISOString
-
   std::vector<std::string> splitString(const std::string& _source,
                                        const char _delimiter,
                                        bool _trimEntries) {
