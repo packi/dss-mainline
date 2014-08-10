@@ -30,6 +30,25 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(DateTools)
 
+class TZSwitcher {
+public:
+  TZSwitcher(const char *tz) {
+    m_old_tz = getenv("TZ");
+    (void)setenv("TZ", tz, true);
+    tzset();
+  }
+  ~TZSwitcher() {
+    if (m_old_tz) {
+      setenv("TZ", m_old_tz, true);
+    } else {
+      unsetenv("TZ");
+    }
+    tzset();
+  }
+private:
+  const char *m_old_tz;
+};
+
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
   DateTime dt(0);
   dt.setDate(1, January, 2008);
@@ -77,13 +96,11 @@ BOOST_AUTO_TEST_CASE(testRFC2445) {
   BOOST_CHECK(dt.toRFC2445IcalDataTime() == "20080506T080102");
 }
 BOOST_AUTO_TEST_CASE(testRFC2445UTC) {
-  DateTime dt = DateTime::parseRFC2445("20080506T080102Z");
-  BOOST_CHECK_EQUAL(2008, dt.getYear());
-  BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
-  BOOST_CHECK_EQUAL(6, dt.getDay());
-  BOOST_CHECK_EQUAL(8, dt.getHour() - dt.getTimezoneOffset() / 3600);
-  BOOST_CHECK_EQUAL(1, dt.getMinute());
-  BOOST_CHECK_EQUAL(2, dt.getSecond());
+  TZSwitcher s("Europe/Zurich");
+  DateTime dt = DateTime::parseRFC2445("20080101T120102Z");
+  BOOST_CHECK(dt.toRFC2445IcalDataTime() == "20080101T130102");
+  dt = DateTime::parseRFC2445("20080721T120102Z");
+  BOOST_CHECK(dt.toRFC2445IcalDataTime() == "20080721T140102");
 }
 BOOST_AUTO_TEST_CASE(testGetDayOfYearZeroBased) {
   BOOST_CHECK_EQUAL(1, DateTime::parseRFC2445("20090102T100000Z").getDayOfYear());
