@@ -27,6 +27,28 @@
 
 namespace dss {
 
+  /**
+   * Converts \tm to local timezone of this machine
+   * @tm contains '2009-01-02T15:00:00+0300'
+   * @tz_offset seconds east of utc
+   * @ret struct tm
+   */
+  struct tm convertTZ(struct tm tm, time_t tz_offset) {
+    time_t t0;
+
+    tm.tm_isdst = -1; /* rely on mktime for daylight saving time */
+    t0 = mktime(&tm);
+    if (t0 == -1) {
+      throw std::invalid_argument("mktime");
+    }
+
+    /* timezone: seconds west of utc (man tzset) */
+    t0 -= (tz_offset + timezone);
+    t0 += tm.tm_isdst * 3600; // TODO, probably okay
+    localtime_r(&t0, &tm);
+    return tm;
+  }
+
   //================================================== DateTime
 
   DateTime::DateTime() {
@@ -193,31 +215,6 @@ namespace dss {
     validate();
   } // setTime
 
-  void DateTime::clearDate() {
-    setDate(1, 0, 1970);
-  } // clearDate
-
-  void DateTime::clearTime() {
-    setTime(0,0,0);
-  } // clearTime
-
-  void DateTime::clear() {
-    DateTime t0(0);
-    m_DateTime = t0.m_DateTime;
-  } // clear
-
-  bool DateTime::before(const DateTime& _other) const {
-    struct tm self = m_DateTime;
-    struct tm other = _other.m_DateTime;
-    return difftime(mktime(&self), mktime(&other)) < 0;
-  } // before
-
-  bool DateTime::after(const DateTime& _other) const {
-    struct tm self = m_DateTime;
-    struct tm other = _other.m_DateTime;
-    return difftime(mktime(&self), mktime(&other)) > 0;
-  } // after
-
   bool DateTime::operator==(const DateTime& _other) const {
     return difference(_other) == 0;
   } // operator==
@@ -257,19 +254,13 @@ namespace dss {
     return m_DateTime.tm_gmtoff;
   }
 
-  std::ostream& DateTime::operator<<(std::ostream& out) const {
-    std::string bla = dateToISOString<std::string>(&m_DateTime);
-    out << bla;
-    return out;
-  } // operator<<
-
   DateTime::operator std::string() const {
     return toString();
   } // operator std::string()
 
   std::string DateTime::toString() const {
-    return dateToISOString<std::string>(&m_DateTime);
-  } // toString
+    return toPrettyString();
+  }
 
   std::string DateTime::toRFC2822String() const {
     static const char* theRFC2822FormatString = "%a, %d %b %Y %T %z";
@@ -288,81 +279,124 @@ namespace dss {
     return std::string(buf);
   }
 
-  std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
-    _dt << out;
-    return out;
-  } // operator<<
-
-  std::string EraseLeadingZeros(const std::string& _string) {
-    std::string result = _string;
-    while((result.size() > 1) && (result.find('0') == 0)) {
-      result.erase(0,1);
-    }
-    return result;
-  }
-
-  DateTime DateTime::fromISO(const std::string& _isoStr) {
-    DateTime result;
-
-    if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 1 /* 'T', 'Z' is optional */) {
-      throw std::invalid_argument("string is shorter than expected YYMMDD'T'HHMMSS[Z]");
-    }
-
-    int year = strToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
-    int month = strToInt(EraseLeadingZeros(_isoStr.substr(4, 2)));
-    if(month > 12 || month == 0) {
-      throw std::invalid_argument("month should be between 1 and 12");
-    }
-    int day = strToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
-
-    if(_isoStr.at(8) != 'T') {
-      throw std::invalid_argument("string should have a 'T' at position 8");
-    }
-
-    int hour = strToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
-    if(hour > 23) {
-      throw std::invalid_argument("hour should be between 0 and 24");
-    }
-    int min = strToInt(EraseLeadingZeros(_isoStr.substr(11,2)));
-    if(min > 59) {
-      throw std::invalid_argument("minute should be between 0 and 59");
-    }
-    int sec = strToInt(EraseLeadingZeros(_isoStr.substr(13, 2)));
-    if(sec > 59) {
-      throw std::invalid_argument("second should be between 0 and 59");
-    }
-
+  DateTime DateTime::parseRFC2445(const std::string& timeString) {
     struct tm tm;
-    memset(&tm, '\0', sizeof(tm));
-    tm.tm_year = year - 1900;
-    tm.tm_mon = month - 1; // month is zero based "*ç"*!
-    tm.tm_mday = day;
-    tm.tm_hour = hour;
-    tm.tm_min = min;
-    tm.tm_sec = sec;
-    tm.tm_isdst = -1;
+    time_t t0;
+    bool utc = *timeString.rbegin() == 'Z';
 
-    // if string ends with "Z" it is in UTC, otherwise it is considered to
-    // be in local time
-    time_t t0 = mktime(&tm);
-    if(_isoStr.at(_isoStr.size()-1) == 'Z') {
+    if (timeString.length() != strlen("19930202T220202") + utc ? 1 : 0) {
+      throw std::invalid_argument("RFC2445: too short " + timeString);
+    }
+
+    memset(&tm, 0, sizeof(tm));
+    char *end = strptime(timeString.c_str(), "%Y%m%dT%H%M%S", &tm);
+    if (!end || (end - timeString.c_str() != strlen("19930202T226202"))) {
+      // strptime %M matches 0-59, so ..T226202 above results in 22:06:20,
+      // the trailing '2' is silently dropped
+      throw std::invalid_argument("RFC2445: invalid " + timeString);
+    }
+
+    tm.tm_isdst = -1;
+    t0 = mktime(&tm);
+    if (t0 == -1) {
+      throw std::invalid_argument("RFC2445: mktime failure" + timeString);
+    }
+    if (utc) {
 #if defined(__CYGWIN__)
       t0 += -_timezone;
 #else
       t0 += tm.tm_gmtoff;
 #endif
     }
+    return DateTime(t0);
+  }
 
-    DateTime d(t0);
-    return d;
-  } // fromISO
+  /*
+   * ISO 8061
+   * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+   * http://www.cs.tut.fi/~jkorpela/iso8601.html
+   * http://www.w3.org/TR/NOTE-datetime
+   * http://www.ietf.org/rfc/rfc3339.txt
+   */
+  DateTime DateTime::parseISO8601(std::string in) {
+    bool utc = in[in.size() - 1]  == 'Z';
+    struct tm tm;
+
+    if (in.length() != strlen("2011-10-08T07:07:09+02:30") &&
+        in.length() != strlen("2011-10-08T07:07:09+0200") &&
+        in.length() != strlen("2011-10-08T07:07:09+02") &&
+        in.length() != strlen("2011-10-08T07:07:09Z")) {
+      throw std::invalid_argument("ISO8601: invalid length " + in);
+    }
+
+    char *end;
+    memset(&tm, 0, sizeof tm);
+    if (utc) {
+      end = strptime(in.c_str(), "%FT%TZ", &tm);
+    } else {
+      end = strptime(in.c_str(), "%FT%T%z", &tm);
+    }
+    if (!end || (*end != '\0' && std::string(end) != ":00")) {
+      throw std::invalid_argument("ISO8601: invalid format " + in);
+    }
+
+    try {
+      // TODO __CYGWIN__ probably fails here
+      return DateTime(convertTZ(tm, tm.tm_gmtoff));
+    } catch (std::invalid_argument &e) {
+      throw std::invalid_argument(std::string("ISO8601: ") + e.what() + " " + in);
+    }
+  }
+
+  std::string DateTime::toISO8601() const {
+    /*
+     * C++11: http://en.cppreference.com/w/cpp/chrono/c/strftime
+     * http://stackoverflow.com/questions/9527960/how-do-i-construct-an-iso-8601-datetime-in-c
+     * TODO: is ms really part of 8601
+     */
+    char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
+    strftime(buf, sizeof buf, "%FT%T%z", &m_DateTime);
+    return std::string(buf);
+  }
+
+  /*
+   * This is no ISO standard
+   * http://www.iso.org/iso/home/search.htm?qt=+date+and+time
+   * To be ISO 8601 suggests to separate date and time with the letter 'T'
+   * also timezone is missing
+   */
+  DateTime DateTime::parsePrettyString(const std::string& timeString) {
+    const char* theISOFormatString = "%Y-%m-%d %H:%M:%S"; // 19
+    struct tm tm;
+
+    memset(&tm, 0, sizeof(tm));
+    if (strptime(timeString.c_str(), theISOFormatString, &tm) == NULL) {
+      throw std::invalid_argument("unknown time format: " + timeString);
+    }
+    tm.tm_isdst = -1;
+    if (mktime(&tm) == -1) {
+      throw std::invalid_argument("mktime");
+    }
+    return DateTime(tm);
+  }
+
+  std::string DateTime::toPrettyString() const {
+    char buf[20];
+    strftime(buf, 20, "%Y-%m-%d %H:%M:%S", &m_DateTime);
+    return std::string(buf);
+  }
+
+  std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
+    out << _dt.toString();
+    return out;
+  } // operator<<
 
   DateTime DateTime::NullDate(0);
 
   //================================================== StaticSchedule
 
   DateTime StaticSchedule::getNextOccurence(const DateTime& _from) {
-    if(_from.before(m_When) || (_from == m_When)) {
+    if (_from <= m_When) {
       return m_When;
     }
     return DateTime::NullDate;
@@ -370,7 +404,7 @@ namespace dss {
 
   std::vector<DateTime> StaticSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
     std::vector<DateTime> result;
-    if(_from.before(m_When) && _to.after(m_When)) {
+    if (_from < m_When && _to > m_When) {
       result.push_back(m_When);
     }
     return result;
@@ -468,24 +502,23 @@ namespace dss {
     do {
       last = current;
       struct icaltimetype icalTime = icalrecur_iterator_next(it);
-      if(!icaltime_is_null_time(icalTime)) {
+      if (!icaltime_is_null_time(icalTime)) {
         current = DateTime(icaltime_as_timet(icalTime));
       } else {
         break;
       }
-    } while(current.before(_from));
+    } while (current < _from);
 
-    if(last.before(_to)) {
-
+    if (last < _to) {
       do {
         result.push_back(last);
         struct icaltimetype icalTime = icalrecur_iterator_next(it);
-        if(!icaltime_is_null_time(icalTime)) {
+        if (!icaltime_is_null_time(icalTime)) {
           last = DateTime(icaltime_as_timet(icalTime));
         } else {
           break;
         }
-      } while(last.before(_to));
+      } while (last < _to);
     }
 
     icalrecur_iterator_free(it);
@@ -516,15 +549,15 @@ namespace dss {
   DateTime RepeatingSchedule::getNextOccurence(const DateTime& _from)  {
     bool hasEndDate = m_EndingAt != DateTime::NullDate;
 
-    if(_from.before(m_BeginingAt)) {
+    if (_from < m_BeginingAt) {
       return m_BeginingAt;
-    } else if(hasEndDate && _from.after(m_EndingAt)) {
+    } else if (hasEndDate && _from > m_EndingAt) {
       return DateTime::NullDate;
     }
     int intervalInSeconds = getIntervalInSeconds();
     int diffInSeconds = _from.difference(m_BeginingAt);
     int numIntervals = diffInSeconds / intervalInSeconds;
-    if(diffInSeconds % intervalInSeconds != 0) {
+    if (diffInSeconds % intervalInSeconds != 0) {
       numIntervals++;
     }
 
@@ -552,7 +585,7 @@ namespace dss {
 
     int intervalInSeconds = getIntervalInSeconds();
     DateTime currentDate = getNextOccurence(_from);
-    while(currentDate != DateTime::NullDate && (currentDate.before(_to) || currentDate == _to)) {
+    while (currentDate != DateTime::NullDate && (currentDate <= _to)) {
       result.push_back(currentDate);
       currentDate = currentDate.addSeconds(intervalInSeconds);
     }

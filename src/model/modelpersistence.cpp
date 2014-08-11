@@ -160,7 +160,14 @@ namespace dss {
         time_t timestamp = strToUInt(fs);
         firstSeen = DateTime(timestamp);
       } catch(std::invalid_argument&) {
-        firstSeen = DateTime(dateFromISOString(fs));
+        try {
+          // TODO probably some ISO format matched better here
+          firstSeen = DateTime::parsePrettyString(std::string(fs));
+        } catch(std::invalid_argument&) {
+          // go with the NULL date
+          Logger::getInstance()->log("firstSeen date invalid: " +
+                                     std::string(fs), lsInfo);
+        }
       }
     }
 
@@ -170,7 +177,14 @@ namespace dss {
         time_t timestamp = strToUInt(is);
         inactiveSince = DateTime(timestamp);
       } catch(std::invalid_argument&) {
-        inactiveSince = DateTime(dateFromISOString(is));
+        try {
+          // TODO probably some ISO format matched better here
+          inactiveSince = DateTime::parsePrettyString(std::string(is));
+        } catch(std::invalid_argument&) {
+          // go with the NULL date
+          Logger::getInstance()->log("inactiveSince invalid: " + std::string(is),
+                                     lsInfo);
+        }
       }
     }
 

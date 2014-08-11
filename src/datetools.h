@@ -111,16 +111,6 @@ namespace dss {
     /** Sets the time part without touching the date */
     void setTime(int _hour, int _minute, int _second);
 
-    /** Clears the date part as in setting it to zero */
-    void clearDate();
-    /** Clears the time part as in settin it to zero */
-    void clearTime();
-    /** Clears the date and time part
-      * @see clearDate
-      * @see clearTime
-      */
-    void clear();
-
     /** Normalizes the date/time information */
     void validate();
 
@@ -129,10 +119,6 @@ namespace dss {
     /** Returns the weekday */
     Weekday getWeekday() const;
 
-    /** Returns true if the instance is before \a _other */
-    bool before(const DateTime& _other) const;
-    /** Returns true if the instance is after \a _other */
-    bool after(const DateTime& _other) const;
     /** Returns true if the instance and \a _other represent the same date and time */
     bool operator==(const DateTime& _other) const;
     /** Returns true if the instance and \a _other do not represent the same time and date */
@@ -159,21 +145,54 @@ namespace dss {
     /** Returns the offset in seconds from GMT */
     long int getTimezoneOffset() const;
 
-    std::ostream& operator<<(std::ostream& out) const;
     operator std::string() const;
     std::string toString() const;
+
     std::string toRFC2822String() const;
+
+    /**
+     * Parses RFC2445 date-time
+     * @param _isoStr DateTime string formatted as "yyyymmddThhmmss[Z]"
+     * @throw invalid_argument if a malformatted \a _isoStr is provided
+     */
+    static DateTime parseRFC2445(const std::string& _isoStr);
+
+    /**
+     * Emit RFC2445 date-time format
+     */
     std::string toRFC2445IcalDataTime() const;
+
+    /**
+     * parseISO8601 -- ISO8601 or similar RFC3339
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     */
+    static DateTime parseISO8601(std::string in);
+
+    /**
+     * Emit ISO8601 or RFC3339 format
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     */
+    std::string toISO8601() const;
+
+    /**
+     * Parses human readable "2014-08-07 23:33:30" format
+     * @throw invalid_argument if parsing fails
+     */
+    static DateTime parsePrettyString(const std::string& strTime);
+
+    /**
+     * Emits human readable "2014-08-07 23:33:30" format
+     */
+    std::string toPrettyString() const;
 
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
     static DateTime NullDate;
 
-   /** Creates an instance from an ISO date.
-     * @param _isoStr DateTime string formatted as "yyyymmddThhmmssZ"
-     * @throw invalid_argument if a malformatted \a _isoStr is provided
-     */
-    static DateTime fromISO(const std::string& _isoStr);
   }; // DateTime
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt);
