@@ -191,7 +191,6 @@ namespace dss {
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
     static DateTime NullDate;
-
   }; // DateTime
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt);
@@ -205,10 +204,6 @@ namespace dss {
       * @return \a DateTime::NullDate or a \a DateTime value after \a _from
       */
     virtual DateTime getNextOccurence(const DateTime& _from) = 0;
-    /** Lists all ocurrences between \a _from and \a _to.
-      * @return A list containing dates between \a _from and \a _to or an empty std::vector
-      */
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
 
   /** Schedule that's scheduled on a specific DateTime */
@@ -218,9 +213,7 @@ namespace dss {
   public:
     StaticSchedule(const DateTime& _when) : m_When(_when) {}
     virtual ~StaticSchedule() {}
-
     virtual DateTime getNextOccurence(const DateTime& _from);
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
@@ -236,9 +229,7 @@ namespace dss {
     ICalSchedule(const std::string& _rrule, const std::string _startDateISO);
     virtual ~ICalSchedule();
 
-    virtual bool hasNextOccurence(const DateTime& _from);
     virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
 #endif
 
@@ -260,7 +251,5 @@ namespace dss {
       return diffMS;
     }
   }; // Timestamp
-
 }
-
 #endif

@@ -205,15 +205,8 @@ BOOST_AUTO_TEST_CASE(testStaticSchedule) {
   when.setTime(10, 00, 00);
 
   StaticSchedule schedule(when);
-
   BOOST_CHECK_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
   BOOST_CHECK_EQUAL(DateTime::NullDate, schedule.getNextOccurence(when.addMinute(1)));
-
-  std::vector<DateTime> schedList = schedule.getOccurencesBetween(when.addMinute(-1), when.addMinute(1));
-  BOOST_CHECK_EQUAL(static_cast<size_t>(1), schedList.size());
-
-  schedList = schedule.getOccurencesBetween(when.addMinute(1), when.addMinute(2));
-  BOOST_CHECK_EQUAL(static_cast<size_t>(0), schedList.size());
 } // testStaticSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)

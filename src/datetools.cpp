@@ -408,14 +408,6 @@ namespace dss {
     return DateTime::NullDate;
   } // getNextOccurence
 
-  std::vector<DateTime> StaticSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
-    std::vector<DateTime> result;
-    if (_from < m_When && _to > m_When) {
-      result.push_back(m_When);
-    }
-    return result;
-  } // getOccurencesBetween
-
   //================================================== ICalSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
@@ -447,13 +439,6 @@ namespace dss {
     icalrecur_iterator_free(m_ICalIterator);
   } // dtor
 
-  bool ICalSchedule::hasNextOccurence(const DateTime& _from) {
-    if(icaltime_is_null_time(m_NextSchedule)) {
-      return false;
-    }
-    return true;
-  } // hasNextOccurence
-
   DateTime ICalSchedule::getNextOccurence(const DateTime& _from) {
     DateTime result;
     DateTime current;
@@ -477,41 +462,5 @@ namespace dss {
     log(std::string(__func__) + " " + result.toString(), lsDebug);
     return result;
   } // getNextOccurence
-
-  std::vector<DateTime> ICalSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
-    std::vector<DateTime> result;
-
-    DateTime current;
-    DateTime last;
-    icalrecur_iterator* it = icalrecur_iterator_new(m_Recurrence, m_StartDate);
-
-    // skip instances before "_from"
-    do {
-      last = current;
-      struct icaltimetype icalTime = icalrecur_iterator_next(it);
-      if (!icaltime_is_null_time(icalTime)) {
-        current = DateTime(icaltime_as_timet(icalTime));
-      } else {
-        break;
-      }
-    } while (current < _from);
-
-    if (last < _to) {
-      do {
-        result.push_back(last);
-        struct icaltimetype icalTime = icalrecur_iterator_next(it);
-        if (!icaltime_is_null_time(icalTime)) {
-          last = DateTime(icaltime_as_timet(icalTime));
-        } else {
-          break;
-        }
-      } while (last < _to);
-    }
-
-    icalrecur_iterator_free(it);
-    it = NULL;
-
-    return result;
-  } // getOccurencesBetween
 #endif
 }
