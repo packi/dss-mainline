@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeRFC2445) {
 }
 
 BOOST_AUTO_TEST_CASE(testPrettyDate) {
-  std::string asString = "2014-08-05 23:23:32";
+  std::string asString = "2014-08-05 23:23:32.000";
   DateTime parsedObj = DateTime::parsePrettyString(asString);
   BOOST_CHECK_EQUAL(asString, parsedObj.toPrettyString());
 }
@@ -181,6 +181,15 @@ BOOST_AUTO_TEST_CASE(testISO8601_timet) {
   foo = DateTime::parseISO8601("2009-01-02T12:00:00+0200");
   bar = DateTime::parseISO8601("2009-01-02T10:00:00Z");
   BOOST_CHECK(foo.secondsSinceEpoch() == bar.secondsSinceEpoch());
+}
+
+BOOST_AUTO_TEST_CASE(testISO8601_ms) {
+  TZSwitcher s("Europe/Zurich");
+  DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0100");
+  BOOST_CHECK(foo.toISO8601_ms() == "2009-01-02T12:00:00.000+0100");
+
+  DateTime bar(foo.secondsSinceEpoch(), 777777);
+  BOOST_CHECK(bar.toISO8601_ms() == "2009-01-02T12:00:00.777+0100");
 }
 
 BOOST_AUTO_TEST_CASE(testStaticSchedule) {

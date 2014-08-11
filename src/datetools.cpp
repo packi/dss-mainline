@@ -348,11 +348,26 @@ namespace dss {
     /*
      * C++11: http://en.cppreference.com/w/cpp/chrono/c/strftime
      * http://stackoverflow.com/questions/9527960/how-do-i-construct-an-iso-8601-datetime-in-c
-     * TODO: is ms really part of 8601
      */
     char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
     localtime_r(&m_timeval.tv_sec, &tm);
     strftime(buf, sizeof buf, "%FT%T%z", &tm);
+    return std::string(buf);
+  }
+
+  /*
+   * 100 Hz machine has less than 10ms accuracy
+   * http://stackoverflow.com/questions/361363/how-to-measure-time-in-milliseconds-using-ansi-c
+   * TODO: is ms really part of 8601
+   */
+  std::string DateTime::toISO8601_ms() const {
+    struct tm tm;
+    char buf[40], fmt[40];
+
+    // http://stackoverflow.com/questions/1551597/using-strftime-in-c-how-can-i-format-time-exactly-like-a-unix-timestamp
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(fmt , sizeof fmt, "%FT%T.%%03u%z", &tm);
+    snprintf(buf, sizeof buf, fmt, m_timeval.tv_usec / 1000);
     return std::string(buf);
   }
 
@@ -379,9 +394,10 @@ namespace dss {
 
   std::string DateTime::toPrettyString() const {
     struct tm tm;
-    char buf[20];
+    char fmt[30], buf[30];
     localtime_r(&m_timeval.tv_sec, &tm);
-    strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", &tm);
+    strftime(fmt, sizeof fmt, "%Y-%m-%d %H:%M:%S.%%03u", &tm);
+    snprintf(buf, sizeof buf, fmt, m_timeval.tv_usec / 1000);
     return std::string(buf);
   }
 

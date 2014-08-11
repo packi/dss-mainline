@@ -158,6 +158,17 @@ namespace dss {
     std::string toISO8601() const;
 
     /**
+     * Emit ISO8601 or RFC3339 with ms precision
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     * TODO probably non-standard:
+     * - rfc3339 has 100 ms digit precision
+     * - ISO8601 seems seconds only precision(spec is 140$)
+     */
+    std::string toISO8601_ms() const;
+
+    /**
      * Parses human readable "2014-08-07 23:33:30" format
      * @throw invalid_argument if parsing fails
      */
