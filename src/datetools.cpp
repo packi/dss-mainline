@@ -24,6 +24,8 @@
 #include "datetools.h"
 
 #include <cstring>
+#include <sys/time.h>
+#include <errno.h>
 
 namespace dss {
 
@@ -78,96 +80,121 @@ namespace dss {
   //================================================== DateTime
 
   DateTime::DateTime() {
-    time_t now;
-    time( &now );
-    localtime_r(&now, &m_DateTime);
+    if (gettimeofday(&m_timeval, NULL)) {
+      throw std::runtime_error(strerror(errno));
+    }
   } // ctor
 
-  DateTime::DateTime(time_t _time) {
-    localtime_r(&_time, &m_DateTime);
+  DateTime::DateTime(time_t secs, suseconds_t usec) {
+    m_timeval.tv_sec = secs;
+    m_timeval.tv_usec = usec;
   } // ctor(time_t)
 
   DateTime::DateTime(const DateTime& _copy)
-  : m_DateTime(_copy.m_DateTime)
+  : m_timeval(_copy.m_timeval)
   { } // ctor(copy)
 
-  DateTime::DateTime(const struct tm& _tm) {
-    m_DateTime = _tm;
+  DateTime::DateTime(const struct tm& _tm, suseconds_t usecs) {
+    struct tm tm = _tm;
+    time_t secs = mktime(&tm);
+    if (secs == -1) {
+      throw std::runtime_error("mktime");
+    }
+    m_timeval.tv_sec = secs;
+    m_timeval.tv_usec = usecs;
   }
 
   DateTime DateTime::addHour(const int _hours) const {
-    DateTime result(*this);
-    result.m_DateTime.tm_hour += _hours;
-    mktime(&result.m_DateTime);
-    return result;
+    struct timeval tv = m_timeval;
+    tv.tv_sec += _hours * 60 * 60;
+    return DateTime(tv);
   } // addHour
 
   DateTime DateTime::addMinute(const int _minutes) const {
-    DateTime result(*this);
-    result.m_DateTime.tm_min += _minutes;
-    mktime(&result.m_DateTime);
-    return result;
+    struct timeval tv = m_timeval;
+    tv.tv_sec += _minutes * 60;
+    return DateTime(tv);
   } // addMinute
 
   DateTime DateTime::addSeconds(const int _seconds) const {
-    DateTime result(*this);
-    result.m_DateTime.tm_sec += _seconds;
-    mktime(&result.m_DateTime);
-    return result;
+    struct timeval tv = m_timeval;
+    tv.tv_sec += _seconds;
+    return DateTime(tv);
   } // addSeconds
 
   DateTime DateTime::addMonth(const int _month) const {
-    DateTime result(*this);
-    result.m_DateTime.tm_mon += _month;
-    mktime(&result.m_DateTime);
-    return result;
+    struct timeval tv = m_timeval;
+    struct tm tm;
 
+    localtime_r(&m_timeval.tv_sec, &tm);
+    tm.tm_mon += _month;
+    tv.tv_sec = mktime(&tm);
+    return DateTime(tv);
   } // addMonth
 
   DateTime DateTime::addYear(const int _years) const {
+    struct timeval tv = m_timeval;
+    struct tm tm;
+
+    localtime_r(&m_timeval.tv_sec, &tm);
+    tm.tm_year += _years;
+    tv.tv_sec = mktime(&tm);
+    return DateTime(tv);
     DateTime result(*this);
-    result.m_DateTime.tm_year += _years;
-    mktime(&result.m_DateTime);
-    return result;
   } // addYear
 
   DateTime DateTime::addDay(const int _days) const {
-    DateTime result(*this);
-    result.m_DateTime.tm_mday += _days;
-    mktime(&result.m_DateTime);
-    return result;
+    struct timeval tv = m_timeval;
+    tv.tv_sec += _days * 24 * 60 * 60;
+    return DateTime(tv);
   } // addDay
 
   int DateTime::getDay() const {
-    return m_DateTime.tm_mday;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_mday;
   } // getDay
 
   int DateTime::getMonth() const {
-    return m_DateTime.tm_mon;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_mon;
   } // getMonth
 
   int DateTime::getYear() const {
-    return m_DateTime.tm_year + 1900;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_year + 1900;
   } // getYear
 
   int DateTime::getHour() const {
-    return m_DateTime.tm_hour;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_hour;
   } // getHour
 
   int DateTime::getMinute() const {
-    return m_DateTime.tm_min;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_min;
   } // getMinute
 
   int DateTime::getSecond() const {
-    return m_DateTime.tm_sec;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_sec;
   } // getSecond
 
   int DateTime::getDayOfYear() const {
-    return m_DateTime.tm_yday;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_yday;
   } // getDayOfYear
 
   Weekday DateTime::getWeekday() const {
-    return (Weekday)m_DateTime.tm_wday;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return (Weekday)tm.tm_wday;
   } // getWeekday
 
   bool DateTime::operator==(const DateTime& _other) const {
@@ -195,18 +222,20 @@ namespace dss {
   } // operator>=
 
   int DateTime::difference(const DateTime& _other) const {
-    struct tm self = m_DateTime;
-    struct tm other = _other.m_DateTime;
-    return static_cast<int>(difftime(mktime(&self), mktime(&other)));
+    // TODO useconds are ignored
+    // TODO use timercmp, timersub
+    return static_cast<int>(difftime(m_timeval.tv_sec,
+                            _other.m_timeval.tv_sec));
   } // difference
 
   time_t DateTime::secondsSinceEpoch() const {
-    struct tm self = m_DateTime;
-    return mktime(&self);
+    return m_timeval.tv_sec;
   }
 
   long int DateTime::getTimezoneOffset() const {
-    return m_DateTime.tm_gmtoff;
+    struct tm tm;
+    localtime_r(&m_timeval.tv_sec, &tm);
+    return tm.tm_gmtoff;
   }
 
   DateTime::operator std::string() const {
@@ -219,18 +248,24 @@ namespace dss {
 
   std::string DateTime::toRFC2822String() const {
     static const char* theRFC2822FormatString = "%a, %d %b %Y %T %z";
+    struct tm tm;
     char buf[32];
-    strftime(buf, 32, theRFC2822FormatString, &m_DateTime);
+
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, theRFC2822FormatString, &tm);
     return std::string(buf);
   } // toRFC2822String
 
   std::string DateTime::toRFC2445IcalDataTime() const {
+    struct tm tm;
+    char buf[20];
+
     /*
      * http://www.ietf.org/rfc/rfc2445.txt
      * http://www.kanzaki.com/docs/ical/dateTime.html
      */
-    char buf[20];
-    strftime(buf, sizeof buf, "%Y%m%dT%H%M%S", &m_DateTime);
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, "%Y%m%dT%H%M%S", &tm);
     return std::string(buf);
   }
 
@@ -304,13 +339,15 @@ namespace dss {
   }
 
   std::string DateTime::toISO8601() const {
+    struct tm tm;
     /*
      * C++11: http://en.cppreference.com/w/cpp/chrono/c/strftime
      * http://stackoverflow.com/questions/9527960/how-do-i-construct-an-iso-8601-datetime-in-c
      * TODO: is ms really part of 8601
      */
     char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
-    strftime(buf, sizeof buf, "%FT%T%z", &m_DateTime);
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, "%FT%T%z", &tm);
     return std::string(buf);
   }
 
@@ -336,8 +373,10 @@ namespace dss {
   }
 
   std::string DateTime::toPrettyString() const {
+    struct tm tm;
     char buf[20];
-    strftime(buf, 20, "%Y-%m-%d %H:%M:%S", &m_DateTime);
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", &tm);
     return std::string(buf);
   }
 

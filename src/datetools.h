@@ -53,17 +53,18 @@ namespace dss {
   /** Class that supports various date and time calculations */
   class DateTime {
   private:
-    struct tm m_DateTime;
+    struct timeval m_timeval;
   public:
     /** Initializes the instance to be equal to \a DateTime::NullDate */
     DateTime();
+    DateTime(struct timeval tv) : m_timeval(tv) {}
     /** Initializes the instance to be equal to \a _time.
       * @param _time Time as seconds since epoch
       */
-    DateTime(time_t _time);
+    DateTime(const struct tm& _tm, suseconds_t tv_usec = 0);
+    DateTime(time_t _time, suseconds_t usecs = 0);
     /** Copy constuctor */
     DateTime(const DateTime& _copy);
-    DateTime(const struct tm& _tm);
 
     /** Adds \a _hours hours to the time and normalizes the DateTime */
     DateTime addHour(const int _hours) const;
