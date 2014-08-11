@@ -360,22 +360,27 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
   JSONObject obj;
   boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
 
-  // AppToken ApartmentID Type piggy backed with websvc_connection?
-  obj.addProperty("dssid", DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue());
-  obj.addProperty("source", "dss" /*EventSource_dSS*/);
+  std::string parameters;
+  // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
+  parameters += "dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
+  parameters += "&source=dss"; /* EventSource_dSS */
+
   obj.addElement("eventsList", array);
   for (; begin != end; begin++) {
     array->add(toJson(*begin));
   }
 
-  std::string parameters = obj.toString();
+  std::string postdata = obj.toString();
   Logger::getInstance()->log(std::string(__func__) + "event data: " + parameters, lsDebug);
 
   // https://testdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-Event-Event_token_apartmentid_dssid_source
   boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(
-      "public/dss/v1_0/Event/Event",
-      parameters, POST, mcb, true);
+  WebserviceConnection::getInstance()->request("public/dss/v1_0/Event/Event",
+                                               parameters,
+                                               headers_t(),
+                                               postdata,
+                                               mcb,
+                                               true);
 }
 
 typedef std::vector<boost::shared_ptr<Event> >::iterator It;
