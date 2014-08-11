@@ -216,24 +216,6 @@ BOOST_AUTO_TEST_CASE(testStaticSchedule) {
   BOOST_CHECK_EQUAL(static_cast<size_t>(0), schedList.size());
 } // testStaticSchedule
 
-BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
-  DateTime when;
-  when.setDate(15, April, 2008);
-  when.setTime(10, 00, 00);
-
-  RepeatingSchedule schedule(Minutely, 5, when);
-
-  BOOST_CHECK_EQUAL(when,              schedule.getNextOccurence(when.addSeconds(-1)));
-  BOOST_CHECK_EQUAL(when.addMinute(5), schedule.getNextOccurence(when.addSeconds(1)));
-
-  std::vector<DateTime> v = schedule.getOccurencesBetween(when, when.addMinute(10));
-
-  BOOST_CHECK_EQUAL(static_cast<size_t>(3), v.size());
-  BOOST_CHECK_EQUAL(when, v[0]);
-  BOOST_CHECK_EQUAL(when.addMinute(5), v[1]);
-  BOOST_CHECK_EQUAL(when.addMinute(10), v[2]);
-} // testDynamicSchedule
-
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
 BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");

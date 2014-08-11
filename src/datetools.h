@@ -223,34 +223,6 @@ namespace dss {
     virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
 
-  typedef enum {
-    Secondly = 0, Minutely, Hourly, Daily, Weekly, Monthly, Yearly
-  } RepetitionMode;
-
-
-  /** RepeatingSchedule */
-  class RepeatingSchedule : public Schedule {
-  private:
-    /** Repetition mode */
-    RepetitionMode m_RepetitionMode;
-    /** Interval in which to repeat.
-     * If the Mode is Minutely and m_RepeatingInterval is 5, we're scheduled every 5 minutes from m_BeginningAt through m_EndingAt.
-     * Equaly, if the Mode is Hourly and the interval is 12, we're scheduled every 12 hours.
-     */
-    int m_RepeatingInterval;
-    DateTime m_BeginingAt;
-    DateTime m_EndingAt;
-  private:
-    int getIntervalInSeconds();
-  public:
-    RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
-    RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
-    virtual ~RepeatingSchedule() {}
-
-    virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
-  }; // RepeatingSchedule
-
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
   /** Schedule that gets it's schedule from an iCal's RRULE */
   class ICalSchedule : public Schedule {
