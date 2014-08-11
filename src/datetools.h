@@ -64,7 +64,6 @@ namespace dss {
     /** Copy constuctor */
     DateTime(const DateTime& _copy);
     DateTime(const struct tm& _tm);
-    DateTime(const struct icaltimetype& _icaltime);
 
     /** Adds \a _hours hours to the time and normalizes the DateTime */
     DateTime addHour(const int _hours) const;

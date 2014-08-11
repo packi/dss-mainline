@@ -33,7 +33,7 @@ namespace dss {
    * @tz_offset seconds east of utc
    * @ret struct tm
    */
-  struct tm convertTZ(struct tm tm, time_t tz_offset) {
+  static struct tm convertTZ(struct tm tm, time_t tz_offset) {
     time_t t0;
 
     tm.tm_isdst = -1; /* rely on mktime for daylight saving time */
@@ -48,6 +48,32 @@ namespace dss {
     localtime_r(&t0, &tm);
     return tm;
   }
+
+  /**
+   * TODO icaltime_as_timet sufficient?
+   */
+  static struct tm ical_to_tm(const icaltimetype& icalTime) {
+    struct tm tm;
+    memset(&tm, '\0', sizeof(tm));
+    if (icalTime.is_utc) {
+      time_t t0 = icaltime_as_timet(icalTime);
+      localtime_r(&t0, &tm);
+    } else {
+      if(!icalTime.is_date) {
+        tm.tm_sec = icalTime.second;
+        tm.tm_min = icalTime.minute;
+        tm.tm_hour = icalTime.hour;
+      }
+      tm.tm_mday = icalTime.day;
+      tm.tm_mon = icalTime.month - 1;
+      tm.tm_year = icalTime.year - 1900;
+      tm.tm_isdst = -1;
+      if (mktime(&tm) == -1) {
+        throw std::invalid_argument("mktime");
+      }
+    }
+    return tm;
+  } // ical_to_tm
 
   //================================================== DateTime
 
@@ -67,26 +93,6 @@ namespace dss {
 
   DateTime::DateTime(const struct tm& _tm) {
     m_DateTime = _tm;
-  }
-
-  DateTime::DateTime(const struct icaltimetype& _icaltime) {
-    memset(&m_DateTime, 0, sizeof(m_DateTime));
-    time_t t0 = icaltime_as_timet(_icaltime);
-    if(_icaltime.is_utc) {
-      localtime_r(&t0, &m_DateTime);
-    } else {
-      //gmtime_r(&t0, &m_DateTime);
-      if(!_icaltime.is_date) {
-        m_DateTime.tm_sec = _icaltime.second;
-        m_DateTime.tm_min = _icaltime.minute;
-        m_DateTime.tm_hour = _icaltime.hour;
-      }
-      m_DateTime.tm_mday = _icaltime.day;
-      m_DateTime.tm_mon = _icaltime.month - 1;
-      m_DateTime.tm_year = _icaltime.year - 1900;
-      m_DateTime.tm_isdst = -1;
-      (void) mktime(&m_DateTime);
-    }
   }
 
   void DateTime::validate() {
@@ -441,25 +447,6 @@ namespace dss {
     icalrecur_iterator_free(m_ICalIterator);
   } // dtor
 
-  void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
-    memset(&tm, '\0', sizeof(tm));
-    if (icalTime.is_utc) {
-      time_t t0 = icaltime_as_timet(icalTime);
-      localtime_r(&t0, &tm);
-    } else {
-      if(!icalTime.is_date) {
-        tm.tm_sec = icalTime.second;
-        tm.tm_min = icalTime.minute;
-        tm.tm_hour = icalTime.hour;
-      }
-      tm.tm_mday = icalTime.day;
-      tm.tm_mon = icalTime.month - 1;
-      tm.tm_year = icalTime.year - 1900;
-      tm.tm_isdst = -1;
-      (void) mktime(&tm);
-    }
-  } // ical_to_tm
-
   bool ICalSchedule::hasNextOccurence(const DateTime& _from) {
     if(icaltime_is_null_time(m_NextSchedule)) {
       return false;
@@ -478,10 +465,10 @@ namespace dss {
       result = DateTime::NullDate;
     }
     else if(icaltime_compare(ifrom, m_NextSchedule) < 0) {
-      result = DateTime(m_NextSchedule);
+      result = DateTime(ical_to_tm(m_NextSchedule));
     }
     else if(icaltime_compare(ifrom, m_NextSchedule) >= 0) {
-      result = DateTime(m_NextSchedule);
+      result = DateTime(ical_to_tm(m_NextSchedule));
       m_NextSchedule = icalrecur_iterator_next(m_ICalIterator);
     }
     else {
