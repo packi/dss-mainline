@@ -232,24 +232,5 @@ namespace dss {
     virtual DateTime getNextOccurence(const DateTime& _from) ;
   }; // ICalSchedule
 #endif
-
-  //================================================== Timestamp
-
-  /** Class that can store and compute the difference to another timestamp. */
-  class Timestamp {
-  private:
-    struct timeval m_Value;
-  public:
-    Timestamp() {
-      gettimeofday(&m_Value, NULL);
-    }
-
-    /** Calculates the difference to \a _previous in miliseconds */
-    double getDifference(const Timestamp& _previous) {
-      double diffMS = ((m_Value.tv_sec*1000.0 + m_Value.tv_usec/1000.0) -
-                       (_previous.m_Value.tv_sec*1000.0 + _previous.m_Value.tv_usec/1000.0));
-      return diffMS;
-    }
-  }; // Timestamp
 }
 #endif
