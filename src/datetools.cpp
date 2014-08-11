@@ -27,6 +27,28 @@
 
 namespace dss {
 
+  /**
+   * Converts \tm to local timezone of this machine
+   * @tm contains '2009-01-02T15:00:00+0300'
+   * @tz_offset seconds east of utc
+   * @ret struct tm
+   */
+  struct tm convertTZ(struct tm tm, time_t tz_offset) {
+    time_t t0;
+
+    tm.tm_isdst = -1; /* rely on mktime for daylight saving time */
+    t0 = mktime(&tm);
+    if (t0 == -1) {
+      throw std::invalid_argument("mktime");
+    }
+
+    /* timezone: seconds west of utc (man tzset) */
+    t0 -= (tz_offset + timezone);
+    t0 += tm.tm_isdst * 3600; // TODO, probably okay
+    localtime_r(&t0, &tm);
+    return tm;
+  }
+
   //================================================== DateTime
 
   DateTime::DateTime() {
@@ -287,6 +309,54 @@ namespace dss {
 #endif
     }
     return DateTime(t0);
+  }
+
+  /*
+   * ISO 8061
+   * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+   * http://www.cs.tut.fi/~jkorpela/iso8601.html
+   * http://www.w3.org/TR/NOTE-datetime
+   * http://www.ietf.org/rfc/rfc3339.txt
+   */
+  DateTime DateTime::parseISO8601(std::string in) {
+    bool utc = in[in.size() - 1]  == 'Z';
+    struct tm tm;
+
+    if (in.length() != strlen("2011-10-08T07:07:09+02:30") &&
+        in.length() != strlen("2011-10-08T07:07:09+0200") &&
+        in.length() != strlen("2011-10-08T07:07:09+02") &&
+        in.length() != strlen("2011-10-08T07:07:09Z")) {
+      throw std::invalid_argument("ISO8601: invalid length " + in);
+    }
+
+    char *end;
+    memset(&tm, 0, sizeof tm);
+    if (utc) {
+      end = strptime(in.c_str(), "%FT%TZ", &tm);
+    } else {
+      end = strptime(in.c_str(), "%FT%T%z", &tm);
+    }
+    if (!end || (*end != '\0' && std::string(end) != ":00")) {
+      throw std::invalid_argument("ISO8601: invalid format " + in);
+    }
+
+    try {
+      // TODO __CYGWIN__ probably fails here
+      return DateTime(convertTZ(tm, tm.tm_gmtoff));
+    } catch (std::invalid_argument &e) {
+      throw std::invalid_argument(std::string("ISO8601: ") + e.what() + " " + in);
+    }
+  }
+
+  std::string DateTime::toISO8601() const {
+    /*
+     * C++11: http://en.cppreference.com/w/cpp/chrono/c/strftime
+     * http://stackoverflow.com/questions/9527960/how-do-i-construct-an-iso-8601-datetime-in-c
+     * TODO: is ms really part of 8601
+     */
+    char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
+    strftime(buf, sizeof buf, "%FT%T%z", &m_DateTime);
+    return std::string(buf);
   }
 
   /*

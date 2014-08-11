@@ -163,6 +163,22 @@ namespace dss {
     std::string toRFC2445IcalDataTime() const;
 
     /**
+     * parseISO8601 -- ISO8601 or similar RFC3339
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     */
+    static DateTime parseISO8601(std::string in);
+
+    /**
+     * Emit ISO8601 or RFC3339 format
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     */
+    std::string toISO8601() const;
+
+    /**
      * Parses human readable "2014-08-07 23:33:30" format
      * @throw invalid_argument if parsing fails
      */
