@@ -232,5 +232,39 @@ namespace dss {
     virtual DateTime getNextOccurence(const DateTime& _from) ;
   }; // ICalSchedule
 #endif
+
+  class TimeStamp {
+  public:
+    TimeStamp() {
+      m_stamp.tv_sec = 0;
+      m_stamp.tv_nsec = 0;
+    };
+
+    void timestamp();
+    //unsigned toNanoSec() const; /* mind the range is only 32bit */
+    unsigned toMicroSec() const;
+
+    TimeStamp operator+(const TimeStamp &o) const;
+    TimeStamp operator-(const TimeStamp &o) const;
+    TimeStamp operator+=(const TimeStamp &o);
+    TimeStamp operator-=(const TimeStamp &o);
+    bool operator<(const TimeStamp &other) const;
+
+  private:
+#ifndef __APPLE__
+    struct timespec m_stamp;
+#else
+#error NOT IMPLEMENTED
+#endif
+  };
+
+#ifndef __APPLE__
+  /* inline to minimize overhead */
+  inline void TimeStamp::timestamp() {
+    (void)clock_gettime(CLOCK_THREAD_CPUTIME_ID, &m_stamp);
+  }
+#else
+#error NOT IMPLEMENTED
+#endif
 }
 #endif
