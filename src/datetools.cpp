@@ -40,7 +40,7 @@ namespace dss {
    * @tz_offset seconds east of utc
    * @ret struct tm
    */
-  static struct tm convertTZ(struct tm tm, time_t tz_offset) {
+  static time_t convertTZ(struct tm tm, time_t tz_offset) {
     time_t t0;
 
     tm.tm_isdst = -1; /* rely on mktime for daylight saving time */
@@ -52,19 +52,18 @@ namespace dss {
     /* timezone: seconds west of utc (man tzset) */
     t0 -= (tz_offset + timezone);
     t0 += tm.tm_isdst * 3600; // TODO, probably okay
-    localtime_r(&t0, &tm);
-    return tm;
+    return t0;
   }
 
   /**
    * TODO icaltime_as_timet sufficient?
    */
-  static struct tm ical_to_tm(const icaltimetype& icalTime) {
+  static time_t ical_to_tm(const icaltimetype& icalTime) {
+    time_t t0;
     struct tm tm;
     memset(&tm, '\0', sizeof(tm));
     if (icalTime.is_utc) {
-      time_t t0 = icaltime_as_timet(icalTime);
-      localtime_r(&t0, &tm);
+      t0 = icaltime_as_timet(icalTime);
     } else {
       if(!icalTime.is_date) {
         tm.tm_sec = icalTime.second;
@@ -75,11 +74,12 @@ namespace dss {
       tm.tm_mon = icalTime.month - 1;
       tm.tm_year = icalTime.year - 1900;
       tm.tm_isdst = -1;
-      if (mktime(&tm) == -1) {
+      t0 = mktime(&tm);
+      if (t0 == -1) {
         throw std::invalid_argument("mktime");
       }
     }
-    return tm;
+    return t0;
   } // ical_to_tm
 
   //================================================== DateTime
@@ -98,16 +98,6 @@ namespace dss {
   DateTime::DateTime(const DateTime& _copy)
   : m_timeval(_copy.m_timeval)
   { } // ctor(copy)
-
-  DateTime::DateTime(const struct tm& _tm, suseconds_t usecs) {
-    struct tm tm = _tm;
-    time_t secs = mktime(&tm);
-    if (secs == -1) {
-      throw std::runtime_error("mktime");
-    }
-    m_timeval.tv_sec = secs;
-    m_timeval.tv_usec = usecs;
-  }
 
   DateTime DateTime::addHour(const int _hours) const {
     struct timeval tv = m_timeval;
@@ -277,7 +267,7 @@ namespace dss {
   DateTime DateTime::parseRFC2445(const std::string& timeString) {
     struct tm tm;
     time_t t0;
-    bool utc = *timeString.rbegin() == 'Z';
+    bool utc = timeString[timeString.size() - 1] == 'Z';
 
     if (timeString.length() != strlen("19930202T220202") + utc ? 1 : 0) {
       throw std::invalid_argument("RFC2445: too short " + timeString);
@@ -380,16 +370,18 @@ namespace dss {
   DateTime DateTime::parsePrettyString(const std::string& timeString) {
     const char* theISOFormatString = "%Y-%m-%d %H:%M:%S"; // 19
     struct tm tm;
+    time_t t0;
 
     memset(&tm, 0, sizeof(tm));
     if (strptime(timeString.c_str(), theISOFormatString, &tm) == NULL) {
       throw std::invalid_argument("unknown time format: " + timeString);
     }
     tm.tm_isdst = -1;
-    if (mktime(&tm) == -1) {
+    t0 = mktime(&tm);
+    if (t0 == -1) {
       throw std::invalid_argument("mktime");
     }
-    return DateTime(tm);
+    return DateTime(t0);
   }
 
   std::string DateTime::toPrettyString() const {

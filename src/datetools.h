@@ -55,14 +55,11 @@ namespace dss {
   private:
     struct timeval m_timeval;
   public:
-    /** Initializes the instance to be equal to \a DateTime::NullDate */
+    /** Current date-time */
     DateTime();
+    /** Construct from sec.usec since epoch (UTC) */
+    DateTime(time_t secs, suseconds_t usecs = 0);
     DateTime(struct timeval tv) : m_timeval(tv) {}
-    /** Initializes the instance to be equal to \a _time.
-      * @param _time Time as seconds since epoch
-      */
-    DateTime(const struct tm& _tm, suseconds_t tv_usec = 0);
-    DateTime(time_t _time, suseconds_t usecs = 0);
     /** Copy constuctor */
     DateTime(const DateTime& _copy);
 
