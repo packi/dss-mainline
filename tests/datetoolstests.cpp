@@ -173,6 +173,17 @@ BOOST_AUTO_TEST_CASE(testISO8601_australia) {
   BOOST_CHECK(foo.toISO8601() == "2009-07-21T18:30:00+0930");
 }
 
+BOOST_AUTO_TEST_CASE(testISO8601_timet) {
+  // the epoch start is in UTC, converted seconds are in UTC too
+  DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0200");
+  DateTime bar = DateTime::parseISO8601("2009-01-02T15:00:00+0500");
+  BOOST_CHECK(foo.secondsSinceEpoch() == bar.secondsSinceEpoch());
+
+  foo = DateTime::parseISO8601("2009-01-02T12:00:00+0200");
+  bar = DateTime::parseISO8601("2009-01-02T10:00:00Z");
+  BOOST_CHECK(foo.secondsSinceEpoch() == bar.secondsSinceEpoch());
+}
+
 BOOST_AUTO_TEST_CASE(testSetters) {
   DateTime dt;
   dt.setDay(1);
