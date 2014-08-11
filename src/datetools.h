@@ -92,27 +92,6 @@ namespace dss {
     /** Returns the second */
     int getSecond() const;
 
-    /** Sets the day of month */
-    void setDay(const int _value);
-    /** Sets the month */
-    void setMonth(const int _value);
-    /** Sets the year */
-    void setYear(const int _value);
-    /** Sets the hour */
-    void setHour(const int _value);
-    /** Sets the minute */
-    void setMinute(const int _value);
-    /** Sets the second */
-    void setSecond(const int _value);
-
-    /** Sets the date part without touching the time */
-    void setDate(int _day, int _month, int _year);
-    /** Sets the time part without touching the date */
-    void setTime(int _hour, int _minute, int _second);
-
-    /** Normalizes the date/time information */
-    void validate();
-
     /** Returns the day of year */
     int getDayOfYear() const;
     /** Returns the weekday */

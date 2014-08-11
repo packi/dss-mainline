@@ -50,8 +50,7 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
-  DateTime dt(0);
-  dt.setDate(1, January, 2008);
+  DateTime dt = DateTime::parseISO8601("2008-01-01T12:00:00Z");
 
   BOOST_CHECK_EQUAL(dt.getYear(), 2008);
   BOOST_CHECK_EQUAL(dt.getWeekday(), Tuesday);
@@ -184,25 +183,8 @@ BOOST_AUTO_TEST_CASE(testISO8601_timet) {
   BOOST_CHECK(foo.secondsSinceEpoch() == bar.secondsSinceEpoch());
 }
 
-BOOST_AUTO_TEST_CASE(testSetters) {
-  DateTime dt;
-  dt.setDay(1);
-  dt.setMonth(2);
-  dt.setYear(2009);
-  dt.setHour(3);
-  dt.setMinute(4);
-  dt.setSecond(5);
-  dt.validate();
-  DateTime other;
-  other.setDate(1, 2, 2009);
-  other.setTime(3,4,5);
-  BOOST_CHECK_EQUAL(dt, other);
-} // testSetters
-
 BOOST_AUTO_TEST_CASE(testStaticSchedule) {
-  DateTime when;
-  when.setDate(15, April, 2008);
-  when.setTime(10, 00, 00);
+  DateTime when = DateTime::parseISO8601("2008-04-15T10:00:00+0200");
 
   StaticSchedule schedule(when);
   BOOST_CHECK_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
@@ -212,16 +194,12 @@ BOOST_AUTO_TEST_CASE(testStaticSchedule) {
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
 BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
-  DateTime startTime = DateTime::parseRFC2445("20080505T080000Z");
 
-  DateTime currentTime;
-  DateTime nextSchedule = currentTime.addMinute(2);
-  nextSchedule.setMinute(nextSchedule.getMinute() & ~1);
-  nextSchedule.setSecond(0);
-
-  DateTime firstRecurr = sched.getNextOccurence(startTime);
-  BOOST_CHECK_EQUAL(nextSchedule, firstRecurr);
-
+  DateTime now;
+  DateTime firstRecurr = sched.getNextOccurence(now);
+  BOOST_CHECK(firstRecurr.getMinute() <= now.getMinute() + 2);
+  BOOST_CHECK(firstRecurr.getMinute() % 2 == 0);
+  BOOST_CHECK(firstRecurr.secondsSinceEpoch() - now.secondsSinceEpoch() <= 120);
 } // testDynamicScheduleICal
 #endif
 

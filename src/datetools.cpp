@@ -95,13 +95,6 @@ namespace dss {
     m_DateTime = _tm;
   }
 
-  void DateTime::validate() {
-    time_t t0 = mktime(&m_DateTime);
-    if (t0 == -1) {
-      throw DSSException("Invalid time");
-    }
-  } // validate
-
   DateTime DateTime::addHour(const int _hours) const {
     DateTime result(*this);
     result.m_DateTime.tm_hour += _hours;
@@ -176,50 +169,6 @@ namespace dss {
   Weekday DateTime::getWeekday() const {
     return (Weekday)m_DateTime.tm_wday;
   } // getWeekday
-
-  void DateTime::setDay(const int _value) {
-    m_DateTime.tm_mday = _value;
-    validate();
-  } // setDay
-
-  void DateTime::setMonth(const int _value) {
-    m_DateTime.tm_mon = _value;
-    validate();
-  } // setMonth
-
-  void DateTime::setYear(const int _value) {
-    m_DateTime.tm_year = _value - 1900;
-    validate();
-  } // setYear
-
-  void DateTime::setHour(const int _value) {
-    m_DateTime.tm_hour = _value;
-    validate();
-  } // setHour
-
-  void DateTime::setMinute(const int _value) {
-    m_DateTime.tm_min = _value;
-    validate();
-  } // setMinute
-
-  void DateTime::setSecond(const int _value) {
-    m_DateTime.tm_sec = _value;
-    validate();
-  } // setSecond
-
-  void DateTime::setDate(int _day, int _month, int _year) {
-    m_DateTime.tm_mday = _day;
-    m_DateTime.tm_mon = _month;
-    m_DateTime.tm_year = _year - 1900;
-    validate();
-  } // setDate
-
-  void DateTime::setTime(int _hour, int _minute, int _second) {
-    m_DateTime.tm_hour = _hour;
-    m_DateTime.tm_min = _minute;
-    m_DateTime.tm_sec = _second;
-    validate();
-  } // setTime
 
   bool DateTime::operator==(const DateTime& _other) const {
     return difference(_other) == 0;
