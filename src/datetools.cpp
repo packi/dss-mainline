@@ -29,6 +29,11 @@
 
 namespace dss {
 
+  /*
+   * TODO can DateTools bre replaced with this:
+   * http://www.boost.org/doc/libs/1_55_0/doc/html/date_time/details.html#date_time.tradeoffs
+   */
+
   /**
    * Converts \tm to local timezone of this machine
    * @tm contains '2009-01-02T15:00:00+0300'
