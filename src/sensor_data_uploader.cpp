@@ -258,14 +258,16 @@ int getSequenceID(int category) {
   return sequenceID[category]++;
 }
 
-void appendCategory(JSONObject &obj, int category)
+void appendCommon(JSONObject &obj, int group, int category)
 {
   if (category >= EventCategory_Last) {
     throw std::runtime_error("invalid category" + intToString(category));
   }
 
+  obj.addProperty("EventGroup", group);
   obj.addProperty("EventCategory", category);
   obj.addProperty("SequenceID", getSequenceID(category));
+  obj.addProperty("Timestamp", DateTime().toISO8601_ms());
 }
 
 // TODO this should be moved to webservice_api
@@ -276,54 +278,44 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
 
   if (event->getName() == EventName::DeviceSensorValue) {
     pDeviceRef = event->getRaisedAtDevice();
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Metering);
-    appendCategory(obj, EventCategory_DeviceMetering);
+    appendCommon(obj, EventGroup_Metering, EventCategory_DeviceMetering);
     obj.addProperty("SensorIndex", event->getPropertyByName("sensorIndex"));
     int sensorType = strToInt(event->getPropertyByName("sensorType"));
     obj.addProperty("SensorType", SceneHelper::sensorName(sensorType));
     obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
     obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
   } else if (event->getName() == EventName::ZoneSensorValue) {
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Metering);
-    appendCategory(obj, EventCategory_ZoneEvent);
+    appendCommon(obj, EventGroup_Metering, EventCategory_ZoneEvent);
     obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
     obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
     obj.addProperty("SensorType", event->getPropertyByName("sensorType"));
     obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
   } else if (event->getName() == EventName::CallScene) {
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Activity);
-    appendCategory(obj, EventCategory_ZoneGroupCallScene);
+    appendCommon(obj, EventGroup_Activity, EventCategory_ZoneGroupCallScene);
     obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
     obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
     obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
     obj.addProperty("forced", event->hasPropertySet("forced"));
     obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
   } else if (event->getName() == EventName::UndoScene) {
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Activity);
-    appendCategory(obj, EventCategory_ZoneGroupUndoScene);
+    appendCommon(obj, EventGroup_Activity, EventCategory_ZoneGroupUndoScene);
     obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
     obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
     obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
     obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
   } else if (event->getName() == EventName::StateChange) {
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Activity);
     boost::shared_ptr<const State> pState = event->getRaisedAtState();
     switch (pState->getType()) {
       case StateType_Apartment:
       case StateType_Service:
       case StateType_Script:
-        appendCategory(obj, EventCategory_ApartmentEvent);
+        appendCommon(obj, EventGroup_Activity, EventCategory_ApartmentEvent);
         break;
       case StateType_Group:
-        appendCategory(obj, EventCategory_ZoneStateGroup);
+        appendCommon(obj, EventGroup_Activity, EventCategory_ZoneStateGroup);
         break;
       case StateType_Device:
-        appendCategory(obj, EventCategory_DeviceState);
+        appendCommon(obj, EventGroup_Activity, EventCategory_DeviceState);
         break;
       default:
         break;
@@ -333,16 +325,12 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
     obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
   } else if (event->getName() == EventName::DeviceStatus) {
     pDeviceRef = event->getRaisedAtDevice();
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Activity);
-    appendCategory(obj, EventCategory_DeviceStatus);
+    appendCommon(obj, EventGroup_Activity, EventCategory_DeviceStatus);
     obj.addProperty("StatusIndex", event->getPropertyByName("statusIndex"));
     obj.addProperty("StatusValue", event->getPropertyByName("statusValue"));
     obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
   } else if (event->getName() == EventName::HeatingControllerSetup) {
-    obj.addProperty("Timestamp", DateTime().toString());
-    obj.addProperty("EventGroup", EventGroup_Activity);
-    appendCategory(obj, EventCategory_HeatingControllerSetup);
+    appendCommon(obj, EventGroup_Activity, EventCategory_HeatingControllerSetup);
 
     // TODO: add event data
 
