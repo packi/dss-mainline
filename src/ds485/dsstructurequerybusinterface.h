@@ -41,7 +41,7 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters();
     virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID);
     virtual std::vector<int> getZones(const dsuid_t& _dsMeterID);
-    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true);
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID);
