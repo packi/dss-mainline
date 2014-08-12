@@ -50,8 +50,7 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
-  DateTime dt(0);
-  dt.setDate(1, January, 2008);
+  DateTime dt = DateTime::parseISO8601("2008-01-01T12:00:00Z");
 
   BOOST_CHECK_EQUAL(dt.getYear(), 2008);
   BOOST_CHECK_EQUAL(dt.getWeekday(), Tuesday);
@@ -129,7 +128,7 @@ BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeRFC2445) {
 }
 
 BOOST_AUTO_TEST_CASE(testPrettyDate) {
-  std::string asString = "2014-08-05 23:23:32";
+  std::string asString = "2014-08-05 23:23:32.000";
   DateTime parsedObj = DateTime::parsePrettyString(asString);
   BOOST_CHECK_EQUAL(asString, parsedObj.toPrettyString());
 }
@@ -173,69 +172,43 @@ BOOST_AUTO_TEST_CASE(testISO8601_australia) {
   BOOST_CHECK(foo.toISO8601() == "2009-07-21T18:30:00+0930");
 }
 
-BOOST_AUTO_TEST_CASE(testSetters) {
-  DateTime dt;
-  dt.setDay(1);
-  dt.setMonth(2);
-  dt.setYear(2009);
-  dt.setHour(3);
-  dt.setMinute(4);
-  dt.setSecond(5);
-  dt.validate();
-  DateTime other;
-  other.setDate(1, 2, 2009);
-  other.setTime(3,4,5);
-  BOOST_CHECK_EQUAL(dt, other);
-} // testSetters
+BOOST_AUTO_TEST_CASE(testISO8601_timet) {
+  // the epoch start is in UTC, converted seconds are in UTC too
+  DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0200");
+  DateTime bar = DateTime::parseISO8601("2009-01-02T15:00:00+0500");
+  BOOST_CHECK(foo.secondsSinceEpoch() == bar.secondsSinceEpoch());
+
+  foo = DateTime::parseISO8601("2009-01-02T12:00:00+0200");
+  bar = DateTime::parseISO8601("2009-01-02T10:00:00Z");
+  BOOST_CHECK(foo.secondsSinceEpoch() == bar.secondsSinceEpoch());
+}
+
+BOOST_AUTO_TEST_CASE(testISO8601_ms) {
+  TZSwitcher s("Europe/Zurich");
+  DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0100");
+  BOOST_CHECK(foo.toISO8601_ms() == "2009-01-02T12:00:00.000+0100");
+
+  DateTime bar(foo.secondsSinceEpoch(), 777777);
+  BOOST_CHECK(bar.toISO8601_ms() == "2009-01-02T12:00:00.777+0100");
+}
 
 BOOST_AUTO_TEST_CASE(testStaticSchedule) {
-  DateTime when;
-  when.setDate(15, April, 2008);
-  when.setTime(10, 00, 00);
+  DateTime when = DateTime::parseISO8601("2008-04-15T10:00:00+0200");
 
   StaticSchedule schedule(when);
-
   BOOST_CHECK_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
   BOOST_CHECK_EQUAL(DateTime::NullDate, schedule.getNextOccurence(when.addMinute(1)));
-
-  std::vector<DateTime> schedList = schedule.getOccurencesBetween(when.addMinute(-1), when.addMinute(1));
-  BOOST_CHECK_EQUAL(static_cast<size_t>(1), schedList.size());
-
-  schedList = schedule.getOccurencesBetween(when.addMinute(1), when.addMinute(2));
-  BOOST_CHECK_EQUAL(static_cast<size_t>(0), schedList.size());
 } // testStaticSchedule
-
-BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
-  DateTime when;
-  when.setDate(15, April, 2008);
-  when.setTime(10, 00, 00);
-
-  RepeatingSchedule schedule(Minutely, 5, when);
-
-  BOOST_CHECK_EQUAL(when,              schedule.getNextOccurence(when.addSeconds(-1)));
-  BOOST_CHECK_EQUAL(when.addMinute(5), schedule.getNextOccurence(when.addSeconds(1)));
-
-  std::vector<DateTime> v = schedule.getOccurencesBetween(when, when.addMinute(10));
-
-  BOOST_CHECK_EQUAL(static_cast<size_t>(3), v.size());
-  BOOST_CHECK_EQUAL(when, v[0]);
-  BOOST_CHECK_EQUAL(when.addMinute(5), v[1]);
-  BOOST_CHECK_EQUAL(when.addMinute(10), v[2]);
-} // testDynamicSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
 BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
-  DateTime startTime = DateTime::parseRFC2445("20080505T080000Z");
 
-  DateTime currentTime;
-  DateTime nextSchedule = currentTime.addMinute(2);
-  nextSchedule.setMinute(nextSchedule.getMinute() & ~1);
-  nextSchedule.setSecond(0);
-
-  DateTime firstRecurr = sched.getNextOccurence(startTime);
-  BOOST_CHECK_EQUAL(nextSchedule, firstRecurr);
-
+  DateTime now;
+  DateTime firstRecurr = sched.getNextOccurence(now);
+  BOOST_CHECK(firstRecurr.getMinute() <= now.getMinute() + 2);
+  BOOST_CHECK(firstRecurr.getMinute() % 2 == 0);
+  BOOST_CHECK(firstRecurr.secondsSinceEpoch() - now.secondsSinceEpoch() <= 120);
 } // testDynamicScheduleICal
 #endif
 
