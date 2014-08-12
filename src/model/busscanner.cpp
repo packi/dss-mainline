@@ -131,6 +131,22 @@ namespace dss {
     return true;
   } // scanDSMeter
 
+  void BusScanner::scanDevicesOfZoneQuick(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
+    std::vector<DeviceSpec_t> devices;
+    try {
+      if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+        log("scanZone: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
+      } else {
+        devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID(), false);
+        foreach(DeviceSpec_t& spec, devices) {
+          initializeDeviceFromSpecQuick(_dsMeter, spec);
+        }
+      }
+    } catch(BusApiError& e) {
+      log("scanZone: Error getDevicesInZone: " + std::string(e.what()), lsWarning);
+    }
+  } // scanDevicesOfZone
+
   bool BusScanner::scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     std::vector<DeviceSpec_t> devices;
     try {
@@ -309,6 +325,31 @@ namespace dss {
     m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
   } // scanDeviceOnBus
+
+  bool BusScanner::initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, DeviceSpec_t& _spec) {
+    log("UpdateDevice: DSID:        " + dsuid2str(_spec.DSID));
+    log("Active: " + intToString(_spec.ActiveState));
+
+    boost::shared_ptr<Device> dev;
+    try {
+      dev = m_Apartment.getDeviceByDSID(_spec.DSID);
+      if ((_spec.ActiveState == 0) && dev->isPresent()) {
+        // ignore this device if there is already an active one with this dSID
+        return false;
+      }
+    } catch(ItemNotFoundException&) {
+      return false;
+    }
+
+    DeviceReference devRef(dev, &m_Apartment);
+
+    dev->setIsPresent(_spec.ActiveState == 1);
+    dev->setIsConnected(true);
+    dev->setIsValid(true);
+
+    m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return true;
+  } // initializeDeviceFromSpecQuick
 
   void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
