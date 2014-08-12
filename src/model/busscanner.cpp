@@ -115,6 +115,21 @@ namespace dss {
       }
       _dsMeter->setIsInitialized(true);
       m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } else {
+      std::vector<int> zoneIDs;
+      try {
+        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+      } catch(BusApiError& e) {
+        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
+        return false;
+      }
+      foreach(int zoneID, zoneIDs) {
+        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+        zone->addToDSMeter(_dsMeter);
+        zone->setIsPresent(true);
+        zone->setIsConnected(true);
+        scanDevicesOfZone(_dsMeter, zone);
+      }
     }
 
     _dsMeter->setDatamodelHash(hash.Hash);
