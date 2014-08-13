@@ -359,11 +359,11 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
   }
 
   std::string postdata = obj.toString();
-  Logger::getInstance()->log(std::string(__func__) + "event data: " + parameters, lsDebug);
+  Logger::getInstance()->log(std::string(__func__) + "event data: " + postdata, lsDebug);
 
-  // https://testdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-Event-Event_token_apartmentid_dssid_source
+  // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
   boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
-  WebserviceConnection::getInstance()->request("public/dss/v1_0/Event/Event",
+  WebserviceConnection::getInstance()->request("public/dss/v1_0/DSSEventData/SaveEvent",
                                                parameters,
                                                headers_t(),
                                                postdata,
