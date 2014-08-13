@@ -226,6 +226,7 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/jshandlertests.cpp \
 	$(top_srcdir)/tests/jsloggertests.cpp \
 	$(top_srcdir)/tests/jsontests.cpp \
+	$(top_srcdir)/tests/jsproperty.cpp \
 	$(top_srcdir)/tests/loggertests.cpp \
 	$(top_srcdir)/tests/meteringtests.cpp \
 	$(top_srcdir)/tests/modeljstests.cpp \
