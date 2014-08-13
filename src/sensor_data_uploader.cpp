@@ -45,6 +45,7 @@ class SensorLog : public WebserviceCallDone,
   };
 public:
   SensorLog() : m_pending_upload(false) {};
+  virtual ~SensorLog() {};
   void append(boost::shared_ptr<Event> event);
   void triggerUpload();
   void done(RestTransferStatus_t status, WebserviceReply reply);
