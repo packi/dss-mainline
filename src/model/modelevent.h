@@ -60,6 +60,9 @@ namespace dss {
                     etDeviceBinaryStateEvent, /**< A device has sent a new binary input state */
                     etDeviceEANReady, /** OEM data has finished reading out from device */
                     etDeviceOEMDataReady, /** OEM data has been retrieved from webservice */
+                    etControllerState, /** State of the controlling device or algorithm changed */
+                    etControllerConfig, /** Configuration of the controlling device or algorithm changed */
+                    etControllerValues, /** Operation Values of the controlling device or algorithm changed */
                  } EventType;
   private:
     EventType m_EventType;

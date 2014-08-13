@@ -53,6 +53,7 @@ namespace dss {
     extern const std::string ZoneSensorValue;
     extern const std::string StateChange;
     extern const std::string HeatingControllerSetup;
+    extern const std::string HeatingControllerValue;
   }
 
   namespace EventProperty {

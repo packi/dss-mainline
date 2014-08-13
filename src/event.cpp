@@ -59,6 +59,7 @@ namespace dss {
     const std::string ZoneSensorValue = "zoneSensorValue";
     const std::string StateChange = "stateChange";
     const std::string HeatingControllerSetup = "HeatingControllerSetup";
+    const std::string HeatingControllerValue = "HeatingControllerValueEvent";
   }
 
   namespace EventProperty {
