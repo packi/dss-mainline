@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2014 digitalSTROM.org, Zurich, Switzerland
  *
+ * Authors: Andreas Fenkart, digitalSTROM ag <andreas.fenkart@dev.digitalstrom.org>
+ *
  * This file is part of digitalSTROM Server.
  *
  * digitalSTROM Server is free software: you can redistribute it and/or modify
