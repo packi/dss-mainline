@@ -112,7 +112,7 @@ namespace dss {
       * @see after */
     bool operator>=(const DateTime& _other) const;
 
-    /** Returns the difference in days */
+    /** Returns the difference in seconds */
     int difference(const DateTime& _other) const;
 
     /** Returns the seconds since epoch */
