@@ -76,8 +76,11 @@ void SensorLog::triggerUpload() {
   m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
   m_events.clear();
 
-  WebserviceApartment::doUploadSensorData(m_uploading.begin(), m_uploading.end(),
-                                          shared_from_this());
+  if (!m_uploading.empty()) {
+    m_pending_upload = true;
+    WebserviceApartment::doUploadSensorData(m_uploading.begin(), m_uploading.end(),
+                                            shared_from_this());
+  }
 }
 
 void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
