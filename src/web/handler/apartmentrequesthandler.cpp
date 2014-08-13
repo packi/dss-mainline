@@ -235,6 +235,131 @@ namespace dss {
           scenes.pop_front();
         }
         return success(result);
+
+      } else if(_request.getMethod() == "getTemperatureControlStatus") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+
+        resultObj->addElement("zones", zones);
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+          zones->addElement("", zone);
+          zone->addProperty("id", pZone->getID());
+          zone->addProperty("name", pZone->getName());
+          zone->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          switch (hProp.m_HeatingControlMode) {
+            case HeatingControlModeIDOff:
+              break;
+            case HeatingControlModeIDPID:
+              zone->addProperty("OperationMode", hStatus.m_OperationMode);
+              zone->addProperty("TemperatureValue", hStatus.m_TemperatureValue);
+              zone->addProperty("TemperatureValueTime", hStatus.m_TemperatureValueTS.toISO8601());
+              zone->addProperty("NominalValue", hStatus.m_NominalValue);
+              zone->addProperty("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
+              zone->addProperty("ControlValue", hStatus.m_ControlValue);
+              zone->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
+              break;
+            case HeatingControlModeIDZoneFollower:
+              zone->addProperty("ControlValue", hStatus.m_ControlValue);
+              zone->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
+              break;
+            case HeatingControlModeIDFixed:
+              zone->addProperty("OperationMode", hStatus.m_OperationMode);
+              zone->addProperty("ControlValue", hStatus.m_ControlValue);
+              break;
+          }
+        }
+        return success(resultObj);
+
+      } else if(_request.getMethod() == "getTemperatureControlConfig") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+
+        resultObj->addElement("zones", zones);
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          zones->addElement("", zone);
+          zone->addProperty("id", pZone->getID());
+          zone->addProperty("name", pZone->getName());
+          zone->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+
+          ZoneHeatingConfigSpec_t hConfig;
+          memset(&hConfig, 0, sizeof(hConfig));
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            continue;
+          } else {
+            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          zone->addProperty("ControlMode", hConfig.ControllerMode);
+          switch (hProp.m_HeatingControlMode) {
+            case HeatingControlModeIDOff:
+              break;
+            case HeatingControlModeIDPID:
+              zone->addProperty("CtrlKp", hConfig.Kp);
+              zone->addProperty("CtrlTs", hConfig.Ts);
+              zone->addProperty("CtrlTi", hConfig.Ti);
+              zone->addProperty("CtrlKd", hConfig.Kd);
+              zone->addProperty("CtrlImin", hConfig.Imin);
+              zone->addProperty("CtrlImax", hConfig.Imax);
+              zone->addProperty("CtrlYmin", hConfig.Ymin);
+              zone->addProperty("CtrlYmax", hConfig.Ymax);
+              zone->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
+              zone->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+              break;
+            case HeatingControlModeIDZoneFollower:
+              zone->addProperty("ReferenceZone", hConfig.SourceZoneId);
+              zone->addProperty("CtrlOffset", hConfig.Offset);
+              break;
+            case HeatingControlModeIDFixed:
+              break;
+          }
+        }
+        return success(resultObj);
+
+      } else if(_request.getMethod() == "getAssignedSensors") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+
+        resultObj->addElement("zones", zones);
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          zones->addElement("zones", zone);
+          zone->addProperty("id", pZone->getID());
+          zone->addProperty("name", pZone->getName());
+
+          boost::shared_ptr<JSONArrayBase> sensors(new JSONArrayBase());
+          zone->addElement("sensors", sensors);
+
+          std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
+          for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
+              it != slist.end();
+              it ++) {
+            boost::shared_ptr<JSONObject> sensor(new JSONObject());
+            boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+            sensors->addElement("", sensor);
+            sensor->addProperty("type", devSensor->m_sensorType);
+            sensor->addProperty("dsuid", dsuid2str(devSensor->m_DSUID));
+          }
+        }
+        return success(resultObj);
+
       } else {
         throw std::runtime_error("Unhandled function");
       }

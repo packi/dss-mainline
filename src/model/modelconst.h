@@ -187,6 +187,7 @@ namespace dss {
   const int BinaryInputIDRainDetector = 9;
   const int BinaryInputIDSun = 10;
   const int BinaryInputIDRoomThermostat = 11;
+  const int BinaryInputIDBatteryLow = 12;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
@@ -205,6 +206,25 @@ namespace dss {
   const uint8_t ClickType2P = 0x0d;     // Short-Short-Long Click
   const uint8_t ClickTypeLS = 0x0e;     // Local-Stop Click
   const uint8_t ClickTypeRES = 0x0f;
+
+  // Heating Control Mode
+  const int HeatingControlModeIDOff = 0;
+  const int HeatingControlModeIDPID = 1;
+  const int HeatingControlModeIDZoneFollower = 2;
+  const int HeatingControlModeIDFixed = 3;
+
+  // Heating Control States
+  const int HeatingControlStateIDInternal = 0;
+  const int HeatingControlStateIDExternal = 1;
+  const int HeatingControlStateIDExBackup = 2;
+  const int HeatingControlStateIDEmergency = 3;
+
+  // Heating Operation Mode
+  const int HeatingOperationModeIDOff = 0;
+  const int HeatingOperationModeIDComfort = 1;
+  const int HeatingOperationModeIDEconomy = 2;
+  const int HeatingOperationModeIDNotUsed = 3;
+  const int HeatingOperationModeIDNight = 4;
 
   // Color ID"s
   const int ColorIDYellow = 1;

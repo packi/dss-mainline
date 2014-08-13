@@ -96,9 +96,22 @@ namespace dss {
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
-    setOnState(_origin, _sceneNr);
 
     AddressableModelItem::callScene(_origin, _category, _sceneNr, _token, _force);
+
+    // TODO: checkAccess might have blocked the actual scene call
+
+    switch (m_GroupID) {
+      case GroupIDControlTemperature:
+        {
+          boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
+          pZone->setHeatingOperationMode(_sceneNr);
+        }
+        break;
+      default:
+        setOnState(_origin, _sceneNr);
+        break;
+    }
   } // callScene
 
   unsigned long Group::getPowerConsumption() {
@@ -234,11 +247,20 @@ namespace dss {
   } // publishToPropertyTree
 
   void Group::sensorPush(const std::string& _sourceID, const int _sensorType, const double _sensorValue) {
+    DateTime now;
+    boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
+
+    switch (_sensorType) {
+      case SensorIDTemperatureIndoors: pZone->setTemperature(_sensorValue, now); break;
+      case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_sensorValue, now); break;
+      case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_sensorValue, now); break;
+      default: break;
+    }
+
     if (m_pPropertyNode != NULL) {
       PropertyNodePtr node = m_pPropertyNode->createProperty("sensor/type" + intToString(_sensorType));
       node->createProperty("value")->setFloatingValue(_sensorValue);
       node->createProperty("sourcedsuid")->setStringValue(_sourceID);
-      DateTime now;
       node->createProperty("time")->setIntegerValue(now.secondsSinceEpoch());
       node->createProperty("timestamp")->setStringValue(now.toString());
     }

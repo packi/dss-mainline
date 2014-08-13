@@ -218,6 +218,305 @@ namespace dss {
             }
           }
           return success(resultObj);
+
+        } else if(_request.getMethod() == "getTemperatureControlStatus") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+          resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          switch (hProp.m_HeatingControlMode) {
+            case HeatingControlModeIDOff:
+              break;
+            case HeatingControlModeIDPID:
+              resultObj->addProperty("OperationMode", hStatus.m_OperationMode);
+              resultObj->addProperty("TemperatureValue", hStatus.m_TemperatureValue);
+              resultObj->addProperty("TemperatureValueTime", hStatus.m_TemperatureValueTS.toISO8601());
+              resultObj->addProperty("NominalValue", hStatus.m_NominalValue);
+              resultObj->addProperty("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
+              resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
+              resultObj->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
+              break;
+            case HeatingControlModeIDZoneFollower:
+              resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
+              resultObj->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
+              break;
+            case HeatingControlModeIDFixed:
+              resultObj->addProperty("OperationMode", hStatus.m_OperationMode);
+              resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
+              break;
+          }
+          return success(resultObj);
+
+        } else if(_request.getMethod() == "getTemperatureControlConfig") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingConfigSpec_t hConfig;
+
+          memset(&hConfig, 0, sizeof(hConfig));
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            // TODO: activate
+            //return failure("No heating control device");
+          } else {
+            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          resultObj->addProperty("ControlMode", hConfig.ControllerMode);
+          switch (hProp.m_HeatingControlMode) {
+            case HeatingControlModeIDOff:
+              break;
+            case HeatingControlModeIDPID:
+              resultObj->addProperty("CtrlKp", hConfig.Kp);
+              resultObj->addProperty("CtrlTs", hConfig.Ts);
+              resultObj->addProperty("CtrlTi", hConfig.Ti);
+              resultObj->addProperty("CtrlKd", hConfig.Kd);
+              resultObj->addProperty("CtrlImin", hConfig.Imin);
+              resultObj->addProperty("CtrlImax", hConfig.Imax);
+              resultObj->addProperty("CtrlYmin", hConfig.Ymin);
+              resultObj->addProperty("CtrlYmax", hConfig.Ymax);
+              resultObj->addProperty("CtrlEmergencyValue", hConfig.EmergencyValue);
+              resultObj->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
+              resultObj->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+              break;
+            case HeatingControlModeIDZoneFollower:
+              resultObj->addProperty("ReferenceZone", hConfig.SourceZoneId);
+              resultObj->addProperty("CtrlOffset", hConfig.Offset);
+              break;
+            case HeatingControlModeIDFixed:
+              break;
+          }
+          return success(resultObj);
+
+        } else if(_request.getMethod() == "setTemperatureControlConfig") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingConfigSpec_t hConfig;
+
+          if (_request.hasParameter("CtrlDSUID")) {
+            dsuid_from_string(_request.getParameter("CtrlDSUID").c_str(), &hProp.m_HeatingControlDSUID);
+          }
+
+          memset(&hConfig, 0, sizeof(hConfig));
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            return failure("No heating control device");
+          } else {
+            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          _request.getParameter("CtrlMode", hConfig.ControllerMode);
+          _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
+          _request.getParameter("CtrlOffset", hConfig.Offset);
+          _request.getParameter("CtrlEmergencyValue", hConfig.EmergencyValue);
+          _request.getParameter("CtrlKp", hConfig.Kp);
+          _request.getParameter("CtrlTi", hConfig.Ti);
+          _request.getParameter("CtrlTs", hConfig.Ts);
+          _request.getParameter("CtrlKd", hConfig.Kd);
+          _request.getParameter("CtrlImin", hConfig.Imin);
+          _request.getParameter("CtrlImax", hConfig.Imax);
+          _request.getParameter("CtrlYmin", hConfig.Ymin);
+          _request.getParameter("CtrlYmax", hConfig.Ymax);
+          _request.getParameter("CtrlAntiWindUp", hConfig.AntiWindUp);
+          _request.getParameter("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+
+          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
+          manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
+          return success(resultObj);
+
+        } else if(_request.getMethod() == "getTemperatureControlValues") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingOperationModeSpec_t hOpValues;
+
+          memset(&hOpValues, 0, sizeof(hOpValues));
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            // TODO: activate
+            //return failure("No heating control device");
+          } else {
+            hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          switch (hProp.m_HeatingControlMode) {
+          case HeatingControlModeIDOff:
+            break;
+          case HeatingControlModeIDPID:
+            resultObj->addProperty("Off",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+            resultObj->addProperty("Comfort",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+            resultObj->addProperty("Economy",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+            resultObj->addProperty("NotUsed",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+            resultObj->addProperty("Night",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+            break;
+          case HeatingControlModeIDZoneFollower:
+            break;
+          case HeatingControlModeIDFixed:
+            resultObj->addProperty("Off",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+            resultObj->addProperty("Comfort",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+            resultObj->addProperty("Economy",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+            resultObj->addProperty("NotUsed",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+            resultObj->addProperty("Night",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+            break;
+
+          }
+          return success(resultObj);
+
+        } else if(_request.getMethod() == "setTemperatureControlValues") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingOperationModeSpec_t hOpValues;
+          int SensorConversion;
+          int iValue;
+          double fValue;
+
+          if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
+            SensorConversion = SensorIDRoomTemperatureSetpoint;
+          } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
+            SensorConversion = SensorIDRoomTemperatureControlVariable;
+          } else {
+            return failure("Cannot set control values in current mode");
+          }
+
+          memset(&hOpValues, 0, sizeof(hOpValues));
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            // TODO: activate
+            //return failure("No heating control device");
+          } else {
+            hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          if (_request.hasParameter("Off")) {
+            try {
+              iValue = strToUInt(_request.getParameter("Off"));
+              hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Off"));
+                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("Comfort")) {
+            try {
+              iValue = strToUInt(_request.getParameter("Comfort"));
+              hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Off"));
+                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("Economy")) {
+            try {
+              iValue = strToUInt(_request.getParameter("Economy"));
+              hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Off"));
+                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("NotUsed")) {
+            try {
+              iValue = strToUInt(_request.getParameter("NotUsed"));
+              hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Off"));
+                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("Night")) {
+            try {
+              iValue = strToUInt(_request.getParameter("Night"));
+              hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Off"));
+                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+
+          m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
+              hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+
+          return success(resultObj);
+
+        } else if(_request.getMethod() == "setTemperatureControlState") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingStateSpec_t hState;
+
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            // TODO: activate
+            //return failure("No heating control device");
+          } else {
+            hState = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingState(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          int value = hState.State;
+          std::string rState = _request.getParameter("ControlState");
+          if (rState == "internal") {
+            value = HeatingControlStateIDInternal;
+          } else if (rState == "external") {
+            value = HeatingControlStateIDExternal;
+          } else {
+            try {
+              value = strToUInt(_request.getParameter("ControlState"));
+            } catch(std::invalid_argument& e) {
+              return failure("Invalid mode for the control state");
+            }
+          }
+          hState.State = (uint8_t) value;
+
+          m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingState(
+              hProp.m_HeatingControlDSUID, pZone->getID(), hState);
+
+        } else if(_request.getMethod() == "getTemperatureControlInternals") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          ZoneHeatingInternalsSpec_t hInternals;
+
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            // TODO: activate
+            //return failure("No heating control device");
+          } else {
+            hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          }
+
+          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
+          resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat10(hInternals.Trecent, SensorIDTemperatureIndoors));
+          resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat10(hInternals.Treference, SensorIDRoomTemperatureSetpoint) );
+          resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
+          resultObj->addProperty("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
+          resultObj->addProperty("CtrlIntegral", (unsigned long int) hInternals.Integral);
+          resultObj->addProperty("CtrlYp", (double) hInternals.Yp * 0.01);
+          resultObj->addProperty("CtrlYi", (double) hInternals.Yi * 0.01);
+          resultObj->addProperty("CtrlYd", (double) hInternals.Yd *0.01);
+          resultObj->addProperty("CtrlY", (double) SceneHelper::sensorToFloat10(hInternals.Y, SensorIDRoomTemperatureControlVariable));
+          resultObj->addProperty("CtrlAntiWindUp", (unsigned long int) hInternals.AntiWindUp);
+
+          return success(resultObj);
+
         } else if(_request.getMethod() == "setSensorSource") {
           if (pZone->getID() == 0) {
             return failure("Not allowed to assign sensor for zone 0");
@@ -247,6 +546,7 @@ namespace dss {
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.resetZoneSensor(pZone, type);
           return success();
+
         } else {
           throw std::runtime_error("Unhandled function");
         }

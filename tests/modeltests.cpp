@@ -927,13 +927,11 @@ public:
   }
   virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
   }
-  virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType,
-                             const dsuid_t& _sensorDSUID) {
-  }
-
-  virtual void resetZoneSensor(const uint16_t _zoneID,
-                               const uint8_t _sensorType) {
-  }
+  virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) {}
+  virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) {}
+  virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) {}
+  virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) {}
+  virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) {}
 };
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
@@ -977,13 +975,22 @@ public:
   virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) {
     return DSMeterHash_t();
   }
-
-  virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID,
-                                const uint16_t _zoneID,
-                                const uint8_t _sensorType) {
+  virtual ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    return ZoneHeatingConfigSpec_t();
+  }
+  virtual ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    return ZoneHeatingInternalsSpec_t();
+  }
+  virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    return ZoneHeatingStateSpec_t();
+  }
+  virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    return ZoneHeatingOperationModeSpec_t();
+  }
+  virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) {
     dsuid_t dsuid;
     SetNullDsuid(dsuid);
-    return dsuid;
+	return dsuid;
   }
 }; // DummyStructureQueryBusInterface
 
