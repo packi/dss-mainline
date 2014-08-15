@@ -339,7 +339,7 @@ namespace dss {
     }
   } // updateOutputChannelTableFromMeter
 
-  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
+  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -362,10 +362,12 @@ namespace dss {
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
-      updateButtonGroupFromMeter(_dsMeterID, spec);
-      updateBinaryInputTableFromMeter(_dsMeterID, spec);
-      updateSensorInputTableFromMeter(_dsMeterID, spec);
-      updateOutputChannelTableFromMeter(_dsMeterID, spec);
+      if (complete) {
+        updateButtonGroupFromMeter(_dsMeterID, spec);
+        updateBinaryInputTableFromMeter(_dsMeterID, spec);
+        updateSensorInputTableFromMeter(_dsMeterID, spec);
+        updateOutputChannelTableFromMeter(_dsMeterID, spec);
+      }
 
       result.push_back(spec);
     }
