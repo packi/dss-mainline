@@ -1016,44 +1016,44 @@ namespace dss {
       forced = (sForced == "true");
     }
 
-    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
-    if (triggerZone == NULL) {
-      return false;
-    }
-
     int iZone;
     try {
-      iZone = triggerZone->getIntegerValue();
-      if (iZone != m_evtSrcZone) {
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+      if (triggerZone) {
+        iZone = triggerZone->getIntegerValue();
+      } else {
+        return false;
+      }
+      if (iZone >= 0 && iZone != m_evtSrcZone) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
-      return false;
-    }
-
-    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
-    if (triggerGroup == NULL) {
       return false;
     }
 
     int iGroup;
     try {
-      iGroup = triggerGroup->getIntegerValue();
-      if (iGroup != m_evtSrcGroup) {
+      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
+      if (triggerGroup) {
+        iGroup = triggerGroup->getIntegerValue();
+      } else {
+        return false;
+      }
+      if (iGroup >= 0 && iGroup != m_evtSrcGroup) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
-    if (triggerScene == NULL) {
-      return false;
-    }
-
     int iScene;
     try {
-      iScene = triggerScene->getIntegerValue();
+      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
+      if (triggerScene) {
+        iScene = triggerScene->getIntegerValue();
+      } else {
+        return false;
+      }
       if (iScene != scene) {
           return false;
       }
@@ -1116,40 +1116,39 @@ namespace dss {
       return false;
     }
 
-    int iZone;
+    int iZone = -1;
     try {
-      iZone = triggerZone->getIntegerValue();
-      if (iZone != m_evtSrcZone) {
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+      if (triggerZone) {
+        iZone = triggerZone->getIntegerValue();
+      }
+      if (iZone >= 0 && iZone != m_evtSrcZone) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
-    if (triggerGroup == NULL) {
-      return false;
-    }
-
-    int iGroup;
+    int iGroup = -1;
     try {
-      iGroup = triggerGroup->getIntegerValue();
-      if (iGroup != m_evtSrcGroup) {
+      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
+      if (triggerGroup) {
+        iGroup = triggerGroup->getIntegerValue();
+      }
+      if (iGroup >= 0 && iGroup != m_evtSrcGroup) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
-    if (triggerScene == NULL) {
-      return false;
-    }
-
-    int iScene;
+    int iScene = -1;
     try {
-      iScene = triggerScene->getIntegerValue();
-      if (iScene != scene) {
+      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
+      if (triggerScene) {
+        iScene = triggerScene->getIntegerValue();
+      }
+      if (iScene >= 0 && iScene != scene) {
           return false;
       }
     } catch (PropertyTypeMismatch& e){
