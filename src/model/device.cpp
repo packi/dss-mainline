@@ -789,7 +789,9 @@ namespace dss {
     if (getDeviceClass() != DEVICE_CLASS_BL) {
       throw DSSException("Not a climate device");
     }
-    uint8_t value = _config.ctrlClipMinZero ? 1 : 0;
+    uint8_t value = _config.ctrlRawValue;
+    value &= 0xf0; // clear bits 0..3, reserved bits 4..7
+    value |= _config.ctrlClipMinZero ? 1 : 0;
     value |= _config.ctrlClipMinLower? 2 : 0;
     value |= _config.ctrlClipMaxHigher ? 4 : 0;
     value |= _config.ctrlNONC ? 8 : 0;
@@ -805,6 +807,7 @@ namespace dss {
     _config.ctrlClipMinLower = ((value & 0x02) == 0x02);
     _config.ctrlClipMaxHigher = ((value & 0x04) == 0x04);
     _config.ctrlNONC = ((value & 0x08) == 0x08);
+    _config.ctrlRawValue = value;
   } // getDeviceValveControl
 
   uint8_t Device::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) {
