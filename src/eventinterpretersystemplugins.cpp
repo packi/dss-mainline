@@ -1634,21 +1634,32 @@ namespace dss {
     if (triggerProperty == NULL) {
       return;
     }
-    for (int i = 0; i < triggerProperty->getChildCount(); i++) {
-      PropertyNodePtr triggerNode = triggerProperty->getChild(i);
-      if (triggerNode == NULL) {
-        continue;
-      }
-      PropertyNodePtr triggerPathNode =
-          triggerNode->getPropertyByName("triggerPath");
-      if (triggerPathNode == NULL) {
-        continue;
-      }
-      std::string sTriggerPath = triggerPathNode->getStringValue();
-      if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
-        relayTrigger(triggerNode);
-      }
-    } // for loop
+
+    int i;
+    PropertyNodePtr triggerPathNode;
+
+    try {
+      for (i = 0; i < triggerProperty->getChildCount(); i++) {
+        PropertyNodePtr triggerNode = triggerProperty->getChild(i);
+        if (triggerNode == NULL) {
+          continue;
+        }
+        triggerPathNode = triggerNode->getPropertyByName("triggerPath");
+        if (triggerPathNode == NULL) {
+          continue;
+        }
+        std::string sTriggerPath = triggerPathNode->getStringValue();
+        if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
+          relayTrigger(triggerNode);
+        }
+      } // for loop
+    } catch (PropertyTypeMismatch& e) {
+      Logger::getInstance()->log("SystemTrigger::run: error parsing trigger at " +
+          triggerPathNode->getDisplayName(), lsInfo);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("SystemTrigger::run: runtime error at " +
+          triggerPathNode->getDisplayName(), lsInfo);
+    }
   }
 
   bool SystemEvent::setup(Event& _event) {
