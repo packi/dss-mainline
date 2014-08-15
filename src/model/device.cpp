@@ -2098,6 +2098,17 @@ namespace dss {
     return m_sensorInputs[_sensorIndex];
   }
 
+  const boost::shared_ptr<DeviceSensor_t> Device::getSensorByType(uint8_t _sensorType) const {
+    for (size_t i = 0; i < getSensorCount(); i++) {
+      boost::shared_ptr<DeviceSensor_t> sensor = m_sensorInputs.at(i);
+      if (sensor->m_sensorType == _sensorType) {
+        return sensor;
+      }
+    }
+      
+    throw ItemNotFoundException(std::string("Device::getSensor: no sensor with given type found"));
+  }
+
   const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));

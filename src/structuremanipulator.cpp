@@ -650,4 +650,17 @@ namespace dss {
 
     return modified;
   }
+
+  void StructureManipulator::setZoneSensor(boost::shared_ptr<Zone> _zone,
+                                           const uint8_t _sensorType,
+                                           boost::shared_ptr<Device> _dev) {
+    _zone->setSensor(_dev, _sensorType);
+    m_Interface.setZoneSensor(_zone->getID(), _sensorType, _dev->getDSID());
+  }
+
+  void StructureManipulator::resetZoneSensor(boost::shared_ptr<Zone> _zone,
+                                             const uint8_t _sensorType) {
+    _zone->resetSensor(_sensorType);
+    m_Interface.resetZoneSensor(_zone->getID(), _sensorType);
+  }
 } // namespace dss

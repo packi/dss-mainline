@@ -57,6 +57,8 @@ namespace dss {
     void updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateOutputChannelTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
+    dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID,
+                          const uint8_t _sensorType);
   private:
     dsuid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface

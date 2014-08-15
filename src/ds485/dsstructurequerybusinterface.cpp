@@ -506,4 +506,20 @@ namespace dss {
     return result;
   } // getDSMeterHash
 
+  dsuid_t DSStructureQueryBusInterface::getZoneSensor(
+                                                const dsuid_t& _meterDSUID,
+                                                const uint16_t _zoneID,
+                                                const uint8_t _sensorType) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsuid_t sensorDSUID;
+    int ret = ZoneProperties_get_zone_sensor(m_DSMApiHandle, _meterDSUID,
+                                             _zoneID, _sensorType,
+                                             &sensorDSUID);
+    DSBusInterface::checkResultCode(ret);
+    return sensorDSUID;
+  }
 } // namespace dss
