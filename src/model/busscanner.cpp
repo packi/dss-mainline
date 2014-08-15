@@ -128,7 +128,7 @@ namespace dss {
         zone->addToDSMeter(_dsMeter);
         zone->setIsPresent(true);
         zone->setIsConnected(true);
-        scanDevicesOfZone(_dsMeter, zone);
+        scanDevicesOfZoneQuick(_dsMeter, zone);
       }
     }
 
