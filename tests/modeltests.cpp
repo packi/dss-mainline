@@ -927,6 +927,13 @@ public:
   }
   virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
   }
+  virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType,
+                             const dsuid_t& _sensorDSUID) {
+  }
+
+  virtual void resetZoneSensor(const uint16_t _zoneID,
+                               const uint8_t _sensorType) {
+  }
 };
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
@@ -940,7 +947,7 @@ public:
   virtual std::vector<int> getZones(const dsuid_t& _dsMeterID) {
     return std::vector<int>();
   }
-  virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
+  virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true) {
     return std::vector<DeviceSpec_t>();
   }
   virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
@@ -969,6 +976,14 @@ public:
   }
   virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) {
     return DSMeterHash_t();
+  }
+
+  virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID,
+                                const uint16_t _zoneID,
+                                const uint8_t _sensorType) {
+    dsuid_t dsuid;
+    SetNullDsuid(dsuid);
+    return dsuid;
   }
 }; // DummyStructureQueryBusInterface
 
