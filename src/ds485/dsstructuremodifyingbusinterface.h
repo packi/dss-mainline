@@ -59,11 +59,11 @@ namespace dss {
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
 
-    virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t sensorType,
-                               const dsuid_t& sensorDSUID);
-
-    virtual void resetZoneSensor(const uint16_t _zoneID,
-                                 const uint8_t sensorType);
+    virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec);
+    virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec);
+    virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec);
+    virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t sensorType, const dsuid_t& sensorDSUID);
+    virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t sensorType);
 private:
     dsuid_t m_BroadcastDSID;
   }; // DSStructureModifyingBusInterface

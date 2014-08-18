@@ -134,6 +134,7 @@ namespace dss {
     bool ctrlClipMinLower;
     bool ctrlClipMaxHigher;
     bool ctrlNONC;
+    uint8_t ctrlRawValue;
   } DeviceValveControlSpec_t;
 
   typedef struct {

@@ -223,6 +223,45 @@ namespace dss {
         uint16_t _ZoneId, uint8_t _GroupId, dsuid_t _dSUID,
         uint8_t _SensorType, uint16_t _Value, uint8_t _Precision);
 
+    void handleHeatingControllerConfig(uint8_t _errorCode,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId, uint8_t ControllerMode,
+        uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
+        uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
+        uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue);
+    static void handleHeatingControllerConfigCallback(uint8_t _errorCode, void *_userData,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId, uint8_t _ControllerMode,
+        uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
+        uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
+        uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue);
+    void handleHeatingControllerOperationModes(uint8_t _errorCode,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId,
+        uint16_t _OperationMode0, uint16_t _OperationMode1, uint16_t _OperationMode2, uint16_t _OperationMode3,
+        uint16_t _OperationMode4, uint16_t _OperationMode5, uint16_t _OperationMode6, uint16_t _OperationMode7,
+        uint16_t _OperationMode8, uint16_t _OperationMode9, uint16_t _OperationModeA, uint16_t _OperationModeB,
+        uint16_t _OperationModeC, uint16_t _OperationModeD, uint16_t _OperationModeE, uint16_t _OperationModeF);
+    static void handleHeatingControllerOperationModesCallback(uint8_t _errorCode, void *_userData,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId,
+        uint16_t _OperationMode0, uint16_t _OperationMode1, uint16_t _OperationMode2, uint16_t _OperationMode3,
+        uint16_t _OperationMode4, uint16_t _OperationMode5, uint16_t _OperationMode6, uint16_t _OperationMode7,
+        uint16_t _OperationMode8, uint16_t _OperationMode9, uint16_t _OperationModeA, uint16_t _OperationModeB,
+        uint16_t _OperationModeC, uint16_t _OperationModeD, uint16_t _OperationModeE, uint16_t _OperationModeF);
+    void handleHeatingControllerState(uint8_t _errorCode,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId, uint8_t _State);
+    static void handleHeatingControllerStateCallback(uint8_t _errorCode, void *_userData,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId, uint8_t _State);
+    void handleHeatingControllerStateEvent(uint8_t _errorCode,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId, uint8_t _State);
+    static void handleHeatingControllerStateEventCallback(uint8_t _errorCode, void *_userData,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _ZoneId, uint8_t _State);
+
     void handleDsmSetFlags(dsuid_t _destinationID, std::bitset<8> _flags);
     static void handleDsmSetFlagsCallback(uint8_t _errorCode,
                                          void *_userData, dsuid_t _sourceID,

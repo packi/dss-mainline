@@ -86,6 +86,38 @@ namespace dss {
   }
 
   template <>
+  bool RestfulRequest::getParameter<uint8_t>(const std::string& _name,
+                                             uint8_t &out) const
+  {
+    std::string tmp = getParameter(_name);
+    if (tmp.empty()) {
+      return false;
+    }
+    try {
+      out = strToUInt(tmp);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
+  template <>
+  bool RestfulRequest::getParameter<uint16_t>(const std::string& _name,
+                                              uint16_t &out) const
+  {
+    std::string tmp = getParameter(_name);
+    if (tmp.empty()) {
+      return false;
+    }
+    try {
+      out = strToUInt(tmp);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
+  template <>
   bool RestfulRequest::getParameter<bool>(const std::string& _name,
                                           bool &out) const
   {

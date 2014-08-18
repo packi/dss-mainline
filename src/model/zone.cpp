@@ -196,6 +196,15 @@ namespace dss {
         m_pPropertyNode->createProperty("ZoneID")->setIntegerValue(m_ZoneID);
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
+        if (m_ZoneID > 0) {
+          m_pPropertyNode->createProperty("heating/");
+          m_pPropertyNode->createProperty("heating/OperationMode")
+              ->linkToProxy(PropertyProxyReference<int>(m_HeatingStatus.m_OperationMode));
+          m_pPropertyNode->createProperty("heating/ControlMode")
+              ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlMode));
+          m_pPropertyNode->createProperty("heating/ControlState")
+              ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlState));
+        }
         m_pPropertyNode->createProperty("devices/");
         foreach(boost::shared_ptr<Group> pGroup, m_Groups) {
           pGroup->publishToPropertyTree();
@@ -210,6 +219,44 @@ namespace dss {
       m_pPropertyNode.reset();
     }
   } // removeFromPropertyTree
+
+  ZoneHeatingProperties_t Zone::getHeatingProperties() const {
+    return m_HeatingProperties;
+  }
+
+  ZoneHeatingStatus_t Zone::getHeatingStatus() const {
+    return m_HeatingStatus;
+  }
+
+  void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice) {
+    m_HeatingProperties.m_CtrlOffset = _ctrlMode;
+    m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
+    m_HeatingProperties.m_CtrlOffset = _offset;
+    m_HeatingProperties.m_HeatingMasterZone = _masterZone;
+  }
+
+  void Zone::setHeatingControlState(int _ctrlState) {
+    m_HeatingProperties.m_HeatingControlState = _ctrlState;
+  }
+
+  void Zone::setHeatingOperationMode(int _operationMode) {
+    m_HeatingStatus.m_OperationMode = _operationMode;
+  }
+
+  void Zone::setTemperature(double _value, DateTime& _ts) {
+    m_HeatingStatus.m_TemperatureValue = _value;
+    m_HeatingStatus.m_TemperatureValueTS = _ts;
+  }
+
+  void Zone::setNominalValue(double _value, DateTime& _ts) {
+    m_HeatingStatus.m_NominalValue = _value;
+    m_HeatingStatus.m_NominalValueTS = _ts;
+  }
+
+  void Zone::setControlValue(double _value, DateTime& _ts) {
+    m_HeatingStatus.m_ControlValue = _value;
+    m_HeatingStatus.m_ControlValueTS = _ts;
+  }
 
   bool Zone::isAllowedSensorType(int _sensorType) {
     switch (_sensorType) {
@@ -260,4 +307,5 @@ namespace dss {
       }
     }
   }
+
 } // namespace dss

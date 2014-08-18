@@ -651,6 +651,15 @@ namespace dss {
     return modified;
   }
 
+  void StructureManipulator::setZoneHeatingConfig(boost::shared_ptr<Zone> _zone,
+                                                  const dsuid_t& _ctrlDSUID,
+                                                  const ZoneHeatingConfigSpec_t _spec) {
+    // TODO: synchronize different and disconnected dSM's
+
+    _zone->setHeatingControlMode(_spec.ControllerMode,_spec.Offset, _spec.SourceZoneId, _ctrlDSUID);
+    m_Interface.setZoneHeatingConfig(_ctrlDSUID, _zone->getID(), _spec);
+  } // setZoneHeatingConfig
+
   void StructureManipulator::setZoneSensor(boost::shared_ptr<Zone> _zone,
                                            const uint8_t _sensorType,
                                            boost::shared_ptr<Device> _dev) {
