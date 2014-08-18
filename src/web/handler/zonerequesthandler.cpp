@@ -254,9 +254,11 @@ namespace dss {
 
           memset(&hConfig, 0, sizeof(hConfig));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            resultObj->addProperty("IsConfigured", false);
             // TODO: activate
             //return failure("No heating control device");
           } else {
+            resultObj->addProperty("IsConfigured", true);
             hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -299,8 +301,10 @@ namespace dss {
 
           memset(&hConfig, 0, sizeof(hConfig));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            resultObj->addProperty("IsConfigured", false);
             return failure("No heating control device");
           } else {
+            resultObj->addProperty("IsConfigured", true);
             hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -331,9 +335,11 @@ namespace dss {
 
           memset(&hOpValues, 0, sizeof(hOpValues));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            resultObj->addProperty("IsConfigured", false);
             // TODO: activate
             //return failure("No heating control device");
           } else {
+            resultObj->addProperty("IsConfigured", true);
             hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -389,9 +395,11 @@ namespace dss {
 
           memset(&hOpValues, 0, sizeof(hOpValues));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            resultObj->addProperty("IsConfigured", false);
             // TODO: activate
             //return failure("No heating control device");
           } else {
+            resultObj->addProperty("IsConfigured", true);
             hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -463,9 +471,11 @@ namespace dss {
           ZoneHeatingStateSpec_t hState;
 
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            resultObj->addProperty("IsConfigured", false);
             // TODO: activate
             //return failure("No heating control device");
           } else {
+            resultObj->addProperty("IsConfigured", true);
             hState = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingState(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -494,9 +504,11 @@ namespace dss {
           ZoneHeatingInternalsSpec_t hInternals;
 
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            resultObj->addProperty("IsConfigured", false);
             // TODO: activate
             //return failure("No heating control device");
           } else {
+            resultObj->addProperty("IsConfigured", true);
             hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }

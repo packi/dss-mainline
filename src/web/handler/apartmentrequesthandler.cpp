@@ -253,6 +253,12 @@ namespace dss {
           zone->addProperty("id", pZone->getID());
           zone->addProperty("name", pZone->getName());
           zone->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            zone->addProperty("IsConfigured", false);
+          } else {
+            zone->addProperty("IsConfigured", true);
+          }
+
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:
               break;
@@ -297,8 +303,10 @@ namespace dss {
           ZoneHeatingConfigSpec_t hConfig;
           memset(&hConfig, 0, sizeof(hConfig));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            zone->addProperty("IsConfigured", false);
             continue;
           } else {
+            zone->addProperty("IsConfigured", true);
             hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
