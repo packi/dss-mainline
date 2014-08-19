@@ -22,7 +22,7 @@
 
 #include "sensor_data_uploader.h"
 
-#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/locks.hpp>
 
 #include "event.h"
 #include "foreach.h"
