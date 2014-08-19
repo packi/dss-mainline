@@ -386,10 +386,9 @@ namespace dss {
 
   std::string DateTime::toPrettyString() const {
     struct tm tm;
-    char fmt[30], buf[30];
+    char buf[30];
     localtime_r(&m_timeval.tv_sec, &tm);
-    strftime(fmt, sizeof fmt, "%Y-%m-%d %H:%M:%S.%%03u", &tm);
-    snprintf(buf, sizeof buf, fmt, m_timeval.tv_usec / 1000);
+    strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", &tm);
     return std::string(buf);
   }
 
