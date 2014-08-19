@@ -1966,20 +1966,12 @@ namespace dss {
       fillSensorTable(_slist);
     }
 
-    int ns = 0;
     for (std::vector<DeviceSensorSpec_t>::const_iterator it = _slist.begin();
         it != _slist.end();
-        ++it, ++ns) {
-
-      // drop reserved, unused or legacy sensor types
-      if ((it->SensorType >= SensorIDNotUsed) ||
-          (it->SensorType == SensorIDReserved1) ||
-          (it->SensorType == SensorIDReserved2)) {
-        continue;
-      }
+        ++it) {
 
       boost::shared_ptr<DeviceSensor_t> binput(new DeviceSensor_t());
-      binput->m_sensorIndex = ns;
+      binput->m_sensorIndex = m_sensorInputCount;
       binput->m_sensorType = it->SensorType;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
@@ -1992,7 +1984,7 @@ namespace dss {
 
       if (m_pPropertyNode != NULL) {
         PropertyNodePtr sensorInputNode = m_pPropertyNode->getPropertyByName("sensorInputs");
-        std::string bpath = std::string("sensorInput") + intToString(ns);
+        std::string bpath = std::string("sensorInput") + intToString(m_sensorInputCount);
         PropertyNodePtr entry = sensorInputNode->getPropertyByName(bpath);
         if (entry != NULL) {
           entry->getParentNode()->removeChild(entry);
