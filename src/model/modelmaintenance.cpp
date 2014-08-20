@@ -1840,6 +1840,7 @@ namespace dss {
 
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerValue));
+    pEvent->setProperty("zoneID", intToString(_zoneID));
     pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
     if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
       pEvent->setProperty("NominalTemperature_Off",
@@ -1878,6 +1879,7 @@ namespace dss {
 
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event("TODO: Heating Error Event"));
+    pEvent->setProperty("zoneID", intToString(_zoneID));
     pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
     pEvent->setProperty("CtrlState", intToString(_State));
     raiseEvent(pEvent);
