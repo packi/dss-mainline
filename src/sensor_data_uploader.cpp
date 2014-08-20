@@ -96,13 +96,13 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
 
   if (status) {
     // keep retrying, with next tick
-    log("network problem: " + intToString(status), lsWarning);
+    log("save event network problem: " + intToString(status), lsWarning);
     m_pending_upload = false;
     return;
   }
 
   if (reply.code) {
-    log("webservice problem: " + intToString(reply.code) + "/" + reply.desc,
+    log("save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
         lsWarning);
     m_uploading.clear();
     // MS-Hub, will detect jumps in sequence ID
@@ -149,11 +149,15 @@ void SensorDataUploadPlugin::subscribe() {
   std::vector<std::string> events;
   events.push_back(EventName::DeviceSensorValue);
   events.push_back(EventName::DeviceStatus);
+  events.push_back(EventName::DeviceInvalidSensor);
   events.push_back(EventName::ZoneSensorValue);
   events.push_back(EventName::CallScene);
   events.push_back(EventName::UndoScene);
   events.push_back(EventName::StateChange);
+  events.push_back(EventName::HeatingEnabled);
   events.push_back(EventName::HeatingControllerSetup);
+  events.push_back(EventName::HeatingControllerValue);
+  events.push_back(EventName::HeatingControllerState);
   events.push_back(EventName::Running);
   events.push_back(EventName::UploadEventLog);
 
@@ -181,21 +185,30 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
     } else if (_event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
                _event.getName() == EventName::DeviceStatus ||
-               _event.getName() == EventName::StateChange ||
-               _event.getName() == EventName::HeatingControllerSetup) {
+               _event.getName() == EventName::DeviceInvalidSensor ||
+               _event.getName() == EventName::HeatingEnabled ||
+               _event.getName() == EventName::HeatingControllerSetup ||
+               _event.getName() == EventName::HeatingControllerValue ||
+               _event.getName() == EventName::HeatingControllerState) {
       log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
       m_log->append(_event.getptr());
 
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
-      if (strToInt(_event.getPropertyByName("groupID")) !=
-          GroupIDControlTemperature) {
+      std::string gID = _event.getPropertyByName("groupID");
+      if (gID.empty() || (strToInt(gID) != GroupIDControlTemperature)) {
         // ignore
         return;
       }
-
       log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
       m_log->append(_event.getptr());
+
+    } else if (_event.getName() == EventName::StateChange) {
+      std::string sName = _event.getPropertyByName("StateName");
+      if (sName == "holiday" || sName == "presence") {
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr());
+      }
 
     } else if (_event.getName() == EventName::UploadEventLog) {
       log(std::string(__func__) + " upload event log", lsDebug);
@@ -208,138 +221,133 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
   }
 }
 
-enum DSEnum_EventCategory {
-  EventCategory_ApartmentSyncEvent = 1,
-  EventCategory_ApartmentEvent = 2,
-  EventCategory_ZoneEvent = 3,
-  EventCategory_DeviceEvent = 4,
-  EventCategory_ClusterEvent = 5,
-  EventCategory_AddOnEvent = 6,
-  EventCategory_ZoneGroupBlink = 7,
-  EventCategory_ZoneGroupCallScene = 8,
-  EventCategory_ZoneGroupUndoScene = 9,
-  EventCategory_ZoneStateGroup = 10,
-  EventCategory_DeviceLocal = 11,
-  EventCategory_DeviceEventTable = 12,
-  EventCategory_DeviceButtonClick = 13,
-  EventCategory_DeviceBlink = 14,
-  EventCategory_DeviceState = 15,
-  EventCategory_DeviceStatus = 16,
-  EventCategory_DeviceScene = 17,
-  EventCategory_DeviceBinaryInput = 18,
-  EventCategory_ModelReady = 19,
-  EventCategory_Running = 20,
-  EventCategory_StateApartment = 21,
-  EventCategory_UserDefinedAction = 22,
-  EventCategory_ExecutionDenied = 23,
-  EventCategory_SensorValue = 24,
-  EventCategory_CircuitMetering = 25,
-  EventCategory_DeviceMetering = 26,
-  EventCategory_LogFileData = 27,
-  EventCategory_HeatingControllerSetup = 28,
-  EventCategory_Last = 29,
-};
-
-enum DSEnum_EventGroup {
-  EventGroup_ApartmentAndDevice = 1,
-  EventGroup_Activity = 2,
-  EventGroup_Metering = 3,
-  EventGroup_ExternalServices = 4,
-};
-
-enum DSEnum_EventSource {
-  EventSource_dSS = 1,
-  EventSource_dSHub = 2,
-};
-
-int getSequenceID(int category) {
-  // TODO, should be persistent across reboots
-  static std::vector<int> sequenceID(EventCategory_Last, 0);
-  static boost::mutex m;
-
-  boost::lock_guard<boost::mutex> lock(m);
-  if (category >= EventCategory_Last) {
-    throw std::runtime_error("invalid category" + intToString(category));
-  }
-  return sequenceID[category]++;
-}
-
-void appendCommon(JSONObject &obj, int group, int category)
+void appendCommon(JSONObject &obj, const std::string& group, const std::string& category)
 {
-  if (category >= EventCategory_Last) {
-    throw std::runtime_error("invalid category" + intToString(category));
-  }
-
   obj.addProperty("EventGroup", group);
   obj.addProperty("EventCategory", category);
-  obj.addProperty("SequenceID", getSequenceID(category));
   obj.addProperty("Timestamp", DateTime().toISO8601_ms());
 }
 
 // TODO this should be moved to webservice_api
 
+const static std::string evtGroup_Metering = "Metering";
+const static std::string evtGroup_Activity = "Activity";
+
+const static std::string evtCategory_DeviceSensorValue = "DeviceSensorValue";
+const static std::string evtCategory_ZoneSensorValue = "ZoneSensorValue";
+const static std::string evtCategory_ZoneGroupCallScene = "ZoneGroupCallScene";
+const static std::string evtCategory_ZoneGroupUndoScene = "ZoneGroupUndoScene";
+const static std::string evtCategory_ApartmentState = "ApartmentState";
+const static std::string evtCategory_ZoneGroupState = "ZoneGroupState";
+const static std::string evtCategory_DeviceInputState = "DeviceInputState";
+const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
+const static std::string evtCategory_HeatingControllerSetup = "HeatingControllerSetup";
+const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
+const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
+const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
+
 JSONObject toJson(const boost::shared_ptr<Event> &event) {
   boost::shared_ptr<const DeviceReference> pDeviceRef;
   JSONObject obj;
+  std::string propValue;
 
   try {
     if (event->getName() == EventName::DeviceSensorValue) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, EventGroup_Metering, EventCategory_DeviceMetering);
-      obj.addProperty("SensorIndex", event->getPropertyByName("sensorIndex"));
+      appendCommon(obj, evtGroup_Metering, evtCategory_DeviceSensorValue);
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorType", SceneHelper::sensorName(sensorType));
+      obj.addProperty("SensorDescription", SceneHelper::sensorName(sensorType));
+      obj.addProperty("SensorType", sensorType);
       obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      propValue = event->getPropertyByName("sensorIndex");
+      if (!propValue.empty()) {
+        obj.addProperty("SensorIndex", propValue);
+      }
     } else if (event->getName() == EventName::ZoneSensorValue) {
-      appendCommon(obj, EventGroup_Metering, EventCategory_ZoneEvent);
-      obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
-      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
-      obj.addProperty("SensorType", event->getPropertyByName("sensorType"));
+      appendCommon(obj, evtGroup_Metering, evtCategory_ZoneSensorValue);
+      int sensorType = strToInt(event->getPropertyByName("sensorType"));
+      obj.addProperty("SensorDescription", SceneHelper::sensorName(sensorType));
+      obj.addProperty("SensorType", sensorType);
       obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
+      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
+      propValue = event->getPropertyByName("GroupID");
+      if (!propValue.empty()) {
+        obj.addProperty("GroupID", strToInt(propValue));
+      }
     } else if (event->getName() == EventName::CallScene) {
-      appendCommon(obj, EventGroup_Activity, EventCategory_ZoneGroupCallScene);
-      obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
+      appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupCallScene);
       obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
+      obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
       obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      obj.addProperty("forced", event->hasPropertySet("forced"));
-      obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
+      obj.addProperty("Force", event->hasPropertySet("forced"));
+      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::UndoScene) {
-      appendCommon(obj, EventGroup_Activity, EventCategory_ZoneGroupUndoScene);
+      appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupUndoScene);
       obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
       obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
+      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       switch (pState->getType()) {
       case StateType_Apartment:
       case StateType_Service:
       case StateType_Script:
-        appendCommon(obj, EventGroup_Activity, EventCategory_ApartmentEvent);
+        appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState);
         break;
       case StateType_Group:
-        appendCommon(obj, EventGroup_Activity, EventCategory_ZoneStateGroup);
+        appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupState);
         break;
       case StateType_Device:
-        appendCommon(obj, EventGroup_Activity, EventCategory_DeviceState);
+        appendCommon(obj, evtGroup_Activity, evtCategory_DeviceInputState);
         break;
       default:
         break;
       }
       obj.addProperty("StateName", pState->getName());
       obj.addProperty("StateValue", pState->toString());
-      obj.addProperty("Origin", event->getPropertyByName("originDSUID"));
+      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::DeviceStatus) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, EventGroup_Activity, EventCategory_DeviceStatus);
+      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
       obj.addProperty("StatusIndex", event->getPropertyByName("statusIndex"));
       obj.addProperty("StatusValue", event->getPropertyByName("statusValue"));
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+    } else if (event->getName() == EventName::DeviceInvalidSensor) {
+      pDeviceRef = event->getRaisedAtDevice();
+      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
+      obj.addProperty("EventDescription", "InvalidSensorData");
+      obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      int sensorType = strToInt(event->getPropertyByName("sensorType"));
+      obj.addProperty("SensorDescription", SceneHelper::sensorName(sensorType));
+      obj.addProperty("SensorType", sensorType);
+      propValue = event->getPropertyByName("sensorIndex");
+      if (!propValue.empty()) {
+        obj.addProperty("SensorIndex", propValue);
+      }
     } else if (event->getName() == EventName::HeatingControllerSetup) {
-      appendCommon(obj, EventGroup_Activity, EventCategory_HeatingControllerSetup);
-
-      // TODO: add event data
+      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerSetup);
+      const dss::HashMapStringString& props =  event->getProperties().getContainer();
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        obj.addProperty(iParam->first, iParam->second);
+      }
+    } else if (event->getName() == EventName::HeatingControllerValue) {
+      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerValue);
+      const dss::HashMapStringString& props =  event->getProperties().getContainer();
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        obj.addProperty(iParam->first, iParam->second);
+      }
+    } else if (event->getName() == EventName::HeatingControllerState) {
+      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerState);
+      const dss::HashMapStringString& props =  event->getProperties().getContainer();
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        obj.addProperty(iParam->first, iParam->second);
+      }
+    } else if (event->getName() == EventName::HeatingEnabled) {
+      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingEnabled);
+      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
+      obj.addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
 
     } else {
       Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
