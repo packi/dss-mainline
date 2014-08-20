@@ -529,6 +529,8 @@ namespace dss {
         _name = "Nominal Temperature"; break;
       case SensorIDRoomTemperatureControlVariable:
         _name = "Temperature Control Value"; break;
+      case SensorIDCO2Concentration:
+        _name = "Carbon Dioxide Concentration"; break;
       case 255:
         _name = "Unknown Type"; break;
     default:
