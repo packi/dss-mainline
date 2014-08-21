@@ -102,10 +102,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/propertysystem.h \
 	$(top_srcdir)/src/sceneaccess.cpp \
 	$(top_srcdir)/src/sceneaccess.h \
-	$(top_srcdir)/src/sensor_monitor.h \
-	$(top_srcdir)/src/sensor_monitor.cpp \
-	$(top_srcdir)/src/sensor_data_uploader.h \
-	$(top_srcdir)/src/sensor_data_uploader.cpp \
 	$(top_srcdir)/src/scripting/jscurl-constants.h \
 	$(top_srcdir)/src/scripting/jscurl.cpp \
 	$(top_srcdir)/src/scripting/jscurl.h \
@@ -132,6 +128,10 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/security/security.h \
 	$(top_srcdir)/src/security/user.cpp \
 	$(top_srcdir)/src/security/user.h \
+	$(top_srcdir)/src/sensor_data_uploader.cpp \
+	$(top_srcdir)/src/sensor_data_uploader.h \
+	$(top_srcdir)/src/sensor_monitor.cpp \
+	$(top_srcdir)/src/sensor_monitor.h \
 	$(top_srcdir)/src/session.cpp \
 	$(top_srcdir)/src/session.h \
 	$(top_srcdir)/src/sessionmanager.cpp \
@@ -159,6 +159,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/thread.h \
 	$(top_srcdir)/src/util.cpp \
 	$(top_srcdir)/src/util.h \
+	$(top_srcdir)/src/vdc-connection.cpp \
+	$(top_srcdir)/src/vdc-connection.h \
 	$(top_srcdir)/src/watchdog.cpp \
 	$(top_srcdir)/src/watchdog.h \
 	$(top_srcdir)/src/web/handler/apartmentrequesthandler.cpp \
