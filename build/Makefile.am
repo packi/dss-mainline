@@ -5,21 +5,32 @@ TESTS = dsstests
 check_PROGRAMS = dsstests
 
 EXTRA_DIST =	$(top_srcdir)/src/messages/messaging.proto \
-				$(top_srcdir)/src/messages/device-scene-table-update.proto
+				$(top_srcdir)/src/messages/device-scene-table-update.proto \
+				$(top_srcdir)/src/messages/vdc-messages.proto \
+				$(top_srcdir)/src/messages/vdcapi.proto
 
 CLEANFILES = \
 			build_info.h \
 			$(top_builddir)/src/messages/messaging.pb.h \
 			$(top_builddir)/src/messages/messaging.pb.cc \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
-			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
+			$(top_builddir)/src/messages/device-scene-table-update.pb.cc \
+			$(top_builddir)/src/messages/vdc-messages.pb.h \
+	        $(top_builddir)/src/messages/vdc-messages.pb.cc \
+			$(top_builddir)/src/messages/vdcapi.pb.h \
+	        $(top_builddir)/src/messages/vdcapi.pb.cc
+
 
 BUILT_SOURCES = \
 			build_info.h \
 			$(top_builddir)/src/messages/messaging.pb.h \
 			$(top_builddir)/src/messages/messaging.pb.cc \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
-			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
+			$(top_builddir)/src/messages/device-scene-table-update.pb.cc \
+			$(top_builddir)/src/messages/vdc-messages.pb.h \
+			$(top_builddir)/src/messages/vdc-messages.pb.cc \
+			$(top_builddir)/src/messages/vdcapi.pb.h \
+	        $(top_builddir)/src/messages/vdcapi.pb.cc
 
 noinst_LIBRARIES = libdsscore.a libmongoose.a libunix.a libprotomessages.a
 
@@ -27,7 +38,11 @@ nodist_libprotomessages_a_SOURCES = \
 			$(top_builddir)/src/messages/messaging.pb.h \
 			$(top_builddir)/src/messages/messaging.pb.cc \
 			$(top_builddir)/src/messages/device-scene-table-update.pb.h \
-			$(top_builddir)/src/messages/device-scene-table-update.pb.cc
+			$(top_builddir)/src/messages/device-scene-table-update.pb.cc \
+			$(top_builddir)/src/messages/vdc-messages.pb.h \
+			$(top_builddir)/src/messages/vdc-messages.pb.cc \
+			$(top_builddir)/src/messages/vdcapi.pb.h \
+	        $(top_builddir)/src/messages/vdcapi.pb.cc
 
 libprotomessages_a_CXXFLAGS = \
 			-I$(top_builddir) \
@@ -142,6 +157,8 @@ $(top_srcdir)/src/dss.cpp: build_info.h
 $(top_srcdir)/src/comm-channel.h: $(top_builddir)/src/messages/messaging.pb.h
 $(top_srcdir)/src/comm-channel.cpp: $(top_builddir)/src/messages/device-scene-table-update.pb.h
 
+
+$(top_srcdir)/src/vdc-connection.h: $(top_builddir)/src/messages/vdc-messages.pb.h
 %.pb.cc %.pb.h: %.proto
 	$(MKDIR_P) $(top_builddir)/src/messages
 	protoc -I$(top_srcdir)/src/messages --cpp_out=$(top_builddir)/src/messages $(top_srcdir)/src/messages/$(<F)
