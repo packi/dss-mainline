@@ -289,6 +289,11 @@ namespace dss {
     virtual void initialize();
 
     virtual const std::string getConnectionURI() { return m_connectionURI; }
+
+    void protobufMessageRequest(dsuid_t _dSMdSUID, uint16_t _request_size,
+                                const uint8_t *_request,
+                                uint16_t *_response_size, uint8_t *_response);
+
   }; // DSBusInterface
 
 } // namespace dss
