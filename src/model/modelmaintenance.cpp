@@ -824,22 +824,24 @@ namespace dss {
           return;
         }
 
-        Set devices = mod->getDevices();
-        for (int i = 0; i < devices.length(); i++) {
-          devices[i].getDevice()->setIsConnected(true);
-        }
+        if (mod->getCapability_HasDevices()) {
+          Set devices = mod->getDevices();
+          for (int i = 0; i < devices.length(); i++) {
+            devices[i].getDevice()->setIsConnected(true);
+          }
 
-        // synchronize devices with binary inputs
-        if (mod->hasPendingEvents()) {
-          scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device> ());
-        } else {
-          log(std::string("Event counter match on dSM ") + dsuid2str(_dsMeterBusID), lsDebug);
-        }
+          // synchronize devices with binary inputs
+          if (mod->hasPendingEvents()) {
+            scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device>());
+          } else {
+            log(std::string("Event counter match on dSM ") + dsuid2str(_dsMeterBusID), lsDebug);
+          }
 
-        // additionally set all previously connected device to valid now
-        devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dsMeterBusID);
-        for (int i = 0; i < devices.length(); i++) {
-          devices[i].getDevice()->setIsValid(true);
+          // additionally set all previously connected device to valid now
+          devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dsMeterBusID);
+          for (int i = 0; i < devices.length(); i++) {
+            devices[i].getDevice()->setIsValid(true);
+          }
         }
 
         boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));

@@ -37,6 +37,7 @@ namespace dss {
 
   DSMeter::DSMeter(const dsuid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
+    m_DeviceType(BusMember_Unknown),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
     m_EnergyMeterValueWh(0),

@@ -37,7 +37,9 @@
 
 #include "src/model/modelevent.h"
 #include "src/model/modelconst.h"
+#include "src/model/apartment.h"
 #include "src/model/device.h"
+#include "src/model/modulator.h"
 #include "src/model/modelmaintenance.h"
 #include "src/security/security.h"
 
@@ -500,19 +502,39 @@ namespace dss {
 
   void DSBusInterface::handleBusChange(dsuid_t *_id, int _flag) {
     loginFromCallback();
-    ModelEvent::EventType eventType;
 
-    if (!DsmApiIsdSM(*_id)) {
-      return;
+    BusMemberDevice_t devType = BusMember_Unknown;
+    boost::shared_ptr<DSMeter> busDevice;
+    try {
+      busDevice = m_pModelMaintenance->getDSS().getApartment().getDSMeterByDSID(*_id);
+      devType = busDevice->getBusMemberType();
+    } catch(ItemNotFoundException& e) {
     }
 
-    if(_flag) {
-      eventType = ModelEvent::etLostDSMeter;
-    } else	{
-      eventType = ModelEvent::etDS485DeviceDiscovered;
+    switch (devType) {
+      case BusMember_dSM11:
+      case BusMember_dSM12:
+      case BusMember_vDC:
+      case BusMember_vDSM:
+        {
+          ModelEvent::EventType eventType;
+          if(_flag) {
+            eventType = ModelEvent::etLostDSMeter;
+          } else  {
+            eventType = ModelEvent::etDS485DeviceDiscovered;
+          }
+          m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
+        }
+        break;
+      case BusMember_Unknown:
+      default:
+        {
+          log("ds485 bus change unhandled: " + dsuid2str(*_id) +
+              ", State: " + intToString(_flag) +
+              ", Device Type: " + intToString(devType), lsWarning);
+        }
+        break;
     }
-
-    m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
   }
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
