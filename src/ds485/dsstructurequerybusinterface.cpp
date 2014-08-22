@@ -48,7 +48,7 @@ namespace dss {
     dsuid_t device_list[63]; // TODO: constant for 63?
     int ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
     lock.unlock();
-    if(ret < 0) {
+    if (ret < 0) {
       // DsmApiGetBusMembers returns >= 0 on success
       DSBusInterface::checkResultCode(ret);
     }
@@ -67,9 +67,10 @@ namespace dss {
 
   DSMeterSpec_t DSStructureQueryBusInterface::getDSMeterSpec(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
+    if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
+
     DSMeterSpec_t result;
     uint8_t nameBuf[NAME_LEN];
     uint8_t flags;

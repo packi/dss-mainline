@@ -220,19 +220,18 @@ namespace dss {
   } // execute
 
   void ModelMaintenance::discoverDS485Devices() {
-    if(m_pStructureQueryBusInterface != NULL) {
+    if (m_pStructureQueryBusInterface != NULL) {
       try {
-        std::vector<DSMeterSpec_t> meters =
-          m_pStructureQueryBusInterface->getDSMeters();
+        std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
         foreach (DSMeterSpec_t& spec, meters) {
 
           boost::shared_ptr<DSMeter> dsMeter;
           try{
              dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
-             log ("dSM already known: " + dsuid2str(spec.DSID));
+             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
           } catch(ItemNotFoundException& e) {
              dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
-             log ("Discovered new dSM: " + dsuid2str(spec.DSID), lsWarning);
+             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
           }
 
           try {
@@ -554,7 +553,6 @@ namespace dss {
             meter->updateEnergyMeterValue(energy);
             m_pMetering->postMeteringEvent(meter, power, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), DateTime());
           } catch(ItemNotFoundException& _e) {
-            log("Received metering data for unknown meter, discarding", lsWarning);
           }
         }
         break;
@@ -751,12 +749,11 @@ namespace dss {
   void ModelMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
     foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
-      if(pDSMeter->isPresent()) {
-        if(!pDSMeter->isValid()) {
+      if (pDSMeter->isPresent() &&
+          (!pDSMeter->isValid())) {
           dsMeterReady(pDSMeter->getDSID());
           hadToUpdate = true;
           break;
-        }
       }
     }
 
@@ -806,21 +803,21 @@ namespace dss {
   } // eraseModelEventsFromQueue
 
   void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
-    log("Scanning dSM: " + dsuid2str(_dsMeterBusID), lsInfo);
+    log("Scanning dS485 bus device: " + dsuid2str(_dsMeterBusID), lsInfo);
     try {
 
       boost::shared_ptr<DSMeter> mod;
       try {
         mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
       } catch(ItemNotFoundException& e) {
-        log("Error scanning dSM: " + dsuid2str(_dsMeterBusID) + " not found in data model", lsError);
+        log("Error scanning dS485 bus device: " + dsuid2str(_dsMeterBusID) + " not found in data model", lsError);
         return; // nothing we could do here ...
       }
 
       try {
         BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if (!scanner.scanDSMeter(mod)) {
-          log("Error scanning dSM: " + dsuid2str(_dsMeterBusID) + ", data model incomplete", lsError);
+          log("Error scanning dS485 device: " + dsuid2str(_dsMeterBusID) + ", data model incomplete", lsError);
           return;
         }
 
