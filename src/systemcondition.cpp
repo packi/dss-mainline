@@ -41,6 +41,8 @@ namespace dss {
     int startSinceMidnight = 0;
     int endSinceMidnight = 24 * 60 * 60;
 
+    // TODO use DateTools instead of ad-hoc parsing
+
     if (timeStartNode != NULL) {
       std::string sTime = timeStartNode->getAsString();
       std::vector<std::string> sTimeArr = splitString(sTime, ':');
@@ -263,10 +265,8 @@ namespace dss {
       PropertyNodePtr timeEndNode = oBaseConditionNode->getPropertyByName("time-end");
       if (timeStartNode != NULL || timeEndNode != NULL) {
         DateTime nTime = DateTime();
-        int secNow =
-            (nTime.getHour() * 60 * 60) +
-            (nTime.getMinute() * 60) +
-            (nTime.getSecond());
+        int secNow = (nTime.getHour() * 60 + nTime.getMinute()) * 60 +
+          nTime.getSecond();
         if (!checkTimeCondition(timeStartNode, timeEndNode, secNow)) {
           return false;
         }

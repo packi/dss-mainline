@@ -89,9 +89,14 @@ namespace dss {
       if(node == NULL) {
         return failure("Could not find node named '" + propName + "'");
       }
+
       try {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("value", node->getIntegerValue());
+        if (node->getValueType() == vTypeInteger) {
+          resultObj->addProperty("value", node->getIntegerValue());
+        } else {
+          resultObj->addProperty("value", (unsigned long int)node->getUnsignedIntegerValue());
+        }
         return success(resultObj);
       } catch(PropertyTypeMismatch& ex) {
         return failure(std::string("Error getting property: '") + ex.what() + "'");
@@ -152,20 +157,38 @@ namespace dss {
       }
       return success();
     } else if(_request.getMethod() == "setInteger") {
-      std::string strValue = _request.getParameter("value");
-      int value;
-      try {
-        value = strToInt(strValue);
-      } catch(...) {
-        return failure("Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
-      }
+      aValueType type = vTypeInteger;
       if(node == NULL) {
         node = m_PropertySystem.createProperty(propName);
+      } else {
+        type = node->getValueType();
       }
-      try {
-        node->setIntegerValue(value);
-      } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error setting property: '") + ex.what() + "'");
+      std::string strValue = _request.getParameter("value");
+      int value;
+      uint32_t uvalue;
+
+      if (type == vTypeInteger) {
+        try {
+          value = strToInt(strValue);
+        } catch(...) {
+          return failure("Could not convert parameter 'value' to integer. Got: '" + strValue + "'");
+        }
+        try {
+          node->setIntegerValue(value);
+        } catch(PropertyTypeMismatch& ex) {
+          return failure(std::string("Error setting property: '") + ex.what() + "'");
+        }
+      } else {
+        try {
+          uvalue = strToUInt(strValue);
+        } catch(...) {
+          return failure("Could not convert parameter 'value' to integer. Got: '" + strValue + "'");
+        }
+        try {
+          node->setUnsignedIntegerValue(uvalue);
+        } catch(PropertyTypeMismatch& ex) {
+          return failure(std::string("Error setting property: '") + ex.what() + "'");
+        }
       }
       return success();
     } else if(_request.getMethod() == "setFloating") {
@@ -195,7 +218,12 @@ namespace dss {
         resultObj->addElement("", prop);
         PropertyNodePtr cnode = node->getChild(iChild);
         prop->addProperty("name", cnode->getDisplayName());
-        prop->addProperty("type", getValueTypeAsString(cnode->getValueType()));
+        // do not expose unsigned int to the UI
+        if (cnode->getValueType() == vTypeUnsignedInteger) {
+          prop->addProperty("type", getValueTypeAsString(vTypeInteger));
+        } else {
+          prop->addProperty("type", getValueTypeAsString(cnode->getValueType()));
+        }
       }
       return success(resultObj);
     } else if(_request.getMethod() == "getType") {

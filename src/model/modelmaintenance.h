@@ -217,6 +217,10 @@ namespace dss {
                            const std::string& _iconPath, const std::string& _productURL,
                            const std::string& _defaultName);
 
+    void onHeatingControllerConfig(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);
+    void onHeatingControllerValues(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);
+    void onHeatingControllerState(dsuid_t _dsMeterID, const int _ZoneID, const int _State);
+
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);

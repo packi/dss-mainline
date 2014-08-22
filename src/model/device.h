@@ -115,6 +115,29 @@ namespace dss {
   } DeviceSensorEventSpec_t;
 
   typedef struct {
+    uint16_t protectionTimer;
+    uint16_t emergencyTimer;
+    uint8_t emergencyControlValue;
+  } DeviceValveTimerSpec_t;
+
+  typedef struct {
+    uint16_t pwmPeriod;
+    uint8_t pwmMinValue;
+    uint8_t pwmMaxValue;
+    uint8_t pwmMinX;
+    uint8_t pwmMaxY;
+    uint8_t pwmOffset;
+  } DeviceValvePwmSpec_t;
+
+  typedef struct {
+    bool ctrlClipMinZero;
+    bool ctrlClipMinLower;
+    bool ctrlClipMaxHigher;
+    bool ctrlNONC;
+    uint8_t ctrlRawValue;
+  } DeviceValveControlSpec_t;
+
+  typedef struct {
     bool pairing;       // device supports pairing
     bool syncButtonID;  // sync button ID setting of slave with master
     bool hasOutputAngle;
@@ -131,7 +154,7 @@ namespace dss {
   typedef struct {
     int m_sensorIndex;       // sensor index
     int m_sensorType;        // type of sensor
-    int m_sensorPollInterval;
+    uint32_t m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
     bool m_sensorValueValidity;
@@ -327,6 +350,14 @@ namespace dss {
     void setSceneAngle(const int _scene, const int _angle);
     int getSceneAngle(const int _scene);
     void configureAreaMembership(const int _areaScene, const bool _addToArea);
+
+    /** Configure climate actuator */
+    void setDeviceValveTimer(DeviceValveTimerSpec_t _config);
+    void getDeviceValveTimer(DeviceValveTimerSpec_t& _config);
+    void setDeviceValvePwm(DeviceValvePwmSpec_t _config);
+    void getDeviceValvePwm(DeviceValvePwmSpec_t& _config);
+    void setDeviceValveControl(DeviceValveControlSpec_t _config);
+    void getDeviceValveControl(DeviceValveControlSpec_t& _config);
 
     /** Binary input devices */
     void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
@@ -590,6 +621,7 @@ namespace dss {
     const uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
+    const boost::shared_ptr<DeviceSensor_t> getSensorByType(uint8_t _sensorType) const;
     const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
     const void setSensorValue(int _sensorIndex, double _sensorValue) const;
     const void setSensorDataValidity(int _sensorIndex, bool _valid) const;

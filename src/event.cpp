@@ -49,6 +49,22 @@ using std::set;
 namespace dss {
   const std::string empty_string("");
 
+  namespace EventName {
+    const std::string CallScene = "callScene";
+    const std::string CallSceneBus = "callSceneBus";
+    const std::string DeviceSensorValue = "deviceSensorValue";
+    const std::string DeviceStatus = "deviceStatusEvent";
+    const std::string DeviceInvalidSensor = "deviceInvalidSensor";
+    const std::string Running = "running";
+    const std::string UndoScene = "undoScene";
+    const std::string ZoneSensorValue = "zoneSensorValue";
+    const std::string StateChange = "stateChange";
+    const std::string HeatingEnabled = "HeatingEnabled";
+    const std::string HeatingControllerSetup = "HeatingControllerSetup";
+    const std::string HeatingControllerValue = "HeatingControllerValue";
+    const std::string HeatingControllerState = "HeatingControllerState";
+  }
+
   namespace EventProperty {
     const char* Name = "name";
     const char* Location = "location";
@@ -64,14 +80,6 @@ namespace dss {
   Event::Event(const std::string& _name)
   : m_Name(_name),
     m_RaiseLocation(erlApartment)
-  {
-    reset();
-  } // ctor
-
-  Event::Event(const std::string& _name, boost::shared_ptr<Zone> _zone)
-  : m_Name(_name),
-    m_RaiseLocation(erlGroup),
-    m_RaisedAtGroup(_zone->getGroup(GroupIDBroadcast))
   {
     reset();
   } // ctor
@@ -647,7 +655,7 @@ namespace dss {
           }
         } else {
           try {
-            when = DateTime::fromISO(timeStr);
+            when = DateTime::parseRFC2445(timeStr);
             validDate = true;
           } catch(std::exception& e) {
             log(std::string("scheduleFromEvent: invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
@@ -895,7 +903,7 @@ namespace dss {
         m_MonitorNode->createProperty(ipSchedEvt->getID() + "/ticks")->setIntegerValue(nextOccurence.difference(now));
       }
 
-      if(nextOccurence.before(now) || (nextOccurence == now)) {
+      if (nextOccurence <= now) {
         result = true;
         if(m_EventQueue != NULL) {
           boost::shared_ptr<Event> evt = ipSchedEvt->getEvent();

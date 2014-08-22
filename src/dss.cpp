@@ -52,6 +52,7 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
+#include "sensor_data_uploader.h"
 #include "subscription_profiler.h"
 #include "defaultbuseventsink.h"
 #ifdef WITH_BONJOUR
@@ -462,6 +463,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     plugin = new EventInterpreterSensorMonitorPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new SensorDataUploadPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
@@ -597,7 +600,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 
     if (!m_ShutdownFlag) {
       m_State = ssRunning;
-      boost::shared_ptr<Event> runningEvent(new Event("running"));
+      boost::shared_ptr<Event> runningEvent(new Event(EventName::Running));
       m_pEventQueue->pushEvent(runningEvent);
 
       // pass control to the eventrunner

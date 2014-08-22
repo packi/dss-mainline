@@ -41,7 +41,7 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters();
     virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID);
     virtual std::vector<int> getZones(const dsuid_t& _dsMeterID);
-    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true);
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID);
@@ -50,6 +50,10 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dsuid_t _dsMeterID);
     virtual std::string getSceneName(dsuid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
     virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID);
+    virtual ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);
+    virtual ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);
+    virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);
+    virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);
   private:
     int getGroupCount(const dsuid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID);
@@ -57,6 +61,8 @@ namespace dss {
     void updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateOutputChannelTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
+    dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID,
+                          const uint8_t _sensorType);
   private:
     dsuid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface

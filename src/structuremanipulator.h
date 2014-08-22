@@ -68,6 +68,11 @@ namespace dss {
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
     void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
+    void deviceRemoveFromGroups(boost::shared_ptr<Device> device);
+
+    void setZoneHeatingConfig(boost::shared_ptr<Zone> _zone, const dsuid_t& _ctrlDSUID, const ZoneHeatingConfigSpec_t _spec);
+    void setZoneSensor(boost::shared_ptr<Zone> _zone, const uint8_t _sensorType, boost::shared_ptr<Device> _dev);
+    void resetZoneSensor(boost::shared_ptr<Zone> _zone, const uint8_t _sensorType);
 
     /**
      * @ret device moved

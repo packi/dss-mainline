@@ -279,24 +279,6 @@ BOOST_AUTO_TEST_CASE(testProperties) {
   BOOST_CHECK_EQUAL(false, props.unset("key"));
 }
 
-BOOST_AUTO_TEST_CASE(testISODate) {
-  struct tm inst;
-  time_t now;
-  time( &now );
-  localtime_r(&now, &inst);
-  mktime(&inst);
-
-  std::string asString = dateToISOString<std::string>(&inst);
-  struct tm parsed = dateFromISOString(asString.c_str());
-
-  DateTime instObj(inst);
-  DateTime parsedObj(parsed);
-#ifdef VERBOSE_TESTS
-  cout << "original: " << instObj << " parsed: " << parsedObj << endl;
-#endif
-  BOOST_CHECK_EQUAL(instObj, parsedObj);
-} // testISODate
-
 BOOST_AUTO_TEST_CASE(testSplitIntoKeyValue) {
   std::string key;
   std::string value;

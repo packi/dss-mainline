@@ -735,7 +735,7 @@ BOOST_AUTO_TEST_CASE(testSystemTriggerSpeed) {
   boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(9492);
   boost::shared_ptr<Group> group = zone->getGroup(1);
   boost::shared_ptr<Event> pEvent;
-  pEvent.reset(new Event("callSceneBus", group));
+  pEvent.reset(new Event(EventName::CallSceneBus, group));
   pEvent->setProperty("sceneID", intToString(11));
   pEvent->setProperty("groupID", intToString(1));
   pEvent->setProperty("zoneID", intToString(9492));

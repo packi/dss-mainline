@@ -60,23 +60,18 @@ namespace dss {
       std::string dsuidStr;
       std::string dsidStr;
 
-      PropertyNodePtr dsidNode =
-          DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid);
+      PropertyNodePtr dsidNode = DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid);
       if (dsidNode != NULL) {
-        dsuidStr = dsidNode->getAsString();
-      } else {
-        return failure("could not find dSUID");
+        dsidStr = dsidNode->getAsString();
       }
-
-      dsuid_t dsuid = str2dsuid(dsuidStr);
+      PropertyNodePtr dsuidNode = DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsuid);
+      if (dsuidNode != NULL) {
+        dsuidStr = dsuidNode->getAsString();
+      }
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("dSID", dsidStr);
       resultObj->addProperty("dSUID", dsuidStr);
-      try {
-        resultObj->addProperty("dSID", dsid2str(dsuid_to_dsid(dsuid)));
-      } catch (std::runtime_error &err) {
-        log(err.what());
-      }
       return success(resultObj);
     } else if (_request.getMethod() == "time") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

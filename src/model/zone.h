@@ -37,12 +37,45 @@ namespace dss {
   class Apartment;
   class DSMeter;
   class Group;
-  class UserGroup;
   class Set;
   class DeviceReference;
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
+  typedef struct ZoneHeatingProperties {
+    ZoneHeatingProperties() :
+      m_HeatingControlMode(0),
+      m_HeatingControlState(0),
+      m_HeatingMasterZone(0),
+      m_CtrlOffset(0)
+      {
+        SetNullDsuid(m_HeatingControlDSUID);
+      }
+    int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value
+    int m_HeatingControlState;     // Control state: 0=internal; 1=external; 2=exbackup; 3=emergency
+    int m_HeatingMasterZone;       // only used for mode 2
+    int m_CtrlOffset;              // only used for mode 2
+    dsuid_t m_HeatingControlDSUID; // DSUID of the meter or device or service running a controller for this zone
+  } ZoneHeatingProperties_t;
+
+  typedef struct ZoneHeatingStatus {
+    ZoneHeatingStatus() :
+      m_OperationMode(0)
+      {}
+    int m_OperationMode;
+    double m_TemperatureValue;
+    DateTime m_TemperatureValueTS;
+    double m_NominalValue;         // only used for mode 1
+    DateTime m_NominalValueTS;
+    double m_ControlValue;
+    DateTime m_ControlValueTS;
+  } ZoneHeatingStatus_t;
+
+  typedef struct {
+    dsuid_t m_DSUID;
+    int m_sensorType;
+    int m_sensorIndex;
+  } MainZoneSensor_t;
     /** Represents a Zone.
    * A Zone houses multiple devices. It can span over multiple dsMeters.
    */
@@ -55,8 +88,13 @@ namespace dss {
     DeviceVector m_Devices;
     std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Group> > m_Groups;
+    std::vector<boost::shared_ptr<MainZoneSensor_t> > m_MainSensors;
+    ZoneHeatingProperties_t m_HeatingProperties;
+    ZoneHeatingStatus_t m_HeatingStatus;
+
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
+
   public:
     Zone(const int _id, Apartment* _pApartment)
     : m_ZoneID(_id),
@@ -110,8 +148,25 @@ namespace dss {
 
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
+
+    /** Returns the heating properties or current status */
+    ZoneHeatingProperties_t getHeatingProperties() const;
+    ZoneHeatingStatus_t getHeatingStatus() const;
+
+    /** Set heating properties and runtime values */
+    void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice);
+    void setHeatingControlState(int _ctrlState);
+    void setHeatingOperationMode(int _operationMode);
+    void setTemperature(double _value, DateTime& _ts);
+    void setNominalValue(double _value, DateTime& _ts);
+    void setControlValue(double _value, DateTime& _ts);
+    void setSensor(boost::shared_ptr<const Device> _device, uint8_t _sensorType);
+    void resetSensor(uint8_t _sensorType);
+    std::vector<boost::shared_ptr<MainZoneSensor_t> > getAssignedSensors() { return m_MainSensors; }
+
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
+    bool isAllowedSensorType(int _sensorType);
   }; // Zone
 
 

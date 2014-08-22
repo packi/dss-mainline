@@ -359,7 +359,6 @@ namespace dss {
     } else {
       WebserviceConnection::getInstance()->request(url, params, reqtype,
           boost::make_shared<HashMapStringString>(headers),
-          boost::shared_ptr<HashMapStringString>(new HashMapStringString()),
           mcb, authenticated);
     }
 

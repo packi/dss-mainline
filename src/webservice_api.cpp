@@ -20,33 +20,44 @@ ParseError::ParseError(const std::string& _message) : runtime_error( _message )
  * @return decodod struct or throw ParseError if failed
  */
 WebserviceReply parse_reply(const char* buf) {
-    WebserviceReply resp;
+  WebserviceReply resp;
+  bool return_code_seen = false;
 
-    if (!buf) {
-      throw ParseError("buffer is NULL");
-    }
+  if (!buf) {
+    throw ParseError("buffer is NULL");
+  }
 
-    json_object * jobj = json_tokener_parse(buf);
-    if (!jobj) {
-      throw ParseError("invalid JSON");
+  json_object * jobj = json_tokener_parse(buf);
+  if (!jobj) {
+    throw ParseError("invalid JSON");
+  }
+  json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
+    enum json_type type = json_object_get_type(val);
+    if (!strcmp(key, "ReturnCode")) {
+      if (type != json_type_int) {
+        throw ParseError("invalid type for ReturnCode");
+      }
+      resp.code = json_object_get_int(val);
+      return_code_seen = true;
+    } else if (!strcmp(key, "ReturnMessage")) {
+      if (type == json_type_null) {
+        // empty string
+        continue;
+      }
+      if (type != json_type_string) {
+        throw ParseError("invalid type for ReturnMessage");
+      }
+      resp.desc = json_object_get_string(val);
+    } else {
+      // ignore, unkown keys
     }
-    json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
-        enum json_type type = json_object_get_type(val);
-        if (!strcmp(key, "ReturnCode")) {
-            if (type != json_type_int) {
-                throw ParseError("invalid type for ReturnCode");
-            }
-            resp.code = json_object_get_int(val);
-        } else if (!strcmp(key, "ReturnMessage")) {
-            if (type != json_type_string) {
-                throw ParseError("invalid type for ReturnMessage");
-            }
-            resp.desc = json_object_get_string(val);
-        } else {
-            throw ParseError("invalid key for message");
-        }
-    }
-    return resp;
+  }
+
+  if (!return_code_seen) {
+    throw ParseError("missing mandatory element: ReturnCode");
+  }
+
+  return resp;
 }
 
 __DEFINE_LOG_CHANNEL__(StatusReplyChecker, lsInfo);
@@ -72,7 +83,7 @@ void StatusReplyChecker::result(long code, const std::string &result) {
       m_callback->done(REST_OK, resp);
     }
   } catch (ParseError &ex) {
-    log(std::string("Invalid return message ") + result, lsError);
+    log(std::string("ParseError: <") + ex.what() + "> " + result, lsError);
     if (m_callback) {
       m_callback->done(JSON_ERROR, WebserviceReply());
     }

@@ -213,4 +213,77 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setButtonCallsPresent
 
+  void DSStructureModifyingBusInterface::setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec)
+  {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        _spec.ControllerMode, _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd,
+        _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp, _spec.KeepFloorWarm,
+        _spec.SourceZoneId, _spec.Offset, _spec.EmergencyValue);
+    DSBusInterface::checkResultCode(ret);
+  } // setZoneHeatingConfig
+
+  void DSStructureModifyingBusInterface::setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec)
+  {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = ControllerHeating_set_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        _spec.State);
+    DSBusInterface::checkResultCode(ret);
+  } // setZoneHeatingState
+
+  void DSStructureModifyingBusInterface::setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec)
+  {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = ControllerHeating_set_operation_modes(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        _spec.OpMode0, _spec.OpMode1, _spec.OpMode2, _spec.OpMode3,
+        _spec.OpMode4, _spec.OpMode5, _spec.OpMode6, _spec.OpMode7,
+        _spec.OpMode8, _spec.OpMode9, _spec.OpModeA, _spec.OpModeB,
+        _spec.OpModeC, _spec.OpModeD, _spec.OpModeE, _spec.OpModeF
+        );
+    DSBusInterface::checkResultCode(ret);
+  } // setZoneHeatingOperationModes
+
+  void DSStructureModifyingBusInterface::setZoneSensor(
+                                const uint16_t _zoneID,
+                                const uint8_t _sensorType,
+                                const dsuid_t& _sensorDSUID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsuid_t broadcastDSUID;
+    SetBroadcastDsuid(broadcastDSUID);
+
+    int ret = ZoneProperties_set_zone_sensor(m_DSMApiHandle, broadcastDSUID,
+                                             _zoneID, _sensorType,
+                                             _sensorDSUID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  }
+
+  void DSStructureModifyingBusInterface::resetZoneSensor(
+                                            const uint16_t _zoneID,
+                                            const uint8_t _sensorType) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsuid_t broadcastDSUID;
+    SetBroadcastDsuid(broadcastDSUID);
+
+    int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, broadcastDSUID,
+                                             _zoneID, _sensorType);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  }
+
 } // namespace dss

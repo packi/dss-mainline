@@ -408,31 +408,30 @@ namespace dss {
     }
   } // fillSensorTable
 
-  void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex,
-                               uint8_t _value) {
-    if(m_pPropertyNode) {
+  void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value) {
+    if (m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    if(m_pApartment->getDeviceBusInterface() != NULL) {
-      m_pApartment->getDeviceBusInterface()->setDeviceConfig(*this,
-                                                             _configClass,
-                                                             _configIndex,
-                                                             _value);
-
-      if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
-                                                    m_DSMeterDSID);
-        pEvent->addParameter(m_ShortAddress);
-        pEvent->addParameter(_configClass);
-        pEvent->addParameter(_configIndex);
-        pEvent->addParameter(_value);
-        m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
-      }
+    if (m_pApartment->getDeviceBusInterface() == NULL) {
+      throw std::runtime_error("DeviceBusInterface missing");
     }
+    if (m_pApartment->getModelMaintenance() == NULL) {
+      throw std::runtime_error("ModelMaintenance missing");
+    }
+
+    m_pApartment->getDeviceBusInterface()->setDeviceConfig(
+        *this, _configClass, _configIndex, _value);
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
+                                                m_DSMeterDSID);
+    pEvent->addParameter(m_ShortAddress);
+    pEvent->addParameter(_configClass);
+    pEvent->addParameter(_configIndex);
+    pEvent->addParameter(_value);
+    m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
   } // setDeviceConfig
 
-  void Device::setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex,
-                                 uint16_t _value)
+  void Device::setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex, uint16_t _value)
   {
     /*
      * webroot/js/dss/dss-setup-interface/dSS/util/Util.js: dSS.util.decode16
@@ -442,10 +441,10 @@ namespace dss {
     if (m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    if(m_pApartment->getDeviceBusInterface() == NULL) {
+    if (m_pApartment->getDeviceBusInterface() == NULL) {
       throw std::runtime_error("DeviceBusInterface missing");
     }
-    if (m_pApartment->getModelMaintenance()) {
+    if (m_pApartment->getModelMaintenance() == NULL) {
       throw std::runtime_error("ModelMaintenance missing");
     }
     DeviceBusInterface *shorty = m_pApartment->getDeviceBusInterface();
@@ -740,6 +739,76 @@ namespace dss {
     up = transitionVal2Time(vup);
     down = transitionVal2Time(vdown);
   } // getDeviceTransitionTime
+
+  /** Configure climate actuator */
+  void Device::setDeviceValveTimer(DeviceValveTimerSpec_t _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue, _config.emergencyControlValue);
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_EmergencyTimer, _config.emergencyTimer);
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_ProtectionTimer, _config.protectionTimer);
+  } // setDeviceValveTimer
+
+  void Device::getDeviceValveTimer(DeviceValveTimerSpec_t& _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    _config.emergencyControlValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
+    _config.emergencyTimer = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_EmergencyTimer);
+    _config.protectionTimer = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_ProtectionTimer);
+  } // getDeviceValveTimer
+
+  void Device::setDeviceValvePwm(DeviceValvePwmSpec_t _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod, _config.pwmPeriod);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue, _config.pwmMinValue);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue, _config.pwmMaxValue);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY, _config.pwmMinX);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY, _config.pwmMaxY);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset, _config.pwmOffset);
+  } // setDeviceValvePwm
+
+  void Device::getDeviceValvePwm(DeviceValvePwmSpec_t& _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    _config.pwmPeriod = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
+    uint16_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
+    _config.pwmMinValue = value & 0xff; // CfgFunction_Valve_PwmMinValue
+    _config.pwmMaxValue = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxValue
+    value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
+    _config.pwmMinX = value & 0xff; // CfgFunction_Valve_PwmMinY
+    _config.pwmMaxY = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxY
+    _config.pwmOffset = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+  } // getDeviceValvePwm
+
+  void Device::setDeviceValveControl(DeviceValveControlSpec_t _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    uint8_t value = _config.ctrlRawValue;
+    value &= 0xf0; // clear bits 0..3, reserved bits 4..7
+    value |= _config.ctrlClipMinZero ? 1 : 0;
+    value |= _config.ctrlClipMinLower? 2 : 0;
+    value |= _config.ctrlClipMaxHigher ? 4 : 0;
+    value |= _config.ctrlNONC ? 8 : 0;
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig, value);
+  }
+
+  void Device::getDeviceValveControl(DeviceValveControlSpec_t& _config) {
+    if (getDeviceClass() != DEVICE_CLASS_BL) {
+      throw DSSException("Not a climate device");
+    }
+    uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
+    _config.ctrlClipMinZero = ((value & 0x01) == 0x01);
+    _config.ctrlClipMinLower = ((value & 0x02) == 0x02);
+    _config.ctrlClipMaxHigher = ((value & 0x04) == 0x04);
+    _config.ctrlNONC = ((value & 0x08) == 0x08);
+    _config.ctrlRawValue = value;
+  } // getDeviceValveControl
 
   uint8_t Device::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
@@ -1897,20 +1966,12 @@ namespace dss {
       fillSensorTable(_slist);
     }
 
-    int ns = 0;
     for (std::vector<DeviceSensorSpec_t>::const_iterator it = _slist.begin();
         it != _slist.end();
-        ++it, ++ns) {
-
-      // drop reserved, unused or legacy sensor types
-      if ((it->SensorType >= SensorIDNotUsed) ||
-          (it->SensorType == SensorIDReserved1) ||
-          (it->SensorType == SensorIDReserved2)) {
-        continue;
-      }
+        ++it) {
 
       boost::shared_ptr<DeviceSensor_t> binput(new DeviceSensor_t());
-      binput->m_sensorIndex = ns;
+      binput->m_sensorIndex = m_sensorInputCount;
       binput->m_sensorType = it->SensorType;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
@@ -1923,7 +1984,7 @@ namespace dss {
 
       if (m_pPropertyNode != NULL) {
         PropertyNodePtr sensorInputNode = m_pPropertyNode->getPropertyByName("sensorInputs");
-        std::string bpath = std::string("sensorInput") + intToString(ns);
+        std::string bpath = std::string("sensorInput") + intToString(m_sensorInputCount);
         PropertyNodePtr entry = sensorInputNode->getPropertyByName(bpath);
         if (entry != NULL) {
           entry->getParentNode()->removeChild(entry);
@@ -1940,7 +2001,7 @@ namespace dss {
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
         entry->createProperty("pollinterval")
-                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
+                ->linkToProxy(PropertyProxyReference<uint32_t>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
         entry->createProperty("conversion")
                 ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorPushConversionFlag));
         entry->createProperty("broadcast")
@@ -2032,6 +2093,17 @@ namespace dss {
     return m_sensorInputs[_sensorIndex];
   }
 
+  const boost::shared_ptr<DeviceSensor_t> Device::getSensorByType(uint8_t _sensorType) const {
+    for (size_t i = 0; i < getSensorCount(); i++) {
+      boost::shared_ptr<DeviceSensor_t> sensor = m_sensorInputs.at(i);
+      if (sensor->m_sensorType == _sensorType) {
+        return sensor;
+      }
+    }
+      
+    throw ItemNotFoundException(std::string("Device::getSensor: no sensor with given type found"));
+  }
+
   const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
@@ -2118,86 +2190,76 @@ namespace dss {
   }
 
   void DeviceBank3_BL::setValveProtectionTimer(uint16_t valveProtectionTimer) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_BL::VENTIL_TMR,
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_ProtectionTimer,
                                 valveProtectionTimer);
   }
   uint16_t DeviceBank3_BL::getValveProtectionTimer() {
-    return m_device->getDeviceConfigWord(CfgClassFunction,
-                                         CfgFunction_BL::VENTIL_TMR);
+    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_ProtectionTimer);
   }
   void DeviceBank3_BL::setEmergencySetPoint(int8_t emergency_sp) {
     // implicit conversion int8_t to uint8_t
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::EMERGENCY_SP,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue,
                               emergency_sp);
   }
   int8_t DeviceBank3_BL::getEmergencySetPoint() {
     // implicit conversion uint8_t to int8_t
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::EMERGENCY_SP);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
   }
   void DeviceBank3_BL::setEmergencyTimer(int16_t emergency_tmr) {
-    m_device->setDeviceConfig16(CfgClassFunction,
-                                CfgFunction_BL::EMERGENCY_TMR, emergency_tmr);
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_EmergencyTimer,
+                                emergency_tmr);
   }
   uint16_t DeviceBank3_BL::getEmergencyTimer() {
-    return m_device->getDeviceConfigWord(CfgClassFunction,
-                                         CfgFunction_BL::EMERGENCY_TMR);
+    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_EmergencyTimer);
   }
 
   void DeviceBank3_BL::setPwmPeriod(uint16_t pwmPeriod) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_BL::PWM_PERIODLEN,
+    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod,
                                 pwmPeriod);
   }
   uint16_t DeviceBank3_BL::getPwmPeriod() {
-    return m_device->getDeviceConfigWord(CfgClassFunction,
-                                         CfgFunction_BL::PWM_PERIODLEN);
+    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
   }
   void DeviceBank3_BL::setPwmMinX(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MIN_X,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMinX() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MIN_X);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
   }
   void DeviceBank3_BL::setPwmMaxX(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MAX_X,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMaxX() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MAX_X);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue);
   }
   void DeviceBank3_BL::setPwmMinY(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MIN_Y,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMinY() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MIN_Y);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
   }
   void DeviceBank3_BL::setPwmMaxY(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_MAX_Y,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY,
                               set_point);
   }
   int8_t DeviceBank3_BL::getPwmMaxY() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_MAX_Y);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY);
   }
   void DeviceBank3_BL::setPwmConfig(uint8_t config) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_CONFIG,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig,
                               config);
   }
   uint8_t DeviceBank3_BL::getPwmConfig() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_CONFIG);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
   }
   void DeviceBank3_BL::setPwmOffset(int8_t config) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_BL::PWM_OFFSET_SP,
+    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset,
                               config);
   }
   int8_t DeviceBank3_BL::getPwmOffset() {
-    return m_device->getDeviceConfig(CfgClassFunction,
-                                     CfgFunction_BL::PWM_OFFSET_SP);
+    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
   }
 } // namespace dss

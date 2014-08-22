@@ -104,6 +104,59 @@ namespace dss {
     uint32_t EventCount;
   } DSMeterHash_t;
 
+  typedef struct {
+    uint8_t ControllerMode;
+    uint16_t Kp;
+    uint16_t Ts;
+    uint16_t Ti;
+    uint16_t Kd;
+    uint16_t Imin;
+    uint16_t Imax;
+    uint16_t Ymin;
+    uint16_t Ymax;
+    uint8_t AntiWindUp;
+    uint8_t KeepFloorWarm;
+    uint16_t SourceZoneId;
+    uint8_t Offset;
+    uint8_t EmergencyValue;
+  } ZoneHeatingConfigSpec_t;
+
+  typedef struct {
+    uint16_t Trecent;
+    uint16_t Treference;
+    uint16_t TError;
+    uint16_t TErrorPrev;
+    uint32_t Integral;
+    uint32_t Yp;
+    uint32_t Yi;
+    uint32_t Yd;
+    uint16_t Y;
+    uint8_t AntiWindUp;
+  } ZoneHeatingInternalsSpec_t;
+
+  typedef struct {
+    uint8_t State;
+  } ZoneHeatingStateSpec_t;
+
+  typedef struct {
+    uint16_t OpMode0;
+    uint16_t OpMode1;
+    uint16_t OpMode2;
+    uint16_t OpMode3;
+    uint16_t OpMode4;
+    uint16_t OpMode5;
+    uint16_t OpMode6;
+    uint16_t OpMode7;
+    uint16_t OpMode8;
+    uint16_t OpMode9;
+    uint16_t OpModeA;
+    uint16_t OpModeB;
+    uint16_t OpModeC;
+    uint16_t OpModeD;
+    uint16_t OpModeE;
+    uint16_t OpModeF;
+  } ZoneHeatingOperationModeSpec_t;
+
   class DeviceBusInterface {
   public:
     //------------------------------------------------ Device manipulation
@@ -198,7 +251,7 @@ namespace dss {
     /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
     virtual std::vector<int> getZones(const dsuid_t& _dsMeterID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
-    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true) = 0;
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
@@ -216,6 +269,13 @@ namespace dss {
 
     /** returns the hash over the dSMeter's datamodel */
     virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) = 0;
+
+    /** return heating controller data model */
+    virtual ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
+    virtual ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
+    virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
+    virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
+    virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {
@@ -251,6 +311,13 @@ namespace dss {
 
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
+
+    /** Create and manage heating controller */
+    virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) = 0;
+    virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) = 0;
+    virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) = 0;
+    virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) = 0;
+    virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
@@ -368,6 +435,13 @@ namespace dss {
 
     virtual void setBusEventSink(BusEventSink* _eventSink) = 0;
     virtual const std::string getConnectionURI() { return ""; }
+    virtual void protobufMessageRequest(dsuid_t _dSMdSUID,
+                                        uint16_t _request_size,
+                                        const uint8_t *_request,
+                                        uint16_t *_response_size,
+                                        uint8_t *_response) {
+      throw std::runtime_error("not supported by interface");
+    }
   };
 
   class BusApiError : public DSSException {

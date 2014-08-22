@@ -196,6 +196,15 @@ namespace dss {
         m_pPropertyNode->createProperty("ZoneID")->setIntegerValue(m_ZoneID);
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
+        if (m_ZoneID > 0) {
+          m_pPropertyNode->createProperty("heating/");
+          m_pPropertyNode->createProperty("heating/OperationMode")
+              ->linkToProxy(PropertyProxyReference<int>(m_HeatingStatus.m_OperationMode));
+          m_pPropertyNode->createProperty("heating/ControlMode")
+              ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlMode));
+          m_pPropertyNode->createProperty("heating/ControlState")
+              ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlState));
+        }
         m_pPropertyNode->createProperty("devices/");
         foreach(boost::shared_ptr<Group> pGroup, m_Groups) {
           pGroup->publishToPropertyTree();
@@ -210,5 +219,93 @@ namespace dss {
       m_pPropertyNode.reset();
     }
   } // removeFromPropertyTree
+
+  ZoneHeatingProperties_t Zone::getHeatingProperties() const {
+    return m_HeatingProperties;
+  }
+
+  ZoneHeatingStatus_t Zone::getHeatingStatus() const {
+    return m_HeatingStatus;
+  }
+
+  void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice) {
+    m_HeatingProperties.m_CtrlOffset = _ctrlMode;
+    m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
+    m_HeatingProperties.m_CtrlOffset = _offset;
+    m_HeatingProperties.m_HeatingMasterZone = _masterZone;
+  }
+
+  void Zone::setHeatingControlState(int _ctrlState) {
+    m_HeatingProperties.m_HeatingControlState = _ctrlState;
+  }
+
+  void Zone::setHeatingOperationMode(int _operationMode) {
+    m_HeatingStatus.m_OperationMode = _operationMode;
+  }
+
+  void Zone::setTemperature(double _value, DateTime& _ts) {
+    m_HeatingStatus.m_TemperatureValue = _value;
+    m_HeatingStatus.m_TemperatureValueTS = _ts;
+  }
+
+  void Zone::setNominalValue(double _value, DateTime& _ts) {
+    m_HeatingStatus.m_NominalValue = _value;
+    m_HeatingStatus.m_NominalValueTS = _ts;
+  }
+
+  void Zone::setControlValue(double _value, DateTime& _ts) {
+    m_HeatingStatus.m_ControlValue = _value;
+    m_HeatingStatus.m_ControlValueTS = _ts;
+  }
+
+  bool Zone::isAllowedSensorType(int _sensorType) {
+    switch (_sensorType) {
+      case SensorIDTemperatureIndoors:
+      case SensorIDBrightnessIndoors:
+      case SensorIDHumidityIndoors:
+      case SensorIDCO2Concentration:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void Zone::setSensor(boost::shared_ptr<const Device> _device,
+                          uint8_t _sensorType) {
+    const boost::shared_ptr<DeviceSensor_t> sensor =
+                                       _device->getSensorByType(_sensorType);
+
+    if (!isAllowedSensorType(sensor->m_sensorType)) {
+      throw std::runtime_error("Assignment of sensor type " + intToString(sensor->m_sensorType) + " is not allowed!");
+    }
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> ms = m_MainSensors.at(i);
+      if (ms && (ms->m_sensorType == sensor->m_sensorType)) {
+        ms->m_DSUID = _device->getDSID();
+        ms->m_sensorIndex = sensor->m_sensorIndex;
+        return;
+      }
+    }
+
+    boost::shared_ptr<MainZoneSensor_t> ms(new MainZoneSensor_t());
+    ms->m_DSUID = _device->getDSID();
+    ms->m_sensorIndex = sensor->m_sensorIndex;
+    ms->m_sensorType = sensor->m_sensorType;
+    m_MainSensors.push_back(ms);
+  }
+
+  void Zone::resetSensor(uint8_t _sensorType) {
+    if (!isAllowedSensorType(_sensorType)) {
+      return;
+    }
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      if (m_MainSensors.at(i)->m_sensorType == _sensorType) {
+        m_MainSensors.at(i).reset();
+        return;
+      }
+    }
+  }
 
 } // namespace dss

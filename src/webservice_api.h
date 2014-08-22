@@ -86,6 +86,10 @@ public:
    * @callback: provides network and server status
    */
   static void doModelChanged(ChangeType type, WebserviceCallDone_t callback);
+
+  template <class iterator>
+    static void doUploadSensorData(iterator begin, iterator end,
+                                   WebserviceCallDone_t callback);
 };
 
 class WebserviceAccessManagement {

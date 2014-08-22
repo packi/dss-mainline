@@ -30,6 +30,7 @@
 #include "src/model/device.h"
 #include "src/model/group.h"
 #include "src/model/modulator.h"
+#include "src/model/zone.h"
 
 #include "dsbusinterface.h"
 
@@ -290,7 +291,7 @@ namespace dss {
 
         for (int i = 0; i < numSensors; i++) {
           uint8_t SensorType;
-          uint8_t SensorPollInterval;
+          uint32_t SensorPollInterval;
           uint8_t SensorBroadcastFlag;
           uint8_t SensorConversionFlag;
           ret = DeviceSensor_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
@@ -339,7 +340,7 @@ namespace dss {
     }
   } // updateOutputChannelTableFromMeter
 
-  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
+  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -362,10 +363,12 @@ namespace dss {
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
-      updateButtonGroupFromMeter(_dsMeterID, spec);
-      updateBinaryInputTableFromMeter(_dsMeterID, spec);
-      updateSensorInputTableFromMeter(_dsMeterID, spec);
-      updateOutputChannelTableFromMeter(_dsMeterID, spec);
+      if (complete) {
+        updateButtonGroupFromMeter(_dsMeterID, spec);
+        updateBinaryInputTableFromMeter(_dsMeterID, spec);
+        updateSensorInputTableFromMeter(_dsMeterID, spec);
+        updateOutputChannelTableFromMeter(_dsMeterID, spec);
+      }
 
       result.push_back(spec);
     }
@@ -505,5 +508,76 @@ namespace dss {
 
     return result;
   } // getDSMeterHash
+
+  ZoneHeatingConfigSpec_t DSStructureQueryBusInterface::getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ZoneHeatingConfigSpec_t result;
+    int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        &result.ControllerMode, &result.Kp, &result.Ts, &result.Ti, &result.Kd,
+        &result.Imin, &result.Imax, &result.Ymin, &result.Ymax, &result.AntiWindUp, &result.KeepFloorWarm,
+        &result.SourceZoneId, &result.Offset, &result.EmergencyValue);
+    DSBusInterface::checkResultCode(ret);
+    return result;
+  } // getZoneHeatingConfig
+
+  ZoneHeatingStateSpec_t DSStructureQueryBusInterface::getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ZoneHeatingStateSpec_t result;
+    int ret = ControllerHeating_get_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        &result.State);
+    DSBusInterface::checkResultCode(ret);
+    return result;
+  } // getZoneHeatingState
+
+  ZoneHeatingInternalsSpec_t DSStructureQueryBusInterface::getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ZoneHeatingInternalsSpec_t result;
+    int ret = ControllerHeating_get_internals(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        &result.Trecent, &result.Treference, &result.TError, &result.TErrorPrev,
+        &result.Integral, &result.Yp, &result.Yi, &result.Yd, &result.Y, &result.AntiWindUp);
+    DSBusInterface::checkResultCode(ret);
+    return result;
+  } // getZoneHeatingInternals
+
+  ZoneHeatingOperationModeSpec_t DSStructureQueryBusInterface::getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ZoneHeatingOperationModeSpec_t result;
+    int ret = ControllerHeating_get_operation_modes(m_DSMApiHandle, _dsMeterID, _ZoneID,
+        &result.OpMode0, &result.OpMode1, &result.OpMode2, &result.OpMode3,
+        &result.OpMode4, &result.OpMode5, &result.OpMode6, &result.OpMode7,
+        &result.OpMode8, &result.OpMode9, &result.OpModeA, &result.OpModeB,
+        &result.OpModeC, &result.OpModeD, &result.OpModeE, &result.OpModeF);
+    DSBusInterface::checkResultCode(ret);
+    return result;
+  } // getZoneHeatingOperationModes
+
+  dsuid_t DSStructureQueryBusInterface::getZoneSensor(
+                                                const dsuid_t& _meterDSUID,
+                                                const uint16_t _zoneID,
+                                                const uint8_t _sensorType) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    dsuid_t sensorDSUID;
+    int ret = ZoneProperties_get_zone_sensor(m_DSMApiHandle, _meterDSUID,
+                                             _zoneID, _sensorType,
+                                             &sensorDSUID);
+    DSBusInterface::checkResultCode(ret);
+    return sensorDSUID;
+  }
 
 } // namespace dss

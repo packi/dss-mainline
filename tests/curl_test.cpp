@@ -28,10 +28,8 @@ BOOST_AUTO_TEST_CASE(curlTest) {
 
     HashMapStringString header;
     header["bar"] = "dada";
-    HashMapStringString postform;
-    postform["foo"] = "bogus";
-    BOOST_CHECK_EQUAL(curl->request(url, POST, boost::make_shared<HashMapStringString>(header),
-                                    boost::make_shared<HashMapStringString>(postform),
+    BOOST_CHECK_EQUAL(curl->request(url, POST,
+                                    boost::make_shared<HashMapStringString>(header),
                                     &result), 200);
 }
 
@@ -58,11 +56,10 @@ BOOST_AUTO_TEST_CASE(test_emptyHeaderMaps) {
 BOOST_AUTO_TEST_CASE(test_emptyHeaderAndFormPostMaps) {
   std::string url = "http://www.digitalstrom.com";
   boost::shared_ptr<HashMapStringString> headers;
-  boost::shared_ptr<HashMapStringString> formpost;
   HttpClient curl(true);
 
   /* does it crash, is the test */
-  BOOST_CHECK_EQUAL(curl.request(url, POST, headers, formpost, NULL), 200);
+  BOOST_CHECK_EQUAL(curl.request(url, POST, headers, NULL), 200);
 }
 
 BOOST_AUTO_TEST_CASE(test_URLRequestStruct) {

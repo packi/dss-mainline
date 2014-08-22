@@ -43,6 +43,22 @@ namespace dss {
 
   //================================================== Constants
 
+  namespace EventName {
+    extern const std::string CallScene;
+    extern const std::string CallSceneBus;
+    extern const std::string DeviceSensorValue;
+    extern const std::string DeviceStatus;
+    extern const std::string DeviceInvalidSensor;
+    extern const std::string Running;
+    extern const std::string UndoScene;
+    extern const std::string ZoneSensorValue;
+    extern const std::string StateChange;
+    extern const std::string HeatingEnabled;
+    extern const std::string HeatingControllerSetup;
+    extern const std::string HeatingControllerValue;
+    extern const std::string HeatingControllerState;
+  }
+
   namespace EventProperty {
     extern const char* Name;
     extern const char* Location;
@@ -76,7 +92,7 @@ namespace dss {
     erlState
   } EventRaiseLocation;
 
-  class Event {
+  class Event : public boost::enable_shared_from_this<Event> {
   private:
     std::string m_Name;
     std::string m_Location;
@@ -95,7 +111,6 @@ namespace dss {
     void reset();
   public:
     Event(const std::string& _name, boost::shared_ptr<Group> _context);
-    Event(const std::string& _name, boost::shared_ptr<Zone> _context);
     Event(const std::string& _name, boost::shared_ptr<State> _state);
     Event(const std::string& _name, boost::shared_ptr<DeviceReference> _ref);
     Event(const std::string& _name);
@@ -124,6 +139,9 @@ namespace dss {
     void applyProperties(const Properties& _others);
     /** Checks whether _other and this are the same regarding uniqueness */
     bool isReplacementFor(const Event& _other);
+    boost::shared_ptr<Event> getptr() {
+      return shared_from_this();
+    };
   }; // Event
 
   //-------------------------------------------------- Events

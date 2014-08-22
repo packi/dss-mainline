@@ -53,18 +53,15 @@ namespace dss {
   /** Class that supports various date and time calculations */
   class DateTime {
   private:
-    struct tm m_DateTime;
+    struct timeval m_timeval;
   public:
-    /** Initializes the instance to be equal to \a DateTime::NullDate */
+    /** Current date-time */
     DateTime();
-    /** Initializes the instance to be equal to \a _time.
-      * @param _time Time as seconds since epoch
-      */
-    DateTime(time_t _time);
+    /** Construct from sec.usec since epoch (UTC) */
+    DateTime(time_t secs, suseconds_t usecs = 0);
+    DateTime(struct timeval tv) : m_timeval(tv) {}
     /** Copy constuctor */
     DateTime(const DateTime& _copy);
-    DateTime(const struct tm& _tm);
-    DateTime(const struct icaltimetype& _icaltime);
 
     /** Adds \a _hours hours to the time and normalizes the DateTime */
     DateTime addHour(const int _hours) const;
@@ -93,46 +90,11 @@ namespace dss {
     /** Returns the second */
     int getSecond() const;
 
-    /** Sets the day of month */
-    void setDay(const int _value);
-    /** Sets the month */
-    void setMonth(const int _value);
-    /** Sets the year */
-    void setYear(const int _value);
-    /** Sets the hour */
-    void setHour(const int _value);
-    /** Sets the minute */
-    void setMinute(const int _value);
-    /** Sets the second */
-    void setSecond(const int _value);
-
-    /** Sets the date part without touching the time */
-    void setDate(int _day, int _month, int _year);
-    /** Sets the time part without touching the date */
-    void setTime(int _hour, int _minute, int _second);
-
-    /** Clears the date part as in setting it to zero */
-    void clearDate();
-    /** Clears the time part as in settin it to zero */
-    void clearTime();
-    /** Clears the date and time part
-      * @see clearDate
-      * @see clearTime
-      */
-    void clear();
-
-    /** Normalizes the date/time information */
-    void validate();
-
     /** Returns the day of year */
     int getDayOfYear() const;
     /** Returns the weekday */
     Weekday getWeekday() const;
 
-    /** Returns true if the instance is before \a _other */
-    bool before(const DateTime& _other) const;
-    /** Returns true if the instance is after \a _other */
-    bool after(const DateTime& _other) const;
     /** Returns true if the instance and \a _other represent the same date and time */
     bool operator==(const DateTime& _other) const;
     /** Returns true if the instance and \a _other do not represent the same time and date */
@@ -150,7 +112,7 @@ namespace dss {
       * @see after */
     bool operator>=(const DateTime& _other) const;
 
-    /** Returns the difference in days */
+    /** Returns the difference in seconds */
     int difference(const DateTime& _other) const;
 
     /** Returns the seconds since epoch */
@@ -159,21 +121,64 @@ namespace dss {
     /** Returns the offset in seconds from GMT */
     long int getTimezoneOffset() const;
 
-    std::ostream& operator<<(std::ostream& out) const;
     operator std::string() const;
     std::string toString() const;
+
     std::string toRFC2822String() const;
+
+    /**
+     * Parses RFC2445 date-time
+     * @param _isoStr DateTime string formatted as "yyyymmddThhmmss[Z]"
+     * @throw invalid_argument if a malformatted \a _isoStr is provided
+     */
+    static DateTime parseRFC2445(const std::string& _isoStr);
+
+    /**
+     * Emit RFC2445 date-time format
+     */
     std::string toRFC2445IcalDataTime() const;
+
+    /**
+     * parseISO8601 -- ISO8601 or similar RFC3339
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     */
+    static DateTime parseISO8601(std::string in);
+
+    /**
+     * Emit ISO8601 or RFC3339 format
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     */
+    std::string toISO8601() const;
+
+    /**
+     * Emit ISO8601 or RFC3339 with ms precision
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     * TODO probably non-standard:
+     * - rfc3339 has 100 ms digit precision
+     * - ISO8601 seems seconds only precision(spec is 140$)
+     */
+    std::string toISO8601_ms() const;
+
+    /**
+     * Parses human readable "2014-08-07 23:33:30" format
+     * @throw invalid_argument if parsing fails
+     */
+    static DateTime parsePrettyString(const std::string& strTime);
+
+    /**
+     * Emits human readable "2014-08-07 23:33:30" format
+     */
+    std::string toPrettyString() const;
 
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
     static DateTime NullDate;
-
-   /** Creates an instance from an ISO date.
-     * @param _isoStr DateTime string formatted as "yyyymmddThhmmssZ"
-     * @throw invalid_argument if a malformatted \a _isoStr is provided
-     */
-    static DateTime fromISO(const std::string& _isoStr);
   }; // DateTime
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt);
@@ -187,10 +192,6 @@ namespace dss {
       * @return \a DateTime::NullDate or a \a DateTime value after \a _from
       */
     virtual DateTime getNextOccurence(const DateTime& _from) = 0;
-    /** Lists all ocurrences between \a _from and \a _to.
-      * @return A list containing dates between \a _from and \a _to or an empty std::vector
-      */
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
 
   /** Schedule that's scheduled on a specific DateTime */
@@ -200,38 +201,8 @@ namespace dss {
   public:
     StaticSchedule(const DateTime& _when) : m_When(_when) {}
     virtual ~StaticSchedule() {}
-
     virtual DateTime getNextOccurence(const DateTime& _from);
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
-
-  typedef enum {
-    Secondly = 0, Minutely, Hourly, Daily, Weekly, Monthly, Yearly
-  } RepetitionMode;
-
-
-  /** RepeatingSchedule */
-  class RepeatingSchedule : public Schedule {
-  private:
-    /** Repetition mode */
-    RepetitionMode m_RepetitionMode;
-    /** Interval in which to repeat.
-     * If the Mode is Minutely and m_RepeatingInterval is 5, we're scheduled every 5 minutes from m_BeginningAt through m_EndingAt.
-     * Equaly, if the Mode is Hourly and the interval is 12, we're scheduled every 12 hours.
-     */
-    int m_RepeatingInterval;
-    DateTime m_BeginingAt;
-    DateTime m_EndingAt;
-  private:
-    int getIntervalInSeconds();
-  public:
-    RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
-    RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
-    virtual ~RepeatingSchedule() {}
-
-    virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
-  }; // RepeatingSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
   /** Schedule that gets it's schedule from an iCal's RRULE */
@@ -246,31 +217,42 @@ namespace dss {
     ICalSchedule(const std::string& _rrule, const std::string _startDateISO);
     virtual ~ICalSchedule();
 
-    virtual bool hasNextOccurence(const DateTime& _from);
     virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
 #endif
 
-  //================================================== Timestamp
-
-  /** Class that can store and compute the difference to another timestamp. */
-  class Timestamp {
-  private:
-    struct timeval m_Value;
+  class TimeStamp {
   public:
-    Timestamp() {
-      gettimeofday(&m_Value, NULL);
-    }
+    TimeStamp() {
+      m_stamp.tv_sec = 0;
+      m_stamp.tv_nsec = 0;
+    };
 
-    /** Calculates the difference to \a _previous in miliseconds */
-    double getDifference(const Timestamp& _previous) {
-      double diffMS = ((m_Value.tv_sec*1000.0 + m_Value.tv_usec/1000.0) -
-                       (_previous.m_Value.tv_sec*1000.0 + _previous.m_Value.tv_usec/1000.0));
-      return diffMS;
-    }
-  }; // Timestamp
+    void timestamp();
+    //unsigned toNanoSec() const; /* mind the range is only 32bit */
+    unsigned toMicroSec() const;
 
+    TimeStamp operator+(const TimeStamp &o) const;
+    TimeStamp operator-(const TimeStamp &o) const;
+    TimeStamp operator+=(const TimeStamp &o);
+    TimeStamp operator-=(const TimeStamp &o);
+    bool operator<(const TimeStamp &other) const;
+
+  private:
+#ifndef __APPLE__
+    struct timespec m_stamp;
+#else
+#error NOT IMPLEMENTED
+#endif
+  };
+
+#ifndef __APPLE__
+  /* inline to minimize overhead */
+  inline void TimeStamp::timestamp() {
+    (void)clock_gettime(CLOCK_THREAD_CPUTIME_ID, &m_stamp);
+  }
+#else
+#error NOT IMPLEMENTED
+#endif
 }
-
 #endif

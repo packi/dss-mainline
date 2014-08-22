@@ -16,80 +16,6 @@
 
 namespace dss {
 
-  /*
-   * TODO cleanup this mess
-   * - move macros into operator functions
-   * - use Templates: typedef TimeStampImpl<timerspec> TimeStamp
-   *   so we can switch between __APPLE__ and/or float
-   */
-
-  /*
-   * taken from sys/time.h addapted for struct timespec
-   */
-  /* Convenience macros for operations on timevals.
-   * NOTE: `timercmp' does not work for >= or <=.  */
-# define timespec_cmp(a, b, CMP) 						      \
-  (((a)->tv_sec == (b)->tv_sec) ? 					      \
-   ((a)->tv_nsec CMP (b)->tv_nsec) : 					      \
-   ((a)->tv_sec CMP (b)->tv_sec))
-# define timespec_add(a, b, result)						      \
-  do {									      \
-    (result)->tv_sec = (a)->tv_sec + (b)->tv_sec;			      \
-    (result)->tv_nsec = (a)->tv_nsec + (b)->tv_nsec;			      \
-    if ((result)->tv_nsec >= 1000000000)					      \
-    {									      \
-      ++(result)->tv_sec;						      \
-      (result)->tv_nsec -= 1000000000;					      \
-    }									      \
-  } while (0)
-# define timespec_sub(a, b, result)						      \
-  do {									      \
-    (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;			      \
-    (result)->tv_nsec = (a)->tv_nsec - (b)->tv_nsec;			      \
-    if ((result)->tv_nsec < 0) {					      \
-      --(result)->tv_sec;						      \
-      (result)->tv_nsec += 1000000000;					      \
-    }									      \
-  } while (0)
-
-#define SEC_TO_NSEC(s) ((s) * 1000 * 1000 * 1000)
-# define timespec_2_ns(a) \
-  (SEC_TO_NSEC(a.tv_sec) + a.tv_nsec) \
-
-#define SEC_TO_MSEC(s) ((s) * 1000 * 1000)
-# define timespec_2_us(a) \
-  (SEC_TO_MSEC(a.tv_sec) + a.tv_nsec / 1000)
-
-  unsigned TimeStamp::toMicroSec() const {
-    return timespec_2_us(m_stamp);
-  }
-
-  TimeStamp TimeStamp::operator+(const TimeStamp &o) const {
-    TimeStamp tmp;
-    timespec_add(&m_stamp, &o.m_stamp, &tmp.m_stamp);
-    return tmp;
-  }
-
-  TimeStamp TimeStamp::operator-(const TimeStamp &o) const {
-    TimeStamp tmp;
-    timespec_sub(&m_stamp, &o.m_stamp, &tmp.m_stamp);
-    return tmp;
-  }
-
-  TimeStamp TimeStamp::operator+=(const TimeStamp &o) {
-    timespec_add(&m_stamp, &o.m_stamp, &m_stamp);
-    return *this;
-  }
-
-  TimeStamp TimeStamp::operator-=(const TimeStamp &o) {
-    timespec_sub(&m_stamp, &o.m_stamp, &m_stamp);
-    return *this;
-  }
-
-  bool TimeStamp::operator<(const TimeStamp &o) const {
-    return timespec_cmp(&m_stamp, &o.m_stamp, <);
-  }
-
   //================================================== SubscriptionTime
 
   bool SubscriptionTime::operator==(const SubscriptionTime &other) const {
@@ -304,7 +230,7 @@ namespace dss {
 
   void BenchmarkPublisherPlugin::handleEvent(Event& _event, const
                                              EventSubscription& _subscription) {
-    if (_event.getName() == "running") {
+    if (_event.getName() == EventName::Running) {
       boost::shared_ptr<Event> pEvent;
       DateTime now;
 

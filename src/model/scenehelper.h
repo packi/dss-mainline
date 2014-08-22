@@ -67,7 +67,7 @@ namespace dss {
     static double sensorToFloat10(const int _sensorType, const int _sensorValue);
     static double sensorToFloat12(const int _sensorType, const int _sensorValue);
     static int sensorToSystem(const int _sensorType, const double _sensorValue);
-    static void sensorName(const int _sensorType, std::string& _name);
+    static std::string sensorName(const int _sensorType);
   }; // SceneHelper
 
 } // namespace dss

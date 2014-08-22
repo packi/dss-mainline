@@ -385,6 +385,34 @@ namespace dss {
                         ZONE_GROUP_SENSOR_PUSH, 0,
                         &callback_struct);
 
+      ControllerHeating_set_config_request_callback_t heatingConfigCallback = DSBusInterface::handleHeatingControllerConfigCallback;
+      callback_struct.function = (void*)heatingConfigCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        CONTROLLER_HEATING, CONTROLLER_HEATING_SET_CONFIG,
+                        &callback_struct);
+
+      ControllerHeating_set_operation_modes_request_callback_t heatingOperationModesCallback = DSBusInterface::handleHeatingControllerOperationModesCallback;
+      callback_struct.function = (void*)heatingOperationModesCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        CONTROLLER_HEATING, CONTROLLER_HEATING_SET_OPERATION_MODES,
+                        &callback_struct);
+
+      ControllerHeating_set_state_request_callback_t heatingStateCallback = DSBusInterface::handleHeatingControllerStateCallback;
+      callback_struct.function = (void*)heatingStateCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        CONTROLLER_HEATING, CONTROLLER_HEATING_SET_STATE,
+                        &callback_struct);
+
+      EventHeatingControllerState_event_callback_t heatingStateEventCallback = DSBusInterface::handleHeatingControllerStateEventCallback;
+      callback_struct.function = (void*)heatingStateEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_HEATING_CONTROLLER_STATE, 0,
+                        &callback_struct);
+
       dSMProperties_set_flags_request_callback_t dSMSetFlagsCallback = DSBusInterface::handleDsmSetFlagsCallback;
       callback_struct.function = (void*)dSMSetFlagsCallback;
       callback_struct.arg = this;
@@ -902,6 +930,140 @@ namespace dss {
     }
   }
 
+  void DSBusInterface::handleHeatingControllerConfig(uint8_t _errorCode,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId, uint8_t _ControllerMode,
+      uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
+      uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
+      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue) {
+    loginFromCallback();
+
+    boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
+    spec->ControllerMode = _ControllerMode;
+    spec->Kp = _Kp;
+    spec->Ts = _Ts,
+    spec->Ti = _Ti;
+    spec->Kd = _Kd;
+    spec->Imin = _Imin;
+    spec->Imax = _Imax;
+    spec->Ymin = _Ymin;
+    spec->Ymax = _Ymax;
+    spec->AntiWindUp = _AntiWindUp;
+    spec->KeepFloorWarm = _KeepFloorWarm;
+    spec->SourceZoneId = _SourceZoneId;
+    spec->Offset = _Offset;
+    spec->EmergencyValue = _EmergencyValue;
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, _destinationID);
+    pEvent->addParameter(_ZoneId);
+    pEvent->setSingleObjectParameter(spec);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleHeatingControllerConfig
+
+  void DSBusInterface::handleHeatingControllerConfigCallback(uint8_t _errorCode, void *_userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId, uint8_t _ControllerMode,
+      uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
+      uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
+      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleHeatingControllerConfig(_errorCode, _sourceID, _destinationID, _ZoneId,
+              _ControllerMode, _Kp, _Ts, _Ti, _Kd, _Imin, _Imax, _Ymin, _Ymax,
+              _AntiWindUp, _KeepFloorWarm, _SourceZoneId, _Offset, _EmergencyValue);
+    }
+  } // handleHeatingControllerConfigCallback
+
+  void DSBusInterface::handleHeatingControllerOperationModes(uint8_t _errorCode,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId,
+      uint16_t _OperationMode0, uint16_t _OperationMode1, uint16_t _OperationMode2, uint16_t _OperationMode3,
+      uint16_t _OperationMode4, uint16_t _OperationMode5, uint16_t _OperationMode6, uint16_t _OperationMode7,
+      uint16_t _OperationMode8, uint16_t _OperationMode9, uint16_t _OperationModeA, uint16_t _OperationModeB,
+      uint16_t _OperationModeC, uint16_t _OperationModeD, uint16_t _OperationModeE, uint16_t _OperationModeF) {
+    loginFromCallback();
+
+    boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec(new ZoneHeatingOperationModeSpec_t);
+    spec->OpMode0 = _OperationMode0;
+    spec->OpMode1 = _OperationMode1;
+    spec->OpMode2 = _OperationMode2;
+    spec->OpMode3 = _OperationMode3;
+    spec->OpMode4 = _OperationMode4;
+    spec->OpMode5 = _OperationMode5;
+    spec->OpMode6 = _OperationMode6;
+    spec->OpMode7 = _OperationMode7;
+    spec->OpMode8 = _OperationMode8;
+    spec->OpMode9 = _OperationMode9;
+    spec->OpModeA = _OperationModeA;
+    spec->OpModeB = _OperationModeB;
+    spec->OpModeC = _OperationModeC;
+    spec->OpModeD = _OperationModeD;
+    spec->OpModeE = _OperationModeE;
+    spec->OpModeF = _OperationModeF;
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerValues, _destinationID);
+    pEvent->addParameter(_ZoneId);
+    pEvent->setSingleObjectParameter(spec);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleHeatingControllerOperationModes
+
+  void DSBusInterface::handleHeatingControllerOperationModesCallback(uint8_t _errorCode, void *_userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId,
+      uint16_t _OperationMode0, uint16_t _OperationMode1, uint16_t _OperationMode2, uint16_t _OperationMode3,
+      uint16_t _OperationMode4, uint16_t _OperationMode5, uint16_t _OperationMode6, uint16_t _OperationMode7,
+      uint16_t _OperationMode8, uint16_t _OperationMode9, uint16_t _OperationModeA, uint16_t _OperationModeB,
+      uint16_t _OperationModeC, uint16_t _OperationModeD, uint16_t _OperationModeE, uint16_t _OperationModeF) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleHeatingControllerOperationModes(_errorCode, _sourceID, _destinationID, _ZoneId,
+              _OperationMode0, _OperationMode1, _OperationMode2, _OperationMode3,
+              _OperationMode4, _OperationMode5, _OperationMode6, _OperationMode7,
+              _OperationMode8, _OperationMode9, _OperationModeA, _OperationModeB,
+              _OperationModeC, _OperationModeD, _OperationModeE, _OperationModeF);
+    }
+  } // handleHeatingControllerOperationModesCallback
+
+  void DSBusInterface::handleHeatingControllerState(uint8_t _errorCode,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId, uint8_t _State) {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _destinationID);
+    pEvent->addParameter(_ZoneId);
+    pEvent->addParameter(_State);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleHeatingControllerState
+
+  void DSBusInterface::handleHeatingControllerStateCallback(uint8_t _errorCode, void *_userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId, uint8_t _State) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleHeatingControllerState(_errorCode, _sourceID, _destinationID,
+              _ZoneId, _State);
+    }
+  } // handleHeatingControllerStateCallback
+
+  void DSBusInterface::handleHeatingControllerStateEvent(uint8_t _errorCode,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId, uint8_t _State) {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _sourceID);
+    pEvent->addParameter(_ZoneId);
+    pEvent->addParameter(_State);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleHeatingControllerStateEvent
+
+  void DSBusInterface::handleHeatingControllerStateEventCallback(uint8_t _errorCode, void *_userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _ZoneId, uint8_t _State) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleHeatingControllerStateEvent(_errorCode, _sourceID, _destinationID,
+              _ZoneId, _State);
+    }
+  } // handleHeatingControllerStateEventCallback
+
 
   DeviceBusInterface* DSBusInterface::getDeviceBusInterface() {
     return m_pDeviceBusInterface.get();
@@ -938,5 +1100,16 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleDsmSetFlags(_destinationID,
                                                         std::bitset<8>(_flags));
   } // handleDsmSetNameCallback
+
+  void DSBusInterface::protobufMessageRequest(dsuid_t _dSMdSUID,
+                                              uint16_t _request_size,
+                                              const uint8_t *_request,
+                                              uint16_t *_response_size,
+                                              uint8_t *_response) {
+    int ret = UserProtobufMessageRequest(m_dsmApiHandle, _dSMdSUID,
+                                         _request_size, _request,
+                                         _response_size, _response);
+    checkResultCode(ret);
+  }
 
 } // namespace dss

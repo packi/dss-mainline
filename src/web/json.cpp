@@ -118,6 +118,11 @@ namespace dss {
     addElement(_name, elem);
   } // addProperty
 
+  void JSONObject::addProperty(const std::string& _name, const long int _value) {
+    boost::shared_ptr<JSONValue<long int> > elem(new JSONValue<long int>(_value));
+    addElement(_name, elem);
+  } // addProperty
+
   void JSONObject::addProperty(const std::string& _name, const unsigned long long _value) {
     boost::shared_ptr<JSONValue<unsigned long long> > elem(new JSONValue<unsigned long long>(_value));
     addElement(_name, elem);

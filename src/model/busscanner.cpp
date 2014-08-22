@@ -115,6 +115,21 @@ namespace dss {
       }
       _dsMeter->setIsInitialized(true);
       m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } else {
+      std::vector<int> zoneIDs;
+      try {
+        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+      } catch(BusApiError& e) {
+        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
+        return false;
+      }
+      foreach(int zoneID, zoneIDs) {
+        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+        zone->addToDSMeter(_dsMeter);
+        zone->setIsPresent(true);
+        zone->setIsConnected(true);
+        scanDevicesOfZoneQuick(_dsMeter, zone);
+      }
     }
 
     _dsMeter->setDatamodelHash(hash.Hash);
@@ -131,8 +146,25 @@ namespace dss {
     return true;
   } // scanDSMeter
 
+  void BusScanner::scanDevicesOfZoneQuick(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
+    std::vector<DeviceSpec_t> devices;
+    try {
+      if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
+        log("scanZone: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
+      } else {
+        devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID(), false);
+        foreach(DeviceSpec_t& spec, devices) {
+          initializeDeviceFromSpecQuick(_dsMeter, spec);
+        }
+      }
+    } catch(BusApiError& e) {
+      log("scanZone: Error getDevicesInZone: " + std::string(e.what()), lsWarning);
+    }
+  } // scanDevicesOfZone
+
   bool BusScanner::scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     std::vector<DeviceSpec_t> devices;
+    bool result = true;
     try {
       if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
         log("scanZone: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
@@ -144,9 +176,22 @@ namespace dss {
       }
     } catch(BusApiError& e) {
       log("scanZone: Error getDevicesInZone: " + std::string(e.what()), lsWarning);
+      result = false;
     }
 
-    return (scanGroupsOfZone(_dsMeter, _zone) && scanStatusOfZone(_dsMeter, _zone));
+    try {
+      result = result && scanGroupsOfZone(_dsMeter, _zone);
+    } catch(BusApiError& e) {
+      log("scanZone: Error scanGroupsOfZone: " + std::string(e.what()), lsWarning);
+    }
+
+    try {
+      result = result && scanStatusOfZone(_dsMeter, _zone);
+    } catch(BusApiError& e) {
+      log("scanZone: Error scanStatusOfZone: " + std::string(e.what()), lsWarning);
+    }
+
+    return result;
   } // scanZone
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
@@ -309,6 +354,31 @@ namespace dss {
     m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
   } // scanDeviceOnBus
+
+  bool BusScanner::initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, DeviceSpec_t& _spec) {
+    log("UpdateDevice: DSID:        " + dsuid2str(_spec.DSID));
+    log("Active: " + intToString(_spec.ActiveState));
+
+    boost::shared_ptr<Device> dev;
+    try {
+      dev = m_Apartment.getDeviceByDSID(_spec.DSID);
+      if ((_spec.ActiveState == 0) && dev->isPresent()) {
+        // ignore this device if there is already an active one with this dSID
+        return false;
+      }
+    } catch(ItemNotFoundException&) {
+      return false;
+    }
+
+    DeviceReference devRef(dev, &m_Apartment);
+
+    dev->setIsPresent(_spec.ActiveState == 1);
+    dev->setIsConnected(true);
+    dev->setIsValid(true);
+
+    m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return true;
+  } // initializeDeviceFromSpecQuick
 
   void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
@@ -493,6 +563,31 @@ namespace dss {
     // light group will automatically generate the appropriate state
     if ((pGroup) && (pGroup->getState() == State_Unknown)) {
       pGroup->setOnState(coUnknown, states.test(GroupIDYellow-1));
+    }
+
+    unsigned char idList[] = { SensorIDTemperatureIndoors,
+        SensorIDHumidityIndoors,
+        SensorIDCO2Concentration,
+        SensorIDBrightnessIndoors };
+
+    for (uint8_t i=0; i < sizeof(idList)/sizeof(unsigned char); i++) {
+      dsuid_t sensorDevice;
+      try {
+        sensorDevice = m_Interface.getZoneSensor(_dsMeter->getDSID(), _zone->getID(), idList[i]);
+        DeviceReference devRef = _zone->getDevices().getByDSID(sensorDevice);
+        boost::shared_ptr<Device> pDev = devRef.getDevice();
+        _zone->setSensor(pDev, SensorIDTemperatureIndoors);
+      } catch (ItemNotFoundException& e) {
+        log("Sensor with id " + dsuid2str(sensorDevice) +
+            " is not present but assigned as zone reference on the dSM " +
+            dsuid2str(_dsMeter->getDSID()), lsWarning);
+      } catch (BusApiError& e) {
+        // not fatal, catch exception here and avoid endless readout
+        break;
+      } catch (std::runtime_error& e) {
+        log("Sensor with id " + dsuid2str(sensorDevice) +
+            " cannot be assigned as zone reference: " + e.what(), lsWarning);
+      }
     }
 
     return true;

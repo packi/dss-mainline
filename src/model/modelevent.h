@@ -25,6 +25,7 @@
 #define MODELEVENT_H
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include "src/ds485types.h"
 
@@ -59,10 +60,14 @@ namespace dss {
                     etDeviceBinaryStateEvent, /**< A device has sent a new binary input state */
                     etDeviceEANReady, /** OEM data has finished reading out from device */
                     etDeviceOEMDataReady, /** OEM data has been retrieved from webservice */
+                    etControllerState, /** State of the controlling device or algorithm changed */
+                    etControllerConfig, /** Configuration of the controlling device or algorithm changed */
+                    etControllerValues, /** Operation Values of the controlling device or algorithm changed */
                  } EventType;
   private:
     EventType m_EventType;
     std::vector<int> m_Parameter;
+    boost::shared_ptr<void> m_SingleObjectParameter;
     std::string m_SingleStringParameter; // won't add a vector/list until
                                          // we really need more string
                                          // parameters which is not yet the
@@ -87,6 +92,9 @@ namespace dss {
 
     void setSingleStringParameter(const std::string _param) { m_SingleStringParameter = _param; }
     std::string getSingleStringParameter() const { return m_SingleStringParameter; }
+
+    void setSingleObjectParameter(const boost::shared_ptr<void> _param) { m_SingleObjectParameter = _param; }
+    boost::shared_ptr<void> getSingleObjectParameter() const { return m_SingleObjectParameter; }
   }; // ModelEvent
 
   // TODO: use boost::any for values and remove this class

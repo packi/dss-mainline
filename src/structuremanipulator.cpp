@@ -614,6 +614,17 @@ namespace dss {
     }
   } // deviceRemoveFromGroup
 
+  void StructureManipulator::deviceRemoveFromGroups(boost::shared_ptr<Device> device) {
+    boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
+    for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
+      if (!device->getGroupBitmask().test(g - 1)) {
+        continue;
+      }
+      boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
+      deviceRemoveFromGroup(device, pGroup);
+    }
+  } // deviceRemoveFromGroups
+
   bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
                                            boost::shared_ptr<Group> newGroup) {
     bool modified = false;
@@ -638,5 +649,27 @@ namespace dss {
     }
 
     return modified;
+  }
+
+  void StructureManipulator::setZoneHeatingConfig(boost::shared_ptr<Zone> _zone,
+                                                  const dsuid_t& _ctrlDSUID,
+                                                  const ZoneHeatingConfigSpec_t _spec) {
+    // TODO: synchronize different and disconnected dSM's
+
+    _zone->setHeatingControlMode(_spec.ControllerMode,_spec.Offset, _spec.SourceZoneId, _ctrlDSUID);
+    m_Interface.setZoneHeatingConfig(_ctrlDSUID, _zone->getID(), _spec);
+  } // setZoneHeatingConfig
+
+  void StructureManipulator::setZoneSensor(boost::shared_ptr<Zone> _zone,
+                                           const uint8_t _sensorType,
+                                           boost::shared_ptr<Device> _dev) {
+    _zone->setSensor(_dev, _sensorType);
+    m_Interface.setZoneSensor(_zone->getID(), _sensorType, _dev->getDSID());
+  }
+
+  void StructureManipulator::resetZoneSensor(boost::shared_ptr<Zone> _zone,
+                                             const uint8_t _sensorType) {
+    _zone->resetSensor(_sensorType);
+    m_Interface.resetZoneSensor(_zone->getID(), _sensorType);
   }
 } // namespace dss

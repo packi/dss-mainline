@@ -563,16 +563,20 @@ namespace dss {
         return success(resultObj);
       }
 
+      StructureManipulator manipulator(*m_pStructureBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       m_Apartment);
+
       if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
         if (m_pStructureBusInterface != NULL) {
-          StructureManipulator manipulator(*m_pStructureBusInterface,
-                                           *m_pStructureQueryBusInterface,
-                                           m_Apartment);
           boost::shared_ptr<Zone> zone = m_Apartment.getZone(
                                                         pDevice->getZoneID());
           manipulator.addDeviceToZone(pPartnerDevice, zone);
         }
       }
+
+      // #3450 - remove slave devices from clusters
+      manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
       if (features.syncButtonID == true) {
         if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
@@ -644,15 +648,67 @@ namespace dss {
       return success(resultObj);
 
     } else if(_request.getMethod() == "getOutputValue") {
-      int offset = strToIntDef(_request.getParameter("offset"), -1);
-      if((offset  < 0) || (offset > 255)) {
-        return failure("Invalid or missing parameter 'offset'");
+      int value;
+      if (_request.hasParameter("type")) {
+        std::string type = _request.getParameter("type");
+
+        // Supported output states for the BL-KM200
+        if ((pDevice->getProductID() == ProductID_KM_200) &&
+            (pDevice->getDeviceClass() == DEVICE_CLASS_BL)) {
+          if (type == "pwmPriorityMode") {
+            value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Valve_PwmPriorityMode);
+          } else if (type == "pwmValue") {
+            value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
+          } else {
+            return failure("Unsupported type parameter for this device");
+          }
+        }
+        // Supported output states for the GR-KL200 und 210
+        else if (((pDevice->getProductID() == ProductID_KL_200) ||
+            (pDevice->getProductID() == ProductID_KL_210)) &&
+            (pDevice->getDeviceClass() == DEVICE_CLASS_GR)) {
+          if (type == "position") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);
+          } if (type == "positionCurrent") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
+          } else {
+            return failure("Unsupported type parameter for this device");
+          }
+        }
+        // Supported output states for the GR-KL220
+        else if ((pDevice->getProductID() == ProductID_KL_220) &&
+            (pDevice->getDeviceClass() == DEVICE_CLASS_GR)) {
+          if (type == "position") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);
+          } else if (type == "angle") {
+            value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Shade_PositionAngle);
+          } if (type == "positionCurrent") {
+            value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
+          } else {
+            return failure("Unsupported type parameter for this device");
+          }
+        }
+        else {
+          return failure("Unsupported device for a type parameter");
+        }
+
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("value", value);
+        return success(resultObj);
+
+      } else {
+        int offset = strToIntDef(_request.getParameter("offset"), -1);
+        if ((offset  < 0) || (offset > 255)) {
+          return failure("Invalid or missing parameter 'type' or 'offset'");
+        }
+        int value = pDevice->getDeviceOutputValue(offset);
+
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("offset", offset);
+        resultObj->addProperty("value", value);
+        return success(resultObj);
       }
-      int value = pDevice->getDeviceOutputValue(offset);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("offset", offset);
-      resultObj->addProperty("value", value);
-      return success(resultObj);
+
     } else if(_request.getMethod() == "setOutputValue") {
       int offset = strToIntDef(_request.getParameter("offset"), -1);
       if((offset  < 0) || (offset > 255)) {
@@ -827,15 +883,15 @@ namespace dss {
       }
       DeviceLedSpec_t config;
       pDevice->getDeviceLedMode(id, config);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("colorSelect"))
         config.colorSelect = strToIntDef(_request.getParameter("colorSelect"), config.colorSelect);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("modeSelect"))
         config.modeSelect = strToIntDef(_request.getParameter("modeSelect"), config.modeSelect);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("dimMode"))
         config.dimMode = strToIntDef(_request.getParameter("dimMode"), config.dimMode);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("rgbMode"))
         config.rgbMode = strToIntDef(_request.getParameter("rgbMode"), config.rgbMode);
-      if(_request.hasParameter(""))
+      if (_request.hasParameter("groupColorMode"))
         config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), config.groupColorMode);
       pDevice->setDeviceLedMode(id, config);
       return success();
@@ -1043,23 +1099,23 @@ namespace dss {
           if ((buttonNumber < 0) || (buttonNumber > 0xF)) {
             return failure("Invalid or missing parameter 'buttonNumber'");
           }
-	  event.buttonNumber = buttonNumber;
+          event.buttonNumber = buttonNumber;
           int clickType = strToIntDef(_request.getParameter("clickType"), -1);
           if ((clickType < 0) || (clickType > 0xF)) {
             return failure("Invalid or missing parameter 'clickType'");
           }
-	  event.clickType = clickType;
+          event.clickType = clickType;
         } else {
           int sceneDeviceMode = strToIntDef(_request.getParameter("sceneDeviceMode"), -1);
           if ((sceneDeviceMode < 0) || (sceneDeviceMode > 0x3)) {
             return failure("Invalid or missing parameter 'sceneDeviceMode'");
           }
-	  event.sceneDeviceMode = sceneDeviceMode;
+          event.sceneDeviceMode = sceneDeviceMode;
           int sceneID = strToIntDef(_request.getParameter("sceneID"), -1);
           if ((sceneID < 0) || (sceneID > 0x7F)) {
             return failure("Invalid or missing parameter 'sceneID'");
           }
-	  event.sceneID = sceneID;
+          event.sceneID = sceneID;
         }
       } else {
         event.buttonNumber = 0;
@@ -1245,10 +1301,6 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
 
       unsigned int protTimer;
@@ -1284,14 +1336,10 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
+
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("valveProtectionTimer",
-                             conf.getValveProtectionTimer());
+      resultObj->addProperty("valveProtectionTimer", conf.getValveProtectionTimer());
       resultObj->addProperty("emergencyValue", conf.getEmergencySetPoint());
       resultObj->addProperty("emergencyTimer", conf.getEmergencyTimer());
       return success(resultObj);
@@ -1303,10 +1351,6 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
-      }
-
       DeviceBank3_BL conf(device);
 
       unsigned pwmPeriod;
@@ -1341,10 +1385,6 @@ namespace dss {
         }
         conf.setPwmMaxY(value);
       };
-      unsigned int config;
-      if (_request.getParameter("pwmConfig", config)) {
-        conf.setPwmMaxY(value);
-      };
       int offset;
       if (_request.getParameter("pwmOffset", offset)) {
         if (offset < -100 || offset > 100) {
@@ -1352,7 +1392,6 @@ namespace dss {
         }
         conf.setPwmOffset(offset);
       };
-
       return success();
 
     } else if (_request.getMethod() == "getValvePwmMode") {
@@ -1362,19 +1401,67 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return failure("No device for given dsuid");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_BL) {
-        return failure("No heating device");
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      uint16_t value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
+      resultObj->addProperty("pwmPeriod", value);
+      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
+      resultObj->addProperty("pwmMinX", value & 0xff);
+      resultObj->addProperty("pwmMaxX", (value >> 8) & 0xff);
+      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
+      resultObj->addProperty("pwmMinY", value & 0xff);
+      resultObj->addProperty("pwmMaxY", (value >> 8) & 0xff);
+      value = device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+      resultObj->addProperty("pwmOffset", value);
+      return success(resultObj);
+
+    } else if (_request.getMethod() == "getValvePwmState") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
       }
 
-      DeviceBank3_BL conf(device);
+      uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("pwmPeriod", conf.getPwmPeriod());
-      resultObj->addProperty("pwmMinX", conf.getPwmMinX());
-      resultObj->addProperty("pwmMaxX", conf.getPwmMaxX());
-      resultObj->addProperty("pwmMinY", conf.getPwmMinY());
-      resultObj->addProperty("pwmMaxY", conf.getPwmMaxY());
-      resultObj->addProperty("pwmConfig", conf.getPwmConfig());
-      resultObj->addProperty("pwmOffset", conf.getPwmOffset());
+      resultObj->addProperty("pwmValue", value & 0xff);
+      resultObj->addProperty("pwmPriorityMode", (value >> 8) & 0xff);
+      return success(resultObj);
+
+    } else if (_request.getMethod() == "setValveControlMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      DeviceValveControlSpec_t config;
+      device->getDeviceValveControl(config);
+
+      _request.getParameter("ctrlClipMinZero", config.ctrlClipMinZero);
+      _request.getParameter("ctrlClipMinLower", config.ctrlClipMinLower);
+      _request.getParameter("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
+      _request.getParameter("ctrlNONC", config.ctrlNONC);
+
+      device->setDeviceValveControl(config);
+      return success();
+
+    } else if (_request.getMethod() == "getValveControlMode") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      DeviceValveControlSpec_t config;
+      device->getDeviceValveControl(config);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("ctrlClipMinZero", config.ctrlClipMinZero);
+      resultObj->addProperty("ctrlClipMinLower", config.ctrlClipMinLower);
+      resultObj->addProperty("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
+      resultObj->addProperty("ctrlNONC", config.ctrlNONC);
       return success(resultObj);
 
     } else {

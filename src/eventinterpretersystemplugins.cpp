@@ -996,7 +996,8 @@ namespace dss {
   }
 
   bool SystemTrigger::checkSceneZone(PropertyNodePtr _triggerProp) {
-    if (!((m_evtName == "callScene") || (m_evtName == "callSceneBus"))) {
+    if (!((m_evtName == EventName::CallScene) ||
+          (m_evtName == EventName::CallSceneBus))) {
       return false;
     }
 
@@ -1015,44 +1016,44 @@ namespace dss {
       forced = (sForced == "true");
     }
 
-    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
-    if (triggerZone == NULL) {
-      return false;
-    }
-
     int iZone;
     try {
-      iZone = triggerZone->getIntegerValue();
-      if (iZone != m_evtSrcZone) {
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+      if (triggerZone) {
+        iZone = triggerZone->getIntegerValue();
+      } else {
+        return false;
+      }
+      if (iZone >= 0 && iZone != m_evtSrcZone) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
-      return false;
-    }
-
-    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
-    if (triggerGroup == NULL) {
       return false;
     }
 
     int iGroup;
     try {
-      iGroup = triggerGroup->getIntegerValue();
-      if (iGroup != m_evtSrcGroup) {
+      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
+      if (triggerGroup) {
+        iGroup = triggerGroup->getIntegerValue();
+      } else {
+        return false;
+      }
+      if (iGroup >= 0 && iGroup != m_evtSrcGroup) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
-    if (triggerScene == NULL) {
-      return false;
-    }
-
     int iScene;
     try {
-      iScene = triggerScene->getIntegerValue();
+      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
+      if (triggerScene) {
+        iScene = triggerScene->getIntegerValue();
+      } else {
+        return false;
+      }
       if (iScene != scene) {
           return false;
       }
@@ -1085,7 +1086,7 @@ namespace dss {
       }
     }
 
-    std::string bus = ((m_evtName == "callSceneBus") ? "Bus" : "");
+    std::string bus = ((m_evtName == EventName::CallSceneBus) ? "Bus" : "");
     Logger::getInstance()->log("SystemTrigger::"
             "checkSceneZone: *** Match: CallScene" +
             bus +
@@ -1096,7 +1097,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkUndoSceneZone(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "undoScene") {
+    if (m_evtName != EventName::UndoScene) {
       return false;
     }
 
@@ -1115,40 +1116,39 @@ namespace dss {
       return false;
     }
 
-    int iZone;
+    int iZone = -1;
     try {
-      iZone = triggerZone->getIntegerValue();
-      if (iZone != m_evtSrcZone) {
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+      if (triggerZone) {
+        iZone = triggerZone->getIntegerValue();
+      }
+      if (iZone >= 0 && iZone != m_evtSrcZone) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
-    if (triggerGroup == NULL) {
-      return false;
-    }
-
-    int iGroup;
+    int iGroup = -1;
     try {
-      iGroup = triggerGroup->getIntegerValue();
-      if (iGroup != m_evtSrcGroup) {
+      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
+      if (triggerGroup) {
+        iGroup = triggerGroup->getIntegerValue();
+      }
+      if (iGroup >= 0 && iGroup != m_evtSrcGroup) {
         return false;
       }
     } catch (PropertyTypeMismatch& e){
       return false;
     }
 
-    PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
-    if (triggerScene == NULL) {
-      return false;
-    }
-
-    int iScene;
+    int iScene = -1;
     try {
-      iScene = triggerScene->getIntegerValue();
-      if (iScene != scene) {
+      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
+      if (triggerScene) {
+        iScene = triggerScene->getIntegerValue();
+      }
+      if (iScene >= 0 && iScene != scene) {
           return false;
       }
     } catch (PropertyTypeMismatch& e){
@@ -1174,7 +1174,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkDeviceScene(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "callScene") {
+    if (m_evtName != EventName::CallScene) {
       return false;
     }
 
@@ -1410,7 +1410,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkState(PropertyNodePtr _triggerProp) {
-    if ((m_evtName != "addonStateChange") && (m_evtName != "stateChange")) {
+    if (m_evtName != "addonStateChange" && m_evtName != EventName::StateChange) {
       return false;
     }
 
@@ -1501,7 +1501,7 @@ namespace dss {
 
       std::string triggerValue = triggerType->getAsString();
 
-      if (m_evtName == "callScene") {
+      if (m_evtName == EventName::CallScene) {
         if (triggerValue == "zone-scene") {
           if (checkSceneZone(triggerProp)) {
             return true;
@@ -1512,14 +1512,14 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "callSceneBus") {
+      } else if (m_evtName == EventName::CallSceneBus) {
         if (triggerValue == "bus-zone-scene") {
           if (checkSceneZone(triggerProp)) {
             return true;
           }
         }
 
-      } else if (m_evtName == "undoScene") {
+      } else if (m_evtName == EventName::UndoScene) {
         if (triggerValue == "undo-zone-scene") {
           if (checkUndoSceneZone(triggerProp)) {
             return true;
@@ -1554,7 +1554,7 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "stateChange") {
+      } else if (m_evtName == EventName::StateChange) {
         if (triggerValue == "state-change") {
           if (checkState(triggerProp)) {
             return true;
@@ -1634,21 +1634,32 @@ namespace dss {
     if (triggerProperty == NULL) {
       return;
     }
-    for (int i = 0; i < triggerProperty->getChildCount(); i++) {
-      PropertyNodePtr triggerNode = triggerProperty->getChild(i);
-      if (triggerNode == NULL) {
-        continue;
-      }
-      PropertyNodePtr triggerPathNode =
-          triggerNode->getPropertyByName("triggerPath");
-      if (triggerPathNode == NULL) {
-        continue;
-      }
-      std::string sTriggerPath = triggerPathNode->getStringValue();
-      if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
-        relayTrigger(triggerNode);
-      }
-    } // for loop
+
+    int i;
+    PropertyNodePtr triggerPathNode;
+
+    try {
+      for (i = 0; i < triggerProperty->getChildCount(); i++) {
+        PropertyNodePtr triggerNode = triggerProperty->getChild(i);
+        if (triggerNode == NULL) {
+          continue;
+        }
+        triggerPathNode = triggerNode->getPropertyByName("triggerPath");
+        if (triggerPathNode == NULL) {
+          continue;
+        }
+        std::string sTriggerPath = triggerPathNode->getStringValue();
+        if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
+          relayTrigger(triggerNode);
+        }
+      } // for loop
+    } catch (PropertyTypeMismatch& e) {
+      Logger::getInstance()->log("SystemTrigger::run: error parsing trigger at " +
+          triggerPathNode->getDisplayName(), lsInfo);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("SystemTrigger::run: runtime error at " +
+          triggerPathNode->getDisplayName(), lsInfo);
+    }
   }
 
   bool SystemEvent::setup(Event& _event) {
@@ -2091,12 +2102,9 @@ namespace dss {
       sensorValueFloat = m_properties.get("sensorValueFloat");
     }
 
-    std::string typeName;
-    SceneHelper::sensorName(sensorType, typeName);
-
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";SensorValue;" +
-        typeName + " [" + intToString(sensorType) + '/' + sensorIndex + "];" +
+    _logger->logln(";SensorValue;" + SceneHelper::sensorName(sensorType) +
+        " [" + intToString(sensorType) + '/' + sensorIndex + "];" +
         sensorValueFloat + " [" + sensorValue + "];" +
         zoneName + ";;;" + devName + ";");
   }
@@ -2111,9 +2119,7 @@ namespace dss {
     std::string sensorValue = m_properties.get("sensorValue");
     std::string sensorValueFloat = m_properties.get("sensorValueFloat");
 
-    std::string typeName;
-    SceneHelper::sensorName(sensorType, typeName);
-
+    std::string typeName = SceneHelper::sensorName(sensorType);
     std::string origName = getDeviceName(m_properties.get("originDSID"));
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
@@ -2437,11 +2443,11 @@ namespace dss {
 
     if (m_evtName == "model_ready") {
       model_ready(logger);
-    } else if (m_evtName == "callScene") {
+    } else if (m_evtName == EventName::CallScene) {
       callScene(logger);
     } else if (m_evtName == "blink") {
       blink(logger);
-    } else if (m_evtName == "undoScene") {
+    } else if (m_evtName == EventName::UndoScene) {
       undoScene(logger);
     } else if (m_evtName == "buttonClick") {
       buttonClick(logger);
@@ -2449,9 +2455,9 @@ namespace dss {
       deviceBinaryInputEvent(logger);
     } else if (m_evtName == "deviceSensorEvent") {
       deviceSensorEvent(logger);
-    } else if (m_evtName == "stateChange") {
+    } else if (m_evtName == EventName::StateChange) {
       stateChange(logger);
-    } else if (m_evtName == "deviceSensorValue") {
+    } else if (m_evtName == EventName::DeviceSensorValue) {
       logger.reset(new ScriptLogger(
           DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
       if (logger == NULL) {
@@ -2459,7 +2465,7 @@ namespace dss {
         return;
       }
       deviceSensorValue(logger);
-    } else if (m_evtName == "zoneSensorValue") {
+    } else if (m_evtName == EventName::ZoneSensorValue) {
       logger.reset(new ScriptLogger(
           DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
       if (logger == NULL) {
@@ -3240,17 +3246,17 @@ namespace dss {
     }
 
     try {
-      if (m_evtName == "running") {
+      if (m_evtName == EventName::Running) {
         bootstrap();
       } else if (m_evtName == "model_ready") {
         startup();
-      } else if (m_evtName == "callScene") {
+      } else if (m_evtName == EventName::CallScene) {
         if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
           callscene();
         }
-      } else if (m_evtName == "undoScene") {
+      } else if (m_evtName == EventName::UndoScene) {
         undoscene();
-      } else if (m_evtName == "stateChange") {
+      } else if (m_evtName == EventName::StateChange) {
         if (m_evtRaiseLocation) {
 
         }
@@ -3276,7 +3282,7 @@ namespace dss {
   void EventInterpreterPluginSystemZoneSensorForward::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
-    subscription.reset(new EventSubscription("deviceSensorValue",
+    subscription.reset(new EventSubscription(EventName::DeviceSensorValue,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -3314,7 +3320,7 @@ namespace dss {
       return;
     }
 
-    if (m_evtName == "deviceSensorValue") {
+    if (m_evtName == EventName::DeviceSensorValue) {
       deviceSensorValue();
     }
   }
