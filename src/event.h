@@ -130,6 +130,7 @@ namespace dss {
     void setTime(const std::string& _value) { m_Time = _value; m_TimeSet = true; }
 
     boost::shared_ptr<const Group> getRaisedAtGroup(Apartment& _apartment) const;
+    boost::shared_ptr<const Group> getRaisedAtGroup() const;
     boost::shared_ptr<const DeviceReference> getRaisedAtDevice() const { return m_RaisedAtDevice; }
     boost::shared_ptr<const State> getRaisedAtState() const { return m_RaisedAtState; }
     EventRaiseLocation getRaiseLocation() { return m_RaiseLocation; }

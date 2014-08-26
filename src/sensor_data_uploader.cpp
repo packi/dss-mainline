@@ -31,6 +31,7 @@
 #include "model/devicereference.h"
 #include "model/modelmaintenance.h"
 #include "model/scenehelper.h"
+#include "model/group.h"
 #include "model/zone.h"
 #include "webservice_api.h"
 #include "web/json.h"
@@ -195,13 +196,16 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
 
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
-      std::string gID = _event.getPropertyByName("groupID");
-      if (gID.empty() || (strToInt(gID) != GroupIDControlTemperature)) {
-        // ignore
-        return;
+      if (_event.getRaiseLocation() == erlGroup) {
+        boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
+        std::string gID = _event.getPropertyByName("groupID");
+        if (pGroup->getID() != GroupIDControlTemperature) {
+          // ignore
+          return;
+        }
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr());
       }
-      log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
-      m_log->append(_event.getptr());
 
     } else if (_event.getName() == EventName::StateChange) {
       std::string sName = _event.getPropertyByName("StateName");
@@ -252,11 +256,10 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
   std::string propValue;
 
   try {
-    if (event->getName() == EventName::DeviceSensorValue) {
+    if ((event->getName() == EventName::DeviceSensorValue) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
       appendCommon(obj, evtGroup_Metering, evtCategory_DeviceSensorValue);
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorDescription", SceneHelper::sensorName(sensorType));
       obj.addProperty("SensorType", sensorType);
       obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
@@ -264,28 +267,27 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       if (!propValue.empty()) {
         obj.addProperty("SensorIndex", propValue);
       }
-    } else if (event->getName() == EventName::ZoneSensorValue) {
+    } else if ((event->getName() == EventName::ZoneSensorValue) && (event->getRaiseLocation() == erlGroup)) {
+      boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       appendCommon(obj, evtGroup_Metering, evtCategory_ZoneSensorValue);
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorDescription", SceneHelper::sensorName(sensorType));
       obj.addProperty("SensorType", sensorType);
       obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
-      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
-      propValue = event->getPropertyByName("GroupID");
-      if (!propValue.empty()) {
-        obj.addProperty("GroupID", strToInt(propValue));
-      }
-    } else if (event->getName() == EventName::CallScene) {
+      obj.addProperty("ZoneID",  pGroup->getZoneID());
+      obj.addProperty("GroupID", pGroup->getID());
+    } else if ((event->getName() == EventName::CallScene) && (event->getRaiseLocation() == erlGroup)) {
+      boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupCallScene);
-      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
-      obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
+      obj.addProperty("ZoneID",  pGroup->getZoneID());
+      obj.addProperty("GroupID", pGroup->getID());
       obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
       obj.addProperty("Force", event->hasPropertySet("forced"));
       obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
-    } else if (event->getName() == EventName::UndoScene) {
+    } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
+      boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupUndoScene);
-      obj.addProperty("GroupID", strToInt(event->getPropertyByName("groupID")));
-      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
+      obj.addProperty("ZoneID",  pGroup->getZoneID());
+      obj.addProperty("GroupID", pGroup->getID());
       obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
       obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::StateChange) {
@@ -308,19 +310,18 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("StateName", pState->getName());
       obj.addProperty("StateValue", pState->toString());
       obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
-    } else if (event->getName() == EventName::DeviceStatus) {
+    } else if ((event->getName() == EventName::DeviceStatus) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
       appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
       obj.addProperty("StatusIndex", event->getPropertyByName("statusIndex"));
       obj.addProperty("StatusValue", event->getPropertyByName("statusValue"));
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-    } else if (event->getName() == EventName::DeviceInvalidSensor) {
+    } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
       appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
       obj.addProperty("EventDescription", "InvalidSensorData");
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorDescription", SceneHelper::sensorName(sensorType));
       obj.addProperty("SensorType", sensorType);
       propValue = event->getPropertyByName("sensorIndex");
       if (!propValue.empty()) {
