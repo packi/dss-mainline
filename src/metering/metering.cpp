@@ -376,6 +376,9 @@ static const long WEEK_IN_SECS = 604800;
     for (std::vector<boost::shared_ptr<DSMeter> >::iterator iter = _meters.begin();
          iter < _meters.end();
          ++iter) {
+      if (! (*iter)->getCapability_HasMetering()) {
+        continue;
+      }
       rrdFileNames.push_back(getOrCreateCachedSeries(m_ConfigChain, *iter));
     }
 

@@ -48,6 +48,7 @@ public:
     m_pApartment.reset(new Apartment(NULL));
     boost::shared_ptr<DSMeter> mod = m_pApartment->allocateDSMeter(m_ValidDSUID);
     mod->setName(m_ValidName);
+    mod->setCapability_HasMetering(true);
     m_pHandler.reset(new CircuitRequestHandler(*m_pApartment, NULL, NULL));
   }
 protected:

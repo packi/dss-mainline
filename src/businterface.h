@@ -43,6 +43,7 @@ namespace dss {
 
   typedef struct {
     dsuid_t DSID;
+    BusMemberDevice_t DeviceType;
     uint32_t SoftwareRevisionARM;
     uint32_t SoftwareRevisionDSP;
     uint32_t HardwareVersion;

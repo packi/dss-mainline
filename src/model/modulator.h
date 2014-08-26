@@ -52,6 +52,12 @@ namespace dss {
                   public PhysicalModelItem {
   private:
     dsuid_t m_DSID;
+
+    /* dsm-api bus device type and capabilities */
+    BusMemberDevice_t m_DeviceType;
+    bool m_capHasDevices;
+    bool m_capHasMetering;
+
     DeviceVector m_ConnectedDevices;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
@@ -93,11 +99,19 @@ namespace dss {
     /** Removes the device identified by the reference. */
     void removeDevice(const DeviceReference& _device);
 
+    /** Set and test capabilities */
+    void setCapability_HasDevices(bool _flag) { m_capHasDevices = _flag; }
+    bool getCapability_HasDevices() const { return m_capHasDevices; }
+    void setCapability_HasMetering(bool _flag) { m_capHasMetering = _flag; }
+    bool getCapability_HasMetering() const { return m_capHasMetering; }
+
+    void setBusMemberType(BusMemberDevice_t _devType) { m_DeviceType = _devType; }
+    BusMemberDevice_t getBusMemberType() const { return m_DeviceType; }
+
     /** Returns the consumption in mW */
     unsigned long getPowerConsumption();
     /** Returns the meter value in Wh */
     unsigned long long getEnergyMeterValue();
-
 
     /** set the consumption in mW */
     void setPowerConsumption(unsigned long _value);

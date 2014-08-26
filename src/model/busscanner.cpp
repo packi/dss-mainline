@@ -57,14 +57,21 @@ namespace dss {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
     DSMeterHash_t hash;
+    DSMeterSpec_t spec;
 
-    log("scanDSMeter: Start " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
+    log("Scan dS485 device start: " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
 
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
       log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsWarning);
-      return false;
+      if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
+        // for known bus device types retry the readout
+        return false;
+      }
+      // for unknown bus devices
+      _dsMeter->setIsValid(true);
+      return true;
     }
 
     if (m_Maintenance.isInitializing() || (_dsMeter->isInitialized() == false) ||
@@ -72,13 +79,15 @@ namespace dss {
         (hash.ModificationCount != _dsMeter->getDatamodelModificationCount())) {
 
       try {
-        DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
+        spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
         _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
         _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
         _dsMeter->setHardwareVersion(spec.HardwareVersion);
         _dsMeter->setApiVersion(spec.APIVersion);
         _dsMeter->setPropertyFlags(spec.flags);
+        _dsMeter->setBusMemberType(spec.DeviceType);
         _dsMeter->setApartmentState(spec.ApartmentState);
+
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }
@@ -95,41 +104,70 @@ namespace dss {
         return false;
       }
 
-      std::vector<int> zoneIDs;
-      try {
-        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
-      } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
-        return false;
+      switch (_dsMeter->getBusMemberType()) {
+        case BusMember_dSM11:
+        case BusMember_dSM12:
+          _dsMeter->setCapability_HasDevices(true);
+          _dsMeter->setCapability_HasMetering(true);
+          break;
+        case BusMember_vDC:
+          // TODO: query VDC to get capabilities for metering and device support
+          _dsMeter->setCapability_HasDevices(true);
+          _dsMeter->setCapability_HasMetering(false);
+          break;
+        case BusMember_vDSM:
+          // TODO: query VDC to get capabilities for metering and device support
+          _dsMeter->setCapability_HasDevices(true);
+          _dsMeter->setCapability_HasMetering(false);
+          break;
+        default:
+          _dsMeter->setCapability_HasDevices(false);
+          _dsMeter->setCapability_HasMetering(false);
+          break;
       }
 
-      foreach(int zoneID, zoneIDs) {
-        log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
-        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
-        zone->addToDSMeter(_dsMeter);
-        zone->setIsPresent(true);
-        zone->setIsConnected(true);
-        if(!scanZone(_dsMeter, zone)) {
+      if (_dsMeter->getCapability_HasDevices()) {
+        std::vector<int> zoneIDs;
+        try {
+          zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+        } catch(BusApiError& e) {
+          log("scanDSMeter: Error getting ZoneIDs", lsWarning);
           return false;
         }
+        foreach(int zoneID, zoneIDs) {
+          log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
+          boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+          zone->addToDSMeter(_dsMeter);
+          zone->setIsPresent(true);
+          zone->setIsConnected(true);
+          if (!scanZone(_dsMeter, zone)) {
+            return false;
+          }
+        }
       }
+
       _dsMeter->setIsInitialized(true);
       m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
     } else {
-      std::vector<int> zoneIDs;
-      try {
-        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
-      } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
-        return false;
+
+      if (_dsMeter->getCapability_HasDevices()) {
+        std::vector<int> zoneIDs;
+        try {
+          zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+        } catch(BusApiError& e) {
+          log("scanDSMeter: Error getting ZoneIDs", lsWarning);
+          return false;
+        }
+        foreach(int zoneID, zoneIDs) {
+          boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+          zone->addToDSMeter(_dsMeter);
+          zone->setIsPresent(true);
+          zone->setIsConnected(true);
+          scanDevicesOfZoneQuick(_dsMeter, zone);
+        }
       }
-      foreach(int zoneID, zoneIDs) {
-        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
-        zone->addToDSMeter(_dsMeter);
-        zone->setIsPresent(true);
-        zone->setIsConnected(true);
-        scanDevicesOfZoneQuick(_dsMeter, zone);
-      }
+
     }
 
     _dsMeter->setDatamodelHash(hash.Hash);
