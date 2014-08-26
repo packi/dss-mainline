@@ -89,10 +89,16 @@ namespace dss {
           return failure("missing parameter newName");
         }
       } else if(_request.getMethod() == "getConsumption") {
+        if (!dsMeter->getCapability_HasMetering()) {
+          return failure("Metering not supported on this device");
+        }
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("consumption", dsMeter->getPowerConsumption());
         return success(resultObj);
       } else if(_request.getMethod() == "getEnergyMeterValue") {
+        if (!dsMeter->getCapability_HasMetering()) {
+          return failure("Metering not supported on this device");
+        }
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("meterValue", dsMeter->getEnergyMeterValue());
         return success(resultObj);

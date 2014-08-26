@@ -192,6 +192,9 @@ namespace dss {
           circuit->addProperty("hwName", dsMeter->getHardwareName());
           circuit->addProperty("isPresent", dsMeter->isPresent());
           circuit->addProperty("isValid", dsMeter->isValid());
+          circuit->addProperty("busMemberType", dsMeter->getBusMemberType());
+          circuit->addProperty("hasDevices", dsMeter->getCapability_HasDevices());
+          circuit->addProperty("hasMetering", dsMeter->getCapability_HasMetering());
           std::bitset<8> flags = dsMeter->getPropertyFlags();
           circuit->addProperty("ignoreActionsFromNewDevices", flags.test(4));
         }
