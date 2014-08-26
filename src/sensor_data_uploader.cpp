@@ -198,7 +198,6 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::UndoScene) {
       if (_event.getRaiseLocation() == erlGroup) {
         boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
-        std::string gID = _event.getPropertyByName("groupID");
         if (pGroup->getID() != GroupIDControlTemperature) {
           // ignore
           return;
