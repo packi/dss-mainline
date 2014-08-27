@@ -42,6 +42,7 @@
 #include "modelmaintenance.h"
 #include "src/ds485/dsdevicebusinterface.h"
 #include "src/ds485/dsbusinterface.h"
+#include "vdc-connection.h"
 
 
 namespace dss {
@@ -106,23 +107,39 @@ namespace dss {
 
       switch (_dsMeter->getBusMemberType()) {
         case BusMember_dSM11:
-        case BusMember_dSM12:
-          _dsMeter->setCapability_HasDevices(true);
-          _dsMeter->setCapability_HasMetering(true);
+          {
+            _dsMeter->setCapability_HasDevices(true);
+            _dsMeter->setCapability_HasMetering(true);
+            _dsMeter->setCapability_HasTemperatureControl(false);
+          }
           break;
-        case BusMember_vDC:
-          // TODO: query VDC to get capabilities for metering and device support
-          _dsMeter->setCapability_HasDevices(true);
-          _dsMeter->setCapability_HasMetering(false);
+        case BusMember_dSM12:
+          {
+            _dsMeter->setCapability_HasDevices(true);
+            _dsMeter->setCapability_HasMetering(true);
+            _dsMeter->setCapability_HasTemperatureControl(true);
+          }
           break;
         case BusMember_vDSM:
-          // TODO: query VDC to get capabilities for metering and device support
-          _dsMeter->setCapability_HasDevices(true);
-          _dsMeter->setCapability_HasMetering(false);
+        case BusMember_vDC:
+          {
+            boost::shared_ptr<VdcSpec_t> props;
+            try {
+              props = VdcHelper::getCapabilities(_dsMeter->getDSID());
+            } catch(BusApiError& e) {
+            } catch(std::runtime_error& f) {
+            }
+            _dsMeter->setCapability_HasDevices(true);
+            _dsMeter->setCapability_HasMetering(props ? props->hasMetering : false);
+            _dsMeter->setCapability_HasTemperatureControl(props ? props->hasTemperatureControl : false);
+          }
           break;
         default:
-          _dsMeter->setCapability_HasDevices(false);
-          _dsMeter->setCapability_HasMetering(false);
+          {
+            _dsMeter->setCapability_HasDevices(false);
+            _dsMeter->setCapability_HasMetering(false);
+            _dsMeter->setCapability_HasTemperatureControl(false);
+          }
           break;
       }
 
@@ -387,7 +404,7 @@ namespace dss {
       }
     }
 
-    scheduleOEMReadout(dev);
+    scheduleDeviceReadout(dev);
 
     m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
@@ -418,7 +435,7 @@ namespace dss {
     return true;
   } // initializeDeviceFromSpecQuick
 
-  void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
+  void BusScanner::scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
       if (_pDevice->getRevisionID() >= 0x0350) {
         log("scheduleOEMReadout: schedule EAN readout for: " +
@@ -442,6 +459,18 @@ namespace dss {
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
       _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);
+    }
+
+    // read properties of virtual devices connected to a VDC
+    boost::shared_ptr<DSMeter> pMeter;
+    try {
+      pMeter = m_Apartment.getDSMeterByDSID(_pDevice->getDSMeterDSID());
+    } catch (ItemNotFoundException& e) {
+    }
+    if (pMeter && pMeter->getBusMemberType() == BusMember_vDC) {
+      boost::shared_ptr<ModelMaintenance::VdcDataQuery> task(new ModelMaintenance::VdcDataQuery(_pDevice));
+      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+      pTP->addEvent(task);
     }
   }
 

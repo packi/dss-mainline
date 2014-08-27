@@ -118,6 +118,7 @@ namespace dss {
 
   class ModelMaintenance : public ThreadedSubsystem {
   public:
+
     class OEMWebQuery : public Task {
     public:
       class OEMWebQueryCallback : public URLRequestCallback {
@@ -140,6 +141,16 @@ namespace dss {
       dsuid_t m_dsmId;
       devid_t m_deviceAdress;
       uint16_t m_serialNumber;
+    };
+
+    class VdcDataQuery : public Task {
+    public:
+      VdcDataQuery(boost::shared_ptr<Device> _device);
+      virtual ~VdcDataQuery() {}
+      virtual void run();
+
+    private:
+      boost::shared_ptr<Device> m_Device;
     };
 
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);

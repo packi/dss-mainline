@@ -56,6 +56,7 @@
 #include "http_client.h"
 #include "boost/filesystem.hpp"
 #include "util.h"
+#include "vdc-connection.h"
 
 namespace dss {
 
@@ -2061,6 +2062,43 @@ namespace dss {
 
     boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_dsmId, m_deviceAdress));
     WebserviceConnection::getInstance()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
+  }
+
+  ModelMaintenance::VdcDataQuery::VdcDataQuery(boost::shared_ptr<Device> _device)
+    : Task(),
+      m_Device(_device)
+  {}
+
+  void ModelMaintenance::VdcDataQuery::run()
+  {
+    boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
+    m_Device->setVdcModelGuid(props->modelGuid);
+    m_Device->setVdcVendorGuid(props->vendorGuid);
+    m_Device->setVdcOemGuid(props->oemGuid);
+    m_Device->setVdcConfigURL(props->configURL);
+    m_Device->setVdcHardwareGuid(props->hardwareGuid);
+    m_Device->setVdcHardwareInfo(props->hardwareInfo);
+    m_Device->setVdcHardwareVersion(props->hardwareVersion);
+
+    uint8_t *data;
+    size_t dataSize;
+    VdcHelper::getIcon(m_Device->getDSMeterDSID(), m_Device->getDSID(), &dataSize, &data);
+    if (dataSize > 0) {
+      boost::filesystem::path iconBasePath;
+      PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+      iconBasePath = propSys.getStringValue("/config/subsystems/Apartment/iconBasePath");
+      boost::filesystem::path iconFile(dsuid2str(m_Device->getDSID()) + ".png");
+      boost::filesystem::path iconPath = iconBasePath / iconFile;
+
+      /* write binary file from memory */
+      FILE *binFile = fopen(iconPath.c_str(), "wb");
+      if (binFile) {
+        fwrite(data, sizeof(uint8_t), dataSize, binFile);
+        fclose(binFile);
+        m_Device->setVdcIconPath(iconPath.string());
+      }
+      free(data);
+    }
   }
 
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
