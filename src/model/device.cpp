@@ -1232,11 +1232,7 @@ namespace dss {
     value = ((_entry.sceneDeviceMode & 0x03) << 2) | (_entry.validity & 0x03);
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 4, value);
     if (_entry.action == 2) {
-      if (!isSceneDevice()) {
-        value = (_entry.buttonNumber << 4) | (_entry.clickType);
-      } else {
-        value = _entry.sceneID;
-      }
+      value = (_entry.buttonNumber << 4) | (_entry.clickType);
       setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 5, value);
     }
   }

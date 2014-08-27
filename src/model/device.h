@@ -569,7 +569,6 @@ namespace dss {
     void setSensorEventName(const int _eventIndex, std::string& _name);
     void getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry);
     void setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry);
-    bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
 
     void setOemInfo(const unsigned long long _eanNumber,
         const uint16_t _serialNumber, const uint8_t _partNumber,
