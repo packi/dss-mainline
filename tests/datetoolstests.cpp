@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeRFC2445) {
 }
 
 BOOST_AUTO_TEST_CASE(testPrettyDate) {
-  std::string asString = "2014-08-05 23:23:32.000";
+  std::string asString = "2014-08-05 23:23:32";
   DateTime parsedObj = DateTime::parsePrettyString(asString);
   BOOST_CHECK_EQUAL(asString, parsedObj.toPrettyString());
 }
