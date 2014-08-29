@@ -2011,7 +2011,7 @@ namespace dss {
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
         entry->createProperty("value")
-                ->linkToProxy(PropertyProxyReference<int, double>(m_sensorInputs[m_sensorInputCount]->m_sensorValueFloat));
+                ->linkToProxy(PropertyProxyReference<double>(m_sensorInputs[m_sensorInputCount]->m_sensorValueFloat));
         entry->createProperty("valueDS")
                 ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
         entry->createProperty("timestamp")
