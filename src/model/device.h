@@ -264,6 +264,15 @@ namespace dss {
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
 
+    std::string m_VdcModelGuid;
+    std::string m_VdcVendorGuid;
+    std::string m_VdcOemGuid;
+    std::string m_VdcConfigURL;
+    std::string m_VdcHardwareGuid;
+    std::string m_VdcHardwareInfo;
+    std::string m_VdcHardwareVersion;
+    std::string m_VdcIconPath;
+
     bool m_IsConfigLocked;
 
     uint8_t m_binaryInputCount;
@@ -433,6 +442,10 @@ namespace dss {
     const std::string& getGTIN() const { return m_GTIN; }
     const std::string& getIconPath() const { return m_iconPath; }
 
+    static const std::string getDeviceTypeString(const DeviceTypes_t _type);
+    static const std::string getDeviceClassString(const DeviceClasses_t _class);
+    static const std::string getColorString(const int _class);
+
     /** Returns the group bitmask (1 based) of the device */
     std::bitset<63>& getGroupBitmask();
     /** @copydoc getGroupBitmask() */
@@ -569,7 +582,6 @@ namespace dss {
     void setSensorEventName(const int _eventIndex, std::string& _name);
     void getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry);
     void setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry);
-    bool isSceneDevice (void) const { return false; } //TODO: other devices not defined yet
 
     void setOemInfo(const unsigned long long _eanNumber,
         const uint16_t _serialNumber, const uint8_t _partNumber,
@@ -592,10 +604,6 @@ namespace dss {
     DeviceOEMState_t getOemStateFromString(const char* _string) const;
     DeviceOEMInetState_t getOemInetStateFromString(const char* _string) const;
 
-    static const std::string getDeviceTypeString(const DeviceTypes_t _type);
-    static const std::string getDeviceClassString(const DeviceClasses_t _class);
-    static const std::string getColorString(const int _class);
-
     void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL);
     void setOemProductInfoState(const DeviceOEMState_t _state);
     std::string getOemProductInfoStateAsString() const { return oemStateToString(m_OemProductInfoState); }
@@ -606,6 +614,26 @@ namespace dss {
     bool isOemCoupledWith(boost::shared_ptr<Device> _otherDev);
     void setConfigLock(bool _lockConfig);
     bool isConfigLocked() const { return m_IsConfigLocked; }
+
+    void setVdcModelGuid(const std::string& _value) { m_VdcModelGuid = _value; }
+    const std::string& getVdcModelGuid() const { return m_VdcModelGuid; }
+    void setVdcVendorGuid(const std::string& _value) { m_VdcVendorGuid = _value; }
+    const std::string& getVdcVendorGuid() const { return m_VdcVendorGuid; }
+    void setVdcOemGuid(const std::string& _value) { m_VdcOemGuid = _value; }
+    const std::string& getVdcOemGuid() const { return m_VdcOemGuid; }
+    void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
+    const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
+    void setVdcHardwareGuid(const std::string& _value) { m_VdcHardwareGuid = _value; }
+    const std::string& getVdcHardwareGuid() const { return m_VdcHardwareGuid; }
+    void setVdcHardwareInfo(const std::string& _value) { m_VdcHardwareInfo = _value; }
+    const std::string& getVdcHardwareInfo() const { return m_VdcHardwareInfo; }
+    void setVdcHardwareVersion(const std::string& _value) { m_VdcHardwareVersion = _value; }
+    const std::string& getVdcHardwareVersion() const { return m_VdcHardwareVersion; }
+    void setVdcIconPath(const std::string& _value) {
+      m_VdcIconPath = _value; updateIconPath();
+    }
+    const std::string& getVdcIconPath() const { return m_VdcIconPath; }
+
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& getBinaryInputs() const;
@@ -613,7 +641,6 @@ namespace dss {
     void setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup);
     void setBinaryInputId(uint8_t _index, uint8_t _inputId);
     void setBinaryInputType(uint8_t _index, uint8_t _inputType);
-
     boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
     void clearBinaryInputStates();
 

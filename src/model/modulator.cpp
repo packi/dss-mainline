@@ -103,6 +103,14 @@ namespace dss {
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
       m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
         ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
+
+      PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
+      capNode->createProperty("devices")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasDevices, false));
+      capNode->createProperty("metering")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasMetering, false));
+      capNode->createProperty("temperature-control")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasTemperatureControl, false));
     }
   } // publishToPropertyTree
 

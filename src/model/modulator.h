@@ -57,6 +57,7 @@ namespace dss {
     BusMemberDevice_t m_DeviceType;
     bool m_capHasDevices;
     bool m_capHasMetering;
+    bool m_capHasTemperatureControl;
 
     DeviceVector m_ConnectedDevices;
     int m_PowerConsumption;
@@ -104,6 +105,8 @@ namespace dss {
     bool getCapability_HasDevices() const { return m_capHasDevices; }
     void setCapability_HasMetering(bool _flag) { m_capHasMetering = _flag; }
     bool getCapability_HasMetering() const { return m_capHasMetering; }
+    void setCapability_HasTemperatureControl(bool _flag) { m_capHasTemperatureControl = _flag; }
+    bool getCapability_HasTemperatureControl() const { return m_capHasTemperatureControl; }
 
     void setBusMemberType(BusMemberDevice_t _devType) { m_DeviceType = _devType; }
     BusMemberDevice_t getBusMemberType() const { return m_DeviceType; }

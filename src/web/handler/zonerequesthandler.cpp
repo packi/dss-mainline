@@ -295,8 +295,8 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
 
-          if (_request.hasParameter("CtrlDSUID")) {
-            dsuid_from_string(_request.getParameter("CtrlDSUID").c_str(), &hProp.m_HeatingControlDSUID);
+          if (_request.hasParameter("ControlDSUID")) {
+            dsuid_from_string(_request.getParameter("ControlDSUID").c_str(), &hProp.m_HeatingControlDSUID);
           }
 
           memset(&hConfig, 0, sizeof(hConfig));
@@ -309,7 +309,7 @@ namespace dss {
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
 
-          _request.getParameter("CtrlMode", hConfig.ControllerMode);
+          _request.getParameter("ControlMode", hConfig.ControllerMode);
           _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
           _request.getParameter("CtrlOffset", hConfig.Offset);
           _request.getParameter("CtrlEmergencyValue", hConfig.EmergencyValue);

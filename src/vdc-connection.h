@@ -35,17 +35,26 @@ namespace dss {
   class JSONObject;
 
   typedef struct {
-    std::string hardwareGuid;
     std::string modelGuid;
-    std::string vendorId;
-    std::string hardwareInfo;
+    std::string vendorGuid;
+    std::string oemGuid;
+    std::string configURL;
+    std::string hardwareGuid;
+    std::string hardwareInfo;     // property: model
+    std::string hardwareVersion;
+  } VdsdSpec_t;
+
+  typedef struct {
+    bool hasDevices;
+    bool hasMetering;
+    bool hasTemperatureControl;
   } VdcSpec_t;
 
   struct VdcHelper
   {
-    static boost::shared_ptr<VdcSpec_t> getSpec(dsuid_t _vdsm, dsuid_t _device);
-    static void getIcon(dsuid_t _vdsm, dsuid_t _device,
-                        size_t *size, uint8_t **data);
+    static boost::shared_ptr<VdsdSpec_t> getSpec(dsuid_t _vdsm, dsuid_t _device);
+    static boost::shared_ptr<VdcSpec_t> getCapabilities(dsuid_t _vdsm);
+    static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
   };
 
 } // namespace

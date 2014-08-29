@@ -211,6 +211,22 @@ namespace dss {
         oemNode->createProperty("configurationLocked")
           ->linkToProxy(PropertyProxyReference<bool>(m_IsConfigLocked, false));
 
+        PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
+        propNode->createProperty("ModelGuid")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelGuid, false));
+        propNode->createProperty("VendorGuid")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
+        propNode->createProperty("OemGuid")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
+        propNode->createProperty("ConfigURL")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
+        propNode->createProperty("HardwareGuid")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareGuid, false));
+        propNode->createProperty("HardwareInfo")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareInfo, false));
+        propNode->createProperty("HardwareVersion")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareVersion, false));
+
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
         m_pPropertyNode->createProperty("shortAddress")
@@ -1232,11 +1248,7 @@ namespace dss {
     value = ((_entry.sceneDeviceMode & 0x03) << 2) | (_entry.validity & 0x03);
     setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 4, value);
     if (_entry.action == 2) {
-      if (!isSceneDevice()) {
-        value = (_entry.buttonNumber << 4) | (_entry.clickType);
-      } else {
-        value = _entry.sceneID;
-      }
+      value = (_entry.buttonNumber << 4) | (_entry.clickType);
       setDeviceConfig(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 5, value);
     }
   }
@@ -1507,6 +1519,8 @@ namespace dss {
     // HWInfo - Priorities: 1. OEM Data, 2. Device Product Data, 3. Device EEPROM Data (Vendor independent)
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
       m_HWInfo = m_OemProductName;
+    } else if (!m_VdcHardwareInfo.empty()) {
+      m_HWInfo = m_VdcHardwareInfo;
     } else if (displayName != NULL) {
       m_HWInfo = displayName;
     } else {
@@ -1534,6 +1548,8 @@ namespace dss {
 
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductIcon.empty()) {
       m_iconPath = m_OemProductIcon;
+    } else if (!m_VdcIconPath.empty()) {
+      m_iconPath = m_VdcIconPath;
     } else {
       DeviceClasses_t deviceClass = getDeviceClass();
       DeviceTypes_t deviceType = getDeviceType();
