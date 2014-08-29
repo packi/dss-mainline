@@ -108,13 +108,13 @@ namespace dss {
   typedef struct {
     uint8_t ControllerMode;
     uint16_t Kp;
-    uint16_t Ts;
+    uint8_t Ts;
     uint16_t Ti;
     uint16_t Kd;
     uint16_t Imin;
     uint16_t Imax;
-    uint16_t Ymin;
-    uint16_t Ymax;
+    uint8_t Ymin;
+    uint8_t Ymax;
     uint8_t AntiWindUp;
     uint8_t KeepFloorWarm;
     uint16_t SourceZoneId;
@@ -131,7 +131,7 @@ namespace dss {
     uint32_t Yp;
     uint32_t Yi;
     uint32_t Yd;
-    uint16_t Y;
+    uint8_t Y;
     uint8_t AntiWindUp;
   } ZoneHeatingInternalsSpec_t;
 

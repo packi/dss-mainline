@@ -955,9 +955,10 @@ namespace dss {
   void DSBusInterface::handleHeatingControllerConfig(uint8_t _errorCode,
       dsuid_t _sourceID, dsuid_t _destinationID,
       uint16_t _ZoneId, uint8_t _ControllerMode,
-      uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
-      uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
-      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue) {
+      uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
+      uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
+      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
+      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     loginFromCallback();
 
     boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
@@ -974,6 +975,7 @@ namespace dss {
     spec->KeepFloorWarm = _KeepFloorWarm;
     spec->SourceZoneId = _SourceZoneId;
     spec->Offset = _Offset;
+    spec->ManualValue = _ManualValue;
     spec->EmergencyValue = _EmergencyValue;
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, _destinationID);
@@ -985,14 +987,15 @@ namespace dss {
   void DSBusInterface::handleHeatingControllerConfigCallback(uint8_t _errorCode, void *_userData,
       dsuid_t _sourceID, dsuid_t _destinationID,
       uint16_t _ZoneId, uint8_t _ControllerMode,
-      uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
-      uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
-      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue) {
+      uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
+      uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
+      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
+      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     if (_errorCode == 0) {
       static_cast<DSBusInterface*>(_userData)->
           handleHeatingControllerConfig(_errorCode, _sourceID, _destinationID, _ZoneId,
               _ControllerMode, _Kp, _Ts, _Ti, _Kd, _Imin, _Imax, _Ymin, _Ymax,
-              _AntiWindUp, _KeepFloorWarm, _SourceZoneId, _Offset, _EmergencyValue);
+              _AntiWindUp, _KeepFloorWarm, _SourceZoneId, _Offset, _ManualValue, _EmergencyValue);
     }
   } // handleHeatingControllerConfigCallback
 

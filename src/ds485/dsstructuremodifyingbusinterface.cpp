@@ -221,8 +221,9 @@ namespace dss {
     }
     int ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
         _spec.ControllerMode, _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd,
-        _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp, _spec.KeepFloorWarm,
-        _spec.SourceZoneId, _spec.Offset, _spec.EmergencyValue);
+        _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax,
+        _spec.AntiWindUp, _spec.KeepFloorWarm, _spec.SourceZoneId,
+        _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     DSBusInterface::checkResultCode(ret);
   } // setZoneHeatingConfig
 

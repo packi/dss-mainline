@@ -546,8 +546,9 @@ namespace dss {
     ZoneHeatingConfigSpec_t result;
     int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
         &result.ControllerMode, &result.Kp, &result.Ts, &result.Ti, &result.Kd,
-        &result.Imin, &result.Imax, &result.Ymin, &result.Ymax, &result.AntiWindUp, &result.KeepFloorWarm,
-        &result.SourceZoneId, &result.Offset, &result.EmergencyValue);
+        &result.Imin, &result.Imax, &result.Ymin, &result.Ymax,
+        &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId,
+        &result.Offset, &result.ManualValue, &result.EmergencyValue);
     DSBusInterface::checkResultCode(ret);
     return result;
   } // getZoneHeatingConfig
