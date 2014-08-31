@@ -120,6 +120,7 @@ namespace dss {
     uint16_t SourceZoneId;
     uint8_t Offset;
     uint8_t EmergencyValue;
+    uint8_t ManualValue;
   } ZoneHeatingConfigSpec_t;
 
   typedef struct {
