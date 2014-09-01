@@ -385,17 +385,18 @@ namespace dss {
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
+    case SensorIDCO2Concentration:
       convertedSensorValue = (double) (exp10(_sensorValue / 200));
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
-      convertedSensorValue = (double) (_sensorValue /* * 0.1 */);
+      convertedSensorValue = (double) (_sensorValue * 0.1);
       break;
     case SensorIDWindSpeed:
       convertedSensorValue = (double) (_sensorValue * 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (double) ((_sensorValue - 100) /* * 0.1 */ );
+      convertedSensorValue = (double) (_sensorValue - 100);
       break;
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
@@ -427,6 +428,7 @@ namespace dss {
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
+    case SensorIDCO2Concentration:
       convertedSensorValue = (double) (exp10(_sensorValue / 800));
       break;
     case SensorIDHumidityIndoors:
@@ -437,10 +439,8 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (double) ((_sensorValue - 100) /* * 0.1 / 4 */ );
+      convertedSensorValue = (double) ((_sensorValue - 100) / 4);
       break;
-    case SensorIDCO2Concentration:
-      /* TODO */
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
     default:
@@ -471,6 +471,7 @@ namespace dss {
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
+    case SensorIDCO2Concentration:
       convertedSensorValue = (int) (200 * log10(_sensorValue));
       break;
     case SensorIDHumidityIndoors:
@@ -481,7 +482,7 @@ namespace dss {
       convertedSensorValue = (int) (_sensorValue / 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (int) ((_sensorValue + 100) /* / 0.1 */);
+      convertedSensorValue = (int) (_sensorValue + 100);
       break;
     case SensorIDWindDirection:
     case SensorIDPrecipitation:

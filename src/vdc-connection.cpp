@@ -189,24 +189,13 @@ namespace dss {
     for (int i = 0; i < response.properties_size(); i++) {
       vdcapi::PropertyElement el = response.properties(i);
 
-      if (!el.has_name()) {
-        continue;
-      }
-
-      // we are only expecting string property values here
-      if (!el.has_value()) {
+      if (!el.has_name() || !el.has_value()) {
         continue;
       }
 
       vdcapi::PropertyValue val = el.value();
-      if (!val.has_v_string()) {
-        continue;
-      }
-
-      if (el.name() == "metering") {
-        ret->hasMetering = true;
-      } else if (el.name() == "temperature-control") {
-        ret->hasTemperatureControl = true;
+      if (el.name() == "metering" && val.has_v_bool()) {
+        ret->hasMetering = val.v_bool();
       }
     }
 
@@ -227,7 +216,6 @@ namespace dss {
 
     vdcapi::PropertyElement *query = getprop->add_query();
     query->set_name("deviceIcon16");
-    query = getprop->add_query();
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -276,33 +264,22 @@ namespace dss {
     for (int i = 0; i < response.properties_size(); i++) {
       vdcapi::PropertyElement el = response.properties(i);
 
-      if (!el.has_name()) {
-        continue;
-      }
-      // we are only expecting string property values here
-      if (!el.has_value()) {
+      if (!el.has_name() || !el.has_value()) {
         continue;
       }
 
       vdcapi::PropertyValue val = el.value();
-      if (!val.has_v_bytes()) {
-        continue;
-      }
-
-      if (el.name() != "deviceIcon16") {
-        continue;
-      }
-
-      std::string icon = val.v_bytes();
-      if (icon.length() > 0) {
-        *data = (uint8_t *)malloc(sizeof(uint8_t) * icon.length());
-        if (*data == NULL) {
-          throw std::runtime_error("could not allocate memory for buffer");
+      if (el.name() == "deviceIcon16" && (val.has_v_bytes())) {
+        std::string icon = val.v_bytes();
+        if (icon.length() > 0) {
+          *data = (uint8_t *)malloc(sizeof(uint8_t) * icon.length());
+          if (*data == NULL) {
+            throw std::runtime_error("could not allocate memory for buffer");
+          }
+          memcpy(*data, icon.data(), icon.length());
+          *size = icon.length();
         }
-        memcpy(*data, icon.data(), icon.length());
-        *size = icon.length();
       }
-      break;
     }
 
     return;

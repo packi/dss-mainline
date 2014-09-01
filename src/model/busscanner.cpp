@@ -121,17 +121,24 @@ namespace dss {
           }
           break;
         case BusMember_vDSM:
+          {
+            _dsMeter->setCapability_HasDevices(false);
+            _dsMeter->setCapability_HasMetering(false);
+            _dsMeter->setCapability_HasTemperatureControl(true);
+          }
+          break;
         case BusMember_vDC:
           {
             boost::shared_ptr<VdcSpec_t> props;
             try {
               props = VdcHelper::getCapabilities(_dsMeter->getDSID());
-            } catch(BusApiError& e) {
-            } catch(std::runtime_error& f) {
+              if (props) {
+                _dsMeter->setCapability_HasMetering(props->hasMetering);
+              }
+            } catch(std::runtime_error& e) {
             }
             _dsMeter->setCapability_HasDevices(true);
-            _dsMeter->setCapability_HasMetering(props ? props->hasMetering : false);
-            _dsMeter->setCapability_HasTemperatureControl(props ? props->hasTemperatureControl : false);
+            _dsMeter->setCapability_HasTemperatureControl(true); // transparently trapped by the vdSM
           }
           break;
         default:
