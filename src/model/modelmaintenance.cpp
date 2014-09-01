@@ -2085,9 +2085,10 @@ namespace dss {
     VdcHelper::getIcon(m_Device->getDSMeterDSID(), m_Device->getDSID(), &dataSize, &data);
     if (dataSize > 0) {
       boost::filesystem::path iconBasePath;
+      boost::filesystem::path iconFile;
       PropertySystem propSys = DSS::getInstance()->getPropertySystem();
       iconBasePath = propSys.getStringValue("/config/subsystems/Apartment/iconBasePath");
-      boost::filesystem::path iconFile(dsuid2str(m_Device->getDSID()) + ".png");
+      iconFile = dsuid2str(m_Device->getDSID()) + ".png";
       boost::filesystem::path iconPath = iconBasePath / iconFile;
 
       /* write binary file from memory */
@@ -2095,7 +2096,7 @@ namespace dss {
       if (binFile) {
         fwrite(data, sizeof(uint8_t), dataSize, binFile);
         fclose(binFile);
-        m_Device->setVdcIconPath(iconPath.string());
+        m_Device->setVdcIconPath(iconFile.string());
       }
       free(data);
     }
