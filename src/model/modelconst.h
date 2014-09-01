@@ -212,6 +212,7 @@ namespace dss {
   const int HeatingControlModeIDPID = 1;
   const int HeatingControlModeIDZoneFollower = 2;
   const int HeatingControlModeIDFixed = 3;
+  const int HeatingControlModeIDManual = 4;
 
   // Heating Control States
   const int HeatingControlStateIDInternal = 0;

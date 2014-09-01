@@ -241,6 +241,7 @@ namespace dss {
               resultObj->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
               break;
             case HeatingControlModeIDFixed:
+            case HeatingControlModeIDManual:
               resultObj->addProperty("OperationMode", hStatus.m_OperationMode);
               resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
               break;
@@ -265,6 +266,7 @@ namespace dss {
 
           resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
           resultObj->addProperty("ControlMode", hConfig.ControllerMode);
+          resultObj->addProperty("EmergencyValue", hConfig.EmergencyValue - 100);
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:
               break;
@@ -277,13 +279,15 @@ namespace dss {
               resultObj->addProperty("CtrlImax", hConfig.Imax);
               resultObj->addProperty("CtrlYmin", hConfig.Ymin);
               resultObj->addProperty("CtrlYmax", hConfig.Ymax);
-              resultObj->addProperty("CtrlEmergencyValue", hConfig.EmergencyValue);
               resultObj->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
               resultObj->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
               break;
             case HeatingControlModeIDZoneFollower:
               resultObj->addProperty("ReferenceZone", hConfig.SourceZoneId);
-              resultObj->addProperty("CtrlOffset", hConfig.Offset);
+              resultObj->addProperty("CtrlOffset", hConfig.Offset - 100);
+              break;
+            case HeatingControlModeIDManual:
+              resultObj->addProperty("ManualValue", hConfig.ManualValue - 100);
               break;
             case HeatingControlModeIDFixed:
               break;
@@ -309,10 +313,24 @@ namespace dss {
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
 
-          _request.getParameter("ControlMode", hConfig.ControllerMode);
-          _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
-          _request.getParameter("CtrlOffset", hConfig.Offset);
-          _request.getParameter("CtrlEmergencyValue", hConfig.EmergencyValue);
+          if (_request.hasParameter("ControlMode")) {
+            _request.getParameter("ControlMode", hConfig.ControllerMode);
+          }
+          if (_request.hasParameter("ReferenceZone")) {
+            _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
+          }
+          if (_request.hasParameter("CtrlOffset")) {
+            _request.getParameter("CtrlOffset", hConfig.Offset);
+            hConfig.Offset += 100;
+          }
+          if (_request.hasParameter("EmergencyValue")) {
+            _request.getParameter("EmergencyValue", hConfig.EmergencyValue);
+            hConfig.EmergencyValue += 100;
+          }
+          if (_request.hasParameter("ManualValue")) {
+            _request.getParameter("ManualValue", hConfig.ManualValue);
+            hConfig.ManualValue += 100;
+          }
           _request.getParameter("CtrlKp", hConfig.Kp);
           _request.getParameter("CtrlTi", hConfig.Ti);
           _request.getParameter("CtrlTs", hConfig.Ts);
@@ -358,6 +376,8 @@ namespace dss {
                 SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
             resultObj->addProperty("Night",
                 SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+            resultObj->addProperty("Holiday",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
@@ -372,6 +392,8 @@ namespace dss {
                 SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
             resultObj->addProperty("Night",
                 SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+            resultObj->addProperty("Holiday",
+                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
             break;
 
           }
@@ -421,8 +443,8 @@ namespace dss {
               hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
-                fValue = strToDouble(_request.getParameter("Off"));
-                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                fValue = strToDouble(_request.getParameter("Comfort"));
+                hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
@@ -432,30 +454,41 @@ namespace dss {
               hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
-                fValue = strToDouble(_request.getParameter("Off"));
-                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                fValue = strToDouble(_request.getParameter("Economy"));
+                hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("NotUsed")) {
             try {
               iValue = strToUInt(_request.getParameter("NotUsed"));
-              hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
-                fValue = strToDouble(_request.getParameter("Off"));
-                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                fValue = strToDouble(_request.getParameter("NotUsed"));
+                hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Night")) {
             try {
               iValue = strToUInt(_request.getParameter("Night"));
-              hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
-                fValue = strToDouble(_request.getParameter("Off"));
-                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                fValue = strToDouble(_request.getParameter("Night"));
+                hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("Holiday")) {
+            try {
+              iValue = strToUInt(_request.getParameter("Holiday"));
+              hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Holiday"));
+                hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
