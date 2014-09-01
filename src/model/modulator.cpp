@@ -103,6 +103,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
       m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
         ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
+      m_pPropertyNode->createProperty("busMemberType")
+        ->linkToProxy(PropertyProxyReference<int>((int &) m_DeviceType, false));
 
       PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
       capNode->createProperty("devices")
