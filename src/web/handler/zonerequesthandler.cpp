@@ -277,8 +277,8 @@ namespace dss {
               resultObj->addProperty("CtrlKd", hConfig.Kd);
               resultObj->addProperty("CtrlImin", hConfig.Imin);
               resultObj->addProperty("CtrlImax", hConfig.Imax);
-              resultObj->addProperty("CtrlYmin", hConfig.Ymin);
-              resultObj->addProperty("CtrlYmax", hConfig.Ymax);
+              resultObj->addProperty("CtrlYmin", hConfig.Ymin - 100);
+              resultObj->addProperty("CtrlYmax", hConfig.Ymax - 100);
               resultObj->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
               resultObj->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
               break;
@@ -331,14 +331,20 @@ namespace dss {
             _request.getParameter("ManualValue", hConfig.ManualValue);
             hConfig.ManualValue += 100;
           }
+          if (_request.hasParameter("CtrlYmin")) {
+            _request.getParameter("CtrlYmin", hConfig.Ymin);
+            hConfig.Ymin += 100;
+          }
+          if (_request.hasParameter("CtrlYmax")) {
+            _request.getParameter("CtrlYmax", hConfig.Ymax);
+            hConfig.Ymax += 100;
+          }
           _request.getParameter("CtrlKp", hConfig.Kp);
           _request.getParameter("CtrlTi", hConfig.Ti);
           _request.getParameter("CtrlTs", hConfig.Ts);
           _request.getParameter("CtrlKd", hConfig.Kd);
           _request.getParameter("CtrlImin", hConfig.Imin);
           _request.getParameter("CtrlImax", hConfig.Imax);
-          _request.getParameter("CtrlYmin", hConfig.Ymin);
-          _request.getParameter("CtrlYmax", hConfig.Ymax);
           _request.getParameter("CtrlAntiWindUp", hConfig.AntiWindUp);
           _request.getParameter("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
 
