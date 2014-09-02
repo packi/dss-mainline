@@ -2071,18 +2071,29 @@ namespace dss {
 
   void ModelMaintenance::VdcDataQuery::run()
   {
-    boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
-    m_Device->setVdcModelGuid(props->modelGuid);
-    m_Device->setVdcVendorGuid(props->vendorGuid);
-    m_Device->setVdcOemGuid(props->oemGuid);
-    m_Device->setVdcConfigURL(props->configURL);
-    m_Device->setVdcHardwareGuid(props->hardwareGuid);
-    m_Device->setVdcHardwareInfo(props->hardwareInfo);
-    m_Device->setVdcHardwareVersion(props->hardwareVersion);
+    try {
+      boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
+      m_Device->setVdcModelGuid(props->modelGuid);
+      m_Device->setVdcVendorGuid(props->vendorGuid);
+      m_Device->setVdcOemGuid(props->oemGuid);
+      m_Device->setVdcConfigURL(props->configURL);
+      m_Device->setVdcHardwareGuid(props->hardwareGuid);
+      m_Device->setVdcHardwareInfo(props->hardwareInfo);
+      m_Device->setVdcHardwareVersion(props->hardwareVersion);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("VdcDataQuery: could not query properties from " +
+          dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
+    }
 
     uint8_t *data;
-    size_t dataSize;
-    VdcHelper::getIcon(m_Device->getDSMeterDSID(), m_Device->getDSID(), &dataSize, &data);
+    size_t dataSize = 0;
+
+    try {
+      VdcHelper::getIcon(m_Device->getDSMeterDSID(), m_Device->getDSID(), &dataSize, &data);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("VdcDataQuery: could not query icon data from " +
+          dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
+    }
     if (dataSize > 0) {
       boost::filesystem::path iconBasePath;
       boost::filesystem::path iconFile;
