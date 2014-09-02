@@ -229,7 +229,7 @@ namespace dss {
   }
 
   void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice) {
-    m_HeatingProperties.m_CtrlOffset = _ctrlMode;
+    m_HeatingProperties.m_HeatingControlMode = _ctrlMode;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
     m_HeatingProperties.m_CtrlOffset = _offset;
     m_HeatingProperties.m_HeatingMasterZone = _masterZone;
