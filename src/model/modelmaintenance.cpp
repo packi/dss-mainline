@@ -747,6 +747,18 @@ namespace dss {
     state->setState(coSystem, strstate);
   }
 
+  void ModelMaintenance::autoAssignSensors() {
+    std::vector<boost::shared_ptr<Zone> > zones = m_pApartment->getZones();
+    for (size_t i = 0; i < zones.size(); i++) {
+      boost::shared_ptr<Zone> zone = zones.at(i);
+      if (!zone) {
+        continue;
+      }
+
+      zone->autoAssignSensors();
+    }
+  }
+
   void ModelMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
     foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
@@ -776,6 +788,7 @@ namespace dss {
       }
 
       setApartmentState();
+      autoAssignSensors();
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);
@@ -1455,6 +1468,27 @@ namespace dss {
     log("  BusID:     " + intToString(_devID));
 
     rescanDevice(_dsMeterID, _devID);
+    // model_ready sets initializing flag to false and we want to perform
+    // this check only if a new device was discovered after the model ready
+    // event
+    if (!m_IsInitializing) {
+
+      boost::shared_ptr<Device> device;
+      try {
+        DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
+        device = devRef.getDevice();
+      } catch (ItemNotFoundException &ex) {
+        log("Device with id " + intToString(_devID) +
+            " not found, not checking sensor assignments");
+        return;
+      }
+
+      // if the newly added devices provides any sensors that are not
+      // yet assigned in the zone: assign it automatically, UC 1.1, including
+      // UC 8.1 check
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      zone->autoAssignSensors();
+    }
   } // onAddDevice
 
   void ModelMaintenance::onRemoveDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID) {
