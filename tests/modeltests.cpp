@@ -992,6 +992,8 @@ public:
     SetNullDsuid(dsuid);
 	return dsuid;
   }
+  virtual void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response) {
+  }
 }; // DummyStructureQueryBusInterface
 
 class DummyActionRequestInterface : public ActionRequestInterface {
