@@ -309,4 +309,34 @@ namespace dss {
     }
   }
 
+  boost::shared_ptr<std::vector<int> > Zone::getUnassignedSensorTypes() const {
+    int sensorTypes[] = {
+      SensorIDTemperatureIndoors,
+      SensorIDBrightnessIndoors,
+      SensorIDHumidityIndoors,
+      SensorIDCO2Concentration
+    };
+
+    boost::shared_ptr<std::vector<int> >ret(
+        new std::vector<int>(sensorTypes,
+                        sensorTypes + sizeof(sensorTypes) / sizeof(int)));
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
+      if (s) {
+        continue;
+      }
+
+      std::vector<int>::iterator it;
+      for (it = ret->begin(); it != ret->end();) {
+        if (*it == s->m_sensorType) {
+          it = ret->erase(it);
+        } else {
+          it++;
+        }
+      }
+    }
+
+    return ret;
+  }
 } // namespace dss

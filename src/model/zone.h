@@ -164,6 +164,7 @@ namespace dss {
     void resetSensor(uint8_t _sensorType);
     std::vector<boost::shared_ptr<MainZoneSensor_t> > getAssignedSensors() { return m_MainSensors; }
 
+    boost::shared_ptr<std::vector<int> > getUnassignedSensorTypes() const;
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
     bool isAllowedSensorType(int _sensorType);
