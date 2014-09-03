@@ -1918,7 +1918,7 @@ namespace dss {
     }
 
     boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event("TODO: Heating Error Event"));
+    pEvent.reset(new Event(EventName::HeatingControllerState));
     pEvent->setProperty("zoneID", intToString(_zoneID));
     pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
     pEvent->setProperty("CtrlState", intToString(_State));
