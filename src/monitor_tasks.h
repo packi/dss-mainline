@@ -20,10 +20,11 @@
 
 */
 
-#ifndef __DSS_SENSOR_MONITOR_H__
-#define __DSS_SENSOR_MONITOR_H__
+#ifndef __DSS_MONITOR_TASKS_H__
+#define __DSS_MONITOR_TASKS_H__
 
 #include "taskprocessor.h"
+#include "event.h"
 #include "model/apartment.h"
 
 namespace dss {
@@ -37,6 +38,20 @@ private:
   Apartment *m_Apartment;
 };
 
+class HeatingMonitorTask : public Task {
+public:
+  HeatingMonitorTask(Apartment* _apartment, boost::shared_ptr<Event> _event) :
+    m_Apartment(_apartment),
+    m_event(_event)
+    {};
+  virtual ~HeatingMonitorTask() {};
+  virtual void run();
+private:
+  Apartment *m_Apartment;
+  boost::shared_ptr<Event> m_event;
+  void syncZone(int _zoneID);
+};
+
 }// namespace
 
-#endif//__DSS_SENSOR_MONITOR_H__
+#endif//__DSS_MONITOR_TASKS_H__
