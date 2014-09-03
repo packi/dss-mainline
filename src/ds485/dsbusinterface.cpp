@@ -1126,15 +1126,4 @@ namespace dss {
                                                         std::bitset<8>(_flags));
   } // handleDsmSetNameCallback
 
-  void DSBusInterface::protobufMessageRequest(dsuid_t _dSMdSUID,
-                                              uint16_t _request_size,
-                                              const uint8_t *_request,
-                                              uint16_t *_response_size,
-                                              uint8_t *_response) {
-    int ret = UserProtobufMessageRequest(m_dsmApiHandle, _dSMdSUID,
-                                         _request_size, _request,
-                                         _response_size, _response);
-    checkResultCode(ret);
-  }
-
 } // namespace dss

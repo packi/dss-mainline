@@ -278,6 +278,9 @@ namespace dss {
     virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) = 0;
+
+    /** vdsm property queries */
+    virtual void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {
@@ -437,13 +440,6 @@ namespace dss {
 
     virtual void setBusEventSink(BusEventSink* _eventSink) = 0;
     virtual const std::string getConnectionURI() { return ""; }
-    virtual void protobufMessageRequest(dsuid_t _dSMdSUID,
-                                        uint16_t _request_size,
-                                        const uint8_t *_request,
-                                        uint16_t *_response_size,
-                                        uint8_t *_response) {
-      throw std::runtime_error("not supported by interface");
-    }
   };
 
   class BusApiError : public DSSException {
