@@ -610,4 +610,19 @@ namespace dss {
     return sensorDSUID;
   }
 
+  void DSStructureQueryBusInterface::protobufMessageRequest(const dsuid_t _dSMdSUID,
+                                              const uint16_t _request_size,
+                                              const uint8_t *_request,
+                                              uint16_t *_response_size,
+                                              uint8_t *_response) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = UserProtobufMessageRequest(m_DSMApiHandle, _dSMdSUID,
+                                         _request_size, _request,
+                                         _response_size, _response);
+    DSBusInterface::checkResultCode(ret);
+  }
+
 } // namespace dss

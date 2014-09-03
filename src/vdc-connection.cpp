@@ -69,9 +69,8 @@ namespace dss {
     }
 
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()
-          ->protobufMessageRequest(_vdsm, message.ByteSize(),
-                                   buffer_in, &bs, buffer_out);
+      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
       return ret;
     }
@@ -158,9 +157,8 @@ namespace dss {
     }
 
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()
-          ->protobufMessageRequest(_vdsm, message.ByteSize(),
-                                   buffer_in, &bs, buffer_out);
+      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
       return ret;
     }
@@ -219,7 +217,7 @@ namespace dss {
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
-    uint16_t bs;
+    uint16_t bs = 0;
 
     memset(buffer_in, 0, sizeof(buffer_in));
     memset(buffer_out, 0, sizeof(buffer_out));
@@ -229,9 +227,8 @@ namespace dss {
     }
 
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()
-          ->protobufMessageRequest(_vdsm, message.ByteSize(),
-                                   buffer_in, &bs, buffer_out);
+      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
       return;
     }
