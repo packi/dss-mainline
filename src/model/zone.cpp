@@ -27,6 +27,7 @@
 #include "src/dss.h"
 #include "src/businterface.h"
 #include "src/base.h"
+#include "src/util.h"
 #include "src/foreach.h"
 #include "src/logger.h"
 #include "src/model/modelconst.h"

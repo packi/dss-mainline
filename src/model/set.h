@@ -92,6 +92,9 @@ namespace dss {
      */
     Set getByGroup(const std::string& _name) const;
 
+    /** Returns a subset of the devices which have sensors of the given type */
+    Set getBySensorType(int _type) const;
+
     /** Returns a subset of devices with the given function-id. */
     Set getByFunctionID(const int _functionID) const;
 

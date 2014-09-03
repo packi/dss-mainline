@@ -24,7 +24,7 @@
 
 #include <stdexcept>
 #include "src/base.h"
-
+#include "src/util.h"
 #include "src/logger.h"
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
@@ -354,6 +354,27 @@ namespace dss {
     }
     return out;
   } // operator<<
+
+  class BySensorSelector : public IDeviceSelector {
+  private:
+    int m_sensorType;
+  public:
+    BySensorSelector(int _type) : m_sensorType(_type) {}
+    virtual ~BySensorSelector() {}
+
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      try {
+        _device->getSensorByType(m_sensorType);
+        return true;
+      } catch (ItemNotFoundException &ex) {}
+
+      return false;
+    }
+  };
+
+  Set Set::getBySensorType(int _type) const {
+    return getSubset(BySensorSelector(_type));
+  }
 
   class SetSplitter {
   public:

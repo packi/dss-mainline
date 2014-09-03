@@ -177,5 +177,4 @@ static OutputChannelInfo kOutputChannels[] = {
     return (kOutputChannels[channel].max * value) /
                     (double)(pow(2, kOutputChannels[channel].size) - 1);
   }
-
 } // namespace
