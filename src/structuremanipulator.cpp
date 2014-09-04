@@ -113,6 +113,18 @@ namespace dss {
       boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(oldZoneID);
       oldZone->removeDevice(ref);
 
+      // if the device that is being moved out of the zone was a zone sensor:
+      // clear the previous sensor assignment and also check if we can reassign
+      // another sensor to the zone
+      try {
+        int sensorType = oldZone->getAssignedSensorType(_device);
+        oldZone->resetSensor(sensorType);
+        oldZone->autoAssignSensors();
+      } catch (ItemNotFoundException &ex) {
+        // no further action for old zone - device was not assigned as
+        // zone sensor
+      }
+
       Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
         Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + dsuid2str(targetDSMeter->getDSID()), lsInfo);
