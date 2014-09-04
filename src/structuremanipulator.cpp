@@ -64,6 +64,21 @@ namespace dss {
     synchronizeGroups(&m_Apartment, &m_Interface);
   } // createZone
 
+  void StructureManipulator::checkSensorsOnDeviceRemoval(
+          boost::shared_ptr<Zone> _zone, boost::shared_ptr<Device> _device) {
+      // if the device that is being moved out of the zone was a zone sensor:
+      // clear the previous sensor assignment and also check if we can reassign
+      // another sensor to the zone
+      try {
+        int sensorType = _zone->getAssignedSensorType(_device);
+        resetZoneSensor(_zone, sensorType);
+        autoAssignZoneSensors(_zone);
+      } catch (ItemNotFoundException &ex) {
+        // no further action for old zone - device was not assigned as
+        // zone sensor
+      }
+  }
+
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
     if(_zone->getPropertyNode() != NULL) {
       _zone->getPropertyNode()->checkWriteAccess();
@@ -112,18 +127,7 @@ namespace dss {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing device from old zone " + intToString(oldZoneID), lsInfo);
       boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(oldZoneID);
       oldZone->removeDevice(ref);
-
-      // if the device that is being moved out of the zone was a zone sensor:
-      // clear the previous sensor assignment and also check if we can reassign
-      // another sensor to the zone
-      try {
-        int sensorType = oldZone->getAssignedSensorType(_device);
-        resetZoneSensor(oldZone, sensorType);
-        autoAssignZoneSensors(oldZone);
-      } catch (ItemNotFoundException &ex) {
-        // no further action for old zone - device was not assigned as
-        // zone sensor
-      }
+      checkSensorsOnDeviceRemoval(oldZone, _device);
 
       Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
@@ -252,7 +256,8 @@ namespace dss {
     if (!IsEqualDsuid(spec.DSID, tmp_dsid)) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
-
+    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_device->getZoneID()),
+                                _device);
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
