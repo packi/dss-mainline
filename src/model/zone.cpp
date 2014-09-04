@@ -339,4 +339,43 @@ namespace dss {
 
     return ret;
   }
+
+  int Zone::getAssignedSensorType(boost::shared_ptr<const Device> _device) const {
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
+      if (!s) {
+        continue;
+      }
+      dsuid_t dev_dsuid = _device->getDSID();
+      dsuid_t zone_dsuid = s->m_DSUID;
+      if (IsEqualDsuid(zone_dsuid, dev_dsuid)) {
+        return s->m_sensorType;
+      }
+    }
+
+    throw ItemNotFoundException("Device " + dsuid2str(_device->getDSID()) +
+                                "has no sensor assignment in zone " +
+                                intToString(m_ZoneID));
+  }
+
+  void Zone::autoAssignSensors() {
+    Set devices = getDevices();
+    if (devices.isEmpty()) {
+      return;
+    }
+
+    boost::shared_ptr<std::vector<int> > unassigned_sensors =
+       getUnassignedSensorTypes();
+
+    // check if our set contains devices that with the matching sensor type
+    // and assign the first device that we find automatically: UC 8.1
+    for (size_t q = 0; q < unassigned_sensors->size(); q++) {
+      Set devicesBySensor =
+          devices.getBySensorType(unassigned_sensors->at(q));
+      if (devicesBySensor.length() > 0) {
+        setSensor(devicesBySensor.get(0).getDevice(),
+                  unassigned_sensors->at(q));
+      }
+    }
+  }
 } // namespace dss
