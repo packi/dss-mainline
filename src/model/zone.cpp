@@ -361,25 +361,4 @@ namespace dss {
                                 "has no sensor assignment in zone " +
                                 intToString(m_ZoneID));
   }
-
-  void Zone::autoAssignSensors() {
-    Set devices = getDevices();
-    if (devices.isEmpty()) {
-      return;
-    }
-
-    boost::shared_ptr<std::vector<int> > unassigned_sensors =
-       getUnassignedSensorTypes();
-
-    // check if our set contains devices that with the matching sensor type
-    // and assign the first device that we find automatically: UC 8.1
-    for (size_t q = 0; q < unassigned_sensors->size(); q++) {
-      Set devicesBySensor =
-          devices.getBySensorType(unassigned_sensors->at(q));
-      if (devicesBySensor.length() > 0) {
-        setSensor(devicesBySensor.get(0).getDevice(),
-                  unassigned_sensors->at(q));
-      }
-    }
-  }
 } // namespace dss

@@ -748,6 +748,9 @@ namespace dss {
   }
 
   void ModelMaintenance::autoAssignSensors() {
+    StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
+                                     *m_pStructureQueryBusInterface,
+                                     *m_pApartment);
     std::vector<boost::shared_ptr<Zone> > zones = m_pApartment->getZones();
     for (size_t i = 0; i < zones.size(); i++) {
       boost::shared_ptr<Zone> zone = zones.at(i);
@@ -755,7 +758,7 @@ namespace dss {
         continue;
       }
 
-      zone->autoAssignSensors();
+      manipulator.autoAssignZoneSensors(zone);
     }
   }
 
@@ -1487,7 +1490,10 @@ namespace dss {
       // yet assigned in the zone: assign it automatically, UC 1.1, including
       // UC 8.1 check
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
-      zone->autoAssignSensors();
+      StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       *m_pApartment);
+      manipulator.autoAssignZoneSensors(zone);
     }
   } // onAddDevice
 

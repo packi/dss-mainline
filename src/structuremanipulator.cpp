@@ -118,8 +118,8 @@ namespace dss {
       // another sensor to the zone
       try {
         int sensorType = oldZone->getAssignedSensorType(_device);
-        oldZone->resetSensor(sensorType);
-        oldZone->autoAssignSensors();
+        resetZoneSensor(oldZone, sensorType);
+        autoAssignZoneSensors(oldZone);
       } catch (ItemNotFoundException &ex) {
         // no further action for old zone - device was not assigned as
         // zone sensor
@@ -149,6 +149,8 @@ namespace dss {
     } else {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: No previous zone...", lsWarning);
     }
+    // check if newly added device might need to be assigned as sensor
+    autoAssignZoneSensors(_zone);
   } // addDeviceToZone
 
   void StructureManipulator::removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter) {
@@ -683,5 +685,26 @@ namespace dss {
                                              const uint8_t _sensorType) {
     _zone->resetSensor(_sensorType);
     m_Interface.resetZoneSensor(_zone->getID(), _sensorType);
+  }
+
+  void StructureManipulator::autoAssignZoneSensors(boost::shared_ptr<Zone> _zone) {
+    Set devices = _zone->getDevices();
+    if (devices.isEmpty()) {
+      return;
+    }
+
+    boost::shared_ptr<std::vector<int> > unassigned_sensors =
+       _zone->getUnassignedSensorTypes();
+
+    // check if our set contains devices that with the matching sensor type
+    // and assign the first device that we find automatically: UC 8.1
+    for (size_t q = 0; q < unassigned_sensors->size(); q++) {
+      Set devicesBySensor =
+          devices.getBySensorType(unassigned_sensors->at(q));
+      if (devicesBySensor.length() > 0) {
+        setZoneSensor(_zone, unassigned_sensors->at(q),
+                      devicesBySensor.get(0).getDevice());
+      }
+    }
   }
 } // namespace dss
