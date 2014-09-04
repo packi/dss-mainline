@@ -301,10 +301,14 @@ namespace dss {
       return;
     }
 
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      if (m_MainSensors.at(i)->m_sensorType == _sensorType) {
-        m_MainSensors.at(i).reset();
+    std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it;
+    for (it = m_MainSensors.begin(); it != m_MainSensors.end();) {
+      if ((*it)->m_sensorType == _sensorType) {
+          (*it).reset();
+        it = m_MainSensors.erase(it);
         return;
+      } else {
+        it++;
       }
     }
   }
