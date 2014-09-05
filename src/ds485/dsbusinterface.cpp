@@ -509,6 +509,13 @@ namespace dss {
       busDevice = m_pModelMaintenance->getDSS().getApartment().getDSMeterByDSID(*_id);
       devType = busDevice->getBusMemberType();
     } catch(ItemNotFoundException& e) {
+      // only important for dSMs that are joining; a dSM that is not known
+      // in the model and that is leaving can be ignored
+      if (!_flag) {
+        m_pModelMaintenance->addModelEvent(
+          new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, *_id));
+        return;
+      }
     }
 
     switch (devType) {
