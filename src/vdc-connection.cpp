@@ -56,6 +56,8 @@ namespace dss {
     query->set_name("model");
     query = getprop->add_query();
     query->set_name("hardwareVersion");
+    query = getprop->add_query();
+    query->set_name("name");
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -127,6 +129,8 @@ namespace dss {
         ret->hardwareInfo = val.v_string();
       } else if (el.name() == "hardwareVersion") {
         ret->hardwareVersion = val.v_string();
+      } else if (el.name() == "name") {
+        ret->name = val.v_string();
       }
     }
 

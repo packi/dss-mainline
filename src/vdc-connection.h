@@ -42,6 +42,7 @@ namespace dss {
     std::string hardwareGuid;
     std::string hardwareInfo;     // property: model
     std::string hardwareVersion;
+    std::string name;
   } VdsdSpec_t;
 
   typedef struct {
