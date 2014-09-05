@@ -130,8 +130,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/security/user.h \
 	$(top_srcdir)/src/sensor_data_uploader.cpp \
 	$(top_srcdir)/src/sensor_data_uploader.h \
-	$(top_srcdir)/src/sensor_monitor.cpp \
-	$(top_srcdir)/src/sensor_monitor.h \
+	$(top_srcdir)/src/monitor_tasks.cpp \
+	$(top_srcdir)/src/monitor_tasks.h \
 	$(top_srcdir)/src/session.cpp \
 	$(top_srcdir)/src/session.h \
 	$(top_srcdir)/src/sessionmanager.cpp \

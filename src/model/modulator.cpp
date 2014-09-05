@@ -37,6 +37,7 @@ namespace dss {
 
   DSMeter::DSMeter(const dsuid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
+    m_DeviceType(BusMember_Unknown),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
     m_EnergyMeterValueWh(0),
@@ -102,6 +103,19 @@ namespace dss {
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
       m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
         ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
+      m_pPropertyNode->createProperty("busMemberType")
+        ->linkToProxy(PropertyProxyReference<int>((int &) m_DeviceType, false));
+
+      m_pPropertyNode->createProperty("ConfigURL")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
+
+      PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
+      capNode->createProperty("devices")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasDevices, false));
+      capNode->createProperty("metering")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasMetering, false));
+      capNode->createProperty("temperature-control")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasTemperatureControl, false));
     }
   } // publishToPropertyTree
 

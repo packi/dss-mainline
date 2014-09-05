@@ -33,9 +33,9 @@
 
 namespace dss {
 
-  boost::shared_ptr<VdcSpec_t> VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
+  boost::shared_ptr<VdsdSpec_t> VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
     vdcapi::Message message;
-    boost::shared_ptr<VdcSpec_t> ret(new VdcSpec_t());
+    boost::shared_ptr<VdsdSpec_t> ret(new VdsdSpec_t());
 
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop =
@@ -43,13 +43,21 @@ namespace dss {
     getprop->set_dsuid(dsuid2str(_device));
 
     vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("hardwareGuid");
-    query = getprop->add_query();
     query->set_name("modelGuid");
     query = getprop->add_query();
-    query->set_name("vendorId");
+    query->set_name("vendorGuid");
     query = getprop->add_query();
-    query->set_name("hardwareInfo");
+    query->set_name("oemGuid");
+    query = getprop->add_query();
+    query->set_name("configURL");
+    query = getprop->add_query();
+    query->set_name("hardwareGuid");
+    query = getprop->add_query();
+    query->set_name("model");
+    query = getprop->add_query();
+    query->set_name("hardwareVersion");
+    query = getprop->add_query();
+    query->set_name("name");
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -63,9 +71,8 @@ namespace dss {
     }
 
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()
-          ->protobufMessageRequest(_vdsm, message.ByteSize(),
-                                   buffer_in, &bs, buffer_out);
+      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
       return ret;
     }
@@ -108,14 +115,89 @@ namespace dss {
         continue;
       }
 
-      if (el.name() == "hardwareGuid") {
-        ret->hardwareGuid = val.v_string();
-      } else if (el.name() == "modelGuid") {
+      if (el.name() == "modelGuid") {
         ret->modelGuid = val.v_string();
-      } else if (el.name() == "vendorId") {
-        ret->vendorId = val.v_string();
-      } else if (el.name() == "hardwareInfo") {
+      } else if (el.name() == "vendorGuid") {
+        ret->vendorGuid = val.v_string();
+      } else if (el.name() == "oemGuid") {
+        ret->oemGuid = val.v_string();
+      } else if (el.name() == "configURL") {
+        ret->configURL = val.v_string();
+      } else if (el.name() == "hardwareGuid") {
+        ret->hardwareGuid = val.v_string();
+      } else if (el.name() == "model") {
         ret->hardwareInfo = val.v_string();
+      } else if (el.name() == "hardwareVersion") {
+        ret->hardwareVersion = val.v_string();
+      } else if (el.name() == "name") {
+        ret->name = val.v_string();
+      }
+    }
+
+    return ret;
+  }
+
+  boost::shared_ptr<VdcSpec_t> VdcHelper::getCapabilities(dsuid_t _vdsm) {
+    vdcapi::Message message;
+    boost::shared_ptr<VdcSpec_t> ret(new VdcSpec_t());
+
+    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
+    vdcapi::vdsm_RequestGetProperty *getprop =
+                                    message.mutable_vdsm_request_get_property();
+    getprop->set_dsuid(dsuid2str(_vdsm));
+
+    vdcapi::PropertyElement *query = getprop->add_query();
+    query->set_name("capabilities");
+
+    uint8_t buffer_in[4096];
+    uint8_t buffer_out[4096];
+    uint16_t bs;
+
+    memset(buffer_in, 0, sizeof(buffer_in));
+    memset(buffer_out, 0, sizeof(buffer_out));
+
+    if (!message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
+      throw std::runtime_error("could not serialize message");
+    }
+
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
+    } else {
+      return ret;
+    }
+
+    message.Clear();
+    if (bs > sizeof(buffer_out)) {
+      throw std::runtime_error("incoming message too large, dropping");
+    }
+
+    if (!message.ParseFromArray(buffer_out, bs)) {
+      throw std::runtime_error("could not parse response message");
+    }
+
+    // error message
+    if (message.type() == vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("received error with code " +
+                               intToString(message.generic_response().code()));
+    }
+    if (!message.has_vdc_response_get_property()) {
+      throw std::runtime_error("received unexpected reply");
+    }
+
+    vdcapi::vdc_ResponseGetProperty response =
+                                            message.vdc_response_get_property();
+
+    for (int i = 0; i < response.properties_size(); i++) {
+      vdcapi::PropertyElement el = response.properties(i);
+
+      if (!el.has_name() || !el.has_value()) {
+        continue;
+      }
+
+      vdcapi::PropertyValue val = el.value();
+      if (el.name() == "metering" && val.has_v_bool()) {
+        ret->hasMetering = val.v_bool();
       }
     }
 
@@ -136,11 +218,10 @@ namespace dss {
 
     vdcapi::PropertyElement *query = getprop->add_query();
     query->set_name("deviceIcon16");
-    query = getprop->add_query();
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
-    uint16_t bs;
+    uint16_t bs = 0;
 
     memset(buffer_in, 0, sizeof(buffer_in));
     memset(buffer_out, 0, sizeof(buffer_out));
@@ -150,9 +231,8 @@ namespace dss {
     }
 
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()
-          ->protobufMessageRequest(_vdsm, message.ByteSize(),
-                                   buffer_in, &bs, buffer_out);
+      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
       return;
     }
@@ -185,33 +265,22 @@ namespace dss {
     for (int i = 0; i < response.properties_size(); i++) {
       vdcapi::PropertyElement el = response.properties(i);
 
-      if (!el.has_name()) {
-        continue;
-      }
-      // we are only expecting string property values here
-      if (!el.has_value()) {
+      if (!el.has_name() || !el.has_value()) {
         continue;
       }
 
       vdcapi::PropertyValue val = el.value();
-      if (!val.has_v_bytes()) {
-        continue;
-      }
-
-      if (el.name() != "deviceIcon16") {
-        continue;
-      }
-
-      std::string icon = val.v_bytes();
-      if (icon.length() > 0) {
-        *data = (uint8_t *)malloc(sizeof(uint8_t) * icon.length());
-        if (*data == NULL) {
-          throw std::runtime_error("could not allocate memory for buffer");
+      if (el.name() == "deviceIcon16" && (val.has_v_bytes())) {
+        std::string icon = val.v_bytes();
+        if (icon.length() > 0) {
+          *data = (uint8_t *)malloc(sizeof(uint8_t) * icon.length());
+          if (*data == NULL) {
+            throw std::runtime_error("could not allocate memory for buffer");
+          }
+          memcpy(*data, icon.data(), icon.length());
+          *size = icon.length();
         }
-        memcpy(*data, icon.data(), icon.length());
-        *size = icon.length();
       }
-      break;
     }
 
     return;

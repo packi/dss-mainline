@@ -52,6 +52,13 @@ namespace dss {
                   public PhysicalModelItem {
   private:
     dsuid_t m_DSID;
+
+    /* dsm-api bus device type and capabilities */
+    BusMemberDevice_t m_DeviceType;
+    bool m_capHasDevices;
+    bool m_capHasMetering;
+    bool m_capHasTemperatureControl;
+
     DeviceVector m_ConnectedDevices;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
@@ -76,6 +83,7 @@ namespace dss {
     std::bitset<8> m_dSMPropertyFlags;
     bool m_IgnoreActionsFromNewDevices;
     uint8_t m_ApartmentState;
+    std::string m_VdcConfigURL;
   private:
     void publishToPropertyTree();
   public:
@@ -93,11 +101,21 @@ namespace dss {
     /** Removes the device identified by the reference. */
     void removeDevice(const DeviceReference& _device);
 
+    /** Set and test capabilities */
+    void setCapability_HasDevices(bool _flag) { m_capHasDevices = _flag; }
+    bool getCapability_HasDevices() const { return m_capHasDevices; }
+    void setCapability_HasMetering(bool _flag) { m_capHasMetering = _flag; }
+    bool getCapability_HasMetering() const { return m_capHasMetering; }
+    void setCapability_HasTemperatureControl(bool _flag) { m_capHasTemperatureControl = _flag; }
+    bool getCapability_HasTemperatureControl() const { return m_capHasTemperatureControl; }
+
+    void setBusMemberType(BusMemberDevice_t _devType) { m_DeviceType = _devType; }
+    BusMemberDevice_t getBusMemberType() const { return m_DeviceType; }
+
     /** Returns the consumption in mW */
     unsigned long getPowerConsumption();
     /** Returns the meter value in Wh */
     unsigned long long getEnergyMeterValue();
-
 
     /** set the consumption in mW */
     void setPowerConsumption(unsigned long _value);
@@ -153,6 +171,8 @@ namespace dss {
     std::string getEnergyMeterValueAsString() const { return intToString(m_EnergyMeterValue); }
     void setApartmentState(uint8_t _state) { m_ApartmentState = _state; }
     uint8_t getApartmentState() const { return m_ApartmentState; }
+    void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
+    const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
   }; // DSMeter
 
 

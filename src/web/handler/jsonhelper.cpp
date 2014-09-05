@@ -64,6 +64,14 @@ namespace dss {
     result->addProperty("OemProductURL", _device.getDevice()->getOemProductURL());
     result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
+    result->addProperty("VdcModelGuid", _device.getDevice()->getVdcModelGuid());
+    result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
+    result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
+    result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
+    result->addProperty("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
+    result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
+    result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+
     if(_device.getDevice()->isPresent()) {
       try {
         result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getDSMeterDSID())));

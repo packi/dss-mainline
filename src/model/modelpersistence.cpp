@@ -586,6 +586,8 @@ namespace dss {
                 m_tempMeter->setDatamodelHash(strToInt(m_chardata));
               } else if (strcmp(_name, "datamodelModification") == 0) {
                 m_tempMeter->setDatamodelModificationcount(strToInt(m_chardata));
+              } else if (strcmp(_name, "deviceType") == 0) {
+                m_tempMeter->setBusMemberType((BusMemberDevice_t) strToInt(m_chardata));
               }
             }
           }
@@ -761,8 +763,8 @@ namespace dss {
     _ofs << doIndent(_indent) << "</zone>" << std::endl;
   } // zoneToXML
 
- void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, std::ofstream& _ofs, const int _indent) {
-   _ofs <<  doIndent(_indent) << "<dsMeter id=\"" + dsuid2str(_pDSMeter->getDSID()) << "\">" << std::endl;
+  void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, std::ofstream& _ofs, const int _indent) {
+    _ofs <<  doIndent(_indent) << "<dsMeter id=\"" + dsuid2str(_pDSMeter->getDSID()) << "\">" << std::endl;
     if(!_pDSMeter->getName().empty()) {
       _ofs << doIndent(_indent + 1) << "<name>" + XMLStringEscape(_pDSMeter->getName()) << "</name>" << std::endl;
     }
@@ -774,6 +776,10 @@ namespace dss {
     _ofs << doIndent(_indent + 1) << "<datamodelModification>" <<
                                         intToString(_pDSMeter->getDatamodelModificationCount()) <<
                                      "</datamodelModification>" << std::endl;
+
+    _ofs << doIndent(_indent + 1) << "<deviceType>" <<
+                                        intToString(_pDSMeter->getBusMemberType()) <<
+                                     "</deviceType>" << std::endl;
 
     _ofs << doIndent(_indent) << "</dsMeter>" << std::endl;
   } // dsMeterToXML

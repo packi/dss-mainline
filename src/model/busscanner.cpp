@@ -42,6 +42,7 @@
 #include "modelmaintenance.h"
 #include "src/ds485/dsdevicebusinterface.h"
 #include "src/ds485/dsbusinterface.h"
+#include "vdc-connection.h"
 
 
 namespace dss {
@@ -57,14 +58,21 @@ namespace dss {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
     DSMeterHash_t hash;
+    DSMeterSpec_t spec;
 
-    log("scanDSMeter: Start " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
+    log("Scan dS485 device start: " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
 
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
       log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsWarning);
-      return false;
+      if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
+        // for known bus device types retry the readout
+        return false;
+      }
+      // for unknown bus devices
+      _dsMeter->setIsValid(true);
+      return true;
     }
 
     if (m_Maintenance.isInitializing() || (_dsMeter->isInitialized() == false) ||
@@ -72,13 +80,15 @@ namespace dss {
         (hash.ModificationCount != _dsMeter->getDatamodelModificationCount())) {
 
       try {
-        DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
+        spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
         _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
         _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
         _dsMeter->setHardwareVersion(spec.HardwareVersion);
         _dsMeter->setApiVersion(spec.APIVersion);
         _dsMeter->setPropertyFlags(spec.flags);
+        _dsMeter->setBusMemberType(spec.DeviceType);
         _dsMeter->setApartmentState(spec.ApartmentState);
+
         if (_dsMeter->getName().empty()) {
           _dsMeter->setName(spec.Name);
         }
@@ -95,41 +105,104 @@ namespace dss {
         return false;
       }
 
-      std::vector<int> zoneIDs;
-      try {
-        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
-      } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
-        return false;
+      switch (_dsMeter->getBusMemberType()) {
+        case BusMember_dSM11:
+          {
+            _dsMeter->setCapability_HasDevices(true);
+            _dsMeter->setCapability_HasMetering(true);
+            _dsMeter->setCapability_HasTemperatureControl(false);
+          }
+          break;
+        case BusMember_dSM12:
+          {
+            _dsMeter->setCapability_HasDevices(true);
+            _dsMeter->setCapability_HasMetering(true);
+            _dsMeter->setCapability_HasTemperatureControl(true);
+          }
+          break;
+        case BusMember_vDSM:
+          {
+            _dsMeter->setCapability_HasDevices(false);
+            _dsMeter->setCapability_HasMetering(false);
+            _dsMeter->setCapability_HasTemperatureControl(true);
+          }
+          break;
+        case BusMember_vDC:
+          {
+            boost::shared_ptr<VdcSpec_t> props;
+            try {
+              props = VdcHelper::getCapabilities(_dsMeter->getDSID());
+              if (props) {
+                _dsMeter->setCapability_HasMetering(props->hasMetering);
+              }
+            } catch(std::runtime_error& e) {
+            }
+            _dsMeter->setCapability_HasDevices(true);
+            _dsMeter->setCapability_HasTemperatureControl(true); // transparently trapped by the vdSM
+
+            boost::shared_ptr<VdsdSpec_t> spec;
+            try {
+              spec = VdcHelper::getSpec(_dsMeter->getDSID(), _dsMeter->getDSID());
+              if (spec) {
+                if (_dsMeter->getName().empty()) {
+                  _dsMeter->setName(spec->name);
+                }
+                _dsMeter->setVdcConfigURL(spec->configURL);
+              }
+            } catch(std::runtime_error& e) {}
+          }
+          break;
+        default:
+          {
+            _dsMeter->setCapability_HasDevices(false);
+            _dsMeter->setCapability_HasMetering(false);
+            _dsMeter->setCapability_HasTemperatureControl(false);
+          }
+          break;
       }
 
-      foreach(int zoneID, zoneIDs) {
-        log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
-        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
-        zone->addToDSMeter(_dsMeter);
-        zone->setIsPresent(true);
-        zone->setIsConnected(true);
-        if(!scanZone(_dsMeter, zone)) {
+      if (_dsMeter->getCapability_HasDevices()) {
+        std::vector<int> zoneIDs;
+        try {
+          zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+        } catch(BusApiError& e) {
+          log("scanDSMeter: Error getting ZoneIDs", lsWarning);
           return false;
         }
+        foreach(int zoneID, zoneIDs) {
+          log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
+          boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+          zone->addToDSMeter(_dsMeter);
+          zone->setIsPresent(true);
+          zone->setIsConnected(true);
+          if (!scanZone(_dsMeter, zone)) {
+            return false;
+          }
+        }
       }
+
       _dsMeter->setIsInitialized(true);
       m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
     } else {
-      std::vector<int> zoneIDs;
-      try {
-        zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
-      } catch(BusApiError& e) {
-        log("scanDSMeter: Error getting ZoneIDs", lsWarning);
-        return false;
+
+      if (_dsMeter->getCapability_HasDevices()) {
+        std::vector<int> zoneIDs;
+        try {
+          zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
+        } catch(BusApiError& e) {
+          log("scanDSMeter: Error getting ZoneIDs", lsWarning);
+          return false;
+        }
+        foreach(int zoneID, zoneIDs) {
+          boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
+          zone->addToDSMeter(_dsMeter);
+          zone->setIsPresent(true);
+          zone->setIsConnected(true);
+          scanDevicesOfZoneQuick(_dsMeter, zone);
+        }
       }
-      foreach(int zoneID, zoneIDs) {
-        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
-        zone->addToDSMeter(_dsMeter);
-        zone->setIsPresent(true);
-        zone->setIsConnected(true);
-        scanDevicesOfZoneQuick(_dsMeter, zone);
-      }
+
     }
 
     _dsMeter->setDatamodelHash(hash.Hash);
@@ -349,7 +422,7 @@ namespace dss {
       }
     }
 
-    scheduleOEMReadout(dev);
+    scheduleDeviceReadout(dev);
 
     m_Maintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
@@ -380,7 +453,7 @@ namespace dss {
     return true;
   } // initializeDeviceFromSpecQuick
 
-  void BusScanner::scheduleOEMReadout(const boost::shared_ptr<Device> _pDevice) {
+  void BusScanner::scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
       if (_pDevice->getRevisionID() >= 0x0350) {
         log("scheduleOEMReadout: schedule EAN readout for: " +
@@ -404,6 +477,18 @@ namespace dss {
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
       _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);
+    }
+
+    // read properties of virtual devices connected to a VDC
+    boost::shared_ptr<DSMeter> pMeter;
+    try {
+      pMeter = m_Apartment.getDSMeterByDSID(_pDevice->getDSMeterDSID());
+    } catch (ItemNotFoundException& e) {
+    }
+    if (pMeter && pMeter->getBusMemberType() == BusMember_vDC) {
+      boost::shared_ptr<ModelMaintenance::VdcDataQuery> task(new ModelMaintenance::VdcDataQuery(_pDevice));
+      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+      pTP->addEvent(task);
     }
   }
 

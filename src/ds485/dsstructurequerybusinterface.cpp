@@ -48,14 +48,16 @@ namespace dss {
     dsuid_t device_list[63]; // TODO: constant for 63?
     int ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
     lock.unlock();
-    if(ret < 0) {
+    if (ret < 0) {
       // DsmApiGetBusMembers returns >= 0 on success
       DSBusInterface::checkResultCode(ret);
     }
 
-    for(int i = 0; i < ret; ++i) {
-      // don't include ourself
-      if(!DsmApiIsdSM(device_list[i])) {
+    dsuid_t ownId;
+    DsmApiGetOwnDSUID(m_DSMApiHandle, &ownId);
+
+    for (int i = 0; i < ret; ++i) {
+      if (IsEqualDsuid(ownId, device_list[i])) {
         continue;
       }
       result.push_back(getDSMeterSpec(device_list[i]));
@@ -65,25 +67,52 @@ namespace dss {
 
   DSMeterSpec_t DSStructureQueryBusInterface::getDSMeterSpec(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
+    if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
+
     DSMeterSpec_t result;
-    result.DSID = _dsMeterID;
     uint8_t nameBuf[NAME_LEN];
     uint8_t flags;
-    int ret = dSMInfo(m_DSMApiHandle, _dsMeterID, &result.HardwareVersion,
-                      &result.SoftwareRevisionARM, &result.SoftwareRevisionDSP,
-                      &result.APIVersion, NULL, nameBuf);
-    DSBusInterface::checkResultCode(ret);
+    uint8_t devType;
+    int ret;
+
+    result.APIVersion = 0;
+    result.HardwareVersion = 0;
+    result.SoftwareRevisionARM = 0;
+    result.SoftwareRevisionDSP = 0;
+    result.ApartmentState = 0;
+    result.DeviceType = BusMember_Unknown;
+    result.DSID = _dsMeterID;
+
+    try {
+      ret = dSMInfo(m_DSMApiHandle, _dsMeterID, &result.HardwareVersion,
+                    &result.SoftwareRevisionARM, &result.SoftwareRevisionDSP,
+                    &result.APIVersion, NULL, nameBuf);
+      DSBusInterface::checkResultCode(ret);
+    } catch (BusApiError& e) {
+      return result;
+    }
 
     char nameStr[NAME_LEN];
     memcpy(nameStr, nameBuf, NAME_LEN);
     result.Name = nameStr;
 
-    ret = dSMProperties_get_flags(m_DSMApiHandle, _dsMeterID, &flags);
-    DSBusInterface::checkResultCode(ret);
-    result.flags = std::bitset<8>(flags);
+    try {
+      ret = dSMProperties_get_flags(m_DSMApiHandle, _dsMeterID, &flags);
+      DSBusInterface::checkResultCode(ret);
+      result.flags = std::bitset<8>(flags);
+    } catch (BusApiError& e) {
+      result.flags = std::bitset<8>(0);
+    }
+
+    try {
+      ret = BusMember_get_type(m_DSMApiHandle, _dsMeterID, &devType);
+      DSBusInterface::checkResultCode(ret);
+    } catch (BusApiError& e) {
+      devType = BusMember_Unknown;
+    }
+    result.DeviceType = (BusMemberDevice_t) devType;
 
     try {
       ret = dSMProperties_get_apartment_state(m_DSMApiHandle, _dsMeterID,
@@ -517,8 +546,9 @@ namespace dss {
     ZoneHeatingConfigSpec_t result;
     int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
         &result.ControllerMode, &result.Kp, &result.Ts, &result.Ti, &result.Kd,
-        &result.Imin, &result.Imax, &result.Ymin, &result.Ymax, &result.AntiWindUp, &result.KeepFloorWarm,
-        &result.SourceZoneId, &result.Offset, &result.EmergencyValue);
+        &result.Imin, &result.Imax, &result.Ymin, &result.Ymax,
+        &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId,
+        &result.Offset, &result.ManualValue, &result.EmergencyValue);
     DSBusInterface::checkResultCode(ret);
     return result;
   } // getZoneHeatingConfig
@@ -578,6 +608,21 @@ namespace dss {
                                              &sensorDSUID);
     DSBusInterface::checkResultCode(ret);
     return sensorDSUID;
+  }
+
+  void DSStructureQueryBusInterface::protobufMessageRequest(const dsuid_t _dSMdSUID,
+                                              const uint16_t _request_size,
+                                              const uint8_t *_request,
+                                              uint16_t *_response_size,
+                                              uint8_t *_response) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = UserProtobufMessageRequest(m_DSMApiHandle, _dSMdSUID,
+                                         _request_size, _request,
+                                         _response_size, _response);
+    DSBusInterface::checkResultCode(ret);
   }
 
 } // namespace dss

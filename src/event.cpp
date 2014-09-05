@@ -195,6 +195,13 @@ namespace dss {
     }
   } // getRaisedAtZone
 
+  boost::shared_ptr<const Group> Event::getRaisedAtGroup() const {
+    if (m_RaiseLocation == erlGroup) {
+      return m_RaisedAtGroup;
+    }
+    return boost::shared_ptr<const Group> ();
+  } // getRaisedAtGroup
+
   bool Event::isReplacementFor(const dss::Event& _other) {
     bool sameName = getName() == _other.getName();
     bool sameContext = getPropertyByName("context") == _other.getPropertyByName("context");

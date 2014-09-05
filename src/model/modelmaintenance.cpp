@@ -56,6 +56,7 @@
 #include "http_client.h"
 #include "boost/filesystem.hpp"
 #include "util.h"
+#include "vdc-connection.h"
 
 namespace dss {
 
@@ -220,19 +221,18 @@ namespace dss {
   } // execute
 
   void ModelMaintenance::discoverDS485Devices() {
-    if(m_pStructureQueryBusInterface != NULL) {
+    if (m_pStructureQueryBusInterface != NULL) {
       try {
-        std::vector<DSMeterSpec_t> meters =
-          m_pStructureQueryBusInterface->getDSMeters();
+        std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
         foreach (DSMeterSpec_t& spec, meters) {
 
           boost::shared_ptr<DSMeter> dsMeter;
           try{
              dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
-             log ("dSM already known: " + dsuid2str(spec.DSID));
+             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
           } catch(ItemNotFoundException& e) {
              dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
-             log ("Discovered new dSM: " + dsuid2str(spec.DSID), lsWarning);
+             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
           }
 
           try {
@@ -554,7 +554,6 @@ namespace dss {
             meter->updateEnergyMeterValue(energy);
             m_pMetering->postMeteringEvent(meter, power, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), DateTime());
           } catch(ItemNotFoundException& _e) {
-            log("Received metering data for unknown meter, discarding", lsWarning);
           }
         }
         break;
@@ -748,15 +747,29 @@ namespace dss {
     state->setState(coSystem, strstate);
   }
 
+  void ModelMaintenance::autoAssignSensors() {
+    StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
+                                     *m_pStructureQueryBusInterface,
+                                     *m_pApartment);
+    std::vector<boost::shared_ptr<Zone> > zones = m_pApartment->getZones();
+    for (size_t i = 0; i < zones.size(); i++) {
+      boost::shared_ptr<Zone> zone = zones.at(i);
+      if (!zone) {
+        continue;
+      }
+
+      manipulator.autoAssignZoneSensors(zone);
+    }
+  }
+
   void ModelMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
     foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
-      if(pDSMeter->isPresent()) {
-        if(!pDSMeter->isValid()) {
+      if (pDSMeter->isPresent() &&
+          (!pDSMeter->isValid())) {
           dsMeterReady(pDSMeter->getDSID());
           hadToUpdate = true;
           break;
-        }
       }
     }
 
@@ -778,6 +791,7 @@ namespace dss {
       }
 
       setApartmentState();
+      autoAssignSensors();
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
         raiseEvent(readyEvent);
@@ -806,40 +820,42 @@ namespace dss {
   } // eraseModelEventsFromQueue
 
   void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
-    log("Scanning dSM: " + dsuid2str(_dsMeterBusID), lsInfo);
+    log("Scanning dS485 bus device: " + dsuid2str(_dsMeterBusID), lsInfo);
     try {
 
       boost::shared_ptr<DSMeter> mod;
       try {
         mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
       } catch(ItemNotFoundException& e) {
-        log("Error scanning dSM: " + dsuid2str(_dsMeterBusID) + " not found in data model", lsError);
+        log("Error scanning dS485 bus device: " + dsuid2str(_dsMeterBusID) + " not found in data model", lsError);
         return; // nothing we could do here ...
       }
 
       try {
         BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if (!scanner.scanDSMeter(mod)) {
-          log("Error scanning dSM: " + dsuid2str(_dsMeterBusID) + ", data model incomplete", lsError);
+          log("Error scanning dS485 device: " + dsuid2str(_dsMeterBusID) + ", data model incomplete", lsError);
           return;
         }
 
-        Set devices = mod->getDevices();
-        for (int i = 0; i < devices.length(); i++) {
-          devices[i].getDevice()->setIsConnected(true);
-        }
+        if (mod->getCapability_HasDevices()) {
+          Set devices = mod->getDevices();
+          for (int i = 0; i < devices.length(); i++) {
+            devices[i].getDevice()->setIsConnected(true);
+          }
 
-        // synchronize devices with binary inputs
-        if (mod->hasPendingEvents()) {
-          scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device> ());
-        } else {
-          log(std::string("Event counter match on dSM ") + dsuid2str(_dsMeterBusID), lsDebug);
-        }
+          // synchronize devices with binary inputs
+          if (mod->hasPendingEvents()) {
+            scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device>());
+          } else {
+            log(std::string("Event counter match on dSM ") + dsuid2str(_dsMeterBusID), lsDebug);
+          }
 
-        // additionally set all previously connected device to valid now
-        devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dsMeterBusID);
-        for (int i = 0; i < devices.length(); i++) {
-          devices[i].getDevice()->setIsValid(true);
+          // additionally set all previously connected device to valid now
+          devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dsMeterBusID);
+          for (int i = 0; i < devices.length(); i++) {
+            devices[i].getDevice()->setIsValid(true);
+          }
         }
 
         boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
@@ -1455,6 +1471,30 @@ namespace dss {
     log("  BusID:     " + intToString(_devID));
 
     rescanDevice(_dsMeterID, _devID);
+    // model_ready sets initializing flag to false and we want to perform
+    // this check only if a new device was discovered after the model ready
+    // event
+    if (!m_IsInitializing) {
+
+      boost::shared_ptr<Device> device;
+      try {
+        DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
+        device = devRef.getDevice();
+      } catch (ItemNotFoundException &ex) {
+        log("Device with id " + intToString(_devID) +
+            " not found, not checking sensor assignments");
+        return;
+      }
+
+      // if the newly added devices provides any sensors that are not
+      // yet assigned in the zone: assign it automatically, UC 1.1, including
+      // UC 8.1 check
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
+                                       *m_pStructureQueryBusInterface,
+                                       *m_pApartment);
+      manipulator.autoAssignZoneSensors(zone);
+    }
   } // onAddDevice
 
   void ModelMaintenance::onRemoveDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID) {
@@ -1878,7 +1918,7 @@ namespace dss {
     }
 
     boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event("TODO: Heating Error Event"));
+    pEvent.reset(new Event(EventName::HeatingControllerState));
     pEvent->setProperty("zoneID", intToString(_zoneID));
     pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
     pEvent->setProperty("CtrlState", intToString(_State));
@@ -2062,6 +2102,55 @@ namespace dss {
 
     boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_dsmId, m_deviceAdress));
     WebserviceConnection::getInstance()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
+  }
+
+  ModelMaintenance::VdcDataQuery::VdcDataQuery(boost::shared_ptr<Device> _device)
+    : Task(),
+      m_Device(_device)
+  {}
+
+  void ModelMaintenance::VdcDataQuery::run()
+  {
+    try {
+      boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
+      m_Device->setVdcModelGuid(props->modelGuid);
+      m_Device->setVdcVendorGuid(props->vendorGuid);
+      m_Device->setVdcOemGuid(props->oemGuid);
+      m_Device->setVdcConfigURL(props->configURL);
+      m_Device->setVdcHardwareGuid(props->hardwareGuid);
+      m_Device->setVdcHardwareInfo(props->hardwareInfo);
+      m_Device->setVdcHardwareVersion(props->hardwareVersion);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("VdcDataQuery: could not query properties from " +
+          dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
+    }
+
+    uint8_t *data;
+    size_t dataSize = 0;
+
+    try {
+      VdcHelper::getIcon(m_Device->getDSMeterDSID(), m_Device->getDSID(), &dataSize, &data);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("VdcDataQuery: could not query icon data from " +
+          dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
+    }
+    if (dataSize > 0) {
+      boost::filesystem::path iconBasePath;
+      boost::filesystem::path iconFile;
+      PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+      iconBasePath = propSys.getStringValue("/config/subsystems/Apartment/iconBasePath");
+      iconFile = dsuid2str(m_Device->getDSID()) + ".png";
+      boost::filesystem::path iconPath = iconBasePath / iconFile;
+
+      /* write binary file from memory */
+      FILE *binFile = fopen(iconPath.c_str(), "wb");
+      if (binFile) {
+        fwrite(data, sizeof(uint8_t), dataSize, binFile);
+        fclose(binFile);
+        m_Device->setVdcIconPath(iconFile.string());
+      }
+      free(data);
+    }
   }
 
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";

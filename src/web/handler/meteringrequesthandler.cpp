@@ -71,6 +71,10 @@ namespace dss {
 
     std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
     foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
+      if (!dsMeter->getCapability_HasMetering()) {
+        continue;
+      }
+
       boost::shared_ptr<JSONObject> energyEntry(new JSONObject());
       series->addElement("", energyEntry);
       energyEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));

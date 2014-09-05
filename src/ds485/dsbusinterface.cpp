@@ -37,7 +37,9 @@
 
 #include "src/model/modelevent.h"
 #include "src/model/modelconst.h"
+#include "src/model/apartment.h"
 #include "src/model/device.h"
+#include "src/model/modulator.h"
 #include "src/model/modelmaintenance.h"
 #include "src/security/security.h"
 
@@ -500,19 +502,46 @@ namespace dss {
 
   void DSBusInterface::handleBusChange(dsuid_t *_id, int _flag) {
     loginFromCallback();
-    ModelEvent::EventType eventType;
 
-    if (!DsmApiIsdSM(*_id)) {
-      return;
+    BusMemberDevice_t devType = BusMember_Unknown;
+    boost::shared_ptr<DSMeter> busDevice;
+    try {
+      busDevice = m_pModelMaintenance->getDSS().getApartment().getDSMeterByDSID(*_id);
+      devType = busDevice->getBusMemberType();
+    } catch(ItemNotFoundException& e) {
+      // only important for dSMs that are joining; a dSM that is not known
+      // in the model and that is leaving can be ignored
+      if (!_flag) {
+        m_pModelMaintenance->addModelEvent(
+          new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, *_id));
+        return;
+      }
     }
 
-    if(_flag) {
-      eventType = ModelEvent::etLostDSMeter;
-    } else	{
-      eventType = ModelEvent::etDS485DeviceDiscovered;
+    switch (devType) {
+      case BusMember_dSM11:
+      case BusMember_dSM12:
+      case BusMember_vDC:
+      case BusMember_vDSM:
+        {
+          ModelEvent::EventType eventType;
+          if(_flag) {
+            eventType = ModelEvent::etLostDSMeter;
+          } else  {
+            eventType = ModelEvent::etDS485DeviceDiscovered;
+          }
+          m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
+        }
+        break;
+      case BusMember_Unknown:
+      default:
+        {
+          log("ds485 bus change unhandled: " + dsuid2str(*_id) +
+              ", State: " + intToString(_flag) +
+              ", Device Type: " + intToString(devType), lsWarning);
+        }
+        break;
     }
-
-    m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
   }
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
@@ -933,9 +962,10 @@ namespace dss {
   void DSBusInterface::handleHeatingControllerConfig(uint8_t _errorCode,
       dsuid_t _sourceID, dsuid_t _destinationID,
       uint16_t _ZoneId, uint8_t _ControllerMode,
-      uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
-      uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
-      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue) {
+      uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
+      uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
+      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
+      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     loginFromCallback();
 
     boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
@@ -952,6 +982,7 @@ namespace dss {
     spec->KeepFloorWarm = _KeepFloorWarm;
     spec->SourceZoneId = _SourceZoneId;
     spec->Offset = _Offset;
+    spec->ManualValue = _ManualValue;
     spec->EmergencyValue = _EmergencyValue;
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, _destinationID);
@@ -963,14 +994,15 @@ namespace dss {
   void DSBusInterface::handleHeatingControllerConfigCallback(uint8_t _errorCode, void *_userData,
       dsuid_t _sourceID, dsuid_t _destinationID,
       uint16_t _ZoneId, uint8_t _ControllerMode,
-      uint16_t _Kp, uint16_t _Ts, uint16_t _Ti, uint16_t _Kd,
-      uint16_t _Imin, uint16_t _Imax, uint16_t _Ymin, uint16_t _Ymax,
-      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId, uint8_t _Offset, uint8_t _EmergencyValue) {
+      uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
+      uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
+      uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
+      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     if (_errorCode == 0) {
       static_cast<DSBusInterface*>(_userData)->
           handleHeatingControllerConfig(_errorCode, _sourceID, _destinationID, _ZoneId,
               _ControllerMode, _Kp, _Ts, _Ti, _Kd, _Imin, _Imax, _Ymin, _Ymax,
-              _AntiWindUp, _KeepFloorWarm, _SourceZoneId, _Offset, _EmergencyValue);
+              _AntiWindUp, _KeepFloorWarm, _SourceZoneId, _Offset, _ManualValue, _EmergencyValue);
     }
   } // handleHeatingControllerConfigCallback
 
@@ -1100,16 +1132,5 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleDsmSetFlags(_destinationID,
                                                         std::bitset<8>(_flags));
   } // handleDsmSetNameCallback
-
-  void DSBusInterface::protobufMessageRequest(dsuid_t _dSMdSUID,
-                                              uint16_t _request_size,
-                                              const uint8_t *_request,
-                                              uint16_t *_response_size,
-                                              uint8_t *_response) {
-    int ret = UserProtobufMessageRequest(m_dsmApiHandle, _dSMdSUID,
-                                         _request_size, _request,
-                                         _response_size, _response);
-    checkResultCode(ret);
-  }
 
 } // namespace dss

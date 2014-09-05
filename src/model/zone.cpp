@@ -27,6 +27,7 @@
 #include "src/dss.h"
 #include "src/businterface.h"
 #include "src/base.h"
+#include "src/util.h"
 #include "src/foreach.h"
 #include "src/logger.h"
 #include "src/model/modelconst.h"
@@ -229,7 +230,7 @@ namespace dss {
   }
 
   void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice) {
-    m_HeatingProperties.m_CtrlOffset = _ctrlMode;
+    m_HeatingProperties.m_HeatingControlMode = _ctrlMode;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
     m_HeatingProperties.m_CtrlOffset = _offset;
     m_HeatingProperties.m_HeatingMasterZone = _masterZone;
@@ -300,12 +301,64 @@ namespace dss {
       return;
     }
 
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      if (m_MainSensors.at(i)->m_sensorType == _sensorType) {
-        m_MainSensors.at(i).reset();
+    std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it;
+    for (it = m_MainSensors.begin(); it != m_MainSensors.end();) {
+      if ((*it)->m_sensorType == _sensorType) {
+          (*it).reset();
+        it = m_MainSensors.erase(it);
         return;
+      } else {
+        it++;
       }
     }
   }
 
+  boost::shared_ptr<std::vector<int> > Zone::getUnassignedSensorTypes() const {
+    int sensorTypes[] = {
+      SensorIDTemperatureIndoors,
+      SensorIDBrightnessIndoors,
+      SensorIDHumidityIndoors,
+      SensorIDCO2Concentration
+    };
+
+    boost::shared_ptr<std::vector<int> >ret(
+        new std::vector<int>(sensorTypes,
+                        sensorTypes + sizeof(sensorTypes) / sizeof(int)));
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
+      if (s) {
+        continue;
+      }
+
+      std::vector<int>::iterator it;
+      for (it = ret->begin(); it != ret->end();) {
+        if (*it == s->m_sensorType) {
+          it = ret->erase(it);
+        } else {
+          it++;
+        }
+      }
+    }
+
+    return ret;
+  }
+
+  int Zone::getAssignedSensorType(boost::shared_ptr<const Device> _device) const {
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
+      if (!s) {
+        continue;
+      }
+      dsuid_t dev_dsuid = _device->getDSID();
+      dsuid_t zone_dsuid = s->m_DSUID;
+      if (IsEqualDsuid(zone_dsuid, dev_dsuid)) {
+        return s->m_sensorType;
+      }
+    }
+
+    throw ItemNotFoundException("Device " + dsuid2str(_device->getDSID()) +
+                                "has no sensor assignment in zone " +
+                                intToString(m_ZoneID));
+  }
 } // namespace dss

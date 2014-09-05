@@ -51,6 +51,7 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
   dsuid_t dsuid;
   dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
+  pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
   pMeters.push_back(pMeter);
   dss::Metering metering(NULL);
@@ -146,6 +147,7 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
   dsuid_t dsuid;
   dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
+  pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
   pMeters.push_back(pMeter);
   dss::Metering metering(NULL);

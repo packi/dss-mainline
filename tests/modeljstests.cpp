@@ -510,6 +510,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
+  apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -532,6 +533,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
+  apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -555,6 +557,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
+  apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -581,6 +584,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
+  apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());

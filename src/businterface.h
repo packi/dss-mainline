@@ -43,6 +43,7 @@ namespace dss {
 
   typedef struct {
     dsuid_t DSID;
+    BusMemberDevice_t DeviceType;
     uint32_t SoftwareRevisionARM;
     uint32_t SoftwareRevisionDSP;
     uint32_t HardwareVersion;
@@ -107,18 +108,19 @@ namespace dss {
   typedef struct {
     uint8_t ControllerMode;
     uint16_t Kp;
-    uint16_t Ts;
+    uint8_t Ts;
     uint16_t Ti;
     uint16_t Kd;
     uint16_t Imin;
     uint16_t Imax;
-    uint16_t Ymin;
-    uint16_t Ymax;
+    uint8_t Ymin;
+    uint8_t Ymax;
     uint8_t AntiWindUp;
     uint8_t KeepFloorWarm;
     uint16_t SourceZoneId;
     uint8_t Offset;
     uint8_t EmergencyValue;
+    uint8_t ManualValue;
   } ZoneHeatingConfigSpec_t;
 
   typedef struct {
@@ -130,7 +132,7 @@ namespace dss {
     uint32_t Yp;
     uint32_t Yi;
     uint32_t Yd;
-    uint16_t Y;
+    uint8_t Y;
     uint8_t AntiWindUp;
   } ZoneHeatingInternalsSpec_t;
 
@@ -276,6 +278,9 @@ namespace dss {
     virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) = 0;
+
+    /** vdsm property queries */
+    virtual void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {
@@ -435,13 +440,6 @@ namespace dss {
 
     virtual void setBusEventSink(BusEventSink* _eventSink) = 0;
     virtual const std::string getConnectionURI() { return ""; }
-    virtual void protobufMessageRequest(dsuid_t _dSMdSUID,
-                                        uint16_t _request_size,
-                                        const uint8_t *_request,
-                                        uint16_t *_response_size,
-                                        uint8_t *_response) {
-      throw std::runtime_error("not supported by interface");
-    }
   };
 
   class BusApiError : public DSSException {

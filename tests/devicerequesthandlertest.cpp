@@ -370,8 +370,9 @@ BOOST_FIXTURE_TEST_CASE(testSetConfig, Fixture) {
   RestfulRequest req("device/setConfig", params);
 
   m_pApartment->getDeviceByDSID(m_ValidDSUID)->setIsPresent(true);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  testOkIs(response, true);
+  // no ds485 bus present, exception is a good thing
+  BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()),
+                    std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetConfigInvalidParameters, Fixture) {
