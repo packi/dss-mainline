@@ -192,6 +192,7 @@ namespace dss {
     void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void setApartmentState();
+    void autoAssignSensors();
     void readOutPendingMeter();
 
     void readConfiguration();

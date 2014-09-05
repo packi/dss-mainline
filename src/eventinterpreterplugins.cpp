@@ -49,7 +49,7 @@
 #include "src/internaleventrelaytarget.h"
 #include "src/webservice_api.h"
 #include "src/subscription_profiler.h"
-#include "src/sensor_monitor.h"
+#include "src/monitor_tasks.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -1114,4 +1114,45 @@ namespace dss {
       pTP->addEvent(task);
     }
   }
+
+  EventInterpreterHeatingMonitorPlugin::EventInterpreterHeatingMonitorPlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterHeatingMonitorPlugin", _pInterpreter) {}
+
+  __DEFINE_LOG_CHANNEL__(EventInterpreterHeatingMonitorPlugin, lsInfo);
+
+  void EventInterpreterHeatingMonitorPlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+    subscription.reset(new EventSubscription("model_ready",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+    subscription.reset(new EventSubscription("dsMeter_ready",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+    subscription.reset(new EventSubscription(EventName::HeatingControllerState,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+    subscription.reset(new EventSubscription("check_heating_groups",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterHeatingMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<HeatingMonitorTask> task(
+          new HeatingMonitorTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
+      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
+      pTP->addEvent(task);
+    }
+  }
+
 } // namespace dss

@@ -169,6 +169,17 @@ namespace dss {
       virtual void subscribe();
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
+
+  class EventInterpreterHeatingMonitorPlugin : public EventInterpreterPlugin {
+    private:
+      __DECL_LOG_CHANNEL__
+    public:
+      EventInterpreterHeatingMonitorPlugin(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterHeatingMonitorPlugin() {};
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

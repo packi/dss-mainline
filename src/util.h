@@ -26,6 +26,7 @@
 
 #include <string>
 #include <inttypes.h>
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
 

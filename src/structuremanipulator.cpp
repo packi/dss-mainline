@@ -64,6 +64,21 @@ namespace dss {
     synchronizeGroups(&m_Apartment, &m_Interface);
   } // createZone
 
+  void StructureManipulator::checkSensorsOnDeviceRemoval(
+          boost::shared_ptr<Zone> _zone, boost::shared_ptr<Device> _device) {
+      // if the device that is being moved out of the zone was a zone sensor:
+      // clear the previous sensor assignment and also check if we can reassign
+      // another sensor to the zone
+      try {
+        int sensorType = _zone->getAssignedSensorType(_device);
+        resetZoneSensor(_zone, sensorType);
+        autoAssignZoneSensors(_zone);
+      } catch (ItemNotFoundException &ex) {
+        // no further action for old zone - device was not assigned as
+        // zone sensor
+      }
+  }
+
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
     if(_zone->getPropertyNode() != NULL) {
       _zone->getPropertyNode()->checkWriteAccess();
@@ -112,6 +127,7 @@ namespace dss {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing device from old zone " + intToString(oldZoneID), lsInfo);
       boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(oldZoneID);
       oldZone->removeDevice(ref);
+      checkSensorsOnDeviceRemoval(oldZone, _device);
 
       Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
@@ -137,6 +153,8 @@ namespace dss {
     } else {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: No previous zone...", lsWarning);
     }
+    // check if newly added device might need to be assigned as sensor
+    autoAssignZoneSensors(_zone);
   } // addDeviceToZone
 
   void StructureManipulator::removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter) {
@@ -238,7 +256,8 @@ namespace dss {
     if (!IsEqualDsuid(spec.DSID, tmp_dsid)) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
-
+    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_device->getZoneID()),
+                                _device);
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
@@ -671,5 +690,26 @@ namespace dss {
                                              const uint8_t _sensorType) {
     _zone->resetSensor(_sensorType);
     m_Interface.resetZoneSensor(_zone->getID(), _sensorType);
+  }
+
+  void StructureManipulator::autoAssignZoneSensors(boost::shared_ptr<Zone> _zone) {
+    Set devices = _zone->getDevices();
+    if (devices.isEmpty()) {
+      return;
+    }
+
+    boost::shared_ptr<std::vector<int> > unassigned_sensors =
+       _zone->getUnassignedSensorTypes();
+
+    // check if our set contains devices that with the matching sensor type
+    // and assign the first device that we find automatically: UC 8.1
+    for (size_t q = 0; q < unassigned_sensors->size(); q++) {
+      Set devicesBySensor =
+          devices.getBySensorType(unassigned_sensors->at(q));
+      if (devicesBySensor.length() > 0) {
+        setZoneSensor(_zone, unassigned_sensors->at(q),
+                      devicesBySensor.get(0).getDevice());
+      }
+    }
   }
 } // namespace dss
