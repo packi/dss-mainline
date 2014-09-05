@@ -106,6 +106,9 @@ namespace dss {
       m_pPropertyNode->createProperty("busMemberType")
         ->linkToProxy(PropertyProxyReference<int>((int &) m_DeviceType, false));
 
+      m_pPropertyNode->createProperty("ConfigURL")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
+
       PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
       capNode->createProperty("devices")
         ->linkToProxy(PropertyProxyReference<bool>(m_capHasDevices, false));

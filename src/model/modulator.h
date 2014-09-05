@@ -83,6 +83,7 @@ namespace dss {
     std::bitset<8> m_dSMPropertyFlags;
     bool m_IgnoreActionsFromNewDevices;
     uint8_t m_ApartmentState;
+    std::string m_VdcConfigURL;
   private:
     void publishToPropertyTree();
   public:
@@ -170,6 +171,8 @@ namespace dss {
     std::string getEnergyMeterValueAsString() const { return intToString(m_EnergyMeterValue); }
     void setApartmentState(uint8_t _state) { m_ApartmentState = _state; }
     uint8_t getApartmentState() const { return m_ApartmentState; }
+    void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
+    const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
   }; // DSMeter
 
 

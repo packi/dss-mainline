@@ -139,6 +139,17 @@ namespace dss {
             }
             _dsMeter->setCapability_HasDevices(true);
             _dsMeter->setCapability_HasTemperatureControl(true); // transparently trapped by the vdSM
+
+            boost::shared_ptr<VdsdSpec_t> spec;
+            try {
+              spec = VdcHelper::getSpec(_dsMeter->getDSID(), _dsMeter->getDSID());
+              if (spec) {
+                if (_dsMeter->getName().empty()) {
+                  _dsMeter->setName(spec->name);
+                }
+                _dsMeter->setVdcConfigURL(spec->configURL);
+              }
+            } catch(std::runtime_error& e) {}
           }
           break;
         default:

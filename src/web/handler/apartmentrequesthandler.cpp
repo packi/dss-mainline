@@ -195,6 +195,7 @@ namespace dss {
           circuit->addProperty("busMemberType", dsMeter->getBusMemberType());
           circuit->addProperty("hasDevices", dsMeter->getCapability_HasDevices());
           circuit->addProperty("hasMetering", dsMeter->getCapability_HasMetering());
+          circuit->addProperty("VdcConfigURL", dsMeter->getVdcConfigURL());
           std::bitset<8> flags = dsMeter->getPropertyFlags();
           circuit->addProperty("ignoreActionsFromNewDevices", flags.test(4));
         }
