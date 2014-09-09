@@ -252,6 +252,7 @@ namespace dss {
 
     switch (_sensorType) {
       case SensorIDTemperatureIndoors: pZone->setTemperature(_sensorValue, now); break;
+      case SensorIDTemperatureOutdoors: pZone->setTemperature(_sensorValue, now); break;
       case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_sensorValue, now); break;
       case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_sensorValue, now); break;
       default: break;
