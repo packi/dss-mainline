@@ -366,7 +366,7 @@ namespace dss {
             boost::shared_ptr<JSONObject> sensor(new JSONObject());
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
             sensors->addElement("", sensor);
-            sensor->addProperty("type", devSensor->m_sensorType);
+            sensor->addProperty("sensorType", devSensor->m_sensorType);
             sensor->addProperty("dsuid", dsuid2str(devSensor->m_DSUID));
           }
         }

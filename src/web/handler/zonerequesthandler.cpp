@@ -597,6 +597,21 @@ namespace dss {
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.resetZoneSensor(pZone, type);
           return success();
+        } else if(_request.getMethod() == "getAssignedSensors") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          boost::shared_ptr<JSONArrayBase> sensors(new JSONArrayBase());
+          resultObj->addElement("sensors", sensors);
+          std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
+          for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
+              it != slist.end();
+              it ++) {
+            boost::shared_ptr<JSONObject> sensor(new JSONObject());
+            boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+            sensors->addElement("", sensor);
+            sensor->addProperty("sensorType", devSensor->m_sensorType);
+            sensor->addProperty("dsuid", dsuid2str(devSensor->m_DSUID));
+          }
+          return success(resultObj);
 
         } else {
           throw std::runtime_error("Unhandled function");
