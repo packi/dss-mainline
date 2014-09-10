@@ -69,13 +69,32 @@ namespace dss {
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
       m_pPropertyNode =
         m_pApartment->getPropertyNode()->createProperty("dSMeters/" + dsuid2str(m_DSID));
-      try {
-      m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
-      } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(err.what());
-      }
-
       m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
+
+      dsid_t dsid;
+      if (dsuid_to_dsid(m_DSID, &dsid)) {
+        m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
+      }
+      m_pPropertyNode->createProperty("name")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
+
+      m_pPropertyNode->createProperty("isValid")
+        ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
+      m_pPropertyNode->createProperty("isInitialized")
+        ->linkToProxy(PropertyProxyReference<bool>(m_IsInitialized, false));
+      m_pPropertyNode->createProperty("present")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
+      m_pPropertyNode->createProperty("busMemberType")
+        ->linkToProxy(PropertyProxyReference<int>((int &) m_DeviceType, false));
+
+      PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
+      capNode->createProperty("devices")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasDevices, false));
+      capNode->createProperty("metering")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasMetering, false));
+      capNode->createProperty("temperature-control")
+        ->linkToProxy(PropertyProxyReference<bool>(m_capHasTemperatureControl, false));
+
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
@@ -86,12 +105,7 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<double>(m_EnergyMeterValue));
       m_pPropertyNode->createProperty("energyMeterAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
-      m_pPropertyNode->createProperty("isValid")
-        ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
-      m_pPropertyNode->createProperty("isInitialized")
-        ->linkToProxy(PropertyProxyReference<bool>(m_IsInitialized, false));
-      m_pPropertyNode->createProperty("present")
-        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
+
       m_pPropertyNode->createProperty("hardwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
       m_pPropertyNode->createProperty("armSoftwareVersion")
@@ -102,23 +116,12 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")
         ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
-      m_pPropertyNode->createProperty("name")
-        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
       m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
         ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
-      m_pPropertyNode->createProperty("busMemberType")
-        ->linkToProxy(PropertyProxyReference<int>((int &) m_DeviceType, false));
 
       m_pPropertyNode->createProperty("ConfigURL")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
 
-      PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
-      capNode->createProperty("devices")
-        ->linkToProxy(PropertyProxyReference<bool>(m_capHasDevices, false));
-      capNode->createProperty("metering")
-        ->linkToProxy(PropertyProxyReference<bool>(m_capHasMetering, false));
-      capNode->createProperty("temperature-control")
-        ->linkToProxy(PropertyProxyReference<bool>(m_capHasTemperatureControl, false));
     }
   } // publishToPropertyTree
 
