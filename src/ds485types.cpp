@@ -103,7 +103,7 @@ bool IsEvenDsuid(dsuid_t dsuid) {
 
 bool dsuid_get_next_dsuid(const dsuid_t dsuid, dsuid_t *out) {
   if (::dsuid_get_next_dsuid(&dsuid, out) != DSUID_RC_OK) {
-    SetNullDsuid(*out);
+    memset(out, 0, sizeof(dsid_t));
     return false;
   }
   return true;
@@ -111,7 +111,7 @@ bool dsuid_get_next_dsuid(const dsuid_t dsuid, dsuid_t *out) {
 
 bool dsuid_to_dsid(const dsuid_t dsuid, dsid_t *dsid) {
   if (::dsuid_to_dsid(&dsuid, dsid) != DSUID_RC_OK) {
-    SetNullDsuid(*dsid);
+    memset(dsid, 0, sizeof(dsid_t));
     return false;
   }
   return true;
