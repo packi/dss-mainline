@@ -976,7 +976,7 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         pEvent->setProperty("token", _token);
-        dsuid_t originDSUID;
+        dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
