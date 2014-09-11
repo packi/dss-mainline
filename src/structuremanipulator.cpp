@@ -675,7 +675,7 @@ namespace dss {
                                                   const ZoneHeatingConfigSpec_t _spec) {
     // TODO: synchronize different and disconnected dSM's
 
-    _zone->setHeatingControlMode(_spec.ControllerMode,_spec.Offset, _spec.SourceZoneId, _ctrlDSUID);
+    _zone->setHeatingControlMode(_spec.ControllerMode,_spec.Offset, _spec.SourceZoneId, _spec.ManualValue, _ctrlDSUID);
     m_Interface.setZoneHeatingConfig(_ctrlDSUID, _zone->getID(), _spec);
   } // setZoneHeatingConfig
 

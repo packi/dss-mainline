@@ -47,14 +47,16 @@ namespace dss {
       m_HeatingControlMode(0),
       m_HeatingControlState(0),
       m_HeatingMasterZone(0),
-      m_CtrlOffset(0)
+      m_CtrlOffset(0),
+      m_ManualValue(0)
       {
         SetNullDsuid(m_HeatingControlDSUID);
       }
-    int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value
+    int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value; 4=manual
     int m_HeatingControlState;     // Control state: 0=internal; 1=external; 2=exbackup; 3=emergency
     int m_HeatingMasterZone;       // only used for mode 2
     int m_CtrlOffset;              // only used for mode 2
+    int m_ManualValue;             // only used for mode 4
     dsuid_t m_HeatingControlDSUID; // DSUID of the meter or device or service running a controller for this zone
   } ZoneHeatingProperties_t;
 
@@ -154,7 +156,7 @@ namespace dss {
     ZoneHeatingStatus_t getHeatingStatus() const;
 
     /** Set heating properties and runtime values */
-    void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice);
+    void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
     void setHeatingControlState(int _ctrlState);
     void setHeatingOperationMode(int _operationMode);
     void setTemperature(double _value, DateTime& _ts);

@@ -1830,7 +1830,7 @@ namespace dss {
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       hProp = zone->getHeatingProperties();
-      zone->setHeatingControlMode(config->ControllerMode, config->Offset, config->SourceZoneId, _dsMeterID);
+      zone->setHeatingControlMode(config->ControllerMode, config->Offset, config->SourceZoneId, config->ManualValue, _dsMeterID);
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control config event, item not found: ") + e.what(), lsWarning);
       return;
@@ -1859,6 +1859,8 @@ namespace dss {
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
       pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
       pEvent->setProperty("CtrlOffset", intToString(config->Offset));
+    } else if (config->ControllerMode == HeatingControlModeIDManual) {
+      pEvent->setProperty("ManualValue", intToString(config->ManualValue));
     }
     raiseEvent(pEvent);
   } // onHeatingControllerConfig

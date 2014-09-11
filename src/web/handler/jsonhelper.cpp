@@ -44,10 +44,9 @@ namespace dss {
     DateTime tmp_date;
 
     boost::shared_ptr<JSONObject> result(new JSONObject());
-    try {
-      result->addProperty("id", dsid2str(dsuid_to_dsid(_device.getDSID())));
-    } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(err.what());
+    dsid_t dsid;
+    if (dsuid_to_dsid(_device.getDSID(), &dsid)) {
+      result->addProperty("id", dsid2str(dsid));
     }
     result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
@@ -73,10 +72,9 @@ namespace dss {
     result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
 
     if(_device.getDevice()->isPresent()) {
-      try {
-        result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getDSMeterDSID())));
-      } catch (std::runtime_error &err) {
-          Logger::getInstance()->log(err.what());
+      dsid_t dsid;
+      if (dsuid_to_dsid(_device.getDevice()->getDSMeterDSID(), &dsid)) {
+        result->addProperty("meterDSID", dsid2str(dsid));
       }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
@@ -87,10 +85,9 @@ namespace dss {
       result->addProperty("meterName", dSMName);
       result->addProperty("busID", _device.getDevice()->getShortAddress());
     } else {
-      try {
-        result->addProperty("meterDSID", dsid2str(dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID())));
-      } catch (std::runtime_error &err) {
-          Logger::getInstance()->log(err.what());
+      dsid_t dsid;
+      if (dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID(), &dsid)) {
+        result->addProperty("meterDSID", dsid2str(dsid));
       }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;

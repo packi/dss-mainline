@@ -742,6 +742,10 @@ namespace dss {
           delete m_Proxy.boolProxy;
           m_Proxy.boolProxy = NULL;
           break;
+        case vTypeFloating:
+          delete m_Proxy.floatingProxy;
+          m_Proxy.floatingProxy = NULL;
+          break;
         default:
           assert(false);
       }

@@ -97,10 +97,14 @@ namespace dss {
       SetNullDsuid(m_LastKnownMeterDSID);
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
-      try {
-        m_DSMeterDSIDstr = dsid2str(dsuid_to_dsid(m_DSMeterDSID));
-        m_LastKnownMeterDSIDstr = dsid2str(dsuid_to_dsid(m_LastKnownMeterDSID));
-      } catch (std::runtime_error &ex) {}
+
+      dsid_t dsid;
+      if (dsuid_to_dsid(m_DSMeterDSID, &dsid)) {
+        m_DSMeterDSIDstr = dsid2str(dsid);
+      }
+      if (dsuid_to_dsid(m_LastKnownMeterDSID, &dsid)) {
+        m_LastKnownMeterDSIDstr = dsid2str(dsid);
+      }
     } // ctor
 
   Device::~Device() {
@@ -157,11 +161,12 @@ namespace dss {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + dsuid2str(m_DSID));
-        try {
-          m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsuid_to_dsid(m_DSID)));
-        } catch (std::runtime_error &ex) {
-          Logger::getInstance()->log(ex.what());
+
+        dsid_t dsid;
+        if (dsuid_to_dsid(m_DSID, &dsid)) {
+          m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
         }
+
         m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
         m_pPropertyNode->createProperty("present")
           ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
@@ -969,11 +974,13 @@ namespace dss {
     m_LastKnownMeterDSID = _dsMeter->getDSID();
     m_DSMeterDSUIDstr = dsuid2str(_dsMeter->getDSID());
     m_LastKnownMeterDSUIDstr = dsuid2str(_dsMeter->getDSID());
-    try {
-      m_DSMeterDSIDstr = dsid2str(dsuid_to_dsid(m_DSMeterDSID));
-      m_LastKnownMeterDSIDstr = dsid2str(dsuid_to_dsid(m_LastKnownMeterDSID));
-    } catch (std::runtime_error &ex) {
-      Logger::getInstance()->log(ex.what());
+
+    dsid_t dsid;
+    if (dsuid_to_dsid(m_DSMeterDSID, &dsid)) {
+      m_DSMeterDSIDstr = dsid2str(dsid);
+    }
+    if (dsuid_to_dsid(m_LastKnownMeterDSID, &dsid)) {
+      m_LastKnownMeterDSIDstr = dsid2str(dsid);
     }
 
     if(m_pPropertyNode != NULL) {

@@ -610,6 +610,22 @@ namespace dss {
     return sensorDSUID;
   }
 
+  void DSStructureQueryBusInterface::getZoneSensorValue(
+      const dsuid_t& _meterDSUID,
+      const uint16_t _zoneID,
+      const uint8_t _sensorType,
+      uint16_t *_sensorValue,
+      uint32_t *_sensorAge) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    int ret = ZoneProperties_get_zone_sensor_value(m_DSMApiHandle, _meterDSUID,
+        _zoneID, _sensorType, _sensorValue, _sensorAge);
+    DSBusInterface::checkResultCode(ret);
+  }
+
   void DSStructureQueryBusInterface::protobufMessageRequest(const dsuid_t _dSMdSUID,
                                               const uint16_t _request_size,
                                               const uint8_t *_request,
