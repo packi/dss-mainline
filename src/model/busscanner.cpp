@@ -28,6 +28,7 @@
 #include "src/businterface.h"
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
+#include "src/model/scenehelper.h"
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/ds485types.h"
@@ -665,13 +666,65 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         log("Sensor with id " + dsuid2str(sensorDevice) +
             " is not present but assigned as zone reference on the dSM " +
-            dsuid2str(_dsMeter->getDSID()), lsWarning);
+            dsuid2str(_dsMeter->getDSID()), lsInfo);
       } catch (BusApiError& e) {
         // not fatal, catch exception here and avoid endless readout
         break;
       } catch (std::runtime_error& e) {
         log("Sensor with id " + dsuid2str(sensorDevice) +
             " cannot be assigned as zone reference: " + e.what(), lsWarning);
+      }
+    }
+
+    if (_dsMeter->getCapability_HasTemperatureControl()) {
+      uint16_t sensorValue;
+      uint32_t sensorAge;
+      DateTime now, age;
+
+      try {
+        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDTemperatureIndoors,
+            &sensorValue, &sensorAge);
+        age = now.addSeconds(-1 * sensorAge);
+        _zone->setTemperature(SceneHelper::sensorToFloat10(SensorIDTemperatureIndoors, sensorValue), age);
+      } catch (BusApiError& e) {
+        log("Bus error getting heating temperature value from " +
+            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+      }
+
+      try {
+        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureSetpoint,
+            &sensorValue, &sensorAge);
+        age = now.addSeconds(-1 * sensorAge);
+        _zone->setNominalValue(SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, sensorValue), age);
+      } catch (BusApiError& e) {
+        log("Bus error getting heating nominal temperature value from " +
+            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+      }
+
+      try {
+        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureControlVariable,
+            &sensorValue, &sensorAge);
+        age = now.addSeconds(-1 * sensorAge);
+        _zone->setControlValue(SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, sensorValue), age);
+      } catch (BusApiError& e) {
+        log("Bus error getting heating control value from " +
+            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+      }
+
+      try {
+        ZoneHeatingConfigSpec_t hConfig =
+            m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
+        ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
+
+        if (IsNullDsuid(hProp.m_HeatingControlDSUID) && (hConfig.ControllerMode > 0)) {
+          _zone->setHeatingControlMode(hConfig.ControllerMode,
+              hConfig.Offset, hConfig.SourceZoneId,
+              hConfig.ManualValue,
+              _dsMeter->getDSID());
+        }
+      } catch (std::runtime_error& e) {
+        log("Fatal error getting heating config from " +
+            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
       }
     }
 
