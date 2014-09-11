@@ -634,10 +634,22 @@ namespace dss {
       } else {
         boost::shared_ptr<Group> pGroup = _zone->getGroup(gid);
         if (pGroup) {
-          if (isUndo) {
-            pGroup->setLastButOneCalledScene(it->second);
-          } else {
-            pGroup->setLastCalledScene(it->second);
+          switch (gid) {
+            case GroupIDControlTemperature:
+              if (isUndo) {
+                pGroup->setLastButOneCalledScene(it->second);
+              } else {
+                pGroup->setLastCalledScene(it->second);
+                _zone->setHeatingOperationMode(it->second);
+              }
+              break;
+            default:
+              if (isUndo) {
+                pGroup->setLastButOneCalledScene(it->second);
+              } else {
+                pGroup->setLastCalledScene(it->second);
+              }
+              break;
           }
         }
       }
