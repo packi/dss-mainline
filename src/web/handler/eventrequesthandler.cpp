@@ -206,10 +206,9 @@ namespace dss {
         boost::shared_ptr<const State> state = evt.getRaisedAtState();
         if (state->getType() == StateType_Device) {
           boost::shared_ptr<Device> device = state->getProviderDevice();
-          try {
-            source->addProperty("dsid", dsid2str(dsuid_to_dsid(device->getDSID())));
-          } catch (std::runtime_error &err) {
-            Logger::getInstance()->log(err.what());
+          dsid_t dsid;
+          if (dsuid_to_dsid(device->getDSID(), &dsid)) {
+            source->addProperty("dsid", dsid2str(dsid));
           }
           source->addProperty("dSUID", dsuid2str(device->getDSID()));
           source->addProperty("zoneID", device->getZoneID());

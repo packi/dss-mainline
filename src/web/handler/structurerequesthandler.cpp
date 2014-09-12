@@ -104,10 +104,10 @@ namespace dss {
           manipulator.addDeviceToZone(dev, zone);
           movedDevices.push_back(dev);
           if (dev->is2WayMaster()) {
-            dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
+            dsuid_t next;
+            dsuid_get_next_dsuid(dev->getDSID(), &next);
             try {
               boost::shared_ptr<Device> pPartnerDevice;
-
               pPartnerDevice = m_Apartment.getDeviceByDSID(next);
               manipulator.addDeviceToZone(pPartnerDevice, zone);
             } catch(std::runtime_error& e) {
@@ -209,10 +209,11 @@ namespace dss {
 
     boost::shared_ptr<Device> pPartnerDevice;
     if (dev->is2WayMaster()) {
-      dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
+      dsuid_t next;
+      dsuid_get_next_dsuid(dev->getDSID(), &next);
       try {
         pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-      } catch(std::runtime_error& e) {
+      } catch(ItemNotFoundException& e) {
         Logger::getInstance()->log("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
       }
     }
@@ -460,7 +461,8 @@ namespace dss {
     modifiedDevices.push_back(dev);
 
     if (dev->is2WayMaster()) {
-      dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
+      dsuid_t next;
+      dsuid_get_next_dsuid(dev->getDSID(), &next);
       try {
         boost::shared_ptr<Device> pPartnerDevice;
 
@@ -559,7 +561,8 @@ namespace dss {
     modifiedDevices.push_back(dev);
 
     if (dev->is2WayMaster()) {
-      dsuid_t next = dsuid_get_next_dsuid(dev->getDSID());
+      dsuid_t next;
+      dsuid_get_next_dsuid(dev->getDSID(), &next);
       try {
         boost::shared_ptr<Device> pPartnerDevice;
 

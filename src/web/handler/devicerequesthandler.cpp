@@ -204,7 +204,8 @@ namespace dss {
         }
 
         if (pDevice->is2WayMaster()) {
-          dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+          dsuid_t next;
+          dsuid_get_next_dsuid(pDevice->getDSID(), &next);
           try {
             boost::shared_ptr<Device> pPartnerDevice;
             pPartnerDevice = m_Apartment.getDeviceByDSID(next);
@@ -345,11 +346,12 @@ namespace dss {
       }
 
       if (pDevice->is2WayMaster()) {
-        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+        dsuid_t next;
+        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
         boost::shared_ptr<Device> pPartnerDevice;
         try {
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-        } catch(std::runtime_error& e) {
+        } catch(ItemNotFoundException& e) {
           return failure("Could not find partner device with dsid '" +
                          dsuid2str(next) + "'");
         }
@@ -421,12 +423,13 @@ namespace dss {
           return success();
         }
 
-        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+        dsuid_t next;
+        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonID(value);
-        } catch(std::runtime_error& e) {
+        } catch(ItemNotFoundException& e) {
           return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
@@ -447,14 +450,10 @@ namespace dss {
         return failure("This device does not support button pairing");
       }
 
-      dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+      dsuid_t next;
+      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
       boost::shared_ptr<Device> pPartnerDevice;
-
-      try {
-        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-      } catch(std::runtime_error& e) {
-        throw DeviceNotFoundException("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-      }
+      pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
 
       bool wasSlave = pPartnerDevice->is2WaySlave();
 
@@ -549,12 +548,10 @@ namespace dss {
       resultObj->addElement("device", toJSON(dr));
 
       boost::shared_ptr<JSONObject> master(new JSONObject());
-      try {
-        master->addProperty("dsid", dsid2str(dsuid_to_dsid(pDevice->getDSID())));
-      } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(err.what());
+      dsid_t dsid;
+      if (dsuid_to_dsid(pDevice->getDSID(), &dsid)) {
+        master->addProperty("dsid", dsid2str(dsid));
       }
-
       master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
       master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
       resultObj->addElement("update", master);
@@ -609,12 +606,13 @@ namespace dss {
           return success();
         }
 
-        dsuid_t next = dsuid_get_next_dsuid(pDevice->getDSID());
+        dsuid_t next;
+        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
         try {
           boost::shared_ptr<Device> pPartnerDevice;
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonActiveGroup(value);
-        } catch(std::runtime_error& e) {
+        } catch(ItemNotFoundException& e) {
           return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }

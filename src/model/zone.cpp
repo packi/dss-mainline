@@ -229,11 +229,12 @@ namespace dss {
     return m_HeatingStatus;
   }
 
-  void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, dsuid_t ctrlDevice) {
+  void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice) {
     m_HeatingProperties.m_HeatingControlMode = _ctrlMode;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
     m_HeatingProperties.m_CtrlOffset = _offset;
     m_HeatingProperties.m_HeatingMasterZone = _masterZone;
+    m_HeatingProperties.m_ManualValue = _manualValue;
   }
 
   void Zone::setHeatingControlState(int _ctrlState) {

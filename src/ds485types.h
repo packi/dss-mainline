@@ -41,8 +41,8 @@ typedef uint16_t devid_t;
   std::string dsid2str(dsid_t dsid);
   uint32_t dsuid2serial(dsuid_t dsuid);
   bool IsEvenDsuid(dsuid_t dsuid);
-  dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid);
-  dsid_t dsuid_to_dsid(dsuid_t dsuid);
+  bool dsuid_get_next_dsuid(const dsuid_t dsuid, dsuid_t *next);
+  bool dsuid_to_dsid(const dsuid_t dsuid, dsid_t *out);
   dsuid_t dsuid_from_dsid(const dsid_t& dsid);
 }
 

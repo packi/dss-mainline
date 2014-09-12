@@ -101,28 +101,26 @@ bool IsEvenDsuid(dsuid_t dsuid) {
   return !(serial % 2);
 }
 
-
-dsuid_t dsuid_get_next_dsuid(dsuid_t dsuid) {
-  dsuid_t out;
-  if (dsuid_get_next_dsuid(&dsuid, &out) != DSUID_RC_OK) {
-    throw std::runtime_error("could not retrieve next dSUID from " +
-                              dsuid2str(dsuid));
+bool dsuid_get_next_dsuid(const dsuid_t dsuid, dsuid_t *out) {
+  if (::dsuid_get_next_dsuid(&dsuid, out) != DSUID_RC_OK) {
+    memset(out, 0, sizeof(dsid_t));
+    return false;
   }
-  return out;
+  return true;
 }
 
-dsid_t dsuid_to_dsid(dsuid_t dsuid) {
-    dsid_t dsid;
-    if (::dsuid_to_dsid(&dsuid, &dsid) != DSUID_RC_OK) {
-      throw std::runtime_error("could not convert dSUID to dSID");
-    }
-    return dsid;
+bool dsuid_to_dsid(const dsuid_t dsuid, dsid_t *dsid) {
+  if (::dsuid_to_dsid(&dsuid, dsid) != DSUID_RC_OK) {
+    memset(dsid, 0, sizeof(dsid_t));
+    return false;
+  }
+  return true;
 }
 
 dsuid_t dsuid_from_dsid(const dsid_t& dsid) {
-    dsuid_t dsuid;
-    dsuid = ::dsuid_from_dsid(&dsid);
-    return dsuid;
+  dsuid_t dsuid;
+  dsuid = ::dsuid_from_dsid(&dsid);
+  return dsuid;
 }
 
 } // namespace

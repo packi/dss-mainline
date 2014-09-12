@@ -834,8 +834,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
             dsid_t di;
             DsmApiGetEthernetDSUID(mac.c_str(), &du);
             dsuid = dsuid2str(du);
-            di = dsuid_to_dsid(du);
-            dsid = dsid2str(di);
+            if (dsuid_to_dsid(du, &di)) {
+              dsid = dsid2str(di);
+            }
         }
     }
 

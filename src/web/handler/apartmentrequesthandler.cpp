@@ -179,10 +179,9 @@ namespace dss {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
-          try {
-            circuit->addProperty("dsid", dsid2str(dsuid_to_dsid(dsMeter->getDSID())));
-          } catch (std::runtime_error &err) {
-            Logger::getInstance()->log(err.what());
+          dsid_t dsid;
+          if (dsuid_to_dsid(dsMeter->getDSID(), &dsid)) {
+            circuit->addProperty("dsid", dsid2str(dsid));
           }
           circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
@@ -366,7 +365,7 @@ namespace dss {
             boost::shared_ptr<JSONObject> sensor(new JSONObject());
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
             sensors->addElement("", sensor);
-            sensor->addProperty("type", devSensor->m_sensorType);
+            sensor->addProperty("sensorType", devSensor->m_sensorType);
             sensor->addProperty("dsuid", dsuid2str(devSensor->m_DSUID));
           }
         }
