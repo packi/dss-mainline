@@ -950,22 +950,15 @@ namespace dss {
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
           s.perform(act);
 
-          std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
-          if(_zoneID == 0) {
-            zonesToUpdate = m_pApartment->getZones();
+          boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
+          if(_groupID == GroupIDBroadcast) {
+            foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
+              pGroup->setLastCalledScene(_sceneID & 0x00ff);
+            }
           } else {
-            zonesToUpdate.push_back(m_pApartment->getZone(_zoneID));
-          }
-          foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
-            if(_groupID == 0) {
-              foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
-                pGroup->setLastCalledScene(_sceneID & 0x00ff);
-              }
-            } else {
-              boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-              if(pGroup != NULL) {
-                pGroup->setLastCalledScene(_sceneID & 0x00ff);
-              }
+            boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+            if(pGroup != NULL) {
+              pGroup->setLastCalledScene(_sceneID & 0x00ff);
             }
           }
         }
@@ -976,7 +969,7 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         pEvent->setProperty("token", _token);
-        dsuid_t originDSUID;
+        dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
@@ -1758,7 +1751,7 @@ namespace dss {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
-      double fValue = SceneHelper::sensorToFloat10(_sensorType, _sensorValue);
+      double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
       pEvent.reset(new Event(EventName::ZoneSensorValue, group));

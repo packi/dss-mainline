@@ -140,10 +140,18 @@ void HeatingMonitorTask::run() {
 
   if (m_event->getName() == "check_heating_groups") {
     try {
-      // do nothing if at home
-      boost::shared_ptr<State> presence = m_Apartment->getState(StateType_Apartment, "present");
-      if (presence && (presence->getState() == State_Active)) {
-        Logger::getInstance()->log("HeatingMonitorTask: present - nothing to do", lsInfo);
+      bool atHome;
+      boost::shared_ptr<State> presence;
+      try {
+        presence = m_Apartment->getState(StateType_Service, "presence");
+        atHome = presence->getState() == State_Active;
+      } catch (ItemNotFoundException& e) {
+        // default to false to be on the safe side
+        atHome = false;
+      }
+      if (atHome) {
+        // do nothing if at home
+        Logger::getInstance()->log("HeatingMonitorTask: present - nothing to do", lsDebug);
       } else {
         // check all zones for device in heating group
         std::vector<boost::shared_ptr<Zone> > zones = m_Apartment->getZones();
