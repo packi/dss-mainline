@@ -62,8 +62,10 @@ void SensorMonitorTask::run() {
         DateTime sensor_ts = sensor->m_sensorValueTS;
         sensor_ts.addSeconds(lifetime);
         DateTime now = DateTime();
+
         // value is invalid because its older than its allowed lifeime
-        if (sensor_ts < now) {
+        if ((sensor_ts < now) && device->isSensorDataValid(s)) {
+
           Logger::getInstance()->log(std::string("Sensor #") +
                     intToString(s) + " of device " +
                     dsuid2str(device->getDSID()) + " is invalid, firing event");

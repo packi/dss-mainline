@@ -467,22 +467,22 @@ namespace dss {
     case SensorIDTemperatureIndoors:
     case SensorIDTemperatureOutdoors:
     case SensorIDRoomTemperatureSetpoint:
-      convertedSensorValue = (int) ((_sensorValue + 273.15 - 230.0) / 0.1);
+      convertedSensorValue = (int) ((_sensorValue + 273.15 - 230.0) * 4 / 0.1);
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
-      convertedSensorValue = (int) (200 * log10(_sensorValue));
+      convertedSensorValue = (int) (800 * log10(_sensorValue));
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
-      convertedSensorValue = (int) (_sensorValue / 0.1);
+      convertedSensorValue = (int) (_sensorValue * 4 / 0.1);
       break;
     case SensorIDWindSpeed:
-      convertedSensorValue = (int) (_sensorValue / 0.1);
+      convertedSensorValue = (int) (_sensorValue * 4 / 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (int) (_sensorValue + 100);
+      convertedSensorValue = (int) (_sensorValue + 100) * 4;
       break;
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
