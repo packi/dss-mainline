@@ -269,17 +269,19 @@ namespace dss {
     }
 
     Group *pGroup= dynamic_cast<Group*>(pTarget);
-    int convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
+    uint16_t convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
+    uint8_t precisionvalue = SceneHelper::sensorToPrecision(_sensorType);
 
     int ret = ZoneGroupSensorPush(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(),
-        _sourceID, _sensorType, convertedSensorValue, 1);
+        _sourceID, _sensorType, convertedSensorValue, precisionvalue);
     DSBusInterface::checkBroadcastResultCode(ret);
 
     if (m_pBusEventSink) {
       dsuid_t nullid;
       SetNullDsuid(nullid);
       m_pBusEventSink->onZoneSensorValue(NULL, nullid, dsuid2str(_sourceID),
-          pGroup->getZoneID(), pGroup->getID(), _sensorType, convertedSensorValue, 1,
+          pGroup->getZoneID(), pGroup->getID(), _sensorType,
+          convertedSensorValue, precisionvalue,
           _category, _origin);
     }
   } // pushSensor
