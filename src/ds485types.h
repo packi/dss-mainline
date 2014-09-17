@@ -44,6 +44,7 @@ typedef uint16_t devid_t;
   bool dsuid_get_next_dsuid(const dsuid_t dsuid, dsuid_t *next);
   bool dsuid_to_dsid(const dsuid_t dsuid, dsid_t *out);
   dsuid_t dsuid_from_dsid(const dsid_t& dsid);
+  dsuid_t dsidOrDsuid2dsuid(std::string dsidStr, std::string dsuidStr);
 }
 
 #endif//__DSS_DSUID_H__

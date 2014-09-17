@@ -51,6 +51,27 @@ dsuid_t str2dsuid(std::string dsuid_str)
   return dsuid;
 }
 
+/**
+ * Logic:
+ * - If there is a value in dsuidStr it is expected to be a dSUID
+ * - dsidStr could contain a dSID od a dSUID
+ */
+dsuid_t dsidOrDsuid2dsuid(std::string dsidStr, std::string dsuidStr)
+{
+  dsuid_t dsuid;
+  if (dsuidStr.empty()) {
+    try {
+      dsid_t dsid = str2dsid(dsidStr);
+      dsuid = dsuid_from_dsid(&dsid);
+    } catch (std::runtime_error& e) {
+      dsuid = str2dsuid(dsuidStr);
+    }
+  } else {
+    dsuid = str2dsuid(dsuidStr);
+  }
+  return dsuid;
+}
+
 dsid_t str2dsid(std::string dsid_str)
 {
   dsid_t dsid;
