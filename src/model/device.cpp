@@ -2002,7 +2002,7 @@ namespace dss {
       binput->m_sensorValue = 0;
       binput->m_sensorValueFloat = 0;
       binput->m_sensorValueTS = DateTime::NullDate;
-      binput->m_sensorValueValidity = false;
+      binput->m_sensorValueValidity = true;
       m_sensorInputs.push_back(binput);
 
       if (m_pPropertyNode != NULL) {
