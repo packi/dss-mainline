@@ -451,14 +451,8 @@ namespace dss {
         throw std::invalid_argument("missing device dsuid parameter");
       }
 
-      dsuid_t deviceDSUID;
+      dsuid_t deviceDSUID = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
       boost::shared_ptr<Device> result;
-      if (!dsuidStr.empty()) {
-        deviceDSUID = str2dsuid(dsuidStr);
-      } else if (!dsidStr.empty()) {
-        dsid_t deviceDSID = str2dsid(dsidStr);
-        deviceDSUID = dsuid_from_dsid(deviceDSID);
-      }
       result = getDSS().getApartment().getDeviceByDSID(deviceDSUID);
       if (result == NULL) {
         throw std::runtime_error("device with id " + dsuid2str(deviceDSUID) + " not found");

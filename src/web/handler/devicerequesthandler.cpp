@@ -110,13 +110,7 @@ namespace dss {
       throw std::runtime_error("missing parameter 'dsuid'");
     }
 
-    dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(dsidStr);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(dsuidStr);
-    }
+    dsuid_t dsuid = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
 
     try {
       result = m_Apartment.getDeviceByDSID(dsuid);

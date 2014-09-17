@@ -152,11 +152,8 @@ namespace dss {
       std::string dsuidStr = _request.getParameter("sourceDSUID");
       if (deviceIDStr.empty() && dsuidStr.empty()) {
         SetNullDsuid(sourceID);
-      } else if (dsuidStr.empty()) {
-        dsid_t dsid = str2dsid(deviceIDStr);
-        sourceID = dsuid_from_dsid(dsid);
       } else {
-        sourceID = str2dsuid(dsuidStr);
+        sourceID = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
       }
       int sensorType = strToIntDef(_request.getParameter("sensorType"), -1);
       std::string sensorValueString = _request.getParameter("sensorValue");
