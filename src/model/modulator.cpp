@@ -74,6 +74,8 @@ namespace dss {
       dsid_t dsid;
       if (dsuid_to_dsid(m_DSID, &dsid)) {
         m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
+      } else {
+        m_pPropertyNode->createProperty("dSID")->setStringValue(dsuid2str(m_DSID));
       }
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));

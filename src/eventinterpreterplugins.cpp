@@ -367,6 +367,8 @@ namespace dss {
             dsid_t dsid;
             if (dsuid_to_dsid((const dsuid_t) device->getDSID(), &dsid)) {
               source.setProperty("dsid", dsid2str(dsid));
+            } else {
+              source.setProperty("dsid", dsuid2str(device->getDSID()));
             }
             source.setProperty("dsuid", dsuid2str(device->getDSID()));
             source.setProperty("zoneID", device->getDevice()->getZoneID());
@@ -383,6 +385,8 @@ namespace dss {
             dsid_t dsid;
             if (dsuid_to_dsid((const dsuid_t) device->getDSID(), &dsid)) {
               source.setProperty("dsid", dsid2str(dsid));
+            } else {
+              source.setProperty("dsid", dsuid2str(device->getDSID()));
             }
             source.setProperty("dsid", dsuid2str(device->getDSID()));
             source.setProperty("zoneID", device->getZoneID());
