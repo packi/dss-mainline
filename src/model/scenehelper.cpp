@@ -364,49 +364,6 @@ namespace dss {
     return ret;
   }
 
-  double SceneHelper::sensorToFloat10(int _sensorType, int _sensorValue) {
-    double convertedSensorValue;
-    switch (_sensorType) {
-    case SensorIDActivePower:
-    case SensorIDOutputCurrent:
-    case SensorIDPowerConsumptionVA:
-      convertedSensorValue = (double) _sensorValue;
-      break;
-    case SensorIDElectricMeter:
-      convertedSensorValue = (double) (_sensorValue * 0.01);
-      break;
-    case SensorIDOutputCurrentEx:
-      convertedSensorValue = (double) (_sensorValue * 4);
-      break;
-    case SensorIDTemperatureIndoors:
-    case SensorIDTemperatureOutdoors:
-    case SensorIDRoomTemperatureSetpoint:
-      convertedSensorValue = (double) ((_sensorValue * 0.1) - 273.15 + 230.0);
-      break;
-    case SensorIDBrightnessIndoors:
-    case SensorIDBrightnessOutdoors:
-    case SensorIDCO2Concentration:
-      convertedSensorValue = (double) (exp10(_sensorValue / 200));
-      break;
-    case SensorIDHumidityIndoors:
-    case SensorIDHumidityOutdoors:
-      convertedSensorValue = (double) (_sensorValue * 0.1);
-      break;
-    case SensorIDWindSpeed:
-      convertedSensorValue = (double) (_sensorValue * 0.1);
-      break;
-    case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (double) (_sensorValue - 100);
-      break;
-    case SensorIDWindDirection:
-    case SensorIDPrecipitation:
-    default:
-      convertedSensorValue = (double) _sensorValue;
-      break;
-    }
-    return convertedSensorValue;
-  } // sensorToFloat10
-
   double SceneHelper::sensorToFloat12(int _sensorType, int _sensorValue) {
     double convertedSensorValue;
     switch (_sensorType) {
@@ -429,7 +386,7 @@ namespace dss {
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
-      convertedSensorValue = (double) (exp10(_sensorValue / 800));
+      convertedSensorValue = (double) (pow(10, _sensorValue / 800));
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
@@ -439,7 +396,7 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (double) ((_sensorValue - 100) / 4);
+      convertedSensorValue = (double) (_sensorValue - 100);
       break;
     case SensorIDWindDirection:
     case SensorIDPrecipitation:

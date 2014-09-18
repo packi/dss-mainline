@@ -373,33 +373,33 @@ namespace dss {
             break;
           case HeatingControlModeIDPID:
             resultObj->addProperty("Off",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
             resultObj->addProperty("Comfort",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
             resultObj->addProperty("Economy",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
             resultObj->addProperty("NotUsed",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
             resultObj->addProperty("Night",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
             resultObj->addProperty("Holiday",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
             resultObj->addProperty("Off",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
             resultObj->addProperty("Comfort",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
             resultObj->addProperty("Economy",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
             resultObj->addProperty("NotUsed",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
             resultObj->addProperty("Night",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
             resultObj->addProperty("Holiday",
-                SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
             break;
 
           }
@@ -555,15 +555,15 @@ namespace dss {
           resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
           resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
           resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
-          resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat10(hInternals.Trecent, SensorIDTemperatureIndoors));
-          resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat10(hInternals.Treference, SensorIDRoomTemperatureSetpoint) );
+          resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat12(hInternals.Trecent, SensorIDTemperatureIndoors));
+          resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(hInternals.Treference, SensorIDRoomTemperatureSetpoint) );
           resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
           resultObj->addProperty("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
           resultObj->addProperty("CtrlIntegral", (unsigned long int) hInternals.Integral);
           resultObj->addProperty("CtrlYp", (double) hInternals.Yp * 0.01);
           resultObj->addProperty("CtrlYi", (double) hInternals.Yi * 0.01);
           resultObj->addProperty("CtrlYd", (double) hInternals.Yd *0.01);
-          resultObj->addProperty("CtrlY", (double) SceneHelper::sensorToFloat10(hInternals.Y, SensorIDRoomTemperatureControlVariable));
+          resultObj->addProperty("CtrlY", (double) SceneHelper::sensorToFloat12(hInternals.Y, SensorIDRoomTemperatureControlVariable));
           resultObj->addProperty("CtrlAntiWindUp", (unsigned long int) hInternals.AntiWindUp);
 
           return success(resultObj);
