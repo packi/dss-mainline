@@ -2516,7 +2516,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        float sensorValueFloat = SceneHelper::sensorToFloat10(sensorType, sensorValue);
+        float sensorValueFloat = SceneHelper::sensorToFloat12(sensorType, sensorValue);
         pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
@@ -2877,33 +2877,33 @@ namespace dss {
         break;
       case HeatingControlModeIDPID:
         obj.setProperty<double>("Off",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
         break;
       case HeatingControlModeIDZoneFollower:
         break;
       case HeatingControlModeIDFixed:
         obj.setProperty<double>("Off",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
         break;
       }
       return JS_TRUE;
