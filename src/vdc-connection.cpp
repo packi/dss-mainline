@@ -30,6 +30,7 @@
 #include "model/apartment.h"
 #include "ds485/dsbusinterface.h"
 #include "messages/vdc-messages.pb.h"
+#include "stringconverter.h"
 
 namespace dss {
 
@@ -115,22 +116,39 @@ namespace dss {
         continue;
       }
 
+      StringConverter st("UTF-8", "UTF-8");
       if (el.name() == "modelGuid") {
-        ret->modelGuid = val.v_string();
+        try {
+          ret->modelGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "vendorGuid") {
-        ret->vendorGuid = val.v_string();
+        try {
+          ret->vendorGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "oemGuid") {
-        ret->oemGuid = val.v_string();
+        try {
+          ret->oemGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "configURL") {
-        ret->configURL = val.v_string();
+        try {
+          ret->configURL = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "hardwareGuid") {
-        ret->hardwareGuid = val.v_string();
+        try {
+          ret->hardwareGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "model") {
-        ret->hardwareInfo = val.v_string();
+        try {
+          ret->hardwareInfo = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "hardwareVersion") {
-        ret->hardwareVersion = val.v_string();
+        try {
+          ret->hardwareVersion = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       } else if (el.name() == "name") {
-        ret->name = val.v_string();
+        try {
+          ret->name = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       }
     }
 
