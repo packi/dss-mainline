@@ -625,7 +625,9 @@ namespace dss {
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
     void setVdcHardwareGuid(const std::string& _value) { m_VdcHardwareGuid = _value; }
     const std::string& getVdcHardwareGuid() const { return m_VdcHardwareGuid; }
-    void setVdcHardwareInfo(const std::string& _value) { m_VdcHardwareInfo = _value; }
+    void setVdcHardwareInfo(const std::string& _value) {
+      m_VdcHardwareInfo = _value; calculateHWInfo();
+    }
     const std::string& getVdcHardwareInfo() const { return m_VdcHardwareInfo; }
     void setVdcHardwareVersion(const std::string& _value) { m_VdcHardwareVersion = _value; }
     const std::string& getVdcHardwareVersion() const { return m_VdcHardwareVersion; }

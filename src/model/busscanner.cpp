@@ -697,7 +697,7 @@ namespace dss {
         m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDTemperatureIndoors,
             &sensorValue, &sensorAge);
         age = now.addSeconds(-1 * sensorAge);
-        _zone->setTemperature(SceneHelper::sensorToFloat10(SensorIDTemperatureIndoors, sensorValue), age);
+        _zone->setTemperature(SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
       } catch (BusApiError& e) {
         log("Bus error getting heating temperature value from " +
             dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
@@ -707,7 +707,7 @@ namespace dss {
         m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureSetpoint,
             &sensorValue, &sensorAge);
         age = now.addSeconds(-1 * sensorAge);
-        _zone->setNominalValue(SceneHelper::sensorToFloat10(SensorIDRoomTemperatureSetpoint, sensorValue), age);
+        _zone->setNominalValue(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
       } catch (BusApiError& e) {
         log("Bus error getting heating nominal temperature value from " +
             dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
@@ -717,7 +717,7 @@ namespace dss {
         m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureControlVariable,
             &sensorValue, &sensorAge);
         age = now.addSeconds(-1 * sensorAge);
-        _zone->setControlValue(SceneHelper::sensorToFloat10(SensorIDRoomTemperatureControlVariable, sensorValue), age);
+        _zone->setControlValue(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
       } catch (BusApiError& e) {
         log("Bus error getting heating control value from " +
             dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);

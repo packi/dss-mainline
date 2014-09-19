@@ -209,6 +209,8 @@ namespace dss {
           dsid_t dsid;
           if (dsuid_to_dsid(device->getDSID(), &dsid)) {
             source->addProperty("dsid", dsid2str(dsid));
+          } else {
+            source->addProperty("dsid", dsuid2str(device->getDSID()));
           }
           source->addProperty("dSUID", dsuid2str(device->getDSID()));
           source->addProperty("zoneID", device->getZoneID());

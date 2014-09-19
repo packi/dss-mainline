@@ -72,13 +72,7 @@ namespace dss {
       return failure("Missing parameter 'dsuid'");
     }
 
-    dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(deviceIDStr);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(dsuidStr);
-    }
+    dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
     
     boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
     if(!dev->isPresent()) {
@@ -194,13 +188,7 @@ namespace dss {
       return failure("Missing parameter 'dsuid'");
     }
 
-    dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(deviceIDStr);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(dsuidStr);
-    }
+    dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
 
     boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
     if(dev->isPresent()) {
@@ -412,13 +400,7 @@ namespace dss {
       return failure("Missing parameter 'dsuid'");
     }
 
-    dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(deviceIDStr);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(dsuidStr);
-    }
+    dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
     
     dev = m_Apartment.getDeviceByDSID(dsuid);
     if(!dev->isPresent()) {
@@ -527,13 +509,7 @@ namespace dss {
       return failure("Missing parameter 'dsuid'");
     }
 
-    dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(deviceIDStr);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(dsuidStr);
-    }
+    dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
 
     dev = m_Apartment.getDeviceByDSID(dsuid);
     if(!dev->isPresent()) {

@@ -99,14 +99,7 @@ namespace dss {
       return failure("Missing parameter 'dsuid'");
     }
 
-    dsuid_t meterID;
-    
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(dsidStr);
-      meterID = dsuid_from_dsid(&dsid);
-    } else {
-      meterID = str2dsuid(dsuidStr);
-    }
+    dsuid_t meterID = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
 
     boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
 
@@ -182,6 +175,8 @@ namespace dss {
           dsid_t dsid;
           if (dsuid_to_dsid(dsMeter->getDSID(), &dsid)) {
             circuit->addProperty("dsid", dsid2str(dsid));
+          } else {
+            circuit->addProperty("dsid", dsuid2str(dsMeter->getDSID()));
           }
           circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());

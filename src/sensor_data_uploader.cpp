@@ -207,7 +207,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       }
 
     } else if (_event.getName() == EventName::StateChange) {
-      std::string sName = _event.getPropertyByName("StateName");
+      std::string sName = _event.getPropertyByName("statename");
       if (sName == "holiday" || sName == "presence") {
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr());

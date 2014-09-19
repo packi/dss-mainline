@@ -69,7 +69,7 @@ namespace dss {
 
   typedef struct {
     uint8_t SensorType;
-    uint8_t SensorPollInterval;
+    uint32_t SensorPollInterval;
     uint8_t SensorBroadcastFlag;
     uint8_t SensorConversionFlag;
   } DeviceSensorSpec_t;

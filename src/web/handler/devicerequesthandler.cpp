@@ -110,13 +110,7 @@ namespace dss {
       throw std::runtime_error("missing parameter 'dsuid'");
     }
 
-    dsuid_t dsuid;
-    if (dsuidStr.empty()) {
-      dsid_t dsid = str2dsid(dsidStr);
-      dsuid = dsuid_from_dsid(&dsid);
-    } else {
-      dsuid = str2dsuid(dsuidStr);
-    }
+    dsuid_t dsuid = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
 
     try {
       result = m_Apartment.getDeviceByDSID(dsuid);
@@ -551,6 +545,8 @@ namespace dss {
       dsid_t dsid;
       if (dsuid_to_dsid(pDevice->getDSID(), &dsid)) {
         master->addProperty("dsid", dsid2str(dsid));
+      } else {
+        master->addProperty("dsid", dsuid2str(pDevice->getDSID()));
       }
       master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
       master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
