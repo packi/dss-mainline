@@ -45,6 +45,7 @@ namespace dss {
     Event popEvent();
     bool hasEvent();
 
+    using EventRelayTarget::subscribeTo;
     virtual std::string subscribeTo(const std::string& _eventName);
   private:
     SyncEvent m_EventArrived;
