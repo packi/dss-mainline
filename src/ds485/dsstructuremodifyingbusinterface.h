@@ -24,7 +24,7 @@
 #define DSSTRUCTUREMODIFYINGBUSINTERFACE_H_
 
 #include "src/businterface.h"
-
+#include "model/modelmaintenance.h"
 #include "dsbusinterfaceobj.h"
 
 namespace dss {
@@ -33,7 +33,8 @@ namespace dss {
                                            public StructureModifyingBusInterface {
   public:
     DSStructureModifyingBusInterface()
-    : DSBusInterfaceObj()
+    : DSBusInterfaceObj(),
+      m_pModelMaintenance(NULL)
     {
       SetBroadcastDsuid(m_BroadcastDSID);
     }
@@ -64,8 +65,11 @@ namespace dss {
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec);
     virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t sensorType, const dsuid_t& sensorDSUID);
     virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t sensorType);
+
+    void setModelMaintenace(ModelMaintenance* _modelMaintenance);
 private:
     dsuid_t m_BroadcastDSID;
+    ModelMaintenance* m_pModelMaintenance;
   }; // DSStructureModifyingBusInterface
 
 } // namespace dss
