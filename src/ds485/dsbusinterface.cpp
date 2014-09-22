@@ -76,6 +76,7 @@ namespace dss {
     m_pMeteringBusInterface.reset(new DSMeteringBusInterface());
     m_pStructureQueryBusInterface.reset(new DSStructureQueryBusInterface());
     m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface());
+    m_pStructureModifyingBusInterface->setModelMaintenace(m_pModelMaintenance);
   } // ctor
 
   void DSBusInterface::setBusEventSink(BusEventSink* _eventSink) {
