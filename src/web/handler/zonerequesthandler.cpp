@@ -555,15 +555,15 @@ namespace dss {
           resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
           resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
           resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
-          resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat12(hInternals.Trecent, SensorIDTemperatureIndoors));
-          resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(hInternals.Treference, SensorIDRoomTemperatureSetpoint) );
+          resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, hInternals.Trecent));
+          resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
           resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
           resultObj->addProperty("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
           resultObj->addProperty("CtrlIntegral", (unsigned long int) hInternals.Integral);
           resultObj->addProperty("CtrlYp", (double) hInternals.Yp * 0.01);
           resultObj->addProperty("CtrlYi", (double) hInternals.Yi * 0.01);
           resultObj->addProperty("CtrlYd", (double) hInternals.Yd *0.01);
-          resultObj->addProperty("CtrlY", (double) SceneHelper::sensorToFloat12(hInternals.Y, SensorIDRoomTemperatureControlVariable));
+          resultObj->addProperty("CtrlY", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hInternals.Y));
           resultObj->addProperty("CtrlAntiWindUp", (unsigned long int) hInternals.AntiWindUp);
 
           return success(resultObj);
