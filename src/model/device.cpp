@@ -1445,6 +1445,8 @@ namespace dss {
         return DEVICE_TYPE_ZWS;
       case 6:
         return DEVICE_TYPE_SDS;
+      case 7:
+        return DEVICE_TYPE_SK;
       case 8:
         return DEVICE_TYPE_AKM;
       case 10:
@@ -1474,6 +1476,8 @@ namespace dss {
         return "ZWS";
       case DEVICE_TYPE_SDS:
         return "SDS";
+      case DEVICE_TYPE_SK:
+        return "SK";
       case DEVICE_TYPE_AKM:
         return "AKM";
       case DEVICE_TYPE_TNY:
