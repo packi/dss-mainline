@@ -176,7 +176,7 @@ namespace dss {
           if (dsuid_to_dsid(dsMeter->getDSID(), &dsid)) {
             circuit->addProperty("dsid", dsid2str(dsid));
           } else {
-            circuit->addProperty("dsid", dsuid2str(dsMeter->getDSID()));
+            circuit->addProperty("dsid", "");
           }
           circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());

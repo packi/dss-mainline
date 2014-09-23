@@ -188,7 +188,7 @@ namespace dss {
         if (dsuid_to_dsid(m_DSID, &dsid)) {
           m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
         } else {
-          m_pPropertyNode->createProperty("dSID")->setStringValue(dsuid2str(m_DSID));
+          m_pPropertyNode->createProperty("dSID")->setStringValue("");
         }
 
         m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
@@ -200,8 +200,7 @@ namespace dss {
           m_pPropertyNode->createProperty("DSMeterDSID")
             ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSIDstr, false));
         } else {
-          m_pPropertyNode->createProperty("DSMeterDSID")
-            ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSUIDstr, false));
+          m_pPropertyNode->createProperty("DSMeterDSID")->setStringValue("");
         }
         m_pPropertyNode->createProperty("DSMeterDSUID")
           ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSUIDstr, false));
@@ -257,8 +256,7 @@ namespace dss {
           m_pPropertyNode->createProperty("lastKnownMeterDSID")
             ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSIDstr, false));
         } else {
-          m_pPropertyNode->createProperty("lastKnownMeterDSID")
-            ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSUIDstr, false));
+          m_pPropertyNode->createProperty("lastKnownMeterDSID")->setStringValue("");
         }
         m_pPropertyNode->createProperty("lastKnownMeterDSUID")
           ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSUIDstr, false));
@@ -997,12 +995,12 @@ namespace dss {
     if (dsuid_to_dsid(m_DSMeterDSID, &dsid)) {
       m_DSMeterDSIDstr = dsid2str(dsid);
     } else {
-      m_DSMeterDSIDstr = dsuid2str(m_DSMeterDSID);
+      m_DSMeterDSIDstr = "";
     }
     if (dsuid_to_dsid(m_LastKnownMeterDSID, &dsid)) {
       m_LastKnownMeterDSIDstr = dsid2str(dsid);
     } else {
-      m_LastKnownMeterDSIDstr = dsuid2str(m_LastKnownMeterDSID);
+      m_LastKnownMeterDSIDstr = "";
     }
 
     if(m_pPropertyNode != NULL) {

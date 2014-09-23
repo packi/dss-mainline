@@ -48,7 +48,7 @@ namespace dss {
     if (dsuid_to_dsid(_device.getDSID(), &dsid)) {
       result->addProperty("id", dsid2str(dsid));
     } else {
-      result->addProperty("id", dsuid2str(_device.getDSID()));
+      result->addProperty("id", "");
     }
     result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
@@ -81,7 +81,7 @@ namespace dss {
       if (dsuid_to_dsid(_device.getDevice()->getDSMeterDSID(), &dsid)) {
         result->addProperty("meterDSID", dsid2str(dsid));
       } else {
-        result->addProperty("meterDSID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
+        result->addProperty("meterDSID", "");
       }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
@@ -96,7 +96,7 @@ namespace dss {
       if (dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID(), &dsid)) {
         result->addProperty("meterDSID", dsid2str(dsid));
       } else {
-        result->addProperty("meterDSID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
+        result->addProperty("meterDSID", "");
       }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;
