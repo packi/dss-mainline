@@ -1109,6 +1109,16 @@ namespace dss {
   {
     log("handle: " + _event.getName(), lsDebug);
 
+    // start the sensor timeout detection with a delay to allow for synchronization to take place
+    if (_event.getName() == "model_ready") {
+      boost::shared_ptr<Event> pEvent(new Event("check_sensor_values"));
+      pEvent->setProperty("time", "+3600");
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+      return;
+    }
+
     if (DSS::hasInstance()) {
       boost::shared_ptr<SensorMonitorTask> task(new SensorMonitorTask(&(DSS::getInstance()->getApartment())));
       boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();

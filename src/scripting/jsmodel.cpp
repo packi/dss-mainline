@@ -3063,7 +3063,13 @@ namespace dss {
             hProp.m_HeatingControlDSUID, pZone->getID());
       }
 
-      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [1]);
+      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [0]);
+      if (!configObj) {
+        JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: invalid parameter data");
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
+        return JS_TRUE;
+      }
+
       JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
       jsid propID;
       while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
@@ -3074,61 +3080,32 @@ namespace dss {
         jsval arg1, arg2;
         JS_GetMethodById(cx, configObj, propID, &obj, &arg1);
         JSString *val = JS_ValueToString(cx, arg1);
-        char* propValue = JS_EncodeString(cx, val);
+        char* sValue = JS_EncodeString(cx, val);
         JS_IdToValue(cx, propID, &arg2);
         val = JS_ValueToString(cx, arg2);
-        char* propKey = JS_EncodeString(cx, val);
+        char* sKey = JS_EncodeString(cx, val);
 
-        int iValue;
-        double fValue;
+        std::string propKey(sKey);
+        std::string propValue(sValue);
+        JS_free(cx, sKey);
+        JS_free(cx, sValue);
 
-        if (strcmp(propKey, "Off") == 0) {
-          iValue = strtol(propValue, NULL, 10);
-          hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, iValue);
-          if (hOpValues.OpMode0 == 0 && errno == EINVAL) {
-             fValue = strtod(propValue, NULL);
-             hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
-          }
-        } else if (strcmp(propKey, "Comfort") == 0) {
-          iValue = strtol(propValue, NULL, 10);
-          hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, iValue);
-          if (hOpValues.OpMode1 == 0 && errno == EINVAL) {
-            fValue = strtod(propValue, NULL);
-            hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, fValue);
-          }
-        } else if (strcmp(propKey, "Economy") == 0) {
-          iValue = strtol(propValue, NULL, 10);
-          hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
-          if (hOpValues.OpMode2 == 0 && errno == EINVAL) {
-            fValue = strtod(propValue, NULL);
-            hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, fValue);
-          }
-        } else if (strcmp(propKey, "NotUsed") == 0) {
-          iValue = strtol(propValue, NULL, 10);
-          hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, iValue);
-          if (hOpValues.OpMode3 == 0 && errno == EINVAL) {
-            fValue = strtod(propValue, NULL);
-            hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, fValue);
-          }
-        } else if (strcmp(propKey, "Night") == 0) {
-          iValue = strtol(propValue, NULL, 10);
-          hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, iValue);
-          if (hOpValues.OpMode4 == 0 && errno == EINVAL) {
-            fValue = strtod(propValue, NULL);
-            hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, fValue);
-          }
-        } else if (strcmp(propKey, "Holiday") == 0) {
-          iValue = strtol(propValue, NULL, 10);
-          hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, iValue);
-          if (hOpValues.OpMode5 == 0 && errno == EINVAL) {
-            fValue = strtod(propValue, NULL);
-            hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
-          }
+        double fValue = strToDouble(propValue);
+        if (propKey == "Off") {
+          hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "Comfort") {
+          hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "Economy") {
+          hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "NotUsed") {
+          hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "Night") {
+          hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "Holiday") {
+          hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
         } else {
-          JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey);
+          JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey.c_str());
         }
-        JS_free(cx, propValue);
-        JS_free(cx, propKey);
       }
 
       ext->getApartment().getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(

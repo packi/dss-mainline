@@ -120,6 +120,17 @@ namespace dss {
     "Stop-Area4"
   };
 
+  const int SceneTableHeating_length = 6;
+  const char *SceneTableHeating[] =
+  {
+    "Off",
+    "Comfort",
+    "Economy",
+    "NotUsed",
+    "Night",
+    "Holiday",
+  };
+
   const int SceneTable1_length = 28;
   const char *SceneTable1[] =
   {
@@ -1819,18 +1830,23 @@ namespace dss {
     return gName + ";" + intToString(_group->getID());
   }
 
-  std::string SystemEventLog::getSceneName(int _scene_id) {
-    std::string sceneName;
+  std::string SystemEventLog::getSceneName(int _sceneID, int _groupID) {
+    std::string sceneName = "Unknown";
 
-    if ((_scene_id >= 0) && (_scene_id < 64) &&
-        (_scene_id < SceneTable0_length)) {
-      sceneName = SceneTable0[_scene_id];
-    }
-    if ((_scene_id >= 64) && ((_scene_id - 64) < SceneTable1_length)) {
-      sceneName = SceneTable1[_scene_id - 64];
+    if (_groupID == GroupIDControlTemperature) {
+      if (_sceneID >= 0 && _sceneID < SceneTableHeating_length) {
+        sceneName = SceneTableHeating[_sceneID];
+      }
+    } else {
+      if ((_sceneID >= 0) && (_sceneID < 64) && (_sceneID < SceneTable0_length)) {
+        sceneName = SceneTable0[_sceneID];
+      }
+      if ((_sceneID >= 64) && ((_sceneID - 64) < SceneTable1_length)) {
+        sceneName = SceneTable1[_sceneID - 64];
+      }
     }
 
-    sceneName += ";" + intToString(_scene_id);
+    sceneName += ";" + intToString(_sceneID);
 
     return sceneName;
   }
@@ -1882,7 +1898,7 @@ namespace dss {
                                     int _scene_id) {
     std::string zoneName = getZoneName(_zone);
     std::string groupName = getGroupName(_group);
-    std::string sceneName = getSceneName(_scene_id);
+    std::string sceneName = getSceneName(_scene_id, _group->getID());
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     _logger->logln(";Last Scene;" + sceneName + ';' + zoneName + ';' +
@@ -1898,7 +1914,7 @@ namespace dss {
                                          std::string _origin_token) {
     std::string zoneName = getZoneName(_zone);
     std::string groupName = getGroupName(_zone->getGroup(_group_id));
-    std::string sceneName = getSceneName(_scene_id);
+    std::string sceneName = getSceneName(_scene_id, _group_id);
     std::string devName = getDeviceName(_origin_dsuid);
     if (_is_forced) {
       //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;CallOrigin;originToken');
@@ -1919,7 +1935,7 @@ namespace dss {
                                         std::string _origin_dsuid,
                                         callOrigin_t _call_origin) {
     std::string devName = getDeviceName(_origin_dsuid);
-    std::string sceneName = getSceneName(_scene_id);
+    std::string sceneName = getSceneName(_scene_id, -1);
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;CallOrigin;originToken');
     _logger->logln(";Device;" + sceneName + ";;;;;" + devName + ";" +
                    getCallOrigin(_call_origin) + ";");
@@ -1936,7 +1952,7 @@ namespace dss {
     std::string devName = _device->getName() + ";" +
                           dsuid2str(_device->getDSID());
     std::string origName = getDeviceName(_origin_dsuid);
-    std::string sceneName = getSceneName(_scene_id);
+    std::string sceneName = getSceneName(_scene_id, -1);
 
     if (_is_forced) {
       //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Device;Device-ID;Origin;Origin-ID;CallOrigin;originToken');
@@ -1990,7 +2006,7 @@ namespace dss {
     std::string zoneName = getZoneName(_zone);
     std::string groupName = getGroupName(_zone->getGroup(_group_id));
     std::string devName = getDeviceName(_origin_dsuid);
-    std::string sceneName = getSceneName(_scene_id);
+    std::string sceneName = getSceneName(_scene_id, _group_id);
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
     _logger->logln(";UndoScene;" + sceneName + ";" + zoneName + ";" +
