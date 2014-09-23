@@ -487,6 +487,7 @@ namespace dss {
     } catch (ItemNotFoundException& e) {
     }
     if (pMeter && pMeter->getBusMemberType() == BusMember_vDC) {
+      _pDevice->setVdcDevice(true);
       boost::shared_ptr<ModelMaintenance::VdcDataQuery> task(new ModelMaintenance::VdcDataQuery(_pDevice));
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);

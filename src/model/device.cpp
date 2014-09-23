@@ -91,7 +91,8 @@ namespace dss {
     m_binaryInputCount(0),
     m_sensorInputCount(0),
     m_outputChannelCount(0),
-    m_AKMInputProperty()
+    m_AKMInputProperty(),
+    m_isVdcDevice(false)
     {
       SetNullDsuid(m_DSMeterDSID);
       SetNullDsuid(m_LastKnownMeterDSID);
@@ -221,6 +222,8 @@ namespace dss {
         oemNode->createProperty("configurationLocked")
           ->linkToProxy(PropertyProxyReference<bool>(m_IsConfigLocked, false));
 
+        m_pPropertyNode->createProperty("isVdcDevice")
+          ->linkToProxy(PropertyProxyReference<bool>(m_isVdcDevice, false));
         PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
         propNode->createProperty("ModelGuid")
           ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelGuid, false));
