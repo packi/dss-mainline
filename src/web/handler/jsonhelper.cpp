@@ -66,13 +66,15 @@ namespace dss {
     result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     result->addProperty("isVdcDevice", _device.getDevice()->isVdcDevice());
-    result->addProperty("VdcModelGuid", _device.getDevice()->getVdcModelGuid());
-    result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
-    result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
-    result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
-    result->addProperty("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
-    result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
-    result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+    if (_device.getDevice()->isVdcDevice()) {
+      result->addProperty("VdcModelGuid", _device.getDevice()->getVdcModelGuid());
+      result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
+      result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
+      result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
+      result->addProperty("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
+      result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
+      result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+    }
 
     if(_device.getDevice()->isPresent()) {
       dsid_t dsid;

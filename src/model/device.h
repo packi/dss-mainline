@@ -616,7 +616,8 @@ namespace dss {
     void setConfigLock(bool _lockConfig);
     bool isConfigLocked() const { return m_IsConfigLocked; }
 
-    void setVdcDevice(bool _isVdcDevice) { m_isVdcDevice = _isVdcDevice; }
+    void publishVdcToPropertyTree();
+    void setVdcDevice(bool _isVdcDevice);
     bool isVdcDevice() const { return m_isVdcDevice; }
     void setVdcModelGuid(const std::string& _value) { m_VdcModelGuid = _value; }
     const std::string& getVdcModelGuid() const { return m_VdcModelGuid; }

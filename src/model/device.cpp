@@ -158,6 +158,27 @@ namespace dss {
     }
   }
 
+  void Device::publishVdcToPropertyTree() {
+    if(m_isVdcDevice && (m_pPropertyNode != NULL)) {
+      PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
+
+      propNode->createProperty("ModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelGuid, false));
+      propNode->createProperty("VendorGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
+      propNode->createProperty("OemGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
+      propNode->createProperty("ConfigURL")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
+      propNode->createProperty("HardwareGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareGuid, false));
+      propNode->createProperty("HardwareInfo")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareInfo, false));
+      propNode->createProperty("HardwareVersion")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareVersion, false));
+    }
+  }
+
   void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
@@ -224,21 +245,7 @@ namespace dss {
 
         m_pPropertyNode->createProperty("isVdcDevice")
           ->linkToProxy(PropertyProxyReference<bool>(m_isVdcDevice, false));
-        PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
-        propNode->createProperty("ModelGuid")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelGuid, false));
-        propNode->createProperty("VendorGuid")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
-        propNode->createProperty("OemGuid")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
-        propNode->createProperty("ConfigURL")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
-        propNode->createProperty("HardwareGuid")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareGuid, false));
-        propNode->createProperty("HardwareInfo")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareInfo, false));
-        propNode->createProperty("HardwareVersion")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareVersion, false));
+        publishVdcToPropertyTree();
 
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
@@ -2218,6 +2225,12 @@ namespace dss {
   void Device::setConfigLock(bool _lockConfig) {
     boost::mutex::scoped_lock lock(m_deviceMutex);
     m_IsConfigLocked = _lockConfig;
+  }
+
+  void Device::setVdcDevice(bool _isVdcDevice)
+  {
+    m_isVdcDevice = _isVdcDevice;
+    publishVdcToPropertyTree();
   }
 
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
