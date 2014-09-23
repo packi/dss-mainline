@@ -439,7 +439,7 @@ namespace dss {
       convertedSensorValue = (int) (_sensorValue * 4 / 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (int) (_sensorValue + 100) * 4;
+      convertedSensorValue = (int) (_sensorValue + 100);
       break;
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
