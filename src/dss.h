@@ -122,7 +122,6 @@ namespace dss {
     bool parseProperties(const std::vector<std::string>& _properties);
     void addDefaultInterpreterPlugins();
 
-    int getUptime() const;
     bool isSaneDirectory(const std::string& _path);
     bool checkDirectoriesExist();
     void setupDirectories();
@@ -172,6 +171,7 @@ namespace dss {
     void setJSLogDirectory(const std::string& _value);
     void setSavedPropsDirectory(const std::string& _value);
     void publishDSID();
+    int getUptime() const;
   }; // DSS
 
 }
