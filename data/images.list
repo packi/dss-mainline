@@ -71,6 +71,7 @@ dist_dssdataimages_DATA =  \
    $(top_srcdir)/data/images/sds_red.png \
    $(top_srcdir)/data/images/sds_white.png \
    $(top_srcdir)/data/images/sds_yellow.png \
+   $(top_srcdir)/data/images/sk_black_black.png \
    $(top_srcdir)/data/images/star_black.png \
    $(top_srcdir)/data/images/star_blue.png \
    $(top_srcdir)/data/images/star_cyan.png \
