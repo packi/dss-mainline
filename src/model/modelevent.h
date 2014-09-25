@@ -52,6 +52,7 @@ namespace dss {
                     etLostDSMeter, /**< We've lost a dsMeter on the bus */
                     etDSMeterReady, /**< A dsMeter has completed its scanning cycle and is now ready */
                     etBusReady, /**< The bus transitioned into ready state */
+                    etBusDown, /**< The bus transitioned into disconnected state */
                     etMeteringValues, /**< Metering values arrived */
                     etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
                     etZoneSensorValue, /**< A zone sensor value has changed */

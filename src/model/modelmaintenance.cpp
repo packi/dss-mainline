@@ -540,6 +540,16 @@ namespace dss {
         log("Got bus ready event.", lsInfo);
         discoverDS485Devices();
         break;
+      case ModelEvent::etBusDown:
+        log("Got bus down event.", lsInfo);
+        try {
+          std::vector<boost::shared_ptr<DSMeter> > meters = m_pApartment->getDSMeters();
+          foreach(boost::shared_ptr<DSMeter> meter, meters) {
+            onLostDSMeter(meter->getDSID());
+          }
+        } catch(ItemNotFoundException& _e) {
+        }
+        break;
       case ModelEvent::etMeteringValues:
         if(event.getParameterCount() != 2) {
           log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");

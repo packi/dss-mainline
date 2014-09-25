@@ -65,11 +65,11 @@ namespace dss {
     m_pBusEventSink(NULL)
   {
     assert(_pModelMaintenance != NULL);
-
     if(_pDSS != NULL) {
-
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "connectionURI")
             ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
+      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "busState")
+            ->linkToProxy(PropertyProxyReference<int>((int &) m_busState, true));
     }
     m_pActionRequestInterface.reset(new DSActionRequest());
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface());
@@ -472,27 +472,29 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleBusState(_state);
   }
 
-  // TODO: expose the state on the property-tree
   void DSBusInterface::handleBusState(bus_state_t _state) {
     loginFromCallback();
     switch (_state) {
       case DS485_STATE_ISOLATED:
-        log("STATE: ISOLATED");
-        break;
-      case DS485_STATE_CONNECTED:
-        log("STATE: CONNECTED");
-        break;
-      case DS485_STATE_ACTIVE:
-        log("STATE: ACTIVE");
-        break;
-      case DS485_STATE_JOIN:
-        log("STATE: JOIN");
+        log("dS485 BusState: ISOLATED", lsError);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusDown));
         break;
       case DS485_STATE_DISCONNECTED:
-        log("STATE: DISCONNECTED");
+        log("dS485 BusState: DISCONNECTED", lsError);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusDown));
+        break;
+      case DS485_STATE_ACTIVE:
+        log("dS485 BusState: ACTIVE", lsWarning);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusReady));
+        break;
+      case DS485_STATE_CONNECTED:
+        log("dS485 BusState: CONNECTED");
+        break;
+      case DS485_STATE_JOIN:
+        log("dS485 BusState: JOIN");
         break;
       default:
-        log("STATE: UNKNOWN: " + intToString(_state));
+        log("dS485 BusState: UNKNOWN: " + intToString(_state));
         break;
     }
   }
