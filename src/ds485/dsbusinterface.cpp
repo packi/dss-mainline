@@ -61,7 +61,7 @@ namespace dss {
     m_pModelMaintenance(_pModelMaintenance),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
-    m_connectionURI("tcp://localhost:8442"),
+    m_connectionURI("tcp://localhost:8440"),
     m_pBusEventSink(NULL)
   {
     assert(_pModelMaintenance != NULL);
