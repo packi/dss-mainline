@@ -244,7 +244,8 @@ namespace dss {
             log("discoverDS485Devices: error resetting device valid flags: " + std::string(e.what()));
           }
 
-          if (!dsMeter->isConnected()) {
+          // #7558 - force a rescan unconditionally
+          if (true) {
             dsMeter->setIsPresent(true);
             dsMeter->setIsConnected(true);
             dsMeter->setIsValid(false);
