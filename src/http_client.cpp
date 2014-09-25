@@ -316,7 +316,8 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
   log("perform: " + std::string((type == POST) ? "POST " : " ") + url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    log(std::string("request: ") + error_buffer, lsError);
+    log(std::string("Request failed: ") + std::string((type == POST) ? "POST " : "GET ") + url +
+        ", Reason: " + error_buffer, lsError);
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
       m_curl_handle = NULL;
@@ -370,7 +371,8 @@ long HttpClient::downloadFile(std::string url, std::string filename) {
   log("download : " + url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    log(std::string("request: ") + error_buffer, lsError);
+    log(std::string("Request failed: ") + "GET " + url +
+        ", Reason: " + error_buffer, lsError);
     fclose(data);
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
