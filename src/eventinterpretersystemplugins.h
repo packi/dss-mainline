@@ -153,7 +153,7 @@ namespace dss {
     private:
       std::string getZoneName(boost::shared_ptr<Zone> _zone);
       std::string getGroupName(boost::shared_ptr<Group> _group);
-      std::string getSceneName(int _scene_id);
+      std::string getSceneName(int _sceneID, int _groupID);
       std::string getDeviceName(std::string _orgin_device_id);
       std::string getCallOrigin(callOrigin_t _call_origin);
       void logDeviceLocalScene(boost::shared_ptr<ScriptLogger> _logger,

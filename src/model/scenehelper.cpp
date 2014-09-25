@@ -386,7 +386,7 @@ namespace dss {
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
-      convertedSensorValue = (double) (pow(10, _sensorValue / 800));
+      convertedSensorValue = (double) (pow(10, ((double) _sensorValue) / 800));
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
@@ -439,7 +439,7 @@ namespace dss {
       convertedSensorValue = (int) (_sensorValue * 4 / 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
-      convertedSensorValue = (int) (_sensorValue + 100) * 4;
+      convertedSensorValue = (int) (_sensorValue + 100);
       break;
     case SensorIDWindDirection:
     case SensorIDPrecipitation:

@@ -549,6 +549,9 @@ namespace dss {
         &result.Imin, &result.Imax, &result.Ymin, &result.Ymax,
         &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId,
         &result.Offset, &result.ManualValue, &result.EmergencyValue);
+    if (result.EmergencyValue == 0) {
+      result.EmergencyValue = 100;
+    }
     DSBusInterface::checkResultCode(ret);
     return result;
   } // getZoneHeatingConfig

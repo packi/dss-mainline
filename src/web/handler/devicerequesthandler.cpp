@@ -546,7 +546,7 @@ namespace dss {
       if (dsuid_to_dsid(pDevice->getDSID(), &dsid)) {
         master->addProperty("dsid", dsid2str(dsid));
       } else {
-        master->addProperty("dsid", dsuid2str(pDevice->getDSID()));
+        master->addProperty("dsid", "");
       }
       master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
       master->addProperty("buttonInputMode", pDevice->getButtonInputMode());

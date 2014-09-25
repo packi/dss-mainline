@@ -48,7 +48,7 @@ namespace dss {
     if (dsuid_to_dsid(_device.getDSID(), &dsid)) {
       result->addProperty("id", dsid2str(dsid));
     } else {
-      result->addProperty("id", dsuid2str(_device.getDSID()));
+      result->addProperty("id", "");
     }
     result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
@@ -65,20 +65,23 @@ namespace dss {
     result->addProperty("OemProductURL", _device.getDevice()->getOemProductURL());
     result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
-    result->addProperty("VdcModelGuid", _device.getDevice()->getVdcModelGuid());
-    result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
-    result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
-    result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
-    result->addProperty("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
-    result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
-    result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+    result->addProperty("isVdcDevice", _device.getDevice()->isVdcDevice());
+    if (_device.getDevice()->isVdcDevice()) {
+      result->addProperty("VdcModelGuid", _device.getDevice()->getVdcModelGuid());
+      result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
+      result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
+      result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
+      result->addProperty("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
+      result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
+      result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+    }
 
     if(_device.getDevice()->isPresent()) {
       dsid_t dsid;
       if (dsuid_to_dsid(_device.getDevice()->getDSMeterDSID(), &dsid)) {
         result->addProperty("meterDSID", dsid2str(dsid));
       } else {
-        result->addProperty("meterDSID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
+        result->addProperty("meterDSID", "");
       }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
@@ -93,7 +96,7 @@ namespace dss {
       if (dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID(), &dsid)) {
         result->addProperty("meterDSID", dsid2str(dsid));
       } else {
-        result->addProperty("meterDSID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
+        result->addProperty("meterDSID", "");
       }
       result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;

@@ -1889,6 +1889,8 @@ namespace dss {
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode3)));
       pEvent->setProperty("NominalTemperature_Night",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode4)));
+      pEvent->setProperty("NominalTemperature_Holiday",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode5)));
     } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
       pEvent->setProperty("ControlValue_Off",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode0)));
@@ -1900,6 +1902,8 @@ namespace dss {
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode3)));
       pEvent->setProperty("ControlValue_Night",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode4)));
+      pEvent->setProperty("ControlValue_Holiday",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode5)));
     }
     raiseEvent(pEvent);
   } // onHeatingControllerValues

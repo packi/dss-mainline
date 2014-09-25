@@ -238,10 +238,10 @@ const static std::string evtGroup_Activity = "Activity";
 
 const static std::string evtCategory_DeviceSensorValue = "DeviceSensorValue";
 const static std::string evtCategory_ZoneSensorValue = "ZoneSensorValue";
-const static std::string evtCategory_ZoneGroupCallScene = "ZoneGroupCallScene";
-const static std::string evtCategory_ZoneGroupUndoScene = "ZoneGroupUndoScene";
-const static std::string evtCategory_ApartmentState = "ApartmentState";
-const static std::string evtCategory_ZoneGroupState = "ZoneGroupState";
+const static std::string evtCategory_ZoneGroupCallScene = "ZoneSceneCall";
+const static std::string evtCategory_ZoneGroupUndoScene = "ZoneUndoScene";
+const static std::string evtCategory_ApartmentState = "ApartmentStateChange";
+const static std::string evtCategory_ZoneGroupState = "ZoneStateChange";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_HeatingControllerSetup = "HeatingControllerSetup";

@@ -225,6 +225,16 @@ namespace dss {
         _spec.AntiWindUp, _spec.KeepFloorWarm, _spec.SourceZoneId,
         _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     DSBusInterface::checkResultCode(ret);
+
+    if (m_pModelMaintenance) {
+      boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
+      *spec = _spec;
+
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, _dsMeterID);
+      pEvent->addParameter(_ZoneID);
+      pEvent->setSingleObjectParameter(spec);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    }
   } // setZoneHeatingConfig
 
   void DSStructureModifyingBusInterface::setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec)
@@ -236,6 +246,13 @@ namespace dss {
     int ret = ControllerHeating_set_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
         _spec.State);
     DSBusInterface::checkResultCode(ret);
+
+    if (m_pModelMaintenance) {
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _dsMeterID);
+      pEvent->addParameter(_ZoneID);
+      pEvent->addParameter(_spec.State);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    }
   } // setZoneHeatingState
 
   void DSStructureModifyingBusInterface::setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec)
@@ -251,6 +268,16 @@ namespace dss {
         _spec.OpModeC, _spec.OpModeD, _spec.OpModeE, _spec.OpModeF
         );
     DSBusInterface::checkResultCode(ret);
+
+    if (m_pModelMaintenance) {
+      boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec(new ZoneHeatingOperationModeSpec_t);
+      *spec = _spec;
+
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerValues, _dsMeterID);
+      pEvent->addParameter(_ZoneID);
+      pEvent->setSingleObjectParameter(spec);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    }
   } // setZoneHeatingOperationModes
 
   void DSStructureModifyingBusInterface::setZoneSensor(
@@ -285,6 +312,10 @@ namespace dss {
     int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, broadcastDSUID,
                                              _zoneID, _sensorType);
     DSBusInterface::checkBroadcastResultCode(ret);
+  }
+
+  void DSStructureModifyingBusInterface::setModelMaintenace(ModelMaintenance* _modelMaintenance) {
+      m_pModelMaintenance = _modelMaintenance;
   }
 
 } // namespace dss
