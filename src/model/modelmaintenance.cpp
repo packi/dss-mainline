@@ -1837,7 +1837,7 @@ namespace dss {
     pEvent->setProperty("ZoneID", intToString(_zoneID));
     pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
     pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
-    pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue));
+    pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue - 100));
     if (config->ControllerMode == HeatingControlModeIDPID) {
       pEvent->setProperty("CtrlKp", intToString(config->Kp));
       pEvent->setProperty("CtrlTs", intToString(config->Ts));
@@ -1851,9 +1851,9 @@ namespace dss {
       pEvent->setProperty("CtrlKeepFloorWarm", intToString(config->KeepFloorWarm));
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
       pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
-      pEvent->setProperty("CtrlOffset", intToString(config->Offset));
+      pEvent->setProperty("CtrlOffset", intToString(config->Offset - 100));
     } else if (config->ControllerMode == HeatingControlModeIDManual) {
-      pEvent->setProperty("ManualValue", intToString(config->ManualValue));
+      pEvent->setProperty("ManualValue", intToString(config->ManualValue - 100));
     }
     raiseEvent(pEvent);
   } // onHeatingControllerConfig
