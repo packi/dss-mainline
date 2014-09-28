@@ -191,9 +191,9 @@ void HeatingMonitorTask::run() {
 
   int zoneID;
   if (m_event->getName() == EventName::HeatingControllerState) {
-    if (m_event->getPropertyByName("CtrlState") == intToString(HeatingControlStateIDEmergency)) {
+    if (m_event->getPropertyByName("ControlState") == intToString(HeatingControlStateIDEmergency)) {
       zoneID = strToInt(m_event->getPropertyByName("zoneID"));
-      dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("CtrlDSUID"));
+      dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("ControlDSUID"));
 
       Logger::getInstance()->log("HeatingMonitorTask: emergency state in zone " +
           intToString(zoneID) + " and controller " + dsuid2str(dsmdsuid),

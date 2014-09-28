@@ -1835,9 +1835,9 @@ namespace dss {
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerSetup));
     pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("CtrlMode", intToString(config->ControllerMode));
-    pEvent->setProperty("CtrlEmergencyValue", intToString(config->EmergencyValue));
+    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
+    pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
+    pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue));
     if (config->ControllerMode == HeatingControlModeIDPID) {
       pEvent->setProperty("CtrlKp", intToString(config->Kp));
       pEvent->setProperty("CtrlTs", intToString(config->Ts));
@@ -1877,7 +1877,7 @@ namespace dss {
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerValue));
     pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
+    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
     if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
       pEvent->setProperty("NominalTemperature_Off",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode0)));
@@ -1920,8 +1920,8 @@ namespace dss {
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerState));
     pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("CtrlState", intToString(_State));
+    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
+    pEvent->setProperty("ControlState", intToString(_State));
     raiseEvent(pEvent);
   } // onHeatingControllerState
 
