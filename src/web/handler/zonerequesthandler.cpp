@@ -537,6 +537,17 @@ namespace dss {
           m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingState(
               hProp.m_HeatingControlDSUID, pZone->getID(), hState);
 
+        } else if(_request.getMethod() == "getTemperatureControlState") {
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+
+          resultObj->addProperty("IsConfigured", !IsNullDsuid(hProp.m_HeatingControlDSUID));
+          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
+
+          return success(resultObj);
+
         } else if(_request.getMethod() == "getTemperatureControlInternals") {
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
