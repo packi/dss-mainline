@@ -337,20 +337,20 @@ namespace dss {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              zone->addProperty("CtrlKp", hConfig.Kp);
+              zone->addProperty("CtrlKp", (double)hConfig.Kp * 0.025);
               zone->addProperty("CtrlTs", hConfig.Ts);
               zone->addProperty("CtrlTi", hConfig.Ti);
               zone->addProperty("CtrlKd", hConfig.Kd);
-              zone->addProperty("CtrlImin", hConfig.Imin);
-              zone->addProperty("CtrlImax", hConfig.Imax);
-              zone->addProperty("CtrlYmin", hConfig.Ymin);
-              zone->addProperty("CtrlYmax", hConfig.Ymax);
+              zone->addProperty("CtrlImin", (double)hConfig.Imin * 0.025);
+              zone->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
+              zone->addProperty("CtrlYmin", hConfig.Ymin - 100);
+              zone->addProperty("CtrlYmax", hConfig.Ymax - 100);
               zone->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
               zone->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
               break;
             case HeatingControlModeIDZoneFollower:
               zone->addProperty("ReferenceZone", hConfig.SourceZoneId);
-              zone->addProperty("CtrlOffset", hConfig.Offset);
+              zone->addProperty("CtrlOffset", hConfig.Offset - 100);
               break;
             case HeatingControlModeIDFixed:
               break;

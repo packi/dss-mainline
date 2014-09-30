@@ -271,12 +271,12 @@ namespace dss {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              resultObj->addProperty("CtrlKp", hConfig.Kp);
+              resultObj->addProperty("CtrlKp", (double)hConfig.Kp * 0.025);
               resultObj->addProperty("CtrlTs", hConfig.Ts);
               resultObj->addProperty("CtrlTi", hConfig.Ti);
               resultObj->addProperty("CtrlKd", hConfig.Kd);
-              resultObj->addProperty("CtrlImin", hConfig.Imin);
-              resultObj->addProperty("CtrlImax", hConfig.Imax);
+              resultObj->addProperty("CtrlImin", (double)hConfig.Imin * 0.025);
+              resultObj->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
               resultObj->addProperty("CtrlYmin", hConfig.Ymin - 100);
               resultObj->addProperty("CtrlYmax", hConfig.Ymax - 100);
               resultObj->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
@@ -320,8 +320,9 @@ namespace dss {
             _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
           }
           if (_request.hasParameter("CtrlOffset")) {
-            _request.getParameter("CtrlOffset", hConfig.Offset);
-            hConfig.Offset += 100;
+            int offset;
+            _request.getParameter("CtrlOffset", offset);
+            hConfig.Offset = offset + 100;
           }
           if (_request.hasParameter("EmergencyValue")) {
             _request.getParameter("EmergencyValue", hConfig.EmergencyValue);
@@ -339,12 +340,16 @@ namespace dss {
             _request.getParameter("CtrlYmax", hConfig.Ymax);
             hConfig.Ymax += 100;
           }
-          _request.getParameter("CtrlKp", hConfig.Kp);
+          double temp = 0;
+          _request.getParameter("CtrlKp", temp);
+          hConfig.Kp = (uint16_t)temp * 40;
           _request.getParameter("CtrlTi", hConfig.Ti);
           _request.getParameter("CtrlTs", hConfig.Ts);
           _request.getParameter("CtrlKd", hConfig.Kd);
-          _request.getParameter("CtrlImin", hConfig.Imin);
-          _request.getParameter("CtrlImax", hConfig.Imax);
+          _request.getParameter("CtrlImin", temp);
+          hConfig.Imin = temp * 40;
+          _request.getParameter("CtrlImax", temp);
+          hConfig.Imax = temp * 40;
           _request.getParameter("CtrlAntiWindUp", hConfig.AntiWindUp);
           _request.getParameter("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
 
@@ -570,7 +575,7 @@ namespace dss {
           resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
           resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
           resultObj->addProperty("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
-          resultObj->addProperty("CtrlIntegral", (unsigned long int) hInternals.Integral);
+          resultObj->addProperty("CtrlIntegral", (double) hInternals.Integral * 0.025);
           resultObj->addProperty("CtrlYp", (double) hInternals.Yp * 0.01);
           resultObj->addProperty("CtrlYi", (double) hInternals.Yi * 0.01);
           resultObj->addProperty("CtrlYd", (double) hInternals.Yd *0.01);
