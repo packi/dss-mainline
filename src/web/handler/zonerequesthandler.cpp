@@ -320,9 +320,8 @@ namespace dss {
             _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
           }
           if (_request.hasParameter("CtrlOffset")) {
-            int offset;
-            _request.getParameter("CtrlOffset", offset);
-            hConfig.Offset = offset + 100;
+            _request.getParameter("CtrlOffset", hConfig.Offset);
+            hConfig.Offset += 100;
           }
           if (_request.hasParameter("EmergencyValue")) {
             _request.getParameter("EmergencyValue", hConfig.EmergencyValue);
