@@ -244,7 +244,8 @@ namespace dss {
             log("discoverDS485Devices: error resetting device valid flags: " + std::string(e.what()));
           }
 
-          if (!dsMeter->isConnected()) {
+          // #7558 - force a rescan unconditionally
+          if (true) {
             dsMeter->setIsPresent(true);
             dsMeter->setIsConnected(true);
             dsMeter->setIsValid(false);
@@ -539,6 +540,16 @@ namespace dss {
       case ModelEvent::etBusReady:
         log("Got bus ready event.", lsInfo);
         discoverDS485Devices();
+        break;
+      case ModelEvent::etBusDown:
+        log("Got bus down event.", lsInfo);
+        try {
+          std::vector<boost::shared_ptr<DSMeter> > meters = m_pApartment->getDSMeters();
+          foreach(boost::shared_ptr<DSMeter> meter, meters) {
+            onLostDSMeter(meter->getDSID());
+          }
+        } catch(ItemNotFoundException& _e) {
+        }
         break;
       case ModelEvent::etMeteringValues:
         if(event.getParameterCount() != 2) {

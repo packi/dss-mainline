@@ -61,6 +61,7 @@ namespace dss {
 
     DsmApiHandle_t m_dsmApiHandle;
     bool m_dsmApiReady;
+    bus_state_t m_busState;
     std::string m_connectionURI;
     BusEventSink* m_pBusEventSink;
 

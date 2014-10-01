@@ -187,6 +187,7 @@ namespace dss {
 
     } else {
 
+      log("Doing a quick scan for: " + dsuid2str(_dsMeter->getDSID()), lsInfo);
       if (_dsMeter->getCapability_HasDevices()) {
         std::vector<int> zoneIDs;
         try {
