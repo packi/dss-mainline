@@ -80,8 +80,8 @@ void SensorMonitorTask::run() {
           device->setSensorDataValidity(s, false);
 
           if (DSS::hasInstance()) {
-            boost::shared_ptr<Event> pEvent(new Event("invalidSensorData"));
-            pEvent->setProperty("dsuid", dsuid2str(device->getDSID()));
+            boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(device, m_Apartment));
+            boost::shared_ptr<Event> pEvent(new Event(EventName::DeviceInvalidSensor, pDevRef));
             pEvent->setProperty("sensorIndex", intToString(s));
             pEvent->setProperty("sensorType",
                                 intToString(sensor->m_sensorType));
