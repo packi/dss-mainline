@@ -208,7 +208,7 @@ void HeatingMonitorTask::run() {
     dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("dsMeter"));
     boost::shared_ptr<DSMeter> pMeter = m_Apartment->getDSMeterByDSID(dsmdsuid);
     Set devList = pMeter->getDevices();
-    std::vector<boost::shared_ptr<Zone> > zones;
+    std::vector<boost::shared_ptr<Zone> > zones = m_Apartment->getZones();
     for (size_t i = 0; i < zones.size(); i++) {
       if (zones[i]->getID() == 0) {
         continue;
