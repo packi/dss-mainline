@@ -59,24 +59,28 @@ void SensorMonitorTask::run() {
         }
 
         int lifetime = sensor->m_sensorPollInterval * 3;
-        DateTime sensor_ts = sensor->m_sensorValueTS;
-        DateTime now = DateTime();
-
-        if (sensor_ts == DateTime::NullDate) {
-          sensor_ts = now;
+        int age = 0;
+        if (sensor->m_sensorValueTS == DateTime::NullDate) {
           if (DSS::hasInstance()) {
-            sensor_ts.addSeconds(-1 * DSS::getInstance()->getUptime());
+            age = DSS::getInstance()->getUptime();
           }
+        } else {
+          DateTime now = DateTime();
+          age = now.difference(sensor->m_sensorValueTS);
         }
-        sensor_ts.addSeconds(lifetime);
 
-        // value is invalid because its older than its allowed lifeime
-        if ((sensor_ts < now) && device->isSensorDataValid(s)) {
+        Logger::getInstance()->log(std::string("Sensor #") +
+                  intToString(s) + " of device " + dsuid2str(device->getDSID()) +
+                  " value is from: " + sensor->m_sensorValueTS.toISO8601_ms() +
+                  ", and age in seconds is " + intToString(age));
+
+        // value is invalid because its older than its allowed lifetime
+        if ((age > lifetime) && device->isSensorDataValid(s)) {
 
           Logger::getInstance()->log(std::string("Sensor #") +
-                    intToString(s) + " of device " +
-                    dsuid2str(device->getDSID()) + " is too old: " +
-                    sensor->m_sensorValueTS.toISO8601_ms());
+                    intToString(s) + " of device " + dsuid2str(device->getDSID()) +
+                    " value is too old: " + sensor->m_sensorValueTS.toISO8601_ms() +
+                    ", age in seconds is " + intToString(age), lsWarning);
           device->setSensorDataValidity(s, false);
 
           if (DSS::hasInstance()) {
