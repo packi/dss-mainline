@@ -284,7 +284,7 @@ namespace dss {
               break;
             case HeatingControlModeIDZoneFollower:
               resultObj->addProperty("ReferenceZone", hConfig.SourceZoneId);
-              resultObj->addProperty("CtrlOffset", hConfig.Offset - 100);
+              resultObj->addProperty("CtrlOffset", hConfig.Offset);
               break;
             case HeatingControlModeIDManual:
               resultObj->addProperty("ManualValue", hConfig.ManualValue - 100);
@@ -322,7 +322,7 @@ namespace dss {
           if (_request.hasParameter("CtrlOffset")) {
             int offset;
             _request.getParameter("CtrlOffset", offset);
-            hConfig.Offset = offset + 100;
+            hConfig.Offset = offset;
           }
           if (_request.hasParameter("EmergencyValue")) {
             _request.getParameter("EmergencyValue", hConfig.EmergencyValue);

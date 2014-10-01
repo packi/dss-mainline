@@ -968,7 +968,7 @@ namespace dss {
       uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
       uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
       uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
-      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
+      uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     loginFromCallback();
 
     boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
@@ -1000,7 +1000,7 @@ namespace dss {
       uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
       uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
       uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
-      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
+      uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     if (_errorCode == 0) {
       static_cast<DSBusInterface*>(_userData)->
           handleHeatingControllerConfig(_errorCode, _sourceID, _destinationID, _ZoneId,

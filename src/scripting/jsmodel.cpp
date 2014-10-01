@@ -2821,7 +2821,7 @@ namespace dss {
           break;
         case HeatingControlModeIDZoneFollower:
           obj.setProperty<int>("ReferenceZone", hConfig.SourceZoneId);
-          obj.setProperty<int>("CtrlOffset", hConfig.Offset - 100);
+          obj.setProperty<int>("CtrlOffset", hConfig.Offset);
           break;
         case HeatingControlModeIDManual:
           obj.setProperty<int>("ManualValue", hConfig.ManualValue - 100);
@@ -2971,7 +2971,6 @@ namespace dss {
           hConfig.SourceZoneId = intValue;
         } else if (strcmp(propKey, "CtrlOffset") == 0) {
           hConfig.Offset = intValue;
-          hConfig.Offset += 100;
         } else if (strcmp(propKey, "EmergencyValue") == 0) {
           hConfig.EmergencyValue = intValue;
           hConfig.EmergencyValue += 100;

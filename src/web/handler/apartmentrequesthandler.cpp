@@ -350,7 +350,7 @@ namespace dss {
               break;
             case HeatingControlModeIDZoneFollower:
               zone->addProperty("ReferenceZone", hConfig.SourceZoneId);
-              zone->addProperty("CtrlOffset", hConfig.Offset - 100);
+              zone->addProperty("CtrlOffset", hConfig.Offset);
               break;
             case HeatingControlModeIDFixed:
               break;

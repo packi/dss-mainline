@@ -118,7 +118,7 @@ namespace dss {
     uint8_t AntiWindUp;
     uint8_t KeepFloorWarm;
     uint16_t SourceZoneId;
-    int8_t Offset;
+    int16_t Offset;
     uint8_t EmergencyValue;
     uint8_t ManualValue;
   } ZoneHeatingConfigSpec_t;

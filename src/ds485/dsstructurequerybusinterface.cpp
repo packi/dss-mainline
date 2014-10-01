@@ -548,7 +548,7 @@ namespace dss {
         &result.ControllerMode, (uint16_t*)&result.Kp, &result.Ts, &result.Ti, &result.Kd,
         (uint16_t*)&result.Imin, (uint16_t*)&result.Imax, &result.Ymin, &result.Ymax,
         &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId,
-        (uint8_t*)&result.Offset, &result.ManualValue, &result.EmergencyValue);
+        (uint16_t*)&result.Offset, &result.ManualValue, &result.EmergencyValue);
 
     if (result.EmergencyValue == 0) {
       result.EmergencyValue = 100;
