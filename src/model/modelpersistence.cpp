@@ -379,6 +379,62 @@ namespace dss {
     m_tempScene = snum;
   }
 
+  void ModelPersistence::parseSensor(const char *_name, const char **_attrs) {
+    if ((m_tempZone == NULL) || (strcmp(_name, "sensor") != 0)) {
+      return;
+    }
+
+    const char *dsuid = NULL;
+    const char *sensorType = NULL;
+    const char *sensorIndex = NULL;
+
+    for (int i = 0; _attrs[i]; i += 2)
+    {
+      if (strcmp(_attrs[i], "dsuid") == 0) {
+        dsuid = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "sensorType") == 0) {
+        sensorType = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "sensorIndex") == 0) {
+        sensorIndex = _attrs[i + 1];
+      }
+    }
+
+    if (dsuid == NULL) {
+      return;
+    }
+
+    dsuid_t _dsuid;
+    try {
+      _dsuid = str2dsuid(dsuid);
+    } catch (std::runtime_error &ex) {
+      Logger::getInstance()->log("ModelPersistence: could not convert dSUID for device " + std::string(dsuid) + ": " + ex.what(), lsError);
+      return;
+    }
+
+    int _sensorType;
+    try {
+      _sensorType = strToInt(sensorType);
+    } catch (std::runtime_error &ex) {
+      Logger::getInstance()->log("ModelPersistence: could not convert sensortype for device " + std::string(sensorType) + ": " + ex.what(), lsError);
+      return;
+    }
+
+    int _sensorIndex;
+    try {
+      _sensorIndex = strToInt(sensorIndex);
+    } catch (std::runtime_error &ex) {
+      Logger::getInstance()->log("ModelPersistence: could not convert sensor index for device " + std::string(sensorIndex) + ": " + ex.what(), lsError);
+      return;
+    }
+
+    boost::shared_ptr<MainZoneSensor_t> ms(new MainZoneSensor_t());
+    ms->m_DSUID = _dsuid;
+    ms->m_sensorType = _sensorType;
+    ms->m_sensorIndex = _sensorIndex;
+
+    m_tempZone->setSensor(ms);
+  }
+
   const char *ModelPersistence::getSingleAttribute(const char* _name,
                                                    const char **_attrs) {
     const char *ret = NULL;
@@ -475,13 +531,15 @@ namespace dss {
           parseMeter(_name, _attrs);
         }
       // level 3 supports <name>, <properties>, <groups>, <datamodelHash>,
-      // <datamodelModification>
+      // <datamodelModification>, <sensors>
       } else if (m_level == 3) {
         if (((m_state == ps_device) || (m_state == ps_zone)) &&
             (strcmp(_name, "name") == 0)) {
           m_expectString = true;
         } else if ((m_state == ps_zone) && (strcmp(_name, "groups") == 0)) {
           m_state = ps_group;
+        } else if ((m_state == ps_zone) && (strcmp(_name, "sensors") == 0)) {
+          m_state = ps_sensor;
         } else if (m_state == ps_meter) {
           m_expectString = true;
         } else if ((m_state == ps_device) &&
@@ -496,6 +554,8 @@ namespace dss {
       } else if (m_level == 4) {
         if (m_state == ps_group) {
           parseGroup(_name, _attrs);
+        } else if (m_state == ps_sensor) {
+          parseSensor(_name, _attrs);
         }
       // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>
       } else if (m_level == 5) {
@@ -592,6 +652,8 @@ namespace dss {
             }
           }
           if ((m_state == ps_group) && (strcmp(_name, "groups") == 0)) {
+            m_state = ps_zone;
+          } else if ((m_state == ps_sensor) && (strcmp(_name, "sensors") == 0)) {
             m_state = ps_zone;
           }
         }
