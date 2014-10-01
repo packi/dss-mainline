@@ -379,7 +379,7 @@ namespace dss {
     m_tempScene = snum;
   }
 
-  const char *ModelPersistence::getSingleAttribute(const char* _name, 
+  const char *ModelPersistence::getSingleAttribute(const char* _name,
                                                    const char **_attrs) {
     const char *ret = NULL;
     for (int i = 0; _attrs[i]; i += 2)
@@ -499,8 +499,8 @@ namespace dss {
         }
       // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>
       } else if (m_level == 5) {
-        if ((m_state == ps_group) && 
-            ((strcmp(_name, "name") == 0) || 
+        if ((m_state == ps_group) &&
+            ((strcmp(_name, "name") == 0) ||
              (strcmp(_name, "color") == 0) ||
              (strcmp(_name, "associatedSet") == 0))) {
           m_expectString = true;
@@ -510,7 +510,7 @@ namespace dss {
       // level 6 supports <property>, <value>, <scene>
       } else if (m_level == 6) {
         if (m_state == ps_scene) {
-          parseScene(_name, _attrs); 
+          parseScene(_name, _attrs);
         }
       // level 7 supports <property>, <value>, <name>
       } else if (m_level == 7) {
@@ -739,6 +739,15 @@ namespace dss {
     _ofs << doIndent(_indent) << "</group>" << std::endl;
   } // groupToXML
 
+  void zoneSensorToXML(boost::shared_ptr<MainZoneSensor_t> _zoneSensor, std::ofstream& _ofs, const int _indent)
+  {
+    _ofs << doIndent(_indent) << "<sensor dsuid=\""
+         << dsuid2str(_zoneSensor->m_DSUID) << "\""
+         << " sensorType=\"" << intToString(_zoneSensor->m_sensorType) << "\""
+         << " sensorIndex=\"" << intToString(_zoneSensor->m_sensorIndex)  << "\"/>"
+         << std::endl;
+  } // zoneSensorToXML
+
   void zoneToXML(boost::shared_ptr<Zone> _pZone, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<zone id=\"" << intToString(_pZone->getID()) << "\">" << std::endl;
     if(!_pZone->getName().empty()) {
@@ -760,6 +769,23 @@ namespace dss {
       }
     }
     _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
+
+    // Zone sensors
+    if (_pZone->getID() != 0) {
+      std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = _pZone->getAssignedSensors();
+
+      if ( !slist.empty() ) {
+        _ofs << doIndent(_indent + 1) << "<sensors>" << std::endl;
+        for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
+            it != slist.end();
+            it ++) {
+          boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+          zoneSensorToXML(devSensor, _ofs, _indent+2);
+        }
+        _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
+      }
+    }
+
     _ofs << doIndent(_indent) << "</zone>" << std::endl;
   } // zoneToXML
 
