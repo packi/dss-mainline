@@ -179,6 +179,7 @@ namespace dss {
             circuit->addProperty("dsid", "");
           }
           circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
+          circuit->addProperty("DisplayID", dsMeter->getDisplayID());
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("armSwVersion", dsMeter->getArmSoftwareVersion());
           circuit->addProperty("dspSwVersion", dsMeter->getDspSoftwareVersion());

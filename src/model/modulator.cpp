@@ -70,13 +70,14 @@ namespace dss {
       m_pPropertyNode =
         m_pApartment->getPropertyNode()->createProperty("dSMeters/" + dsuid2str(m_DSID));
       m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
-
       dsid_t dsid;
       if (dsuid_to_dsid(m_DSID, &dsid)) {
         m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
       } else {
         m_pPropertyNode->createProperty("dSID")->setStringValue("");
       }
+      m_pPropertyNode->createProperty("DisplayID")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string, false>(*this, &DSMeter::getDisplayID));
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
 
@@ -153,6 +154,22 @@ namespace dss {
   dsuid_t DSMeter::getDSID() const {
     return m_DSID;
   } // getDSID
+
+  std::string DSMeter::getDisplayID() const
+  {
+    dsid_t dsid;
+    std::string displayID;
+    if (dsuid_to_dsid(m_DSID, &dsid)) {
+      displayID = dsid2str(dsid);
+      displayID = displayID.substr(displayID.size() - 8);
+    } else {
+      displayID = dsuid2str(m_DSID).substr(0, 7) + "\u2026";
+    }
+    if (m_DSID.id[16] != 0) {
+      displayID += "-" + intToString(m_DSID.id[16]);
+    }
+    return displayID;
+  }
 
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
