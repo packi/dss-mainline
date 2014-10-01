@@ -334,6 +334,7 @@ namespace dss {
     void setDeviceOutputChannelDontCareFlags(uint8_t _scene, uint16_t _value);
     uint16_t getDeviceOutputChannelDontCareFlags(uint8_t _scene);
 
+    std::string getDisplayID() const;
 
     bool is2WayMaster() const;
     bool is2WaySlave() const;
