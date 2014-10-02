@@ -165,6 +165,7 @@ namespace dss {
     void setSensor(boost::shared_ptr<const Device> _device, uint8_t _sensorType);
     void setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor);
     void resetSensor(uint8_t _sensorType);
+    bool isSensorAssigned(uint8_t _sensorType) const;
     std::vector<boost::shared_ptr<MainZoneSensor_t> > getAssignedSensors() { return m_MainSensors; }
 
     boost::shared_ptr<std::vector<int> > getUnassignedSensorTypes() const;

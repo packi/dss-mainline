@@ -330,6 +330,18 @@ namespace dss {
     }
   }
 
+  bool Zone::isSensorAssigned(uint8_t _sensorType) const {
+    for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::const_iterator it = m_MainSensors.begin();
+        it != m_MainSensors.end();
+        it ++) {
+      boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+      if (devSensor->m_sensorType == _sensorType) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   boost::shared_ptr<std::vector<int> > Zone::getUnassignedSensorTypes() const {
     int sensorTypes[] = {
       SensorIDTemperatureIndoors,
