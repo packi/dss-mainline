@@ -214,10 +214,10 @@ void HeatingMonitorTask::run() {
         continue;
       }
       Set devices = devList.getByZone(zones[i]->getID());
-      if (devices.isEmpty()) {
-        continue;
+      ZoneHeatingProperties_t hConfig = zones[i]->getHeatingProperties();
+      if (!devices.isEmpty() || IsEqualDsuid(hConfig.m_HeatingControlDSUID, dsmdsuid)) {
+        syncZone(zones[i]->getID());
       }
-      syncZone(zones[i]->getID());
     }
   }
 }

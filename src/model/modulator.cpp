@@ -163,7 +163,7 @@ namespace dss {
       displayID = dsid2str(dsid);
       displayID = displayID.substr(displayID.size() - 8);
     } else {
-      displayID = dsuid2str(m_DSID).substr(0, 7) + "\u2026";
+      displayID = dsuid2str(m_DSID).substr(0, 8) + "\u2026";
     }
     if (m_DSID.id[16] != 0) {
       displayID += "-" + intToString(m_DSID.id[16]);
