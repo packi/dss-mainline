@@ -60,7 +60,8 @@ namespace dss {
         ps_zone,
         ps_group,
         ps_scene,
-        ps_properties
+        ps_properties,
+        ps_sensor
     };
     bool m_ignore;
     bool m_expectString;
@@ -79,6 +80,7 @@ namespace dss {
     void parseGroup(const char *_name, const char **_attrs);
     void parseMeter(const char *_name, const char **_attrs);
     void parseScene(const char *_name, const char **_attrs);
+    void parseSensor(const char *_name, const char **_attrs);
     const char *getSingleAttribute(const char *_name, const char **_attrs);
     virtual void elementStart(const char *_name, const char **_attrs);
     virtual void elementEnd(const char *_name);
