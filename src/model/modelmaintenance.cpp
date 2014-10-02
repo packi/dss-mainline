@@ -1858,8 +1858,8 @@ namespace dss {
       pEvent->setProperty("CtrlImax", intToString(config->Imax));
       pEvent->setProperty("CtrlYmin", intToString(config->Ymin));
       pEvent->setProperty("CtrlYmax", intToString(config->Ymax));
-      pEvent->setProperty("CtrlAntiWindUp", intToString(config->AntiWindUp));
-      pEvent->setProperty("CtrlKeepFloorWarm", intToString(config->KeepFloorWarm));
+      pEvent->setProperty("CtrlAntiWindUp", (config->AntiWindUp > 0) ? "true" : "false");
+      pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
       pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
       pEvent->setProperty("CtrlOffset", intToString(config->Offset - 100));
