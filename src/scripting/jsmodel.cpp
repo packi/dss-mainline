@@ -2816,8 +2816,8 @@ namespace dss {
           obj.setProperty<double>("CtrlImax", (double)hConfig.Imax * 0.025);
           obj.setProperty<int>("CtrlYmin", hConfig.Ymin - 100);
           obj.setProperty<int>("CtrlYmax", hConfig.Ymax - 100);
-          obj.setProperty<int>("CtrlAntiWindUp", hConfig.AntiWindUp);
-          obj.setProperty<int>("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+          obj.setProperty<bool>("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+          obj.setProperty<bool>("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
           break;
         case HeatingControlModeIDZoneFollower:
           obj.setProperty<int>("ReferenceZone", hConfig.SourceZoneId);
@@ -2999,9 +2999,9 @@ namespace dss {
           double doubleValue = strToDouble(propValue, 0);
           hConfig.Imax = doubleValue * 40;
         } else if (strcmp(propKey, "CtrlAntiWindUp") == 0) {
-          hConfig.AntiWindUp = intValue;
+          hConfig.AntiWindUp = ctx->convertTo<bool>(arg1) ? 1 : 0;;
         } else if (strcmp(propKey, "CtrlKeepFloorWarm") == 0) {
-          hConfig.KeepFloorWarm = intValue;
+          hConfig.KeepFloorWarm = ctx->convertTo<bool>(arg1) ? 1 : 0;
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlConfiguration: unknown configuration \"%s\"", propKey);
         }

@@ -346,8 +346,8 @@ namespace dss {
               zone->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
               zone->addProperty("CtrlYmin", hConfig.Ymin - 100);
               zone->addProperty("CtrlYmax", hConfig.Ymax - 100);
-              zone->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
-              zone->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+              zone->addProperty("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+              zone->addProperty("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
               break;
             case HeatingControlModeIDZoneFollower:
               zone->addProperty("ReferenceZone", hConfig.SourceZoneId);

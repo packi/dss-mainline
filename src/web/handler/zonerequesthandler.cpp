@@ -279,8 +279,8 @@ namespace dss {
               resultObj->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
               resultObj->addProperty("CtrlYmin", hConfig.Ymin - 100);
               resultObj->addProperty("CtrlYmax", hConfig.Ymax - 100);
-              resultObj->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
-              resultObj->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+              resultObj->addProperty("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+              resultObj->addProperty("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
               break;
             case HeatingControlModeIDZoneFollower:
               resultObj->addProperty("ReferenceZone", hConfig.SourceZoneId);
@@ -340,18 +340,21 @@ namespace dss {
             _request.getParameter("CtrlYmax", hConfig.Ymax);
             hConfig.Ymax += 100;
           }
-          double temp = 0;
-          _request.getParameter("CtrlKp", temp);
-          hConfig.Kp = (uint16_t)temp * 40;
+          double tempDouble = 0;
+          _request.getParameter("CtrlKp", tempDouble);
+          hConfig.Kp = (uint16_t)tempDouble * 40;
           _request.getParameter("CtrlTi", hConfig.Ti);
           _request.getParameter("CtrlTs", hConfig.Ts);
           _request.getParameter("CtrlKd", hConfig.Kd);
-          _request.getParameter("CtrlImin", temp);
-          hConfig.Imin = temp * 40;
-          _request.getParameter("CtrlImax", temp);
-          hConfig.Imax = temp * 40;
-          _request.getParameter("CtrlAntiWindUp", hConfig.AntiWindUp);
-          _request.getParameter("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+          _request.getParameter("CtrlImin", tempDouble);
+          hConfig.Imin = tempDouble * 40;
+          _request.getParameter("CtrlImax", tempDouble);
+          hConfig.Imax = tempDouble * 40;
+          bool tempBool;
+          _request.getParameter("CtrlAntiWindUp", tempBool);
+          hConfig.AntiWindUp = tempBool ? 1 : 0;
+          _request.getParameter("CtrlKeepFloorWarm", tempBool);
+          hConfig.KeepFloorWarm = tempBool ? 1 : 0;
 
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
