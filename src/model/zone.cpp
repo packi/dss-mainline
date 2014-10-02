@@ -356,9 +356,6 @@ namespace dss {
 
     for (size_t i = 0; i < m_MainSensors.size(); i++) {
       boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
-      if (s) {
-        continue;
-      }
 
       std::vector<int>::iterator it;
       for (it = ret->begin(); it != ret->end();) {
