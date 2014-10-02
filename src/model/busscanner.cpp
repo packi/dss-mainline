@@ -676,7 +676,11 @@ namespace dss {
         sensorDevice = m_Interface.getZoneSensor(_dsMeter->getDSID(), _zone->getID(), idList[i]);
         DeviceReference devRef = _zone->getDevices().getByDSID(sensorDevice);
         boost::shared_ptr<Device> pDev = devRef.getDevice();
-        _zone->setSensor(pDev, SensorIDTemperatureIndoors);
+
+        // check if zone sensor already assigned
+        if (!_zone->isSensorAssigned(SensorIDTemperatureIndoors)) {
+          _zone->setSensor(pDev, SensorIDTemperatureIndoors);
+        }
       } catch (ItemNotFoundException& e) {
         log("Sensor with id " + dsuid2str(sensorDevice) +
             " is not present but assigned as zone reference on the dSM " +
