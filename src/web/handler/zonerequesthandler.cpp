@@ -220,6 +220,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlStatus") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
@@ -249,6 +253,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlConfig") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
@@ -295,6 +303,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "setTemperatureControlConfig") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
@@ -361,6 +373,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlValues") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
@@ -414,6 +430,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "setTemperatureControlValues") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
@@ -513,6 +533,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "setTemperatureControlState") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStateSpec_t hState;
@@ -546,6 +570,10 @@ namespace dss {
               hProp.m_HeatingControlDSUID, pZone->getID(), hState);
 
         } else if(_request.getMethod() == "getTemperatureControlState") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
 
@@ -557,6 +585,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlInternals") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingInternalsSpec_t hInternals;
