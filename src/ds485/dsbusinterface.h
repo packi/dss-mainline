@@ -61,6 +61,7 @@ namespace dss {
 
     DsmApiHandle_t m_dsmApiHandle;
     bool m_dsmApiReady;
+    bus_state_t m_busState;
     std::string m_connectionURI;
     BusEventSink* m_pBusEventSink;
 
@@ -229,14 +230,14 @@ namespace dss {
         uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
         uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
         uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
-        uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue);
+        uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue);
     static void handleHeatingControllerConfigCallback(uint8_t _errorCode, void *_userData,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _ZoneId, uint8_t _ControllerMode,
         uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
         uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
         uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
-        uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue);
+        uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue);
     void handleHeatingControllerOperationModes(uint8_t _errorCode,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _ZoneId,

@@ -61,15 +61,15 @@ namespace dss {
     m_pModelMaintenance(_pModelMaintenance),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
-    m_connectionURI("tcp://localhost:8442"),
+    m_connectionURI("tcp://localhost:8440"),
     m_pBusEventSink(NULL)
   {
     assert(_pModelMaintenance != NULL);
-
     if(_pDSS != NULL) {
-
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "connectionURI")
             ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
+      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "busState")
+            ->linkToProxy(PropertyProxyReference<int>((int &) m_busState, true));
     }
     m_pActionRequestInterface.reset(new DSActionRequest());
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface());
@@ -472,27 +472,29 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleBusState(_state);
   }
 
-  // TODO: expose the state on the property-tree
   void DSBusInterface::handleBusState(bus_state_t _state) {
     loginFromCallback();
     switch (_state) {
       case DS485_STATE_ISOLATED:
-        log("STATE: ISOLATED");
-        break;
-      case DS485_STATE_CONNECTED:
-        log("STATE: CONNECTED");
-        break;
-      case DS485_STATE_ACTIVE:
-        log("STATE: ACTIVE");
-        break;
-      case DS485_STATE_JOIN:
-        log("STATE: JOIN");
+        log("dS485 BusState: ISOLATED", lsError);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusDown));
         break;
       case DS485_STATE_DISCONNECTED:
-        log("STATE: DISCONNECTED");
+        log("dS485 BusState: DISCONNECTED", lsError);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusDown));
+        break;
+      case DS485_STATE_ACTIVE:
+        log("dS485 BusState: ACTIVE", lsWarning);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusReady));
+        break;
+      case DS485_STATE_CONNECTED:
+        log("dS485 BusState: CONNECTED");
+        break;
+      case DS485_STATE_JOIN:
+        log("dS485 BusState: JOIN");
         break;
       default:
-        log("STATE: UNKNOWN: " + intToString(_state));
+        log("dS485 BusState: UNKNOWN: " + intToString(_state));
         break;
     }
   }
@@ -966,7 +968,7 @@ namespace dss {
       uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
       uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
       uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
-      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
+      uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     loginFromCallback();
 
     boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
@@ -998,7 +1000,7 @@ namespace dss {
       uint16_t _Kp, uint8_t _Ts, uint16_t _Ti, uint16_t _Kd,
       uint16_t _Imin, uint16_t _Imax, uint8_t _Ymin, uint8_t _Ymax,
       uint8_t _AntiWindUp, uint8_t _KeepFloorWarm, uint16_t _SourceZoneId,
-      uint8_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
+      uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     if (_errorCode == 0) {
       static_cast<DSBusInterface*>(_userData)->
           handleHeatingControllerConfig(_errorCode, _sourceID, _destinationID, _ZoneId,

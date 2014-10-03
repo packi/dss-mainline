@@ -95,6 +95,9 @@ namespace dss {
     /** Returns the DSID of the DSMeter */
     dsuid_t getDSID() const;
 
+    /** returns a short id of the DSMeter */
+    std::string getDisplayID() const;
+
     /** Adds a DeviceReference to the dsMeters devices list */
     void addDevice(const DeviceReference& _device);
 

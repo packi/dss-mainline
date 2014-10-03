@@ -297,6 +297,22 @@ namespace dss {
     m_MainSensors.push_back(ms);
   }
 
+  void Zone::setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor) {
+    if (!isAllowedSensorType(_mainZoneSensor->m_sensorType)) {
+      throw std::runtime_error("Assignment of sensor type " + intToString(_mainZoneSensor->m_sensorType) + " is not allowed!");
+    }
+
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> ms = m_MainSensors.at(i);
+      if (ms && (ms->m_sensorType == _mainZoneSensor->m_sensorType)) {
+        ms->m_DSUID = _mainZoneSensor->m_DSUID;
+        ms->m_sensorIndex = _mainZoneSensor->m_sensorIndex;
+        return;
+      }
+    }
+    m_MainSensors.push_back(_mainZoneSensor);
+  }
+
   void Zone::resetSensor(uint8_t _sensorType) {
     if (!isAllowedSensorType(_sensorType)) {
       return;
@@ -314,6 +330,18 @@ namespace dss {
     }
   }
 
+  bool Zone::isSensorAssigned(uint8_t _sensorType) const {
+    for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::const_iterator it = m_MainSensors.begin();
+        it != m_MainSensors.end();
+        it ++) {
+      boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+      if (devSensor->m_sensorType == _sensorType) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   boost::shared_ptr<std::vector<int> > Zone::getUnassignedSensorTypes() const {
     int sensorTypes[] = {
       SensorIDTemperatureIndoors,
@@ -328,9 +356,6 @@ namespace dss {
 
     for (size_t i = 0; i < m_MainSensors.size(); i++) {
       boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
-      if (s) {
-        continue;
-      }
 
       std::vector<int>::iterator it;
       for (it = ret->begin(); it != ret->end();) {

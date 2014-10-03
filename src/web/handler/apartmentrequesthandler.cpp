@@ -179,6 +179,7 @@ namespace dss {
             circuit->addProperty("dsid", "");
           }
           circuit->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
+          circuit->addProperty("DisplayID", dsMeter->getDisplayID());
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("armSwVersion", dsMeter->getArmSoftwareVersion());
           circuit->addProperty("dspSwVersion", dsMeter->getDspSoftwareVersion());
@@ -281,6 +282,29 @@ namespace dss {
         }
         return success(resultObj);
 
+      } else if(_request.getMethod() == "getTemperatureControlState") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+
+        resultObj->addElement("zones", zones);
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          zones->addElement("", zone);
+          zone->addProperty("id", pZone->getID());
+          zone->addProperty("name", pZone->getName());
+
+          zone->addProperty("IsConfigured", !IsNullDsuid(hProp.m_HeatingControlDSUID));
+          zone->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          zone->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          zone->addProperty("ControlState", hProp.m_HeatingControlState);
+        }
+        return success(resultObj);
+
       } else if(_request.getMethod() == "getTemperatureControlConfig") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
@@ -314,16 +338,16 @@ namespace dss {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              zone->addProperty("CtrlKp", hConfig.Kp);
+              zone->addProperty("CtrlKp", (double)hConfig.Kp * 0.025);
               zone->addProperty("CtrlTs", hConfig.Ts);
               zone->addProperty("CtrlTi", hConfig.Ti);
               zone->addProperty("CtrlKd", hConfig.Kd);
-              zone->addProperty("CtrlImin", hConfig.Imin);
-              zone->addProperty("CtrlImax", hConfig.Imax);
-              zone->addProperty("CtrlYmin", hConfig.Ymin);
-              zone->addProperty("CtrlYmax", hConfig.Ymax);
-              zone->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
-              zone->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+              zone->addProperty("CtrlImin", (double)hConfig.Imin * 0.025);
+              zone->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
+              zone->addProperty("CtrlYmin", hConfig.Ymin - 100);
+              zone->addProperty("CtrlYmax", hConfig.Ymax - 100);
+              zone->addProperty("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+              zone->addProperty("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
               break;
             case HeatingControlModeIDZoneFollower:
               zone->addProperty("ReferenceZone", hConfig.SourceZoneId);

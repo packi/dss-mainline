@@ -111,14 +111,14 @@ namespace dss {
     uint8_t Ts;
     uint16_t Ti;
     uint16_t Kd;
-    uint16_t Imin;
-    uint16_t Imax;
+    int16_t Imin;
+    int16_t Imax;
     uint8_t Ymin;
     uint8_t Ymax;
     uint8_t AntiWindUp;
     uint8_t KeepFloorWarm;
     uint16_t SourceZoneId;
-    uint8_t Offset;
+    int16_t Offset;
     uint8_t EmergencyValue;
     uint8_t ManualValue;
   } ZoneHeatingConfigSpec_t;
@@ -126,12 +126,12 @@ namespace dss {
   typedef struct {
     uint16_t Trecent;
     uint16_t Treference;
-    uint16_t TError;
-    uint16_t TErrorPrev;
-    uint32_t Integral;
-    uint32_t Yp;
-    uint32_t Yi;
-    uint32_t Yd;
+    int16_t TError;
+    int16_t TErrorPrev;
+    int32_t Integral;
+    int32_t Yp;
+    int32_t Yi;
+    int32_t Yd;
     uint8_t Y;
     uint8_t AntiWindUp;
   } ZoneHeatingInternalsSpec_t;

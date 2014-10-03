@@ -220,6 +220,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlStatus") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
@@ -249,6 +253,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlConfig") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
@@ -271,20 +279,20 @@ namespace dss {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              resultObj->addProperty("CtrlKp", hConfig.Kp);
+              resultObj->addProperty("CtrlKp", (double)hConfig.Kp * 0.025);
               resultObj->addProperty("CtrlTs", hConfig.Ts);
               resultObj->addProperty("CtrlTi", hConfig.Ti);
               resultObj->addProperty("CtrlKd", hConfig.Kd);
-              resultObj->addProperty("CtrlImin", hConfig.Imin);
-              resultObj->addProperty("CtrlImax", hConfig.Imax);
+              resultObj->addProperty("CtrlImin", (double)hConfig.Imin * 0.025);
+              resultObj->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
               resultObj->addProperty("CtrlYmin", hConfig.Ymin - 100);
               resultObj->addProperty("CtrlYmax", hConfig.Ymax - 100);
-              resultObj->addProperty("CtrlAntiWindUp", hConfig.AntiWindUp);
-              resultObj->addProperty("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+              resultObj->addProperty("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+              resultObj->addProperty("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
               break;
             case HeatingControlModeIDZoneFollower:
               resultObj->addProperty("ReferenceZone", hConfig.SourceZoneId);
-              resultObj->addProperty("CtrlOffset", hConfig.Offset - 100);
+              resultObj->addProperty("CtrlOffset", hConfig.Offset);
               break;
             case HeatingControlModeIDManual:
               resultObj->addProperty("ManualValue", hConfig.ManualValue - 100);
@@ -295,6 +303,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "setTemperatureControlConfig") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
@@ -320,8 +332,9 @@ namespace dss {
             _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
           }
           if (_request.hasParameter("CtrlOffset")) {
-            _request.getParameter("CtrlOffset", hConfig.Offset);
-            hConfig.Offset += 100;
+            int offset;
+            _request.getParameter("CtrlOffset", offset);
+            hConfig.Offset = offset;
           }
           if (_request.hasParameter("EmergencyValue")) {
             _request.getParameter("EmergencyValue", hConfig.EmergencyValue);
@@ -339,20 +352,31 @@ namespace dss {
             _request.getParameter("CtrlYmax", hConfig.Ymax);
             hConfig.Ymax += 100;
           }
-          _request.getParameter("CtrlKp", hConfig.Kp);
+          double tempDouble = 0;
+          _request.getParameter("CtrlKp", tempDouble);
+          hConfig.Kp = (uint16_t)tempDouble * 40;
           _request.getParameter("CtrlTi", hConfig.Ti);
           _request.getParameter("CtrlTs", hConfig.Ts);
           _request.getParameter("CtrlKd", hConfig.Kd);
-          _request.getParameter("CtrlImin", hConfig.Imin);
-          _request.getParameter("CtrlImax", hConfig.Imax);
-          _request.getParameter("CtrlAntiWindUp", hConfig.AntiWindUp);
-          _request.getParameter("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+          _request.getParameter("CtrlImin", tempDouble);
+          hConfig.Imin = tempDouble * 40;
+          _request.getParameter("CtrlImax", tempDouble);
+          hConfig.Imax = tempDouble * 40;
+          bool tempBool;
+          _request.getParameter("CtrlAntiWindUp", tempBool);
+          hConfig.AntiWindUp = tempBool ? 1 : 0;
+          _request.getParameter("CtrlKeepFloorWarm", tempBool);
+          hConfig.KeepFloorWarm = tempBool ? 1 : 0;
 
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
           return success(resultObj);
 
         } else if(_request.getMethod() == "getTemperatureControlValues") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
@@ -406,6 +430,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "setTemperatureControlValues") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
@@ -505,6 +533,10 @@ namespace dss {
           return success(resultObj);
 
         } else if(_request.getMethod() == "setTemperatureControlState") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStateSpec_t hState;
@@ -537,7 +569,26 @@ namespace dss {
           m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingState(
               hProp.m_HeatingControlDSUID, pZone->getID(), hState);
 
+        } else if(_request.getMethod() == "getTemperatureControlState") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+
+          resultObj->addProperty("IsConfigured", !IsNullDsuid(hProp.m_HeatingControlDSUID));
+          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
+
+          return success(resultObj);
+
         } else if(_request.getMethod() == "getTemperatureControlInternals") {
+          if (pZone->getID() == 0) {
+            return failure("Zone id 0 is invalid");
+          }
+
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingInternalsSpec_t hInternals;
@@ -559,7 +610,7 @@ namespace dss {
           resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
           resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
           resultObj->addProperty("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
-          resultObj->addProperty("CtrlIntegral", (unsigned long int) hInternals.Integral);
+          resultObj->addProperty("CtrlIntegral", (double) hInternals.Integral * 0.025);
           resultObj->addProperty("CtrlYp", (double) hInternals.Yp * 0.01);
           resultObj->addProperty("CtrlYi", (double) hInternals.Yi * 0.01);
           resultObj->addProperty("CtrlYd", (double) hInternals.Yd *0.01);

@@ -244,7 +244,8 @@ namespace dss {
             log("discoverDS485Devices: error resetting device valid flags: " + std::string(e.what()));
           }
 
-          if (!dsMeter->isConnected()) {
+          // #7558 - force a rescan unconditionally
+          if (true) {
             dsMeter->setIsPresent(true);
             dsMeter->setIsConnected(true);
             dsMeter->setIsValid(false);
@@ -539,6 +540,16 @@ namespace dss {
       case ModelEvent::etBusReady:
         log("Got bus ready event.", lsInfo);
         discoverDS485Devices();
+        break;
+      case ModelEvent::etBusDown:
+        log("Got bus down event.", lsInfo);
+        try {
+          std::vector<boost::shared_ptr<DSMeter> > meters = m_pApartment->getDSMeters();
+          foreach(boost::shared_ptr<DSMeter> meter, meters) {
+            onLostDSMeter(meter->getDSID());
+          }
+        } catch(ItemNotFoundException& _e) {
+        }
         break;
       case ModelEvent::etMeteringValues:
         if(event.getParameterCount() != 2) {
@@ -1835,9 +1846,9 @@ namespace dss {
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerSetup));
     pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("CtrlMode", intToString(config->ControllerMode));
-    pEvent->setProperty("CtrlEmergencyValue", intToString(config->EmergencyValue));
+    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
+    pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
+    pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue - 100));
     if (config->ControllerMode == HeatingControlModeIDPID) {
       pEvent->setProperty("CtrlKp", intToString(config->Kp));
       pEvent->setProperty("CtrlTs", intToString(config->Ts));
@@ -1847,13 +1858,13 @@ namespace dss {
       pEvent->setProperty("CtrlImax", intToString(config->Imax));
       pEvent->setProperty("CtrlYmin", intToString(config->Ymin));
       pEvent->setProperty("CtrlYmax", intToString(config->Ymax));
-      pEvent->setProperty("CtrlAntiWindUp", intToString(config->AntiWindUp));
-      pEvent->setProperty("CtrlKeepFloorWarm", intToString(config->KeepFloorWarm));
+      pEvent->setProperty("CtrlAntiWindUp", (config->AntiWindUp > 0) ? "true" : "false");
+      pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
       pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
-      pEvent->setProperty("CtrlOffset", intToString(config->Offset));
+      pEvent->setProperty("CtrlOffset", intToString(config->Offset - 100));
     } else if (config->ControllerMode == HeatingControlModeIDManual) {
-      pEvent->setProperty("ManualValue", intToString(config->ManualValue));
+      pEvent->setProperty("ManualValue", intToString(config->ManualValue - 100));
     }
     raiseEvent(pEvent);
   } // onHeatingControllerConfig
@@ -1877,7 +1888,7 @@ namespace dss {
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerValue));
     pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
+    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
     if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
       pEvent->setProperty("NominalTemperature_Off",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode0)));
@@ -1920,8 +1931,8 @@ namespace dss {
     boost::shared_ptr<Event> pEvent;
     pEvent.reset(new Event(EventName::HeatingControllerState));
     pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("CtrlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("CtrlState", intToString(_State));
+    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
+    pEvent->setProperty("ControlState", intToString(_State));
     raiseEvent(pEvent);
   } // onHeatingControllerState
 

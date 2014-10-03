@@ -190,6 +190,8 @@ namespace dss {
         } else {
           m_pPropertyNode->createProperty("dSID")->setStringValue("");
         }
+        m_pPropertyNode->createProperty("DisplayID")
+              ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getDisplayID));
 
         m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
         m_pPropertyNode->createProperty("present")
@@ -2233,6 +2235,24 @@ namespace dss {
   {
     m_isVdcDevice = _isVdcDevice;
     publishVdcToPropertyTree();
+  }
+
+  std::string Device::getDisplayID() const
+  {
+    dsid_t dsid;
+    std::string displayID;
+    if (dsuid_to_dsid(m_DSID, &dsid)) {
+      displayID = dsid2str(dsid);
+      displayID = displayID.substr(displayID.size() - 8);
+    } else if (!m_VdcHardwareGuid.empty()) {
+      displayID = m_VdcHardwareGuid.substr(m_VdcHardwareGuid.find(":") + 1);
+    } else {
+      displayID = dsuid2str(m_DSID).substr(0, 8) + "\u2026";
+    }
+    if (m_DSID.id[16] != 0) {
+      displayID += "-" + intToString(m_DSID.id[16]);
+    }
+    return displayID;
   }
 
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)

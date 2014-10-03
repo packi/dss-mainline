@@ -2808,20 +2808,20 @@ namespace dss {
         case HeatingControlModeIDOff:
           break;
         case HeatingControlModeIDPID:
-          obj.setProperty<int>("CtrlKp", hConfig.Kp);
+          obj.setProperty<double>("CtrlKp", (double)hConfig.Kp * 0.025);
           obj.setProperty<int>("CtrlTs", hConfig.Ts);
           obj.setProperty<int>("CtrlTi", hConfig.Ti);
           obj.setProperty<int>("CtrlKd", hConfig.Kd);
-          obj.setProperty<int>("CtrlImin", hConfig.Imin);
-          obj.setProperty<int>("CtrlImax", hConfig.Imax);
-          obj.setProperty<int>("CtrlYmin", hConfig.Ymin);
-          obj.setProperty<int>("CtrlYmax", hConfig.Ymax);
-          obj.setProperty<int>("CtrlAntiWindUp", hConfig.AntiWindUp);
-          obj.setProperty<int>("CtrlKeepFloorWarm", hConfig.KeepFloorWarm);
+          obj.setProperty<double>("CtrlImin", (double)hConfig.Imin * 0.025);
+          obj.setProperty<double>("CtrlImax", (double)hConfig.Imax * 0.025);
+          obj.setProperty<int>("CtrlYmin", hConfig.Ymin - 100);
+          obj.setProperty<int>("CtrlYmax", hConfig.Ymax - 100);
+          obj.setProperty<bool>("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+          obj.setProperty<bool>("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
           break;
         case HeatingControlModeIDZoneFollower:
           obj.setProperty<int>("ReferenceZone", hConfig.SourceZoneId);
-          obj.setProperty<int>("CtrlOffset", hConfig.Offset - 100);
+          obj.setProperty<int>("CtrlOffset", hConfig.Offset);
           break;
         case HeatingControlModeIDManual:
           obj.setProperty<int>("ManualValue", hConfig.ManualValue - 100);
@@ -2971,7 +2971,6 @@ namespace dss {
           hConfig.SourceZoneId = intValue;
         } else if (strcmp(propKey, "CtrlOffset") == 0) {
           hConfig.Offset = intValue;
-          hConfig.Offset += 100;
         } else if (strcmp(propKey, "EmergencyValue") == 0) {
           hConfig.EmergencyValue = intValue;
           hConfig.EmergencyValue += 100;
@@ -2985,7 +2984,8 @@ namespace dss {
           hConfig.Ymax = intValue;
           hConfig.Ymax += 100;
         } else if (strcmp(propKey, "CtrlKp") == 0) {
-          hConfig.Kp = intValue;
+          double doubleValue = strToDouble(propValue, 0);
+          hConfig.Kp = doubleValue * 40;
         } else if (strcmp(propKey, "CtrlTi") == 0) {
           hConfig.Ti = intValue;
         } else if (strcmp(propKey, "CtrlTs") == 0) {
@@ -2993,13 +2993,15 @@ namespace dss {
         } else if (strcmp(propKey, "CtrlKd") == 0) {
           hConfig.Kd = intValue;
         } else if (strcmp(propKey, "CtrlImin") == 0) {
-          hConfig.Imin = intValue;
+          double doubleValue = strToDouble(propValue, 0);
+          hConfig.Imin = doubleValue * 40;
         } else if (strcmp(propKey, "CtrlImax") == 0) {
-          hConfig.Imax = intValue;
+          double doubleValue = strToDouble(propValue, 0);
+          hConfig.Imax = doubleValue * 40;
         } else if (strcmp(propKey, "CtrlAntiWindUp") == 0) {
-          hConfig.AntiWindUp = intValue;
+          hConfig.AntiWindUp = ctx->convertTo<bool>(arg1) ? 1 : 0;;
         } else if (strcmp(propKey, "CtrlKeepFloorWarm") == 0) {
-          hConfig.KeepFloorWarm = intValue;
+          hConfig.KeepFloorWarm = ctx->convertTo<bool>(arg1) ? 1 : 0;
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlConfiguration: unknown configuration \"%s\"", propKey);
         }

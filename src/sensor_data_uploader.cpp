@@ -244,10 +244,14 @@ const static std::string evtCategory_ApartmentState = "ApartmentStateChange";
 const static std::string evtCategory_ZoneGroupState = "ZoneStateChange";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
+const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
 const static std::string evtCategory_HeatingControllerSetup = "HeatingControllerSetup";
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
+
+const static int dsEnum_SensorError_invalidValue = 1;
+const static int dsEnum_SensorError_noValue = 2;
 
 JSONObject toJson(const boost::shared_ptr<Event> &event) {
   boost::shared_ptr<const DeviceReference> pDeviceRef;
@@ -317,15 +321,10 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
-      obj.addProperty("EventDescription", "InvalidSensorData");
+      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceSensorError);
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorType", sensorType);
-      propValue = event->getPropertyByName("sensorIndex");
-      if (!propValue.empty()) {
-        obj.addProperty("SensorIndex", propValue);
-      }
+      obj.addProperty("SensorType", strToInt(event->getPropertyByName("sensorType")));
+      obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
     } else if (event->getName() == EventName::HeatingControllerSetup) {
       appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerSetup);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();

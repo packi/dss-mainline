@@ -59,32 +59,36 @@ void SensorMonitorTask::run() {
         }
 
         int lifetime = sensor->m_sensorPollInterval * 3;
-        DateTime sensor_ts = sensor->m_sensorValueTS;
-        DateTime now = DateTime();
-
-        if (sensor_ts == DateTime::NullDate) {
-          sensor_ts = now;
+        int age = 0;
+        if (sensor->m_sensorValueTS == DateTime::NullDate) {
           if (DSS::hasInstance()) {
-            sensor_ts.addSeconds(-1 * DSS::getInstance()->getUptime());
+            age = DSS::getInstance()->getUptime();
           }
+        } else {
+          DateTime now = DateTime();
+          age = now.difference(sensor->m_sensorValueTS);
         }
-        sensor_ts.addSeconds(lifetime);
 
-        // value is invalid because its older than its allowed lifeime
-        if ((sensor_ts < now) && device->isSensorDataValid(s)) {
+        Logger::getInstance()->log(std::string("Sensor #") +
+                  intToString(s) + " of device " + dsuid2str(device->getDSID()) +
+                  " value is from: " + sensor->m_sensorValueTS.toISO8601_ms() +
+                  ", and age in seconds is " + intToString(age));
+
+        // value is invalid because its older than its allowed lifetime
+        if ((age > lifetime) && device->isSensorDataValid(s)) {
 
           Logger::getInstance()->log(std::string("Sensor #") +
-                    intToString(s) + " of device " +
-                    dsuid2str(device->getDSID()) + " is too old: " +
-                    sensor->m_sensorValueTS.toISO8601_ms());
+                    intToString(s) + " of device " + dsuid2str(device->getDSID()) +
+                    " value is too old: " + sensor->m_sensorValueTS.toISO8601_ms() +
+                    ", age in seconds is " + intToString(age), lsWarning);
           device->setSensorDataValidity(s, false);
 
           if (DSS::hasInstance()) {
-            boost::shared_ptr<Event> pEvent(new Event("invalidSensorData"));
-            pEvent->setProperty("dsuid", dsuid2str(device->getDSID()));
+            boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(device, m_Apartment));
+            boost::shared_ptr<Event> pEvent(new Event(EventName::DeviceInvalidSensor, pDevRef));
             pEvent->setProperty("sensorIndex", intToString(s));
-            pEvent->setProperty("sensorType",
-                                intToString(sensor->m_sensorType));
+            pEvent->setProperty("sensorType", intToString(sensor->m_sensorType));
+            pEvent->setProperty("lastValueTS", sensor->m_sensorValueTS.toISO8601_ms());
             DSS::getInstance()->getEventQueue().pushEvent(pEvent);
           }
         }
@@ -191,9 +195,9 @@ void HeatingMonitorTask::run() {
 
   int zoneID;
   if (m_event->getName() == EventName::HeatingControllerState) {
-    if (m_event->getPropertyByName("CtrlState") == intToString(HeatingControlStateIDEmergency)) {
+    if (m_event->getPropertyByName("ControlState") == intToString(HeatingControlStateIDEmergency)) {
       zoneID = strToInt(m_event->getPropertyByName("zoneID"));
-      dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("CtrlDSUID"));
+      dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("ControlDSUID"));
 
       Logger::getInstance()->log("HeatingMonitorTask: emergency state in zone " +
           intToString(zoneID) + " and controller " + dsuid2str(dsmdsuid),
@@ -204,16 +208,16 @@ void HeatingMonitorTask::run() {
     dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("dsMeter"));
     boost::shared_ptr<DSMeter> pMeter = m_Apartment->getDSMeterByDSID(dsmdsuid);
     Set devList = pMeter->getDevices();
-    std::vector<boost::shared_ptr<Zone> > zones;
+    std::vector<boost::shared_ptr<Zone> > zones = m_Apartment->getZones();
     for (size_t i = 0; i < zones.size(); i++) {
       if (zones[i]->getID() == 0) {
         continue;
       }
       Set devices = devList.getByZone(zones[i]->getID());
-      if (devices.isEmpty()) {
-        continue;
+      ZoneHeatingProperties_t hConfig = zones[i]->getHeatingProperties();
+      if (!devices.isEmpty() || IsEqualDsuid(hConfig.m_HeatingControlDSUID, dsmdsuid)) {
+        syncZone(zones[i]->getID());
       }
-      syncZone(zones[i]->getID());
     }
   }
 }

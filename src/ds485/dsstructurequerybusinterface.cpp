@@ -545,10 +545,11 @@ namespace dss {
     }
     ZoneHeatingConfigSpec_t result;
     int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        &result.ControllerMode, &result.Kp, &result.Ts, &result.Ti, &result.Kd,
-        &result.Imin, &result.Imax, &result.Ymin, &result.Ymax,
+        &result.ControllerMode, (uint16_t*)&result.Kp, &result.Ts, &result.Ti, &result.Kd,
+        (uint16_t*)&result.Imin, (uint16_t*)&result.Imax, &result.Ymin, &result.Ymax,
         &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId,
-        &result.Offset, &result.ManualValue, &result.EmergencyValue);
+        (uint16_t*)&result.Offset, &result.ManualValue, &result.EmergencyValue);
+
     if (result.EmergencyValue == 0) {
       result.EmergencyValue = 100;
     }
@@ -575,8 +576,9 @@ namespace dss {
     }
     ZoneHeatingInternalsSpec_t result;
     int ret = ControllerHeating_get_internals(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        &result.Trecent, &result.Treference, &result.TError, &result.TErrorPrev,
-        &result.Integral, &result.Yp, &result.Yi, &result.Yd, &result.Y, &result.AntiWindUp);
+        &result.Trecent, &result.Treference, (uint16_t*)&result.TError, (uint16_t*)&result.TErrorPrev,
+        (uint32_t*)&result.Integral, (uint32_t*)&result.Yp, (uint32_t*)&result.Yi, (uint32_t*)&result.Yd,
+        &result.Y, &result.AntiWindUp);
     DSBusInterface::checkResultCode(ret);
     return result;
   } // getZoneHeatingInternals

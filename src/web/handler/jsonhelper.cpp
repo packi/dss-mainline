@@ -50,6 +50,7 @@ namespace dss {
     } else {
       result->addProperty("id", "");
     }
+    result->addProperty("DisplayID", _device.getDevice()->getDisplayID());
     result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
     result->addProperty("name", _device.getName());
