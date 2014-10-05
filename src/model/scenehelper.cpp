@@ -413,18 +413,18 @@ namespace dss {
     case SensorIDActivePower:
     case SensorIDOutputCurrent:
     case SensorIDPowerConsumptionVA:
-      convertedSensorValue = (int) _sensorValue;
+      convertedSensorValue = (int) (_sensorValue + 0.5);
       break;
     case SensorIDElectricMeter:
-      convertedSensorValue = (int) (_sensorValue / 0.01);
+      convertedSensorValue = (int) ((_sensorValue + 0.005) / 0.01);
       break;
     case SensorIDOutputCurrentEx:
-      convertedSensorValue = (int) (_sensorValue / 4);
+      convertedSensorValue = (int) ((_sensorValue + 2) / 4);
       break;
     case SensorIDTemperatureIndoors:
     case SensorIDTemperatureOutdoors:
     case SensorIDRoomTemperatureSetpoint:
-      convertedSensorValue = (int) ((_sensorValue + 273.15 - 230.0) * 4 / 0.1);
+      convertedSensorValue = (int) ((_sensorValue + 0.0125 + 273.15 - 230.0) * 4 / 0.1);
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
@@ -433,10 +433,10 @@ namespace dss {
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
-      convertedSensorValue = (int) (_sensorValue * 4 / 0.1);
+      convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorIDWindSpeed:
-      convertedSensorValue = (int) (_sensorValue * 4 / 0.1);
+      convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
       convertedSensorValue = (int) (_sensorValue + 100);
@@ -444,7 +444,7 @@ namespace dss {
     case SensorIDWindDirection:
     case SensorIDPrecipitation:
     default:
-      convertedSensorValue = (int) _sensorValue;
+      convertedSensorValue = (int) (_sensorValue + 0.5);
       break;
     }
     return convertedSensorValue;
