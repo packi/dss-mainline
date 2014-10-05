@@ -1862,7 +1862,7 @@ namespace dss {
       pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
       pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
-      pEvent->setProperty("CtrlOffset", intToString(config->Offset - 100));
+      pEvent->setProperty("CtrlOffset", intToString(config->Offset));
     } else if (config->ControllerMode == HeatingControlModeIDManual) {
       pEvent->setProperty("ManualValue", intToString(config->ManualValue - 100));
     }
