@@ -87,12 +87,12 @@ namespace dss {
     m_OemProductName(),
     m_OemProductIcon(),
     m_OemProductURL(),
+    m_isVdcDevice(false),
     m_IsConfigLocked(false),
     m_binaryInputCount(0),
     m_sensorInputCount(0),
     m_outputChannelCount(0),
-    m_AKMInputProperty(),
-    m_isVdcDevice(false)
+    m_AKMInputProperty()
     {
       SetNullDsuid(m_DSMeterDSID);
       SetNullDsuid(m_LastKnownMeterDSID);
