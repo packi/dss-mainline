@@ -25,19 +25,11 @@
 #include "src/base.h"
 
 #include <cassert>
-
-#ifndef WIN32
 #include <signal.h>
-#endif
 
 namespace dss {
 
-#ifndef WIN32
-void*
-#else
-DWORD WINAPI
-#endif
-Thread::ThreadStarterHelperFunc( void* _pThreadObj ) {
+void *Thread::ThreadStarterHelperFunc( void* _pThreadObj ) {
   Thread* thObj = static_cast<Thread*>(_pThreadObj);
 
   std::string message = thObj->getThreadIdentifier();
@@ -55,68 +47,44 @@ Thread::ThreadStarterHelperFunc( void* _pThreadObj ) {
   Logger::getInstance()->log(message);
 
   return NULL;
-} // threadStarterHelpFunc
-
+}
 
 Thread::Thread(const std::string& _name )
   : m_ThreadHandle( 0 ),
     m_Name( _name ),
     m_Running( false ),
     m_Terminated( false )
-{ } // ctor
+{
+}
 
 Thread::~Thread() {
-  if(m_ThreadHandle != 0) {
+  if (m_ThreadHandle != 0) {
     m_Terminated = true;
-#ifndef WIN32
-    pthread_join( m_ThreadHandle, NULL );
-#else
-    WaitForSingleObject( m_ThreadHandle, INFINITE );
-#endif
+    pthread_join(m_ThreadHandle, NULL);
   }
-} // dtor
+}
 
 bool Thread::run() {
   assert( !m_Running );
   m_Running = true;
-  if( !m_Name.empty() ) {
+  if (!m_Name.empty()) {
     Logger::getInstance()->log(std::string("creating thread for \"") + m_Name + "\"");
   }
-#ifndef WIN32
-  pthread_create( &m_ThreadHandle, NULL, ThreadStarterHelperFunc, this );
-#else
-  m_ThreadHandle = CreateThread( NULL, 0, &ThreadStarterHelperFunc, this, NULL, NULL );
-#endif
+  pthread_create(&m_ThreadHandle, NULL, ThreadStarterHelperFunc, this);
   return true;
-} // run
-
-bool Thread::stop() {
-#ifdef WIN32
-  TerminateThread( m_ThreadHandle, 0 );
-#else
-    // FIXME: Hmm... Quit rude ;)
-  pthread_kill( m_ThreadHandle, SIGKILL );
-#endif
-  return true;
-} // stop
-
+}
 
 bool Thread::terminate() {
-  if( !m_Terminated && (m_ThreadHandle != 0) ) {
+  if (!m_Terminated && (m_ThreadHandle != 0)) {
     m_Terminated = true;
-#ifndef WIN32
     int ret = pthread_join( m_ThreadHandle, NULL );
-    if(ret != 0) {
+    if (ret != 0) {
       Logger::getInstance()->log("Error stopping thread: " + intToString(ret), lsError);
     }
-#else
-    WaitForSingleObject( m_ThreadHandle, INFINITE );
-#endif
   }
   m_ThreadHandle = 0;
   m_Running = false;
   return true;
-} // terminate
-
+}
 
 }
