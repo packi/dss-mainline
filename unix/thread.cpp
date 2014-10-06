@@ -25,6 +25,7 @@
 #include "src/base.h"
 
 #include <cassert>
+#include <cstring>
 #include <signal.h>
 
 namespace dss {
@@ -70,7 +71,11 @@ bool Thread::run() {
   if (!m_Name.empty()) {
     Logger::getInstance()->log(std::string("creating thread for \"") + m_Name + "\"");
   }
-  pthread_create(&m_ThreadHandle, NULL, ThreadStarterHelperFunc, this);
+  int ret = pthread_create(&m_ThreadHandle, NULL, ThreadStarterHelperFunc, this);
+  if (ret) {
+      Logger::getInstance()->log(std::string("Thread: pthread_create: ") +
+                                 strerror(ret), lsWarning);
+  }
   return true;
 }
 
