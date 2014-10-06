@@ -252,6 +252,8 @@ namespace dss {
           zone->addProperty("id", pZone->getID());
           zone->addProperty("name", pZone->getName());
           zone->addProperty("ControlMode", hProp.m_HeatingControlMode);
+          zone->addProperty("ControlState", hProp.m_HeatingControlState);
+          zone->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
             zone->addProperty("IsConfigured", false);
           } else {
@@ -279,29 +281,6 @@ namespace dss {
               zone->addProperty("ControlValue", hStatus.m_ControlValue);
               break;
           }
-        }
-        return success(resultObj);
-
-      } else if(_request.getMethod() == "getTemperatureControlState") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
-
-        resultObj->addElement("zones", zones);
-        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
-        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
-          if (pZone->getID() == 0) {
-            continue;
-          }
-          boost::shared_ptr<JSONObject> zone(new JSONObject());
-          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-          zones->addElement("", zone);
-          zone->addProperty("id", pZone->getID());
-          zone->addProperty("name", pZone->getName());
-
-          zone->addProperty("IsConfigured", !IsNullDsuid(hProp.m_HeatingControlDSUID));
-          zone->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
-          zone->addProperty("ControlMode", hProp.m_HeatingControlMode);
-          zone->addProperty("ControlState", hProp.m_HeatingControlState);
         }
         return success(resultObj);
 
