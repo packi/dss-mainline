@@ -62,7 +62,10 @@ namespace dss {
 
   typedef struct ZoneHeatingStatus {
     ZoneHeatingStatus() :
-      m_OperationMode(0)
+      m_OperationMode(0),
+      m_TemperatureValueTS(0),
+      m_NominalValueTS(0),
+      m_ControlValueTS(0)
       {}
     int m_OperationMode;
     double m_TemperatureValue;
