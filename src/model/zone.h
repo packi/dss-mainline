@@ -172,6 +172,7 @@ namespace dss {
     // return sensor type if device is assigned as zone sensor, otherwise
     // throw ItemNotFoundException
     int getAssignedSensorType(boost::shared_ptr<const Device> _device) const;
+    boost::shared_ptr<Device> getAssignedSensorDevice(int _sensorType) const;
     bool isDeviceZoneMember(const DeviceReference& _device) const;
     void removeInvalidZoneSensors();
 

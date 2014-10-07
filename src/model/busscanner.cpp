@@ -677,8 +677,14 @@ namespace dss {
         boost::shared_ptr<Device> pDev = devRef.getDevice();
 
         // check if zone sensor already assigned
-        if (!_zone->isSensorAssigned(SensorIDTemperatureIndoors)) {
-          _zone->setSensor(pDev, SensorIDTemperatureIndoors);
+        boost::shared_ptr<Device> oldDev = _zone->getAssignedSensorDevice(idList[i]);
+        if (oldDev && !IsEqualDsuid(oldDev->getDSID(), sensorDevice)) {
+          log("Sensor on zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
+              " with id " + dsuid2str(oldDev->getDSID()) +
+              " is already reference, but id " + dsuid2str(sensorDevice) +
+              " is set on dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
+        } else {
+          _zone->setSensor(pDev, idList[i]);
         }
       } catch (ItemNotFoundException& e) {
         log("Sensor with id " + dsuid2str(sensorDevice) +
