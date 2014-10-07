@@ -431,8 +431,7 @@ namespace dss {
   } // scanDeviceOnBus
 
   bool BusScanner::initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, DeviceSpec_t& _spec) {
-    log("UpdateDevice: DSID:        " + dsuid2str(_spec.DSID));
-    log("Active: " + intToString(_spec.ActiveState));
+    log("UpdateDevice: DSUID:" + dsuid2str(_spec.DSID) + "active:" + intToString(_spec.ActiveState), lsInfo);
 
     boost::shared_ptr<Device> dev;
     try {
