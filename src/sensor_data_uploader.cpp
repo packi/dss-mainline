@@ -111,7 +111,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   }
 }
 
-__DEFINE_LOG_CHANNEL__(SensorDataUploadPlugin, lsDebug);
+__DEFINE_LOG_CHANNEL__(SensorDataUploadPlugin, lsInfo);
 
 SensorDataUploadPlugin::SensorDataUploadPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
@@ -214,7 +214,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       }
 
     } else if (_event.getName() == EventName::UploadEventLog) {
-      log(std::string(__func__) + " upload event log", lsDebug);
+      log(std::string(__func__) + " upload event log", lsInfo);
       m_log->triggerUpload();
     } else {
       log("Unhandled event " + _event.getName(), lsInfo);
@@ -363,6 +363,7 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
 
   JSONObject obj;
   boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  int ct = 0;
 
   std::string parameters;
   // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
@@ -372,9 +373,14 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
   obj.addElement("eventsList", array);
   for (; begin != end; begin++) {
     array->add(toJson(*begin));
+    ct++;
   }
 
   std::string postdata = obj.toString();
+  // TODO eventually emit summary: 10 callsceene, 27 metering, ...
+  // dumping whole postdata leads to log rotation and is seldomly needed
+  // unless for solving a blame war with cloud team
+  Logger::getInstance()->log(std::string(__func__) + "upload events: " + intToString(ct) + " bytes: " + intToString(postdata.length()), lsInfo);
   Logger::getInstance()->log(std::string(__func__) + "event data: " + postdata, lsDebug);
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
