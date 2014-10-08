@@ -61,12 +61,11 @@ namespace dss {
     DSMeterHash_t hash;
     DSMeterSpec_t spec;
 
-    log("Scan dS485 device start: " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
-
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
-      log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsWarning);
+      log("Scan dS485 device " + dsuid2str(_dsMeter->getDSID()) +
+          ": getDSMeterHash Error: " + e.what(), lsWarning);
       if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
         // for known bus device types retry the readout
         return false;
@@ -76,9 +75,20 @@ namespace dss {
       return true;
     }
 
-    if (m_Maintenance.isInitializing() || (_dsMeter->isInitialized() == false) ||
-        (hash.Hash != _dsMeter->getDatamodelHash()) ||
-        (hash.ModificationCount != _dsMeter->getDatamodelModificationCount())) {
+    uint32_t dsmHash, dsmModCount;
+    dsmHash = _dsMeter->getDatamodelHash();
+    dsmModCount = _dsMeter->getDatamodelModificationCount();
+
+    log("Scan dS485 device " + dsuid2str(_dsMeter->getDSID()) +
+        ": Initializing " + intToString(m_Maintenance.isInitializing()) +
+        ", Init Model " + intToString(_dsMeter->isInitialized()) +
+        ", Hash Model/dSM " + intToString(dsmHash, true) + "/" + intToString(hash.Hash, true) +
+        ", ModCount Model/dSM " + intToString(dsmModCount, true) + "/" + intToString(hash.ModificationCount, true), lsInfo);
+
+    if (m_Maintenance.isInitializing() ||
+        (_dsMeter->isInitialized() == false) ||
+        (hash.Hash != dsmHash) ||
+        (hash.ModificationCount != dsmModCount)) {
 
       try {
         spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
@@ -679,17 +689,19 @@ namespace dss {
         // check if zone sensor already assigned
         boost::shared_ptr<Device> oldDev = _zone->getAssignedSensorDevice(idList[i]);
         if (oldDev && !IsEqualDsuid(oldDev->getDSID(), sensorDevice)) {
-          log("Sensor on zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
-              " with id " + dsuid2str(oldDev->getDSID()) +
-              " is already reference, but id " + dsuid2str(sensorDevice) +
-              " is set on dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
+          log("Duplicate sensor type " + intToString(idList[i]) +
+              " registration on zone " + intToString(_zone->getID()) +
+              ": dsuid " + dsuid2str(oldDev->getDSID()) +
+              " is zone reference, and dsuid " + dsuid2str(sensorDevice) +
+              " is additionally registered on dSM " + dsuid2str(_dsMeter->getDSID()), lsWarning);
         } else {
           _zone->setSensor(pDev, idList[i]);
         }
       } catch (ItemNotFoundException& e) {
-        log("Sensor with id " + dsuid2str(sensorDevice) +
-            " is not present but assigned as zone reference on " +
-            dsuid2str(_dsMeter->getDSID()), lsInfo);
+        log("Sensor on zone " + intToString(_zone->getID()) +
+            " with id " + dsuid2str(sensorDevice) +
+            " is not present but assigned as zone reference on dSM " +
+            dsuid2str(_dsMeter->getDSID()), lsWarning);
       } catch (BusApiError& e) {
         // not fatal, catch exception here and avoid endless readout
         break;
@@ -746,8 +758,8 @@ namespace dss {
                 SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), "");
           }
         } catch (BusApiError& e) {
-          log("Error reading heating temperature value from " +
-              dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+          log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
+              " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureSetpoint,
@@ -761,8 +773,8 @@ namespace dss {
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
           }
         } catch (BusApiError& e) {
-          log("Error reading heating nominal temperature value from " +
-              dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+          log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
+              " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureControlVariable,
@@ -776,8 +788,8 @@ namespace dss {
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
           }
         } catch (BusApiError& e) {
-          log("Error reading heating control value from " +
-              dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+          log("Error reading heating control value on zone " + intToString(_zone->getID()) +
+              " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
       }
     }
