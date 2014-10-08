@@ -717,4 +717,31 @@ namespace dss {
       }
     }
   }
+
+  void StructureManipulator::synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones)
+  {
+    for (size_t i = 0; i < _zones.size(); ++i) {
+      boost::shared_ptr<Zone> zone = _zones.at(i);
+      if (!zone) {
+        continue;
+      }
+
+      // remove sensors that do not belong to the zone
+      zone->removeInvalidZoneSensors();
+
+      // erase all unassigned sensors in zone
+      boost::shared_ptr<std::vector<int> > sUnasList =  zone->getUnassignedSensorTypes();
+      for (size_t index = 0; index < sUnasList->size(); ++index) {
+        m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
+      }
+
+      // reassign all assigned sensors in zone
+      std::vector<boost::shared_ptr<MainZoneSensor_t> >sAsList = zone->getAssignedSensors();
+      for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = sAsList.begin();
+          it != sAsList.end();
+          ++it) {
+          m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);
+      }
+    }
+  }
 } // namespace dss
