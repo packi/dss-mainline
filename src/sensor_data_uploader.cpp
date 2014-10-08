@@ -38,12 +38,14 @@
 
 namespace dss {
 
+typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 JSONObject toJson(const boost::shared_ptr<Event> &event);
 
 class SensorLog : public WebserviceCallDone,
                   public boost::enable_shared_from_this<SensorLog> {
   __DECL_LOG_CHANNEL__
   enum {
+    max_post_events = 50,
     max_elements = 10000,
   };
 public:
@@ -80,10 +82,27 @@ void SensorLog::triggerUpload() {
   m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
   m_events.clear();
 
-  if (!m_uploading.empty()) {
-    m_pending_upload = true;
-    WebserviceApartment::doUploadSensorData(m_uploading.begin(), m_uploading.end(),
+  if (m_uploading.empty()) {
+    return;
+  }
+
+  It chunk_start = m_uploading.begin();
+  It chunk_end = m_uploading.begin();
+
+  m_pending_upload = true;
+
+  while (chunk_end != m_uploading.end()) {
+    size_t remainder = std::distance(chunk_start, m_uploading.end());
+    if (remainder > max_post_events) {
+      remainder = max_post_events;
+    }
+
+    chunk_end = chunk_start + remainder;
+    WebserviceApartment::doUploadSensorData(chunk_start, chunk_end,
                                             shared_from_this());
+    if (chunk_end != m_uploading.end()) {
+      chunk_start = chunk_end;
+    }
   }
 }
 
@@ -393,7 +412,6 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
                                                true);
 }
 
-typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 template void WebserviceApartment::doUploadSensorData<It>(It begin, It end,
                                                           WebserviceCallDone_t
                                                           callback);
