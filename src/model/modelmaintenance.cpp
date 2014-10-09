@@ -773,6 +773,15 @@ namespace dss {
     }
   }
 
+  void ModelMaintenance::synchronizeZoneSensorAssignment() {
+
+    StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
+                                     *m_pStructureQueryBusInterface,
+                                     *m_pApartment);
+
+    manipulator.synchronizeZoneSensorAssignment(m_pApartment->getZones());
+  }
+
   void ModelMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
     foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
@@ -802,6 +811,7 @@ namespace dss {
       }
 
       setApartmentState();
+      synchronizeZoneSensorAssignment();
       autoAssignSensors();
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));

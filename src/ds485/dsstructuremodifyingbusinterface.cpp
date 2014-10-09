@@ -296,7 +296,9 @@ namespace dss {
                                              _zoneID, _sensorType,
                                              _sensorDSUID);
     DSBusInterface::checkBroadcastResultCode(ret);
-    m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    if (m_pModelMaintenance) {
+      m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    }
   }
 
   void DSStructureModifyingBusInterface::resetZoneSensor(
@@ -313,7 +315,9 @@ namespace dss {
     int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, broadcastDSUID,
                                              _zoneID, _sensorType);
     DSBusInterface::checkBroadcastResultCode(ret);
-    m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    if (m_pModelMaintenance) {
+      m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    }
   }
 
   void DSStructureModifyingBusInterface::setModelMaintenace(ModelMaintenance* _modelMaintenance) {

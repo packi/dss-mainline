@@ -193,6 +193,7 @@ namespace dss {
     void discoverDS485Devices();
     void setApartmentState();
     void autoAssignSensors();
+    void synchronizeZoneSensorAssignment();
     void readOutPendingMeter();
 
     void readConfiguration();
