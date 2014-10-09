@@ -43,6 +43,7 @@ const char *pp_sysinfo_git_revision = "/system/version/gitRevision";
 #endif
 
 const char *pp_websvc_enabled = "/config/webservice-api/enabled";
+const char *pp_websvc_event_batch_delay = "/config/webservice-api/event-batch-delay";
 const char *pp_websvc_url_authority = "/config/webservice-api/base-url";
 const char *pp_websvc_apartment_changed_url_path = "/config/webservice-api/model-pusher/url";
 const char *pp_websvc_apartment_changed_notify_delay = "/config/webservice-api/model-pusher/delay";
@@ -63,6 +64,7 @@ void setupCommonProperties(PropertySystem &propSystem) {
   propSystem.createProperty("/config/debug/coredumps/limit")->setFloatingValue(RLIM_INFINITY);
 
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
+  propSystem.createProperty(pp_websvc_event_batch_delay)->setIntegerValue(60);
   propSystem.createProperty(pp_websvc_url_authority)
     ->setStringValue("https://dsservices.aizo.com/");
 #if 0

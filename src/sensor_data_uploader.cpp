@@ -199,7 +199,8 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       boost::shared_ptr<Event> pEvent(new Event(EventName::UploadEventLog));
       pEvent->setProperty(EventProperty::ICalStartTime,
                           DateTime().toRFC2445IcalDataTime());
-      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=60");
+      int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 
     } else if (_event.getName() == EventName::DeviceSensorValue ||
