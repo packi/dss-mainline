@@ -41,6 +41,7 @@
 #include "zone.h"
 #include "state.h"
 #include "modelmaintenance.h"
+#include "structuremanipulator.h"
 #include "src/ds485/dsdevicebusinterface.h"
 #include "src/ds485/dsbusinterface.h"
 #include "vdc-connection.h"
@@ -716,28 +717,42 @@ namespace dss {
       uint32_t sensorAge;
       DateTime now, age;
       ZoneHeatingConfigSpec_t hConfig;
+      ZoneHeatingStateSpec_t hState;
       ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
 
       try {
         memset(&hConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
         hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
+        hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
       } catch (std::runtime_error& e) {
-        log("Error getting heating config from bus device " +
+        log("Error getting heating config from dsm " +
             dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        return false;
       }
 
       // is there a controller running for this zone?
-      if (hConfig.ControllerMode > 0) {
-        if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-          _zone->setHeatingControlMode(hConfig.ControllerMode,
-              hConfig.Offset, hConfig.SourceZoneId,
-              hConfig.ManualValue,
-              _dsMeter->getDSID());
-          hProp = _zone->getHeatingProperties();
-        } else {
-          log("Controller for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
-              " is active on dsm with id " + dsuid2str(hProp.m_HeatingControlDSUID) +
-              ", and a second one on dsm " + dsuid2str(_dsMeter->getDSID()), lsWarning);
+      if ((hState.State == HeatingControlStateIDInternal) ||
+          (hState.State == HeatingControlStateIDEmergency)) {
+        if (hConfig.ControllerMode > 0) {
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID) || IsEqualDsuid(hProp.m_HeatingControlDSUID, _dsMeter->getDSID())) {
+            _zone->setHeatingControlMode(hConfig.ControllerMode,
+                hConfig.Offset, hConfig.SourceZoneId, hConfig.ManualValue,
+                _dsMeter->getDSID());
+              hProp = _zone->getHeatingProperties();
+          } else {
+            log("Controller for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
+                " is active on dsm with id " + dsuid2str(hProp.m_HeatingControlDSUID) +
+                ", and a second one on dsm " + dsuid2str(_dsMeter->getDSID()), lsWarning);
+            StructureManipulator manip(
+                *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
+                m_Interface,
+                m_Apartment);
+            ZoneHeatingConfigSpec_t disableConfig = hConfig;
+            disableConfig.ControllerMode = 0;
+            manip.setZoneHeatingConfig(_zone,
+                (const dsuid_t) _dsMeter->getDSID(),
+                (const ZoneHeatingConfigSpec_t) disableConfig);
+          }
         }
       }
 
