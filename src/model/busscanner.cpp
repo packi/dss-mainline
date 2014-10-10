@@ -41,6 +41,7 @@
 #include "zone.h"
 #include "state.h"
 #include "modelmaintenance.h"
+#include "structuremanipulator.h"
 #include "src/ds485/dsdevicebusinterface.h"
 #include "src/ds485/dsbusinterface.h"
 #include "vdc-connection.h"
@@ -61,12 +62,11 @@ namespace dss {
     DSMeterHash_t hash;
     DSMeterSpec_t spec;
 
-    log("Scan dS485 device start: " + dsuid2str(_dsMeter->getDSID()) , lsInfo);
-
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
     } catch(BusApiError& e) {
-      log(std::string("scanDSMeter: getDSMeterHash: ") + e.what(), lsWarning);
+      log("Scan dS485 device " + dsuid2str(_dsMeter->getDSID()) +
+          ": getDSMeterHash Error: " + e.what(), lsWarning);
       if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
         // for known bus device types retry the readout
         return false;
@@ -76,9 +76,20 @@ namespace dss {
       return true;
     }
 
-    if (m_Maintenance.isInitializing() || (_dsMeter->isInitialized() == false) ||
-        (hash.Hash != _dsMeter->getDatamodelHash()) ||
-        (hash.ModificationCount != _dsMeter->getDatamodelModificationCount())) {
+    uint32_t dsmHash, dsmModCount;
+    dsmHash = _dsMeter->getDatamodelHash();
+    dsmModCount = _dsMeter->getDatamodelModificationCount();
+
+    log("Scan dS485 device " + dsuid2str(_dsMeter->getDSID()) +
+        ": Initializing " + intToString(m_Maintenance.isInitializing()) +
+        ", Init Model " + intToString(_dsMeter->isInitialized()) +
+        ", Hash Model/dSM " + intToString(dsmHash, true) + "/" + intToString(hash.Hash, true) +
+        ", ModCount Model/dSM " + intToString(dsmModCount, true) + "/" + intToString(hash.ModificationCount, true), lsInfo);
+
+    if (m_Maintenance.isInitializing() ||
+        (_dsMeter->isInitialized() == false) ||
+        (hash.Hash != dsmHash) ||
+        (hash.ModificationCount != dsmModCount)) {
 
       try {
         spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
@@ -677,13 +688,21 @@ namespace dss {
         boost::shared_ptr<Device> pDev = devRef.getDevice();
 
         // check if zone sensor already assigned
-        if (!_zone->isSensorAssigned(SensorIDTemperatureIndoors)) {
-          _zone->setSensor(pDev, SensorIDTemperatureIndoors);
+        boost::shared_ptr<Device> oldDev = _zone->getAssignedSensorDevice(idList[i]);
+        if (oldDev && !IsEqualDsuid(oldDev->getDSID(), sensorDevice)) {
+          log("Duplicate sensor type " + intToString(idList[i]) +
+              " registration on zone " + intToString(_zone->getID()) +
+              ": dsuid " + dsuid2str(oldDev->getDSID()) +
+              " is zone reference, and dsuid " + dsuid2str(sensorDevice) +
+              " is additionally registered on dSM " + dsuid2str(_dsMeter->getDSID()), lsWarning);
+        } else {
+          _zone->setSensor(pDev, idList[i]);
         }
       } catch (ItemNotFoundException& e) {
-        log("Sensor with id " + dsuid2str(sensorDevice) +
-            " is not present but assigned as zone reference on the dSM " +
-            dsuid2str(_dsMeter->getDSID()), lsInfo);
+        log("Sensor on zone " + intToString(_zone->getID()) +
+            " with id " + dsuid2str(sensorDevice) +
+            " is not present but assigned as zone reference on dSM " +
+            dsuid2str(_dsMeter->getDSID()), lsWarning);
       } catch (BusApiError& e) {
         // not fatal, catch exception here and avoid endless readout
         break;
@@ -697,51 +716,96 @@ namespace dss {
       uint16_t sensorValue;
       uint32_t sensorAge;
       DateTime now, age;
+      ZoneHeatingConfigSpec_t hConfig;
+      ZoneHeatingStateSpec_t hState;
+      ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
 
       try {
-        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDTemperatureIndoors,
-            &sensorValue, &sensorAge);
-        age = now.addSeconds(-1 * sensorAge);
-        _zone->setTemperature(SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
-      } catch (BusApiError& e) {
-        log("Bus error getting heating temperature value from " +
-            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
-      }
-
-      try {
-        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureSetpoint,
-            &sensorValue, &sensorAge);
-        age = now.addSeconds(-1 * sensorAge);
-        _zone->setNominalValue(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
-      } catch (BusApiError& e) {
-        log("Bus error getting heating nominal temperature value from " +
-            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
-      }
-
-      try {
-        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureControlVariable,
-            &sensorValue, &sensorAge);
-        age = now.addSeconds(-1 * sensorAge);
-        _zone->setControlValue(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
-      } catch (BusApiError& e) {
-        log("Bus error getting heating control value from " +
-            dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
-      }
-
-      try {
-        ZoneHeatingConfigSpec_t hConfig =
-            m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
-        ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
-
-        if (IsNullDsuid(hProp.m_HeatingControlDSUID) && (hConfig.ControllerMode > 0)) {
-          _zone->setHeatingControlMode(hConfig.ControllerMode,
-              hConfig.Offset, hConfig.SourceZoneId,
-              hConfig.ManualValue,
-              _dsMeter->getDSID());
-        }
+        memset(&hConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
+        hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
+        hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
       } catch (std::runtime_error& e) {
-        log("Fatal error getting heating config from " +
+        log("Error getting heating config from dsm " +
             dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        return false;
+      }
+
+      // is there a controller running for this zone?
+      if ((hState.State == HeatingControlStateIDInternal) ||
+          (hState.State == HeatingControlStateIDEmergency)) {
+        if (hConfig.ControllerMode > 0) {
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID) || IsEqualDsuid(hProp.m_HeatingControlDSUID, _dsMeter->getDSID())) {
+            _zone->setHeatingControlMode(hConfig.ControllerMode,
+                hConfig.Offset, hConfig.SourceZoneId, hConfig.ManualValue,
+                _dsMeter->getDSID());
+              hProp = _zone->getHeatingProperties();
+          } else {
+            log("Controller for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
+                " is active on dsm with id " + dsuid2str(hProp.m_HeatingControlDSUID) +
+                ", and a second one on dsm " + dsuid2str(_dsMeter->getDSID()), lsWarning);
+            StructureManipulator manip(
+                *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
+                m_Interface,
+                m_Apartment);
+            ZoneHeatingConfigSpec_t disableConfig = hConfig;
+            disableConfig.ControllerMode = 0;
+            manip.setZoneHeatingConfig(_zone,
+                (const dsuid_t) _dsMeter->getDSID(),
+                (const ZoneHeatingConfigSpec_t) disableConfig);
+          }
+        }
+      }
+
+      // sync zone settings from the controlling dsm only
+      if (IsEqualDsuid(hProp.m_HeatingControlDSUID, _dsMeter->getDSID())) {
+        dsuid_t NullId;
+        SetNullDsuid(NullId);
+        ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
+        try {
+          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDTemperatureIndoors,
+              &sensorValue, &sensorAge);
+          age = now.addSeconds(-1 * sensorAge);
+          if (age > zValues.m_TemperatureValueTS) {
+            _zone->setTemperature(
+                SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
+          } else {
+            _zone->pushSensor(coSystem, SAC_MANUAL, NullId, SensorIDTemperatureIndoors,
+                SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), "");
+          }
+        } catch (BusApiError& e) {
+          log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
+              " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        }
+        try {
+          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureSetpoint,
+              &sensorValue, &sensorAge);
+          age = now.addSeconds(-1 * sensorAge);
+          if (age > zValues.m_NominalValueTS) {
+            _zone->setNominalValue(
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
+          } else {
+            _zone->pushSensor(coSystem, SAC_MANUAL, NullId, SensorIDRoomTemperatureSetpoint,
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
+          }
+        } catch (BusApiError& e) {
+          log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
+              " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        }
+        try {
+          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureControlVariable,
+              &sensorValue, &sensorAge);
+          age = now.addSeconds(-1 * sensorAge);
+          if (age > zValues.m_ControlValueTS) {
+            _zone->setControlValue(
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
+          } else {
+            _zone->pushSensor(coSystem, SAC_MANUAL, NullId, SensorIDRoomTemperatureControlVariable,
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
+          }
+        } catch (BusApiError& e) {
+          log("Error reading heating control value on zone " + intToString(_zone->getID()) +
+              " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        }
       }
     }
 

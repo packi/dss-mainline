@@ -405,4 +405,17 @@ namespace dss {
     }
   }
 
+  boost::shared_ptr<Device> Zone::getAssignedSensorDevice(int _sensorType) const {
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
+      if (!s) {
+        continue;
+      }
+      if (s->m_sensorType == _sensorType) {
+        return getDevices().getByDSID(s->m_DSUID).getDevice();
+      }
+    }
+    return boost::shared_ptr<Device> ();
+  }
+
 } // namespace dss
