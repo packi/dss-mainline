@@ -38,12 +38,14 @@
 
 namespace dss {
 
+typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 JSONObject toJson(const boost::shared_ptr<Event> &event);
 
 class SensorLog : public WebserviceCallDone,
                   public boost::enable_shared_from_this<SensorLog> {
   __DECL_LOG_CHANNEL__
   enum {
+    max_post_events = 50,
     max_elements = 10000,
   };
 public:
@@ -80,10 +82,27 @@ void SensorLog::triggerUpload() {
   m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
   m_events.clear();
 
-  if (!m_uploading.empty()) {
-    m_pending_upload = true;
-    WebserviceApartment::doUploadSensorData(m_uploading.begin(), m_uploading.end(),
+  if (m_uploading.empty()) {
+    return;
+  }
+
+  It chunk_start = m_uploading.begin();
+  It chunk_end = m_uploading.begin();
+
+  m_pending_upload = true;
+
+  while (chunk_end != m_uploading.end()) {
+    size_t remainder = std::distance(chunk_start, m_uploading.end());
+    if (remainder > max_post_events) {
+      remainder = max_post_events;
+    }
+
+    chunk_end = chunk_start + remainder;
+    WebserviceApartment::doUploadSensorData(chunk_start, chunk_end,
                                             shared_from_this());
+    if (chunk_end != m_uploading.end()) {
+      chunk_start = chunk_end;
+    }
   }
 }
 
@@ -111,7 +130,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   }
 }
 
-__DEFINE_LOG_CHANNEL__(SensorDataUploadPlugin, lsDebug);
+__DEFINE_LOG_CHANNEL__(SensorDataUploadPlugin, lsInfo);
 
 SensorDataUploadPlugin::SensorDataUploadPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
@@ -180,7 +199,8 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       boost::shared_ptr<Event> pEvent(new Event(EventName::UploadEventLog));
       pEvent->setProperty(EventProperty::ICalStartTime,
                           DateTime().toRFC2445IcalDataTime());
-      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=60");
+      int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
+      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 
     } else if (_event.getName() == EventName::DeviceSensorValue ||
@@ -214,7 +234,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       }
 
     } else if (_event.getName() == EventName::UploadEventLog) {
-      log(std::string(__func__) + " upload event log", lsDebug);
+      log(std::string(__func__) + " upload event log", lsInfo);
       m_log->triggerUpload();
     } else {
       log("Unhandled event " + _event.getName(), lsInfo);
@@ -363,6 +383,7 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
 
   JSONObject obj;
   boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  int ct = 0;
 
   std::string parameters;
   // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
@@ -372,9 +393,14 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
   obj.addElement("eventsList", array);
   for (; begin != end; begin++) {
     array->add(toJson(*begin));
+    ct++;
   }
 
   std::string postdata = obj.toString();
+  // TODO eventually emit summary: 10 callsceene, 27 metering, ...
+  // dumping whole postdata leads to log rotation and is seldomly needed
+  // unless for solving a blame war with cloud team
+  Logger::getInstance()->log(std::string(__func__) + "upload events: " + intToString(ct) + " bytes: " + intToString(postdata.length()), lsInfo);
   Logger::getInstance()->log(std::string(__func__) + "event data: " + postdata, lsDebug);
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
@@ -387,7 +413,6 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
                                                true);
 }
 
-typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 template void WebserviceApartment::doUploadSensorData<It>(It begin, It end,
                                                           WebserviceCallDone_t
                                                           callback);

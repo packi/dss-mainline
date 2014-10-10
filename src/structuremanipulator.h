@@ -76,6 +76,7 @@ namespace dss {
     void setZoneSensor(boost::shared_ptr<Zone> _zone, const uint8_t _sensorType, boost::shared_ptr<Device> _dev);
     void resetZoneSensor(boost::shared_ptr<Zone> _zone, const uint8_t _sensorType);
     void autoAssignZoneSensors(boost::shared_ptr<Zone> _zone);
+    void synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones);
     /**
      * @ret device moved
      */

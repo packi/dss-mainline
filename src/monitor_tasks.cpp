@@ -120,11 +120,11 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
         pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
             hStatus.m_NominalValue, "");
         usleep(1000 * 1000);
-        pGroup->callScene(coSystem, SAC_MANUAL, pGroup->getLastCalledScene(), "", false);
+        pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
         usleep(1000 * 1000);
         break;
       case HeatingControlModeIDFixed:
-        pGroup->callScene(coSystem, SAC_MANUAL, pGroup->getLastCalledScene(), "", false);
+        pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
         usleep(1000 * 1000);
         break;
       case HeatingControlModeIDManual:

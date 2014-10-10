@@ -387,4 +387,35 @@ namespace dss {
                                 "has no sensor assignment in zone " +
                                 intToString(m_ZoneID));
   }
+
+  bool Zone::isDeviceZoneMember(const DeviceReference& _device) const {
+    return contains(m_Devices, _device);
+  }
+
+  void Zone::removeInvalidZoneSensors() {
+    std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it;
+    for (it = m_MainSensors.begin(); it != m_MainSensors.end();) {
+      DeviceReference devRef ((*it)->m_DSUID, m_pApartment);
+      if (isDeviceZoneMember(devRef)) {
+        ++it;
+      } else {
+        (*it).reset();
+        it = m_MainSensors.erase(it);
+      }
+    }
+  }
+
+  boost::shared_ptr<Device> Zone::getAssignedSensorDevice(int _sensorType) const {
+    for (size_t i = 0; i < m_MainSensors.size(); i++) {
+      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
+      if (!s) {
+        continue;
+      }
+      if (s->m_sensorType == _sensorType) {
+        return getDevices().getByDSID(s->m_DSUID).getDevice();
+      }
+    }
+    return boost::shared_ptr<Device> ();
+  }
+
 } // namespace dss

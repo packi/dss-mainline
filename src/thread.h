@@ -23,35 +23,21 @@
 #ifndef THREAD_H_INCLUDED
 #define THREAD_H_INCLUDED
 
-#ifndef WIN32
 #include <pthread.h>
-#else
-#include <windows.h>
-#endif
-
 #include <string>
 
 namespace dss {
 
-/** Wrapper for pthread- and Windows threads
+/** Wrapper for pthread-threads
 @author Patrick Staehlin
 */
 class Thread{
 private:
-#ifndef WIN32
   pthread_t m_ThreadHandle;
-#else
-  HANDLE m_ThreadHandle;
-#endif
   std::string m_Name;
   bool m_Running;
 
-  #ifndef WIN32
-  static void*
-  #else
-  static DWORD WINAPI
-  #endif
-  ThreadStarterHelperFunc( void* _pThreadObj );
+  static void *ThreadStarterHelperFunc( void* _pThreadObj );
 protected:
   bool m_Terminated;
 public:
@@ -65,8 +51,6 @@ public:
 
     /** Starts the thread. This will call execute. */
     bool run();
-    /** Stops the thread */
-    bool stop();
     /** Terminates the thread */
     bool terminate();
 

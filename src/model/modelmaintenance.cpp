@@ -773,6 +773,15 @@ namespace dss {
     }
   }
 
+  void ModelMaintenance::synchronizeZoneSensorAssignment() {
+
+    StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
+                                     *m_pStructureQueryBusInterface,
+                                     *m_pApartment);
+
+    manipulator.synchronizeZoneSensorAssignment(m_pApartment->getZones());
+  }
+
   void ModelMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
     foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
@@ -802,6 +811,7 @@ namespace dss {
       }
 
       setApartmentState();
+      synchronizeZoneSensorAssignment();
       autoAssignSensors();
       {
         boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
@@ -1862,7 +1872,7 @@ namespace dss {
       pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
       pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
-      pEvent->setProperty("CtrlOffset", intToString(config->Offset - 100));
+      pEvent->setProperty("CtrlOffset", intToString(config->Offset));
     } else if (config->ControllerMode == HeatingControlModeIDManual) {
       pEvent->setProperty("ManualValue", intToString(config->ManualValue - 100));
     }
