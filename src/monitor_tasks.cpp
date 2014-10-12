@@ -109,13 +109,14 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     boost::shared_ptr<Zone> pZone = m_Apartment->getZone(_zoneID);
     boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDControlTemperature);
     ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+    ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
     ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
 
     SetNullDsuid(sourceDSID);
     switch (hConfig.m_HeatingControlMode) {
       case HeatingControlModeIDPID:
         pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDTemperatureIndoors,
-            hStatus.m_TemperatureValue, "");
+            hSensors.m_TemperatureValue, "");
         usleep(1000 * 1000);
         pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
             hStatus.m_NominalValue, "");
