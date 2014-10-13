@@ -68,6 +68,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/model/deviceinterface.h \
 	$(top_srcdir)/src/model/devicereference.cpp \
 	$(top_srcdir)/src/model/devicereference.h \
+	$(top_srcdir)/src/model-features.cpp \
+	$(top_srcdir)/src/model-features.h \
 	$(top_srcdir)/src/model/group.cpp \
 	$(top_srcdir)/src/model/group.h \
 	$(top_srcdir)/src/model/modelconst.h \
@@ -92,6 +94,8 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/model/state.h \
 	$(top_srcdir)/src/model/zone.cpp \
 	$(top_srcdir)/src/model/zone.h \
+	$(top_srcdir)/src/monitor_tasks.cpp \
+	$(top_srcdir)/src/monitor_tasks.h \
 	$(top_srcdir)/src/mutex.cpp \
 	$(top_srcdir)/src/mutex.h \
 	$(top_srcdir)/src/propertyquery.cpp \
@@ -130,8 +134,6 @@ libdsscore_a_SOURCES =  \
 	$(top_srcdir)/src/security/user.h \
 	$(top_srcdir)/src/sensor_data_uploader.cpp \
 	$(top_srcdir)/src/sensor_data_uploader.h \
-	$(top_srcdir)/src/monitor_tasks.cpp \
-	$(top_srcdir)/src/monitor_tasks.h \
 	$(top_srcdir)/src/session.cpp \
 	$(top_srcdir)/src/session.h \
 	$(top_srcdir)/src/sessionmanager.cpp \

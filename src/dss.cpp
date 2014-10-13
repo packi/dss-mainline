@@ -80,6 +80,7 @@
 #include <boost/algorithm/string/finder.hpp>
 
 #include "webservice_connection.h"
+#include "model-features.h"
 
 namespace dss {
 
@@ -280,6 +281,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
     log("DSS::initialize", lsInfo);
     m_State = ssCreatingSubsystems;
+
+    ModelFeatures::createInstance();
 
     try {
       m_commChannel = CommChannel::createInstance();
