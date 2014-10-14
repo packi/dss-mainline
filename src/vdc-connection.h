@@ -35,7 +35,8 @@ namespace dss {
   class JSONObject;
 
   typedef struct {
-    std::string modelGuid;
+    std::string hardwareModelGuid;
+    std::string modelUID;
     std::string vendorGuid;
     std::string oemGuid;
     std::string configURL;

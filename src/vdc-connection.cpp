@@ -44,7 +44,9 @@ namespace dss {
     getprop->set_dsuid(dsuid2str(_device));
 
     vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("modelGuid");
+    query->set_name("hardwareModelGuid");
+    query = getprop->add_query();
+    query->set_name("modelUID");
     query = getprop->add_query();
     query->set_name("vendorGuid");
     query = getprop->add_query();
@@ -117,9 +119,9 @@ namespace dss {
       }
 
       StringConverter st("UTF-8", "UTF-8");
-      if (el.name() == "modelGuid") {
+      if (el.name() == "hardwareModelGuid") {
         try {
-          ret->modelGuid = st.convert(val.v_string());
+          ret->hardwareModelGuid = st.convert(val.v_string());
         } catch (DSSException& e) {}
       } else if (el.name() == "vendorGuid") {
         try {
@@ -140,6 +142,10 @@ namespace dss {
       } else if (el.name() == "model") {
         try {
           ret->hardwareInfo = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "modelUID") {
+        try {
+          ret->modelUID = st.convert(val.v_string());
         } catch (DSSException& e) {}
       } else if (el.name() == "hardwareVersion") {
         try {

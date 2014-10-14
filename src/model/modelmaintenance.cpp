@@ -2134,7 +2134,8 @@ namespace dss {
   {
     try {
       boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
-      m_Device->setVdcModelGuid(props->modelGuid);
+      m_Device->setVdcHardwareModelGuid(props->hardwareModelGuid);
+      m_Device->setVdcModelUID(props->modelUID);
       m_Device->setVdcVendorGuid(props->vendorGuid);
       m_Device->setVdcOemGuid(props->oemGuid);
       m_Device->setVdcConfigURL(props->configURL);
