@@ -37,6 +37,28 @@
 
 namespace dss {
 
+bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+  static const int maxZoneSensorLifeTime = 60 * 60 * 4;
+  DateTime now;
+  if (_ts != DateTime::NullDate) {
+    int age = now.difference(_ts);
+    if (age > maxZoneSensorLifeTime) {
+      Logger::getInstance()->log(std::string("Temperature value for zone #") +
+          intToString(_group->getZoneID()) +
+          " is too old: " + _ts.toISO8601_ms() +
+          ", age in seconds is " + intToString(age), lsWarning);
+      if (DSS::hasInstance()) {
+        boost::shared_ptr<Event> pEvent(new Event(EventName::ZoneSensorError, _group));
+        pEvent->setProperty("sensorType", intToString(_sensorType));
+        pEvent->setProperty("lastValueTS", _ts.toISO8601_ms());
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
 void SensorMonitorTask::run() {
   try {
     std::vector<boost::shared_ptr<Device> > devices = m_Apartment->getDevicesVector();
@@ -95,6 +117,47 @@ void SensorMonitorTask::run() {
       }
     }
   } catch (...) {}
+
+  try {
+    std::vector<boost::shared_ptr<Zone> > zones = m_Apartment->getZones();
+    for (std::vector<boost::shared_ptr<Zone> >::iterator it = zones.begin(); it != zones.end(); it ++) {
+      boost::shared_ptr<Zone> pZone = *it;
+      if (pZone->getID() > 0) {
+        ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_TemperatureValueTS)) {
+          hSensors.m_TemperatureValueTS = DateTime::NullDate;
+        }
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityIndoors, hSensors.m_HumidityValueTS)) {
+          hSensors.m_HumidityValueTS = DateTime::NullDate;
+        }
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_CO2ConcentrationValueTS)) {
+          hSensors.m_CO2ConcentrationValueTS = DateTime::NullDate;
+        }
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, hSensors.m_BrightnessValueTS)) {
+          hSensors.m_BrightnessValueTS = DateTime::NullDate;
+        }
+        ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+        if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureSetpoint, hStatus.m_NominalValueTS)) {
+          hStatus.m_NominalValueTS = DateTime::NullDate;
+        }
+        if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
+          hStatus.m_ControlValueTS = DateTime::NullDate;
+        }
+      } else {
+        ApartmentSensorStatus_t aSensors = m_Apartment->getSensorStatus();
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureOutdoors, aSensors.m_TemperatureValueTS)) {
+          aSensors.m_TemperatureValueTS = DateTime::NullDate;
+        }
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityOutdoors, aSensors.m_HumidityValueTS)) {
+          aSensors.m_HumidityValueTS = DateTime::NullDate;
+        }
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, aSensors.m_BrightnessValueTS)) {
+          aSensors.m_BrightnessValueTS = DateTime::NullDate;
+        }
+      }
+    }
+  } catch (...) {}
+
   boost::shared_ptr<Event> pEvent(new Event("check_sensor_values"));
   pEvent->setProperty("time", "+600");
   if (DSS::hasInstance()) {
