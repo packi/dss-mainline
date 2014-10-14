@@ -54,6 +54,7 @@ namespace dss {
     extern const std::string ZoneSensorValue;
     extern const std::string ZoneSensorError;
     extern const std::string StateChange;
+    extern const std::string AddonStateChange;
     extern const std::string HeatingEnabled;
     extern const std::string HeatingControllerSetup;
     extern const std::string HeatingControllerValue;

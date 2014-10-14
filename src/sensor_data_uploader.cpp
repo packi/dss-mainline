@@ -191,6 +191,7 @@ void SensorDataUploadPlugin::subscribe() {
   events.push_back(EventName::CallScene);
   events.push_back(EventName::UndoScene);
   events.push_back(EventName::StateChange);
+  events.push_back(EventName::AddonStateChange);
   events.push_back(EventName::HeatingEnabled);
   events.push_back(EventName::HeatingControllerSetup);
   events.push_back(EventName::HeatingControllerValue);
@@ -266,9 +267,14 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
 
     } else if (_event.getName() == EventName::StateChange) {
       std::string sName = _event.getPropertyByName("statename");
-      if (sName == "holiday" ||
-          sName == "presence" ||
-          beginsWith(sName, "heating-controller.")) {
+      if (sName == "holiday" || sName == "presence") {
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr(), highPrio);
+      }
+
+    } else if (_event.getName() == EventName::AddonStateChange) {
+      std::string sName = _event.getPropertyByName("scriptID");
+      if (sName == "heating-controller") {
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
@@ -375,6 +381,13 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("StateName", pState->getName());
       obj.addProperty("StateValue", pState->toString());
       obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+    } else if (event->getName() == EventName::AddonStateChange) {
+      boost::shared_ptr<const State> pState = event->getRaisedAtState();
+      std::string addonName = event->getPropertyByName("scriptID");
+      appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState);
+      obj.addProperty("StateName", addonName + "." + pState->getName());
+      obj.addProperty("StateValue", pState->toString());
+      obj.addProperty("Origin", event->getPropertyByName("scriptID"));
     } else if ((event->getName() == EventName::DeviceStatus) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
       appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
