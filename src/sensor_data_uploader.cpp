@@ -345,7 +345,7 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceSensorError);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_DeviceSensorError);
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       obj.addProperty("SensorType", strToInt(event->getPropertyByName("sensorType")));
       obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
@@ -358,25 +358,25 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("GroupID", pGroup->getID());
       obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
     } else if (event->getName() == EventName::HeatingControllerSetup) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerSetup);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerSetup);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerValue) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerValue);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerValue);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerState) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerState);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerState);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingEnabled) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingEnabled);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingEnabled);
       obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       obj.addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
 
