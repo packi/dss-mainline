@@ -255,6 +255,7 @@ void appendCommon(JSONObject &obj, const std::string& group, const std::string& 
 
 const static std::string evtGroup_Metering = "Metering";
 const static std::string evtGroup_Activity = "Activity";
+const static std::string evtGroup_ApartmentAndDevice = "ApartmentAndDevice";
 
 const static std::string evtCategory_DeviceSensorValue = "DeviceSensorValue";
 const static std::string evtCategory_ZoneSensorValue = "ZoneSensorValue";
