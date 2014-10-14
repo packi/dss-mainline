@@ -443,9 +443,12 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
   boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
+  HashMapStringString sensorUploadHeaders;
+  sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
+
   WebserviceConnection::getInstance()->request("public/dss/v1_0/DSSEventData/SaveEvent",
                                                parameters,
-                                               headers_t(),
+                                               boost::make_shared<HashMapStringString>(sensorUploadHeaders),
                                                postdata,
                                                mcb,
                                                true);
