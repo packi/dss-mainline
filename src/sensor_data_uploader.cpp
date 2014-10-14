@@ -171,6 +171,7 @@ void SensorDataUploadPlugin::subscribe() {
   events.push_back(EventName::DeviceStatus);
   events.push_back(EventName::DeviceInvalidSensor);
   events.push_back(EventName::ZoneSensorValue);
+  events.push_back(EventName::ZoneSensorError);
   events.push_back(EventName::CallScene);
   events.push_back(EventName::UndoScene);
   events.push_back(EventName::StateChange);
@@ -205,6 +206,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
 
     } else if (_event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
+               _event.getName() == EventName::ZoneSensorError ||
                _event.getName() == EventName::DeviceStatus ||
                _event.getName() == EventName::DeviceInvalidSensor ||
                _event.getName() == EventName::HeatingEnabled ||
@@ -255,6 +257,7 @@ void appendCommon(JSONObject &obj, const std::string& group, const std::string& 
 
 const static std::string evtGroup_Metering = "Metering";
 const static std::string evtGroup_Activity = "Activity";
+const static std::string evtGroup_ApartmentAndDevice = "ApartmentAndDevice";
 
 const static std::string evtCategory_DeviceSensorValue = "DeviceSensorValue";
 const static std::string evtCategory_ZoneSensorValue = "ZoneSensorValue";
@@ -265,6 +268,7 @@ const static std::string evtCategory_ZoneGroupState = "ZoneStateChange";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
+const static std::string evtCategory_ZoneSensorError = "ZoneSensorError";
 const static std::string evtCategory_HeatingControllerSetup = "HeatingControllerSetup";
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
@@ -341,30 +345,38 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceSensorError);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_DeviceSensorError);
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       obj.addProperty("SensorType", strToInt(event->getPropertyByName("sensorType")));
       obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
+    } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
+      boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_ZoneSensorError);
+      int sensorType = strToInt(event->getPropertyByName("sensorType"));
+      obj.addProperty("SensorType", sensorType);
+      obj.addProperty("ZoneID",  pGroup->getZoneID());
+      obj.addProperty("GroupID", pGroup->getID());
+      obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
     } else if (event->getName() == EventName::HeatingControllerSetup) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerSetup);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerSetup);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerValue) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerValue);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerValue);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerState) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerState);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerState);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingEnabled) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingEnabled);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingEnabled);
       obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       obj.addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
 

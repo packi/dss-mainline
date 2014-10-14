@@ -548,4 +548,30 @@ namespace dss {
     }
   } // setPropertySystem
 
+  ApartmentSensorStatus_t Apartment::getSensorStatus() const {
+    return m_SensorStatus;
+  }
+
+  void Apartment::setTemperature(double _value, DateTime& _ts) {
+    m_SensorStatus.m_TemperatureValue = _value;
+    m_SensorStatus.m_TemperatureValueTS = _ts;
+  }
+
+  void Apartment::setHumidityValue(double _value, DateTime& _ts) {
+    m_SensorStatus.m_HumidityValue = _value;
+    m_SensorStatus.m_HumidityValueTS = _ts;
+  }
+
+  void Apartment::setBrightnessValue(double _value, DateTime& _ts) {
+    m_SensorStatus.m_BrightnessValue = _value;
+    m_SensorStatus.m_BrightnessValueTS = _ts;
+  }
+
+  void Apartment::setWeatherInformation(std::string& _iconId, std::string& _conditionId, std::string _serviceId, DateTime& _ts) {
+    m_SensorStatus.m_WeatherIconId = _iconId;
+    m_SensorStatus.m_WeatherConditionId = _conditionId;
+    m_SensorStatus.m_WeatherServiceId = _serviceId;
+    m_SensorStatus.m_WeatherTS = _ts;
+  }
+
 } // namespace dss

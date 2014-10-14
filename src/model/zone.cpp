@@ -229,6 +229,10 @@ namespace dss {
     return m_HeatingStatus;
   }
 
+  ZoneSensorStatus_t Zone::getSensorStatus() const {
+    return m_SensorStatus;
+  }
+
   void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice) {
     m_HeatingProperties.m_HeatingControlMode = _ctrlMode;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
@@ -246,8 +250,8 @@ namespace dss {
   }
 
   void Zone::setTemperature(double _value, DateTime& _ts) {
-    m_HeatingStatus.m_TemperatureValue = _value;
-    m_HeatingStatus.m_TemperatureValueTS = _ts;
+    m_SensorStatus.m_TemperatureValue = _value;
+    m_SensorStatus.m_TemperatureValueTS = _ts;
   }
 
   void Zone::setNominalValue(double _value, DateTime& _ts) {
@@ -260,15 +264,41 @@ namespace dss {
     m_HeatingStatus.m_ControlValueTS = _ts;
   }
 
+  void Zone::setHumidityValue(double _value, DateTime& _ts) {
+    m_SensorStatus.m_HumidityValue = _value;
+    m_SensorStatus.m_HumidityValueTS = _ts;
+  }
+
+  void Zone::setBrightnessValue(double _value, DateTime& _ts) {
+    m_SensorStatus.m_BrightnessValue = _value;
+    m_SensorStatus.m_BrightnessValueTS = _ts;
+  }
+
+  void Zone::setCO2ConcentrationValue(double _value, DateTime& _ts) {
+    m_SensorStatus.m_CO2ConcentrationValue = _value;
+    m_SensorStatus.m_CO2ConcentrationValueTS = _ts;
+  }
+
   bool Zone::isAllowedSensorType(int _sensorType) {
-    switch (_sensorType) {
-      case SensorIDTemperatureIndoors:
-      case SensorIDBrightnessIndoors:
-      case SensorIDHumidityIndoors:
-      case SensorIDCO2Concentration:
-        return true;
-      default:
-        return false;
+    if (m_ZoneID == 0) {
+      switch (_sensorType) {
+        case SensorIDTemperatureOutdoors:
+        case SensorIDBrightnessOutdoors:
+        case SensorIDHumidityOutdoors:
+          return true;
+        default:
+          return false;
+      }
+    } else {
+      switch (_sensorType) {
+        case SensorIDTemperatureIndoors:
+        case SensorIDBrightnessIndoors:
+        case SensorIDHumidityIndoors:
+        case SensorIDCO2Concentration:
+          return true;
+        default:
+          return false;
+      }
     }
   }
 

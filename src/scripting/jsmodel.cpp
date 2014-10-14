@@ -2733,6 +2733,7 @@ namespace dss {
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
       ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+      ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
 
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
@@ -2743,8 +2744,8 @@ namespace dss {
           break;
         case HeatingControlModeIDPID:
           obj.setProperty<int>("OperationMode", hStatus.m_OperationMode);
-          obj.setProperty<double>("TemperatureValue", hStatus.m_TemperatureValue);
-          obj.setProperty<std::string>("TemperatureValueTime", hStatus.m_TemperatureValueTS.toISO8601());
+          obj.setProperty<double>("TemperatureValue", hSensors.m_TemperatureValue);
+          obj.setProperty<std::string>("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
           obj.setProperty<double>("NominalValue", hStatus.m_NominalValue);
           obj.setProperty<std::string>("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
           obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);

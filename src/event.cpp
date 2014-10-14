@@ -58,6 +58,7 @@ namespace dss {
     const std::string Running = "running";
     const std::string UndoScene = "undoScene";
     const std::string ZoneSensorValue = "zoneSensorValue";
+    const std::string ZoneSensorError = "zoneSensorError";
     const std::string StateChange = "stateChange";
     const std::string HeatingEnabled = "HeatingEnabled";
     const std::string HeatingControllerSetup = "HeatingControllerSetup";
