@@ -51,11 +51,12 @@ class SensorLog : public WebserviceCallDone,
 public:
   SensorLog() : m_pending_upload(false) {};
   virtual ~SensorLog() {};
-  void append(boost::shared_ptr<Event> event);
+  void append(boost::shared_ptr<Event> event, bool highPrio = false);
   void triggerUpload();
   void done(RestTransferStatus_t status, WebserviceReply reply);
 private:
   std::vector<boost::shared_ptr<Event> > m_events;
+  std::vector<boost::shared_ptr<Event> > m_eventsHighPrio;
   std::vector<boost::shared_ptr<Event> > m_uploading;
   boost::mutex m_lock;
   bool m_pending_upload;
@@ -63,8 +64,16 @@ private:
 
 __DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
 
-void SensorLog::append(boost::shared_ptr<Event> event) {
+void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
   boost::mutex::scoped_lock lock(m_lock);
+
+  if (highPrio) {
+    m_eventsHighPrio.push_back(event);
+    lock.unlock();
+    triggerUpload();
+    return;
+  }
+
   if (m_events.size() + m_uploading.size() > max_elements) {
     // MS-Hub will detect from jumps in sequence id
     return;
@@ -79,8 +88,13 @@ void SensorLog::triggerUpload() {
     return;
   }
 
-  m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
-  m_events.clear();
+  if (m_eventsHighPrio.size()) {
+    m_uploading.insert(m_uploading.end(), m_eventsHighPrio.begin(), m_eventsHighPrio.end());
+    m_eventsHighPrio.clear();
+  } else {
+    m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
+    m_events.clear();
+  }
 
   if (m_uploading.empty()) {
     return;
@@ -115,18 +129,20 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   }
 
   if (status) {
-    // keep retrying, with next tick
+    // keep events in the upload queue, retry with next tick
     log("save event network problem: " + intToString(status), lsWarning);
-    m_pending_upload = false;
-    return;
-  }
-
-  if (reply.code) {
+  } else if (reply.code) {
     log("save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
         lsWarning);
     m_uploading.clear();
     // MS-Hub, will detect jumps in sequence ID
-    m_pending_upload = false;
+  }
+  m_pending_upload = false;
+
+  // re-schedule the uploader for high prio events
+  if (m_eventsHighPrio.size()) {
+    lock.unlock();
+    triggerUpload();
   }
 }
 
@@ -192,6 +208,27 @@ void SensorDataUploadPlugin::subscribe() {
 void SensorDataUploadPlugin::handleEvent(Event& _event,
                                          const EventSubscription& _subscription) {
   try {
+
+    /* #7725
+     * EventName::DeviceSensorValue
+     * EventName::ZoneSensorValue with SensorType != 50 or 51
+     */
+    bool highPrio = true;
+    if (_event.getName() == EventName::DeviceSensorValue) {
+      highPrio = false;
+    }
+    if (_event.getName() == EventName::ZoneSensorValue) {
+      int sensorType = strToInt(_event.getPropertyByName("sensorType"));
+      switch (sensorType) {
+        case SensorIDRoomTemperatureControlVariable:
+        case SensorIDRoomTemperatureSetpoint:
+          break;
+        default:
+          highPrio = false;
+          break;
+      }
+    }
+
     if (_event.getName() == EventName::Running &&
         webservice_communication_authorized()) {
 
@@ -202,7 +239,6 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
-
     } else if (_event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
                _event.getName() == EventName::DeviceStatus ||
@@ -212,7 +248,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState) {
       log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
-      m_log->append(_event.getptr());
+      m_log->append(_event.getptr(), highPrio);
 
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
@@ -223,14 +259,16 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
           return;
         }
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
-        m_log->append(_event.getptr());
+        m_log->append(_event.getptr(), highPrio);
       }
 
     } else if (_event.getName() == EventName::StateChange) {
       std::string sName = _event.getPropertyByName("statename");
-      if (sName == "holiday" || sName == "presence") {
+      if (sName == "holiday" ||
+          sName == "presence" ||
+          beginsWith(sName, "heating-controller.")) {
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
-        m_log->append(_event.getptr());
+        m_log->append(_event.getptr(), highPrio);
       }
 
     } else if (_event.getName() == EventName::UploadEventLog) {
