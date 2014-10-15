@@ -66,17 +66,15 @@ namespace dss {
 
   void StructureManipulator::checkSensorsOnDeviceRemoval(
           boost::shared_ptr<Zone> _zone, boost::shared_ptr<Device> _device) {
-      // if the device that is being moved out of the zone was a zone sensor:
-      // clear the previous sensor assignment and also check if we can reassign
-      // another sensor to the zone
-      try {
-        int sensorType = _zone->getAssignedSensorType(_device);
-        resetZoneSensor(_zone, sensorType);
-        autoAssignZoneSensors(_zone);
-      } catch (ItemNotFoundException &ex) {
-        // no further action for old zone - device was not assigned as
-        // zone sensor
-      }
+    // if the device that is being moved out of the zone was a zone sensor:
+    // clear the previous sensor assignment and also check if we can reassign
+    // another sensor to the zone
+    boost::shared_ptr<std::vector<int> > types_to_clear = _zone->getAssignedSensorTypes(_device);
+    for (size_t q = 0; q < types_to_clear->size(); ++q) {
+      int sensorType = types_to_clear->at(q);
+      resetZoneSensor(_zone, sensorType);
+    }
+    autoAssignZoneSensors(_zone);
   }
 
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {

@@ -400,22 +400,21 @@ namespace dss {
     return ret;
   }
 
-  int Zone::getAssignedSensorType(boost::shared_ptr<const Device> _device) const {
+  boost::shared_ptr<std::vector<int> > Zone::getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const {
+    boost::shared_ptr<std::vector<int> >ret(new std::vector<int>());
+    dsuid_t dev_dsuid = _device->getDSID();
+
     for (size_t i = 0; i < m_MainSensors.size(); i++) {
       boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
       if (!s) {
         continue;
       }
-      dsuid_t dev_dsuid = _device->getDSID();
       dsuid_t zone_dsuid = s->m_DSUID;
       if (IsEqualDsuid(zone_dsuid, dev_dsuid)) {
-        return s->m_sensorType;
+        ret->push_back(s->m_sensorType);
       }
     }
-
-    throw ItemNotFoundException("Device " + dsuid2str(_device->getDSID()) +
-                                "has no sensor assignment in zone " +
-                                intToString(m_ZoneID));
+    return ret;
   }
 
   bool Zone::isDeviceZoneMember(const DeviceReference& _device) const {
