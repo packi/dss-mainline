@@ -31,6 +31,8 @@
 #include "ds485/dsbusinterface.h"
 #include "messages/vdc-messages.pb.h"
 #include "stringconverter.h"
+#include "logger.h"
+#include "model-features.h"
 
 namespace dss {
 
@@ -47,6 +49,8 @@ namespace dss {
     query->set_name("hardwareModelGuid");
     query = getprop->add_query();
     query->set_name("modelUID");
+    query = getprop->add_query();
+    query->set_name("modelFeatures");
     query = getprop->add_query();
     query->set_name("vendorGuid");
     query = getprop->add_query();
@@ -72,6 +76,9 @@ namespace dss {
     if (!message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
       throw std::runtime_error("could not serialize message");
     }
+
+    boost::shared_ptr<std::vector<int> > features(new std::vector<int>());
+    ret->modelFeatures = features;
 
     if (DSS::hasInstance()) {
       DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
@@ -108,14 +115,20 @@ namespace dss {
         continue;
       }
 
-      // we are only expecting string property values here
-      if (!el.has_value()) {
-        continue;
+      // we are only expecting string property values here except for model
+      // features
+      if (el.name() != "modelFeatures") {
+        if (!el.has_value()) {
+          continue;
+        }
       }
 
       vdcapi::PropertyValue val = el.value();
-      if (!val.has_v_string()) {
-        continue;
+
+      if (el.name() != "modelFeatures") {
+        if (!val.has_v_string()) {
+          continue;
+        }
       }
 
       StringConverter st("UTF-8", "UTF-8");
@@ -151,6 +164,24 @@ namespace dss {
         try {
           ret->hardwareVersion = st.convert(val.v_string());
         } catch (DSSException& e) {}
+      } else if (el.name() == "modelFeatures") {
+        for (int j = 0; j < el.elements_size(); j++) {
+          vdcapi::PropertyElement feature = el.elements(j);
+          if (feature.has_value()) {
+            vdcapi::PropertyValue fval = feature.value();
+            if (fval.has_v_bool() && fval.v_bool() == true) {
+              try {
+                ret->modelFeatures->push_back(
+                  ModelFeatures::getInstance()->nameToFeature(feature.name()));
+              } catch (std::runtime_error &ex) {
+                Logger::getInstance()->log("Ignoring feature '" +
+                                            feature.name() + "' from device " +
+                                            dsuid2str(_device));
+              }
+            }
+          }
+        }
+
       } else if (el.name() == "name") {
         try {
           ret->name = st.convert(val.v_string());

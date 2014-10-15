@@ -44,6 +44,7 @@ namespace dss {
     std::string hardwareInfo;     // property: model
     std::string hardwareVersion;
     std::string name;
+    boost::shared_ptr<std::vector<int> > modelFeatures;
   } VdsdSpec_t;
 
   typedef struct {

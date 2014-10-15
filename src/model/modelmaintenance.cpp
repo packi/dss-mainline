@@ -57,6 +57,7 @@
 #include "boost/filesystem.hpp"
 #include "util.h"
 #include "vdc-connection.h"
+#include "model-features.h"
 
 namespace dss {
 
@@ -2142,6 +2143,14 @@ namespace dss {
       m_Device->setVdcHardwareGuid(props->hardwareGuid);
       m_Device->setVdcHardwareInfo(props->hardwareInfo);
       m_Device->setVdcHardwareVersion(props->hardwareVersion);
+
+      try {
+        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), props->modelUID, props->modelFeatures);
+      } catch (std::runtime_error& err) {
+        Logger::getInstance()->log("Could not set model features for device " +
+            dsuid2str(m_Device->getDSID()) + ", Message: " +
+            err.what(), lsWarning);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("VdcDataQuery: could not query properties from " +
           dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
