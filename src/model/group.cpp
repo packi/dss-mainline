@@ -250,12 +250,23 @@ namespace dss {
     DateTime now;
     boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
 
-    switch (_sensorType) {
-      case SensorIDTemperatureIndoors: pZone->setTemperature(_sensorValue, now); break;
-      case SensorIDTemperatureOutdoors: pZone->setTemperature(_sensorValue, now); break;
-      case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_sensorValue, now); break;
-      case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_sensorValue, now); break;
-      default: break;
+    if (m_ZoneID == 0) {
+      switch (_sensorType) {
+        case SensorIDTemperatureOutdoors: m_pApartment->setTemperature(_sensorValue, now); break;
+        case SensorIDHumidityOutdoors: m_pApartment->setHumidityValue(_sensorValue, now); break;
+        case SensorIDBrightnessOutdoors: m_pApartment->setBrightnessValue(_sensorValue, now); break;
+        default: break;
+      }
+    } else {
+      switch (_sensorType) {
+        case SensorIDTemperatureIndoors: pZone->setTemperature(_sensorValue, now); break;
+        case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_sensorValue, now); break;
+        case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_sensorValue, now); break;
+        case SensorIDHumidityIndoors: pZone->setHumidityValue(_sensorValue, now); break;
+        case SensorIDBrightnessIndoors: pZone->setBrightnessValue(_sensorValue, now); break;
+        case SensorIDCO2Concentration: pZone->setCO2ConcentrationValue(_sensorValue, now); break;
+        default: break;
+      }
     }
 
     if (m_pPropertyNode != NULL) {

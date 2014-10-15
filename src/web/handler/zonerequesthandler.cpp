@@ -227,6 +227,7 @@ namespace dss {
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+          ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
           resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
           resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
           resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
@@ -241,8 +242,8 @@ namespace dss {
               break;
             case HeatingControlModeIDPID:
               resultObj->addProperty("OperationMode", hStatus.m_OperationMode);
-              resultObj->addProperty("TemperatureValue", hStatus.m_TemperatureValue);
-              resultObj->addProperty("TemperatureValueTime", hStatus.m_TemperatureValueTS.toISO8601());
+              resultObj->addProperty("TemperatureValue", hSensors.m_TemperatureValue);
+              resultObj->addProperty("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
               resultObj->addProperty("NominalValue", hStatus.m_NominalValue);
               resultObj->addProperty("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
               resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
@@ -654,6 +655,41 @@ namespace dss {
             sensors->addElement("", sensor);
             sensor->addProperty("sensorType", devSensor->m_sensorType);
             sensor->addProperty("dsuid", dsuid2str(devSensor->m_DSUID));
+          }
+          return success(resultObj);
+
+        } else if(_request.getMethod() == "getSensorValues") {
+          ZoneSensorStatus_t sensorStatus = pZone->getSensorStatus();
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          boost::shared_ptr<JSONArrayBase> values(new JSONArrayBase());
+
+          resultObj->addProperty("id", pZone->getID());
+          resultObj->addProperty("name", pZone->getName());
+          resultObj->addElement("values", values);
+
+          if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
+            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            values->addElement("", svalue);
+            svalue->addProperty("TemperatureValue", sensorStatus.m_TemperatureValue);
+            svalue->addProperty("TemperatureValueTime", sensorStatus.m_TemperatureValueTS.toISO8601_ms());
+          }
+          if (sensorStatus.m_HumidityValueTS != DateTime::NullDate) {
+            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            values->addElement("", svalue);
+            svalue->addProperty("HumidityValue", sensorStatus.m_HumidityValue);
+            svalue->addProperty("HumidityValueTime", sensorStatus.m_HumidityValueTS.toISO8601_ms());
+          }
+          if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate) {
+            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            values->addElement("", svalue);
+            svalue->addProperty("CO2concentrationValue", sensorStatus.m_CO2ConcentrationValue);
+            svalue->addProperty("CO2concentrationValueTime", sensorStatus.m_CO2ConcentrationValueTS.toISO8601_ms());
+          }
+          if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate) {
+            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            values->addElement("", svalue);
+            svalue->addProperty("BrightnessValue", sensorStatus.m_BrightnessValue);
+            svalue->addProperty("BrightnessValueTime", sensorStatus.m_BrightnessValueTS.toISO8601_ms());
           }
           return success(resultObj);
 

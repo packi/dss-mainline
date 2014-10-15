@@ -35,6 +35,7 @@
 #include "src/mutex.h"
 #include "src/base.h"
 #include "src/model/state.h"
+#include "src/datetools.h"
 
 namespace dss {
   class PropertyNode;
@@ -51,6 +52,28 @@ namespace dss {
   class DeviceBusInterface;
   class ActionRequestInterface;
 
+  typedef struct ApartmentSensorStatus {
+    ApartmentSensorStatus() :
+      m_TemperatureValue(0),
+      m_TemperatureValueTS(0),
+      m_HumidityValue(0),
+      m_HumidityValueTS(0),
+      m_BrightnessValue(0),
+      m_BrightnessValueTS(0),
+      m_WeatherTS(0)
+      {}
+    double m_TemperatureValue;
+    DateTime m_TemperatureValueTS;
+    double m_HumidityValue;
+    DateTime m_HumidityValueTS;
+    double m_BrightnessValue;
+    DateTime m_BrightnessValueTS;
+    std::string m_WeatherIconId;
+    std::string m_WeatherConditionId;
+    std::string m_WeatherServiceId;
+    DateTime m_WeatherTS;
+  } ApartmentSensorStatus_t;
+
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
@@ -64,6 +87,7 @@ namespace dss {
     std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Device> > m_Devices;
     std::vector<boost::shared_ptr<State> > m_States;
+    ApartmentSensorStatus_t m_SensorStatus;
 
     BusInterface* m_pBusInterface;
     PropertyNodePtr m_pPropertyNode;
@@ -136,6 +160,12 @@ namespace dss {
     void removeDSMeter(dsuid_t _dsMeter);
     void removeInactiveMeters();
     void removeState(const std::string& _name);
+
+    ApartmentSensorStatus_t getSensorStatus() const;
+    void setTemperature(double _value, DateTime& _ts);
+    void setHumidityValue(double _value, DateTime& _ts);
+    void setBrightnessValue(double _value, DateTime& _ts);
+    void setWeatherInformation(std::string& _iconId, std::string& _conditionId, std::string _serviceId, DateTime& _ts);
 
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }

@@ -41,6 +41,7 @@ namespace dss {
   class DeviceReference;
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
+  class DateTime;
 
   typedef struct ZoneHeatingProperties {
     ZoneHeatingProperties() :
@@ -63,18 +64,38 @@ namespace dss {
   typedef struct ZoneHeatingStatus {
     ZoneHeatingStatus() :
       m_OperationMode(0),
-      m_TemperatureValueTS(0),
+      m_NominalValue(0),
       m_NominalValueTS(0),
+      m_ControlValue(0),
       m_ControlValueTS(0)
       {}
     int m_OperationMode;
-    double m_TemperatureValue;
-    DateTime m_TemperatureValueTS;
     double m_NominalValue;         // only used for mode 1
     DateTime m_NominalValueTS;
     double m_ControlValue;
     DateTime m_ControlValueTS;
   } ZoneHeatingStatus_t;
+
+  typedef struct ZoneSensorStatus {
+    ZoneSensorStatus() :
+      m_TemperatureValue(0),
+      m_TemperatureValueTS(0),
+      m_HumidityValue(0),
+      m_HumidityValueTS(0),
+      m_BrightnessValue(0),
+      m_BrightnessValueTS(0),
+      m_CO2ConcentrationValue(0),
+      m_CO2ConcentrationValueTS(0)
+      {}
+    double m_TemperatureValue;
+    DateTime m_TemperatureValueTS;
+    double m_HumidityValue;
+    DateTime m_HumidityValueTS;
+    double m_BrightnessValue;
+    DateTime m_BrightnessValueTS;
+    double m_CO2ConcentrationValue;
+    DateTime m_CO2ConcentrationValueTS;
+  } ZoneSensorStatus_t;
 
   typedef struct {
     dsuid_t m_DSUID;
@@ -96,6 +117,7 @@ namespace dss {
     std::vector<boost::shared_ptr<MainZoneSensor_t> > m_MainSensors;
     ZoneHeatingProperties_t m_HeatingProperties;
     ZoneHeatingStatus_t m_HeatingStatus;
+    ZoneSensorStatus_t m_SensorStatus;
 
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
@@ -154,9 +176,10 @@ namespace dss {
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
 
-    /** Returns the heating properties or current status */
+    /** Returns the heating  and sensor properties */
     ZoneHeatingProperties_t getHeatingProperties() const;
     ZoneHeatingStatus_t getHeatingStatus() const;
+    ZoneSensorStatus_t getSensorStatus() const;
 
     /** Set heating properties and runtime values */
     void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
@@ -165,6 +188,10 @@ namespace dss {
     void setTemperature(double _value, DateTime& _ts);
     void setNominalValue(double _value, DateTime& _ts);
     void setControlValue(double _value, DateTime& _ts);
+    void setHumidityValue(double _value, DateTime& _ts);
+    void setBrightnessValue(double _value, DateTime& _ts);
+    void setCO2ConcentrationValue(double _value, DateTime& _ts);
+
     void setSensor(boost::shared_ptr<const Device> _device, uint8_t _sensorType);
     void setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor);
     void resetSensor(uint8_t _sensorType);
@@ -172,9 +199,8 @@ namespace dss {
     std::vector<boost::shared_ptr<MainZoneSensor_t> > getAssignedSensors() { return m_MainSensors; }
 
     boost::shared_ptr<std::vector<int> > getUnassignedSensorTypes() const;
-    // return sensor type if device is assigned as zone sensor, otherwise
-    // throw ItemNotFoundException
-    int getAssignedSensorType(boost::shared_ptr<const Device> _device) const;
+    boost::shared_ptr<std::vector<int> > getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const;
+
     boost::shared_ptr<Device> getAssignedSensorDevice(int _sensorType) const;
     bool isDeviceZoneMember(const DeviceReference& _device) const;
     void removeInvalidZoneSensors();

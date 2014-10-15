@@ -51,11 +51,12 @@ class SensorLog : public WebserviceCallDone,
 public:
   SensorLog() : m_pending_upload(false) {};
   virtual ~SensorLog() {};
-  void append(boost::shared_ptr<Event> event);
+  void append(boost::shared_ptr<Event> event, bool highPrio = false);
   void triggerUpload();
   void done(RestTransferStatus_t status, WebserviceReply reply);
 private:
   std::vector<boost::shared_ptr<Event> > m_events;
+  std::vector<boost::shared_ptr<Event> > m_eventsHighPrio;
   std::vector<boost::shared_ptr<Event> > m_uploading;
   boost::mutex m_lock;
   bool m_pending_upload;
@@ -63,8 +64,16 @@ private:
 
 __DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
 
-void SensorLog::append(boost::shared_ptr<Event> event) {
+void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
   boost::mutex::scoped_lock lock(m_lock);
+
+  if (highPrio) {
+    m_eventsHighPrio.push_back(event);
+    lock.unlock();
+    triggerUpload();
+    return;
+  }
+
   if (m_events.size() + m_uploading.size() > max_elements) {
     // MS-Hub will detect from jumps in sequence id
     return;
@@ -79,8 +88,13 @@ void SensorLog::triggerUpload() {
     return;
   }
 
-  m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
-  m_events.clear();
+  if (m_eventsHighPrio.size()) {
+    m_uploading.insert(m_uploading.end(), m_eventsHighPrio.begin(), m_eventsHighPrio.end());
+    m_eventsHighPrio.clear();
+  } else {
+    m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
+    m_events.clear();
+  }
 
   if (m_uploading.empty()) {
     return;
@@ -115,18 +129,20 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   }
 
   if (status) {
-    // keep retrying, with next tick
+    // keep events in the upload queue, retry with next tick
     log("save event network problem: " + intToString(status), lsWarning);
-    m_pending_upload = false;
-    return;
-  }
-
-  if (reply.code) {
+  } else if (reply.code) {
     log("save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
         lsWarning);
     m_uploading.clear();
     // MS-Hub, will detect jumps in sequence ID
-    m_pending_upload = false;
+  }
+  m_pending_upload = false;
+
+  // re-schedule the uploader for high prio events
+  if (m_eventsHighPrio.size()) {
+    lock.unlock();
+    triggerUpload();
   }
 }
 
@@ -171,9 +187,11 @@ void SensorDataUploadPlugin::subscribe() {
   events.push_back(EventName::DeviceStatus);
   events.push_back(EventName::DeviceInvalidSensor);
   events.push_back(EventName::ZoneSensorValue);
+  events.push_back(EventName::ZoneSensorError);
   events.push_back(EventName::CallScene);
   events.push_back(EventName::UndoScene);
   events.push_back(EventName::StateChange);
+  events.push_back(EventName::AddonStateChange);
   events.push_back(EventName::HeatingEnabled);
   events.push_back(EventName::HeatingControllerSetup);
   events.push_back(EventName::HeatingControllerValue);
@@ -192,6 +210,27 @@ void SensorDataUploadPlugin::subscribe() {
 void SensorDataUploadPlugin::handleEvent(Event& _event,
                                          const EventSubscription& _subscription) {
   try {
+
+    /* #7725
+     * EventName::DeviceSensorValue
+     * EventName::ZoneSensorValue with SensorType != 50 or 51
+     */
+    bool highPrio = true;
+    if (_event.getName() == EventName::DeviceSensorValue) {
+      highPrio = false;
+    }
+    if (_event.getName() == EventName::ZoneSensorValue) {
+      int sensorType = strToInt(_event.getPropertyByName("sensorType"));
+      switch (sensorType) {
+        case SensorIDRoomTemperatureControlVariable:
+        case SensorIDRoomTemperatureSetpoint:
+          break;
+        default:
+          highPrio = false;
+          break;
+      }
+    }
+
     if (_event.getName() == EventName::Running &&
         webservice_communication_authorized()) {
 
@@ -202,9 +241,9 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
-
     } else if (_event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
+               _event.getName() == EventName::ZoneSensorError ||
                _event.getName() == EventName::DeviceStatus ||
                _event.getName() == EventName::DeviceInvalidSensor ||
                _event.getName() == EventName::HeatingEnabled ||
@@ -212,7 +251,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState) {
       log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
-      m_log->append(_event.getptr());
+      m_log->append(_event.getptr(), highPrio);
 
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
@@ -223,14 +262,21 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
           return;
         }
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
-        m_log->append(_event.getptr());
+        m_log->append(_event.getptr(), highPrio);
       }
 
     } else if (_event.getName() == EventName::StateChange) {
       std::string sName = _event.getPropertyByName("statename");
       if (sName == "holiday" || sName == "presence") {
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
-        m_log->append(_event.getptr());
+        m_log->append(_event.getptr(), highPrio);
+      }
+
+    } else if (_event.getName() == EventName::AddonStateChange) {
+      std::string sName = _event.getPropertyByName("scriptID");
+      if (sName == "heating-controller") {
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr(), highPrio);
       }
 
     } else if (_event.getName() == EventName::UploadEventLog) {
@@ -255,6 +301,7 @@ void appendCommon(JSONObject &obj, const std::string& group, const std::string& 
 
 const static std::string evtGroup_Metering = "Metering";
 const static std::string evtGroup_Activity = "Activity";
+const static std::string evtGroup_ApartmentAndDevice = "ApartmentAndDevice";
 
 const static std::string evtCategory_DeviceSensorValue = "DeviceSensorValue";
 const static std::string evtCategory_ZoneSensorValue = "ZoneSensorValue";
@@ -265,6 +312,7 @@ const static std::string evtCategory_ZoneGroupState = "ZoneStateChange";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
+const static std::string evtCategory_ZoneSensorError = "ZoneSensorError";
 const static std::string evtCategory_HeatingControllerSetup = "HeatingControllerSetup";
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
@@ -333,6 +381,13 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("StateName", pState->getName());
       obj.addProperty("StateValue", pState->toString());
       obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+    } else if (event->getName() == EventName::AddonStateChange) {
+      boost::shared_ptr<const State> pState = event->getRaisedAtState();
+      std::string addonName = event->getPropertyByName("scriptID");
+      appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState);
+      obj.addProperty("StateName", addonName + "." + pState->getName());
+      obj.addProperty("StateValue", pState->toString());
+      obj.addProperty("Origin", event->getPropertyByName("scriptID"));
     } else if ((event->getName() == EventName::DeviceStatus) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
       appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport);
@@ -341,30 +396,38 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceSensorError);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_DeviceSensorError);
       obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       obj.addProperty("SensorType", strToInt(event->getPropertyByName("sensorType")));
       obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
+    } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
+      boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_ZoneSensorError);
+      int sensorType = strToInt(event->getPropertyByName("sensorType"));
+      obj.addProperty("SensorType", sensorType);
+      obj.addProperty("ZoneID",  pGroup->getZoneID());
+      obj.addProperty("GroupID", pGroup->getID());
+      obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
     } else if (event->getName() == EventName::HeatingControllerSetup) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerSetup);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerSetup);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerValue) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerValue);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerValue);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerState) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingControllerState);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingControllerState);
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
         obj.addProperty(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingEnabled) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_HeatingEnabled);
+      appendCommon(obj, evtGroup_ApartmentAndDevice, evtCategory_HeatingEnabled);
       obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       obj.addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
 
@@ -405,9 +468,12 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
   boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
+  HashMapStringString sensorUploadHeaders;
+  sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
+
   WebserviceConnection::getInstance()->request("public/dss/v1_0/DSSEventData/SaveEvent",
                                                parameters,
-                                               headers_t(),
+                                               boost::make_shared<HashMapStringString>(sensorUploadHeaders),
                                                postdata,
                                                mcb,
                                                true);

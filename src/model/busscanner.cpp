@@ -761,11 +761,12 @@ namespace dss {
         dsuid_t NullId;
         SetNullDsuid(NullId);
         ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
+        ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDTemperatureIndoors,
               &sensorValue, &sensorAge);
           age = now.addSeconds(-1 * sensorAge);
-          if (age > zValues.m_TemperatureValueTS) {
+          if (age > zSensors.m_TemperatureValueTS) {
             _zone->setTemperature(
                 SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
           } else {
