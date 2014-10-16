@@ -1861,14 +1861,14 @@ namespace dss {
     pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
     pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue - 100));
     if (config->ControllerMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("CtrlKp", intToString(config->Kp));
+      pEvent->setProperty("CtrlKp", doubleToString((double)config->Kp * 0.025));
       pEvent->setProperty("CtrlTs", intToString(config->Ts));
       pEvent->setProperty("CtrlTi", intToString(config->Ti));
       pEvent->setProperty("CtrlKd", intToString(config->Kd));
-      pEvent->setProperty("CtrlImin", intToString(config->Imin));
-      pEvent->setProperty("CtrlImax", intToString(config->Imax));
-      pEvent->setProperty("CtrlYmin", intToString(config->Ymin));
-      pEvent->setProperty("CtrlYmax", intToString(config->Ymax));
+      pEvent->setProperty("CtrlImin", doubleToString((double)config->Imin * 0.025));
+      pEvent->setProperty("CtrlImax", doubleToString((double)config->Imax * 0.025));
+      pEvent->setProperty("CtrlYmin", intToString(config->Ymin - 100));
+      pEvent->setProperty("CtrlYmax", intToString(config->Ymax - 100));
       pEvent->setProperty("CtrlAntiWindUp", (config->AntiWindUp > 0) ? "true" : "false");
       pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
