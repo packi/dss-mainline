@@ -643,6 +643,7 @@ namespace dss {
       _config.ledconIndex = (mode >> 4) & 7;
       _config.dimtimeIndex = 0; // no dim time index
       _config.flashmode = (mode & (1 << 8)) > 0; // effect 1
+      return;
     }
     throw std::runtime_error("Bus interface not available");
   } // getDeviceOutputChannelSceneConfig
