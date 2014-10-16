@@ -706,12 +706,25 @@ namespace dss {
 
     // check if our set contains devices that with the matching sensor type
     // and assign the first device that we find automatically: UC 8.1
-    for (size_t q = 0; q < unassigned_sensors->size(); q++) {
+    for (size_t q = 0; q < unassigned_sensors->size(); ++q) {
       Set devicesBySensor =
           devices.getBySensorType(unassigned_sensors->at(q));
       if (devicesBySensor.length() > 0) {
-        setZoneSensor(_zone, unassigned_sensors->at(q),
-                      devicesBySensor.get(0).getDevice());
+        // select an active sensor
+        bool assigned = false;
+        for (size_t i = 0; i < devicesBySensor.length(); ++i) {
+          if (devicesBySensor.get(i).getDevice()->isPresent()) {
+            setZoneSensor(_zone, unassigned_sensors->at(q),
+                          devicesBySensor.get(i).getDevice());
+            assigned = true;
+            break;
+          }
+        }
+        if (!assigned) {
+          // all sensor inactive. take first one
+          setZoneSensor(_zone, unassigned_sensors->at(q),
+                        devicesBySensor.get(0).getDevice());
+        }
       }
     }
   }

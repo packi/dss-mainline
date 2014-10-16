@@ -37,6 +37,7 @@
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
 #include "src/stringconverter.h"
+#include "src/model-features.h"
 #include "util.h"
 #include "jsonhelper.h"
 
@@ -432,7 +433,39 @@ namespace dss {
           }
         }
         return success(resultObj);
+      } else if(_request.getMethod() == "getModelFeatures") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> matrix(new JSONObject());
 
+        for (int colorID = ColorIDYellow; colorID <= ColorIDBlack; colorID++) {
+          std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > > f = ModelFeatures::getInstance()->getFeatures(colorID);
+          boost::shared_ptr<JSONObject> color(new JSONObject());
+
+          for (size_t i = 0; i < f.size(); i++) {
+            boost::shared_ptr<JSONObject> device(new JSONObject());
+
+            boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > model = f.at(i);
+
+            for (size_t devf = 0; devf < model->second->size(); devf++) {
+              int feature = model->second->at(devf);
+              device->addProperty(ModelFeatures::getInstance()->getFeatureName(feature), true);
+            }
+            color->addElement(model->first, device);
+          }
+          matrix->addElement(ModelFeatures::getInstance()->colorToString(colorID), color);
+        }
+        resultObj->addElement("modelFeatures", matrix);
+        
+        boost::shared_ptr<JSONObject> reference(new JSONObject());
+
+        boost::shared_ptr<std::vector<int> > all = ModelFeatures::getInstance()->getAvailableFeatures();
+        for (size_t a = 0; a < all->size(); a++) {
+          reference->addProperty(ModelFeatures::getInstance()->getFeatureName(all->at(a)), false);
+        }
+
+        resultObj->addElement("reference", reference);
+
+        return success(resultObj);
       } else {
         throw std::runtime_error("Unhandled function");
       }

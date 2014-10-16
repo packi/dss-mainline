@@ -35,7 +35,8 @@ namespace dss {
   class JSONObject;
 
   typedef struct {
-    std::string modelGuid;
+    std::string hardwareModelGuid;
+    std::string modelUID;
     std::string vendorGuid;
     std::string oemGuid;
     std::string configURL;
@@ -43,6 +44,7 @@ namespace dss {
     std::string hardwareInfo;     // property: model
     std::string hardwareVersion;
     std::string name;
+    boost::shared_ptr<std::vector<int> > modelFeatures;
   } VdsdSpec_t;
 
   typedef struct {

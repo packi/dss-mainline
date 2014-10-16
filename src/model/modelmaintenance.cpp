@@ -57,6 +57,7 @@
 #include "boost/filesystem.hpp"
 #include "util.h"
 #include "vdc-connection.h"
+#include "model-features.h"
 
 namespace dss {
 
@@ -1860,14 +1861,14 @@ namespace dss {
     pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
     pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue - 100));
     if (config->ControllerMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("CtrlKp", intToString(config->Kp));
+      pEvent->setProperty("CtrlKp", doubleToString((double)config->Kp * 0.025));
       pEvent->setProperty("CtrlTs", intToString(config->Ts));
       pEvent->setProperty("CtrlTi", intToString(config->Ti));
       pEvent->setProperty("CtrlKd", intToString(config->Kd));
-      pEvent->setProperty("CtrlImin", intToString(config->Imin));
-      pEvent->setProperty("CtrlImax", intToString(config->Imax));
-      pEvent->setProperty("CtrlYmin", intToString(config->Ymin));
-      pEvent->setProperty("CtrlYmax", intToString(config->Ymax));
+      pEvent->setProperty("CtrlImin", doubleToString((double)config->Imin * 0.025));
+      pEvent->setProperty("CtrlImax", doubleToString((double)config->Imax * 0.025));
+      pEvent->setProperty("CtrlYmin", intToString(config->Ymin - 100));
+      pEvent->setProperty("CtrlYmax", intToString(config->Ymax - 100));
       pEvent->setProperty("CtrlAntiWindUp", (config->AntiWindUp > 0) ? "true" : "false");
       pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
     } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
@@ -2134,13 +2135,22 @@ namespace dss {
   {
     try {
       boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
-      m_Device->setVdcModelGuid(props->modelGuid);
+      m_Device->setVdcHardwareModelGuid(props->hardwareModelGuid);
+      m_Device->setVdcModelUID(props->modelUID);
       m_Device->setVdcVendorGuid(props->vendorGuid);
       m_Device->setVdcOemGuid(props->oemGuid);
       m_Device->setVdcConfigURL(props->configURL);
       m_Device->setVdcHardwareGuid(props->hardwareGuid);
       m_Device->setVdcHardwareInfo(props->hardwareInfo);
       m_Device->setVdcHardwareVersion(props->hardwareVersion);
+
+      try {
+        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), props->modelUID, props->modelFeatures);
+      } catch (std::runtime_error& err) {
+        Logger::getInstance()->log("Could not set model features for device " +
+            dsuid2str(m_Device->getDSID()) + ", Message: " +
+            err.what(), lsWarning);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("VdcDataQuery: could not query properties from " +
           dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
