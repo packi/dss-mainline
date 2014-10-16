@@ -162,8 +162,10 @@ namespace dss {
     if(m_isVdcDevice && (m_pPropertyNode != NULL)) {
       PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
 
-      propNode->createProperty("ModelGuid")
-        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelGuid, false));
+      propNode->createProperty("HardwareModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareModelGuid, false));
+      propNode->createProperty("ModelUID")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelUID, false));
       propNode->createProperty("VendorGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       propNode->createProperty("OemGuid")
@@ -641,6 +643,7 @@ namespace dss {
       _config.ledconIndex = (mode >> 4) & 7;
       _config.dimtimeIndex = 0; // no dim time index
       _config.flashmode = (mode & (1 << 8)) > 0; // effect 1
+      return;
     }
     throw std::runtime_error("Bus interface not available");
   } // getDeviceOutputChannelSceneConfig

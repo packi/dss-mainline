@@ -68,7 +68,8 @@ namespace dss {
     result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
     result->addProperty("isVdcDevice", _device.getDevice()->isVdcDevice());
     if (_device.getDevice()->isVdcDevice()) {
-      result->addProperty("VdcModelGuid", _device.getDevice()->getVdcModelGuid());
+      result->addProperty("VdcHardwareModelGuid", _device.getDevice()->getVdcHardwareModelGuid());
+      result->addProperty("VdcModelUID", _device.getDevice()->getVdcModelUID());
       result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
       result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
       result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());

@@ -235,6 +235,7 @@ namespace dss {
   const int ColorIDViolet = 5;
   const int ColorIDRed = 6;
   const int ColorIDGreen = 7;
+  const int ColorIDBlack = 8;
 
   // Group ID"s
   const int GroupIDBroadcast = 0;

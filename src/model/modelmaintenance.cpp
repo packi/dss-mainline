@@ -57,6 +57,7 @@
 #include "boost/filesystem.hpp"
 #include "util.h"
 #include "vdc-connection.h"
+#include "model-features.h"
 
 namespace dss {
 
@@ -2134,13 +2135,22 @@ namespace dss {
   {
     try {
       boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
-      m_Device->setVdcModelGuid(props->modelGuid);
+      m_Device->setVdcHardwareModelGuid(props->hardwareModelGuid);
+      m_Device->setVdcModelUID(props->modelUID);
       m_Device->setVdcVendorGuid(props->vendorGuid);
       m_Device->setVdcOemGuid(props->oemGuid);
       m_Device->setVdcConfigURL(props->configURL);
       m_Device->setVdcHardwareGuid(props->hardwareGuid);
       m_Device->setVdcHardwareInfo(props->hardwareInfo);
       m_Device->setVdcHardwareVersion(props->hardwareVersion);
+
+      try {
+        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), props->modelUID, props->modelFeatures);
+      } catch (std::runtime_error& err) {
+        Logger::getInstance()->log("Could not set model features for device " +
+            dsuid2str(m_Device->getDSID()) + ", Message: " +
+            err.what(), lsWarning);
+      }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("VdcDataQuery: could not query properties from " +
           dsuid2str(m_Device->getDSID()) + ", Message: " + e.what(), lsWarning);
