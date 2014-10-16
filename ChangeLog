@@ -1,5 +1,34 @@
 dSS - digitalSTROM Server
 
+v1.26.0	16.10.2014
+	* fixed initialization of unplugged devices, #3789
+	* fixed read out of device config bits, #3801
+	* added device sensor sources and values, #3635
+	* improved session handling, #3901, #3921
+	* fixed trigger evaluation for subscriptions without force flag, #3838
+	* replaced system JS scripts with C++ code, #4146
+	* added dedicated websrvice connection, #4419
+	* fixed subscription filter, #4422
+	* added support for new device types, #4466
+	* support raw fromdata from JS scripts for posting
+	* removed all simulation related code, #1546
+	* removed SOAP support
+	* support device output channels, #3796, #3794
+	* fixed memory leaks
+	* added support for secure cookies
+	* removed jssocket support, #5136
+	* removed download handler
+	* added support for dSUID
+	* check sensor timestamps and provide validity information, #6471
+	* added support for heating/climate devices
+	* added unsigned int support to property system
+	* fixed blocking of rrd, #7086
+	* implemented sensor and event data uploader
+	* added support for virtual devices, #6838
+	* implemented sensor assignments to zones
+	* added scripting backend methods for heating
+	* added displayID for devices and vdCs
+
 v1.22.5 18.11.2013
 	* added some sanity checks for user input when requesting tokens
 
