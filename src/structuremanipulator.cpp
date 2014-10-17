@@ -712,7 +712,7 @@ namespace dss {
       if (devicesBySensor.length() > 0) {
         // select an active sensor
         bool assigned = false;
-        for (size_t i = 0; i < devicesBySensor.length(); ++i) {
+        for (int i = 0; i < devicesBySensor.length(); ++i) {
           if (devicesBySensor.get(i).getDevice()->isPresent()) {
             setZoneSensor(_zone, unassigned_sensors->at(q),
                           devicesBySensor.get(i).getDevice());
