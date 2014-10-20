@@ -1421,7 +1421,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkState(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "addonStateChange" && m_evtName != EventName::StateChange) {
+    if (m_evtName != EventName::AddonStateChange && m_evtName != EventName::StateChange) {
       return false;
     }
 
@@ -1435,7 +1435,7 @@ namespace dss {
     PropertyNodePtr triggerValue = _triggerProp->getPropertyByName("value");
     PropertyNodePtr triggerOldvalue = _triggerProp->getPropertyByName("oldvalue");
 
-    if (m_evtName == "addonStateChange") {
+    if (m_evtName == EventName::AddonStateChange) {
       std::string scriptID = m_properties.get("scriptID");
       PropertyNodePtr triggerScriptID = _triggerProp->getPropertyByName("addon-id");      
       if (triggerScriptID == NULL) {
@@ -1571,7 +1571,7 @@ namespace dss {
             return true;
           }
         }
-      } else if (m_evtName == "addonStateChange") {
+      } else if (m_evtName == EventName::AddonStateChange) {
         if (triggerValue == "addon-state-change") {
           if (checkState(triggerProp)) {
             return true;

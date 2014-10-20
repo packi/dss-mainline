@@ -252,7 +252,7 @@ namespace dss {
       boost::shared_ptr<Event> pEvent;
 
       if (m_type == StateType_Script) {
-        pEvent.reset(new Event("addonStateChange", shared_from_this()));
+        pEvent.reset(new Event(EventName::AddonStateChange, shared_from_this()));
         pEvent->setProperty("scriptID", m_serviceName);
       } else {
         pEvent.reset(new Event(EventName::StateChange, shared_from_this()));
