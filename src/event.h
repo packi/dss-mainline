@@ -109,6 +109,7 @@ namespace dss {
     boost::shared_ptr<DeviceReference> m_RaisedAtDevice;
 
     Properties m_Properties;
+    DateTime m_timestamp;
   private:
     void reset();
   public:
@@ -145,6 +146,8 @@ namespace dss {
     boost::shared_ptr<Event> getptr() {
       return shared_from_this();
     };
+
+    DateTime getTimestamp() const { return m_timestamp; }
   }; // Event
 
   //-------------------------------------------------- Events
