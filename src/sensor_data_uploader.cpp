@@ -198,6 +198,7 @@ void SensorDataUploadPlugin::subscribe() {
   events.push_back(EventName::HeatingControllerState);
   events.push_back(EventName::Running);
   events.push_back(EventName::UploadEventLog);
+  events.push_back(EventName::OldStateChange);
 
   foreach (std::string name, events) {
     subscription.reset(new EventSubscription(name, getName(),
@@ -265,7 +266,8 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
         m_log->append(_event.getptr(), highPrio);
       }
 
-    } else if (_event.getName() == EventName::StateChange) {
+    } else if (_event.getName() == EventName::StateChange ||
+               _event.getName() == EventName::OldStateChange) {
       std::string sName = _event.getPropertyByName("statename");
       if (sName == "holiday" || sName == "presence") {
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
@@ -388,6 +390,11 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       }
       obj.addProperty("StateName", pState->getName());
       obj.addProperty("StateValue", pState->toString());
+      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+    } else if (event->getName() == EventName::OldStateChange) {
+      appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState, event.get());
+      obj.addProperty("StateName", event->getPropertyByName("statename"));
+      obj.addProperty("StateValue", event->getPropertyByName("state"));
       obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::AddonStateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();

@@ -65,6 +65,7 @@ namespace dss {
     const std::string HeatingControllerSetup = "HeatingControllerSetup";
     const std::string HeatingControllerValue = "HeatingControllerValue";
     const std::string HeatingControllerState = "HeatingControllerState";
+    const std::string OldStateChange = "oldStateChange";
   }
 
   namespace EventProperty {

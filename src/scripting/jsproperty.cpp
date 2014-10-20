@@ -31,6 +31,9 @@
 #include "src/security/security.h"
 #include "src/stringconverter.h"
 #include "src/util.h"
+#include "src/event.h"
+#include "src/model/deviceinterface.h"
+#include "src/dss.h"
 
 namespace dss {
 
@@ -248,6 +251,19 @@ namespace dss {
       JS_ReportError(cx, "Property.setStatusProperty: cannot convert argument, not in UTF-8");
       return JS_FALSE;
     }
+
+    try {
+      // send event
+      boost::shared_ptr<Event> pEvent(new Event(EventName::OldStateChange));
+      pEvent->setProperty("scriptID", ctx->getWrapper()->getIdentifier());
+      pEvent->setProperty("statename", node->getDisplayName());
+      pEvent->setProperty("state", valueNode->getStringValue());
+      pEvent->setProperty("originDeviceID", intToString((int) coJSScripting));
+
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    } catch (...) {}
 
     // save state values
     if (node->getPropertyByName("persistent")) {
