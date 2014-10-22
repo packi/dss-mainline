@@ -199,6 +199,7 @@ void SensorDataUploadPlugin::subscribe() {
   events.push_back(EventName::Running);
   events.push_back(EventName::UploadEventLog);
   events.push_back(EventName::OldStateChange);
+  events.push_back(EventName::AddonToCloud);
 
   foreach (std::string name, events) {
     subscription.reset(new EventSubscription(name, getName(),
@@ -250,7 +251,8 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingEnabled ||
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
-               _event.getName() == EventName::HeatingControllerState) {
+               _event.getName() == EventName::HeatingControllerState ||
+               _event.getName() == EventName::AddonToCloud) {
       log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
       m_log->append(_event.getptr(), highPrio);
 
@@ -320,6 +322,7 @@ const static std::string evtCategory_HeatingControllerSetup = "HeatingController
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
+const static std::string evtCategory_AddonToCloud = "AddonToCloud";
 
 const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
@@ -452,6 +455,16 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
                    evtCategory_HeatingEnabled, event.get());
       obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       obj.addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
+
+    } else if (event->getName() == EventName::AddonToCloud) {
+      appendCommon(obj, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
+      obj.addProperty("EventName", event->getPropertyByName("EventName"));
+      const dss::HashMapStringString& props =  event->getProperties().getContainer();
+      boost::shared_ptr<JSONObject> parameterObj(new JSONObject);
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        parameterObj->addProperty(iParam->first, iParam->second);
+      }
+      obj.addElement("parameter", parameterObj);
 
     } else {
       Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
