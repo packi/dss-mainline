@@ -60,6 +60,7 @@ namespace dss {
     extern const std::string HeatingControllerValue;
     extern const std::string HeatingControllerState;
     extern const std::string OldStateChange;
+    extern const std::string AddonToCloud;
   }
 
   namespace EventProperty {
