@@ -1331,28 +1331,14 @@ namespace dss {
     if ((_areaScene < SceneOffA1) || (_areaScene == Scene1) || (_areaScene > SceneA41)) {
       throw DSSException("Device::configureAreaMembership: scene number does not indicate an area");
     }
-    DeviceSceneSpec_t sceneSpec;
-
     int areaOnScene = (_areaScene >= SceneA11) ? _areaScene : (_areaScene - SceneOffA1 + SceneA11);
-    getDeviceSceneMode(areaOnScene, sceneSpec);
-    sceneSpec.dontcare = !_addToArea;
-    setDeviceSceneMode(areaOnScene, sceneSpec);
-    if (_addToArea) {
-      setSceneValue(areaOnScene, 0xFFFF);
-    }
+    uint8_t outValue = 0;
 
-    int areaOffScene = areaOnScene - SceneA11 + SceneOffA1;
-    getDeviceSceneMode(areaOffScene, sceneSpec);
-    sceneSpec.dontcare = !_addToArea;
-    setDeviceSceneMode(areaOffScene, sceneSpec);
     if (_addToArea) {
-      setSceneValue(areaOffScene, 0);
+      outValue = 0xFF;
     }
-
-    int areaStopScene = areaOnScene - SceneA11 + SceneStopA1;
-    getDeviceSceneMode(areaStopScene, sceneSpec);
-    sceneSpec.dontcare = !_addToArea;
-    setDeviceSceneMode(areaStopScene, sceneSpec);
+    setDeviceValue(outValue);
+    saveScene(coSystem, areaOnScene, "");
   }
 
   void Device::setButtonInputMode(const uint8_t _value) {
