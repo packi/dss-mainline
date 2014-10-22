@@ -147,7 +147,6 @@ namespace dss {
     result->addElement("binaryInputs", binaryInputArr);
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
     result->addProperty("binaryInputCount", (int)binaryInputs.size());
-    result->addProperty("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
     for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       boost::shared_ptr<JSONObject> element(new JSONObject());
       element->addProperty("targetGroupType", (*it)->m_targetGroupType);
@@ -156,6 +155,15 @@ namespace dss {
       element->addProperty("inputId", (*it)->m_inputId);
       element->addProperty("state", _device.getDevice()->getBinaryInputState((*it)->m_inputIndex)->getState());
       binaryInputArr->addElement("", element);
+    }
+    result->addProperty("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
+
+    boost::shared_ptr<JSONArray<int> > sensorsArr(new JSONArray<int>());
+    result->addElement("sensors", sensorsArr);
+
+    const std::vector<boost::shared_ptr<DeviceSensor_t> > sensors = _device.getDevice()->getSensors();
+    for (size_t i = 0; i < sensors.size(); i++) {
+      sensorsArr->add(sensors.at(i)->m_sensorType);
     }
 
     // check if device has invalid sensor values
