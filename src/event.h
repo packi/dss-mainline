@@ -59,6 +59,8 @@ namespace dss {
     extern const std::string HeatingControllerSetup;
     extern const std::string HeatingControllerValue;
     extern const std::string HeatingControllerState;
+    extern const std::string OldStateChange;
+    extern const std::string AddonToCloud;
   }
 
   namespace EventProperty {
@@ -109,6 +111,7 @@ namespace dss {
     boost::shared_ptr<DeviceReference> m_RaisedAtDevice;
 
     Properties m_Properties;
+    DateTime m_timestamp;
   private:
     void reset();
   public:
@@ -145,6 +148,8 @@ namespace dss {
     boost::shared_ptr<Event> getptr() {
       return shared_from_this();
     };
+
+    DateTime getTimestamp() const { return m_timestamp; }
   }; // Event
 
   //-------------------------------------------------- Events
