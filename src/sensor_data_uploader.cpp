@@ -322,7 +322,7 @@ const static std::string evtCategory_HeatingControllerSetup = "HeatingController
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
-const static std::string evtCategory_AddonToCloud = "AddonToCloud";
+const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 
 const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
