@@ -107,7 +107,7 @@ namespace dss {
     bool requestMeteringSet = false;
 
     // set builder will handle dsid/dsuid compatibility
-    if (!deviceDSUIDString.empty()) {
+    if (deviceDSUIDString.empty()) {
       deviceDSUIDString = deviceDSIDString;
     }
 
