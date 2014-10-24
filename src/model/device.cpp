@@ -298,6 +298,11 @@ namespace dss {
         PropertyNodePtr sensorInputNode = m_pPropertyNode->createProperty("sensorInputs");
         PropertyNodePtr outputChannelNode = m_pPropertyNode->createProperty("outputChannels");
 
+        m_pPropertyNode->createProperty("isValveType")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isValveDevice));
+
+        publishValveTypeToPropertyTree();
+
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
 
@@ -356,6 +361,8 @@ namespace dss {
       calculateHWInfo();
     }
     updateIconPath();
+
+    publishValveTypeToPropertyTree();
   } // setFunctionID
 
   int Device::getProductID() const {
@@ -1805,6 +1812,75 @@ namespace dss {
     if ((m_OemProductInfoState == DEVICE_OEM_NONE) || (m_OemProductInfoState == DEVICE_OEM_VALID)) {
       dirty();
     }
+  }
+
+  std::string Device::getValveTypeAsString() const
+  {
+    return valveTypeToString(m_ValveType);
+  }
+
+  bool Device::setValveTypeAsString(const std::string& _value)
+  {
+    if (isValveDevice()) {
+      DeviceValveType_t type;
+      if (getValveTypeFromString(_value.c_str(), type)) {
+        setValveType(type);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  std::string Device::valveTypeToString(const DeviceValveType_t _type) {
+    switch (_type) {
+    case DEVICE_VALVE_UNKNOWN:
+      return "Unknown";
+    case DEVICE_VALVE_FLOOR:
+      return "Floor";
+    case DEVICE_VALVE_RADIATOR:
+      return "Radiator";
+    case DEVICE_VALVE_WALL:
+      return "Wall";
+    }
+    return "";
+  }
+
+  bool Device::getValveTypeFromString(const char* _string, DeviceValveType_t &deviceType) {
+    bool assigned = false;
+    if (strcmp(_string, "Floor") == 0) {
+      deviceType = DEVICE_VALVE_FLOOR;
+      assigned = true;
+    } else if (strcmp(_string, "Radiator") == 0) {
+      deviceType = DEVICE_VALVE_RADIATOR;
+      assigned = true;
+    } else if (strcmp(_string, "Wall") == 0) {
+      deviceType = DEVICE_VALVE_WALL;
+      assigned = true;
+    } else if (strcmp(_string, "Unknown") == 0) {
+      deviceType = DEVICE_VALVE_UNKNOWN;
+      assigned = true;
+    }
+    return assigned;
+  }
+
+  void Device::publishValveTypeToPropertyTree() {
+    if(isValveDevice() && (m_pPropertyNode != NULL)) {
+      PropertyNodePtr valveType = m_pPropertyNode->createProperty("ValveType");
+      valveType->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getValveTypeAsString));
+    }
+  }
+
+  bool Device::isValveDevice() const {
+    return (hasOutput() && (getDeviceClass() == DEVICE_CLASS_BL));
+  }
+
+  const DeviceValveType_t Device::getValveType () const {
+    return m_ValveType;
+  }
+
+  void Device::setValveType(DeviceValveType_t _type) {
+    m_ValveType = _type;
+    dirty();
   }
 
   void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {

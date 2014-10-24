@@ -595,6 +595,19 @@ namespace dss {
     void getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry);
     void setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry);
 
+    // valve configuration
+    bool isValveDevice() const;
+    const DeviceValveType_t getValveType() const;
+    void setValveType(DeviceValveType_t _type);
+
+    std::string getValveTypeAsString() const;
+    bool setValveTypeAsString(const std::string &_value);
+
+    static std::string valveTypeToString(const DeviceValveType_t _type);
+    static bool getValveTypeFromString(const char* _string, DeviceValveType_t &deviceType);
+
+    void publishValveTypeToPropertyTree();
+
     void setOemInfo(const unsigned long long _eanNumber,
         const uint16_t _serialNumber, const uint8_t _partNumber,
         const DeviceOEMInetState_t _iNetState,
