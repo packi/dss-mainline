@@ -1,5 +1,16 @@
 dSS - digitalSTROM Server
 
+v1.27.0	24.10.2014
+	* fixed event category name for sensor data upload
+	* changed method of adding and removen devices from areas, #2310
+	* added AddonToCloud event
+	* fixed json/metering/getValues, #7723
+	* render sensor types of a device in getStructure, #7726
+	* send event on state changes, #7860
+	* imestamp each event upon creation and upload this timestamp
+	* fixed compile warning
+	* fixed background for the SK device icon, #7732
+
 v1.26.0	16.10.2014
 	* fixed initialization of unplugged devices, #3789
 	* fixed read out of device config bits, #3801
