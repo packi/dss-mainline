@@ -88,6 +88,7 @@ namespace dss {
     m_OemProductIcon(),
     m_OemProductURL(),
     m_isVdcDevice(false),
+    m_ValveType(DEVICE_VALVE_UNKNOWN),
     m_IsConfigLocked(false),
     m_binaryInputCount(0),
     m_sensorInputCount(0),
@@ -2138,7 +2139,7 @@ namespace dss {
         return sensor;
       }
     }
-      
+
     throw ItemNotFoundException(std::string("Device::getSensor: no sensor with given type found"));
   }
 

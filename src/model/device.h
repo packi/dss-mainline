@@ -206,6 +206,13 @@ namespace dss {
     DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY = 3,
   } DeviceOEMInetState_t;
 
+  typedef enum {
+    DEVICE_VALVE_UNKNOWN = 0,
+    DEVICE_VALVE_FLOOR = 1,
+    DEVICE_VALVE_RADIATOR = 2,
+    DEVICE_VALVE_WALL = 3,
+  } DeviceValveType_t;
+
   /** Represents a dsID */
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
@@ -274,6 +281,8 @@ namespace dss {
     std::string m_VdcHardwareInfo;
     std::string m_VdcHardwareVersion;
     std::string m_VdcIconPath;
+
+    DeviceValveType_t m_ValveType;
 
     bool m_IsConfigLocked;
 
