@@ -1822,6 +1822,88 @@ namespace dss {
     return JS_TRUE;
   } // dev_get_property_node
 
+  JSBool dev_get_valve_type(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
+        jsrefcount ref = JS_SuspendRequest(cx);
+        try {
+          // make a local reference so the std::string does not go out of scope
+          if (pDev->isValveDevice()) {
+            std::string tmp = pDev->getValveTypeAsString();
+            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str())));
+            JS_ResumeRequest(cx, ref);
+            return JS_TRUE;
+          }
+        } catch(const BusApiError& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
+        } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "General failure: %s", ex.what());
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_get_valve_type
+
+  JSBool dev_set_valve_type(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
+        if (pDev->isValveDevice()) {
+          if(argc == 1) {
+            std::string valveType;
+            try {
+              valveType = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+            } catch (ScriptException& ex) {
+              JS_ReportError(cx, "Convert arguments: %s", ex.what());
+              return JS_FALSE;
+            }
+            jsrefcount ref = JS_SuspendRequest(cx);
+            try {
+              pDev->setValveTypeAsString(valveType);
+              JS_ResumeRequest(cx, ref);
+              JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+              return JS_TRUE;
+            } catch(const BusApiError& ex) {
+              JS_ResumeRequest(cx, ref);
+              JS_ReportError(cx, "Bus failure: %s", ex.what());
+            } catch (DSSException& ex) {
+              JS_ResumeRequest(cx, ref);
+              JS_ReportError(cx, "Failure: %s", ex.what());
+            } catch (std::exception& ex) {
+              JS_ResumeRequest(cx, ref);
+              JS_ReportError(cx, "General failure: %s", ex.what());
+            }
+          }
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_set_valve_type
+
   JSFunctionSpec device_interface_methods[] = {
     JS_FS("turnOn", dev_turn_on, 0, 0),
     JS_FS("turnOff", dev_turn_off, 0, 0),
@@ -1842,6 +1924,8 @@ namespace dss {
     JS_FS("getSensorValue", dev_get_sensor_value, 1, 0),
     JS_FS("getSensorType", dev_get_sensor_type, 1, 0),
     JS_FS("getPropertyNode", dev_get_property_node, 0, 0),
+    JS_FS("getValveType", dev_get_valve_type, 0, 0),
+    JS_FS("setValveType", dev_set_valve_type, 1, 0),
     JS_FS_END
   };
 
