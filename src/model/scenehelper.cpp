@@ -364,6 +364,14 @@ namespace dss {
     return ret;
   }
 
+  double SceneHelper::roundDigits(const double input, const int digits) {
+    double output = input;
+    output *= pow(10, digits);
+    output = round(output);
+    output /= pow(10, digits);
+    return output;
+  }
+
   double SceneHelper::sensorToFloat12(int _sensorType, int _sensorValue) {
     double convertedSensorValue;
     switch (_sensorType) {
@@ -374,6 +382,7 @@ namespace dss {
       break;
     case SensorIDElectricMeter:
       convertedSensorValue = (double) (_sensorValue * 0.01);
+      convertedSensorValue= roundDigits(convertedSensorValue, 2);
       break;
     case SensorIDOutputCurrentEx:
       convertedSensorValue = (double) (_sensorValue * 4);
@@ -382,18 +391,22 @@ namespace dss {
     case SensorIDTemperatureOutdoors:
     case SensorIDRoomTemperatureSetpoint:
       convertedSensorValue = (double) ((_sensorValue * 0.1 / 4) - 273.15 + 230.0);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
       convertedSensorValue = (double) (pow(10, ((double) _sensorValue) / 800));
+      convertedSensorValue= roundDigits(convertedSensorValue, 4);
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     case SensorIDWindSpeed:
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     case SensorIDRoomTemperatureControlVariable:
       convertedSensorValue = (double) (_sensorValue - 100);
