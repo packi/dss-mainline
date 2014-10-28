@@ -215,6 +215,12 @@ void SensorDataUploadPlugin::subscribe() {
 
 void SensorDataUploadPlugin::handleEvent(Event& _event,
                                          const EventSubscription& _subscription) {
+
+  if (!webservice_communication_authorized()) {
+    // no upload when webservice is disabled
+    return;
+  }
+
   try {
 
     /* #7725
@@ -237,8 +243,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       }
     }
 
-    if (_event.getName() == EventName::Running &&
-        webservice_communication_authorized()) {
+    if (_event.getName() == EventName::Running) {
       scheduleBatchUploader();
     } else if (_event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
