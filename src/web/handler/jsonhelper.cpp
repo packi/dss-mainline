@@ -77,6 +77,9 @@ namespace dss {
       result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
       result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
     }
+    if (_device.getDevice()->isValveDevice()) {
+      result->addProperty("ValveType", _device.getDevice()->getValveTypeAsString());
+    }
 
     if(_device.getDevice()->isPresent()) {
       dsid_t dsid;

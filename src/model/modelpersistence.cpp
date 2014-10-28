@@ -73,6 +73,7 @@ namespace dss {
     const char *oemProdIcon = NULL;
     const char *oemProdURL = NULL;
     const char *configLocked = NULL;
+    const char *valve = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -118,6 +119,8 @@ namespace dss {
         oemProdURL = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "configurationLocked") == 0) {
         configLocked = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "valveType") == 0) {
+        valve = _attrs[i + 1];
       }
     }
 
@@ -267,6 +270,10 @@ namespace dss {
       } catch(std::invalid_argument&) {}
     }
     m_tempDevice->setConfigLock(isConfigLocked);
+
+    if (valve != NULL) {
+      m_tempDevice->setValveTypeAsString(valve);
+    }
 
     m_tempDevice->setIsValid(true);
     m_tempDevice->setIsPresent(isPresent);
@@ -763,6 +770,11 @@ namespace dss {
       }
     }
     _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
+
+    if (_pDevice->isValveDevice()) {
+      _ofs << " valveType=\"" << _pDevice->getValveTypeAsString() <<"\"";
+    }
+
     _ofs << ">" << std::endl;
 
     if(!_pDevice->getName().empty()) {
