@@ -227,7 +227,7 @@ namespace dss {
       }
 
       tagName = escapeHTML(tagName);
-     
+
       pDevice->addTag(st.convert(tagName));
       return success();
     } else if(_request.getMethod() == "removeTag") {
@@ -1129,7 +1129,7 @@ namespace dss {
 
       for (size_t i = 0; i < channels->size(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
-        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
+        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));
         chanObj->addProperty("value",
                 convertFromOutputChannelValue(
                     channels->at(i).first,
@@ -1237,7 +1237,7 @@ namespace dss {
 
       for (size_t i = 0; i < channels->size(); i++) {
         boost::shared_ptr<JSONObject> chanObj(new JSONObject());
-        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));  
+        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));
         chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
         channelsObj->addElement("", chanObj);
       }
@@ -1439,6 +1439,39 @@ namespace dss {
       resultObj->addProperty("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
       resultObj->addProperty("ctrlNONC", config.ctrlNONC);
       return success(resultObj);
+
+    } else if (_request.getMethod() == "setValveType") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+      if (device->isValveDevice()) {
+        std::string valveType = _request.getParameter("valveType");
+        if (device->setValveTypeAsString(valveType)) {
+          return success();
+        } else {
+          return failure("valve type not valid");
+        }
+      }
+      return failure("device is not a valve type");
+
+    } else if (_request.getMethod() == "getValveType") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      if (device->isValveDevice()) {
+        std::string valveType = device->getValveTypeAsString();
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("valveType", valveType);
+        return success(resultObj);
+      }
+      return failure("device is not a valve type");
 
     } else {
       throw std::runtime_error("Unhandled function");

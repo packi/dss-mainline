@@ -163,16 +163,20 @@ namespace EventName {
   std::string UploadEventLog = "upload_event_log";
 }
 
+void SensorDataUploadPlugin::scheduleBatchUploader() {
+  log(std::string(__func__) + " start uploading", lsInfo);
+  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadEventLog));
+  pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+  int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
+  pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
+  DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+}
+
 void SensorDataUploadPlugin::propertyChanged(PropertyNodePtr _caller,
                                              PropertyNodePtr _changedNode) {
   // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
-    log(std::string(__func__) + " start uploading", lsInfo);
-    boost::shared_ptr<Event> pEvent(new Event(EventName::UploadEventLog));
-    pEvent->setProperty(EventProperty::ICalStartTime,
-                        DateTime().toRFC2445IcalDataTime());
-    pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=60");
-    DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    scheduleBatchUploader();
   } else {
     log(std::string(__func__) + " stop uploading", lsInfo);
     DSS::getInstance()->getEventRunner().removeEventByName(EventName::UploadEventLog);
@@ -211,6 +215,12 @@ void SensorDataUploadPlugin::subscribe() {
 
 void SensorDataUploadPlugin::handleEvent(Event& _event,
                                          const EventSubscription& _subscription) {
+
+  if (!webservice_communication_authorized()) {
+    // no upload when webservice is disabled
+    return;
+  }
+
   try {
 
     /* #7725
@@ -233,16 +243,8 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
       }
     }
 
-    if (_event.getName() == EventName::Running &&
-        webservice_communication_authorized()) {
-
-      log(std::string(__func__) + " install ical rules", lsInfo);
-      boost::shared_ptr<Event> pEvent(new Event(EventName::UploadEventLog));
-      pEvent->setProperty(EventProperty::ICalStartTime,
-                          DateTime().toRFC2445IcalDataTime());
-      int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
-      pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
-      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    if (_event.getName() == EventName::Running) {
+      scheduleBatchUploader();
     } else if (_event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
                _event.getName() == EventName::ZoneSensorError ||
