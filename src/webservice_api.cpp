@@ -52,6 +52,7 @@ WebserviceReply parse_reply(const char* buf) {
       // ignore, unkown keys
     }
   }
+  json_object_put(jobj);
 
   if (!return_code_seen) {
     throw ParseError("missing mandatory element: ReturnCode");
