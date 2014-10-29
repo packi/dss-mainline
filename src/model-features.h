@@ -63,7 +63,8 @@ enum {
   mf_heatinggroup,
   mf_heatingoutmode,
   mf_heatingprops,
-  mf_pwmvalue
+  mf_pwmvalue,
+  mf_valvetype
 };
 
 class ModelFeatures
