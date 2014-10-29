@@ -46,7 +46,7 @@ namespace dss {
     m_EnergyMeterValueWh(0),
     m_LastReportedEnergyMeterValue(0),
     m_ReceivedMeterValue(false),
-    m_HardwareVersion(0),
+    m_HardwareVersion(""),
     m_armSoftwareVersion(0),
     m_dspSoftwareVersion(0),
     m_ApiVersion(0),
@@ -109,8 +109,9 @@ namespace dss {
       m_pPropertyNode->createProperty("energyMeterAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
 
-      m_pPropertyNode->createProperty("hardwareVersion")
-        ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
+      m_pPropertyNode->createProperty("hardwareVersion")->setIntegerValue(0);
+      m_pPropertyNode->createProperty("hardwareVersion2")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareVersion, false));
       m_pPropertyNode->createProperty("armSoftwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_armSoftwareVersion, false));
       m_pPropertyNode->createProperty("dspSoftwareVersion")
