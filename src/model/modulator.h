@@ -147,7 +147,7 @@ namespace dss {
     void setDspSoftwareVersion(const int _value) { m_dspSoftwareVersion = _value; }
     int getApiVersion() const { return m_ApiVersion; }
     void setApiVersion(const int _value) { m_ApiVersion = _value; }
-    std::string getHardwareName() const { return m_HardwareName; }
+    std::string getHardwareName() const;
     void setHardwareName(const std::string& _value) { m_HardwareName = _value; }
 
     unsigned int getDatamodelHash() const { return m_DatamodelHash; }

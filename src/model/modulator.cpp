@@ -119,7 +119,7 @@ namespace dss {
       m_pPropertyNode->createProperty("apiVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")
-        ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string, false>(*this, &DSMeter::getHardwareName));
       m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
         ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
 
@@ -239,5 +239,20 @@ namespace dss {
   void DSMeter::setPropertyFlags(std::bitset<8> _flags) {
     m_dSMPropertyFlags = _flags;
     m_IgnoreActionsFromNewDevices = m_dSMPropertyFlags.test(4);
+  }
+
+  std::string DSMeter::getHardwareName() const {
+    if (!m_HardwareName.empty()) {
+      return m_HardwareName;
+    }
+
+    switch (getBusMemberType()) {
+    case BusMember_dSM11:
+      return "dSM11";
+    case BusMember_dSM12:
+      return "dSM12";
+    default:
+      return "";
+    }
   }
 } // namespace dss
