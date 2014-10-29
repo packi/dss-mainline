@@ -112,6 +112,8 @@ namespace dss {
       m_pPropertyNode->createProperty("hardwareVersion")->setIntegerValue(0);
       m_pPropertyNode->createProperty("hardwareVersion2")
         ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareVersion, false));
+      m_pPropertyNode->createProperty("softwareVersion")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string, false>(*this, &DSMeter::getSoftwareVersion));
       m_pPropertyNode->createProperty("armSoftwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_armSoftwareVersion, false));
       m_pPropertyNode->createProperty("dspSoftwareVersion")
@@ -254,5 +256,16 @@ namespace dss {
     default:
       return "";
     }
+  }
+
+  std::string DSMeter::getSoftwareVersion() const {
+    if (!m_softwareVersion.empty()) {
+      return m_softwareVersion;
+    }
+
+    return intToString((m_armSoftwareVersion >> 24) & 0xFF) + "." +
+           intToString((m_armSoftwareVersion >> 16) & 0xFF) + "." +
+           intToString((m_armSoftwareVersion >> 8) & 0xFF) + "." +
+           intToString(m_armSoftwareVersion & 0xFF);
   }
 } // namespace dss

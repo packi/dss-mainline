@@ -84,6 +84,7 @@ namespace dss {
     bool m_IgnoreActionsFromNewDevices;
     uint8_t m_ApartmentState;
     std::string m_VdcConfigURL;
+    std::string m_softwareVersion;
   private:
     void publishToPropertyTree();
   public:
@@ -138,6 +139,8 @@ namespace dss {
     /** Returns timestamp of the last energy measurement */
     const DateTime& getCachedEnergyMeterTimeStamp() const;
 
+    void setSoftwareVersion(const std::string _version) { m_softwareVersion = _version; }
+    std::string getSoftwareVersion() const;
     std::string getHardwareVersion() const { return m_HardwareVersion; }
     void setHardwareVersion(const int _value) { m_HardwareVersion = intToString((_value >> 24) & 0xFF) + "." + intToString((_value >> 16) & 0xFF) + "." + intToString((_value >> 8) & 0xFF) + "." + intToString(_value & 0xFF); }
     void setHardwareVersion(const std::string _value) { m_HardwareVersion = _value; }
