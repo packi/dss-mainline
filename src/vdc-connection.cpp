@@ -203,6 +203,12 @@ namespace dss {
 
     vdcapi::PropertyElement *query = getprop->add_query();
     query->set_name("capabilities");
+    query = getprop->add_query();
+    query->set_name("modelVersion");
+    query = getprop->add_query();
+    query->set_name("model");
+    query = getprop->add_query();
+    query->set_name("hardwareVersion");
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -250,9 +256,22 @@ namespace dss {
         continue;
       }
 
+      StringConverter st("UTF-8", "UTF-8");
       vdcapi::PropertyValue val = el.value();
       if (el.name() == "metering" && val.has_v_bool()) {
         ret->hasMetering = val.v_bool();
+      } else if (el.name() == "modelVersion" && val.has_v_string()) {
+        try {
+          ret->modelVersion = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "model" && val.has_v_string()) {
+        try {
+          ret->model = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "hardwareVersion" && val.has_v_string()) {
+        try {
+          ret->hardwareVersion = st.convert(val.v_string());
+        } catch (DSSException& e) {}
       }
     }
 
