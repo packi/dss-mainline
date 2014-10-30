@@ -146,6 +146,9 @@ namespace dss {
               props = VdcHelper::getCapabilities(_dsMeter->getDSID());
               if (props) {
                 _dsMeter->setCapability_HasMetering(props->hasMetering);
+                _dsMeter->setHardwareVersion(props->hardwareVersion);
+                _dsMeter->setHardwareName(props->model);
+                _dsMeter->setSoftwareVersion(props->modelVersion);
               }
             } catch(std::runtime_error& e) {
             }
