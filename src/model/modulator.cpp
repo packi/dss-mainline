@@ -46,7 +46,7 @@ namespace dss {
     m_EnergyMeterValueWh(0),
     m_LastReportedEnergyMeterValue(0),
     m_ReceivedMeterValue(false),
-    m_HardwareVersion(0),
+    m_HardwareVersion(""),
     m_armSoftwareVersion(0),
     m_dspSoftwareVersion(0),
     m_ApiVersion(0),
@@ -109,8 +109,11 @@ namespace dss {
       m_pPropertyNode->createProperty("energyMeterAge")
         ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
 
-      m_pPropertyNode->createProperty("hardwareVersion")
-        ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
+      m_pPropertyNode->createProperty("hardwareVersion")->setIntegerValue(0);
+      m_pPropertyNode->createProperty("hardwareVersion2")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareVersion, false));
+      m_pPropertyNode->createProperty("softwareVersion")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string, false>(*this, &DSMeter::getSoftwareVersion));
       m_pPropertyNode->createProperty("armSoftwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_armSoftwareVersion, false));
       m_pPropertyNode->createProperty("dspSoftwareVersion")
@@ -118,7 +121,7 @@ namespace dss {
       m_pPropertyNode->createProperty("apiVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")
-        ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string, false>(*this, &DSMeter::getHardwareName));
       m_pPropertyNode->createProperty("ignoreActionsFromNewDevices")
         ->linkToProxy(PropertyProxyReference<bool>(m_IgnoreActionsFromNewDevices, false));
 
@@ -238,5 +241,31 @@ namespace dss {
   void DSMeter::setPropertyFlags(std::bitset<8> _flags) {
     m_dSMPropertyFlags = _flags;
     m_IgnoreActionsFromNewDevices = m_dSMPropertyFlags.test(4);
+  }
+
+  std::string DSMeter::getHardwareName() const {
+    if (!m_HardwareName.empty()) {
+      return m_HardwareName;
+    }
+
+    switch (getBusMemberType()) {
+    case BusMember_dSM11:
+      return "dSM11";
+    case BusMember_dSM12:
+      return "dSM12";
+    default:
+      return "";
+    }
+  }
+
+  std::string DSMeter::getSoftwareVersion() const {
+    if (!m_softwareVersion.empty()) {
+      return m_softwareVersion;
+    }
+
+    return intToString((m_armSoftwareVersion >> 24) & 0xFF) + "." +
+           intToString((m_armSoftwareVersion >> 16) & 0xFF) + "." +
+           intToString((m_armSoftwareVersion >> 8) & 0xFF) + "." +
+           intToString(m_armSoftwareVersion & 0xFF);
   }
 } // namespace dss

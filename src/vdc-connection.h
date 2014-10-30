@@ -51,6 +51,9 @@ namespace dss {
     bool hasDevices;
     bool hasMetering;
     bool hasTemperatureControl;
+    std::string model;
+    std::string modelVersion;
+    std::string hardwareVersion;
   } VdcSpec_t;
 
   struct VdcHelper

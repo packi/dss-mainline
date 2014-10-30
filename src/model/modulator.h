@@ -67,7 +67,7 @@ namespace dss {
     unsigned long long m_LastReportedEnergyMeterValue;
     bool m_ReceivedMeterValue;
     DateTime m_EnergyMeterValueTimeStamp;
-    int m_HardwareVersion;
+    std::string m_HardwareVersion;
     int m_armSoftwareVersion;
     int m_dspSoftwareVersion;
     int m_ApiVersion;
@@ -84,6 +84,7 @@ namespace dss {
     bool m_IgnoreActionsFromNewDevices;
     uint8_t m_ApartmentState;
     std::string m_VdcConfigURL;
+    std::string m_softwareVersion;
   private:
     void publishToPropertyTree();
   public:
@@ -138,15 +139,18 @@ namespace dss {
     /** Returns timestamp of the last energy measurement */
     const DateTime& getCachedEnergyMeterTimeStamp() const;
 
-    int getHardwareVersion() const { return m_HardwareVersion; }
-    void setHardwareVersion(const int _value) { m_HardwareVersion = _value; }
+    void setSoftwareVersion(const std::string _version) { m_softwareVersion = _version; }
+    std::string getSoftwareVersion() const;
+    std::string getHardwareVersion() const { return m_HardwareVersion; }
+    void setHardwareVersion(const int _value) { m_HardwareVersion = intToString((_value >> 24) & 0xFF) + "." + intToString((_value >> 16) & 0xFF) + "." + intToString((_value >> 8) & 0xFF) + "." + intToString(_value & 0xFF); }
+    void setHardwareVersion(const std::string _value) { m_HardwareVersion = _value; }
     int getArmSoftwareVersion() const { return m_armSoftwareVersion; }
     void setArmSoftwareVersion(const int _value) { m_armSoftwareVersion = _value; }
     int getDspSoftwareVersion() const { return m_dspSoftwareVersion; }
     void setDspSoftwareVersion(const int _value) { m_dspSoftwareVersion = _value; }
     int getApiVersion() const { return m_ApiVersion; }
     void setApiVersion(const int _value) { m_ApiVersion = _value; }
-    std::string getHardwareName() const { return m_HardwareName; }
+    std::string getHardwareName() const;
     void setHardwareName(const std::string& _value) { m_HardwareName = _value; }
 
     unsigned int getDatamodelHash() const { return m_DatamodelHash; }
