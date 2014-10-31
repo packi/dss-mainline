@@ -36,6 +36,8 @@ namespace dss {
     __DECL_LOG_CHANNEL__
     virtual void propertyChanged(PropertyNodePtr _caller,
                                  PropertyNodePtr _changedNode);
+    void scheduleBatchUploader();
+
   public:
     SensorDataUploadPlugin(EventInterpreter* _pInterpreter);
     virtual ~SensorDataUploadPlugin();

@@ -88,7 +88,8 @@ const int MF_AVAILABLE[] =
   mf_heatinggroup,
   mf_heatingoutmode,
   mf_heatingprops,
-  mf_pwmvalue
+  mf_pwmvalue,
+  mf_valvetype
 };
 
 // model features
@@ -366,7 +367,8 @@ const int MF_BL_KM200[] =
   mf_heatinggroup,
   mf_heatingoutmode,
   mf_heatingprops,
-  mf_pwmvalue
+  mf_pwmvalue,
+  mf_valvetype
 };
 
 const int MF_BL_KL2[] =
@@ -749,6 +751,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_heatingprops;
   } else if (_name == "pwmvalue") {
     return mf_pwmvalue;
+  } else if (_name == "valvetype") {
+    return mf_valvetype;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -816,6 +820,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "heatingprops";
     case mf_pwmvalue:
       return "pwmvalue";
+    case mf_valvetype:
+      return "valvetype";
     default:
       break;
   }
