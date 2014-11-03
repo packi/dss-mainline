@@ -269,8 +269,7 @@ const int MF_GE_UMV200[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outputchannels
+  mf_pushbadvanced
 };
 
 const int MF_GN_KM2[] =
