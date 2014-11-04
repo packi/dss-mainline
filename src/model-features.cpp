@@ -89,7 +89,8 @@ const int MF_AVAILABLE[] =
   mf_heatingoutmode,
   mf_heatingprops,
   mf_pwmvalue,
-  mf_valvetype
+  mf_valvetype,
+  mf_extradimmer
 };
 
 // model features
@@ -270,7 +271,7 @@ const int MF_GE_UMV200[] =
   mf_pushbdevice,
   mf_pushbarea,
   mf_pushbadvanced,
-  mf_outputchannels
+  mf_extradimmer
 };
 
 const int MF_GN_KM2[] =
@@ -753,6 +754,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_pwmvalue;
   } else if (_name == "valvetype") {
     return mf_valvetype;
+  } else if (_name == "extradimmer") {
+    return mf_extradimmer;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -822,6 +825,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "pwmvalue";
     case mf_valvetype:
       return "valvetype";
+    case mf_extradimmer:
+      return "extradimmer";
     default:
       break;
   }
