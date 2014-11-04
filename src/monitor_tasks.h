@@ -53,6 +53,20 @@ private:
   void syncZone(int _zoneID);
 };
 
+class HeatingValveProtectionTask : public Task {
+public:
+  HeatingValveProtectionTask(Apartment* _apartment, boost::shared_ptr<Event> _event) :
+    m_Apartment(_apartment),
+    m_event(_event)
+    {};
+  virtual ~HeatingValveProtectionTask() {};
+  virtual void run();
+private:
+  Apartment *m_Apartment;
+  boost::shared_ptr<Event> m_event;
+  static int m_zoneIndex;
+};
+
 }// namespace
 
 #endif//__DSS_MONITOR_TASKS_H__

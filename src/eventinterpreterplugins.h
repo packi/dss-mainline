@@ -180,6 +180,16 @@ namespace dss {
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+  class EventInterpreterHeatingValveProtectionPlugin : public EventInterpreterPlugin {
+    private:
+      __DECL_LOG_CHANNEL__
+    public:
+      EventInterpreterHeatingValveProtectionPlugin(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterHeatingValveProtectionPlugin() {};
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

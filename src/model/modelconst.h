@@ -227,6 +227,8 @@ namespace dss {
   const int HeatingOperationModeIDNotUsed = 3;
   const int HeatingOperationModeIDNight = 4;
 
+  const int HeatingOperationModeIDValveProtection = 31;
+
   // Color ID"s
   const int ColorIDYellow = 1;
   const int ColorIDGray = 2;

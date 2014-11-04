@@ -1166,4 +1166,34 @@ namespace dss {
     }
   }
 
+  EventInterpreterHeatingValveProtectionPlugin::EventInterpreterHeatingValveProtectionPlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterHeatingValveProtectionPlugin", _pInterpreter) {}
+
+  __DEFINE_LOG_CHANNEL__(EventInterpreterHeatingValveProtectionPlugin, lsInfo);
+
+  void EventInterpreterHeatingValveProtectionPlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+    subscription.reset(new EventSubscription("model_ready",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+    subscription.reset(new EventSubscription(EventName::HeatingValveProtection,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterHeatingValveProtectionPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<HeatingValveProtectionTask> task(
+          new HeatingValveProtectionTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
+      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
+      pTP->addEvent(task);
+    }
+  }
+
 } // namespace dss
