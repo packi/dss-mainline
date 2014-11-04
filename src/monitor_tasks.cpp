@@ -286,4 +286,56 @@ void HeatingMonitorTask::run() {
   }
 }
 
+int HeatingValveProtectionTask::m_zoneIndex = 0;
+
+/**
+ * Every Thursday around 15:00 send a HeatingOperationModeIDValveProtection scene call
+ * to all rooms that contain devices in the temperature control group. The calls into
+ * the zones are delayed by 15 minutes each.
+ */
+void HeatingValveProtectionTask::run() {
+
+  if (m_event->getName() == "model_ready") {
+    boost::shared_ptr<Event> pEvent(new Event(EventName::HeatingValveProtection));
+    // randomize the valve protection over two hours
+    int randomizeStartMinutes = rand() % 120;
+    DateTime start = DateTime::parseRFC2445("19700101T140000");
+    start = start.addMinute(randomizeStartMinutes);
+    pEvent->setProperty(EventProperty::ICalStartTime, start.toRFC2445IcalDataTime());
+    pEvent->setProperty(EventProperty::ICalRRule, "FREQ=WEEKLY;BYDAY=TH");
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+    return;
+  }
+
+  if (m_event->getName() == EventName::HeatingValveProtection) {
+    try {
+      std::vector<boost::shared_ptr<Zone> > zones = m_Apartment->getZones();
+      for ( ; m_zoneIndex < zones.size(); m_zoneIndex++) {
+        if (zones[m_zoneIndex]->getID() == 0) {
+          continue;
+        }
+        boost::shared_ptr<Group> tempControlGroup = zones[m_zoneIndex]->getGroup(GroupIDControlTemperature);
+        Set devices = tempControlGroup->getDevices();
+        if (devices.isEmpty()) {
+          continue;
+        }
+        tempControlGroup->callScene(coSystem, SAC_MANUAL, HeatingOperationModeIDValveProtection, "", false);
+        boost::shared_ptr<Event> pEvent(new Event(EventName::HeatingValveProtection));
+        pEvent->setProperty("time", "+900");
+        if (DSS::hasInstance()) {
+          DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        }
+        m_zoneIndex++;
+        return;
+      }
+      m_zoneIndex = 0;
+
+    } catch (...) {
+      Logger::getInstance()->log("HeatingValveProtectionTask: error executing valve protection", lsWarning);
+    }
+  }
+}
+
 }// namespace
