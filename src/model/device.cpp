@@ -2401,4 +2401,22 @@ namespace dss {
   int8_t DeviceBank3_BL::getPwmOffset() {
     return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
   }
+
+  // TODO: extend for all devices, for now only handle GE-UMV200
+  bool Device::isFirstdSUID() const
+  {
+    if ((getDeviceType() == DEVICE_TYPE_UMV) && (getDeviceNumber() == 200) &&
+        (getDeviceClass() == DEVICE_CLASS_GE)) {
+      uint32_t serial = 0;
+      if (dsuid_get_serial_number(&m_DSID, &serial) == DSUID_RC_OK) {
+        if ((serial % 4) == 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
 } // namespace dss
