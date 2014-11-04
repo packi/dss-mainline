@@ -178,23 +178,29 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     SetNullDsuid(sourceDSID);
     switch (hConfig.m_HeatingControlMode) {
       case HeatingControlModeIDPID:
+        if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
+          pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
+          usleep(1000 * 1000);
+          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
+              hStatus.m_NominalValue, "");
+          usleep(1000 * 1000);
+        }
         pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDTemperatureIndoors,
             hSensors.m_TemperatureValue, "");
         usleep(1000 * 1000);
-        pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
-            hStatus.m_NominalValue, "");
-        usleep(1000 * 1000);
-        pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
-        usleep(1000 * 1000);
         break;
       case HeatingControlModeIDFixed:
-        pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
-        usleep(1000 * 1000);
+        if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
+          pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
+          usleep(1000 * 1000);
+        }
         break;
       case HeatingControlModeIDManual:
-        pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureControlVariable,
-            hStatus.m_ControlValue, "");
-        usleep(1000 * 1000);
+        if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
+          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureControlVariable,
+              hStatus.m_ControlValue, "");
+          usleep(1000 * 1000);
+        }
         break;
       case HeatingControlModeIDZoneFollower:
       case HeatingControlModeIDOff:

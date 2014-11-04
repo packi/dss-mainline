@@ -28,6 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "modelconst.h"
 #include "modeltypes.h"
 #include "devicecontainer.h"
 #include "nonaddressablemodelitem.h"
@@ -63,7 +64,7 @@ namespace dss {
 
   typedef struct ZoneHeatingStatus {
     ZoneHeatingStatus() :
-      m_OperationMode(0),
+      m_OperationMode(HeatingOperationModeInvalid),
       m_NominalValue(0),
       m_NominalValueTS(0),
       m_ControlValue(0),
