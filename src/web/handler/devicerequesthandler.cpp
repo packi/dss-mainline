@@ -1472,7 +1472,34 @@ namespace dss {
         return success(resultObj);
       }
       return failure("device is not a valve type");
+    } else if (_request.getMethod() == "getUMVRelayValue") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
 
+      std::string valveType = device->getValveTypeAsString();
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("relayValue", device->getDeviceUMVRelayValue());
+      return success(resultObj);
+    } else if (_request.getMethod() == "setUMVRelayValue") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      std::string value = _request.getParameter("value");
+      int relayValue = strToIntDef(value, -1);
+      if ((relayValue < 0) || (relayValue > 3)) { // 3/FOLLOW_L is max value
+        return failure("invalid relay value given");
+      }
+
+      device->setDeviceUMVRelayValue(strToInt(value));
+      return success();
     } else {
       throw std::runtime_error("Unhandled function");
     }

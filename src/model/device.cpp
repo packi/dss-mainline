@@ -2321,6 +2321,23 @@ namespace dss {
     return displayID;
   }
 
+  uint8_t Device::getDeviceUMVRelayValue()
+  {
+    if ((getDeviceType() != DEVICE_TYPE_UMV) || (getDeviceNumber() != 200)) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+    return getDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config);
+  }
+
+  void Device::setDeviceUMVRelayValue(uint8_t _value)
+  {
+    if ((getDeviceType() != DEVICE_TYPE_UMV) || (getDeviceNumber() != 200)) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    setDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config, _value);
+  }
+
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
     : m_device(device) {
       if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {
