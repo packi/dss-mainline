@@ -208,7 +208,7 @@ namespace dss {
         if (m_ZoneID > 0) {
           m_pPropertyNode->createProperty("heating/");
           m_pPropertyNode->createProperty("heating/OperationMode")
-              ->linkToProxy(PropertyProxyReference<int>(m_HeatingStatus.m_OperationMode));
+            ->linkToProxy(PropertyProxyMemberFunction<Zone, int>(*this, &Zone::getHeatingOperationMode, &Zone::setHeatingOperationMode));
           m_pPropertyNode->createProperty("heating/ControlMode")
               ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlMode));
           m_pPropertyNode->createProperty("heating/ControlState")
