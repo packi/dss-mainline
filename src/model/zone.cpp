@@ -31,6 +31,7 @@
 #include "src/foreach.h"
 #include "src/logger.h"
 #include "src/model/modelconst.h"
+#include "src/model/modelmaintenance.h"
 #include "src/propertysystem.h"
 #include "src/model/set.h"
 #include "src/model/device.h"
@@ -254,6 +255,7 @@ namespace dss {
 
   void Zone::setHeatingOperationMode(int _operationMode) {
     m_HeatingStatus.m_OperationMode = _operationMode;
+    dirty();
   }
 
   int Zone::getHeatingOperationMode() const {
@@ -456,6 +458,14 @@ namespace dss {
       }
     }
     return boost::shared_ptr<Device> ();
+  }
+
+  void Zone::dirty() {
+    if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+      m_pApartment->getModelMaintenance()->addModelEvent(
+          new ModelEvent(ModelEvent::etModelDirty)
+      );
+    }
   }
 
 } // namespace dss

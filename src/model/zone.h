@@ -210,6 +210,7 @@ namespace dss {
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
     bool isAllowedSensorType(int _sensorType);
+    void dirty();
   }; // Zone
 
 
