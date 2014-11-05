@@ -65,7 +65,8 @@ enum {
   mf_heatingprops,
   mf_pwmvalue,
   mf_valvetype,
-  mf_extradimmer
+  mf_extradimmer,
+  mf_umvrelay
 };
 
 class ModelFeatures
