@@ -186,6 +186,7 @@ namespace dss {
     void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
     void setHeatingControlState(int _ctrlState);
     void setHeatingOperationMode(int _operationMode);
+    int getHeatingOperationMode() const;
     void setTemperature(double _value, DateTime& _ts);
     void setNominalValue(double _value, DateTime& _ts);
     void setControlValue(double _value, DateTime& _ts);

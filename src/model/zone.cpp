@@ -256,6 +256,10 @@ namespace dss {
     m_HeatingStatus.m_OperationMode = _operationMode;
   }
 
+  int Zone::getHeatingOperationMode() const {
+    return m_HeatingStatus.m_OperationMode;
+  }
+
   void Zone::setTemperature(double _value, DateTime& _ts) {
     m_SensorStatus.m_TemperatureValue = _value;
     m_SensorStatus.m_TemperatureValueTS = _ts;

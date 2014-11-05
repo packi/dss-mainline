@@ -547,6 +547,8 @@ namespace dss {
           m_state = ps_group;
         } else if ((m_state == ps_zone) && (strcmp(_name, "sensors") == 0)) {
           m_state = ps_sensor;
+        } else if ((m_state == ps_zone) && (strcmp(_name, "heatingOperation") == 0)) {
+          m_expectString = true;
         } else if (m_state == ps_meter) {
           m_expectString = true;
         } else if ((m_state == ps_device) &&
@@ -644,8 +646,12 @@ namespace dss {
           if (!m_chardata.empty()) {
             if ((m_state == ps_device) && (m_tempDevice != NULL) && isName) {
               m_tempDevice->setName(m_chardata);
-            } else if ((m_state == ps_zone) && (m_tempZone != NULL) && isName) {
-              m_tempZone->setName(m_chardata);
+            } else if ((m_state == ps_zone) && (m_tempZone != NULL)) {
+              if (isName) {
+                m_tempZone->setName(m_chardata);
+              } else if (strcmp(_name ,"heatingOperation") == 0) {
+                m_tempZone->setHeatingOperationMode(strToInt(m_chardata));
+              }
             } else if ((m_state == ps_meter) && (m_tempMeter != NULL)) {
               if (isName) {
                 m_tempMeter->setName(m_chardata);
@@ -859,6 +865,9 @@ namespace dss {
         _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
       }
     }
+
+    // Zone heating configuration
+    _ofs << doIndent(_indent + 1) << "<heatingOperation>" << _pZone->getHeatingOperationMode() << "</heatingOperation>" << std::endl;
 
     _ofs << doIndent(_indent) << "</zone>" << std::endl;
   } // zoneToXML
