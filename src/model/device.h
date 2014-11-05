@@ -692,6 +692,8 @@ namespace dss {
     const int getOutputChannelIndex(int _channelId) const;
     const int getOutputChannel(int _index) const;
 
+    uint8_t getDeviceUMVRelayValue();
+    void setDeviceUMVRelayValue(uint8_t _value);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
