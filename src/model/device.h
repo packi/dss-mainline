@@ -356,6 +356,7 @@ namespace dss {
     DeviceClasses_t getDeviceClass() const;
     const DeviceFeatures_t getFeatures() const;
     std::string getAKMInputProperty() const;
+    bool isFirstdSUID() const;
 
     /** Configure scene configuration */
     void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
@@ -691,6 +692,8 @@ namespace dss {
     const int getOutputChannelIndex(int _channelId) const;
     const int getOutputChannel(int _index) const;
 
+    uint8_t getDeviceUMVRelayValue();
+    void setDeviceUMVRelayValue(uint8_t _value);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

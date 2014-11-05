@@ -452,6 +452,9 @@ namespace dss {
         &result.Version, &result.ZoneID, &result.ActiveState, &locked, &result.OutputMode,
         &result.LTMode, groups, name, &result.DSID);
     DSBusInterface::checkResultCode(ret);
+    if (_id != result.ShortAddress) {
+      throw BusApiError("DeviceInfo returned answer from a different device (" + intToString(_id) + " != " + intToString(result.ShortAddress) + ")");
+    }
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);
     result.Name = std::string(reinterpret_cast<char*>(name));
