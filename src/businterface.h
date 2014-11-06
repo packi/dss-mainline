@@ -31,6 +31,8 @@
 #include <vector>
 #include <bitset>
 #include <boost/shared_ptr.hpp>
+#include <limits.h>
+
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
 
@@ -445,8 +447,10 @@ namespace dss {
 
   class BusApiError : public DSSException {
   public:
-    BusApiError(const std::string& _what)
-    : DSSException(_what) {}
+    BusApiError(const std::string& _what, int _error=INT_MIN)
+    : DSSException(_what)
+    , error(_error) {}
+    int error;
   }; // BusApiError
 
 }
