@@ -1819,9 +1819,9 @@ namespace dss {
     return valveTypeToString(m_ValveType);
   }
 
-  bool Device::setValveTypeAsString(const std::string& _value)
+  bool Device::setValveTypeAsString(const std::string& _value, bool _ignoreValveCheck)
   {
-    if (isValveDevice()) {
+    if (_ignoreValveCheck || isValveDevice()) {
       DeviceValveType_t type;
       if (getValveTypeFromString(_value.c_str(), type)) {
         setValveType(type);
