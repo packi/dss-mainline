@@ -1819,9 +1819,9 @@ namespace dss {
     return valveTypeToString(m_ValveType);
   }
 
-  bool Device::setValveTypeAsString(const std::string& _value)
+  bool Device::setValveTypeAsString(const std::string& _value, bool _ignoreValveCheck)
   {
-    if (isValveDevice()) {
+    if (_ignoreValveCheck || isValveDevice()) {
       DeviceValveType_t type;
       if (getValveTypeFromString(_value.c_str(), type)) {
         setValveType(type);
@@ -2321,6 +2321,23 @@ namespace dss {
     return displayID;
   }
 
+  uint8_t Device::getDeviceUMVRelayValue()
+  {
+    if ((getDeviceType() != DEVICE_TYPE_UMV) || (getDeviceNumber() != 200)) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+    return getDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config);
+  }
+
+  void Device::setDeviceUMVRelayValue(uint8_t _value)
+  {
+    if ((getDeviceType() != DEVICE_TYPE_UMV) || (getDeviceNumber() != 200)) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    setDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config, _value);
+  }
+
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
     : m_device(device) {
       if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {
@@ -2400,5 +2417,23 @@ namespace dss {
   }
   int8_t DeviceBank3_BL::getPwmOffset() {
     return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+  }
+
+  // TODO: extend for all devices, for now only handle GE-UMV200
+  bool Device::isFirstdSUID() const
+  {
+    if ((getDeviceType() == DEVICE_TYPE_UMV) && (getDeviceNumber() == 200) &&
+        (getDeviceClass() == DEVICE_CLASS_GE)) {
+      uint32_t serial = 0;
+      if (dsuid_get_serial_number(&m_DSID, &serial) == DSUID_RC_OK) {
+        if ((serial % 4) == 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 } // namespace dss

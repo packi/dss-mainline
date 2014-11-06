@@ -176,7 +176,7 @@ namespace dss {
           message = ds485c_strerror(_resultCode);
           break;
       }
-      throw BusApiError(msgprefix + message);
+      throw BusApiError(msgprefix + message, _resultCode);
     }
   } // checkResultCode
 

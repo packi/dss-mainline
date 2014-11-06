@@ -227,6 +227,8 @@ namespace dss {
   const int HeatingOperationModeIDNotUsed = 3;
   const int HeatingOperationModeIDNight = 4;
 
+  const int HeatingOperationModeIDValveProtection = 31;
+
   // Color ID"s
   const int ColorIDYellow = 1;
   const int ColorIDGray = 2;
@@ -306,6 +308,8 @@ namespace dss {
   const uint8_t CfgFunction_Valve_PwmConfig = 0x4e;
   const uint8_t CfgFunction_Valve_PwmOffset = 0x4f;
   const uint8_t CfgFunction_Valve_ProtectionTimer = 0x52;
+
+  const uint8_t CfgFunction_UMV_Relay_Config = 0x52;
 
   const uint8_t CfgRuntime_Shade_Position = 0x02;
   const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;

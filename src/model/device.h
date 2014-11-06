@@ -356,6 +356,7 @@ namespace dss {
     DeviceClasses_t getDeviceClass() const;
     const DeviceFeatures_t getFeatures() const;
     std::string getAKMInputProperty() const;
+    bool isFirstdSUID() const;
 
     /** Configure scene configuration */
     void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
@@ -601,7 +602,7 @@ namespace dss {
     void setValveType(DeviceValveType_t _type);
 
     std::string getValveTypeAsString() const;
-    bool setValveTypeAsString(const std::string &_value);
+    bool setValveTypeAsString(const std::string &_value, bool _ignoreValveCheck = false);
 
     static std::string valveTypeToString(const DeviceValveType_t _type);
     static bool getValveTypeFromString(const char* _string, DeviceValveType_t &deviceType);
@@ -691,6 +692,8 @@ namespace dss {
     const int getOutputChannelIndex(int _channelId) const;
     const int getOutputChannel(int _index) const;
 
+    uint8_t getDeviceUMVRelayValue();
+    void setDeviceUMVRelayValue(uint8_t _value);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
