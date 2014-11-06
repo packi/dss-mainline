@@ -23,6 +23,7 @@
 #include <digitalSTROM/dsuid/dsuid.h>
 #include "apartmentrequesthandler.h"
 
+#include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
 
@@ -310,12 +311,20 @@ namespace dss {
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
             zone->addProperty("IsConfigured", false);
             continue;
-          } else {
-            zone->addProperty("IsConfigured", true);
-            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
-                hProp.m_HeatingControlDSUID, pZone->getID());
           }
 
+          try {
+            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          } catch (BusApiError& e) {
+            if (e.error == ERROR_ZONE_NOT_FOUND) {
+              zone->addProperty("IsConfigured", false);
+              continue;
+            }
+            throw e;
+          }
+
+          zone->addProperty("IsConfigured", true);
           zone->addProperty("ControlMode", hConfig.ControllerMode);
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:

@@ -602,7 +602,7 @@ namespace dss {
     void setValveType(DeviceValveType_t _type);
 
     std::string getValveTypeAsString() const;
-    bool setValveTypeAsString(const std::string &_value);
+    bool setValveTypeAsString(const std::string &_value, bool _ignoreValveCheck = false);
 
     static std::string valveTypeToString(const DeviceValveType_t _type);
     static bool getValveTypeFromString(const char* _string, DeviceValveType_t &deviceType);

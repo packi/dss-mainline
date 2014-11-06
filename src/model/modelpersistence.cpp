@@ -272,7 +272,7 @@ namespace dss {
     m_tempDevice->setConfigLock(isConfigLocked);
 
     if (valve != NULL) {
-      m_tempDevice->setValveTypeAsString(valve);
+      m_tempDevice->setValveTypeAsString(valve, true);
     }
 
     m_tempDevice->setIsValid(true);
