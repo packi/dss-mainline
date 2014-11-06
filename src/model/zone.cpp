@@ -162,6 +162,13 @@ namespace dss {
         alias->getParentNode()->removeChild(alias);
       }
     }
+    ZoneHeatingProperties_t prop = getHeatingProperties();
+    if (IsEqualDsuid(prop.m_HeatingControlDSUID, _dsMeter->getDSID())) {
+      dsuid_t null;
+      SetNullDsuid(null);
+      setHeatingControlMode(0, 0, 0, 0, null);
+    }
+
   } // removeFromDSMeter
 
   bool Zone::registeredOnDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const {
