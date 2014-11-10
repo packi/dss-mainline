@@ -665,6 +665,36 @@ namespace dss {
     }
   }
 
+  void SystemEventActionExecute::executeHeatingMode(PropertyNodePtr _actionNode) {
+    PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
+    if (oZoneNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeAddonStateChange - missing zone parameter", lsError);
+      return;
+    }
+
+    PropertyNodePtr oModeNode = _actionNode->getPropertyByName("mode");
+    if (oModeNode == NULL) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeAddonStateChange - missing mode parameter", lsError);
+      return;
+    }
+
+    PropertyNodePtr oResetNode = _actionNode->getPropertyByName("reset");
+    bool reset = false;
+    if (oResetNode != NULL) {
+      reset = oResetNode->getBoolValue();
+    }
+
+    boost::shared_ptr<Event> evt(new Event("heating-controller.operation-mode"));
+    evt->setProperty("actions", reset ? "resetOperationMode" : "setOperationMode");
+    evt->setProperty("zoneID", oZoneNode->getAsString());
+    evt->setProperty("operationMode", oModeNode->getAsString());
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().pushEvent(evt);
+    }
+  }
+
   unsigned int SystemEventActionExecute::executeOne(
                                                 PropertyNodePtr _actionNode) {
     Logger::getInstance()->log("SystemEventActionExecute::"
@@ -703,6 +733,9 @@ namespace dss {
           return ACTION_DURATION_STATE_CHANGE;
         } else if (sActionType == "change-addon-state") {
           executeAddonStateChange(_actionNode);
+          return ACTION_DURATION_STATE_CHANGE;
+        } else if (sActionType == "heating-mode") {
+          executeHeatingMode(_actionNode);
           return ACTION_DURATION_STATE_CHANGE;
         }
 
