@@ -2441,21 +2441,36 @@ namespace dss {
     return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
   }
 
-  // TODO: extend for all devices, for now only handle GE-UMV200
-  bool Device::isFirstdSUID() const
-  {
+  int Device::multiDeviceIndex() const {
+    uint8_t deviceCount = 1;
+    uint8_t deviceIndex = 0;
     if ((getDeviceType() == DEVICE_TYPE_UMV) && (getDeviceNumber() == 200) &&
         (getDeviceClass() == DEVICE_CLASS_GE)) {
-      uint32_t serial = 0;
-      if (dsuid_get_serial_number(&m_DSID, &serial) == DSUID_RC_OK) {
-        if ((serial % 4) == 0) {
-          return true;
-        } else {
-          return false;
-        }
+      deviceCount = 4;
+    } else if ((getDeviceType() == DEVICE_TYPE_UMR) &&
+               (getDeviceNumber() == 200) &&
+               (getDeviceClass() == DEVICE_CLASS_SW)) {
+      deviceCount = 4;
+    } else if ((m_FunctionID & 0xffc0) == 0x1000) {
+      switch (m_FunctionID & 0x7) {
+        case 0: deviceCount = 1; break;
+        case 1: deviceCount = 2; break;
+        case 2: deviceCount = 4; break;
+        case 7: deviceCount = 1; break;
+      }
+    } else if ((m_FunctionID & 0x0fc0) == 0x0100) {
+      switch (m_FunctionID & 0x3) {
+        case 0: deviceCount = 1; break;
+        case 1: deviceCount = 1; break;
+        case 2: deviceCount = 2; break;
+        case 3: deviceCount = 4; break;
       }
     }
 
-    return true;
+    uint32_t serial;
+    if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
+      deviceIndex = (uint8_t)(serial & 0xff) % deviceCount;
+    }
+    return deviceIndex;
   }
 } // namespace dss

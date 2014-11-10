@@ -356,7 +356,7 @@ namespace dss {
     DeviceClasses_t getDeviceClass() const;
     const DeviceFeatures_t getFeatures() const;
     std::string getAKMInputProperty() const;
-    bool isFirstdSUID() const;
+    int multiDeviceIndex() const;
 
     /** Configure scene configuration */
     void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
