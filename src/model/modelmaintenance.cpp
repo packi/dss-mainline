@@ -2032,7 +2032,7 @@ namespace dss {
           Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: JSON-ERROR: ") + errorMessage, lsError);
         } else {
           json_object *response;
-          if (json_object_object_get_ex(json_request, "Response", &response)) {
+          if (!json_object_object_get_ex(json_request, "Response", &response)) {
             Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'Response' object in response"), lsError);
           } else {
             if (json_object_object_get_ex(response, "ArticleName", &obj)) {
