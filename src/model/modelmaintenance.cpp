@@ -2031,25 +2031,25 @@ namespace dss {
           }
           Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: JSON-ERROR: ") + errorMessage, lsError);
         } else {
-          json_object *result;
-          if (json_object_object_get_ex(json_request, "Response", &result)) {
-            Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'result' object in response"), lsError);
+          json_object *response;
+          if (!json_object_object_get_ex(json_request, "Response", &response)) {
+            Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'Response' object in response"), lsError);
           } else {
-            if (json_object_object_get_ex(result, "ArticleName", &obj)) {
+            if (json_object_object_get_ex(response, "ArticleName", &obj)) {
               productName = json_object_get_string(obj);
             }
 
-            if (json_object_object_get_ex(result, "ArticleIcon", &obj)) {
+            if (json_object_object_get_ex(response, "ArticleIcon", &obj)) {
               remoteIconPath = json_object_get_string(obj);
             }
 
-            if (json_object_object_get_ex(result,
+            if (json_object_object_get_ex(response,
                                           "ArticleDescriptionForCustomer",
                                           &obj)) {
               productURL = json_object_get_string(obj);
             }
 
-            if (json_object_object_get_ex(result, "DefaultName", &obj)) {
+            if (json_object_object_get_ex(response, "DefaultName", &obj)) {
               defaultName = json_object_get_string(obj);
             }
           }
