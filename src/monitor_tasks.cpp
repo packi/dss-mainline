@@ -43,7 +43,8 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
   if (_ts != DateTime::NullDate) {
     int age = now.difference(_ts);
     if (age > maxZoneSensorLifeTime) {
-      Logger::getInstance()->log(std::string("Temperature value for zone #") +
+      Logger::getInstance()->log(std::string("Sensor value (type: ") +
+          intToString(_sensorType) + ") for zone #" +
           intToString(_group->getZoneID()) +
           " is too old: " + _ts.toISO8601_ms() +
           ", age in seconds is " + intToString(age), lsWarning);
