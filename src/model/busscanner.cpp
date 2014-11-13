@@ -727,6 +727,20 @@ namespace dss {
         memset(&hConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
         hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
         hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
+
+        log(std::string("Heating properties") +
+            " for zone " + intToString(_zone->getID()) +
+            ": control dsm  " + dsuid2str(hProp.m_HeatingControlDSUID) +
+            ", mode " + intToString(hProp.m_HeatingControlMode) +
+            ", state " + intToString(hProp.m_HeatingControlState)
+            , lsInfo);
+        log(std::string("Heating configuration") +
+            " for zone " + intToString(_zone->getID()) +
+            " on dsm " + dsuid2str(_dsMeter->getDSID()) +
+            ": mode " + intToString(hConfig.ControllerMode) +
+            ", state " + intToString(hState.State)
+            , lsInfo);
+
       } catch (std::runtime_error& e) {
         log("Error getting heating config from dsm " +
             dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
@@ -743,9 +757,9 @@ namespace dss {
                 _dsMeter->getDSID());
               hProp = _zone->getHeatingProperties();
           } else {
-            log("Controller for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
-                " is active on dsm with id " + dsuid2str(hProp.m_HeatingControlDSUID) +
-                ", and a second one on dsm " + dsuid2str(_dsMeter->getDSID()), lsWarning);
+            log("Heating controller conflict for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
+                ": active on dsm " + dsuid2str(hProp.m_HeatingControlDSUID) +
+                " and a second one this dsm " + dsuid2str(_dsMeter->getDSID()), lsError);
             StructureManipulator manip(
                 *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
                 m_Interface,
