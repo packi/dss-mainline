@@ -335,13 +335,10 @@ namespace dss {
 
   std::string DateTime::toISO8601() const {
     struct tm tm;
-    /*
-     * C++11: http://en.cppreference.com/w/cpp/chrono/c/strftime
-     * http://stackoverflow.com/questions/9527960/how-do-i-construct-an-iso-8601-datetime-in-c
-     */
-    char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
-    localtime_r(&m_timeval.tv_sec, &tm);
-    strftime(buf, sizeof buf, "%FT%T%z", &tm);
+    char buf[sizeof "2011-10-08T07:07:09Z"];
+
+    gmtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, "%FT%TZ", &tm);
     return std::string(buf);
   }
 
@@ -355,8 +352,8 @@ namespace dss {
     char buf[40], fmt[40];
 
     // http://stackoverflow.com/questions/1551597/using-strftime-in-c-how-can-i-format-time-exactly-like-a-unix-timestamp
-    localtime_r(&m_timeval.tv_sec, &tm);
-    strftime(fmt , sizeof fmt, "%FT%T.%%03u%z", &tm);
+    gmtime_r(&m_timeval.tv_sec, &tm);
+    strftime(fmt , sizeof fmt, "%FT%T.%%03uZ", &tm);
     snprintf(buf, sizeof buf, fmt, m_timeval.tv_usec / 1000);
     return std::string(buf);
   }
