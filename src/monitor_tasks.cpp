@@ -125,34 +125,34 @@ void SensorMonitorTask::run() {
       if (pZone->getID() > 0) {
         ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_TemperatureValueTS)) {
-          hSensors.m_TemperatureValueTS = DateTime::NullDate;
+          pZone->setTemperature(hSensors.m_TemperatureValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityIndoors, hSensors.m_HumidityValueTS)) {
-          hSensors.m_HumidityValueTS = DateTime::NullDate;
+          pZone->setHumidityValue(hSensors.m_HumidityValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_CO2ConcentrationValueTS)) {
-          hSensors.m_CO2ConcentrationValueTS = DateTime::NullDate;
+          pZone->setCO2ConcentrationValue(hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, hSensors.m_BrightnessValueTS)) {
-          hSensors.m_BrightnessValueTS = DateTime::NullDate;
+          pZone->setBrightnessValue(hSensors.m_BrightnessValue, DateTime::NullDate);
         }
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureSetpoint, hStatus.m_NominalValueTS)) {
-          hStatus.m_NominalValueTS = DateTime::NullDate;
+          pZone->setNominalValue(hStatus.m_NominalValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
-          hStatus.m_ControlValueTS = DateTime::NullDate;
+          pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
         }
       } else {
         ApartmentSensorStatus_t aSensors = m_Apartment->getSensorStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureOutdoors, aSensors.m_TemperatureValueTS)) {
-          aSensors.m_TemperatureValueTS = DateTime::NullDate;
+          pZone->setTemperature(aSensors.m_TemperatureValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityOutdoors, aSensors.m_HumidityValueTS)) {
-          aSensors.m_HumidityValueTS = DateTime::NullDate;
+          pZone->setHumidityValue(aSensors.m_HumidityValue, DateTime::NullDate);
         }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, aSensors.m_BrightnessValueTS)) {
-          aSensors.m_BrightnessValueTS = DateTime::NullDate;
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessOutdoors, aSensors.m_BrightnessValueTS)) {
+          pZone->setBrightnessValue(aSensors.m_BrightnessValue,  DateTime::NullDate);
         }
       }
     }
