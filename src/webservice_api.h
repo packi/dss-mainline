@@ -13,12 +13,6 @@ namespace dss {
 // --------------------------------------------------------------------
 // helper
 
-/**
- * Did the user authorize cloud service
- * @return
- */
-bool webservice_communication_authorized();
-
 struct WebserviceReply {
   int code;
   std::string desc;
@@ -35,13 +29,6 @@ public:
     ParseError(const std::string& _message);
 };
 
-/**
- * Extract return code and message
- * @param json -- json encoded reply
- * @return decodod struct or throw ParseError if failed
- */
-WebserviceReply parse_reply(const char* json);
-
 class WebserviceCallDone {
 public:
   /**
@@ -53,25 +40,10 @@ public:
 
 typedef boost::shared_ptr<WebserviceCallDone> WebserviceCallDone_t;
 
-class StatusReplyChecker : public URLRequestCallback {
-  __DECL_LOG_CHANNEL__
-public:
-  /**
-   * StatusReplyChecker - triggered by http client, will parse the returned
-   * JSON as WebserviceReply structure, and trigger provided callbac
-   * @callback: trigger
-   */
-  StatusReplyChecker(WebserviceCallDone_t callback) : m_callback(callback) {};
-  virtual ~StatusReplyChecker() {};
-  virtual void result(long code, const std::string &result);
-private:
-  WebserviceCallDone_t m_callback;
-};
-
 // --------------------------------------------------------------------
 // interface calls
 
-class WebserviceApartment {
+class WebserviceMsHub {
   __DECL_LOG_CHANNEL__
 public:
   typedef enum {
@@ -81,22 +53,19 @@ public:
   } ChangeType;
 
   /**
+   * Did the user authorize cloud service
+   * @return
+   */
+  static bool isAuthorized();
+
+  /**
    * doModelChanged - schedules asynchronous http request
    * @type: what part of the model changed
    * @callback: provides network and server status
    */
   static void doModelChanged(ChangeType type, WebserviceCallDone_t callback);
 
-  template <class iterator>
-    static void doUploadSensorData(iterator begin, iterator end,
-                                   WebserviceCallDone_t callback);
-
   static void doDssBackAgain(WebserviceCallDone_t callback);
-};
-
-class WebserviceAccessManagement {
-  __DECL_LOG_CHANNEL__
-public:
   /**
    * Asynchronously notifies the cloud about removed application token
    * if you want to retry the request in case of network failure you can pass
@@ -106,6 +75,17 @@ public:
    */
   static void doNotifyTokenDeleted(const std::string &token,
                                    WebserviceCallDone_t callback);
+
+  template <class iterator>
+  static void doUploadSensorData(iterator begin, iterator end,
+                                 WebserviceCallDone_t callback);
+
+  /**
+   * Extract return code and message
+   * @param json -- json encoded reply
+   * @return decodod struct or throw ParseError if failed
+   */
+  static WebserviceReply parseReply(const char* buf);
 };
 
 }

@@ -105,8 +105,7 @@ void SensorLog::triggerUpload() {
     }
 
     chunk_end = chunk_start + remainder;
-    WebserviceApartment::doUploadSensorData(chunk_start, chunk_end,
-                                            shared_from_this());
+    WebserviceMsHub::doUploadSensorData(chunk_start, chunk_end, shared_from_this());
     if (chunk_end != m_uploading.end()) {
       chunk_start = chunk_end;
     }
@@ -209,7 +208,7 @@ void SensorDataUploadPlugin::subscribe() {
 void SensorDataUploadPlugin::handleEvent(Event& _event,
                                          const EventSubscription& _subscription) {
 
-  if (!webservice_communication_authorized()) {
+  if (!WebserviceMsHub::isAuthorized()) {
     // no upload when webservice is disabled
     return;
   }

@@ -70,7 +70,7 @@ void HeatingRegisteringPlugin::handleEvent(Event& _event,
 }
 
 void HeatingRegisteringPlugin::sendRegisterMessage() {
-  WebserviceApartment::doDssBackAgain(m_callback);
+  WebserviceMsHub::doDssBackAgain(m_callback);
 }
 
 }

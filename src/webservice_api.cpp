@@ -15,9 +15,14 @@ namespace dss {
 
 typedef std::vector<boost::shared_ptr<Event> >::iterator ItEvent;
 
-/*
- * Helpers of Ms Hub
- */
+ParseError::ParseError(const std::string& _message) : runtime_error( _message )
+{
+}
+
+/****************************************************************************/
+/* Helpers of Ms Hub                                                        */
+/****************************************************************************/
+namespace MsHub {
 
 const static std::string evtGroup_Metering = "Metering";
 const static std::string evtGroup_Activity = "Activity";
@@ -198,17 +203,178 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
   return obj;
 }
 
+} /* namespace MsHub */
 
-ParseError::ParseError(const std::string& _message) : runtime_error( _message )
-{
+
+/****************************************************************************/
+/* Ms Hub Reply Checker                                                     */
+/****************************************************************************/
+
+class MsHubReplyChecker : public URLRequestCallback {
+  __DECL_LOG_CHANNEL__
+public:
+  /**
+   * MsHubReplyChecker - triggered by http client, will parse the returned
+   * JSON as WebserviceReply structure, and trigger provided callback
+   * @callback: trigger
+   */
+  MsHubReplyChecker(WebserviceCallDone_t callback) : m_callback(callback) {};
+  virtual ~MsHubReplyChecker() {};
+  virtual void result(long code, const std::string &result);
+private:
+  WebserviceCallDone_t m_callback;
+};
+
+__DEFINE_LOG_CHANNEL__(MsHubReplyChecker, lsInfo);
+
+void MsHubReplyChecker::result(long code, const std::string &result) {
+
+  if (code != 200) {
+    log("HTTP POST failed " + intToString(code), lsError);
+    if (m_callback) {
+      m_callback->done(NETWORK_ERROR, WebserviceReply());
+    }
+    return;
+  }
+
+  try {
+    WebserviceReply resp = WebserviceMsHub::parseReply(result.c_str());
+    if (resp.code != 0) {
+      log("Webservice complained: <" + intToString(resp.code) + "> " + resp.desc,
+          lsWarning);
+    }
+
+    if (m_callback) {
+      m_callback->done(REST_OK, resp);
+    }
+  } catch (ParseError &ex) {
+    log(std::string("ParseError: <") + ex.what() + "> " + result, lsError);
+    if (m_callback) {
+      m_callback->done(JSON_ERROR, WebserviceReply());
+    }
+    return;
+  }
 }
 
-/**
- * Extract return code and message
- * @param json -- json encoded reply
- * @return decodod struct or throw ParseError if failed
- */
-WebserviceReply parse_reply(const char* buf) {
+
+/****************************************************************************/
+/* Webservice MS Hub                                                        */
+/****************************************************************************/
+
+__DEFINE_LOG_CHANNEL__(WebserviceMsHub, lsInfo)
+
+bool WebserviceMsHub::isAuthorized() {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  return propSystem.getBoolValue(pp_websvc_enabled);
+}
+
+template <class Iterator>
+void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
+                                         WebserviceCallDone_t callback) {
+
+  JSONObject obj;
+  boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  int ct = 0;
+
+  std::string parameters;
+  // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
+  parameters += "dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
+  parameters += "&source=dss"; /* EventSource_dSS */
+
+  obj.addElement("eventsList", array);
+  for (; begin != end; begin++) {
+    array->add(MsHub::toJson(*begin));
+    ct++;
+  }
+
+  std::string postdata = obj.toString();
+  // TODO eventually emit summary: 10 callsceene, 27 metering, ...
+  // dumping whole postdata leads to log rotation and is seldomly needed
+  // unless for solving a blame war with cloud team
+  log("upload events: " + intToString(ct) + " bytes: " + intToString(postdata.length()), lsInfo);
+  log("event data: " + postdata, lsDebug);
+
+  // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
+  boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
+  HashMapStringString sensorUploadHeaders;
+  sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
+
+  WebserviceConnection::getInstance()->request("public/dss/v1_0/DSSEventData/SaveEvent",
+                                               parameters,
+                                               boost::make_shared<HashMapStringString>(sensorUploadHeaders),
+                                               postdata,
+                                               mcb,
+                                               true);
+}
+
+template void WebserviceMsHub::doUploadSensorData<ItEvent>(
+      ItEvent begin, ItEvent end, WebserviceCallDone_t callback);
+
+void WebserviceMsHub::doDssBackAgain(WebserviceCallDone_t callback)
+{
+  std::string parameters;
+
+  if (!WebserviceMsHub::isAuthorized()) {
+    return;
+  }
+
+  // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
+  parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
+  boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
+  log("sending DSSBackAgain", lsInfo);
+  WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
+}
+
+void WebserviceMsHub::doModelChanged(ChangeType type,
+                                     WebserviceCallDone_t callback) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+  std::string params;
+
+  if (!WebserviceMsHub::isAuthorized()) {
+    return;
+  }
+
+  url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
+  params = "dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  params += "&apartmentChangeType=";
+  switch (type) {
+  case ApartmentChange:
+      params += "Apartment";
+      break;
+  case TimedEventChange:
+      params += "TimedEvent";
+      break;
+  case UDAChange:
+      params += "UserDefinedAction";
+      break;
+  }
+
+  log("execute: " + url + "?" + params, lsDebug);
+  boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
+  WebserviceConnection::getInstance()->request(url, params, POST, mcb, true);
+}
+
+void WebserviceMsHub::doNotifyTokenDeleted(const std::string &token,
+                                           WebserviceCallDone_t callback) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+  std::string params;
+
+  if (!WebserviceMsHub::isAuthorized()) {
+    return;
+  }
+
+  url += propSystem.getStringValue(pp_websvc_access_mgmt_delete_token_url_path);
+  params = "dsid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  params += "&token=" + token;
+
+  // webservice is fire and forget, so use shared ptr for life cycle mgmt
+  boost::shared_ptr<MsHubReplyChecker> cont(new MsHubReplyChecker(callback));
+  WebserviceConnection::getInstance()->request(url, params, POST, cont, false);
+}
+
+WebserviceReply WebserviceMsHub::parseReply(const char* buf) {
   WebserviceReply resp;
   bool return_code_seen = false;
 
@@ -250,164 +416,5 @@ WebserviceReply parse_reply(const char* buf) {
   return resp;
 }
 
-__DEFINE_LOG_CHANNEL__(StatusReplyChecker, lsInfo);
 
-void StatusReplyChecker::result(long code, const std::string &result) {
-
-  if (code != 200) {
-    log("HTTP POST failed " + intToString(code), lsError);
-    if (m_callback) {
-      m_callback->done(NETWORK_ERROR, WebserviceReply());
-    }
-    return;
-  }
-
-  try {
-    WebserviceReply resp = parse_reply(result.c_str());
-    if (resp.code != 0) {
-      log("Webservice complained: <" + intToString(resp.code) + "> " + resp.desc,
-          lsWarning);
-    }
-
-    if (m_callback) {
-      m_callback->done(REST_OK, resp);
-    }
-  } catch (ParseError &ex) {
-    log(std::string("ParseError: <") + ex.what() + "> " + result, lsError);
-    if (m_callback) {
-      m_callback->done(JSON_ERROR, WebserviceReply());
-    }
-    return;
-  }
-}
-
-
-/**
- * Did the user authorize cloud service
- * @return
- */
-bool webservice_communication_authorized() {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  return propSystem.getBoolValue(pp_websvc_enabled);
-}
-
-/*
- * Apartment management
- */
-
-__DEFINE_LOG_CHANNEL__(WebserviceApartment, lsInfo)
-
-template <class Iterator>
-void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
-                                             WebserviceCallDone_t callback) {
-
-  JSONObject obj;
-  boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
-  int ct = 0;
-
-  std::string parameters;
-  // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
-  parameters += "dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
-  parameters += "&source=dss"; /* EventSource_dSS */
-
-  obj.addElement("eventsList", array);
-  for (; begin != end; begin++) {
-    array->add(toJson(*begin));
-    ct++;
-  }
-
-  std::string postdata = obj.toString();
-  // TODO eventually emit summary: 10 callsceene, 27 metering, ...
-  // dumping whole postdata leads to log rotation and is seldomly needed
-  // unless for solving a blame war with cloud team
-  Logger::getInstance()->log(std::string(__func__) + "upload events: " + intToString(ct) + " bytes: " + intToString(postdata.length()), lsInfo);
-  Logger::getInstance()->log(std::string(__func__) + "event data: " + postdata, lsDebug);
-
-  // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
-  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
-  HashMapStringString sensorUploadHeaders;
-  sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
-
-  WebserviceConnection::getInstance()->request("public/dss/v1_0/DSSEventData/SaveEvent",
-                                               parameters,
-                                               boost::make_shared<HashMapStringString>(sensorUploadHeaders),
-                                               postdata,
-                                               mcb,
-                                               true);
-}
-
-template void WebserviceApartment::doUploadSensorData<ItEvent>(
-    ItEvent begin, ItEvent end, WebserviceCallDone_t callback);
-
-void WebserviceApartment::doDssBackAgain(WebserviceCallDone_t callback)
-{
-  std::string parameters;
-
-  if (!webservice_communication_authorized()) {
-    return;
-  }
-
-  // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
-  parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
-  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
-  log("sending DSSBackAgain", lsInfo);
-  WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
-}
-
-
-void WebserviceApartment::doModelChanged(ChangeType type,
-                                         WebserviceCallDone_t callback) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  std::string url;
-  std::string params;
-
-  if (!webservice_communication_authorized()) {
-    return;
-  }
-
-  url = propSystem.getStringValue(pp_websvc_apartment_changed_url_path);
-  params = "dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-  params += "&apartmentChangeType=";
-  switch (type) {
-  case ApartmentChange:
-      params += "Apartment";
-      break;
-  case TimedEventChange:
-      params += "TimedEvent";
-      break;
-  case UDAChange:
-      params += "UserDefinedAction";
-      break;
-  }
-
-  log("execute: " + url + "?" + params, lsDebug);
-  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(url, params, POST, mcb, true);
-}
-
-/*
- * Access Management
- */
-
-__DEFINE_LOG_CHANNEL__(WebserviceAccessManagement, lsInfo)
-
-void WebserviceAccessManagement::doNotifyTokenDeleted(const std::string &token,
-                                                      WebserviceCallDone_t callback) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  std::string url;
-  std::string params;
-
-  if (!webservice_communication_authorized()) {
-    return;
-  }
-
-  url += propSystem.getStringValue(pp_websvc_access_mgmt_delete_token_url_path);
-  params = "dsid=" + propSystem.getStringValue(pp_sysinfo_dsid);
-  params += "&token=" + token;
-
-  // webservice is fire and forget, so use shared ptr for life cycle mgmt
-  boost::shared_ptr<StatusReplyChecker> cont(new StatusReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(url, params, POST, cont, false);
-}
-
-}
+} /* namespace dss */

@@ -31,29 +31,29 @@ BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
   WebserviceReply resp;
   {
     const char *buf =  "{\"ReturnCode\":2,\"ReturnMessage\":\"The dSS was not found in the database\"}";
-    BOOST_CHECK_NO_THROW(resp = parse_reply(buf));
+    BOOST_CHECK_NO_THROW(resp = WebserviceMsHub::parseReply(buf));
     BOOST_CHECK_EQUAL(resp.code, 2);
     BOOST_CHECK_EQUAL(resp.desc, "The dSS was not found in the database");
   }
   {
     const char *buf =  "{\"ReturnCode\":\"2\",\"ReturnMessage\":\"The dSS was not found in the database\"}";
-    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
+    BOOST_CHECK_THROW(resp = WebserviceMsHub::parseReply(buf), ParseError);
   }
   {
     const char *buf =  "{\"ReturnCode\":2,\"ReturnMessage\":42}";
-    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
+    BOOST_CHECK_THROW(resp = WebserviceMsHub::parseReply(buf), ParseError);
   }
   {
     const char *buf =  "";
-    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
+    BOOST_CHECK_THROW(resp = WebserviceMsHub::parseReply(buf), ParseError);
   }
   {
     const char *buf =  "{128471049asdfhla}";
-    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
+    BOOST_CHECK_THROW(resp = WebserviceMsHub::parseReply(buf), ParseError);
   }
   {
     const char *buf =  NULL;
-    BOOST_CHECK_THROW(resp = parse_reply(buf), ParseError);
+    BOOST_CHECK_THROW(resp = WebserviceMsHub::parseReply(buf), ParseError);
   }
 }
 
@@ -114,8 +114,8 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
   NotifyDone *notifyDone = static_cast<NotifyDone*>(cont.get());
 
   boost::mutex::scoped_lock lock(mutex);
-  WebserviceApartment::doModelChanged(WebserviceApartment::ApartmentChange,
-                                      cont);
+  WebserviceMsHub::doModelChanged(WebserviceMsHub::ApartmentChange,
+                                  cont);
   completion.wait(lock);
 
   BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
@@ -131,8 +131,8 @@ BOOST_FIXTURE_TEST_CASE(test_revokeToken, WebserviceFixture) {
   NotifyDone *notifyDone = static_cast<NotifyDone*>(cont.get());
 
   boost::mutex::scoped_lock lock(mutex);
-  WebserviceAccessManagement::doNotifyTokenDeleted(SessionTokenGenerator::generate(),
-                                                   cont);
+  WebserviceMsHub::doNotifyTokenDeleted(SessionTokenGenerator::generate(),
+                                        cont);
   completion.wait(lock);
 
   BOOST_CHECK_EQUAL(notifyDone->status, REST_OK);
