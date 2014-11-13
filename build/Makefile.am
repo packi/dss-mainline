@@ -90,7 +90,8 @@ dss_CXXFLAGS = \
 			$(GCOV_CFLAGS) \
             $(LIBPROTOBUF_CFLAGS) \
             $(LIBCOMMCHANNEL_CFLAGS) \
-			$(LIBDSUID_CFLAGS)
+			$(LIBDSUID_CFLAGS) \
+			$(OSSP_UUID_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
@@ -113,7 +114,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(JSONC_LIBS) \
 			$(LIBPROTOBUF_LIBS) \
 			$(LIBCOMMCHANNEL_LIBS) \
-			$(LIBDSUID_LIBS)
+			$(LIBDSUID_LIBS) \
+			$(OSSP_UUID_LIBS)
 
 dsstests_CXXFLAGS = \
 			-I$(top_srcdir) \
