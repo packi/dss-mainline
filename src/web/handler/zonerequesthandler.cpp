@@ -586,6 +586,17 @@ namespace dss {
           resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
           resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
           resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
+
+          if (hProp.m_HeatingControlMode != HeatingControlModeIDPID) {
+            return failure("Not a PID controller");
+          }
+          if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
+            return failure("PID controller not running");
+          }
+          memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
+          hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
+              hProp.m_HeatingControlDSUID, pZone->getID());
+
           resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, hInternals.Trecent));
           resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
           resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
