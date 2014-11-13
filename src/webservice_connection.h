@@ -41,9 +41,10 @@ public:
 };
 
 class WebserviceConnection : public TaskProcessor {
+protected:
   __DECL_LOG_CHANNEL__
+  WebserviceConnection(const char *pp_base_url);
 public:
-  WebserviceConnection();
   virtual ~WebserviceConnection();
   void request(const std::string& url,
                const std::string &parameters,
@@ -62,6 +63,7 @@ public:
                boost::shared_ptr<HashMapStringString> headers,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
+
   static WebserviceConnection *getInstanceMsHub();
   static void shutdown();
 
@@ -71,8 +73,15 @@ private:
   std::string m_base_url;
   boost::shared_ptr<HttpClient> m_url;
 
-  std::string constructURL(const std::string& url,
-                           const std::string& parameters, bool authenticated);
+  std::string constructURL(const std::string& url, const std::string& parameters);
+
+  void request(boost::shared_ptr<HttpRequest> req,
+               boost::shared_ptr<URLRequestCallback> cb,
+               bool hasUrlParameters,
+               bool authenticated);
+
+  virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters) = 0;
+
 };
 
 class URLRequestTask : public Task {
