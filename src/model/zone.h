@@ -28,6 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "modelconst.h"
 #include "modeltypes.h"
 #include "devicecontainer.h"
 #include "nonaddressablemodelitem.h"
@@ -63,7 +64,7 @@ namespace dss {
 
   typedef struct ZoneHeatingStatus {
     ZoneHeatingStatus() :
-      m_OperationMode(0),
+      m_OperationMode(HeatingOperationModeInvalid),
       m_NominalValue(0),
       m_NominalValueTS(0),
       m_ControlValue(0),
@@ -185,6 +186,7 @@ namespace dss {
     void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
     void setHeatingControlState(int _ctrlState);
     void setHeatingOperationMode(int _operationMode);
+    int getHeatingOperationMode() const;
     void setTemperature(double _value, DateTime& _ts);
     void setNominalValue(double _value, DateTime& _ts);
     void setControlValue(double _value, DateTime& _ts);
@@ -208,6 +210,7 @@ namespace dss {
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
     bool isAllowedSensorType(int _sensorType);
+    void dirty();
   }; // Zone
 
 

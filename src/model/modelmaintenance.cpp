@@ -312,9 +312,8 @@ namespace dss {
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
           boost::shared_ptr<Group> group = zone->getGroup(groupID);
-          dsuid_t originDSUID;
-          dsuid_t evtDSID = mEvent->getSource();
-          if (!IsNullDsuid(evtDSID) && (originDeviceID != 0)) {
+          dsuid_t originDSUID = mEvent->getSource();
+          if (!IsNullDsuid(originDSUID) && (originDeviceID != 0)) {
             DeviceReference devRef = m_pApartment->getDevices().getByBusID(originDeviceID, mEvent->getSource());
             originDSUID = devRef.getDSID();
           }
@@ -990,17 +989,17 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        pEvent->setProperty("token", _token);
         dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
-        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
         if (_forced) {
           pEvent->setProperty("forced", "true");
         }
         pEvent->setProperty("callOrigin", intToString(_origin));
+        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
+        pEvent->setProperty("originToken", _token);
         raiseEvent(pEvent);
       } else {
         log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -1058,7 +1057,7 @@ namespace dss {
         pEvent->setProperty("sceneID", intToString(_sceneID));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        dsuid_t originDSUID;
+        dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
@@ -1237,7 +1236,7 @@ namespace dss {
         pEvent.reset(new Event("blink", group));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
-        dsuid_t originDSUID;
+        dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
@@ -2031,25 +2030,25 @@ namespace dss {
           }
           Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: JSON-ERROR: ") + errorMessage, lsError);
         } else {
-          json_object *result;
-          if (json_object_object_get_ex(json_request, "Response", &result)) {
-            Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'result' object in response"), lsError);
+          json_object *response;
+          if (!json_object_object_get_ex(json_request, "Response", &response)) {
+            Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'Response' object in response"), lsError);
           } else {
-            if (json_object_object_get_ex(result, "ArticleName", &obj)) {
+            if (json_object_object_get_ex(response, "ArticleName", &obj)) {
               productName = json_object_get_string(obj);
             }
 
-            if (json_object_object_get_ex(result, "ArticleIcon", &obj)) {
+            if (json_object_object_get_ex(response, "ArticleIcon", &obj)) {
               remoteIconPath = json_object_get_string(obj);
             }
 
-            if (json_object_object_get_ex(result,
+            if (json_object_object_get_ex(response,
                                           "ArticleDescriptionForCustomer",
                                           &obj)) {
               productURL = json_object_get_string(obj);
             }
 
-            if (json_object_object_get_ex(result, "DefaultName", &obj)) {
+            if (json_object_object_get_ex(response, "DefaultName", &obj)) {
               defaultName = json_object_get_string(obj);
             }
           }

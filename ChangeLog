@@ -1,5 +1,15 @@
 dSS - digitalSTROM Server
 
+v1.28.0	07.11.2014
+	* add API for valve type settings, #7948
+	* finalize event uploading mechanisms, #7883
+	* fixed memory leak in webservice reply class
+	* query more properties from vdc's (model version, etc.), #8040
+	* added heating heating valve protection process, #7953
+	* extended UMV support, #8011
+	* added sanity checks when reading out devices
+	* fix get temperature control config call, #8001
+
 v1.27.0	24.10.2014
 	* fixed event category name for sensor data upload
 	* changed method of adding and removen devices from areas, #2310

@@ -31,6 +31,7 @@
 #include "src/foreach.h"
 #include "src/logger.h"
 #include "src/model/modelconst.h"
+#include "src/model/modelmaintenance.h"
 #include "src/propertysystem.h"
 #include "src/model/set.h"
 #include "src/model/device.h"
@@ -207,7 +208,7 @@ namespace dss {
         if (m_ZoneID > 0) {
           m_pPropertyNode->createProperty("heating/");
           m_pPropertyNode->createProperty("heating/OperationMode")
-              ->linkToProxy(PropertyProxyReference<int>(m_HeatingStatus.m_OperationMode));
+            ->linkToProxy(PropertyProxyMemberFunction<Zone, int>(*this, &Zone::getHeatingOperationMode, &Zone::setHeatingOperationMode));
           m_pPropertyNode->createProperty("heating/ControlMode")
               ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlMode));
           m_pPropertyNode->createProperty("heating/ControlState")
@@ -254,6 +255,11 @@ namespace dss {
 
   void Zone::setHeatingOperationMode(int _operationMode) {
     m_HeatingStatus.m_OperationMode = _operationMode;
+    dirty();
+  }
+
+  int Zone::getHeatingOperationMode() const {
+    return m_HeatingStatus.m_OperationMode;
   }
 
   void Zone::setTemperature(double _value, DateTime& _ts) {
@@ -452,6 +458,14 @@ namespace dss {
       }
     }
     return boost::shared_ptr<Device> ();
+  }
+
+  void Zone::dirty() {
+    if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+      m_pApartment->getModelMaintenance()->addModelEvent(
+          new ModelEvent(ModelEvent::etModelDirty)
+      );
+    }
   }
 
 } // namespace dss

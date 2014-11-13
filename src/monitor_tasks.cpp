@@ -43,7 +43,8 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
   if (_ts != DateTime::NullDate) {
     int age = now.difference(_ts);
     if (age > maxZoneSensorLifeTime) {
-      Logger::getInstance()->log(std::string("Temperature value for zone #") +
+      Logger::getInstance()->log(std::string("Sensor value (type: ") +
+          intToString(_sensorType) + ") for zone #" +
           intToString(_group->getZoneID()) +
           " is too old: " + _ts.toISO8601_ms() +
           ", age in seconds is " + intToString(age), lsWarning);
@@ -125,34 +126,34 @@ void SensorMonitorTask::run() {
       if (pZone->getID() > 0) {
         ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_TemperatureValueTS)) {
-          hSensors.m_TemperatureValueTS = DateTime::NullDate;
+          pZone->setTemperature(hSensors.m_TemperatureValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityIndoors, hSensors.m_HumidityValueTS)) {
-          hSensors.m_HumidityValueTS = DateTime::NullDate;
+          pZone->setHumidityValue(hSensors.m_HumidityValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_CO2ConcentrationValueTS)) {
-          hSensors.m_CO2ConcentrationValueTS = DateTime::NullDate;
+          pZone->setCO2ConcentrationValue(hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, hSensors.m_BrightnessValueTS)) {
-          hSensors.m_BrightnessValueTS = DateTime::NullDate;
+          pZone->setBrightnessValue(hSensors.m_BrightnessValue, DateTime::NullDate);
         }
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureSetpoint, hStatus.m_NominalValueTS)) {
-          hStatus.m_NominalValueTS = DateTime::NullDate;
+          pZone->setNominalValue(hStatus.m_NominalValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
-          hStatus.m_ControlValueTS = DateTime::NullDate;
+          pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
         }
       } else {
         ApartmentSensorStatus_t aSensors = m_Apartment->getSensorStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureOutdoors, aSensors.m_TemperatureValueTS)) {
-          aSensors.m_TemperatureValueTS = DateTime::NullDate;
+          pZone->setTemperature(aSensors.m_TemperatureValue, DateTime::NullDate);
         }
         if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityOutdoors, aSensors.m_HumidityValueTS)) {
-          aSensors.m_HumidityValueTS = DateTime::NullDate;
+          pZone->setHumidityValue(aSensors.m_HumidityValue, DateTime::NullDate);
         }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, aSensors.m_BrightnessValueTS)) {
-          aSensors.m_BrightnessValueTS = DateTime::NullDate;
+        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessOutdoors, aSensors.m_BrightnessValueTS)) {
+          pZone->setBrightnessValue(aSensors.m_BrightnessValue,  DateTime::NullDate);
         }
       }
     }
@@ -178,23 +179,29 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     SetNullDsuid(sourceDSID);
     switch (hConfig.m_HeatingControlMode) {
       case HeatingControlModeIDPID:
+        if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
+          pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
+          usleep(1000 * 1000);
+          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
+              hStatus.m_NominalValue, "");
+          usleep(1000 * 1000);
+        }
         pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDTemperatureIndoors,
             hSensors.m_TemperatureValue, "");
         usleep(1000 * 1000);
-        pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
-            hStatus.m_NominalValue, "");
-        usleep(1000 * 1000);
-        pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
-        usleep(1000 * 1000);
         break;
       case HeatingControlModeIDFixed:
-        pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
-        usleep(1000 * 1000);
+        if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
+          pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
+          usleep(1000 * 1000);
+        }
         break;
       case HeatingControlModeIDManual:
-        pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureControlVariable,
-            hStatus.m_ControlValue, "");
-        usleep(1000 * 1000);
+        if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
+          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureControlVariable,
+              hStatus.m_ControlValue, "");
+          usleep(1000 * 1000);
+        }
         break;
       case HeatingControlModeIDZoneFollower:
       case HeatingControlModeIDOff:
