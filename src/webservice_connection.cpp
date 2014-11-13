@@ -68,12 +68,42 @@ void WebserviceConnectionMsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
 
 
 /****************************************************************************/
+/* WebserviceConnectionDsHub                                                */
+/****************************************************************************/
+
+class WebserviceConnectionDsHub : public WebserviceConnection {
+public:
+  WebserviceConnectionDsHub();
+private:
+  virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters);
+};
+
+WebserviceConnectionDsHub::WebserviceConnectionDsHub()
+  : WebserviceConnection(pp_websvc_dshub_url)
+{
+}
+
+void WebserviceConnectionDsHub::authorizeRequest(HttpRequest& req, bool hasUrlParameters)
+{
+  std::string osptoken = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_dshub_token);
+
+  if (!osptoken.empty()) {
+    (*req.headers)["Authorization"] =  "Bearer " + osptoken;
+  } else {
+    log("authentication parameters enabled, but token could not be "
+        "fetched!", lsError);
+  }
+}
+
+
+/****************************************************************************/
 /* WebserviceConnection                                                     */
 /****************************************************************************/
 
 __DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
 
 WebserviceConnection* WebserviceConnection::m_instance_mshub = NULL;
+WebserviceConnection* WebserviceConnection::m_instance_dshub = NULL;
 
 WebserviceConnection::WebserviceConnection(const char *pp_base_url)
 {
@@ -97,10 +127,25 @@ WebserviceConnection* WebserviceConnection::getInstanceMsHub()
   return m_instance_mshub;
 }
 
+WebserviceConnection* WebserviceConnection::getInstanceDsHub()
+{
+  if (m_instance_dshub == NULL) {
+    m_instance_dshub = new WebserviceConnectionDsHub();
+  }
+  assert (m_instance_dshub != NULL);
+  return m_instance_dshub;
+}
+
 void WebserviceConnection::shutdown() {
   if (m_instance_mshub != NULL) {
     WebserviceConnection* inst = m_instance_mshub;
     m_instance_mshub = NULL;
+    delete inst;
+  }
+
+  if (m_instance_dshub != NULL) {
+    WebserviceConnection* inst = m_instance_dshub;
+    m_instance_dshub = NULL;
     delete inst;
   }
 }

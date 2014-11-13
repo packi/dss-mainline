@@ -65,10 +65,12 @@ public:
                bool authenticated = false);
 
   static WebserviceConnection *getInstanceMsHub();
+  static WebserviceConnection *getInstanceDsHub();
   static void shutdown();
 
 private:
   static WebserviceConnection *m_instance_mshub;
+  static WebserviceConnection *m_instance_dshub;
 
   std::string m_base_url;
   boost::shared_ptr<HttpClient> m_url;
