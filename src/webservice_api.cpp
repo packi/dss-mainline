@@ -299,12 +299,12 @@ void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
   HashMapStringString sensorUploadHeaders;
   sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
 
-  WebserviceConnection::getInstance()->request("public/dss/v1_0/DSSEventData/SaveEvent",
-                                               parameters,
-                                               boost::make_shared<HashMapStringString>(sensorUploadHeaders),
-                                               postdata,
-                                               mcb,
-                                               true);
+  WebserviceConnection::getInstanceMsHub()->request("public/dss/v1_0/DSSEventData/SaveEvent",
+                                                    parameters,
+                                                    boost::make_shared<HashMapStringString>(sensorUploadHeaders),
+                                                    postdata,
+                                                    mcb,
+                                                    true);
 }
 
 template void WebserviceMsHub::doUploadSensorData<ItEvent>(
@@ -322,7 +322,7 @@ void WebserviceMsHub::doDssBackAgain(WebserviceCallDone_t callback)
   parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
   boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
   log("sending DSSBackAgain", lsInfo);
-  WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
+  WebserviceConnection::getInstanceMsHub()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
 }
 
 void WebserviceMsHub::doModelChanged(ChangeType type,
@@ -352,7 +352,7 @@ void WebserviceMsHub::doModelChanged(ChangeType type,
 
   log("execute: " + url + "?" + params, lsDebug);
   boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(url, params, POST, mcb, true);
+  WebserviceConnection::getInstanceMsHub()->request(url, params, POST, mcb, true);
 }
 
 void WebserviceMsHub::doNotifyTokenDeleted(const std::string &token,
@@ -371,7 +371,7 @@ void WebserviceMsHub::doNotifyTokenDeleted(const std::string &token,
 
   // webservice is fire and forget, so use shared ptr for life cycle mgmt
   boost::shared_ptr<MsHubReplyChecker> cont(new MsHubReplyChecker(callback));
-  WebserviceConnection::getInstance()->request(url, params, POST, cont, false);
+  WebserviceConnection::getInstanceMsHub()->request(url, params, POST, cont, false);
 }
 
 WebserviceReply WebserviceMsHub::parseReply(const char* buf) {

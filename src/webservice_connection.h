@@ -62,11 +62,11 @@ public:
                boost::shared_ptr<HashMapStringString> headers,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
-  static WebserviceConnection *getInstance();
+  static WebserviceConnection *getInstanceMsHub();
   static void shutdown();
 
 private:
-  static WebserviceConnection *m_instance;
+  static WebserviceConnection *m_instance_mshub;
 
   std::string m_base_url;
   boost::shared_ptr<HttpClient> m_url;

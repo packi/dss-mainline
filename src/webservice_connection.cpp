@@ -34,7 +34,7 @@ namespace dss {
 
 __DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
 
-WebserviceConnection* WebserviceConnection::m_instance = NULL;
+WebserviceConnection* WebserviceConnection::m_instance_mshub = NULL;
 
 WebserviceConnection::WebserviceConnection()
 {
@@ -49,19 +49,19 @@ WebserviceConnection::~WebserviceConnection()
 {
 }
 
-WebserviceConnection* WebserviceConnection::getInstance()
+WebserviceConnection* WebserviceConnection::getInstanceMsHub()
 {
-  if (m_instance == NULL) {
-    m_instance = new WebserviceConnection();
+  if (m_instance_mshub == NULL) {
+    m_instance_mshub = new WebserviceConnection();
   }
-  assert (m_instance != NULL);
-  return m_instance;
+  assert (m_instance_mshub != NULL);
+  return m_instance_mshub;
 }
 
 void WebserviceConnection::shutdown() {
-  if (m_instance != NULL) {
-    WebserviceConnection* inst = m_instance;
-    m_instance = NULL;
+  if (m_instance_mshub != NULL) {
+    WebserviceConnection* inst = m_instance_mshub;
+    m_instance_mshub = NULL;
     delete inst;
   }
 }

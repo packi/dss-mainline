@@ -2118,7 +2118,7 @@ namespace dss {
                              "&languageCode=" + language;
 
     boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_deviceDSUID));
-    WebserviceConnection::getInstance()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
+    WebserviceConnection::getInstanceMsHub()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
   }
 
   ModelMaintenance::VdcDataQuery::VdcDataQuery(boost::shared_ptr<Device> _device)

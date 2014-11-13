@@ -354,7 +354,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     // options override config.xml
     parseProperties(_properties);
 
-    WebserviceConnection::getInstance();
+    WebserviceConnection::getInstanceMsHub();
 
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly

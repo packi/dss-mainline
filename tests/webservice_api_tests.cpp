@@ -75,7 +75,7 @@ public:
 
     // TODO: webservice connection fetched original authority, restart it
     WebserviceConnection::shutdown();
-    WebserviceConnection::getInstance();
+    WebserviceConnection::getInstanceMsHub();
 
     propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(true);
   }
