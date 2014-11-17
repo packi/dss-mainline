@@ -37,6 +37,7 @@
 #include "src/model/group.h"
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
+#include "src/model/scenehelper.h"
 #include "src/stringconverter.h"
 #include "src/model-features.h"
 #include "util.h"
@@ -347,6 +348,81 @@ namespace dss {
               break;
             case HeatingControlModeIDFixed:
               break;
+          }
+        }
+        return success(resultObj);
+
+      } else if(_request.getMethod() == "getTemperatureControlValues") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+
+        resultObj->addElement("zones", zones);
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+          zones->addElement("", zone);
+          zone->addProperty("id", pZone->getID());
+          zone->addProperty("name", pZone->getName());
+          zone->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+
+          ZoneHeatingOperationModeSpec_t hOpValues;
+          memset(&hOpValues, 0, sizeof(hOpValues));
+
+          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+            zone->addProperty("IsConfigured", false);
+            continue;
+          }
+
+          try {
+            hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+          } catch (BusApiError& e) {
+            if (e.error == ERROR_ZONE_NOT_FOUND) {
+              zone->addProperty("IsConfigured", false);
+              continue;
+            }
+            throw e;
+          }
+
+          zone->addProperty("IsConfigured", true);
+          switch (hProp.m_HeatingControlMode) {
+          case HeatingControlModeIDOff:
+            break;
+          case HeatingControlModeIDPID:
+            zone->addProperty("Off",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+            zone->addProperty("Comfort",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+            zone->addProperty("Economy",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+            zone->addProperty("NotUsed",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+            zone->addProperty("Night",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+            zone->addProperty("Holiday",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+            break;
+          case HeatingControlModeIDZoneFollower:
+            break;
+          case HeatingControlModeIDFixed:
+            zone->addProperty("Off",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+            zone->addProperty("Comfort",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+            zone->addProperty("Economy",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+            zone->addProperty("NotUsed",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+            zone->addProperty("Night",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+            zone->addProperty("Holiday",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+            break;
+
           }
         }
         return success(resultObj);
