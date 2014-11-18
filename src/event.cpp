@@ -68,6 +68,7 @@ namespace dss {
     const std::string OldStateChange = "oldStateChange";
     const std::string AddonToCloud = "AddonToCloud";
     const std::string HeatingValveProtection = "execute_valve_protection";
+    const std::string DeviceHeatingTypeChanged = "DeviceHeatingTypeChanged";
   }
 
   namespace EventProperty {
