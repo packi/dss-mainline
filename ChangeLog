@@ -1,5 +1,15 @@
 dSS - digitalSTROM Server
 
+v1.28.1	14.11.2014
+	* avoid writing invalid operation mode into zone, #7939
+	* fix regression in OEM web queries, #8143
+	* deactivate all heating controllers in a zone before setting up a new
+	  one, #8272
+	* fix zone sensor timeout detection
+	* return a proper error if no controller is configured for the zone, #7740
+	* fix emergency value, #8272
+	* fix originDSUID for scripting events
+
 v1.28.0	07.11.2014
 	* add API for valve type settings, #7948
 	* finalize event uploading mechanisms, #7883

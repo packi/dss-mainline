@@ -36,6 +36,7 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
+#include "src/event.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -412,6 +413,15 @@ namespace dss {
     DeviceSensorSpec_t sensorInput65 = { SensorIDActivePowerVA, 0, 0, 0 };
     DeviceClasses_t deviceClass = getDeviceClass();
     int devType = (deviceClass << 16) | m_ProductID;
+
+    if (isVdcDevice()) {
+        // vdc devices have no implicit sensors, but 1st
+        // generation vdc devices mocked themselves as dS components,
+        // so they accidently got an implicit sensor attached
+        // need to exit early here
+        // http://redmine.digitalstrom.org/issues/8294
+        return;
+    }
 
     /* common */
     _slist.push_back(sensorInputReserved1);
@@ -1880,6 +1890,13 @@ namespace dss {
 
   void Device::setValveType(DeviceValveType_t _type) {
     m_ValveType = _type;
+    {
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event(EventName::DeviceHeatingTypeChanged));
+      if (DSS::getInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    }
     dirty();
   }
 
