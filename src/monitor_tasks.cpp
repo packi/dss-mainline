@@ -37,12 +37,13 @@
 
 namespace dss {
 
+static const int maxSensorLifeTime = 3600; /* 1h */
+
 bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
-  static const int maxZoneSensorLifeTime = 60 * 60 * 4;
   DateTime now;
   if (_ts != DateTime::NullDate) {
     int age = now.difference(_ts);
-    if (age > maxZoneSensorLifeTime) {
+    if (age > maxSensorLifeTime) {
       Logger::getInstance()->log(std::string("Sensor value (type: ") +
           intToString(_sensorType) + ") for zone #" +
           intToString(_group->getZoneID()) +
@@ -81,7 +82,6 @@ void SensorMonitorTask::run() {
           continue;
         }
 
-        int lifetime = sensor->m_sensorPollInterval * 3;
         int age = 0;
         if (sensor->m_sensorValueTS == DateTime::NullDate) {
           if (DSS::hasInstance()) {
@@ -98,7 +98,7 @@ void SensorMonitorTask::run() {
                   ", and age in seconds is " + intToString(age));
 
         // value is invalid because its older than its allowed lifetime
-        if ((age > lifetime) && device->isSensorDataValid(s)) {
+        if ((age > maxSensorLifeTime) && device->isSensorDataValid(s)) {
 
           Logger::getInstance()->log(std::string("Sensor #") +
                     intToString(s) + " of device " + dsuid2str(device->getDSID()) +
