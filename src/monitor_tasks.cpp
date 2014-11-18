@@ -293,7 +293,7 @@ void HeatingMonitorTask::run() {
   }
 }
 
-int HeatingValveProtectionTask::m_zoneIndex = 0;
+size_t HeatingValveProtectionTask::m_zoneIndex = 0;
 
 /**
  * Every Thursday around 15:00 send a HeatingOperationModeIDValveProtection scene call
