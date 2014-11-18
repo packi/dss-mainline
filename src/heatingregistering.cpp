@@ -4,7 +4,6 @@
 #include "foreach.h"
 
 namespace {
-  static const int REGISTERING_TIMEOUT_MINUTE = 5;
   static const std::string EV_RETRY_REGISTRATION("retry_registration");
 }
 
@@ -57,13 +56,8 @@ HeatingRegisteringPlugin::~HeatingRegisteringPlugin()
 
 void HeatingRegisteringPlugin::startTimeout() {
   log(std::string(__func__) + " start cloud response timeout", lsInfo);
-
-  DateTime start;
-  start = start.addMinute(REGISTERING_TIMEOUT_MINUTE);
-
   boost::shared_ptr<Event> pEvent(new Event(EV_RETRY_REGISTRATION));
-  pEvent->setProperty(EventProperty::ICalStartTime, start.toRFC2445IcalDataTime());
-  pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY");
+  pEvent->setProperty("time", "+300"); // 5 minutes
   DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 }
 
