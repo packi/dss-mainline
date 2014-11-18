@@ -64,7 +64,7 @@ public:
 private:
   Apartment *m_Apartment;
   boost::shared_ptr<Event> m_event;
-  static int m_zoneIndex;
+  static size_t m_zoneIndex;
 };
 
 }// namespace
