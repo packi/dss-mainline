@@ -36,6 +36,7 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
+#include "src/event.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -1880,6 +1881,13 @@ namespace dss {
 
   void Device::setValveType(DeviceValveType_t _type) {
     m_ValveType = _type;
+    {
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event(EventName::DeviceHeatingTypeChanged));
+      if (DSS::getInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    }
     dirty();
   }
 
