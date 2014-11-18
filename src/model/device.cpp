@@ -416,7 +416,7 @@ namespace dss {
 
     if (isVdcDevice()) {
         // vdc devices have no implicit sensors, but 1st
-        // generation vdc devices mocked themselves as dS components,
+        // generation vdc devices mocked themselves as Klemmen,
         // so they accidently got an implicit sensor attached
         // need to exit early here
         // http://redmine.digitalstrom.org/issues/8294
