@@ -52,6 +52,7 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"
+#include "heatingregistering.h"
 #include "sensor_data_uploader.h"
 #include "subscription_profiler.h"
 #include "defaultbuseventsink.h"
@@ -468,6 +469,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     plugin = new SensorDataUploadPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterHeatingValveProtectionPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new HeatingRegisteringPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
