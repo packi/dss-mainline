@@ -323,6 +323,10 @@ namespace dss {
       dev = m_Apartment.allocateDevice(_spec.DSID);
     }
 
+    if (_dsMeter && _dsMeter->getBusMemberType() == BusMember_vDC) {
+      dev->setVdcDevice(true);
+    }
+
     DeviceReference devRef(dev, &m_Apartment);
 
     // remove from old dsMeter
@@ -501,7 +505,6 @@ namespace dss {
     } catch (ItemNotFoundException& e) {
     }
     if (pMeter && pMeter->getBusMemberType() == BusMember_vDC) {
-      _pDevice->setVdcDevice(true);
       boost::shared_ptr<ModelMaintenance::VdcDataQuery> task(new ModelMaintenance::VdcDataQuery(_pDevice));
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
