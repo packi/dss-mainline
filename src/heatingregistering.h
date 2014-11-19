@@ -14,7 +14,7 @@ namespace dss {
   class HeatingRegisteringItf {
   public:
     virtual ~HeatingRegisteringItf(){};
-    virtual void stopTimeout() = 0;
+    virtual void startTimeout(int _delay) = 0;
   };
 
   class RegisteringLog : public WebserviceCallDone,
@@ -23,11 +23,7 @@ namespace dss {
     RegisteringLog(HeatingRegisteringItf* pItf);
     virtual ~RegisteringLog();
     virtual void done(RestTransferStatus_t status, WebserviceReply reply);
-    bool isRegistered() const;
-    void resetRegistration();
   private:
-    mutable boost::mutex m_lock;
-    bool m_registration;
     HeatingRegisteringItf *m_HeatingRegistering;
   };
 
@@ -42,8 +38,7 @@ namespace dss {
     virtual void subscribe();
 
   private:
-    void startTimeout();
-    void stopTimeout();
+    void startTimeout(int _delay);
 
     void sendRegisterMessage();
     boost::shared_ptr<RegisteringLog> m_callback;

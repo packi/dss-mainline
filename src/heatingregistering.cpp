@@ -11,7 +11,6 @@ namespace dss {
 
 /*----------------------------------------------------------------------------*/
 RegisteringLog::RegisteringLog(HeatingRegisteringItf* pItf) :
-  m_registration(false),
   m_HeatingRegistering(pItf)
 { } //ctor
 
@@ -20,26 +19,9 @@ RegisteringLog::~RegisteringLog()
 
 void RegisteringLog::done(RestTransferStatus_t status, WebserviceReply reply)
 {
-  if ((REST_OK == status) && (0 == reply.code )) {
-    boost::mutex::scoped_lock lock(m_lock);
-    m_registration = true;
-
-    if (m_HeatingRegistering) {
-      m_HeatingRegistering->stopTimeout();
-    }
+  if (!((REST_OK == status) && (0 == reply.code))) {
+    m_HeatingRegistering->startTimeout(500);
   }
-}
-
-bool RegisteringLog::isRegistered() const
-{
-  boost::mutex::scoped_lock lock(m_lock);
-  return m_registration;
-}
-
-void RegisteringLog::resetRegistration()
-{
-  boost::mutex::scoped_lock lock(m_lock);
-  m_registration = false;
 }
 
 __DEFINE_LOG_CHANNEL__(HeatingRegisteringPlugin, lsInfo);
@@ -54,22 +36,18 @@ HeatingRegisteringPlugin::HeatingRegisteringPlugin(EventInterpreter* _pInterpret
 HeatingRegisteringPlugin::~HeatingRegisteringPlugin()
 { } // dtor
 
-void HeatingRegisteringPlugin::startTimeout() {
-  log(std::string(__func__) + " start cloud response timeout", lsInfo);
+void HeatingRegisteringPlugin::startTimeout(int _delay) {
+  log(std::string(__func__) + " start cloud registration delay", lsInfo);
   boost::shared_ptr<Event> pEvent(new Event(EV_RETRY_REGISTRATION));
-  pEvent->setProperty("time", "+300"); // 5 minutes
+  pEvent->setProperty("time", "+" + intToString(_delay));
+  pEvent->setProperty(EventProperty::Unique, "Yes");
   DSS::getInstance()->getEventQueue().pushEvent(pEvent);
-}
-
-void HeatingRegisteringPlugin::stopTimeout()
-{
-  DSS::getInstance()->getEventRunner().removeEventByName(EV_RETRY_REGISTRATION);
 }
 
 void HeatingRegisteringPlugin::subscribe() {
   boost::shared_ptr<EventSubscription> subscription;
 
-  subscription.reset(new EventSubscription("model_ready",
+  subscription.reset(new EventSubscription("dsMeter_ready",
                                            getName(),
                                            getEventInterpreter(),
                                            boost::shared_ptr<SubscriptionOptions>()));
@@ -84,26 +62,22 @@ void HeatingRegisteringPlugin::subscribe() {
 
 void HeatingRegisteringPlugin::handleEvent(Event& _event,
                                            const EventSubscription& _subscription) {
-  if ( (_event.getName() == "model_ready") ||
-       (_event.getName() == EV_RETRY_REGISTRATION)) {
+  if (_event.getName() == "dsMeter_ready") {
+    startTimeout(120);
+  } else if (_event.getName() == EV_RETRY_REGISTRATION) {
     sendRegisterMessage();
   }
 }
 
 void HeatingRegisteringPlugin::sendRegisterMessage() {
-  if (m_callback->isRegistered()) {
-    stopTimeout();
-  } else {
-    bool webServiceEnabled = DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_enabled);
-    if (webServiceEnabled) {
-      std::string parameters;
-      // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
-      parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
-      boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(m_callback));
-      WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
-      m_callback->resetRegistration();
-      startTimeout();
-    }
+  bool webServiceEnabled = DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_enabled);
+  if (webServiceEnabled) {
+    std::string parameters;
+    // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
+    parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
+    boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(m_callback));
+    log(std::string(__func__) + " sending DSSBackAgain", lsInfo);
+    WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
   }
 }
 

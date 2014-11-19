@@ -309,7 +309,8 @@ namespace dss {
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
-        ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version)
+        ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version) +
+        ", Vendor-ID: " + unsignedLongIntToHexString(_spec.VendorID)
         );
 
     boost::shared_ptr<Device> dev;
