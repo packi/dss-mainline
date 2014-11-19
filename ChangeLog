@@ -1,5 +1,12 @@
 dSS - digitalSTROM Server
 
+v1.29.0	19.11.2014
+	* added getTemperatureControlValues to apartment
+	* added DeviceHeatingTypeChanged event, #8349
+	* invalidate sensor value after 1h in monitor task, #8338
+	* added classes to handle heating registering to the cloud, #8252
+	* rework DSSBackAgain logic, #8365
+
 v1.28.1	14.11.2014
 	* avoid writing invalid operation mode into zone, #7939
 	* fix regression in OEM web queries, #8143
