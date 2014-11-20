@@ -1893,6 +1893,7 @@ namespace dss {
     {
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event(EventName::DeviceHeatingTypeChanged));
+      pEvent->setProperty("zoneID", intToString(getZoneID()));
       if (DSS::getInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
