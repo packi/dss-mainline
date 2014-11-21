@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.29.1	21.11.2014
+	* add zoneID of changed device to DeviceHeatingTypeChanged event
+
 v1.29.0	19.11.2014
 	* added getTemperatureControlValues to apartment
 	* added DeviceHeatingTypeChanged event, #8349
