@@ -138,9 +138,6 @@ void SensorMonitorTask::run() {
           pZone->setBrightnessValue(hSensors.m_BrightnessValue, DateTime::NullDate);
         }
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-        if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureSetpoint, hStatus.m_NominalValueTS)) {
-          pZone->setNominalValue(hStatus.m_NominalValue, DateTime::NullDate);
-        }
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
           pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
         }
