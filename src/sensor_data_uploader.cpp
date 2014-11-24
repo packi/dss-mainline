@@ -34,6 +34,8 @@ namespace dss {
 
 typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 
+typedef void (*doUploadSensorDataFunction)(It begin, It end, WebserviceCallDone_t callback);
+
 class SensorLog : public WebserviceCallDone,
                   public boost::enable_shared_from_this<SensorLog> {
   __DECL_LOG_CHANNEL__
@@ -42,7 +44,8 @@ class SensorLog : public WebserviceCallDone,
     max_elements = 10000,
   };
 public:
-  SensorLog() : m_pending_upload(false) {};
+  SensorLog(const std::string hubName, doUploadSensorDataFunction doUpload)
+    : m_pending_upload(false), m_hubName(hubName), m_doUpload(doUpload) {};
   virtual ~SensorLog() {};
   void append(boost::shared_ptr<Event> event, bool highPrio = false);
   void triggerUpload();
@@ -53,6 +56,8 @@ private:
   std::vector<boost::shared_ptr<Event> > m_uploading;
   boost::mutex m_lock;
   bool m_pending_upload;
+  const std::string m_hubName;
+  doUploadSensorDataFunction m_doUpload;
 };
 
 __DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
@@ -105,7 +110,7 @@ void SensorLog::triggerUpload() {
     }
 
     chunk_end = chunk_start + remainder;
-    WebserviceMsHub::doUploadSensorData(chunk_start, chunk_end, shared_from_this());
+    m_doUpload(chunk_start, chunk_end, shared_from_this());
     if (chunk_end != m_uploading.end()) {
       chunk_start = chunk_end;
     }
@@ -122,9 +127,9 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
 
   if (status) {
     // keep events in the upload queue, retry with next tick
-    log("save event network problem: " + intToString(status), lsWarning);
+    log("[" + m_hubName + "] save event network problem: " + intToString(status), lsWarning);
   } else if (reply.code) {
-    log("save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
+    log("[" + m_hubName + "] save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
         lsWarning);
     m_uploading.clear();
     // MS-Hub, will detect jumps in sequence ID
@@ -142,7 +147,8 @@ __DEFINE_LOG_CHANNEL__(SensorDataUploadPlugin, lsInfo);
 
 SensorDataUploadPlugin::SensorDataUploadPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>()) {
+    m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<It>))
+{
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
   websvcEnabledNode ->addListener(this);
