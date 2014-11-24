@@ -325,8 +325,8 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
     return http_code;
   }
 
-  if (result != NULL) {
-    *result = outputCollector.content();
+  if ((result != NULL) && (outputCollector.content() != NULL)) {
+      *result = outputCollector.content();
   }
 
   if (cheaders) {
