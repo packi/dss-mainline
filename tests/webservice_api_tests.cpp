@@ -145,9 +145,10 @@ BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixture) {
   // also starts event runner et. al
   m_dss_guard.initPlugins();
 
-  // check keep alive ical is scheduled,  (+1 for sensor data upload)
+  // check event subscriptions when webservice is enabled:
+  // (ms-hub keepalive, event uploder mshub + dshub)
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(true);
-  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 2);
+  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 3);
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
   BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 0);
 }

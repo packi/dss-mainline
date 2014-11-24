@@ -47,5 +47,23 @@ namespace dss {
     boost::shared_ptr<SensorLog> m_log;
     PropertyNodePtr websvcEnabledNode;
   };
+
+  class SensorDataUploadDsHubPlugin : public EventInterpreterPlugin,
+                                      private PropertyListener {
+  private:
+    __DECL_LOG_CHANNEL__
+    virtual void propertyChanged(PropertyNodePtr _caller,
+                                 PropertyNodePtr _changedNode);
+    void scheduleBatchUploader();
+
+  public:
+    SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter);
+    virtual ~SensorDataUploadDsHubPlugin();
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+    virtual void subscribe();
+  private:
+    boost::shared_ptr<SensorLog> m_log;
+    PropertyNodePtr websvcEnabledNode;
+  };
 }
 #endif

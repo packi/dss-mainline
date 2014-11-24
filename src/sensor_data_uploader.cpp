@@ -311,4 +311,168 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
   }
 }
 
+
+/****************************************************************************/
+/* Sensor Data Upload dS Hub Plugin                                         */
+/****************************************************************************/
+
+__DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);
+
+SensorDataUploadDsHubPlugin::SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
+    m_log(boost::make_shared<SensorLog>("dshub", WebserviceDsHub::doUploadSensorData<It>))
+{
+  websvcEnabledNode =
+    DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
+  websvcEnabledNode ->addListener(this);
+}
+
+SensorDataUploadDsHubPlugin::~SensorDataUploadDsHubPlugin()
+{ }
+
+namespace EventName {
+  std::string UploadDsHubEventLog = "upload_ds_hub_event_log";
+}
+
+void SensorDataUploadDsHubPlugin::scheduleBatchUploader() {
+  log(std::string(__func__) + " start uploading", lsInfo);
+  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadDsHubEventLog));
+  pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+  int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
+  pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
+  DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+}
+
+void SensorDataUploadDsHubPlugin::propertyChanged(PropertyNodePtr _caller,
+                                             PropertyNodePtr _changedNode) {
+  // initiate connection as soon as webservice got enabled
+  if (_changedNode->getBoolValue() == true) {
+    scheduleBatchUploader();
+  } else {
+    log(std::string(__func__) + " stop uploading", lsInfo);
+    DSS::getInstance()->getEventRunner().removeEventByName(EventName::UploadDsHubEventLog);
+  }
+}
+
+void SensorDataUploadDsHubPlugin::subscribe() {
+  boost::shared_ptr<EventSubscription> subscription;
+
+  std::vector<std::string> events;
+  events.push_back(EventName::DeviceSensorValue);
+  events.push_back(EventName::DeviceStatus);
+  events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::ZoneSensorValue);
+  events.push_back(EventName::ZoneSensorError);
+  events.push_back(EventName::CallScene);
+  events.push_back(EventName::UndoScene);
+  events.push_back(EventName::StateChange);
+  events.push_back(EventName::AddonStateChange);
+  events.push_back(EventName::HeatingEnabled);
+  events.push_back(EventName::HeatingControllerSetup);
+  events.push_back(EventName::HeatingControllerValue);
+  events.push_back(EventName::HeatingControllerState);
+  events.push_back(EventName::Running);
+  events.push_back(EventName::UploadDsHubEventLog);
+  events.push_back(EventName::OldStateChange);
+  events.push_back(EventName::AddonToCloud);
+
+  foreach (std::string name, events) {
+    subscription.reset(new EventSubscription(name, getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+}
+
+void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
+                                              const EventSubscription& _subscription) {
+
+  if (!WebserviceDsHub::isAuthorized()) {
+    // no upload when webservice is disabled
+    return;
+  }
+
+  try {
+
+    /* #7725
+     * EventName::DeviceSensorValue
+     * EventName::ZoneSensorValue with SensorType != 50 or 51
+     */
+    bool highPrio = true;
+    if (_event.getName() == EventName::DeviceSensorValue) {
+      highPrio = false;
+    }
+
+    if (_event.getName() == EventName::ZoneSensorValue) {
+      int sensorType = strToInt(_event.getPropertyByName("sensorType"));
+      switch (sensorType) {
+        case SensorIDRoomTemperatureControlVariable:
+        case SensorIDRoomTemperatureSetpoint:
+          break;
+        default:
+          highPrio = false;
+          break;
+      }
+    }
+
+    if (_event.getName() == EventName::Running) {
+      scheduleBatchUploader();
+    } else if (_event.getName() == EventName::DeviceSensorValue ||
+               _event.getName() == EventName::ZoneSensorValue ||
+               _event.getName() == EventName::ZoneSensorError ||
+               _event.getName() == EventName::DeviceStatus ||
+               _event.getName() == EventName::DeviceInvalidSensor ||
+               _event.getName() == EventName::HeatingEnabled ||
+               _event.getName() == EventName::HeatingControllerSetup ||
+               _event.getName() == EventName::HeatingControllerValue ||
+               _event.getName() == EventName::HeatingControllerState ||
+               _event.getName() == EventName::AddonToCloud) {
+      log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
+      m_log->append(_event.getptr(), highPrio);
+    } else if (_event.getName() == EventName::CallScene ||
+               _event.getName() == EventName::UndoScene) {
+      if (_event.getRaiseLocation() == erlGroup) {
+        boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
+        if (pGroup->getID() != GroupIDControlTemperature) {
+          // ignore
+          return;
+        }
+        if (_event.hasPropertySet("sceneID")) {
+          // limited set of allowed operation modes on the temperature control group
+          int sceneID = strToInt(_event.getPropertyByName("sceneID"));
+          if (sceneID < 0 || sceneID > 15) {
+            return;
+          }
+        }
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr(), highPrio);
+      }
+
+    } else if (_event.getName() == EventName::StateChange ||
+               _event.getName() == EventName::OldStateChange) {
+      std::string sName = _event.getPropertyByName("statename");
+      if (sName == "holiday" || sName == "presence") {
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr(), highPrio);
+      }
+
+    } else if (_event.getName() == EventName::AddonStateChange) {
+      std::string sName = _event.getPropertyByName("scriptID");
+      if (sName == "heating-controller") {
+        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
+        m_log->append(_event.getptr(), highPrio);
+      }
+
+    } else if (_event.getName() == EventName::UploadDsHubEventLog) {
+      log(std::string(__func__) + " upload event log", lsInfo);
+      m_log->triggerUpload();
+    } else {
+      log("Unhandled event " + _event.getName(), lsInfo);
+    }
+
+  } catch (std::runtime_error &e) {
+    log(std::string("exception ") + e.what(), lsWarning);
+  }
+}
+
 }
