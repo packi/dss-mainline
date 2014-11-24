@@ -104,7 +104,9 @@ namespace dss {
       boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
       boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
       mEvent->setProperty("action", "moved");
-      mEvent->setProperty("id", intToString(_zone->getID()));
+      mEvent->setProperty("id", intToString(_zone->getID())); //TODO: remove property in next release
+      mEvent->setProperty("oldZoneID", intToString(oldZoneID));
+      mEvent->setProperty("newZoneID", intToString(_zone->getID()));
       if(DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(mEvent);
       }
