@@ -66,9 +66,9 @@ namespace dss {
     ZoneHeatingStatus() :
       m_OperationMode(HeatingOperationModeInvalid),
       m_NominalValue(0),
-      m_NominalValueTS(0),
+      m_NominalValueTS(DateTime::NullDate),
       m_ControlValue(0),
-      m_ControlValueTS(0)
+      m_ControlValueTS(DateTime::NullDate)
       {}
     int m_OperationMode;
     double m_NominalValue;         // only used for mode 1
@@ -80,13 +80,13 @@ namespace dss {
   typedef struct ZoneSensorStatus {
     ZoneSensorStatus() :
       m_TemperatureValue(0),
-      m_TemperatureValueTS(0),
+      m_TemperatureValueTS(DateTime::NullDate),
       m_HumidityValue(0),
-      m_HumidityValueTS(0),
+      m_HumidityValueTS(DateTime::NullDate),
       m_BrightnessValue(0),
-      m_BrightnessValueTS(0),
+      m_BrightnessValueTS(DateTime::NullDate),
       m_CO2ConcentrationValue(0),
-      m_CO2ConcentrationValueTS(0)
+      m_CO2ConcentrationValueTS(DateTime::NullDate)
       {}
     double m_TemperatureValue;
     DateTime m_TemperatureValueTS;
