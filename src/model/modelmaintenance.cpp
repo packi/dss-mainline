@@ -207,7 +207,7 @@ namespace dss {
       DSS::getInstance()->getSecurity().loginAsSystemUser("ModelMaintenance needs system-rights");
     }
 
-    log("ModelMaintenance::execute: Enumerating model", lsInfo);
+    log("ModelMaintenance::execute: Enumerating model", lsNotice);
     discoverDS485Devices();
 
     boost::shared_ptr<ApartmentTreeListener> treeListener
@@ -913,6 +913,7 @@ namespace dss {
       if (boost::filesystem::exists(configFileName)) {
         persistence.readConfigurationFromXML(configFileName);
       }
+      log("processed apartment.xml", lsNotice);
     }
   } // readConfiguration
 
