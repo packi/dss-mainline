@@ -777,8 +777,16 @@ namespace dss {
     }
     _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
 
-    if (_pDevice->isValveDevice()) {
-      _ofs << " valveType=\"" << _pDevice->getValveTypeAsString() <<"\"";
+    /*
+     * Problem: we can't rely on isValveDevice, because the
+     * corresponding DSM might not have been read out yet,
+     * hence the type of device might be unknown
+     * On the other side, getValveTyp != UNKNOWN must have
+     * been set by the user, it can't be read out from the
+     * device, hence never lose that setting!
+     */
+    if (_pDevice->getValveType() != DEVICE_VALVE_UNKNOWN) {
+        _ofs << " valveType=\"" << _pDevice->getValveTypeAsString() <<"\"";
     }
 
     _ofs << ">" << std::endl;

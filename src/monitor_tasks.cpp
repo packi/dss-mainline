@@ -138,9 +138,6 @@ void SensorMonitorTask::run() {
           pZone->setBrightnessValue(hSensors.m_BrightnessValue, DateTime::NullDate);
         }
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-        if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureSetpoint, hStatus.m_NominalValueTS)) {
-          pZone->setNominalValue(hStatus.m_NominalValue, DateTime::NullDate);
-        }
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
           pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
         }
@@ -182,13 +179,13 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
         if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
           pGroup->callScene(coSystem, SAC_MANUAL, hStatus.m_OperationMode, "", false);
           usleep(1000 * 1000);
-          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureSetpoint,
-              hStatus.m_NominalValue, "");
+        }
+        if (hSensors.m_TemperatureValueTS  != DateTime::NullDate) {
+          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDTemperatureIndoors,
+              hSensors.m_TemperatureValue, "");
           usleep(1000 * 1000);
         }
-        pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDTemperatureIndoors,
-            hSensors.m_TemperatureValue, "");
-        usleep(1000 * 1000);
+
         break;
       case HeatingControlModeIDFixed:
         if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
@@ -198,9 +195,12 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
         break;
       case HeatingControlModeIDManual:
         if (HeatingOperationModeInvalid != hStatus.m_OperationMode) {
-          pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureControlVariable,
-              hStatus.m_ControlValue, "");
-          usleep(1000 * 1000);
+          if (hStatus.m_ControlValueTS != DateTime::NullDate) {
+            pZone->pushSensor(coSystem, SAC_MANUAL, sourceDSID, SensorIDRoomTemperatureControlVariable,
+                hStatus.m_ControlValue, "");
+            usleep(1000 * 1000);
+          }
+
         }
         break;
       case HeatingControlModeIDZoneFollower:
