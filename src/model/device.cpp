@@ -1869,7 +1869,11 @@ namespace dss {
     } else if (strcmp(_string, "Unknown") == 0) {
       deviceType = DEVICE_VALVE_UNKNOWN;
       assigned = true;
+    } else {
+        Logger::getInstance()->log(std::string("Invalid valve type: ") +
+                                   _string, lsWarning);
     }
+
     return assigned;
   }
 
