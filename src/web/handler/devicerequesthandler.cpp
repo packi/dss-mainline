@@ -1493,6 +1493,63 @@ namespace dss {
 
       device->setDeviceUMVRelayValue(strToInt(value));
       return success();
+    } else if (_request.getMethod() == "setBlinkConfig") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      int blinkCount = -1;
+      double onDelay = -1;
+      double offDelay = -1;
+
+      std::string value = _request.getParameter("count");
+
+      if (!value.empty()) {
+        blinkCount = strToIntDef(value, -1);
+        if ((blinkCount < 0) || (blinkCount > 255)) { //255/FCOUNT1 is max value
+          return failure("invalid count value given");
+        }
+      }
+
+      value = _request.getParameter("ondelay");
+      if (!value.empty()) {
+        onDelay = strToDouble(value);
+      }
+
+      value = _request.getParameter("offdelay");
+      if (!value.empty()) {
+        offDelay = strToDouble(value);
+      }
+
+      if (blinkCount != -1) {
+        device->setDeviceUMRBlinkRepetitions((uint8_t)blinkCount);
+      }
+
+      if (onDelay != -1) {
+        device->setDeviceUMROnDelay(onDelay);
+      }
+
+      if (offDelay != -1) {
+         device->setDeviceUMROffDelay(offDelay);
+      }
+      return success();
+    } else if (_request.getMethod() == "getBlinkConfig") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("count", device->getDeviceUMRBlinkRepetitions());
+      resultObj->addProperty("ondelay", device->getDeviceUMROnDelay());
+      resultObj->addProperty("offdelay", device->getDeviceUMROffDelay());
+      return success(resultObj);
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

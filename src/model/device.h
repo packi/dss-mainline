@@ -694,6 +694,13 @@ namespace dss {
 
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);
+
+    void setDeviceUMRBlinkRepetitions(uint8_t _count);
+    void setDeviceUMROnDelay(double delay);
+    void setDeviceUMROffDelay(double delay);
+    uint8_t getDeviceUMRBlinkRepetitions();
+    double getDeviceUMROnDelay();
+    double getDeviceUMROffDelay();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

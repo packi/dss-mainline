@@ -23,6 +23,7 @@
 #include "device.h"
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
 #include <digitalSTROM/dsuid/dsuid.h>
+#include <math.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -40,6 +41,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
   //================================================== Device
@@ -2358,6 +2360,70 @@ namespace dss {
     }
 
     setDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config, _value);
+  }
+
+  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
+  }
+
+  void Device::setDeviceUMROnDelay(double _delay) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    _delay = _delay * 1000.0; // convert from seconds to ms
+
+    if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
+      throw std::runtime_error("invalid delay value");
+    }
+    uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
+  }
+
+  void Device::setDeviceUMROffDelay(double _delay) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    _delay = _delay * 1000.0; // convert from seconds to ms
+
+    if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
+      throw std::runtime_error("invalid delay value");
+    }
+    uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
+  }
+
+  uint8_t Device::getDeviceUMRBlinkRepetitions() {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+    return getDeviceConfig(CfgClassFunction, CfgFunction_FCount1);
+  }
+
+  double Device::getDeviceUMROnDelay() {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1);
+    double ret = (value * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
+    return ret;
+
+  }
+
+  double Device::getDeviceUMROffDelay() {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+    double ret = (value * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
+    return ret;
   }
 
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)

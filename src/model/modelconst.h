@@ -296,6 +296,9 @@ namespace dss {
   const uint8_t CfgFunction_Mode = 0;
   const uint8_t CfgFunction_ButtonMode = 1;
   const uint8_t CfgFunction_DimTime0 = 0x06;
+  const uint8_t CfgFunction_FOffTime1 = 0x15;
+  const uint8_t CfgFunction_FOnTime1 = 0x16;
+  const uint8_t CfgFunction_FCount1 = 0x17;
   const uint8_t CfgFunction_LedConfig0 = 0x18;
   const uint8_t CfgFunction_LTMode = 0x1E;
   const uint8_t CfgFunction_LTTimeoutOff = 0x22;
