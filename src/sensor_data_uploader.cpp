@@ -266,6 +266,13 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
           // ignore
           return;
         }
+        if (_event.hasPropertySet("sceneID")) {
+          // limited set of allowed operation modes on the temperature control group
+          int sceneID = strToInt(_event.getPropertyByName("sceneID"));
+          if (sceneID < 0 || sceneID > 15) {
+            return;
+          }
+        }
         log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
