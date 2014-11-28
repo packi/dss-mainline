@@ -505,6 +505,78 @@ namespace dss {
     return JS_FALSE;
   } // global_getConsumption
 
+  JSBool global_get_weatherInformation(JSContext *cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+        ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if (ext != NULL) {
+      ApartmentSensorStatus_t aStatus = ext->getApartment().getSensorStatus();
+
+      ScriptObject obj(*ctx, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
+
+      if (aStatus.m_TemperatureValueTS != DateTime::NullDate) {
+        obj.setProperty<double>("TemperatureValue", aStatus.m_TemperatureValue);
+        obj.setProperty<std::string>("TemperatureValueTime", aStatus.m_TemperatureValueTS.toISO8601_ms());
+      }
+      if (aStatus.m_BrightnessValueTS != DateTime::NullDate) {
+        obj.setProperty<double>("BrightnessValue", aStatus.m_BrightnessValue);
+        obj.setProperty<std::string>("BrightnessValueTime", aStatus.m_BrightnessValueTS.toISO8601_ms());
+      }
+      if (aStatus.m_HumidityValueTS != DateTime::NullDate) {
+        obj.setProperty<double>("HumidityValue", aStatus.m_HumidityValue);
+        obj.setProperty<std::string>("HumidityValueTime", aStatus.m_HumidityValueTS.toISO8601_ms());
+      }
+      if (aStatus.m_WeatherTS != DateTime::NullDate) {
+        obj.setProperty<std::string>("WeatherIconId", aStatus.m_WeatherIconId);
+        obj.setProperty<std::string>("WeatherConditionId", aStatus.m_WeatherConditionId);
+        obj.setProperty<std::string>("WeatherServiceId", aStatus.m_WeatherServiceId);
+        obj.setProperty<std::string>("WeatherServiceTime", aStatus.m_WeatherTS.toISO8601_ms());
+      }
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_get_weatherInformation
+
+  JSBool global_set_weatherInformation(JSContext *cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext != NULL && argc >= 1) {
+        StringConverter st("UTF-8", "UTF-8");
+        std::string iconId, condId, serviceName;
+        if (argc >= 1) {
+          iconId = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+          iconId = escapeHTML(iconId);
+        }
+        if (argc >= 2) {
+          condId = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+          condId = escapeHTML(condId);
+        }
+        if (argc >= 3) {
+          serviceName = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
+          serviceName = escapeHTML(serviceName);
+        }
+        DateTime now;
+        ext->getApartment().setWeatherInformation(iconId, condId, serviceName, now);
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(0));
+        return JS_TRUE;
+      }
+    } catch (ScriptException& ex) {
+      JS_ReportError(cx, ex.what());
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+    return JS_FALSE;
+  } // global_set_weatherInformation
+
   JSFunctionSpec apartment_static_methods[] = {
     JS_FS("getName", global_get_name, 0, 0),
     JS_FS("setName", global_set_name, 1, 0),
@@ -518,6 +590,8 @@ namespace dss {
     JS_FS("getZoneByID", global_getZoneByID, 0, 0),
     JS_FS("getState", global_getStateByName, 1, 0),
     JS_FS("registerState", global_registerState, 1, 0),
+    JS_FS("getWeatherInformation", global_get_weatherInformation, 0, 0),
+    JS_FS("setWeatherInformation", global_set_weatherInformation, 3, 0),
     JS_FS_END
   };
 
@@ -3214,6 +3288,58 @@ namespace dss {
     return JS_FALSE;
   } // zone_setTemperatureControlValues
 
+  JSBool zone_getAssignedSensor(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_getAssignedSensor: ext of wrong type");
+        return JS_FALSE;
+      }
+      int sensorType = SensorIDNotUsed;
+      if (argc >= 1) {
+        try {
+          sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+      } else {
+        JS_ReportError(cx, "Model.zone_getAssignedSensor: parameter sensortype missing");
+        return JS_FALSE;
+      }
+
+      ScriptObject obj(*ctx, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      boost::shared_ptr<Device> pSensor = pZone->getAssignedSensorDevice(sensorType);
+
+      obj.setProperty<int>("type", sensorType);
+      if (!pSensor) {
+        obj.setProperty<bool>("dsuid", false);
+      } else {
+        obj.setProperty<std::string>("dsuid", dsuid2str(pSensor->getDSID()));
+      }
+      return JS_TRUE;
+
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+
+    return JS_FALSE;
+  } // zone_getAssignedSensor
+
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 4, 0),
@@ -3232,6 +3358,7 @@ namespace dss {
     JS_FS("getTemperatureControlValues", zone_getTemperatureControlValues, 0, 0),
     JS_FS("setTemperatureControlConfiguration", zone_setTemperatureControlConfiguration, 1, 0),
     JS_FS("setTemperatureControlValues", zone_setTemperatureControlValues, 1, 0),
+    JS_FS("getAssignedSensor", zone_getAssignedSensor, 1, 0),
     JS_FS_END
   };
 
