@@ -105,7 +105,9 @@ namespace dss {
       case GroupIDControlTemperature:
         {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
-          pZone->setHeatingOperationMode(_sceneNr);
+          if (_sceneNr <= 15) {
+            pZone->setHeatingOperationMode(_sceneNr);
+          }
         }
         break;
       default:

@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.29.2	26.11.2014
+	* setpoint values should not expire
+	* added checks to set temperature status value only if they are valid
+	* add old zoneID to DeviceEvent.moved, #8382
+	* save getValveType if set by user
+
 v1.29.1	21.11.2014
 	* add zoneID of changed device to DeviceHeatingTypeChanged event
 
