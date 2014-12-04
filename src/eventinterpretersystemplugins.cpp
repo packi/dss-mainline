@@ -1520,6 +1520,79 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkSensorValue(PropertyNodePtr _triggerProp) {
+    if (m_evtName != EventName::DeviceSensorValue && m_evtName != EventName::ZoneSensorValue) {
+      return false;
+    }
+
+    if (m_evtName == EventName::DeviceSensorValue) {
+      PropertyNodePtr triggerDevice = _triggerProp->getPropertyByName("dsuid");
+      std::string triggerDSID = triggerDevice ? triggerDevice->getAsString() : "";
+      dsuid_t dsuid = m_evtSrcDSID;
+      std::string eventDSID = dsuid2str(dsuid);
+      if (triggerDSID != eventDSID) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: type: " + m_evtName +
+                ", dsuid: " + dsuid2str(m_evtSrcDSID) + ", trigger dsuid " + triggerDSID, lsWarning);
+        return false;
+      }
+    } else if (m_evtName == EventName::ZoneSensorValue) {
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName("zone");
+      std::string zone = triggerZone ? triggerZone->getAsString() : "";
+      if (strToInt(zone) != m_evtSrcZone) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: type: " + m_evtName +
+                ", zone: " + intToString(m_evtSrcZone) + ", trigger zone " + zone, lsWarning);
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    std::string sensorType = m_properties.get("sensorType");
+    PropertyNodePtr triggerSensorType = _triggerProp->getPropertyByName("sensor");
+    std::string sSensorType = triggerSensorType ? triggerSensorType->getAsString() : "";
+    if (sSensorType != sensorType) {
+      Logger::getInstance()->log("SystemTrigger::checkSensor:: type: " + m_evtName +
+              ", sensor: " + sensorType + ", trigger sensor " + sSensorType, lsWarning);
+      return false;
+    }
+
+    std::string sensorValueFloat = m_properties.get("sensorValueFloat");
+    double eventValueFloat = strToDouble(sensorValueFloat);
+    double triggerValueFloat;
+
+    PropertyNodePtr triggerValue = _triggerProp->getPropertyByName("value");
+    PropertyNodePtr triggerOperator = _triggerProp->getPropertyByName("operator");
+
+    std::string sValue;
+    std::string sOperator;
+    if (triggerValue) {
+      sValue = triggerValue->getAsString();
+      triggerValueFloat = strToDouble(sValue);
+    }
+    if (triggerOperator) {
+      sOperator = triggerOperator->getAsString();
+    }
+
+    Logger::getInstance()->log("SystemTrigger::checkSensor:: value: " + sValue +
+            ", event value: " + sensorValueFloat + ", operator " + sOperator, lsError);
+
+    if (sOperator == "greater") {
+      if (eventValueFloat > triggerValueFloat) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
+                ", event value: " + sensorValueFloat, lsError);
+        return true;
+      }
+    } else if (sOperator == "lower") {
+      if (eventValueFloat < triggerValueFloat) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
+                ", event value: " + sensorValueFloat, lsError);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool SystemTrigger::checkTrigger(std::string _path) {
     if (!DSS::hasInstance()) {
       return false;
@@ -1583,6 +1656,20 @@ namespace dss {
       } else if (m_evtName == "deviceSensorEvent") {
         if (triggerValue == "device-sensor") {
           if (checkDeviceSensor(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == "deviceSensorValue") {
+        if (triggerValue == "device-sensor-value") {
+          if (checkSensorValue(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == "zoneSensorValue") {
+        if (triggerValue == "zone-sensor-value") {
+          if (checkSensorValue(triggerProp)) {
             return true;
           }
         }
