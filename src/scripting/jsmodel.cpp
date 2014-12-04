@@ -448,6 +448,61 @@ namespace dss {
     return JS_FALSE;
   } // global_registerState
 
+  JSBool global_unregisterState(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_unregisterState: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      std::string stateName;
+      try {
+        stateName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: state name");
+        return JS_FALSE;
+      }
+
+      eStateType stateType = StateType_Script;
+      try {
+        if (argc >= 2) {
+          if (!ctx->convertTo<bool>(JS_ARGV(cx, vp)[1])) {
+            stateType = StateType_Service;
+          }
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: script type");
+        return JS_FALSE;
+      }
+
+      std::string identifier = ctx->getWrapper()->getIdentifier();
+      try {
+        boost::shared_ptr<State> state;
+        state = ext->getApartment().getState(stateType, identifier, stateName);
+        state.reset();
+        ext->getApartment().removeState(stateName);
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {
+        JS_ReportError(cx, "State with given name not found");
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_FALSE;
+  } // global_unregisterState
+
   JSBool global_getEnergyMeterValue(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
