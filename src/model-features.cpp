@@ -388,6 +388,15 @@ const int MF_TK_TKM2[] =
   mf_pushbarea
 };
 
+const int MF_GE_TKM2[] =
+{ 
+  mf_blink,
+  mf_leddark,
+  mf_pushbutton,
+  mf_pushbarea,
+  mf_pushbadvanced
+};
+
 const int MF_SW_TKM2[] =
 {
   mf_blink,
@@ -614,6 +623,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::shared_ptr<std::vector<int> >(new std::vector<int>());
   fv->assign(MF_BL_KL2, MF_ARRAY_SIZE(MF_BL_KL2));
   setFeatures(ColorIDBlue, KL2, fv);
+  fv.reset();
+
+  fv = boost::shared_ptr<std::vector<int> >(new std::vector<int>());
+  fv->assign(MF_GE_TKM2, MF_ARRAY_SIZE(MF_GE_TKM2));
+  setFeatures(ColorIDYellow, TKM2, fv);
   fv.reset();
 
   fv = boost::shared_ptr<std::vector<int> >(new std::vector<int>());
