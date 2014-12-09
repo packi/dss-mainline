@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.29.3	09.12.2014
+	* filter temperature control group scene calls, #8506
+	* fix missing GE-TKM220/230 model features, #8525
+
 v1.29.2	26.11.2014
 	* setpoint values should not expire
 	* added checks to set temperature status value only if they are valid
