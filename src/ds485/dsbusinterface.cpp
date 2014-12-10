@@ -506,11 +506,8 @@ namespace dss {
   void DSBusInterface::handleBusChange(dsuid_t *_id, int _flag) {
     loginFromCallback();
 
-    BusMemberDevice_t devType = BusMember_Unknown;
-    boost::shared_ptr<DSMeter> busDevice;
     try {
-      busDevice = m_pModelMaintenance->getDSS().getApartment().getDSMeterByDSID(*_id);
-      devType = busDevice->getBusMemberType();
+      m_pModelMaintenance->getDSS().getApartment().getDSMeterByDSID(*_id);
     } catch(ItemNotFoundException& e) {
       // only important for dSMs that are joining; a dSM that is not known
       // in the model and that is leaving can be ignored
@@ -521,30 +518,13 @@ namespace dss {
       }
     }
 
-    switch (devType) {
-      case BusMember_dSM11:
-      case BusMember_dSM12:
-      case BusMember_vDC:
-      case BusMember_vDSM:
-        {
-          ModelEvent::EventType eventType;
-          if(_flag) {
-            eventType = ModelEvent::etLostDSMeter;
-          } else  {
-            eventType = ModelEvent::etDS485DeviceDiscovered;
-          }
-          m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
-        }
-        break;
-      case BusMember_Unknown:
-      default:
-        {
-          log("ds485 bus change unhandled: " + dsuid2str(*_id) +
-              ", State: " + intToString(_flag) +
-              ", Device Type: " + intToString(devType), lsWarning);
-        }
-        break;
+    ModelEvent::EventType eventType;
+    if (_flag) {
+      eventType = ModelEvent::etLostDSMeter;
+    } else  {
+      eventType = ModelEvent::etDS485DeviceDiscovered;
     }
+    m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType, *_id));
   }
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
