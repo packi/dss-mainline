@@ -782,11 +782,7 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getDeviceType() == DEVICE_TYPE_UMV) {
-        pDevice->getDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->getDeviceSceneMode(id, config);
-      }
+      pDevice->getDeviceSceneMode(id, config);
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("sceneID", id);
       resultObj->addProperty("dontCare", config.dontcare);
