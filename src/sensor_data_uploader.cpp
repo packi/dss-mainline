@@ -358,9 +358,11 @@ void SensorDataUploadDsHubPlugin::subscribe() {
   boost::shared_ptr<EventSubscription> subscription;
 
   std::vector<std::string> events;
+  events.push_back(EventName::DeviceBinaryInputEvent);
   events.push_back(EventName::DeviceSensorValue);
   events.push_back(EventName::DeviceStatus);
   events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::ExecutionDenied);
   events.push_back(EventName::ZoneSensorValue);
   events.push_back(EventName::ZoneSensorError);
   events.push_back(EventName::CallScene);
@@ -417,7 +419,8 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
 
     if (_event.getName() == EventName::Running) {
       scheduleBatchUploader();
-    } else if (_event.getName() == EventName::DeviceSensorValue ||
+    } else if (_event.getName() == EventName::DeviceBinaryInputEvent ||
+               _event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
                _event.getName() == EventName::ZoneSensorError ||
                _event.getName() == EventName::DeviceStatus ||
@@ -426,7 +429,8 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
-               _event.getName() == EventName::AddonToCloud) {
+               _event.getName() == EventName::AddonToCloud ||
+               _event.getName() == EventName::ExecutionDenied) {
       log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
       m_log->append(_event.getptr(), highPrio);
     } else if (_event.getName() == EventName::CallScene ||
