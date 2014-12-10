@@ -60,6 +60,8 @@ namespace dss {
     bool initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, DeviceSpec_t& _spec);
     void scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice);
     void setMeterCapability(boost::shared_ptr<DSMeter> _dsMeter);
+    bool applyMeterSpec(boost::shared_ptr<DSMeter> _dsMeter);
+
   private:
     Apartment& m_Apartment;
     StructureQueryBusInterface& m_Interface;

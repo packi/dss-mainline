@@ -60,7 +60,6 @@ namespace dss {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
     DSMeterHash_t hash;
-    DSMeterSpec_t spec;
 
     try {
       hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
@@ -91,19 +90,7 @@ namespace dss {
         (hash.Hash != dsmHash) ||
         (hash.ModificationCount != dsmModCount)) {
 
-      try {
-        spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
-        _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
-        _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
-        _dsMeter->setHardwareVersion(spec.HardwareVersion);
-        _dsMeter->setApiVersion(spec.APIVersion);
-        _dsMeter->setPropertyFlags(spec.flags);
-        _dsMeter->setBusMemberType(spec.DeviceType);
-        _dsMeter->setApartmentState(spec.ApartmentState);
-
-        if (_dsMeter->getName().empty()) {
-          _dsMeter->setName(spec.Name);
-        }
+      if (applyMeterSpec(_dsMeter)) {
         if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
           log("scanDSMeter: dSMeter is incompatible", lsWarning);
           _dsMeter->setDatamodelHash(hash.Hash);
@@ -112,7 +99,7 @@ namespace dss {
           _dsMeter->setIsValid(true);
           return true;
         }
-      } catch(BusApiError& e) {
+      } else {
         log("scanDSMeter: Error getting dSMSpecs", lsWarning);
         return false;
       }
@@ -514,6 +501,28 @@ namespace dss {
         }
         break;
     }
+  }
+
+  bool BusScanner::applyMeterSpec(boost::shared_ptr<DSMeter> _dsMeter) {
+    try {
+      DSMeterSpec_t spec;
+      spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
+      _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
+      _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
+      _dsMeter->setHardwareVersion(spec.HardwareVersion);
+      _dsMeter->setApiVersion(spec.APIVersion);
+      _dsMeter->setPropertyFlags(spec.flags);
+      _dsMeter->setBusMemberType(spec.DeviceType);
+      _dsMeter->setApartmentState(spec.ApartmentState);
+
+      if (_dsMeter->getName().empty()) {
+        _dsMeter->setName(spec.Name);
+      }
+    } catch(BusApiError& e) {
+      log("applyMeterSpec: Error getting dSMSpecs", lsWarning);
+      return false;
+    }
+    return true;
   }
 
   bool BusScanner::scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
