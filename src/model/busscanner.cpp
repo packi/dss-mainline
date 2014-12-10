@@ -117,64 +117,7 @@ namespace dss {
         return false;
       }
 
-      switch (_dsMeter->getBusMemberType()) {
-        case BusMember_dSM11:
-          {
-            _dsMeter->setCapability_HasDevices(true);
-            _dsMeter->setCapability_HasMetering(true);
-            _dsMeter->setCapability_HasTemperatureControl(false);
-          }
-          break;
-        case BusMember_dSM12:
-          {
-            _dsMeter->setCapability_HasDevices(true);
-            _dsMeter->setCapability_HasMetering(true);
-            _dsMeter->setCapability_HasTemperatureControl(true);
-          }
-          break;
-        case BusMember_vDSM:
-          {
-            _dsMeter->setCapability_HasDevices(false);
-            _dsMeter->setCapability_HasMetering(false);
-            _dsMeter->setCapability_HasTemperatureControl(true);
-          }
-          break;
-        case BusMember_vDC:
-          {
-            boost::shared_ptr<VdcSpec_t> props;
-            try {
-              props = VdcHelper::getCapabilities(_dsMeter->getDSID());
-              if (props) {
-                _dsMeter->setCapability_HasMetering(props->hasMetering);
-                _dsMeter->setHardwareVersion(props->hardwareVersion);
-                _dsMeter->setHardwareName(props->model);
-                _dsMeter->setSoftwareVersion(props->modelVersion);
-              }
-            } catch(std::runtime_error& e) {
-            }
-            _dsMeter->setCapability_HasDevices(true);
-            _dsMeter->setCapability_HasTemperatureControl(true); // transparently trapped by the vdSM
-
-            boost::shared_ptr<VdsdSpec_t> spec;
-            try {
-              spec = VdcHelper::getSpec(_dsMeter->getDSID(), _dsMeter->getDSID());
-              if (spec) {
-                if (_dsMeter->getName().empty()) {
-                  _dsMeter->setName(spec->name);
-                }
-                _dsMeter->setVdcConfigURL(spec->configURL);
-              }
-            } catch(std::runtime_error& e) {}
-          }
-          break;
-        default:
-          {
-            _dsMeter->setCapability_HasDevices(false);
-            _dsMeter->setCapability_HasMetering(false);
-            _dsMeter->setCapability_HasTemperatureControl(false);
-          }
-          break;
-      }
+      setMeterCapability(_dsMeter);
 
       if (_dsMeter->getCapability_HasDevices()) {
         std::vector<int> zoneIDs;
@@ -509,6 +452,67 @@ namespace dss {
       boost::shared_ptr<ModelMaintenance::VdcDataQuery> task(new ModelMaintenance::VdcDataQuery(_pDevice));
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
+    }
+  }
+
+  void BusScanner::setMeterCapability(boost::shared_ptr<DSMeter> _dsMeter) {
+    switch (_dsMeter->getBusMemberType()) {
+      case BusMember_dSM11:
+        {
+          _dsMeter->setCapability_HasDevices(true);
+          _dsMeter->setCapability_HasMetering(true);
+          _dsMeter->setCapability_HasTemperatureControl(false);
+        }
+        break;
+      case BusMember_dSM12:
+        {
+          _dsMeter->setCapability_HasDevices(true);
+          _dsMeter->setCapability_HasMetering(true);
+          _dsMeter->setCapability_HasTemperatureControl(true);
+        }
+        break;
+      case BusMember_vDSM:
+        {
+          _dsMeter->setCapability_HasDevices(false);
+          _dsMeter->setCapability_HasMetering(false);
+          _dsMeter->setCapability_HasTemperatureControl(true);
+        }
+        break;
+      case BusMember_vDC:
+        {
+          boost::shared_ptr<VdcSpec_t> props;
+          try {
+            props = VdcHelper::getCapabilities(_dsMeter->getDSID());
+            if (props) {
+              _dsMeter->setCapability_HasMetering(props->hasMetering);
+              _dsMeter->setHardwareVersion(props->hardwareVersion);
+              _dsMeter->setHardwareName(props->model);
+              _dsMeter->setSoftwareVersion(props->modelVersion);
+            }
+          } catch(std::runtime_error& e) {
+          }
+          _dsMeter->setCapability_HasDevices(true);
+          _dsMeter->setCapability_HasTemperatureControl(true); // transparently trapped by the vdSM
+
+          boost::shared_ptr<VdsdSpec_t> spec;
+          try {
+            spec = VdcHelper::getSpec(_dsMeter->getDSID(), _dsMeter->getDSID());
+            if (spec) {
+              if (_dsMeter->getName().empty()) {
+                _dsMeter->setName(spec->name);
+              }
+              _dsMeter->setVdcConfigURL(spec->configURL);
+            }
+          } catch(std::runtime_error& e) {}
+        }
+        break;
+      default:
+        {
+          _dsMeter->setCapability_HasDevices(false);
+          _dsMeter->setCapability_HasMetering(false);
+          _dsMeter->setCapability_HasTemperatureControl(false);
+        }
+        break;
     }
   }
 
