@@ -969,7 +969,8 @@ namespace dss {
         return failure("Invalid or missing parameter 'mode'");
       }
 
-      if (pDevice->getDeviceType() != DEVICE_TYPE_AKM) {
+      if ((pDevice->getDeviceType() != DEVICE_TYPE_AKM) &&
+          (pDevice->getDeviceType() != DEVICE_TYPE_UMR)) {
         return failure("This device does not support AKM properties");
       }
 

@@ -379,7 +379,7 @@ namespace dss {
     }
     updateIconPath();
 
-    if ((getDeviceType() == DEVICE_TYPE_AKM) && (m_pPropertyNode != NULL)) {
+    if (((getDeviceType() == DEVICE_TYPE_AKM) || (getDeviceType() == DEVICE_TYPE_UMR)) && (m_pPropertyNode != NULL)) {
         m_pPropertyNode->createProperty("AKMInputProperty")
           ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
     }

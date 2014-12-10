@@ -492,6 +492,7 @@ const int MF_SW_UMR200[] =
   mf_highlevel,
   mf_jokerconfig,
   mf_twowayconfig,
+  mf_akminput,
   mf_akmsensor,
   mf_akmdelay,
   mf_blinkconfig,
