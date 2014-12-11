@@ -58,6 +58,7 @@ namespace dss {
     extern const std::string HeatingEnabled;
     extern const std::string HeatingControllerSetup;
     extern const std::string HeatingControllerValue;
+    extern const std::string HeatingControllerValueDsHub;
     extern const std::string HeatingControllerState;
     extern const std::string OldStateChange;
     extern const std::string AddonToCloud;

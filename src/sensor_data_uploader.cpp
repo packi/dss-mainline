@@ -369,7 +369,7 @@ void SensorDataUploadDsHubPlugin::subscribe() {
   events.push_back(EventName::AddonStateChange);
   events.push_back(EventName::HeatingEnabled);
   events.push_back(EventName::HeatingControllerSetup);
-  events.push_back(EventName::HeatingControllerValue);
+  events.push_back(EventName::HeatingControllerValueDsHub);
   events.push_back(EventName::HeatingControllerState);
   events.push_back(EventName::Running);
   events.push_back(EventName::UploadDsHubEventLog);

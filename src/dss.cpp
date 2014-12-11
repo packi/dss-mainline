@@ -220,6 +220,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // getUptime
 
+  time_t DSS::getStartTime() const {
+    return m_TimeStarted;
+  } // getStartTime
+
   bool DSS::isSaneDirectory(const std::string& _path) {
     return boost::filesystem::is_directory(_path);
   } // isSaneDirectory
