@@ -30,8 +30,8 @@ namespace dss {
 
   class SensorLog;
 
-  class SensorDataUploadPlugin : public EventInterpreterPlugin,
-                                 private PropertyListener {
+  class SensorDataUploadMsHubPlugin : public EventInterpreterPlugin,
+                                      private PropertyListener {
   private:
     __DECL_LOG_CHANNEL__
     virtual void propertyChanged(PropertyNodePtr _caller,
@@ -39,8 +39,8 @@ namespace dss {
     void scheduleBatchUploader();
 
   public:
-    SensorDataUploadPlugin(EventInterpreter* _pInterpreter);
-    virtual ~SensorDataUploadPlugin();
+    SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter);
+    virtual ~SensorDataUploadMsHubPlugin();
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
     virtual void subscribe();
   private:

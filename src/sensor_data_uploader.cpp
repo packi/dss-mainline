@@ -36,6 +36,11 @@ typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 
 typedef void (*doUploadSensorDataFunction)(It begin, It end, WebserviceCallDone_t callback);
 
+
+/****************************************************************************/
+/* Sensor Log                                                               */
+/****************************************************************************/
+
 class SensorLog : public WebserviceCallDone,
                   public boost::enable_shared_from_this<SensorLog> {
   __DECL_LOG_CHANNEL__
@@ -143,9 +148,14 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   }
 }
 
-__DEFINE_LOG_CHANNEL__(SensorDataUploadPlugin, lsInfo);
 
-SensorDataUploadPlugin::SensorDataUploadPlugin(EventInterpreter* _pInterpreter)
+/****************************************************************************/
+/* Sensor Data Upload Ms Hub Plugin                                         */
+/****************************************************************************/
+
+__DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
+
+SensorDataUploadMsHubPlugin::SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
     m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<It>))
 {
@@ -154,34 +164,34 @@ SensorDataUploadPlugin::SensorDataUploadPlugin(EventInterpreter* _pInterpreter)
   websvcEnabledNode ->addListener(this);
 }
 
-SensorDataUploadPlugin::~SensorDataUploadPlugin()
+SensorDataUploadMsHubPlugin::~SensorDataUploadMsHubPlugin()
 { }
 
 namespace EventName {
-  std::string UploadEventLog = "upload_event_log";
+  std::string UploadMsHubEventLog = "upload_ms_hub_event_log";
 }
 
-void SensorDataUploadPlugin::scheduleBatchUploader() {
+void SensorDataUploadMsHubPlugin::scheduleBatchUploader() {
   log(std::string(__func__) + " start uploading", lsInfo);
-  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadEventLog));
+  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadMsHubEventLog));
   pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
   int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
   pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
   DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 }
 
-void SensorDataUploadPlugin::propertyChanged(PropertyNodePtr _caller,
+void SensorDataUploadMsHubPlugin::propertyChanged(PropertyNodePtr _caller,
                                              PropertyNodePtr _changedNode) {
   // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
     scheduleBatchUploader();
   } else {
     log(std::string(__func__) + " stop uploading", lsInfo);
-    DSS::getInstance()->getEventRunner().removeEventByName(EventName::UploadEventLog);
+    DSS::getInstance()->getEventRunner().removeEventByName(EventName::UploadMsHubEventLog);
   }
 }
 
-void SensorDataUploadPlugin::subscribe() {
+void SensorDataUploadMsHubPlugin::subscribe() {
   boost::shared_ptr<EventSubscription> subscription;
 
   std::vector<std::string> events;
@@ -199,7 +209,7 @@ void SensorDataUploadPlugin::subscribe() {
   events.push_back(EventName::HeatingControllerValue);
   events.push_back(EventName::HeatingControllerState);
   events.push_back(EventName::Running);
-  events.push_back(EventName::UploadEventLog);
+  events.push_back(EventName::UploadMsHubEventLog);
   events.push_back(EventName::OldStateChange);
   events.push_back(EventName::AddonToCloud);
 
@@ -211,8 +221,8 @@ void SensorDataUploadPlugin::subscribe() {
   }
 }
 
-void SensorDataUploadPlugin::handleEvent(Event& _event,
-                                         const EventSubscription& _subscription) {
+void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
+                                              const EventSubscription& _subscription) {
 
   if (!WebserviceMsHub::isAuthorized()) {
     // no upload when webservice is disabled
@@ -290,7 +300,7 @@ void SensorDataUploadPlugin::handleEvent(Event& _event,
         m_log->append(_event.getptr(), highPrio);
       }
 
-    } else if (_event.getName() == EventName::UploadEventLog) {
+    } else if (_event.getName() == EventName::UploadMsHubEventLog) {
       log(std::string(__func__) + " upload event log", lsInfo);
       m_log->triggerUpload();
     } else {
