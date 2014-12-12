@@ -59,13 +59,9 @@ namespace dss {
   bool BusScanner::scanDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
-    DSMeterHash_t hash;
 
-    try {
-      hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
-    } catch(BusApiError& e) {
-      log("Scan dS485 device " + dsuid2str(_dsMeter->getDSID()) +
-          ": getDSMeterHash Error: " + e.what(), lsWarning);
+    DSMeterHash_t hash;
+    if (!getMeterHash(_dsMeter, hash)) {
       if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
         // for known bus device types retry the readout
         return false;
@@ -520,6 +516,17 @@ namespace dss {
       }
     } catch(BusApiError& e) {
       log("applyMeterSpec: Error getting dSMSpecs", lsWarning);
+      return false;
+    }
+    return true;
+  }
+
+  bool BusScanner::getMeterHash(boost::shared_ptr<DSMeter> _dsMeter, DSMeterHash_t& _hash) {
+    try {
+      _hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
+    } catch(BusApiError& e) {
+      log("getMeterHash " + dsuid2str(_dsMeter->getDSID()) +
+          ": getDSMeterHash Error: " + e.what(), lsWarning);
       return false;
     }
     return true;

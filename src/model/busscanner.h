@@ -61,6 +61,7 @@ namespace dss {
     void scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice);
     void setMeterCapability(boost::shared_ptr<DSMeter> _dsMeter);
     bool applyMeterSpec(boost::shared_ptr<DSMeter> _dsMeter);
+    bool getMeterHash(boost::shared_ptr<DSMeter> _dsMeter, DSMeterHash_t& _hash);
 
   private:
     Apartment& m_Apartment;
