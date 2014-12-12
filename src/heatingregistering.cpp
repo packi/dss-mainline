@@ -70,15 +70,7 @@ void HeatingRegisteringPlugin::handleEvent(Event& _event,
 }
 
 void HeatingRegisteringPlugin::sendRegisterMessage() {
-  bool webServiceEnabled = DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_enabled);
-  if (webServiceEnabled) {
-    std::string parameters;
-    // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
-    parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
-    boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(m_callback));
-    log(std::string(__func__) + " sending DSSBackAgain", lsInfo);
-    WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
-  }
+  WebserviceApartment::doDssBackAgain(m_callback);
 }
 
 }

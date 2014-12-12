@@ -90,6 +90,8 @@ public:
   template <class iterator>
     static void doUploadSensorData(iterator begin, iterator end,
                                    WebserviceCallDone_t callback);
+
+  static void doDssBackAgain(WebserviceCallDone_t callback);
 };
 
 class WebserviceAccessManagement {

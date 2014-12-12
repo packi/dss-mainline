@@ -339,6 +339,21 @@ void WebserviceApartment::doUploadSensorData(Iterator begin, Iterator end,
 template void WebserviceApartment::doUploadSensorData<ItEvent>(
     ItEvent begin, ItEvent end, WebserviceCallDone_t callback);
 
+void WebserviceApartment::doDssBackAgain(WebserviceCallDone_t callback)
+{
+  std::string parameters;
+
+  if (!webservice_communication_authorized()) {
+    return;
+  }
+
+  // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
+  parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
+  boost::shared_ptr<StatusReplyChecker> mcb(new StatusReplyChecker(callback));
+  log("sending DSSBackAgain", lsInfo);
+  WebserviceConnection::getInstance()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
+}
+
 
 void WebserviceApartment::doModelChanged(ChangeType type,
                                          WebserviceCallDone_t callback) {
