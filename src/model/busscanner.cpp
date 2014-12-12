@@ -62,6 +62,11 @@ namespace dss {
 
     DSMeterHash_t hash;
     if (!getMeterHash(_dsMeter, hash)) {
+      if (!applyMeterSpec(_dsMeter)) {
+        // could not get any info about device. We have to retry.
+        return false;
+      }
+      // bus member type can be read. We have to retry.
       if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
         // for known bus device types retry the readout
         return false;
