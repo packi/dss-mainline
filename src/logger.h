@@ -51,9 +51,10 @@
 typedef enum {
   lsDebug = 0,
   lsInfo = 1,
-  lsWarning = 2,
-  lsError = 3,
-  lsFatal = 4
+  lsNotice = 2,
+  lsWarning = 3,
+  lsError = 4,
+  lsFatal = 5
 } aLogSeverity;
 
 namespace dss {

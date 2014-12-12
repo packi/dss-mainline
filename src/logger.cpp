@@ -48,6 +48,8 @@ namespace dss {
         return "[Debug]";
       case lsInfo:
         return "[Info]";
+      case lsNotice:
+        return "[Notice]";
       case lsWarning:
         return "[Warning]";
       case lsError:
