@@ -123,12 +123,11 @@ namespace dss {
     public:
       class OEMWebQueryCallback : public URLRequestCallback {
       public:
-        OEMWebQueryCallback(dsuid_t dsmId, devid_t deviceAddress);
+        OEMWebQueryCallback(dsuid_t _deviceDSUID);
         virtual ~OEMWebQueryCallback() {}
         virtual void result(long code, const std::string &result);
       private:
-        dsuid_t m_dsmId;
-        devid_t m_deviceAddress;
+        dsuid_t m_deviceDSUID;
       };
 
       OEMWebQuery(boost::shared_ptr<Device> _device);
@@ -138,8 +137,7 @@ namespace dss {
     private:
       std::string m_EAN;
       uint16_t m_partNumber;
-      dsuid_t m_dsmId;
-      devid_t m_deviceAdress;
+      dsuid_t m_deviceDSUID;
       uint16_t m_serialNumber;
     };
 
@@ -225,7 +223,7 @@ namespace dss {
                       const unsigned long long _eanNumber,
                       const int _serialNumber, const int _partNumber,
                       const bool _isIndependent, const bool _isConfigLocked);
-    void onOEMDataReady(dsuid_t _dsMeterID, const devid_t _deviceID,
+    void onOEMDataReady(dsuid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
                            const std::string& _defaultName);
