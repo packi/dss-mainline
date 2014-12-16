@@ -354,7 +354,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     // options override config.xml
     parseProperties(_properties);
 
-    WebserviceConnection::getInstance();
+    WebserviceConnection::getInstanceMsHub();
 
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly
@@ -466,7 +466,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterHeatingMonitorPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new SensorDataUploadPlugin(m_pEventInterpreter.get());
+    plugin = new SensorDataUploadMsHubPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterHeatingValveProtectionPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);

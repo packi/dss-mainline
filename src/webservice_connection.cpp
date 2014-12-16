@@ -32,13 +32,52 @@
 
 namespace dss {
 
+/****************************************************************************/
+/* WebserviceConnectionMsHub                                                */
+/****************************************************************************/
+
+class WebserviceConnectionMsHub : public WebserviceConnection {
+public:
+  WebserviceConnectionMsHub();
+private:
+  virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters);
+};
+
+WebserviceConnectionMsHub::WebserviceConnectionMsHub()
+  : WebserviceConnection(pp_websvc_url_authority)
+{
+}
+
+void WebserviceConnectionMsHub::authorizeRequest(HttpRequest& req, bool hasUrlParameters)
+{
+  std::string osptoken = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_rc_osptoken);
+
+  if (!osptoken.empty()) {
+    std::string default_webservice_param = "token=" + osptoken;
+
+    if (hasUrlParameters) {
+      req.url = req.url + "&" + default_webservice_param;
+    } else {
+      req.url = req.url + "?" + default_webservice_param;
+    }
+  } else {
+    log("authentication parameters enabled, but token could not be "
+        "fetched!", lsError);
+  }
+}
+
+
+/****************************************************************************/
+/* WebserviceConnection                                                     */
+/****************************************************************************/
+
 __DEFINE_LOG_CHANNEL__(WebserviceConnection, lsInfo)
 
-WebserviceConnection* WebserviceConnection::m_instance = NULL;
+WebserviceConnection* WebserviceConnection::m_instance_mshub = NULL;
 
-WebserviceConnection::WebserviceConnection()
+WebserviceConnection::WebserviceConnection(const char *pp_base_url)
 {
-  m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_url_authority);
+  m_base_url = DSS::getInstance()->getPropertySystem().getStringValue(pp_base_url);
   if (!endsWith(m_base_url, "/")) {
     m_base_url = m_base_url + "/";
   }
@@ -49,55 +88,44 @@ WebserviceConnection::~WebserviceConnection()
 {
 }
 
-WebserviceConnection* WebserviceConnection::getInstance()
+WebserviceConnection* WebserviceConnection::getInstanceMsHub()
 {
-  if (m_instance == NULL) {
-    m_instance = new WebserviceConnection();
+  if (m_instance_mshub == NULL) {
+    m_instance_mshub = new WebserviceConnectionMsHub();
   }
-  assert (m_instance != NULL);
-  return m_instance;
+  assert (m_instance_mshub != NULL);
+  return m_instance_mshub;
 }
 
 void WebserviceConnection::shutdown() {
-  if (m_instance != NULL) {
-    WebserviceConnection* inst = m_instance;
-    m_instance = NULL;
+  if (m_instance_mshub != NULL) {
+    WebserviceConnection* inst = m_instance_mshub;
+    m_instance_mshub = NULL;
     delete inst;
   }
 }
 
 std::string WebserviceConnection::constructURL(const std::string& url,
-                                               const std::string& parameters,
-                                               bool authenticated)
+                                               const std::string& parameters)
 {
-  std::string default_webservice_param;
-  if (authenticated) {
-    std::string osptoken =  DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_rc_osptoken);
-
-    if (!osptoken.empty()) {
-      default_webservice_param = "token=" + osptoken;
-    } else {
-      log("authentication parameters enabled, but token could not be "
-          "fetched!", lsError);
-    }
-  }
-
   std::string ret = m_base_url + url;
-  bool auth = authenticated && (!default_webservice_param.empty());
+  if (!parameters.empty()) {
+    ret = ret + "?" + parameters;
+  }
+  return ret;
+}
 
-  if (auth) {
-    if (parameters.empty()) {
-      ret = ret + "?" + default_webservice_param;
-    } else {
-      ret = ret + "?" + parameters + "&" + default_webservice_param;
-    }
-  } else {
-    if (!parameters.empty()) {
-      ret = ret + "?" + parameters;
-    }
+void WebserviceConnection::request(boost::shared_ptr<HttpRequest> req,
+                                   boost::shared_ptr<URLRequestCallback> cb,
+                                   bool hasUrlParameters,
+                                   bool authenticated)
+{
+  if (authenticated) {
+    authorizeRequest(*req, hasUrlParameters);
   }
 
-  return ret;
+  boost::shared_ptr<URLRequestTask> task(new URLRequestTask(m_url, req, cb));
+  addEvent(task);
 }
 
 void WebserviceConnection::request(const std::string& url,
@@ -107,11 +135,10 @@ void WebserviceConnection::request(const std::string& url,
                                    bool authenticated)
 {
   boost::shared_ptr<HttpRequest> req(new HttpRequest);
-  req->url = constructURL(url, parameters, authenticated);
+  req->url = constructURL(url, parameters);
   req->type = type;
 
-  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
-  addEvent(task);
+  request(req, cb, !parameters.empty(), authenticated);
 }
 
 void WebserviceConnection::request(const std::string& url,
@@ -122,13 +149,12 @@ void WebserviceConnection::request(const std::string& url,
                                  bool authenticated)
 {
   boost::shared_ptr<HttpRequest> req(new HttpRequest);
-  req->url = constructURL(url, parameters, authenticated);
+  req->url = constructURL(url, parameters);
   req->type = POST;
   req->headers = headers;
   req->postdata = postdata;
 
-  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
-  addEvent(task);
+  request(req, cb, !parameters.empty(), authenticated);
 }
 
 
@@ -140,13 +166,17 @@ void WebserviceConnection::request(const std::string& url,
                                 bool authenticated)
 {
   boost::shared_ptr<HttpRequest> req(new HttpRequest);
-  req->url = constructURL(url, parameters, authenticated);
+  req->url = constructURL(url, parameters);
   req->type = type;
   req->headers = headers;
 
-  boost::shared_ptr<URLRequestTask>task(new URLRequestTask(m_url, req, cb));
-  addEvent(task);
+  request(req, cb, !parameters.empty(), authenticated);
 }
+
+
+/****************************************************************************/
+/* URLRequestTask                                                           */
+/****************************************************************************/
 
 __DEFINE_LOG_CHANNEL__(URLRequestTask, lsInfo)
 
@@ -156,7 +186,6 @@ URLRequestTask::URLRequestTask(boost::shared_ptr<HttpClient> client,
   : m_client(client), m_req(req), m_cb(cb)
 {
 }
-
 
 void URLRequestTask::run()
 {
