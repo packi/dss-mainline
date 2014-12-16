@@ -192,6 +192,7 @@ namespace dss {
 
     boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
     if(dev->isPresent()) {
+      // ATTENTION: this is string is translated by the web UI
       return failure("Cannot remove present device");
     }
 
