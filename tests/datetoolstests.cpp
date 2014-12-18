@@ -49,6 +49,21 @@ private:
   const char *m_old_tz;
 };
 
+BOOST_AUTO_TEST_CASE(test_mktime_dst_modifies_gmtoff) {
+  struct tm tmw, tms;
+  TZSwitcher s("Europe/Zurich");
+
+  strptime("2014-01-02T12:00:00+0300", "%FT%T%z", &tmw);
+  strptime("2014-07-02T12:00:00+0300", "%FT%T%z", &tms);
+  mktime(&tmw);
+  mktime(&tms);
+
+  BOOST_CHECK_EQUAL(tmw.tm_isdst, 0);
+  BOOST_CHECK_EQUAL(tmw.tm_gmtoff, 3600);
+  BOOST_CHECK_EQUAL(tms.tm_isdst, 1);
+  BOOST_CHECK_EQUAL(tms.tm_gmtoff, 7200);
+}
+
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
   DateTime dt = DateTime::parseISO8601("2008-01-01T12:00:00Z");
 

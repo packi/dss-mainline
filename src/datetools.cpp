@@ -44,15 +44,29 @@ namespace dss {
   static time_t convertTZ(struct tm tm, time_t tz_offset) {
     time_t t0;
 
+    /*
+     * mktime will override tm_gmtoff with offset of local
+     * timezone. tm_isdst can be 1, 0, -1 aka enabled,
+     * disabled and figure it out
+     * http://caml.inria.fr/mantis/print_bug_page.php?bug_id=1882
+     */
     tm.tm_isdst = -1; /* rely on mktime for daylight saving time */
     t0 = mktime(&tm);
     if (t0 == -1) {
       throw std::invalid_argument("mktime");
     }
 
-    /* timezone: seconds west of utc (man tzset) */
-    t0 -= (tz_offset + timezone);
-    t0 += tm.tm_isdst * 3600; // TODO, probably okay
+    /*
+     * mktime did not modify year, month, day, hour, minutes
+     * and second. It has only overwritten the timezone and
+     * daylight saving time, which is of course incorrect
+     * without also correcting the hours.
+     * NOTE: the input tz_offset includes daylight saving
+     * time correction, the tm_gmtoff computed by mktime as well
+     * By subracting the old offset we get UTC by adding
+     * the local offset we get localtime
+     */
+    t0 -= (tz_offset - tm.tm_gmtoff);
     return t0;
   }
 
