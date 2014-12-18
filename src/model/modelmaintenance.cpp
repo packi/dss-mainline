@@ -1882,10 +1882,12 @@ namespace dss {
     boost::shared_ptr<ZoneHeatingOperationModeSpec_t> values =
         boost::static_pointer_cast<ZoneHeatingOperationModeSpec_t> (_spec);
     ZoneHeatingProperties_t hProp;
+    ZoneHeatingStatus_t hStatus;
 
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       hProp = zone->getHeatingProperties();
+      hStatus = zone->getHeatingStatus();
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control value event, item not found: ") + e.what(), lsWarning);
       return;
@@ -1926,6 +1928,27 @@ namespace dss {
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode5)));
     }
     raiseEvent(pEvent);
+
+
+    boost::shared_ptr<Event> pEventDsHub;
+    pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
+    pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
+    switch (hStatus.m_OperationMode) {
+    case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
+    case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
+    case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
+    case 3: pEventDsHub->setProperty("OperationMode", "NotUsed"); break;
+    case 4: pEventDsHub->setProperty("OperationMode", "Night"); break;
+    case 5: pEventDsHub->setProperty("OperationMode", "Holiday"); break;
+    }
+    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
+      pEventDsHub->setProperty("NominalTemperature",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_NominalValue)));
+    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
+      pEventDsHub->setProperty("ControlValue",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValue)));
+    }
+    raiseEvent(pEventDsHub);
   } // onHeatingControllerValues
 
   void ModelMaintenance::onHeatingControllerState(dsuid_t _dsMeterID, const int _zoneID, const int _State) {

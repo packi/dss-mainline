@@ -165,6 +165,7 @@ namespace dss {
     const std::string& getWebrootDirectory() const { return m_webrootDirectory; }
     const std::string& getJSLogDirectory() const { return m_jsLogDirectory; }
     const std::string& getSavedPropsDirectory() const { return  m_savedPropsDirectory; }
+    time_t getStartTime() const;
     void setDataDirectory(const std::string& _value);
     void setConfigDirectory(const std::string& _value);
     void setWebrootDirectory(const std::string& _value);

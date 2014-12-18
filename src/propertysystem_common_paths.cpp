@@ -50,6 +50,10 @@ const char *pp_websvc_apartment_changed_notify_delay = "/config/webservice-api/m
 const char *pp_websvc_access_mgmt_delete_token_url_path = "/config/webservice-api/account_mgmt/url";
 const char *pp_websvc_rc_osptoken = "/scripts/system-addon-remote-connectivity/OSPToken";
 
+const char *pp_websvc_dshub_url = "/config/webservice-api/dshub/base-url";
+const char *pp_websvc_dshub_token = "/scripts/system-addon-remote-connectivity/dSToken";
+
+
 void setupCommonProperties(PropertySystem &propSystem) {
   propSystem.createProperty(pp_sysinfo_dss_version)->setStringValue(DSS_VERSION);
   propSystem.createProperty(pp_sysinfo_distro_version)
@@ -81,6 +85,9 @@ void setupCommonProperties(PropertySystem &propSystem) {
     ->setIntegerValue(30);
   propSystem.createProperty(pp_websvc_access_mgmt_delete_token_url_path)
     ->setStringValue("public/accessmanagement/v1_0/RemoteConnectivity/DeleteApplicationToken");
+
+  propSystem.createProperty(pp_websvc_dshub_url)
+    ->setStringValue("https://prd-tibco.cloudapp.net:41402/");
 }
 
 }

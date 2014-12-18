@@ -42,6 +42,9 @@ extern const char *pp_websvc_apartment_changed_url_path;
 extern const char *pp_websvc_apartment_changed_notify_delay;
 extern const char *pp_websvc_rc_osptoken;
 
+extern const char *pp_websvc_dshub_url;
+extern const char *pp_websvc_dshub_token;
+
 void setupCommonProperties(PropertySystem &propSystem);
 
 }

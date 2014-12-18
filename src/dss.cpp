@@ -220,6 +220,10 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // getUptime
 
+  time_t DSS::getStartTime() const {
+    return m_TimeStarted;
+  } // getStartTime
+
   bool DSS::isSaneDirectory(const std::string& _path) {
     return boost::filesystem::is_directory(_path);
   } // isSaneDirectory
@@ -355,6 +359,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     parseProperties(_properties);
 
     WebserviceConnection::getInstanceMsHub();
+    WebserviceConnection::getInstanceDsHub();
 
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly
@@ -467,6 +472,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     plugin = new EventInterpreterHeatingMonitorPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new SensorDataUploadMsHubPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new SensorDataUploadDsHubPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterHeatingValveProtectionPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);

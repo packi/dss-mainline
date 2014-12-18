@@ -64,6 +64,7 @@ namespace dss {
     const std::string HeatingEnabled = "HeatingEnabled";
     const std::string HeatingControllerSetup = "HeatingControllerSetup";
     const std::string HeatingControllerValue = "HeatingControllerValue";
+    const std::string HeatingControllerValueDsHub = "HeatingControllerValueDsHub";
     const std::string HeatingControllerState = "HeatingControllerState";
     const std::string OldStateChange = "oldStateChange";
     const std::string AddonToCloud = "AddonToCloud";

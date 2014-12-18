@@ -88,6 +88,20 @@ public:
   static WebserviceReply parseReply(const char* buf);
 };
 
+
+class WebserviceDsHub {
+  __DECL_LOG_CHANNEL__
+public:
+  /**
+   * Checks whether the user authorize cloud service.
+   */
+  static bool isAuthorized();
+
+  template <class iterator>
+  static void doUploadSensorData(iterator begin, iterator end,
+                                 WebserviceCallDone_t callback);
+};
+
 }
 
 #endif

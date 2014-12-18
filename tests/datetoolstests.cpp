@@ -138,38 +138,38 @@ BOOST_AUTO_TEST_CASE(testISO8601) {
 
   // localtime
   DateTime foo = DateTime::parseISO8601("2009-01-02T13:00:00+0100");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T13:00:00+0100");
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T12:00:00Z");
   foo = DateTime::parseISO8601("2009-07-21T14:00:00+0200");
-  BOOST_CHECK(foo.toISO8601() == "2009-07-21T14:00:00+0200");
+  BOOST_CHECK(foo.toISO8601() == "2009-07-21T12:00:00Z");
 
   // convert +0300
   foo = DateTime::parseISO8601("2009-01-02T15:00:00+0300");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T13:00:00+0100");
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T12:00:00Z");
   foo = DateTime::parseISO8601("2009-07-21T15:00:00+0300");
-  BOOST_CHECK(foo.toISO8601() == "2009-07-21T14:00:00+0200");
+  BOOST_CHECK(foo.toISO8601() == "2009-07-21T12:00:00Z");
 
   // convert +0230
   foo = DateTime::parseISO8601("2009-01-02T14:30:00+0230");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T13:00:00+0100");
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T12:00:00Z");
 
   // half working: +01:00 format
   foo = DateTime::parseISO8601("2009-01-02T11:00:00+01");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T11:00:00+0100");
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T10:00:00Z");
   // the minutes are not parsed
   foo = DateTime::parseISO8601("2009-01-02T11:00:00+01:00");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T11:00:00+0100");
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T10:00:00Z");
 
   // utc
   foo = DateTime::parseISO8601("2009-01-02T12:00:00Z");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T13:00:00+0100");
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T12:00:00Z");
 }
 
 BOOST_AUTO_TEST_CASE(testISO8601_australia) {
   TZSwitcher s("Australia/Adelaide");
   DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0300");
-  BOOST_CHECK(foo.toISO8601() == "2009-01-02T19:30:00+1030"); // dst
+  BOOST_CHECK(foo.toISO8601() == "2009-01-02T09:00:00Z"); // dst
   foo = DateTime::parseISO8601("2009-07-21T12:00:00+0300");
-  BOOST_CHECK(foo.toISO8601() == "2009-07-21T18:30:00+0930");
+  BOOST_CHECK(foo.toISO8601() == "2009-07-21T09:00:00Z");
 }
 
 BOOST_AUTO_TEST_CASE(testISO8601_timet) {
@@ -186,10 +186,10 @@ BOOST_AUTO_TEST_CASE(testISO8601_timet) {
 BOOST_AUTO_TEST_CASE(testISO8601_ms) {
   TZSwitcher s("Europe/Zurich");
   DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0100");
-  BOOST_CHECK(foo.toISO8601_ms() == "2009-01-02T12:00:00.000+0100");
+  BOOST_CHECK(foo.toISO8601_ms() == "2009-01-02T11:00:00.000Z");
 
   DateTime bar(foo.secondsSinceEpoch(), 777777);
-  BOOST_CHECK(bar.toISO8601_ms() == "2009-01-02T12:00:00.777+0100");
+  BOOST_CHECK(bar.toISO8601_ms() == "2009-01-02T11:00:00.777Z");
 }
 
 BOOST_AUTO_TEST_CASE(testStaticSchedule) {
