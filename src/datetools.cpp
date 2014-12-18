@@ -24,8 +24,9 @@
 #include "datetools.h"
 
 #include <cstring>
-#include <sys/time.h>
 #include <errno.h>
+#include <math.h>
+#include <sys/time.h>
 
 namespace dss {
 
@@ -309,6 +310,7 @@ namespace dss {
 
     if (in.length() != strlen("2011-10-08T07:07:09+02:30") &&
         in.length() != strlen("2011-10-08T07:07:09+0200") &&
+        in.length() != strlen("2011-10-08T07:07:09+02:") &&
         in.length() != strlen("2011-10-08T07:07:09+02") &&
         in.length() != strlen("2011-10-08T07:07:09Z")) {
       throw std::invalid_argument("ISO8601: invalid length " + in);
@@ -321,8 +323,24 @@ namespace dss {
     } else {
       end = strptime(in.c_str(), "%FT%T%z", &tm);
     }
-    if (!end || (*end != '\0' && std::string(end) != ":00")) {
-      throw std::invalid_argument("ISO8601: invalid format " + in);
+    if (!end || (*end != '\0' && *end != ':')) {
+        throw std::invalid_argument("ISO8601: invalid format " + in);
+    }
+
+    if (*end == ':' && *(end + 1) != '\0') {
+        // strptime can't parse timezone with colon
+        char *tz_minutes = end + 1;
+        int ret;
+
+        errno = 0;
+        ret = strtod(tz_minutes, &end);
+        if (!end || end == tz_minutes || *end != '\0' ||
+            (ret == HUGE_VAL || ret == -HUGE_VAL) ||
+            (ret == 0 && errno == ERANGE)) {
+            throw std::invalid_argument("ISO8601: invalid tz minutes " + in);
+        }
+
+        tm.tm_gmtoff += ret * 60; // gmtoff in seconds
     }
 
     try {
@@ -339,6 +357,23 @@ namespace dss {
 
     gmtime_r(&m_timeval.tv_sec, &tm);
     strftime(buf, sizeof buf, "%FT%TZ", &tm);
+    return std::string(buf);
+  }
+
+  std::string DateTime::toISO8601_local() const {
+    struct tm tm;
+    char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
+
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, "%FT%T%z", &tm);
+
+    /* ensure there is a colon in time zone */
+    if (buf[22] != ':') {
+        buf[25] = '\0';
+        buf[24] = buf[23];
+        buf[23] = buf[22];
+        buf[22] = ':';
+    }
     return std::string(buf);
   }
 

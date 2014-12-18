@@ -155,6 +155,23 @@ namespace dss {
     std::string toISO8601() const;
 
     /**
+     * Will emit ISO8601 format with timezone appended
+     *
+     * Various versions are floating around for the timezone
+     * format: e.g. 02:00, 0200, 02 and not all entities
+     * accept all formats
+     * We emit it as '+hh:mm' since that is the format
+     * mentioned in the public rfc3339 specification[2]
+     * It's recomended to emit the time in UTC where no
+     * timezone needs to be appended
+     *
+     * @see toISO8601
+     * [1] http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * [2] http://www.ietf.org/rfc/rfc3339.txt
+     */
+    std::string toISO8601_local() const;
+
+    /**
      * Emit ISO8601 or RFC3339 with ms precision
      * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
      * http://www.cs.tut.fi/~jkorpela/iso8601.html
