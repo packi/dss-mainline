@@ -24,8 +24,9 @@
 #include "datetools.h"
 
 #include <cstring>
-#include <sys/time.h>
 #include <errno.h>
+#include <math.h>
+#include <sys/time.h>
 
 namespace dss {
 
@@ -43,15 +44,29 @@ namespace dss {
   static time_t convertTZ(struct tm tm, time_t tz_offset) {
     time_t t0;
 
+    /*
+     * mktime will override tm_gmtoff with offset of local
+     * timezone. tm_isdst can be 1, 0, -1 aka enabled,
+     * disabled and figure it out
+     * http://caml.inria.fr/mantis/print_bug_page.php?bug_id=1882
+     */
     tm.tm_isdst = -1; /* rely on mktime for daylight saving time */
     t0 = mktime(&tm);
     if (t0 == -1) {
       throw std::invalid_argument("mktime");
     }
 
-    /* timezone: seconds west of utc (man tzset) */
-    t0 -= (tz_offset + timezone);
-    t0 += tm.tm_isdst * 3600; // TODO, probably okay
+    /*
+     * mktime did not modify year, month, day, hour, minutes
+     * and second. It has only overwritten the timezone and
+     * daylight saving time, which is of course incorrect
+     * without also correcting the hours.
+     * NOTE: the input tz_offset includes daylight saving
+     * time correction, the tm_gmtoff computed by mktime as well
+     * By subracting the old offset we get UTC by adding
+     * the local offset we get localtime
+     */
+    t0 -= (tz_offset - tm.tm_gmtoff);
     return t0;
   }
 
@@ -309,6 +324,7 @@ namespace dss {
 
     if (in.length() != strlen("2011-10-08T07:07:09+02:30") &&
         in.length() != strlen("2011-10-08T07:07:09+0200") &&
+        in.length() != strlen("2011-10-08T07:07:09+02:") &&
         in.length() != strlen("2011-10-08T07:07:09+02") &&
         in.length() != strlen("2011-10-08T07:07:09Z")) {
       throw std::invalid_argument("ISO8601: invalid length " + in);
@@ -321,8 +337,24 @@ namespace dss {
     } else {
       end = strptime(in.c_str(), "%FT%T%z", &tm);
     }
-    if (!end || (*end != '\0' && std::string(end) != ":00")) {
-      throw std::invalid_argument("ISO8601: invalid format " + in);
+    if (!end || (*end != '\0' && *end != ':')) {
+        throw std::invalid_argument("ISO8601: invalid format " + in);
+    }
+
+    if (*end == ':' && *(end + 1) != '\0') {
+        // strptime can't parse timezone with colon
+        char *tz_minutes = end + 1;
+        int ret;
+
+        errno = 0;
+        ret = strtod(tz_minutes, &end);
+        if (!end || end == tz_minutes || *end != '\0' ||
+            (ret == HUGE_VAL || ret == -HUGE_VAL) ||
+            (ret == 0 && errno == ERANGE)) {
+            throw std::invalid_argument("ISO8601: invalid tz minutes " + in);
+        }
+
+        tm.tm_gmtoff += ret * 60; // gmtoff in seconds
     }
 
     try {
@@ -339,6 +371,23 @@ namespace dss {
 
     gmtime_r(&m_timeval.tv_sec, &tm);
     strftime(buf, sizeof buf, "%FT%TZ", &tm);
+    return std::string(buf);
+  }
+
+  std::string DateTime::toISO8601_local() const {
+    struct tm tm;
+    char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
+
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(buf, sizeof buf, "%FT%T%z", &tm);
+
+    /* ensure there is a colon in time zone */
+    if (buf[22] != ':') {
+        buf[25] = '\0';
+        buf[24] = buf[23];
+        buf[23] = buf[22];
+        buf[22] = ':';
+    }
     return std::string(buf);
   }
 
