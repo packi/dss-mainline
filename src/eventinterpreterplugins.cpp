@@ -972,7 +972,7 @@ namespace dss {
 
   void EventInterpreterPluginApartmentChange::handleEvent(Event& _event, const EventSubscription& _subscription)
   {
-    if (!webservice_communication_authorized()) {
+    if (!WebserviceMsHub::isAuthorized()) {
       return;
     }
 
@@ -981,21 +981,21 @@ namespace dss {
       Logger::getInstance()->log(" name " + it->first + " : " + it->second);
     }
 
-    WebserviceApartment::ChangeType type;
+    WebserviceMsHub::ChangeType type;
     /* momentan ist definiert: 1=Apartment, 2=TimedEvent, 3=UDA */
     if (_event.getName() == ModelChangedEvent::Apartment) {
-      type = WebserviceApartment::ApartmentChange;
+      type = WebserviceMsHub::ApartmentChange;
     } else if (_event.getName() == ModelChangedEvent::TimedEvent) {
-      type = WebserviceApartment::TimedEventChange;
+      type = WebserviceMsHub::TimedEventChange;
     } else if (_event.getName() == ModelChangedEvent::UserDefinedAction) {
-      type = WebserviceApartment::UDAChange;
+      type = WebserviceMsHub::UDAChange;
     } else {
       log(" unkown ModelChange event " + _event.getName(), lsError);
       return;
     }
 
     /* no retval, no error handling, just log entry */
-    WebserviceApartment::doModelChanged(type, WebserviceCallDone_t());
+    WebserviceMsHub::doModelChanged(type, WebserviceCallDone_t());
   }
 
   namespace EventName {
@@ -1056,7 +1056,7 @@ namespace dss {
   {
     log("handle: " + _event.getName(), lsDebug);
     if (_event.getName() == EventName::Running) {
-      if (webservice_communication_authorized()) {
+      if (WebserviceMsHub::isAuthorized()) {
         boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
         pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
         pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
@@ -1065,21 +1065,21 @@ namespace dss {
       }
     }
 
-    if (!webservice_communication_authorized()) {
+    if (!WebserviceMsHub::isAuthorized()) {
       log("!webservice_communication_authorized", lsWarning);
       return;
     }
 
     if (_event.getName() == EventName::WebserviceKeepAlive) {
       boost::shared_ptr<URLRequestCallback> cb;
-      WebserviceConnection::getInstance()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", "", GET, cb, false);
+      WebserviceConnection::getInstanceMsHub()->request("public/accessmanagement/v1_0/RemoteConnectivity/TestConnection", "", GET, cb, false);
     } else if (_event.getName() == EventName::ApplicationTokenDeleted) {
       if (!_event.hasPropertySet(EventProperty::ApplicationToken)) {
         log("Invalid token deleted event missing token", lsWarning);
         return;
       }
       std::string token = _event.getPropertyByName(EventProperty::ApplicationToken);
-      WebserviceAccessManagement::doNotifyTokenDeleted(token, WebserviceCallDone_t());
+      WebserviceMsHub::doNotifyTokenDeleted(token, WebserviceCallDone_t());
       return;
     }
   }

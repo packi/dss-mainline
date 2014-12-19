@@ -207,7 +207,7 @@ namespace dss {
       DSS::getInstance()->getSecurity().loginAsSystemUser("ModelMaintenance needs system-rights");
     }
 
-    log("ModelMaintenance::execute: Enumerating model", lsInfo);
+    log("ModelMaintenance::execute: Enumerating model", lsNotice);
     discoverDS485Devices();
 
     boost::shared_ptr<ApartmentTreeListener> treeListener
@@ -623,12 +623,11 @@ namespace dss {
         break;
       case ModelEvent::etDeviceOEMDataReady:
         assert(pEventWithStrings != NULL);
-        if((event.getParameterCount() != 2) && (pEventWithStrings->getStringParameterCount() != 4)) {
+        if((event.getParameterCount() != 1) && (pEventWithStrings->getStringParameterCount() != 4)) {
           log("Expected 5 parameters for ModelEvent::etDeviceOEMDataReady");
         } else {
           onOEMDataReady(pEventWithDSID->getDSID(),
-                         event.getParameter(0),
-                         (DeviceOEMState_t)event.getParameter(1),
+                         (DeviceOEMState_t)event.getParameter(0),
                          pEventWithStrings->getStringParameter(0),
                          pEventWithStrings->getStringParameter(1),
                          pEventWithStrings->getStringParameter(2),
@@ -913,6 +912,7 @@ namespace dss {
       if (boost::filesystem::exists(configFileName)) {
         persistence.readConfigurationFromXML(configFileName);
       }
+      log("processed apartment.xml", lsNotice);
     }
   } // readConfiguration
 
@@ -1815,22 +1815,21 @@ namespace dss {
     }
   } // onEANReady
 
-  void ModelMaintenance::onOEMDataReady(dsuid_t _dsMeterID,
-                                             const devid_t _deviceID,
+  void ModelMaintenance::onOEMDataReady(dsuid_t _deviceID,
                                              const DeviceOEMState_t _state,
                                              const std::string& _productName,
                                              const std::string& _iconPath,
                                              const std::string& _productURL,
                                              const std::string& _defaultName) {
     try {
-      DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
+      boost::shared_ptr<Device> pDevice = m_pApartment->getDeviceByDSID(_deviceID);
       if (_state == DEVICE_OEM_VALID) {
-        devRef.getDevice()->setOemProductInfo(_productName, _iconPath, _productURL);
-        if (devRef.getDevice()->getName().empty()) {
-          devRef.getDevice()->setName(_defaultName);
+        pDevice->setOemProductInfo(_productName, _iconPath, _productURL);
+        if (pDevice->getName().empty()) {
+          pDevice->setName(_defaultName);
         }
       }
-      devRef.getDevice()->setOemProductInfoState(_state);
+      pDevice->setOemProductInfoState(_state);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
@@ -1883,10 +1882,12 @@ namespace dss {
     boost::shared_ptr<ZoneHeatingOperationModeSpec_t> values =
         boost::static_pointer_cast<ZoneHeatingOperationModeSpec_t> (_spec);
     ZoneHeatingProperties_t hProp;
+    ZoneHeatingStatus_t hStatus;
 
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       hProp = zone->getHeatingProperties();
+      hStatus = zone->getHeatingStatus();
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control value event, item not found: ") + e.what(), lsWarning);
       return;
@@ -1927,6 +1928,27 @@ namespace dss {
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode5)));
     }
     raiseEvent(pEvent);
+
+
+    boost::shared_ptr<Event> pEventDsHub;
+    pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
+    pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
+    switch (hStatus.m_OperationMode) {
+    case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
+    case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
+    case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
+    case 3: pEventDsHub->setProperty("OperationMode", "NotUsed"); break;
+    case 4: pEventDsHub->setProperty("OperationMode", "Night"); break;
+    case 5: pEventDsHub->setProperty("OperationMode", "Holiday"); break;
+    }
+    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
+      pEventDsHub->setProperty("NominalTemperature",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_NominalValue)));
+    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
+      pEventDsHub->setProperty("ControlValue",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValue)));
+    }
+    raiseEvent(pEventDsHub);
   } // onHeatingControllerValues
 
   void ModelMaintenance::onHeatingControllerState(dsuid_t _dsMeterID, const int _zoneID, const int _State) {
@@ -1988,16 +2010,14 @@ namespace dss {
   ModelMaintenance::OEMWebQuery::OEMWebQuery(boost::shared_ptr<Device> _device)
     : Task()
   {
-    m_deviceAdress = _device->getShortAddress();
-    m_dsmId = _device->getDSMeterDSID();
+    m_deviceDSUID = _device->getDSID();
     m_EAN = _device->getOemEanAsString();
     m_partNumber = _device->getOemPartNumber();
     m_serialNumber = _device->getOemSerialNumber();
   }
 
-  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dsuid_t dsmId, devid_t deviceAddress)
-    : m_dsmId(dsmId)
-    , m_deviceAddress(deviceAddress)
+  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dsuid_t _deviceDSUID)
+    : m_deviceDSUID(_deviceDSUID)
   {
   }
 
@@ -2095,8 +2115,7 @@ namespace dss {
           "data. Error: " + intToString(code) + "Message: " + result, lsWarning);
     }
 
-    ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_dsmId);
-    pEvent->addParameter(m_deviceAddress);
+    ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_deviceDSUID);
     pEvent->addParameter(state);
     pEvent->addStringParameter(productName);
     pEvent->addStringParameter(iconFile.string());
@@ -2121,8 +2140,8 @@ namespace dss {
                              "&countryCode=" + country +
                              "&languageCode=" + language;
 
-    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_dsmId, m_deviceAdress));
-    WebserviceConnection::getInstance()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
+    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_deviceDSUID));
+    WebserviceConnection::getInstanceMsHub()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
   }
 
   ModelMaintenance::VdcDataQuery::VdcDataQuery(boost::shared_ptr<Device> _device)

@@ -107,6 +107,7 @@ namespace dss {
     boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
 
     if(meter->isPresent()) {
+      // ATTENTION: this is string is translated by the web UI
       return failure("Cannot remove present meter");
     }
 

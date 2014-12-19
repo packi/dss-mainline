@@ -198,7 +198,7 @@ namespace dss {
     boost::shared_ptr<WebserviceRequestCallback> mcb(
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
-    WebserviceConnection::getInstance()->request(url, params, reqtype, mcb,
+    WebserviceConnection::getInstanceMsHub()->request(url, params, reqtype, mcb,
                                                  authenticated);
 
     return JS_TRUE;
@@ -353,11 +353,11 @@ namespace dss {
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
     if (reqtype == POST) {
-      WebserviceConnection::getInstance()->request(url, params,
+      WebserviceConnection::getInstanceMsHub()->request(url, params,
         boost::make_shared<HashMapStringString>(headers), formdata, mcb,
         authenticated);
     } else {
-      WebserviceConnection::getInstance()->request(url, params, reqtype,
+      WebserviceConnection::getInstanceMsHub()->request(url, params, reqtype,
           boost::make_shared<HashMapStringString>(headers),
           mcb, authenticated);
     }
