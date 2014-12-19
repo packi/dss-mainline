@@ -302,11 +302,7 @@ namespace dss {
       throw std::invalid_argument("RFC2445: mktime failure" + timeString);
     }
     if (utc) {
-#if defined(__CYGWIN__)
-      t0 += -_timezone;
-#else
       t0 += tm.tm_gmtoff;
-#endif
     }
     return DateTime(t0);
   }
