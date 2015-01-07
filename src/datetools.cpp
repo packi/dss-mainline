@@ -150,7 +150,6 @@ namespace dss {
     tm.tm_year += _years;
     tv.tv_sec = mktime(&tm);
     return DateTime(tv);
-    DateTime result(*this);
   } // addYear
 
   DateTime DateTime::addDay(const int _days) const {

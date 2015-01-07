@@ -746,8 +746,6 @@ namespace dss {
       pEvent->addParameter(SceneLocalOn);
     } else if (_state == 2) {
       pEvent->addParameter(SceneStop);
-    } else {
-      pEvent->addParameter(-1);
     }
     pEvent->addParameter(coDsmApi); // origin
     pEvent->addParameter(false); // force
