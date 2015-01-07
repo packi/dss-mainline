@@ -50,6 +50,51 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(Model)
 
+class DummyStructureModifyingInterface : public StructureModifyingBusInterface {
+public:
+  virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
+  }
+  virtual void createZone(const dsuid_t& _dsMeterID, const int _zoneID) {
+  }
+  virtual void removeZone(const dsuid_t& _dsMeterID, const int _zoneID) {
+  }
+  virtual void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+  }
+  virtual void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+  }
+  virtual void removeInactiveDevices(const dsuid_t& _dsMeterID) {
+  }
+  virtual void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID) {
+  }
+  virtual void removeDeviceFromDSMeters(const dsuid_t& _deviceDSID) {
+  }
+  virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
+  }
+  virtual void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
+  }
+  virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) {
+  }
+  virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
+  }
+  virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
+  }
+  virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
+  }
+  virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
+  }
+  virtual void sensorPush(uint16_t _zoneID, uint8_t groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
+  }
+  virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
+  }
+  virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
+  }
+  virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) {}
+  virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) {}
+  virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) {}
+  virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) {}
+  virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) {}
+};
+
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Apartment apt(NULL);
 
@@ -744,6 +789,7 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
 
   ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);
+  maintenance.setStructureModifyingBusInterface(new DummyStructureModifyingInterface());
   maintenance.initialize();
 
   dsuid_t nonexistingDSMeterDSID;
@@ -858,6 +904,7 @@ BOOST_AUTO_TEST_CASE(testDeviceStateWhenRemovingMeter) {
 
   ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);
+  maintenance.setStructureModifyingBusInterface(new DummyStructureModifyingInterface());
   maintenance.initialize();
 
   dsuid_t dsuid1, meter1DSID;
@@ -888,51 +935,6 @@ BOOST_AUTO_TEST_CASE(testDeviceStateWhenRemovingMeter) {
   BOOST_CHECK_EQUAL(meter1->isPresent(), false);
   BOOST_CHECK_EQUAL(dev1->isPresent(), false);
 }
-
-class DummyStructureModifyingInterface : public StructureModifyingBusInterface {
-public:
-  virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
-  }
-  virtual void createZone(const dsuid_t& _dsMeterID, const int _zoneID) {
-  }
-  virtual void removeZone(const dsuid_t& _dsMeterID, const int _zoneID) {
-  }
-  virtual void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-  }
-  virtual void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-  }
-  virtual void removeInactiveDevices(const dsuid_t& _dsMeterID) {
-  }
-  virtual void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID) {
-  }
-  virtual void removeDeviceFromDSMeters(const dsuid_t& _deviceDSID) {
-  }
-  virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
-  }
-  virtual void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
-  }
-  virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) {
-  }
-  virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
-  }
-  virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
-  }
-  virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
-  }
-  virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
-  }
-  virtual void sensorPush(uint16_t _zoneID, uint8_t groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
-  }
-  virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
-  }
-  virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) {
-  }
-  virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) {}
-  virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) {}
-  virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) {}
-  virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) {}
-  virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) {}
-};
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
 public:
