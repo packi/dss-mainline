@@ -390,7 +390,7 @@ const int MF_TK_TKM2[] =
 };
 
 const int MF_GE_TKM2[] =
-{ 
+{
   mf_blink,
   mf_leddark,
   mf_pushbutton,
@@ -599,11 +599,6 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_GR_KL220, MF_ARRAY_SIZE(MF_GR_KL220));
   setFeatures(ColorIDGray, KL220, fv);
-  fv.reset();
-
-  fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GR_KL2, MF_ARRAY_SIZE(MF_GR_KL2));
-  setFeatures(ColorIDGray, KL2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
@@ -851,7 +846,7 @@ std::string ModelFeatures::getFeatureName(int _feature)
     default:
       break;
   }
-      
+
   throw std::runtime_error("unknown feature encountered");
 }
 
