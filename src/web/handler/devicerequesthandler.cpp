@@ -1293,7 +1293,7 @@ namespace dss {
 
       unsigned int emergencyTimer;
       if (_request.getParameter("emergencyTimer", emergencyTimer)) {
-        if (protTimer > std::numeric_limits<uint8_t>::max()) {
+        if (emergencyTimer > std::numeric_limits<uint8_t>::max()) {
           return failure("emergencyTimer too big");
         }
         conf.setEmergencyTimer(emergencyTimer);
