@@ -2123,6 +2123,8 @@ namespace dss {
     pEvent->addStringParameter(defaultName);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    } else {
+      delete pEvent;
     }
   }
 
@@ -2198,8 +2200,8 @@ namespace dss {
         fclose(binFile);
         m_Device->setVdcIconPath(iconFile.string());
       }
-      free(data);
     }
+    free(data);
   }
 
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
