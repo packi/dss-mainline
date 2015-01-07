@@ -120,7 +120,7 @@ bool IsEvenDsuid(dsuid_t dsuid) {
 
 bool dsuid_get_next_dsuid(const dsuid_t dsuid, dsuid_t *out) {
   if (::dsuid_get_next_dsuid(&dsuid, out) != DSUID_RC_OK) {
-    memset(out, 0, sizeof(dsid_t));
+    memset(out, 0, sizeof(dsuid_t));
     return false;
   }
   return true;
