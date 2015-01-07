@@ -406,7 +406,7 @@ namespace dss {
       }
     }
 
-    if (dsuid == NULL) {
+    if (dsuid == NULL || sensorType == NULL || sensorIndex == NULL) {
       return;
     }
 
