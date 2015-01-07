@@ -291,7 +291,7 @@ static const long WEEK_IN_SECS = 604800;
       time(&actualTime);
 
       // Calculate absolute delta
-      double secondsAbs = abs(difftime(actualTime, timestamp));
+      double secondsAbs = std::abs(difftime(actualTime, timestamp));
 
       log("Actual Timestamp:"+ doubleToString(actualTime) +
           "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
