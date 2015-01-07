@@ -676,7 +676,7 @@ namespace dss {
             value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);
           } else if (type == "angle") {
             value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Shade_PositionAngle);
-          } if (type == "positionCurrent") {
+          } else if (type == "positionCurrent") {
             value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
           } else {
             return failure("Unsupported type parameter for this device");
