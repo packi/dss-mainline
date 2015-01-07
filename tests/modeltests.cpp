@@ -1143,7 +1143,7 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   meter1DSID.id[DSUID_SIZE - 1] = 10;
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid2.id[DSUID_SIZE - 1] = 3;
+  dsuid3.id[DSUID_SIZE - 1] = 3;
 
   boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
   boost::shared_ptr<Zone> zone1 = apt.allocateZone(1);
@@ -1161,7 +1161,7 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   dev2->addToGroup(1);
   DeviceReference devRef2 = DeviceReference(dev2, &apt);
   zone1->addDevice(devRef2);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsuid2);
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsuid3);
   dev3->setShortAddress(3);
   dev3->setDSMeter(meter1);
   dev3->setZoneID(1);
