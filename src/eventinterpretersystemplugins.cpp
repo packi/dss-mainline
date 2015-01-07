@@ -2742,7 +2742,7 @@ namespace dss {
       if (state != NULL) {
         if ((sleeping == true) && (state->getState() == State_Inactive)) {
           state->setState(coJSScripting, "sleeping");
-        } else if (absent == false) {
+        } else if (sleeping == false) {
           state->setState(coJSScripting, "awake");
         }
       } // hibernation state
