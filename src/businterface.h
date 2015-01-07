@@ -82,7 +82,6 @@ namespace dss {
     uint16_t ProductID;
     uint16_t VendorID;
     uint16_t Version;
-    uint32_t SerialNumber;
     bool Locked;
     uint8_t ActiveState;
     uint8_t OutputMode;
