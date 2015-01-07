@@ -434,6 +434,7 @@ const static std::string evtCategory_ZoneGroupCallScene = "ZoneSceneCall";
 const static std::string evtCategory_ZoneGroupUndoScene = "ZoneUndoScene";
 const static std::string evtCategory_ApartmentState = "ApartmentStateChange";
 const static std::string evtCategory_ZoneGroupState = "ZoneStateChange";
+const static std::string evtCategory_DeviceBinaryInput = "DeviceBinaryInput";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
@@ -443,6 +444,7 @@ const static std::string evtCategory_HeatingControllerValue = "HeatingController
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
 const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
+const static std::string evtCategory_ExecutionDenied = "ExecutionDenied";
 
 const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
@@ -635,6 +637,20 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
         parameterObj->addProperty(iParam->first, iParam->second);
       }
       body->addElement("Parameter", parameterObj);
+    } else if (event->getName() == EventName::DeviceBinaryInputEvent) {
+      /* TODO is event group and category correct? */
+      pDeviceRef = event->getRaisedAtDevice();
+      createHeader(header, evtGroup_ApartmentAndDevice, evtCategory_DeviceBinaryInput, event.get());
+      body->addProperty("InputIndex", event->getPropertyByName("inputIndex"));
+      body->addProperty("InputValue", event->getPropertyByName("inputValue"));
+      body->addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+    } else if (event->getName() == EventName::ExecutionDenied) {
+      /* TODO is event group and category correct? */
+      createHeader(header, evtGroup_Activity, evtCategory_ExecutionDenied, event.get());
+      body->addProperty("ActivityType", event->getPropertyByName("action-type"));
+      body->addProperty("ActivityName", event->getPropertyByName("action-name"));
+      body->addProperty("SourceName", event->getPropertyByName("source-name"));
+      body->addProperty("Reason", event->getPropertyByName("reason"));
     } else {
       Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
     }

@@ -49,6 +49,8 @@ namespace dss {
     extern const std::string DeviceSensorValue;
     extern const std::string DeviceStatus;
     extern const std::string DeviceInvalidSensor;
+    extern const std::string DeviceBinaryInputEvent;
+    extern const std::string ExecutionDenied;
     extern const std::string Running;
     extern const std::string UndoScene;
     extern const std::string ZoneSensorValue;

@@ -55,6 +55,8 @@ namespace dss {
     const std::string DeviceSensorValue = "deviceSensorValue";
     const std::string DeviceStatus = "deviceStatusEvent";
     const std::string DeviceInvalidSensor = "deviceInvalidSensor";
+    const std::string DeviceBinaryInputEvent = "deviceBinaryInputEvent";
+    const std::string ExecutionDenied = "executionDenied";
     const std::string Running = "running";
     const std::string UndoScene = "undoScene";
     const std::string ZoneSensorValue = "zoneSensorValue";
