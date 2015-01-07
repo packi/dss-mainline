@@ -68,7 +68,7 @@ void dssHandleSignal(int _sig) {
   }
 }
 
-void platformSpecificStartup() {
+bool platformSpecificStartup() {
 #ifndef WIN32
   srand((getpid() << 16) ^ getuid() ^ time(0));
   sigset_t signal_set;
@@ -90,7 +90,7 @@ void platformSpecificStartup() {
   pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 
   /* create the signal handling thread */
-  pthread_create(&sig_thread, NULL, dss::DSS::handleSignal, NULL);
+  return (0 == pthread_create(&sig_thread, NULL, dss::DSS::handleSignal, NULL));
 #else
   srand( (int)time( (time_t)NULL ) );
   WSAData dat;
@@ -114,7 +114,9 @@ int main (int argc, char* argv[]) {
   if(!setupLocale()) {
     return -1;
   }
-  platformSpecificStartup();
+  if (!platformSpecificStartup()) {
+    return -1;
+  }
   dss::init_libraries();
 
   vector<string> properties;
