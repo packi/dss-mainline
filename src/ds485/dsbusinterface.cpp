@@ -68,8 +68,6 @@ namespace dss {
     if(_pDSS != NULL) {
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "connectionURI")
             ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
-      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "busState")
-            ->linkToProxy(PropertyProxyReference<int>((int &) m_busState, true));
     }
     m_pActionRequestInterface.reset(new DSActionRequest());
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface());
