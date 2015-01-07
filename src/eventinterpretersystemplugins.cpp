@@ -1054,7 +1054,7 @@ namespace dss {
     if (m_properties.has(ss_originDSUID)) {
       originDSUID = str2dsuid(m_properties.get(ss_originDSUID));
     }
-    bool forced;
+    bool forced = false;
     if (m_properties.has(ss_forced)) {
       std::string sForced = m_properties.get(ss_forced);
       forced = (sForced == "true");
