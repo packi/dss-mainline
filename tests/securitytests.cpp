@@ -27,6 +27,7 @@
 #include <fstream>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 
 #include "src/foreach.h"
 
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE(testDigestPasswords) {
   PropertySystem propertySystem;
   PropertyNodePtr userNode = propertySystem.createProperty("/dssadmin");
 
-  boost::shared_ptr<HTDigestPasswordChecker> checker(new HTDigestPasswordChecker(fileName));
+  boost::shared_ptr<HTDigestPasswordChecker> checker = boost::make_shared<HTDigestPasswordChecker>(fileName);
   BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "dssadmin"), true);
   BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "asfd"), false);
   BOOST_CHECK_EQUAL(checker->checkPassword(userNode, ""), false);
@@ -110,7 +111,7 @@ class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
     m_pSecurity.reset(new Security(m_PropertySystem.createProperty(pathSecurity)));
-    boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
+    boost::shared_ptr<PasswordChecker> checker = boost::make_shared<BuiltinPasswordChecker>();
     m_pSecurity->setPasswordChecker(checker);
     m_pSecurity->signOff();
 
@@ -183,7 +184,7 @@ BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
   BOOST_CHECK(m_pSecurity->authenticate("testuser", "test"));
   BOOST_CHECK(Security::getCurrentlyLoggedInUser()->getName() == "testuser");
 
-  boost::shared_ptr<OtherThread> threadObj(new OtherThread);
+  boost::shared_ptr<OtherThread> threadObj = boost::make_shared<OtherThread>();
   boost::thread th(boost::bind(&OtherThread::run, threadObj));
   th.join();
   BOOST_CHECK(threadObj->result == true);
@@ -202,13 +203,13 @@ void setupPrivileges(PropertySystem &propSys) {
   privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
   privilegeUser->addRight(Privilege::Write);
 
-  boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
+  boost::shared_ptr<NodePrivileges> privileges = boost::make_shared<NodePrivileges>();
   privileges->addPrivilege(privilegeSystem);
   privileges->addPrivilege(privilegeUser);
   propSys.getProperty("/")->setPrivileges(privileges);
 
   /* security: passwords and credentials */
-  boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
+  boost::shared_ptr<NodePrivileges> privilegesSecurityNode = boost::make_shared<NodePrivileges>();
   privilegesSecurityNode->addPrivilege(privilegeSystem);
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }
@@ -345,7 +346,7 @@ BOOST_FIXTURE_TEST_CASE(testSecurityPersistency, FixtureTestUserTest) {
   PropertyNodePtr vaultRootNode(new PropertyNode("security"));
   Security security = Security(PropertyNodePtr(vaultRootNode));
   security.setFileName(fileName);
-  boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
+  boost::shared_ptr<PasswordChecker> checker = boost::make_shared<BuiltinPasswordChecker>();
   security.setPasswordChecker(checker);
 
   BOOST_CHECK_EQUAL(security.loadFromXML(), true);

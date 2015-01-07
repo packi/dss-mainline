@@ -63,7 +63,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsuid);
       if(_request.getMethod() == "getName") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("name", dsMeter->getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
@@ -87,14 +87,14 @@ namespace dss {
         if (!dsMeter->getCapability_HasMetering()) {
           return failure("Metering not supported on this device");
         }
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("consumption", dsMeter->getPowerConsumption());
         return success(resultObj);
       } else if(_request.getMethod() == "getEnergyMeterValue") {
         if (!dsMeter->getCapability_HasMetering()) {
           return failure("Metering not supported on this device");
         }
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("meterValue", dsMeter->getEnergyMeterValue());
         return success(resultObj);
       } else if(_request.getMethod() == "rescan") {

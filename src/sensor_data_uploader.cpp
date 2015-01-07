@@ -173,7 +173,7 @@ namespace EventName {
 
 void SensorDataUploadMsHubPlugin::scheduleBatchUploader() {
   log(std::string(__func__) + " start uploading", lsInfo);
-  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadMsHubEventLog));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::UploadMsHubEventLog);
   pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
   int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
   pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
@@ -336,7 +336,7 @@ namespace EventName {
 
 void SensorDataUploadDsHubPlugin::scheduleBatchUploader() {
   log(std::string(__func__) + " start uploading", lsInfo);
-  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadDsHubEventLog));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::UploadDsHubEventLog);
   pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
   int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
   pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));

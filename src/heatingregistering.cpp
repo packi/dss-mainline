@@ -38,7 +38,7 @@ HeatingRegisteringPlugin::~HeatingRegisteringPlugin()
 
 void HeatingRegisteringPlugin::startTimeout(int _delay) {
   log(std::string(__func__) + " start cloud registration delay", lsInfo);
-  boost::shared_ptr<Event> pEvent(new Event(EV_RETRY_REGISTRATION));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EV_RETRY_REGISTRATION);
   pEvent->setProperty("time", "+" + intToString(_delay));
   pEvent->setProperty(EventProperty::Unique, "Yes");
   DSS::getInstance()->getEventQueue().pushEvent(pEvent);

@@ -99,42 +99,42 @@ namespace dss {
   //================================================== JSONObject
 
   void JSONObject::addProperty(const std::string& _name, const std::string& _value) {
-    boost::shared_ptr<JSONValue<std::string> > elem(new JSONValue<std::string>(_value));
+    boost::shared_ptr<JSONValue<std::string> > elem = boost::make_shared<JSONValue<std::string> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const char* _value) {
-    boost::shared_ptr<JSONValue<std::string> > elem(new JSONValue<std::string>(_value));
+    boost::shared_ptr<JSONValue<std::string> > elem = boost::make_shared<JSONValue<std::string> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const int _value) {
-    boost::shared_ptr<JSONValue<int> > elem(new JSONValue<int>(_value));
+    boost::shared_ptr<JSONValue<int> > elem = boost::make_shared<JSONValue<int> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const unsigned long int _value) {
-    boost::shared_ptr<JSONValue<unsigned long int> > elem(new JSONValue<unsigned long int>(_value));
+    boost::shared_ptr<JSONValue<unsigned long int> > elem = boost::make_shared<JSONValue<unsigned long int> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const long int _value) {
-    boost::shared_ptr<JSONValue<long int> > elem(new JSONValue<long int>(_value));
+    boost::shared_ptr<JSONValue<long int> > elem = boost::make_shared<JSONValue<long int> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const unsigned long long _value) {
-    boost::shared_ptr<JSONValue<unsigned long long> > elem(new JSONValue<unsigned long long>(_value));
+    boost::shared_ptr<JSONValue<unsigned long long> > elem = boost::make_shared<JSONValue<unsigned long long> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const bool _value) {
-    boost::shared_ptr<JSONValue<bool> > elem(new JSONValue<bool>(_value));
+    boost::shared_ptr<JSONValue<bool> > elem = boost::make_shared<JSONValue<bool> >(_value);
     addElement(_name, elem);
   } // addProperty
 
   void JSONObject::addProperty(const std::string& _name, const double _value) {
-    boost::shared_ptr<JSONValue<double> > elem(new JSONValue<double>(_value));
+    boost::shared_ptr<JSONValue<double> > elem = boost::make_shared<JSONValue<double> >(_value);
     addElement(_name, elem);
   } // addProperty
 

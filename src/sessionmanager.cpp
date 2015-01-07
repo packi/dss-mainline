@@ -32,6 +32,7 @@
 #endif
 
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 #include <vector>
 #include <sstream>
 
@@ -93,7 +94,7 @@ namespace dss {
 
   void SessionManager::sendCleanupEvent() {
     DateTime now;
-    boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("webSessionCleanup");
     pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
     pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(kSessionCleanupInterval));
     m_EventQueue.pushEvent(pEvent);
@@ -103,7 +104,7 @@ namespace dss {
     if (m_pRelayTarget == NULL) {
       EventInterpreterInternalRelay* pRelay =
         dynamic_cast<EventInterpreterInternalRelay*>(m_EventInterpreter.getPluginByName(EventInterpreterInternalRelay::getPluginName()));
-      m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+      m_pRelayTarget = boost::make_shared<InternalEventRelayTarget>(boost::ref<EventInterpreterInternalRelay>(*pRelay));
 
       if (m_pRelayTarget != NULL) {
         boost::shared_ptr<EventSubscription> cleanupEventSubscription(
@@ -123,7 +124,7 @@ namespace dss {
   boost::shared_ptr<Session> SessionManager::createSession() {
     setupCleanupEventRelayTarget();
 
-    boost::shared_ptr<Session> result(new Session(SessionTokenGenerator::generate()));
+    boost::shared_ptr<Session> result = boost::make_shared<Session>(SessionTokenGenerator::generate());
     result->setTimeout(m_timeoutSecs);
     return result;
   }

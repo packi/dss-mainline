@@ -79,7 +79,7 @@ namespace dss {
         return failure("Could not find node named '" + propName + "'");
       }
       try {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("value", node->getStringValue());
         return success(resultObj);
       } catch(PropertyTypeMismatch& ex) {
@@ -91,7 +91,7 @@ namespace dss {
       }
 
       try {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         if (node->getValueType() == vTypeInteger) {
           resultObj->addProperty("value", node->getIntegerValue());
         } else {
@@ -106,7 +106,7 @@ namespace dss {
         return failure("Could not find node named '" + propName + "'");
       }
       try {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("value", node->getBoolValue());
         return success(resultObj);
       } catch(PropertyTypeMismatch& ex) {
@@ -117,7 +117,7 @@ namespace dss {
         return failure("Could not find node named '" + propName + "'");
       }
       try {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("value", node->getFloatingValue());
         return success(resultObj);
       } catch(PropertyTypeMismatch& ex) {
@@ -212,9 +212,9 @@ namespace dss {
       if(node == NULL) {
         return failure("Could not find node named '" + propName + "'");
       }
-      boost::shared_ptr<JSONArrayBase> resultObj(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> resultObj = boost::make_shared<JSONArrayBase>();
       for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
-        boost::shared_ptr<JSONObject> prop(new JSONObject());
+        boost::shared_ptr<JSONObject> prop = boost::make_shared<JSONObject>();
         resultObj->addElement("", prop);
         PropertyNodePtr cnode = node->getChild(iChild);
         prop->addProperty("name", cnode->getDisplayName());
@@ -230,7 +230,7 @@ namespace dss {
       if(node == NULL) {
         return failure("Could not find node named '" + propName + "'");
       }
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("type", getValueTypeAsString(node->getValueType()));
       return success(resultObj);
     } else if(_request.getMethod() == "setFlag") {
@@ -269,7 +269,7 @@ namespace dss {
         return failure("Could not find node named '" + propName + "'");
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("READABLE", node->hasFlag(PropertyNode::Readable));
       resultObj->addProperty("WRITEABLE", node->hasFlag(PropertyNode::Writeable));
       resultObj->addProperty("ARCHIVE", node->hasFlag(PropertyNode::Archive));

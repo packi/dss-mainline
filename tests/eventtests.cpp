@@ -76,7 +76,7 @@ protected:
 };
 
 BOOST_FIXTURE_TEST_CASE(testSimpleEvent, NonRunningFixture) {
-  boost::shared_ptr<Event> pEvent(new Event("event1"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("event1");
 
   m_pQueue->pushEvent(pEvent);
 
@@ -94,7 +94,7 @@ BOOST_FIXTURE_TEST_CASE(testSimpleEvent, NonRunningFixture) {
 } // testSimpleEvent
 
 BOOST_FIXTURE_TEST_CASE(testScheduledEvent, NonRunningFixture) {
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
   pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY");
   m_pQueue->pushEvent(pEvent);
@@ -122,13 +122,13 @@ BOOST_FIXTURE_TEST_CASE(testSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
 
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", "event1");
   opts->setParameter("test_override", "always testing");
   opts->setParameter("test2_default", "defaults to that");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
   m_pEventInterpreter->subscribe(subscription);
 
   m_pQueue->pushEvent(pEvent);
@@ -155,9 +155,9 @@ BOOST_FIXTURE_TEST_CASE(testEmptySubscriptionXML, NonRunningFixture) {
   ofs << "<?xml version=\"1.0\"?>\n<subscriptions version=\"1\">\n</subscriptions>";
   ofs.close();
 
-  boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+  boost::shared_ptr<SubscriptionParserProxy> subParser = boost::make_shared<SubscriptionParserProxy>(
       m_propSys->createProperty("/temp"),
-      PropertyNodePtr() ));
+      PropertyNodePtr() );
 
   subParser->loadFromXML(fileName);
   m_pEventInterpreter->loadSubscriptionsFromProperty(m_propSys->getProperty("/temp"));
@@ -169,9 +169,9 @@ BOOST_FIXTURE_TEST_CASE(testEmptySubscriptionXML, NonRunningFixture) {
 BOOST_FIXTURE_TEST_CASE(testNonExistingXML, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 
-  boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+  boost::shared_ptr<SubscriptionParserProxy> subParser = boost::make_shared<SubscriptionParserProxy>(
       m_propSys->createProperty("/temp"),
-      PropertyNodePtr() ));
+      PropertyNodePtr() );
 
   try {
     subParser->loadFromXML("data/iwillnever_be_a_subscription.xml");
@@ -209,9 +209,9 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
          "</subscriptions>\n";
   ofs.close();
 
-  boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+  boost::shared_ptr<SubscriptionParserProxy> subParser = boost::make_shared<SubscriptionParserProxy>(
       m_propSys->createProperty("/usr/subs"),
-      PropertyNodePtr()));
+      PropertyNodePtr());
 
   subParser->loadFromXML(fileName);
   m_pEventInterpreter->loadSubscriptionsFromProperty(m_propSys->getProperty("/usr/subs"));
@@ -220,7 +220,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
-  boost::shared_ptr<Event> evt(new Event("event1"));
+  boost::shared_ptr<Event> evt = boost::make_shared<Event>("event1");
   evt->setProperty("local", "true");
   m_pQueue->pushEvent(evt);
   m_pEventInterpreter->executePendingEvent();
@@ -233,7 +233,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
-  boost::shared_ptr<Event> evt2(new Event("event1"));
+  boost::shared_ptr<Event> evt2 = boost::make_shared<Event>("event1");
   evt2->setProperty("remote", "true");
   m_pQueue->pushEvent(evt2);
   m_pEventInterpreter->executePendingEvent();
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexisti
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
   interpreter.addPlugin(plugin);
 
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("filename1", "idontexistandneverwill.js");
   EventSubscription subscription("testEvent", "javascript", interpreter, opts);
   Event evt("testEvent");
@@ -267,11 +267,11 @@ BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
 
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", "event1");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
   m_pEventInterpreter->subscribe(subscription);
 
   m_pQueue->pushEvent(pEvent);
@@ -296,11 +296,11 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsWork) {
   EventQueue queue(&interpreter);
   interpreter.initialize();
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
 
   queue.pushEvent(pEvent);
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent2 = boost::make_shared<Event>("my_event");
   pEvent2->setProperty("unique", "yes");
 
   queue.pushEvent(pEvent2);
@@ -314,11 +314,11 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsDontBreakRegularOnes) {
   EventQueue queue(&interpreter);
   interpreter.initialize();
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
 
   queue.pushEvent(pEvent);
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_other_event"));
+  boost::shared_ptr<Event> pEvent2 = boost::make_shared<Event>("my_other_event");
   pEvent2->setProperty("unique", "yes");
 
   queue.pushEvent(pEvent2);
@@ -332,9 +332,9 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsCopyProperties) {
   EventQueue queue(&interpreter);
   interpreter.initialize();
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent2 = boost::make_shared<Event>("my_event");
   pEvent2->setProperty("unique", "yes");
   pEvent2->setProperty("aProperty", "aValue");
 
@@ -351,12 +351,12 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwriteProperties) {
   EventQueue queue(&interpreter);
   interpreter.initialize();
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   pEvent->setProperty("aProperty", "SomeValue");
 
   queue.pushEvent(pEvent);
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent2 = boost::make_shared<Event>("my_event");
   pEvent2->setProperty("unique", "yes");
   pEvent2->setProperty("aProperty", "aValue");
 
@@ -375,13 +375,13 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
   interpreter.initialize();
   queue.setEventRunner(&runner);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   pEvent->setProperty("time", "+5");
 
   queue.pushEvent(pEvent);
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent2 = boost::make_shared<Event>("my_event");
   pEvent2->setProperty("unique", "yes");
   pEvent2->setProperty("time", "+2");
   queue.pushEvent(pEvent2);
@@ -398,12 +398,12 @@ BOOST_AUTO_TEST_CASE(testRemoveAndGetEvents) {
   interpreter.initialize();
   queue.setEventRunner(&runner);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event1"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event1");
   pEvent->setProperty("time", "+2");
   queue.pushEvent(pEvent);
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
 
-  boost::shared_ptr<Event> pEvent2(new Event("my_event2"));
+  boost::shared_ptr<Event> pEvent2 = boost::make_shared<Event>("my_event2");
   pEvent2->setProperty("time", "+4");
   queue.pushEvent(pEvent2);
 
@@ -423,7 +423,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, NonRunningFixture) {
   EventCollector collector(*relay);
   std::string subscriptionID = collector.subscribeTo("my_event");
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   m_pQueue->pushEvent(pEvent);
 
   m_pEventInterpreter->executePendingEvent();
@@ -502,7 +502,7 @@ BOOST_FIXTURE_TEST_CASE(testInternalEventRelay, NonRunningFixture) {
   InternalEventRelayTester tester;
   target.setCallback(boost::bind(&InternalEventRelayTester::onEvent, &tester, _1, _2));
 
-  boost::shared_ptr<Event> pEvent(new Event("one"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("one");
   m_pQueue->pushEvent(pEvent);
 
   m_pEventInterpreter->executePendingEvent();
@@ -573,13 +573,13 @@ protected:
 const std::string RelayEventFixture::kReraisedName = "reraised_event";
 
 BOOST_FIXTURE_TEST_CASE(testOverrideOnlyOverrides, RelayEventFixture) {
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", kReraisedName);
   opts->setParameter("test_override", "always testing");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
   m_pEventInterpreter->subscribe(subscription);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   m_pQueue->pushEvent(pEvent);
 
   m_pEventInterpreter->executePendingEvent();
@@ -590,14 +590,14 @@ BOOST_FIXTURE_TEST_CASE(testOverrideOnlyOverrides, RelayEventFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testOverrideOverrides, RelayEventFixture) {
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_override", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
   m_pEventInterpreter->subscribe(subscription);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   pEvent->setProperty("test", "bla");
   m_pQueue->pushEvent(pEvent);
 
@@ -609,14 +609,14 @@ BOOST_FIXTURE_TEST_CASE(testOverrideOverrides, RelayEventFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDefaultDoesntOverride, RelayEventFixture) {
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_default", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
   m_pEventInterpreter->subscribe(subscription);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   const std::string kOriginalValue = "bla";
   pEvent->setProperty("test", kOriginalValue);
   m_pQueue->pushEvent(pEvent);
@@ -629,14 +629,14 @@ BOOST_FIXTURE_TEST_CASE(testDefaultDoesntOverride, RelayEventFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDefaultSetsDefault, RelayEventFixture) {
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_default", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
   m_pEventInterpreter->subscribe(subscription);
 
-  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
   const std::string kOriginalValue = "bla";
   m_pQueue->pushEvent(pEvent);
 
@@ -667,7 +667,7 @@ BOOST_AUTO_TEST_CASE(testMultipleScriptFiles) {
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
   interpreter.addPlugin(plugin);
 
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("filename1", fileName1);
   opts->setParameter("filename2", fileName2);
   EventSubscription subscription("testEvent", "javascript", interpreter, opts);
@@ -694,7 +694,7 @@ BOOST_AUTO_TEST_CASE(testEventSourceGetsPassed) {
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
   interpreter.addPlugin(plugin);
 
-  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("filename1", fileName1);
   EventSubscription subscription("testEvent", "javascript", interpreter, opts);
   Event evt("testEvent");
@@ -741,7 +741,7 @@ BOOST_AUTO_TEST_CASE(testSystemTriggerSpeed) {
   pEvent->setProperty("zoneID", intToString(9492));
   pEvent->setProperty("token", "wuafhawepufhasuofhawuopfhweaopfuhaweufhaweufhaweufhesufhweaupfhawufhw");
 
-  boost::shared_ptr<SystemTrigger> trigger(new SystemTrigger());
+  boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
 
   BOOST_CHECK_EQUAL(true, trigger->setup(*pEvent.get()));
 

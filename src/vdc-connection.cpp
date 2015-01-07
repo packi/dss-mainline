@@ -38,7 +38,7 @@ namespace dss {
 
   boost::shared_ptr<VdsdSpec_t> VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
     vdcapi::Message message;
-    boost::shared_ptr<VdsdSpec_t> ret(new VdsdSpec_t());
+    boost::shared_ptr<VdsdSpec_t> ret = boost::make_shared<VdsdSpec_t>();
 
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop =
@@ -77,7 +77,7 @@ namespace dss {
       throw std::runtime_error("could not serialize message");
     }
 
-    boost::shared_ptr<std::vector<int> > features(new std::vector<int>());
+    boost::shared_ptr<std::vector<int> > features = boost::make_shared<std::vector<int> >();
     ret->modelFeatures = features;
 
     if (DSS::hasInstance()) {
@@ -194,7 +194,7 @@ namespace dss {
 
   boost::shared_ptr<VdcSpec_t> VdcHelper::getCapabilities(dsuid_t _vdsm) {
     vdcapi::Message message;
-    boost::shared_ptr<VdcSpec_t> ret(new VdcSpec_t());
+    boost::shared_ptr<VdcSpec_t> ret = boost::make_shared<VdcSpec_t>();
 
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop =
@@ -280,7 +280,7 @@ namespace dss {
 
   void VdcHelper::getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data) {
     vdcapi::Message message;
-    boost::shared_ptr<VdcSpec_t> ret(new VdcSpec_t());
+    boost::shared_ptr<VdcSpec_t> ret = boost::make_shared<VdcSpec_t>();
 
     *size = 0;
     *data = NULL;

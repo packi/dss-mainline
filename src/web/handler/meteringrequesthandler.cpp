@@ -48,13 +48,13 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getResolutions() {
     std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = m_Metering.getConfig();
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> resolutions(new JSONArrayBase());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONArrayBase> resolutions = boost::make_shared<JSONArrayBase>();
     resultObj->addElement("resolutions", resolutions);
 
     foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
       for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
-        boost::shared_ptr<JSONObject> resolution(new JSONObject());
+        boost::shared_ptr<JSONObject> resolution = boost::make_shared<JSONObject>();
         resolutions->addElement("", resolution);
 
         resolution->addProperty("resolution", pChain->getResolution(iConfig));
@@ -65,8 +65,8 @@ namespace dss {
   }
 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getSeries() {
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> series(new JSONArrayBase());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONArrayBase> series = boost::make_shared<JSONArrayBase>();
     resultObj->addElement("series", series);
 
     std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
@@ -77,17 +77,17 @@ namespace dss {
       dsid_t dsid;
       dsuid_to_dsid(dsMeter->getDSID(), &dsid);
 
-      boost::shared_ptr<JSONObject> energyEntry(new JSONObject());
+      boost::shared_ptr<JSONObject> energyEntry = boost::make_shared<JSONObject>();
       series->addElement("", energyEntry);
       energyEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
       energyEntry->addProperty("dsid", dsid2str(dsid));
       energyEntry->addProperty("type", "energy");
-      boost::shared_ptr<JSONObject> energyDeltaEntry(new JSONObject());
+      boost::shared_ptr<JSONObject> energyDeltaEntry = boost::make_shared<JSONObject>();
       series->addElement("", energyDeltaEntry);
       energyDeltaEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
       energyDeltaEntry->addProperty("dsid", dsid2str(dsid));
       energyDeltaEntry->addProperty("type", "energyDelta");
-      boost::shared_ptr<JSONObject> consumptionEntry(new JSONObject());
+      boost::shared_ptr<JSONObject> consumptionEntry = boost::make_shared<JSONObject>();
       series->addElement("", consumptionEntry);
       consumptionEntry->addProperty("dSUID", dsuid2str(dsMeter->getDSID()));
       consumptionEntry->addProperty("dsid", dsid2str(dsid));
@@ -193,9 +193,9 @@ namespace dss {
                                                                          valueCount);
 
     if(pSeries != NULL) {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       if (requestMeteringSet) {
-        boost::shared_ptr<JSONArrayBase> dsidSet(new JSONArrayBase());
+        boost::shared_ptr<JSONArrayBase> dsidSet = boost::make_shared<JSONArrayBase>();
         resultObj->addElement("meterID", dsidSet);
         for(std::vector<boost::shared_ptr<DSMeter> >::iterator iMeter = meters.begin(),
             e = meters.end();
@@ -203,7 +203,7 @@ namespace dss {
             ++iMeter)
         {
           std::string dsid = dsuid2str(iMeter->get()->getDSID());
-          boost::shared_ptr<JSONValue<std::string> > dsidVal(new JSONValue<std::string>(dsid));
+          boost::shared_ptr<JSONValue<std::string> > dsidVal = boost::make_shared<JSONValue<std::string> >(dsid);
           dsidSet->addElement("", dsidVal);
         }
       } else {
@@ -212,18 +212,18 @@ namespace dss {
       resultObj->addProperty("type", typeString);
       resultObj->addProperty("unit", unitString);
       resultObj->addProperty("resolution", intToString(resolution));
-      boost::shared_ptr<JSONArrayBase> valuesArray(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> valuesArray = boost::make_shared<JSONArrayBase>();
       resultObj->addElement("values", valuesArray);
       for(std::deque<Value>::iterator iValue = pSeries->begin(),
           e = pSeries->end();
           iValue != e;
           ++iValue)
       {
-        boost::shared_ptr<JSONArrayBase> valuePair(new JSONArrayBase());
+        boost::shared_ptr<JSONArrayBase> valuePair = boost::make_shared<JSONArrayBase>();
         valuesArray->addElement("", valuePair);
         DateTime tmp_date = iValue->getTimeStamp();
-        boost::shared_ptr<JSONValue<int> > timeVal(new JSONValue<int>(tmp_date.secondsSinceEpoch()));
-        boost::shared_ptr<JSONValue<double> > valueVal(new JSONValue<double>(iValue->getValue()));
+        boost::shared_ptr<JSONValue<int> > timeVal = boost::make_shared<JSONValue<int> >(tmp_date.secondsSinceEpoch());
+        boost::shared_ptr<JSONValue<double> > valueVal = boost::make_shared<JSONValue<double> >(iValue->getValue());
         valuePair->addElement("", timeVal);
         valuePair->addElement("", valueVal);
       }
@@ -266,10 +266,10 @@ namespace dss {
       return failure(std::string("Couldn't parse parameter 'from': '") + e.what() + "'");
     }
 
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> modulators(new JSONArrayBase());
-    boost::shared_ptr<JSONArrayBase> dsidSet(new JSONArrayBase());
-    boost::shared_ptr<JSONArrayBase> dsuidSet(new JSONArrayBase());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONArrayBase> modulators = boost::make_shared<JSONArrayBase>();
+    boost::shared_ptr<JSONArrayBase> dsidSet = boost::make_shared<JSONArrayBase>();
+    boost::shared_ptr<JSONArrayBase> dsuidSet = boost::make_shared<JSONArrayBase>();
     resultObj->addElement("values", modulators);
 
     bool isEnergy = (type == "energy");
@@ -289,16 +289,16 @@ namespace dss {
       if (aggregateMeterValues) {
         aggregatedValue += value;
         try {
-          boost::shared_ptr<JSONValue<std::string> > dsidVal(new JSONValue<std::string>(dsid2str(dsid)));
+          boost::shared_ptr<JSONValue<std::string> > dsidVal = boost::make_shared<JSONValue<std::string> >(dsid2str(dsid));
         dsidSet->addElement("", dsidVal);
         } catch (std::runtime_error &err) {
           Logger::getInstance()->log(err.what());
         }
-        boost::shared_ptr<JSONValue<std::string> > dsuidVal(new JSONValue<std::string>(dsuid));
+        boost::shared_ptr<JSONValue<std::string> > dsuidVal = boost::make_shared<JSONValue<std::string> >(dsuid);
         dsuidSet->addElement("", dsuidVal);
       } else {
         try {
-          boost::shared_ptr<JSONObject> modulator(new JSONObject());
+          boost::shared_ptr<JSONObject> modulator = boost::make_shared<JSONObject>();
           modulator->addProperty("dsid", dsid2str(dsid));
           modulator->addProperty("dSUID", dsuid);
           modulator->addProperty("value", value);
@@ -311,7 +311,7 @@ namespace dss {
     }
     if (aggregateMeterValues) {
       try {
-        boost::shared_ptr<JSONObject> modulator(new JSONObject());
+        boost::shared_ptr<JSONObject> modulator = boost::make_shared<JSONObject>();
         modulator->addElement("dsid", dsidSet);
         modulator->addElement("dSUID", dsuidSet);
         modulator->addProperty("value", aggregatedValue);

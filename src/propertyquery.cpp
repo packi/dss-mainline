@@ -86,7 +86,7 @@ namespace dss {
   boost::shared_ptr<JSONElement> PropertyQuery::addProperties(part_t& _part,
                                     boost::shared_ptr<JSONElement> _parentElement,
                                     dss::PropertyNodePtr _node) {
-    boost::shared_ptr<JSONObject> obj(new JSONObject());
+    boost::shared_ptr<JSONObject> obj = boost::make_shared<JSONObject>();
     foreach(std::string subprop, _part.properties) {
       log(std::string(__func__) + " from node: <" + _node->getName() + "> filter: " + subprop, lsDebug);
       if(subprop == "*") {
@@ -203,7 +203,7 @@ namespace dss {
   } // runFor2
 
   boost::shared_ptr<JSONElement> PropertyQuery::run() {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     if(beginsWith(m_Query, m_pProperty->getName())) {
       runFor(m_pProperty, 0, result);
     }
@@ -211,7 +211,7 @@ namespace dss {
   } // run
 
   boost::shared_ptr<JSONElement> PropertyQuery::run2() {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     if(beginsWith(m_Query, m_pProperty->getName())) {
       runFor2(m_pProperty, 0, result);
     }

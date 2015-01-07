@@ -235,7 +235,7 @@ namespace dss {
   {
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
-    boost::shared_ptr<Event> pEvent(new Event(desc));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(desc);
     pEvent->setProperty(EventProperty::Time, "+" +
                         intToString(propSystem.getIntValue(pp_websvc_apartment_changed_notify_delay)));
     pEvent->setProperty(EventProperty::Unique, "Yes");
@@ -299,9 +299,9 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
 
     PropertySystem subProperties;
-    boost::shared_ptr<SubscriptionParserProxy> subParser(new SubscriptionParserProxy(
+    boost::shared_ptr<SubscriptionParserProxy> subParser = boost::make_shared<SubscriptionParserProxy>(
         subProperties.createProperty("/temp"),
-        getDSS().getPropertySystem().createProperty("/usr/states")));
+        getDSS().getPropertySystem().createProperty("/usr/states"));
 
     if (!subParser) {
       log("Memory error while loading subscriptions", lsFatal);
@@ -582,7 +582,7 @@ namespace dss {
         return;
       }
 
-      boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions);
+      boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
       EventInterpreterPlugin* plugin = getPluginByName(handlerName);
       if (plugin == NULL) {
         log(std::string("loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);

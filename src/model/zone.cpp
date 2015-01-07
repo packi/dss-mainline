@@ -333,7 +333,7 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<MainZoneSensor_t> ms(new MainZoneSensor_t());
+    boost::shared_ptr<MainZoneSensor_t> ms = boost::make_shared<MainZoneSensor_t>();
     ms->m_DSUID = _device->getDSID();
     ms->m_sensorIndex = sensor->m_sensorIndex;
     ms->m_sensorType = sensor->m_sensorType;
@@ -414,7 +414,7 @@ namespace dss {
   }
 
   boost::shared_ptr<std::vector<int> > Zone::getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const {
-    boost::shared_ptr<std::vector<int> >ret(new std::vector<int>());
+    boost::shared_ptr<std::vector<int> >ret = boost::make_shared<std::vector<int> >();
     dsuid_t dev_dsuid = _device->getDSID();
 
     for (size_t i = 0; i < m_MainSensors.size(); i++) {

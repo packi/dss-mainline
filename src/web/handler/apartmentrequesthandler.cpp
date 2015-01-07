@@ -53,8 +53,8 @@ namespace dss {
   { }
 
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::getReachableGroups(const RestfulRequest& _request) {
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> resultZones(new JSONArrayBase());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONArrayBase> resultZones = boost::make_shared<JSONArrayBase>();
     resultObj->addElement("zones", resultZones);
 
     std::vector<boost::shared_ptr<Zone> > zones =
@@ -65,11 +65,11 @@ namespace dss {
         continue;
       }
 
-      boost::shared_ptr<JSONObject> resultZone(new JSONObject());
+      boost::shared_ptr<JSONObject> resultZone = boost::make_shared<JSONObject>();
       resultZones->addElement("", resultZone);
       resultZone->addProperty("zoneID", zone->getID());
       resultZone->addProperty("name", zone->getName());
-      boost::shared_ptr<JSONArray<int> > resultGroups(new JSONArray<int>());
+      boost::shared_ptr<JSONArray<int> > resultGroups = boost::make_shared<JSONArray<int> >();
       resultZone->addElement("groups", resultGroups);
 
       std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
@@ -123,7 +123,7 @@ namespace dss {
       foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMeters()) {
         accumulatedConsumption += pDSMeter->getPowerConsumption();
       }
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("consumption", accumulatedConsumption);
       return success(resultObj);
     } else if(isDeviceInterfaceCall(_request)) {
@@ -167,13 +167,13 @@ namespace dss {
 
         return success(toJSON(devices));
       } else if(_request.getMethod() == "getCircuits") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> circuits(new JSONArrayBase());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArrayBase> circuits = boost::make_shared<JSONArrayBase>();
 
         resultObj->addElement("circuits", circuits);
         std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
         foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
-          boost::shared_ptr<JSONObject> circuit(new JSONObject());
+          boost::shared_ptr<JSONObject> circuit = boost::make_shared<JSONObject>();
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
           dsid_t dsid;
@@ -202,7 +202,7 @@ namespace dss {
         }
         return success(resultObj);
       } else if(_request.getMethod() == "getName") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("name", m_Apartment.getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
@@ -232,8 +232,8 @@ namespace dss {
         return getReachableGroups(_request);
       } else if(_request.getMethod() == "getLockedScenes") {
         std::list<uint32_t> scenes = CommChannel::getInstance()->getLockedScenes();
-        boost::shared_ptr<JSONObject> result(new JSONObject());
-        boost::shared_ptr<JSONArray<int> > lockedScenes(new JSONArray<int>());
+        boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArray<int> > lockedScenes = boost::make_shared<JSONArray<int> >();
         result->addElement("lockedScenes", lockedScenes);
         while (!scenes.empty()) {
           lockedScenes->add((int)scenes.front());
@@ -242,8 +242,8 @@ namespace dss {
         return success(result);
 
       } else if(_request.getMethod() == "getTemperatureControlStatus") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArrayBase> zones = boost::make_shared<JSONArrayBase>();
 
         resultObj->addElement("zones", zones);
         std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
@@ -251,7 +251,7 @@ namespace dss {
           if (pZone->getID() == 0) {
             continue;
           }
-          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          boost::shared_ptr<JSONObject> zone = boost::make_shared<JSONObject>();
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
           ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
@@ -292,8 +292,8 @@ namespace dss {
         return success(resultObj);
 
       } else if(_request.getMethod() == "getTemperatureControlConfig") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArrayBase> zones = boost::make_shared<JSONArrayBase>();
 
         resultObj->addElement("zones", zones);
         std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
@@ -301,7 +301,7 @@ namespace dss {
           if (pZone->getID() == 0) {
             continue;
           }
-          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          boost::shared_ptr<JSONObject> zone = boost::make_shared<JSONObject>();
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           zones->addElement("", zone);
           zone->addProperty("id", pZone->getID());
@@ -354,8 +354,8 @@ namespace dss {
         return success(resultObj);
 
       } else if(_request.getMethod() == "getTemperatureControlValues") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArrayBase> zones = boost::make_shared<JSONArrayBase>();
 
         resultObj->addElement("zones", zones);
         std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
@@ -363,7 +363,7 @@ namespace dss {
           if (pZone->getID() == 0) {
             continue;
           }
-          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          boost::shared_ptr<JSONObject> zone = boost::make_shared<JSONObject>();
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           zones->addElement("", zone);
           zone->addProperty("id", pZone->getID());
@@ -429,25 +429,25 @@ namespace dss {
         return success(resultObj);
 
       } else if(_request.getMethod() == "getAssignedSensors") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArrayBase> zones = boost::make_shared<JSONArrayBase>();
 
         resultObj->addElement("zones", zones);
         std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
         foreach(boost::shared_ptr<Zone> pZone, zoneList) {
-          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          boost::shared_ptr<JSONObject> zone = boost::make_shared<JSONObject>();
           zones->addElement("zones", zone);
           zone->addProperty("id", pZone->getID());
           zone->addProperty("name", pZone->getName());
 
-          boost::shared_ptr<JSONArrayBase> sensors(new JSONArrayBase());
+          boost::shared_ptr<JSONArrayBase> sensors = boost::make_shared<JSONArrayBase>();
           zone->addElement("sensors", sensors);
 
           std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
           for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
               it != slist.end();
               it ++) {
-            boost::shared_ptr<JSONObject> sensor(new JSONObject());
+            boost::shared_ptr<JSONObject> sensor = boost::make_shared<JSONObject>();
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
             sensors->addElement("", sensor);
             sensor->addProperty("sensorType", devSensor->m_sensorType);
@@ -458,8 +458,8 @@ namespace dss {
 
       } else if(_request.getMethod() == "getSensorValues") {
         ApartmentSensorStatus_t aSensorStatus = m_Apartment.getSensorStatus();
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> zones(new JSONArrayBase());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONArrayBase> zones = boost::make_shared<JSONArrayBase>();
 
         if (aSensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
           resultObj->addProperty("TemperatureValue", aSensorStatus.m_TemperatureValue);
@@ -487,34 +487,34 @@ namespace dss {
             continue;
           }
           ZoneSensorStatus_t sensorStatus = pZone->getSensorStatus();
-          boost::shared_ptr<JSONObject> zone(new JSONObject());
+          boost::shared_ptr<JSONObject> zone = boost::make_shared<JSONObject>();
           zones->addElement("zones", zone);
           zone->addProperty("id", pZone->getID());
           zone->addProperty("name", pZone->getName());
 
-          boost::shared_ptr<JSONArrayBase> values(new JSONArrayBase());
+          boost::shared_ptr<JSONArrayBase> values = boost::make_shared<JSONArrayBase>();
           zone->addElement("values", values);
 
           if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
             values->addElement("", svalue);
             svalue->addProperty("TemperatureValue", sensorStatus.m_TemperatureValue);
             svalue->addProperty("TemperatureValueTime", sensorStatus.m_TemperatureValueTS.toISO8601_ms());
           }
           if (sensorStatus.m_HumidityValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
             values->addElement("", svalue);
             svalue->addProperty("HumidityValue", sensorStatus.m_HumidityValue);
             svalue->addProperty("HumidityValueTime", sensorStatus.m_HumidityValueTS.toISO8601_ms());
           }
           if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
             values->addElement("", svalue);
             svalue->addProperty("CO2concentrationValue", sensorStatus.m_CO2ConcentrationValue);
             svalue->addProperty("CO2concentrationValueTime", sensorStatus.m_CO2ConcentrationValueTS.toISO8601_ms());
           }
           if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue(new JSONObject());
+            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
             values->addElement("", svalue);
             svalue->addProperty("BrightnessValue", sensorStatus.m_BrightnessValue);
             svalue->addProperty("BrightnessValueTime", sensorStatus.m_BrightnessValueTS.toISO8601_ms());
@@ -522,15 +522,15 @@ namespace dss {
         }
         return success(resultObj);
       } else if(_request.getMethod() == "getModelFeatures") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONObject> matrix(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        boost::shared_ptr<JSONObject> matrix = boost::make_shared<JSONObject>();
 
         for (int colorID = ColorIDYellow; colorID <= ColorIDBlack; colorID++) {
           std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > > f = ModelFeatures::getInstance()->getFeatures(colorID);
-          boost::shared_ptr<JSONObject> color(new JSONObject());
+          boost::shared_ptr<JSONObject> color = boost::make_shared<JSONObject>();
 
           for (size_t i = 0; i < f.size(); i++) {
-            boost::shared_ptr<JSONObject> device(new JSONObject());
+            boost::shared_ptr<JSONObject> device = boost::make_shared<JSONObject>();
 
             boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > model = f.at(i);
 
@@ -544,7 +544,7 @@ namespace dss {
         }
         resultObj->addElement("modelFeatures", matrix);
         
-        boost::shared_ptr<JSONObject> reference(new JSONObject());
+        boost::shared_ptr<JSONObject> reference = boost::make_shared<JSONObject>();
 
         boost::shared_ptr<std::vector<int> > all = ModelFeatures::getInstance()->getAvailableFeatures();
         for (size_t a = 0; a < all->size(); a++) {

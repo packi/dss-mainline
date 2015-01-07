@@ -50,7 +50,7 @@ namespace dss {
   WebServerResponse SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     if(_request.getMethod() == "version") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("version", DSS::getInstance()->versionString());
       return success(resultObj);
     } else if ((_request.getMethod() == "getDSID") ||
@@ -69,18 +69,18 @@ namespace dss {
         dsuidStr = dsuidNode->getAsString();
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("dSID", dsidStr);
       resultObj->addProperty("dSUID", dsuidStr);
       return success(resultObj);
     } else if (_request.getMethod() == "time") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("time",
               static_cast<long unsigned int>(DateTime().secondsSinceEpoch()));
       return success(resultObj);
     } else if(_request.getMethod() == "login") {
       if(_session != NULL) {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("token", _session->getID());
 
         WebServerResponse response(success(resultObj));
@@ -114,7 +114,7 @@ namespace dss {
           log("Registered new JSON session for user: " + user +
               " (" + token + ")");
 
-          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
           resultObj->addProperty("token", token);
 
           WebServerResponse response(success(resultObj));
@@ -151,7 +151,7 @@ namespace dss {
             m_pSessionManager->getSecurity()->getApplicationName(loginToken) +
             " (" + token + ")");
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("token", token);
 
         WebServerResponse response(success(resultObj));
@@ -170,7 +170,7 @@ namespace dss {
       response.setRevokeSessionToken();
       return response;
     } else if(_request.getMethod() == "loggedInUser") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       User* pUser = m_pSessionManager->getSecurity()->getCurrentlyLoggedInUser();
       if(pUser != NULL) {
         resultObj->addProperty("name", pUser->getName());
@@ -210,7 +210,7 @@ namespace dss {
       m_pSessionManager->getSecurity()->createApplicationToken(applicationName,
                                                                applicationToken);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("applicationToken", applicationToken);
       return success(resultObj);
     } else if(_request.getMethod() == "enableToken") {

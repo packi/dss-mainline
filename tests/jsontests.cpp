@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(testObjectWithProperties) {
 BOOST_AUTO_TEST_CASE(testObjectWithSubObject) {
   JSONObject obj;
   obj.addProperty("name", "test");
-  boost::shared_ptr<JSONObject> obj2(new JSONObject());
+  boost::shared_ptr<JSONObject> obj2 = boost::make_shared<JSONObject>();
   obj2->addProperty("street", "blastreet");
   obj.addElement("address", obj2);
   std::string value = obj.toString();
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(testStringArray) {
 
 BOOST_AUTO_TEST_CASE(testObjectWithSubArray) {
   JSONObject obj;
-  boost::shared_ptr<JSONArray<int> > array(new JSONArray<int>());
+  boost::shared_ptr<JSONArray<int> > array = boost::make_shared<JSONArray<int> >();
   obj.addElement("elements", array);
   array->add(1);
   array->add(2);
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(testObjectWithSubArray) {
 
 BOOST_AUTO_TEST_CASE(testObjectWithSubArrayOfObject) {
   JSONObject obj;
-  boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  boost::shared_ptr<JSONArray<JSONObject> > array = boost::make_shared<JSONArray<JSONObject> >();
   int i;
 
   obj.addElement("elements", array);
@@ -184,22 +184,22 @@ BOOST_AUTO_TEST_CASE(testJSONEscapeMixedMiddle) {
 
 BOOST_AUTO_TEST_CASE(testGetElementByName) {
   const std::string kElementName = "child";
-  boost::shared_ptr<JSONElement> parent(new JSONObject());
-  boost::shared_ptr<JSONElement> child(new JSONObject());
+  boost::shared_ptr<JSONElement> parent = boost::make_shared<JSONObject>();
+  boost::shared_ptr<JSONElement> child = boost::make_shared<JSONObject>();
   parent->addElement(kElementName, child);
   BOOST_CHECK_EQUAL(parent->getElementByName(kElementName), child);
 }
 
 BOOST_AUTO_TEST_CASE(testGetElementByNameReturnsNull) {
   const std::string kElementName = "child";
-  boost::shared_ptr<JSONElement> parent(new JSONObject());
+  boost::shared_ptr<JSONElement> parent = boost::make_shared<JSONObject>();
   BOOST_CHECK_EQUAL(parent->getElementByName(kElementName), boost::shared_ptr<JSONElement>());
 }
 
 BOOST_AUTO_TEST_CASE(testGetElementName) {
   const std::string kElementName = "child";
-  boost::shared_ptr<JSONElement> parent(new JSONObject());
-  boost::shared_ptr<JSONElement> child(new JSONObject());
+  boost::shared_ptr<JSONElement> parent = boost::make_shared<JSONObject>();
+  boost::shared_ptr<JSONElement> child = boost::make_shared<JSONObject>();
   parent->addElement(kElementName, child);
   BOOST_CHECK_EQUAL(parent->getElementName(0), kElementName);
 }
