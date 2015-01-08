@@ -2229,6 +2229,7 @@ int mg_modify_passwords_file(struct mg_context *ctx, const char *fname,
     return 0;
   } else if ((fp2 = mg_fopen(tmp, "w+")) == NULL) {
     cry(fc(ctx), "Cannot open %s: %s", tmp, strerror(errno));
+    (void) fclose(fp);
     return 0;
   }
 
@@ -2392,6 +2393,7 @@ static void handle_directory_request(struct mg_connection *conn,
     if (entries == NULL) {
       send_http_error(conn, 500, "Cannot open directory",
           "%s", "Error: cannot allocate memory");
+      (void) closedir(dirp);
       return;
     }
 
@@ -3543,6 +3545,7 @@ static int load_dll(struct mg_context *ctx, const char *dll_name,
 #endif /* _WIN32 */
     if (u.fp == NULL) {
       cry(fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
+      dlclose(dll_handle);
       return 0;
     } else {
       fp->ptr = u.fp;
