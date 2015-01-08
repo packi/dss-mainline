@@ -3930,6 +3930,7 @@ static void accept_new_connection(const struct socket *listener,
   struct socket accepted;
   int allowed;
 
+  accepted.next = NULL;
   accepted.rsa.len = sizeof(accepted.rsa.u.sin);
   accepted.lsa = listener->lsa;
   accepted.sock = accept(listener->sock, &accepted.rsa.u.sa, &accepted.rsa.len);
