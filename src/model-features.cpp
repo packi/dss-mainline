@@ -67,6 +67,7 @@ const int MF_AVAILABLE[] =
   mf_leddark,
   mf_transt,
   mf_outmode,
+  mf_outmodeswitch,
   mf_outvalue8,
   mf_pushbutton,
   mf_pushbdevice,
@@ -130,6 +131,7 @@ const int MF_GE_KL200[] =
   mf_blink,
   mf_ledauto,
   mf_transt,
+  mf_outmodeswitch,
   mf_outvalue8,
   mf_pushbutton,
   mf_pushbdevice,
@@ -723,6 +725,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_transt;
   } else if (_name == "outmode") {
     return mf_outmode;
+  } else if (_name == "outmodeswitch") {
+    return mf_outmodeswitch;
   } else if (_name == "outvalue8") {
     return mf_outvalue8;
   } else if (_name == "pushbutton") {
@@ -796,6 +800,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "transt";
     case mf_outmode:
       return "outmode";
+    case mf_outmodeswitch:
+      return "outmodeswitch";
     case mf_outvalue8:
       return "outvalue8";
     case mf_pushbutton:
