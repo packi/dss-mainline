@@ -19,7 +19,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(CurlTest)
 
 BOOST_AUTO_TEST_CASE(curlTest) {
-    boost::shared_ptr<HttpClient> curl(new HttpClient());
+    boost::shared_ptr<HttpClient> curl = boost::make_shared<HttpClient>();
     std::string url = "http://www.digitalstrom.com";
     std::string result;
 

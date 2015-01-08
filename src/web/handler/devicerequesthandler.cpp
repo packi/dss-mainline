@@ -62,7 +62,7 @@ namespace dss {
   };
 
   boost::shared_ptr<std::vector<std::pair<int, int> > > DeviceRequestHandler::parseOutputChannels(std::string _channels) {
-    boost::shared_ptr<std::vector<std::pair<int, int> > > out(new std::vector<std::pair<int, int> >);
+    boost::shared_ptr<std::vector<std::pair<int, int> > > out = boost::make_shared<std::vector<std::pair<int, int> > >();
 
     std::vector<std::string> chans = dss::splitString(_channels, ';');
     for (size_t i = 0; i < chans.size(); i++) {
@@ -73,7 +73,7 @@ namespace dss {
   }
 
   boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > DeviceRequestHandler::parseOutputChannelsWithValues(std::string _values) {
-    boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > out(new std::vector<boost::tuple<int, int, int> >);
+    boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > out = boost::make_shared<std::vector<boost::tuple<int, int, int> > >();
 
     std::pair<std::string, std::string> kv;
     std::vector<std::string> vals = dss::splitString(_values, ';');
@@ -149,21 +149,21 @@ namespace dss {
     if(isDeviceInterfaceCall(_request)) {
       return handleDeviceInterfaceRequest(_request, pDevice, _session);
     } else if(_request.getMethod() == "getSpec") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("functionID", pDevice->getFunctionID());
       resultObj->addProperty("productID", pDevice->getProductID());
       resultObj->addProperty("revisionID", pDevice->getRevisionID());
       return success(resultObj);
     } else if(_request.getMethod() == "getGroups") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       int numGroups = pDevice->getGroupsCount();
 
-      boost::shared_ptr<JSONArrayBase> groups(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> groups = boost::make_shared<JSONArrayBase>();
       resultObj->addElement("groups", groups);
       for(int iGroup = 0; iGroup < numGroups; iGroup++) {
         try {
           boost::shared_ptr<Group> group = pDevice->getGroupByIndex(iGroup);
-          boost::shared_ptr<JSONObject> groupObj(new JSONObject());
+          boost::shared_ptr<JSONObject> groupObj = boost::make_shared<JSONObject>();
           groups->addElement("", groupObj);
 
           groupObj->addProperty("id", group->getID());
@@ -176,11 +176,11 @@ namespace dss {
       }
       return success(resultObj);
     } else if(_request.getMethod() == "getState") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("isOn", pDevice->isOn());
       return success(resultObj);
     } else if(_request.getMethod() == "getName") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("name", pDevice->getName());
       return success(resultObj);
     } else if(_request.getMethod() == "setName") {
@@ -242,12 +242,12 @@ namespace dss {
       if(tagName.empty()) {
         return failure("missing parameter 'tag'");
       }
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
       return success(resultObj);
     } else if(_request.getMethod() == "getTags") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      boost::shared_ptr<JSONArray<std::string> > tagsObj(new JSONArray<std::string>());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      boost::shared_ptr<JSONArray<std::string> > tagsObj = boost::make_shared<JSONArray<std::string> >();
       resultObj->addElement("tags", tagsObj);
       std::vector<std::string> tags = pDevice->getTags();
       std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
@@ -293,7 +293,7 @@ namespace dss {
 
       uint8_t value = pDevice->getDeviceConfig(configClass, configIndex);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("class", configClass);
       resultObj->addProperty("index", configIndex);
       resultObj->addProperty("value", value);
@@ -311,7 +311,7 @@ namespace dss {
 
       uint16_t value = pDevice->getDeviceConfigWord(configClass, configIndex);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("class", configClass);
       resultObj->addProperty("index", configIndex);
       resultObj->addProperty("value", value);
@@ -355,9 +355,9 @@ namespace dss {
         }
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       if (!modifiedDevices.empty()) {
-        boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+        boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
         foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
           const DeviceReference d(device, &m_Apartment);
           modified->addElement("", toJSON(d));
@@ -396,8 +396,8 @@ namespace dss {
                                        m_Apartment);
       manipulator.deviceAddToGroup(pDevice, newGroup);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
       const DeviceReference d(pDevice, &m_Apartment);
       modified->addElement("", toJSON(d));
       resultObj->addProperty("action", "update");
@@ -529,7 +529,7 @@ namespace dss {
         return failure("Invalid mode specified");
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       std::string action = "none";
       if ((wasSlave == true) && (pPartnerDevice->is2WaySlave() == false)) {
         action = "add";
@@ -541,7 +541,7 @@ namespace dss {
       DeviceReference dr(pPartnerDevice, &m_Apartment);
       resultObj->addElement("device", toJSON(dr));
 
-      boost::shared_ptr<JSONObject> master(new JSONObject());
+      boost::shared_ptr<JSONObject> master = boost::make_shared<JSONObject>();
       dsid_t dsid;
       if (dsuid_to_dsid(pDevice->getDSID(), &dsid)) {
         master->addProperty("dsid", dsid2str(dsid));
@@ -636,7 +636,7 @@ namespace dss {
       std::pair<uint8_t, uint16_t> p = pDevice->getDeviceTransmissionQuality();
       uint8_t down = p.first;
       uint16_t up = p.second;
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("upstream", up);
       resultObj->addProperty("downstream", down);
       return success(resultObj);
@@ -686,7 +686,7 @@ namespace dss {
           return failure("Unsupported device for a type parameter");
         }
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("value", value);
         return success(resultObj);
 
@@ -697,7 +697,7 @@ namespace dss {
         }
         int value = pDevice->getDeviceOutputValue(offset);
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("offset", offset);
         resultObj->addProperty("value", value);
         return success(resultObj);
@@ -762,7 +762,7 @@ namespace dss {
         return failure("Device settings are being updated for selected activity, please try again later");
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("value", pDevice->getSceneValue(id));
 
       DeviceFeatures_t features = pDevice->getFeatures();
@@ -783,7 +783,7 @@ namespace dss {
 
       DeviceSceneSpec_t config;
       pDevice->getDeviceSceneMode(id, config);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("sceneID", id);
       resultObj->addProperty("dontCare", config.dontcare);
       resultObj->addProperty("localPrio", config.localprio);
@@ -836,7 +836,7 @@ namespace dss {
       }
       int up, down;
       pDevice->getDeviceTransitionTime(id, up, down);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("dimtimeIndex", id);
       resultObj->addProperty("up", up);
       resultObj->addProperty("down", down);
@@ -858,7 +858,7 @@ namespace dss {
       }
       DeviceLedSpec_t config;
       pDevice->getDeviceLedMode(id, config);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("ledconIndex", id);
       resultObj->addProperty("colorSelect", config.colorSelect);
       resultObj->addProperty("modeSelect", config.modeSelect);
@@ -887,14 +887,14 @@ namespace dss {
       return success();
 
     } else if(_request.getMethod() == "getBinaryInputs") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      boost::shared_ptr<JSONArrayBase> inputs(new JSONArrayBase());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      boost::shared_ptr<JSONArrayBase> inputs = boost::make_shared<JSONArrayBase>();
       resultObj->addElement("inputs", inputs);
       std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
       for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::iterator it = binputs.begin();
           it != binputs.end();
           it ++) {
-        boost::shared_ptr<JSONObject> inputObj(new JSONObject());
+        boost::shared_ptr<JSONObject> inputObj = boost::make_shared<JSONObject>();
         inputObj->addProperty("inputIndex", (*it)->m_inputIndex);
         inputObj->addProperty("inputId", (*it)->m_inputId);
         inputObj->addProperty("inputType", (*it)->m_inputType);
@@ -942,7 +942,7 @@ namespace dss {
       return success();
 
     } else if(_request.getMethod() == "getAKMInputTimeouts") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       int onDelay, offDelay;
       pDevice->getDeviceAKMInputTimeouts(onDelay, offDelay);
       resultObj->addProperty("ondelay", onDelay);
@@ -1002,7 +1002,7 @@ namespace dss {
         return failure("Invalid or missing parameter 'sensorIndex'");
       }
       int value = pDevice->getDeviceSensorValue(id);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("sensorIndex", id);
       resultObj->addProperty("sensorValue", value);
       return success(resultObj);
@@ -1013,7 +1013,7 @@ namespace dss {
       }
       boost::shared_ptr<DeviceSensor_t> sensor = pDevice->getSensor(id);
       int value = sensor->m_sensorType;
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("sensorIndex", id);
       resultObj->addProperty("sensorType", value);
       return success(resultObj);
@@ -1025,7 +1025,7 @@ namespace dss {
       }
       DeviceSensorEventSpec_t event;
       pDevice->getSensorEventEntry(id, event);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("eventIndex", id);
       resultObj->addProperty("eventName", event.name);
       resultObj->addProperty("isSceneDevice", false);
@@ -1119,12 +1119,12 @@ namespace dss {
 
       boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      boost::shared_ptr<JSONArrayBase> channelsObj(new JSONArrayBase());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      boost::shared_ptr<JSONArrayBase> channelsObj = boost::make_shared<JSONArrayBase>();
       resultObj->addElement("channels", channelsObj);
 
       for (size_t i = 0; i < channels->size(); i++) {
-        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        boost::shared_ptr<JSONObject> chanObj = boost::make_shared<JSONObject>();
         chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));
         chanObj->addProperty("value",
                 convertFromOutputChannelValue(
@@ -1198,14 +1198,14 @@ namespace dss {
         return failure("Missing or invalid parameter 'sceneNumber'");
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      boost::shared_ptr<JSONObject> channelsObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      boost::shared_ptr<JSONObject> channelsObj = boost::make_shared<JSONObject>();
 
       resultObj->addElement("channels", channelsObj);
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
       for (int i = 0; i < pDevice->getOutputChannelCount(); i++) {
-        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        boost::shared_ptr<JSONObject> chanObj = boost::make_shared<JSONObject>();
         int channelId = pDevice->getOutputChannel(i);
         chanObj->addProperty("channel", getOutputChannelName(channelId));
 
@@ -1226,13 +1226,13 @@ namespace dss {
 
       boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("sceneID", scene);
-      boost::shared_ptr<JSONArrayBase> channelsObj(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> channelsObj = boost::make_shared<JSONArrayBase>();
       resultObj->addElement("channels", channelsObj);
 
       for (size_t i = 0; i < channels->size(); i++) {
-        boost::shared_ptr<JSONObject> chanObj(new JSONObject());
+        boost::shared_ptr<JSONObject> chanObj = boost::make_shared<JSONObject>();
         chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));
         chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
         channelsObj->addElement("", chanObj);
@@ -1310,7 +1310,7 @@ namespace dss {
       }
       DeviceBank3_BL conf(device);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("valveProtectionTimer", conf.getValveProtectionTimer());
       resultObj->addProperty("emergencyValue", conf.getEmergencySetPoint());
       resultObj->addProperty("emergencyTimer", conf.getEmergencyTimer());
@@ -1374,7 +1374,7 @@ namespace dss {
         return failure("No device for given dsuid");
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       uint16_t value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
       resultObj->addProperty("pwmPeriod", value);
       value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
@@ -1396,7 +1396,7 @@ namespace dss {
       }
 
       uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("pwmValue", value & 0xff);
       resultObj->addProperty("pwmPriorityMode", (value >> 8) & 0xff);
       return success(resultObj);
@@ -1429,7 +1429,7 @@ namespace dss {
       DeviceValveControlSpec_t config;
       device->getDeviceValveControl(config);
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("ctrlClipMinZero", config.ctrlClipMinZero);
       resultObj->addProperty("ctrlClipMinLower", config.ctrlClipMinLower);
       resultObj->addProperty("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
@@ -1463,7 +1463,7 @@ namespace dss {
 
       if (device->isValveDevice()) {
         std::string valveType = device->getValveTypeAsString();
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("valveType", valveType);
         return success(resultObj);
       }
@@ -1477,7 +1477,7 @@ namespace dss {
       }
 
       std::string valveType = device->getValveTypeAsString();
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("relayValue", device->getDeviceUMVRelayValue());
       return success(resultObj);
     } else if (_request.getMethod() == "setUMVRelayValue") {

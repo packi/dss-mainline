@@ -119,7 +119,7 @@ namespace dss {
       }
       return success();
     } else if(_request.getMethod() == "getConsumption") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("consumption", _interface->getPowerConsumption());
       return success(resultObj);
     } else if(_request.getMethod() == "blink") {

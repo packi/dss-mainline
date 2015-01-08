@@ -2030,7 +2030,7 @@ namespace dss {
     for (std::vector<DeviceBinaryInputSpec_t>::const_iterator it = _binaryInputs.begin();
         it != _binaryInputs.end();
         ++it) {
-      boost::shared_ptr<DeviceBinaryInput_t> binput(new DeviceBinaryInput_t());
+      boost::shared_ptr<DeviceBinaryInput_t> binput = boost::make_shared<DeviceBinaryInput_t>();
       binput->m_inputIndex = m_binaryInputCount;
       binput->m_inputId = it->InputID;
       binput->m_inputType = it->InputType;
@@ -2038,7 +2038,7 @@ namespace dss {
       binput->m_targetGroupId = it->TargetGroup;
       m_binaryInputs.push_back(binput);
 
-      boost::shared_ptr<State> state(new State(me, m_binaryInputCount));
+      boost::shared_ptr<State> state = boost::make_shared<State>(me, m_binaryInputCount);
       try {
         getApartment().allocateState(state);
       } catch (ItemDuplicateException& ex) {
@@ -2107,7 +2107,7 @@ namespace dss {
         it != _slist.end();
         ++it) {
 
-      boost::shared_ptr<DeviceSensor_t> binput(new DeviceSensor_t());
+      boost::shared_ptr<DeviceSensor_t> binput = boost::make_shared<DeviceSensor_t>();
       binput->m_sensorIndex = m_sensorInputCount;
       binput->m_sensorType = it->SensorType;
       binput->m_sensorPollInterval = it->SensorPollInterval;

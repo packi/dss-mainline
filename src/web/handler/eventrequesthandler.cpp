@@ -58,7 +58,7 @@ namespace dss {
       return failure("Missing event name!");
     }
 
-    boost::shared_ptr<Event> evt(new Event(name));
+    boost::shared_ptr<Event> evt = boost::make_shared<Event>(name);
     if (!context.empty()) {
       evt->setContext(context);
     }
@@ -157,17 +157,17 @@ namespace dss {
 
 
   boost::shared_ptr<JSONObject> EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONArrayBase> eventsArray = boost::make_shared<JSONArrayBase>();
     result->addElement("events", eventsArray);
 
     while (_subscriptionSession->hasEvent()) {
       Event evt = _subscriptionSession->popEvent();
-      boost::shared_ptr<JSONObject> evtObj(new JSONObject());
+      boost::shared_ptr<JSONObject> evtObj = boost::make_shared<JSONObject>();
       eventsArray->addElement("event", evtObj);
 
       evtObj->addProperty("name", evt.getName());
-      boost::shared_ptr<JSONObject> evtprops(new JSONObject());
+      boost::shared_ptr<JSONObject> evtprops = boost::make_shared<JSONObject>();
       evtObj->addElement("properties", evtprops);
 
       const dss::HashMapStringString& props =  evt.getProperties().getContainer();
@@ -175,7 +175,7 @@ namespace dss {
         evtprops->addProperty(iParam->first, iParam->second);
       }
 
-      boost::shared_ptr<JSONObject> source(new JSONObject());
+      boost::shared_ptr<JSONObject> source = boost::make_shared<JSONObject>();
       evtObj->addElement("source", source);
 
       EventRaiseLocation raiseLocation = evt.getRaiseLocation();

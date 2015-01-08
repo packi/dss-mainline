@@ -21,6 +21,7 @@
 */
 
 #include <unistd.h>
+#include <boost/make_shared.hpp>
 
 #include "dsstructuremodifyingbusinterface.h"
 
@@ -234,7 +235,7 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
 
     if (m_pModelMaintenance) {
-      boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
+      boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
       *spec = _spec;
 
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, _dsMeterID);
@@ -277,7 +278,7 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
 
     if (m_pModelMaintenance) {
-      boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec(new ZoneHeatingOperationModeSpec_t);
+      boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec = boost::make_shared<ZoneHeatingOperationModeSpec_t>();
       *spec = _spec;
 
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerValues, _dsMeterID);

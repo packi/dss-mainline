@@ -32,6 +32,7 @@
 #include <cassert>
 #include <cstring>
 #include <fstream>
+#include <boost/make_shared.hpp>
 
 #include "src/base.h"
 #include "src/foreach.h"
@@ -49,7 +50,7 @@ namespace dss {
 
   bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode) {
     assert(_rootNode != NULL);
-    boost::shared_ptr<PropertyParser> pp(new PropertyParser());
+    boost::shared_ptr<PropertyParser> pp = boost::make_shared<PropertyParser>();
     return pp->loadFromXML(_fileName, _rootNode);
   } // loadFromXML
 

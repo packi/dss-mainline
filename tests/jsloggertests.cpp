@@ -28,6 +28,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#include <boost/make_shared.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -192,7 +193,7 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
   fs::copy_file(getTempDir() + "blalog.log", getTempDir() + "blalog1.log");
   fs::remove(getTempDir() + "blalog.log");
 
-  boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("SIGNAL");
   pEvent->setProperty("signum", intToString(SIGUSR1));
   queue.pushEvent(pEvent);
 

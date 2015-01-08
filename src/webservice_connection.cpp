@@ -29,6 +29,7 @@
 #include "event.h"
 #include "propertysystem.h"
 #include "webservice_api.h"
+#include <boost/make_shared.hpp>
 
 namespace dss {
 
@@ -111,7 +112,7 @@ WebserviceConnection::WebserviceConnection(const char *pp_base_url)
   if (!endsWith(m_base_url, "/")) {
     m_base_url = m_base_url + "/";
   }
-  m_url = boost::shared_ptr<HttpClient>(new HttpClient(true));
+  m_url = boost::make_shared<HttpClient>(true);
 }
 
 WebserviceConnection::~WebserviceConnection()
@@ -169,7 +170,7 @@ void WebserviceConnection::request(boost::shared_ptr<HttpRequest> req,
     authorizeRequest(*req, hasUrlParameters);
   }
 
-  boost::shared_ptr<URLRequestTask> task(new URLRequestTask(m_url, req, cb));
+  boost::shared_ptr<URLRequestTask> task = boost::make_shared<URLRequestTask>(m_url, req, cb);
   addEvent(task);
 }
 
@@ -179,7 +180,7 @@ void WebserviceConnection::request(const std::string& url,
                                    boost::shared_ptr<URLRequestCallback> cb,
                                    bool authenticated)
 {
-  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  boost::shared_ptr<HttpRequest> req = boost::make_shared<HttpRequest>();
   req->url = constructURL(url, parameters);
   req->type = type;
 
@@ -193,7 +194,7 @@ void WebserviceConnection::request(const std::string& url,
                                  boost::shared_ptr<URLRequestCallback> cb,
                                  bool authenticated)
 {
-  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  boost::shared_ptr<HttpRequest> req = boost::make_shared<HttpRequest>();
   req->url = constructURL(url, parameters);
   req->type = POST;
   req->headers = headers;
@@ -210,7 +211,7 @@ void WebserviceConnection::request(const std::string& url,
                                 boost::shared_ptr<URLRequestCallback> cb,
                                 bool authenticated)
 {
-  boost::shared_ptr<HttpRequest> req(new HttpRequest);
+  boost::shared_ptr<HttpRequest> req = boost::make_shared<HttpRequest>();
   req->url = constructURL(url, parameters);
   req->type = type;
   req->headers = headers;

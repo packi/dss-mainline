@@ -44,14 +44,14 @@ namespace dss {
   }
 
   boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::success(const std::string& _message) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     result->addProperty("ok", true);
     result->addProperty("message", _message);
     return result;
   }
 
   boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::success(boost::shared_ptr<JSONElement> _innerResult) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     result->addProperty("ok", true);
     if(_innerResult != NULL) {
       result->addElement("result", _innerResult);
@@ -60,7 +60,7 @@ namespace dss {
   }
 
   boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::failure(const std::string& _message) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     result->addProperty("ok", false);
     if(!_message.empty()) {
       result->addProperty("message", _message);

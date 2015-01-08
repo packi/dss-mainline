@@ -132,7 +132,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_State = ssInvalid;
     m_TimeStarted = time(NULL);
 
-    m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
+    m_pPropertySystem = boost::make_shared<PropertySystem>();
     setupCommonProperties(*m_pPropertySystem);
 
     // TODO why this setFooDirectoryPath
@@ -302,27 +302,27 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       return false;
     }
 
-    m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
+    m_pMetering = boost::make_shared<Metering>(this);
     m_Subsystems.push_back(m_pMetering.get());
 
     // will start a thread
-    m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
+    m_pModelMaintenance = boost::make_shared<ModelMaintenance>(this);
     m_Subsystems.push_back(m_pModelMaintenance.get());
 
-    m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this));
+    m_pApartment = boost::make_shared<Apartment>(this);
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pModelMaintenance->setApartment(m_pApartment.get());
 
-    m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
+    m_pEventInterpreter = boost::make_shared<EventInterpreter>(this);
     m_Subsystems.push_back(m_pEventInterpreter.get());
 
-    boost::shared_ptr<DSBusInterface> pDSBusInterface(new DSBusInterface(this, m_pModelMaintenance.get()));
+    boost::shared_ptr<DSBusInterface> pDSBusInterface = boost::make_shared<DSBusInterface>(this, m_pModelMaintenance.get());
     m_Subsystems.push_back(pDSBusInterface.get());
 
-    m_pDefaultBusEventSink = boost::shared_ptr<DefaultBusEventSink>(new DefaultBusEventSink(m_pApartment, m_pModelMaintenance));
+    m_pDefaultBusEventSink = boost::make_shared<DefaultBusEventSink>(m_pApartment, m_pModelMaintenance);
     pDSBusInterface->setBusEventSink(m_pDefaultBusEventSink.get());
 
-    m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
+    m_pWebServer = boost::make_shared<WebServer>(this);
     m_Subsystems.push_back(m_pWebServer.get());
 
     m_pBusInterface = boost::shared_ptr<BusInterface>(pDSBusInterface);
@@ -335,8 +335,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pApartment->setMetering(m_pMetering.get());
 
     PropertyNodePtr eventMonitor = m_pPropertySystem->createProperty("/system/EventInterpreter/ScheduledEvents");
-    m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(m_pEventInterpreter.get(), eventMonitor));
-    m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue(m_pEventInterpreter.get()));
+    m_pEventRunner = boost::make_shared<EventRunner>(m_pEventInterpreter.get(), eventMonitor);
+    m_pEventQueue = boost::make_shared<EventQueue>(m_pEventInterpreter.get());
 
     m_pSecurity.reset(
         new Security(m_pPropertySystem->createProperty("/system/security")));
@@ -383,7 +383,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       Logger::getInstance()->getLogChannel()->setMinimumSeverity(logLevel);
     }
 
-    m_pWatchdog = boost::shared_ptr<Watchdog>(new Watchdog(this));
+    m_pWatchdog = boost::make_shared<Watchdog>(this);
     m_Subsystems.push_back(m_pWatchdog.get());
     return checkDirectoriesExist();
   } // initialize
@@ -559,12 +559,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
           pSecurityNode->getProperty("roles/owner")));
     privilegeOwner->addRight(Privilege::Write);
 
-    boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
+    boost::shared_ptr<NodePrivileges> privileges = boost::make_shared<NodePrivileges>();
     privileges->addPrivilege(privilegeSystem);
     privileges->addPrivilege(privilegeOwner);
     m_pPropertySystem->getProperty("/")->setPrivileges(privileges);
 
-    boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
+    boost::shared_ptr<NodePrivileges> privilegesSecurityNode = boost::make_shared<NodePrivileges>();
     privilegesSecurityNode->addPrivilege(privilegeSystem);
     pSecurityNode->setPrivileges(privilegesSecurityNode);
 
@@ -608,13 +608,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     }
 
 #ifdef WITH_BONJOUR
-    m_pBonjour = boost::shared_ptr<BonjourHandler>(new BonjourHandler());
+    m_pBonjour = boost::make_shared<BonjourHandler>();
     m_pBonjour->run();
 #endif
 
     if (!m_ShutdownFlag) {
       m_State = ssRunning;
-      boost::shared_ptr<Event> runningEvent(new Event(EventName::Running));
+      boost::shared_ptr<Event> runningEvent = boost::make_shared<Event>(EventName::Running);
       m_pEventQueue->pushEvent(runningEvent);
 
       // pass control to the eventrunner
@@ -789,7 +789,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         }
       }
       if (DSS::hasInstance()) {
-        boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("SIGNAL");
         pEvent->setProperty("signum", intToString(sig));
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }

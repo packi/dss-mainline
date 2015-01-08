@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <digitalSTROM/dsuid/dsuid.h>
+#include <boost/make_shared.hpp>
 
 #include "src/businterface.h"
 #include "src/foreach.h"
@@ -366,8 +367,8 @@ namespace dss {
     }
 
     {
-      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
-      boost::shared_ptr<Event> readyEvent(new Event("DeviceEvent", pDevRef));
+      boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
+      boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
       readyEvent->setProperty("action", "ready");
       if(DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
@@ -411,7 +412,7 @@ namespace dss {
             dsuid2str(_pDevice->getDSID()));
         boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
         std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
-        task = boost::shared_ptr<DSDeviceBusInterface::OEMDataReader>(new DSDeviceBusInterface::OEMDataReader(connURI));
+        task = boost::make_shared<DSDeviceBusInterface::OEMDataReader>(connURI);
         task->setup(_pDevice);
         boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
         pTP->addEvent(task);
@@ -424,7 +425,7 @@ namespace dss {
                 (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
                 ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&
                  (_pDevice->getOemProductInfoState() != DEVICE_OEM_LOADING))) {
-      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task(new ModelMaintenance::OEMWebQuery(_pDevice));
+      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task = boost::make_shared<ModelMaintenance::OEMWebQuery>(_pDevice);
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
       _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);
@@ -437,7 +438,7 @@ namespace dss {
     } catch (ItemNotFoundException& e) {
     }
     if (pMeter && pMeter->getBusMemberType() == BusMember_vDC) {
-      boost::shared_ptr<ModelMaintenance::VdcDataQuery> task(new ModelMaintenance::VdcDataQuery(_pDevice));
+      boost::shared_ptr<ModelMaintenance::VdcDataQuery> task = boost::make_shared<ModelMaintenance::VdcDataQuery>(_pDevice);
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
     }
@@ -862,7 +863,7 @@ namespace dss {
   void BusScanner::syncBinaryInputStates(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr <Device> _device) {
     boost::shared_ptr<BinaryInputScanner> task;
     std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
-    task = boost::shared_ptr<BinaryInputScanner> (new BinaryInputScanner(&m_Apartment, connURI));
+    task = boost::make_shared<BinaryInputScanner>(&m_Apartment, connURI);
     task->setup(_dsMeter, _device);
     boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
     pTP->addEvent(task);

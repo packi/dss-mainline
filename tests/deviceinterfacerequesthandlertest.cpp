@@ -142,8 +142,8 @@ private:
   void testFunctionDo(const std::string& _functionName,
                       const std::string& _functionNameWithParams,
                       const std::string& _params) {
-    boost::shared_ptr<DeviceInterfaceDummy> dummy(new DeviceInterfaceDummy);
-    boost::shared_ptr<Session> dummySession(new Session("dummy"));
+    boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
+    boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
     RestfulRequest req("bla/" + _functionName, _params);
     WebServerResponse response =
       m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession);
