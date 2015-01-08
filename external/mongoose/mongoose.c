@@ -3714,7 +3714,9 @@ static int parse_url(const char *url, char *host, int *port) {
 
   if (sscanf(url, "%1024[^:]:%d/%n", host, port, &len) == 2) {
   } else {
-    sscanf(url, "%1024[^/]/%n", host, &len);
+    if (sscanf(url, "%1024[^/]/%n", host, &len) != 1) {
+      DEBUG_TRACE(("Host empty"));
+    }
     *port = 80;
   }
   DEBUG_TRACE(("Host:%s, port:%d", host, *port));
