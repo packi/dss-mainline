@@ -2432,7 +2432,9 @@ static void handle_directory_request(struct mg_connection *conn,
       conn->request_info.uri, "..", "Parent directory", "-", "-");
 
   // Sort and print directory entries
-  qsort(entries, num_entries, sizeof(entries[0]), compare_dir_entries);
+  if (entries) {
+    qsort(entries, num_entries, sizeof(entries[0]), compare_dir_entries);
+  }
   for (i = 0; i < num_entries; i++) {
     print_dir_entry(&entries[i]);
     free(entries[i].file_name);
@@ -3860,6 +3862,9 @@ static int consume_socket(struct mg_context *ctx, struct socket *sp) {
 static void worker_thread(struct mg_context *ctx) {
   struct mg_connection *conn;
   int buf_size = atoi(ctx->config[MAX_REQUEST_SIZE]);
+  if (buf_size == 0) {
+    buf_size = 1;
+  }
 
   conn = calloc(1, sizeof(*conn) + buf_size);
   conn->buf_size = buf_size;
