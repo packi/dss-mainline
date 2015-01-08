@@ -75,7 +75,8 @@ namespace dss {
         continue;
       }
       dsid_t dsid;
-      dsuid_to_dsid(dsMeter->getDSID(), &dsid);
+      // if there is no valid dsid we accept the all 0's one
+      (void) dsuid_to_dsid(dsMeter->getDSID(), &dsid);
 
       boost::shared_ptr<JSONObject> energyEntry = boost::make_shared<JSONObject>();
       series->addElement("", energyEntry);
@@ -285,12 +286,12 @@ namespace dss {
       }
       std::string dsuid = dsuid2str(dsMeter->getDSID());
       dsid_t dsid;
-      dsuid_to_dsid(dsMeter->getDSID(), &dsid);
+      (void) dsuid_to_dsid(dsMeter->getDSID(), &dsid);
       if (aggregateMeterValues) {
         aggregatedValue += value;
         try {
           boost::shared_ptr<JSONValue<std::string> > dsidVal = boost::make_shared<JSONValue<std::string> >(dsid2str(dsid));
-        dsidSet->addElement("", dsidVal);
+          dsidSet->addElement("", dsidVal);
         } catch (std::runtime_error &err) {
           Logger::getInstance()->log(err.what());
         }
