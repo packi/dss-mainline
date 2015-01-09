@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cstring>
-#include <ossp/uuid.h>
+#include <uuid.h>
 
 #include "dss.h"
 #include "event.h"

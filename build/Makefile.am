@@ -66,6 +66,7 @@ libdsscore_a_CXXFLAGS = \
 			$(LIBRRD_CFLAGS) \
 			$(EXPAT_CFLAGS) \
 			$(GCOV_CFLAGS) \
+			$(OSSP_UUID_CFLAGS) \
 			$(LIBPROTOBUF_CFLAGS) \
 			$(LIBCOMMCHANNEL_CFLAGS) \
 			$(LIBDSUID_CFLAGS)
@@ -148,7 +149,9 @@ dsstests_LDADD = \
 			$(LIBTCMALLOC_LIBS) \
 			$(JSONC_LIBS) \
 			$(LIBPROTOBUF_LIBS) \
+			$(OSSP_UUID_CFLAGS) \
 			$(LIBCOMMCHANNEL_LIBS) \
+			$(OSSP_UUID_LIBS) \
 			$(LIBDSUID_LIBS)
 
 build_info.h:
