@@ -373,10 +373,7 @@ namespace dss {
       if (!isDefaultGroup(newGroupId)) {
         return failure("Invalid or missing parameter 'groupID'");
       }
-
-      if ((pDevice->getDeviceClass() == DEVICE_CLASS_BL) &&
-          (pDevice->getDeviceType() == DEVICE_TYPE_KM) &&
-          (pDevice->getProductID() / 100 == 2)) {
+        if (pDevice->isValveDevice()) {
           switch (newGroupId) {
           case GroupIDHeating:
           case GroupIDCooling:
