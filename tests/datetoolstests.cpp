@@ -220,6 +220,24 @@ BOOST_AUTO_TEST_CASE(testISO8601_australia) {
   BOOST_CHECK_EQUAL(foo.toISO8601_local(), "2009-07-21T18:30:00+09:30");
 }
 
+BOOST_AUTO_TEST_CASE(testISO8601_ms_australia) {
+  TZSwitcher s("Australia/Adelaide");
+  // convert australia local time, in australia timezone
+  DateTime foo = DateTime::parseISO8601("2009-01-02T19:30:00+1030");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms(), "2009-01-02T09:00:00.000Z");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms_local(), "2009-01-02T19:30:00.000+10:30");
+
+  // convert non-australian local time, still australia timezone
+  foo = DateTime::parseISO8601("2009-01-02T12:00:00+0300");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms(), "2009-01-02T09:00:00.000Z");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms_local(), "2009-01-02T19:30:00.000+10:30");
+
+  // same but with daylight saving
+  foo = DateTime::parseISO8601("2009-07-21T12:00:00+0300");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms(), "2009-07-21T09:00:00.000Z");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms_local(), "2009-07-21T18:30:00.000+09:30");
+}
+
 BOOST_AUTO_TEST_CASE(testISO8601_timet) {
   // the epoch start is in UTC, converted seconds are in UTC too
   DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0200");
@@ -238,6 +256,15 @@ BOOST_AUTO_TEST_CASE(testISO8601_ms) {
 
   DateTime bar(foo.secondsSinceEpoch(), 777777);
   BOOST_CHECK_EQUAL(bar.toISO8601_ms(), "2009-01-02T11:00:00.777Z");
+}
+
+BOOST_AUTO_TEST_CASE(testISO8601_ms_local) {
+  TZSwitcher s("Europe/Zurich");
+  DateTime foo = DateTime::parseISO8601("2009-01-02T12:00:00+0100");
+  BOOST_CHECK_EQUAL(foo.toISO8601_ms_local(), "2009-01-02T12:00:00.000+01:00");
+
+  DateTime bar(foo.secondsSinceEpoch(), 777777);
+  BOOST_CHECK_EQUAL(bar.toISO8601_ms_local(), "2009-01-02T12:00:00.777+01:00");
 }
 
 BOOST_AUTO_TEST_CASE(testStaticSchedule) {
