@@ -60,12 +60,12 @@ static const long WEEK_IN_SECS = 604800;
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
     m_ConfigChain.reset(new MeteringConfigChain(1));
-    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(                1,  600)));
-    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(               60,  720)));
-    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(          15 * 60, 2976)));
-    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(     24 * 60 * 60,  370)));
-    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig( 7 * 24 * 60 * 60,  260)));
-    m_ConfigChain->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig(30 * 24 * 60 * 60,   60)));
+    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(                1,  600));
+    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(               60,  720));
+    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(          15 * 60, 2976));
+    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(     24 * 60 * 60,  370));
+    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>( 7 * 24 * 60 * 60,  260));
+    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(30 * 24 * 60 * 60,   60));
     m_Config.push_back(m_ConfigChain);
   } // metering
 
@@ -216,7 +216,7 @@ static const long WEEK_IN_SECS = 604800;
                                   argString);
         if (result < 0) {
           log(rrd_get_error(), lsError);
-          boost::shared_ptr<std::string> pFileName(new std::string(""));
+          boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
           return pFileName;
         }
       } else if (tunePowerMaxSetting) {
@@ -238,7 +238,7 @@ static const long WEEK_IN_SECS = 604800;
         }
       }
 
-      boost::shared_ptr<std::string> pFileName(new std::string(fileName));
+      boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
       m_CachedSeries[_pMeter] = pFileName;
     }
     return m_CachedSeries[_pMeter];
@@ -291,7 +291,7 @@ static const long WEEK_IN_SECS = 604800;
       time(&actualTime);
 
       // Calculate absolute delta
-      double secondsAbs = abs(difftime(actualTime, timestamp));
+      double secondsAbs = std::abs(difftime(actualTime, timestamp));
 
       log("Actual Timestamp:"+ doubleToString(actualTime) +
           "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
@@ -366,7 +366,7 @@ static const long WEEK_IN_SECS = 604800;
       }
     }
 
-    boost::shared_ptr<std::deque<Value> > returnVector(new std::deque<Value>);
+    boost::shared_ptr<std::deque<Value> > returnVector = boost::make_shared<std::deque<Value> >();
     if (_meters.size() == 0) {
       _valueCount = 0;
       return returnVector;

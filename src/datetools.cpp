@@ -150,7 +150,6 @@ namespace dss {
     tm.tm_year += _years;
     tv.tv_sec = mktime(&tm);
     return DateTime(tv);
-    DateTime result(*this);
   } // addYear
 
   DateTime DateTime::addDay(const int _days) const {
@@ -302,11 +301,7 @@ namespace dss {
       throw std::invalid_argument("RFC2445: mktime failure" + timeString);
     }
     if (utc) {
-#if defined(__CYGWIN__)
-      t0 += -_timezone;
-#else
       t0 += tm.tm_gmtoff;
-#endif
     }
     return DateTime(t0);
   }

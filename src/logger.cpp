@@ -27,6 +27,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <boost/make_shared.hpp>
 
 #if defined(__CYGWIN__)
 #include <time.h>
@@ -90,7 +91,7 @@ namespace dss {
   } // severityToString<const wstring>
 
   Logger::Logger()
-    : m_logTarget(boost::shared_ptr<LogTarget>(new CoutLogTarget())),
+    : m_logTarget(boost::make_shared<CoutLogTarget>()),
       m_defaultLogChannel(new LogChannel("System"))
   {}
 

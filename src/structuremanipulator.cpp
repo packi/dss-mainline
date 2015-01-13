@@ -22,6 +22,8 @@
 
 #include "structuremanipulator.h"
 
+#include <boost/ref.hpp>
+
 #include "src/foreach.h"
 #include "src/businterface.h"
 #include "src/mutex.h"
@@ -101,8 +103,8 @@ namespace dss {
     _zone->addDevice(ref);
 
     {
-      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
-      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
       mEvent->setProperty("action", "moved");
       mEvent->setProperty("id", intToString(_zone->getID())); //TODO: remove property in next release
       mEvent->setProperty("oldZoneID", intToString(oldZoneID));
@@ -268,8 +270,8 @@ namespace dss {
 
     {
       DeviceReference ref(_pDevice, &m_Apartment);
-      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
-      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
       mEvent->setProperty("action", "name");
       mEvent->setProperty("name", _name);
       if(DSS::hasInstance()) {
@@ -375,7 +377,7 @@ namespace dss {
           }
           pGroup = pZone->getGroup(_groupNumber);
           if (pGroup == NULL) {
-            pGroup = boost::shared_ptr<Group>(new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
+            pGroup = boost::make_shared<Group>(_groupNumber, m_Apartment.getZone(0), boost::ref<Apartment>(m_Apartment));
             pGroup->setIsValid(true);
             m_Apartment.getZone(0)->addGroup(pGroup);
             m_Interface.createGroup(pZone->getID(), _groupNumber, _standardGroupNumber, _name);
@@ -404,7 +406,7 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Creating user group " + intToString(_groupNumber) +
             " in zone " + intToString(_zone->getID()), lsInfo);
-        pGroup = boost::shared_ptr<Group>(new Group(_groupNumber, _zone, m_Apartment));
+        pGroup = boost::make_shared<Group>(_groupNumber, _zone, boost::ref<Apartment>(m_Apartment));
         _zone->addGroup(pGroup);
         m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
       }
@@ -594,8 +596,8 @@ namespace dss {
     }
     {
       DeviceReference ref(_device, &m_Apartment);
-      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
-      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
       mEvent->setProperty("action", "groupAdd");
       mEvent->setProperty("id", intToString(_group->getID()));
       if(DSS::hasInstance()) {
@@ -617,14 +619,14 @@ namespace dss {
       /* AKM with single input, active on removed group */
       _device->setDeviceBinaryInputTarget(0, 0, GroupIDBlack);
       _device->setBinaryInputTarget(0, 0, GroupIDBlack);
-    } else if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
+    } else if (_group->getID() == _device->getButtonActiveGroup()) {
       /* device has no output, button is active on removed group */
       _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
     }
     {
       DeviceReference ref(_device, &m_Apartment);
-      boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(ref));
-      boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+      boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
       mEvent->setProperty("action", "groupRemove");
       mEvent->setProperty("id", intToString(_group->getID()));
       if(DSS::hasInstance()) {

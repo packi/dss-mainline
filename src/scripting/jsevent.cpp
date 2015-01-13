@@ -24,6 +24,7 @@
 
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -174,7 +175,7 @@ namespace dss {
     JS_free(cx, str);
 
     try {
-      boost::shared_ptr<Event> newEvent(new Event(eName));
+      boost::shared_ptr<Event> newEvent = boost::make_shared<Event>(eName);
 
       if(argc >= 2) {
         readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[1], newEvent);
@@ -223,7 +224,7 @@ namespace dss {
         return JS_FALSE;
       }
 
-      boost::shared_ptr<Event> newEvent(new Event(name));
+      boost::shared_ptr<Event> newEvent = boost::make_shared<Event>(name);
 
       if(argc >= 3) {
         readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[2], newEvent);
@@ -283,7 +284,7 @@ namespace dss {
         return JS_FALSE;
       }
 
-      boost::shared_ptr<Event> newEvent(new Event(name));
+      boost::shared_ptr<Event> newEvent = boost::make_shared<Event>(name);
 
       if(argc >= 4) {
         readEventPropertiesFrom(cx, JS_ARGV(cx, vp)[3], newEvent);
@@ -449,7 +450,7 @@ namespace dss {
     char* eventName = JS_EncodeString(cx, s1);
     char* handlerName = JS_EncodeString(cx, s2);
 
-    boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+    boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
 
     JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
     jsid propID;
@@ -472,7 +473,7 @@ namespace dss {
       JS_free(cx, propName);
     }
 
-    boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, ext->getEventInterpreter(), opts));
+    boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>(eventName, handlerName, boost::ref<EventInterpreter>(ext->getEventInterpreter()), opts);
     subscription_wrapper* subscriptionWrapper = new subscription_wrapper();
     subscriptionWrapper->subscription = subscription;
 

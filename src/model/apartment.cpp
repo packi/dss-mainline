@@ -23,6 +23,9 @@
 
 #include "apartment.h"
 
+#include <boost/make_shared.hpp>
+#include <boost/ref.hpp>
+
 #include "src/businterface.h"
 #include "src/model/modelconst.h"
 #include "src/logger.h"
@@ -70,7 +73,7 @@ namespace dss {
   } // dtor
 
   void Apartment::addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone) {
-    boost::shared_ptr<Group> grp(new Group(GroupIDBroadcast, _zone, *this));
+    boost::shared_ptr<Group> grp = boost::make_shared<Group>(GroupIDBroadcast, _zone, boost::ref<Apartment>(*this));
     grp->setName("broadcast");
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDYellow, _zone, *this));
@@ -291,7 +294,7 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<DSMeter> pResult(new DSMeter(_dsid, this));
+    boost::shared_ptr<DSMeter> pResult = boost::make_shared<DSMeter>(_dsid, this);
     m_DSMeters.push_back(pResult);
 
     // set initial meter value from metering subsystem
@@ -358,8 +361,8 @@ namespace dss {
         DeviceReference devRef = DeviceReference(pDevice, this);
 
         {
-          boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
-          boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+          boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
+          boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
           mEvent->setProperty("action", "deleted");
           if (DSS::hasInstance()) {
             DSS::getInstance()->getEventQueue().pushEvent(mEvent);

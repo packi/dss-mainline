@@ -33,6 +33,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include "jscurl.h"
 #include "jscurl-constants.h"
@@ -617,7 +618,7 @@ namespace dss {
     }
     functionVal = OBJECT_TO_JSVAL(jsFunction);
 
-    boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(JS_THIS_OBJECT(cx, vp), *ctx));
+    boost::shared_ptr<ScriptObject> scriptObj = boost::make_shared<ScriptObject>(JS_THIS_OBJECT(cx, vp), boost::ref<ScriptContext>(*ctx));
     ScriptFunctionRooter* functionRoot(new ScriptFunctionRooter(ctx, scriptObj->getJSObject(), functionVal));
 
     SessionAttachedAsyncCurlObject* pAsyncCurlObj = new SessionAttachedAsyncCurlObject(ctx);

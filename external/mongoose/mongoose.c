@@ -1956,7 +1956,7 @@ static void MD5Final(unsigned char digest[16], MD5_CTX *ctx) {
   MD5Transform(ctx->buf, (uint32_t *) ctx->in);
   byteReverse((unsigned char *) ctx->buf, 4);
   memcpy(digest, ctx->buf, 16);
-  memset((char *) ctx, 0, sizeof(ctx));
+  memset((char *) ctx, 0, sizeof(*ctx));
 }
 #endif // !HAVE_MD5
 
@@ -2229,6 +2229,7 @@ int mg_modify_passwords_file(struct mg_context *ctx, const char *fname,
     return 0;
   } else if ((fp2 = mg_fopen(tmp, "w+")) == NULL) {
     cry(fc(ctx), "Cannot open %s: %s", tmp, strerror(errno));
+    (void) fclose(fp);
     return 0;
   }
 
@@ -2392,6 +2393,7 @@ static void handle_directory_request(struct mg_connection *conn,
     if (entries == NULL) {
       send_http_error(conn, 500, "Cannot open directory",
           "%s", "Error: cannot allocate memory");
+      (void) closedir(dirp);
       return;
     }
 
@@ -2430,7 +2432,9 @@ static void handle_directory_request(struct mg_connection *conn,
       conn->request_info.uri, "..", "Parent directory", "-", "-");
 
   // Sort and print directory entries
-  qsort(entries, num_entries, sizeof(entries[0]), compare_dir_entries);
+  if (entries) {
+    qsort(entries, num_entries, sizeof(entries[0]), compare_dir_entries);
+  }
   for (i = 0; i < num_entries; i++) {
     print_dir_entry(&entries[i]);
     free(entries[i].file_name);
@@ -3543,6 +3547,7 @@ static int load_dll(struct mg_context *ctx, const char *dll_name,
 #endif /* _WIN32 */
     if (u.fp == NULL) {
       cry(fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
+      dlclose(dll_handle);
       return 0;
     } else {
       fp->ptr = u.fp;
@@ -3709,7 +3714,9 @@ static int parse_url(const char *url, char *host, int *port) {
 
   if (sscanf(url, "%1024[^:]:%d/%n", host, port, &len) == 2) {
   } else {
-    sscanf(url, "%1024[^/]/%n", host, &len);
+    if (sscanf(url, "%1024[^/]/%n", host, &len) != 1) {
+      DEBUG_TRACE(("Host empty"));
+    }
     *port = 80;
   }
   DEBUG_TRACE(("Host:%s, port:%d", host, *port));
@@ -3857,6 +3864,9 @@ static int consume_socket(struct mg_context *ctx, struct socket *sp) {
 static void worker_thread(struct mg_context *ctx) {
   struct mg_connection *conn;
   int buf_size = atoi(ctx->config[MAX_REQUEST_SIZE]);
+  if (buf_size == 0) {
+    buf_size = 1;
+  }
 
   conn = calloc(1, sizeof(*conn) + buf_size);
   conn->buf_size = buf_size;
@@ -3920,6 +3930,7 @@ static void accept_new_connection(const struct socket *listener,
   struct socket accepted;
   int allowed;
 
+  accepted.next = NULL;
   accepted.rsa.len = sizeof(accepted.rsa.u.sin);
   accepted.lsa = listener->lsa;
   accepted.sock = accept(listener->sock, &accepted.rsa.u.sa, &accepted.rsa.len);

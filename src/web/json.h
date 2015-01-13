@@ -28,6 +28,7 @@
 #include <iosfwd>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 
 namespace dss {
@@ -88,7 +89,7 @@ namespace dss {
   class JSONArray : public JSONArrayBase {
   public:
     void add(T _value) {
-      boost::shared_ptr<JSONValue<T> > elem(new JSONValue<T>(_value));
+      boost::shared_ptr<JSONValue<T> > elem = boost::make_shared<JSONValue<T> >(_value);
       addElement("", elem);
     }
   };

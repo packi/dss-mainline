@@ -43,7 +43,7 @@ namespace dss {
   boost::shared_ptr<JSONObject> toJSON(const DeviceReference& _device) {
     DateTime tmp_date;
 
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     dsid_t dsid;
     if (dsuid_to_dsid(_device.getDSID(), &dsid)) {
       result->addProperty("id", dsid2str(dsid));
@@ -138,7 +138,7 @@ namespace dss {
     result->addProperty("buttonInputCount", _device.getDevice()->getButtonInputCount());
     result->addProperty("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
 
-    boost::shared_ptr<JSONArray<int> > groupsArr(new JSONArray<int>());
+    boost::shared_ptr<JSONArray<int> > groupsArr = boost::make_shared<JSONArray<int> >();
     result->addElement("groups", groupsArr);
     std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
     for (int g = 1; g <= 63; g++) {
@@ -147,12 +147,12 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<JSONArrayBase> binaryInputArr(new JSONArrayBase());
+    boost::shared_ptr<JSONArrayBase> binaryInputArr = boost::make_shared<JSONArrayBase>();
     result->addElement("binaryInputs", binaryInputArr);
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
     result->addProperty("binaryInputCount", (int)binaryInputs.size());
     for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
-      boost::shared_ptr<JSONObject> element(new JSONObject());
+      boost::shared_ptr<JSONObject> element = boost::make_shared<JSONObject>();
       element->addProperty("targetGroupType", (*it)->m_targetGroupType);
       element->addProperty("targetGroup", (*it)->m_targetGroupId);
       element->addProperty("inputType", (*it)->m_inputType);
@@ -162,7 +162,7 @@ namespace dss {
     }
     result->addProperty("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
 
-    boost::shared_ptr<JSONArray<int> > sensorsArr(new JSONArray<int>());
+    boost::shared_ptr<JSONArray<int> > sensorsArr = boost::make_shared<JSONArray<int> >();
     result->addElement("sensors", sensorsArr);
 
     const std::vector<boost::shared_ptr<DeviceSensor_t> > sensors = _device.getDevice()->getSensors();
@@ -184,7 +184,7 @@ namespace dss {
   } // toJSON(DeviceReference)
 
   boost::shared_ptr<JSONArrayBase> toJSON(const Set& _set) {
-    boost::shared_ptr<JSONArrayBase> result(new JSONArrayBase());
+    boost::shared_ptr<JSONArrayBase> result = boost::make_shared<JSONArrayBase>();
 
     for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
       const DeviceReference& d = _set.get(iDevice);
@@ -198,14 +198,14 @@ namespace dss {
   } // toJSON(Set,Name)
 
   boost::shared_ptr<JSONObject> toJSON(boost::shared_ptr<const Group> _group) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     result->addProperty("id", _group->getID());
     result->addProperty("name", _group->getName());
     result->addProperty("color", _group->getStandardGroupID());
     result->addProperty("isPresent", _group->isPresent());
     result->addProperty("isValid", _group->isValid());
 
-    boost::shared_ptr<JSONArray<std::string> > devicesArr(new JSONArray<std::string>());
+    boost::shared_ptr<JSONArray<std::string> > devicesArr = boost::make_shared<JSONArray<std::string> >();
     result->addElement("devices", devicesArr);
     Set devices = _group->getDevices();
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
@@ -219,14 +219,14 @@ namespace dss {
   } // toJSON(Group)
 
   boost::shared_ptr<JSONObject> toJSON(Zone& _zone, bool _includeDevices) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
     result->addProperty("id", _zone.getID());
     result->addProperty("name", _zone.getName());
     result->addProperty("isPresent", _zone.isPresent());
 
     if(_includeDevices) {
       result->addElement("devices", toJSON(_zone.getDevices()));
-      boost::shared_ptr<JSONArrayBase> groups(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> groups = boost::make_shared<JSONArrayBase>();
       result->addElement("groups", groups);
       foreach(boost::shared_ptr<Group> pGroup, _zone.getGroups()) {
         groups->addElement("", toJSON(pGroup));
@@ -237,10 +237,10 @@ namespace dss {
   } // toJSON(Zone)
 
   boost::shared_ptr<JSONObject> toJSON(Apartment& _apartment) {
-    boost::shared_ptr<JSONObject> result(new JSONObject());
-    boost::shared_ptr<JSONObject> apartment(new JSONObject());
+    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONObject> apartment = boost::make_shared<JSONObject>();
     result->addElement("apartment", apartment);
-    boost::shared_ptr<JSONArrayBase> zonesArr(new JSONArrayBase());
+    boost::shared_ptr<JSONArrayBase> zonesArr = boost::make_shared<JSONArrayBase>();
     apartment->addElement("zones", zonesArr);
 
     std::vector<boost::shared_ptr<Zone> > zones = _apartment.getZones();

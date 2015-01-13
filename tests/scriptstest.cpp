@@ -24,6 +24,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 
 #include "src/scripting/jshandler.h"
 #include "src/scripting/scriptobject.h"
@@ -91,7 +92,7 @@ BOOST_AUTO_TEST_CASE(testMultipleIterations) {
 } // testMultipleIterations
 
 BOOST_AUTO_TEST_CASE(testExceptionHandling) {
-  boost::shared_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  boost::shared_ptr<ScriptEnvironment> env = boost::make_shared<ScriptEnvironment>();
   env->initialize();
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
 

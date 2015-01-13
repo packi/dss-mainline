@@ -41,6 +41,7 @@ enum {
   mf_leddark,
   mf_transt,
   mf_outmode,
+  mf_outmodeswitch,
   mf_outvalue8,
   mf_pushbutton,
   mf_pushbdevice,

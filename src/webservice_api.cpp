@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cstring>
-#include <ossp/uuid.h>
+#include <uuid.h>
 
 #include "dss.h"
 #include "event.h"
@@ -274,7 +274,7 @@ void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
                                          WebserviceCallDone_t callback) {
 
   JSONObject obj;
-  boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  boost::shared_ptr<JSONArray<JSONObject> > array = boost::make_shared<JSONArray<JSONObject> >();
   int ct = 0;
 
   std::string parameters;
@@ -296,7 +296,7 @@ void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
   log("event data: " + postdata, lsDebug);
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
-  boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
+  boost::shared_ptr<MsHubReplyChecker> mcb = boost::make_shared<MsHubReplyChecker>(callback);
   HashMapStringString sensorUploadHeaders;
   sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
 
@@ -321,7 +321,7 @@ void WebserviceMsHub::doDssBackAgain(WebserviceCallDone_t callback)
 
   // AppToken is piggy backed with websvc_connection::request(.., authenticated=true)
   parameters += "&dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
-  boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
+  boost::shared_ptr<MsHubReplyChecker> mcb = boost::make_shared<MsHubReplyChecker>(callback);
   log("sending DSSBackAgain", lsInfo);
   WebserviceConnection::getInstanceMsHub()->request("internal/dss/v1_0/DSSApartment/DSSBackAgain", parameters, POST, mcb, true);
 }
@@ -352,7 +352,7 @@ void WebserviceMsHub::doModelChanged(ChangeType type,
   }
 
   log("execute: " + url + "?" + params, lsDebug);
-  boost::shared_ptr<MsHubReplyChecker> mcb(new MsHubReplyChecker(callback));
+  boost::shared_ptr<MsHubReplyChecker> mcb = boost::make_shared<MsHubReplyChecker>(callback);
   WebserviceConnection::getInstanceMsHub()->request(url, params, POST, mcb, true);
 }
 
@@ -371,7 +371,7 @@ void WebserviceMsHub::doNotifyTokenDeleted(const std::string &token,
   params += "&token=" + token;
 
   // webservice is fire and forget, so use shared ptr for life cycle mgmt
-  boost::shared_ptr<MsHubReplyChecker> cont(new MsHubReplyChecker(callback));
+  boost::shared_ptr<MsHubReplyChecker> cont = boost::make_shared<MsHubReplyChecker>(callback);
   WebserviceConnection::getInstanceMsHub()->request(url, params, POST, cont, false);
 }
 
@@ -434,6 +434,7 @@ const static std::string evtCategory_ZoneGroupCallScene = "ZoneSceneCall";
 const static std::string evtCategory_ZoneGroupUndoScene = "ZoneUndoScene";
 const static std::string evtCategory_ApartmentState = "ApartmentStateChange";
 const static std::string evtCategory_ZoneGroupState = "ZoneStateChange";
+const static std::string evtCategory_DeviceBinaryInput = "DeviceBinaryInput";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
@@ -443,6 +444,7 @@ const static std::string evtCategory_HeatingControllerValue = "HeatingController
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
 const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
+const static std::string evtCategory_ExecutionDenied = "ExecutionDenied";
 
 const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
@@ -497,8 +499,8 @@ void createHeader(boost::shared_ptr<JSONObject> &header, const std::string& grou
 
 JSONObject toJson(const boost::shared_ptr<Event> &event) {
   boost::shared_ptr<const DeviceReference> pDeviceRef;
-  boost::shared_ptr<JSONObject> header(new JSONObject());
-  boost::shared_ptr<JSONObject> body(new JSONObject());
+  boost::shared_ptr<JSONObject> header = boost::make_shared<JSONObject>();
+  boost::shared_ptr<JSONObject> body = boost::make_shared<JSONObject>();
   JSONObject eventJson;
 
   std::string propValue;
@@ -635,6 +637,20 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
         parameterObj->addProperty(iParam->first, iParam->second);
       }
       body->addElement("Parameter", parameterObj);
+    } else if (event->getName() == EventName::DeviceBinaryInputEvent) {
+      /* TODO is event group and category correct? */
+      pDeviceRef = event->getRaisedAtDevice();
+      createHeader(header, evtGroup_ApartmentAndDevice, evtCategory_DeviceBinaryInput, event.get());
+      body->addProperty("InputIndex", event->getPropertyByName("inputIndex"));
+      body->addProperty("InputValue", event->getPropertyByName("inputValue"));
+      body->addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+    } else if (event->getName() == EventName::ExecutionDenied) {
+      /* TODO is event group and category correct? */
+      createHeader(header, evtGroup_Activity, evtCategory_ExecutionDenied, event.get());
+      body->addProperty("ActivityType", event->getPropertyByName("action-type"));
+      body->addProperty("ActivityName", event->getPropertyByName("action-name"));
+      body->addProperty("SourceName", event->getPropertyByName("source-name"));
+      body->addProperty("Reason", event->getPropertyByName("reason"));
     } else {
       Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
     }
@@ -703,7 +719,7 @@ void WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
                                          WebserviceCallDone_t callback) {
 
   JSONObject obj;
-  boost::shared_ptr<JSONArray<JSONObject> > array(new JSONArray<JSONObject>());
+  boost::shared_ptr<JSONArray<JSONObject> > array = boost::make_shared<JSONArray<JSONObject> >();
   int ct = 0;
 
   // /v1/DSS/{dssID}/Events
@@ -724,7 +740,7 @@ void WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
   log("event data: " + postdata, lsDebug);
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
-  boost::shared_ptr<DsHubReplyChecker> mcb(new DsHubReplyChecker(callback));
+  boost::shared_ptr<DsHubReplyChecker> mcb = boost::make_shared<DsHubReplyChecker>(callback);
   HashMapStringString sensorUploadHeaders;
   sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
   sensorUploadHeaders["Accept"] = "application/json";

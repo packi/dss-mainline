@@ -40,7 +40,7 @@ namespace dss {
 
   WebServerResponse SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "fromApartment") {
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       resultObj->addProperty("self", ".");
       return success(resultObj);
     } else {
@@ -62,7 +62,7 @@ namespace dss {
           return failure("Missing either zoneID or zoneName");
         }
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(_request.getMethod() == "byGroup") {
@@ -78,7 +78,7 @@ namespace dss {
           return failure("Missing either groupID or groupName");
         }
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(_request.getMethod() == "byDSID") {
@@ -92,7 +92,7 @@ namespace dss {
           return failure("Missing parameter dsid");
         }
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(_request.getMethod() == "byDSUID") {
@@ -106,7 +106,7 @@ namespace dss {
           return failure("Missing parameter dsuid");
         }
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
 
@@ -125,7 +125,7 @@ namespace dss {
         }
         additionalPart += "add(" + other + ")";
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(_request.getMethod() == "subtract") {
@@ -139,13 +139,13 @@ namespace dss {
         }
         additionalPart += "subtract(" + other + ")";
 
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(isDeviceInterfaceCall(_request)) {
         SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, boost::shared_ptr<Zone>());
-        boost::shared_ptr<Set> pSet(new Set(set));
+        boost::shared_ptr<Set> pSet = boost::make_shared<Set>(set);
         return handleDeviceInterfaceRequest(_request, pSet, _session);
       } else {
         throw std::runtime_error("Unhandled function");

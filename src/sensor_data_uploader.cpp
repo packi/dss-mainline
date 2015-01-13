@@ -173,7 +173,7 @@ namespace EventName {
 
 void SensorDataUploadMsHubPlugin::scheduleBatchUploader() {
   log(std::string(__func__) + " start uploading", lsInfo);
-  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadMsHubEventLog));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::UploadMsHubEventLog);
   pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
   int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
   pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
@@ -336,7 +336,7 @@ namespace EventName {
 
 void SensorDataUploadDsHubPlugin::scheduleBatchUploader() {
   log(std::string(__func__) + " start uploading", lsInfo);
-  boost::shared_ptr<Event> pEvent(new Event(EventName::UploadDsHubEventLog));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::UploadDsHubEventLog);
   pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
   int batchDelay = DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_event_batch_delay)->getIntegerValue();
   pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(batchDelay));
@@ -358,9 +358,11 @@ void SensorDataUploadDsHubPlugin::subscribe() {
   boost::shared_ptr<EventSubscription> subscription;
 
   std::vector<std::string> events;
+  events.push_back(EventName::DeviceBinaryInputEvent);
   events.push_back(EventName::DeviceSensorValue);
   events.push_back(EventName::DeviceStatus);
   events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::ExecutionDenied);
   events.push_back(EventName::ZoneSensorValue);
   events.push_back(EventName::ZoneSensorError);
   events.push_back(EventName::CallScene);
@@ -417,7 +419,8 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
 
     if (_event.getName() == EventName::Running) {
       scheduleBatchUploader();
-    } else if (_event.getName() == EventName::DeviceSensorValue ||
+    } else if (_event.getName() == EventName::DeviceBinaryInputEvent ||
+               _event.getName() == EventName::DeviceSensorValue ||
                _event.getName() == EventName::ZoneSensorValue ||
                _event.getName() == EventName::ZoneSensorError ||
                _event.getName() == EventName::DeviceStatus ||
@@ -426,7 +429,8 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
-               _event.getName() == EventName::AddonToCloud) {
+               _event.getName() == EventName::AddonToCloud ||
+               _event.getName() == EventName::ExecutionDenied) {
       log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
       m_log->append(_event.getptr(), highPrio);
     } else if (_event.getName() == EventName::CallScene ||

@@ -68,8 +68,6 @@ namespace dss {
     if(_pDSS != NULL) {
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "connectionURI")
             ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
-      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "busState")
-            ->linkToProxy(PropertyProxyReference<int>((int &) m_busState, true));
     }
     m_pActionRequestInterface.reset(new DSActionRequest());
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface());
@@ -748,8 +746,6 @@ namespace dss {
       pEvent->addParameter(SceneLocalOn);
     } else if (_state == 2) {
       pEvent->addParameter(SceneStop);
-    } else {
-      pEvent->addParameter(-1);
     }
     pEvent->addParameter(coDsmApi); // origin
     pEvent->addParameter(false); // force
@@ -951,7 +947,7 @@ namespace dss {
       uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     loginFromCallback();
 
-    boost::shared_ptr<ZoneHeatingConfigSpec_t> spec(new ZoneHeatingConfigSpec_t);
+    boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
     spec->ControllerMode = _ControllerMode;
     spec->Kp = _Kp;
     spec->Ts = _Ts,
@@ -998,7 +994,7 @@ namespace dss {
       uint16_t _OperationModeC, uint16_t _OperationModeD, uint16_t _OperationModeE, uint16_t _OperationModeF) {
     loginFromCallback();
 
-    boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec(new ZoneHeatingOperationModeSpec_t);
+    boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec = boost::make_shared<ZoneHeatingOperationModeSpec_t>();
     spec->OpMode0 = _OperationMode0;
     spec->OpMode1 = _OperationMode1;
     spec->OpMode2 = _OperationMode2;

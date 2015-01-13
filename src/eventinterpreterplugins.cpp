@@ -79,7 +79,7 @@ namespace dss {
   { } // dtor
 
   void EventInterpreterPluginRaiseEvent::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    boost::shared_ptr<Event> newEvent(new Event(_subscription.getOptions()->getParameter("event_name")));
+    boost::shared_ptr<Event> newEvent = boost::make_shared<Event>(_subscription.getOptions()->getParameter("event_name"));
     if(_subscription.getOptions()->hasParameter("time")) {
       std::string timeParam = _subscription.getOptions()->getParameter("time");
       if(!timeParam.empty()) {
@@ -568,7 +568,7 @@ namespace dss {
   void EventInterpreterPluginJavascript::setupCleanupEvent() {
     EventInterpreterInternalRelay* pRelay =
       dynamic_cast<EventInterpreterInternalRelay*>(getEventInterpreter().getPluginByName(EventInterpreterInternalRelay::getPluginName()));
-    m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+    m_pRelayTarget = boost::make_shared<InternalEventRelayTarget>(boost::ref<EventInterpreterInternalRelay>(*pRelay));
 
     boost::shared_ptr<EventSubscription> cleanupEventSubscription(
             new dss::EventSubscription(
@@ -606,7 +606,7 @@ namespace dss {
   } // cleanupTerminatedScripts
 
   void EventInterpreterPluginJavascript::sendCleanupEvent() {
-    boost::shared_ptr<Event> pEvent(new Event(kCleanupScriptsEventName));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(kCleanupScriptsEventName);
     pEvent->setProperty("time", "+" + intToString(20));
     getEventInterpreter().getQueue().pushEvent(pEvent);
   } // sendCleanupEvent
@@ -926,7 +926,7 @@ namespace dss {
                << reason << "!" << std::endl << std::endl;
 
       if (!m_check_scheduled) {
-        boost::shared_ptr<Event> pEvent(new Event("execution_denied_digest_check"));
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("execution_denied_digest_check");
         pEvent->setProperty("time", "+60");
         if (DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -948,7 +948,7 @@ namespace dss {
       if (m_digest.str().length() == 0) {
         return;
       }
-      boost::shared_ptr<Event> pEvent(new Event("sendmail"));
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("sendmail");
       pEvent->setProperty("body", m_digest.str());
       pEvent->setProperty("subject",
                           "digitalSTROM server actions not executed");
@@ -1021,7 +1021,7 @@ namespace dss {
                                                                   PropertyNodePtr _changedNode) {
     // initiate connection as soon as webservice got enabled
     if (_changedNode->getBoolValue() == true) {
-      boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::WebserviceKeepAlive);
       pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -1057,7 +1057,7 @@ namespace dss {
     log("handle: " + _event.getName(), lsDebug);
     if (_event.getName() == EventName::Running) {
       if (WebserviceMsHub::isAuthorized()) {
-        boost::shared_ptr<Event> pEvent(new Event(EventName::WebserviceKeepAlive));
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::WebserviceKeepAlive);
         pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
         pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -1111,7 +1111,7 @@ namespace dss {
 
     // start the sensor timeout detection with a delay to allow for synchronization to take place
     if (_event.getName() == "model_ready") {
-      boost::shared_ptr<Event> pEvent(new Event("check_sensor_values"));
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_sensor_values");
       pEvent->setProperty("time", "+3600");
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -1120,7 +1120,7 @@ namespace dss {
     }
 
     if (DSS::hasInstance()) {
-      boost::shared_ptr<SensorMonitorTask> task(new SensorMonitorTask(&(DSS::getInstance()->getApartment())));
+      boost::shared_ptr<SensorMonitorTask> task = boost::make_shared<SensorMonitorTask>(&(DSS::getInstance()->getApartment()));
       boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
       pTP->addEvent(task);
     }

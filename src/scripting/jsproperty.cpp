@@ -23,6 +23,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
@@ -254,7 +255,7 @@ namespace dss {
 
     try {
       // send event
-      boost::shared_ptr<Event> pEvent(new Event(EventName::OldStateChange));
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::OldStateChange);
       pEvent->setProperty("scriptID", ctx->getWrapper()->getIdentifier());
       pEvent->setProperty("statename", node->getDisplayName());
       pEvent->setProperty("state", valueNode->getStringValue());

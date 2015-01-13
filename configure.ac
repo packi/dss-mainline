@@ -221,9 +221,6 @@ AC_LANG_CPLUSPLUS
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h sys/resource.h], [], [AC_MSG_ERROR([required system header not found])])
 
-AC_CHECK_HEADER([uuid/uuid.h], [],
-        [AC_MSG_ERROR([required header uuid/uuid.h not found])])
-
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE

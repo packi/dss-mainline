@@ -31,6 +31,7 @@
 #include "src/session.h"
 
 #include <boost/thread/mutex.hpp>
+#include <boost/make_shared.hpp>
 
 namespace dss {
 
@@ -227,7 +228,7 @@ namespace dss {
         m_pTreeListener->writeXML();
       }
 
-      boost::shared_ptr<Event> pEvent(new Event(EventName::ApplicationTokenDeleted));
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::ApplicationTokenDeleted);
       pEvent->setProperty(EventProperty::ApplicationToken, _token);
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       return true;

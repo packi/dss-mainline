@@ -80,7 +80,7 @@ namespace dss {
     }
 
     std::string zoneIDStr = _request.getParameter("zone");
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
 
     if(!zoneIDStr.empty()) {
       try {
@@ -120,7 +120,7 @@ namespace dss {
             }
           }
 
-          boost::shared_ptr<JSONArrayBase> moved(new JSONArrayBase());
+          boost::shared_ptr<JSONArrayBase> moved = boost::make_shared<JSONArrayBase>();
           foreach (const boost::shared_ptr<Device>& device, movedDevices) {
             const DeviceReference d(device, &m_Apartment);
             moved->addElement("", toJSON(d));
@@ -247,7 +247,7 @@ namespace dss {
     }
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
     resultObj->addProperty("groupID", groupID);
     return success(resultObj);
   } // persistSet
@@ -382,7 +382,7 @@ namespace dss {
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
     resultObj->addProperty("groupID", groupID);
     resultObj->addProperty("zoneID", zoneID);
     resultObj->addProperty("groupName", groupName);
@@ -483,9 +483,9 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
     if (!modifiedDevices.empty()) {
-      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
       foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
         const DeviceReference d(device, &m_Apartment);
         modified->addElement("", toJSON(d));
@@ -562,9 +562,9 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
     if (!modifiedDevices.empty()) {
-      boost::shared_ptr<JSONArrayBase> modified(new JSONArrayBase());
+      boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
       foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
         const DeviceReference d(device, &m_Apartment);
         modified->addElement("", toJSON(d));

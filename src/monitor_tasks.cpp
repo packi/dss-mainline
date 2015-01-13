@@ -50,7 +50,7 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
           " is too old: " + _ts.toISO8601_ms() +
           ", age in seconds is " + intToString(age), lsWarning);
       if (DSS::hasInstance()) {
-        boost::shared_ptr<Event> pEvent(new Event(EventName::ZoneSensorError, _group));
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::ZoneSensorError, _group);
         pEvent->setProperty("sensorType", intToString(_sensorType));
         pEvent->setProperty("lastValueTS", _ts.toISO8601_ms());
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -107,8 +107,8 @@ void SensorMonitorTask::run() {
           device->setSensorDataValidity(s, false);
 
           if (DSS::hasInstance()) {
-            boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(device, m_Apartment));
-            boost::shared_ptr<Event> pEvent(new Event(EventName::DeviceInvalidSensor, pDevRef));
+            boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(device, m_Apartment);
+            boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::DeviceInvalidSensor, pDevRef);
             pEvent->setProperty("sensorIndex", intToString(s));
             pEvent->setProperty("sensorType", intToString(sensor->m_sensorType));
             pEvent->setProperty("lastValueTS", sensor->m_sensorValueTS.toISO8601_ms());
@@ -156,7 +156,7 @@ void SensorMonitorTask::run() {
     }
   } catch (...) {}
 
-  boost::shared_ptr<Event> pEvent(new Event("check_sensor_values"));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_sensor_values");
   pEvent->setProperty("time", "+600");
   if (DSS::hasInstance()) {
       Logger::getInstance()->log("queued check_sensor_values event");
@@ -215,7 +215,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
 void HeatingMonitorTask::run() {
 
   if (m_event->getName() == "model_ready") {
-    boost::shared_ptr<Event> pEvent(new Event("check_heating_groups"));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -256,7 +256,7 @@ void HeatingMonitorTask::run() {
       Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsWarning);
     }
 
-    boost::shared_ptr<Event> pEvent(new Event("check_heating_groups"));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -303,7 +303,7 @@ size_t HeatingValveProtectionTask::m_zoneIndex = 0;
 void HeatingValveProtectionTask::run() {
 
   if (m_event->getName() == "model_ready") {
-    boost::shared_ptr<Event> pEvent(new Event(EventName::HeatingValveProtection));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::HeatingValveProtection);
     // randomize the valve protection over two hours
     int randomizeStartMinutes = rand() % 120;
     DateTime start = DateTime::parseRFC2445("19700101T140000");
@@ -329,7 +329,7 @@ void HeatingValveProtectionTask::run() {
           continue;
         }
         tempControlGroup->callScene(coSystem, SAC_MANUAL, HeatingOperationModeIDValveProtection, "", false);
-        boost::shared_ptr<Event> pEvent(new Event(EventName::HeatingValveProtection));
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::HeatingValveProtection);
         pEvent->setProperty("time", "+900");
         if (DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(pEvent);

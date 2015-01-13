@@ -102,7 +102,8 @@ namespace dss {
       struct ifreq ifr;
       log(std::string("intf") + intToString(i) + " : " +
           intToString(if_name[i].if_index) + " " + if_name[i].if_name, lsDebug);
-      strncpy(ifr.ifr_name, if_name[i].if_name, IFNAMSIZ);
+      strncpy(ifr.ifr_name, if_name[i].if_name, IFNAMSIZ-1);
+      ifr.ifr_name[IFNAMSIZ-1] = '\0';
 
       std::string ip;
       if(ioctl(sock, SIOCGIFADDR, &ifr) < 0) {

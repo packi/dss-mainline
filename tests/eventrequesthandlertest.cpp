@@ -285,9 +285,9 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, Fixture) {
   WebServerResponse response = m_pHandler->jsonHandleRequest(reqSubscribe, m_pSession);
   testOkIs(response, true);
 
-  boost::shared_ptr<Event> pUnrelatedEvent(new Event("asdfasdf"));
+  boost::shared_ptr<Event> pUnrelatedEvent = boost::make_shared<Event>("asdfasdf");
   m_pQueue->pushEvent(pUnrelatedEvent);
-  boost::shared_ptr<Event> pEvent(new Event(kEventName));
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(kEventName);
   m_pQueue->pushEvent(pEvent);
 
   m_pInterpreter->executePendingEvent();

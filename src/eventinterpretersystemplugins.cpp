@@ -544,7 +544,7 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<Event> evt(new Event("highlevelevent"));
+    boost::shared_ptr<Event> evt = boost::make_shared<Event>("highlevelevent");
     evt->setProperty("id", oEventNode->getStringValue());
     evt->setProperty("source-name", getActionName(_actionNode));
     if (DSS::hasInstance()) {
@@ -570,7 +570,7 @@ namespace dss {
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: " + oUrl);
 
-    boost::shared_ptr<HttpClient> url(new HttpClient());
+    boost::shared_ptr<HttpClient> url = boost::make_shared<HttpClient>();
     long code = url->request(oUrl, GET, NULL);
     std::ostringstream out;
     out << code;
@@ -686,7 +686,7 @@ namespace dss {
       reset = oResetNode->getBoolValue();
     }
 
-    boost::shared_ptr<Event> evt(new Event("heating-controller.operation-mode"));
+    boost::shared_ptr<Event> evt = boost::make_shared<Event>("heating-controller.operation-mode");
     evt->setProperty("actions", reset ? "resetOperationMode" : "setOperationMode");
     evt->setProperty("zoneID", oZoneNode->getAsString());
     evt->setProperty("operationMode", oModeNode->getAsString());
@@ -811,7 +811,7 @@ namespace dss {
               "parameter present, execution will be fragmented", lsDebug);
 
       for (size_t s = 0; s < oDelay.size(); s++) {
-        boost::shared_ptr<Event> evt(new Event("action_execute"));
+        boost::shared_ptr<Event> evt = boost::make_shared<Event>("action_execute");
         evt->applyProperties(m_properties);
         evt->setProperty("path", _path);
         evt->setProperty("delay", intToString(oDelay.at(s)));
@@ -1054,7 +1054,7 @@ namespace dss {
     if (m_properties.has(ss_originDSUID)) {
       originDSUID = str2dsuid(m_properties.get(ss_originDSUID));
     }
-    bool forced;
+    bool forced = false;
     if (m_properties.has(ss_forced)) {
       std::string sForced = m_properties.get(ss_forced);
       forced = (sForced == "true");
@@ -1636,7 +1636,7 @@ namespace dss {
       additionalParameter = aParam->getAsString();
     }
 
-    boost::shared_ptr<Event> evt(new Event(sRelayedEventName));
+    boost::shared_ptr<Event> evt = boost::make_shared<Event>(sRelayedEventName);
     evt->applyProperties(m_properties);
     evt->setProperty("path", sTriggerPath);
 
@@ -1752,7 +1752,7 @@ namespace dss {
     Logger::getInstance()->log("EventInterpreterPluginActionExecute::"
             "handleEvent: processing event " + _event.getName());
 
-    boost::shared_ptr<SystemEventActionExecute> action(new SystemEventActionExecute());
+    boost::shared_ptr<SystemEventActionExecute> action = boost::make_shared<SystemEventActionExecute>();
     if (action->setup(_event) == false) {
       Logger::getInstance()->log("EventInterpreterPluginActionExecute::"
               "handleEvent: missing path property, ignoring event");
@@ -1775,7 +1775,7 @@ namespace dss {
             "handleEvent: processing event \'" + _event.getName() + "\'",
             lsDebug);
 
-    boost::shared_ptr<SystemTrigger> trigger(new SystemTrigger());
+    boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
 
     if (!trigger->setup(_event)) {
       Logger::getInstance()->log("EventInterpreterPluginSystemTrigger::"
@@ -1798,14 +1798,14 @@ namespace dss {
             "handleEvent " + _event.getName(), lsDebug);
 
 
-    boost::shared_ptr<SystemTrigger> trigger(new SystemTrigger());
+    boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
     if (trigger->setup(_event) == false) {
       Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
               "handleEvent: could not setup event data for SystemTrigger!");
       return;
     }
 
-    boost::shared_ptr<SystemEventHighlevel> hl(new SystemEventHighlevel());
+    boost::shared_ptr<SystemEventHighlevel> hl = boost::make_shared<SystemEventHighlevel>();
     if (hl->setup(_event) == false) {
       Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
         "handleEvent: could not setup event data for SystemEventHighlevel!");
@@ -1828,7 +1828,7 @@ namespace dss {
             "handleEvent: processing event \'" + _event.getName() + "\'",
             lsDebug);
 
-    boost::shared_ptr<SystemEventLog> log(new SystemEventLog());
+    boost::shared_ptr<SystemEventLog> log = boost::make_shared<SystemEventLog>();
 
     if (!log->setup(_event)) {
       Logger::getInstance()->log("EventInterpreterPluginSystemEventLog::"
@@ -2546,7 +2546,7 @@ namespace dss {
             "handleEvent: processing event \'" + _event.getName() + "\'",
             lsDebug);
 
-    boost::shared_ptr<SystemState> state(new SystemState());
+    boost::shared_ptr<SystemState> state = boost::make_shared<SystemState>();
 
     if (!state->setup(_event)) {
       Logger::getInstance()->log("EventInterpreterPluginSystemState::"
@@ -2742,7 +2742,7 @@ namespace dss {
       if (state != NULL) {
         if ((sleeping == true) && (state->getState() == State_Inactive)) {
           state->setState(coJSScripting, "sleeping");
-        } else if (absent == false) {
+        } else if (sleeping == false) {
           state->setState(coJSScripting, "awake");
         }
       } // hibernation state
@@ -2784,7 +2784,7 @@ namespace dss {
       "scope":"system_state.auto_cleanup"\
       }';
 */
-    boost::shared_ptr<Event> event(new Event("system-addon-scene-responder.config"));
+    boost::shared_ptr<Event> event = boost::make_shared<Event>("system-addon-scene-responder.config");
     event->setProperty("actions", "save");
     event->setProperty("value", CLEAR_ALARM_URLENCODED_JSON);
     DSS::getInstance()->getEventQueue().pushEvent(event);

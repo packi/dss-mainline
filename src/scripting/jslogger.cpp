@@ -35,6 +35,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include <signal.h>
 #include <fcntl.h>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #define LOG_OBJECT_IDENTIFIER   "logfile"
 
@@ -249,7 +250,7 @@ namespace dss {
   {
     EventInterpreterInternalRelay* pRelay =
         dynamic_cast<EventInterpreterInternalRelay*>(m_EventInterpreter.getPluginByName(EventInterpreterInternalRelay::getPluginName()));
-      m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+      m_pRelayTarget = boost::make_shared<InternalEventRelayTarget>(boost::ref<EventInterpreterInternalRelay>(*pRelay));
 
       if (m_pRelayTarget != NULL) {
         boost::shared_ptr<EventSubscription> signalSubscription(

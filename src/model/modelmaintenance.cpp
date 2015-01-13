@@ -143,7 +143,7 @@ namespace dss {
     m_EventTimeoutMS(_eventTimeoutMS),
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
-    m_taskProcessor(boost::shared_ptr<TaskProcessor>(new TaskProcessor()))
+    m_taskProcessor(boost::make_shared<TaskProcessor>())
   { }
 
   void ModelMaintenance::checkConfigFile(boost::filesystem::path _filename) {
@@ -375,10 +375,10 @@ namespace dss {
 
         try {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(deviceID, bEvent->getSource());
-          boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+          boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
           if (bEvent->isDue() || (clickType == ClickTypeHE)) {
-            boost::shared_ptr<Event> event(new Event("buttonClick", pDevRev));
+            boost::shared_ptr<Event> event = boost::make_shared<Event>("buttonClick", pDevRev);
             event->setProperty("clickType", intToString(clickType));
             event->setProperty("buttonIndex", intToString(buttonIndex));
             if (bEvent->getRepeatCount() > 0) {
@@ -813,7 +813,7 @@ namespace dss {
       synchronizeZoneSensorAssignment();
       autoAssignSensors();
       {
-        boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
+        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>("model_ready");
         raiseEvent(readyEvent);
         try {
           CommChannel::getInstance()->resumeUpdateTask();
@@ -878,7 +878,7 @@ namespace dss {
           }
         }
 
-        boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
+        boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
         raiseEvent(dsMeterReadyEvent);
 
@@ -1117,7 +1117,7 @@ namespace dss {
         }
       }
 
-      boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _origin, _forced, _token));
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::make_shared<ModelDeferredSceneEvent>(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _origin, _forced, _token);
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
       return;
@@ -1222,7 +1222,7 @@ namespace dss {
         ", OriginToken=" + _token +
         ", Scene=" + intToString(_sceneID), lsDebug);
 
-    boost::shared_ptr<ModelDeferredSceneEvent> mEvent(new ModelDeferredSceneEvent(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _origin, _forced, _token));
+    boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::make_shared<ModelDeferredSceneEvent>(_source, _zoneID, _groupID, _originDeviceID, _sceneID, _origin, _forced, _token);
     m_DeferredEvents.push_back(mEvent);
   } // onGroupCallSceneFiltered
 
@@ -1283,7 +1283,7 @@ namespace dss {
           ": buttonIndex=" + intToString(_buttonNr) +
           ", clickType=" + intToString(_clickType), lsDebug);
 
-      boost::shared_ptr<ModelDeferredButtonEvent> mEvent(new ModelDeferredButtonEvent(_source, _deviceID, _buttonNr, _clickType));
+      boost::shared_ptr<ModelDeferredButtonEvent> mEvent = boost::make_shared<ModelDeferredButtonEvent>(_source, _deviceID, _buttonNr, _clickType);
       mEvent->clearTimestamp();  // force immediate event processing
       m_DeferredEvents.push_back(mEvent);
       return;
@@ -1350,7 +1350,7 @@ namespace dss {
         ": buttonIndex=" + intToString(_buttonNr) +
         ", clickType=" + intToString(_clickType), lsDebug);
 
-    boost::shared_ptr<ModelDeferredButtonEvent> mEvent(new ModelDeferredButtonEvent(_source, _deviceID, _buttonNr, _clickType));
+    boost::shared_ptr<ModelDeferredButtonEvent> mEvent = boost::make_shared<ModelDeferredButtonEvent>(_source, _deviceID, _buttonNr, _clickType);
     m_DeferredEvents.push_back(mEvent);
   } // onDeviceActionFiltered
 
@@ -1410,8 +1410,8 @@ namespace dss {
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice()->setLastCalledScene(_sceneID & 0x00ff);
         }
-        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
-        boost::shared_ptr<Event> event(new Event(EventName::CallScene, pDevRev));
+        boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> event = boost::make_shared<Event>(EventName::CallScene, pDevRev);
         event->setProperty("sceneID", intToString(_sceneID));
         event->setProperty("callOrigin", intToString(_origin));
         event->setProperty("originToken", _token);
@@ -1433,8 +1433,8 @@ namespace dss {
       try {
         log("OnDeviceBlink: dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID));
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
-        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
-        boost::shared_ptr<Event> event(new Event("blink", pDevRev));
+        boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> event = boost::make_shared<Event>("blink", pDevRev);
         event->setProperty("callOrigin", intToString(_origin));
         event->setProperty("originToken", _token);
         raiseEvent(event);
@@ -1453,8 +1453,8 @@ namespace dss {
           "' button: " + intToString(_buttonNr) + ", click: " + intToString(_clickType));
       try {
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
-        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
-        boost::shared_ptr<Event> event(new Event("buttonClickBus", pDevRev));
+        boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> event = boost::make_shared<Event>("buttonClickBus", pDevRev);
         event->setProperty("clickType", intToString(_clickType));
         event->setProperty("buttonIndex", intToString(_buttonNr));
         raiseEvent(event);
@@ -1472,8 +1472,8 @@ namespace dss {
       DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
       log("  DSID   : " +  dsuid2str(devRef.getDSID()));
       {
-        boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
-        boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+        boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
         mEvent->setProperty("action", "added");
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
@@ -1517,8 +1517,8 @@ namespace dss {
       DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
       log("  DSID   : " +  dsuid2str(devRef.getDSID()));
       {
-        boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
-        boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+        boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
         mEvent->setProperty("action", "removed");
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
@@ -1616,8 +1616,8 @@ namespace dss {
         }
       }
       {
-        boost::shared_ptr<DeviceReference> pDevRef(new DeviceReference(devRef));
-        boost::shared_ptr<Event> mEvent(new Event("DeviceEvent", pDevRef));
+        boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
         mEvent->setProperty("action", "configure");
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
@@ -1635,7 +1635,7 @@ namespace dss {
       boost::shared_ptr<DSMeter> pMeter =
         m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
-      boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
       std::string eventName = pDevRev->getSensorEventName(_eventIndex);
       if (eventName.empty()) {
@@ -1656,7 +1656,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
-      boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
@@ -1698,7 +1698,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
-      boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
       boost::shared_ptr<Device> pDev = devRef.getDevice();
 
       // binary input state synchronization event
@@ -1802,7 +1802,7 @@ namespace dss {
         if ((_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
             (_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
           // query Webservice
-          getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(devRef.getDevice())));
+          getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice()));
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
         } else {
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_NONE);
@@ -2123,6 +2123,8 @@ namespace dss {
     pEvent->addStringParameter(defaultName);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    } else {
+      delete pEvent;
     }
   }
 
@@ -2140,7 +2142,7 @@ namespace dss {
                              "&countryCode=" + country +
                              "&languageCode=" + language;
 
-    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb(new OEMWebQuery::OEMWebQueryCallback(m_deviceDSUID));
+    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb = boost::make_shared<OEMWebQuery::OEMWebQueryCallback>(m_deviceDSUID);
     WebserviceConnection::getInstanceMsHub()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
   }
 
@@ -2198,8 +2200,8 @@ namespace dss {
         fclose(binFile);
         m_Device->setVdcIconPath(iconFile.string());
       }
-      free(data);
     }
+    free(data);
   }
 
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
@@ -2211,7 +2213,7 @@ namespace dss {
     }
     EventInterpreterInternalRelay* pRelay =
       dynamic_cast<EventInterpreterInternalRelay*>(DSS::getInstance()->getEventInterpreter().getPluginByName(EventInterpreterInternalRelay::getPluginName()));
-    m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+    m_pRelayTarget = boost::make_shared<InternalEventRelayTarget>(boost::ref<EventInterpreterInternalRelay>(*pRelay));
 
     boost::shared_ptr<EventSubscription> updateWebSubscription(
             new dss::EventSubscription(
@@ -2232,7 +2234,7 @@ namespace dss {
            ((device->getOemProductInfoState() == DEVICE_OEM_VALID) ||
             (device->getOemProductInfoState() == DEVICE_OEM_UNKOWN))) {
         // query Webservice
-        getTaskProcessor()->addEvent(boost::shared_ptr<OEMWebQuery>(new OEMWebQuery(device)));
+        getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(device));
         device->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
     }
@@ -2240,7 +2242,7 @@ namespace dss {
   } // cleanupTerminatedScripts
 
   void ModelMaintenance::sendWebUpdateEvent(int _interval) {
-    boost::shared_ptr<Event> pEvent(new Event(kWebUpdateEventName));
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(kWebUpdateEventName);
     pEvent->setProperty("time", "+" + intToString(_interval));
     DSS::getInstance()->getEventInterpreter().getQueue().pushEvent(pEvent);
   } // sendCleanupEvent

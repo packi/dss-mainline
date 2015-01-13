@@ -4,6 +4,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/make_shared.hpp>
 #include <libical/ical.h>
 #include <time.h>
 
@@ -240,21 +241,21 @@ namespace dss {
        * -- credits or complaints: rk
        * http://www.kanzaki.com/docs/ical/rrule.html
        */
-      pEvent = boost::shared_ptr<Event>(new Event("reexport_timings"));
+      pEvent = boost::make_shared<Event>("reexport_timings");
       // 1st min till 29th min
       pEvent->setProperty(EventProperty::ICalStartTime,
                           now.addMinute(1).toRFC2445IcalDataTime());
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;COUNT=29");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 
-      pEvent = boost::shared_ptr<Event>(new Event("reexport_timings"));
+      pEvent = boost::make_shared<Event>("reexport_timings");
       // 30th min till 30th + 8 * 10 min == 110min
       pEvent->setProperty(EventProperty::ICalStartTime,
                           now.addMinute(30).toRFC2445IcalDataTime());
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;INTERVAL=10;COUNT=9");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
 
-      pEvent = boost::shared_ptr<Event>(new Event("reexport_timings"));
+      pEvent = boost::make_shared<Event>("reexport_timings");
       pEvent->setProperty(EventProperty::ICalStartTime,
                           now.addHour(2).toRFC2445IcalDataTime());
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=HOURLY");
