@@ -619,7 +619,7 @@ namespace dss {
       /* AKM with single input, active on removed group */
       _device->setDeviceBinaryInputTarget(0, 0, GroupIDBlack);
       _device->setBinaryInputTarget(0, 0, GroupIDBlack);
-    } else if ((_device->getOutputMode() == 0) && (_group->getID() == _device->getButtonActiveGroup())) {
+    } else if (_group->getID() == _device->getButtonActiveGroup()) {
       /* device has no output, button is active on removed group */
       _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
     }
