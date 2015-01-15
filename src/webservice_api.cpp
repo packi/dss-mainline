@@ -460,6 +460,7 @@ const static std::string evtCategory_HeatingControllerState = "HeatingController
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
 const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 const static std::string evtCategory_ExecutionDenied = "ExecutionDenied";
+const static std::string evtCategory_LogFileData = "LogFileData";
 
 const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
@@ -667,6 +668,8 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       body->addProperty("ActivityName", event->getPropertyByName("action-name"));
       body->addProperty("SourceName", event->getPropertyByName("source-name"));
       body->addProperty("Reason", event->getPropertyByName("reason"));
+    } else if (event->getName() == EventName::LogFileData) {
+      createHeader(header, evtGroup_Activity, evtCategory_LogFileData, event.get());
     } else {
       Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
     }
