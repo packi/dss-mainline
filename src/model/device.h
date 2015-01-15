@@ -77,6 +77,10 @@
 #define BUTTONINPUT_AKM_RISING_EDGE         "rising_edge"
 #define BUTTONINPUT_AKM_FALLING_EDGE        "falling_edge"
 
+// UMR output modes for pairing
+#define OUTPUT_MODE_TWO_STAGE_SWITCH        34
+#define OUTPUT_MODE_BIPOLAR_SWITCH          43
+#define OUTPUT_MODE_THREE_STAGE_SWITCH      38
 namespace dss {
 
   class Group;
@@ -574,7 +578,7 @@ namespace dss {
     void setButtonID(const int _value) { m_ButtonID = _value; }
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
-    void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
+    void setOutputMode(const uint8_t _value);
     void setButtonInputMode(const uint8_t _value);
     uint8_t getButtonInputMode() const { return m_ButtonInputMode; }
     void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }

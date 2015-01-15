@@ -615,8 +615,82 @@ namespace dss {
       if((value  < 0) || (value > 255)) {
         return failure("Invalid or missing parameter 'modeID'");
       }
+
+      std::string action = "none";
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       pDevice->setDeviceOutputMode(value);
-      return success();
+      if (pDevice->getDeviceType() == DEVICE_TYPE_UMR) {
+        DeviceFeatures_t features = pDevice->getFeatures();
+        if (features.pairing == false) {
+          resultObj->addProperty("action", action);
+          DeviceReference dr(pDevice, &m_Apartment);
+          resultObj->addElement("device", toJSON(dr));
+          return success(resultObj);
+        }
+
+        dsuid_t next;
+        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
+        boost::shared_ptr<Device> pPartnerDevice;
+
+        try {
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
+        } catch(ItemNotFoundException& e) {
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+        }
+
+        bool wasSlave = pPartnerDevice->is2WaySlave();
+        if (pDevice->multiDeviceIndex() == 2) {
+          // hide 4th dsid
+          if ((value == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+              (value == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+              (value == OUTPUT_MODE_THREE_STAGE_SWITCH)) {
+            if (wasSlave == false) {
+              action = "remove";
+            }
+
+            pPartnerDevice->setDeviceOutputMode(value);
+          } else {
+            if (wasSlave == true) {
+              action = "add";
+              pPartnerDevice->setDeviceOutputMode(value);
+              // wait to ensure the model has time to update
+              sleep(1);
+            }
+          }
+
+          resultObj->addProperty("action", action);
+          DeviceReference dr(pPartnerDevice, &m_Apartment);
+          resultObj->addElement("device", toJSON(dr));
+
+          StructureManipulator manipulator(*m_pStructureBusInterface,
+                                           *m_pStructureQueryBusInterface,
+                                            m_Apartment);
+
+          if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
+            if (m_pStructureBusInterface != NULL) {
+              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                        pDevice->getZoneID());
+              manipulator.addDeviceToZone(pPartnerDevice, zone);
+            }
+          }
+
+          // #3450 - remove slave devices from clusters
+          manipulator.deviceRemoveFromGroups(pPartnerDevice);
+
+          if ((pDevice->getJokerGroup() > 0) &&
+              (pPartnerDevice->getJokerGroup() > 0) &&
+              (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
+            if (m_pStructureBusInterface != NULL) {
+              pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+            }
+          }
+        } else {
+          resultObj->addProperty("action", action);
+          DeviceReference dr(pDevice, &m_Apartment);
+          resultObj->addElement("device", toJSON(dr));
+        }
+      }
+      return success(resultObj);
     } else if(_request.getMethod() == "setProgMode") {
       uint8_t modeId;
       std::string pmode = _request.getParameter("mode");

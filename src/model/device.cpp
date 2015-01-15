@@ -1373,6 +1373,19 @@ namespace dss {
     }
   }
 
+  void Device::setOutputMode(const uint8_t _value) {
+    bool wasSlave = is2WaySlave();
+
+    m_OutputMode = _value;
+    if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
+      if (is2WaySlave()) {
+        removeFromPropertyTree();
+      } else if (wasSlave) {
+        publishToPropertyTree();
+      }
+    }
+  }
+
   std::string Device::getAKMInputProperty() const {
     return m_AKMInputProperty;
   }
@@ -1381,14 +1394,22 @@ namespace dss {
     bool ret = false;
 
     try {
-      ret = (getFeatures().pairing &&
-            ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
-             (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
-              IsEvenDsuid(m_DSID)))); // even dSID
+      if ((multiDeviceIndex() == 2) && (getDeviceType() == DEVICE_TYPE_UMR)) {
+        ret = (getFeatures().pairing &&
+               ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+                (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               IsEvenDsuid(m_DSID)); // even dSID
+      } else {
+        ret = (getFeatures().pairing &&
+              ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
+               (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
+                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
+                IsEvenDsuid(m_DSID)))); // even dSID
+      }
     } catch (std::runtime_error &err) {
       Logger::getInstance()->log(err.what());
     }
@@ -1399,17 +1420,26 @@ namespace dss {
   bool Device::is2WaySlave() const {
     bool ret = false;
 
-    if (!hasInput()) {
-      return ret;
+    if (!(multiDeviceIndex() == 3) && (getDeviceType() == DEVICE_TYPE_UMR)) {
+      if (!hasInput()) {
+        return ret;
+      }
     }
 
     try {
-      ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
-             ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
-             !IsEvenDsuid(m_DSID))); // odd dSID
+      if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
+        ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               (!IsEvenDsuid(m_DSID)); // odd dSID
+      } else {
+        ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
+               ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
+               !IsEvenDsuid(m_DSID))); // odd dSID
+      }
     } catch (std::runtime_error &err) {
       Logger::getInstance()->log(err.what());
     }
@@ -1693,6 +1723,14 @@ namespace dss {
                this->hasMultibuttons() &&
                (m_ButtonInputIndex == 0)) {
       features.pairing = true;
+    } else if ((devCls == DEVICE_CLASS_SW) && (devType == DEVICE_TYPE_UMR) &&
+               (devNumber == 200)) {
+      if (multiDeviceIndex() == 0) {
+        features.pairing = true;
+        features.syncButtonID = true;
+      } else if (multiDeviceIndex() == 2) {
+        features.pairing = true;
+      }
     }
 
     if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL) &&
