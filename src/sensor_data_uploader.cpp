@@ -156,7 +156,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
 __DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
 
 SensorDataUploadMsHubPlugin::SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter)
-  : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
+  : EventInterpreterPlugin("sensor_data_upload_ms_hub", _pInterpreter),
     m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<It>))
 {
   websvcEnabledNode =
@@ -319,7 +319,7 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
 __DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);
 
 SensorDataUploadDsHubPlugin::SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter)
-  : EventInterpreterPlugin("sensor_data_upload", _pInterpreter),
+  : EventInterpreterPlugin("sensor_data_upload_ds_hub", _pInterpreter),
     m_log(boost::make_shared<SensorLog>("dshub", WebserviceDsHub::doUploadSensorData<It>))
 {
   websvcEnabledNode =
