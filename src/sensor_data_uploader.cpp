@@ -32,38 +32,9 @@
 
 namespace dss {
 
-typedef std::vector<boost::shared_ptr<Event> >::iterator It;
-
-typedef void (*doUploadSensorDataFunction)(It begin, It end, WebserviceCallDone_t callback);
-
-
 /****************************************************************************/
 /* Sensor Log                                                               */
 /****************************************************************************/
-
-class SensorLog : public WebserviceCallDone,
-                  public boost::enable_shared_from_this<SensorLog> {
-  __DECL_LOG_CHANNEL__
-  enum {
-    max_post_events = 50,
-    max_elements = 10000,
-  };
-public:
-  SensorLog(const std::string hubName, doUploadSensorDataFunction doUpload)
-    : m_pending_upload(false), m_hubName(hubName), m_doUpload(doUpload) {};
-  virtual ~SensorLog() {};
-  void append(boost::shared_ptr<Event> event, bool highPrio = false);
-  void triggerUpload();
-  void done(RestTransferStatus_t status, WebserviceReply reply);
-private:
-  std::vector<boost::shared_ptr<Event> > m_events;
-  std::vector<boost::shared_ptr<Event> > m_eventsHighPrio;
-  std::vector<boost::shared_ptr<Event> > m_uploading;
-  boost::mutex m_lock;
-  bool m_pending_upload;
-  const std::string m_hubName;
-  doUploadSensorDataFunction m_doUpload;
-};
 
 __DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
 
@@ -157,7 +128,7 @@ __DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
 
 SensorDataUploadMsHubPlugin::SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ms_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<It>))
+    m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<SensorLog::It>))
 {
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
@@ -315,7 +286,7 @@ __DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);
 
 SensorDataUploadDsHubPlugin::SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ds_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("dshub", WebserviceDsHub::doUploadSensorData<It>))
+    m_log(boost::make_shared<SensorLog>("dshub", WebserviceDsHub::doUploadSensorData<SensorLog::It>))
 {
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);

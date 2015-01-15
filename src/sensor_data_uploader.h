@@ -25,10 +25,39 @@
 
 #include "event.h"
 #include "logger.h"
+#include "webservice_api.h"
 
 namespace dss {
 
-  class SensorLog;
+
+
+  class SensorLog : public WebserviceCallDone,
+                    public boost::enable_shared_from_this<SensorLog> {
+    __DECL_LOG_CHANNEL__
+    enum {
+      max_post_events = 50,
+      max_elements = 10000,
+    };
+  public:
+    typedef std::vector<boost::shared_ptr<Event> >::iterator It;
+    typedef void (*doUploadSensorDataFunction)(It begin, It end,
+                                               WebserviceCallDone_t callback);
+
+    SensorLog(const std::string hubName, doUploadSensorDataFunction doUpload)
+      : m_pending_upload(false), m_hubName(hubName), m_doUpload(doUpload) {};
+    virtual ~SensorLog() {};
+    void append(boost::shared_ptr<Event> event, bool highPrio = false);
+    void triggerUpload();
+    void done(RestTransferStatus_t status, WebserviceReply reply);
+  private:
+    std::vector<boost::shared_ptr<Event> > m_events;
+    std::vector<boost::shared_ptr<Event> > m_eventsHighPrio;
+    std::vector<boost::shared_ptr<Event> > m_uploading;
+    boost::mutex m_lock;
+    bool m_pending_upload;
+    const std::string m_hubName;
+    doUploadSensorDataFunction m_doUpload;
+  };
 
   class SensorDataUploadMsHubPlugin : public EventInterpreterPlugin,
                                       private PropertyListener {
