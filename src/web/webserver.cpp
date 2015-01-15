@@ -93,7 +93,8 @@ namespace dss {
 
   static std::string strprintf_HTTPHeader(int _code, int length,
                                           const std::string& _contentType,
-                                          const std::string& _setCookie) {
+                                          const std::string& _setCookie,
+                                          const std::string& _contentName = "") {
     std::ostringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
@@ -105,6 +106,9 @@ namespace dss {
       sstream << "\r\n";
     }
     sstream << "Content-Length: " << intToString(length) << "\r\n";
+    if (!_contentName.empty()) {
+      sstream << "Content-Disposition: attachment; filename=\"" << _contentName << "\"" << "\r\n";
+    }
     sstream << "\r\n";
     std::string header = sstream.str();
     return header;
@@ -112,9 +116,10 @@ namespace dss {
 
   static void emitHTTPHeader(struct mg_connection* _connection, int _code, int length,
                              const std::string& _contentType,
-                             const std::string& _setCookie = "") {
+                             const std::string& _setCookie = "",
+                             const std::string& _contentName = "") {
     std::string tmp = strprintf_HTTPHeader(_code, length, _contentType,
-                                           _setCookie);
+                                           _setCookie, _contentName);
     mg_write(_connection, tmp.c_str(), tmp.length());
   }
 
