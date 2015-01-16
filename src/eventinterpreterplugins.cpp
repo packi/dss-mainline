@@ -65,6 +65,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <json.h>
 
 namespace dss {
 
@@ -1000,6 +1001,154 @@ namespace dss {
 
   namespace EventName {
     std::string WebserviceKeepAlive = "keepWebserviceAlive";
+    std::string WebserviceGetWeatherInformation = "getWeatherInformation";
+  }
+
+  void EventInterpreterWebserviceGetWeatherInformationDone::result(long code, const std::string &res) {
+    if (code != 200) {
+      Logger::getInstance()->log("GetWeatherInformation error code: " + intToString(code) + " result: " + res, lsError);
+      return;
+    }
+    Logger::getInstance()->log("GetWeatherInformation code: " + intToString(code) + " result: " + res, lsDebug);
+
+    const char* buf = res.c_str();
+    int ReturnCode;
+    std::string ReturnMessage;
+    bool ReturnCodeSeen = false;
+
+    std::string weatherTime;
+    std::string weatherIconID;
+    std::string weatherConditionID;
+    std::string weatherService;
+    double valOutdoorTemperature;
+    bool valueSeen = false;
+
+/*
+Sample: {
+  "Response": {
+    "MeasurementTime": "2015-01-15T10:14:47.3144097+00:00",
+    "OutdoorTemperature": 2.1,
+    "WeatherIconID": "sample string 3",
+    "WeatherID": 4,
+    "WeatherService": 1
+  },
+  "ReturnCode": 5,
+  "ReturnMessage": "sample string 6"
+}
+*/
+
+    try {
+      json_object * jobj = json_tokener_parse(buf);
+      if (!jobj) {
+        throw ParseError("Invalid JSON");
+      }
+      json_object_object_foreach(jobj, key, val) {
+        enum json_type type = json_object_get_type(val);
+        if (!strcmp(key, "ReturnCode")) {
+          if (type == json_type_int) {
+            ReturnCode = json_object_get_int(val);
+            ReturnCodeSeen = true;
+          }
+        } else if (!strcmp(key, "ReturnMessage")) {
+          if (type == json_type_null) {
+            // empty string
+            continue;
+          }
+          if (type == json_type_string) {
+            ReturnMessage = json_object_get_string(val);
+          }
+        } else if (!strcmp(key, "Response")) {
+          if (type != json_type_object) {
+            throw ParseError("Invalid type for Response");
+          }
+          json_object * jobj2 = val;
+          json_object_object_foreach(jobj2, key, val) {
+            enum json_type type2 = json_object_get_type(val);
+            if (!strcmp(key, "MeasurementTime")) {
+              if (type2 == json_type_string) {
+                weatherTime =  json_object_get_string(val);
+              }
+            }
+            else if (!strcmp(key, "WeatherIconID")) {
+              if (type2 == json_type_string) {
+                weatherIconID =  json_object_get_string(val);
+              } else if (type2 == json_type_int) {
+                weatherIconID =  intToString(json_object_get_int(val));
+              }
+            }
+            else if (!strcmp(key, "WeatherID")) {
+              if (type2 == json_type_int) {
+                weatherConditionID =  intToString(json_object_get_int(val));
+              } else if (type2 == json_type_string) {
+                weatherConditionID =  json_object_get_string(val);
+              }
+            }
+            else if (!strcmp(key, "WeatherService")) {
+              if (type2 == json_type_string) {
+                weatherService =  json_object_get_string(val);
+              } else if (type2 == json_type_int) {
+                weatherService =  intToString(json_object_get_int(val));
+              }
+            }
+            else if (!strcmp(key, "OutdoorTemperature")) {
+              if (type2 == json_type_double) {
+                valOutdoorTemperature =  json_object_get_double(val);
+                valueSeen = true;
+              }
+            } else {
+              // ignore, unkown keys
+            }
+          }
+        } else {
+          // ignore, unkown keys
+        }
+      }
+      json_object_put(jobj);
+
+    } catch (ParseError &ex) {
+      Logger::getInstance()->log(std::string("GetWeatherInformation: Parse error <") + ex.what() + "> " + res, lsError);
+      return;
+    }
+
+    if (!ReturnCodeSeen) {
+      Logger::getInstance()->log("GetWeatherInformation: no ReturnCode in response data", lsWarning);
+    } else if (!ReturnCodeSeen && ReturnCode != 0) {
+      Logger::getInstance()->log("GetWeatherInformation: ReturnCode: " + intToString(ReturnCode) +
+          ", ReturnMessage: " + ReturnMessage, lsWarning);
+    } else {
+      DateTime now = DateTime();
+      DateTime ts;
+      int age = 0;
+      try {
+        ts.parseISO8601(weatherTime);
+        age = now.difference(ts);
+      } catch (std::invalid_argument &ex) {
+        Logger::getInstance()->log(std::string("GetWeatherInformation: invalid timestamp: ") + ex.what(), lsError);
+      }
+
+      Apartment& apt = DSS::getInstance()->getApartment();
+      boost::shared_ptr<Zone> pZone = apt.getZone(0);
+
+      if (age > SensorMaxLifeTime) {
+        Logger::getInstance()->log("GetWeatherInformation: ignore data, too old: " + weatherTime, lsInfo);
+      } else {
+        Logger::getInstance()->log("GetWeatherInformation: Date: " + weatherTime +
+            ", IconID: " + weatherIconID +
+            ", ConditionID: " + weatherConditionID +
+            ", ServiceID: " + weatherService, lsDebug);
+        apt.setWeatherInformation(weatherIconID, weatherConditionID, weatherService, ts);
+
+        if (!valueSeen) {
+          Logger::getInstance()->log(std::string("GetWeatherInformation: missing temperature value: "), lsInfo);
+        } else if (1 /* TODO: && no local sensor set as source, see #7701 */) {
+          Logger::getInstance()->log("GetWeatherInformation: Outdoor Temperature: " + doubleToString(valOutdoorTemperature), lsDebug);
+          dsuid_t null;
+          SetNullDsuid(null);
+          pZone->pushSensor(coSystem, SAC_MANUAL, null,
+              SensorIDTemperatureOutdoors, valOutdoorTemperature, "");
+        }
+      }
+    }
   }
 
   __DEFINE_LOG_CHANNEL__(EventInterpreterWebservicePlugin, lsInfo);
@@ -1025,8 +1174,13 @@ namespace dss {
       pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
       pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      boost::shared_ptr<Event> pEventWeather = boost::make_shared<Event>(EventName::WebserviceGetWeatherInformation);
+      pEventWeather->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+      pEventWeather->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;INTERVAL=15");
+      DSS::getInstance()->getEventQueue().pushEvent(pEventWeather);
     } else {
       DSS::getInstance()->getEventRunner().removeEventByName(EventName::WebserviceKeepAlive);
+      DSS::getInstance()->getEventRunner().removeEventByName(EventName::WebserviceGetWeatherInformation);
     }
   }
 
@@ -1040,6 +1194,12 @@ namespace dss {
     getEventInterpreter().subscribe(subscription);
 
     subscription.reset(new EventSubscription(EventName::WebserviceKeepAlive,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription(EventName::WebserviceGetWeatherInformation,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1061,6 +1221,10 @@ namespace dss {
         pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
         pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=100");
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        boost::shared_ptr<Event> pEventWeather = boost::make_shared<Event>(EventName::WebserviceGetWeatherInformation);
+        pEventWeather->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+        pEventWeather->setProperty(EventProperty::ICalRRule, "FREQ=MINUTELY;INTERVAL=15");
+        DSS::getInstance()->getEventQueue().pushEvent(pEventWeather);
         return;
       }
     }
@@ -1081,6 +1245,10 @@ namespace dss {
       std::string token = _event.getPropertyByName(EventProperty::ApplicationToken);
       WebserviceMsHub::doNotifyTokenDeleted(token, WebserviceCallDone_t());
       return;
+    } else if (_event.getName() == EventName::WebserviceGetWeatherInformation) {
+      boost::shared_ptr<EventInterpreterWebserviceGetWeatherInformationDone> done =
+          boost::make_shared<EventInterpreterWebserviceGetWeatherInformationDone> ();
+      WebserviceMsHub::doGetWeatherInformation(done);
     }
   }
 

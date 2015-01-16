@@ -175,6 +175,8 @@ namespace dss {
   const int SensorIDActivePowerVA = 65;
   const int SensorIDNotUsed = 253;
 
+  const int SensorMaxLifeTime = 3600; /* 1h */
+
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;
   const int BinaryInputIDRoomBrightness = 2;
