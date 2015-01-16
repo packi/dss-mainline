@@ -52,6 +52,10 @@ namespace dss {
     void triggerUpload();
     void done(RestTransferStatus_t status, WebserviceReply reply);
   private:
+    SensorLog::It packet_end();
+    void send_packet();
+    void clear_packet();
+
     std::vector<boost::shared_ptr<Event> > m_events;
     std::vector<boost::shared_ptr<Event> > m_eventsHighPrio;
     std::vector<boost::shared_ptr<Event> > m_uploading;
