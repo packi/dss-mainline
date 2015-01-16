@@ -301,7 +301,6 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
       }
 
     } else if (_event.getName() == EventName::UploadMsHubEventLog) {
-      log(std::string(__func__) + " upload event log", lsInfo);
       m_log->triggerUpload();
     } else {
       log("Unhandled event " + _event.getName(), lsInfo);
@@ -468,7 +467,6 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
       }
 
     } else if (_event.getName() == EventName::UploadDsHubEventLog) {
-      log(std::string(__func__) + " upload event log", lsInfo);
       m_log->triggerUpload();
     } else {
       log("Unhandled event " + _event.getName(), lsInfo);
