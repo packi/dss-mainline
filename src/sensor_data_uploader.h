@@ -30,7 +30,6 @@
 namespace dss {
 
 
-
   class SensorLog : public WebserviceCallDone,
                     public boost::enable_shared_from_this<SensorLog> {
     __DECL_LOG_CHANNEL__
@@ -40,11 +39,13 @@ namespace dss {
     };
   public:
     typedef std::vector<boost::shared_ptr<Event> >::iterator It;
-    typedef void (*doUploadSensorDataFunction)(It begin, It end,
-                                               WebserviceCallDone_t callback);
 
-    SensorLog(const std::string hubName, doUploadSensorDataFunction doUpload)
-      : m_pending_upload(false), m_hubName(hubName), m_doUpload(doUpload) {};
+    struct Uploader {
+      virtual void upload(It begin, It end, WebserviceCallDone_t callback) = 0;
+    };
+
+    SensorLog(const std::string hubName, Uploader *uploader)
+      : m_pending_upload(false), m_hubName(hubName), m_uploader(uploader) {};
     virtual ~SensorLog() {};
     void append(boost::shared_ptr<Event> event, bool highPrio = false);
     void triggerUpload();
@@ -56,7 +57,12 @@ namespace dss {
     boost::mutex m_lock;
     bool m_pending_upload;
     const std::string m_hubName;
-    doUploadSensorDataFunction m_doUpload;
+    Uploader *m_uploader;
+  };
+
+  class MSUploadWrapper : public SensorLog::Uploader {
+    virtual void upload(SensorLog::It begin, SensorLog::It end,
+                        WebserviceCallDone_t callback);
   };
 
   class SensorDataUploadMsHubPlugin : public EventInterpreterPlugin,
@@ -73,8 +79,14 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
     virtual void subscribe();
   private:
+    MSUploadWrapper m_uploader;
     boost::shared_ptr<SensorLog> m_log;
     PropertyNodePtr websvcEnabledNode;
+  };
+
+  class DSUploadWrapper : public SensorLog::Uploader {
+    virtual void upload(SensorLog::It begin, SensorLog::It end,
+                        WebserviceCallDone_t callback);
   };
 
   class SensorDataUploadDsHubPlugin : public EventInterpreterPlugin,
@@ -91,6 +103,7 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
     virtual void subscribe();
   private:
+    MSUploadWrapper m_uploader;
     boost::shared_ptr<SensorLog> m_log;
     PropertyNodePtr websvcEnabledNode;
   };

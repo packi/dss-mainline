@@ -86,7 +86,7 @@ void SensorLog::triggerUpload() {
     }
 
     chunk_end = chunk_start + remainder;
-    m_doUpload(chunk_start, chunk_end, shared_from_this());
+    m_uploader->upload(chunk_start, chunk_end, shared_from_this());
     if (chunk_end != m_uploading.end()) {
       chunk_start = chunk_end;
     }
@@ -124,11 +124,16 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
 /* Sensor Data Upload Ms Hub Plugin                                         */
 /****************************************************************************/
 
+void MSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
+                             WebserviceCallDone_t callback) {
+  WebserviceMsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
+};
+
 __DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
 
 SensorDataUploadMsHubPlugin::SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ms_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<SensorLog::It>))
+    m_log(boost::make_shared<SensorLog>("mshub", &m_uploader))
 {
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
@@ -282,11 +287,16 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
 /* Sensor Data Upload dS Hub Plugin                                         */
 /****************************************************************************/
 
+void DSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
+                             WebserviceCallDone_t callback) {
+  WebserviceDsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
+};
+
 __DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);
 
 SensorDataUploadDsHubPlugin::SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ds_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("dshub", WebserviceDsHub::doUploadSensorData<SensorLog::It>))
+    m_log(boost::make_shared<SensorLog>("dshub", &m_uploader))
 {
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
