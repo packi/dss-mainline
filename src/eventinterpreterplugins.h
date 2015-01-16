@@ -25,6 +25,7 @@
 #define EVENTINTERPRETERPLUGINS_H_
 
 #include "event.h"
+#include "webservice_api.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -143,6 +144,12 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+  class EventInterpreterWebserviceGetWeatherInformationDone : public URLRequestCallback {
+  public:
+    virtual ~EventInterpreterWebserviceGetWeatherInformationDone() {}
+    virtual void result(long code, const std::string &res);
+  };
+
   class EventInterpreterWebservicePlugin : public EventInterpreterPlugin,
                                            private PropertyListener {
   private:
@@ -158,6 +165,7 @@ namespace dss {
   private:
     /** do not call DSS::getInstance() in destructor */
     PropertyNodePtr websvcEnabledNode;
+    EventInterpreterWebserviceGetWeatherInformationDone m_cbW;
   };
 
   class EventInterpreterSensorMonitorPlugin : public EventInterpreterPlugin {
