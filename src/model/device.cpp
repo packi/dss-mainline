@@ -2436,32 +2436,18 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
   }
 
-  uint8_t Device::getDeviceUMRBlinkRepetitions() {
-    if (getDeviceType() != DEVICE_TYPE_UMR) {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
-    return getDeviceConfig(CfgClassFunction, CfgFunction_FCount1);
-  }
-
-  double Device::getDeviceUMROnDelay() {
+  void Device::getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay,
+                                         uint8_t  *_count) {
     if (getDeviceType() != DEVICE_TYPE_UMR) {
       throw std::runtime_error("unsupported configuration for this device");
     }
 
-    uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1);
-    double ret = (value * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
-    return ret;
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
+    *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
+    *_count = (uint8_t)(value >> 8) & 0xff;
 
-  }
-
-  double Device::getDeviceUMROffDelay() {
-    if (getDeviceType() != DEVICE_TYPE_UMR) {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
-
-    uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
-    double ret = (value * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
-    return ret;
+    uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+    *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
   }
 
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)

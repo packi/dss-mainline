@@ -1620,9 +1620,13 @@ namespace dss {
       }
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("count", device->getDeviceUMRBlinkRepetitions());
-      resultObj->addProperty("ondelay", device->getDeviceUMROnDelay());
-      resultObj->addProperty("offdelay", device->getDeviceUMROffDelay());
+      uint8_t umr_count;
+      double umr_ondelay;
+      double umr_offdelay;
+      device->getDeviceUMRDelaySettings(&umr_ondelay, &umr_offdelay, &umr_count);
+      resultObj->addProperty("count", umr_count);
+      resultObj->addProperty("ondelay", umr_ondelay);
+      resultObj->addProperty("offdelay", umr_offdelay);
       return success(resultObj);
 
     } else {
