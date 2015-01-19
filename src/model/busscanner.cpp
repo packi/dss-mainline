@@ -175,7 +175,7 @@ namespace dss {
       } else {
         devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID(), false);
         foreach(DeviceSpec_t& spec, devices) {
-          initializeDeviceFromSpecQuick(_dsMeter, spec);
+          initializeDeviceFromSpecQuick(_dsMeter, _zone, spec);
         }
       }
     } catch(BusApiError& e) {
@@ -381,7 +381,7 @@ namespace dss {
     return true;
   } // scanDeviceOnBus
 
-  bool BusScanner::initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, DeviceSpec_t& _spec) {
+  bool BusScanner::initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {
     log("UpdateDevice: DSUID:" + dsuid2str(_spec.DSID) + "active:" + intToString(_spec.ActiveState), lsInfo);
 
     boost::shared_ptr<Device> dev;
@@ -393,6 +393,19 @@ namespace dss {
       }
     } catch(ItemNotFoundException&) {
       return false;
+    }
+
+    boost::shared_ptr<DSMeter> oldDSMeter;
+    try {
+      oldDSMeter = m_Apartment.getDSMeterByDSID(dev->getLastKnownDSMeterDSID());
+    } catch(ItemNotFoundException&) {
+      return false;
+    }
+
+    // compare ds meter. if attached on wrong dsmeter
+    // -> reattach to correct one given by _dsMeter
+    if (!IsEqualDsuid(oldDSMeter->getDSID(), _dsMeter->getDSID())) {
+      return initializeDeviceFromSpec(_dsMeter, _zone, _spec);
     }
 
     DeviceReference devRef(dev, &m_Apartment);
