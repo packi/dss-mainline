@@ -171,7 +171,6 @@ namespace dss {
 
   void Security::loginAsSystemUser(const std::string& _reason) {
     if(m_pSystemUser != NULL) {
-      Logger::getInstance()->log("Logged in as system user (" + _reason + ")", lsDebug);
       m_LoggedInUser.reset(new User(*m_pSystemUser));
     } else {
       Logger::getInstance()->log("Failed to login as system-user (" + _reason + ")", lsWarning);
