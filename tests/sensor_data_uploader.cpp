@@ -117,12 +117,14 @@ BOOST_AUTO_TEST_CASE(test_upload_network_failure) {
   // SensorLog will not retry after an error occured, so only first
   // batch of date was sent, then transmission stops
   //
-  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_post_events);
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    static_cast<size_t>(SensorLog::max_post_events));
   std::set<int> indices1 = filter_indices(mu.m_events, f.m_events);
 
   // SensorLog will retry uploading same events
   s->triggerUpload();  // retry
-  BOOST_CHECK_EQUAL(mu.m_events.size(), 2 * SensorLog::max_post_events);
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    2 * static_cast<size_t>(SensorLog::max_post_events));
   std::set<int> indices2 = filter_indices(mu.m_events, f.m_events);
   BOOST_CHECK(indices1 == indices2); // no new index seen
 }
@@ -145,7 +147,8 @@ BOOST_AUTO_TEST_CASE(test_upload_reply_parse_error) {
   // SensorLog will drop the events without retry, so all
   // events will be transferred
   //
-  BOOST_CHECK_EQUAL(mu.m_events.size(),  3 * SensorLog::max_post_events);
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    3 * static_cast<size_t>(SensorLog::max_post_events));
   std::set<int> indices = filter_indices(mu.m_events, f.m_events);
   BOOST_CHECK_EQUAL(mu.m_events.size(), indices.size());
 }
@@ -167,7 +170,8 @@ BOOST_AUTO_TEST_CASE(test_upload_ws_complains) {
   //
   // Webservice complains about something, but we will continue
   //
-  BOOST_CHECK_EQUAL(mu.m_events.size(),  3 * SensorLog::max_post_events);
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    3 * static_cast<size_t>(SensorLog::max_post_events));
   std::set<int> indices = filter_indices(mu.m_events, f.m_events);
   BOOST_CHECK_EQUAL(mu.m_events.size(), indices.size());
 }
@@ -188,7 +192,8 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle) {
   // uploaded a full packet and one packet containing only 1 event
   // another event is queued
   //
-  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_post_events + 1);
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    static_cast<size_t>(SensorLog::max_post_events) + 1);
   BOOST_CHECK_EQUAL(mu.m_events.size(), f.m_events.size() - 1);
 }
 
@@ -211,7 +216,8 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle2) {
   // while uploading that, another 1/2 packet worth of data trickles in
   // that packet is not uploaded since the packet before was not full
   //
-  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_post_events * (2 + 1 + 0.5));
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    static_cast<size_t>(SensorLog::max_post_events) * (2 + 1 + 0.5));
   BOOST_CHECK_EQUAL(mu.m_events.size() + SensorLog::max_post_events / 2,
                     f.m_events.size());
 }
