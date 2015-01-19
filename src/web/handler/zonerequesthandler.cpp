@@ -359,20 +359,25 @@ namespace dss {
             hConfig.Ymax += 100;
           }
           double tempDouble = 0;
-          _request.getParameter("CtrlKp", tempDouble);
-          hConfig.Kp = (uint16_t)tempDouble * 40;
+          if (_request.getParameter("CtrlKp", tempDouble)) {
+            hConfig.Kp = (uint16_t)tempDouble * 40;
+          }
           _request.getParameter("CtrlTi", hConfig.Ti);
           _request.getParameter("CtrlTs", hConfig.Ts);
           _request.getParameter("CtrlKd", hConfig.Kd);
-          _request.getParameter("CtrlImin", tempDouble);
-          hConfig.Imin = tempDouble * 40;
-          _request.getParameter("CtrlImax", tempDouble);
-          hConfig.Imax = tempDouble * 40;
+          if (_request.getParameter("CtrlImin", tempDouble)) {
+            hConfig.Imin = tempDouble * 40;
+          }
+          if (_request.getParameter("CtrlImax", tempDouble)) {
+            hConfig.Imax = tempDouble * 40;
+          }
           bool tempBool;
-          _request.getParameter("CtrlAntiWindUp", tempBool);
-          hConfig.AntiWindUp = tempBool ? 1 : 0;
-          _request.getParameter("CtrlKeepFloorWarm", tempBool);
-          hConfig.KeepFloorWarm = tempBool ? 1 : 0;
+          if (_request.getParameter("CtrlAntiWindUp", tempBool)) {
+            hConfig.AntiWindUp = tempBool ? 1 : 0;
+          }
+          if (_request.getParameter("CtrlKeepFloorWarm", tempBool)) {
+            hConfig.KeepFloorWarm = tempBool ? 1 : 0;
+          }
 
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
