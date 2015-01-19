@@ -408,8 +408,6 @@ namespace dss {
       return initializeDeviceFromSpec(_dsMeter, _zone, _spec);
     }
 
-    DeviceReference devRef(dev, &m_Apartment);
-
     dev->setIsPresent(_spec.ActiveState == 1);
     dev->setIsConnected(true);
     dev->setIsValid(true);
