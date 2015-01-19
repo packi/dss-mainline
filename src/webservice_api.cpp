@@ -492,6 +492,7 @@ int getRandomUUID(std::string &str)
     str = std::string(cstr);
 
     free(cstr);
+    uuid_destroy(uuid);
     return 0;
 }
 
