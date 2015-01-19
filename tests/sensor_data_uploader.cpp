@@ -1,7 +1,9 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 
+#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
+#include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
@@ -17,12 +19,10 @@ struct EventFactory {
   void emit_events(boost::shared_ptr<SensorLog> s, int count,
                    bool auto_flush = true)
   {
-    int i;
-
-    for (i = 0; i < count; i++) {
+    while (count--) {
       boost::shared_ptr<Event> event =
         boost::make_shared<Event>(EventName::DeviceSensorValue);
-      event->setProperty("index", intToString(i));
+      event->setProperty("index", intToString(m_events.size()));
 
       m_events.push_back(event);
       s->append(event, false);
@@ -45,9 +45,17 @@ struct MockUploader : public SensorLog::Uploader {
                int wscode = 0)
     : m_restcode(restcode), m_wscode(wscode) {}
 
+  void install_upload_action(boost::function<void()> action)
+  {
+    m_upload_action = action;
+  }
+
   void upload(SensorLog::It it, SensorLog::It end,
               WebserviceCallDone_t callback)
   {
+    if (m_upload_action) {
+      m_upload_action();
+    }
 
     m_events.insert(m_events.end(), it, end);
     WebserviceReply ws_reply = { m_wscode, "fake-reply" };
@@ -57,6 +65,7 @@ struct MockUploader : public SensorLog::Uploader {
   RestTransferStatus_t m_restcode;
   int m_wscode;
   std::vector<boost::shared_ptr<Event> > m_events;
+  boost::function<void()> m_upload_action;
 };
 
 std::set<int> filter_indices(const std::vector<boost::shared_ptr<Event> > &recv_events,
@@ -161,6 +170,50 @@ BOOST_AUTO_TEST_CASE(test_upload_ws_complains) {
   BOOST_CHECK_EQUAL(mu.m_events.size(),  3 * SensorLog::max_post_events);
   std::set<int> indices = filter_indices(mu.m_events, f.m_events);
   BOOST_CHECK_EQUAL(mu.m_events.size(), indices.size());
+}
+
+BOOST_AUTO_TEST_CASE(test_sensor_data_trickle) {
+  EventFactory f;
+  MockUploader mu;
+
+  boost::shared_ptr<SensorLog> s =
+    boost::make_shared<SensorLog>("unit-test", &mu);
+
+  // whenever a packet is sent, a new sensor value arrives
+  mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s, 1,
+                                       false));
+  f.emit_events(s, SensorLog::max_post_events, true);
+
+  //
+  // uploaded a full packet and one packet containing only 1 event
+  // another event is queued
+  //
+  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_post_events + 1);
+  BOOST_CHECK_EQUAL(mu.m_events.size(), f.m_events.size() - 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_sensor_data_trickle2) {
+  EventFactory f;
+  MockUploader mu;
+
+  boost::shared_ptr<SensorLog> s =
+    boost::make_shared<SensorLog>("unit-test", &mu);
+
+  // whenever a packet is sent, a new sensor value arrives
+  mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s,
+                                       SensorLog::max_post_events / 2,
+                                       false));
+  f.emit_events(s, 2 * SensorLog::max_post_events, true);
+
+  //
+  // while the first 2 full packet are uploaded, another packet trickles in
+  // while uploading that, another 1/2 packet worth of data trickles in
+  // while uploading that, another 1/2 packet worth of data trickles in
+  // that packet is not uploaded since the packet before was not full
+  //
+  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_post_events * (2 + 1 + 0.5));
+  BOOST_CHECK_EQUAL(mu.m_events.size() + SensorLog::max_post_events / 2,
+                    f.m_events.size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

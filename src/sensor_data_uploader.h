@@ -62,6 +62,7 @@ namespace dss {
     bool m_pending_upload;
     const std::string m_hubName;
     Uploader *m_uploader;
+    int m_upload_run;
   };
 
   class MSUploadWrapper : public SensorLog::Uploader {

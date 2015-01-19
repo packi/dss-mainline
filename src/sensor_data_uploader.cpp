@@ -50,20 +50,36 @@ void SensorLog::packet_append(std::vector<boost::shared_ptr<Event> > &events)
   events.erase(events.begin(), events.begin() + space);
 }
 
+/**
+ * @next -- send followup package
+ */
 void SensorLog::send_packet(bool next) {
   boost::mutex::scoped_lock lock(m_lock);
 
   if (next) {
+    m_upload_run += m_packet.size();
     m_packet.clear();
+  } else {
+    // not clear packet, might be retry
+    m_upload_run = 0;
+  }
+
+  if ((m_eventsHighPrio.empty() && m_events.empty() && m_packet.empty()) ||
+      ((m_events.size() < max_post_events) &&
+        (m_upload_run % max_post_events != 0) && next)) {
+    //
+    // prevent uploading forever due to sensor data trickle:
+    // last packet wasn't a full packet and not enough data to
+    // create a full packet. mind that the first packet of an
+    // upload run it is always uploaded
+    //
+    m_pending_upload = false;
+    return;
   }
 
   packet_append(m_eventsHighPrio);
   packet_append(m_events);
-
-  if (m_packet.empty()) {
-    m_pending_upload = false;
-    return;
-  }
+  assert(!m_packet.empty());
 
   lock.unlock(); // upload call might trigger callback immediately
   m_uploader->upload(m_packet.begin(), m_packet.end(), shared_from_this());
@@ -91,6 +107,10 @@ void SensorLog::triggerUpload() {
   boost::mutex::scoped_lock lock(m_lock);
 
   if (m_pending_upload) {
+    return;
+  }
+
+  if (m_packet.empty() && m_eventsHighPrio.empty() && m_events.empty()) {
     return;
   }
 
@@ -122,10 +142,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
 
   case REST_OK:
     if (reply.code) {
-      //
-      // the webservice has a dislikes our request,
-      // scream for HELP and continue.
-      //
+      // the webservice dislikes our request, scream for HELP and continue.
       log("[" + m_hubName + "] webservice problem: " + intToString(reply.code) +
           "/" + reply.desc, lsWarning);
       send_packet(true);
