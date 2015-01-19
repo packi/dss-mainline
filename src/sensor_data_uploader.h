@@ -33,11 +33,12 @@ namespace dss {
   class SensorLog : public WebserviceCallDone,
                     public boost::enable_shared_from_this<SensorLog> {
     __DECL_LOG_CHANNEL__
+  public:
     enum {
       max_post_events = 50,
       max_elements = 10000,
     };
-  public:
+
     typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 
     struct Uploader {
