@@ -263,7 +263,6 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
                _event.getName() == EventName::AddonToCloud) {
-      log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
       m_log->append(_event.getptr(), highPrio);
 
     } else if (_event.getName() == EventName::CallScene ||
@@ -281,7 +280,6 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
             return;
           }
         }
-        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
 
@@ -289,14 +287,12 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::OldStateChange) {
       std::string sName = _event.getPropertyByName("statename");
       if (sName == "holiday" || sName == "presence") {
-        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
 
     } else if (_event.getName() == EventName::AddonStateChange) {
       std::string sName = _event.getPropertyByName("scriptID");
       if (sName == "heating-controller") {
-        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
 
@@ -430,7 +426,6 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerState ||
                _event.getName() == EventName::AddonToCloud ||
                _event.getName() == EventName::ExecutionDenied) {
-      log(std::string(__func__) + " store event " + _event.getName(), lsDebug);
       m_log->append(_event.getptr(), highPrio);
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
@@ -447,7 +442,6 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
             return;
           }
         }
-        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
 
@@ -455,14 +449,12 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::OldStateChange) {
       std::string sName = _event.getPropertyByName("statename");
       if (sName == "holiday" || sName == "presence") {
-        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
 
     } else if (_event.getName() == EventName::AddonStateChange) {
       std::string sName = _event.getPropertyByName("scriptID");
       if (sName == "heating-controller") {
-        log(std::string(__func__) + " activity value " + _event.getName(), lsDebug);
         m_log->append(_event.getptr(), highPrio);
       }
 
