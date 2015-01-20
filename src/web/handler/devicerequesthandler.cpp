@@ -615,8 +615,82 @@ namespace dss {
       if((value  < 0) || (value > 255)) {
         return failure("Invalid or missing parameter 'modeID'");
       }
+
+      std::string action = "none";
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       pDevice->setDeviceOutputMode(value);
-      return success();
+      if (pDevice->getDeviceType() == DEVICE_TYPE_UMR) {
+        DeviceFeatures_t features = pDevice->getFeatures();
+        if (features.pairing == false) {
+          resultObj->addProperty("action", action);
+          DeviceReference dr(pDevice, &m_Apartment);
+          resultObj->addElement("device", toJSON(dr));
+          return success(resultObj);
+        }
+
+        dsuid_t next;
+        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
+        boost::shared_ptr<Device> pPartnerDevice;
+
+        try {
+          pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
+        } catch(ItemNotFoundException& e) {
+          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+        }
+
+        bool wasSlave = pPartnerDevice->is2WaySlave();
+        if (pDevice->multiDeviceIndex() == 2) {
+          // hide 4th dsid
+          if ((value == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+              (value == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+              (value == OUTPUT_MODE_THREE_STAGE_SWITCH)) {
+            if (wasSlave == false) {
+              action = "remove";
+            }
+
+            pPartnerDevice->setDeviceOutputMode(value);
+          } else {
+            if (wasSlave == true) {
+              action = "add";
+              pPartnerDevice->setDeviceOutputMode(value);
+              // wait to ensure the model has time to update
+              sleep(1);
+            }
+          }
+
+          resultObj->addProperty("action", action);
+          DeviceReference dr(pPartnerDevice, &m_Apartment);
+          resultObj->addElement("device", toJSON(dr));
+
+          StructureManipulator manipulator(*m_pStructureBusInterface,
+                                           *m_pStructureQueryBusInterface,
+                                            m_Apartment);
+
+          if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
+            if (m_pStructureBusInterface != NULL) {
+              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                        pDevice->getZoneID());
+              manipulator.addDeviceToZone(pPartnerDevice, zone);
+            }
+          }
+
+          // #3450 - remove slave devices from clusters
+          manipulator.deviceRemoveFromGroups(pPartnerDevice);
+
+          if ((pDevice->getJokerGroup() > 0) &&
+              (pPartnerDevice->getJokerGroup() > 0) &&
+              (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
+            if (m_pStructureBusInterface != NULL) {
+              pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+            }
+          }
+        } else {
+          resultObj->addProperty("action", action);
+          DeviceReference dr(pDevice, &m_Apartment);
+          resultObj->addElement("device", toJSON(dr));
+        }
+      }
+      return success(resultObj);
     } else if(_request.getMethod() == "setProgMode") {
       uint8_t modeId;
       std::string pmode = _request.getParameter("mode");
@@ -969,7 +1043,8 @@ namespace dss {
         return failure("Invalid or missing parameter 'mode'");
       }
 
-      if (pDevice->getDeviceType() != DEVICE_TYPE_AKM) {
+      if ((pDevice->getDeviceType() != DEVICE_TYPE_AKM) &&
+          (pDevice->getDeviceType() != DEVICE_TYPE_UMR)) {
         return failure("This device does not support AKM properties");
       }
 
@@ -1493,6 +1568,67 @@ namespace dss {
 
       device->setDeviceUMVRelayValue(strToInt(value));
       return success();
+    } else if (_request.getMethod() == "setBlinkConfig") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      int blinkCount = -1;
+      double onDelay = -1;
+      double offDelay = -1;
+
+      std::string value = _request.getParameter("count");
+
+      if (!value.empty()) {
+        blinkCount = strToIntDef(value, -1);
+        if ((blinkCount < 0) || (blinkCount > 255)) { //255/FCOUNT1 is max value
+          return failure("invalid count value given");
+        }
+      }
+
+      value = _request.getParameter("ondelay");
+      if (!value.empty()) {
+        onDelay = strToDouble(value);
+      }
+
+      value = _request.getParameter("offdelay");
+      if (!value.empty()) {
+        offDelay = strToDouble(value);
+      }
+
+      if (blinkCount != -1) {
+        device->setDeviceUMRBlinkRepetitions((uint8_t)blinkCount);
+      }
+
+      if (onDelay != -1) {
+        device->setDeviceUMROnDelay(onDelay);
+      }
+
+      if (offDelay != -1) {
+         device->setDeviceUMROffDelay(offDelay);
+      }
+      return success();
+    } else if (_request.getMethod() == "getBlinkConfig") {
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return failure("No device for given dsuid");
+      }
+
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      uint8_t umr_count;
+      double umr_ondelay;
+      double umr_offdelay;
+      device->getDeviceUMRDelaySettings(&umr_ondelay, &umr_offdelay, &umr_count);
+      resultObj->addProperty("count", umr_count);
+      resultObj->addProperty("ondelay", umr_ondelay);
+      resultObj->addProperty("offdelay", umr_offdelay);
+      return success(resultObj);
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

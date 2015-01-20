@@ -54,7 +54,7 @@ namespace dss {
     result->addProperty("dSUID", dsuid2str(_device.getDSID()));
     result->addProperty("GTIN", _device.getDevice()->getGTIN());
     result->addProperty("name", _device.getName());
-    result->addProperty("firstdSUID", _device.getDevice()->isFirstdSUID());
+    result->addProperty("dSUIDIndex", _device.getDevice()->multiDeviceIndex());
     result->addProperty("functionID", _device.getFunctionID());
     result->addProperty("productRevision", _device.getDevice()->getRevisionID());
     result->addProperty("productID", _device.getDevice()->getProductID());

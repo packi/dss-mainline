@@ -93,7 +93,10 @@ const int MF_AVAILABLE[] =
   mf_pwmvalue,
   mf_valvetype,
   mf_extradimmer,
-  mf_umvrelay
+  mf_umvrelay,
+  mf_blinkconfig,
+  mf_umroutmode,
+  mf_pushbsensor
 };
 
 // model features
@@ -483,11 +486,17 @@ const int MF_SW_UMR200[] =
   mf_leddark,
   mf_outvalue8,
   mf_pushbutton,
+  mf_pushbsensor,
   mf_pushbarea,
   mf_pushbadvanced,
   mf_highlevel,
   mf_jokerconfig,
-  mf_twowayconfig
+  mf_twowayconfig,
+  mf_akminput,
+  mf_akmsensor,
+  mf_akmdelay,
+  mf_blinkconfig,
+  mf_umroutmode
 };
 
 ModelFeatures* ModelFeatures::createInstance()
@@ -774,6 +783,12 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_extradimmer;
   } else if (_name == "umvrelay") {
     return mf_umvrelay;
+  } else if (_name == "blinkconfig") {
+    return mf_blinkconfig;
+  } else if (_name == "umroutmode") {
+    return mf_umroutmode;
+  } else if (_name == "pushbsensor") {
+    return mf_pushbsensor;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -849,6 +864,12 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "extradimmer";
     case mf_umvrelay:
       return "umvrelay";
+    case mf_blinkconfig:
+      return "blinkconfig";
+    case mf_umroutmode:
+      return "umroutmode";
+    case mf_pushbsensor:
+      return "pushbsensor";
     default:
       break;
   }

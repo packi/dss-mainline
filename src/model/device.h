@@ -77,6 +77,10 @@
 #define BUTTONINPUT_AKM_RISING_EDGE         "rising_edge"
 #define BUTTONINPUT_AKM_FALLING_EDGE        "falling_edge"
 
+// UMR output modes for pairing
+#define OUTPUT_MODE_TWO_STAGE_SWITCH        34
+#define OUTPUT_MODE_BIPOLAR_SWITCH          43
+#define OUTPUT_MODE_THREE_STAGE_SWITCH      38
 namespace dss {
 
   class Group;
@@ -356,7 +360,7 @@ namespace dss {
     DeviceClasses_t getDeviceClass() const;
     const DeviceFeatures_t getFeatures() const;
     std::string getAKMInputProperty() const;
-    bool isFirstdSUID() const;
+    int multiDeviceIndex() const;
 
     /** Configure scene configuration */
     void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
@@ -542,6 +546,7 @@ namespace dss {
     const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
 
+    void updateAKMNode();
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
@@ -574,7 +579,7 @@ namespace dss {
     void setButtonID(const int _value) { m_ButtonID = _value; }
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
-    void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
+    void setOutputMode(const uint8_t _value);
     void setButtonInputMode(const uint8_t _value);
     uint8_t getButtonInputMode() const { return m_ButtonInputMode; }
     void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }
@@ -694,6 +699,11 @@ namespace dss {
 
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);
+
+    void setDeviceUMRBlinkRepetitions(uint8_t _count);
+    void setDeviceUMROnDelay(double delay);
+    void setDeviceUMROffDelay(double delay);
+    void getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay, uint8_t *_count);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
