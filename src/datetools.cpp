@@ -391,6 +391,31 @@ namespace dss {
    * http://stackoverflow.com/questions/361363/how-to-measure-time-in-milliseconds-using-ansi-c
    * TODO: is ms really part of 8601
    */
+  std::string DateTime::toISO8601_ms_local() const {
+    struct tm tm;
+    char buf[sizeof "2011-10-08T07:07:09.000+02:00"];
+    char fmt[sizeof "2011-10-08T07:07:09.000+02:00"];
+
+    // http://stackoverflow.com/questions/1551597/using-strftime-in-c-how-can-i-format-time-exactly-like-a-unix-timestamp
+    localtime_r(&m_timeval.tv_sec, &tm);
+    strftime(fmt , sizeof fmt, "%FT%T.%%03u%z", &tm);
+    snprintf(buf, sizeof buf, fmt, m_timeval.tv_usec / 1000);
+
+    /* ensure there is a colon in time zone */
+    if (buf[26] != ':') {
+        buf[29] = '\0';
+        buf[28] = buf[27];
+        buf[27] = buf[26];
+        buf[26] = ':';
+    }
+    return std::string(buf);
+  }
+
+  /*
+   * 100 Hz machine has less than 10ms accuracy
+   * http://stackoverflow.com/questions/361363/how-to-measure-time-in-milliseconds-using-ansi-c
+   * TODO: is ms really part of 8601
+   */
   std::string DateTime::toISO8601_ms() const {
     struct tm tm;
     char buf[40], fmt[40];
