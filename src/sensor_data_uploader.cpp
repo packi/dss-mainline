@@ -32,40 +32,59 @@
 
 namespace dss {
 
-typedef std::vector<boost::shared_ptr<Event> >::iterator It;
-
-typedef void (*doUploadSensorDataFunction)(It begin, It end, WebserviceCallDone_t callback);
-
-
 /****************************************************************************/
 /* Sensor Log                                                               */
 /****************************************************************************/
 
-class SensorLog : public WebserviceCallDone,
-                  public boost::enable_shared_from_this<SensorLog> {
-  __DECL_LOG_CHANNEL__
-  enum {
-    max_post_events = 50,
-    max_elements = 10000,
-  };
-public:
-  SensorLog(const std::string hubName, doUploadSensorDataFunction doUpload)
-    : m_pending_upload(false), m_hubName(hubName), m_doUpload(doUpload) {};
-  virtual ~SensorLog() {};
-  void append(boost::shared_ptr<Event> event, bool highPrio = false);
-  void triggerUpload();
-  void done(RestTransferStatus_t status, WebserviceReply reply);
-private:
-  std::vector<boost::shared_ptr<Event> > m_events;
-  std::vector<boost::shared_ptr<Event> > m_eventsHighPrio;
-  std::vector<boost::shared_ptr<Event> > m_uploading;
-  boost::mutex m_lock;
-  bool m_pending_upload;
-  const std::string m_hubName;
-  doUploadSensorDataFunction m_doUpload;
-};
-
 __DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
+
+/**
+ * must hold m_lock when being calling
+ */
+void SensorLog::packet_append(std::vector<boost::shared_ptr<Event> > &events)
+{
+  // how much space left in the packet
+  size_t free = std::distance(m_packet.begin(), m_packet.end());
+  size_t space = std::min(events.size(), max_post_events - free);
+  m_packet.insert(m_packet.end(), events.begin(), events.begin() + space);
+  events.erase(events.begin(), events.begin() + space);
+}
+
+/**
+ * @next -- send followup package
+ */
+void SensorLog::send_packet(bool next) {
+  boost::mutex::scoped_lock lock(m_lock);
+
+  if (next) {
+    m_upload_run += m_packet.size();
+    m_packet.clear();
+  } else {
+    // not clear packet, might be retry
+    m_upload_run = 0;
+  }
+
+  if ((m_eventsHighPrio.empty() && m_events.empty() && m_packet.empty()) ||
+      ((m_events.size() < max_post_events) &&
+        (m_upload_run % max_post_events != 0) && next)) {
+    //
+    // prevent uploading forever due to sensor data trickle:
+    // last packet wasn't a full packet and not enough data to
+    // create a full packet. mind that the first packet of an
+    // upload run it is always uploaded
+    //
+    m_pending_upload = false;
+    return;
+  }
+
+  packet_append(m_eventsHighPrio);
+  packet_append(m_events);
+  assert(!m_packet.empty());
+
+  lock.unlock(); // upload call might trigger callback immediately
+  m_uploader->upload(m_packet.begin(), m_packet.end(), shared_from_this());
+}
+
 
 void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
   boost::mutex::scoped_lock lock(m_lock);
@@ -77,7 +96,7 @@ void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
     return;
   }
 
-  if (m_events.size() + m_uploading.size() > max_elements) {
+  if (m_events.size() + m_packet.size() > max_elements) {
     // MS-Hub will detect from jumps in sequence id
     return;
   }
@@ -91,73 +110,64 @@ void SensorLog::triggerUpload() {
     return;
   }
 
-  if (m_eventsHighPrio.size()) {
-    m_uploading.insert(m_uploading.end(), m_eventsHighPrio.begin(), m_eventsHighPrio.end());
-    m_eventsHighPrio.clear();
-  } else {
-    m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
-    m_events.clear();
-  }
-
-  if (m_uploading.empty()) {
+  if (m_packet.empty() && m_eventsHighPrio.empty() && m_events.empty()) {
     return;
   }
 
-  It chunk_start = m_uploading.begin();
-  It chunk_end = m_uploading.begin();
-
   m_pending_upload = true;
 
-  while (chunk_end != m_uploading.end()) {
-    size_t remainder = std::distance(chunk_start, m_uploading.end());
-    if (remainder > max_post_events) {
-      remainder = max_post_events;
-    }
-
-    chunk_end = chunk_start + remainder;
-    m_doUpload(chunk_start, chunk_end, shared_from_this());
-    if (chunk_end != m_uploading.end()) {
-      chunk_start = chunk_end;
-    }
-  }
+  lock.unlock();
+  send_packet();
 }
 
 void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
-  boost::mutex::scoped_lock lock(m_lock);
-
-  if (!status && !reply.code) {
-    m_uploading.clear();
-    m_pending_upload = false;
-  }
-
-  if (status) {
+  //
+  // MS-Hub, will detect jumps in sequence ID, when we throw away events
+  //
+  switch (status) {
+  case NETWORK_ERROR:
     // keep events in the upload queue, retry with next tick
-    log("[" + m_hubName + "] save event network problem: " + intToString(status), lsWarning);
-  } else if (reply.code) {
-    log("[" + m_hubName + "] save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
-        lsWarning);
-    m_uploading.clear();
-    // MS-Hub, will detect jumps in sequence ID
-  }
-  m_pending_upload = false;
+    log("[" + m_hubName + "] network problem", lsWarning);
+    {
+      boost::mutex::scoped_lock lock(m_lock);
+      m_pending_upload = false;
+    }
+    return;
 
-  // re-schedule the uploader for high prio events
-  if (m_eventsHighPrio.size()) {
-    lock.unlock();
-    triggerUpload();
+  case JSON_ERROR:
+    // well, retrying will probably not help...
+    log("[" + m_hubName + "] failed to parse webservice reply", lsWarning);
+    send_packet(true);
+    return;
+
+  case REST_OK:
+    if (reply.code) {
+      // the webservice dislikes our request, scream for HELP and continue.
+      log("[" + m_hubName + "] webservice problem: " + intToString(reply.code) +
+          "/" + reply.desc, lsWarning);
+      send_packet(true);
+    } else {
+      // the normal case
+      send_packet(true);
+    }
+    break;
   }
 }
-
 
 /****************************************************************************/
 /* Sensor Data Upload Ms Hub Plugin                                         */
 /****************************************************************************/
 
+void MSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
+                             WebserviceCallDone_t callback) {
+  WebserviceMsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
+};
+
 __DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
 
 SensorDataUploadMsHubPlugin::SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ms_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("mshub", WebserviceMsHub::doUploadSensorData<It>))
+    m_log(boost::make_shared<SensorLog>("mshub", &m_uploader))
 {
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
@@ -311,11 +321,16 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
 /* Sensor Data Upload dS Hub Plugin                                         */
 /****************************************************************************/
 
+void DSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
+                             WebserviceCallDone_t callback) {
+  WebserviceDsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
+};
+
 __DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);
 
 SensorDataUploadDsHubPlugin::SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ds_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("dshub", WebserviceDsHub::doUploadSensorData<It>))
+    m_log(boost::make_shared<SensorLog>("dshub", &m_uploader))
 {
   websvcEnabledNode =
     DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);

@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(parseModelChangeTest) {
 
 class WebserviceFixture {
 public:
-  WebserviceFixture() {
+  WebserviceFixture(const std::string &url, const std::string &token) {
 
     /* TODO clean this up */
     SystemInfo info;
@@ -68,10 +68,8 @@ public:
 
     /* switch from production to test webservice */
     PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-    propSystem.getProperty(pp_websvc_url_authority)
-      ->setStringValue(websvc_url_authority_test);
-    propSystem.createProperty(pp_websvc_rc_osptoken)
-      ->setStringValue(websvc_osp_token_test);
+    propSystem.getProperty(pp_websvc_url_authority)->setStringValue(url);
+    propSystem.createProperty(pp_websvc_rc_osptoken)->setStringValue(token);
 
     // TODO: webservice connection fetched original authority, restart it
     WebserviceConnection::shutdown();
@@ -81,6 +79,15 @@ public:
   }
 
   DSSLifeCycle m_dss_guard;
+};
+
+
+class WebserviceFixtureReal : public WebserviceFixture {
+public:
+  /* test instance but still real implementation */
+  WebserviceFixtureReal()
+    : WebserviceFixture(websvc_url_authority_test,
+                        websvc_osp_token_test) {}
 };
 
 class NotifyDone : public WebserviceCallDone {
@@ -106,7 +113,7 @@ private:
   boost::condition_variable &m_completion;
 };
 
-BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
+BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixtureReal) {
   boost::mutex mutex;
   boost::condition_variable completion;
 
@@ -123,7 +130,7 @@ BOOST_FIXTURE_TEST_CASE(test_notifyApartmentChange, WebserviceFixture) {
 }
 
 /* Access Management */
-BOOST_FIXTURE_TEST_CASE(test_revokeToken, WebserviceFixture) {
+BOOST_FIXTURE_TEST_CASE(test_revokeToken, WebserviceFixtureReal) {
   boost::mutex mutex;
   boost::condition_variable completion;
 
@@ -139,7 +146,7 @@ BOOST_FIXTURE_TEST_CASE(test_revokeToken, WebserviceFixture) {
   BOOST_CHECK_EQUAL(notifyDone->reply.code, 98); /* no access rights for token */
 }
 
-BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixture) {
+BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixtureReal) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
   // also starts event runner et. al
