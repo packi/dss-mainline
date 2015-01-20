@@ -332,39 +332,39 @@ namespace dss {
           }
 
           if (_request.hasParameter("ControlMode")) {
-            _request.getParameter("ControlMode", hConfig.ControllerMode);
+            (void) _request.getParameter("ControlMode", hConfig.ControllerMode);
           }
           if (_request.hasParameter("ReferenceZone")) {
-            _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
+            (void) _request.getParameter("ReferenceZone", hConfig.SourceZoneId);
           }
           if (_request.hasParameter("CtrlOffset")) {
             int offset;
-            _request.getParameter("CtrlOffset", offset);
+            (void) _request.getParameter("CtrlOffset", offset);
             hConfig.Offset = offset;
           }
           if (_request.hasParameter("EmergencyValue")) {
-            _request.getParameter("EmergencyValue", hConfig.EmergencyValue);
+            (void) _request.getParameter("EmergencyValue", hConfig.EmergencyValue);
             hConfig.EmergencyValue += 100;
           }
           if (_request.hasParameter("ManualValue")) {
-            _request.getParameter("ManualValue", hConfig.ManualValue);
+            (void) _request.getParameter("ManualValue", hConfig.ManualValue);
             hConfig.ManualValue += 100;
           }
           if (_request.hasParameter("CtrlYmin")) {
-            _request.getParameter("CtrlYmin", hConfig.Ymin);
+            (void) _request.getParameter("CtrlYmin", hConfig.Ymin);
             hConfig.Ymin += 100;
           }
           if (_request.hasParameter("CtrlYmax")) {
-            _request.getParameter("CtrlYmax", hConfig.Ymax);
+            (void) _request.getParameter("CtrlYmax", hConfig.Ymax);
             hConfig.Ymax += 100;
           }
           double tempDouble = 0;
           if (_request.getParameter("CtrlKp", tempDouble)) {
             hConfig.Kp = (uint16_t)tempDouble * 40;
           }
-          _request.getParameter("CtrlTi", hConfig.Ti);
-          _request.getParameter("CtrlTs", hConfig.Ts);
-          _request.getParameter("CtrlKd", hConfig.Kd);
+          (void) _request.getParameter("CtrlTi", hConfig.Ti);
+          (void) _request.getParameter("CtrlTs", hConfig.Ts);
+          (void) _request.getParameter("CtrlKd", hConfig.Kd);
           if (_request.getParameter("CtrlImin", tempDouble)) {
             hConfig.Imin = tempDouble * 40;
           }
