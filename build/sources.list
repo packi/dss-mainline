@@ -241,6 +241,7 @@ dsstests_SOURCES = \
 	$(top_srcdir)/tests/restfulapitests.cpp \
 	$(top_srcdir)/tests/scriptstest.cpp \
 	$(top_srcdir)/tests/securitytests.cpp \
+	$(top_srcdir)/tests/sensor_data_uploader.cpp \
 	$(top_srcdir)/tests/testrunner.cpp \
 	$(top_srcdir)/tests/webfixture.h \
 	$(top_srcdir)/tests/webserver.cpp \
