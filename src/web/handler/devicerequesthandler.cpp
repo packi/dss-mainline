@@ -1619,7 +1619,7 @@ namespace dss {
         return failure("No device for given dsuid");
       }
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       uint8_t umr_count;
       double umr_ondelay;
       double umr_offdelay;
