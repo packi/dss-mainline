@@ -709,7 +709,7 @@ namespace dss {
 #ifdef HAVE_SENDMAIL
     pthread_t pid;
     int err;
-    pthread_mutex_init(&m_Mutex, NULL);
+    (void) pthread_mutex_init(&m_Mutex, NULL);
     pthread_cond_init(&m_Condition, NULL);
     if ((err = pthread_create(&pid, NULL, EventInterpreterPluginSendmail::run, this)) < 0) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
@@ -837,7 +837,7 @@ namespace dss {
         std::string(mailText), lsDebug);
 
 #ifdef HAVE_SENDMAIL
-    pthread_mutex_lock(&m_Mutex);
+    (void) pthread_mutex_lock(&m_Mutex);
     m_MailFiles.push_back(mailText);
     pthread_cond_signal(&m_Condition);
     pthread_mutex_unlock(&m_Mutex);
@@ -857,7 +857,7 @@ namespace dss {
 
     while (1) {
 
-      pthread_mutex_lock(&me->m_Mutex);
+      (void) pthread_mutex_lock(&me->m_Mutex);
       while (me->m_MailFiles.size() == 0) {
         pthread_cond_wait(&me->m_Condition, &me->m_Mutex);
       }
