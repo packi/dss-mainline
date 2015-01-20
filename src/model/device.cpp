@@ -372,18 +372,21 @@ namespace dss {
     return m_ProductID;
   } // getProductID
 
+  void Device::updateAKMNode() {
+    if (((getDeviceType() == DEVICE_TYPE_AKM) || (getDeviceType() == DEVICE_TYPE_UMR)) && (m_pPropertyNode != NULL)) {
+      m_pPropertyNode->createProperty("AKMInputProperty")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
+    }
+
+  }
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
     if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
     updateIconPath();
-
-    if (((getDeviceType() == DEVICE_TYPE_AKM) || (getDeviceType() == DEVICE_TYPE_UMR)) && (m_pPropertyNode != NULL)) {
-        m_pPropertyNode->createProperty("AKMInputProperty")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
-    }
-  } // setProductID
+    updateAKMNode();
+    } // setProductID
 
   int Device::getRevisionID() const {
     return m_RevisionID;
@@ -1370,6 +1373,7 @@ namespace dss {
       removeFromPropertyTree();
     } else if (wasSlave && !is2WaySlave()) {
       publishToPropertyTree();
+      updateAKMNode();
     }
   }
 
@@ -1382,6 +1386,7 @@ namespace dss {
         removeFromPropertyTree();
       } else if (wasSlave) {
         publishToPropertyTree();
+        updateAKMNode();
       }
     }
   }

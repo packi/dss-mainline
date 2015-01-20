@@ -546,6 +546,7 @@ namespace dss {
     const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
 
+    void updateAKMNode();
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
