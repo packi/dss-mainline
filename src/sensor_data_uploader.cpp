@@ -41,35 +41,32 @@ __DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
 /**
  * must hold m_lock when being calling
  */
-SensorLog::It SensorLog::packet_end() {
-  size_t remainder = std::distance(m_uploading.begin(), m_uploading.end());
-  if (remainder > max_post_events) {
-    remainder = max_post_events;
-  }
-  return m_uploading.begin() + remainder;
+void SensorLog::packet_append(std::vector<boost::shared_ptr<Event> > &events)
+{
+  // how much space left in the packet
+  size_t free = std::distance(m_packet.begin(), m_packet.end());
+  size_t space = std::min(events.size(), max_post_events - free);
+  m_packet.insert(m_packet.end(), events.begin(), events.begin() + space);
+  events.erase(events.begin(), events.begin() + space);
 }
 
-void SensorLog::clear_packet() {
-  boost::mutex::scoped_lock lock(m_lock);
-  m_uploading.erase(m_uploading.begin(), packet_end());
-}
-
-void SensorLog::send_packet() {
+void SensorLog::send_packet(bool next) {
   boost::mutex::scoped_lock lock(m_lock);
 
-  if (m_eventsHighPrio.size()) {
-    m_uploading.insert(m_uploading.end(), m_eventsHighPrio.begin(),
-                       m_eventsHighPrio.end());
-    m_eventsHighPrio.clear();
+  if (next) {
+    m_packet.clear();
   }
 
-  if (m_uploading.empty()) {
+  packet_append(m_eventsHighPrio);
+  packet_append(m_events);
+
+  if (m_packet.empty()) {
     m_pending_upload = false;
     return;
   }
 
   lock.unlock(); // upload call might trigger callback immediately
-  m_uploader->upload(m_uploading.begin(), packet_end(), shared_from_this());
+  m_uploader->upload(m_packet.begin(), m_packet.end(), shared_from_this());
 }
 
 
@@ -83,7 +80,7 @@ void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
     return;
   }
 
-  if (m_events.size() + m_uploading.size() > max_elements) {
+  if (m_events.size() + m_packet.size() > max_elements) {
     // MS-Hub will detect from jumps in sequence id
     return;
   }
@@ -95,11 +92,6 @@ void SensorLog::triggerUpload() {
 
   if (m_pending_upload) {
     return;
-  }
-
-  if (m_events.size()) {
-    m_uploading.insert(m_uploading.end(), m_events.begin(), m_events.end());
-    m_events.clear();
   }
 
   m_pending_upload = true;
@@ -125,8 +117,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   case JSON_ERROR:
     // well, retrying will probably not help...
     log("[" + m_hubName + "] failed to parse webservice reply", lsWarning);
-    clear_packet();
-    send_packet();
+    send_packet(true);
     return;
 
   case REST_OK:
@@ -137,12 +128,10 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
       //
       log("[" + m_hubName + "] webservice problem: " + intToString(reply.code) +
           "/" + reply.desc, lsWarning);
-      clear_packet();
-      send_packet();
+      send_packet(true);
     } else {
       // the normal case
-      clear_packet();
-      send_packet();
+      send_packet(true);
     }
     break;
   }
