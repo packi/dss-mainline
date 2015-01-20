@@ -109,24 +109,42 @@ void SensorLog::triggerUpload() {
 }
 
 void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
-  boost::mutex::scoped_lock lock(m_lock);
-
-  if (!status && !reply.code) {
-    lock.unlock();
-    clear_packet();
-    send_packet();
-  }
-
-  if (status) {
+  //
+  // MS-Hub, will detect jumps in sequence ID, when we throw away events
+  //
+  switch (status) {
+  case NETWORK_ERROR:
     // keep events in the upload queue, retry with next tick
-    log("[" + m_hubName + "] save event network problem: " + intToString(status), lsWarning);
-  } else if (reply.code) {
-    log("[" + m_hubName + "] save event webservice problem: " + intToString(reply.code) + "/" + reply.desc,
-        lsWarning);
-    lock.unlock();
+    log("[" + m_hubName + "] network problem", lsWarning);
+    {
+      boost::mutex::scoped_lock lock(m_lock);
+      m_pending_upload = false;
+    }
+    return;
+
+  case JSON_ERROR:
+    // well, retrying will probably not help...
+    log("[" + m_hubName + "] failed to parse webservice reply", lsWarning);
     clear_packet();
     send_packet();
-    // MS-Hub, will detect jumps in sequence ID
+    return;
+
+  case REST_OK:
+    if (reply.code) {
+      //
+      // the webservice has a dislikes our request,
+      // scream for HELP and continue.
+      //
+      log("[" + m_hubName + "] webservice problem: " + intToString(reply.code) +
+          "/" + reply.desc, lsWarning);
+      clear_packet();
+      send_packet();
+    } else {
+      // the normal case
+      clear_packet();
+      send_packet();
+    }
+    break;
   }
 }
 
