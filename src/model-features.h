@@ -45,6 +45,7 @@ enum {
   mf_outvalue8,
   mf_pushbutton,
   mf_pushbdevice,
+  mf_pushbsensor,
   mf_pushbarea,
   mf_pushbadvanced,
   mf_pushbcombined,
@@ -67,7 +68,9 @@ enum {
   mf_pwmvalue,
   mf_valvetype,
   mf_extradimmer,
-  mf_umvrelay
+  mf_umvrelay,
+  mf_blinkconfig,
+  mf_umroutmode
 };
 
 class ModelFeatures

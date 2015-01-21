@@ -23,6 +23,7 @@
 #include "device.h"
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
 #include <digitalSTROM/dsuid/dsuid.h>
+#include <math.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -40,6 +41,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
   //================================================== Device
@@ -370,18 +372,21 @@ namespace dss {
     return m_ProductID;
   } // getProductID
 
+  void Device::updateAKMNode() {
+    if (((getDeviceType() == DEVICE_TYPE_AKM) || (getDeviceType() == DEVICE_TYPE_UMR)) && (m_pPropertyNode != NULL)) {
+      m_pPropertyNode->createProperty("AKMInputProperty")
+          ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
+    }
+
+  }
   void Device::setProductID(const int _value) {
     m_ProductID = _value;
     if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
     updateIconPath();
-
-    if ((getDeviceType() == DEVICE_TYPE_AKM) && (m_pPropertyNode != NULL)) {
-        m_pPropertyNode->createProperty("AKMInputProperty")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_AKMInputProperty, false));
-    }
-  } // setProductID
+    updateAKMNode();
+    } // setProductID
 
   int Device::getRevisionID() const {
     return m_RevisionID;
@@ -1368,6 +1373,21 @@ namespace dss {
       removeFromPropertyTree();
     } else if (wasSlave && !is2WaySlave()) {
       publishToPropertyTree();
+      updateAKMNode();
+    }
+  }
+
+  void Device::setOutputMode(const uint8_t _value) {
+    bool wasSlave = is2WaySlave();
+
+    m_OutputMode = _value;
+    if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
+      if (is2WaySlave()) {
+        removeFromPropertyTree();
+      } else if (wasSlave) {
+        publishToPropertyTree();
+        updateAKMNode();
+      }
     }
   }
 
@@ -1379,14 +1399,22 @@ namespace dss {
     bool ret = false;
 
     try {
-      ret = (getFeatures().pairing &&
-            ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
-             (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
-              IsEvenDsuid(m_DSID)))); // even dSID
+      if ((multiDeviceIndex() == 2) && (getDeviceType() == DEVICE_TYPE_UMR)) {
+        ret = (getFeatures().pairing &&
+               ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+                (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               IsEvenDsuid(m_DSID)); // even dSID
+      } else {
+        ret = (getFeatures().pairing &&
+              ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
+               (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
+                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
+                IsEvenDsuid(m_DSID)))); // even dSID
+      }
     } catch (std::runtime_error &err) {
       Logger::getInstance()->log(err.what());
     }
@@ -1397,17 +1425,26 @@ namespace dss {
   bool Device::is2WaySlave() const {
     bool ret = false;
 
-    if (!hasInput()) {
-      return ret;
+    if (!(multiDeviceIndex() == 3) && (getDeviceType() == DEVICE_TYPE_UMR)) {
+      if (!hasInput()) {
+        return ret;
+      }
     }
 
     try {
-      ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
-             (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
-             ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
-             !IsEvenDsuid(m_DSID))); // odd dSID
+      if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
+        ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               (!IsEvenDsuid(m_DSID)); // odd dSID
+      } else {
+        ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
+               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
+               ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
+               !IsEvenDsuid(m_DSID))); // odd dSID
+      }
     } catch (std::runtime_error &err) {
       Logger::getInstance()->log(err.what());
     }
@@ -1691,6 +1728,14 @@ namespace dss {
                this->hasMultibuttons() &&
                (m_ButtonInputIndex == 0)) {
       features.pairing = true;
+    } else if ((devCls == DEVICE_CLASS_SW) && (devType == DEVICE_TYPE_UMR) &&
+               (devNumber == 200)) {
+      if (multiDeviceIndex() == 0) {
+        features.pairing = true;
+        features.syncButtonID = true;
+      } else if (multiDeviceIndex() == 2) {
+        features.pairing = true;
+      }
     }
 
     if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL) &&
@@ -2360,6 +2405,56 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config, _value);
   }
 
+  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
+  }
+
+  void Device::setDeviceUMROnDelay(double _delay) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    _delay = _delay * 1000.0; // convert from seconds to ms
+
+    if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
+      throw std::runtime_error("invalid delay value");
+    }
+    uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
+  }
+
+  void Device::setDeviceUMROffDelay(double _delay) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    _delay = _delay * 1000.0; // convert from seconds to ms
+
+    if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
+      throw std::runtime_error("invalid delay value");
+    }
+    uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
+  }
+
+  void Device::getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay,
+                                         uint8_t  *_count) {
+    if (getDeviceType() != DEVICE_TYPE_UMR) {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
+
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
+    *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
+    *_count = (uint8_t)(value >> 8) & 0xff;
+
+    uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+    *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
+  }
+
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
     : m_device(device) {
       if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {
@@ -2441,21 +2536,36 @@ namespace dss {
     return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
   }
 
-  // TODO: extend for all devices, for now only handle GE-UMV200
-  bool Device::isFirstdSUID() const
-  {
+  int Device::multiDeviceIndex() const {
+    uint8_t deviceCount = 1;
+    uint8_t deviceIndex = 0;
     if ((getDeviceType() == DEVICE_TYPE_UMV) && (getDeviceNumber() == 200) &&
         (getDeviceClass() == DEVICE_CLASS_GE)) {
-      uint32_t serial = 0;
-      if (dsuid_get_serial_number(&m_DSID, &serial) == DSUID_RC_OK) {
-        if ((serial % 4) == 0) {
-          return true;
-        } else {
-          return false;
-        }
+      deviceCount = 4;
+    } else if ((getDeviceType() == DEVICE_TYPE_UMR) &&
+               (getDeviceNumber() == 200) &&
+               (getDeviceClass() == DEVICE_CLASS_SW)) {
+      deviceCount = 4;
+    } else if ((m_FunctionID & 0xffc0) == 0x1000) {
+      switch (m_FunctionID & 0x7) {
+        case 0: deviceCount = 1; break;
+        case 1: deviceCount = 2; break;
+        case 2: deviceCount = 4; break;
+        case 7: deviceCount = 1; break;
+      }
+    } else if ((m_FunctionID & 0x0fc0) == 0x0100) {
+      switch (m_FunctionID & 0x3) {
+        case 0: deviceCount = 1; break;
+        case 1: deviceCount = 1; break;
+        case 2: deviceCount = 2; break;
+        case 3: deviceCount = 4; break;
       }
     }
 
-    return true;
+    uint32_t serial;
+    if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
+      deviceIndex = (uint8_t)(serial & 0xff) % deviceCount;
+    }
+    return deviceIndex;
   }
 } // namespace dss

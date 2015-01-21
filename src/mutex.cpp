@@ -26,7 +26,7 @@ namespace dss {
 
 Mutex::Mutex() {
 #ifndef WIN32
-  pthread_mutex_init( &m_Mutex, NULL );
+  (void) pthread_mutex_init( &m_Mutex, NULL );
 #else
   m_Mutex = CreateMutex( NULL, false, NULL );
 #endif

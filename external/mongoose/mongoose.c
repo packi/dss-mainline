@@ -3611,7 +3611,7 @@ static int set_ssl_option(struct mg_context *ctx) {
   }
 
   for (i = 0; i < CRYPTO_num_locks(); i++) {
-    pthread_mutex_init(&ssl_mutexes[i], NULL);
+    (void) pthread_mutex_init(&ssl_mutexes[i], NULL);
   }
 
   CRYPTO_set_locking_callback(&ssl_locking_callback);

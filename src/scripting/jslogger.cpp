@@ -196,7 +196,7 @@ namespace dss {
     if (m_f) {
       DateTime timestamp = DateTime();
 
-      std::string out = "[" + timestamp.toString() + "] " + text;
+      std::string out = "[" + timestamp.toISO8601_ms_local() + "] " + text;
       m_LogWriteMutex.lock();
       size_t written = fwrite(out.c_str(), 1, out.size(), m_f);
       fflush(m_f);

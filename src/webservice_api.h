@@ -76,6 +76,12 @@ public:
   static void doNotifyTokenDeleted(const std::string &token,
                                    WebserviceCallDone_t callback);
 
+  /**
+   * Pull online weather information.
+   * @callback: provides network and server status
+   */
+  static void doGetWeatherInformation(boost::shared_ptr<URLRequestCallback> callback);
+
   template <class iterator>
   static void doUploadSensorData(iterator begin, iterator end,
                                  WebserviceCallDone_t callback);

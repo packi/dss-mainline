@@ -267,7 +267,7 @@ namespace dss {
     static int ct = 0;
 
     ct++;
-    log(std::string(__func__) + " " + _event.getName() + " " + intToString(ct), lsInfo);
+    log(std::string(__func__) + " " + _event.getName() + " " + intToString(ct), lsDebug);
     BenchmarkAccumulator::instance()->upload();
   }
 

@@ -375,6 +375,21 @@ void WebserviceMsHub::doNotifyTokenDeleted(const std::string &token,
   WebserviceConnection::getInstanceMsHub()->request(url, params, POST, cont, false);
 }
 
+void WebserviceMsHub::doGetWeatherInformation(boost::shared_ptr<URLRequestCallback> callback) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+  std::string params;
+
+  if (!WebserviceMsHub::isAuthorized()) {
+    return;
+  }
+
+  url += "public/dss/v1_0/DSSApartment/GetWeatherInformation";
+  params = "dssid=" + propSystem.getStringValue(pp_sysinfo_dsid);
+
+  WebserviceConnection::getInstanceMsHub()->request(url, params, GET, callback, false);
+}
+
 WebserviceReply WebserviceMsHub::parseReply(const char* buf) {
   WebserviceReply resp;
   bool return_code_seen = false;
@@ -477,6 +492,7 @@ int getRandomUUID(std::string &str)
     str = std::string(cstr);
 
     free(cstr);
+    uuid_destroy(uuid);
     return 0;
 }
 

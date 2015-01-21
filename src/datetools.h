@@ -179,6 +179,25 @@ namespace dss {
      * TODO probably non-standard:
      * - rfc3339 has 100 ms digit precision
      * - ISO8601 seems seconds only precision(spec is 140$)
+     *
+     * Various versions are floating around for the timezone
+     * format: e.g. 02:00, 0200, 02 and not all entities
+     * accept all formats
+     * We emit it as '+hh:mm' since that is the format
+     * mentioned in the public rfc3339 specification[2]
+     * It's recomended to emit the time in UTC where no
+     * timezone needs to be appended
+     */
+    std::string toISO8601_ms_local() const;
+
+    /**
+     * Emit ISO8601 or RFC3339 with ms precision
+     * http://www.cl.cam.ac.uk/~mgk25/iso-time.html
+     * http://www.cs.tut.fi/~jkorpela/iso8601.html
+     * http://www.ietf.org/rfc/rfc3339.txt
+     * TODO probably non-standard:
+     * - rfc3339 has 100 ms digit precision
+     * - ISO8601 seems seconds only precision(spec is 140$)
      */
     std::string toISO8601_ms() const;
 
