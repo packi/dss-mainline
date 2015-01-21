@@ -1,5 +1,17 @@
 dSS - digitalSTROM Server
 
+v1.30.0	21.01.2015
+	* add scripting methods for zone sensor assignment and weather
+	  status, #7701
+	* fix readout of bus members, #8530
+	* fix OEM web query, #8688
+	* add dShub support, #8065
+	* upload events to dShub, #8421
+	* various fixes for problems found by coverity scan
+	* periodically pull local weather information, #8926, #7701
+	* avoid active assignment of device to wrong meter, #8916
+	* delete a meter that reports the same dSUID as the dSS has, #8977
+
 v1.29.3	09.12.2014
 	* filter temperature control group scene calls, #8506
 	* fix missing GE-TKM220/230 model features, #8525
