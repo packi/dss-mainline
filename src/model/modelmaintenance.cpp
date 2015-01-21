@@ -227,6 +227,16 @@ namespace dss {
         std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
         foreach (DSMeterSpec_t& spec, meters) {
 
+          std::string ownDSUID;
+          PropertySystem* pPropSystem = m_pApartment->getPropertySystem();
+          if (pPropSystem) {
+            ownDSUID = pPropSystem->getStringValue(pp_sysinfo_dsuid);
+          }
+
+          if (dsuid2str(spec.DSID) == ownDSUID) {
+             continue;
+          }
+
           boost::shared_ptr<DSMeter> dsMeter;
           try{
              dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
