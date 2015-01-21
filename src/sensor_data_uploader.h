@@ -46,7 +46,8 @@ namespace dss {
     };
 
     SensorLog(const std::string hubName, Uploader *uploader)
-      : m_pending_upload(false), m_hubName(hubName), m_uploader(uploader) {};
+      : m_pending_upload(false), m_hubName(hubName), m_uploader(uploader),
+        m_upload_run(0) {}
     virtual ~SensorLog() {};
     void append(boost::shared_ptr<Event> event, bool highPrio = false);
     void triggerUpload();
