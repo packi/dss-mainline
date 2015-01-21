@@ -87,7 +87,7 @@ void setupCommonProperties(PropertySystem &propSystem) {
     ->setStringValue("public/accessmanagement/v1_0/RemoteConnectivity/DeleteApplicationToken");
 
   propSystem.createProperty(pp_websvc_dshub_url)
-    ->setStringValue("https://prd-tibco.cloudapp.net:41402/");
+    ->setStringValue("https://public.api.digitalstrom.com:41402/");
 }
 
 }
