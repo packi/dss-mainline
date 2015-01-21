@@ -315,6 +315,15 @@ namespace dss {
         return;
       }
     }
+    std::string ownDSUID;
+    PropertySystem* pPropSystem = m_Apartment.getPropertySystem();
+    if (pPropSystem) {
+      ownDSUID = pPropSystem->getStringValue(pp_sysinfo_dsuid);
+    }
+
+    if (dsuid2str(dsuid) == ownDSUID) {
+      return;
+    }
     m_tempMeter = m_Apartment.allocateDSMeter(dsuid);
   }
 
