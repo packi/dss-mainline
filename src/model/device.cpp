@@ -20,6 +20,8 @@
 
 */
 
+#include <unistd.h>
+
 #include "device.h"
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
 #include <digitalSTROM/dsuid/dsuid.h>
@@ -546,6 +548,7 @@ namespace dss {
         ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged,
                                                     m_DSMeterDSID);
         pEvent->addParameter(m_ShortAddress);
+        sleep(3); // #8900: make sure all settings were really saved
         m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
       }
     }
