@@ -93,11 +93,11 @@ namespace dss {
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result = getDeviceByDSID(_request);
-    if(result == NULL) {
+    if (result == NULL) {
       result = getDeviceByName(_request);
-    }
-    if(result == NULL) {
-      throw DeviceNotFoundException("Need parameter name or dsid to identify device");
+      if (result == NULL) {
+        throw DeviceNotFoundException("Need parameter name or dsuid to identify device");
+      }
     }
     return result;
   } // getDeviceFromRequest
@@ -106,17 +106,14 @@ namespace dss {
     boost::shared_ptr<Device> result;
     std::string dsidStr = _request.getParameter("dsid");
     std::string dsuidStr = _request.getParameter("dsuid");
-    if (dsidStr.empty() && dsuidStr.empty()) {
-      throw std::runtime_error("missing parameter 'dsuid'");
-    }
-
-    dsuid_t dsuid = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
-
-    try {
-      result = m_Apartment.getDeviceByDSID(dsuid);
-    } catch(std::runtime_error& e) {
-      throw DeviceNotFoundException("Could not find device with dsuid '" +
-                                    dsuid2str(dsuid) + "'");
+    if (dsuidStr.length() || dsidStr.length()) {
+      dsuid_t dsuid = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
+      try {
+        result = m_Apartment.getDeviceByDSID(dsuid);
+      } catch(std::runtime_error& e) {
+        throw DeviceNotFoundException("Could not find device with dsuid '" +
+            dsuid2str(dsuid) + "'");
+      }
     }
     return result;
   } // getDeviceByDSID
