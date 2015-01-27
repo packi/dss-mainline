@@ -30,6 +30,7 @@
 #include "src/model/apartment.h"
 #include "src/model/device.h"
 #include "src/model/group.h"
+#include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
 #include "src/structuremanipulator.h"
@@ -119,15 +120,45 @@ namespace dss {
   } // getDeviceByDSID
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByName(const RestfulRequest& _request) {
+
+    class DeviceNameFilter : public IDeviceAction {
+    private:
+      std::string m_name;
+      std::vector<boost::shared_ptr<Device> > m_devs;
+    public:
+      DeviceNameFilter(std::string _name) : m_name(_name) {}
+      virtual ~DeviceNameFilter() {}
+      virtual bool perform(boost::shared_ptr<Device> _device) {
+        if (_device->getName() == m_name) {
+          m_devs.push_back(_device);
+        }
+        return true;
+      }
+      std::vector<boost::shared_ptr<Device> > getDeviceList() {
+        return m_devs;
+      }
+    };
+
     boost::shared_ptr<Device> result;
     std::string deviceName = _request.getParameter("name");
     if (deviceName.empty()) {
       return result;
     }
     try {
-      result = m_Apartment.getDeviceByName(deviceName);
+      DeviceNameFilter mFilter(deviceName);
+      Set mDevices = m_Apartment.getDevices();
+      mDevices.perform(mFilter);
+      if (mFilter.getDeviceList().size() > 1) {
+        throw DeviceNotFoundException("Multiple devices with name '" + deviceName + "'");
+      } else if (mFilter.getDeviceList().size() == 0) {
+        throw DeviceNotFoundException("Could not find device named '" + deviceName + "'");
+      } else {
+        result = mFilter.getDeviceList().at(0);
+      }
+    } catch(DeviceNotFoundException&  e) {
+      throw;
     } catch(std::runtime_error&  e) {
-      throw DeviceNotFoundException("Could not find device named '" + deviceName + "'");
+      throw DeviceNotFoundException("Error selecting device named '" + deviceName + "': " + e.what());
     }
     return result;
   } // getDeviceByName
