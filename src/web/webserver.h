@@ -72,6 +72,10 @@ namespace dss {
                       RestfulRequest &request,
                       const std::string &trustedSetCookie,
                       boost::shared_ptr<Session> _session);
+    void *logDownloadHandler(struct mg_connection* _connection,
+                             RestfulRequest &request,
+                             const std::string &trustedSetCookie,
+                             boost::shared_ptr<Session> _session);
     static void *httpRequestCallback(enum mg_event event, 
                                      struct mg_connection* _connection,
                                      const struct mg_request_info* _info);
