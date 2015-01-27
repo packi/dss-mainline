@@ -106,8 +106,9 @@ fi
 
 fetch_trusted()
 {
-  WGET_CMD="${WGET_CMD} --header Authorization:username=\"${USER}\""
-  ${WGET_CMD} ${PROT}://${SERVER}${QUERY} -O ${OUTPUT}
+  # http://stackoverflow.com/questions/18063679/setting-wget-header-in-bash-doesnt-work
+  AUTH_HEADER="--header=Authorization: Digest username=\"${USER}\""
+  ${WGET_CMD} "${AUTH_HEADER}" ${PROT}://${SERVER}${QUERY} -O ${OUTPUT}
 }
 
 fetch_with_login()
