@@ -387,6 +387,7 @@ void SensorDataUploadDsHubPlugin::subscribe() {
   events.push_back(EventName::UploadDsHubEventLog);
   events.push_back(EventName::OldStateChange);
   events.push_back(EventName::AddonToCloud);
+  events.push_back(EventName::LogFileData);
 
   foreach (std::string name, events) {
     subscription.reset(new EventSubscription(name, getName(),
@@ -440,7 +441,8 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
                _event.getName() == EventName::AddonToCloud ||
-               _event.getName() == EventName::ExecutionDenied) {
+               _event.getName() == EventName::ExecutionDenied ||
+               _event.getName() == EventName::LogFileData) {
       m_log->append(_event.getptr(), highPrio);
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
