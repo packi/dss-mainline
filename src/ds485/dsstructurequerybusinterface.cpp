@@ -23,6 +23,7 @@
 #include "dsstructurequerybusinterface.h"
 
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
+#include <digitalSTROM/ds485-client-interface.h>
 
 #include "src/logger.h"
 
@@ -60,7 +61,17 @@ namespace dss {
       if (IsEqualDsuid(ownId, device_list[i])) {
         continue;
       }
-      result.push_back(getDSMeterSpec(device_list[i]));
+      try {
+        result.push_back(getDSMeterSpec(device_list[i]));
+      } catch (BusApiError& err) {
+        if (err.error == ERROR_RESPONSE_TIMEOUT) {
+          Logger::getInstance()->log("DSStructureQueryBusInterface::"
+                                     "getDSMeters: ignore response timeout of " +
+                                     dsuid2str(device_list[i]), lsDebug);
+          continue;
+        }
+        throw; // rethrow exception
+      }
     }
     return result;
   } // getDSMeters
