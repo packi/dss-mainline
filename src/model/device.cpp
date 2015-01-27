@@ -1408,7 +1408,7 @@ namespace dss {
                 (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
                 (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
                IsEvenDsuid(m_DSID)); // even dSID
-      } else {
+      } else if (hasInput()) {
         ret = (getFeatures().pairing &&
               ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
@@ -1440,7 +1440,7 @@ namespace dss {
                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
                (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
                (!IsEvenDsuid(m_DSID)); // odd dSID
-      } else {
+      } else if (hasInput()) {
         ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
