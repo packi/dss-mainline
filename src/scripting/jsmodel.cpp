@@ -97,9 +97,7 @@ namespace dss {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       if(ext != NULL && argc >= 1) {
-        StringConverter st("UTF-8", "UTF-8");
-        std::string aptName = st.convert(
-                               ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+        std::string aptName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
         aptName = escapeHTML(aptName);
 
         ext->getApartment().setName(aptName);

@@ -146,10 +146,8 @@ namespace dss {
           return success(resultObj);
         } else if(_request.getMethod() == "setName") {
           if (_request.hasParameter("newName")) {
-
-            std::string newName = st.convert(_request.getParameter("newName"));
+            std::string newName = _request.getParameter("newName");
             newName = escapeHTML(newName);
-
             pZone->setName(newName);
           } else {
             return failure("missing parameter 'newName'");
