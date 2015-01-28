@@ -36,6 +36,9 @@
 #include "foreach.h"
 #include <limits>
 
+#include "logger.h"
+#include "stringconverter.h"
+
 namespace dss {
 
   //============================================= std::string parsing/formatting/conversion
@@ -491,9 +494,21 @@ namespace dss {
   /* Escape reserved characters in XML
    * inspired by http://mediatomb.svn.sourceforge.net/viewvc/mediatomb/trunk/mediatomb/src/mxml/node.cc
    * and http://pugixml.googlecode.com/svn/tags/latest/src/pugixml.cpp
+   *
+   * if string is not valid UTF-8 reset to "" (empty)
    */
   std::string XMLStringEscape(const std::string& str) {
     std::stringstream sstream;
+
+    StringConverter st("UTF-8", "UTF-8");
+    try {
+      st.convert(str);
+    } catch (DSSException &ex) {
+      Logger::getInstance()->log("cleared out invalid UTF-8 string " + str,
+                                 lsWarning);
+      return "";
+    }
+
     signed char *ptr = (signed char *)str.c_str();
     while (ptr && *ptr)
     {
