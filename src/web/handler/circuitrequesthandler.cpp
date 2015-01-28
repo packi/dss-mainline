@@ -68,9 +68,7 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
         if(_request.hasParameter("newName")) {
-          StringConverter st("UTF-8", "UTF-8");
           std::string nameStr = _request.getParameter("newName");
-          nameStr = st.convert(nameStr);
           nameStr = escapeHTML(nameStr);
           dsMeter->setName(nameStr);
           if (m_pStructureBusInterface != NULL) {
