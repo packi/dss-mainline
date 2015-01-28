@@ -725,7 +725,8 @@ namespace dss {
     }
   }
 
-  void ModelPersistence::readConfigurationFromXML(const std::string& _fileName) {
+  void ModelPersistence::readConfigurationFromXML(const std::string& _fileName,
+                                                  const std::string& _backup) {
     m_ignore = false;
     m_expectString = false;
     m_level = 0;
@@ -741,8 +742,13 @@ namespace dss {
 
     bool ret = parseFile(_fileName);
     if (!ret) {
-      throw std::runtime_error("ModelPersistence::readConfigurationFromXML: "
-                               "Parse error in Model configuration");
+      Logger::getInstance()->log("apartment.xml is invalid, will backup up to "
+                                 + _backup, lsError);
+      ret = rename(_fileName.c_str(), _backup.c_str());
+      if (ret < 0) {
+        Logger::getInstance()->log("failed to write file " +
+                                   _backup, lsWarning);
+      }
     }
     if (m_Apartment.getName().empty()) {
       m_Apartment.setName("dSS");

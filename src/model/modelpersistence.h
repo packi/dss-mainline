@@ -46,7 +46,8 @@ namespace dss {
     ModelPersistence(Apartment& _apartment);
     virtual ~ModelPersistence();
 
-    void readConfigurationFromXML(const std::string& _fileName);
+    void readConfigurationFromXML(const std::string& _fileName,
+                                  const std::string& _backup);
     void writeConfigurationToXML(const std::string& _fileName);
   private:
     Apartment& m_Apartment;
