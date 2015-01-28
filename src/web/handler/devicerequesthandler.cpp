@@ -768,8 +768,8 @@ namespace dss {
             return failure("Unsupported type parameter for this device");
           }
         }
-        // Supported output states for the GR-KL220
-        else if ((pDevice->getProductID() == ProductID_KL_220) &&
+        // Supported output states for the GR-KL220/GR-KL230
+        else if (((pDevice->getProductID() == ProductID_KL_220) || (pDevice->getProductID() == ProductID_KL_230)) &&
             (pDevice->getDeviceClass() == DEVICE_CLASS_GR)) {
           if (type == "position") {
             value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);
