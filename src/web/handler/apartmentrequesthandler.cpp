@@ -207,10 +207,7 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
         if (_request.hasParameter("newName")) {
-          StringConverter st("UTF-8", "UTF-8");
-          std::string newName = st.convert(_request.getParameter("newName"));
-          newName = escapeHTML(newName);
-
+          std::string newName = escapeHTML(_request.getParameter("newName"));
           m_Apartment.setName(newName);
           DSS::getInstance()->getBonjourHandler().restart();
         } else {
