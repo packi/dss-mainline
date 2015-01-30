@@ -42,6 +42,7 @@ const char *KM200 =     "KM:200";
 const char *KM2 =       "KM:2"; // wildcard for all KM-2*
 const char *KL200 =     "KL:200";
 const char *KL220 =     "KL:220";
+const char *KL230 =     "KL:230";
 const char *KL2 =       "KL:2"; // wildcard for all KL-2*
 const char *TKM210 =    "TKM:210";
 const char *TKM200 =    "TKM:200";
@@ -343,6 +344,17 @@ const int MF_GR_KL220[] =
   mf_shadebladeang
 };
 
+const int MF_GR_KL230[] =
+{
+  mf_dontcare,
+  mf_blink,
+  mf_ledauto,
+  mf_shadeprops,
+  mf_shadeposition,
+  mf_motiontimefins,
+  mf_shadebladeang
+};
+
 const int MF_GR_KL2[] =
 {
   mf_dontcare,
@@ -610,6 +622,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_GR_KL220, MF_ARRAY_SIZE(MF_GR_KL220));
   setFeatures(ColorIDGray, KL220, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_GR_KL230, MF_ARRAY_SIZE(MF_GR_KL230));
+  setFeatures(ColorIDGray, KL230, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
