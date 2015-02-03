@@ -196,29 +196,7 @@ static const long WEEK_IN_SECS = 604800;
       log("RRD MatchCount: " + intToString(rrdMatchCount));
 
       if (rrdMatchCount != (2 + _pChain->size())) {
-        log("Creating new RRD database.", lsWarning);
-        /* create new DB */
-        std::vector<std::string> lines;
-        lines.push_back("DS:power:GAUGE:5:0:40000");
-        lines.push_back("DS:energy:DERIVE:5:0:U");
-        MeteringConfigChain *chain = _pChain.get();
-        for (int i = 0; i < chain->size(); ++i) {
-          std::stringstream sstream;
-          sstream << "RRA:AVERAGE:0.5:" << chain->getResolution(i) << ":" << chain->getNumberOfValues(i);
-          lines.push_back(sstream.str());
-        }
-
-        std::vector<const char*> starts;
-        std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-        const char** argString = &starts.front();
-
-        DateTime iCurrentTimeStamp;
-        rrd_clear_error();
-        int result = rrd_create_r(fileName.c_str(),
-                                  1,
-                                  iCurrentTimeStamp.secondsSinceEpoch() - 10,
-                                  starts.size(),
-                                  argString);
+        int result = createDB(fileName, _pChain);
         if (result < 0) {
           log(rrd_get_error(), lsError);
           boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
@@ -280,6 +258,42 @@ static const long WEEK_IN_SECS = 604800;
     }
     m_ValuesMutex.unlock();
   } // postMeteringEvent
+
+  int Metering::createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain)
+  {
+    log("Creating new RRD database.", lsWarning);
+
+    /* create new DB */
+    std::vector<std::string> lines;
+    lines.push_back("DS:power:GAUGE:5:0:40000");
+    lines.push_back("DS:energy:DERIVE:5:0:U");
+
+    MeteringConfigChain *chain = _pChain.get();
+    for (int i = 0; i < chain->size(); ++i) {
+      std::stringstream sstream;
+      sstream << "RRA:AVERAGE:0.5:" << chain->getResolution(i) << ":" << chain->getNumberOfValues(i);
+      lines.push_back(sstream.str());
+    }
+
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    const char** argString = &starts.front();
+
+    DateTime iCurrentTimeStamp;
+    time_t currentInSecs = iCurrentTimeStamp.secondsSinceEpoch();
+    if (currentInSecs > 10) {
+      currentInSecs -= 10;
+    }
+
+    rrd_clear_error();
+    int result = rrd_create_r(_filename.c_str(),
+                              1,
+                              currentInSecs,
+                              starts.size(),
+                              argString);
+
+    return result;
+  }
 
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
     m_ValuesMutex.lock();
