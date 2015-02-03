@@ -16,8 +16,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(SensorDataUploaderTest)
 
 struct EventFactory {
-  void emit_events(boost::shared_ptr<SensorLog> s, int count,
-                   bool auto_flush = true)
+  void emit_events(boost::shared_ptr<SensorLog> s, int count)
   {
     while (count--) {
       boost::shared_ptr<Event> event =
@@ -26,14 +25,6 @@ struct EventFactory {
 
       m_events.push_back(event);
       s->append(event, false);
-
-      if (auto_flush && (m_events.size() % SensorLog::max_elements == 0)) {
-        s->triggerUpload();
-      }
-    }
-
-    if (auto_flush) {
-      s->triggerUpload();
     }
   }
 
@@ -90,6 +81,7 @@ BOOST_AUTO_TEST_CASE(test_upload_10k_events) {
     boost::make_shared<SensorLog>("unit-test", &mu);
 
   f.emit_events(s, 10 * 1000);
+  s->triggerUpload();
 
   // received all events
   BOOST_CHECK_EQUAL(mu.m_events.size(), f.m_events.size());
@@ -110,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_upload_network_failure) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, SensorLog::max_elements, false);
+  f.emit_events(s, SensorLog::max_elements);
   s->triggerUpload();
 
   //
@@ -140,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_upload_reply_parse_error) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, 3 * SensorLog::max_post_events, false);
+  f.emit_events(s, 3 * SensorLog::max_post_events);
   s->triggerUpload();
 
   //
@@ -164,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_upload_ws_complains) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, 3 * SensorLog::max_post_events, false);
+  f.emit_events(s, 3 * SensorLog::max_post_events);
   s->triggerUpload();
 
   //
@@ -184,9 +176,9 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle) {
     boost::make_shared<SensorLog>("unit-test", &mu);
 
   // whenever a packet is sent, a new sensor value arrives
-  mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s, 1,
-                                       false));
-  f.emit_events(s, SensorLog::max_post_events, true);
+  mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s, 1));
+  f.emit_events(s, SensorLog::max_post_events);
+  s->triggerUpload();
 
   //
   // uploaded a full packet and one packet containing only 1 event
@@ -206,9 +198,9 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle2) {
 
   // whenever a packet is sent, a new sensor value arrives
   mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s,
-                                       SensorLog::max_post_events / 2,
-                                       false));
-  f.emit_events(s, 2 * SensorLog::max_post_events, true);
+                                       SensorLog::max_post_events / 2));
+  f.emit_events(s, 2 * SensorLog::max_post_events);
+  s->triggerUpload();
 
   //
   // while the first 2 full packet are uploaded, another packet trickles in
