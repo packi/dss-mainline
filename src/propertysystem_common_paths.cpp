@@ -18,9 +18,11 @@
 
 */
 
-#include "propertysystem_common_paths.h"
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
 
-#include "config.h"
+#include "propertysystem_common_paths.h"
 
 #ifdef HAVE_BUILD_INFO_H
   #include "build_info.h"

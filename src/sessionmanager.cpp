@@ -21,11 +21,11 @@
 
 */
 
-#include "sessionmanager.h"
-
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
+
+#include "sessionmanager.h"
 
 #ifdef HAVE_BUILD_INFO_H
   #include "build_info.h"

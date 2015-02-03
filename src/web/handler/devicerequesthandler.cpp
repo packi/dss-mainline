@@ -21,6 +21,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "devicerequesthandler.h"
 
 #include <boost/bind.hpp>

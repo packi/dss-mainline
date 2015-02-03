@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "dsstructurequerybusinterface.h"
 
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>

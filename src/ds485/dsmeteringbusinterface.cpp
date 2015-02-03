@@ -20,6 +20,10 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "dsmeteringbusinterface.h"
 
 #include "src/dsidhelper.h"
