@@ -16,15 +16,28 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(SensorDataUploaderTest)
 
 struct EventFactory {
-  void emit_events(boost::shared_ptr<SensorLog> s, int count)
+  enum {
+    EventLimit = 10000,
+  };
+  void emit_priority_events(boost::shared_ptr<SensorLog> s, int count)
   {
-    while (count--) {
+    emit_events(s, count, true);
+  }
+
+  void emit_sensor_events(boost::shared_ptr<SensorLog> s, int count)
+  {
+    emit_events(s, count, false);
+  }
+
+  void emit_events(boost::shared_ptr<SensorLog> s, int count, bool prio)
+  {
+    while (count-- && m_events.size() < EventLimit) {
       boost::shared_ptr<Event> event =
         boost::make_shared<Event>(EventName::DeviceSensorValue);
       event->setProperty("index", intToString(m_events.size()));
 
       m_events.push_back(event);
-      s->append(event, false);
+      s->append(event, prio);
     }
   }
 
@@ -80,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_upload_10k_events) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, 10 * 1000);
+  f.emit_sensor_events(s, 10 * 1000);
   s->triggerUpload();
 
   // received all events
@@ -94,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_upload_10k_events) {
 BOOST_AUTO_TEST_CASE(test_upload_network_failure) {
   //
   // will collect all the events to be uploaded but always tell
-  // Sensor Log it faild due to network error
+  // Sensor Log it failed due to a network error
   //
   MockUploader mu(NETWORK_ERROR);
   EventFactory f;
@@ -102,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_upload_network_failure) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, SensorLog::max_elements);
+  f.emit_sensor_events(s, SensorLog::max_elements);
   s->triggerUpload();
 
   //
@@ -124,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_upload_network_failure) {
 BOOST_AUTO_TEST_CASE(test_upload_reply_parse_error) {
   //
   // will collect all the events to be uploaded but always tell
-  // Sensor Log it faild due to json error
+  // Sensor Log it failed due to json error
   //
   MockUploader mu(JSON_ERROR);
   EventFactory f;
@@ -132,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_upload_reply_parse_error) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, 3 * SensorLog::max_post_events);
+  f.emit_sensor_events(s, 3 * SensorLog::max_post_events);
   s->triggerUpload();
 
   //
@@ -156,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_upload_ws_complains) {
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_events(s, 3 * SensorLog::max_post_events);
+  f.emit_sensor_events(s, 3 * SensorLog::max_post_events);
   s->triggerUpload();
 
   //
@@ -176,8 +189,9 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle) {
     boost::make_shared<SensorLog>("unit-test", &mu);
 
   // whenever a packet is sent, a new sensor value arrives
-  mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s, 1));
-  f.emit_events(s, SensorLog::max_post_events);
+  mu.install_upload_action(boost::bind(&EventFactory::emit_sensor_events, &f, s,
+                                       1));
+  f.emit_sensor_events(s, SensorLog::max_post_events);
   s->triggerUpload();
 
   //
@@ -197,9 +211,9 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle2) {
     boost::make_shared<SensorLog>("unit-test", &mu);
 
   // whenever a packet is sent, a new sensor value arrives
-  mu.install_upload_action(boost::bind(&EventFactory::emit_events, &f, s,
+  mu.install_upload_action(boost::bind(&EventFactory::emit_sensor_events, &f, s,
                                        SensorLog::max_post_events / 2));
-  f.emit_events(s, 2 * SensorLog::max_post_events);
+  f.emit_sensor_events(s, 2 * SensorLog::max_post_events);
   s->triggerUpload();
 
   //
@@ -212,6 +226,22 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle2) {
                     static_cast<size_t>(SensorLog::max_post_events) * (2 + 1 + 0.5));
   BOOST_CHECK_EQUAL(mu.m_events.size() + SensorLog::max_post_events / 2,
                     f.m_events.size());
+}
+
+BOOST_AUTO_TEST_CASE(test_sensor_data_trickle_high_prio) {
+  EventFactory f;
+  MockUploader mu;
+
+  boost::shared_ptr<SensorLog> s =
+    boost::make_shared<SensorLog>("unit-test", &mu);
+
+  // whenever a packet is sent, a new high prio value arrives
+  mu.install_upload_action(boost::bind(&EventFactory::emit_priority_events, &f,
+                                       s, 1));
+  f.emit_priority_events(s, 1);
+
+  // will never stop until EventFactory limit reached
+  BOOST_CHECK_EQUAL(mu.m_events.size(), EventFactory::EventLimit);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
