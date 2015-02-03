@@ -64,17 +64,23 @@ void SensorLog::send_packet(bool next) {
     m_upload_run = 0;
   }
 
-  if ((m_eventsHighPrio.empty() && m_events.empty() && m_packet.empty()) ||
-      ((m_events.size() < max_post_events) &&
-        (m_upload_run % max_post_events != 0) && next)) {
-    //
-    // prevent uploading forever due to sensor data trickle:
-    // last packet wasn't a full packet and not enough data to
-    // create a full packet. mind that the first packet of an
-    // upload run it is always uploaded
-    //
-    m_pending_upload = false;
-    return;
+  if (m_eventsHighPrio.empty()) {
+    // never stop uploading as long high priority events are pending
+    if (m_events.empty() && m_packet.empty()) {
+      // no retries needed and no more events to upload
+      m_pending_upload = false;
+      return;
+    } else if ((m_upload_run % max_post_events != 0) &&
+               (m_events.size() < max_post_events)) {
+      //
+      // one of the previous packets was not full and
+      // this packet wouldn't be a full either. hence two
+      // non-full packets in this run.
+      // delay upload till next trigger
+      //
+      m_pending_upload = false;
+      return;
+    }
   }
 
   packet_append(m_eventsHighPrio);
