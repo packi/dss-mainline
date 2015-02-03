@@ -3,6 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <curl/curl.h>
@@ -17,6 +18,7 @@
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
 #include "tests/dss_life_cycle.h"
+#include "src/web/json.h"
 
 using namespace dss;
 
@@ -158,6 +160,36 @@ BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixtureReal) {
   BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 4);
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
   BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(webservice_ms_json) {
+  boost::shared_ptr<Event> pEvent;
+
+  pEvent = boost::make_shared<Event>("aaaahhh");
+  BOOST_CHECK_THROW(MsHub::toJson(pEvent), DSSException);
+
+  pEvent = boost::make_shared<Event>(EventName::DeviceSensorValue);
+  BOOST_CHECK_THROW(MsHub::toJson(pEvent), DSSException);
+
+  pEvent = boost::make_shared<Event>(EventName::HeatingControllerSetup);
+  JSONObject jsonOBJ;
+  BOOST_CHECK_NO_THROW(jsonOBJ = MsHub::toJson(pEvent));
+  BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 3);
+}
+
+BOOST_AUTO_TEST_CASE(webservice_ds_json) {
+  boost::shared_ptr<Event> pEvent;
+
+  pEvent = boost::make_shared<Event>("aaaahhh");
+  BOOST_CHECK_THROW(DsHub::toJson(pEvent), DSSException);
+
+  pEvent = boost::make_shared<Event>(EventName::DeviceSensorValue);
+  BOOST_CHECK_THROW(DsHub::toJson(pEvent), DSSException);
+
+  pEvent = boost::make_shared<Event>(EventName::HeatingControllerSetup);
+  JSONObject jsonOBJ;
+  BOOST_CHECK_NO_THROW(jsonOBJ = DsHub::toJson(pEvent));
+  BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

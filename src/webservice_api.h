@@ -9,9 +9,14 @@
 
 namespace dss {
 
+class JSONObject;
 
 // --------------------------------------------------------------------
 // helper
+
+namespace MsHub {
+  JSONObject toJson(const boost::shared_ptr<Event> &event);
+}
 
 struct WebserviceReply {
   int code;
@@ -94,6 +99,10 @@ public:
   static WebserviceReply parseReply(const char* buf);
 };
 
+
+namespace DsHub {
+  JSONObject toJson(const boost::shared_ptr<Event> &event);
+}
 
 class WebserviceDsHub {
   __DECL_LOG_CHANNEL__
