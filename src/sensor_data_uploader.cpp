@@ -423,7 +423,7 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
      * EventName::DeviceSensorValue
      * EventName::ZoneSensorValue with SensorType != 50 or 51
      */
-    bool highPrio = true;
+    bool highPrio = false;
     if (_event.getName() == EventName::DeviceSensorValue) {
       highPrio = false;
     }
