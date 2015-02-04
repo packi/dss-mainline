@@ -36,7 +36,7 @@ namespace dss {
 /* Sensor Log                                                               */
 /****************************************************************************/
 
-__DEFINE_LOG_CHANNEL__(SensorLog, lsDebug)
+__DEFINE_LOG_CHANNEL__(SensorLog, lsInfo)
 
 /**
  * must hold m_lock when being calling
@@ -55,7 +55,7 @@ void SensorLog::packet_append(std::vector<boost::shared_ptr<Event> > &events)
  */
 void SensorLog::send_packet(bool next) {
   boost::mutex::scoped_lock lock(m_lock);
-
+  log("[" + m_hubName + "] send_packet: start", lsDebug);
   if (next) {
     m_upload_run += m_packet.size();
     m_packet.clear();
@@ -69,6 +69,7 @@ void SensorLog::send_packet(bool next) {
     if (m_events.empty() && m_packet.empty()) {
       // no retries needed and no more events to upload
       m_pending_upload = false;
+      log("[" + m_hubName + "] send_packet: nothing to upload", lsDebug);
       return;
     } else if ((m_upload_run % max_post_events != 0) &&
                (m_events.size() < max_post_events)) {
@@ -79,6 +80,7 @@ void SensorLog::send_packet(bool next) {
       // delay upload till next trigger
       //
       m_pending_upload = false;
+      log("[" + m_hubName + "] send_packet: tickle prevention, no upload", lsDebug);
       return;
     }
   }
@@ -96,6 +98,7 @@ void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
   boost::mutex::scoped_lock lock(m_lock);
 
   if (highPrio) {
+    log("[" + m_hubName + "] append: add high prio event: " + event->getName(), lsDebug);
     m_eventsHighPrio.push_back(event);
     lock.unlock();
     triggerUpload();
@@ -106,6 +109,7 @@ void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
     // MS-Hub will detect from jumps in sequence id
     return;
   }
+  log("[" + m_hubName + "] append: add event: " + event->getName(), lsDebug);
   m_events.push_back(event);
 }
 
@@ -113,10 +117,12 @@ void SensorLog::triggerUpload() {
   boost::mutex::scoped_lock lock(m_lock);
 
   if (m_pending_upload) {
+    log("[" + m_hubName + "] triggerUpload: upload still pending", lsDebug);
     return;
   }
 
   if (m_packet.empty() && m_eventsHighPrio.empty() && m_events.empty()) {
+    log("[" + m_hubName + "] triggerUpload: all queues empty", lsDebug);
     return;
   }
 
@@ -130,6 +136,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
   //
   // MS-Hub, will detect jumps in sequence ID, when we throw away events
   //
+  log("[" + m_hubName + "] upload done", lsDebug);
   switch (status) {
   case NETWORK_ERROR:
     // keep events in the upload queue, retry with next tick
