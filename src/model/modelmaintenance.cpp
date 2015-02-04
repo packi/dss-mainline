@@ -523,6 +523,11 @@ namespace dss {
           raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
         }
         break;
+      case ModelEvent::etModelOperationModeChanged:
+        eraseModelEventsFromQueue(ModelEvent::etModelOperationModeChanged);
+        eraseEventFromList = false;
+        writeConfiguration();
+        break;
       case ModelEvent::etLostDSMeter:
         assert(pEventWithDSID != NULL);
         onLostDSMeter(pEventWithDSID->getDSID());
