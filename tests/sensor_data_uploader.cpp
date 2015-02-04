@@ -241,7 +241,8 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle_high_prio) {
   f.emit_priority_events(s, 1);
 
   // will never stop until EventFactory limit reached
-  BOOST_CHECK_EQUAL(mu.m_events.size(), EventFactory::EventLimit);
+  BOOST_CHECK_EQUAL(mu.m_events.size(),
+                    static_cast<size_t>(EventFactory::EventLimit));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
