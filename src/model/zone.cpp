@@ -462,9 +462,7 @@ namespace dss {
 
   void Zone::dirty() {
     if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-      m_pApartment->getModelMaintenance()->addModelEvent(
-          new ModelEvent(ModelEvent::etModelDirty)
-      );
+      m_pApartment->getModelMaintenance()->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
     }
   }
 
