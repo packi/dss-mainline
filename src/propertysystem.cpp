@@ -46,6 +46,8 @@
 #include "src/security/privilege.h"
 #include "src/security/security.h"
 #include "src/security/user.h"
+#include "src/expatparser.h"
+#include "src/util.h"
 
 namespace dss {
 
@@ -76,14 +78,7 @@ namespace dss {
 
       syncFile(tmpOut);
 
-      // move it to the desired location
-      int ret = rename(tmpOut.c_str(), _fileName.c_str());
-      if (ret < 0) {
-        Logger::getInstance()->log("Copying to final destination (" + _fileName + ") failed: " +
-            std::string(strerror(errno)), lsFatal);
-      }
-    } else {
-      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
+      saveValidatedXML(tmpOut, _fileName);
     }
 
     return true;

@@ -49,6 +49,18 @@ namespace dss {
     static void XMLCALL expatCharData(void *_userdata, const XML_Char *_s,
                                       int _len);
   };
+
+  class XMLFileValidator : public ExpatParser
+  {
+  public:
+    XMLFileValidator() {}
+    bool validateFile(const std::string& _fileName) { return parseFile(_fileName); }
+    virtual ~XMLFileValidator() {}
+  protected:
+    virtual void elementStart(const char *_name, const char **_attrs) {}
+    virtual void elementEnd(const char *_name) {}
+    virtual void characterData(const XML_Char *_s, int _len) {}
+  };
 };
 
 #endif

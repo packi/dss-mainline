@@ -34,6 +34,7 @@
 
 #include "src/foreach.h"
 #include "src/base.h"
+#include "src/util.h"
 #include "src/backtrace.h"
 #include "src/propertysystem.h"
 #include "src/ds485types.h"
@@ -967,14 +968,7 @@ namespace dss {
 
       syncFile(tmpOut);
 
-      // move it to the desired location
-      int ret = rename(tmpOut.c_str(), _fileName.c_str());
-      if (ret < 0) {
-        Logger::getInstance()->log("Copying to final destination (" + _fileName + ") failed: " +
-            std::string(strerror(errno)), lsFatal);
-      }
-    } else {
-      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
+      saveValidatedXML(tmpOut, _fileName);
     }
   } // writeConfigurationToXML
 }
