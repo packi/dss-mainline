@@ -310,6 +310,32 @@ static const long WEEK_IN_SECS = 604800;
     return result;
   }
 
+ void Metering::flushCachedDBValues(boost::shared_ptr<std::string> _rrdFileName) {
+    std::vector<boost::shared_ptr<std::string> > rrdFileNames;
+    rrdFileNames.push_back(_rrdFileName);
+    flushCachedDBValues(rrdFileNames);
+  }
+
+  void Metering::flushCachedDBValues(std::vector<boost::shared_ptr<std::string> > _rrdFileNames) {
+    std::vector<std::string> lines;
+    lines.push_back("flushcached");
+    lines.push_back("--daemon");
+    lines.push_back(m_RrdcachedPath);
+    for (std::vector<boost::shared_ptr<std::string> >::iterator iter = _rrdFileNames.begin();
+         iter < _rrdFileNames.end();
+         ++iter) {
+      lines.push_back(iter->get()->c_str());
+    }
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    char** argString = (char**)&starts.front();
+    log("flushing cached rrd data to file", lsInfo);
+    int result = rrd_flushcached(starts.size(), argString);
+    if (result < 0) {
+      log(rrd_get_error());
+    }
+  }
+
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
     m_ValuesMutex.lock();
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
@@ -330,23 +356,11 @@ static const long WEEK_IN_SECS = 604800;
       log("Actual Timestamp:"+ doubleToString(actualTime) +
           "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
 
-      // call rrd_flushcached (blocking function) only if delta is small enough.
+      // call flushCachedDBValues (blocking function) only if delta is small enough.
       if (secondsAbs < WEEK_IN_SECS) {
-          std::vector<std::string> lines;
-          lines.push_back("flushcached");
-          lines.push_back("--daemon");
-          lines.push_back(m_RrdcachedPath);
-          lines.push_back(rrdFileName.get()->c_str());
-          std::vector<const char*> starts;
-          std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-          char** argString = (char**)&starts.front();
-          log("flushing cached rrd data to file", lsInfo);
-          int result = rrd_flushcached(starts.size(), argString);
-          if (result < 0) {
-            log(rrd_get_error());
-          }
+        flushCachedDBValues(rrdFileName);
       } else {
-          log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
+        log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
       }
     }
 
@@ -450,22 +464,7 @@ static const long WEEK_IN_SECS = 604800;
     m_ValuesMutex.lock();
 
     if (!m_RrdcachedPath.empty()) {
-      std::vector<std::string> lines;
-      lines.push_back("flushcached");
-      lines.push_back("--daemon");
-      lines.push_back(m_RrdcachedPath);
-      for (std::vector<boost::shared_ptr<std::string> >::iterator iter = rrdFileNames.begin();
-           iter < rrdFileNames.end();
-           ++iter) {
-        lines.push_back(iter->get()->c_str());
-      }
-      std::vector<const char*> starts;
-      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-      char** argString = (char**)&starts.front();
-      int result = rrd_flushcached(starts.size(), argString);
-      if (result < 0) {
-        log(rrd_get_error());
-      }
+      flushCachedDBValues(rrdFileNames);
     }
 
     std::vector<std::string> lines;
