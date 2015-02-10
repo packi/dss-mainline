@@ -101,10 +101,6 @@ static const long WEEK_IN_SECS = 604800;
     run();
   } // start
 
-  void Metering::checkDSMeters() {
-    m_pMeteringBusInterface->requestMeterData();
-  } // checkDSMeters
-
   void Metering::execute() {
     assert(m_pMeteringBusInterface != NULL);
     while (DSS::getInstance()->getModelMaintenance().isInitializing()) {
@@ -115,7 +111,7 @@ static const long WEEK_IN_SECS = 604800;
       int sleepTimeMSec = 60000 * 1000;
 
       try {
-        checkDSMeters();
+        m_pMeteringBusInterface->requestMeterData();
       } catch (dss::BusApiError& apiError) {
         log("Metering::execute: Couldn't get metering data: " + std::string(apiError.what()));
       }

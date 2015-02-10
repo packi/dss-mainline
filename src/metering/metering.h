@@ -82,8 +82,6 @@ namespace dss {
     Mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
   private:
-    void checkDSMeters();
-
     virtual void initialize();
     virtual void execute();
     boost::shared_ptr<std::string> getOrCreateCachedSeries(
