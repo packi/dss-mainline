@@ -87,6 +87,7 @@ namespace dss {
     bool validateDBSeries(std::string& _fileName,
       boost::shared_ptr<MeteringConfigChain> _pChain,
       bool& _tunePowerMaxSetting);
+    void tuneDBPowerSettings(std::string& _fileName);
     boost::shared_ptr<std::string> getOrCreateCachedSeries(
       boost::shared_ptr<MeteringConfigChain> _pChain,
       boost::shared_ptr<DSMeter> _pMeter);

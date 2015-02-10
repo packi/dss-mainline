@@ -182,6 +182,26 @@ static const long WEEK_IN_SECS = 604800;
     return (rrdMatchCount == (2 + _pChain->size()));
   }
 
+  void Metering::tuneDBPowerSettings(std::string& _fileName)
+  {
+    log(std::string("tuning max acceptable power value in RRD ") + _fileName, lsWarning);
+    std::vector<std::string> lines;
+    lines.push_back("tune");
+    lines.push_back(_fileName);
+    lines.push_back("--maximum");
+    lines.push_back("power:40000");
+
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    const char** argString = &starts.front();
+    rrd_clear_error();
+    // cast-away the const, should be ok according to rrd_tune() sources
+    int result = rrd_tune(starts.size(), (char**)argString);
+    if (result < 0) {
+      log(rrd_get_error());
+    }
+  }
+
   boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
     if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
@@ -214,22 +234,7 @@ static const long WEEK_IN_SECS = 604800;
         return pFileName;
       }
     } else if (tunePowerMaxSetting) {
-      log(std::string("tuning max acceptable power value in RRD ") + fileName, lsWarning);
-      std::vector<std::string> lines;
-      lines.push_back("tune");
-      lines.push_back(fileName);
-      lines.push_back("--maximum");
-      lines.push_back("power:40000");
-
-      std::vector<const char*> starts;
-      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-      const char** argString = &starts.front();
-      rrd_clear_error();
-      // cast-away the const, should be ok according to rrd_tune() sources
-      int result = rrd_tune(starts.size(), (char**)argString);
-      if (result < 0) {
-        log(rrd_get_error());
-      }
+      tuneDBPowerSettings(fileName);
     }
 
     boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
