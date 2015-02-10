@@ -65,12 +65,12 @@ static const long WEEK_IN_SECS = 604800;
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
     m_ConfigChain.reset(new MeteringConfigChain(1));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(                1,  600));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(               60,  720));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(          15 * 60, 2976));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(     24 * 60 * 60,  370));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>( 7 * 24 * 60 * 60,  260));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(30 * 24 * 60 * 60,   60));
+    m_ConfigChain->addConfig(MeteringConfig(                1,  600));
+    m_ConfigChain->addConfig(MeteringConfig(               60,  720));
+    m_ConfigChain->addConfig(MeteringConfig(          15 * 60, 2976));
+    m_ConfigChain->addConfig(MeteringConfig(     24 * 60 * 60,  370));
+    m_ConfigChain->addConfig(MeteringConfig( 7 * 24 * 60 * 60,  260));
+    m_ConfigChain->addConfig(MeteringConfig(30 * 24 * 60 * 60,   60));
     m_Config.push_back(m_ConfigChain);
   } // metering
 
@@ -596,8 +596,33 @@ static const long WEEK_IN_SECS = 604800;
 
   //================================================== MeteringConfigChain
 
-  void MeteringConfigChain::addConfig(boost::shared_ptr<MeteringConfig> _config) {
+  MeteringConfigChain::MeteringConfigChain(int _checkIntervalSeconds)
+  : m_CheckIntervalSeconds(_checkIntervalSeconds)
+  { }
+
+  MeteringConfigChain::~MeteringConfigChain()
+  {
+    m_Chain.clear();
+  }
+
+  void MeteringConfigChain::addConfig(MeteringConfig _config) {
     m_Chain.push_back(_config);
-  } // addConfig
+  }
+
+  const int MeteringConfigChain::size() const {
+    return m_Chain.size();
+  }
+
+  const int MeteringConfigChain::getResolution(int _index) const {
+    return m_Chain.at(_index).m_Resolution;
+  }
+
+  const int MeteringConfigChain::getNumberOfValues(int _index) const {
+    return m_Chain.at(_index).m_NumberOfValues;
+  }
+
+  int MeteringConfigChain::getCheckIntervalSeconds() const {
+    return m_CheckIntervalSeconds;
+  }
 
 } // namespace dss

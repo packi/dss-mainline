@@ -115,39 +115,33 @@ namespace dss {
     unsigned long getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter);
   }; // Metering
 
-  class MeteringConfig {
-  private:
+  struct MeteringConfig {
     int m_Resolution;
     int m_NumberOfValues;
-  public:
-    MeteringConfig(int _resolution,
-                   int _numberOfValues)
+    MeteringConfig(int _resolution, int _numberOfValues)
     : m_Resolution(_resolution)
     , m_NumberOfValues(_numberOfValues)
     { } // ctor
-
-    const int getResolution() const { return m_Resolution; }
-    const int getNumberOfValues() const { return m_NumberOfValues; }
   }; // MeteringConfig
 
   class MeteringConfigChain {
+
   private:
     int m_CheckIntervalSeconds;
-    std::vector<boost::shared_ptr<MeteringConfig> > m_Chain;
+    std::vector<MeteringConfig> m_Chain;
+
   public:
-    MeteringConfigChain(int _checkIntervalSeconds)
-    : m_CheckIntervalSeconds(_checkIntervalSeconds)
-    { }
+    MeteringConfigChain(int _checkIntervalSeconds);
+    ~MeteringConfigChain();
 
-    void addConfig(boost::shared_ptr<MeteringConfig> _config);
+    void addConfig(MeteringConfig _config);
 
-    const int size() const { return m_Chain.size(); }
-    boost::shared_ptr<MeteringConfig> get(int _index) { return m_Chain.at(_index); }
+    const int size() const;
 
-    const int getResolution(int _index) const { return m_Chain.at(_index)->getResolution(); }
-    const int getNumberOfValues(int _index) const { return m_Chain.at(_index)->getNumberOfValues(); }
+    const int getResolution(int _index) const;
+    const int getNumberOfValues(int _index) const;
 
-    int getCheckIntervalSeconds() const { return m_CheckIntervalSeconds; }
+    int getCheckIntervalSeconds() const;
   }; // MeteringConfigChain
 
 } // namespace dss
