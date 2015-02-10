@@ -131,98 +131,100 @@ static const long WEEK_IN_SECS = 604800;
 
   boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                                    boost::shared_ptr<DSMeter> _pMeter) {
-    if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
-      bool tunePowerMaxSetting = false;
-      int rrdMatchCount = 0;
-      std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
+    if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
+      return m_CachedSeries[_pMeter];
+    }
 
-      if (!boost::filesystem::exists(fileName)) {
-        dsuid_t dsuid = _pMeter->getDSID();
-        dsid_t dsid;
-        if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
-          std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
-                                ".rrd";
-          if (boost::filesystem::exists(oldFile)) {
-            boost::filesystem::rename(oldFile, fileName);
-            log("Migrated metering data from " + oldFile + " to " + fileName);
-          }
+    bool tunePowerMaxSetting = false;
+    int rrdMatchCount = 0;
+    std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
+
+    if (!boost::filesystem::exists(fileName)) {
+      dsuid_t dsuid = _pMeter->getDSID();
+      dsid_t dsid;
+      if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
+        std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
+                              ".rrd";
+        if (boost::filesystem::exists(oldFile)) {
+          boost::filesystem::rename(oldFile, fileName);
+          log("Migrated metering data from " + oldFile + " to " + fileName);
         }
       }
+    }
 
-      rrd_clear_error();
-      rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
-      if (rrdInfo != 0) {
-        regex_t rraRowRegex;
-        int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
-        if (regCompErr != 0) {
-          int errSize = regerror(regCompErr, &rraRowRegex, 0, 0);
-          char *errString = new char[errSize];
-          regerror(regCompErr, &rraRowRegex, errString, errSize);
-          log(errString, lsError);
-          delete [] errString;
-        }
-        rrd_info_t *rrdInfoOrig = rrdInfo;
-        log("RRD DB present");
-        /* check DB contents */
-        while (rrdInfo != NULL) {
-          if (((strcmp(rrdInfo->key, "ds[power].index") == 0) &&
-               (rrdInfo->type == RD_I_CNT) &&
-               (rrdInfo->value.u_cnt == 0)) ||
-              ((strcmp(rrdInfo->key, "ds[energy].index") == 0) &&
-               (rrdInfo->type == RD_I_CNT) &&
-               (rrdInfo->value.u_cnt == 1))) {
-            rrdMatchCount++;
-          } else {
-            regmatch_t subMatch[2];
-            if (regexec(&rraRowRegex, rrdInfo->key, 2, subMatch, 0) == 0) {
-              std::string key(rrdInfo->key);
-              int index = strToInt(key.substr(subMatch[1].rm_so, subMatch[1].rm_eo - subMatch[1].rm_so));
-              if (static_cast<int>(rrdInfo->value.u_cnt) == _pChain->getNumberOfValues(index)) {
-                rrdMatchCount++;
-              }
+    rrd_clear_error();
+    rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
+    if (rrdInfo != 0) {
+      regex_t rraRowRegex;
+      int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
+      if (regCompErr != 0) {
+        int errSize = regerror(regCompErr, &rraRowRegex, 0, 0);
+        char *errString = new char[errSize];
+        regerror(regCompErr, &rraRowRegex, errString, errSize);
+        log(errString, lsError);
+        delete [] errString;
+      }
+      rrd_info_t *rrdInfoOrig = rrdInfo;
+      log("RRD DB present");
+      /* check DB contents */
+      while (rrdInfo != NULL) {
+        if (((strcmp(rrdInfo->key, "ds[power].index") == 0) &&
+             (rrdInfo->type == RD_I_CNT) &&
+             (rrdInfo->value.u_cnt == 0)) ||
+            ((strcmp(rrdInfo->key, "ds[energy].index") == 0) &&
+             (rrdInfo->type == RD_I_CNT) &&
+             (rrdInfo->value.u_cnt == 1))) {
+          rrdMatchCount++;
+        } else {
+          regmatch_t subMatch[2];
+          if (regexec(&rraRowRegex, rrdInfo->key, 2, subMatch, 0) == 0) {
+            std::string key(rrdInfo->key);
+            int index = strToInt(key.substr(subMatch[1].rm_so, subMatch[1].rm_eo - subMatch[1].rm_so));
+            if (static_cast<int>(rrdInfo->value.u_cnt) == _pChain->getNumberOfValues(index)) {
+              rrdMatchCount++;
             }
           }
-          if ((strcmp(rrdInfo->key, "ds[power].max") == 0) &&
-              (rrdInfo->type == RD_I_VAL) &&
-              (rrdInfo->value.u_val == 4.5e3)) {
-            tunePowerMaxSetting = true;
-          }
-          rrdInfo = rrdInfo->next;
         }
-        rrd_info_free(rrdInfoOrig);
-        regfree(&rraRowRegex);
+        if ((strcmp(rrdInfo->key, "ds[power].max") == 0) &&
+            (rrdInfo->type == RD_I_VAL) &&
+            (rrdInfo->value.u_val == 4.5e3)) {
+          tunePowerMaxSetting = true;
+        }
+        rrdInfo = rrdInfo->next;
       }
-      log("RRD MatchCount: " + intToString(rrdMatchCount));
-
-      if (rrdMatchCount != (2 + _pChain->size())) {
-        int result = createDB(fileName, _pChain);
-        if (result < 0) {
-          log(rrd_get_error(), lsError);
-          boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
-          return pFileName;
-        }
-      } else if (tunePowerMaxSetting) {
-        log(std::string("tuning max acceptable power value in RRD ") + fileName, lsWarning);
-        std::vector<std::string> lines;
-        lines.push_back("tune");
-        lines.push_back(fileName);
-        lines.push_back("--maximum");
-        lines.push_back("power:40000");
-
-        std::vector<const char*> starts;
-        std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-        const char** argString = &starts.front();
-        rrd_clear_error();
-        // cast-away the const, should be ok according to rrd_tune() sources
-        int result = rrd_tune(starts.size(), (char**)argString);
-        if (result < 0) {
-          log(rrd_get_error());
-        }
-      }
-
-      boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
-      m_CachedSeries[_pMeter] = pFileName;
+      rrd_info_free(rrdInfoOrig);
+      regfree(&rraRowRegex);
     }
+    log("RRD MatchCount: " + intToString(rrdMatchCount));
+
+    if (rrdMatchCount != (2 + _pChain->size())) {
+      int result = createDB(fileName, _pChain);
+      if (result < 0) {
+        log(rrd_get_error(), lsError);
+        boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
+        return pFileName;
+      }
+    } else if (tunePowerMaxSetting) {
+      log(std::string("tuning max acceptable power value in RRD ") + fileName, lsWarning);
+      std::vector<std::string> lines;
+      lines.push_back("tune");
+      lines.push_back(fileName);
+      lines.push_back("--maximum");
+      lines.push_back("power:40000");
+
+      std::vector<const char*> starts;
+      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+      const char** argString = &starts.front();
+      rrd_clear_error();
+      // cast-away the const, should be ok according to rrd_tune() sources
+      int result = rrd_tune(starts.size(), (char**)argString);
+      if (result < 0) {
+        log(rrd_get_error());
+      }
+    }
+
+    boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
+    m_CachedSeries[_pMeter] = pFileName;
     return m_CachedSeries[_pMeter];
   } // getOrCreateCachedSeries
 
