@@ -42,6 +42,7 @@
 #include "src/security/security.h"
 
 #include <algorithm>
+#include "foreach.h"
 #include <functional>
 #include <iterator>
 #include <time.h>
@@ -115,9 +116,11 @@ static const long WEEK_IN_SECS = 604800;
       } catch (dss::BusApiError& apiError) {
         log("Metering::execute: Couldn't get metering data: " + std::string(apiError.what()));
       }
-      for (unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
-        sleepTimeMSec = std::min(sleepTimeMSec, 1000 * m_Config[iConfig]->getCheckIntervalSeconds());
+
+      foreach (boost::shared_ptr<MeteringConfigChain> configChain, m_Config) {
+        sleepTimeMSec = std::min(sleepTimeMSec, 1000 * configChain->getCheckIntervalSeconds());
       }
+
       while (!m_Terminated && (sleepTimeMSec > 0)) {
         const int kMinSleepTimeMS = 100;
         sleepMS(std::min(sleepTimeMSec, kMinSleepTimeMS));
