@@ -129,31 +129,12 @@ static const long WEEK_IN_SECS = 604800;
     }
   } // execute
 
-  boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
-                                                                   boost::shared_ptr<DSMeter> _pMeter) {
-    if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
-      return m_CachedSeries[_pMeter];
-    }
-
-    bool tunePowerMaxSetting = false;
+  bool Metering::validateDBSeries(std::string& _fileName,
+                                  boost::shared_ptr<MeteringConfigChain> _pChain,
+                                  bool& _tunePowerMaxSetting) {
     int rrdMatchCount = 0;
-    std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
-
-    if (!boost::filesystem::exists(fileName)) {
-      dsuid_t dsuid = _pMeter->getDSID();
-      dsid_t dsid;
-      if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
-        std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
-                              ".rrd";
-        if (boost::filesystem::exists(oldFile)) {
-          boost::filesystem::rename(oldFile, fileName);
-          log("Migrated metering data from " + oldFile + " to " + fileName);
-        }
-      }
-    }
-
     rrd_clear_error();
-    rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
+    rrd_info_t *rrdInfo = rrd_info_r((char *) _fileName.c_str());
     if (rrdInfo != 0) {
       regex_t rraRowRegex;
       int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
@@ -185,19 +166,47 @@ static const long WEEK_IN_SECS = 604800;
             }
           }
         }
+
         if ((strcmp(rrdInfo->key, "ds[power].max") == 0) &&
             (rrdInfo->type == RD_I_VAL) &&
             (rrdInfo->value.u_val == 4.5e3)) {
-          tunePowerMaxSetting = true;
+          _tunePowerMaxSetting = true;
         }
+
         rrdInfo = rrdInfo->next;
       }
       rrd_info_free(rrdInfoOrig);
       regfree(&rraRowRegex);
     }
     log("RRD MatchCount: " + intToString(rrdMatchCount));
+    return (rrdMatchCount == (2 + _pChain->size()));
+  }
 
-    if (rrdMatchCount != (2 + _pChain->size())) {
+  boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
+                                                                   boost::shared_ptr<DSMeter> _pMeter) {
+    if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
+      return m_CachedSeries[_pMeter];
+    }
+
+    std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
+
+    if (!boost::filesystem::exists(fileName)) {
+      dsuid_t dsuid = _pMeter->getDSID();
+      dsid_t dsid;
+      if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
+        std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
+                              ".rrd";
+        if (boost::filesystem::exists(oldFile)) {
+          boost::filesystem::rename(oldFile, fileName);
+          log("Migrated metering data from " + oldFile + " to " + fileName);
+        }
+      }
+    }
+
+    bool tunePowerMaxSetting = false;
+    bool validate = validateDBSeries(fileName, _pChain, tunePowerMaxSetting);
+
+    if (!validate) {
       int result = createDB(fileName, _pChain);
       if (result < 0) {
         log(rrd_get_error(), lsError);
