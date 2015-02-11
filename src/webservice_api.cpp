@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "webservice_api.h"
 
 #include <json.h>
@@ -196,10 +200,10 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addElement("parameter", parameterObj);
 
     } else {
-      Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
+      throw DSSException(std::string("unhandled event ") + event->getName());
     }
   } catch (std::invalid_argument& e) {
-    Logger::getInstance()->log(std::string(__func__) + "Error converting event " + event->getName() + ", skip", lsInfo);
+    throw DSSException(std::string("Error converting event ") + event->getName());
   }
   return obj;
 }
@@ -284,8 +288,16 @@ void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
 
   obj.addElement("eventsList", array);
   for (; begin != end; begin++) {
-    array->add(MsHub::toJson(*begin));
-    ct++;
+    try {
+      array->add(MsHub::toJson(*begin));
+      ct++;
+    } catch (DSSException& e) {
+      log(e.what(), lsWarning);
+    }
+  }
+
+  if (ct == 0) {
+    return;
   }
 
   std::string postdata = obj.toString();
@@ -671,13 +683,13 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
     } else if (event->getName() == EventName::LogFileData) {
       createHeader(header, evtGroup_Activity, evtCategory_LogFileData, event.get());
     } else {
-      Logger::getInstance()->log(std::string(__func__) + "unhandled event " + event->getName() + ", skip", lsInfo);
+      throw DSSException(std::string("unhandled event ") + event->getName());
     }
 
     eventJson.addElement("EventHeader", header);
     eventJson.addElement("EventBody", body);
   } catch (std::invalid_argument& e) {
-    Logger::getInstance()->log(std::string(__func__) + "Error converting event " + event->getName() + ", skip", lsInfo);
+    throw DSSException(std::string("Error converting event ") + event->getName());
   }
   return eventJson;
 }
@@ -747,8 +759,16 @@ void WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
 
   obj.addElement("Events", array);
   for (; begin != end; begin++) {
-    array->add(DsHub::toJson(*begin));
-    ct++;
+    try {
+      array->add(DsHub::toJson(*begin));
+      ct++;
+    } catch (DSSException& e) {
+      log(e.what(), lsWarning);
+    }
+  }
+
+  if (ct == 0) {
+    return;
   }
 
   std::string postdata = obj.toString();

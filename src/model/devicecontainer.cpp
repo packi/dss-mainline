@@ -20,12 +20,17 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "devicecontainer.h"
 
 #include "src/dss.h"
 #include "modelevent.h"
 #include "apartment.h"
 #include "modelmaintenance.h"
+#include "src/stringconverter.h"
 
 namespace dss {
 
@@ -33,9 +38,14 @@ namespace dss {
 
   void DeviceContainer::setName(const std::string& _name) {
     if(m_Name != _name) {
-      m_Name = _name;
-      if(DSS::hasInstance()) {
-        DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      try {
+        StringConverter st("UTF-8", "UTF-8");
+        m_Name = st.convert(_name);
+        if(DSS::hasInstance()) {
+          DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+        }
+      } catch (DSSException& e) {
+        // could not convert name to UTF-8
       }
     }
   }

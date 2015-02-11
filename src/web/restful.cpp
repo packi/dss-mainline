@@ -22,6 +22,11 @@
     by $Author: pstaehlin $
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "restful.h"
 
 namespace dss {

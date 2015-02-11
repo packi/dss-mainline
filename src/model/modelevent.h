@@ -64,6 +64,7 @@ namespace dss {
                     etControllerState, /** State of the controlling device or algorithm changed */
                     etControllerConfig, /** Configuration of the controlling device or algorithm changed */
                     etControllerValues, /** Operation Values of the controlling device or algorithm changed */
+                    etModelOperationModeChanged, /**< A parameter that will be stored in \c apartment.xml has been changed, but the cloud service should not be informed about it */
                  } EventType;
   private:
     EventType m_EventType;

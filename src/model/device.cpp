@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include <unistd.h>
 
 #include "device.h"
@@ -1742,7 +1747,7 @@ namespace dss {
     }
 
     if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL) &&
-        (devNumber == 220)) {
+        ((devNumber == 220) || (devNumber == 230))) {
       features.hasOutputAngle = true;
     }
 

@@ -19,7 +19,12 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
-  
+
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "privilege.h"
 
 #include "src/foreach.h"

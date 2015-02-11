@@ -21,6 +21,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "devicerequesthandler.h"
 
 #include <boost/bind.hpp>
@@ -30,6 +35,7 @@
 #include "src/model/apartment.h"
 #include "src/model/device.h"
 #include "src/model/group.h"
+#include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
 #include "src/structuremanipulator.h"
@@ -93,11 +99,11 @@ namespace dss {
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result = getDeviceByDSID(_request);
-    if(result == NULL) {
+    if (result == NULL) {
       result = getDeviceByName(_request);
-    }
-    if(result == NULL) {
-      throw DeviceNotFoundException("Need parameter name or dsid to identify device");
+      if (result == NULL) {
+        throw DeviceNotFoundException("Need parameter name or dsuid to identify device");
+      }
     }
     return result;
   } // getDeviceFromRequest
@@ -106,31 +112,58 @@ namespace dss {
     boost::shared_ptr<Device> result;
     std::string dsidStr = _request.getParameter("dsid");
     std::string dsuidStr = _request.getParameter("dsuid");
-    if (dsidStr.empty() && dsuidStr.empty()) {
-      throw std::runtime_error("missing parameter 'dsuid'");
-    }
-
-    dsuid_t dsuid = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
-
-    try {
-      result = m_Apartment.getDeviceByDSID(dsuid);
-    } catch(std::runtime_error& e) {
-      throw DeviceNotFoundException("Could not find device with dsuid '" +
-                                    dsuid2str(dsuid) + "'");
+    if (dsuidStr.length() || dsidStr.length()) {
+      dsuid_t dsuid = dsidOrDsuid2dsuid(dsidStr, dsuidStr);
+      try {
+        result = m_Apartment.getDeviceByDSID(dsuid);
+      } catch(std::runtime_error& e) {
+        throw DeviceNotFoundException("Could not find device with dsuid '" +
+            dsuid2str(dsuid) + "'");
+      }
     }
     return result;
   } // getDeviceByDSID
 
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByName(const RestfulRequest& _request) {
+
+    class DeviceNameFilter : public IDeviceAction {
+    private:
+      std::string m_name;
+      std::vector<boost::shared_ptr<Device> > m_devs;
+    public:
+      DeviceNameFilter(std::string _name) : m_name(_name) {}
+      virtual ~DeviceNameFilter() {}
+      virtual bool perform(boost::shared_ptr<Device> _device) {
+        if (_device->getName() == m_name) {
+          m_devs.push_back(_device);
+        }
+        return true;
+      }
+      std::vector<boost::shared_ptr<Device> > getDeviceList() {
+        return m_devs;
+      }
+    };
+
     boost::shared_ptr<Device> result;
     std::string deviceName = _request.getParameter("name");
     if (deviceName.empty()) {
       return result;
     }
     try {
-      result = m_Apartment.getDeviceByName(deviceName);
+      DeviceNameFilter mFilter(deviceName);
+      Set mDevices = m_Apartment.getDevices();
+      mDevices.perform(mFilter);
+      if (mFilter.getDeviceList().size() > 1) {
+        throw DeviceNotFoundException("Multiple devices with name '" + deviceName + "'");
+      } else if (mFilter.getDeviceList().size() == 0) {
+        throw DeviceNotFoundException("Could not find device named '" + deviceName + "'");
+      } else {
+        result = mFilter.getDeviceList().at(0);
+      }
+    } catch(DeviceNotFoundException&  e) {
+      throw;
     } catch(std::runtime_error&  e) {
-      throw DeviceNotFoundException("Could not find device named '" + deviceName + "'");
+      throw DeviceNotFoundException("Error selecting device named '" + deviceName + "': " + e.what());
     }
     return result;
   } // getDeviceByName
@@ -740,8 +773,8 @@ namespace dss {
             return failure("Unsupported type parameter for this device");
           }
         }
-        // Supported output states for the GR-KL220
-        else if ((pDevice->getProductID() == ProductID_KL_220) &&
+        // Supported output states for the GR-KL220/GR-KL230
+        else if (((pDevice->getProductID() == ProductID_KL_220) || (pDevice->getProductID() == ProductID_KL_230)) &&
             (pDevice->getDeviceClass() == DEVICE_CLASS_GR)) {
           if (type == "position") {
             value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_Position);

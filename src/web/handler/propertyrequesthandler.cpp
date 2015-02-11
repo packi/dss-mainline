@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "propertyrequesthandler.h"
 
 #include "src/propertysystem.h"

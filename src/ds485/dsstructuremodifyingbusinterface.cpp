@@ -20,6 +20,10 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include <unistd.h>
 #include <boost/make_shared.hpp>
 
@@ -115,10 +119,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     std::string nameStr = truncateUTF8String(_name, 19);
-    uint8_t name[20];
-    strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
-    name[19] = '\0';
-    int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sceneNumber, name);
+    int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sceneNumber, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
   
@@ -128,10 +129,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     std::string nameStr = truncateUTF8String(_name, 19);
-    uint8_t name[20];
-    strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
-    name[19] = '\0';
-    int ret = DeviceProperties_set_name(m_DSMApiHandle, _meterDSID, _deviceID, name);
+    int ret = DeviceProperties_set_name(m_DSMApiHandle, _meterDSID, _deviceID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkResultCode(ret);
   } // deviceSetName
 
@@ -141,10 +139,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     std::string nameStr = truncateUTF8String(_name, 19);
-    uint8_t name[20];
-    strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
-    name[19] = '\0';
-    int ret = dSMProperties_set_name(m_DSMApiHandle, _meterDSID, name);
+    int ret = dSMProperties_set_name(m_DSMApiHandle, _meterDSID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkResultCode(ret);
   } // meterSetName
 
@@ -155,10 +150,8 @@ namespace dss {
     }
     int ret = ZoneGroupModify_add(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
-    uint8_t grName[NAME_LEN];
-    strncpy((char *) grName, _name.c_str(), NAME_LEN);
-    grName[NAME_LEN-1] = '\0';
-    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
+    std::string nameStr = truncateUTF8String(_name, 19);
+    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
   } // createGroup
 
@@ -179,10 +172,8 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    uint8_t grName[NAME_LEN];
-    strncpy((char *) grName, _name.c_str(), NAME_LEN);
-    grName[NAME_LEN-1] = '\0';
-    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, grName);
+    std::string nameStr = truncateUTF8String(_name, 19);
+    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetName

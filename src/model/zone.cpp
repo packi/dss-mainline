@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "zone.h"
 
 #include <vector>
@@ -462,9 +467,7 @@ namespace dss {
 
   void Zone::dirty() {
     if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-      m_pApartment->getModelMaintenance()->addModelEvent(
-          new ModelEvent(ModelEvent::etModelDirty)
-      );
+      m_pApartment->getModelMaintenance()->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
     }
   }
 

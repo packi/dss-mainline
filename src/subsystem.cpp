@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "subsystem.h"
 #include "dss.h"
 #include "propertysystem.h"
