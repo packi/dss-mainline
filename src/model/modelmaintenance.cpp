@@ -22,6 +22,10 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 
 #include "modelmaintenance.h"
 
@@ -178,6 +182,10 @@ namespace dss {
       DSS::getInstance()->getPropertySystem().setStringValue(
               getConfigPropertyBasePath() + "configfile",
               getDSS().getDataDirectory() + "apartment.xml", true, false);
+
+      DSS::getInstance()->getPropertySystem().setStringValue(
+              getConfigPropertyBasePath() + "invalidbackup",
+              getDSS().getDataDirectory() + "invalid-apartment.xml", true, false);
 
       boost::filesystem::path filename(
               DSS::getInstance()->getPropertySystem().getStringValue(
@@ -927,9 +935,10 @@ namespace dss {
   void ModelMaintenance::readConfiguration() {
     if(DSS::hasInstance()) {
       std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
+      std::string backupFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "invalidbackup");
       ModelPersistence persistence(*m_pApartment);
       if (boost::filesystem::exists(configFileName)) {
-        persistence.readConfigurationFromXML(configFileName);
+        persistence.readConfigurationFromXML(configFileName, backupFileName);
       }
       log("processed apartment.xml", lsNotice);
     }

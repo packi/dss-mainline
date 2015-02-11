@@ -20,6 +20,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "sensor_data_uploader.h"
 
 #include <boost/thread/locks.hpp>

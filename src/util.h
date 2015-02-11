@@ -42,6 +42,7 @@ namespace dss {
   std::string getOutputChannelName(uint8_t _channel);
   uint16_t convertToOutputChannelValue(uint8_t channel, double value);
   double convertFromOutputChannelValue(uint8_t channel, uint16_t value);
+  bool saveValidatedXML(const std::string& _fileName, const std::string& _targetFile);
 }
 
 #endif

@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "base.h"
 #include "dss.h"
 #include "logger.h"

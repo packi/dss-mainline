@@ -21,6 +21,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "util.h"
 #include "logger.h"
 #include "base.h"
@@ -33,6 +38,8 @@
 #include "ds485/dsdevicebusinterface.h"
 #include "structuremanipulator.h"
 #include "foreach.h"
+#include "expatparser.h"
+
 #include <boost/algorithm/string/replace.hpp>
 #include <math.h>
 
@@ -177,4 +184,25 @@ static OutputChannelInfo kOutputChannels[] = {
     return (kOutputChannels[channel].max * value) /
                     (double)(pow(2, kOutputChannels[channel].size) - 1);
   }
+
+  bool saveValidatedXML(const std::string& _fileName, const std::string& _targetFile) {
+    boost::shared_ptr<XMLFileValidator> v = boost::make_shared<XMLFileValidator>();
+    int ret = v->validateFile(_fileName);
+    if (ret) {
+      // move it to the desired location
+      ret = rename(_fileName.c_str(), _targetFile.c_str());
+      if (ret != 0) {
+        Logger::getInstance()->log("Copying to final destination (" +
+            _targetFile + ") failed: " +
+            std::string(strerror(errno)), lsFatal);
+      }
+    } else {
+      Logger::getInstance()->log("XML not saved! Generated file '" +
+            _fileName + "' is invalid, will not overwrite" +
+            _targetFile, lsFatal);
+    }
+
+    return ret;
+  }
+    
 } // namespace

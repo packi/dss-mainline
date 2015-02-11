@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include "subscriptionrequesthandler.h"
 
 #include "src/web/json.h"

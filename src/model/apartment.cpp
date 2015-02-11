@@ -21,6 +21,10 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "apartment.h"
 
 #include <boost/make_shared.hpp>

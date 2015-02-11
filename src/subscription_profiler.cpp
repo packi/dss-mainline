@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "subscription_profiler.h"
 
 #include <assert.h>

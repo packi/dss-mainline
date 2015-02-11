@@ -20,6 +20,11 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
+
 #include <digitalSTROM/dsuid/dsuid.h>
 #include "circuitrequesthandler.h"
 
