@@ -1215,6 +1215,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   ModelPersistence model(apt);
 
   std::string fileName = getTempDir() + "/apt.xml";
+  std::string invalidBackup = getTempDir() + "/invalid.xml";
   std::ofstream ofs(fileName.c_str());
   ofs <<
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -1250,7 +1251,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
 
   Logger::getInstance()->log("Checking apartment XML");
 
-  model.readConfigurationFromXML(fileName);
+  model.readConfigurationFromXML(fileName, invalidBackup);
   BOOST_CHECK_EQUAL(apt.getName(), "UAZ");
 
   boost::shared_ptr<Device> dev = apt.getDeviceByName("UAZ-469");
