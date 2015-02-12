@@ -746,11 +746,10 @@ namespace dss {
 
     m_propParser.reset(new PropertyParserProxy());
 
-    bool ret = parseFile(_fileName);
-    if (!ret) {
+    if (!parseFile(_fileName)) {
       Logger::getInstance()->log("apartment.xml is invalid, will backup up to "
                                  + _backup, lsError);
-      ret = rename(_fileName.c_str(), _backup.c_str());
+      int ret = rename(_fileName.c_str(), _backup.c_str());
       if (ret < 0) {
         Logger::getInstance()->log("failed to write file " +
                                    _backup, lsWarning);
