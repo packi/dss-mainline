@@ -109,14 +109,13 @@ static const long WEEK_IN_SECS = 604800;
     }
     // check dsMeters periodically
     while (!m_Terminated) {
-      int sleepTimeMSec = 60000 * 1000;
-
       try {
         m_pMeteringBusInterface->requestMeterData();
       } catch (dss::BusApiError& apiError) {
         log("Metering::execute: Couldn't get metering data: " + std::string(apiError.what()));
       }
 
+      int sleepTimeMSec = 60000 * 1000;
       foreach (boost::shared_ptr<MeteringConfigChain> configChain, m_Config) {
         sleepTimeMSec = std::min(sleepTimeMSec, 1000 * configChain->getCheckIntervalSeconds());
       }
