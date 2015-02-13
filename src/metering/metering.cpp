@@ -245,7 +245,18 @@ static const long WEEK_IN_SECS = 604800;
                                    unsigned int _valuePower,
                                    unsigned long long _valueEnergy,
                                    DateTime _sampledAt) {
+
+    if (!_meter->getCapability_HasMetering()) {
+      log("postMeteringEvent meter does not support metering data:", lsDebug);
+      return;
+    }
+
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
+    if (rrdFileName->empty()) {
+      log("postMeteringEvent rrd filename is empty.", lsWarning);
+      return;
+    }
 
     std::vector<std::string> lines;
     lines.push_back("update");
