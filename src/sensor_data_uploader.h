@@ -42,7 +42,7 @@ namespace dss {
     typedef std::vector<boost::shared_ptr<Event> >::iterator It;
 
     struct Uploader {
-      virtual void upload(It begin, It end, WebserviceCallDone_t callback) = 0;
+      virtual bool upload(It begin, It end, WebserviceCallDone_t callback) = 0;
     };
 
     SensorLog(const std::string hubName, Uploader *uploader)
@@ -67,7 +67,7 @@ namespace dss {
   };
 
   class MSUploadWrapper : public SensorLog::Uploader {
-    virtual void upload(SensorLog::It begin, SensorLog::It end,
+    virtual bool upload(SensorLog::It begin, SensorLog::It end,
                         WebserviceCallDone_t callback);
   };
 
@@ -91,7 +91,7 @@ namespace dss {
   };
 
   class DSUploadWrapper : public SensorLog::Uploader {
-    virtual void upload(SensorLog::It begin, SensorLog::It end,
+    virtual bool upload(SensorLog::It begin, SensorLog::It end,
                         WebserviceCallDone_t callback);
   };
 
