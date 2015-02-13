@@ -54,7 +54,7 @@ struct MockUploader : public SensorLog::Uploader {
     m_upload_action = action;
   }
 
-  void upload(SensorLog::It it, SensorLog::It end,
+  bool upload(SensorLog::It it, SensorLog::It end,
               WebserviceCallDone_t callback)
   {
     if (m_upload_action) {
@@ -64,6 +64,7 @@ struct MockUploader : public SensorLog::Uploader {
     m_events.insert(m_events.end(), it, end);
     WebserviceReply ws_reply = { m_wscode, "fake-reply" };
     callback->done(m_restcode, ws_reply);
+    return true;
   }
 
   RestTransferStatus_t m_restcode;
