@@ -1,5 +1,10 @@
 dSS - digitalSTROM Server
 
+v1.30.2	12.02.2015
+	* extend sensor debug logging, #9080
+	* do not call ApartmentHasChanged on heating operation mode changes, #9080
+	* don't stop dsm registration when a dsm doesn't response, #8962
+
 v1.30.1	27.01.2015
 	* wait for device model update after device group manipulations, #8900
 	* wait for settings to be saved when writing device button ID, #8900

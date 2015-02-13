@@ -94,7 +94,10 @@ void SensorLog::send_packet(bool next) {
   assert(!m_packet.empty());
 
   lock.unlock(); // upload call might trigger callback immediately
-  m_uploader->upload(m_packet.begin(), m_packet.end(), shared_from_this());
+  if (!m_uploader->upload(m_packet.begin(), m_packet.end(), shared_from_this())) {
+    boost::mutex::scoped_lock lock(m_lock);
+    m_pending_upload = false;
+  }
 }
 
 
@@ -175,9 +178,9 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
 /* Sensor Data Upload Ms Hub Plugin                                         */
 /****************************************************************************/
 
-void MSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
+bool MSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
                              WebserviceCallDone_t callback) {
-  WebserviceMsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
+  return WebserviceMsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
 };
 
 __DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
@@ -338,9 +341,9 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
 /* Sensor Data Upload dS Hub Plugin                                         */
 /****************************************************************************/
 
-void DSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
+bool DSUploadWrapper::upload(SensorLog::It begin, SensorLog::It end,
                              WebserviceCallDone_t callback) {
-  WebserviceDsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
+  return WebserviceDsHub::doUploadSensorData<SensorLog::It>(begin, end, callback);
 };
 
 __DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);

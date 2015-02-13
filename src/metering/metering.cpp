@@ -42,6 +42,7 @@
 #include "src/security/security.h"
 
 #include <algorithm>
+#include "foreach.h"
 #include <functional>
 #include <iterator>
 #include <time.h>
@@ -65,12 +66,12 @@ static const long WEEK_IN_SECS = 604800;
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
     m_ConfigChain.reset(new MeteringConfigChain(1));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(                1,  600));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(               60,  720));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(          15 * 60, 2976));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(     24 * 60 * 60,  370));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>( 7 * 24 * 60 * 60,  260));
-    m_ConfigChain->addConfig(boost::make_shared<MeteringConfig>(30 * 24 * 60 * 60,   60));
+    m_ConfigChain->addConfig(MeteringConfig(                1,  600));
+    m_ConfigChain->addConfig(MeteringConfig(               60,  720));
+    m_ConfigChain->addConfig(MeteringConfig(          15 * 60, 2976));
+    m_ConfigChain->addConfig(MeteringConfig(     24 * 60 * 60,  370));
+    m_ConfigChain->addConfig(MeteringConfig( 7 * 24 * 60 * 60,  260));
+    m_ConfigChain->addConfig(MeteringConfig(30 * 24 * 60 * 60,   60));
     m_Config.push_back(m_ConfigChain);
   } // metering
 
@@ -101,10 +102,6 @@ static const long WEEK_IN_SECS = 604800;
     run();
   } // start
 
-  void Metering::checkDSMeters() {
-    m_pMeteringBusInterface->requestMeterData();
-  } // checkDSMeters
-
   void Metering::execute() {
     assert(m_pMeteringBusInterface != NULL);
     while (DSS::getInstance()->getModelMaintenance().isInitializing()) {
@@ -115,13 +112,15 @@ static const long WEEK_IN_SECS = 604800;
       int sleepTimeMSec = 60000 * 1000;
 
       try {
-        checkDSMeters();
+        m_pMeteringBusInterface->requestMeterData();
       } catch (dss::BusApiError& apiError) {
         log("Metering::execute: Couldn't get metering data: " + std::string(apiError.what()));
       }
-      for (unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
-        sleepTimeMSec = std::min(sleepTimeMSec, 1000 * m_Config[iConfig]->getCheckIntervalSeconds());
+
+      foreach (boost::shared_ptr<MeteringConfigChain> configChain, m_Config) {
+        sleepTimeMSec = std::min(sleepTimeMSec, 1000 * configChain->getCheckIntervalSeconds());
       }
+
       while (!m_Terminated && (sleepTimeMSec > 0)) {
         const int kMinSleepTimeMS = 100;
         sleepMS(std::min(sleepTimeMSec, kMinSleepTimeMS));
@@ -130,122 +129,116 @@ static const long WEEK_IN_SECS = 604800;
     }
   } // execute
 
-  boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
-                                                                   boost::shared_ptr<DSMeter> _pMeter) {
-    if (m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
-      bool tunePowerMaxSetting = false;
-      int rrdMatchCount = 0;
-      std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
-
-      if (!boost::filesystem::exists(fileName)) {
-        dsuid_t dsuid = _pMeter->getDSID();
-        dsid_t dsid;
-        if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
-          std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
-                                ".rrd";
-          if (boost::filesystem::exists(oldFile)) {
-            boost::filesystem::rename(oldFile, fileName);
-            log("Migrated metering data from " + oldFile + " to " + fileName);
-          }
-        }
+  bool Metering::validateDBSeries(std::string& _fileName,
+                                  boost::shared_ptr<MeteringConfigChain> _pChain,
+                                  bool& _tunePowerMaxSetting) {
+    int rrdMatchCount = 0;
+    rrd_clear_error();
+    rrd_info_t *rrdInfo = rrd_info_r((char *) _fileName.c_str());
+    if (rrdInfo != 0) {
+      regex_t rraRowRegex;
+      int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
+      if (regCompErr != 0) {
+        int errSize = regerror(regCompErr, &rraRowRegex, 0, 0);
+        char *errString = new char[errSize];
+        regerror(regCompErr, &rraRowRegex, errString, errSize);
+        log(errString, lsError);
+        delete [] errString;
       }
-
-      rrd_clear_error();
-      rrd_info_t *rrdInfo = rrd_info_r((char *) fileName.c_str());
-      if (rrdInfo != 0) {
-        regex_t rraRowRegex;
-        int regCompErr = regcomp(&rraRowRegex, "rra\\[([0-9])\\].rows", REG_EXTENDED);
-        if (regCompErr != 0) {
-          int errSize = regerror(regCompErr, &rraRowRegex, 0, 0);
-          char *errString = new char[errSize];
-          regerror(regCompErr, &rraRowRegex, errString, errSize);
-          log(errString, lsError);
-          delete [] errString;
-        }
-        rrd_info_t *rrdInfoOrig = rrdInfo;
-        log("RRD DB present");
-        /* check DB contents */
-        while (rrdInfo != NULL) {
-          if (((strcmp(rrdInfo->key, "ds[power].index") == 0) &&
-               (rrdInfo->type == RD_I_CNT) &&
-               (rrdInfo->value.u_cnt == 0)) ||
-              ((strcmp(rrdInfo->key, "ds[energy].index") == 0) &&
-               (rrdInfo->type == RD_I_CNT) &&
-               (rrdInfo->value.u_cnt == 1))) {
-            rrdMatchCount++;
-          } else {
-            regmatch_t subMatch[2];
-            if (regexec(&rraRowRegex, rrdInfo->key, 2, subMatch, 0) == 0) {
-              std::string key(rrdInfo->key);
-              int index = strToInt(key.substr(subMatch[1].rm_so, subMatch[1].rm_eo - subMatch[1].rm_so));
-              if (static_cast<int>(rrdInfo->value.u_cnt) == _pChain->getNumberOfValues(index)) {
-                rrdMatchCount++;
-              }
+      rrd_info_t *rrdInfoOrig = rrdInfo;
+      log("RRD DB present");
+      /* check DB contents */
+      while (rrdInfo != NULL) {
+        if (((strcmp(rrdInfo->key, "ds[power].index") == 0) &&
+             (rrdInfo->type == RD_I_CNT) &&
+             (rrdInfo->value.u_cnt == 0)) ||
+            ((strcmp(rrdInfo->key, "ds[energy].index") == 0) &&
+             (rrdInfo->type == RD_I_CNT) &&
+             (rrdInfo->value.u_cnt == 1))) {
+          rrdMatchCount++;
+        } else {
+          regmatch_t subMatch[2];
+          if (regexec(&rraRowRegex, rrdInfo->key, 2, subMatch, 0) == 0) {
+            std::string key(rrdInfo->key);
+            int index = strToInt(key.substr(subMatch[1].rm_so, subMatch[1].rm_eo - subMatch[1].rm_so));
+            if (static_cast<int>(rrdInfo->value.u_cnt) == _pChain->getNumberOfValues(index)) {
+              rrdMatchCount++;
             }
           }
-          if ((strcmp(rrdInfo->key, "ds[power].max") == 0) &&
-              (rrdInfo->type == RD_I_VAL) &&
-              (rrdInfo->value.u_val == 4.5e3)) {
-            tunePowerMaxSetting = true;
-          }
-          rrdInfo = rrdInfo->next;
         }
-        rrd_info_free(rrdInfoOrig);
-        regfree(&rraRowRegex);
+
+        if ((strcmp(rrdInfo->key, "ds[power].max") == 0) &&
+            (rrdInfo->type == RD_I_VAL) &&
+            (rrdInfo->value.u_val == 4.5e3)) {
+          _tunePowerMaxSetting = true;
+        }
+
+        rrdInfo = rrdInfo->next;
       }
-      log("RRD MatchCount: " + intToString(rrdMatchCount));
-
-      if (rrdMatchCount != (2 + _pChain->size())) {
-        log("Creating new RRD database.", lsWarning);
-        /* create new DB */
-        std::vector<std::string> lines;
-        lines.push_back("DS:power:GAUGE:5:0:40000");
-        lines.push_back("DS:energy:DERIVE:5:0:U");
-        MeteringConfigChain *chain = _pChain.get();
-        for (int i = 0; i < chain->size(); ++i) {
-          std::stringstream sstream;
-          sstream << "RRA:AVERAGE:0.5:" << chain->getResolution(i) << ":" << chain->getNumberOfValues(i);
-          lines.push_back(sstream.str());
-        }
-
-        std::vector<const char*> starts;
-        std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-        const char** argString = &starts.front();
-
-        DateTime iCurrentTimeStamp;
-        rrd_clear_error();
-        int result = rrd_create_r(fileName.c_str(),
-                                  1,
-                                  iCurrentTimeStamp.secondsSinceEpoch() - 10,
-                                  starts.size(),
-                                  argString);
-        if (result < 0) {
-          log(rrd_get_error(), lsError);
-          boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
-          return pFileName;
-        }
-      } else if (tunePowerMaxSetting) {
-        log(std::string("tuning max acceptable power value in RRD ") + fileName, lsWarning);
-        std::vector<std::string> lines;
-        lines.push_back("tune");
-        lines.push_back(fileName);
-        lines.push_back("--maximum");
-        lines.push_back("power:40000");
-
-        std::vector<const char*> starts;
-        std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-        const char** argString = &starts.front();
-        rrd_clear_error();
-        // cast-away the const, should be ok according to rrd_tune() sources
-        int result = rrd_tune(starts.size(), (char**)argString);
-        if (result < 0) {
-          log(rrd_get_error());
-        }
-      }
-
-      boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
-      m_CachedSeries[_pMeter] = pFileName;
+      rrd_info_free(rrdInfoOrig);
+      regfree(&rraRowRegex);
     }
+    log("RRD MatchCount: " + intToString(rrdMatchCount));
+    return (rrdMatchCount == (2 + _pChain->size()));
+  }
+
+  void Metering::tuneDBPowerSettings(std::string& _fileName)
+  {
+    log(std::string("tuning max acceptable power value in RRD ") + _fileName, lsWarning);
+    std::vector<std::string> lines;
+    lines.push_back("tune");
+    lines.push_back(_fileName);
+    lines.push_back("--maximum");
+    lines.push_back("power:40000");
+
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    const char** argString = &starts.front();
+    rrd_clear_error();
+    // cast-away the const, should be ok according to rrd_tune() sources
+    int result = rrd_tune(starts.size(), (char**)argString);
+    if (result < 0) {
+      log(rrd_get_error());
+    }
+  }
+
+  boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
+                                                                   boost::shared_ptr<DSMeter> _pMeter) {
+    if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
+      return m_CachedSeries[_pMeter];
+    }
+
+    std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
+
+    if (!boost::filesystem::exists(fileName)) {
+      dsuid_t dsuid = _pMeter->getDSID();
+      dsid_t dsid;
+      if (::dsuid_to_dsid(&dsuid, &dsid) == DSUID_RC_OK) {
+        std::string oldFile = m_MeteringStorageLocation + dsid2str(dsid) +
+                              ".rrd";
+        if (boost::filesystem::exists(oldFile)) {
+          boost::filesystem::rename(oldFile, fileName);
+          log("Migrated metering data from " + oldFile + " to " + fileName);
+        }
+      }
+    }
+
+    bool tunePowerMaxSetting = false;
+    bool validate = validateDBSeries(fileName, _pChain, tunePowerMaxSetting);
+
+    if (!validate) {
+      int result = createDB(fileName, _pChain);
+      if (result < 0) {
+        log(rrd_get_error(), lsError);
+        boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
+        return pFileName;
+      }
+    } else if (tunePowerMaxSetting) {
+      tuneDBPowerSettings(fileName);
+    }
+
+    boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
+    m_CachedSeries[_pMeter] = pFileName;
     return m_CachedSeries[_pMeter];
   } // getOrCreateCachedSeries
 
@@ -281,6 +274,68 @@ static const long WEEK_IN_SECS = 604800;
     m_ValuesMutex.unlock();
   } // postMeteringEvent
 
+  int Metering::createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain)
+  {
+    log("Creating new RRD database.", lsWarning);
+
+    /* create new DB */
+    std::vector<std::string> lines;
+    lines.push_back("DS:power:GAUGE:5:0:40000");
+    lines.push_back("DS:energy:DERIVE:5:0:U");
+
+    MeteringConfigChain *chain = _pChain.get();
+    for (int i = 0; i < chain->size(); ++i) {
+      std::stringstream sstream;
+      sstream << "RRA:AVERAGE:0.5:" << chain->getResolution(i) << ":" << chain->getNumberOfValues(i);
+      lines.push_back(sstream.str());
+    }
+
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    const char** argString = &starts.front();
+
+    DateTime iCurrentTimeStamp;
+    time_t currentInSecs = iCurrentTimeStamp.secondsSinceEpoch();
+    if (currentInSecs > 10) {
+      currentInSecs -= 10;
+    }
+
+    rrd_clear_error();
+    int result = rrd_create_r(_filename.c_str(),
+                              1,
+                              currentInSecs,
+                              starts.size(),
+                              argString);
+
+    return result;
+  }
+
+ void Metering::flushCachedDBValues(boost::shared_ptr<std::string> _rrdFileName) {
+    std::vector<boost::shared_ptr<std::string> > rrdFileNames;
+    rrdFileNames.push_back(_rrdFileName);
+    flushCachedDBValues(rrdFileNames);
+  }
+
+  void Metering::flushCachedDBValues(std::vector<boost::shared_ptr<std::string> > _rrdFileNames) {
+    std::vector<std::string> lines;
+    lines.push_back("flushcached");
+    lines.push_back("--daemon");
+    lines.push_back(m_RrdcachedPath);
+    for (std::vector<boost::shared_ptr<std::string> >::iterator iter = _rrdFileNames.begin();
+         iter < _rrdFileNames.end();
+         ++iter) {
+      lines.push_back(iter->get()->c_str());
+    }
+    std::vector<const char*> starts;
+    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+    char** argString = (char**)&starts.front();
+    log("flushing cached rrd data to file", lsInfo);
+    int result = rrd_flushcached(starts.size(), argString);
+    if (result < 0) {
+      log(rrd_get_error());
+    }
+  }
+
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
     m_ValuesMutex.lock();
     boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
@@ -301,23 +356,11 @@ static const long WEEK_IN_SECS = 604800;
       log("Actual Timestamp:"+ doubleToString(actualTime) +
           "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
 
-      // call rrd_flushcached (blocking function) only if delta is small enough.
+      // call flushCachedDBValues (blocking function) only if delta is small enough.
       if (secondsAbs < WEEK_IN_SECS) {
-          std::vector<std::string> lines;
-          lines.push_back("flushcached");
-          lines.push_back("--daemon");
-          lines.push_back(m_RrdcachedPath);
-          lines.push_back(rrdFileName.get()->c_str());
-          std::vector<const char*> starts;
-          std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-          char** argString = (char**)&starts.front();
-          log("flushing cached rrd data to file", lsInfo);
-          int result = rrd_flushcached(starts.size(), argString);
-          if (result < 0) {
-            log(rrd_get_error());
-          }
+        flushCachedDBValues(rrdFileName);
       } else {
-          log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
+        log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
       }
     }
 
@@ -421,22 +464,7 @@ static const long WEEK_IN_SECS = 604800;
     m_ValuesMutex.lock();
 
     if (!m_RrdcachedPath.empty()) {
-      std::vector<std::string> lines;
-      lines.push_back("flushcached");
-      lines.push_back("--daemon");
-      lines.push_back(m_RrdcachedPath);
-      for (std::vector<boost::shared_ptr<std::string> >::iterator iter = rrdFileNames.begin();
-           iter < rrdFileNames.end();
-           ++iter) {
-        lines.push_back(iter->get()->c_str());
-      }
-      std::vector<const char*> starts;
-      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-      char** argString = (char**)&starts.front();
-      int result = rrd_flushcached(starts.size(), argString);
-      if (result < 0) {
-        log(rrd_get_error());
-      }
+      flushCachedDBValues(rrdFileNames);
     }
 
     std::vector<std::string> lines;
@@ -582,8 +610,33 @@ static const long WEEK_IN_SECS = 604800;
 
   //================================================== MeteringConfigChain
 
-  void MeteringConfigChain::addConfig(boost::shared_ptr<MeteringConfig> _config) {
+  MeteringConfigChain::MeteringConfigChain(int _checkIntervalSeconds)
+  : m_CheckIntervalSeconds(_checkIntervalSeconds)
+  { }
+
+  MeteringConfigChain::~MeteringConfigChain()
+  {
+    m_Chain.clear();
+  }
+
+  void MeteringConfigChain::addConfig(MeteringConfig _config) {
     m_Chain.push_back(_config);
-  } // addConfig
+  }
+
+  const int MeteringConfigChain::size() const {
+    return m_Chain.size();
+  }
+
+  const int MeteringConfigChain::getResolution(int _index) const {
+    return m_Chain.at(_index).m_Resolution;
+  }
+
+  const int MeteringConfigChain::getNumberOfValues(int _index) const {
+    return m_Chain.at(_index).m_NumberOfValues;
+  }
+
+  int MeteringConfigChain::getCheckIntervalSeconds() const {
+    return m_CheckIntervalSeconds;
+  }
 
 } // namespace dss
