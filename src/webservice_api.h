@@ -83,7 +83,7 @@ public:
   static void doGetWeatherInformation(boost::shared_ptr<URLRequestCallback> callback);
 
   template <class iterator>
-  static void doUploadSensorData(iterator begin, iterator end,
+  static bool doUploadSensorData(iterator begin, iterator end,
                                  WebserviceCallDone_t callback);
 
   /**
@@ -104,7 +104,7 @@ public:
   static bool isAuthorized();
 
   template <class iterator>
-  static void doUploadSensorData(iterator begin, iterator end,
+  static bool doUploadSensorData(iterator begin, iterator end,
                                  WebserviceCallDone_t callback);
 };
 

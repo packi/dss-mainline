@@ -270,7 +270,7 @@ bool WebserviceMsHub::isAuthorized() {
 }
 
 template <class Iterator>
-void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
+bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
                                          WebserviceCallDone_t callback) {
 
   JSONObject obj;
@@ -293,7 +293,7 @@ void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
   }
 
   if (ct == 0) {
-    return;
+    return false;
   }
 
   std::string postdata = obj.toString();
@@ -314,9 +314,10 @@ void WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
                                                     postdata,
                                                     mcb,
                                                     true);
+  return true;
 }
 
-template void WebserviceMsHub::doUploadSensorData<ItEvent>(
+template bool WebserviceMsHub::doUploadSensorData<ItEvent>(
       ItEvent begin, ItEvent end, WebserviceCallDone_t callback);
 
 void WebserviceMsHub::doDssBackAgain(WebserviceCallDone_t callback)
@@ -739,7 +740,7 @@ bool WebserviceDsHub::isAuthorized() {
 }
 
 template <class Iterator>
-void WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
+bool WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
                                          WebserviceCallDone_t callback) {
 
   JSONObject obj;
@@ -761,7 +762,7 @@ void WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
   }
 
   if (ct == 0) {
-    return;
+    return false;
   }
 
   std::string postdata = obj.toString();
@@ -783,9 +784,10 @@ void WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
                                                     postdata,
                                                     mcb,
                                                     true);
+  return true;
 }
 
-template void WebserviceDsHub::doUploadSensorData<ItEvent>(
+template bool WebserviceDsHub::doUploadSensorData<ItEvent>(
       ItEvent begin, ItEvent end, WebserviceCallDone_t callback);
 
 } /* namespace dss */
