@@ -99,7 +99,7 @@ namespace dss {
       boost::shared_ptr<MeteringConfigChain> _pChain,
       boost::shared_ptr<DSMeter> _pMeter);
     int createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain);
-    void flushCachedDBValues();
+    void syncCachedDBValues();
   protected:
     // protected for testing
     bool checkDBReset(DateTime& _sampledAt, std::string& _rrdFileName);

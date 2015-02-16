@@ -339,7 +339,7 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     return result;
   }
 
-  void Metering::flushCachedDBValues() {
+  void Metering::syncCachedDBValues() {
     std::vector<std::string> lines;
     lines.push_back("flushcached");
     lines.push_back("--daemon");
@@ -451,7 +451,7 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
       }
     } // end scoped lock
     if (syncData) {
-      flushCachedDBValues();
+      syncCachedDBValues();
     }
   }
 
@@ -529,7 +529,7 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
       boost::mutex::scoped_lock lock(m_ValuesMutex);
 
       if (!m_RrdcachedPath.empty()) {
-        flushCachedDBValues();
+        syncCachedDBValues();
       }
 
       std::vector<std::string> lines;
