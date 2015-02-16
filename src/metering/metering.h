@@ -37,7 +37,7 @@
 
 namespace dss {
 
-  class MeteringConfig;
+  struct MeteringConfig;
   class MeteringConfigChain;
   class DSMeter;
   class MeteringValue;
