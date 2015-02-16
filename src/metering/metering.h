@@ -88,12 +88,12 @@ namespace dss {
       boost::shared_ptr<MeteringConfigChain> _pChain,
       bool& _tunePowerMaxSetting);
     void tuneDBPowerSettings(std::string& _fileName);
-    boost::shared_ptr<std::string> getOrCreateCachedSeries(
+    std::string getOrCreateCachedSeries(
       boost::shared_ptr<MeteringConfigChain> _pChain,
       boost::shared_ptr<DSMeter> _pMeter);
     int createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain);
-    void flushCachedDBValues(boost::shared_ptr<std::string> _rrdFileName);
-    void flushCachedDBValues(std::vector<boost::shared_ptr<std::string> > _rrdFileNames);
+    void flushCachedDBValues(std::string& _rrdFileName);
+    void flushCachedDBValues(std::vector<std::string>& _rrdFileNames);
   protected:
     virtual void doStart();
   public:
