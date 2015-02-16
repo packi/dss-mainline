@@ -77,6 +77,7 @@ struct MockUploader : public SensorLog::Uploader {
  * Delay upload of first packet until unblock is called
  */
 struct MockBlockingUpload: public SensorLog::Uploader {
+  MockBlockingUpload() : m_blocked(true) {}
   bool upload(SensorLog::It it, SensorLog::It end,
               WebserviceCallDone_t callback)
   {
