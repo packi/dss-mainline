@@ -120,14 +120,14 @@ std::set<int> filter_indices(const std::vector<boost::shared_ptr<Event> > &recv_
   return indices;
 }
 
-BOOST_AUTO_TEST_CASE(test_upload_10k_events) {
+BOOST_AUTO_TEST_CASE(test_upload_1k_events) {
   MockUploader mu(REST_OK);
   EventFactory f;
 
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_sensor_events(s, 10 * 1000);
+  f.emit_sensor_events(s, SensorLog::max_elements);
   s->triggerUpload();
 
   // received all events
