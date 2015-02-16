@@ -73,6 +73,40 @@ struct MockUploader : public SensorLog::Uploader {
   boost::function<void()> m_upload_action;
 };
 
+/*
+ * Delay upload of first packet until unblock is called
+ */
+struct MockBlockingUpload: public SensorLog::Uploader {
+  MockBlockingUpload() : m_blocked(true) {}
+  bool upload(SensorLog::It it, SensorLog::It end,
+              WebserviceCallDone_t callback)
+  {
+    m_events.insert(m_events.end(), it, end);
+    m_callback = callback;
+
+    if (!m_blocked) {
+      notify();
+    }
+
+    return true; //< upload started
+  }
+
+  void unblockUpload() {
+    m_blocked = false;
+    notify();
+  }
+
+  std::vector<boost::shared_ptr<Event> > m_events;
+
+private:
+  void notify() {
+    m_callback->done(REST_OK, WebserviceReply());
+  }
+
+  WebserviceCallDone_t m_callback;
+  bool m_blocked;
+};
+
 std::set<int> filter_indices(const std::vector<boost::shared_ptr<Event> > &recv_events,
                              const std::vector<boost::shared_ptr<Event> > &sent_events)
 {
@@ -87,14 +121,14 @@ std::set<int> filter_indices(const std::vector<boost::shared_ptr<Event> > &recv_
   return indices;
 }
 
-BOOST_AUTO_TEST_CASE(test_upload_10k_events) {
+BOOST_AUTO_TEST_CASE(test_upload_1k_events) {
   MockUploader mu(REST_OK);
   EventFactory f;
 
   boost::shared_ptr<SensorLog> s =
     boost::make_shared<SensorLog>("unit-test", &mu);
 
-  f.emit_sensor_events(s, 10 * 1000);
+  f.emit_sensor_events(s, SensorLog::max_elements);
   s->triggerUpload();
 
   // received all events
@@ -103,6 +137,35 @@ BOOST_AUTO_TEST_CASE(test_upload_10k_events) {
   // all events had a different index?
   std::set<int> indices = filter_indices(mu.m_events, f.m_events);
   BOOST_CHECK_EQUAL(mu.m_events.size(), indices.size());
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_sensor_events) {
+  MockUploader mu(REST_OK);
+  EventFactory f;
+
+  boost::shared_ptr<SensorLog> s =
+    boost::make_shared<SensorLog>("unit-test", &mu);
+
+  f.emit_sensor_events(s, SensorLog::max_elements + 1);
+  s->triggerUpload();
+  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_elements);
+}
+
+BOOST_AUTO_TEST_CASE(test_limit_prio_events) {
+  MockBlockingUpload mu;
+  EventFactory f;
+
+  boost::shared_ptr<SensorLog> s =
+    boost::make_shared<SensorLog>("unit-test", &mu);
+
+  /*
+   * first packet is immediately uploaded,
+   * max_prio_elements are queued, 2 elements are lost
+   * upon unblock all queued events uploaded
+   */
+  f.emit_priority_events(s, SensorLog::max_prio_elements + 3);
+  mu.unblockUpload();
+  BOOST_CHECK_EQUAL(mu.m_events.size(), SensorLog::max_prio_elements + 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_upload_network_failure) {
