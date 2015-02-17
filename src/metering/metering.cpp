@@ -289,14 +289,12 @@ static const long WEEK_IN_SECS = 604800;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char **)&starts.front();
 
-    m_ValuesMutex.lock();
-
+    boost::mutex::scoped_lock lock(m_ValuesMutex);
     rrd_clear_error();
     int result = rrd_update(starts.size(), argString);
     if (result < 0) {
       log(rrd_get_error());
     }
-    m_ValuesMutex.unlock();
   } // postMeteringEvent
 
   int Metering::createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain)
@@ -362,44 +360,47 @@ static const long WEEK_IN_SECS = 604800;
   }
 
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
-    m_ValuesMutex.lock();
-    std::string rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
-
-    if (!m_RrdcachedPath.empty()) {
-
-      // Get last entry-timestamp of data in file
-      time_t  timestamp = rrd_last_r(rrdFileName.c_str());
-
-      // Get current timestamp
-      time_t actualTime;
-      time(&actualTime);
-
-      // Calculate absolute delta
-      double secondsAbs = std::abs(difftime(actualTime, timestamp));
-
-      log("Actual Timestamp:"+ doubleToString(actualTime) +
-          "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
-
-      // call flushCachedDBValues (blocking function) only if delta is small enough.
-      if (secondsAbs < WEEK_IN_SECS) {
-        flushCachedDBValues(rrdFileName);
-      } else {
-        log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
-      }
-    }
 
     char **names = 0;
     char **data = 0;
     time_t lastUpdate;
-    unsigned long dscount;
-    rrd_clear_error();
-    int result = rrd_lastupdate_r(rrdFileName.c_str(),
-                                  &lastUpdate,
-                                  &dscount,
-                                  &names,
-                                  &data);
+    unsigned long dscount = 0;
+    int result = 0;
 
-    m_ValuesMutex.unlock();
+    {
+      boost::mutex::scoped_lock lock(m_ValuesMutex);
+      std::string rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
+      if (!m_RrdcachedPath.empty()) {
+
+        // Get last entry-timestamp of data in file
+        time_t  timestamp = rrd_last_r(rrdFileName.c_str());
+
+        // Get current timestamp
+        time_t actualTime;
+        time(&actualTime);
+
+        // Calculate absolute delta
+        double secondsAbs = std::abs(difftime(actualTime, timestamp));
+
+        log("Actual Timestamp:"+ doubleToString(actualTime) +
+            "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
+
+        // call flushCachedDBValues (blocking function) only if delta is small enough.
+        if (secondsAbs < WEEK_IN_SECS) {
+          flushCachedDBValues(rrdFileName);
+        } else {
+          log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
+        }
+      }
+
+      rrd_clear_error();
+      result = rrd_lastupdate_r(rrdFileName.c_str(),
+                                &lastUpdate,
+                                &dscount,
+                                &names,
+                                &data);
+    } // end scoped lock
 
     if (result != 0) {
       log(rrd_get_error());
@@ -485,91 +486,92 @@ static const long WEEK_IN_SECS = 604800;
       end = (_endTime.secondsSinceEpoch() / step) * step;
     }
 
-    m_ValuesMutex.lock();
-
-    if (!m_RrdcachedPath.empty()) {
-      flushCachedDBValues(rrdFileNames);
-    }
-
-    std::vector<std::string> lines;
-    lines.push_back("xport");
-    if (!m_RrdcachedPath.empty()) {
-      lines.push_back("--daemon");
-      lines.push_back(m_RrdcachedPath);
-    }
-    lines.push_back("--start");
-    lines.push_back(intToString(start));
-    lines.push_back("--end");
-    lines.push_back(intToString(end));
-    lines.push_back("--step");
-    lines.push_back(intToString(step));
-    lines.push_back("--maxrows");
-    lines.push_back("3000");
-    {
-      int i = 0;
-      int size = rrdFileNames.size();
-      std::stringstream sstream;
-      for (i = 0; i < size; ++i) {
-        const char* filename = rrdFileNames.at(i).c_str();
-        sstream << "DEF:raw" << i << "=" << filename;
-        if ((_type == etConsumption) && (step == 1)) {
-          sstream << ":power";
-        } else {
-          sstream << ":energy";
-        }
-        sstream << ":AVERAGE";
-        lines.push_back(sstream.str());
-
-        sstream.str(std::string());
-        sstream << "CDEF:data" << i << "=raw" << i << ",UN,0,raw" << i << ",IF";
-        lines.push_back(sstream.str());
-        sstream.str(std::string());
-      }
-      sstream << "CDEF:sum=data0";
-      for (i = 1; i < size; ++i) {
-        sstream << ",data" << i << ",+";
-      }
-      lines.push_back(sstream.str());
-    }
-    lines.push_back("CDEF:limit=sum,0,40000,LIMIT");
-    switch (_type) {
-    case etEnergy:
-    case etEnergyDelta: {
-      lines.push_back("CDEF:ratePerStep=limit," + intToString(step) + ",*");
-      if (_energyInWh) {
-        lines.push_back("CDEF:adj=ratePerStep,3600,/");
-        lines.push_back("XPORT:adj");
-      } else {
-        lines.push_back("XPORT:ratePerStep");
-      }
-      break;
-    }
-    default: {
-      lines.push_back("XPORT:limit");
-      break;
-    }
-    }
-
-    std::vector<const char*> starts;
-    std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
-    char** argString = (char**)&starts.front();
 
     unsigned long dscount = 0;
     char **names = 0;
     rrd_value_t *data = 0;
+    int result = 0;
+    {
+      boost::mutex::scoped_lock lock(m_ValuesMutex);
 
-    rrd_clear_error();
-    int result = rrd_xport(starts.size(),
-                           argString,
-                           0,
-                           &start,
-                           &end,
-                           &step,
-                           &dscount,
-                           &names,
-                           &data);
+      if (!m_RrdcachedPath.empty()) {
+        flushCachedDBValues(rrdFileNames);
+      }
 
-    m_ValuesMutex.unlock();
+      std::vector<std::string> lines;
+      lines.push_back("xport");
+      if (!m_RrdcachedPath.empty()) {
+        lines.push_back("--daemon");
+        lines.push_back(m_RrdcachedPath);
+      }
+      lines.push_back("--start");
+      lines.push_back(intToString(start));
+      lines.push_back("--end");
+      lines.push_back(intToString(end));
+      lines.push_back("--step");
+      lines.push_back(intToString(step));
+      lines.push_back("--maxrows");
+      lines.push_back("3000");
+      {
+        int i = 0;
+        int size = rrdFileNames.size();
+        std::stringstream sstream;
+        for (i = 0; i < size; ++i) {
+          const char* filename = rrdFileNames.at(i).c_str();
+          sstream << "DEF:raw" << i << "=" << filename;
+          if ((_type == etConsumption) && (step == 1)) {
+            sstream << ":power";
+          } else {
+            sstream << ":energy";
+          }
+          sstream << ":AVERAGE";
+          lines.push_back(sstream.str());
+
+          sstream.str(std::string());
+          sstream << "CDEF:data" << i << "=raw" << i << ",UN,0,raw" << i << ",IF";
+          lines.push_back(sstream.str());
+          sstream.str(std::string());
+        }
+        sstream << "CDEF:sum=data0";
+        for (i = 1; i < size; ++i) {
+          sstream << ",data" << i << ",+";
+        }
+        lines.push_back(sstream.str());
+      }
+      lines.push_back("CDEF:limit=sum,0,40000,LIMIT");
+      switch (_type) {
+      case etEnergy:
+      case etEnergyDelta: {
+        lines.push_back("CDEF:ratePerStep=limit," + intToString(step) + ",*");
+        if (_energyInWh) {
+          lines.push_back("CDEF:adj=ratePerStep,3600,/");
+          lines.push_back("XPORT:adj");
+        } else {
+          lines.push_back("XPORT:ratePerStep");
+        }
+        break;
+      }
+      default: {
+        lines.push_back("XPORT:limit");
+        break;
+      }
+      }
+
+      std::vector<const char*> starts;
+      std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
+      char** argString = (char**)&starts.front();
+
+      rrd_clear_error();
+      result = rrd_xport(starts.size(),
+                         argString,
+                         0,
+                         &start,
+                         &end,
+                         &step,
+                         &dscount,
+                         &names,
+                         &data);
+    } // end scoped lock
 
     if (result != 0) {
       log(rrd_get_error());

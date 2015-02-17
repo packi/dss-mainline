@@ -27,12 +27,12 @@
 #include "src/thread.h"
 #include "src/subsystem.h"
 #include "src/datetools.h"
-#include "src/mutex.h"
 
 #include <string>
 #include <vector>
 #include <deque>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
@@ -85,7 +85,7 @@ namespace dss {
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
     std::vector<RRDLookup> m_CachedSeries;
 
-    Mutex m_ValuesMutex;
+    boost::mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
   private:
     virtual void initialize();
