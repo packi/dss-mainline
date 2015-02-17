@@ -89,6 +89,7 @@ class LogHandler;
 
     static Mutex m_handlerListMutex;
     static std::list<LogHandler *> m_handlerList;
+    static Mutex m_streamMutex;
   }; // Logger
 
   class LogChannel {
