@@ -127,11 +127,13 @@ bool SyncEvent::waitFor(int _timeoutMS) {
     result = pthread_cond_timedwait(&m_Condition, m_ConditionMutex.getMutex(), &timeout);
   }
 
-  m_ConditionMutex.unlock();
+  bool ret = m_State;
   if(result < 0) {
-    return false;
+    ret = false;
   }
-  return m_State;
+  m_ConditionMutex.unlock();
+
+  return ret;
 #else
   return WaitForSingleObject(m_EventHandle, _timeoutMS) == WAIT_OBJECT_0;
 #endif
