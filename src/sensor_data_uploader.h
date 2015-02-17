@@ -41,18 +41,18 @@ namespace dss {
     };
 
     typedef std::vector<boost::shared_ptr<Event> >::iterator It;
+    typedef std::vector<boost::shared_ptr<Event> > m_events_t;
 
     struct Uploader {
       virtual bool upload(It begin, It end, WebserviceCallDone_t callback) = 0;
     };
 
-    SensorLog(const std::string hubName, Uploader *uploader)
-      : m_pending_upload(false), m_hubName(hubName), m_uploader(uploader),
-        m_upload_run(0) {}
-    virtual ~SensorLog() {};
+    SensorLog(const std::string hubName, Uploader *uploader);
+    virtual ~SensorLog();
     void append(boost::shared_ptr<Event> event, bool highPrio = false);
     void triggerUpload();
     void done(RestTransferStatus_t status, WebserviceReply reply);
+
   private:
     void packet_append(std::vector<boost::shared_ptr<Event> > &events);
     void send_packet(bool next = false);
@@ -65,6 +65,8 @@ namespace dss {
     const std::string m_hubName;
     Uploader *m_uploader;
     int m_upload_run;
+    PropertyNodePtr m_propFolder; //< system/<hub_name>/eventlog
+    std::string m_lastUpload;
   };
 
   class MSUploadWrapper : public SensorLog::Uploader {
