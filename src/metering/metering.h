@@ -70,15 +70,21 @@ namespace dss {
     void setValue(double _value) { m_Value = _value; }
   }; // Value
 
+  struct RRDLookup {
+    RRDLookup(boost::shared_ptr<DSMeter> _meter, std::string& _file) :
+      m_Meter(_meter), m_RrdFile(_file) {};
+    boost::shared_ptr<DSMeter> m_Meter;
+    std::string m_RrdFile;
+  }; // RRDLookup
+
   class Metering : public ThreadedSubsystem {
   private:
     std::string m_MeteringStorageLocation;
     std::string m_RrdcachedPath;
     boost::shared_ptr<MeteringConfigChain> m_ConfigChain;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
-    typedef std::map<boost::shared_ptr<DSMeter>,
-                     boost::shared_ptr<std::string> > CachedSeriesMap;
-    CachedSeriesMap m_CachedSeries;
+    std::vector<RRDLookup> m_CachedSeries;
+
     Mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
   private:

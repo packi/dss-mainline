@@ -62,6 +62,17 @@ namespace dss {
 
 static const long WEEK_IN_SECS = 604800;
 
+  struct find_rrd
+  {
+    boost::shared_ptr<DSMeter> m_Meter;
+    find_rrd(boost::shared_ptr<DSMeter> _meter) {
+      m_Meter = _meter;
+    }
+    bool operator () (const RRDLookup& _lookup) const {
+      return (m_Meter == _lookup.m_Meter);
+    }
+  };
+
   Metering::Metering(DSS* _pDSS)
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
@@ -204,8 +215,10 @@ static const long WEEK_IN_SECS = 604800;
 
   std::string Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                 boost::shared_ptr<DSMeter> _pMeter) {
-    if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
-      return *m_CachedSeries[_pMeter].get();
+    std::vector<RRDLookup>::iterator it =
+        std::find_if(m_CachedSeries.begin(), m_CachedSeries.end(), find_rrd(_pMeter));
+    if (it != m_CachedSeries.end()) {
+      return it->m_RrdFile;
     }
 
     std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
@@ -237,9 +250,10 @@ static const long WEEK_IN_SECS = 604800;
       tuneDBPowerSettings(fileName);
     }
 
-    boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
-    m_CachedSeries[_pMeter] = pFileName;
-    return *m_CachedSeries[_pMeter].get();
+    RRDLookup lookup(_pMeter, fileName);
+    m_CachedSeries.push_back(lookup);
+    return lookup.m_RrdFile;
+
   } // getOrCreateCachedSeries
 
   void Metering::postMeteringEvent(boost::shared_ptr<DSMeter> _meter,
