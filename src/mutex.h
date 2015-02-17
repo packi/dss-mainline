@@ -59,46 +59,6 @@ public:
 #endif
 }; //  Mutex
 
-
-/** Provides an object with a lockable interface
- */
-class LockableObject {
-  private:
-    mutable Mutex m_LockMutex;
-    mutable bool m_Locked;
-#ifdef WIN32
-    mutable DWORD m_LockedBy;
-#else
-    mutable pthread_t m_LockedBy;
-#endif
-  public:
-    LockableObject();
-    virtual ~LockableObject();
-    /** Returns \c true if the object is locked */
-    bool isLocked() const;
-    /** Returns \c true if the object is locked by the current thread */
-    bool isLockedCurrentThread() const;
-    /** Acquires a lock.
-     * @see Mutex::lock */
-    bool lock() const;
-    /** Releases a lock.
-     * @see Mutex::unlock */
-    bool unlock() const;
-}; // LockableObject;
-
-/** Asserts that an object can be accessed from the current thread.
- * If another thread instanciates assertLocked( obj ), it requires
- * the other thread to wait for a proper lock.
- */
-class AssertLocked {
-  private:
-    bool m_OwnLock;
-    const LockableObject* m_ObjRef;
-  public:
-    AssertLocked(const LockableObject* objToLock);
-    ~AssertLocked();
-}; // LockAsserter
-
 }
 
 #endif

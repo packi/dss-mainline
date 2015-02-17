@@ -55,7 +55,7 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
-    AssertLocked apartmentLocked(&m_Apartment);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     if(!_dsMeter->isPresent()) {
       throw std::runtime_error("Need dsMeter to be present");
     }
@@ -90,7 +90,7 @@ namespace dss {
     if(_device->getPropertyNode() != NULL) {
       _device->getPropertyNode()->checkWriteAccess();
     }
-    AssertLocked apartmentLocked(&m_Apartment);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     if(!_device->isPresent()) {
       throw std::runtime_error("Need device to be present");
     }
@@ -164,7 +164,7 @@ namespace dss {
   } // addDeviceToZone
 
   void StructureManipulator::removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter) {
-    AssertLocked apartmentLocked(&m_Apartment);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     Set presentDevicesInZoneOfDSMeter = _zone->getDevices().getByDSMeter(_dsMeter).getByPresence(true);
     if(presentDevicesInZoneOfDSMeter.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
@@ -204,7 +204,7 @@ namespace dss {
   } // removeZoneOnDSMeter
 
   void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
-    AssertLocked apartmentLocked(&m_Apartment);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     try {
       dsuid_t broadcastDSID;
       SetBroadcastDsuid(broadcastDSID);

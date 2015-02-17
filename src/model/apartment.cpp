@@ -29,6 +29,7 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/ref.hpp>
+#include <boost/thread/thread.hpp>
 
 #include "src/businterface.h"
 #include "src/model/modelconst.h"
@@ -54,6 +55,7 @@
 
 namespace dss {
 
+  boost::recursive_mutex Apartment::m_mutex;
 
   //================================================== Apartment
 
@@ -155,7 +157,7 @@ namespace dss {
   } // addDefaultGroupsToZone
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) const {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       dsuid_t dev_dsid = dev->getDSID();
       if(IsEqualDsuid(dev_dsid,  _dsid)) {
@@ -166,7 +168,7 @@ namespace dss {
   } // getDeviceByShortAddress const
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       dsuid_t dev_dsid = dev->getDSID();
       if(IsEqualDsuid(dev_dsid, _dsid)) {
@@ -177,7 +179,7 @@ namespace dss {
   } // getDeviceByShortAddress
 
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if(dev->getName() == _name) {
         return dev;
@@ -188,7 +190,7 @@ namespace dss {
 
   Set Apartment::getDevices() const {
     DeviceVector devs;
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       devs.push_back(DeviceReference(dev, this));
     }
@@ -197,7 +199,7 @@ namespace dss {
   } // getDevices
 
   boost::shared_ptr<Zone> Apartment::getZone(const std::string& _zoneName) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getName() == _zoneName) {
         return zone;
@@ -207,7 +209,7 @@ namespace dss {
   } // getZone(name)
 
   boost::shared_ptr<Zone> Apartment::getZone(const int _id) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getID() == _id) {
         return zone;
@@ -217,13 +219,13 @@ namespace dss {
   } // getZone(id)
 
   std::vector<boost::shared_ptr<Zone> > Apartment::getZones() {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     std::vector<boost::shared_ptr<Zone> > result = m_Zones;
     return result;
   } // getZones
 
   boost::shared_ptr<DSMeter> Apartment::getDSMeter(const std::string& _modName) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getName() == _modName) {
         return dsMeter;
@@ -233,7 +235,7 @@ namespace dss {
   } // getDSMeter(name)
 
   boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dsuid_t _dsid) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       dsuid_t tmp_dsid = dsMeter->getDSID();
       if(IsEqualDsuid(tmp_dsid, _dsid)) {
@@ -244,7 +246,7 @@ namespace dss {
   } // getDSMeterByDSID
 
   std::vector<boost::shared_ptr<DSMeter> > Apartment::getDSMeters() {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     std::vector<boost::shared_ptr<DSMeter> > result = m_DSMeters;
     return result;
   } // getDSMeters
@@ -267,7 +269,7 @@ namespace dss {
   } // getGroup(id)
 
   boost::shared_ptr<Device> Apartment::allocateDevice(const dsuid_t _dsid) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     boost::shared_ptr<Device> pResult;
     // search for existing device
     foreach(boost::shared_ptr<Device> device, m_Devices) {
@@ -290,7 +292,7 @@ namespace dss {
   } // allocateDevice
 
   boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dsuid_t _dsid) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       dsuid_t tmp_dsid = dsMeter->getDSID();
       if(IsEqualDsuid(tmp_dsid, _dsid)) {
@@ -311,7 +313,7 @@ namespace dss {
   } // allocateDSMeter
 
   boost::shared_ptr<Zone> Apartment::allocateZone(int _zoneID) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -335,7 +337,7 @@ namespace dss {
   } // allocateZone
 
   void Apartment::removeZone(int _zoneID) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -351,7 +353,7 @@ namespace dss {
   } // removeZone
 
   void Apartment::removeDevice(dsuid_t _device) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -405,7 +407,7 @@ namespace dss {
   } // removeDevice
 
   void Apartment::removeDSMeter(dsuid_t _dsMeter) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -437,7 +439,7 @@ namespace dss {
   } // removeInactiveMeters
 
   boost::shared_ptr<State> Apartment::allocateState(const eStateType _type, const std::string& _stateName, const std::string& _scriptId) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -462,7 +464,7 @@ namespace dss {
   } // allocateState
 
   void Apartment::allocateState(boost::shared_ptr<State> _state) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
@@ -476,7 +478,7 @@ namespace dss {
   } // allocateState
 
   boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<State> state, m_States) {
       if ((state->getType() == _type) && (state->getName() == _name)) {
         return state;
@@ -486,7 +488,7 @@ namespace dss {
   } // getState
 
   boost::shared_ptr<State> Apartment::getNonScriptState(const std::string& _stateName) const {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<State> state, m_States) {
       if ((state->getType() != StateType_Script) &&
           (state->getName() == _stateName)) {
@@ -499,7 +501,7 @@ namespace dss {
   boost::shared_ptr<State> Apartment::getState(const eStateType _type,
                                                const std::string& _identifier,
                                                const std::string& _stateName) const {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<State> state, m_States) {
       if ((state->getType() == _type) &&
           (state->getProviderService() == _identifier) &&
@@ -511,12 +513,12 @@ namespace dss {
   }
 
   std::vector<boost::shared_ptr<State> > Apartment::getStates() const {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     return m_States;
   } // getStates
 
   void Apartment::removeState(const std::string& _name) {
-    AssertLocked lock(this);
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
       m_pPropertyNode->checkWriteAccess();
     }
