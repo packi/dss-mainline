@@ -70,15 +70,21 @@ namespace dss {
     void setValue(double _value) { m_Value = _value; }
   }; // Value
 
+  struct RRDLookup {
+    RRDLookup(boost::shared_ptr<DSMeter> _meter, std::string& _file) :
+      m_Meter(_meter), m_RrdFile(_file) {};
+    boost::shared_ptr<DSMeter> m_Meter;
+    std::string m_RrdFile;
+  }; // RRDLookup
+
   class Metering : public ThreadedSubsystem {
   private:
     std::string m_MeteringStorageLocation;
     std::string m_RrdcachedPath;
     boost::shared_ptr<MeteringConfigChain> m_ConfigChain;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
-    typedef std::map<boost::shared_ptr<DSMeter>,
-                     boost::shared_ptr<std::string> > CachedSeriesMap;
-    CachedSeriesMap m_CachedSeries;
+    std::vector<RRDLookup> m_CachedSeries;
+
     Mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
   private:
@@ -88,12 +94,12 @@ namespace dss {
       boost::shared_ptr<MeteringConfigChain> _pChain,
       bool& _tunePowerMaxSetting);
     void tuneDBPowerSettings(std::string& _fileName);
-    boost::shared_ptr<std::string> getOrCreateCachedSeries(
+    std::string getOrCreateCachedSeries(
       boost::shared_ptr<MeteringConfigChain> _pChain,
       boost::shared_ptr<DSMeter> _pMeter);
     int createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain);
-    void flushCachedDBValues(boost::shared_ptr<std::string> _rrdFileName);
-    void flushCachedDBValues(std::vector<boost::shared_ptr<std::string> > _rrdFileNames);
+    void flushCachedDBValues(std::string& _rrdFileName);
+    void flushCachedDBValues(std::vector<std::string>& _rrdFileNames);
   protected:
     virtual void doStart();
   public:

@@ -62,6 +62,17 @@ namespace dss {
 
 static const long WEEK_IN_SECS = 604800;
 
+  struct find_rrd
+  {
+    boost::shared_ptr<DSMeter> m_Meter;
+    find_rrd(boost::shared_ptr<DSMeter> _meter) {
+      m_Meter = _meter;
+    }
+    bool operator () (const RRDLookup& _lookup) const {
+      return (m_Meter == _lookup.m_Meter);
+    }
+  };
+
   Metering::Metering(DSS* _pDSS)
     : ThreadedSubsystem(_pDSS, "Metering")
     , m_pMeteringBusInterface(NULL) {
@@ -97,6 +108,7 @@ static const long WEEK_IN_SECS = 604800;
       }
     }
   }
+
   void Metering::doStart() {
     log("Writing files to: " + m_MeteringStorageLocation);
     run();
@@ -109,14 +121,13 @@ static const long WEEK_IN_SECS = 604800;
     }
     // check dsMeters periodically
     while (!m_Terminated) {
-      int sleepTimeMSec = 60000 * 1000;
-
       try {
         m_pMeteringBusInterface->requestMeterData();
       } catch (dss::BusApiError& apiError) {
         log("Metering::execute: Couldn't get metering data: " + std::string(apiError.what()));
       }
 
+      int sleepTimeMSec = 60000 * 1000;
       foreach (boost::shared_ptr<MeteringConfigChain> configChain, m_Config) {
         sleepTimeMSec = std::min(sleepTimeMSec, 1000 * configChain->getCheckIntervalSeconds());
       }
@@ -202,10 +213,12 @@ static const long WEEK_IN_SECS = 604800;
     }
   }
 
-  boost::shared_ptr<std::string> Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
-                                                                   boost::shared_ptr<DSMeter> _pMeter) {
-    if (m_CachedSeries.find(_pMeter) != m_CachedSeries.end()) {
-      return m_CachedSeries[_pMeter];
+  std::string Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
+                                                boost::shared_ptr<DSMeter> _pMeter) {
+    std::vector<RRDLookup>::iterator it =
+        std::find_if(m_CachedSeries.begin(), m_CachedSeries.end(), find_rrd(_pMeter));
+    if (it != m_CachedSeries.end()) {
+      return it->m_RrdFile;
     }
 
     std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
@@ -230,23 +243,35 @@ static const long WEEK_IN_SECS = 604800;
       int result = createDB(fileName, _pChain);
       if (result < 0) {
         log(rrd_get_error(), lsError);
-        boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>("");
+        std::string pFileName("");
         return pFileName;
       }
     } else if (tunePowerMaxSetting) {
       tuneDBPowerSettings(fileName);
     }
 
-    boost::shared_ptr<std::string> pFileName = boost::make_shared<std::string>(fileName);
-    m_CachedSeries[_pMeter] = pFileName;
-    return m_CachedSeries[_pMeter];
+    RRDLookup lookup(_pMeter, fileName);
+    m_CachedSeries.push_back(lookup);
+    return lookup.m_RrdFile;
+
   } // getOrCreateCachedSeries
 
   void Metering::postMeteringEvent(boost::shared_ptr<DSMeter> _meter,
                                    unsigned int _valuePower,
                                    unsigned long long _valueEnergy,
                                    DateTime _sampledAt) {
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
+    if (!_meter->getCapability_HasMetering()) {
+      log("postMeteringEvent meter does not support metering data:", lsDebug);
+      return;
+    }
+
+    std::string rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
+
+    if (rrdFileName.empty()) {
+      log("postMeteringEvent rrd filename is empty.", lsWarning);
+      return;
+    }
 
     std::vector<std::string> lines;
     lines.push_back("update");
@@ -254,7 +279,7 @@ static const long WEEK_IN_SECS = 604800;
       lines.push_back("--daemon");
       lines.push_back(m_RrdcachedPath);
     }
-    lines.push_back(rrdFileName.get()->c_str());
+    lines.push_back(rrdFileName.c_str());
     {
       std::stringstream sstream;
       sstream << _sampledAt.secondsSinceEpoch() << ":" << _valuePower << ":" << _valueEnergy;
@@ -310,21 +335,21 @@ static const long WEEK_IN_SECS = 604800;
     return result;
   }
 
- void Metering::flushCachedDBValues(boost::shared_ptr<std::string> _rrdFileName) {
-    std::vector<boost::shared_ptr<std::string> > rrdFileNames;
+  void Metering::flushCachedDBValues(std::string& _rrdFileName) {
+    std::vector<std::string> rrdFileNames;
     rrdFileNames.push_back(_rrdFileName);
     flushCachedDBValues(rrdFileNames);
   }
 
-  void Metering::flushCachedDBValues(std::vector<boost::shared_ptr<std::string> > _rrdFileNames) {
+  void Metering::flushCachedDBValues(std::vector<std::string>& _rrdFileNames) {
     std::vector<std::string> lines;
     lines.push_back("flushcached");
     lines.push_back("--daemon");
     lines.push_back(m_RrdcachedPath);
-    for (std::vector<boost::shared_ptr<std::string> >::iterator iter = _rrdFileNames.begin();
+    for (std::vector<std::string>::iterator iter = _rrdFileNames.begin();
          iter < _rrdFileNames.end();
          ++iter) {
-      lines.push_back(iter->get()->c_str());
+      lines.push_back(iter->c_str());
     }
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
@@ -338,13 +363,12 @@ static const long WEEK_IN_SECS = 604800;
 
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
     m_ValuesMutex.lock();
-    boost::shared_ptr<std::string> rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
-
+    std::string rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
 
     if (!m_RrdcachedPath.empty()) {
 
       // Get last entry-timestamp of data in file
-      time_t  timestamp = rrd_last_r(rrdFileName.get()->c_str());
+      time_t  timestamp = rrd_last_r(rrdFileName.c_str());
 
       // Get current timestamp
       time_t actualTime;
@@ -369,7 +393,7 @@ static const long WEEK_IN_SECS = 604800;
     time_t lastUpdate;
     unsigned long dscount;
     rrd_clear_error();
-    int result = rrd_lastupdate_r(rrdFileName.get()->c_str(),
+    int result = rrd_lastupdate_r(rrdFileName.c_str(),
                                   &lastUpdate,
                                   &dscount,
                                   &names,
@@ -419,7 +443,7 @@ static const long WEEK_IN_SECS = 604800;
       _valueCount = 0;
       return returnVector;
     }
-    std::vector<boost::shared_ptr<std::string> > rrdFileNames;
+    std::vector<std::string> rrdFileNames;
 
     for (std::vector<boost::shared_ptr<DSMeter> >::iterator iter = _meters.begin();
          iter < _meters.end();
@@ -486,7 +510,7 @@ static const long WEEK_IN_SECS = 604800;
       int size = rrdFileNames.size();
       std::stringstream sstream;
       for (i = 0; i < size; ++i) {
-        const char* filename = rrdFileNames.at(i)->c_str();
+        const char* filename = rrdFileNames.at(i).c_str();
         sstream << "DEF:raw" << i << "=" << filename;
         if ((_type == etConsumption) && (step == 1)) {
           sstream << ":power";
