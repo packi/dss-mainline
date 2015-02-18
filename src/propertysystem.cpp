@@ -212,7 +212,7 @@ namespace dss {
   } // ctor
 
   PropertyNode::~PropertyNode() {
-    log(std::string(__func__) + " " + m_Name, lsDebug);
+    log(std::string(__func__) + " " + m_Name.get(), lsDebug);
 
     // remove listeners
     boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
@@ -451,7 +451,7 @@ namespace dss {
           m_Proxy.stringProxy->setValue(_value);
         } else {
           Logger::getInstance()->log("*** setting std::string on a non std::string property", lsError);
-          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
         }
       } else {
         clearValue();
@@ -478,7 +478,7 @@ namespace dss {
           m_Proxy.intProxy->setValue(_value);
         } else {
           Logger::getInstance()->log("*** setting integer on a non integer property", lsError);
-          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
         }
       } else {
         clearValue();
@@ -499,7 +499,7 @@ namespace dss {
           m_Proxy.uintProxy->setValue(_value);
         } else {
           Logger::getInstance()->log("*** setting unsigned integer on a non unsigned integer property", lsError);
-          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
         }
       } else {
         clearValue();
@@ -520,7 +520,7 @@ namespace dss {
           m_Proxy.boolProxy->setValue(_value);
         } else {
           Logger::getInstance()->log("*** setting bool on a non booleanproperty");
-          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
         }
       } else {
         clearValue();
@@ -541,7 +541,7 @@ namespace dss {
           m_Proxy.floatingProxy->setValue(_value);
         } else {
           Logger::getInstance()->log("*** setting float on a non floating-property");
-          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
         }
       } else {
         clearValue();
@@ -564,7 +564,7 @@ namespace dss {
         }
       } else {
 //        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
       }
     }
   } // getStringValue
@@ -581,7 +581,7 @@ namespace dss {
         }
       } else {
  //       std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
       }
     }
   } // getIntegerValue
@@ -598,7 +598,7 @@ namespace dss {
         }
       } else {
  //       std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
       }
     }
   } // getUnsignedIntegerValue
@@ -615,7 +615,7 @@ namespace dss {
         }
       } else {
 //        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
       }
     }
   } // getBoolValue
@@ -632,7 +632,7 @@ namespace dss {
         }
       } else {
 //        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name.get());
       }
     }
   } // getBoolValue
