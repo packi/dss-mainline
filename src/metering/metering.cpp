@@ -35,7 +35,6 @@
 #include "src/logger.h"
 #include "src/businterface.h"
 #include "src/propertysystem.h"
-#include "src/foreach.h"
 #include "src/model/modulator.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
@@ -60,7 +59,9 @@
 namespace dss {
   //================================================== Metering
 
-static const long WEEK_IN_SECS = 604800;
+
+static const int MAX_INTERPOLATION_INTERVAL = 7*24*60*60; // data not interpolated, if interval is longer
+static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
 
   struct find_rrd
   {
@@ -137,6 +138,7 @@ static const long WEEK_IN_SECS = 604800;
         sleepMS(std::min(sleepTimeMSec, kMinSleepTimeMS));
         sleepTimeMSec -= kMinSleepTimeMS;
       }
+      checkDBConsistency();
     }
   } // execute
 
@@ -215,11 +217,14 @@ static const long WEEK_IN_SECS = 604800;
 
   std::string Metering::getOrCreateCachedSeries(boost::shared_ptr<MeteringConfigChain> _pChain,
                                                 boost::shared_ptr<DSMeter> _pMeter) {
-    std::vector<RRDLookup>::iterator it =
-        std::find_if(m_CachedSeries.begin(), m_CachedSeries.end(), find_rrd(_pMeter));
-    if (it != m_CachedSeries.end()) {
-      return it->m_RrdFile;
-    }
+    {
+      boost::mutex::scoped_lock lock(m_cachedSeries_mutex);
+      std::vector<RRDLookup>::iterator it =
+          std::find_if(m_CachedSeries.begin(), m_CachedSeries.end(), find_rrd(_pMeter));
+      if (it != m_CachedSeries.end()) {
+        return it->m_RrdFile;
+      }
+    } // end scoped lock
 
     std::string fileName = m_MeteringStorageLocation + dsuid2str(_pMeter->getDSID()) + ".rrd";
 
@@ -251,6 +256,7 @@ static const long WEEK_IN_SECS = 604800;
     }
 
     RRDLookup lookup(_pMeter, fileName);
+    boost::mutex::scoped_lock lock(m_cachedSeries_mutex);
     m_CachedSeries.push_back(lookup);
     return lookup.m_RrdFile;
 
@@ -333,22 +339,18 @@ static const long WEEK_IN_SECS = 604800;
     return result;
   }
 
-  void Metering::flushCachedDBValues(std::string& _rrdFileName) {
-    std::vector<std::string> rrdFileNames;
-    rrdFileNames.push_back(_rrdFileName);
-    flushCachedDBValues(rrdFileNames);
-  }
-
-  void Metering::flushCachedDBValues(std::vector<std::string>& _rrdFileNames) {
+  void Metering::flushCachedDBValues() {
     std::vector<std::string> lines;
     lines.push_back("flushcached");
     lines.push_back("--daemon");
     lines.push_back(m_RrdcachedPath);
-    for (std::vector<std::string>::iterator iter = _rrdFileNames.begin();
-         iter < _rrdFileNames.end();
-         ++iter) {
-      lines.push_back(iter->c_str());
-    }
+
+    {
+      boost::mutex::scoped_lock lock(m_cachedSeries_mutex);
+      foreach(RRDLookup rrd_lookup, m_CachedSeries) {
+        lines.push_back(rrd_lookup.m_RrdFile.c_str());
+      }
+    } // end scoped lock
     std::vector<const char*> starts;
     std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
     char** argString = (char**)&starts.front();
@@ -361,6 +363,11 @@ static const long WEEK_IN_SECS = 604800;
 
   unsigned long Metering::getLastEnergyCounter(boost::shared_ptr<DSMeter> _meter) {
 
+    if (!_meter->getCapability_HasMetering()) {
+      log("getLastEnergyCounter meter does not support metering data:", lsDebug);
+      return 0;
+    }
+
     char **names = 0;
     char **data = 0;
     time_t lastUpdate;
@@ -370,30 +377,6 @@ static const long WEEK_IN_SECS = 604800;
     {
       boost::mutex::scoped_lock lock(m_ValuesMutex);
       std::string rrdFileName = getOrCreateCachedSeries(m_ConfigChain, _meter);
-
-      if (!m_RrdcachedPath.empty()) {
-
-        // Get last entry-timestamp of data in file
-        time_t  timestamp = rrd_last_r(rrdFileName.c_str());
-
-        // Get current timestamp
-        time_t actualTime;
-        time(&actualTime);
-
-        // Calculate absolute delta
-        double secondsAbs = std::abs(difftime(actualTime, timestamp));
-
-        log("Actual Timestamp:"+ doubleToString(actualTime) +
-            "RRD Last Entry Timestamp:" + doubleToString(timestamp), lsDebug);
-
-        // call flushCachedDBValues (blocking function) only if delta is small enough.
-        if (secondsAbs < WEEK_IN_SECS) {
-          flushCachedDBValues(rrdFileName);
-        } else {
-          log("Time difference for rrd data too big. Not flushing cached data to file.", lsWarning);
-        }
-      }
-
       rrd_clear_error();
       result = rrd_lastupdate_r(rrdFileName.c_str(),
                                 &lastUpdate,
@@ -419,6 +402,57 @@ static const long WEEK_IN_SECS = 604800;
     rrd_freemem(data);
 
     return lastEnergyCounter;
+  }
+
+  bool Metering::checkDBReset(DateTime& _sampledAt, std::string& _rrdFileName)
+  {
+    assert(!_rrdFileName.empty());
+    DateTime lastDbEntry(rrd_last_r(_rrdFileName.c_str()));
+    int deltaTime = _sampledAt.difference(lastDbEntry);
+    int result = 0;
+
+    // If new sample time is more than MAX_INTERPOLATION_INTERVAL newer than last
+    // db entry, it would take too long to roll forward. (more than 15 minutes!)
+    // If the the new sample ist older than latest sample in the database,
+    // rrd will silently ignore it (ntp update), and no data will be stored
+    // until time is going forward again.
+    // If the jump into the past is too big discard all data and start over.
+
+    if (abs(deltaTime) > MAX_INTERPOLATION_INTERVAL) {
+      result = createDB(_rrdFileName, m_ConfigChain);
+      if (result < 0) {
+        log(rrd_get_error(), lsError);
+      }
+    }
+    return (result == 0);
+  }
+
+  void Metering::checkAllDBReset(DateTime& _sampledAt) {
+    boost::mutex::scoped_lock lock(m_cachedSeries_mutex);
+    foreach(RRDLookup rrd_lookup, m_CachedSeries) {
+      checkDBReset(_sampledAt, rrd_lookup.m_RrdFile);
+    }
+  }
+
+  void Metering::checkDBConsistency() {
+    DateTime now;
+    checkAllDBReset(now);
+
+    bool syncData = false;
+    {
+      boost::mutex::scoped_lock lock(m_cachedSeries_mutex);
+      foreach(RRDLookup rrd_lookup, m_CachedSeries) {
+        DateTime lastDBEntry(rrd_last_r(rrd_lookup.m_RrdFile.c_str()));
+        int deltaTime = now.difference(lastDBEntry);
+        if (deltaTime > DISK_FLUSH_INTERVAL) {
+          syncData = true;
+          break;
+        }
+      }
+    } // end scoped lock
+    if (syncData) {
+      flushCachedDBValues();
+    }
   }
 
   boost::shared_ptr<std::deque<Value> > Metering::getSeries(std::vector<boost::shared_ptr<DSMeter> > _meters,
@@ -495,7 +529,7 @@ static const long WEEK_IN_SECS = 604800;
       boost::mutex::scoped_lock lock(m_ValuesMutex);
 
       if (!m_RrdcachedPath.empty()) {
-        flushCachedDBValues(rrdFileNames);
+        flushCachedDBValues();
       }
 
       std::vector<std::string> lines;
