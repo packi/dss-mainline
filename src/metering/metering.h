@@ -84,6 +84,7 @@ namespace dss {
     boost::shared_ptr<MeteringConfigChain> m_ConfigChain;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
     std::vector<RRDLookup> m_CachedSeries;
+    boost::mutex m_cachedSeries_mutex;
 
     boost::mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
@@ -98,9 +99,13 @@ namespace dss {
       boost::shared_ptr<MeteringConfigChain> _pChain,
       boost::shared_ptr<DSMeter> _pMeter);
     int createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain);
-    void flushCachedDBValues(std::string& _rrdFileName);
-    void flushCachedDBValues(std::vector<std::string>& _rrdFileNames);
+    void flushCachedDBValues();
   protected:
+    // protected for testing
+    bool checkDBReset(DateTime& _sampledAt, std::string& _rrdFileName);
+    void checkAllDBReset(DateTime& _sampledAt);
+    void checkDBConsistency();
+
     virtual void doStart();
   public:
     Metering(DSS* _pDSS);
