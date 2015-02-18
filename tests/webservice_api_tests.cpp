@@ -157,7 +157,7 @@ BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixtureReal) {
   // check event subscriptions when webservice is enabled:
   // (ms-hub keepalive, event uploder mshub + dshub, weather downloader)
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(true);
-  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 4);
+  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 3);
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
   BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 0);
 }
