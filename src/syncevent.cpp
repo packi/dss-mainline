@@ -20,6 +20,7 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
+#include <boost/thread.hpp>
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -41,102 +42,43 @@ namespace dss {
 SyncEvent::SyncEvent()
 : m_State(false)
 {
-#ifndef WIN32
-  pthread_cond_init(&m_Condition, NULL);
-#else
-  m_EventHandle = CreateEvent(NULL, false, false, NULL);
-#endif
 }
-
-
-SyncEvent::~SyncEvent()
-{
-#ifndef WIN32
-  pthread_cond_destroy(&m_Condition);
-#else
-  CloseHandle(m_EventHandle);
-#endif
-}
-
 
 void SyncEvent::signal() {
-#ifndef WIN32
-  m_ConditionMutex.lock();
-
+  boost::mutex::scoped_lock lock(m_ConditionMutex);
   m_State = true;
-  assert(pthread_cond_signal(&m_Condition) == 0);
-
-  m_ConditionMutex.unlock();
-#else
-  SetEvent(m_EventHandle);
-#endif
+  m_Condition.notify_one();
 } // signal
 
 void SyncEvent::broadcast() {
-#ifndef WIN32
-  m_ConditionMutex.lock();
-
+  boost::mutex::scoped_lock lock(m_ConditionMutex);
   m_State = true;
-  assert(pthread_cond_broadcast(&m_Condition) == 0);
-
-  m_ConditionMutex.unlock();
-#else
-  #error SyncEvent::broadcast is not yet implemented
-#endif
+  m_Condition.notify_all();
 } // broadcast
 
 int SyncEvent::waitFor() {
-#ifndef WIN32
-  m_ConditionMutex.lock();
+  boost::mutex::scoped_lock lock(m_ConditionMutex);
 
   m_State = false;
-  int result = 0;
-  while((result == 0) && !m_State) {
-    result = pthread_cond_wait(&m_Condition, m_ConditionMutex.getMutex());
+  while(!m_State) {
+    m_Condition.wait(lock);
   }
-
-  m_ConditionMutex.unlock();
-  if(result < 0) {
-    return false;
-  }
-  return true;
-#else
-  return WaitForSingleObject(m_EventHandle, INFINITE);
-#endif
+  return m_State;
 } // waitFor
 
 bool SyncEvent::waitFor(int _timeoutMS) {
-#ifndef WIN32
-  struct timeval now;
-  struct timespec timeout;
-  int timeoutSec = _timeoutMS / 1000;
-  int timeoutMSec = _timeoutMS - 1000 * timeoutSec;
-
-  m_ConditionMutex.lock();
-  gettimeofday(&now, NULL);
-  timeout.tv_sec = now.tv_sec + timeoutSec;
-  timeout.tv_nsec = (now.tv_usec + timeoutMSec * 1000) * 1000;
-  if(timeout.tv_nsec > 1000000000) {
-    timeout.tv_sec += 1;
-    timeout.tv_nsec -= 1000000000;
-  }
+  boost::mutex::scoped_lock lock(m_ConditionMutex);
+  boost::system_time const timeout = boost::get_system_time() +
+                                     boost::posix_time::milliseconds(_timeoutMS);
 
   m_State = false;
-  int result = 0;
-  while(result == 0 && !m_State) {
-    result = pthread_cond_timedwait(&m_Condition, m_ConditionMutex.getMutex(), &timeout);
+  while(!m_State) {
+    if (!m_Condition.timed_wait(lock, timeout)) {
+      return false;
+    }
   }
 
-  bool ret = m_State;
-  if(result < 0) {
-    ret = false;
-  }
-  m_ConditionMutex.unlock();
-
-  return ret;
-#else
-  return WaitForSingleObject(m_EventHandle, _timeoutMS) == WAIT_OBJECT_0;
-#endif
+  return m_State;
 } // waitFor
 
 } // namespace
