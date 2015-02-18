@@ -37,6 +37,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+#include <boost/flyweight.hpp>
 
 #include "src/logger.h"
 #include "expatparser.h"
@@ -405,7 +406,7 @@ namespace dss {
     std::vector<PropertyNode*> m_AliasedBy;
     std::vector<PropertyListener*> m_Listeners;
     PropertyNode* m_ParentNode;
-    std::string m_Name;
+    boost::flyweight<std::string> m_Name;
     mutable std::string m_DisplayName;
     bool m_LinkedToProxy;
     bool m_Aliased;
