@@ -6,7 +6,7 @@ for f in `find src | egrep '\.(cpp?|h)$' | egrep -v '(messages|build_info.h)' | 
 do
     if (test -f $f); then
         echo " \\" >> $FILE
-        echo -n '	$(top_srcdir)/' >>$FILE
+        echo -n '	../' >>$FILE
         echo -n $f >> $FILE
     fi
 done
@@ -19,7 +19,7 @@ for f in `find external/mongoose | egrep '\.(c?|h)$' | sort`
 do
     if (test -f $f); then
         echo " \\" >> $FILE
-        echo -n '	$(top_srcdir)/' >>$FILE
+        echo -n '	../' >>$FILE
         echo -n $f >> $FILE
     fi
 done
@@ -32,7 +32,7 @@ for f in `find unix | egrep '\.(cpp?|h)$' | sort`
 do
     if (test -f $f); then
         echo " \\" >> $FILE
-        echo -n '	$(top_srcdir)/' >>$FILE
+        echo -n '	../' >>$FILE
         echo -n $f >> $FILE
     fi
 done
@@ -45,7 +45,7 @@ for f in `find tests | egrep '\.(cpp?|h)$' | egrep -v '(dsidhelpertest.cpp|dssim
 do
     if (test -f $f); then
         echo " \\" >> $FILE
-        echo -n '	$(top_srcdir)/' >>$FILE
+        echo -n '	../' >>$FILE
         echo -n $f >> $FILE
     fi
 done
@@ -60,7 +60,7 @@ for f in `find data/images | egrep '\.(png)$' | sort`
 do
     if (test -f $f); then
         echo " \\" >> $IMAGES_FILE
-        echo -n '   $(top_srcdir)/' >>$IMAGES_FILE
+        echo -n '   ../' >>$IMAGES_FILE
         echo -n $f >> $IMAGES_FILE
     fi
 done
