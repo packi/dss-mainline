@@ -42,6 +42,50 @@ namespace dss {
 
 __DEFINE_LOG_CHANNEL__(SensorLog, lsInfo)
 
+static const char* pp_prio_pending = "prio_pending";
+static const char* pp_normal_pending = "normal_pending";
+static const char* pp_last_upload = "last_upload";
+
+/*
+ * TODO figure out how to reuse PropertyProxyMemberFunction
+ */
+class PendingEventsProxy : public PropertyProxy<int> {
+public:
+  PendingEventsProxy(const SensorLog::m_events_t &queue) : m_events(queue) {}
+  virtual int getValue() const {
+    return static_cast<int>(m_events.size());
+  }
+  virtual void setValue(int value) {/* readonly */}
+  virtual PropertyProxy<int>* clone() const {
+    return new PendingEventsProxy(m_events);
+  }
+private:
+  const SensorLog::m_events_t &m_events;
+};
+
+SensorLog::SensorLog(const std::string hubName, Uploader *uploader)
+  : m_pending_upload(false), m_hubName(hubName), m_uploader(uploader),
+    m_upload_run(0), m_lastUpload("never")
+{
+  m_propFolder =
+    DSS::getInstance()->getPropertySystem().createProperty("/system/" + hubName + "/eventlog");
+
+  m_propFolder->createProperty(pp_last_upload)
+    ->linkToProxy(PropertyProxyReference<std::string>(m_lastUpload, false));
+  m_propFolder->createProperty(pp_prio_pending)
+    ->linkToProxy(PendingEventsProxy(m_eventsHighPrio));
+  m_propFolder->createProperty(pp_normal_pending)
+    ->linkToProxy(PendingEventsProxy(m_events));
+}
+
+SensorLog::~SensorLog()
+{
+  m_propFolder->removeChild(m_propFolder->getPropertyByName(pp_last_upload));
+  m_propFolder->removeChild(m_propFolder->getPropertyByName(pp_prio_pending));
+  m_propFolder->removeChild(m_propFolder->getPropertyByName(pp_normal_pending));
+  m_propFolder->getParentNode()->removeChild(m_propFolder);
+}
+
 /**
  * must hold m_lock when being calling
  */
@@ -170,6 +214,7 @@ void SensorLog::done(RestTransferStatus_t status, WebserviceReply reply) {
     return;
 
   case REST_OK:
+    m_lastUpload = DateTime().toISO8601();
     if (reply.code) {
       // the webservice dislikes our request, scream for HELP and continue.
       log("[" + m_hubName + "] webservice problem: " + intToString(reply.code) +
