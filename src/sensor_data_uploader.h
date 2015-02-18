@@ -36,7 +36,8 @@ namespace dss {
   public:
     enum {
       max_post_events = 50,
-      max_elements = 10000,
+      max_elements = 1000,
+      max_prio_elements = 400, //< late data bad data
     };
 
     typedef std::vector<boost::shared_ptr<Event> >::iterator It;

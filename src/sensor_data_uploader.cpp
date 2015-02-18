@@ -105,6 +105,13 @@ void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
   boost::mutex::scoped_lock lock(m_lock);
 
   if (highPrio) {
+
+    if (m_eventsHighPrio.size() >= max_prio_elements) {
+      // should not happen, but prevent unlimited memory usage
+      log("[" + m_hubName + "] event overflow discarding prio event: " +
+          event->getName(), lsWarning);
+      return;
+    }
     log("[" + m_hubName + "] append: add high prio event: " + event->getName(), lsDebug);
     m_eventsHighPrio.push_back(event);
     lock.unlock();
@@ -112,8 +119,10 @@ void SensorLog::append(boost::shared_ptr<Event> event, bool highPrio) {
     return;
   }
 
-  if (m_events.size() + m_packet.size() > max_elements) {
+  if (m_events.size() + m_packet.size() >= max_elements) {
     // MS-Hub will detect from jumps in sequence id
+    log("[" + m_hubName + "] event overflow, discarding: " + event->getName(),
+        lsWarning);
     return;
   }
   log("[" + m_hubName + "] append: add event: " + event->getName(), lsDebug);

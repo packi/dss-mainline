@@ -46,23 +46,29 @@ namespace dss {
 
   std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getDSMeters() {
     std::vector<DSMeterSpec_t> result;
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      return result;
-    }
 
-    dsuid_t device_list[63]; // TODO: constant for 63?
-    int ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
-    lock.unlock();
-    if (ret < 0) {
-      // DsmApiGetBusMembers returns >= 0 on success
-      DSBusInterface::checkResultCode(ret);
-    }
+    static const int MAX_DEVICE = 63;
+    dsuid_t device_list[MAX_DEVICE];
+    int deviceCount = 0;
+
+    { // scoped lock.
+      boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+      if(m_DSMApiHandle == NULL) {
+        return result;
+      }
+      deviceCount = DsmApiGetBusMembersPerType(m_DSMApiHandle, device_list, MAX_DEVICE, BUS_MEMBER_GET_DSM | BUS_MEMBER_GET_VDC);
+      if (deviceCount < 0) {
+        // DsmApiGetBusMembers:
+        //    result >= 0 number of devices.
+        //    result < 0 -> error code.
+        DSBusInterface::checkResultCode(deviceCount);
+      }
+    } // end scoped lock.
 
     dsuid_t ownId;
     DsmApiGetOwnDSUID(m_DSMApiHandle, &ownId);
 
-    for (int i = 0; i < ret; ++i) {
+    for (int i = 0; i < deviceCount; ++i) {
       if (IsEqualDsuid(ownId, device_list[i])) {
         continue;
       }
