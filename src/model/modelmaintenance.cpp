@@ -1688,7 +1688,7 @@ namespace dss {
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
+      pEvent.reset(new Event(EventName::DeviceBinaryInputEvent, pDevRev));
       pEvent->setProperty("inputIndex", intToString(_eventIndex));
       pEvent->setProperty("inputType", intToString(_eventType));
       pEvent->setProperty("inputState", intToString(_state));
@@ -1750,7 +1750,7 @@ namespace dss {
             state->setState(coSystem, newState);
 
             boost::shared_ptr<Event> pEvent;
-            pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
+            pEvent.reset(new Event(EventName::DeviceBinaryInputEvent, pDevRev));
             pEvent->setProperty("inputIndex", intToString(index));
             pEvent->setProperty("inputType", intToString(pDev->getDeviceBinaryInputType(index)));
             pEvent->setProperty("inputState", intToString(newState));
