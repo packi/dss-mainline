@@ -200,10 +200,10 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
       obj.addElement("parameter", parameterObj);
 
     } else {
-      throw DSSException(std::string("unhandled event ") + event->getName());
+      throw DSSException(std::string("unhandled event ") + event->toString());
     }
   } catch (std::invalid_argument& e) {
-    throw DSSException(std::string("Error converting event ") + event->getName());
+    throw DSSException(std::string("Error converting event ") + event->toString());
   }
   return obj;
 }
@@ -684,13 +684,13 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
     } else if (event->getName() == EventName::LogFileData) {
       createHeader(header, evtGroup_Activity, evtCategory_LogFileData, event.get());
     } else {
-      throw DSSException(std::string("unhandled event ") + event->getName());
+      throw DSSException(std::string("unhandled event ") + event->toString());
     }
 
     eventJson.addElement("EventHeader", header);
     eventJson.addElement("EventBody", body);
   } catch (std::invalid_argument& e) {
-    throw DSSException(std::string("Error converting event ") + event->getName());
+    throw DSSException(std::string("Error converting event ") + event->toString());
   }
   return eventJson;
 }
