@@ -156,6 +156,7 @@ namespace dss {
     };
 
     DateTime getTimestamp() const { return m_timestamp; }
+    std::string toString() const;
   }; // Event
 
   //-------------------------------------------------- Events

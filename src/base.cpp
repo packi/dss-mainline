@@ -578,4 +578,14 @@ namespace dss {
     }
     return false;
   } // unset
+
+  std::string Properties::toString() const {
+    std::string ret;
+    const char *delim = "";
+    foreach (HashMapStringString::value_type value, m_Container) {
+      ret += delim + value.first + ":" + value.second;
+      delim = " ";
+    }
+    return ret;
+  }
 }
