@@ -111,6 +111,7 @@ namespace dss {
     bool unset(const std::string& _key);
 
     const HashMapStringString& getContainer() const { return m_Container; }
+    std::string toString() const;
   };
 
   template<class t>

@@ -232,6 +232,20 @@ namespace dss {
     }
   } // applyProperties
 
+  std::string toString(const EventRaiseLocation& loc) {
+    switch (loc) {
+    case erlGroup: return "group";
+    case erlDevice: return "device";
+    case erlApartment: return "apartment";
+    case erlState: return "state";
+    default : return "bad location";
+    }
+  }
+
+  std::string Event::toString() const {
+    return "name:" + m_Name + " raise-loc:" + dss::toString(m_RaiseLocation) +
+      " props:{" + m_Properties.toString() + "}";
+  }
 
   //================================================== ModelChangedEvent
   //
