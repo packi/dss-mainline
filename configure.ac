@@ -468,7 +468,10 @@ PKG_CHECK_MODULES([LIBDSUID], [libdsuid], [],
 
 PKG_CHECK_MODULES([OSSP_UUID], [ossp-uuid], [],
     [
+        PKG_CHECK_MODULES([OSSP_UUID], [uuid], [],
+    [
         AC_MSG_ERROR([$OSSP_UUID_PKG_ERRORS])
+    ])
     ])
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
