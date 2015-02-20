@@ -28,6 +28,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include "devicecontainer.h"
 #include "modeltypes.h"
@@ -79,8 +80,7 @@ namespace dss {
     * and loading all subitems.
     */
   class Apartment : public boost::noncopyable,
-                    public DeviceContainer,
-                    public LockableObject
+                    public DeviceContainer
   {
   private:
     std::vector<boost::shared_ptr<Zone> > m_Zones;
@@ -94,11 +94,14 @@ namespace dss {
     ModelMaintenance* m_pModelMaintenance;
     PropertySystem* m_pPropertySystem;
     Metering* m_pMetering;
+    static boost::recursive_mutex m_mutex;
   private:
     void addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone);
   public:
     Apartment(DSS* _pDSS);
     virtual ~Apartment();
+
+    boost::recursive_mutex& getMutex() const { return m_mutex; }
 
     /** Returns a set containing all devices of the set */
     virtual Set getDevices() const;

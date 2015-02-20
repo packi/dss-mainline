@@ -24,12 +24,8 @@
 #ifndef NEUROSYNCEVENT_H
 #define NEUROSYNCEVENT_H
 
-#ifndef WIN32
-#include <pthread.h>
-#include "mutex.h"
-#else
-#include <windows.h>
-#endif
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace dss {
 
@@ -41,16 +37,12 @@ namespace dss {
  */
 class SyncEvent{
   private:
-#ifndef WIN32
-    Mutex m_ConditionMutex;
-    pthread_cond_t m_Condition;
+    boost::mutex m_ConditionMutex;
+    boost::condition_variable m_Condition;
     bool m_State;
-#else
-    HANDLE m_EventHandle;
-#endif
   public:
     SyncEvent();
-    virtual ~SyncEvent();
+    virtual ~SyncEvent() {};
 
     /** Signals one listener */
     void signal();
