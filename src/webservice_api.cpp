@@ -2,13 +2,14 @@
   #include "config.h"
 #endif
 
+#include <uuid.h>
+
 #include "webservice_api.h"
 
 #include <json.h>
 #include <stdio.h>
 #include <iostream>
 #include <cstring>
-#include <uuid.h>
 
 #include "dss.h"
 #include "event.h"
