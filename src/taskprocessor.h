@@ -25,6 +25,7 @@
 #define _TASK_PROCESSOR_H
 
 #include <boost/shared_ptr.hpp>
+#include <pthread.h>
 #include <list>
 
 namespace dss {
