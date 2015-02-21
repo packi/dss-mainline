@@ -94,7 +94,7 @@ namespace dss {
     ModelMaintenance* m_pModelMaintenance;
     PropertySystem* m_pPropertySystem;
     Metering* m_pMetering;
-    static boost::recursive_mutex m_mutex;
+    mutable boost::recursive_mutex m_mutex;
   private:
     void addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone);
   public:
