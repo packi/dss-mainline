@@ -868,7 +868,7 @@ namespace dss {
       }
       mailFile = me->m_MailFiles.front();
       me->m_MailFiles.pop_front();
-      pthread_mutex_unlock(&me->m_Mutex);
+      (void) pthread_mutex_unlock(&me->m_Mutex);
 
       Logger::getInstance()->log("EventInterpreterPluginSendmail: send file " +
           mailFile, lsFatal);
