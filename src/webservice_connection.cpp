@@ -85,7 +85,9 @@ public:
   WebserviceConnectionMsHub();
 private:
   virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters);
+  virtual bool isConnectionActive();
   WebserviceTokenConverter m_Converter;
+
 };
 
 WebserviceConnectionMsHub::WebserviceConnectionMsHub()
@@ -112,6 +114,10 @@ void WebserviceConnectionMsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
   }
 }
 
+bool WebserviceConnectionMsHub::isConnectionActive()
+{
+  return DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_mshub_active);
+}
 
 /****************************************************************************/
 /* WebserviceConnectionDsHub                                                */
@@ -122,6 +128,7 @@ public:
   WebserviceConnectionDsHub();
 private:
   virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters);
+  virtual bool isConnectionActive();
   WebserviceTokenConverter m_Converter;
 };
 
@@ -143,6 +150,10 @@ void WebserviceConnectionDsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
   }
 }
 
+bool WebserviceConnectionDsHub::isConnectionActive()
+{
+  return DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_dshub_active);
+}
 
 /****************************************************************************/
 /* WebserviceConnection                                                     */
@@ -213,6 +224,10 @@ void WebserviceConnection::request(boost::shared_ptr<HttpRequest> req,
                                    bool hasUrlParameters,
                                    bool authenticated)
 {
+  if (authenticated && !isConnectionActive()) {
+    log("Webservice connection Problem. Token is not set!", lsWarning);
+  }
+
   if (authenticated) {
     authorizeRequest(*req, hasUrlParameters);
   }

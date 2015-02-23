@@ -83,7 +83,7 @@ private:
                bool authenticated);
 
   virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters) = 0;
-
+  virtual bool isConnectionActive() = 0;
 };
 
 class URLRequestTask : public Task {
