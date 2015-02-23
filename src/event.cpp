@@ -493,6 +493,20 @@ namespace dss {
     }
   } // unsubscribe
 
+  void EventInterpreter::unsubscribe(boost::shared_ptr<EventSubscription> _subscription) {
+    boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
+
+    for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+        ipSubscription != e; ++ipSubscription)
+    {
+      if((*ipSubscription)->getID() == _subscription->getID()) {
+        m_Subscriptions.erase(ipSubscription);
+        break;
+      }
+    }
+  } // unsubscribe
+
+
   boost::shared_ptr<EventSubscription> EventInterpreter::subscriptionByID(const std::string& _subscriptionID) {
     boost::shared_ptr<EventSubscription> result;
     boost::mutex::scoped_lock lock(m_SubscriptionsMutex);

@@ -413,6 +413,7 @@ namespace dss {
 
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);
     void unsubscribe(const std::string& _subscriptionID);
+    void unsubscribe(boost::shared_ptr<EventSubscription> _subscription);
 
     void loadSubscriptionsFromProperty(PropertyNodePtr _node);
     void loadStatesFromProperty(PropertyNodePtr _node);
