@@ -726,7 +726,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   std::vector<unsigned char> DSS::getRandomSalt(unsigned int len) {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     std::vector<unsigned char> urandom(len);
 
     std::ifstream file ("/dev/urandom", std::ios::binary);
