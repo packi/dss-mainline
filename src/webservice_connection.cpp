@@ -38,18 +38,61 @@
 namespace dss {
 
 /****************************************************************************/
+/* WebserviceTokenConverter                                                 */
+/****************************************************************************/
+class WebserviceTokenConverter : public PropertyListener {
+public:
+  WebserviceTokenConverter(const char* propertyRoot, const char* inputProperty, const char* outputProperty) :
+    m_input(inputProperty), m_output(outputProperty) {
+
+    m_websvcTokenNode = DSS::getInstance()->getPropertySystem().createProperty(propertyRoot);
+    m_websvcTokenNode->addListener(this);
+
+    m_websvcAuthenticatedNode = DSS::getInstance()->getPropertySystem().createProperty(m_output);
+    m_websvcAuthenticatedNode->setBooleanValue(false);
+  }
+
+protected:
+  virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
+    std::string key = _changedNode->getName();
+    if (key.compare(m_input) == 0) {
+      // Set property m_output to true, if token contains data.
+      std::string value = _changedNode->getStringValue();
+      DSS::getInstance()->getPropertySystem().setBoolValue(m_output, !value.empty());
+    }
+  }
+
+  virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child) {
+    std::string key = _child->getName();
+    if (key.compare(m_input) == 0) {
+      // remove property -> set state to false
+      DSS::getInstance()->getPropertySystem().setBoolValue(m_output, false);
+    }
+  }
+
+private:
+  std::string m_input;
+  std::string m_output;
+  PropertyNodePtr m_websvcTokenNode;
+  PropertyNodePtr m_websvcAuthenticatedNode;
+};
+
+/****************************************************************************/
 /* WebserviceConnectionMsHub                                                */
 /****************************************************************************/
-
 class WebserviceConnectionMsHub : public WebserviceConnection {
 public:
   WebserviceConnectionMsHub();
 private:
   virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters);
+  virtual bool isConnectionActive();
+  WebserviceTokenConverter m_Converter;
+
 };
 
 WebserviceConnectionMsHub::WebserviceConnectionMsHub()
-  : WebserviceConnection(pp_websvc_url_authority)
+  : WebserviceConnection(pp_websvc_url_authority),
+    m_Converter(pp_websvc_root, pp_mshub_token, pp_websvc_mshub_active)
 {
 }
 
@@ -71,6 +114,10 @@ void WebserviceConnectionMsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
   }
 }
 
+bool WebserviceConnectionMsHub::isConnectionActive()
+{
+  return DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_mshub_active);
+}
 
 /****************************************************************************/
 /* WebserviceConnectionDsHub                                                */
@@ -81,10 +128,13 @@ public:
   WebserviceConnectionDsHub();
 private:
   virtual void authorizeRequest(HttpRequest& req, bool hasUrlParameters);
+  virtual bool isConnectionActive();
+  WebserviceTokenConverter m_Converter;
 };
 
 WebserviceConnectionDsHub::WebserviceConnectionDsHub()
-  : WebserviceConnection(pp_websvc_dshub_url)
+  : WebserviceConnection(pp_websvc_dshub_url),
+    m_Converter(pp_websvc_root, pp_dshub_token, pp_websvc_dshub_active)
 {
 }
 
@@ -100,6 +150,10 @@ void WebserviceConnectionDsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
   }
 }
 
+bool WebserviceConnectionDsHub::isConnectionActive()
+{
+  return DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_dshub_active);
+}
 
 /****************************************************************************/
 /* WebserviceConnection                                                     */
@@ -170,6 +224,10 @@ void WebserviceConnection::request(boost::shared_ptr<HttpRequest> req,
                                    bool hasUrlParameters,
                                    bool authenticated)
 {
+  if (authenticated && !isConnectionActive()) {
+    log("Webservice connection Problem. Token is not set!", lsWarning);
+  }
+
   if (authenticated) {
     authorizeRequest(*req, hasUrlParameters);
   }
