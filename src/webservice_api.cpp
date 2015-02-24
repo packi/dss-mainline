@@ -271,7 +271,7 @@ __DEFINE_LOG_CHANNEL__(WebserviceMsHub, lsInfo)
 
 bool WebserviceMsHub::isAuthorized() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  return propSystem.getBoolValue(pp_websvc_enabled);
+  return propSystem.getBoolValue(pp_websvc_mshub_active);
 }
 
 template <class Iterator>
@@ -744,7 +744,7 @@ __DEFINE_LOG_CHANNEL__(WebserviceDsHub, lsInfo)
 
 bool WebserviceDsHub::isAuthorized() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  return propSystem.getBoolValue(pp_websvc_enabled);
+  return propSystem.getBoolValue(pp_websvc_dshub_active);
 }
 
 template <class Iterator>

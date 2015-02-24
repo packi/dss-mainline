@@ -241,11 +241,12 @@ __DEFINE_LOG_CHANNEL__(SensorDataUploadMsHubPlugin, lsInfo);
 
 SensorDataUploadMsHubPlugin::SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ms_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("mshub", &m_uploader))
+    m_log(boost::make_shared<SensorLog>("mshub", &m_uploader)),
+    m_subscribed(false)
 {
-  websvcEnabledNode =
-    DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
-  websvcEnabledNode ->addListener(this);
+  m_websvcActive =
+    DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_mshub_active);
+  m_websvcActive ->addListener(this);
 }
 
 SensorDataUploadMsHubPlugin::~SensorDataUploadMsHubPlugin()
@@ -266,18 +267,49 @@ void SensorDataUploadMsHubPlugin::scheduleBatchUploader() {
 
 void SensorDataUploadMsHubPlugin::propertyChanged(PropertyNodePtr _caller,
                                              PropertyNodePtr _changedNode) {
-  // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
+    doSubscribe();
     scheduleBatchUploader();
   } else {
     log(std::string(__func__) + " stop uploading", lsInfo);
     DSS::getInstance()->getEventRunner().removeEventByName(EventName::UploadMsHubEventLog);
+    doUnsubscribe();
   }
 }
 
-void SensorDataUploadMsHubPlugin::subscribe() {
-  boost::shared_ptr<EventSubscription> subscription;
+void SensorDataUploadMsHubPlugin::doSubscribe() {
+  if (m_subscribed) {
+    return;
+  }
+  m_subscribed = true;
 
+  std::vector<std::string> events = getSubscriptionEvents();
+  boost::shared_ptr<EventSubscription> subscription;
+  foreach (std::string name, events) {
+    subscription.reset(new EventSubscription(name, getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+}
+
+void SensorDataUploadMsHubPlugin::doUnsubscribe() {
+  if (!m_subscribed) {
+    return;
+  }
+  m_subscribed = false;
+
+  std::vector<std::string> events = getSubscriptionEvents();
+  boost::shared_ptr<EventSubscription> subscription;
+  foreach (std::string name, events) {
+    subscription.reset(new EventSubscription(name, getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().unsubscribe(subscription);
+  }
+}
+
+std::vector<std::string> SensorDataUploadMsHubPlugin::getSubscriptionEvents() {
   std::vector<std::string> events;
   events.push_back(EventName::DeviceSensorValue);
   events.push_back(EventName::DeviceStatus);
@@ -296,13 +328,7 @@ void SensorDataUploadMsHubPlugin::subscribe() {
   events.push_back(EventName::UploadMsHubEventLog);
   events.push_back(EventName::OldStateChange);
   events.push_back(EventName::AddonToCloud);
-
-  foreach (std::string name, events) {
-    subscription.reset(new EventSubscription(name, getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-  }
+  return events;
 }
 
 void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
@@ -404,11 +430,13 @@ __DEFINE_LOG_CHANNEL__(SensorDataUploadDsHubPlugin, lsInfo);
 
 SensorDataUploadDsHubPlugin::SensorDataUploadDsHubPlugin(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sensor_data_upload_ds_hub", _pInterpreter),
-    m_log(boost::make_shared<SensorLog>("dshub", &m_uploader))
+    m_log(boost::make_shared<SensorLog>("dshub", &m_uploader)),
+    m_subscribed(false)
 {
-  websvcEnabledNode =
-    DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_enabled);
-  websvcEnabledNode ->addListener(this);
+  m_websvcActive =
+    DSS::getInstance()->getPropertySystem().getProperty(pp_websvc_dshub_active);
+  m_websvcActive ->addListener(this);
+
 }
 
 SensorDataUploadDsHubPlugin::~SensorDataUploadDsHubPlugin()
@@ -429,18 +457,56 @@ void SensorDataUploadDsHubPlugin::scheduleBatchUploader() {
 
 void SensorDataUploadDsHubPlugin::propertyChanged(PropertyNodePtr _caller,
                                              PropertyNodePtr _changedNode) {
-  // initiate connection as soon as webservice got enabled
   if (_changedNode->getBoolValue() == true) {
+    doSubscribe();
     scheduleBatchUploader();
   } else {
     log(std::string(__func__) + " stop uploading", lsInfo);
     DSS::getInstance()->getEventRunner().removeEventByName(EventName::UploadDsHubEventLog);
+    doUnsubscribe();
   }
 }
 
 void SensorDataUploadDsHubPlugin::subscribe() {
-  boost::shared_ptr<EventSubscription> subscription;
+  if (DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_dshub_active)) {
+    doSubscribe();
+  }
+}
 
+void SensorDataUploadDsHubPlugin::doSubscribe() {
+  if (m_subscribed) {
+    return;
+  }
+  m_subscribed = true;
+
+  std::vector<std::string> events = getSubscriptionEvents();
+
+  boost::shared_ptr<EventSubscription> subscription;
+  foreach (std::string name, events) {
+    subscription.reset(new EventSubscription(name, getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+}
+
+void SensorDataUploadDsHubPlugin::doUnsubscribe() {
+  if (!m_subscribed) {
+    return;
+  }
+  m_subscribed = false;
+
+  std::vector<std::string> events = getSubscriptionEvents();
+  boost::shared_ptr<EventSubscription> subscription;
+  foreach (std::string name, events) {
+    subscription.reset(new EventSubscription(name, getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().unsubscribe(subscription);
+  }
+}
+
+std::vector<std::string> SensorDataUploadDsHubPlugin::getSubscriptionEvents() {
   std::vector<std::string> events;
   events.push_back(EventName::DeviceBinaryInputEvent);
   events.push_back(EventName::DeviceSensorValue);
@@ -462,13 +528,7 @@ void SensorDataUploadDsHubPlugin::subscribe() {
   events.push_back(EventName::OldStateChange);
   events.push_back(EventName::AddonToCloud);
   events.push_back(EventName::LogFileData);
-
-  foreach (std::string name, events) {
-    subscription.reset(new EventSubscription(name, getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-  }
+  return events;
 }
 
 void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
@@ -559,5 +619,4 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
     log(std::string("exception ") + e.what(), lsWarning);
   }
 }
-
 }

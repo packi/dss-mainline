@@ -86,11 +86,15 @@ namespace dss {
     SensorDataUploadMsHubPlugin(EventInterpreter* _pInterpreter);
     virtual ~SensorDataUploadMsHubPlugin();
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-    virtual void subscribe();
+  private:
+    void doSubscribe();
+    void doUnsubscribe();
+    std::vector<std::string> getSubscriptionEvents();
   private:
     MSUploadWrapper m_uploader;
     boost::shared_ptr<SensorLog> m_log;
-    PropertyNodePtr websvcEnabledNode;
+    PropertyNodePtr m_websvcActive;
+    bool m_subscribed;
   };
 
   class DSUploadWrapper : public SensorLog::Uploader {
@@ -112,9 +116,14 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
     virtual void subscribe();
   private:
+    void doSubscribe();
+    void doUnsubscribe();
+    std::vector<std::string> getSubscriptionEvents();
+  private:
     DSUploadWrapper m_uploader;
     boost::shared_ptr<SensorLog> m_log;
-    PropertyNodePtr websvcEnabledNode;
+    PropertyNodePtr m_websvcActive;
+    bool m_subscribed;
   };
 }
 #endif
