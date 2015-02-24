@@ -330,6 +330,7 @@ namespace dss {
 
           zone->addProperty("IsConfigured", true);
           zone->addProperty("ControlMode", hConfig.ControllerMode);
+          zone->addProperty("EmergencyValue", hConfig.EmergencyValue - 100);
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:
               break;

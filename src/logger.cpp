@@ -33,6 +33,7 @@
 #include <cassert>
 #include <iostream>
 #include <boost/make_shared.hpp>
+#include <boost/thread/mutex.hpp>
 
 #if defined(__CYGWIN__)
 #include <time.h>
@@ -42,6 +43,7 @@ namespace dss {
 
   Logger* Logger::m_Instance = NULL;
   Mutex Logger::m_handlerListMutex = Mutex();
+  Mutex Logger::m_streamMutex = Mutex();
   std::list<LogHandler *> Logger::m_handlerList = std::list<LogHandler *>();
 
   template <class t>
@@ -131,7 +133,11 @@ namespace dss {
         + "[" + _channel.getName() + "]"
         + " " + _message + "\n";
 
-      m_logTarget->outputStream() << logMessage; // only for backward compatibility
+      {
+        m_streamMutex.lock();
+        m_logTarget->outputStream() << logMessage; // only for backward compatibility
+        m_streamMutex.unlock();
+      }
 
       m_handlerListMutex.lock();
       foreach(LogHandler *h,m_handlerList) {

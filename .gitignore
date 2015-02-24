@@ -29,5 +29,8 @@ webservices/soapC.cpp
 internal/
 data/metering
 doc/webservices/html
-
+INSTALL
+*.o
 *.pb.*
+*.rrd
+.dirstamp

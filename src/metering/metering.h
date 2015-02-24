@@ -27,12 +27,12 @@
 #include "src/thread.h"
 #include "src/subsystem.h"
 #include "src/datetools.h"
-#include "src/mutex.h"
 
 #include <string>
 #include <vector>
 #include <deque>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
@@ -84,8 +84,9 @@ namespace dss {
     boost::shared_ptr<MeteringConfigChain> m_ConfigChain;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
     std::vector<RRDLookup> m_CachedSeries;
+    boost::mutex m_cachedSeries_mutex;
 
-    Mutex m_ValuesMutex;
+    boost::mutex m_ValuesMutex;
     MeteringBusInterface* m_pMeteringBusInterface;
   private:
     virtual void initialize();
@@ -98,9 +99,13 @@ namespace dss {
       boost::shared_ptr<MeteringConfigChain> _pChain,
       boost::shared_ptr<DSMeter> _pMeter);
     int createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain);
-    void flushCachedDBValues(std::string& _rrdFileName);
-    void flushCachedDBValues(std::vector<std::string>& _rrdFileNames);
+    void syncCachedDBValues();
   protected:
+    // protected for testing
+    bool checkDBReset(DateTime& _sampledAt, std::string& _rrdFileName);
+    void checkAllDBReset(DateTime& _sampledAt);
+    void checkDBConsistency();
+
     virtual void doStart();
   public:
     Metering(DSS* _pDSS);
