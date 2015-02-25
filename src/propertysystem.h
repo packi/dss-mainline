@@ -38,6 +38,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/flyweight.hpp>
+#include <boost/atomic.hpp>
 
 #include "src/logger.h"
 #include "expatparser.h"
@@ -415,6 +416,7 @@ namespace dss {
     int m_Flags;
     boost::shared_ptr<NodePrivileges> m_pPrivileges;
     static boost::recursive_mutex m_GlobalMutex;
+    static boost::atomic<int> sm_NodeCounter;
   private:
     void clearValue();
 
@@ -432,6 +434,8 @@ namespace dss {
   public:
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
+
+    static int getNodeCount() { return sm_NodeCounter; }
 
     /** Returns the name of the property. */
     const std::string& getName() const {

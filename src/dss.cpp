@@ -151,6 +151,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
+    m_pPropertySystem->createProperty("/config/debug/propertyNodeCount")->linkToProxy(
+        PropertyProxyStaticFunction<int>(&PropertyNode::getNodeCount));
   } // ctor
 
   DSS::~DSS() {
