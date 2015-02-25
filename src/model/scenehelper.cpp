@@ -442,7 +442,13 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue - 100);
       break;
     case SensorIDWindDirection:
+      convertedSensorValue = (double) (_sensorValue * 2);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
     case SensorIDPrecipitation:
+      convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
     default:
       convertedSensorValue = (double) _sensorValue;
       break;
@@ -485,7 +491,11 @@ namespace dss {
       convertedSensorValue = (int) (_sensorValue + 100);
       break;
     case SensorIDWindDirection:
+      convertedSensorValue = (int) ((_sensorValue + 0.0625) / 2);
+      break;
     case SensorIDPrecipitation:
+      convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
+      break;
     default:
       convertedSensorValue = (int) (_sensorValue + 0.5);
       break;
