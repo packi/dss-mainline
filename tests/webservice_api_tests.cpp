@@ -78,6 +78,7 @@ public:
     WebserviceConnection::getInstanceMsHub();
 
     propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(true);
+    propSystem.createProperty(pp_websvc_mshub_active)->setBooleanValue(true);
   }
 
   DSSLifeCycle m_dss_guard;
@@ -157,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixtureReal) {
   // check event subscriptions when webservice is enabled:
   // (ms-hub keepalive, event uploder mshub + dshub, weather downloader)
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(true);
-  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 3);
+  BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 2);
   propSystem.createProperty(pp_websvc_enabled)->setBooleanValue(false);
   BOOST_CHECK_EQUAL(DSS::getInstance()->getEventRunner().getSize(), 0);
 }
