@@ -289,11 +289,11 @@ BOOST_FIXTURE_TEST_CASE(testPushSensorIDHumidityOutdoors, Fixture) {
   testFunctionThrow("pushSensorValue", "sensorType=14&sensorValue=102.4");
 }
 
-//BOOST_FIXTURE_TEST_CASE(testPushSensorIDAirPressure, Fixture) {
-//  testFunctionOK("pushSensorValue", "sensorType=15&sensorValue=1000");
-//  testFunctionThrow("pushSensorValue", "sensorType=15&sensorValue=199");
-//  testFunctionThrow("pushSensorValue", "sensorType=15&sensorValue=1224");
-//}
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDAirPressure, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=15&sensorValue=1000");
+  testFunctionThrow("pushSensorValue", "sensorType=15&sensorValue=199");
+  testFunctionThrow("pushSensorValue", "sensorType=15&sensorValue=1224");
+}
 
 BOOST_FIXTURE_TEST_CASE(testPushSensorIDWindSpeed, Fixture) {
   testFunctionOK("pushSensorValue", "sensorType=18&sensorValue=35");

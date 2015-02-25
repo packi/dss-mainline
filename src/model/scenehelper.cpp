@@ -449,6 +449,10 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
+    case SensorIDAirPressure:
+      convertedSensorValue = (double) ((_sensorValue / 4) + 200);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
     default:
       convertedSensorValue = (double) _sensorValue;
       break;
@@ -525,6 +529,12 @@ namespace dss {
         throw SensorOutOfRangeException("Value must be in range [0..102.375]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
+      break;
+    case SensorIDAirPressure:
+      if (_sensorValue < 200 || _sensorValue > 1223.75) {
+        throw SensorOutOfRangeException("Value must be in range [200..1223.75]");
+      }
+      convertedSensorValue = (int) ((_sensorValue + 0.125 - 200) * 4);
       break;
     default:
       convertedSensorValue = (int) (_sensorValue + 0.5);
