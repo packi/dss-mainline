@@ -30,6 +30,7 @@
 #include "src/web/handler/deviceinterfacerequesthandler.h"
 #include "src/web/json.h"
 #include "src/session.h"
+#include "src/model/scenehelper.h"
 
 using namespace dss;
 
@@ -92,7 +93,8 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
       functionCalled("stopOutputChannelValue(" + intToString(_channel) + ")");
     }
     virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
-      functionCalled("pushSensor(" + intToString(_sensorType) + ", " + doubleToString(_sensorValueFloat) + ")");
+      (void)SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
+      functionCalled("pushSensorValue");
     }
 
     int getNumberOfCalls() const { return m_NumberOfCalls; }
@@ -126,6 +128,14 @@ public:
     testFunctionDo(_functionName, _functionName, "");
   }
 
+  void testFunctionOK(const std::string& _functionName, const std::string& _params) {
+    testFunctionDo(_functionName, _functionName, _params);
+  }
+
+  void testFunctionThrow(const std::string& _functionName, const std::string& _params) {
+    testFunctionThrow(_functionName, _functionName, _params);
+  }
+
   void testFunction(const std::string& _functionName, const std::string& _paramName, const std::string& _paramValue) {
     std::string params = urlEncode(_paramName) + "=" + urlEncode(_paramValue);
     testFunctionDo(_functionName, _functionName + "(" + _paramValue + ")", params);
@@ -145,11 +155,23 @@ private:
     boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
     boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
     RestfulRequest req("bla/" + _functionName, _params);
-    WebServerResponse response =
-      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession);
+    boost::shared_ptr<JSONObject> temp;
+    BOOST_CHECK_NO_THROW(temp =
+      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession));
+    WebServerResponse response = temp;
     BOOST_CHECK_EQUAL(dummy->getNumberOfCalls(), 1);
     BOOST_CHECK_EQUAL(dummy->getLastFunction(), _functionNameWithParams);
     testOkIs(response, true);
+  }
+  void testFunctionThrow(const std::string& _functionName,
+                         const std::string& _functionNameWithParams,
+                         const std::string& _params) {
+    boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
+    boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
+    RestfulRequest req("bla/" + _functionName, _params);
+    boost::shared_ptr<JSONObject> temp;
+    BOOST_CHECK_THROW(temp =
+      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), SensorOutOfRangeException);
   }
 
   DeviceInterfaceRequestHandlerValid m_RequestHandler;
@@ -193,6 +215,114 @@ BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testBlink, Fixture) {
   testFunction("blink");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDRoomTemperatureSetpoint, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=50&sensorValue=25.5");
+  testFunctionThrow("pushSensorValue", "sensorType=50&sensorValue=-50");
+  testFunctionThrow("pushSensorValue", "sensorType=50&sensorValue=150.25");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDActivePower, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=4&sensorValue=548");
+  testFunctionThrow("pushSensorValue", "sensorType=4&sensorValue=-1");
+  testFunctionThrow("pushSensorValue", "sensorType=4&sensorValue=4096");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDOutputCurrent, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=5&sensorValue=658");
+  testFunctionThrow("pushSensorValue", "sensorType=5&sensorValue=-1");
+  testFunctionThrow("pushSensorValue", "sensorType=5&sensorValue=4096.32");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDElectricMeter, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=6&sensorValue=25.36");
+  testFunctionThrow("pushSensorValue", "sensorType=6&sensorValue=-0.25");
+  testFunctionThrow("pushSensorValue", "sensorType=6&sensorValue=41.265");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDOutputCurrentEx, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=64&sensorValue=15487");
+  testFunctionThrow("pushSensorValue", "sensorType=64&sensorValue=-15");
+  testFunctionThrow("pushSensorValue", "sensorType=64&sensorValue=16381");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDPowerConsumptionVA, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=65&sensorValue=659");
+  testFunctionThrow("pushSensorValue", "sensorType=65&sensorValue=-1");
+  testFunctionThrow("pushSensorValue", "sensorType=65&sensorValue=4096");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDTemperatureIndoors, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=9&sensorValue=25.251");
+  testFunctionThrow("pushSensorValue", "sensorType=9&sensorValue=-44");
+  testFunctionThrow("pushSensorValue", "sensorType=9&sensorValue=60");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDTemperatureOutdoors, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=10&sensorValue=-15.36");
+  testFunctionThrow("pushSensorValue", "sensorType=10&sensorValue=-44");
+  testFunctionThrow("pushSensorValue", "sensorType=10&sensorValue=59.524");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDBrightnessIndoors, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=11&sensorValue=45874.254");
+  testFunctionThrow("pushSensorValue", "sensorType=11&sensorValue=0");
+  testFunctionThrow("pushSensorValue", "sensorType=11&sensorValue=132000.254");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDBrightnessOutdoors, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=12&sensorValue=25");
+  testFunctionThrow("pushSensorValue", "sensorType=12&sensorValue=-5698");
+  testFunctionThrow("pushSensorValue", "sensorType=12&sensorValue=200000.326598");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDHumidityIndoors, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=13&sensorValue=0");
+  testFunctionThrow("pushSensorValue", "sensorType=13&sensorValue=-1");
+  testFunctionThrow("pushSensorValue", "sensorType=13&sensorValue=103.264");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDHumidityOutdoors, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=14&sensorValue=102.37");
+  testFunctionThrow("pushSensorValue", "sensorType=14&sensorValue=-4654");
+  testFunctionThrow("pushSensorValue", "sensorType=14&sensorValue=102.4");
+}
+
+//BOOST_FIXTURE_TEST_CASE(testPushSensorIDAirPressure, Fixture) {
+//  testFunctionOK("pushSensorValue", "sensorType=15&sensorValue=1000");
+//  testFunctionThrow("pushSensorValue", "sensorType=15&sensorValue=199");
+//  testFunctionThrow("pushSensorValue", "sensorType=15&sensorValue=1224");
+//}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDWindSpeed, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=18&sensorValue=35");
+  testFunctionThrow("pushSensorValue", "sensorType=18&sensorValue=-4");
+  testFunctionThrow("pushSensorValue", "sensorType=18&sensorValue=105");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDWindDirection, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=19&sensorValue=180");
+  testFunctionThrow("pushSensorValue", "sensorType=19&sensorValue=-1");
+  testFunctionThrow("pushSensorValue", "sensorType=19&sensorValue=512");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDPrecipitation, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=20&sensorValue=45");
+  testFunctionThrow("pushSensorValue", "sensorType=20&sensorValue=-1");
+  testFunctionThrow("pushSensorValue", "sensorType=20&sensorValue=102.5");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDCO2Concentration, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=21&sensorValue=50000");
+  testFunctionThrow("pushSensorValue", "sensorType=21&sensorValue=0");
+  testFunctionThrow("pushSensorValue", "sensorType=21&sensorValue=132000");
+}
+
+BOOST_FIXTURE_TEST_CASE(testPushSensorIDRoomTemperatureControlVariable, Fixture) {
+  testFunctionOK("pushSensorValue", "sensorType=51&sensorValue=51.25");
+  testFunctionThrow("pushSensorValue", "sensorType=51&sensorValue=-101");
+  testFunctionThrow("pushSensorValue", "sensorType=51&sensorValue=104");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
