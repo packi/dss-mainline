@@ -1916,8 +1916,9 @@ namespace dss {
     ZoneHeatingProperties_t hProp;
     ZoneHeatingStatus_t hStatus;
 
+    boost::shared_ptr<Zone> zone;
     try {
-      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      zone = m_pApartment->getZone(_zoneID);
       hProp = zone->getHeatingProperties();
       hStatus = zone->getHeatingStatus();
     } catch(ItemNotFoundException& e) {
@@ -1965,7 +1966,7 @@ namespace dss {
     boost::shared_ptr<Event> pEventDsHub;
     pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
     pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
-    switch (hStatus.m_OperationMode) {
+    switch (zone->getHeatingOperationMode()) {
     case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
     case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
     case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
