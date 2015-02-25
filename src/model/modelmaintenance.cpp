@@ -1136,11 +1136,15 @@ namespace dss {
           ", OriginToken=" + _token +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
-      // flush all pending events from same origin
+      // flush all pending scene call events from same origin
       foreach(boost::shared_ptr<ModelDeferredEvent> evt, m_DeferredEvents) {
         boost::shared_ptr<ModelDeferredSceneEvent> pEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
+        // object may be NULL in case of ModelDeferredButtonEvent's
+        if (pEvent == NULL) {
+          continue;
+        }
         dsuid_t tmp_dsuid = pEvent->getSource();
-        if ((pEvent != NULL) && IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
+        if (IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
           pEvent->clearTimestamp();
         }
       }
