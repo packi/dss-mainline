@@ -26,9 +26,16 @@
 
 #include <bitset>
 
+#include "src/base.h"
 #include "src/model/modelconst.h"
 
 namespace dss {
+
+  class SensorOutOfRangeException : public DSSException {
+  public:
+    SensorOutOfRangeException(const std::string& _what)
+    : DSSException(_what) {}
+  }; // SensorOutOfRangeException
 
   /** Helper functions for scene management. */
   class SceneHelper {
