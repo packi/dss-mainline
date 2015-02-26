@@ -33,6 +33,7 @@
 #include "devicecontainer.h"
 #include "nonaddressablemodelitem.h"
 #include "physicalmodelitem.h"
+#include "storagetools.h"
 
 namespace dss {
   class Apartment;
@@ -64,13 +65,11 @@ namespace dss {
 
   typedef struct ZoneHeatingStatus {
     ZoneHeatingStatus() :
-      m_OperationMode(HeatingOperationModeInvalid),
       m_NominalValue(0),
       m_NominalValueTS(DateTime::NullDate),
       m_ControlValue(0),
       m_ControlValueTS(DateTime::NullDate)
       {}
-    int m_OperationMode;
     double m_NominalValue;         // only used for mode 1
     DateTime m_NominalValueTS;
     double m_ControlValue;
@@ -118,8 +117,8 @@ namespace dss {
     std::vector<boost::shared_ptr<MainZoneSensor_t> > m_MainSensors;
     ZoneHeatingProperties_t m_HeatingProperties;
     ZoneHeatingStatus_t m_HeatingStatus;
+    PersistentValue<int> m_HeatingOperationMode;
     ZoneSensorStatus_t m_SensorStatus;
-
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
 

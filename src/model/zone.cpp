@@ -46,11 +46,16 @@
 
 namespace dss {
 
+  static const std::string HeatingSuffix("heatingOperation_");
+
   //================================================== Zone
 
   Zone::Zone(const int _id, Apartment* _pApartment)
-    : m_ZoneID(_id),
-      m_pApartment(_pApartment)
+  : m_ZoneID(_id),
+    m_pApartment(_pApartment),
+    m_HeatingOperationMode(
+      HeatingSuffix+intToString(m_ZoneID),
+      HeatingOperationModeInvalid)
   {}
 
   Zone::~Zone() {
@@ -152,6 +157,8 @@ namespace dss {
 
   void Zone::setZoneID(const int _value) {
     m_ZoneID = _value;
+    // key changed -> trigger storage at new location
+    m_HeatingOperationMode.store(HeatingSuffix+intToString(m_ZoneID));
   } // setZoneID
 
   void Zone::addToDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
@@ -264,12 +271,11 @@ namespace dss {
   }
 
   void Zone::setHeatingOperationMode(int _operationMode) {
-    m_HeatingStatus.m_OperationMode = _operationMode;
-    dirty();
+    m_HeatingOperationMode.setValue(_operationMode);
   }
 
   int Zone::getHeatingOperationMode() const {
-    return m_HeatingStatus.m_OperationMode;
+    return m_HeatingOperationMode.getValue();
   }
 
   void Zone::setTemperature(double _value, DateTime& _ts) {
