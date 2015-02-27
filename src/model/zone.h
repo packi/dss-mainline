@@ -124,10 +124,7 @@ namespace dss {
     PropertyNodePtr m_pPropertyNode;
 
   public:
-    Zone(const int _id, Apartment* _pApartment)
-    : m_ZoneID(_id),
-      m_pApartment(_pApartment)
-    {}
+    Zone(const int _id, Apartment* _pApartment);
     virtual ~Zone();
     virtual Set getDevices() const;
 

@@ -48,6 +48,11 @@ namespace dss {
 
   //================================================== Zone
 
+  Zone::Zone(const int _id, Apartment* _pApartment)
+    : m_ZoneID(_id),
+      m_pApartment(_pApartment)
+  {}
+
   Zone::~Zone() {
     // we don't own our dsMeters
     m_DSMeters.clear();
