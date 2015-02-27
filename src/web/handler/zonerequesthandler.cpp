@@ -243,7 +243,7 @@ namespace dss {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              resultObj->addProperty("OperationMode", hStatus.m_OperationMode);
+              resultObj->addProperty("OperationMode", pZone->getHeatingOperationMode());
               resultObj->addProperty("TemperatureValue", hSensors.m_TemperatureValue);
               resultObj->addProperty("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
               resultObj->addProperty("NominalValue", hStatus.m_NominalValue);
@@ -257,7 +257,7 @@ namespace dss {
               break;
             case HeatingControlModeIDFixed:
             case HeatingControlModeIDManual:
-              resultObj->addProperty("OperationMode", hStatus.m_OperationMode);
+              resultObj->addProperty("OperationMode", pZone->getHeatingOperationMode());
               resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
               break;
           }

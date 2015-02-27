@@ -893,10 +893,6 @@ namespace dss {
         _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
       }
     }
-
-    // Zone heating configuration
-    _ofs << doIndent(_indent + 1) << "<heatingOperation>" << _pZone->getHeatingOperationMode() << "</heatingOperation>" << std::endl;
-
     _ofs << doIndent(_indent) << "</zone>" << std::endl;
   } // zoneToXML
 
