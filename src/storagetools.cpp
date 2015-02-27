@@ -94,4 +94,40 @@ namespace dss {
     }
   }
 
+  BasePersistentValue::~BasePersistentValue()
+  {
+  }
+
+  void BasePersistentValue::setup(const std::string& _name) {
+    std::string dirname;
+    if (DSS::hasInstance()) {
+      dirname = DSS::getInstance()->getDataDirectory() + "/store/";
+    } else {
+      dirname = std::string(DataDirectory) + "/store/";
+    }
+    int ret = mkdir(dirname.c_str(), S_IRWXU | S_IRGRP);
+    if (ret < 0) {
+      // do not warn about already existing directory
+      if (errno != EEXIST) {
+        Logger::getInstance()->log("Create directory '" + dirname + "' failed: " +
+            std::string(strerror(errno)), lsFatal);
+      }
+    }
+    m_filename = dirname + "value." + _name;
+  }
+
+  const std::string& BasePersistentValue::getFilename() const {
+    return m_filename;
+  }
+
+  void BasePersistentValue::moveFile(const std::string& _temp, const std::string& _target) {
+    // move it to the desired location
+    int ret = rename(_temp.c_str(), _target.c_str());
+    if (ret != 0) {
+      Logger::getInstance()->log("Copying Persistent data to final destination (" +
+          _target + ") failed: " +
+          std::string(strerror(errno)), lsFatal);
+    }
+  }
+
 }
