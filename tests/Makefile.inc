@@ -37,4 +37,4 @@ dsstests_LDADD = \
 			$(LIBCOMMCHANNEL_LIBS) \
 			$(OSSP_UUID_LIBS) \
 			$(LIBDSUID_LIBS) \
-			$(LIBICONV)
+			$(LTLIBICONV)
