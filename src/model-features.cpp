@@ -497,7 +497,6 @@ const int MF_SW_AKM2[] =
 const int MF_SW_UMR200[] =
 {
   mf_blink,
-  mf_leddark,
   mf_outvalue8,
   mf_pushbutton,
   mf_pushbsensor,
