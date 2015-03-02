@@ -202,6 +202,10 @@ namespace dss {
       return failure("Cannot remove present device");
     }
 
+    boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+    boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
+    resultObj->addElement("devices", modified);
+
     boost::shared_ptr<Device> pPartnerDevice;
     if (dev->is2WayMaster()) {
       dsuid_t next;
@@ -216,20 +220,25 @@ namespace dss {
     try {
       manipulator.removeDeviceFromDSMeter(dev);
       if (pPartnerDevice != NULL) {
-       manipulator.removeDeviceFromDSMeter(pPartnerDevice);
+        manipulator.removeDeviceFromDSMeter(pPartnerDevice);
       }
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log(std::string("Could not remove device from "
                                  "dSM: ") + e.what(), lsError);
     }
+    DeviceReference pDevRef(dev, &DSS::getInstance()->getApartment());
+    modified->addElement("", toJSON(pDevRef));
     m_Apartment.removeDevice(dsuid);
     if (pPartnerDevice != NULL) {
       Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
+      DeviceReference pPartnerDeviceRef(pPartnerDevice, &DSS::getInstance()->getApartment());
+      modified->addElement("", toJSON(pPartnerDeviceRef));
       m_Apartment.removeDevice(pPartnerDevice->getDSID());
     }
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-    return success();
     
+    resultObj->addProperty("action", "remove");
+    return success(resultObj);
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::persistSet(const RestfulRequest& _request) {
