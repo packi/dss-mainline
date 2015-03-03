@@ -311,23 +311,10 @@ void SensorDataUploadMsHubPlugin::doUnsubscribe() {
 
 std::vector<std::string> SensorDataUploadMsHubPlugin::getSubscriptionEvents() {
   std::vector<std::string> events;
-  events.push_back(EventName::DeviceSensorValue);
-  events.push_back(EventName::DeviceStatus);
-  events.push_back(EventName::DeviceInvalidSensor);
-  events.push_back(EventName::ZoneSensorValue);
-  events.push_back(EventName::ZoneSensorError);
-  events.push_back(EventName::CallScene);
-  events.push_back(EventName::UndoScene);
-  events.push_back(EventName::StateChange);
-  events.push_back(EventName::AddonStateChange);
-  events.push_back(EventName::HeatingEnabled);
-  events.push_back(EventName::HeatingControllerSetup);
-  events.push_back(EventName::HeatingControllerValue);
-  events.push_back(EventName::HeatingControllerState);
+
+  events = MsHub::uploadEvents();
   events.push_back(EventName::Running);
   events.push_back(EventName::UploadMsHubEventLog);
-  events.push_back(EventName::OldStateChange);
-  events.push_back(EventName::AddonToCloud);
   return events;
 }
 
@@ -508,26 +495,10 @@ void SensorDataUploadDsHubPlugin::doUnsubscribe() {
 
 std::vector<std::string> SensorDataUploadDsHubPlugin::getSubscriptionEvents() {
   std::vector<std::string> events;
-  events.push_back(EventName::DeviceBinaryInputEvent);
-  events.push_back(EventName::DeviceSensorValue);
-  events.push_back(EventName::DeviceStatus);
-  events.push_back(EventName::DeviceInvalidSensor);
-  events.push_back(EventName::ExecutionDenied);
-  events.push_back(EventName::ZoneSensorValue);
-  events.push_back(EventName::ZoneSensorError);
-  events.push_back(EventName::CallScene);
-  events.push_back(EventName::UndoScene);
-  events.push_back(EventName::StateChange);
-  events.push_back(EventName::AddonStateChange);
-  events.push_back(EventName::HeatingEnabled);
-  events.push_back(EventName::HeatingControllerSetup);
-  events.push_back(EventName::HeatingControllerValueDsHub);
-  events.push_back(EventName::HeatingControllerState);
+
+  events = DsHub::uploadEvents();
   events.push_back(EventName::Running);
   events.push_back(EventName::UploadDsHubEventLog);
-  events.push_back(EventName::OldStateChange);
-  events.push_back(EventName::AddonToCloud);
-  events.push_back(EventName::LogFileData);
   return events;
 }
 

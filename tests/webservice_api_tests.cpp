@@ -8,6 +8,7 @@
 #include <boost/thread/condition_variable.hpp>
 #include <curl/curl.h>
 #include <iostream>
+#include "foreach.h"
 
 #include "eventinterpreterplugins.h"
 #include "http_client.h"
@@ -17,8 +18,8 @@
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
+#include "web/json.h"
 #include "tests/dss_life_cycle.h"
-#include "src/web/json.h"
 
 using namespace dss;
 
@@ -191,6 +192,40 @@ BOOST_AUTO_TEST_CASE(webservice_ds_json) {
   JSONObject jsonOBJ;
   BOOST_CHECK_NO_THROW(jsonOBJ = DsHub::toJson(pEvent));
   BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 2);
+}
+
+boost::shared_ptr<Event> createEvent(const std::string eventName)
+{
+  boost::shared_ptr<Event> pEvent;
+  // enable with '-l warning'
+  BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
+  return pEvent;
+}
+
+BOOST_AUTO_TEST_CASE(test_mshub_tojson) {
+  boost::shared_ptr<Event> pEvent;
+
+  foreach (std::string event, MsHub::uploadEvents()) {
+    pEvent = createEvent(event);
+    if (!pEvent) {
+      continue;
+    }
+
+    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_dshub_tojson) {
+  boost::shared_ptr<Event> pEvent;
+
+  foreach (std::string event, DsHub::uploadEvents()) {
+    pEvent = createEvent(event);
+    if (!pEvent) {
+      continue;
+    }
+
+    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent));
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
