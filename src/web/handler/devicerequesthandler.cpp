@@ -532,8 +532,10 @@ namespace dss {
       } else if (value == BUTTONINPUT_1WAY) {
         if (m_pStructureBusInterface != NULL) {
           pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
-          pPartnerDevice->setDeviceButtonInputMode(
+          if (pPartnerDevice->is2WaySlave()) {
+            pPartnerDevice->setDeviceButtonInputMode(
                                             DEV_PARAM_BUTTONINPUT_STANDARD);
+          }
         }
         pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
         pPartnerDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
