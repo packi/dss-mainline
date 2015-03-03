@@ -1752,11 +1752,8 @@ namespace dss {
 
       // device status and error event
       } else if (_sensorIndex <= 31 && _sensorIndex >= 16) {
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::DeviceStatus, pDevRev));
-        pEvent->setProperty("statusIndex", intToString(_sensorIndex));
-        pEvent->setProperty("statusValue", intToString(_sensorValue));
-        raiseEvent(pEvent);
+        raiseEvent(createDeviceStatusEvent(pDevRev, _sensorIndex,
+                                           _sensorValue));
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {

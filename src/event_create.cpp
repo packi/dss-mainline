@@ -26,6 +26,17 @@
 namespace dss {
 
 boost::shared_ptr<Event>
+createDeviceStatusEvent(boost::shared_ptr<DeviceReference> pDevRev,
+                        int statusIndex, int statusValue)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::DeviceStatus, pDevRev);
+  event->setProperty("statusIndex", intToString(statusIndex));
+  event->setProperty("statusValue", intToString(statusValue));
+  return event;
+}
+
+boost::shared_ptr<Event>
 createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> pDevRev,
                              int inputIndex, int inputType, int inputState)
 {

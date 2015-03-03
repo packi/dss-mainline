@@ -222,6 +222,8 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createDeviceBinaryInputEvent(createDevRef(), 0, 1, 7);
   } else if (eventName == EventName::DeviceSensorValue) {
     pEvent = createDeviceSensorValueEvent(createDevRef(), 0, 1, 7);
+  } else if (eventName == EventName::DeviceStatus) {
+    pEvent = createDeviceStatusEvent(createDevRef(), 0, 1);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
