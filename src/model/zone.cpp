@@ -52,10 +52,10 @@ namespace dss {
 
   Zone::Zone(const int _id, Apartment* _pApartment)
   : m_ZoneID(_id),
-    m_pApartment(_pApartment),
     m_HeatingOperationMode(
       HeatingSuffix+intToString(m_ZoneID),
-      HeatingOperationModeInvalid)
+      HeatingOperationModeInvalid),
+    m_pApartment(_pApartment)
   {}
 
   Zone::~Zone() {
