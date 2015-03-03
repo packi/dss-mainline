@@ -169,11 +169,6 @@ namespace dss {
         case ERROR_OUT_OF_RESOURCES:
           message = "out of resources";
           break;
-#if DSM_API_VERSION > 0x106
-        case ERROR_PROGRAMMING_MODE_IS_DISABLED:
-          message = "programming mode disabled";
-          break;
-#endif
         default:
           message = ds485c_strerror(_resultCode);
           break;

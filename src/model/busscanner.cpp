@@ -220,15 +220,6 @@ namespace dss {
     return result;
   } // scanZone
 
-  bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
-    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
-      log("scanDeviceOnBus: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
-      return false;
-    }
-    DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
-    return initializeDeviceFromSpec(_dsMeter, _zone, spec);
-  } // scanDeviceOnBus
-
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
     if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
       log("scanDeviceOnBus: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);

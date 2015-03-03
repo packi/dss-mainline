@@ -200,6 +200,8 @@ namespace dss {
     std::string sslCert = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "sslcert");
     if (!boost::filesystem::exists(sslCert)) {
       throw std::runtime_error("Could not find SSL certificate file: " + sslCert);
+    } else if (boost::filesystem::is_empty(sslCert)) {
+      throw std::runtime_error("SSL certificate file is empty: " + sslCert);
     }
 
     log("Webserver: Configured SSL certificate: " + sslCert, lsInfo);
