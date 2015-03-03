@@ -30,5 +30,10 @@ boost::shared_ptr<Event>
   createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> pDevRev,
                                int inputIndex, int inputType, int inputState);
 
+boost::shared_ptr<Event>
+  createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> pDevRev,
+                               int sensorIndex, int sensorType,
+                               int sensorValue);
+
 }
 #endif

@@ -21,6 +21,8 @@
 
 #include <boost/make_shared.hpp>
 
+#include "model/scenehelper.h"
+
 namespace dss {
 
 boost::shared_ptr<Event>
@@ -32,6 +34,22 @@ createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> pDevRev,
   event->setProperty("inputIndex", intToString(inputIndex));
   event->setProperty("inputType", intToString(inputType));
   event->setProperty("inputState", intToString(inputState));
+  return event;
+}
+
+boost::shared_ptr<Event>
+createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> pDevRev, int
+                             sensorIndex, int sensorType, int sensorValue)
+{
+  boost::shared_ptr<Event> event;
+  // TODO ensure sensorType valid or implement fallback
+  double floatValue = SceneHelper::sensorToFloat12(sensorType, sensorValue);
+
+  event = boost::make_shared<Event>(EventName::DeviceSensorValue, pDevRev);
+  event->setProperty("sensorIndex", intToString(sensorIndex));
+  event->setProperty("sensorType", intToString(sensorType));
+  event->setProperty("sensorValue", intToString(sensorValue));
+  event->setProperty("sensorValueFloat", doubleToString(floatValue));
   return event;
 }
 

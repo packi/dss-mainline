@@ -1760,21 +1760,16 @@ namespace dss {
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::DeviceSensorValue, pDevRev));
-        pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
-        pEvent->setProperty("sensorValue", intToString(_sensorValue));
+        uint8_t sensorType = 0;
         try {
           pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
-
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
-          uint8_t sensorType = pdSensor->m_sensorType;
-          pEvent->setProperty("sensorType", intToString(sensorType));
-
-          double fValue = SceneHelper::sensorToFloat12(sensorType, _sensorValue);
-          pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
-        } catch (ItemNotFoundException& e) {}
-        raiseEvent(pEvent);
+          sensorType = pdSensor->m_sensorType;
+        } catch (ItemNotFoundException& e) {
+          log(std::string("onSensorValue: ") + e.what(), lsNotice);
+        }
+        raiseEvent(createDeviceSensorValueEvent(pDevRev, _sensorIndex,
+                                                sensorType, _sensorValue));
       }
     } catch(ItemNotFoundException& e) {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
