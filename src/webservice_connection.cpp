@@ -57,7 +57,7 @@ protected:
     std::string key = _changedNode->getName();
     if (key.compare(m_input) == 0) {
       // Set property m_output to true, if token contains data.
-      std::string value = _changedNode->getStringValue();
+      std::string value = _changedNode->getAsString();
       DSS::getInstance()->getPropertySystem().setBoolValue(m_output, !value.empty());
     }
   }
