@@ -238,15 +238,21 @@ namespace dss {
       try {
         std::vector<DSMeterSpec_t> busMembers = m_pStructureQueryBusInterface->getBusMembers();
         foreach (DSMeterSpec_t& spec, busMembers) {
-
-
           boost::shared_ptr<DSMeter> dsMeter;
           try{
-             dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
-             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
+            dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
+            log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
+            if (!busMemberIsDSMeter(dsMeter->getBusMemberType())) {
+              m_pApartment->removeDSMeter(spec.DSID);
+              log ("removing uninteresting Bus Device: " + dsuid2str(dsMeter->getDSID()) + ", type:" + intToString(dsMeter->getBusMemberType()));
+            }
           } catch(ItemNotFoundException& e) {
-             dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
-             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
+            if (!busMemberIsDSMeter(spec.DeviceType)) {
+              log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
+              continue;
+            }
+            dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
+            log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
           }
 
           try {
