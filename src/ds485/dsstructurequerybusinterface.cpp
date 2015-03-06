@@ -65,13 +65,7 @@ namespace dss {
       }
     } // end scoped lock.
 
-    dsuid_t ownId;
-    DsmApiGetOwnDSUID(m_DSMApiHandle, &ownId);
-
     for (int i = 0; i < deviceCount; ++i) {
-      if (IsEqualDsuid(ownId, device_list[i])) {
-        continue;
-      }
       try {
         result.push_back(getDSMeterSpec(device_list[i]));
       } catch (BusApiError& err) {
