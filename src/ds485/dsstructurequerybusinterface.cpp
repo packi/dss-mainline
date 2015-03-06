@@ -118,6 +118,13 @@ namespace dss {
     }
     result.DeviceType = (BusMemberDevice_t) devType;
 
+    if (!busMemberIsDSMeter(result.DeviceType)) {
+      Logger::getInstance()->log("DSStructureQueryBusInterface::"
+                                 "getDSMeterSpec: ignore bus member " + dsuid2str(_dsMeterID) +
+                                 " with bus member type " + intToString(devType), lsInfo);
+      return result;
+    }
+
     try {
       ret = dSMInfo(m_DSMApiHandle, _dsMeterID, &result.HardwareVersion,
                     &result.SoftwareRevisionARM, &result.SoftwareRevisionDSP,
