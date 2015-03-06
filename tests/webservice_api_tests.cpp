@@ -180,6 +180,8 @@ BOOST_AUTO_TEST_CASE(webservice_ms_json) {
 }
 
 BOOST_AUTO_TEST_CASE(webservice_ds_json) {
+  /* DsHub::createHeader, requires instance */
+  DSSLifeCycle dss_instance;
   boost::shared_ptr<Event> pEvent;
 
   pEvent = boost::make_shared<Event>("aaaahhh");
