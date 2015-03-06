@@ -909,11 +909,7 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getDeviceType() == DEVICE_TYPE_UMV) {
-        pDevice->getDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->getDeviceSceneMode(id, config);
-      }
+      pDevice->getDeviceSceneMode(id, config);
 
       if(_request.hasParameter("dontCare"))
         config.dontcare = strToIntDef(_request.getParameter("dontCare"), config.dontcare);
@@ -927,11 +923,7 @@ namespace dss {
         config.ledconIndex = strToIntDef(_request.getParameter("ledconIndex"), config.ledconIndex);
       if(_request.hasParameter("dimtimeIndex"))
         config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
-      if (pDevice->getDeviceType() == DEVICE_TYPE_UMV) {
-        pDevice->setDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->setDeviceSceneMode(id, config);
-      }
+      pDevice->setDeviceSceneMode(id, config);
 
       return success();
 
