@@ -48,6 +48,7 @@
 #include "group.h"
 #include "device.h"
 #include "devicereference.h"
+#include "event_create.h"
 #include "eventinterpreterplugins.h"
 #include "internaleventrelaytarget.h"
 #include "modulator.h"
@@ -1687,13 +1688,8 @@ namespace dss {
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
-      boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event(EventName::DeviceBinaryInputEvent, pDevRev));
-      pEvent->setProperty("inputIndex", intToString(_eventIndex));
-      pEvent->setProperty("inputType", intToString(_eventType));
-      pEvent->setProperty("inputState", intToString(_state));
-      raiseEvent(pEvent);
-
+      raiseEvent(createDeviceBinaryInputEvent(pDevRev, _eventIndex, _eventType,
+                                              _state));
       boost::shared_ptr<State> pState;
       try {
         pState = devRef.getDevice()->getBinaryInputState(_eventIndex);
@@ -1748,13 +1744,9 @@ namespace dss {
           }
           if (newState != oldState) {
             state->setState(coSystem, newState);
-
-            boost::shared_ptr<Event> pEvent;
-            pEvent.reset(new Event(EventName::DeviceBinaryInputEvent, pDevRev));
-            pEvent->setProperty("inputIndex", intToString(index));
-            pEvent->setProperty("inputType", intToString(pDev->getDeviceBinaryInputType(index)));
-            pEvent->setProperty("inputState", intToString(newState));
-            raiseEvent(pEvent);
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+                                                    pDev->getDeviceBinaryInputType(index),
+                                                    newState));
           }
         }
 

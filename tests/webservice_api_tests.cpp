@@ -10,8 +10,11 @@
 #include <iostream>
 #include "foreach.h"
 
+#include "event_create.h"
 #include "eventinterpreterplugins.h"
 #include "http_client.h"
+#include "model/apartment.h"
+#include "model/devicereference.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
@@ -196,15 +199,38 @@ BOOST_AUTO_TEST_CASE(webservice_ds_json) {
   BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 2);
 }
 
-boost::shared_ptr<Event> createEvent(const std::string eventName)
+class EventFactory {
+public:
+  EventFactory() {}
+  boost::shared_ptr<Event> createEvent(const std::string& eventName);
+
+  boost::shared_ptr<DeviceReference> createDevRef() {
+    Apartment &apartment(DSS::getInstance()->getApartment());
+    boost::shared_ptr<Device> dev = apartment.allocateDevice(dsuid_t());
+    return boost::make_shared<DeviceReference>(dev, &apartment);
+  }
+
+private:
+  DSSLifeCycle m_dss_guard;
+};
+
+boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
 {
   boost::shared_ptr<Event> pEvent;
-  // enable with '-l warning'
-  BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
+
+  if (eventName == EventName::DeviceBinaryInputEvent) {
+    pEvent = createDeviceBinaryInputEvent(createDevRef(), 0, 1, 7);
+  } else {
+    // enable with '-l warning'
+    BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
+    return pEvent;
+  }
+
+  BOOST_CHECK_EQUAL(pEvent->getName(), eventName);
   return pEvent;
 }
 
-BOOST_AUTO_TEST_CASE(test_mshub_tojson) {
+BOOST_FIXTURE_TEST_CASE(test_mshub_tojson, EventFactory) {
   boost::shared_ptr<Event> pEvent;
 
   foreach (std::string event, MsHub::uploadEvents()) {
@@ -217,7 +243,7 @@ BOOST_AUTO_TEST_CASE(test_mshub_tojson) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_dshub_tojson) {
+BOOST_FIXTURE_TEST_CASE(test_dshub_tojson, EventFactory) {
   boost::shared_ptr<Event> pEvent;
 
   foreach (std::string event, DsHub::uploadEvents()) {
