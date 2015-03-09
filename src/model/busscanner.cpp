@@ -72,12 +72,12 @@ namespace dss {
         // could not get any info about device. We have to retry.
         return false;
       }
-      // bus member type can be read. We have to retry.
-      if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
+      // bus member type can be read. We have to retry for interesting bus devices.
+      if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
         // for known bus device types retry the readout
         return false;
       }
-      // for unknown bus devices
+      // for unknown/uninteresting bus devices
       _dsMeter->setIsValid(true);
       return true;
     }

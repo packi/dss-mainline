@@ -37,6 +37,16 @@
 
 namespace dss {
 
+  bool busMemberIsDSMeter(BusMemberDevice_t type)
+  {
+    if ((type == BusMember_dSM11) ||
+        (type == BusMember_dSM12) ||
+        (type == BusMember_vDC)) {
+      return true;
+    }
+    return false;
+  }
+
 
   //================================================== DSMeter
 
