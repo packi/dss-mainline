@@ -38,7 +38,7 @@ namespace dss {
       SetBroadcastDsuid(m_BroadcastDSID);
     }
 
-    virtual std::vector<DSMeterSpec_t> getDSMeters();
+    virtual std::vector<DSMeterSpec_t> getBusMembers();
     virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID);
     virtual std::vector<int> getZones(const dsuid_t& _dsMeterID);
     virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true);

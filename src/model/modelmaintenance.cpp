@@ -236,8 +236,8 @@ namespace dss {
   void ModelMaintenance::discoverDS485Devices() {
     if (m_pStructureQueryBusInterface != NULL) {
       try {
-        std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
-        foreach (DSMeterSpec_t& spec, meters) {
+        std::vector<DSMeterSpec_t> busMembers = m_pStructureQueryBusInterface->getBusMembers();
+        foreach (DSMeterSpec_t& spec, busMembers) {
 
           std::string ownDSUID;
           PropertySystem* pPropSystem = m_pApartment->getPropertySystem();

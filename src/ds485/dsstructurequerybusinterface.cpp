@@ -44,7 +44,7 @@ namespace dss {
 
   //================================================== DSStructureQueryBusInterface
 
-  std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getDSMeters() {
+  std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getBusMembers() {
     std::vector<DSMeterSpec_t> result;
 
     static const int MAX_DEVICE = 63;
@@ -56,7 +56,7 @@ namespace dss {
       if(m_DSMApiHandle == NULL) {
         return result;
       }
-      deviceCount = DsmApiGetBusMembersPerType(m_DSMApiHandle, device_list, MAX_DEVICE, BUS_MEMBER_GET_DSM | BUS_MEMBER_GET_VDC);
+      deviceCount = DsmApiGetBusMembers(m_DSMApiHandle, device_list, MAX_DEVICE);
       if (deviceCount < 0) {
         // DsmApiGetBusMembers:
         //    result >= 0 number of devices.

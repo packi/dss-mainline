@@ -246,7 +246,7 @@ namespace dss {
   class StructureQueryBusInterface {
   public:
     /** Returns an std::vector containing the dsMeter-spec of all dsMeters present. */
-    virtual std::vector<DSMeterSpec_t> getDSMeters() = 0;
+    virtual std::vector<DSMeterSpec_t> getBusMembers() = 0;
 
     /** Returns the dsMeter-spec for a dsMeter */
     virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID) = 0;
