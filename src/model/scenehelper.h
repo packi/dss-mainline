@@ -74,7 +74,7 @@ namespace dss {
     static double roundDigits(const double input, const int digits);
     static double sensorToFloat12(const int _sensorType, const int _sensorValue);
     static int sensorToSystem(const int _sensorType, const double _sensorValue);
-    static uint8_t sensorToPrecision(const int _sensorType) { return 1; }
+    static uint8_t sensorToPrecision(const int _sensorType) { return 0; }
     static std::string sensorName(const int _sensorType);
   }; // SceneHelper
 
