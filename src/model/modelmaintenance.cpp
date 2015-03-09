@@ -48,6 +48,7 @@
 #include "group.h"
 #include "device.h"
 #include "devicereference.h"
+#include "event_create.h"
 #include "eventinterpreterplugins.h"
 #include "internaleventrelaytarget.h"
 #include "modulator.h"
@@ -1687,13 +1688,8 @@ namespace dss {
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
-      boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
-      pEvent->setProperty("inputIndex", intToString(_eventIndex));
-      pEvent->setProperty("inputType", intToString(_eventType));
-      pEvent->setProperty("inputState", intToString(_state));
-      raiseEvent(pEvent);
-
+      raiseEvent(createDeviceBinaryInputEvent(pDevRev, _eventIndex, _eventType,
+                                              _state));
       boost::shared_ptr<State> pState;
       try {
         pState = devRef.getDevice()->getBinaryInputState(_eventIndex);
@@ -1748,41 +1744,29 @@ namespace dss {
           }
           if (newState != oldState) {
             state->setState(coSystem, newState);
-
-            boost::shared_ptr<Event> pEvent;
-            pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
-            pEvent->setProperty("inputIndex", intToString(index));
-            pEvent->setProperty("inputType", intToString(pDev->getDeviceBinaryInputType(index)));
-            pEvent->setProperty("inputState", intToString(newState));
-            raiseEvent(pEvent);
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+                                                    pDev->getDeviceBinaryInputType(index),
+                                                    newState));
           }
         }
 
       // device status and error event
       } else if (_sensorIndex <= 31 && _sensorIndex >= 16) {
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::DeviceStatus, pDevRev));
-        pEvent->setProperty("statusIndex", intToString(_sensorIndex));
-        pEvent->setProperty("statusValue", intToString(_sensorValue));
-        raiseEvent(pEvent);
+        raiseEvent(createDeviceStatusEvent(pDevRev, _sensorIndex,
+                                           _sensorValue));
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::DeviceSensorValue, pDevRev));
-        pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
-        pEvent->setProperty("sensorValue", intToString(_sensorValue));
+        uint8_t sensorType = 0;
         try {
           pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
-
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
-          uint8_t sensorType = pdSensor->m_sensorType;
-          pEvent->setProperty("sensorType", intToString(sensorType));
-
-          double fValue = SceneHelper::sensorToFloat12(sensorType, _sensorValue);
-          pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
-        } catch (ItemNotFoundException& e) {}
-        raiseEvent(pEvent);
+          sensorType = pdSensor->m_sensorType;
+        } catch (ItemNotFoundException& e) {
+          log(std::string("onSensorValue: ") + e.what(), lsNotice);
+        }
+        raiseEvent(createDeviceSensorValueEvent(pDevRev, _sensorIndex,
+                                                sensorType, _sensorValue));
       }
     } catch(ItemNotFoundException& e) {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);

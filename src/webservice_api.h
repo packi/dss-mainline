@@ -16,6 +16,7 @@ class JSONObject;
 
 namespace MsHub {
   JSONObject toJson(const boost::shared_ptr<Event> &event);
+  std::vector<std::string> uploadEvents(void);
 }
 
 struct WebserviceReply {
@@ -101,6 +102,7 @@ public:
 
 
 namespace DsHub {
+  std::vector<std::string> uploadEvents();
   JSONObject toJson(const boost::shared_ptr<Event> &event);
 }
 

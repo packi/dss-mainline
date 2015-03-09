@@ -8,17 +8,21 @@
 #include <boost/thread/condition_variable.hpp>
 #include <curl/curl.h>
 #include <iostream>
+#include "foreach.h"
 
+#include "event_create.h"
 #include "eventinterpreterplugins.h"
 #include "http_client.h"
+#include "model/apartment.h"
+#include "model/devicereference.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
+#include "web/json.h"
 #include "tests/dss_life_cycle.h"
-#include "src/web/json.h"
 
 using namespace dss;
 
@@ -179,6 +183,8 @@ BOOST_AUTO_TEST_CASE(webservice_ms_json) {
 }
 
 BOOST_AUTO_TEST_CASE(webservice_ds_json) {
+  /* DsHub::createHeader, requires instance */
+  DSSLifeCycle dss_instance;
   boost::shared_ptr<Event> pEvent;
 
   pEvent = boost::make_shared<Event>("aaaahhh");
@@ -191,6 +197,67 @@ BOOST_AUTO_TEST_CASE(webservice_ds_json) {
   JSONObject jsonOBJ;
   BOOST_CHECK_NO_THROW(jsonOBJ = DsHub::toJson(pEvent));
   BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 2);
+}
+
+class EventFactory {
+public:
+  EventFactory() {}
+  boost::shared_ptr<Event> createEvent(const std::string& eventName);
+
+  boost::shared_ptr<DeviceReference> createDevRef() {
+    Apartment &apartment(DSS::getInstance()->getApartment());
+    boost::shared_ptr<Device> dev = apartment.allocateDevice(dsuid_t());
+    return boost::make_shared<DeviceReference>(dev, &apartment);
+  }
+
+private:
+  DSSLifeCycle m_dss_guard;
+};
+
+boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
+{
+  boost::shared_ptr<Event> pEvent;
+
+  if (eventName == EventName::DeviceBinaryInputEvent) {
+    pEvent = createDeviceBinaryInputEvent(createDevRef(), 0, 1, 7);
+  } else if (eventName == EventName::DeviceSensorValue) {
+    pEvent = createDeviceSensorValueEvent(createDevRef(), 0, 1, 7);
+  } else if (eventName == EventName::DeviceStatus) {
+    pEvent = createDeviceStatusEvent(createDevRef(), 0, 1);
+  } else {
+    // enable with '-l warning'
+    BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
+    return pEvent;
+  }
+
+  BOOST_CHECK_EQUAL(pEvent->getName(), eventName);
+  return pEvent;
+}
+
+BOOST_FIXTURE_TEST_CASE(test_mshub_tojson, EventFactory) {
+  boost::shared_ptr<Event> pEvent;
+
+  foreach (std::string event, MsHub::uploadEvents()) {
+    pEvent = createEvent(event);
+    if (!pEvent) {
+      continue;
+    }
+
+    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent));
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE(test_dshub_tojson, EventFactory) {
+  boost::shared_ptr<Event> pEvent;
+
+  foreach (std::string event, DsHub::uploadEvents()) {
+    pEvent = createEvent(event);
+    if (!pEvent) {
+      continue;
+    }
+
+    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent));
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -230,7 +230,7 @@ namespace dss {
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("executionDenied"));
+      pEvent.reset(new Event(EventName::ExecutionDenied));
       pEvent->setProperty("action-type", "zone-scene");
       pEvent->setProperty("action-name", action_name);
       pEvent->setProperty("source-name", m_properties.get("source-name", ""));
@@ -296,7 +296,7 @@ namespace dss {
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("executionDenied"));
+      pEvent.reset(new Event(EventName::ExecutionDenied));
       pEvent->setProperty("action-type", "zone-undo-scene");
       pEvent->setProperty("action-name", action_name);
       pEvent->setProperty("source-name", m_properties.get("source-name", ""));
@@ -378,7 +378,7 @@ namespace dss {
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("executionDenied"));
+      pEvent.reset(new Event(EventName::ExecutionDenied));
       pEvent->setProperty("action-type", "device-scene");
       pEvent->setProperty("action-name", action_name);
       pEvent->setProperty("source-name", m_properties.get("source-name", ""));
@@ -428,7 +428,7 @@ namespace dss {
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("executionDenied"));
+      pEvent.reset(new Event(EventName::ExecutionDenied));
       pEvent->setProperty("action-type", "device-value");
       pEvent->setProperty("action-name", action_name);
       pEvent->setProperty("source-name", m_properties.get("source-name", ""));
@@ -468,7 +468,7 @@ namespace dss {
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("executionDenied"));
+      pEvent.reset(new Event(EventName::ExecutionDenied));
       pEvent->setProperty("action-type", "device-blink");
       pEvent->setProperty("action-name", action_name);
       pEvent->setProperty("source-name", m_properties.get("source-name", ""));
@@ -524,7 +524,7 @@ namespace dss {
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
       boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("executionDenied"));
+      pEvent.reset(new Event(EventName::ExecutionDenied));
       pEvent->setProperty("action-type", "zone-blink");
       pEvent->setProperty("action-name", action_name);
       pEvent->setProperty("source-name", m_properties.get("source-name", ""));
@@ -1317,7 +1317,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkDeviceBinaryInput(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "deviceBinaryInputEvent") {
+    if (m_evtName != EventName::DeviceBinaryInputEvent) {
       return false;
     }
 
@@ -1587,7 +1587,7 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "deviceBinaryInputEvent") {
+      } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
         if (triggerValue == "device-binary-input") {
           if (checkDeviceBinaryInput(triggerProp)) {
             return true;
@@ -2503,7 +2503,7 @@ namespace dss {
       undoScene(logger);
     } else if (m_evtName == "buttonClick") {
       buttonClick(logger);
-    } else if (m_evtName == "deviceBinaryInputEvent") {
+    } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
       deviceBinaryInputEvent(logger);
     } else if (m_evtName == "deviceSensorEvent") {
       deviceSensorEvent(logger);

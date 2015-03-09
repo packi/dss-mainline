@@ -909,7 +909,7 @@ namespace dss {
   }
 
   void EventInterpreterPluginExecutionDeniedDigest::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    if (_event.getName() == "executionDenied") {
+    if (_event.getName() == EventName::ExecutionDenied) {
       boost::mutex::scoped_lock lock(m_digest_mutex);
       std::string action;
       std::string reason;
