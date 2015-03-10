@@ -2,13 +2,14 @@
   #include "config.h"
 #endif
 
+#include <uuid.h>
+
 #include "webservice_api.h"
 
 #include <json.h>
 #include <stdio.h>
 #include <iostream>
 #include <cstring>
-#include <uuid.h>
 
 #include "dss.h"
 #include "event.h"
@@ -58,6 +59,28 @@ void appendCommon(JSONObject &obj, const std::string& group,
   obj.addProperty("EventGroup", group);
   obj.addProperty("EventCategory", category);
   obj.addProperty("Timestamp", event->getTimestamp().toISO8601_ms());
+}
+
+/* mshub */
+std::vector<std::string> uploadEvents()
+{
+  std::vector<std::string> events;
+  events.push_back(EventName::DeviceSensorValue);
+  events.push_back(EventName::DeviceStatus);
+  events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::ZoneSensorValue);
+  events.push_back(EventName::ZoneSensorError);
+  events.push_back(EventName::CallScene);
+  events.push_back(EventName::UndoScene);
+  events.push_back(EventName::StateChange);
+  events.push_back(EventName::AddonStateChange);
+  events.push_back(EventName::HeatingEnabled);
+  events.push_back(EventName::HeatingControllerSetup);
+  events.push_back(EventName::HeatingControllerValue);
+  events.push_back(EventName::HeatingControllerState);
+  events.push_back(EventName::OldStateChange);
+  events.push_back(EventName::AddonToCloud);
+  return events;
 }
 
 JSONObject toJson(const boost::shared_ptr<Event> &event) {
@@ -270,7 +293,7 @@ __DEFINE_LOG_CHANNEL__(WebserviceMsHub, lsInfo)
 
 bool WebserviceMsHub::isAuthorized() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  return propSystem.getBoolValue(pp_websvc_enabled);
+  return propSystem.getBoolValue(pp_websvc_mshub_active);
 }
 
 template <class Iterator>
@@ -527,6 +550,31 @@ void createHeader(boost::shared_ptr<JSONObject> &header, const std::string& grou
   header->addProperty("Source", "dss");
 }
 
+/* dshub */
+std::vector<std::string> uploadEvents()
+{
+  std::vector<std::string> events;
+  events.push_back(EventName::DeviceBinaryInputEvent);
+  events.push_back(EventName::DeviceSensorValue);
+  events.push_back(EventName::DeviceStatus);
+  events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::ExecutionDenied);
+  events.push_back(EventName::ZoneSensorValue);
+  events.push_back(EventName::ZoneSensorError);
+  events.push_back(EventName::CallScene);
+  events.push_back(EventName::UndoScene);
+  events.push_back(EventName::StateChange);
+  events.push_back(EventName::AddonStateChange);
+  events.push_back(EventName::HeatingEnabled);
+  events.push_back(EventName::HeatingControllerSetup);
+  events.push_back(EventName::HeatingControllerValueDsHub);
+  events.push_back(EventName::HeatingControllerState);
+  events.push_back(EventName::OldStateChange);
+  events.push_back(EventName::AddonToCloud);
+  events.push_back(EventName::LogFileData);
+  return events;
+}
+
 JSONObject toJson(const boost::shared_ptr<Event> &event) {
   boost::shared_ptr<const DeviceReference> pDeviceRef;
   boost::shared_ptr<JSONObject> header = boost::make_shared<JSONObject>();
@@ -743,7 +791,7 @@ __DEFINE_LOG_CHANNEL__(WebserviceDsHub, lsInfo)
 
 bool WebserviceDsHub::isAuthorized() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  return propSystem.getBoolValue(pp_websvc_enabled);
+  return propSystem.getBoolValue(pp_websvc_dshub_active);
 }
 
 template <class Iterator>

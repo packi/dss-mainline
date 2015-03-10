@@ -47,6 +47,8 @@ namespace dss {
     DSM_APARTMENT_STATE_UNKNOWN = 2
   };
 
+  bool busMemberIsDSMeter(BusMemberDevice_t type);
+
   /** Represents a DSMeter */
   class DSMeter : public DeviceContainer,
                   public PhysicalModelItem {

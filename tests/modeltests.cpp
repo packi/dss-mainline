@@ -938,7 +938,7 @@ BOOST_AUTO_TEST_CASE(testDeviceStateWhenRemovingMeter) {
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
 public:
-  virtual std::vector<DSMeterSpec_t> getDSMeters() {
+  virtual std::vector<DSMeterSpec_t> getBusMembers() {
     return std::vector<DSMeterSpec_t>();
   }
   virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID) {

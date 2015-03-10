@@ -139,6 +139,9 @@ namespace dss {
     static std::string versionString();
     static std::string readDistroVersion();
     static std::vector<unsigned char> getRandomSalt(unsigned int len);
+    static std::string getCurrentTime();
+    static int getCurrentTimeSec();
+    static int getCurrentGMTOffset();
 
 #ifndef WIN32
     static void* handleSignal(void* arg);

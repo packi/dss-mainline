@@ -55,6 +55,12 @@ const char *pp_websvc_rc_osptoken = "/scripts/system-addon-remote-connectivity/O
 const char *pp_websvc_dshub_url = "/config/webservice-api/dshub/base-url";
 const char *pp_websvc_dshub_token = "/scripts/system-addon-remote-connectivity/dSToken";
 
+const char *pp_websvc_root = "/scripts/system-addon-remote-connectivity";
+const char *pp_dshub_token = "dSToken";
+const char *pp_mshub_token = "OSPToken";
+
+const char *pp_websvc_mshub_active = "/system/mshub/eventlog/active";
+const char *pp_websvc_dshub_active = "/system/dshub/eventlog/active";
 
 void setupCommonProperties(PropertySystem &propSystem) {
   propSystem.createProperty(pp_sysinfo_dss_version)->setStringValue(DSS_VERSION);

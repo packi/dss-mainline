@@ -98,7 +98,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(LIBPROTOBUF_LIBS) \
 			$(LIBCOMMCHANNEL_LIBS) \
 			$(LIBDSUID_LIBS) \
-			$(OSSP_UUID_LIBS)
+			$(OSSP_UUID_LIBS) \
+			$(LTLIBICONV)
 
 ../src/dss.cpp: build_info.h
 

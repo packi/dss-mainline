@@ -241,8 +241,10 @@ AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS(dup2 gethostbyname gettimeofday inet_ntoa localtime_r memchr memmove memset select setlocale socket strchr strcspn strdup strerror strrchr strspn strstr strtol strtoul iconv setrlimit, [],
+AC_CHECK_FUNCS(dup2 gethostbyname gettimeofday inet_ntoa localtime_r memchr memmove memset select setlocale socket strchr strcspn strdup strerror strrchr strspn strstr strtol strtoul setrlimit, [],
         [ AC_MSG_ERROR([required function not available]) ])
+
+AM_ICONV
 
 AC_CHECK_HEADERS(sys/prctl.h)
 AC_CHECK_FUNCS(prctl)
@@ -466,7 +468,10 @@ PKG_CHECK_MODULES([LIBDSUID], [libdsuid], [],
 
 PKG_CHECK_MODULES([OSSP_UUID], [ossp-uuid], [],
     [
+        PKG_CHECK_MODULES([OSSP_UUID], [uuid], [],
+    [
         AC_MSG_ERROR([$OSSP_UUID_PKG_ERRORS])
+    ])
     ])
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"

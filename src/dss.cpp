@@ -139,6 +139,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     setupDirectories();
     m_pPropertySystem->createProperty("/system/start_time")
       ->setStringValue(DateTime().toString());
+    m_pPropertySystem->createProperty("/system/time/current")->linkToProxy(
+        PropertyProxyStaticFunction<std::string>(&DSS::getCurrentTime));
+    m_pPropertySystem->createProperty("/system/time/current_sec")->linkToProxy(
+        PropertyProxyStaticFunction<int>(&DSS::getCurrentTimeSec));
+    m_pPropertySystem->createProperty("/system/time/gmt_offset")->linkToProxy(
+        PropertyProxyStaticFunction<int>(&DSS::getCurrentGMTOffset));
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
     m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
@@ -151,6 +157,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
     m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
+    m_pPropertySystem->createProperty("/config/debug/propertyNodeCount")->linkToProxy(
+        PropertyProxyStaticFunction<int>(&PropertyNode::getNodeCount));
   } // ctor
 
   DSS::~DSS() {
@@ -726,7 +734,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   }
 
   std::vector<unsigned char> DSS::getRandomSalt(unsigned int len) {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     std::vector<unsigned char> urandom(len);
 
     std::ifstream file ("/dev/urandom", std::ios::binary);
@@ -857,5 +865,20 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     dsidNode->setStringValue(dsid);
     dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsuid);
     dsidNode->setStringValue(dsuid);
+  }
+
+  std::string DSS::getCurrentTime()
+  {
+    return DateTime().toISO8601_local();
+  }
+
+  int DSS::getCurrentTimeSec()
+  {
+    return DateTime().secondsSinceEpoch();
+  }
+
+  int DSS::getCurrentGMTOffset()
+  {
+    return DateTime().getTimezoneOffset();
   }
 }

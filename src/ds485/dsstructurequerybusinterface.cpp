@@ -44,7 +44,7 @@ namespace dss {
 
   //================================================== DSStructureQueryBusInterface
 
-  std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getDSMeters() {
+  std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getBusMembers() {
     std::vector<DSMeterSpec_t> result;
 
     static const int MAX_DEVICE = 63;
@@ -56,7 +56,7 @@ namespace dss {
       if(m_DSMApiHandle == NULL) {
         return result;
       }
-      deviceCount = DsmApiGetBusMembersPerType(m_DSMApiHandle, device_list, MAX_DEVICE, BUS_MEMBER_GET_DSM | BUS_MEMBER_GET_VDC);
+      deviceCount = DsmApiGetBusMembers(m_DSMApiHandle, device_list, MAX_DEVICE);
       if (deviceCount < 0) {
         // DsmApiGetBusMembers:
         //    result >= 0 number of devices.
@@ -65,13 +65,7 @@ namespace dss {
       }
     } // end scoped lock.
 
-    dsuid_t ownId;
-    DsmApiGetOwnDSUID(m_DSMApiHandle, &ownId);
-
     for (int i = 0; i < deviceCount; ++i) {
-      if (IsEqualDsuid(ownId, device_list[i])) {
-        continue;
-      }
       try {
         result.push_back(getDSMeterSpec(device_list[i]));
       } catch (BusApiError& err) {
@@ -108,6 +102,24 @@ namespace dss {
     result.DSID = _dsMeterID;
 
     try {
+      ret = BusMember_get_type(m_DSMApiHandle, _dsMeterID, &devType);
+      DSBusInterface::checkResultCode(ret);
+    } catch (BusApiError& err) {
+      Logger::getInstance()->log("DSStructureQueryBusInterface::"
+                                 "getDSMeterSpec: BusMember_get_type: Bus api error: " +
+                                 std::string(err.what()), lsWarning);
+      return result; // do not rethrow exception
+    }
+    result.DeviceType = (BusMemberDevice_t) devType;
+
+    if (!busMemberIsDSMeter(result.DeviceType)) {
+      Logger::getInstance()->log("DSStructureQueryBusInterface::"
+                                 "getDSMeterSpec: ignore bus member " + dsuid2str(_dsMeterID) +
+                                 " with bus member type " + intToString(devType), lsInfo);
+      return result;
+    }
+
+    try {
       ret = dSMInfo(m_DSMApiHandle, _dsMeterID, &result.HardwareVersion,
                     &result.SoftwareRevisionARM, &result.SoftwareRevisionDSP,
                     &result.APIVersion, NULL, nameBuf);
@@ -134,17 +146,6 @@ namespace dss {
                                  std::string(err.what()), lsWarning);
       throw; // rethrow exception
     }
-
-    try {
-      ret = BusMember_get_type(m_DSMApiHandle, _dsMeterID, &devType);
-      DSBusInterface::checkResultCode(ret);
-    } catch (BusApiError& err) {
-      Logger::getInstance()->log("DSStructureQueryBusInterface::"
-                                 "getDSMeterSpec: BusMember_get_type: Bus api error: " +
-                                 std::string(err.what()), lsWarning);
-      throw; // rethrow exception
-    }
-    result.DeviceType = (BusMemberDevice_t) devType;
 
     try {
       ret = dSMProperties_get_apartment_state(m_DSMApiHandle, _dsMeterID,

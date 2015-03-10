@@ -38,6 +38,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/atomic.hpp>
 
 namespace dss {
 
@@ -326,7 +327,7 @@ namespace dss {
     boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
     const int m_EventTimeoutMS;
 
-    unsigned long int m_ScheduledEventCounter;
+    boost::atomic<unsigned long int> m_ScheduledEventCounter;
 
   public:
     EventQueue(Subsystem* _subsystem, const int _eventTimeoutMS = 1000);
@@ -413,6 +414,7 @@ namespace dss {
 
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);
     void unsubscribe(const std::string& _subscriptionID);
+    void unsubscribe(boost::shared_ptr<EventSubscription> _subscription);
 
     void loadSubscriptionsFromProperty(PropertyNodePtr _node);
     void loadStatesFromProperty(PropertyNodePtr _node);

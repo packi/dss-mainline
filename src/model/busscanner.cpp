@@ -72,12 +72,12 @@ namespace dss {
         // could not get any info about device. We have to retry.
         return false;
       }
-      // bus member type can be read. We have to retry.
-      if (_dsMeter->getBusMemberType() != BusMember_Unknown) {
+      // bus member type can be read. We have to retry for interesting bus devices.
+      if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
         // for known bus device types retry the readout
         return false;
       }
-      // for unknown bus devices
+      // for unknown/uninteresting bus devices
       _dsMeter->setIsValid(true);
       return true;
     }
@@ -219,15 +219,6 @@ namespace dss {
 
     return result;
   } // scanZone
-
-  bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
-    if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
-      log("scanDeviceOnBus: dSMeter " + dsuid2str(_dsMeter->getDSID()) + " is incompatible", lsWarning);
-      return false;
-    }
-    DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
-    return initializeDeviceFromSpec(_dsMeter, _zone, spec);
-  } // scanDeviceOnBus
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
     if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {

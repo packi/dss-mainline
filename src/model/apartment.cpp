@@ -55,8 +55,6 @@
 
 namespace dss {
 
-  boost::recursive_mutex Apartment::m_mutex;
-
   //================================================== Apartment
 
   Apartment::Apartment(DSS* _pDSS)

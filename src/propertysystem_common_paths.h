@@ -45,6 +45,13 @@ extern const char *pp_websvc_rc_osptoken;
 extern const char *pp_websvc_dshub_url;
 extern const char *pp_websvc_dshub_token;
 
+extern const char *pp_websvc_mshub_active;
+extern const char *pp_websvc_dshub_active;
+
+extern const char *pp_websvc_root;
+extern const char *pp_dshub_token;
+extern const char *pp_mshub_token;
+
 void setupCommonProperties(PropertySystem &propSystem);
 
 }

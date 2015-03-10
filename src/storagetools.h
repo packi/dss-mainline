@@ -25,7 +25,8 @@
 
 #include <stdint.h>
 #include <string>
-
+#include <iostream>
+#include "base.h"
 #include "logger.h"
 
 namespace dss {
@@ -44,6 +45,76 @@ namespace dss {
     uint64_t getValue() const { return m_value; }
   };
 
+  class BasePersistentValue {
+  public:
+    virtual ~BasePersistentValue();
+  protected:
+    void setup(const std::string& _name);
+    const std::string& getFilename() const;
+    void moveFile(const std::string& _temp, const std::string& _target);
+  private:
+    std::string m_filename;
+  };
+
+  template <class VALTYPE>
+  class PersistentValue : public BasePersistentValue {
+  public:
+    PersistentValue(const std::string& _name, VALTYPE _uninitValue) :
+      m_value(_uninitValue) {
+      setup(_name);
+      load();
+    }
+
+    void setValue(VALTYPE _value) {
+      m_value = _value;
+      store();
+    }
+
+    VALTYPE getValue() const {
+      return m_value;
+    }
+
+    void store() {
+      std::string tmpOut = getFilename() + ".tmp";
+      std::ofstream ofs(tmpOut.c_str());
+      if(ofs) {
+        ofs << m_value << std::endl;
+        ofs.close();
+        syncFile(tmpOut);
+        if (validatePersistenData(tmpOut)) {
+          std::string finalOutput = getFilename();
+          moveFile(tmpOut, finalOutput);
+        }
+      }
+    }
+
+    void store(const std::string& _name) {
+      setup(_name);
+      store();
+    }
+
+  private:
+    void load() {
+      std::ifstream input_file(getFilename().c_str());
+      if (input_file.is_open()) {
+        input_file >> m_value;
+      }
+      input_file.close();
+    }
+
+    bool validatePersistenData(const std::string& _file) {
+      std::ifstream tempIfs(_file.c_str());
+      if (tempIfs.is_open()) {
+        VALTYPE value;
+        tempIfs >> value;
+        tempIfs.close();
+        return (value == m_value);
+      }
+      return false;
+    }
+
+    VALTYPE m_value;
+  };
 }
 
 #endif // STORAGETOOLS_H_INCLUDED

@@ -27,14 +27,18 @@
 #include <vector>
 #include <stdint.h>
 
-#ifndef WIN32
+#if !(definedWIN32 || defined(__APPLE__))
   #include <tr1/unordered_map>
 #else
   #include <unordered_map>
 #endif
 #include <stdexcept>
 
+#ifdef __APPLE__
+#define HASH_MAP std::unordered_map
+#else
 #define HASH_MAP std::tr1::unordered_map
+#endif
 
 namespace dss {
 

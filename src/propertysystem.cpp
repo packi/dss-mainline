@@ -199,6 +199,8 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(PropertyNode, lsInfo);
 
+  boost::atomic<int> PropertyNode::sm_NodeCounter;
+
   PropertyNode::PropertyNode(const char* _name, int _index)
     : m_ParentNode(NULL),
       m_Name(_name),
@@ -208,6 +210,7 @@ namespace dss {
       m_Index(_index),
       m_Flags(Readable | Writeable)
   {
+    sm_NodeCounter++;
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
   } // ctor
 
@@ -279,6 +282,7 @@ namespace dss {
     }
 
     clearValue();
+    sm_NodeCounter--;
   } // dtor
 
   PropertyNodePtr PropertyNode::removeChild(PropertyNodePtr _childNode) {

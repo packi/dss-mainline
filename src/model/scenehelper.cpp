@@ -421,13 +421,13 @@ namespace dss {
     case SensorIDTemperatureOutdoors:
     case SensorIDRoomTemperatureSetpoint:
       convertedSensorValue = (double) ((_sensorValue * 0.1 / 4) - 273.15 + 230.0);
-      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      convertedSensorValue = roundDigits(convertedSensorValue, 3);
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
       convertedSensorValue = (double) (pow(10, ((double) _sensorValue) / 800));
-      convertedSensorValue= roundDigits(convertedSensorValue, 4);
+      convertedSensorValue = roundDigits(convertedSensorValue, 4);
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
@@ -442,7 +442,17 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue - 100);
       break;
     case SensorIDWindDirection:
+      convertedSensorValue = (double) (_sensorValue * 2);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
     case SensorIDPrecipitation:
+      convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
+    case SensorIDAirPressure:
+      convertedSensorValue = (double) ((_sensorValue / 4) + 200);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
     default:
       convertedSensorValue = (double) _sensorValue;
       break;
@@ -456,36 +466,76 @@ namespace dss {
     case SensorIDActivePower:
     case SensorIDOutputCurrent:
     case SensorIDPowerConsumptionVA:
+      if (_sensorValue < 0 || _sensorValue > 4095) {
+        throw SensorOutOfRangeException("Value must be in range [0..4095]");
+      }
       convertedSensorValue = (int) (_sensorValue + 0.5);
       break;
     case SensorIDElectricMeter:
+      if (_sensorValue < 0 || _sensorValue > 40.95) {
+        throw SensorOutOfRangeException("Value must be in range [0..40.95]");
+      }
       convertedSensorValue = (int) ((_sensorValue + 0.005) / 0.01);
       break;
     case SensorIDOutputCurrentEx:
+      if (_sensorValue < 0 || _sensorValue > 16380) {
+        throw SensorOutOfRangeException("Value must be in range [0..16380]");
+      }
       convertedSensorValue = (int) ((_sensorValue + 2) / 4);
       break;
     case SensorIDTemperatureIndoors:
     case SensorIDTemperatureOutdoors:
     case SensorIDRoomTemperatureSetpoint:
+      if (_sensorValue < -43.15 || _sensorValue > 59.225) {
+        throw SensorOutOfRangeException("Value must be in range [-43.15..59.225]");
+      }
       convertedSensorValue = (int) ((_sensorValue + 0.0125 + 273.15 - 230.0) * 4 / 0.1);
       break;
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
+      if (_sensorValue < 1 || _sensorValue > 131446.795) {
+        throw SensorOutOfRangeException("Value must be in range [1..131446.795]");
+      }
       convertedSensorValue = (int) (800 * log10(_sensorValue));
       break;
     case SensorIDHumidityIndoors:
     case SensorIDHumidityOutdoors:
+      if (_sensorValue < 0 || _sensorValue > 102.375) {
+        throw SensorOutOfRangeException("Value must be in range [0..102.375]");
+      }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorIDWindSpeed:
+      if (_sensorValue < 0 || _sensorValue > 102.375) {
+        throw SensorOutOfRangeException("Value must be in range [0..102.375]");
+      }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorIDRoomTemperatureControlVariable:
+      if (_sensorValue < -100 || _sensorValue > 100) {
+        throw SensorOutOfRangeException("Value must be in range [-100..100]");
+      }
       convertedSensorValue = (int) (_sensorValue + 100);
       break;
     case SensorIDWindDirection:
+      if (_sensorValue < 0 || _sensorValue > 511.875) {
+        throw SensorOutOfRangeException("Value must be in range [0..511.875]");
+      }
+      convertedSensorValue = (int) ((_sensorValue + 0.0625) / 2);
+      break;
     case SensorIDPrecipitation:
+      if (_sensorValue < 0 || _sensorValue > 102.375) {
+        throw SensorOutOfRangeException("Value must be in range [0..102.375]");
+      }
+      convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
+      break;
+    case SensorIDAirPressure:
+      if (_sensorValue < 200 || _sensorValue > 1223.75) {
+        throw SensorOutOfRangeException("Value must be in range [200..1223.75]");
+      }
+      convertedSensorValue = (int) ((_sensorValue + 0.125 - 200) * 4);
+      break;
     default:
       convertedSensorValue = (int) (_sensorValue + 0.5);
       break;

@@ -2824,7 +2824,7 @@ namespace dss {
         case HeatingControlModeIDOff:
           break;
         case HeatingControlModeIDPID:
-          obj.setProperty<int>("OperationMode", hStatus.m_OperationMode);
+          obj.setProperty<int>("OperationMode", pZone->getHeatingOperationMode());
           obj.setProperty<double>("TemperatureValue", hSensors.m_TemperatureValue);
           obj.setProperty<std::string>("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
           obj.setProperty<double>("NominalValue", hStatus.m_NominalValue);
@@ -2838,7 +2838,7 @@ namespace dss {
           break;
         case HeatingControlModeIDFixed:
         case HeatingControlModeIDManual:
-          obj.setProperty<int>("OperationMode", hStatus.m_OperationMode);
+          obj.setProperty<int>("OperationMode", pZone->getHeatingOperationMode());
           obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
           break;
       }

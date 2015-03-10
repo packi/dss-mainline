@@ -48,6 +48,7 @@
 #include "group.h"
 #include "device.h"
 #include "devicereference.h"
+#include "event_create.h"
 #include "eventinterpreterplugins.h"
 #include "internaleventrelaytarget.h"
 #include "modulator.h"
@@ -236,26 +237,23 @@ namespace dss {
   void ModelMaintenance::discoverDS485Devices() {
     if (m_pStructureQueryBusInterface != NULL) {
       try {
-        std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
-        foreach (DSMeterSpec_t& spec, meters) {
-
-          std::string ownDSUID;
-          PropertySystem* pPropSystem = m_pApartment->getPropertySystem();
-          if (pPropSystem) {
-            ownDSUID = pPropSystem->getStringValue(pp_sysinfo_dsuid);
-          }
-
-          if (dsuid2str(spec.DSID) == ownDSUID) {
-             continue;
-          }
-
+        std::vector<DSMeterSpec_t> busMembers = m_pStructureQueryBusInterface->getBusMembers();
+        foreach (DSMeterSpec_t& spec, busMembers) {
           boost::shared_ptr<DSMeter> dsMeter;
           try{
-             dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
-             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
+            dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
+            log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
+            if (!busMemberIsDSMeter(dsMeter->getBusMemberType())) {
+              m_pApartment->removeDSMeter(spec.DSID);
+              log ("removing uninteresting Bus Device: " + dsuid2str(dsMeter->getDSID()) + ", type:" + intToString(dsMeter->getBusMemberType()));
+            }
           } catch(ItemNotFoundException& e) {
-             dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
-             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
+            if (!busMemberIsDSMeter(spec.DeviceType)) {
+              log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
+              continue;
+            }
+            dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
+            log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
           }
 
           try {
@@ -1136,11 +1134,15 @@ namespace dss {
           ", OriginToken=" + _token +
           ", Scene=" + intToString(_sceneID), lsDebug);
 
-      // flush all pending events from same origin
+      // flush all pending scene call events from same origin
       foreach(boost::shared_ptr<ModelDeferredEvent> evt, m_DeferredEvents) {
         boost::shared_ptr<ModelDeferredSceneEvent> pEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
+        // object may be NULL in case of ModelDeferredButtonEvent's
+        if (pEvent == NULL) {
+          continue;
+        }
         dsuid_t tmp_dsuid = pEvent->getSource();
-        if ((pEvent != NULL) && IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
+        if (IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
           pEvent->clearTimestamp();
         }
       }
@@ -1686,13 +1688,8 @@ namespace dss {
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
-      boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
-      pEvent->setProperty("inputIndex", intToString(_eventIndex));
-      pEvent->setProperty("inputType", intToString(_eventType));
-      pEvent->setProperty("inputState", intToString(_state));
-      raiseEvent(pEvent);
-
+      raiseEvent(createDeviceBinaryInputEvent(pDevRev, _eventIndex, _eventType,
+                                              _state));
       boost::shared_ptr<State> pState;
       try {
         pState = devRef.getDevice()->getBinaryInputState(_eventIndex);
@@ -1747,41 +1744,29 @@ namespace dss {
           }
           if (newState != oldState) {
             state->setState(coSystem, newState);
-
-            boost::shared_ptr<Event> pEvent;
-            pEvent.reset(new Event("deviceBinaryInputEvent", pDevRev));
-            pEvent->setProperty("inputIndex", intToString(index));
-            pEvent->setProperty("inputType", intToString(pDev->getDeviceBinaryInputType(index)));
-            pEvent->setProperty("inputState", intToString(newState));
-            raiseEvent(pEvent);
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+                                                    pDev->getDeviceBinaryInputType(index),
+                                                    newState));
           }
         }
 
       // device status and error event
       } else if (_sensorIndex <= 31 && _sensorIndex >= 16) {
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::DeviceStatus, pDevRev));
-        pEvent->setProperty("statusIndex", intToString(_sensorIndex));
-        pEvent->setProperty("statusValue", intToString(_sensorValue));
-        raiseEvent(pEvent);
+        raiseEvent(createDeviceStatusEvent(pDevRev, _sensorIndex,
+                                           _sensorValue));
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::DeviceSensorValue, pDevRev));
-        pEvent->setProperty("sensorIndex", intToString(_sensorIndex));
-        pEvent->setProperty("sensorValue", intToString(_sensorValue));
+        uint8_t sensorType = 0;
         try {
           pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
-
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
-          uint8_t sensorType = pdSensor->m_sensorType;
-          pEvent->setProperty("sensorType", intToString(sensorType));
-
-          double fValue = SceneHelper::sensorToFloat12(sensorType, _sensorValue);
-          pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
-        } catch (ItemNotFoundException& e) {}
-        raiseEvent(pEvent);
+          sensorType = pdSensor->m_sensorType;
+        } catch (ItemNotFoundException& e) {
+          log(std::string("onSensorValue: ") + e.what(), lsNotice);
+        }
+        raiseEvent(createDeviceSensorValueEvent(pDevRev, _sensorIndex,
+                                                sensorType, _sensorValue));
       }
     } catch(ItemNotFoundException& e) {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
@@ -1912,8 +1897,9 @@ namespace dss {
     ZoneHeatingProperties_t hProp;
     ZoneHeatingStatus_t hStatus;
 
+    boost::shared_ptr<Zone> zone;
     try {
-      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      zone = m_pApartment->getZone(_zoneID);
       hProp = zone->getHeatingProperties();
       hStatus = zone->getHeatingStatus();
     } catch(ItemNotFoundException& e) {
@@ -1961,7 +1947,7 @@ namespace dss {
     boost::shared_ptr<Event> pEventDsHub;
     pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
     pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
-    switch (hStatus.m_OperationMode) {
+    switch (zone->getHeatingOperationMode()) {
     case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
     case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
     case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
