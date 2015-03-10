@@ -130,65 +130,58 @@ namespace dss {
   }
 
   std::string SessionManager::registerSession() {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     if (m_Sessions.size() >= m_maxSessionCount) {
       Logger::getInstance()->log("SessionManager: session limit reached!", lsWarning);
-      m_MapMutex.unlock();
       return std::string();
     }
     boost::shared_ptr<Session> session = createSession();
     std::string id = session->getID();
     m_Sessions[id] = session;
-    m_MapMutex.unlock();
     Logger::getInstance()->log("SessionManager: register session " + id, lsDebug);
     return id;
   }
 
   std::string SessionManager::registerApplicationSession() {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     if (m_Sessions.size() >= m_maxSessionCount) {
       Logger::getInstance()->log("SessionManager: session limit reached!", lsWarning);
-      m_MapMutex.unlock();
       return std::string();
     }
     boost::shared_ptr<Session> session = createSession();
     session->markAsApplicationSession();
     std::string id = session->getID();
     m_Sessions[id] = session;
-    m_MapMutex.unlock();
     Logger::getInstance()->log("SessionManager: register application session " + id, lsDebug);
     return id;
   }
 
   boost::shared_ptr<Session> SessionManager::getSession(const std::string& _id) {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     boost::shared_ptr<Session> rv = m_Sessions[_id];
-    m_MapMutex.unlock();
     return rv;
   }
 
   void SessionManager::removeSession(const std::string& _id) {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
     if(i != m_Sessions.end()) {
       m_Sessions.erase(i);
     } else {
       Logger::getInstance()->log("Tried to remove nonexistent session!", lsWarning);
     }
-    m_MapMutex.unlock();
   }
 
   void SessionManager::touchSession(const std::string& _id) {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
     if(i != m_Sessions.end()) {
       m_Sessions[_id]->touch();
     }
-    m_MapMutex.unlock();
   }
 
   void SessionManager::cleanupOldestSession() {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     unsigned int age = 0;
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i, oldest;
     for (oldest = m_Sessions.end(), i = m_Sessions.begin(); i != m_Sessions.end(); ) {
@@ -207,11 +200,10 @@ namespace dss {
       Logger::getInstance()->log("SessionManager: auto-cleanup session: " + oSession->getID(), lsWarning);
       m_Sessions.erase(oldest);
     }
-    m_MapMutex.unlock();
   }
 
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i;
     for(i = m_Sessions.begin(); i != m_Sessions.end(); ) {
       boost::shared_ptr<Session> s = i->second;
@@ -224,7 +216,6 @@ namespace dss {
         i++;
       }
     }
-    m_MapMutex.unlock();
   }
 }
 

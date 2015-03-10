@@ -24,11 +24,10 @@
 #ifndef __SESSION_MANAGER_H__
 #define __SESSION_MANAGER_H__
 
-#include "src/mutex.h"
-
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "logger.h"
 
@@ -102,7 +101,7 @@ namespace dss {
     std::string m_VersionInfo;
 
     std::map<const std::string, boost::shared_ptr<Session> > m_Sessions;
-    Mutex m_MapMutex;
+    boost::mutex m_MapMutex;
 
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     void sendCleanupEvent();

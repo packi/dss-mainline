@@ -198,14 +198,13 @@ namespace dss {
   } // ctor
 
   void ScriptLogger::log(const std::string& text) {
+    boost::mutex::scoped_lock lock(m_LogWriteMutex);
     if (m_f) {
       DateTime timestamp = DateTime();
 
       std::string out = "[" + timestamp.toISO8601_ms_local() + "] " + text;
-      m_LogWriteMutex.lock();
       size_t written = fwrite(out.c_str(), 1, out.size(), m_f);
       fflush(m_f);
-      m_LogWriteMutex.unlock();
       if (written < text.size()) {
         throw std::runtime_error("Could not complete write operation to log file");
       }
@@ -217,8 +216,8 @@ namespace dss {
   } // logln
 
   void ScriptLogger::reopenLogfile() {
+    boost::mutex::scoped_lock lock(m_LogWriteMutex);
     if (m_f) {
-      m_LogWriteMutex.lock();
       fclose(m_f);
 #ifdef __USE_GNU
       m_f = fopen(m_fileName.c_str(), "a+e");
@@ -229,10 +228,8 @@ namespace dss {
       }
 #endif
       if (!m_f) {
-        m_LogWriteMutex.unlock();
         throw std::runtime_error("Could not open file " + m_fileName + " for writing");
       }
-      m_LogWriteMutex.unlock();
     }
   }
 
@@ -276,14 +273,13 @@ namespace dss {
   void ScriptLoggerExtension::reopenLogfiles(Event& _event, const EventSubscription& _subscription) {
     int signal = strToIntDef( _event.getPropertyByName("signum"), -1);
     if (signal == SIGUSR1) {
-      m_MapMutex.lock();
+      boost::mutex::scoped_lock lock(m_MapMutex);
       std::map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i;
       for (i = m_Loggers.begin(); i != m_Loggers.end(); i++) {
         if (!i->second.expired()) {
           i->second.lock()->reopenLogfile();
         }
       }
-      m_MapMutex.unlock();
     }
   }
 
@@ -301,7 +297,7 @@ namespace dss {
 
   boost::shared_ptr<ScriptLogger> ScriptLoggerExtension::getLogger(const std::string& _filename) {
     boost::shared_ptr<ScriptLogger> result;
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     std::map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
     if(i == m_Loggers.end()) {
       result.reset(new ScriptLogger(m_Directory, _filename, this));
@@ -310,19 +306,17 @@ namespace dss {
     } else {
       result = m_Loggers[_filename].lock();
     }
-    m_MapMutex.unlock();
     return result;
   } // getLogger
 
   void ScriptLoggerExtension::removeLogger(const std::string& _filename) {
-    m_MapMutex.lock();
+    boost::mutex::scoped_lock lock(m_MapMutex);
     std::map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
     if(i != m_Loggers.end()) {
       m_Loggers.erase(i);
     } else {
       Logger::getInstance()->log("Tried to remove nonexistent logger '" + _filename + "' !", lsWarning);
     }
-    m_MapMutex.unlock();
   } // removeLogger
 
 } // namespace dss

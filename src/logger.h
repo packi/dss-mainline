@@ -28,8 +28,8 @@
 #include <fstream>
 #include <iostream>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <list>
-#include "mutex.h"
 
 /*
  * Usage:
@@ -87,9 +87,9 @@ class LogHandler;
     boost::shared_ptr<LogTarget> m_logTarget;
     boost::shared_ptr<LogChannel> m_defaultLogChannel;
 
-    static Mutex m_handlerListMutex;
+    static boost::mutex m_handlerListMutex;
     static std::list<LogHandler *> m_handlerList;
-    static Mutex m_streamMutex;
+    static boost::mutex m_streamMutex;
   }; // Logger
 
   class LogChannel {
