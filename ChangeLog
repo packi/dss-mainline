@@ -1,5 +1,13 @@
 dSS - digitalSTROM Server
 
+v1.30.4	10.03.2015
+	* remove RRD metering databeses if time difference is to big, #7575
+	* add EmergencyValue to apartment/getTemperatureControlConfig, #9290
+	* fix null pointer dereference, #8088
+	* multiple UMR fixes, #9368, #9367
+	* fix local prio settings for UMV, #9357
+	* return removed device in JSON repsonse, #9391
+
 v1.30.3	20.02.2015
 	* deactivate dSHub event uploader, #9132
 	* SensorLog, reduce number of queued sensor events
