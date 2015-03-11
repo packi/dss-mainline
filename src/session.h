@@ -27,10 +27,10 @@
 #include <map>
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "eventsubscriptionsession.h"
 #include "datetools.h"
-#include "mutex.h"
 
 namespace dss {
 
@@ -59,7 +59,7 @@ namespace dss {
     unsigned int getIdleTime() { return m_LastTouched.secondsSinceEpoch(); }
   protected:
     const std::string m_Token;
-    Mutex m_UseCountMutex;
+    boost::mutex m_UseCountMutex;
     int m_UsageCount;
     DateTime m_LastTouched;
     int m_SessionTimeoutSec;

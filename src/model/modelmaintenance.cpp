@@ -853,7 +853,7 @@ namespace dss {
   } // readOutPendingMeter
 
   void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
-    m_ModelEventsMutex.lock();
+    boost::mutex::scoped_lock lock(m_ModelEventsMutex);
     for(boost::ptr_vector<ModelEvent>::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end(); ) {
       if(it->getEventType() == _type) {
         it = m_ModelEvents.erase(it);
@@ -861,7 +861,6 @@ namespace dss {
         ++it;
       }
     }
-    m_ModelEventsMutex.unlock();
   } // eraseModelEventsFromQueue
 
   void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
@@ -923,9 +922,10 @@ namespace dss {
       m_IsDirty = true;
       delete _pEvent;
     } else {
-      m_ModelEventsMutex.lock();
-      m_ModelEvents.push_back(_pEvent);
-      m_ModelEventsMutex.unlock();
+      {
+        boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+        m_ModelEvents.push_back(_pEvent);
+      }
       m_NewModelEvent.signal();
     }
   } // addModelEvent

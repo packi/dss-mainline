@@ -55,25 +55,22 @@ namespace dss {
   } // isStillValid
 
   bool Session::isUsed() {
-    m_UseCountMutex.lock();
+    boost::mutex::scoped_lock lock(m_UseCountMutex);
     bool result = (m_UsageCount != 0);
-    m_UseCountMutex.unlock();
     return result;
   }
 
   void Session::use() {
-    m_UseCountMutex.lock();
+    boost::mutex::scoped_lock lock(m_UseCountMutex);
     m_UsageCount++;
-    m_UseCountMutex.unlock();
   }
 
   void Session::unuse() {
-    m_UseCountMutex.lock();
+    boost::mutex::scoped_lock lock(m_UseCountMutex);
     m_UsageCount--;
     if(m_UsageCount < 0) {
       m_UsageCount = 0;
     }
-    m_UseCountMutex.unlock();
     touch();
   }
 

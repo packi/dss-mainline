@@ -98,8 +98,6 @@ libdsscore_a_SOURCES =  \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
 	../src/monitor_tasks.h \
-	../src/mutex.cpp \
-	../src/mutex.h \
 	../src/propertyquery.cpp \
 	../src/propertyquery.h \
 	../src/propertysystem_common_paths.cpp \

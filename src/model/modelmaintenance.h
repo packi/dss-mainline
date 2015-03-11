@@ -240,7 +240,7 @@ namespace dss {
     bool m_IsDirty;
 
     boost::ptr_vector<ModelEvent> m_ModelEvents;
-    Mutex m_ModelEventsMutex;
+    boost::mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
     Apartment* m_pApartment;
     Metering* m_pMetering;

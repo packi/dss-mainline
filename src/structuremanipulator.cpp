@@ -30,7 +30,6 @@
 
 #include "src/foreach.h"
 #include "src/businterface.h"
-#include "src/mutex.h"
 #include "src/propertysystem.h"
 #include "src/model/device.h"
 #include "src/model/devicereference.h"

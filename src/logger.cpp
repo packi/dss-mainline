@@ -42,8 +42,8 @@
 namespace dss {
 
   Logger* Logger::m_Instance = NULL;
-  Mutex Logger::m_handlerListMutex = Mutex();
-  Mutex Logger::m_streamMutex = Mutex();
+  boost::mutex Logger::m_handlerListMutex;
+  boost::mutex Logger::m_streamMutex;
   std::list<LogHandler *> Logger::m_handlerList = std::list<LogHandler *>();
 
   template <class t>
@@ -134,16 +134,16 @@ namespace dss {
         + " " + _message + "\n";
 
       {
-        m_streamMutex.lock();
+        boost::mutex::scoped_lock lock(m_streamMutex);
         m_logTarget->outputStream() << logMessage; // only for backward compatibility
-        m_streamMutex.unlock();
       }
 
-      m_handlerListMutex.lock();
-      foreach(LogHandler *h,m_handlerList) {
-        h->handle(logMessage);
+      {
+        boost::mutex::scoped_lock lock(m_handlerListMutex);
+        foreach(LogHandler *h,m_handlerList) {
+          h->handle(logMessage);
+        }
       }
-      m_handlerListMutex.unlock();
     }
   } // log
 
@@ -164,17 +164,15 @@ namespace dss {
 
 
   void Logger::registerHandler(LogHandler& _logHandler) {
-	  m_handlerListMutex.lock();
-	  m_handlerList.push_back(&_logHandler);
-	  m_handlerListMutex.unlock();
+    boost::mutex::scoped_lock lock(m_handlerListMutex);
+    m_handlerList.push_back(&_logHandler);
   } //registerHandler
 
   void Logger::deregisterHandler(LogHandler& _logHandler) {
-	  m_handlerListMutex.lock();
-	  std::list<LogHandler *>::iterator it = find(m_handlerList.begin(), m_handlerList.end(), &_logHandler);
-	  if (it != m_handlerList.end()) {
-		  m_handlerList.erase(it);
-	  }
-	  m_handlerListMutex.unlock();
+    boost::mutex::scoped_lock lock(m_handlerListMutex);
+    std::list<LogHandler *>::iterator it = find(m_handlerList.begin(), m_handlerList.end(), &_logHandler);
+    if (it != m_handlerList.end()) {
+      m_handlerList.erase(it);
+    }
   } // deregisterHandler
 }
