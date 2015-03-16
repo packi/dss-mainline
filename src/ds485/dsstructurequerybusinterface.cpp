@@ -420,7 +420,7 @@ namespace dss {
     int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
     Logger::getInstance()->log(std::string("Found ") + intToString(numDevices) + " devices in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
-      DeviceSpec_t spec;
+      DeviceSpec_t spec = {};
       uint8_t locked;
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
@@ -456,7 +456,7 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
 
     for(int iDevice = 0; iDevice < numberOfDevices; iDevice++) {
-      DeviceSpec_t spec;
+      DeviceSpec_t spec = {};
       uint8_t locked;
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
@@ -484,7 +484,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    DeviceSpec_t result;
+    DeviceSpec_t result = {};
     uint8_t locked;
     uint8_t groups[GROUPS_LEN];
     uint8_t name[NAME_LEN];
