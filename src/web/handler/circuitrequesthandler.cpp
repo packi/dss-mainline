@@ -32,7 +32,6 @@
 #include "src/model/apartment.h"
 #include "src/ds485types.h"
 
-#include "src/web/json.h"
 #include "src/model/modelmaintenance.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
@@ -55,22 +54,22 @@ namespace dss {
     std::string idString = _request.getParameter("id");
     std::string dsuidStr = _request.getParameter("dsuid");
     if (idString.empty() && dsuidStr.empty()) {
-      return failure("Missing parameter dsuid");
+      return JSONWriter::failure("Missing parameter dsuid");
     }
 
     dsuid_t dsuid;
     try {
       dsuid = dsidOrDsuid2dsuid(idString, dsuidStr);
     } catch(std::runtime_error& e) {
-      return failure(e.what());
+      return JSONWriter::failure(e.what());
     }
 
     try {
       boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsuid);
       if(_request.getMethod() == "getName") {
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("name", dsMeter->getName());
-        return success(resultObj);
+        JSONWriter json;
+        json.add("name", dsMeter->getName());
+        return json.successJSON();
       } else if(_request.getMethod() == "setName") {
         if(_request.hasParameter("newName")) {
           std::string nameStr = _request.getParameter("newName");
@@ -82,32 +81,32 @@ namespace dss {
                                              m_Apartment);
             manipulator.meterSetName(dsMeter, nameStr);
           }
-          return success();
+          return JSONWriter::success();
         } else {
-          return failure("missing parameter newName");
+          return JSONWriter::failure("missing parameter newName");
         }
       } else if(_request.getMethod() == "getConsumption") {
         if (!dsMeter->getCapability_HasMetering()) {
-          return failure("Metering not supported on this device");
+          return JSONWriter::failure("Metering not supported on this device");
         }
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("consumption", dsMeter->getPowerConsumption());
-        return success(resultObj);
+        JSONWriter json;
+        json.add("consumption", (long long int)dsMeter->getPowerConsumption());
+        return json.successJSON();
       } else if(_request.getMethod() == "getEnergyMeterValue") {
         if (!dsMeter->getCapability_HasMetering()) {
-          return failure("Metering not supported on this device");
+          return JSONWriter::failure("Metering not supported on this device");
         }
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("meterValue", dsMeter->getEnergyMeterValue());
-        return success(resultObj);
+        JSONWriter json;
+        json.add("meterValue", (long long int)dsMeter->getEnergyMeterValue());
+        return json.successJSON();
       } else if(_request.getMethod() == "rescan") {
         dsMeter->setIsValid(false);
-        return success();
+        return JSONWriter::success();
       } else {
         throw std::runtime_error("Unhandled function");
       }
     } catch(ItemNotFoundException&) {
-      return failure("Could not find dSMeter with given dSUID");
+      return JSONWriter::failure("Could not find dSMeter with given dSUID");
     }
   } // handleRequest
 

@@ -65,8 +65,6 @@
 
 #include "src/businterface.h"
 
-#include "json.h"
-
 #include "src/model/device.h"
 #include "src/model/apartment.h"
 
@@ -385,13 +383,11 @@ namespace dss {
         }
         WebServerResponse response =
           m_Handlers[request.getClass()]->jsonHandleRequest(request, _session);
-        if(response.getResponse() != NULL) {
-          std::string callback = request.getParameter("callback");
-          if (callback.empty()) {
-            result = response.getResponse()->toString();
-          } else {
-            result = callback + "(" + response.getResponse()->toString() + ")";
-          }
+        std::string callback = request.getParameter("callback");
+        if (callback.empty()) {
+          result = response.getResponse();
+        } else {
+          result = callback + "(" + response.getResponse() + ")";
         }
         if (response.isRevokeSessionToken()) {
           setCookieHeader = generateRevokeCookieString();
@@ -405,34 +401,21 @@ namespace dss {
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 200, setCookieHeader, result);
       } catch(SecurityException& e) {
-        JSONObject resultObj;
-        resultObj.addProperty("ok", false);
-        resultObj.addProperty("message", e.what());
-        result = resultObj.toString();
+        result = JSONWriter::failure(e.what());
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 403, setCookieHeader, result);;
       } catch(std::runtime_error& e) {
-        JSONObject resultObj;
-        resultObj.addProperty("ok", false);
-        resultObj.addProperty("message", e.what());
-        result = resultObj.toString();
+        result = JSONWriter::failure(e.what());
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
       } catch(std::invalid_argument& e) {
-        JSONObject resultObj;
-        resultObj.addProperty("ok", false);
-        resultObj.addProperty("message", e.what());
-        result = resultObj.toString();
+        result = JSONWriter::failure(e.what());
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
       }
     } else {
       log("Unknown function '" + request.getUrlPath() + "'", lsError);
-      std::ostringstream sstream;
-      sstream << "{" << "\"ok\"" << ":" << "false" << ",";
-      sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
-      sstream << "}";
-      result = sstream.str();
+      result = JSONWriter::failure("Call to unknown function");
       emitHTTPJsonPacket(_connection, 404, setCookieHeader, result);
     }
     return _connection;
@@ -546,22 +529,13 @@ namespace dss {
         throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
       }
     } catch(SecurityException& e) {
-      JSONObject resultObj;
-      resultObj.addProperty("ok", false);
-      resultObj.addProperty("message", e.what());
-      result = resultObj.toString();
+      result = JSONWriter::failure(e.what());
       emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     } catch(std::runtime_error& e) {
-      JSONObject resultObj;
-      resultObj.addProperty("ok", false);
-      resultObj.addProperty("message", e.what());
-      result = resultObj.toString();
+      result = JSONWriter::failure(e.what());
       emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     } catch(std::invalid_argument& e) {
-      JSONObject resultObj;
-      resultObj.addProperty("ok", false);
-      resultObj.addProperty("message", e.what());
-      result = resultObj.toString();
+      result = JSONWriter::failure(e.what());
       emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
     }
 

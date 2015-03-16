@@ -27,7 +27,6 @@
 
 #include "setrequesthandler.h"
 
-#include "src/web/json.h"
 #include "src/model/apartment.h"
 #include "src/model/set.h"
 
@@ -45,13 +44,13 @@ namespace dss {
 
   WebServerResponse SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "fromApartment") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("self", ".");
-      return success(resultObj);
+      JSONWriter json;
+      json.add("self", ".");
+      return json.successJSON();
     } else {
       std::string self = trim(_request.getParameter("self"));
       if(self.empty()) {
-        return failure("Missing parameter 'self'");
+        return JSONWriter::failure("Missing parameter 'self'");
       }
 
       if(_request.getMethod() == "byZone") {
@@ -64,12 +63,12 @@ namespace dss {
         } else if(!_request.getParameter("zoneName").empty()) {
           additionalPart += _request.getParameter("zoneName");
         } else {
-          return failure("Missing either zoneID or zoneName");
+          return JSONWriter::failure("Missing either zoneID or zoneName");
         }
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("self", self + additionalPart);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("self", self + additionalPart);
+        return json.successJSON();
       } else if(_request.getMethod() == "byGroup") {
         std::string additionalPart;
         if(self != ".") {
@@ -80,12 +79,12 @@ namespace dss {
         } else if(!_request.getParameter("groupName").empty()) {
           additionalPart += _request.getParameter("groupName");
         } else {
-          return failure("Missing either groupID or groupName");
+          return JSONWriter::failure("Missing either groupID or groupName");
         }
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("self", self + additionalPart);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("self", self + additionalPart);
+        return json.successJSON();
       } else if(_request.getMethod() == "byDSID") {
         std::string additionalPart;
         if(self != ".") {
@@ -94,12 +93,12 @@ namespace dss {
         if(!_request.getParameter("dsid").empty()) {
           additionalPart += "dsud(" + _request.getParameter("dsid") + ")";
         } else {
-          return failure("Missing parameter dsid");
+          return JSONWriter::failure("Missing parameter dsid");
         }
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("self", self + additionalPart);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("self", self + additionalPart);
+        return json.successJSON();
       } else if(_request.getMethod() == "byDSUID") {
         std::string additionalPart;
         if(self != ".") {
@@ -108,21 +107,23 @@ namespace dss {
         if(!_request.getParameter("dsuid").empty()) {
           additionalPart += "dsuid(" + _request.getParameter("dsuid") + ")";
         } else {
-          return failure("Missing parameter dsuid");
+          return JSONWriter::failure("Missing parameter dsuid");
         }
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("self", self + additionalPart);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("self", self + additionalPart);
+        return json.successJSON();
 
       } else if(_request.getMethod() == "getDevices") {
         SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, boost::shared_ptr<Zone>());
-        return success(toJSON(set));
+        JSONWriter json(JSONWriter::jsonArrayResult);
+        toJSON(set, json);
+        return json.successJSON();
       } else if(_request.getMethod() == "add") {
         std::string other = _request.getParameter("other");
         if(other.empty()) {
-          return failure("Missing parameter other");
+          return JSONWriter::failure("Missing parameter other");
         }
         std::string additionalPart;
         if(self != ".") {
@@ -130,13 +131,13 @@ namespace dss {
         }
         additionalPart += "add(" + other + ")";
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("self", self + additionalPart);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("self", self + additionalPart);
+        return json.successJSON();
       } else if(_request.getMethod() == "subtract") {
         std::string other = _request.getParameter("other");
         if(other.empty()) {
-          return failure("Missing parameter other");
+          return JSONWriter::failure("Missing parameter other");
         }
         std::string additionalPart;
         if(self != ".") {
@@ -144,9 +145,9 @@ namespace dss {
         }
         additionalPart += "subtract(" + other + ")";
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("self", self + additionalPart);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("self", self + additionalPart);
+        return json.successJSON();
       } else if(isDeviceInterfaceCall(_request)) {
         SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, boost::shared_ptr<Zone>());

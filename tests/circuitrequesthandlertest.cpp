@@ -103,8 +103,7 @@ BOOST_FIXTURE_TEST_CASE(testCircuitGetName, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("circuit/getName", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("name", m_ValidName, result);
+  checkPropertyEquals("name", m_ValidName, response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitSetNameMissingNewName, Fixture) {
@@ -125,8 +124,8 @@ BOOST_FIXTURE_TEST_CASE(testCircuitSetName, Fixture) {
   RestfulRequest req2("circuit/getName", m_Params);
   WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
 
-  boost::shared_ptr<JSONObject> result = getResultObject(response2);
-  checkPropertyEquals("name", kNewName, result);
+
+  checkPropertyEquals("name", kNewName, response2);
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
@@ -147,15 +146,15 @@ BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
   RestfulRequest req("circuit/getConsumption", m_Params);
   m_pApartment->getDSMeterByDSID(m_ValidDSUID)->setPowerConsumption(kConsumption);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("consumption", kConsumption, result);
+
+  checkPropertyEquals("consumption", (int)kConsumption, response);
 
   // verify that power consumption for inactive devices is zero
   sleep(2);
   RestfulRequest req2("circuit/getConsumption", m_Params);
   WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result2 = getResultObject(response2);
-  checkPropertyEquals("consumption", kNullConsumption, result2);
+
+  checkPropertyEquals("consumption", (int)kNullConsumption, response2);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
@@ -165,8 +164,8 @@ BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
   RestfulRequest req("circuit/getEnergyMeterValue", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
 
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("meterValue", kMeterValue, result);
+
+  checkPropertyEquals("meterValue", (int)kMeterValue, response);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

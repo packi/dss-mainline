@@ -297,10 +297,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, Fixture) {
   response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
   testOkIs(response, true);
 
-  boost::shared_ptr<JSONElement> eventsArray = getResultObject(response)->getElementByName("events");
-  BOOST_CHECK_EQUAL(eventsArray->getElementCount(), 1);
-  boost::shared_ptr<JSONObject> eventObj = boost::dynamic_pointer_cast<JSONObject>(eventsArray->getElement(0));
-  checkPropertyEquals("name", kEventName, eventObj);
+  checkPropertyEquals("events", "[ { \"name\": \"" + kEventName + "\", \"properties\": { }, \"source\": { } } ]", response);
 
   RestfulRequest reqUnsubscribe("event/unsubscribe", m_Params);
   response = m_pHandler->jsonHandleRequest(reqUnsubscribe, m_pSession);

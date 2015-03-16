@@ -42,7 +42,6 @@
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
 #include "src/ds485types.h"
-#include "src/web/json.h"
 #include "jsonhelper.h"
 #include "foreach.h"
 #include "util.h"
@@ -174,48 +173,48 @@ namespace dss {
     try {
       pDevice = getDeviceFromRequest(_request);
     } catch(DeviceNotFoundException& ex) {
-      return failure(ex.what());
+      return JSONWriter::failure(ex.what());
     } catch(std::runtime_error& ex) {
-      return failure(ex.what());
+      return JSONWriter::failure(ex.what());
     }
     assert(pDevice != NULL);
     if(isDeviceInterfaceCall(_request)) {
       return handleDeviceInterfaceRequest(_request, pDevice, _session);
     } else if(_request.getMethod() == "getSpec") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("functionID", pDevice->getFunctionID());
-      resultObj->addProperty("productID", pDevice->getProductID());
-      resultObj->addProperty("revisionID", pDevice->getRevisionID());
-      return success(resultObj);
+      JSONWriter json;
+      json.add("functionID", pDevice->getFunctionID());
+      json.add("productID", pDevice->getProductID());
+      json.add("revisionID", pDevice->getRevisionID());
+      return json.successJSON();
     } else if(_request.getMethod() == "getGroups") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      JSONWriter json;
       int numGroups = pDevice->getGroupsCount();
 
-      boost::shared_ptr<JSONArrayBase> groups = boost::make_shared<JSONArrayBase>();
-      resultObj->addElement("groups", groups);
+      json.startArray("groups");
       for(int iGroup = 0; iGroup < numGroups; iGroup++) {
         try {
           boost::shared_ptr<Group> group = pDevice->getGroupByIndex(iGroup);
-          boost::shared_ptr<JSONObject> groupObj = boost::make_shared<JSONObject>();
-          groups->addElement("", groupObj);
+          json.startObject();
 
-          groupObj->addProperty("id", group->getID());
+          json.add("id", group->getID());
           if(!group->getName().empty()) {
-            groupObj->addProperty("name", group->getName());
+            json.add("name", group->getName());
           }
+          json.endObject();
         } catch(std::runtime_error&) {
           Logger::getInstance()->log("DeviceRequestHandler: Group only present at device level");
         }
       }
-      return success(resultObj);
+      json.endArray();
+      return json.successJSON();
     } else if(_request.getMethod() == "getState") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("isOn", pDevice->isOn());
-      return success(resultObj);
+      JSONWriter json;
+      json.add("isOn", pDevice->isOn());
+      return json.successJSON();
     } else if(_request.getMethod() == "getName") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("name", pDevice->getName());
-      return success(resultObj);
+      JSONWriter json;
+      json.add("name", pDevice->getName());
+      return json.successJSON();
     } else if(_request.getMethod() == "setName") {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
@@ -246,120 +245,122 @@ namespace dss {
               }
             }
           } catch(std::runtime_error& e) {
-            return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+            return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
           }
         }
-        return success();
+        return JSONWriter::success();
       } else {
-        return failure("missing parameter 'newName'");
+        return JSONWriter::failure("missing parameter 'newName'");
       }
     } else if(_request.getMethod() == "addTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
-        return failure("missing parameter 'tag'");
+        return JSONWriter::failure("missing parameter 'tag'");
       }
 
       tagName = escapeHTML(tagName);
 
       pDevice->addTag(st.convert(tagName));
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "removeTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
-        return failure("missing parameter 'tag'");
+        return JSONWriter::failure("missing parameter 'tag'");
       }
       pDevice->removeTag(tagName);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "hasTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
-        return failure("missing parameter 'tag'");
+        return JSONWriter::failure("missing parameter 'tag'");
       }
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
-      return success(resultObj);
+      JSONWriter json;
+      json.add("hasTag", pDevice->hasTag(tagName));
+      return json.successJSON();
     } else if(_request.getMethod() == "getTags") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      boost::shared_ptr<JSONArray<std::string> > tagsObj = boost::make_shared<JSONArray<std::string> >();
-      resultObj->addElement("tags", tagsObj);
+      JSONWriter json;
+      json.startArray("tags");
       std::vector<std::string> tags = pDevice->getTags();
-      std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
-      return success(resultObj);
+      foreach(std::string tag, tags) {
+        json.add(tag);
+      }
+      json.endArray();
+      return json.successJSON();
     } else if(_request.getMethod() == "lock") {
       if (!pDevice->isPresent()) {
-        return failure("Device is not present");
+        return JSONWriter::failure("Device is not present");
       }
       pDevice->lock();
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "unlock") {
       if (!pDevice->isPresent()) {
-        return failure("Device is not present");
+        return JSONWriter::failure("Device is not present");
       }
       pDevice->unlock();
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setConfig") {
       int value = strToIntDef(_request.getParameter("value"), -1);
       if((value  < 0) || (value > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'value'");
+        return JSONWriter::failure("Invalid or missing parameter 'value'");
       }
 
       int configClass = strToIntDef(_request.getParameter("class"), -1);
       if((configClass < 0) || (configClass > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'class'");
+        return JSONWriter::failure("Invalid or missing parameter 'class'");
       }
       int configIndex = strToIntDef(_request.getParameter("index"), -1);
       if((configIndex < 0) || (configIndex > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'index'");
+        return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
 
       pDevice->setDeviceConfig(configClass, configIndex, value);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "getConfig") {
       int configClass = strToIntDef(_request.getParameter("class"), -1);
       if((configClass < 0) || (configClass > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'class'");
+        return JSONWriter::failure("Invalid or missing parameter 'class'");
       }
       int configIndex = strToIntDef(_request.getParameter("index"), -1);
       if((configIndex < 0) || (configIndex > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'index'");
+        return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
 
       uint8_t value = pDevice->getDeviceConfig(configClass, configIndex);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("class", configClass);
-      resultObj->addProperty("index", configIndex);
-      resultObj->addProperty("value", value);
+      JSONWriter json;
+      json.add("class", configClass);
+      json.add("index", configIndex);
+      json.add("value", value);
 
-      return success(resultObj);
+      return json.successJSON();
     } else if(_request.getMethod() == "getConfigWord") {
       int configClass = strToIntDef(_request.getParameter("class"), -1);
       if((configClass < 0) || (configClass > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'class'");
+        return JSONWriter::failure("Invalid or missing parameter 'class'");
       }
       int configIndex = strToIntDef(_request.getParameter("index"), -1);
       if((configIndex < 0) || (configIndex > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'index'");
+        return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
 
       uint16_t value = pDevice->getDeviceConfigWord(configClass, configIndex);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("class", configClass);
-      resultObj->addProperty("index", configIndex);
-      resultObj->addProperty("value", value);
+      JSONWriter json;
+      json.add("class", configClass);
+      json.add("index", configIndex);
+      json.add("value", value);
 
-      return success(resultObj);
+      return json.successJSON();
     } else if (_request.getMethod() == "setJokerGroup") {
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
       if (!isDefaultGroup(newGroupId)) {
-        return failure("Invalid or missing parameter 'groupID'");
+        return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       if (m_pStructureBusInterface == NULL) {
-          return failure("No handle to bus interface");
+          return JSONWriter::failure("No handle to bus interface");
       }
       if (pDevice->getDeviceClass() != DEVICE_CLASS_SW) {
-          return failure("Device is not joker device");
+          return JSONWriter::failure("Device is not joker device");
       }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
@@ -379,7 +380,7 @@ namespace dss {
         try {
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
         } catch(ItemNotFoundException& e) {
-          return failure("Could not find partner device with dsid '" +
+          return JSONWriter::failure("Could not find partner device with dsid '" +
                          dsuid2str(next) + "'");
         }
 
@@ -388,23 +389,23 @@ namespace dss {
         }
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      JSONWriter json;
       if (!modifiedDevices.empty()) {
-        boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
+        json.startArray("devices");
         foreach (const boost::shared_ptr<Device>& device, modifiedDevices) {
           const DeviceReference d(device, &m_Apartment);
-          modified->addElement("", toJSON(d));
+          toJSON(d, json);
         }
-        resultObj->addProperty("action", "update");
-        resultObj->addElement("devices", modified);
+        json.endArray();
+        json.add("action", "update");
       } else {
-        resultObj->addProperty("action", "none");
+        json.add("action", "none");
       }
-      return success(resultObj);
+      return json.successJSON();
     } else if(_request.getMethod() == "setHeatingGroup") {
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
       if (!isDefaultGroup(newGroupId)) {
-        return failure("Invalid or missing parameter 'groupID'");
+        return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
         if (pDevice->isValveDevice()) {
           switch (newGroupId) {
@@ -414,10 +415,10 @@ namespace dss {
           case GroupIDControlTemperature:
             break;
           default:
-            return failure("Invalid group for this device");
+            return JSONWriter::failure("Invalid group for this device");
           }
       } else {
-        return failure("Cannot change group for this device");
+        return JSONWriter::failure("Cannot change group for this device");
       }
 
       boost::shared_ptr<Group> newGroup = m_Apartment.getZone(pDevice->getZoneID())->getGroup(newGroupId);
@@ -426,25 +427,27 @@ namespace dss {
                                        m_Apartment);
       manipulator.deviceAddToGroup(pDevice, newGroup);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      boost::shared_ptr<JSONArrayBase> modified = boost::make_shared<JSONArrayBase>();
+      JSONWriter json;
+      json.startObject("devices");
+      json.startArray();
       const DeviceReference d(pDevice, &m_Apartment);
-      modified->addElement("", toJSON(d));
-      resultObj->addProperty("action", "update");
-      resultObj->addElement("devices", modified);
-      return success(resultObj);
+      toJSON(d, json);
+      json.endArray();
+      json.add("action", "update");
+      json.endObject();
+      return json.successJSON();
 
     } else if(_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
       if((value  < 0) || (value > 15)) {
-        return failure("Invalid or missing parameter 'buttonID'");
+        return JSONWriter::failure("Invalid or missing parameter 'buttonID'");
       }
       pDevice->setDeviceButtonID(value);
 
       if (pDevice->is2WayMaster()) {
         DeviceFeatures_t features = pDevice->getFeatures();
         if (!features.syncButtonID) {
-          return success();
+          return JSONWriter::success();
         }
 
         dsuid_t next;
@@ -454,24 +457,24 @@ namespace dss {
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonID(value);
         } catch(ItemNotFoundException& e) {
-          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setButtonInputMode") {
       if (_request.hasParameter("modeID")) {
-        return failure("API has changed, parameter mode ID is no longer \
+        return JSONWriter::failure("API has changed, parameter mode ID is no longer \
                         valid, please update your code");
       }
       std::string value = _request.getParameter("mode");
       if (value.empty()) {
-        return failure("Invalid or missing parameter 'mode'");
+        return JSONWriter::failure("Invalid or missing parameter 'mode'");
       }
 
 
       DeviceFeatures_t features = pDevice->getFeatures();
       if (features.pairing == false) {
-        return failure("This device does not support button pairing");
+        return JSONWriter::failure("This device does not support button pairing");
       }
 
       dsuid_t next;
@@ -558,10 +561,10 @@ namespace dss {
         pPartnerDevice->setButtonInputMode(
                                         DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
       } else {
-        return failure("Invalid mode specified");
+        return JSONWriter::failure("Invalid mode specified");
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      JSONWriter json;
       std::string action = "none";
       if ((wasSlave == true) && (pPartnerDevice->is2WaySlave() == false)) {
         action = "add";
@@ -569,23 +572,27 @@ namespace dss {
                  (pPartnerDevice->is2WaySlave() == true)) {
         action = "remove";
       }
-      resultObj->addProperty("action", action);
+      json.add("action", action);
       DeviceReference dr(pPartnerDevice, &m_Apartment);
-      resultObj->addElement("device", toJSON(dr));
+      json.add("device");
+      toJSON(dr, json);
 
-      boost::shared_ptr<JSONObject> master = boost::make_shared<JSONObject>();
+      json.startObject("update");
       dsid_t dsid;
       if (dsuid_to_dsid(pDevice->getDSID(), &dsid)) {
-        master->addProperty("dsid", dsid2str(dsid));
+        json.add("dsid", dsid2str(dsid));
       } else {
-        master->addProperty("dsid", "");
+        json.add("dsid", "");
       }
-      master->addProperty("dSUID", dsuid2str(pDevice->getDSID()));
-      master->addProperty("buttonInputMode", pDevice->getButtonInputMode());
-      resultObj->addElement("update", master);
+      json.add("dSUID", dsuid2str(pDevice->getDSID()));
+      json.add("buttonInputMode", pDevice->getButtonInputMode());
+      json.endObject();
+
+      json.endObject();
+      json.endObject();
 
       if (value == BUTTONINPUT_1WAY) {
-        return success(resultObj);
+        return json.successJSON();
       }
 
       StructureManipulator manipulator(*m_pStructureBusInterface,
@@ -619,19 +626,19 @@ namespace dss {
           pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
         }
       }
-      return success(resultObj);
+      return json.successJSON();
     } else if(_request.getMethod() == "setButtonActiveGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -2);
       if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
           ((value < -1) || (value > 63))) {
-        return failure("Invalid or missing parameter 'groupID'");
+        return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceButtonActiveGroup(value);
 
       if (pDevice->is2WayMaster()) {
         DeviceFeatures_t features = pDevice->getFeatures();
         if (!features.syncButtonID) {
-          return success();
+          return JSONWriter::success();
         }
 
         dsuid_t next;
@@ -641,26 +648,27 @@ namespace dss {
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);
           pPartnerDevice->setDeviceButtonActiveGroup(value);
         } catch(ItemNotFoundException& e) {
-          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setOutputMode") {
       int value = strToIntDef(_request.getParameter("modeID"), -1);
       if((value  < 0) || (value > 255)) {
-        return failure("Invalid or missing parameter 'modeID'");
+        return JSONWriter::failure("Invalid or missing parameter 'modeID'");
       }
 
+      JSONWriter json;
       std::string action = "none";
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
       pDevice->setDeviceOutputMode(value);
       if (pDevice->getDeviceType() == DEVICE_TYPE_UMR) {
         DeviceFeatures_t features = pDevice->getFeatures();
         if (features.pairing == false) {
-          resultObj->addProperty("action", action);
+          json.add("action", action);
           DeviceReference dr(pDevice, &m_Apartment);
-          resultObj->addElement("device", toJSON(dr));
-          return success(resultObj);
+          json.add("device");
+          toJSON(dr, json);
+          return json.successJSON();
         }
 
         dsuid_t next;
@@ -670,7 +678,7 @@ namespace dss {
         try {
           pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
         } catch(ItemNotFoundException& e) {
-          return failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
         }
 
         bool wasSlave = pPartnerDevice->is2WaySlave();
@@ -693,9 +701,10 @@ namespace dss {
             }
           }
 
-          resultObj->addProperty("action", action);
+          json.add("action", action);
           DeviceReference dr(pPartnerDevice, &m_Apartment);
-          resultObj->addElement("device", toJSON(dr));
+          json.add("device");
+          toJSON(dr, json);
 
           StructureManipulator manipulator(*m_pStructureBusInterface,
                                            *m_pStructureQueryBusInterface,
@@ -720,12 +729,13 @@ namespace dss {
             }
           }
         } else {
-          resultObj->addProperty("action", action);
+          json.add("action", action);
           DeviceReference dr(pDevice, &m_Apartment);
-          resultObj->addElement("device", toJSON(dr));
+          json.add("device");
+          toJSON(dr, json);
         }
       }
-      return success(resultObj);
+      return json.successJSON();
     } else if(_request.getMethod() == "setProgMode") {
       uint8_t modeId;
       std::string pmode = _request.getParameter("mode");
@@ -734,18 +744,18 @@ namespace dss {
       } else if(pmode.compare("disable") == 0) {
         modeId = 0;
       } else {
-        return failure("Invalid or missing parameter 'mode'");
+        return JSONWriter::failure("Invalid or missing parameter 'mode'");
       }
       pDevice->setProgMode(modeId);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "getTransmissionQuality") {
       std::pair<uint8_t, uint16_t> p = pDevice->getDeviceTransmissionQuality();
       uint8_t down = p.first;
       uint16_t up = p.second;
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("upstream", up);
-      resultObj->addProperty("downstream", down);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("upstream", up);
+      json.add("downstream", down);
+      return json.successJSON();
 
     } else if(_request.getMethod() == "getOutputValue") {
       int value;
@@ -760,7 +770,7 @@ namespace dss {
           } else if (type == "pwmValue") {
             value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
           } else {
-            return failure("Unsupported type parameter for this device");
+            return JSONWriter::failure("Unsupported type parameter for this device");
           }
         }
         // Supported output states for the GR-KL200 und 210
@@ -772,7 +782,7 @@ namespace dss {
           } else if (type == "positionCurrent") {
             value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
           } else {
-            return failure("Unsupported type parameter for this device");
+            return JSONWriter::failure("Unsupported type parameter for this device");
           }
         }
         // Supported output states for the GR-KL220/GR-KL230
@@ -785,70 +795,70 @@ namespace dss {
           } else if (type == "positionCurrent") {
             value = pDevice->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Shade_PositionCurrent);
           } else {
-            return failure("Unsupported type parameter for this device");
+            return JSONWriter::failure("Unsupported type parameter for this device");
           }
         }
         else {
-          return failure("Unsupported device for a type parameter");
+          return JSONWriter::failure("Unsupported device for a type parameter");
         }
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("value", value);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("value", value);
+        return json.successJSON();
 
       } else {
         int offset = strToIntDef(_request.getParameter("offset"), -1);
         if ((offset  < 0) || (offset > 255)) {
-          return failure("Invalid or missing parameter 'type' or 'offset'");
+          return JSONWriter::failure("Invalid or missing parameter 'type' or 'offset'");
         }
         int value = pDevice->getDeviceOutputValue(offset);
 
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("offset", offset);
-        resultObj->addProperty("value", value);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("offset", offset);
+        json.add("value", value);
+        return json.successJSON();
       }
 
     } else if(_request.getMethod() == "setOutputValue") {
       int offset = strToIntDef(_request.getParameter("offset"), -1);
       if((offset  < 0) || (offset > 255)) {
-        return failure("Invalid or missing parameter 'offset'");
+        return JSONWriter::failure("Invalid or missing parameter 'offset'");
       }
       int value = strToIntDef(_request.getParameter("value"), -1);
       if((value  < 0) || (value > 65535)) {
-        return failure("Invalid or missing parameter 'value'");
+        return JSONWriter::failure("Invalid or missing parameter 'value'");
       }
       pDevice->setDeviceOutputValue(offset, value);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setSceneValue") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 127)) {
-        return failure("Invalid or missing parameter 'sceneID'");
+        return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
       }
 
       if (!_request.hasParameter("value") && !_request.hasParameter("angle")) {
-        return failure("Must supply at least value or angle");
+        return JSONWriter::failure("Must supply at least value or angle");
       }
       int value = strToIntDef(_request.getParameter("value"), -1);
       int angle = strToIntDef(_request.getParameter("angle"), -1);
       if ((value < 0) && (angle < 0)) {
-        return failure("Invalid value and/or angle parameter");
+        return JSONWriter::failure("Invalid value and/or angle parameter");
       }
       if (value > 65535) {
-        return failure("Invalid value parameter");
+        return JSONWriter::failure("Invalid value parameter");
       }
       if (angle > 255) {
-        return failure("Invalid angle parameter");
+        return JSONWriter::failure("Invalid angle parameter");
       }
 
       if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
-        return failure("Device settings are being updated for selected activity, please try again later");
+        return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
       }
 
       if (angle != -1) {
         DeviceFeatures_t features = pDevice->getFeatures();
         if (!features.hasOutputAngle) {
-          return failure("Device does not support output angle configuration");
+          return JSONWriter::failure("Device does not support output angle configuration");
         }
         pDevice->setSceneAngle(id, angle);
       }
@@ -857,55 +867,55 @@ namespace dss {
         pDevice->setSceneValue(id, value);
       }
 
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "getSceneValue") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 127)) {
-        return failure("Invalid or missing parameter 'sceneID'");
+        return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
       }
 
       if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
-        return failure("Device settings are being updated for selected activity, please try again later");
+        return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("value", pDevice->getSceneValue(id));
+      JSONWriter json;
+      json.add("value", pDevice->getSceneValue(id));
 
       DeviceFeatures_t features = pDevice->getFeatures();
       if (features.hasOutputAngle) {
-        resultObj->addProperty("angle", pDevice->getSceneAngle(id));
+        json.add("angle", pDevice->getSceneAngle(id));
       }
 
-      return success(resultObj);
+      return json.successJSON();
     } else if(_request.getMethod() == "getSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
-        return failure("Invalid or missing parameter 'sceneID'");
+        return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
       }
 
       if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
-        return failure("Device settings are being updated for selected activity, please try again later");
+        return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
       }
 
       DeviceSceneSpec_t config;
       pDevice->getDeviceSceneMode(id, config);
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("sceneID", id);
-      resultObj->addProperty("dontCare", config.dontcare);
-      resultObj->addProperty("localPrio", config.localprio);
-      resultObj->addProperty("specialMode", config.specialmode);
-      resultObj->addProperty("flashMode", config.flashmode);
-      resultObj->addProperty("ledconIndex", config.ledconIndex);
-      resultObj->addProperty("dimtimeIndex", config.dimtimeIndex);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("sceneID", id);
+      json.add("dontCare", config.dontcare);
+      json.add("localPrio", config.localprio);
+      json.add("specialMode", config.specialmode);
+      json.add("flashMode", config.flashmode);
+      json.add("ledconIndex", config.ledconIndex);
+      json.add("dimtimeIndex", config.dimtimeIndex);
+      return json.successJSON();
     } else if(_request.getMethod() == "setSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
-        return failure("Invalid or missing parameter 'sceneID'");
+        return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
       }
 
       if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
-        return failure("Device settings are being updated for selected activity, please try again later");
+        return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
       }
 
       DeviceSceneSpec_t config;
@@ -925,49 +935,49 @@ namespace dss {
         config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
       pDevice->setDeviceSceneMode(id, config);
 
-      return success();
+      return JSONWriter::success();
 
     } else if(_request.getMethod() == "getTransitionTime") {
       int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'dimtimeIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'dimtimeIndex'");
       }
       int up, down;
       pDevice->getDeviceTransitionTime(id, up, down);
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("dimtimeIndex", id);
-      resultObj->addProperty("up", up);
-      resultObj->addProperty("down", down);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("dimtimeIndex", id);
+      json.add("up", up);
+      json.add("down", down);
+      return json.successJSON();
     } else if(_request.getMethod() == "setTransitionTime") {
       int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'dimtimeIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'dimtimeIndex'");
       }
       int up = strToIntDef(_request.getParameter("up"), -1);
       int down = strToIntDef(_request.getParameter("down"), -1);
       pDevice->setDeviceTransitionTime(id, up, down);
-      return success();
+      return JSONWriter::success();
 
     } else if(_request.getMethod() == "getLedMode") {
       int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'ledconIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'ledconIndex'");
       }
       DeviceLedSpec_t config;
       pDevice->getDeviceLedMode(id, config);
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("ledconIndex", id);
-      resultObj->addProperty("colorSelect", config.colorSelect);
-      resultObj->addProperty("modeSelect", config.modeSelect);
-      resultObj->addProperty("dimMode", config.dimMode);
-      resultObj->addProperty("rgbMode", config.rgbMode);
-      resultObj->addProperty("groupColorMode", config.groupColorMode);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("ledconIndex", id);
+      json.add("colorSelect", config.colorSelect);
+      json.add("modeSelect", config.modeSelect);
+      json.add("dimMode", config.dimMode);
+      json.add("rgbMode", config.rgbMode);
+      json.add("groupColorMode", config.groupColorMode);
+      return json.successJSON();
     } else if(_request.getMethod() == "setLedMode") {
       int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
-        return failure("Invalid or missing parameter 'ledconIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'ledconIndex'");
       }
       DeviceLedSpec_t config;
       pDevice->getDeviceLedMode(id, config);
@@ -982,97 +992,97 @@ namespace dss {
       if (_request.hasParameter("groupColorMode"))
         config.groupColorMode = strToIntDef(_request.getParameter("groupColorMode"), config.groupColorMode);
       pDevice->setDeviceLedMode(id, config);
-      return success();
+      return JSONWriter::success();
 
     } else if(_request.getMethod() == "getBinaryInputs") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      boost::shared_ptr<JSONArrayBase> inputs = boost::make_shared<JSONArrayBase>();
-      resultObj->addElement("inputs", inputs);
+      JSONWriter json;
+      json.startArray("inputs");
       std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
       for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::iterator it = binputs.begin();
           it != binputs.end();
           it ++) {
-        boost::shared_ptr<JSONObject> inputObj = boost::make_shared<JSONObject>();
-        inputObj->addProperty("inputIndex", (*it)->m_inputIndex);
-        inputObj->addProperty("inputId", (*it)->m_inputId);
-        inputObj->addProperty("inputType", (*it)->m_inputType);
-        inputObj->addProperty("targetType", (*it)->m_targetGroupType);
-        inputObj->addProperty("targetGroup", (*it)->m_targetGroupId);
-        inputs->addElement("", inputObj);
+        json.startObject();
+        json.add("inputIndex", (*it)->m_inputIndex);
+        json.add("inputId", (*it)->m_inputId);
+        json.add("inputType", (*it)->m_inputType);
+        json.add("targetType", (*it)->m_targetGroupType);
+        json.add("targetGroup", (*it)->m_targetGroupId);
+        json.endObject();
       }
-      return success(resultObj);
+      json.endArray();
+      return json.successJSON();
     } else if(_request.getMethod() == "setBinaryInputType") {
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
-        return failure("Invalid or missing parameter 'index'");
+        return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
       int type = strToIntDef(_request.getParameter("type"), -1);
       if (type < 0 || type > 254) {
-        return failure("Invalid or missing parameter 'type'");
+        return JSONWriter::failure("Invalid or missing parameter 'type'");
       }
       pDevice->setDeviceBinaryInputType(index, type);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setBinaryInputTarget") {
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
-        return failure("Invalid or missing parameter 'index'");
+        return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
       int gtype = strToIntDef(_request.getParameter("groupType"), -1);
       if (gtype < 0 || gtype > 4) {
-        return failure("Invalid or missing parameter 'groupType'");
+        return JSONWriter::failure("Invalid or missing parameter 'groupType'");
       }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
       if (gid < 0 || gid > 63) {
-        return failure("Invalid or missing parameter 'groupId'");
+        return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
       pDevice->setDeviceBinaryInputTarget(index, gtype, gid);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
-        return failure("Invalid or missing parameter 'index'");
+        return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
       int id = strToIntDef(_request.getParameter("inputId"), -1);
       if (id < 0 || id > 15) {
-        return failure("Invalid or missing parameter 'inputId'");
+        return JSONWriter::failure("Invalid or missing parameter 'inputId'");
       }
       pDevice->setDeviceBinaryInputId(index, id);
-      return success();
+      return JSONWriter::success();
 
     } else if(_request.getMethod() == "getAKMInputTimeouts") {
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      JSONWriter json;
       int onDelay, offDelay;
       pDevice->getDeviceAKMInputTimeouts(onDelay, offDelay);
-      resultObj->addProperty("ondelay", onDelay);
-      resultObj->addProperty("offdelay", offDelay);
-      return success(resultObj);
+      json.add("ondelay", onDelay);
+      json.add("offdelay", offDelay);
+      return json.successJSON();
     } else if(_request.getMethod() == "setAKMInputTimeouts") {
       int onDelay = strToIntDef(_request.getParameter("ondelay"), -1);
       if (onDelay > 6552000) { // ms
-        return failure("Invalid parameter 'ondelay', must be < 6552000");
+        return JSONWriter::failure("Invalid parameter 'ondelay', must be < 6552000");
       }
 
       int offDelay = strToIntDef(_request.getParameter("offdelay"), -1);
       if (offDelay > 6552000) {
-        return failure("Invalid parameter 'offdelay', must be < 6552000");
+        return JSONWriter::failure("Invalid parameter 'offdelay', must be < 6552000");
       }
 
       if ((onDelay < 0) && (offDelay < 0)) {
-        return failure("No valid parameters given");
+        return JSONWriter::failure("No valid parameters given");
       }
 
       // values < 0 are ignored by this function
       pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
-      return success();
+      return JSONWriter::success();
     } else if (_request.getMethod() == "setAKMInputProperty") {
       std::string mode = _request.getParameter("mode");
       if (mode.empty()) {
-        return failure("Invalid or missing parameter 'mode'");
+        return JSONWriter::failure("Invalid or missing parameter 'mode'");
       }
 
       if ((pDevice->getDeviceType() != DEVICE_TYPE_AKM) &&
           (pDevice->getDeviceType() != DEVICE_TYPE_UMR)) {
-        return failure("This device does not support AKM properties");
+        return JSONWriter::failure("This device does not support AKM properties");
       }
 
       if (mode == BUTTONINPUT_AKM_STANDARD) {
@@ -1092,100 +1102,100 @@ namespace dss {
       } else if (mode == BUTTONINPUT_AKM_FALLING_EDGE) {
         pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
       } else {
-        return failure("Unsupported mode: " + mode);
+        return JSONWriter::failure("Unsupported mode: " + mode);
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
-        return failure("Invalid or missing parameter 'sensorIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
       }
       int value = pDevice->getDeviceSensorValue(id);
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("sensorIndex", id);
-      resultObj->addProperty("sensorValue", value);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("sensorIndex", id);
+      json.add("sensorValue", value);
+      return json.successJSON();
     } else if(_request.getMethod() == "getSensorType") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
-        return failure("Invalid or missing parameter 'sensorIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
       }
       boost::shared_ptr<DeviceSensor_t> sensor = pDevice->getSensor(id);
       int value = sensor->m_sensorType;
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("sensorIndex", id);
-      resultObj->addProperty("sensorType", value);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("sensorIndex", id);
+      json.add("sensorType", value);
+      return json.successJSON();
 
     } else if(_request.getMethod() == "getSensorEventTableEntry") {
       int id = strToIntDef(_request.getParameter("eventIndex"), -1);
       if((id < 0) || (id > 15)) {
-        return failure("Invalid or missing parameter 'eventIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'eventIndex'");
       }
       DeviceSensorEventSpec_t event;
       pDevice->getSensorEventEntry(id, event);
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("eventIndex", id);
-      resultObj->addProperty("eventName", event.name);
-      resultObj->addProperty("isSceneDevice", false);
-      resultObj->addProperty("sensorIndex", event.sensorIndex);
-      resultObj->addProperty("test", event.test);
-      resultObj->addProperty("action", event.action);
-      resultObj->addProperty("value", event.value);
-      resultObj->addProperty("hysteresis", event.hysteresis);
-      resultObj->addProperty("validity", event.validity);
+      JSONWriter json;
+      json.add("eventIndex", id);
+      json.add("eventName", event.name);
+      json.add("isSceneDevice", false);
+      json.add("sensorIndex", event.sensorIndex);
+      json.add("test", event.test);
+      json.add("action", event.action);
+      json.add("value", event.value);
+      json.add("hysteresis", event.hysteresis);
+      json.add("validity", event.validity);
       if (event.action == 2) {
-        resultObj->addProperty("buttonNumber", event.buttonNumber);
-        resultObj->addProperty("clickType", event.clickType);
+        json.add("buttonNumber", event.buttonNumber);
+        json.add("clickType", event.clickType);
       }
-      return success(resultObj);
+      return json.successJSON();
 
     } else if(_request.getMethod() == "setSensorEventTableEntry") {
       int id = strToIntDef(_request.getParameter("eventIndex"), -1);
       if((id < 0) || (id > 15)) {
-        return failure("Invalid or missing parameter 'eventIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'eventIndex'");
       }
       DeviceSensorEventSpec_t event;
       event.name = st.convert(_request.getParameter("eventName"));
       int sensorIndex = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if ((sensorIndex < 0) || (sensorIndex > 0xF)) {
-        return failure("Invalid or missing parameter 'sensorIndex'");
+        return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
       }
       event.sensorIndex = sensorIndex;
       int test = strToIntDef(_request.getParameter("test"), -1);
       if ((test < 0) || (test > 0x3)) {
-        return failure("Invalid or missing parameter 'test'");
+        return JSONWriter::failure("Invalid or missing parameter 'test'");
       }
       event.test = test;
       int action = strToIntDef(_request.getParameter("action"), -1);
       if ((action < 0) || (action > 0x3)) {
-        return failure("Invalid or missing parameter 'action'");
+        return JSONWriter::failure("Invalid or missing parameter 'action'");
       }
       event.action = action;
       int value = strToIntDef(_request.getParameter("value"), -1);
       if ((value < 0) || (value > 0xFFF)) {
-        return failure("Invalid or missing parameter 'value'");
+        return JSONWriter::failure("Invalid or missing parameter 'value'");
       }
       event.value = value;
       int hysteresis = strToIntDef(_request.getParameter("hysteresis"), -1);
       if ((hysteresis < 0) || (hysteresis > 0xFFF)) {
-        return failure("Invalid or missing parameter 'hysteresis'");
+        return JSONWriter::failure("Invalid or missing parameter 'hysteresis'");
       }
       event.hysteresis = hysteresis;
       int validity = strToIntDef(_request.getParameter("validity"), -1);
       if ((validity < 0) || (validity > 0x3)) {
-        return failure("Invalid or missing parameter 'validity'");
+        return JSONWriter::failure("Invalid or missing parameter 'validity'");
       }
       event.validity = validity;
       if (event.action == 2) {
         int buttonNumber = strToIntDef(_request.getParameter("buttonNumber"), -1);
         if ((buttonNumber < 0) || (buttonNumber > 0xF)) {
-          return failure("Invalid or missing parameter 'buttonNumber'");
+          return JSONWriter::failure("Invalid or missing parameter 'buttonNumber'");
         }
         event.buttonNumber = buttonNumber;
         int clickType = strToIntDef(_request.getParameter("clickType"), -1);
         if ((clickType < 0) || (clickType > 0xF)) {
-          return failure("Invalid or missing parameter 'clickType'");
+          return JSONWriter::failure("Invalid or missing parameter 'clickType'");
         }
         event.clickType = clickType;
       } else {
@@ -1195,53 +1205,53 @@ namespace dss {
         event.sceneID = 0;
       }
       pDevice->setSensorEventEntry(id, event);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "addToArea") {
       int areaScene = strToIntDef(_request.getParameter("areaScene"), -1);
       if (areaScene < 0) {
-        return failure("Missing parameter 'areaScene'");
+        return JSONWriter::failure("Missing parameter 'areaScene'");
       }
       pDevice->configureAreaMembership(areaScene, true);
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "removeFromArea") {
       int areaScene = strToIntDef(_request.getParameter("areaScene"), -1);
       if (areaScene < 0) {
-        return failure("Missing parameter 'areaScene'");
+        return JSONWriter::failure("Missing parameter 'areaScene'");
       }
       pDevice->configureAreaMembership(areaScene, false);
-      return success();
+      return JSONWriter::success();
     } else if (_request.getMethod() == "getOutputChannelValue") {
       std::string str_chan = _request.getParameter("channels");
       if (str_chan.empty()) {
-        return failure("Missing or invalid parameter 'channels'");
+        return JSONWriter::failure("Missing or invalid parameter 'channels'");
       }
 
       boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      boost::shared_ptr<JSONArrayBase> channelsObj = boost::make_shared<JSONArrayBase>();
-      resultObj->addElement("channels", channelsObj);
+      JSONWriter json;
+      json.startArray("channels");
 
       for (size_t i = 0; i < channels->size(); i++) {
-        boost::shared_ptr<JSONObject> chanObj = boost::make_shared<JSONObject>();
-        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));
-        chanObj->addProperty("value",
+        json.startObject();
+        json.add("channel", getOutputChannelName(channels->at(i).first));
+        json.add("value",
                 convertFromOutputChannelValue(
                     channels->at(i).first,
                     pDevice->getDeviceOutputChannelValue(channels->at(i).first)));
-        channelsObj->addElement("", chanObj);
+        json.endObject();
         // don't flood the bus on bulk requests
         if ((channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
         }
       }
+      json.endArray();
 
-      return success(resultObj);
+      return json.successJSON();
     } else if (_request.getMethod() == "setOutputChannelValue") {
       bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
       std::string vals = _request.getParameter("channelvalues");
       if (vals.empty()) {
-        return failure("Missing or invalid parameter 'channelvalues'");
+        return JSONWriter::failure("Missing or invalid parameter 'channelvalues'");
       }
 
       boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
@@ -1258,21 +1268,21 @@ namespace dss {
         }
       }
 
-      return success();
+      return JSONWriter::success();
     } else if (_request.getMethod() == "setOutputChannelDontCareFlag") {
       std::string str_chan = _request.getParameter("channels");
       if (str_chan.empty()) {
-        return failure("Missing or invalid parameter 'channels'");
+        return JSONWriter::failure("Missing or invalid parameter 'channels'");
       }
 
       int flag = strToIntDef(_request.getParameter("dontCare"), -1);
       if (flag < 0) {
-        return failure("Missing or invalid parameter 'dontCare'");
+        return JSONWriter::failure("Missing or invalid parameter 'dontCare'");
       }
 
       int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
       if ((scene < 0) || (scene > MaxSceneNumber)) {
-        return failure("Missing or invalid parameter 'sceneNumber'");
+        return JSONWriter::failure("Missing or invalid parameter 'sceneNumber'");
       }
 
       boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
@@ -1281,7 +1291,7 @@ namespace dss {
       for (size_t i = 0; i < channels->size(); i++) {
         int channelIndex = pDevice->getOutputChannelIndex(channels->at(i).first);
         if (channelIndex < 0) {
-          return failure("Channel '" + getOutputChannelName(channels->at(i).first) + "' is unknown on this device");
+          return JSONWriter::failure("Channel '" + getOutputChannelName(channels->at(i).first) + "' is unknown on this device");
         }
         if (flag) {
           value |= 1 << channelIndex;
@@ -1290,63 +1300,62 @@ namespace dss {
         }
       }
       pDevice->setDeviceOutputChannelDontCareFlags(scene, value);
-      return success();
+      return JSONWriter::success();
     } else if (_request.getMethod() == "getOutputChannelDontCareFlags") {
       int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
       if ((scene < 0) || (scene > MaxSceneNumber)) {
-        return failure("Missing or invalid parameter 'sceneNumber'");
+        return JSONWriter::failure("Missing or invalid parameter 'sceneNumber'");
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      boost::shared_ptr<JSONObject> channelsObj = boost::make_shared<JSONObject>();
-
-      resultObj->addElement("channels", channelsObj);
+      JSONWriter json;
+      json.startObject("channels");
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
       for (int i = 0; i < pDevice->getOutputChannelCount(); i++) {
-        boost::shared_ptr<JSONObject> chanObj = boost::make_shared<JSONObject>();
+        json.startObject();
         int channelId = pDevice->getOutputChannel(i);
-        chanObj->addProperty("channel", getOutputChannelName(channelId));
+        json.add("channel", getOutputChannelName(channelId));
 
-        chanObj->addProperty("dontCare", ((value & (1 << i)) > 0));
-        channelsObj->addElement("", chanObj);
+        json.add("dontCare", ((value & (1 << i)) > 0));
+        json.endObject();
       }
-      return success(resultObj);
+      json.endObject();
+      return json.successJSON();
     } else if (_request.getMethod() == "getOutputChannelSceneValue") {
       std::string str_chan = _request.getParameter("channels");
       if (str_chan.empty()) {
-        return failure("Missing or invalid parameter 'channels'");
+        return JSONWriter::failure("Missing or invalid parameter 'channels'");
       }
 
       int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
       if ((scene < 0) || (scene > MaxSceneNumber)) {
-        return failure("Missing or invalid parameter 'sceneNumber'");
+        return JSONWriter::failure("Missing or invalid parameter 'sceneNumber'");
       }
 
       boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("sceneID", scene);
-      boost::shared_ptr<JSONArrayBase> channelsObj = boost::make_shared<JSONArrayBase>();
-      resultObj->addElement("channels", channelsObj);
+      JSONWriter json;
+      json.add("sceneID", scene);
+      json.startArray("channels");
 
       for (size_t i = 0; i < channels->size(); i++) {
-        boost::shared_ptr<JSONObject> chanObj = boost::make_shared<JSONObject>();
-        chanObj->addProperty("channel", getOutputChannelName(channels->at(i).first));
-        chanObj->addProperty("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
-        channelsObj->addElement("", chanObj);
+        json.startObject();
+        json.add("channel", getOutputChannelName(channels->at(i).first));
+        json.add("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
+        json.endObject();
       }
+      json.endArray();
 
-      return success(resultObj);
+      return json.successJSON();
     } else if (_request.getMethod() == "setOutputChannelSceneValue") {
       std::string vals = _request.getParameter("channelvalues");
       if (vals.empty()) {
-        return failure("Missing or invalid parameter 'channelvalues'");
+        return JSONWriter::failure("Missing or invalid parameter 'channelvalues'");
       }
 
       int scene = strToIntDef(_request.getParameter("sceneNumber"), -1);
       if ((scene < 0) || (scene > MaxSceneNumber)) {
-        return failure("Missing or invalid parameter 'sceneNumber'");
+        return JSONWriter::failure("Missing or invalid parameter 'sceneNumber'");
       }
 
       boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
@@ -1363,21 +1372,21 @@ namespace dss {
         }
       }
 
-      return success();
+      return JSONWriter::success();
 
     } else if (_request.getMethod() == "setValveTimerMode") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
       DeviceBank3_BL conf(device);
 
       unsigned int protTimer;
       if (_request.getParameter("valveProtectionTimer", protTimer)) {
         if (protTimer > std::numeric_limits<uint16_t>::max()) {
-          return failure("valveProtectionTimer too large");
+          return JSONWriter::failure("valveProtectionTimer too large");
         }
         conf.setValveProtectionTimer(protTimer);
       };
@@ -1385,7 +1394,7 @@ namespace dss {
       int emergencyValue;
       if (_request.getParameter("emergencyValue", emergencyValue)) {
         if (emergencyValue < -100 || emergencyValue > 100) {
-          return failure("emergencyValue out of [-100:100] range");
+          return JSONWriter::failure("emergencyValue out of [-100:100] range");
         }
         conf.setEmergencySetPoint(emergencyValue);
       };
@@ -1393,119 +1402,119 @@ namespace dss {
       unsigned int emergencyTimer;
       if (_request.getParameter("emergencyTimer", emergencyTimer)) {
         if (emergencyTimer > std::numeric_limits<uint8_t>::max()) {
-          return failure("emergencyTimer too big");
+          return JSONWriter::failure("emergencyTimer too big");
         }
         conf.setEmergencyTimer(emergencyTimer);
       };
 
-      return success();
+      return JSONWriter::success();
 
     } else if (_request.getMethod() == "getValveTimerMode") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
       DeviceBank3_BL conf(device);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("valveProtectionTimer", conf.getValveProtectionTimer());
-      resultObj->addProperty("emergencyValue", conf.getEmergencySetPoint());
-      resultObj->addProperty("emergencyTimer", conf.getEmergencyTimer());
-      return success(resultObj);
+      JSONWriter json;
+      json.add("valveProtectionTimer", conf.getValveProtectionTimer());
+      json.add("emergencyValue", conf.getEmergencySetPoint());
+      json.add("emergencyTimer", conf.getEmergencyTimer());
+      return json.successJSON();
 
     } else if (_request.getMethod() == "setValvePwmMode") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
       DeviceBank3_BL conf(device);
 
       unsigned pwmPeriod;
       if (_request.getParameter("pwmPeriod", pwmPeriod)) {
         if (pwmPeriod > std::numeric_limits<uint16_t>::max()) {
-          return failure("valveProtectionTimer too large");
+          return JSONWriter::failure("valveProtectionTimer too large");
         }
         conf.setPwmPeriod(pwmPeriod);
       };
       int value;
       if (_request.getParameter("pwmMinX", value)) {
         if (value < 0  || value > 100) {
-          return failure("pwmMinX out of [0:100] range");
+          return JSONWriter::failure("pwmMinX out of [0:100] range");
         }
         conf.setPwmMinX(value);
       };
       if (_request.getParameter("pwmMaxX", value)) {
         if (value < 0  || value > 100) {
-          return failure("pwmMaxX out of [0:100] range");
+          return JSONWriter::failure("pwmMaxX out of [0:100] range");
         }
         conf.setPwmMaxX(value);
       };
       if (_request.getParameter("pwmMinY", value)) {
         if (value < 0  || value > 100) {
-          return failure("pwmMinY out of [0:100] range");
+          return JSONWriter::failure("pwmMinY out of [0:100] range");
         }
         conf.setPwmMinY(value);
       };
       if (_request.getParameter("pwmMaxY", value)) {
         if (value < 0  || value > 100) {
-          return failure("pwmMaxY out of [0:100] range");
+          return JSONWriter::failure("pwmMaxY out of [0:100] range");
         }
         conf.setPwmMaxY(value);
       };
       int offset;
       if (_request.getParameter("pwmOffset", offset)) {
         if (offset < -100 || offset > 100) {
-          return failure("PWM offset out of [-100:100] range");
+          return JSONWriter::failure("PWM offset out of [-100:100] range");
         }
         conf.setPwmOffset(offset);
       };
-      return success();
+      return JSONWriter::success();
 
     } else if (_request.getMethod() == "getValvePwmMode") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      JSONWriter json;
       uint16_t value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
-      resultObj->addProperty("pwmPeriod", value);
+      json.add("pwmPeriod", value);
       value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
-      resultObj->addProperty("pwmMinX", value & 0xff);
-      resultObj->addProperty("pwmMaxX", (value >> 8) & 0xff);
+      json.add("pwmMinX", value & 0xff);
+      json.add("pwmMaxX", (value >> 8) & 0xff);
       value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
-      resultObj->addProperty("pwmMinY", value & 0xff);
-      resultObj->addProperty("pwmMaxY", (value >> 8) & 0xff);
+      json.add("pwmMinY", value & 0xff);
+      json.add("pwmMaxY", (value >> 8) & 0xff);
       value = device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
-      resultObj->addProperty("pwmOffset", value);
-      return success(resultObj);
+      json.add("pwmOffset", value);
+      return json.successJSON();
 
     } else if (_request.getMethod() == "getValvePwmState") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
       uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("pwmValue", value & 0xff);
-      resultObj->addProperty("pwmPriorityMode", (value >> 8) & 0xff);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("pwmValue", value & 0xff);
+      json.add("pwmPriorityMode", (value >> 8) & 0xff);
+      return json.successJSON();
 
     } else if (_request.getMethod() == "setValveControlMode") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
       DeviceValveControlSpec_t config;
       device->getDeviceValveControl(config);
@@ -1516,91 +1525,91 @@ namespace dss {
       _request.getParameter("ctrlNONC", config.ctrlNONC);
 
       device->setDeviceValveControl(config);
-      return success();
+      return JSONWriter::success();
 
     } else if (_request.getMethod() == "getValveControlMode") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
       DeviceValveControlSpec_t config;
       device->getDeviceValveControl(config);
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("ctrlClipMinZero", config.ctrlClipMinZero);
-      resultObj->addProperty("ctrlClipMinLower", config.ctrlClipMinLower);
-      resultObj->addProperty("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
-      resultObj->addProperty("ctrlNONC", config.ctrlNONC);
-      return success(resultObj);
+      JSONWriter json;
+      json.add("ctrlClipMinZero", config.ctrlClipMinZero);
+      json.add("ctrlClipMinLower", config.ctrlClipMinLower);
+      json.add("ctrlClipMaxHigher", config.ctrlClipMaxHigher);
+      json.add("ctrlNONC", config.ctrlNONC);
+      return json.successJSON();
 
     } else if (_request.getMethod() == "setValveType") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
       if (device->isValveDevice()) {
         std::string valveType = _request.getParameter("valveType");
         if (device->setValveTypeAsString(valveType)) {
-          return success();
+          return JSONWriter::success();
         } else {
-          return failure("valve type not valid");
+          return JSONWriter::failure("valve type not valid");
         }
       }
-      return failure("device is not a valve type");
+      return JSONWriter::failure("device is not a valve type");
 
     } else if (_request.getMethod() == "getValveType") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
       if (device->isValveDevice()) {
         std::string valveType = device->getValveTypeAsString();
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("valveType", valveType);
-        return success(resultObj);
+        JSONWriter json;
+        json.add("valveType", valveType);
+        return json.successJSON();
       }
-      return failure("device is not a valve type");
+      return JSONWriter::failure("device is not a valve type");
     } else if (_request.getMethod() == "getUMVRelayValue") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
       std::string valveType = device->getValveTypeAsString();
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("relayValue", device->getDeviceUMVRelayValue());
-      return success(resultObj);
+      JSONWriter json;
+      json.add("relayValue", device->getDeviceUMVRelayValue());
+      return json.successJSON();
     } else if (_request.getMethod() == "setUMVRelayValue") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
       std::string value = _request.getParameter("value");
       int relayValue = strToIntDef(value, -1);
       if ((relayValue < 0) || (relayValue > 3)) { // 3/FOLLOW_L is max value
-        return failure("invalid relay value given");
+        return JSONWriter::failure("invalid relay value given");
       }
 
       device->setDeviceUMVRelayValue(strToInt(value));
-      return success();
+      return JSONWriter::success();
     } else if (_request.getMethod() == "setBlinkConfig") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
       int blinkCount = -1;
@@ -1612,7 +1621,7 @@ namespace dss {
       if (!value.empty()) {
         blinkCount = strToIntDef(value, -1);
         if ((blinkCount < 0) || (blinkCount > 255)) { //255/FCOUNT1 is max value
-          return failure("invalid count value given");
+          return JSONWriter::failure("invalid count value given");
         }
       }
 
@@ -1637,24 +1646,24 @@ namespace dss {
       if (offDelay != -1) {
          device->setDeviceUMROffDelay(offDelay);
       }
-      return success();
+      return JSONWriter::success();
     } else if (_request.getMethod() == "getBlinkConfig") {
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
       } catch(std::runtime_error& e) {
-        return failure("No device for given dsuid");
+        return JSONWriter::failure("No device for given dsuid");
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+      JSONWriter json;
       uint8_t umr_count;
       double umr_ondelay;
       double umr_offdelay;
       device->getDeviceUMRDelaySettings(&umr_ondelay, &umr_offdelay, &umr_count);
-      resultObj->addProperty("count", umr_count);
-      resultObj->addProperty("ondelay", umr_ondelay);
-      resultObj->addProperty("offdelay", umr_offdelay);
-      return success(resultObj);
+      json.add("count", umr_count);
+      json.add("ondelay", umr_ondelay);
+      json.add("offdelay", umr_offdelay);
+      return json.successJSON();
 
     } else {
       throw std::runtime_error("Unhandled function");

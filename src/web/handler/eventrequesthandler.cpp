@@ -33,8 +33,6 @@
 
 #include "src/base.h"
 
-#include "src/web/json.h"
-
 #include "src/eventcollector.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/eventsubscriptionsession.h"
@@ -52,7 +50,7 @@ namespace dss {
   : m_EventInterpreter(_interpreter)
   { }
 
-  boost::shared_ptr<JSONObject> EventRequestHandler::raise(const RestfulRequest& _request) {
+  std::string EventRequestHandler::raise(const RestfulRequest& _request) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string location = st.convert(_request.getParameter("location"));
@@ -60,7 +58,7 @@ namespace dss {
     std::string parameter = _request.getParameter("parameter");
 
     if (name.empty()) {
-      return failure("Missing event name!");
+      return JSONWriter::failure("Missing event name!");
     }
 
     boost::shared_ptr<Event> evt = boost::make_shared<Event>(name);
@@ -82,12 +80,12 @@ namespace dss {
         dss::Logger::getInstance()->log("EventRequestHandler::raise: Got parameter '" + key + "'='" + value + "'");
         evt->setProperty(st.convert(key), st.convert(value));
       } else {
-        return failure("Invalid parameter found: " + keyValue);
+        return JSONWriter::failure("Invalid parameter found: " + keyValue);
       }
     }
 
     m_EventInterpreter.getQueue().pushEvent(evt);
-    return success();
+    return JSONWriter::success();
   }
 
   int EventRequestHandler::validateArgs(boost::shared_ptr<Session> _session,
@@ -112,9 +110,8 @@ namespace dss {
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject>
-    EventRequestHandler::subscribe(const RestfulRequest& _request,
-                                   boost::shared_ptr<Session> _session) {
+  std::string EventRequestHandler::subscribe(const RestfulRequest& _request,
+                                             boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string tokenStr = _request.getParameter("subscriptionID");
@@ -123,18 +120,18 @@ namespace dss {
     try {
       token = validateArgs(_session, name, tokenStr);
     } catch (std::runtime_error e) {
-      return failure(e.what());
+      return JSONWriter::failure(e.what());
     }
 
     boost::mutex::scoped_lock lock(m_Mutex);
     boost::shared_ptr<EventSubscriptionSession> subscription =
       _session->createEventSubscription(m_EventInterpreter, token);
     subscription->subscribe(name);
-    return success();
+    return JSONWriter::success();
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  std::string EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string subscribtionID = _request.getParameter("subscriptionID");
@@ -143,7 +140,7 @@ namespace dss {
     try {
       token = validateArgs(_session, name, subscribtionID);
     } catch (std::runtime_error e) {
-      return failure(e.what());
+      return JSONWriter::failure(e.what());
     }
 
     boost::mutex::scoped_lock lock(m_Mutex);
@@ -153,105 +150,105 @@ namespace dss {
       sub->unsubscribe(name);
     } catch (std::exception& e) {
       // TODO still erase the subscription
-      return failure(e.what());
+      return JSONWriter::failure(e.what());
     }
 
     _session->deleteEventSubscription(sub);
-    return success();
+    return JSONWriter::success();
   }
 
 
-  boost::shared_ptr<JSONObject> EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    boost::shared_ptr<JSONArrayBase> eventsArray = boost::make_shared<JSONArrayBase>();
-    result->addElement("events", eventsArray);
+  std::string EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
+    JSONWriter json;
+    json.startArray("events");
 
     while (_subscriptionSession->hasEvent()) {
       Event evt = _subscriptionSession->popEvent();
-      boost::shared_ptr<JSONObject> evtObj = boost::make_shared<JSONObject>();
-      eventsArray->addElement("event", evtObj);
+      json.startObject();
 
-      evtObj->addProperty("name", evt.getName());
-      boost::shared_ptr<JSONObject> evtprops = boost::make_shared<JSONObject>();
-      evtObj->addElement("properties", evtprops);
+      json.add("name", evt.getName());
+      json.startObject("properties");
 
       const dss::HashMapStringString& props =  evt.getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        evtprops->addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
+      json.endObject();
 
-      boost::shared_ptr<JSONObject> source = boost::make_shared<JSONObject>();
-      evtObj->addElement("source", source);
+      json.startObject("source");
 
       EventRaiseLocation raiseLocation = evt.getRaiseLocation();
       if ((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
         if (DSS::hasInstance()) {
           boost::shared_ptr<const Group> group =
               evt.getRaisedAtGroup(DSS::getInstance()->getApartment());
-          source->addProperty("set", ".zone(" + intToString(group->getZoneID())+
+          json.add("set", ".zone(" + intToString(group->getZoneID())+
                   ").group(" + intToString(group->getID()) + ")");
-          source->addProperty("groupID", group->getID());
-          source->addProperty("zoneID", group->getZoneID());
-          source->addProperty("isApartment", raiseLocation == erlApartment);
-          source->addProperty("isGroup", raiseLocation == erlGroup);
-          source->addProperty("isDevice", false);
+          json.add("groupID", group->getID());
+          json.add("zoneID", group->getZoneID());
+          json.add("isApartment", raiseLocation == erlApartment);
+          json.add("isGroup", raiseLocation == erlGroup);
+          json.add("isDevice", false);
         }
       } else if (raiseLocation == erlDevice) {
         boost::shared_ptr<const DeviceReference> device = evt.getRaisedAtDevice();
         try {
-          source->addProperty("set", "dsid(" + dsuid2str(device->getDSID()) + ")");
-          source->addProperty("dsid", dsuid2str(device->getDSID()));
-          source->addProperty("zoneID", device->getDevice()->getZoneID());
+          json.add("set", "dsid(" + dsuid2str(device->getDSID()) + ")");
+          json.add("dsid", dsuid2str(device->getDSID()));
+          json.add("zoneID", device->getDevice()->getZoneID());
         } catch (ItemNotFoundException& e) {
         }
-        source->addProperty("isApartment", false);
-        source->addProperty("isGroup", false);
-        source->addProperty("isDevice", true);
+        json.add("isApartment", false);
+        json.add("isGroup", false);
+        json.add("isDevice", true);
       } else if (raiseLocation == erlState) {
         boost::shared_ptr<const State> state = evt.getRaisedAtState();
         if (state->getType() == StateType_Device) {
           boost::shared_ptr<Device> device = state->getProviderDevice();
           dsid_t dsid;
           if (dsuid_to_dsid(device->getDSID(), &dsid)) {
-            source->addProperty("dsid", dsid2str(dsid));
+            json.add("dsid", dsid2str(dsid));
           } else {
-            source->addProperty("dsid", "");
+            json.add("dsid", "");
           }
-          source->addProperty("dSUID", dsuid2str(device->getDSID()));
-          source->addProperty("zoneID", device->getZoneID());
-          source->addProperty("isApartment", false);
-          source->addProperty("isGroup", false);
-          source->addProperty("isDevice", true);
+          json.add("dSUID", dsuid2str(device->getDSID()));
+          json.add("zoneID", device->getZoneID());
+          json.add("isApartment", false);
+          json.add("isGroup", false);
+          json.add("isDevice", true);
         } else if (state->getType() == StateType_Apartment) {
-          source->addProperty("isApartment", true);
-          source->addProperty("isGroup", false);
-          source->addProperty("isDevice", false);
+          json.add("isApartment", true);
+          json.add("isGroup", false);
+          json.add("isDevice", false);
         } else if (state->getType() == StateType_Group) {
           boost::shared_ptr<Group> group = state->getProviderGroup();
-          source->addProperty("isApartment", false);
-          source->addProperty("isGroup", true);
-          source->addProperty("isDevice", false);
-          source->addProperty("groupID", group->getID());
-          source->addProperty("zoneID", group->getZoneID());
+          json.add("isApartment", false);
+          json.add("isGroup", true);
+          json.add("isDevice", false);
+          json.add("groupID", group->getID());
+          json.add("zoneID", group->getZoneID());
         } else if (state->getType() == StateType_Service) {
-          source->addProperty("isService", true);
-          source->addProperty("isGroup", false);
-          source->addProperty("isDevice", false);
-          source->addProperty("serviceName", state->getProviderService());
+          json.add("isService", true);
+          json.add("isGroup", false);
+          json.add("isDevice", false);
+          json.add("serviceName", state->getProviderService());
         } else if (state->getType() == StateType_Script) {
-          source->addProperty("isScript", true);
-          source->addProperty("isGroup", false);
-          source->addProperty("isDevice", false);
-          source->addProperty("serviceName", state->getProviderService());
+          json.add("isScript", true);
+          json.add("isGroup", false);
+          json.add("isDevice", false);
+          json.add("serviceName", state->getProviderService());
         }
       }
+      json.endObject();
+      json.endObject();
     }
+    json.endArray();
 
-    return result;
+    return json.successJSON();
   } // buildEventResponse
 
   // sid=SubscriptionID&timeout=0
-  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  std::string EventRequestHandler::get(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string tokenStr = _request.getParameter("subscriptionID");
     std::string timeoutStr = _request.getParameter("timeout");
     int timeout = 0;
@@ -260,14 +257,14 @@ namespace dss {
     try {
       token = validateArgs(_session, "sentinel", tokenStr);
     } catch (std::runtime_error e) {
-      return failure(e.what());
+      return JSONWriter::failure(e.what());
     }
 
     if (!timeoutStr.empty()) {
       try {
         timeout = strToInt(timeoutStr);
       } catch (std::invalid_argument& err) {
-        return failure("Could not parse timeout parameter!");
+        return JSONWriter::failure("Could not parse timeout parameter!");
       }
     }
 
@@ -276,7 +273,7 @@ namespace dss {
     try {
       subscriptionSession = _session->getEventSubscription(token);
     } catch (std::runtime_error& e) {
-      return failure(e.what());
+      return JSONWriter::failure(e.what());
     }
 
     _session->use();
@@ -310,7 +307,7 @@ namespace dss {
 
     _session->unuse();
 
-    return success(buildEventResponse(subscriptionSession));
+    return buildEventResponse(subscriptionSession);
   }
 
   WebServerResponse EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {

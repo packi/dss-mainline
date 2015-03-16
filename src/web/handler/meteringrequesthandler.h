@@ -39,10 +39,10 @@ namespace dss {
     Apartment& m_Apartment;
     Metering& m_Metering;
 
-    boost::shared_ptr<JSONObject> getResolutions();
-    boost::shared_ptr<JSONObject> getSeries();
-    boost::shared_ptr<JSONObject> getValues(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> getLatest(const RestfulRequest& _request, bool aggregateMeterValues);
+    std::string getResolutions();
+    std::string getSeries();
+    std::string getValues(const RestfulRequest& _request);
+    std::string getLatest(const RestfulRequest& _request, bool aggregateMeterValues);
 
   }; // MeteringRequestHandler
 
