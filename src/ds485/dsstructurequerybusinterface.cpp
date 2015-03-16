@@ -304,6 +304,7 @@ namespace dss {
   } // updateButtonGroupFromMeter
 
   void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
+    _spec.binaryInputsValid = false;
     if ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0)) {
       try {
         _spec.binaryInputs.clear();
@@ -333,6 +334,7 @@ namespace dss {
           binaryInput.InputID = InputID;
           _spec.binaryInputs.push_back(binaryInput);
         }
+        _spec.binaryInputsValid = true;
       } catch(BusApiError& e) {
         Logger::getInstance()->log("Error reading DeviceBinaryInput: " +
         std::string(e.what()), lsWarning);
@@ -341,6 +343,7 @@ namespace dss {
   } // updateBinaryInputTableFromMeter
 
   void DSStructureQueryBusInterface::updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
+    _spec.sensorInputsValid = false;
     if (true || ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0))) {
       try {
         _spec.sensorInputs.clear();
@@ -370,6 +373,7 @@ namespace dss {
           sensorInput.SensorConversionFlag = SensorConversionFlag;
           _spec.sensorInputs.push_back(sensorInput);
         }
+        _spec.sensorInputsValid = true;
       } catch(BusApiError& e) {
         Logger::getInstance()->log("Error reading DeviceSensor: " +
         std::string(e.what()), lsWarning);
@@ -378,6 +382,7 @@ namespace dss {
   } // updateBinaryInputTableFromMeter
 
   void DSStructureQueryBusInterface::updateOutputChannelTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
+    _spec.outputChannelsValid = false;
     if (true || ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0))) {
       try {
         _spec.outputChannels.clear();
@@ -398,6 +403,7 @@ namespace dss {
           DSBusInterface::checkResultCode(ret);
           _spec.outputChannels.push_back(outputChannel);
         }
+        _spec.outputChannelsValid = true;
       } catch(BusApiError& e) {
         Logger::getInstance()->log("Error reading DeviceOPCTable: " +
         std::string(e.what()), lsWarning);

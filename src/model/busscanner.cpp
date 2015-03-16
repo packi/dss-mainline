@@ -333,7 +333,9 @@ namespace dss {
     }
 
     // synchronize binary input configuration
-    dev->setBinaryInputs(dev, _spec.binaryInputs);
+    if (_spec.binaryInputsValid) {
+      dev->setBinaryInputs(dev, _spec.binaryInputs);
+    }
 
     if ((dev->getDeviceType() == DEVICE_TYPE_AKM) &&
         (dev->getBinaryInputCount() > 0) &&
@@ -344,10 +346,14 @@ namespace dss {
     }
 
     // synchronize sensor configuration
-    dev->setSensors(dev, _spec.sensorInputs);
+    if (_spec.sensorInputsValid) {
+      dev->setSensors(dev, _spec.sensorInputs);
+    }
 
     // synchronize output channel configuration
-    dev->setOutputChannels(dev, _spec.outputChannels);
+    if (_spec.outputChannelsValid) {
+      dev->setOutputChannels(dev, _spec.outputChannels);
+    }
 
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
