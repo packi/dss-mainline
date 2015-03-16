@@ -96,8 +96,11 @@ namespace dss {
     std::string Name;
     uint16_t ZoneID;
     std::vector<DeviceBinaryInputSpec_t> binaryInputs;
+    bool binaryInputsValid;
     std::vector<DeviceSensorSpec_t> sensorInputs;
+    bool sensorInputsValid;
     std::vector<int> outputChannels;
+    bool outputChannelsValid;
   } DeviceSpec_t;
 
   typedef struct {
