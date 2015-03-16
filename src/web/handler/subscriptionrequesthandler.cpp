@@ -19,6 +19,7 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
+#include <boost/make_shared.hpp>
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -26,8 +27,6 @@
 
 
 #include "subscriptionrequesthandler.h"
-
-#include "src/web/json.h"
 
 #include "src/event.h"
 #include "src/base.h"
@@ -53,81 +52,81 @@ namespace dss {
     throw std::runtime_error("Unhandled function");
   } // handleRequest
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::list(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  std::string SubscriptionRequestHandler::list(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     typedef boost::shared_ptr<EventSubscription> EventSubscriptionPtr;
     std::vector<EventSubscriptionPtr> subscriptionsList = m_EventInterpreter.getSubscriptions();
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    boost::shared_ptr<JSONArrayBase> subscriptions = boost::make_shared<JSONArrayBase>();
-    result->addElement("subscriptions", subscriptions);
+    JSONWriter json;
+    json.startArray("subscriptions");
     foreach(EventSubscriptionPtr pSubscription, subscriptionsList) {
-      boost::shared_ptr<JSONObject> subscription = boost::make_shared<JSONObject>();
-      subscriptions->addElement("", subscription);
-      subscription->addProperty("id", pSubscription->getID());
-      subscription->addProperty("handlerName", pSubscription->getHandlerName());
-      subscription->addProperty("eventName", pSubscription->getEventName());
-      boost::shared_ptr<JSONObject> optsObj = boost::make_shared<JSONObject>();
-      subscription->addElement("options", optsObj);
+      json.startObject();
+      json.add("id", pSubscription->getID());
+      json.add("handlerName", pSubscription->getHandlerName());
+      json.add("eventName", pSubscription->getEventName());
+      json.startObject("options");
       boost::shared_ptr<const SubscriptionOptions> opts = pSubscription->getOptions();
       if(opts != NULL) {
         HashMapStringString optsHash = opts->getParameters().getContainer();
         foreach(HashMapStringString::reference option, optsHash) {
-          optsObj->addProperty(option.first, option.second);
+          json.add(option.first, option.second);
         }
       }
+      json.endObject();
       EventPropertyFilter** filter = pSubscription->getFilter();
       if (filter && *filter) {
-        boost::shared_ptr<JSONObject> filterObj = boost::make_shared<JSONObject>();
-        subscription->addElement("filter", filterObj);
-        filterObj->addProperty("mode", pSubscription->getFilterMode());
-        boost::shared_ptr<JSONArrayBase> jsonFilter = boost::make_shared<JSONArrayBase>();
-        filterObj->addElement("list", jsonFilter);
+        json.startObject("filter");
+        json.add("mode", pSubscription->getFilterMode());
+        json.startArray("list");
         for (; *filter; filter++) {
-          boost::shared_ptr<JSONObject> f = boost::make_shared<JSONObject>();
-          jsonFilter->addElement("", f);
-          f->addProperty("property", (*filter)->getPropertyName());
+          json.startObject();
+          json.add("property", (*filter)->getPropertyName());
           EventPropertyMatchFilter* fm = dynamic_cast<EventPropertyMatchFilter *> (*filter);
           if (fm) {
-            f->addProperty("match", fm->getValue());
+            json.add("match", fm->getValue());
           }
           else if (dynamic_cast<EventPropertyMissingFilter *> (*filter)) {
-            f->addProperty("missing", "");
+            json.add("missing", "");
           }
           else if (dynamic_cast<EventPropertyExistsFilter *> (*filter)) {
-            f->addProperty("exists", "");
+            json.add("exists", "");
           }
+          json.endObject();
         }
+        json.endArray();
+        json.endObject();
       }
+      json.endObject();
     }
-    return success(result);
+    json.endArray();
+    return json.successJSON();
   } // list
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::remove(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  std::string SubscriptionRequestHandler::remove(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string subscriptionID = _request.getParameter("id");
     if(subscriptionID.empty()) {
-      return failure("Need parameter id");
+      return JSONWriter::failure("Need parameter id");
     }
     m_EventInterpreter.unsubscribe(subscriptionID);
-    return success();
+    return JSONWriter::success();
   } // remove
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::add(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  std::string SubscriptionRequestHandler::add(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
 
     std::string eventName = st.convert(_request.getParameter("eventName"));
     std::string handlerName = st.convert(_request.getParameter("handlerName"));
     std::string optionsParameter = _request.getParameter("parameter");
     if(eventName.empty()) {
-      return failure("need parameter eventName");
+      return JSONWriter::failure("need parameter eventName");
     }
     if(handlerName.empty()) {
-      return failure("need parameter handlerName");
+      return JSONWriter::failure("need parameter handlerName");
     }
     boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
     std::vector<std::string> optionLines = splitString(optionsParameter, ';');
     foreach(std::string optionLine, optionLines) {
       std::vector<std::string> keyValue = splitString(optionLine, '=');
       if(keyValue.size() != 2) {
-        return failure("Can't parse line: '" + optionLine + "' as key/value pair");
+        return JSONWriter::failure("Can't parse line: '" + optionLine + "' as key/value pair");
       } else {
         opts->setParameter(st.convert(keyValue[0]), st.convert(keyValue[1]));
       }
@@ -136,9 +135,9 @@ namespace dss {
 
     m_EventInterpreter.subscribe(subscription);
 
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    result->addProperty("id", subscription->getID());
-    return success(result);
+    JSONWriter json;
+    json.add("id", subscription->getID());
+    return json.successJSON();
   } // add
 
 } // namespace dss

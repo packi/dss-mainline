@@ -116,7 +116,7 @@ public:
   virtual WebServerResponse jsonHandleRequest(
     const RestfulRequest& _request,
     boost::shared_ptr<Session> _session) {
-    boost::shared_ptr<JSONObject> result;
+    std::string result;
     return result;
   }
 };
@@ -155,7 +155,7 @@ private:
     boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
     boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
     RestfulRequest req("bla/" + _functionName, _params);
-    boost::shared_ptr<JSONObject> temp;
+    std::string temp;
     BOOST_CHECK_NO_THROW(temp =
       m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession));
     WebServerResponse response = temp;
@@ -169,7 +169,7 @@ private:
     boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
     boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
     RestfulRequest req("bla/" + _functionName, _params);
-    boost::shared_ptr<JSONObject> temp;
+    std::string temp;
     BOOST_CHECK_THROW(temp =
       m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), SensorOutOfRangeException);
   }

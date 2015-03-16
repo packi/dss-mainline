@@ -26,12 +26,12 @@
 
 
 #include "src/propertyquery.h"
+#include "web/webrequests.h"
 
 #include <cassert>
 #include <iostream>
 
 #include "src/propertysystem.h"
-#include "src/web/json.h"
 
 #include "src/foreach.h"
 #include "src/base.h"
@@ -60,56 +60,51 @@ namespace dss {
     m_PartList.erase(m_PartList.begin());
   } // parseParts
 
-  boost::shared_ptr<JSONElement>
-    PropertyQuery::addProperty(boost::shared_ptr<JSONObject> obj,
-                               PropertyNodePtr node) {
+  void PropertyQuery::addProperty(JSONWriter& json,
+                                  PropertyNodePtr node) {
     if (node->getValueType() == vTypeNone) {
       /* ignore container type */
-      return obj;
+      return;
     }
     log(std::string(__func__) + " " + node->getName() + ": " + node->getAsString(), lsDebug);
     switch (node->getValueType()) {
     case vTypeInteger:
-      obj->addProperty(node->getName(), node->getIntegerValue());
+      json.add(node->getName(), node->getIntegerValue());
       break;
     case vTypeFloating:
-      obj->addProperty(node->getName(), node->getFloatingValue());
+      json.add(node->getName(), node->getFloatingValue());
       break;
     case vTypeBoolean:
-      obj->addProperty(node->getName(), node->getBoolValue());
+      json.add(node->getName(), node->getBoolValue());
       break;
     case vTypeNone:
       break;
     case vTypeString:
     default:
-      obj->addProperty(node->getName(), node->getAsString());
+      json.add(node->getName(), node->getAsString());
       break;
     }
-    return obj;
+    return;
   }
 
-  boost::shared_ptr<JSONElement> PropertyQuery::addProperties(part_t& _part,
-                                    boost::shared_ptr<JSONElement> _parentElement,
-                                    dss::PropertyNodePtr _node) {
-    boost::shared_ptr<JSONObject> obj = boost::make_shared<JSONObject>();
+  void PropertyQuery::addProperties(part_t& _part, JSONWriter& json, dss::PropertyNodePtr _node) {
     foreach(std::string subprop, _part.properties) {
       log(std::string(__func__) + " from node: <" + _node->getName() + "> filter: " + subprop, lsDebug);
       if(subprop == "*") {
         for(int iChild = 0; iChild < _node->getChildCount(); iChild++) {
           PropertyNodePtr childNode = _node->getChild(iChild);
           if (childNode != NULL) {
-            addProperty(obj, childNode);
+            addProperty(json, childNode);
           }
         }
       } else {
         PropertyNodePtr node = _node->getPropertyByName(subprop);
         if (node != NULL) {
-          addProperty(obj, node);
+          addProperty(json, node);
         }
       }
     }
-    _parentElement->addElement(_node->getName(), obj);
-    return obj;
+    return;
   } // addProperties
 
   /**
@@ -128,7 +123,7 @@ namespace dss {
    */
   void PropertyQuery::runFor(PropertyNodePtr _parentNode,
                              unsigned int _partIndex,
-                             boost::shared_ptr<JSONElement> _parentElement) {
+                             JSONWriter& json) {
 
     log(std::string(__func__) + " Level" + intToString(_partIndex) + " : " +
         m_PartList[_partIndex].name, lsDebug);
@@ -136,29 +131,34 @@ namespace dss {
     assert(_partIndex < m_PartList.size());
     part_t& part = m_PartList[_partIndex];
     bool hasSubpart = m_PartList.size() > (_partIndex + 1);
-    boost::shared_ptr<JSONElement> container;
 
     if (!part.properties.empty()) {
       /* add current node */
       std::string name = (part.name == "*") ? _parentNode->getName() : part.name;
       log(std::string(__func__) + "   addElement " + name, lsDebug);
-      container = boost::shared_ptr<JSONElement>(new JSONArrayBase());
-      _parentElement->addElement(name, container);
+      json.startArray(name);
     }
 
     for (int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
       PropertyNodePtr childNode = _parentNode->getChild(iChild);
-      boost::shared_ptr<JSONElement> node = _parentElement;
       if ((part.name == "*") || (childNode->getName() == part.name)) {
 
         if (!part.properties.empty()) {
-          node = addProperties(part, container, childNode);
+          json.startObject();
+          addProperties(part, json, childNode);
         }
 
         if (hasSubpart) {
-          runFor(childNode, _partIndex + 1, node);
+          runFor(childNode, _partIndex + 1, json);
+        }
+        if (!part.properties.empty()) {
+          json.endObject();
         }
       }
+    }
+
+    if (!part.properties.empty()) {
+      json.endArray();
     }
   } // runFor
 
@@ -178,7 +178,7 @@ namespace dss {
    */
   void PropertyQuery::runFor2(PropertyNodePtr _parentNode,
                              unsigned int _partIndex,
-                             boost::shared_ptr<JSONElement> _parentElement) {
+                             JSONWriter& json) {
 
     log(std::string(__func__) + " Level" + intToString(_partIndex) + " : " +
         "node: <" + _parentNode->getName() + "> filter: " +
@@ -190,37 +190,39 @@ namespace dss {
 
     for (int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
       PropertyNodePtr childNode = _parentNode->getChild(iChild);
-      boost::shared_ptr<JSONElement> node = _parentElement;
 
       if (((part.name == "*") || (childNode->getName() == part.name)) &&
           (childNode->getValueType() == vTypeNone)) {
         /* none means node is not value node, but container */
 
         if (!part.properties.empty()) {
-          node = addProperties(part, _parentElement, childNode);
+          json.startObject(childNode->getName());
+          addProperties(part, json, childNode);
         }
 
         if (hasSubpart) {
-          runFor2(childNode, _partIndex + 1, node);
+          runFor2(childNode, _partIndex + 1, json);
+        }
+
+        if (!part.properties.empty()) {
+          json.endObject();
         }
       }
     }
   } // runFor2
 
-  boost::shared_ptr<JSONElement> PropertyQuery::run() {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
+  void PropertyQuery::run(JSONWriter& json) {
     if(beginsWith(m_Query, m_pProperty->getName())) {
-      runFor(m_pProperty, 0, result);
+      runFor(m_pProperty, 0, json);
     }
-    return result;
+    return;
   } // run
 
-  boost::shared_ptr<JSONElement> PropertyQuery::run2() {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
+  void PropertyQuery::run2(JSONWriter& json) {
     if(beginsWith(m_Query, m_pProperty->getName())) {
-      runFor2(m_pProperty, 0, result);
+      runFor2(m_pProperty, 0, json);
     }
-    return result;
+    return;
   } // run2
 
 } // namespace dss

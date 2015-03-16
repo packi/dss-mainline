@@ -9,14 +9,14 @@
 
 namespace dss {
 
-class JSONObject;
+class JSONWriter;
 
 // --------------------------------------------------------------------
 // helper
 
 namespace MsHub {
-  JSONObject toJson(const boost::shared_ptr<Event> &event);
   std::vector<std::string> uploadEvents(void);
+  void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json);
 }
 
 struct WebserviceReply {
@@ -103,7 +103,7 @@ public:
 
 namespace DsHub {
   std::vector<std::string> uploadEvents();
-  JSONObject toJson(const boost::shared_ptr<Event> &event);
+  void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json);
 }
 
 class WebserviceDsHub {

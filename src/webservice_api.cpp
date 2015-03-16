@@ -5,6 +5,7 @@
 #include <uuid.h>
 
 #include "webservice_api.h"
+#include "web/webrequests.h"
 
 #include <json.h>
 #include <stdio.h>
@@ -15,7 +16,6 @@
 #include "event.h"
 #include "propertysystem.h"
 #include "model/group.h"
-#include "web/json.h"
 
 namespace dss {
 
@@ -53,12 +53,12 @@ const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
 
-void appendCommon(JSONObject &obj, const std::string& group,
+void appendCommon(JSONWriter& json, const std::string& group,
                   const std::string& category, const Event *event)
 {
-  obj.addProperty("EventGroup", group);
-  obj.addProperty("EventCategory", category);
-  obj.addProperty("Timestamp", event->getTimestamp().toISO8601_ms());
+  json.add("EventGroup", group);
+  json.add("EventCategory", category);
+  json.add("Timestamp", event->getTimestamp().toISO8601_ms());
 }
 
 /* mshub */
@@ -83,144 +83,143 @@ std::vector<std::string> uploadEvents()
   return events;
 }
 
-JSONObject toJson(const boost::shared_ptr<Event> &event) {
+void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
   boost::shared_ptr<const DeviceReference> pDeviceRef;
-  JSONObject obj;
   std::string propValue;
 
   try {
     if ((event->getName() == EventName::DeviceSensorValue) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_Metering, evtCategory_DeviceSensorValue,
+      appendCommon(json, evtGroup_Metering, evtCategory_DeviceSensorValue,
                    event.get());
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorType", sensorType);
-      obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
-      obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.add("SensorType", sensorType);
+      json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       propValue = event->getPropertyByName("sensorIndex");
       if (!propValue.empty()) {
-        obj.addProperty("SensorIndex", propValue);
+        json.add("SensorIndex", propValue);
       }
     } else if ((event->getName() == EventName::ZoneSensorValue) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      appendCommon(obj, evtGroup_Metering, evtCategory_ZoneSensorValue,
+      appendCommon(json, evtGroup_Metering, evtCategory_ZoneSensorValue,
                    event.get());
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorType", sensorType);
-      obj.addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
-      obj.addProperty("ZoneID",  pGroup->getZoneID());
-      obj.addProperty("GroupID", pGroup->getID());
+      json.add("SensorType", sensorType);
+      json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
     } else if ((event->getName() == EventName::CallScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupCallScene,
+      appendCommon(json, evtGroup_Activity, evtCategory_ZoneGroupCallScene,
                    event.get());
-      obj.addProperty("ZoneID",  pGroup->getZoneID());
-      obj.addProperty("GroupID", pGroup->getID());
-      obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      obj.addProperty("Force", event->hasPropertySet("forced"));
-      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
+      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
+      json.add("Force", event->hasPropertySet("forced"));
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
     } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupUndoScene,
+      appendCommon(json, evtGroup_Activity, evtCategory_ZoneGroupUndoScene,
                    event.get());
-      obj.addProperty("ZoneID",  pGroup->getZoneID());
-      obj.addProperty("GroupID", pGroup->getID());
-      obj.addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
+      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       switch (pState->getType()) {
       case StateType_Apartment:
       case StateType_Service:
       case StateType_Script:
-        appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState,
+        appendCommon(json, evtGroup_Activity, evtCategory_ApartmentState,
                      event.get());
         break;
       case StateType_Group:
-        appendCommon(obj, evtGroup_Activity, evtCategory_ZoneGroupState,
+        appendCommon(json, evtGroup_Activity, evtCategory_ZoneGroupState,
                      event.get());
         break;
       case StateType_Device:
-        appendCommon(obj, evtGroup_Activity, evtCategory_DeviceInputState,
+        appendCommon(json, evtGroup_Activity, evtCategory_DeviceInputState,
                      event.get());
         break;
       default:
         break;
       }
-      obj.addProperty("StateName", pState->getName());
-      obj.addProperty("StateValue", pState->toString());
-      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("StateName", pState->getName());
+      json.add("StateValue", pState->toString());
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::OldStateChange) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState, event.get());
-      obj.addProperty("StateName", event->getPropertyByName("statename"));
-      obj.addProperty("StateValue", event->getPropertyByName("state"));
-      obj.addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      appendCommon(json, evtGroup_Activity, evtCategory_ApartmentState, event.get());
+      json.add("StateName", event->getPropertyByName("statename"));
+      json.add("StateValue", event->getPropertyByName("state"));
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::AddonStateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       std::string addonName = event->getPropertyByName("scriptID");
-      appendCommon(obj, evtGroup_Activity, evtCategory_ApartmentState, event.get());
-      obj.addProperty("StateName", addonName + "." + pState->getName());
-      obj.addProperty("StateValue", pState->toString());
-      obj.addProperty("Origin", event->getPropertyByName("scriptID"));
+      appendCommon(json, evtGroup_Activity, evtCategory_ApartmentState, event.get());
+      json.add("StateName", addonName + "." + pState->getName());
+      json.add("StateValue", pState->toString());
+      json.add("Origin", event->getPropertyByName("scriptID"));
     } else if ((event->getName() == EventName::DeviceStatus) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_Activity, evtCategory_DeviceStatusReport,
+      appendCommon(json, evtGroup_Activity, evtCategory_DeviceStatusReport,
                    event.get());
-      obj.addProperty("StatusIndex", event->getPropertyByName("statusIndex"));
-      obj.addProperty("StatusValue", event->getPropertyByName("statusValue"));
-      obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.add("StatusIndex", event->getPropertyByName("statusIndex"));
+      json.add("StatusValue", event->getPropertyByName("statusValue"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      appendCommon(obj, evtGroup_ApartmentAndDevice,
+      appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_DeviceSensorError, event.get());
-      obj.addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-      obj.addProperty("SensorType", strToInt(event->getPropertyByName("sensorType")));
-      obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.add("SensorType", strToInt(event->getPropertyByName("sensorType")));
+      json.add("StatusCode", dsEnum_SensorError_noValue);
     } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      appendCommon(obj, evtGroup_ApartmentAndDevice,
+      appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_ZoneSensorError, event.get());
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      obj.addProperty("SensorType", sensorType);
-      obj.addProperty("ZoneID",  pGroup->getZoneID());
-      obj.addProperty("GroupID", pGroup->getID());
-      obj.addProperty("StatusCode", dsEnum_SensorError_noValue);
+      json.add("SensorType", sensorType);
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
+      json.add("StatusCode", dsEnum_SensorError_noValue);
     } else if (event->getName() == EventName::HeatingControllerSetup) {
-      appendCommon(obj, evtGroup_ApartmentAndDevice,
+      appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerSetup, event.get());
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        obj.addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerValue) {
-      appendCommon(obj, evtGroup_ApartmentAndDevice,
+      appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerValue, event.get());
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        obj.addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingControllerState) {
-      appendCommon(obj, evtGroup_ApartmentAndDevice,
+      appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerState, event.get());
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        obj.addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
     } else if (event->getName() == EventName::HeatingEnabled) {
-      appendCommon(obj, evtGroup_ApartmentAndDevice,
+      appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingEnabled, event.get());
-      obj.addProperty("ZoneID", strToInt(event->getPropertyByName("zoneID")));
-      obj.addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
+      json.add("ZoneID", strToInt(event->getPropertyByName("zoneID")));
+      json.add("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
 
     } else if (event->getName() == EventName::AddonToCloud) {
-      appendCommon(obj, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
-      obj.addProperty("EventName", event->getPropertyByName("EventName"));
+      appendCommon(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
+      json.add("EventName", event->getPropertyByName("EventName"));
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      boost::shared_ptr<JSONObject> parameterObj(new JSONObject);
+      json.startObject("parameter");
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        parameterObj->addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
-      obj.addElement("parameter", parameterObj);
+      json.endObject();
 
     } else {
       throw DSSException(std::string("unhandled event ") + event->toString());
@@ -228,7 +227,7 @@ JSONObject toJson(const boost::shared_ptr<Event> &event) {
   } catch (std::invalid_argument& e) {
     throw DSSException(std::string("Error converting event ") + event->toString());
   }
-  return obj;
+  return;
 }
 
 } /* namespace MsHub */
@@ -300,8 +299,7 @@ template <class Iterator>
 bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
                                          WebserviceCallDone_t callback) {
 
-  JSONObject obj;
-  boost::shared_ptr<JSONArray<JSONObject> > array = boost::make_shared<JSONArray<JSONObject> >();
+  JSONWriter json(JSONWriter::jsonNoneResult);
   int ct = 0;
 
   std::string parameters;
@@ -309,21 +307,22 @@ bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
   parameters += "dssid=" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue();
   parameters += "&source=dss"; /* EventSource_dSS */
 
-  obj.addElement("eventsList", array);
+  json.startArray("eventsList");
   for (; begin != end; begin++) {
     try {
-      array->add(MsHub::toJson(*begin));
+      MsHub::toJson(*begin, json);
       ct++;
     } catch (DSSException& e) {
       log(e.what(), lsWarning);
     }
   }
+  json.endArray();
 
   if (ct == 0) {
     return false;
   }
 
-  std::string postdata = obj.toString();
+  std::string postdata = json.successJSON();
   // TODO eventually emit summary: 10 callsceene, 27 metering, ...
   // dumping whole postdata leads to log rotation and is seldomly needed
   // unless for solving a blame war with cloud team
@@ -533,7 +532,7 @@ int getRandomUUID(std::string &str)
     return 0;
 }
 
-void createHeader(boost::shared_ptr<JSONObject> &header, const std::string& group,
+void createHeader(JSONWriter& json, const std::string& group,
                   const std::string& category, const Event *event)
 {
   static unsigned long int sequenceId = 0;
@@ -541,13 +540,15 @@ void createHeader(boost::shared_ptr<JSONObject> &header, const std::string& grou
   std::string eventId;
   assert(getRandomUUID(eventId) == 0);
 
-  header->addProperty("EventCategory", category);
-  header->addProperty("EventGroup", group);
-  header->addProperty("SequenceID", sequenceId++);
-  header->addProperty("SequenceIDSince", DateTime(DSS::getInstance()->getStartTime()).toISO8601());
-  header->addProperty("Timestamp", event->getTimestamp().toISO8601());
-  header->addProperty("EventID", eventId);
-  header->addProperty("Source", "dss");
+  json.startObject("EventHeader");
+  json.add("EventCategory", category);
+  json.add("EventGroup", group);
+  json.add("SequenceID", (int)sequenceId++);
+  json.add("SequenceIDSince", DateTime(DSS::getInstance()->getStartTime()).toISO8601());
+  json.add("Timestamp", event->getTimestamp().toISO8601());
+  json.add("EventID", eventId);
+  json.add("Source", "dss");
+  json.endObject();
 }
 
 /* dshub */
@@ -575,172 +576,205 @@ std::vector<std::string> uploadEvents()
   return events;
 }
 
-JSONObject toJson(const boost::shared_ptr<Event> &event) {
+void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
   boost::shared_ptr<const DeviceReference> pDeviceRef;
-  boost::shared_ptr<JSONObject> header = boost::make_shared<JSONObject>();
-  boost::shared_ptr<JSONObject> body = boost::make_shared<JSONObject>();
-  JSONObject eventJson;
 
   std::string propValue;
 
   try {
     if ((event->getName() == EventName::DeviceSensorValue) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      createHeader(header, evtGroup_Metering, evtCategory_DeviceSensorValue,
+      createHeader(json, evtGroup_Metering, evtCategory_DeviceSensorValue,
                    event.get());
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      body->addProperty("SensorType", sensorType);
-      body->addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
-      body->addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.startObject("EventBody");
+      json.add("SensorType", sensorType);
+      json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.endObject();
     } else if ((event->getName() == EventName::ZoneSensorValue) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      createHeader(header, evtGroup_Metering, evtCategory_ZoneSensorValue,
+      createHeader(json, evtGroup_Metering, evtCategory_ZoneSensorValue,
                    event.get());
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      body->addProperty("SensorType", sensorType);
-      body->addProperty("SensorValue", event->getPropertyByName("sensorValueFloat"));
-      body->addProperty("ZoneID",  pGroup->getZoneID());
+      json.startObject("EventBody");
+      json.add("SensorType", sensorType);
+      json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.endObject();
     } else if ((event->getName() == EventName::CallScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      createHeader(header, evtGroup_Activity, evtCategory_ZoneGroupCallScene,
+      createHeader(json, evtGroup_Activity, evtCategory_ZoneGroupCallScene,
                    event.get());
-      body->addProperty("ZoneID",  pGroup->getZoneID());
-      body->addProperty("GroupID", pGroup->getID());
-      body->addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      body->addProperty("Force", event->hasPropertySet("forced"));
-      body->addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      json.startObject("EventBody");
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
+      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
+      json.add("Force", event->hasPropertySet("forced"));
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.endObject();
     } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      createHeader(header, evtGroup_Activity, evtCategory_ZoneGroupUndoScene,
+      createHeader(json, evtGroup_Activity, evtCategory_ZoneGroupUndoScene,
                    event.get());
-      body->addProperty("ZoneID",  pGroup->getZoneID());
-      body->addProperty("GroupID", pGroup->getID());
-      body->addProperty("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      body->addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      json.startObject("EventBody");
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
+      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.endObject();
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       switch (pState->getType()) {
       case StateType_Apartment:
       case StateType_Service:
       case StateType_Script:
-        createHeader(header, evtGroup_Activity, evtCategory_ApartmentState,
+        createHeader(json, evtGroup_Activity, evtCategory_ApartmentState,
                      event.get());
-        body->addProperty("Origin", event->getPropertyByName("originDeviceID"));
+        json.startObject("EventBody");
+        json.add("Origin", event->getPropertyByName("originDeviceID"));
         break;
       case StateType_Group:
-        createHeader(header, evtGroup_Activity, evtCategory_ZoneGroupState,
+        createHeader(json, evtGroup_Activity, evtCategory_ZoneGroupState,
                      event.get());
-        body->addProperty("ZoneId", event->getPropertyByName("zoneId"));
-        body->addProperty("GroupId", event->getPropertyByName("groupId"));
+        json.startObject("EventBody");
+        json.add("ZoneId", event->getPropertyByName("zoneId"));
+        json.add("GroupId", event->getPropertyByName("groupId"));
         break;
       case StateType_Device:
         /* TODO Does it correspond to DeviceStateChangeEvent in BOM? */
-        createHeader(header, evtGroup_Activity, evtCategory_DeviceInputState,
+        createHeader(json, evtGroup_Activity, evtCategory_DeviceInputState,
                      event.get());
+        json.startObject("EventBody");
         /* TODO Should DeviceStateChangeEvent contain device identifier field named 'DeviceId', or 'Origin'? */
-        body->addProperty("Origin", event->getPropertyByName("originDeviceID"));
+        json.add("Origin", event->getPropertyByName("originDeviceID"));
         break;
       default:
         break;
       }
-      body->addProperty("StateName", pState->getName());
-      body->addProperty("StateValue", pState->toString());
+      json.add("StateName", pState->getName());
+      json.add("StateValue", pState->toString());
+      json.endObject();
     } else if (event->getName() == EventName::OldStateChange) {
-      createHeader(header, evtGroup_Activity, evtCategory_ApartmentState, event.get());
-      body->addProperty("StateName", event->getPropertyByName("statename"));
-      body->addProperty("StateValue", event->getPropertyByName("state"));
-      body->addProperty("Origin", event->getPropertyByName("originDeviceID"));
+      createHeader(json, evtGroup_Activity, evtCategory_ApartmentState, event.get());
+      json.startObject("EventBody");
+      json.add("StateName", event->getPropertyByName("statename"));
+      json.add("StateValue", event->getPropertyByName("state"));
+      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.endObject();
     } else if (event->getName() == EventName::AddonStateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       std::string addonName = event->getPropertyByName("scriptID");
-      createHeader(header, evtGroup_Activity, evtCategory_ApartmentState, event.get());
-      body->addProperty("StateName", addonName + "." + pState->getName());
-      body->addProperty("StateValue", pState->toString());
-      body->addProperty("Origin", event->getPropertyByName("scriptID"));
+      createHeader(json, evtGroup_Activity, evtCategory_ApartmentState, event.get());
+      json.startObject("EventBody");
+      json.add("StateName", addonName + "." + pState->getName());
+      json.add("StateValue", pState->toString());
+      json.add("Origin", event->getPropertyByName("scriptID"));
+      json.endObject();
     } else if ((event->getName() == EventName::DeviceStatus) && (event->getRaiseLocation() == erlDevice)) {
       /* TODO Does it correspond to DeviceStatusErrorEvent in BOM? */
       pDeviceRef = event->getRaisedAtDevice();
-      createHeader(header, evtGroup_Activity, evtCategory_DeviceStatusReport,
+      createHeader(json, evtGroup_Activity, evtCategory_DeviceStatusReport,
                    event.get());
-      body->addProperty("Index", event->getPropertyByName("statusIndex"));
-      body->addProperty("Value", event->getPropertyByName("statusValue"));
-      body->addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.startObject("EventBody");
+      json.add("Index", event->getPropertyByName("statusIndex"));
+      json.add("Value", event->getPropertyByName("statusValue"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.endObject();
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();
-      createHeader(header, evtGroup_ApartmentAndDevice,
+      createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_DeviceSensorError, event.get());
-      body->addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-      body->addProperty("SensorType", strToInt(event->getPropertyByName("sensorType")));
-      body->addProperty("StatusCode", dsEnum_SensorError_noValue);
+      json.startObject("EventBody");
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.add("SensorType", strToInt(event->getPropertyByName("sensorType")));
+      json.add("StatusCode", dsEnum_SensorError_noValue);
+      json.endObject();
     } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
-      createHeader(header, evtGroup_ApartmentAndDevice,
+      createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_ZoneSensorError, event.get());
       int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      body->addProperty("SensorType", sensorType);
-      body->addProperty("ZoneID",  pGroup->getZoneID());
-      body->addProperty("GroupID", pGroup->getID());
-      body->addProperty("StatusCode", dsEnum_SensorError_noValue);
+      json.startObject("EventBody");
+      json.add("SensorType", sensorType);
+      json.add("ZoneID",  pGroup->getZoneID());
+      json.add("GroupID", pGroup->getID());
+      json.add("StatusCode", dsEnum_SensorError_noValue);
+      json.endObject();
     } else if (event->getName() == EventName::HeatingControllerSetup) {
-      createHeader(header, evtGroup_ApartmentAndDevice,
+      createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerSetup, event.get());
+      json.startObject("EventBody");
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        body->addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
+      json.endObject();
     } else if (event->getName() == EventName::HeatingControllerValueDsHub) {
-      createHeader(header, evtGroup_ApartmentAndDevice,
+      createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerValue, event.get());
+      json.startObject("EventBody");
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        body->addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
+      json.endObject();
     } else if (event->getName() == EventName::HeatingControllerState) {
-      createHeader(header, evtGroup_ApartmentAndDevice,
+      createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerState, event.get());
+      json.startObject("EventBody");
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        body->addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
+      json.endObject();
     } else if (event->getName() == EventName::HeatingEnabled) {
-      createHeader(header, evtGroup_ApartmentAndDevice,
+      createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingEnabled, event.get());
-      body->addProperty("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
+      json.startObject("EventBody");
+      json.add("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
+      json.endObject();
     } else if (event->getName() == EventName::AddonToCloud) {
-      createHeader(header, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
-      body->addProperty("EventName", event->getPropertyByName("EventName"));
+      createHeader(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
+      json.startObject("EventBody");
+      json.add("EventName", event->getPropertyByName("EventName"));
       const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      boost::shared_ptr<JSONObject> parameterObj(new JSONObject);
+      json.startObject("Parameter");
       for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        parameterObj->addProperty(iParam->first, iParam->second);
+        json.add(iParam->first, iParam->second);
       }
-      body->addElement("Parameter", parameterObj);
+      json.endObject();
+      json.endObject();
     } else if (event->getName() == EventName::DeviceBinaryInputEvent) {
       /* TODO is event group and category correct? */
       pDeviceRef = event->getRaisedAtDevice();
-      createHeader(header, evtGroup_ApartmentAndDevice, evtCategory_DeviceBinaryInput, event.get());
-      body->addProperty("InputIndex", event->getPropertyByName("inputIndex"));
-      body->addProperty("InputValue", event->getPropertyByName("inputValue"));
-      body->addProperty("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      createHeader(json, evtGroup_ApartmentAndDevice, evtCategory_DeviceBinaryInput, event.get());
+      json.startObject("EventBody");
+      json.add("InputIndex", event->getPropertyByName("inputIndex"));
+      json.add("InputValue", event->getPropertyByName("inputValue"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.endObject();
     } else if (event->getName() == EventName::ExecutionDenied) {
       /* TODO is event group and category correct? */
-      createHeader(header, evtGroup_Activity, evtCategory_ExecutionDenied, event.get());
-      body->addProperty("ActivityType", event->getPropertyByName("action-type"));
-      body->addProperty("ActivityName", event->getPropertyByName("action-name"));
-      body->addProperty("SourceName", event->getPropertyByName("source-name"));
-      body->addProperty("Reason", event->getPropertyByName("reason"));
+      createHeader(json, evtGroup_Activity, evtCategory_ExecutionDenied, event.get());
+      json.startObject("EventBody");
+      json.add("ActivityType", event->getPropertyByName("action-type"));
+      json.add("ActivityName", event->getPropertyByName("action-name"));
+      json.add("SourceName", event->getPropertyByName("source-name"));
+      json.add("Reason", event->getPropertyByName("reason"));
+      json.endObject();
     } else if (event->getName() == EventName::LogFileData) {
-      createHeader(header, evtGroup_Activity, evtCategory_LogFileData, event.get());
+      createHeader(json, evtGroup_Activity, evtCategory_LogFileData, event.get());
+      json.startObject("EventBody");
+      json.endObject();
     } else {
       throw DSSException(std::string("unhandled event ") + event->toString());
     }
 
-    eventJson.addElement("EventHeader", header);
-    eventJson.addElement("EventBody", body);
   } catch (std::invalid_argument& e) {
     throw DSSException(std::string("Error converting event ") + event->toString());
   }
-  return eventJson;
+  return;
 }
 
 } /* namespace dSHub */
@@ -798,18 +832,17 @@ template <class Iterator>
 bool WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
                                          WebserviceCallDone_t callback) {
 
-  JSONObject obj;
-  boost::shared_ptr<JSONArray<JSONObject> > array = boost::make_shared<JSONArray<JSONObject> >();
+  JSONWriter json(JSONWriter::jsonNoneResult);
   int ct = 0;
 
   // /v1/DSS/{dssID}/Events
   std::string url;
   url = "v1/DSS/" + DSS::getInstance()->getPropertySystem().getProperty(pp_sysinfo_dsid)->getStringValue() + "/Events";
 
-  obj.addElement("Events", array);
+  json.startArray("Events");
   for (; begin != end; begin++) {
     try {
-      array->add(DsHub::toJson(*begin));
+      DsHub::toJson(*begin, json);
       ct++;
     } catch (DSSException& e) {
       log(e.what(), lsWarning);
@@ -820,7 +853,7 @@ bool WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
     return false;
   }
 
-  std::string postdata = obj.toString();
+  std::string postdata = json.successJSON();
   // TODO eventually emit summary: 10 callsceene, 27 metering, ...
   // dumping whole postdata leads to log rotation and is seldomly needed
   // unless for solving a blame war with cloud team

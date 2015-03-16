@@ -193,8 +193,6 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/systemrequesthandler.h \
 	../src/web/handler/zonerequesthandler.cpp \
 	../src/web/handler/zonerequesthandler.h \
-	../src/web/json.cpp \
-	../src/web/json.h \
 	../src/web/restful.cpp \
 	../src/web/restful.h \
 	../src/webservice_api.cpp \

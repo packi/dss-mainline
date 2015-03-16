@@ -28,7 +28,6 @@
 #include "eventsubscriptionsession.h"
 
 #include "src/event.h"
-#include "src/web/json.h"
 #include "src/session.h"
 #include "src/eventinterpreterplugins.h"
 #include "eventcollector.h"

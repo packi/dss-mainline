@@ -31,6 +31,7 @@
 #include <fstream>
 
 #include "src/logger.h"
+#include "src/web/webrequests.h"
 
 int testGetter() {
 #ifdef VERBOSE_TESTS
@@ -538,12 +539,9 @@ BOOST_AUTO_TEST_CASE(testQueryAttributes) {
   propSys.createProperty("/test+/test1")->setStringValue("content3");
   propSys.createProperty("/test+/test2")->setStringValue("content4");
   PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2)");
-  boost::shared_ptr<JSONElement> pArray = query.run();
-  BOOST_CHECK_EQUAL(pArray->getElementCount(), 1);
-  BOOST_CHECK_EQUAL(pArray->getElement(0)->getElementCount(), 3);
-  boost::shared_ptr<JSONElement> val1Elem = pArray->getElement(0)->getElement(0)->getElementByName("test1");
-  boost::shared_ptr<JSONValue<std::string> > val1 = boost::dynamic_pointer_cast<JSONValue<std::string> >(val1Elem);
-  BOOST_CHECK_EQUAL(val1->getValue(), "content1");
+  JSONWriter json(JSONWriter::jsonNoneResult);
+  query.run(json);
+  BOOST_CHECK_EQUAL(json.successJSON(), "{\"test\":[{\"test1\":\"content1\",\"test2\":\"content2\"},{\"test1\":\"content3\"},{\"test2\":\"content4\"}]}");
 }
 
 BOOST_AUTO_TEST_CASE(testQuerySubPropertyTwice) {
@@ -552,30 +550,17 @@ BOOST_AUTO_TEST_CASE(testQuerySubPropertyTwice) {
   propSys.createProperty("/test/test2")->setStringValue("content2");
   propSys.createProperty("/test/content/text")->setStringValue("text1");
   PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2)/content(text)");
-  boost::shared_ptr<JSONElement> pArray = query.run();
-  BOOST_CHECK_EQUAL(pArray->getElementCount(), 1);
-  boost::shared_ptr<JSONElement> testElem = pArray->getElement(0);
-  BOOST_CHECK_EQUAL(testElem->getElementCount(), 1);
-  boost::shared_ptr<JSONElement> contentElem = testElem->
-    getElement(0)->getElementByName("content")->
-    getElement(0)->getElementByName("text");
-  boost::shared_ptr<JSONValue<std::string> > contentVal =
-    boost::dynamic_pointer_cast<JSONValue<std::string> >(contentElem);
-  BOOST_CHECK_EQUAL(contentVal->getValue(), "text1");
+  JSONWriter json(JSONWriter::jsonNoneResult);
+  query.run(json);
+  BOOST_CHECK_EQUAL(json.successJSON(), "{\"test\":[{\"test1\":\"content1\",\"test2\":\"content2\",\"content\":[{\"text\":\"text1\"}]}]}");
 }
 
 BOOST_AUTO_TEST_CASE(testQuerySubProperty) {
   PropertySystem propSys;
   propSys.createProperty("/test/subnode/content")->setStringValue("content1");
   PropertyQuery query(propSys.getProperty("/"), "/test/subnode(content)");
-  boost::shared_ptr<JSONElement> pArray = query.run();
-  BOOST_CHECK_EQUAL(pArray->getElementCount(), 1);
-  boost::shared_ptr<JSONElement> subnodeElem = pArray->getElement(0);
-  BOOST_CHECK_EQUAL(subnodeElem->getElementCount(), 1);
-  boost::shared_ptr<JSONElement> contentElem = subnodeElem->
-    getElement(0)->getElementByName("content");
-  boost::shared_ptr<JSONValue<std::string> > contentVal =
-    boost::dynamic_pointer_cast<JSONValue<std::string> >(contentElem);
-  BOOST_CHECK_EQUAL(contentVal->getValue(), "content1");
+  JSONWriter json(JSONWriter::jsonNoneResult);
+  query.run(json);
+  BOOST_CHECK_EQUAL(json.successJSON(), "{\"subnode\":[{\"content\":\"content1\"}]}");
 }
 BOOST_AUTO_TEST_SUITE_END()

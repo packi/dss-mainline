@@ -28,24 +28,28 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 #include "src/logger.h"
 #include "src/dss.h"
 
+using rapidjson::StringBuffer;
+using rapidjson::Writer;
+
 namespace dss {
 
-  class JSONObject;
-  class JSONElement;
   class RestfulRequest;
   class Session;
   
   class WebServerResponse {
   public:
-    WebServerResponse(boost::shared_ptr<JSONObject> _response)
-    : m_Response(_response), m_revokeCookie(false)
+    WebServerResponse(std::string _response)
+    : m_response(_response), m_revokeCookie(false)
     { }
-
-    boost::shared_ptr<JSONObject> getResponse() {
-      return m_Response;
+    std::string getResponse() const {
+      return m_response;
     }
     void setRevokeSessionToken() {
       m_newSessionToken.clear();
@@ -64,17 +68,48 @@ namespace dss {
       return m_newSessionToken;
     }
   private:
-    boost::shared_ptr<JSONObject> m_Response;
+    std::string m_response;
     std::string m_newSessionToken;
     bool m_revokeCookie;
   };
 
+  class JSONWriter {
+  public:
+    typedef enum {
+      jsonObjectResult,
+      jsonArrayResult,
+      jsonNoneResult
+    } jsonResult_t;
+    JSONWriter(jsonResult_t _responseType = jsonObjectResult);
+    std::string successJSON();
+    void add(std::string _name, std::string _value);
+    void add(std::string _name, const char* _value);
+    void add(std::string _name, int _value);
+    void add(std::string _name, long long int _value);
+    void add(std::string _name, bool _value);
+    void add(std::string _name, double _value);
+    void add(std::string _value);
+    void add(const char* _value);
+    void add(int _value);
+    void add(long int _value);
+    void add(bool _value);
+    void add(double _value);
+    void startArray(std::string _name);
+    void startArray();
+    void endArray();
+    void startObject(std::string _name);
+    void startObject();
+    void endObject();
+    static std::string success();
+    static std::string success(std::string _message);
+    static std::string failure(std::string _message);
+  private:
+    StringBuffer m_buffer;
+    Writer<StringBuffer> m_writer;
+    jsonResult_t m_resultType;
+  };
+
   class WebServerRequestHandlerJSON {
-  protected:
-    boost::shared_ptr<JSONObject> success();
-    boost::shared_ptr<JSONObject> success(boost::shared_ptr<JSONElement> _innerResult);
-    boost::shared_ptr<JSONObject> success(const std::string& _message);
-    boost::shared_ptr<JSONObject> failure(const std::string& _message = "");
   public:
     virtual std::string handleRequest(const RestfulRequest& _request,
                                       boost::shared_ptr<Session> _session);

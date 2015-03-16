@@ -22,9 +22,11 @@
 
 
 #include <iostream>
+#include <json.h>
 
 #include <boost/pointer_cast.hpp>
 #include <boost/assert.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "src/web/json.h"
 #include "src/web/webrequests.h"
@@ -35,51 +37,181 @@ namespace dss {
   public:
 
     void testOkIs(WebServerResponse& _response, bool _value) {
-      boost::shared_ptr<JSONElement> okElem = _response.getResponse()->getElementByName("ok");
-      if(okElem == NULL) {
-        BOOST_ASSERT(false);
-        return;
+      std::string result = _response.getResponse();
+      struct json_tokener* tok;
+
+      tok = json_tokener_new();
+      json_object* json_request = json_tokener_parse_ex(tok, result.c_str(), -1);
+
+      bool resultCode = false;
+      if (tok->err == json_tokener_success) {
+        json_object* obj;
+        if (json_object_object_get_ex(json_request, "ok", &obj)) {
+          resultCode = json_object_get_boolean(obj);
+        } else {
+          BOOST_ASSERT(false);
+        }
       }
-      JSONValue<bool>* val = dynamic_cast<JSONValue<bool>*>(okElem.get());
-      if(val == NULL) {
-        BOOST_ASSERT(false);
-        return;
-      }
-      BOOST_ASSERT(val->getValue() == _value);
+      json_object_put(json_request);
+      json_tokener_free(tok);
+
+      BOOST_ASSERT(resultCode == _value);
     }
 
-    boost::shared_ptr<JSONObject> getSubObject(const std::string& _name, boost::shared_ptr<JSONElement> _elem) {
-      boost::shared_ptr<JSONElement> resultElem = _elem->getElementByName(_name);
-      if(resultElem == NULL) {
-        BOOST_ASSERT(false);
+//    boost::shared_ptr<JSONObject> getSubObject(const std::string& _name, boost::shared_ptr<JSONElement> _elem) {
+//      boost::shared_ptr<JSONElement> resultElem = _elem->getElementByName(_name);
+//      if(resultElem == NULL) {
+//        BOOST_ASSERT(false);
+//      }
+//      boost::shared_ptr<JSONObject> result = boost::dynamic_pointer_cast<JSONObject>(resultElem);
+//      BOOST_ASSERT(result != NULL);
+//      return result;
+//    }
+//
+//    boost::shared_ptr<JSONObject> getResultObject(WebServerResponse& _response) {
+//      testOkIs(_response, true);
+//      struct json_tokener* tok;
+//
+//      tok = json_tokener_new();
+//      json_object* json_request = json_tokener_parse_ex(tok, _response.getResponse().c_str(), -1);
+//
+//      json_object* result;
+//      if (tok->err == json_tokener_success) {
+//        json_object* obj;
+//        if (json_object_object_get_ex(json_request, "result", &obj)) {
+//          result = json_object_object_get_ex(obj);
+//        } else {
+//          BOOST_ASSERT(false);
+//        }
+//      }
+//      json_object_put(json_request);
+//      json_tokener_free(tok);
+//      BOOST_ASSERT(result != NULL);
+//      return result;
+//    }
+
+    void checkPropertyEquals(const std::string& _name, const int& _expected, WebServerResponse& _response) {
+      struct json_tokener* tok;
+
+      tok = json_tokener_new();
+      json_object* json_request = json_tokener_parse_ex(tok, _response.getResponse().c_str(), -1);
+
+      if (tok->err == json_tokener_success) {
+        json_object* obj;
+        if (json_object_object_get_ex(json_request, "result", &obj)) {
+          json_object* cont;
+          if (json_object_object_get_ex(obj, _name.c_str(), &cont)) {
+            switch (json_object_get_type(cont)) {
+            case json_type_int:
+            {
+              int result = json_object_get_int(cont);
+              BOOST_CHECK_EQUAL(result, _expected);
+              break;
+            }
+            default:
+              BOOST_ASSERT(false);
+          }
+        } else {
+          BOOST_ASSERT(false);
+        }
+
       }
-      boost::shared_ptr<JSONObject> result = boost::dynamic_pointer_cast<JSONObject>(resultElem);
-      BOOST_ASSERT(result != NULL);
-      return result;
+      json_object_put(json_request);
+      json_tokener_free(tok);
+    }
+    }
+    void checkPropertyEquals(const std::string& _name, const std::string& _expected, WebServerResponse& _response) {
+      struct json_tokener* tok;
+
+      tok = json_tokener_new();
+      json_object* json_request = json_tokener_parse_ex(tok, _response.getResponse().c_str(), -1);
+
+      if (tok->err == json_tokener_success) {
+        json_object* obj;
+        if (json_object_object_get_ex(json_request, "result", &obj)) {
+          json_object* cont;
+          if (json_object_object_get_ex(obj, _name.c_str(), &cont)) {
+            switch (json_object_get_type(cont)) {
+            case json_type_string:
+            case json_type_array:
+            case json_type_object:
+            {
+              std::string result = json_object_get_string(cont);
+              BOOST_CHECK_EQUAL(result, _expected);
+              break;
+            }
+            default:
+              BOOST_ASSERT(false);
+            }
+          }
+        } else {
+          BOOST_ASSERT(false);
+        }
+
+      }
+      json_object_put(json_request);
+      json_tokener_free(tok);
+    }
+    void checkPropertyEquals(const std::string& _name, const bool& _expected, WebServerResponse& _response) {
+      struct json_tokener* tok;
+
+      tok = json_tokener_new();
+      json_object* json_request = json_tokener_parse_ex(tok, _response.getResponse().c_str(), -1);
+
+      if (tok->err == json_tokener_success) {
+        json_object* obj;
+        if (json_object_object_get_ex(json_request, "result", &obj)) {
+          json_object* cont;
+          if (json_object_object_get_ex(obj, _name.c_str(), &cont)) {
+            switch (json_object_get_type(cont)) {
+            case json_type_boolean:
+            {
+              bool result = json_object_get_boolean(cont);
+              BOOST_CHECK_EQUAL(result, _expected);
+              break;
+            }
+            default:
+              BOOST_ASSERT(false);
+            }
+          }
+        } else {
+          BOOST_ASSERT(false);
+        }
+
+      }
+      json_object_put(json_request);
+      json_tokener_free(tok);
     }
 
-    boost::shared_ptr<JSONObject> getResultObject(WebServerResponse& _response) {
-      testOkIs(_response, true);
-      boost::shared_ptr<JSONObject> result = getSubObject("result", _response.getResponse());
-      BOOST_ASSERT(result != NULL);
-      return result;
-    }
+    void checkPropertyEquals(const std::string& _name, const double& _expected, WebServerResponse& _response) {
+      struct json_tokener* tok;
 
-    template<class t>
-    void checkPropertyEquals(const std::string& _name, const t& _expected, boost::shared_ptr<JSONObject> _obj) {
-      boost::shared_ptr<JSONElement> elem = _obj->getElementByName(_name);
-      if(elem == NULL) {
-        std::cout << "No element found " << _name << std::endl;
-        BOOST_CHECK(false);
-        return;
+      tok = json_tokener_new();
+      json_object* json_request = json_tokener_parse_ex(tok, _response.getResponse().c_str(), -1);
+
+      if (tok->err == json_tokener_success) {
+        json_object* obj;
+        if (json_object_object_get_ex(json_request, "result", &obj)) {
+          json_object* cont;
+          if (json_object_object_get_ex(obj, _name.c_str(), &cont)) {
+            switch (json_object_get_type(cont)) {
+            case json_type_double:
+            {
+              double result = json_object_get_double(cont);
+              BOOST_CHECK_EQUAL(result, _expected);
+              break;
+            }
+            default:
+              BOOST_ASSERT(false);
+            }
+          }
+        } else {
+          BOOST_ASSERT(false);
+        }
+
       }
-      JSONValue<t>* val = dynamic_cast<JSONValue<t>*>(elem.get());
-      if(val == NULL) {
-        std::cout << "Not a value" << std::endl;
-        BOOST_CHECK(false);
-        return;
-      }
-      BOOST_CHECK_EQUAL(val->getValue(), _expected);
+      json_object_put(json_request);
+      json_tokener_free(tok);
     }
   }; // WebFixture
 

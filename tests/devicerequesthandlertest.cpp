@@ -160,39 +160,30 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetSpec, Fixture) {
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("device/getSpec", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("functionID", m_FunctionID, result);
-  checkPropertyEquals("revisionID", m_RevisionID, result);
-  checkPropertyEquals("productID", m_ProductID, result);
+  checkPropertyEquals("functionID", m_FunctionID, response);
+  checkPropertyEquals("revisionID", m_RevisionID, response);
+  checkPropertyEquals("productID", m_ProductID, response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetGroups, Fixture) {
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("device/getGroups", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  boost::shared_ptr<JSONElement> groupsArr = result->getElementByName("groups");
-  BOOST_CHECK_EQUAL(groupsArr->getElementCount(), 1);
-  boost::shared_ptr<JSONObject> groupObj = boost::dynamic_pointer_cast<JSONObject>(groupsArr->getElement(0));
-  BOOST_CHECK(groupObj != NULL);
-  checkPropertyEquals("id", m_ValidGroupID, groupObj);
-  checkPropertyEquals("name", std::string("yellow"), groupObj);
+  BOOST_CHECK_EQUAL(response.getResponse(), "{\"result\":{\"groups\":[{\"id\":"+intToString(m_ValidGroupID)+",\"name\":\"yellow\"}]},\"ok\":true}");
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetState, Fixture) {
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("device/getState", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("isOn", false, result);
+  checkPropertyEquals("isOn", false, response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetName, Fixture) {
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("device/getName", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result = getResultObject(response);
-  checkPropertyEquals("name", m_ValidName, result);
+  checkPropertyEquals("name", m_ValidName, response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceSetNameMissingNewName, Fixture) {
@@ -213,8 +204,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceSetName, Fixture) {
   RestfulRequest req2("device/getName", params);
   WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
 
-  boost::shared_ptr<JSONObject> result = getResultObject(response2);
-  checkPropertyEquals("name", kNewName, result);
+  checkPropertyEquals("name", kNewName, response2);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceAddTagMissingTag, Fixture) {
@@ -249,8 +239,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
 
   // check that tag doesn't exist
   WebServerResponse response = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
-  result = getResultObject(response);
-  checkPropertyEquals("hasTag", false, result);
+  checkPropertyEquals("hasTag", false, response);
 
   // add tag
   WebServerResponse response2 = m_pHandler->jsonHandleRequest(reqAddTag, boost::shared_ptr<Session>());
@@ -258,8 +247,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
 
   // check that tag does exist
   WebServerResponse response3 = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
-  result = getResultObject(response3);
-  checkPropertyEquals("hasTag", true, result);
+  checkPropertyEquals("hasTag", true, response3);
 
   // remove tag
   WebServerResponse response4 = m_pHandler->jsonHandleRequest(reqRemoveTag, boost::shared_ptr<Session>());
@@ -267,8 +255,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
 
   // check that tag doesn't exist
   WebServerResponse response5 = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
-  result = getResultObject(response5);
-  checkPropertyEquals("hasTag", false, result);
+  checkPropertyEquals("hasTag", false, response5);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
@@ -277,10 +264,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result;
 
-  result = getResultObject(response);
-  boost::shared_ptr<JSONElement> tagsArray = result->getElementByName("tags");
-  BOOST_CHECK(tagsArray != NULL);
-  BOOST_CHECK_EQUAL(tagsArray->getElementCount(), 0);
+  checkPropertyEquals("tags", std::string("[ ]"), response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
@@ -291,12 +275,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result;
 
-  result = getResultObject(response);
-  boost::shared_ptr<JSONElement> tagsArray = result->getElementByName("tags");
-  BOOST_CHECK(tagsArray != NULL);
-  BOOST_CHECK_EQUAL(tagsArray->getElementCount(), 1);
-  boost::shared_ptr<JSONValue<std::string> > strValue = boost::dynamic_pointer_cast<JSONValue<std::string> >(tagsArray->getElement(0));
-  BOOST_CHECK_EQUAL(strValue->getValue(), kTagName);
+  checkPropertyEquals("tags", "[ \""+kTagName+"\" ]", response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testEnable, Fixture) {
