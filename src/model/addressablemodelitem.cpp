@@ -91,6 +91,23 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->callScene(this, _origin, _category, _sceneNr, _token, _force);
   } // callScene
 
+  void AddressableModelItem::callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
+    if (!SceneAccess::checkAccess(this, _category)) {
+      Logger::getInstance()->log("AddressableModelItem: callScene blocked", lsDebug);
+      return;
+    }
+    if (_origin == coJSON) {
+      if (!SceneAccess::checkStates(this, _sceneNr)) {
+        Logger::getInstance()->log("AddressableModelItem: callSceneMin from web service blocked", lsDebug);
+        return;
+      }
+    }
+    m_pApartment->getActionRequestInterface()->callSceneMin(this, _origin, _category, _sceneNr, _token);
+  } // callSceneMin
+
   void AddressableModelItem::saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
