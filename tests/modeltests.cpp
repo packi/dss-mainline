@@ -992,7 +992,7 @@ public:
   virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) {
     dsuid_t dsuid;
     SetNullDsuid(dsuid);
-	  return dsuid;
+    return dsuid;
   }
   virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType, uint16_t *_sensorValue, uint32_t *_sensorAge) {
   }
@@ -1012,6 +1012,8 @@ public:
       m_Log += intToString(pDevice->getShortAddress());
     }
     m_Log += "," + intToString(scene) + ")";
+  }
+  virtual void callSceneMin(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token) {
   }
   virtual void saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t scene, const std::string _token) {
   }

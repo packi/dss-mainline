@@ -78,6 +78,32 @@ namespace dss {
     }
   }
 
+  void DSActionRequest::callSceneMin(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token) {
+    int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+
+    if(pGroup) {
+      ret = ZoneGroupActionRequest_action_call_scene_min(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
+      DSBusInterface::checkBroadcastResultCode(ret);
+      if (m_pBusEventSink) {
+        dsuid_t nullid;
+        SetNullDsuid(nullid);
+        m_pBusEventSink->onGroupCallScene(NULL, nullid, pGroup->getZoneID(),
+                                          pGroup->getID(), 0, _category,
+                                          _scene, _origin, _token, false);
+      } else if(pDevice) {
+        // TODO extend dsm api, dsm and vdsm to support command
+        // DeviceActionRequest_action_call_sceneMin(...)
+      }
+    }
+  }
+
   void DSActionRequest::saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t _scene, const std::string _token) {
     int ret;
 
