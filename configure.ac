@@ -476,7 +476,11 @@ PKG_CHECK_MODULES([OSSP_UUID], [ossp-uuid], [],
 
 PKG_CHECK_MODULES([RAPIDJSON], [RapidJSON], [],
     [
-        AC_MSG_ERROR([$RAPIDJSON_PKG_ERRORS])
+        AC_MSG_WARN([$RAPIDJSON_PKG_ERRORS])
+        AC_CHECK_HEADERS([rapidjson/rapidjson.h], [],
+        [
+            AC_MSG_ERROR([Could not find required header rapidjson.h!])
+        ])
     ])
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
