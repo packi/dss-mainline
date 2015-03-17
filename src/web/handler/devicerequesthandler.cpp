@@ -588,9 +588,6 @@ namespace dss {
       json.add("buttonInputMode", pDevice->getButtonInputMode());
       json.endObject();
 
-      json.endObject();
-      json.endObject();
-
       if (value == BUTTONINPUT_1WAY) {
         return json.successJSON();
       }
