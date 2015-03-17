@@ -96,6 +96,20 @@ namespace dss {
         return JSONWriter::failure("Invalid sceneNumber: '" + sceneStr + "'");
       }
       return JSONWriter::success();
+    } else if (_request.getMethod() == "callSceneMin") {
+      std::string sceneStr = _request.getParameter("sceneNumber");
+      int sceneID = strToIntDef(sceneStr, -1);
+      SceneAccessCategory category = SceneAccess::stringToCategory(categoryStr);
+      if(sceneID != -1) {
+        if(SceneHelper::isInRange(sceneID, 0)) {
+          _interface->callSceneMin(coJSON, category, sceneID, sessionToken);
+        } else {
+          return JSONWriter::failure("Parameter 'sceneNumber' out of bounds ('" + sceneStr + "')");
+        }
+      } else {
+        return JSONWriter::failure("Invalid sceneNumber: '" + sceneStr + "'");
+      }
+      return JSONWriter::success();
     } else if(_request.getMethod() == "saveScene") {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
@@ -179,6 +193,7 @@ namespace dss {
         || _request.getMethod() == "decreaseValue"
         || _request.getMethod() == "setValue"
         || _request.getMethod() == "callScene"
+        || _request.getMethod() == "callSceneMin"
         || _request.getMethod() == "saveScene"
         || _request.getMethod() == "undoScene"
         || _request.getMethod() == "getConsumption"
