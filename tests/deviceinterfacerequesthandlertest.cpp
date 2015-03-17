@@ -61,6 +61,9 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");
     }
+    virtual void callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
+      functionCalled("callSceneMin(" + intToString(_sceneNr) + ")");
+    }
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
     }

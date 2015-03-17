@@ -62,6 +62,13 @@ namespace dss {
     }
   } // callScene
 
+  void NonAddressableModelItem::callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
+      item->callSceneMin(_origin, _category, _sceneNr, _token);
+    }
+  } // callSceneMin
+
   void NonAddressableModelItem::saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {

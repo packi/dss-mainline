@@ -64,6 +64,10 @@ namespace dss {
      * The output value will be set according to the scene lookup table in the device.
      */
     virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force = false) = 0;
+    /** Sets the min Scene on the device.
+     * The output value will be set according to the scene lookup table in the device.
+     */
+    virtual void callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) = 0;
     /** Stores the current output value into the scene lookup table.
      * The next time scene _sceneNr gets called the output will be set according to the lookup table.
      */
