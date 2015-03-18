@@ -310,9 +310,12 @@ bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
   json.startArray("eventsList");
   for (; begin != end; begin++) {
     try {
+      json.startObject();
       MsHub::toJson(*begin, json);
+      json.endObject();
       ct++;
     } catch (DSSException& e) {
+      json.endObject();
       log(e.what(), lsWarning);
     }
   }
