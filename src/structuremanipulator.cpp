@@ -657,6 +657,13 @@ namespace dss {
     if (oldGroupId != newGroup->getID()) {
       device->setDeviceJokerGroup(newGroup->getID());
       modified = true;
+
+      if ((newGroup->getID() != ColorIDBlack) &&
+          device->hasInput() &&
+          (device->getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
+        device->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+        device->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+      }
     }
 
     /* check if device is also in a colored user group */
