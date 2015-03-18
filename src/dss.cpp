@@ -475,6 +475,8 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterWebservicePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterStateSensorPlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterSensorMonitorPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterHeatingMonitorPlugin(m_pEventInterpreter.get());

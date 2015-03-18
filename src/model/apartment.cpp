@@ -515,6 +515,18 @@ namespace dss {
     return m_States;
   } // getStates
 
+  std::vector<boost::shared_ptr<State> > Apartment::getStates(const std::string& _filter) const {
+    std::vector<boost::shared_ptr<State> > result;
+    regex_t stateNameRegex;
+    regcomp(&stateNameRegex, _filter.c_str(), REG_EXTENDED);
+    foreach(boost::shared_ptr<State> state, m_States) {
+      if (0 == regexec(&stateNameRegex, state->getName().c_str(), (size_t)0, NULL, 0)) {
+        result.push_back(state);
+      }
+    }
+    return result;
+  } // getStates
+
   void Apartment::removeState(const std::string& _name) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     if(m_pPropertyNode != NULL) {
