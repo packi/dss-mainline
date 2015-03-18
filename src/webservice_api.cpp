@@ -310,9 +310,12 @@ bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
   json.startArray("eventsList");
   for (; begin != end; begin++) {
     try {
+      json.startObject();
       MsHub::toJson(*begin, json);
+      json.endObject();
       ct++;
     } catch (DSSException& e) {
+      json.endObject();
       log(e.what(), lsWarning);
     }
   }
@@ -842,12 +845,16 @@ bool WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
   json.startArray("Events");
   for (; begin != end; begin++) {
     try {
+      json.startObject();
       DsHub::toJson(*begin, json);
+      json.endObject();
       ct++;
     } catch (DSSException& e) {
+      json.endObject();
       log(e.what(), lsWarning);
     }
   }
+  json.endArray();
 
   if (ct == 0) {
     return false;
