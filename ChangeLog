@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.30.5	18.03.2015
+	* fix corrupted property tree values, #9452
+	* fix issue when setting UMR button to a color, #9395
+
 v1.30.4	10.03.2015
 	* remove RRD metering databeses if time difference is to big, #7575
 	* add EmergencyValue to apartment/getTemperatureControlConfig, #9290
