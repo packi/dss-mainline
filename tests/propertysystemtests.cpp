@@ -83,7 +83,6 @@ public:
 
 #include "src/base.h"
 #include "src/propertysystem.h"
-#include "src/web/json.h"
 #include "src/propertyquery.h"
 
 using namespace dss;

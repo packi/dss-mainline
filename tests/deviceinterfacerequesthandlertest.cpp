@@ -24,11 +24,11 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/make_shared.hpp>
 #include "webfixture.h"
 
 #include "src/model/deviceinterface.h"
 #include "src/web/handler/deviceinterfacerequesthandler.h"
-#include "src/web/json.h"
 #include "src/session.h"
 #include "src/model/scenehelper.h"
 
