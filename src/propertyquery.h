@@ -20,6 +20,9 @@
 
 */
 
+#ifndef PROPERTYQUERY_H_INCLUDED
+#define PROPERTYQUERY_H_INCLUDED
+
 #include <string>
 #include <vector>
 
@@ -115,3 +118,5 @@ namespace dss {
   }; // PropertyQuery
 
 } // namespace dss
+
+#endif
