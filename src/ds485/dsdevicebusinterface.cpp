@@ -37,6 +37,8 @@
 #include "src/model/device.h"
 #include "src/model/modelevent.h"
 #include "src/model/modelmaintenance.h"
+#include "src/model/modulator.h"
+#include "src/model/apartment.h"
 #include "dss.h"
 
 namespace dss {
@@ -98,9 +100,18 @@ namespace dss {
       return;
     }
 
-    int ret = DeviceConfig_set(m_DSMApiHandle, _device.getDSMeterDSID(),
-                               _device.getShortAddress(), _configClass,
-                               _configIndex, _value);
+    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment()
+                                        .getDSMeterByDSID(_device.getDSMeterDSID());
+    int ret;
+    if (pMeter->getApiVersion() >= 0x301) {
+    ret = DeviceConfig_set_sync(m_DSMApiHandle, _device.getDSMeterDSID(),
+                                _device.getShortAddress(), _configClass,
+                                _configIndex, _value, 30);
+    } else {
+      ret = DeviceConfig_set(m_DSMApiHandle, _device.getDSMeterDSID(),
+                             _device.getShortAddress(), _configClass,
+                             _configIndex, _value);
+    }
     DSBusInterface::checkResultCode(ret);
   } // setDeviceConfig
 

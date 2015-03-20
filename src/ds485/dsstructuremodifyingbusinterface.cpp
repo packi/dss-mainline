@@ -30,6 +30,8 @@
 #include "dsstructuremodifyingbusinterface.h"
 
 #include "dsbusinterface.h"
+#include "src/model/modulator.h"
+#include "src/model/apartment.h"
 
 #define BROADCAST_SLEEP_MICROSECONDS    50000 // 50ms
 
@@ -42,7 +44,13 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = DeviceProperties_set_zone(m_DSMApiHandle, _dsMeterID, _deviceID, _zoneID);
+    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment().getDSMeterByDSID(_dsMeterID);
+    int ret;
+    if (pMeter->getApiVersion() >= 0x301) {
+      ret = DeviceProperties_set_zone_sync(m_DSMApiHandle, _dsMeterID, _deviceID, _zoneID, 30);
+    } else {
+      ret = DeviceProperties_set_zone(m_DSMApiHandle, _dsMeterID, _deviceID, _zoneID);
+    }
     DSBusInterface::checkResultCode(ret);
   } // setZoneID
 
