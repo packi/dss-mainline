@@ -206,22 +206,12 @@ namespace dss {
       void logZoneSensorValue(boost::shared_ptr<ScriptLogger> _logger,
                               boost::shared_ptr<Zone> _zone,
                               int _groupId);
-      void logStateChangeScript(boost::shared_ptr<ScriptLogger> _logger,
-                                std::string _statename, std::string _state,
-                                std::string _value,
-                                std::string _origin_device_id);
-      void logStateChangeApartment(boost::shared_ptr<ScriptLogger> _logger,
-                                   std::string _statename, std::string _state,
-                                   std::string _value,
-                                   std::string _origin_device_id);
-      void logStateChangeDevice(boost::shared_ptr<ScriptLogger> _logger,
-                                std::string _statename, std::string _state,
-                                std::string _value,
-                                boost::shared_ptr<const Device> _device);
-      void logStateChangeGroup(boost::shared_ptr<ScriptLogger> _logger,
-                               std::string _statename, std::string _state,
-                               std::string _value,
-                               int _group_id, int _zone_id);
+      void logStateChange(boost::shared_ptr<ScriptLogger> _logger,
+          boost::shared_ptr<const State> _st,
+          const std::string& _statename,
+          const std::string& _state,
+          const std::string& _value,
+          const std::string& _origin_device_id);
 
       void model_ready(boost::shared_ptr<ScriptLogger> _logger);
       void callScene(boost::shared_ptr<ScriptLogger> _logger);
