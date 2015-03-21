@@ -425,16 +425,17 @@ namespace dss {
   } // handleDeferredModelEvents
 
   bool ModelMaintenance::handleModelEvents() {
-
-    if (m_ModelEvents.empty()) {
-      return m_NewModelEvent.waitFor(m_EventTimeoutMS);
-    }
-
     m_ModelEvents_t::auto_type event;
+
     {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+      if (m_ModelEvents.empty()) {
+        lock.unlock();
+        return m_NewModelEvent.waitFor(m_EventTimeoutMS);
+      }
       event = m_ModelEvents.pop_front();
     }
+
     ModelEventWithDSID* pEventWithDSID =
       dynamic_cast<ModelEventWithDSID*>(event.get());
     ModelEventWithStrings* pEventWithStrings =
