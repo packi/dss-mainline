@@ -425,18 +425,20 @@ namespace dss {
   } // handleDeferredModelEvents
 
   bool ModelMaintenance::handleModelEvents() {
-    ModelEvent *event;
-    bool eraseEventFromList = true;
 
     if (m_ModelEvents.empty()) {
       return m_NewModelEvent.waitFor(m_EventTimeoutMS);
     }
-    event = &m_ModelEvents.front();
 
+    m_ModelEvents_t::auto_type event;
+    {
+      boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+      event = m_ModelEvents.pop_front();
+    }
     ModelEventWithDSID* pEventWithDSID =
-      dynamic_cast<ModelEventWithDSID*>(event);
+      dynamic_cast<ModelEventWithDSID*>(event.get());
     ModelEventWithStrings* pEventWithStrings =
-      dynamic_cast<ModelEventWithStrings*>(event);
+      dynamic_cast<ModelEventWithStrings*>(event.get());
 
     switch (event->getEventType()) {
     case ModelEvent::etNewDevice:
@@ -533,7 +535,6 @@ namespace dss {
       break;
     case ModelEvent::etModelDirty:
       eraseModelEventsFromQueue(ModelEvent::etModelDirty);
-      eraseEventFromList = false;
       writeConfiguration();
       if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
         raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
@@ -541,7 +542,6 @@ namespace dss {
       break;
     case ModelEvent::etModelOperationModeChanged:
       eraseModelEventsFromQueue(ModelEvent::etModelOperationModeChanged);
-      eraseEventFromList = false;
       writeConfiguration();
       break;
     case ModelEvent::etLostDSMeter:
@@ -691,11 +691,6 @@ namespace dss {
       break;
     }
 
-    if (eraseEventFromList) {
-      m_ModelEventsMutex.lock();
-      m_ModelEvents.erase(m_ModelEvents.begin());
-      m_ModelEventsMutex.unlock();
-    }
     return true;
   } // handleModelEvents
 
