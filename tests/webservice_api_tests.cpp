@@ -21,7 +21,6 @@
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
-#include "web/json.h"
 #include "tests/dss_life_cycle.h"
 #include "src/web/webrequests.h"
 

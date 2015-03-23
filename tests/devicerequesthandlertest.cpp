@@ -235,7 +235,6 @@ BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
   RestfulRequest reqHasTag("device/hasTag", params);
   RestfulRequest reqAddTag("device/addTag", params);
   RestfulRequest reqRemoveTag("device/removeTag", params);
-  boost::shared_ptr<JSONObject> result;
 
   // check that tag doesn't exist
   WebServerResponse response = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
@@ -262,7 +261,6 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("device/getTags", params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result;
 
   checkPropertyEquals("tags", std::string("[ ]"), response);
 }
@@ -273,7 +271,6 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
   RestfulRequest req("device/getTags", params);
   m_pApartment->getDeviceByDSID(m_ValidDSUID)->addTag(kTagName);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-  boost::shared_ptr<JSONObject> result;
 
   checkPropertyEquals("tags", "[ \""+kTagName+"\" ]", response);
 }

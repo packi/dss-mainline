@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/lambda/lambda.hpp>
+#include <boost/make_shared.hpp>
 
 #include "webfixture.h"
 
