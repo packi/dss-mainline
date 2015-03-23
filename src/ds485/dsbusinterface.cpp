@@ -240,185 +240,185 @@ namespace dss {
       // register callbacks
       callback_struct.function = (void*)DSBusInterface::busStateCallback;
       callback_struct.arg = this;
-      DsmApiSetBusStateCallback(m_dsmApiHandle, &callback_struct);
+      DsmApiSetBusStateCallback(m_dsmApiHandle, &callback_struct, NULL);
       callback_struct.function = (void*)DSBusInterface::busChangeCallback;
       callback_struct.arg = this;
-      DsmApiSetBusChangeCallback(m_dsmApiHandle, &callback_struct);
+      DsmApiSetBusChangeCallback(m_dsmApiHandle, &callback_struct, NULL);
 
       EventDeviceAccessibility_on_event_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
       callback_struct.function = (void*)evDevAccessOn;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY,
-                        EVENT_DEVICE_ACCESSIBILITY_ON, &callback_struct);
+                        EVENT_DEVICE_ACCESSIBILITY_ON, &callback_struct, NULL);
       EventDeviceAccessibility_off_event_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
       callback_struct.function = (void*)evDevAccessOff;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY,
-                        EVENT_DEVICE_ACCESSIBILITY_OFF, &callback_struct);
+                        EVENT_DEVICE_ACCESSIBILITY_OFF, &callback_struct, NULL);
       EventTestDevicePresence_event_callback_t evDevPresence = DSBusInterface::eventDevicePresenceCallback;
       callback_struct.function = (void*)evDevPresence;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_TEST_DEVICE_PRESENCE,
-                        0, &callback_struct);
+                        0, &callback_struct, NULL);
       EventDeviceModelChanged_event_callback_t evDevModelChanged = DSBusInterface::eventDataModelChangedCallback;
       callback_struct.function = (void*)evDevModelChanged;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_MODEL_CHANGED,
-                        0, &callback_struct);
+                        0, &callback_struct, NULL);
       DeviceConfig_set_request_callback_t evDevConfigSet = DSBusInterface::deviceConfigSetCallback;
       callback_struct.function = (void*)evDevConfigSet;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST, DEVICE_CONFIG,
-                        DEVICE_CONFIG_SET, &callback_struct);
+                        DEVICE_CONFIG_SET, &callback_struct, NULL);
 
       ZoneGroupActionRequest_action_call_scene_request_callback_t handleBusCall = DSBusInterface::handleBusCallSceneCallback;
       callback_struct.function = (void*)handleBusCall;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
-                        &callback_struct);
+                        &callback_struct, NULL);
       ZoneGroupActionRequest_action_force_call_scene_request_callback_t handleBusCallForced = DSBusInterface::handleBusCallSceneForcedCallback;
       callback_struct.function = (void*)handleBusCallForced;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       ZoneGroupActionRequest_action_undo_scene_request_callback_t handleBusUndo = DSBusInterface::handleBusUndoSceneCallback;
       callback_struct.function = (void*)handleBusUndo;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_UNDO_SCENE,
-                        &callback_struct);
+                        &callback_struct, NULL);
       ZoneGroupActionRequest_action_undo_scene_number_request_callback_t handleBusUndoNumber = DSBusInterface::handleBusUndoSceneNumberCallback;
       callback_struct.function = (void*)handleBusUndoNumber;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_UNDO_SCENE_NUMBER,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       ZoneGroupActionRequest_action_blink_request_callback_t handleBusBlink = DSBusInterface::handleBusBlinkCallback;
       callback_struct.function = (void*)handleBusBlink;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_BLINK,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
       callback_struct.function = (void*)localActionCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
-                        EVENT_DEVICE_LOCAL_ACTION, 0, &callback_struct);
+                        EVENT_DEVICE_LOCAL_ACTION, 0, &callback_struct, NULL);
 
       EventDeviceAction_event_callback_t deviceActionCallback = DSBusInterface::handleDeviceActionCallback;
       callback_struct.function = (void*)deviceActionCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
-                        EVENT_DEVICE_ACTION, 0, &callback_struct);
+                        EVENT_DEVICE_ACTION, 0, &callback_struct, NULL);
 
       DeviceActionRequest_action_call_scene_request_callback_t deviceCallSceneCallback = DSBusInterface::handleDeviceCallSceneCallback;
       callback_struct.function = (void*)deviceCallSceneCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
-                        &callback_struct);
+                        &callback_struct, NULL);
       DeviceActionRequest_action_force_call_scene_request_callback_t deviceCallSceneForcedCallback = DSBusInterface::handleDeviceCallSceneForcedCallback;
       callback_struct.function = (void*)deviceCallSceneForcedCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_FORCE_CALL_SCENE,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       DeviceActionRequest_action_blink_request_callback_t deviceBlinkCallback = DSBusInterface::handleDeviceBlinkCallback;
       callback_struct.function = (void*)deviceBlinkCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_BLINK,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       DeviceProperties_set_name_request_callback_t deviceSetNameCallback = DSBusInterface::handleDeviceSetNameCallback;
       callback_struct.function = (void*)deviceSetNameCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DEVICE_PROPERTIES, DEVICE_PROPERTIES_SET_NAME,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       dSMProperties_set_name_request_callback_t dSMSetNameCallback = DSBusInterface::handleDsmSetNameCallback;
       callback_struct.function = (void*)dSMSetNameCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DSM_PROPERTIES, DSM_PROPERTIES_SET_NAME,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
       callback_struct.function = (void*)meteringCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
                         CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_WS_GET,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       EventDeviceSensor_event_event_callback_t sensorEventCallback = DSBusInterface::handleSensorEventCallback;
       callback_struct.function = (void*)sensorEventCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_EVENT,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       EventDeviceSensor_binaryInputEvent_event_callback_t binaryInputCallback = DSBusInterface::handleBinaryInputEventCallback;
       callback_struct.function = (void*)binaryInputCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_BINARYINPUTEVENT,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       EventDeviceSensor_value_event_callback_t sensorValueCallback = DSBusInterface::handleSensorValueCallback;
       callback_struct.function = (void*)sensorValueCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_VALUE,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       ZoneGroupSensorPush_request_callback_t sensorValueZoneCallback = DSBusInterface::handleZoneSensorValueCallback;
       callback_struct.function = (void*)sensorValueZoneCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         ZONE_GROUP_SENSOR_PUSH, 0,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       ControllerHeating_set_config_request_callback_t heatingConfigCallback = DSBusInterface::handleHeatingControllerConfigCallback;
       callback_struct.function = (void*)heatingConfigCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         CONTROLLER_HEATING, CONTROLLER_HEATING_SET_CONFIG,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       ControllerHeating_set_operation_modes_request_callback_t heatingOperationModesCallback = DSBusInterface::handleHeatingControllerOperationModesCallback;
       callback_struct.function = (void*)heatingOperationModesCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         CONTROLLER_HEATING, CONTROLLER_HEATING_SET_OPERATION_MODES,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       ControllerHeating_set_state_request_callback_t heatingStateCallback = DSBusInterface::handleHeatingControllerStateCallback;
       callback_struct.function = (void*)heatingStateCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         CONTROLLER_HEATING, CONTROLLER_HEATING_SET_STATE,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       EventHeatingControllerState_event_callback_t heatingStateEventCallback = DSBusInterface::handleHeatingControllerStateEventCallback;
       callback_struct.function = (void*)heatingStateEventCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_HEATING_CONTROLLER_STATE, 0,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       dSMProperties_set_flags_request_callback_t dSMSetFlagsCallback = DSBusInterface::handleDsmSetFlagsCallback;
       callback_struct.function = (void*)dSMSetFlagsCallback;
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DSM_PROPERTIES, DSM_PROPERTIES_SET_FLAGS,
-                        &callback_struct);
+                        &callback_struct, NULL);
 
       m_dsmApiReady = true;
     }
