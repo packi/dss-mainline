@@ -1299,6 +1299,81 @@ Sample: {
     }
   }
 
+  EventInterpreterStateSensorPlugin::EventInterpreterStateSensorPlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterStateSensorPlugin", _pInterpreter) {}
+
+  __DEFINE_LOG_CHANNEL__(EventInterpreterStateSensorPlugin, lsInfo);
+
+  void EventInterpreterStateSensorPlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription(EventName::DeviceSensorValue,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription(EventName::ZoneSensorValue,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterStateSensorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+
+    if (!DSS::hasInstance()) {
+      return;
+    }
+
+    if (_event.getName() == EventName::DeviceSensorValue && _event.getRaisedAtDevice()) {
+      boost::shared_ptr<const DeviceReference> pDevRev = _event.getRaisedAtDevice();
+
+      std::string strType = _event.getPropertyByName("sensorType");
+      std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
+
+      int sensorType = 255;
+      if (!strType.empty()) {
+        sensorType = strToInt(strType);
+      } else {
+        try {
+          std::string strIndex = _event.getPropertyByName("sensorIndex");
+          boost::shared_ptr<DeviceSensor_t> pSensor = pDevRev->getDevice()->getSensor(strToInt(strIndex));
+          sensorType = pSensor->m_sensorType;
+        } catch (ItemNotFoundException& ex) {}
+      }
+
+      std::string sName = "dev." + dsuid2str(pDevRev->getDSID()) + ".type" + strType + ".*";
+      std::vector<boost::shared_ptr<State> > sList = DSS::getInstance()->getApartment().getStates(sName);
+      foreach(boost::shared_ptr<State> state, sList) {
+        double fValue = strToDouble(sensorValueFloat);
+        boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (state);
+        pSensor->newValue(coDsmApi, fValue);
+      }
+      return;
+    }
+
+    if (_event.getName() == EventName::ZoneSensorValue && _event.getRaisedAtGroup()) {
+      boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
+
+      std::string strType = _event.getPropertyByName("sensorType");
+      std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
+
+      std::string sName = "zone.zone" + intToString(pGroup->getZoneID()) +
+          ".group" + intToString(pGroup->getID()) +
+          ".type" + strType + ".*";
+      std::vector<boost::shared_ptr<State> > sList = DSS::getInstance()->getApartment().getStates(sName);
+      foreach(boost::shared_ptr<State> state, sList) {
+        double fValue = strToDouble(sensorValueFloat);
+        boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (state);
+        pSensor->newValue(coDsmApi, fValue);
+      }
+      return;
+    }
+  }
+
   EventInterpreterHeatingMonitorPlugin::EventInterpreterHeatingMonitorPlugin(EventInterpreter* _pInterpreter)
     : EventInterpreterPlugin("EventInterpreterHeatingMonitorPlugin", _pInterpreter) {}
 

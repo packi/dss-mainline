@@ -33,6 +33,7 @@
 #include "model/state.h"
 #include "model/device.h"
 #include "model/group.h"
+#include "model/zone.h"
 #include "model/apartment.h"
 #include "model/modelconst.h"
 #include "modelmaintenance.h"
@@ -119,9 +120,16 @@ namespace dss {
 
   void State::publishToPropertyTree() {
     removeFromPropertyTree();
-    std::string basepath = "/usr/states/";
-    if (m_type == StateType_Script) {
-      basepath = "/usr/addon-states/" + m_serviceName + "/";
+    std::string basepath;
+    switch (m_type) {
+      case StateType_Script:
+      case StateType_SensorDevice:
+      case StateType_SensorZone:
+        basepath = "/usr/addon-states/" + m_serviceName + "/";
+        break;
+      default:
+        basepath = "/usr/states/";
+        break;
     }
     if (m_pPropertyNode == NULL && DSS::hasInstance()) {
       if (DSS::getInstance()->getPropertySystem().getProperty(basepath + m_name) != NULL) {
@@ -304,6 +312,88 @@ namespace dss {
 
   void State::setValueRange(std::list<std::string> _values) {
     m_values = _values;
+  }
+
+  void StateSensor::parseCondition(const std::string& _input, eValueComparator& _comp, double& _threshold) {
+    _comp = eComp_undef;
+    _threshold = 0;
+    if (_input.empty()) {
+      return;
+    }
+    std::vector<std::string> tokens = splitString(_input, ';', true);
+    if (tokens[0].length() > 0) {
+      if (tokens[0][0] == '>') {
+        _comp = eComp_higher;
+      } else if (tokens[0][0] == '<') {
+        _comp = eComp_lower;
+      }
+    }
+    try {
+      _threshold = strToDouble(tokens[1]);
+    } catch(std::invalid_argument& ex) {
+    }
+  }
+
+  StateSensor::StateSensor(const std::string& _identifier, boost::shared_ptr<Device> _device, int _sensorType,
+      const std::string& _activateCondition, const std::string& _deactivateCondition)
+  : State(StateType_SensorDevice, "dev." + dsuid2str(_device->getDSID()) + ".type" + intToString(_sensorType), _identifier),
+    m_activateCondition(_activateCondition),
+    m_deactivateCondition(_deactivateCondition)
+  {
+    parseCondition(m_activateCondition, m_activateComparator, m_activateValue);
+    parseCondition(m_deactivateCondition, m_deactivateComparator, m_deactivateValue);
+    setProviderDevice(_device);
+  }
+
+  StateSensor::StateSensor(const std::string& _identifier, boost::shared_ptr<Group> _group, int _sensorType,
+      const std::string& _activateCondition, const std::string& _deactivateCondition)
+  : State(StateType_SensorZone,
+      "zone.zone" + intToString(_group->getZoneID()) +
+      ".group"  + intToString(_group->getID()) +
+      ".type" + intToString(_sensorType), _identifier),
+    m_activateCondition(_activateCondition),
+    m_deactivateCondition(_deactivateCondition)
+  {
+    parseCondition(m_activateCondition, m_activateComparator, m_activateValue);
+    parseCondition(m_deactivateCondition, m_deactivateComparator, m_deactivateValue);
+    setProviderGroup(_group);
+  }
+
+  void StateSensor::newValue(const callOrigin_t _origin, double _value) {
+    bool cond0, cond1;
+
+    if (m_activateComparator == eComp_lower) {
+      cond1 = _value < m_activateValue;
+    } else if (m_activateComparator == eComp_higher) {
+      cond1 = _value > m_activateValue;
+    } else {
+      cond1 = false;
+    }
+    if (m_deactivateComparator == eComp_lower) {
+      cond0 = _value < m_deactivateValue;
+    } else if (m_deactivateComparator == eComp_higher) {
+      cond0 = _value > m_deactivateValue;
+    } else {
+      cond0 = false;
+    }
+
+    eState oldState = getState();
+    if (oldState == State_Active) {
+      if (cond1 == false && cond0 == true) {
+        setState(_origin, State_Inactive);
+      } else if (cond1 == true && cond0 == true) {
+        setState(_origin, State_Unknown);
+      }
+    } else {
+      if (cond1 == true && cond0 == false) {
+        setState(_origin, State_Active);
+      } else if (cond1 == true && cond0 == true) {
+        setState(_origin, State_Unknown);
+      }
+    }
+  }
+
+  StateSensor::~StateSensor() {
   }
 
 } // namespace dss

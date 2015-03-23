@@ -172,7 +172,17 @@ namespace dss {
                                           _sensorIndex, kDSM_API_TIMEOUT,
                                           &retVal);
     DSBusInterface::checkResultCode(ret);
-    _device.setSensorValue(_sensorIndex, (const unsigned int) retVal);
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceSensorValue, _device.getDSMeterDSID());
+    pEvent->addParameter(_device.getShortAddress());
+    pEvent->addParameter(_sensorIndex);
+    pEvent->addParameter(retVal);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    } else {
+      delete pEvent;
+    }
+
     return retVal;
   } // getSensorValue
 

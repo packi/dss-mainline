@@ -632,4 +632,50 @@ BOOST_AUTO_TEST_CASE(testConnectedDevice) {
   BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 0);
 } // testConnectedDevice
 
+BOOST_AUTO_TEST_CASE(testStateSensors) {
+  Apartment apt(NULL);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+  apt.allocateZone(42);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+
+  std::string id = ctx->evaluate<std::string>(
+      "var z = getZoneByID(42);\n"
+      "var s = z.addStateSensor(0, 9, \"> ; 24.99\", \"< ; 20.0\");\n"
+      "print(s);\n");
+
+  /*
+   * Pushing a sensor value is not supported by our testing environment:
+   * the ActionInterface requires a valid apartment object, which is not
+   * supported by this test mockup.
+   * Alternatively set the new current value directly and use the newValue
+   * method of the state object.
+   */
+
+  boost::shared_ptr<State> pState = apt.getState(StateType_SensorZone, "zone.zone42.group0.type9");
+  BOOST_CHECK(pState != boost::shared_ptr<State> ());
+  BOOST_CHECK_EQUAL(pState->getState(), 2);
+
+  boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (pState);
+  pSensor->newValue(coSystem, 25.0);
+  BOOST_CHECK_EQUAL(pState->getState(), 1);
+  pSensor->newValue(coSystem, 23.0);
+  BOOST_CHECK_EQUAL(pState->getState(), 1);
+  pSensor->newValue(coSystem, 20.0);
+  BOOST_CHECK_EQUAL(pState->getState(), 1);
+  pSensor->newValue(coSystem, 19.99);
+  BOOST_CHECK_EQUAL(pState->getState(), 2);
+  pSensor->newValue(coSystem, 20.0);
+  BOOST_CHECK_EQUAL(pState->getState(), 2);
+  pSensor->newValue(coSystem, 23.0);
+  BOOST_CHECK_EQUAL(pState->getState(), 2);
+  pSensor->newValue(coSystem, 25.0);
+  BOOST_CHECK_EQUAL(pState->getState(), 1);
+} // testStates
+
 BOOST_AUTO_TEST_SUITE_END()

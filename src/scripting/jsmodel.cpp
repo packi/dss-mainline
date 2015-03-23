@@ -448,6 +448,61 @@ namespace dss {
     return JS_FALSE;
   } // global_registerState
 
+  JSBool global_unregisterState(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_unregisterState: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      std::string stateName;
+      try {
+        stateName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: state name");
+        return JS_FALSE;
+      }
+
+      eStateType stateType = StateType_Script;
+      try {
+        if (argc >= 2) {
+          if (!ctx->convertTo<bool>(JS_ARGV(cx, vp)[1])) {
+            stateType = StateType_Service;
+          }
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: script type");
+        return JS_FALSE;
+      }
+
+      std::string identifier = ctx->getWrapper()->getIdentifier();
+      try {
+        boost::shared_ptr<State> state;
+        state = ext->getApartment().getState(stateType, identifier, stateName);
+        state.reset();
+        ext->getApartment().removeState(stateName);
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {
+        JS_ReportError(cx, "State with given name not found");
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_FALSE;
+  } // global_unregisterState
+
   JSBool global_getEnergyMeterValue(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -1882,6 +1937,81 @@ namespace dss {
     return JS_FALSE;
   } // dev_get_sensor_type
 
+  // dev.addStateSensor(int sensorType, string 1-Condition, string 0-Condition)
+  JSBool dev_addStateSensor(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      boost::shared_ptr<Device> pDev;
+      int sensorType;
+      std::string activateCondition;
+      std::string deactivateCondition;
+
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.dev_addStateSensor: ext of wrong type");
+        return JS_FALSE;
+      }
+      if (argc < 3) {
+        JS_ReportError(cx, "Model.dev_addStateSensor: missing arguments");
+        return JS_FALSE;
+      }
+      if (self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        pDev = intf->getDevice();
+      }
+      if (NULL == pDev) {
+        JS_ReportError(cx, "Model.dev_addStateSensor: device object error");
+        return JS_FALSE;
+      }
+
+      try {
+        sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        activateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+        deactivateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      }
+
+      boost::shared_ptr<DeviceSensor_t> pSensor;
+      try {
+        pSensor = pDev->getSensorByType(sensorType);
+      } catch (ItemNotFoundException& ex) {
+        JS_ReportError(cx, "Model.dev_addStateSensor: invalid sensor type");
+        return JS_TRUE;
+      }
+
+      std::string identifier = ctx->getWrapper() ? ctx->getWrapper()->getIdentifier() : "";
+      boost::shared_ptr<StateSensor> state = boost::make_shared<StateSensor> (
+          identifier, pDev, sensorType, activateCondition, deactivateCondition);
+      state->setPersistence(true);
+      ext->getApartment().allocateState(state);
+
+      std::string sName = state->getName();
+      JSString* str = JS_NewStringCopyN(cx, sName.c_str(), sName.size());
+      JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
+      return JS_TRUE;
+
+    } catch(ItemDuplicateException& ex) {
+      JS_ReportWarning(cx, "Item duplicate: %s", ex.what());
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_addStateSensor
+
   JSBool dev_get_property_node(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension("propertyextension"));
@@ -1918,6 +2048,7 @@ namespace dss {
     JS_FS("setOutputValue", dev_set_output_value, 2, 0),
     JS_FS("getSensorValue", dev_get_sensor_value, 1, 0),
     JS_FS("getSensorType", dev_get_sensor_type, 1, 0),
+    JS_FS("addStateSensor", dev_addStateSensor, 3, 0),
     JS_FS("getPropertyNode", dev_get_property_node, 0, 0),
     JS_FS_END
   };
@@ -3303,6 +3434,70 @@ namespace dss {
     return JS_FALSE;
   } // zone_getAssignedSensor
 
+  // zone.addStateSensor(int gropNumber, int sensorType, string Active-Condition, string Inactive-Condition)
+  JSBool zone_addStateSensor(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_addStateSensor: ext of wrong type");
+        return JS_FALSE;
+      }
+      if (argc < 4) {
+        JS_ReportError(cx, "Model.zone_addStateSensor: missing arguments");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      if (NULL == pZone) {
+        JS_ReportError(cx, "Model.zone_addStateSensor: zone object error");
+        return JS_FALSE;
+      }
+
+      int groupNumber;
+      int sensorType;
+      std::string activateCondition;
+      std::string deactivateCondition;
+
+      try {
+        groupNumber = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+        activateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
+        deactivateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      }
+
+      boost::shared_ptr<Group> pGroup = pZone->getGroup(groupNumber);
+      std::string identifier = ctx->getWrapper() ? ctx->getWrapper()->getIdentifier() : "";
+      boost::shared_ptr<StateSensor> state = boost::make_shared<StateSensor> (
+          identifier, pGroup, sensorType, activateCondition, deactivateCondition);
+      state->setPersistence(true);
+      ext->getApartment().allocateState(state);
+
+      std::string sName = state->getName();
+      JSString* str = JS_NewStringCopyN(cx, sName.c_str(), sName.size());
+      JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
+      return JS_TRUE;
+
+    } catch(ItemDuplicateException& ex) {
+      JS_ReportWarning(cx, "Item duplicate: %s", ex.what());
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_addStateSensor
+
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 4, 0),
@@ -3323,6 +3518,7 @@ namespace dss {
     JS_FS("setTemperatureControlConfiguration", zone_setTemperatureControlConfiguration, 1, 0),
     JS_FS("setTemperatureControlValues", zone_setTemperatureControlValues, 1, 0),
     JS_FS("getAssignedSensor", zone_getAssignedSensor, 1, 0),
+    JS_FS("addStateSensor", zone_addStateSensor, 3, 0),
     JS_FS_END
   };
 

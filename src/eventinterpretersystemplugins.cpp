@@ -1520,6 +1520,79 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkSensorValue(PropertyNodePtr _triggerProp) {
+    if (m_evtName != EventName::DeviceSensorValue && m_evtName != EventName::ZoneSensorValue) {
+      return false;
+    }
+
+    if (m_evtName == EventName::DeviceSensorValue) {
+      PropertyNodePtr triggerDevice = _triggerProp->getPropertyByName("dsuid");
+      std::string triggerDSID = triggerDevice ? triggerDevice->getAsString() : "";
+      dsuid_t dsuid = m_evtSrcDSID;
+      std::string eventDSID = dsuid2str(dsuid);
+      if (triggerDSID != eventDSID) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: type: " + m_evtName +
+                ", dsuid: " + dsuid2str(m_evtSrcDSID) + ", trigger dsuid " + triggerDSID, lsWarning);
+        return false;
+      }
+    } else if (m_evtName == EventName::ZoneSensorValue) {
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName("zone");
+      std::string zone = triggerZone ? triggerZone->getAsString() : "";
+      if (strToInt(zone) != m_evtSrcZone) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: type: " + m_evtName +
+                ", zone: " + intToString(m_evtSrcZone) + ", trigger zone " + zone, lsWarning);
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    std::string sensorType = m_properties.get("sensorType");
+    PropertyNodePtr triggerSensorType = _triggerProp->getPropertyByName("sensor");
+    std::string sSensorType = triggerSensorType ? triggerSensorType->getAsString() : "";
+    if (sSensorType != sensorType) {
+      Logger::getInstance()->log("SystemTrigger::checkSensor:: type: " + m_evtName +
+              ", sensor: " + sensorType + ", trigger sensor " + sSensorType, lsWarning);
+      return false;
+    }
+
+    std::string sensorValueFloat = m_properties.get("sensorValueFloat");
+    double eventValueFloat = strToDouble(sensorValueFloat);
+    double triggerValueFloat;
+
+    PropertyNodePtr triggerValue = _triggerProp->getPropertyByName("value");
+    PropertyNodePtr triggerOperator = _triggerProp->getPropertyByName("operator");
+
+    std::string sValue;
+    std::string sOperator;
+    if (triggerValue) {
+      sValue = triggerValue->getAsString();
+      triggerValueFloat = strToDouble(sValue);
+    }
+    if (triggerOperator) {
+      sOperator = triggerOperator->getAsString();
+    }
+
+    Logger::getInstance()->log("SystemTrigger::checkSensor:: value: " + sValue +
+            ", event value: " + sensorValueFloat + ", operator " + sOperator, lsError);
+
+    if (sOperator == "greater") {
+      if (eventValueFloat > triggerValueFloat) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
+                ", event value: " + sensorValueFloat, lsError);
+        return true;
+      }
+    } else if (sOperator == "lower") {
+      if (eventValueFloat < triggerValueFloat) {
+        Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
+                ", event value: " + sensorValueFloat, lsError);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool SystemTrigger::checkTrigger(std::string _path) {
     if (!DSS::hasInstance()) {
       return false;
@@ -1583,6 +1656,20 @@ namespace dss {
       } else if (m_evtName == "deviceSensorEvent") {
         if (triggerValue == "device-sensor") {
           if (checkDeviceSensor(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == "deviceSensorValue") {
+        if (triggerValue == "device-sensor-value") {
+          if (checkSensorValue(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == "zoneSensorValue") {
+        if (triggerValue == "zone-sensor-value") {
+          if (checkSensorValue(triggerProp)) {
             return true;
           }
         }
@@ -2179,62 +2266,54 @@ namespace dss {
         typeName + " [" + intToString(sensorType) + "];" +
         sensorValueFloat + " [" + sensorValue + "];" +
         zoneName + ";" + groupName + ";" + origName + ";");
-  }
+    }
 
-  void SystemEventLog::logStateChangeScript(
-                                    boost::shared_ptr<ScriptLogger> _logger,
-                                    std::string _statename, std::string _state,
-                                    std::string _value,
-                                    std::string _origin_dsuid) {
+    void SystemEventLog::logStateChange(
+      boost::shared_ptr<ScriptLogger> _logger,
+      boost::shared_ptr<const State> _st,
+      const std::string& _statename, const std::string& _state,
+      const std::string& _value, const std::string& _origin_device_id) {
 
-    std::string origName = getDeviceName(_origin_dsuid);
-    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";StateAddonScript;" + _statename + ";" + _value + ";" +
-                   _state + ";;;;;" + origName + ";");
-  }
-
-  void SystemEventLog::logStateChangeApartment(
-                                    boost::shared_ptr<ScriptLogger> _logger,
-                                    std::string _statename, std::string _state,
-                                    std::string _value,
-                                    std::string _origin_dsuid) {
-
-    std::string origName = getDeviceName(_origin_dsuid);
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken'');
-    _logger->logln(";StateApartment;" + _statename + ";" + _value + ";" +
-                   _state  + ";;;;;" + origName + ";");
-  }
 
-  void SystemEventLog::logStateChangeDevice(
-                                    boost::shared_ptr<ScriptLogger> _logger,
-                                    std::string _statename, std::string _state,
-                                    std::string _value,
-                                    boost::shared_ptr<const Device> _device) {
+    if (m_raisedAtState->getType() == StateType_Service) {
+      std::string origName = getDeviceName(_origin_device_id);
+      _logger->logln(";StateApartment;" + _statename + ";" + _value + ";" + _state  + ";;;;;" + origName + ";");
 
-    std::string devName = _device->getName() + ";" +
-                          dsuid2str(_device->getDSID());
-    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state +
-                   ";;;;" + devName + ";");
-  }
+    } else if (m_raisedAtState->getType() == StateType_Device) {
+      boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
+      std::string devName = device->getName() + ";" + dsuid2str(device->getDSID());
+      _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state + ";;;;" + devName + ";");
 
-  void SystemEventLog::logStateChangeGroup(
-                                    boost::shared_ptr<ScriptLogger> _logger,
-                                    std::string _statename, std::string _state,
-                                    std::string _value,
-                                    int _group_id, int _zone_id) {
-    try {
-      boost::shared_ptr<Zone> zone =
-              DSS::getInstance()->getApartment().getZone(_zone_id);
-
-      std::string groupName = getGroupName(zone->getGroup(_group_id));
+    } else if (m_raisedAtState->getType() == StateType_Group) {
+      boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
+      int groupID = group->getID();
+      int zoneID = group->getZoneID();
+      boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(zoneID);
+      std::string groupName = getGroupName(zone->getGroup(groupID));
       std::string zoneName = getZoneName(zone);
+      _logger->logln(";StateGroup;" + _statename + ";" + _value + ";" + _state + ";" +
+          zoneName + ";" + groupName + ";;");
 
-      //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-      _logger->logln(";StateGroup;" + _statename + ";" + _value + ";" + _state +
-                     ";" + zoneName + ";" + intToString(_zone_id) + ';' +
-                     groupName + ";;");
-    } catch (ItemNotFoundException &ex) {}
+    } else if (m_raisedAtState->getType() == StateType_SensorDevice) {
+      boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
+      std::string devName = device->getName() + ";" + dsuid2str(device->getDSID());
+      _logger->logln(";StateSensorDevice;" + _statename + ";" + _value + ";" + _state + ";;;;" + devName + ";");
+
+    } else if (m_raisedAtState->getType() == StateType_SensorZone) {
+      boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
+      int groupID = group->getID();
+      int zoneID = group->getZoneID();
+      boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(zoneID);
+      std::string groupName = getGroupName(zone->getGroup(groupID));
+      std::string zoneName = getZoneName(zone);
+      _logger->logln(";StateSensorGroup;" + _statename + ";" + _value + ";" + _state + ";" +
+          zoneName + ";" + groupName + ";;");
+
+    } else {
+      std::string origName = getDeviceName(_origin_device_id);
+      _logger->logln(";StateScript;" + _statename + ";" + _value + ";" + _state + ";;;;;" + origName + ";");
+    }
   }
 
   void SystemEventLog::model_ready(boost::shared_ptr<ScriptLogger> _logger) {
@@ -2441,37 +2520,22 @@ namespace dss {
     if (m_properties.has("statename")) {
       statename = m_properties.get("statename");
     }
-
     std::string state;
     if (m_properties.has("state")) {
       state = m_properties.get("state");
     }
-
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
     }
-
     std::string originDSUID;
     if (m_properties.has("originDSUID")) {
       originDSUID = m_properties.get("originDSUID");
     }
-
     if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
-      if (m_raisedAtState->getType() == StateType_Script) {
-        logStateChangeScript(_logger, statename, state, value, originDSUID);
-      } else if (m_raisedAtState->getType() == StateType_Service) {
-        logStateChangeApartment(_logger, statename, state, value,
-                                originDSUID);
-      } else if (m_raisedAtState->getType() == StateType_Device) {
-        boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
-        logStateChangeDevice(_logger, statename, state, value, device);
-      } else if (m_raisedAtState->getType() == StateType_Group) {
-        boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
-        int groupID = group->getID();
-        int zoneID = group->getZoneID();
-        logStateChangeGroup(_logger, statename, state, value, groupID, zoneID);
-      }
+      try {
+        logStateChange(_logger, m_raisedAtState, statename, state, value, originDSUID);
+      } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
     }
   }
 

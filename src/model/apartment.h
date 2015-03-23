@@ -29,6 +29,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+#include <regex.h>
 
 #include "devicecontainer.h"
 #include "modeltypes.h"
@@ -134,6 +135,8 @@ namespace dss {
 
     /** returns a vector of all states */
     std::vector<boost::shared_ptr<State> > getStates() const;
+    /** returns a vector of all states that match the given name (filter expression with regex) */
+    std::vector<boost::shared_ptr<State> > getStates(const std::string& _filter) const;
     /** Returns the State by name and type */
     boost::shared_ptr<State> getState(const eStateType _type, 
                                       const std::string& _stateName) const;
@@ -152,9 +155,7 @@ namespace dss {
       */
     boost::shared_ptr<Zone> allocateZone(int _zoneID);
     boost::shared_ptr<DSMeter> allocateDSMeter(const dsuid_t _dsid);
-    boost::shared_ptr<State> allocateState(eStateType _type,
-                                           const std::string& _name,
-                                           const std::string& _scriptId);
+    boost::shared_ptr<State> allocateState(eStateType _type, const std::string& _name, const std::string& _scriptId);
     void allocateState(boost::shared_ptr<State> _state);
 
     void removeZone(int _zoneID);
