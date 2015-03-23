@@ -48,6 +48,7 @@
 
 namespace dss {
 
+  boost::recursive_mutex DeviceRequestHandler::m_LTMODEMutex;
 
   //=========================================== DeviceRequestHandler
 
@@ -352,6 +353,7 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "setJokerGroup") {
+      boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
       if (!isDefaultGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
@@ -462,6 +464,7 @@ namespace dss {
       }
       return JSONWriter::success();
     } else if(_request.getMethod() == "setButtonInputMode") {
+      boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
       if (_request.hasParameter("modeID")) {
         return JSONWriter::failure("API has changed, parameter mode ID is no longer \
                         valid, please update your code");
@@ -1072,6 +1075,7 @@ namespace dss {
       pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setAKMInputProperty") {
+      boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
       std::string mode = _request.getParameter("mode");
       if (mode.empty()) {
         return JSONWriter::failure("Invalid or missing parameter 'mode'");
