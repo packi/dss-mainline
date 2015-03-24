@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.30.6	24.03.2015
+	* fix UMR configration issue, #9382
+
 v1.30.5	18.03.2015
 	* fix corrupted property tree values, #9452
 	* fix issue when setting UMR button to a color, #9395
