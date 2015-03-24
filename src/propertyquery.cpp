@@ -54,11 +54,65 @@ namespace dss {
   void PropertyQuery::parseParts() {
     std::vector<std::string> parts = splitString(m_Query, '/');
     foreach(std::string part, parts) {
-      std::vector<std::string> properties = extractPropertyList(part);
-      m_PartList.push_back(part_t(part, properties));
+      // if loop is run more than once: elements are on the same level.
+      // They must not be considered as children
+      bool child = true;
+      do {
+        std::string key;
+        std::vector<std::string> properties = evalPropertyList(part, key);
+        std::vector<KeyValueContainer> container = splitKeyValue(properties);
+        m_PartList.push_back(PropertyContainer(key, container, child));
+        // if loop is repeated -> the next PropertyContainer is not a child.
+        // the PropertyContainer is on the same level.
+        child = false;
+      } while(part.size());
     }
     m_PartList.erase(m_PartList.begin());
   } // parseParts
+
+  std::vector<KeyValueContainer> PropertyQuery::splitKeyValue(std::vector<std::string> input) {
+    std::vector<KeyValueContainer> output;
+    foreach (std::string& item, input) {
+      std::vector<std::string> data  = splitString(item, '=', true);
+      if (data.size() >= 2) {
+        output.push_back(KeyValueContainer(data.at(0), data.at(1)));
+      } else {
+        output.push_back(KeyValueContainer(data.at(0)));
+      }
+    }
+    return output;
+  }
+
+  // _input: Key1(valname1=value1,valname2=value2),Key2,Key3(valname1=value1)
+  std::vector<std::string> PropertyQuery::evalPropertyList(std::string& _input, std::string& _output_key) {
+    std::size_t colonPos   = _input.find(',');
+    std::size_t bracketPos = _input.find('(');
+    // Key without values
+    if ((colonPos != std::string::npos) &&
+        (colonPos < bracketPos)) {
+        _output_key = _input.substr (0, colonPos);
+        _input.erase(0, ++colonPos);
+    } else {
+      // assign key from value up to bracket position or end of string
+      _output_key = _input.substr (0, bracketPos);
+
+      if(bracketPos != std::string::npos) {
+        std::size_t bracketEndPos = _input.find(')');
+        std::string propListStr = _input.substr(bracketPos + 1, bracketEndPos - bracketPos - 1);
+        std::size_t eraseEnd = _input.find(',',bracketEndPos);
+        if (eraseEnd == std::string::npos) {
+            eraseEnd = bracketEndPos + 1; // ')' remove inclusive
+        } else {
+            ++eraseEnd; // ',' remove inclusive
+        }
+        _input.erase(0, eraseEnd);
+        return splitString(propListStr, ',', true);
+      } else {
+        _input.erase();
+      }
+    }
+    return std::vector<std::string>();
+  } // evalPropertyList
 
   void PropertyQuery::addProperty(JSONWriter& json,
                                   PropertyNodePtr node) {
@@ -87,10 +141,10 @@ namespace dss {
     return;
   }
 
-  void PropertyQuery::addProperties(part_t& _part, JSONWriter& json, dss::PropertyNodePtr _node) {
-    foreach(std::string subprop, _part.properties) {
-      log(std::string(__func__) + " from node: <" + _node->getName() + "> filter: " + subprop, lsDebug);
-      if(subprop == "*") {
+  void PropertyQuery::addProperties(PropertyContainer& _part, JSONWriter& json, dss::PropertyNodePtr _node) {
+    foreach(KeyValueContainer& subprop, _part.properties) {
+      log(std::string(__func__) + " from node: <" + _node->getName() + "> filter: " + subprop.name, lsDebug);
+      if(subprop.name == "*") {
         for(int iChild = 0; iChild < _node->getChildCount(); iChild++) {
           PropertyNodePtr childNode = _node->getChild(iChild);
           if (childNode != NULL) {
@@ -98,13 +152,12 @@ namespace dss {
           }
         }
       } else {
-        PropertyNodePtr node = _node->getPropertyByName(subprop);
+        PropertyNodePtr node = _node->getPropertyByName(subprop.name);
         if (node != NULL) {
           addProperty(json, node);
         }
       }
     }
-    return;
   } // addProperties
 
   /**
@@ -129,7 +182,7 @@ namespace dss {
         m_PartList[_partIndex].name, lsDebug);
 
     assert(_partIndex < m_PartList.size());
-    part_t& part = m_PartList[_partIndex];
+    PropertyContainer& part = m_PartList[_partIndex];
     bool hasSubpart = m_PartList.size() > (_partIndex + 1);
 
     if (!part.properties.empty()) {
@@ -185,7 +238,7 @@ namespace dss {
         m_PartList[_partIndex].name, lsDebug);
 
     assert(_partIndex < m_PartList.size());
-    part_t& part = m_PartList[_partIndex];
+    PropertyContainer& part = m_PartList[_partIndex];
     bool hasSubpart = m_PartList.size() > (_partIndex + 1);
 
     for (int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
