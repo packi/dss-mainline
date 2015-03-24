@@ -24,12 +24,9 @@
   #include "config.h"
 #endif
 
-
 #include "jsonhelper.h"
 
 #include "src/foreach.h"
-
-#include "src/web/json.h"
 
 #include "src/datetools.h"
 
@@ -42,138 +39,138 @@
 #include "src/model/apartment.h"
 #include "src/dss.h"
 #include "src/model/modulator.h"
+#include "src/web/webrequests.h"
 
 namespace dss {
 
-  boost::shared_ptr<JSONObject> toJSON(const DeviceReference& _device) {
+  void toJSON(const DeviceReference& _device, JSONWriter& _json) {
     DateTime tmp_date;
 
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
+    _json.startObject();
     dsid_t dsid;
     if (dsuid_to_dsid(_device.getDSID(), &dsid)) {
-      result->addProperty("id", dsid2str(dsid));
+      _json.add("id", dsid2str(dsid));
     } else {
-      result->addProperty("id", "");
+      _json.add("id", "");
     }
-    result->addProperty("DisplayID", _device.getDevice()->getDisplayID());
-    result->addProperty("dSUID", dsuid2str(_device.getDSID()));
-    result->addProperty("GTIN", _device.getDevice()->getGTIN());
-    result->addProperty("name", _device.getName());
-    result->addProperty("dSUIDIndex", _device.getDevice()->multiDeviceIndex());
-    result->addProperty("functionID", _device.getFunctionID());
-    result->addProperty("productRevision", _device.getDevice()->getRevisionID());
-    result->addProperty("productID", _device.getDevice()->getProductID());
-    result->addProperty("hwInfo", _device.getDevice()->getHWInfo());
-    result->addProperty("OemStatus", _device.getDevice()->getOemStateAsString());
-    result->addProperty("OemEanNumber", _device.getDevice()->getOemEanAsString());
-    result->addProperty("OemSerialNumber", _device.getDevice()->getOemSerialNumber());
-    result->addProperty("OemPartNumber", _device.getDevice()->getOemPartNumber());
-    result->addProperty("OemProductInfoState", _device.getDevice()->getOemProductInfoStateAsString());
-    result->addProperty("OemProductURL", _device.getDevice()->getOemProductURL());
-    result->addProperty("OemInternetState", _device.getDevice()->getOemInetStateAsString());
-    result->addProperty("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
-    result->addProperty("isVdcDevice", _device.getDevice()->isVdcDevice());
+    _json.add("DisplayID", _device.getDevice()->getDisplayID());
+    _json.add("dSUID", dsuid2str(_device.getDSID()));
+    _json.add("GTIN", _device.getDevice()->getGTIN());
+    _json.add("name", _device.getName());
+    _json.add("dSUIDIndex", _device.getDevice()->multiDeviceIndex());
+    _json.add("functionID", _device.getFunctionID());
+    _json.add("productRevision", _device.getDevice()->getRevisionID());
+    _json.add("productID", _device.getDevice()->getProductID());
+    _json.add("hwInfo", _device.getDevice()->getHWInfo());
+    _json.add("OemStatus", _device.getDevice()->getOemStateAsString());
+    _json.add("OemEanNumber", _device.getDevice()->getOemEanAsString());
+    _json.add("OemSerialNumber", _device.getDevice()->getOemSerialNumber());
+    _json.add("OemPartNumber", _device.getDevice()->getOemPartNumber());
+    _json.add("OemProductInfoState", _device.getDevice()->getOemProductInfoStateAsString());
+    _json.add("OemProductURL", _device.getDevice()->getOemProductURL());
+    _json.add("OemInternetState", _device.getDevice()->getOemInetStateAsString());
+    _json.add("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
+    _json.add("isVdcDevice", _device.getDevice()->isVdcDevice());
     if (_device.getDevice()->isVdcDevice()) {
-      result->addProperty("VdcHardwareModelGuid", _device.getDevice()->getVdcHardwareModelGuid());
-      result->addProperty("VdcModelUID", _device.getDevice()->getVdcModelUID());
-      result->addProperty("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
-      result->addProperty("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
-      result->addProperty("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
-      result->addProperty("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
-      result->addProperty("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
-      result->addProperty("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+      _json.add("VdcHardwareModelGuid", _device.getDevice()->getVdcHardwareModelGuid());
+      _json.add("VdcModelUID", _device.getDevice()->getVdcModelUID());
+      _json.add("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
+      _json.add("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
+      _json.add("VdcConfigURL", _device.getDevice()->getVdcConfigURL());
+      _json.add("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
+      _json.add("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
+      _json.add("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
     }
     if (_device.getDevice()->isValveDevice()) {
-      result->addProperty("ValveType", _device.getDevice()->getValveTypeAsString());
+      _json.add("ValveType", _device.getDevice()->getValveTypeAsString());
     }
 
     if(_device.getDevice()->isPresent()) {
       dsid_t dsid;
       if (dsuid_to_dsid(_device.getDevice()->getDSMeterDSID(), &dsid)) {
-        result->addProperty("meterDSID", dsid2str(dsid));
+        _json.add("meterDSID", dsid2str(dsid));
       } else {
-        result->addProperty("meterDSID", "");
+        _json.add("meterDSID", "");
       }
-      result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
+      _json.add("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
       } catch(std::runtime_error&) {
       }
-      result->addProperty("meterName", dSMName);
-      result->addProperty("busID", _device.getDevice()->getShortAddress());
+      _json.add("meterName", dSMName);
+      _json.add("busID", _device.getDevice()->getShortAddress());
     } else {
       dsid_t dsid;
       if (dsuid_to_dsid(_device.getDevice()->getLastKnownDSMeterDSID(), &dsid)) {
-        result->addProperty("meterDSID", dsid2str(dsid));
+        _json.add("meterDSID", dsid2str(dsid));
       } else {
-        result->addProperty("meterDSID", "");
+        _json.add("meterDSID", "");
       }
-      result->addProperty("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
+      _json.add("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
       } catch(std::runtime_error&) {
       }
-      result->addProperty("meterName", dSMName);
-      result->addProperty("busID", _device.getDevice()->getLastKnownShortAddress());
+      _json.add("meterName", dSMName);
+      _json.add("busID", _device.getDevice()->getLastKnownShortAddress());
     }
-    result->addProperty("zoneID", _device.getDevice()->getZoneID());
-    result->addProperty("isPresent", _device.getDevice()->isPresent());
-    result->addProperty("isValid", _device.getDevice()->isValid());
+    _json.add("zoneID", _device.getDevice()->getZoneID());
+    _json.add("isPresent", _device.getDevice()->isPresent());
+    _json.add("isValid", _device.getDevice()->isValid());
 
     tmp_date = _device.getDevice()->getLastDiscovered();
-    result->addProperty("lastDiscovered", tmp_date);
+    _json.add("lastDiscovered", tmp_date);
 
     tmp_date = _device.getDevice()->getFirstSeen();
-    result->addProperty("firstSeen", tmp_date);
+    _json.add("firstSeen", tmp_date);
 
     tmp_date = _device.getDevice()->getInactiveSince();
-    result->addProperty("inactiveSince", tmp_date);
+    _json.add("inactiveSince", tmp_date);
 
-    result->addProperty("on", _device.getDevice()->isOn());
-    result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());
-    result->addProperty("configurationLocked", _device.getDevice()->isConfigLocked());
-    result->addProperty("outputMode", _device.getDevice()->getOutputMode());
-    result->addProperty("buttonID", _device.getDevice()->getButtonID());
-    result->addProperty("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
-    result->addProperty("buttonGroupMembership", _device.getDevice()->getButtonGroupMembership());
-    result->addProperty("buttonInputMode", _device.getDevice()->getButtonInputMode());
-    result->addProperty("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
-    result->addProperty("buttonInputCount", _device.getDevice()->getButtonInputCount());
-    result->addProperty("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
+    _json.add("on", _device.getDevice()->isOn());
+    _json.add("locked", _device.getDevice()->getIsLockedInDSM());
+    _json.add("configurationLocked", _device.getDevice()->isConfigLocked());
+    _json.add("outputMode", _device.getDevice()->getOutputMode());
+    _json.add("buttonID", _device.getDevice()->getButtonID());
+    _json.add("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
+    _json.add("buttonGroupMembership", _device.getDevice()->getButtonGroupMembership());
+    _json.add("buttonInputMode", _device.getDevice()->getButtonInputMode());
+    _json.add("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
+    _json.add("buttonInputCount", _device.getDevice()->getButtonInputCount());
+    _json.add("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
 
-    boost::shared_ptr<JSONArray<int> > groupsArr = boost::make_shared<JSONArray<int> >();
-    result->addElement("groups", groupsArr);
+    _json.startArray("groups");
     std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
     for (int g = 1; g <= 63; g++) {
       if (deviceGroups.test(g-1)) {
-        groupsArr->add(g);
+        _json.add(g);
       }
     }
+    _json.endArray();
 
-    boost::shared_ptr<JSONArrayBase> binaryInputArr = boost::make_shared<JSONArrayBase>();
-    result->addElement("binaryInputs", binaryInputArr);
     const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
-    result->addProperty("binaryInputCount", (int)binaryInputs.size());
+    _json.add("binaryInputCount", (int)binaryInputs.size());
+    _json.startArray("binaryInputs");
     for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
-      boost::shared_ptr<JSONObject> element = boost::make_shared<JSONObject>();
-      element->addProperty("targetGroupType", (*it)->m_targetGroupType);
-      element->addProperty("targetGroup", (*it)->m_targetGroupId);
-      element->addProperty("inputType", (*it)->m_inputType);
-      element->addProperty("inputId", (*it)->m_inputId);
-      element->addProperty("state", _device.getDevice()->getBinaryInputState((*it)->m_inputIndex)->getState());
-      binaryInputArr->addElement("", element);
+      _json.startObject();
+      _json.add("targetGroupType", (*it)->m_targetGroupType);
+      _json.add("targetGroup", (*it)->m_targetGroupId);
+      _json.add("inputType", (*it)->m_inputType);
+      _json.add("inputId", (*it)->m_inputId);
+      _json.add("state", _device.getDevice()->getBinaryInputState((*it)->m_inputIndex)->getState());
+      _json.endObject();
     }
-    result->addProperty("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
+    _json.endArray();
+    _json.add("sensorInputCount", (int)(_device.getDevice()->getSensorCount()));
 
-    boost::shared_ptr<JSONArray<int> > sensorsArr = boost::make_shared<JSONArray<int> >();
-    result->addElement("sensors", sensorsArr);
-
+    _json.startArray("sensors");
     const std::vector<boost::shared_ptr<DeviceSensor_t> > sensors = _device.getDevice()->getSensors();
     for (size_t i = 0; i < sensors.size(); i++) {
-      sensorsArr->add(sensors.at(i)->m_sensorType);
+      _json.add(sensors.at(i)->m_sensorType);
     }
+    _json.endArray();
 
     // check if device has invalid sensor values
     uint8_t sensorCount = _device.getDevice()->getSensorCount();
@@ -184,75 +181,72 @@ namespace dss {
         break;
       }
     }
-    result->addProperty("sensorDataValid", sensorFlag);
-    return result;
+    _json.add("sensorDataValid", sensorFlag);
+    _json.endObject();
   } // toJSON(DeviceReference)
 
-  boost::shared_ptr<JSONArrayBase> toJSON(const Set& _set) {
-    boost::shared_ptr<JSONArrayBase> result = boost::make_shared<JSONArrayBase>();
-
+  void toJSON(const Set& _set, JSONWriter& _json) {
     for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
       const DeviceReference& d = _set.get(iDevice);
       if (d.getDevice()->is2WaySlave() == true) {
         // do not render "slave" devices
         continue;
       }
-      result->addElement("", toJSON(d));
+      toJSON(d, _json);
     }
-    return result;
   } // toJSON(Set,Name)
 
-  boost::shared_ptr<JSONObject> toJSON(boost::shared_ptr<const Group> _group) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    result->addProperty("id", _group->getID());
-    result->addProperty("name", _group->getName());
-    result->addProperty("color", _group->getStandardGroupID());
-    result->addProperty("isPresent", _group->isPresent());
-    result->addProperty("isValid", _group->isValid());
+  void toJSON(boost::shared_ptr<const Group> _group, JSONWriter& _json) {
+    _json.startObject();
+    _json.add("id", _group->getID());
+    _json.add("name", _group->getName());
+    _json.add("color", _group->getStandardGroupID());
+    _json.add("isPresent", _group->isPresent());
+    _json.add("isValid", _group->isValid());
 
-    boost::shared_ptr<JSONArray<std::string> > devicesArr = boost::make_shared<JSONArray<std::string> >();
-    result->addElement("devices", devicesArr);
+    _json.startArray("devices");
     Set devices = _group->getDevices();
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
       if (devices[iDevice].getDevice()->is2WaySlave()) {
         // do not render "slave" devices
         continue;
       }
-      devicesArr->add(dsuid2str(devices[iDevice].getDSID()));
+      _json.add(dsuid2str(devices[iDevice].getDSID()));
     }
-    return result;
+    _json.endArray();
+    _json.endObject();
   } // toJSON(Group)
 
-  boost::shared_ptr<JSONObject> toJSON(Zone& _zone, bool _includeDevices) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    result->addProperty("id", _zone.getID());
-    result->addProperty("name", _zone.getName());
-    result->addProperty("isPresent", _zone.isPresent());
+  void toJSON(Zone& _zone, JSONWriter& _json, bool _includeDevices) {
+    _json.startObject();
+    _json.add("id", _zone.getID());
+    _json.add("name", _zone.getName());
+    _json.add("isPresent", _zone.isPresent());
 
     if(_includeDevices) {
-      result->addElement("devices", toJSON(_zone.getDevices()));
-      boost::shared_ptr<JSONArrayBase> groups = boost::make_shared<JSONArrayBase>();
-      result->addElement("groups", groups);
+      _json.startArray("devices");
+      toJSON(_zone.getDevices(), _json);
+      _json.endArray();
+      _json.startArray("groups");
       foreach(boost::shared_ptr<Group> pGroup, _zone.getGroups()) {
-        groups->addElement("", toJSON(pGroup));
+        toJSON(pGroup, _json);
       }
+      _json.endArray();
     }
 
-    return result;
+    _json.endObject();
   } // toJSON(Zone)
 
-  boost::shared_ptr<JSONObject> toJSON(Apartment& _apartment) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    boost::shared_ptr<JSONObject> apartment = boost::make_shared<JSONObject>();
-    result->addElement("apartment", apartment);
-    boost::shared_ptr<JSONArrayBase> zonesArr = boost::make_shared<JSONArrayBase>();
-    apartment->addElement("zones", zonesArr);
+  void toJSON(Apartment& _apartment, JSONWriter& _json) {
+    _json.startObject("apartment");
+    _json.startArray("zones");
 
     std::vector<boost::shared_ptr<Zone> > zones = _apartment.getZones();
     foreach(boost::shared_ptr<Zone> pZone, zones) {
-      zonesArr->addElement("", toJSON(*pZone));
+      toJSON(*pZone, _json);
     }
-    return result;
+    _json.endArray();
+    _json.endObject();
   } // toJSON(Apartment)
 
 }

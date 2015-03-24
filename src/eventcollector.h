@@ -25,11 +25,11 @@
 #define __EVENT_COLLECTOR_H__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <vector>
 #include <string>
 
 #include "src/eventinterpreterplugins.h"
-#include "src/mutex.h"
 #include "src/syncevent.h"
 
 
@@ -49,7 +49,7 @@ namespace dss {
     virtual std::string subscribeTo(const std::string& _eventName);
   private:
     SyncEvent m_EventArrived;
-    Mutex m_PendingEventsMutex;
+    boost::mutex m_PendingEventsMutex;
     std::vector<Event> m_PendingEvents;
   }; // EventCollector
 

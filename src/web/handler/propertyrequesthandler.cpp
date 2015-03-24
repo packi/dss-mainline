@@ -29,7 +29,6 @@
 
 #include "src/propertysystem.h"
 
-#include "src/web/json.h"
 #include "src/propertyquery.h"
 #include "src/stringconverter.h"
 #include "util.h"
@@ -46,87 +45,90 @@ namespace dss {
   WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
     if (_request.getMethod() == "query" || _request.getMethod() == "query2") {
+      JSONWriter json;
       std::string query = _request.getParameter("query");
       if(query.empty()) {
-        return failure("Need parameter 'query'");
+        return JSONWriter::failure("Need parameter 'query'");
       }
       PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query);
       if (_request.getMethod() == "query2") {
-          return success(propertyQuery.run2());
+        propertyQuery.run2(json);
+        return json.successJSON();
       }
-      return success(propertyQuery.run());
+      propertyQuery.run(json);
+      return json.successJSON();
     }
 
     std::string propName = st.convert(_request.getParameter("path"));
     if(propName.empty()) {
-      return failure("Need parameter 'path' for property operations");
+      return JSONWriter::failure("Need parameter 'path' for property operations");
     }
     propName = escapeHTML(propName);
     PropertyNodePtr node = m_PropertySystem.getProperty(propName);
 
     if(_request.getMethod() == "remove") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
       try {
         PropertyNode* parent = node->getParentNode();
         if(parent != NULL) {
           parent->removeChild(node);
-          return success();
+          return JSONWriter::success();
         } else {
-          return failure("Can't remove root node");
+          return JSONWriter::failure("Can't remove root node");
         }
       } catch (...) {
-        return failure(std::string("Error removing node '") + propName + "'");
+        return JSONWriter::failure(std::string("Error removing node '") + propName + "'");
       }
     } else if(_request.getMethod() == "getString") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
       try {
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("value", node->getStringValue());
-        return success(resultObj);
+        JSONWriter json;
+        json.add("value", node->getStringValue());
+        return json.successJSON();
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error getting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(_request.getMethod() == "getInteger") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
 
       try {
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+        JSONWriter json;
         if (node->getValueType() == vTypeInteger) {
-          resultObj->addProperty("value", node->getIntegerValue());
+          json.add("value", node->getIntegerValue());
         } else {
-          resultObj->addProperty("value", (unsigned long int)node->getUnsignedIntegerValue());
+          json.add("value", (long long int)node->getUnsignedIntegerValue());
         }
-        return success(resultObj);
+        return json.successJSON();
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error getting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(_request.getMethod() == "getBoolean") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
       try {
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("value", node->getBoolValue());
-        return success(resultObj);
+        JSONWriter json;
+        json.add("value", node->getBoolValue());
+        return json.successJSON();
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error getting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(_request.getMethod() == "getFloating") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
       try {
-        boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-        resultObj->addProperty("value", node->getFloatingValue());
-        return success(resultObj);
+        JSONWriter json;
+        json.add("value", node->getFloatingValue());
+        return json.successJSON();
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error getting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(_request.getMethod() == "setString") {
       std::string value = st.convert(_request.getParameter("value"));
@@ -139,9 +141,9 @@ namespace dss {
       try {
         node->setStringValue(value);
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error setting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error setting property: '") + ex.what() + "'");
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setBoolean") {
       std::string strValue = _request.getParameter("value");
       bool value;
@@ -150,7 +152,7 @@ namespace dss {
       } else if(strValue == "false") {
         value = false;
       } else {
-        return failure("Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
+        return JSONWriter::failure("Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
       }
       if(node == NULL) {
         node = m_PropertySystem.createProperty(propName);
@@ -158,9 +160,9 @@ namespace dss {
       try {
         node->setBooleanValue(value);
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error setting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error setting property: '") + ex.what() + "'");
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setInteger") {
       aValueType type = vTypeInteger;
       if(node == NULL) {
@@ -176,33 +178,33 @@ namespace dss {
         try {
           value = strToInt(strValue);
         } catch(...) {
-          return failure("Could not convert parameter 'value' to integer. Got: '" + strValue + "'");
+          return JSONWriter::failure("Could not convert parameter 'value' to integer. Got: '" + strValue + "'");
         }
         try {
           node->setIntegerValue(value);
         } catch(PropertyTypeMismatch& ex) {
-          return failure(std::string("Error setting property: '") + ex.what() + "'");
+          return JSONWriter::failure(std::string("Error setting property: '") + ex.what() + "'");
         }
       } else {
         try {
           uvalue = strToUInt(strValue);
         } catch(...) {
-          return failure("Could not convert parameter 'value' to integer. Got: '" + strValue + "'");
+          return JSONWriter::failure("Could not convert parameter 'value' to integer. Got: '" + strValue + "'");
         }
         try {
           node->setUnsignedIntegerValue(uvalue);
         } catch(PropertyTypeMismatch& ex) {
-          return failure(std::string("Error setting property: '") + ex.what() + "'");
+          return JSONWriter::failure(std::string("Error setting property: '") + ex.what() + "'");
         }
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "setFloating") {
       std::string strValue = _request.getParameter("value");
       int value;
       try {
         value = strToDouble(strValue);
       } catch(...) {
-        return failure("Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
+        return JSONWriter::failure("Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
       }
       if(node == NULL) {
         node = m_PropertySystem.createProperty(propName);
@@ -210,40 +212,40 @@ namespace dss {
       try {
         node->setFloatingValue(value);
       } catch(PropertyTypeMismatch& ex) {
-        return failure(std::string("Error setting property: '") + ex.what() + "'");
+        return JSONWriter::failure(std::string("Error setting property: '") + ex.what() + "'");
       }
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "getChildren") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
-      boost::shared_ptr<JSONArrayBase> resultObj = boost::make_shared<JSONArrayBase>();
+      JSONWriter json(JSONWriter::jsonArrayResult);
       for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
-        boost::shared_ptr<JSONObject> prop = boost::make_shared<JSONObject>();
-        resultObj->addElement("", prop);
+        json.startObject();
         PropertyNodePtr cnode = node->getChild(iChild);
-        prop->addProperty("name", cnode->getDisplayName());
+        json.add("name", cnode->getDisplayName());
         // do not expose unsigned int to the UI
         if (cnode->getValueType() == vTypeUnsignedInteger) {
-          prop->addProperty("type", getValueTypeAsString(vTypeInteger));
+          json.add("type", getValueTypeAsString(vTypeInteger));
         } else {
-          prop->addProperty("type", getValueTypeAsString(cnode->getValueType()));
+          json.add("type", getValueTypeAsString(cnode->getValueType()));
         }
+        json.endObject();
       }
-      return success(resultObj);
+      return json.successJSON();
     } else if(_request.getMethod() == "getType") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("type", getValueTypeAsString(node->getValueType()));
-      return success(resultObj);
+      JSONWriter json;
+      json.add("type", getValueTypeAsString(node->getValueType()));
+      return json.successJSON();
     } else if(_request.getMethod() == "setFlag") {
       PropertyNode::Flag flag;
       bool value;
 
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
 
       std::string strFlag = _request.getParameter("flag");
@@ -254,7 +256,7 @@ namespace dss {
       } else if(strFlag == "ARCHIVE") {
         flag = PropertyNode::Archive;
       } else {
-        return failure("Expected 'READABLE', 'WRITEABLE' or 'ARCHIVE' for parameter 'flag' but got: '" + strFlag + "'");
+        return JSONWriter::failure("Expected 'READABLE', 'WRITEABLE' or 'ARCHIVE' for parameter 'flag' but got: '" + strFlag + "'");
       }
 
       std::string strValue = _request.getParameter("value");
@@ -263,23 +265,23 @@ namespace dss {
       } else if(strValue == "false") {
         value = false;
       } else {
-        return failure("Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
+        return JSONWriter::failure("Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
       }
 
       node->setFlag(flag, value);
 
-      return success();
+      return JSONWriter::success();
     } else if(_request.getMethod() == "getFlags") {
       if(node == NULL) {
-        return failure("Could not find node named '" + propName + "'");
+        return JSONWriter::failure("Could not find node named '" + propName + "'");
       }
 
-      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-      resultObj->addProperty("READABLE", node->hasFlag(PropertyNode::Readable));
-      resultObj->addProperty("WRITEABLE", node->hasFlag(PropertyNode::Writeable));
-      resultObj->addProperty("ARCHIVE", node->hasFlag(PropertyNode::Archive));
+      JSONWriter json;
+      json.add("READABLE", node->hasFlag(PropertyNode::Readable));
+      json.add("WRITEABLE", node->hasFlag(PropertyNode::Writeable));
+      json.add("ARCHIVE", node->hasFlag(PropertyNode::Archive));
 
-      return success(resultObj);
+      return json.successJSON();
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

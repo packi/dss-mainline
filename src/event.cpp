@@ -783,8 +783,11 @@ namespace dss {
   } // popEvent
 
   bool EventQueue::waitForEvent() {
+    boost::mutex::scoped_lock lock(m_QueueMutex);
     if(m_EventQueue.empty()) {
+      lock.unlock();
       m_EntryInQueueEvt.waitFor(m_EventTimeoutMS);
+      lock.lock();
     }
     return !m_EventQueue.empty();
   } // waitForEvent

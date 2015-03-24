@@ -28,19 +28,18 @@
 
 namespace dss {
 
-  class JSONObject;
-  class JSONArrayBase;
+  class JSONWriter;
   class DeviceReference;
   class Set;
   class Group;
   class Zone;
   class Apartment;
 
-  boost::shared_ptr<JSONObject> toJSON(const DeviceReference& _device);
-  boost::shared_ptr<JSONArrayBase> toJSON(const Set& _set);
-  boost::shared_ptr<JSONObject> toJSON(boost::shared_ptr<const Group> _group);
-  boost::shared_ptr<JSONObject> toJSON(Zone& _zone, bool _includeDevices = true);
-  boost::shared_ptr<JSONObject> toJSON(Apartment& _apartment);
+  void toJSON(const DeviceReference& _device, JSONWriter& _json);
+  void toJSON(const Set& _set, JSONWriter& _json);
+  void toJSON(boost::shared_ptr<const Group> _group, JSONWriter& _json);
+  void toJSON(Zone& _zone, JSONWriter& _json, bool _includeDevices = true);
+  void toJSON(Apartment& _apartment, JSONWriter& _json);
 
 } // namespace dss
 

@@ -1,5 +1,26 @@
 dSS - digitalSTROM Server
 
+v1.30.6	24.03.2015
+	* fix UMR configration issue, #9382
+
+v1.30.5	18.03.2015
+	* fix corrupted property tree values, #9452
+	* fix issue when setting UMR button to a color, #9395
+
+v1.30.4	10.03.2015
+	* remove RRD metering databeses if time difference is to big, #7575
+	* add EmergencyValue to apartment/getTemperatureControlConfig, #9290
+	* fix null pointer dereference, #8088
+	* multiple UMR fixes, #9368, #9367
+	* fix local prio settings for UMV, #9357
+	* return removed device in JSON repsonse, #9391
+
+v1.30.3	20.02.2015
+	* deactivate dSHub event uploader, #9132
+	* SensorLog, reduce number of queued sensor events
+	* Read out according types, #8962
+	* sensor_data_uploader, an incomplete event block further uploads, #9247, #9248
+
 v1.30.2	12.02.2015
 	* extend sensor debug logging, #9080
 	* do not call ApartmentHasChanged on heating operation mode changes, #9080

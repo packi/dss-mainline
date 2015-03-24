@@ -6,6 +6,7 @@ dsstests_CXXFLAGS = \
 			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
 			-I$(top_builddir)/src \
+			$(JSONC_CFLAGS) \
 			$(JS_CFLAGS) \
 			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
@@ -20,6 +21,7 @@ dsstests_LDADD = \
 			$(BOOST_FILESYSTEM_LIBS) \
 			$(BOOST_UNIT_TEST_FRAMEWORK_LIBS) \
 			$(LIBDSM_API_LDFLAGS) \
+			$(JSONC_LIBS) \
 			$(JS_LIBS) \
 			$(ICAL_LIBS) \
 			$(LIBDSM_API_LIBS) \

@@ -25,6 +25,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <vector>
 #include <string>
 
@@ -57,6 +58,7 @@ namespace dss {
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
+    static boost::recursive_mutex m_LTMODEMutex;
   }; // DeviceRequestHandler
 
 }

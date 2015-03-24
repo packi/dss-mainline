@@ -24,11 +24,11 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #ifndef __JS_LOGGER_H__
 #define __JS_LOGGER_H__
 
-#include "src/mutex.h"
 #include "src/scripting/jshandler.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace dss {
 
@@ -48,7 +48,7 @@ namespace dss {
   private:
     std::string m_logName;
     FILE *m_f;
-    Mutex m_LogWriteMutex;
+    boost::mutex m_LogWriteMutex;
     ScriptLoggerExtension* m_pExtension;
     std::string m_fileName;
   };
@@ -67,7 +67,7 @@ namespace dss {
 
   private:
     std::map<const std::string, boost::weak_ptr<ScriptLogger> > m_Loggers;
-    Mutex m_MapMutex;
+    boost::mutex m_MapMutex;
     const std::string m_Directory;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     EventInterpreter& m_EventInterpreter;

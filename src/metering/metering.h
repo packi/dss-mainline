@@ -34,6 +34,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace dss {
 

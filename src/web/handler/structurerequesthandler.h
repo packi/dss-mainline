@@ -45,19 +45,19 @@ namespace dss {
     StructureModifyingBusInterface& m_Interface;
     StructureQueryBusInterface& m_QueryInterface;
 
-    boost::shared_ptr<JSONObject> zoneAddDevice(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> removeDevice(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> addZone(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> removeZone(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> removeInactiveDevices(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> persistSet(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> unpersistSet(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> addGroup(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> removeGroup(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> groupAddDevice(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> groupRemoveDevice(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> groupSetName(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> groupSetColor(const RestfulRequest& _request);
+    std::string zoneAddDevice(const RestfulRequest& _request);
+    std::string removeDevice(const RestfulRequest& _request);
+    std::string addZone(const RestfulRequest& _request);
+    std::string removeZone(const RestfulRequest& _request);
+    std::string removeInactiveDevices(const RestfulRequest& _request);
+    std::string persistSet(const RestfulRequest& _request);
+    std::string unpersistSet(const RestfulRequest& _request);
+    std::string addGroup(const RestfulRequest& _request);
+    std::string removeGroup(const RestfulRequest& _request);
+    std::string groupAddDevice(const RestfulRequest& _request);
+    std::string groupRemoveDevice(const RestfulRequest& _request);
+    std::string groupSetName(const RestfulRequest& _request);
+    std::string groupSetColor(const RestfulRequest& _request);
   }; // StructureRequestHandler
 
 } // namespace dss

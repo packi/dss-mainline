@@ -92,6 +92,10 @@ namespace dss {
     getDevice()->callScene(_origin, _category, _sceneNr, _token, _force);
   } // callScene
 
+  void DeviceReference::callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
+    getDevice()->callSceneMin(_origin, _category, _sceneNr, _token);
+  } // callSceneMin
+
   void DeviceReference::saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token) {
     getDevice()->saveScene(_origin, _sceneNr, _token);
   } // saveScene

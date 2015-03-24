@@ -96,8 +96,11 @@ namespace dss {
     std::string Name;
     uint16_t ZoneID;
     std::vector<DeviceBinaryInputSpec_t> binaryInputs;
+    bool binaryInputsValid;
     std::vector<DeviceSensorSpec_t> sensorInputs;
+    bool sensorInputsValid;
     std::vector<int> outputChannels;
+    bool outputChannelsValid;
   } DeviceSpec_t;
 
   typedef struct {
@@ -332,6 +335,7 @@ namespace dss {
   class ActionRequestInterface {
   public:
     virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) = 0;
+    virtual void callSceneMin(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token) = 0;
     virtual void saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t scene, const std::string _token) = 0;
     virtual void undoScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token) = 0;
     virtual void undoSceneLast(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token) = 0;

@@ -29,8 +29,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "json.h"
-
 namespace dss {
 
 
@@ -38,40 +36,129 @@ namespace dss {
 
   std::string WebServerRequestHandlerJSON::handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     WebServerResponse response = jsonHandleRequest(_request, _session);
-    if(response.getResponse() != NULL) {
-      return response.getResponse()->toString();
-    }
-    return "";
+    return response.getResponse();
   } // handleRequest
 
-  boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::success() {
-    return success(boost::shared_ptr<JSONObject>());
-  }
 
-  boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::success(const std::string& _message) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    result->addProperty("ok", true);
-    result->addProperty("message", _message);
-    return result;
-  }
-
-  boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::success(boost::shared_ptr<JSONElement> _innerResult) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    result->addProperty("ok", true);
-    if(_innerResult != NULL) {
-      result->addElement("result", _innerResult);
+  JSONWriter::JSONWriter(jsonResult_t _responseType) : m_writer(m_buffer), m_resultType(_responseType) {
+    startObject();
+    switch (m_resultType) {
+    case jsonObjectResult:
+      startObject("result");
+      break;
+    case jsonArrayResult:
+      startArray("result");
+      break;
+    case jsonNoneResult:
+      break;
     }
-    return result;
   }
 
-  boost::shared_ptr<JSONObject> WebServerRequestHandlerJSON::failure(const std::string& _message) {
-    boost::shared_ptr<JSONObject> result = boost::make_shared<JSONObject>();
-    result->addProperty("ok", false);
-    if(!_message.empty()) {
-      result->addProperty("message", _message);
+  std::string JSONWriter::successJSON() {
+    switch (m_resultType) {
+    case jsonObjectResult:
+      endObject();
+      add("ok", true);
+      break;
+    case jsonArrayResult:
+      endArray();
+      add("ok", true);
+      break;
+    case jsonNoneResult:
+      break;
     }
-    Logger::getInstance()->log("JSON call failed: '" + _message + "'");
-    return result;
+    endObject();
+    return m_buffer.GetString();
+  }
+  void JSONWriter::add(std::string _name, std::string _value) {
+    add(_name, _value.c_str());
+  }
+  void JSONWriter::add(std::string _name, const char* _value) {
+    m_writer.String(_name);
+    m_writer.String(_value);
+  }
+  void JSONWriter::add(std::string _name, int _value) {
+    m_writer.String(_name);
+    m_writer.Uint(_value);
+  }
+  void JSONWriter::add(std::string _name, long long int _value) {
+    m_writer.String(_name);
+    m_writer.Uint64(_value);
+  }
+  void JSONWriter::add(std::string _name, bool _value) {
+    m_writer.String(_name);
+    m_writer.Bool(_value);
+  }
+  void JSONWriter::add(std::string _name, double _value) {
+    m_writer.String(_name);
+    m_writer.Double(_value);
+  }
+  void JSONWriter::add(std::string _value) {
+    add(_value.c_str());
+  }
+  void JSONWriter::add(const char* _value) {
+    m_writer.String(_value);
+  }
+  void JSONWriter::add(int _value) {
+    m_writer.Uint(_value);
+  }
+  void JSONWriter::add(long int _value) {
+    m_writer.Uint64(_value);
+  }
+  void JSONWriter::add(bool _value) {
+    m_writer.Bool(_value);
+  }
+  void JSONWriter::add(double _value) {
+    m_writer.Double(_value);
+  }
+  void JSONWriter::startArray(std::string _name) {
+    m_writer.String(_name);
+    m_writer.StartArray();
+  }
+  void JSONWriter::startArray() {
+    m_writer.StartArray();
+  }
+  void JSONWriter::endArray() {
+    m_writer.EndArray();
+  }
+  void JSONWriter::startObject(std::string _name) {
+    m_writer.String(_name);
+    m_writer.StartObject();
+  }
+  void JSONWriter::startObject() {
+    m_writer.StartObject();
+  }
+  void JSONWriter::endObject() {
+    m_writer.EndObject();
+  }
+  std::string JSONWriter::success() {
+    return success("");
+  }
+  std::string JSONWriter::success(std::string _message) {
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+    writer.StartObject();
+    writer.String("ok"); writer.Bool(true);
+    if (!_message.empty()) {
+      writer.String("message");
+      writer.String(_message);
+    }
+    writer.EndObject();
+    return s.GetString();
+  }
+  std::string JSONWriter::failure(std::string _message) {
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+    s.Clear();
+    writer.Reset(s);
+    writer.StartObject();
+    writer.String("ok"); writer.Bool(false);
+    if (!_message.empty()) {
+      writer.String("message");
+      writer.String(_message);
+    }
+    writer.EndObject();
+    return s.GetString();
   }
 
 } // namespace dss

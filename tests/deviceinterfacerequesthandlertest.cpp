@@ -24,11 +24,11 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/make_shared.hpp>
 #include "webfixture.h"
 
 #include "src/model/deviceinterface.h"
 #include "src/web/handler/deviceinterfacerequesthandler.h"
-#include "src/web/json.h"
 #include "src/session.h"
 #include "src/model/scenehelper.h"
 
@@ -60,6 +60,9 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     }
     virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");
+    }
+    virtual void callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token) {
+      functionCalled("callSceneMin(" + intToString(_sceneNr) + ")");
     }
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
@@ -116,7 +119,7 @@ public:
   virtual WebServerResponse jsonHandleRequest(
     const RestfulRequest& _request,
     boost::shared_ptr<Session> _session) {
-    boost::shared_ptr<JSONObject> result;
+    std::string result;
     return result;
   }
 };
@@ -155,7 +158,7 @@ private:
     boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
     boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
     RestfulRequest req("bla/" + _functionName, _params);
-    boost::shared_ptr<JSONObject> temp;
+    std::string temp;
     BOOST_CHECK_NO_THROW(temp =
       m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession));
     WebServerResponse response = temp;
@@ -169,7 +172,7 @@ private:
     boost::shared_ptr<DeviceInterfaceDummy> dummy = boost::make_shared<DeviceInterfaceDummy>();
     boost::shared_ptr<Session> dummySession = boost::make_shared<Session>("dummy");
     RestfulRequest req("bla/" + _functionName, _params);
-    boost::shared_ptr<JSONObject> temp;
+    std::string temp;
     BOOST_CHECK_THROW(temp =
       m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), SensorOutOfRangeException);
   }

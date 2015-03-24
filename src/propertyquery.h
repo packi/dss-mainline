@@ -31,9 +31,7 @@ namespace dss {
 
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
-  class JSONElement;
-  class JSONObject;
-  class JSONArrayBase;
+  class JSONWriter;
 
   class PropertyQuery {
     __DECL_LOG_CHANNEL__
@@ -46,8 +44,8 @@ namespace dss {
       parseParts();
     }
 
-    boost::shared_ptr<JSONElement> run();
-    boost::shared_ptr<JSONElement> run2();
+    void run(JSONWriter& json);
+    void run2(JSONWriter& json);
   private:
     class part_t {
     public:
@@ -75,7 +73,7 @@ namespace dss {
      * @see also runFor2
      */
     void runFor(PropertyNodePtr _parentNode, unsigned int _partIndex,
-                boost::shared_ptr<JSONElement> _parentElement);
+                JSONWriter& json);
 
     /**
      * Handles one level of the query
@@ -92,7 +90,7 @@ namespace dss {
      *
      */
     void runFor2(PropertyNodePtr _parentNode, unsigned int _partIndex,
-                 boost::shared_ptr<JSONElement> _parentElement);
+                 JSONWriter& json);
     /**
      * Filter children of _node by part and store
      * and extracted values in JSON object
@@ -102,18 +100,14 @@ namespace dss {
      * @param _node element that should be filtered
      * @return JSON object with the added properties
      */
-    boost::shared_ptr<JSONElement>
-      addProperties(part_t& _part,
-                    boost::shared_ptr<JSONElement> _parentElement,
-                    dss::PropertyNodePtr _node);
+    void addProperties(part_t& _part, JSONWriter& json, dss::PropertyNodePtr _node);
 
     /**
      * Read int/float/bool value from node and store
      * in JSON object
      */
-    boost::shared_ptr<JSONElement>
-      addProperty(boost::shared_ptr<JSONObject> _obj,
-                  dss::PropertyNodePtr _node);
+    void addProperty(JSONWriter& json,
+                     dss::PropertyNodePtr _node);
 
     PropertyNodePtr m_pProperty;
     std::string m_Query;

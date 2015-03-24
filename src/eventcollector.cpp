@@ -37,9 +37,10 @@ namespace dss {
   }
 
   void EventCollector::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    m_PendingEventsMutex.lock();
-    m_PendingEvents.push_back(_event);
-    m_PendingEventsMutex.unlock();
+    {
+      boost::mutex::scoped_lock lock(m_PendingEventsMutex);
+      m_PendingEvents.push_back(_event);
+    }
     m_EventArrived.signal();
   } // handleEvent
 
@@ -56,10 +57,9 @@ namespace dss {
 
   Event EventCollector::popEvent() {
     Event result;
-    m_PendingEventsMutex.lock();
+    boost::mutex::scoped_lock lock(m_PendingEventsMutex);
     result = m_PendingEvents.front();
     m_PendingEvents.erase(m_PendingEvents.begin());
-    m_PendingEventsMutex.unlock();
     return result;
   } // popEvent
 

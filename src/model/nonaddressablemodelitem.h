@@ -40,6 +40,7 @@ namespace dss {
     virtual void setValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _value, const std::string _token);
 
     virtual void callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, std::string _token, const bool _force = false);
+    virtual void callSceneMin(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token);
     virtual void saveScene(const callOrigin_t _origin, const int _sceneNr, const std::string _token);
     virtual void undoScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token);
     virtual void undoSceneLast(const callOrigin_t _origin, const SceneAccessCategory _category, const std::string _token);

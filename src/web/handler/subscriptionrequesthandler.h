@@ -34,9 +34,9 @@ namespace dss {
     SubscriptionRequestHandler(EventInterpreter& _interpreter);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
-    boost::shared_ptr<JSONObject> list(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
-    boost::shared_ptr<JSONObject> remove(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
-    boost::shared_ptr<JSONObject> add(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    std::string list(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    std::string remove(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    std::string add(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     EventInterpreter& m_EventInterpreter;
   }; // StructureRequestHandler

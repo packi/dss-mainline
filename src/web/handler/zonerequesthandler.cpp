@@ -39,7 +39,6 @@
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "util.h"
-#include "src/web/json.h"
 
 namespace dss {
 
@@ -141,32 +140,32 @@ namespace dss {
             // should never reach here because ok, would be false
             assert(false);
           }
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-          resultObj->addProperty("scene", lastScene);
-          return success(resultObj);
+          JSONWriter json;
+          json.add("scene", lastScene);
+          return json.successJSON();
         } else if(_request.getMethod() == "getName") {
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-          resultObj->addProperty("name", pZone->getName());
-          return success(resultObj);
+          JSONWriter json;
+          json.add("name", pZone->getName());
+          return json.successJSON();
         } else if(_request.getMethod() == "setName") {
           if (_request.hasParameter("newName")) {
             std::string newName = _request.getParameter("newName");
             newName = escapeHTML(newName);
             pZone->setName(newName);
           } else {
-            return failure("missing parameter 'newName'");
+            return JSONWriter::failure("missing parameter 'newName'");
           }
-          return success();
+          return JSONWriter::success();
         } else if(_request.getMethod() == "sceneSetName") {
           if(pGroup == NULL) {
-            return failure("Need group to work");
+            return JSONWriter::failure("Need group to work");
           }
           int sceneNumber = strToIntDef(_request.getParameter("sceneNumber"), -1);
           if(sceneNumber == -1) {
-            return failure("Need valid parameter 'sceneNumber'");
+            return JSONWriter::failure("Need valid parameter 'sceneNumber'");
           }
           if(!SceneHelper::isInRange(sceneNumber, pGroup->getZoneID())) {
-            return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
+            return JSONWriter::failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
           }
 
           if (_request.hasParameter("newName")) {
@@ -179,25 +178,25 @@ namespace dss {
             // raise ModelDirty to force rewrite of model data to apartment.xml
             DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
           } else {
-            return failure("missing parameter 'newName'");
+            return JSONWriter::failure("missing parameter 'newName'");
           }
-          return success();
+          return JSONWriter::success();
         } else if(_request.getMethod() == "sceneGetName") {
           if(pGroup == NULL) {
-            return failure("Need group to work");
+            return JSONWriter::failure("Need group to work");
           }
           int sceneNumber = strToIntDef(_request.getParameter("sceneNumber"), -1);
           if(sceneNumber == -1) {
-            return failure("Need valid parameter 'sceneNumber'");
+            return JSONWriter::failure("Need valid parameter 'sceneNumber'");
           }
           if(!SceneHelper::isInRange(sceneNumber, pGroup->getZoneID())) {
-            return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
+            return JSONWriter::failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
           }
 
           std::string sceneName = pGroup->getSceneName(sceneNumber);
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-          resultObj->addProperty("name", sceneName);
-          return success(resultObj);
+          JSONWriter json;
+          json.add("name", sceneName);
+          return json.successJSON();
         } else if(_request.getMethod() == "getReachableScenes") {
           uint64_t reachableScenes = 0uLL;
           Set devicesInZone;
@@ -211,112 +210,112 @@ namespace dss {
             int buttonID = ref.getDevice()->getButtonID();
             reachableScenes |= SceneHelper::getReachableScenesBitmapForButtonID(buttonID);
           }
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-          boost::shared_ptr<JSONArray<int> > reachableArray = boost::make_shared<JSONArray<int> >();
-          resultObj->addElement("reachableScenes", reachableArray);
+          JSONWriter json;
+          json.startArray("reachableScenes");
           for(int iBit = 0; iBit < 64; iBit++) {
             if((reachableScenes & (1uLL << iBit)) != 0uLL) {
-              reachableArray->add(iBit);
+              json.add(iBit);
             }
           }
-          return success(resultObj);
+          json.endArray();
+          return json.successJSON();
 
         } else if(_request.getMethod() == "getTemperatureControlStatus") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
           ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           }
 
-          resultObj->addProperty("IsConfigured", true);
-          resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
-          resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
-          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("IsConfigured", true);
+          json.add("ControlMode", hProp.m_HeatingControlMode);
+          json.add("ControlState", hProp.m_HeatingControlState);
+          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
 
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              resultObj->addProperty("OperationMode", pZone->getHeatingOperationMode());
-              resultObj->addProperty("TemperatureValue", hSensors.m_TemperatureValue);
-              resultObj->addProperty("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
-              resultObj->addProperty("NominalValue", hStatus.m_NominalValue);
-              resultObj->addProperty("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
-              resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
-              resultObj->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
+              json.add("OperationMode", pZone->getHeatingOperationMode());
+              json.add("TemperatureValue", hSensors.m_TemperatureValue);
+              json.add("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
+              json.add("NominalValue", hStatus.m_NominalValue);
+              json.add("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
+              json.add("ControlValue", hStatus.m_ControlValue);
+              json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
               break;
             case HeatingControlModeIDZoneFollower:
-              resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
-              resultObj->addProperty("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
+              json.add("ControlValue", hStatus.m_ControlValue);
+              json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
               break;
             case HeatingControlModeIDFixed:
             case HeatingControlModeIDManual:
-              resultObj->addProperty("OperationMode", pZone->getHeatingOperationMode());
-              resultObj->addProperty("ControlValue", hStatus.m_ControlValue);
+              json.add("OperationMode", pZone->getHeatingOperationMode());
+              json.add("ControlValue", hStatus.m_ControlValue);
               break;
           }
-          return success(resultObj);
+          return json.successJSON();
 
         } else if(_request.getMethod() == "getTemperatureControlConfig") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
 
           memset(&hConfig, 0, sizeof(hConfig));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           } else {
-            resultObj->addProperty("IsConfigured", true);
+            json.add("IsConfigured", true);
             hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
 
-          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
-          resultObj->addProperty("ControlMode", hConfig.ControllerMode);
-          resultObj->addProperty("EmergencyValue", hConfig.EmergencyValue - 100);
+          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlMode", hConfig.ControllerMode);
+          json.add("EmergencyValue", hConfig.EmergencyValue - 100);
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              resultObj->addProperty("CtrlKp", (double)hConfig.Kp * 0.025);
-              resultObj->addProperty("CtrlTs", hConfig.Ts);
-              resultObj->addProperty("CtrlTi", hConfig.Ti);
-              resultObj->addProperty("CtrlKd", hConfig.Kd);
-              resultObj->addProperty("CtrlImin", (double)hConfig.Imin * 0.025);
-              resultObj->addProperty("CtrlImax", (double)hConfig.Imax * 0.025);
-              resultObj->addProperty("CtrlYmin", hConfig.Ymin - 100);
-              resultObj->addProperty("CtrlYmax", hConfig.Ymax - 100);
-              resultObj->addProperty("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
-              resultObj->addProperty("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
+              json.add("CtrlKp", (double)hConfig.Kp * 0.025);
+              json.add("CtrlTs", hConfig.Ts);
+              json.add("CtrlTi", hConfig.Ti);
+              json.add("CtrlKd", hConfig.Kd);
+              json.add("CtrlImin", (double)hConfig.Imin * 0.025);
+              json.add("CtrlImax", (double)hConfig.Imax * 0.025);
+              json.add("CtrlYmin", hConfig.Ymin - 100);
+              json.add("CtrlYmax", hConfig.Ymax - 100);
+              json.add("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
+              json.add("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
               break;
             case HeatingControlModeIDZoneFollower:
-              resultObj->addProperty("ReferenceZone", hConfig.SourceZoneId);
-              resultObj->addProperty("CtrlOffset", hConfig.Offset);
+              json.add("ReferenceZone", hConfig.SourceZoneId);
+              json.add("CtrlOffset", hConfig.Offset);
               break;
             case HeatingControlModeIDManual:
-              resultObj->addProperty("ManualValue", hConfig.ManualValue - 100);
+              json.add("ManualValue", hConfig.ManualValue - 100);
               break;
             case HeatingControlModeIDFixed:
               break;
           }
-          return success(resultObj);
+          return json.successJSON();
 
         } else if(_request.getMethod() == "setTemperatureControlConfig") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingConfigSpec_t hConfig;
 
@@ -326,9 +325,9 @@ namespace dss {
 
           memset(&hConfig, 0, sizeof(hConfig));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           } else {
-            resultObj->addProperty("IsConfigured", true);
+            json.add("IsConfigured", true);
             hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -383,22 +382,22 @@ namespace dss {
 
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
-          return success(resultObj);
+          return json.successJSON();
 
         } else if(_request.getMethod() == "getTemperatureControlValues") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
 
           memset(&hOpValues, 0, sizeof(hOpValues));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           } else {
-            resultObj->addProperty("IsConfigured", true);
+            json.add("IsConfigured", true);
             hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -407,45 +406,45 @@ namespace dss {
           case HeatingControlModeIDOff:
             break;
           case HeatingControlModeIDPID:
-            resultObj->addProperty("Off",
+            json.add("Off",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
-            resultObj->addProperty("Comfort",
+            json.add("Comfort",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
-            resultObj->addProperty("Economy",
+            json.add("Economy",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
-            resultObj->addProperty("NotUsed",
+            json.add("NotUsed",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
-            resultObj->addProperty("Night",
+            json.add("Night",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
-            resultObj->addProperty("Holiday",
+            json.add("Holiday",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
-            resultObj->addProperty("Off",
+            json.add("Off",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
-            resultObj->addProperty("Comfort",
+            json.add("Comfort",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
-            resultObj->addProperty("Economy",
+            json.add("Economy",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
-            resultObj->addProperty("NotUsed",
+            json.add("NotUsed",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
-            resultObj->addProperty("Night",
+            json.add("Night",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
-            resultObj->addProperty("Holiday",
+            json.add("Holiday",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
             break;
 
           }
-          return success(resultObj);
+          return json.successJSON();
 
         } else if(_request.getMethod() == "setTemperatureControlValues") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
           int SensorConversion;
@@ -457,14 +456,14 @@ namespace dss {
           } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
             SensorConversion = SensorIDRoomTemperatureControlVariable;
           } else {
-            return failure("Cannot set control values in current mode");
+            return JSONWriter::failure("Cannot set control values in current mode");
           }
 
           memset(&hOpValues, 0, sizeof(hOpValues));
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           } else {
-            resultObj->addProperty("IsConfigured", true);
+            json.add("IsConfigured", true);
             hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -539,21 +538,21 @@ namespace dss {
           m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
               hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
 
-          return success(resultObj);
+          return json.successJSON();
 
         } else if(_request.getMethod() == "setTemperatureControlState") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStateSpec_t hState;
 
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           } else {
-            resultObj->addProperty("IsConfigured", true);
+            json.add("IsConfigured", true);
             hState = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingState(
                 hProp.m_HeatingControlDSUID, pZone->getID());
           }
@@ -568,7 +567,7 @@ namespace dss {
             try {
               value = strToUInt(_request.getParameter("ControlState"));
             } catch(std::invalid_argument& e) {
-              return failure("Invalid mode for the control state");
+              return JSONWriter::failure("Invalid mode for the control state");
             }
           }
           hState.State = (uint8_t) value;
@@ -578,124 +577,124 @@ namespace dss {
 
         } else if(_request.getMethod() == "getTemperatureControlInternals") {
           if (pZone->getID() == 0) {
-            return failure("Zone id 0 is invalid");
+            return JSONWriter::failure("Zone id 0 is invalid");
           }
 
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+          JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingInternalsSpec_t hInternals;
 
           if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-            return failure("Not a heating control device");
+            return JSONWriter::failure("Not a heating control device");
           }
 
-          resultObj->addProperty("IsConfigured", true);
-          resultObj->addProperty("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
-          resultObj->addProperty("ControlMode", hProp.m_HeatingControlMode);
-          resultObj->addProperty("ControlState", hProp.m_HeatingControlState);
+          json.add("IsConfigured", true);
+          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlMode", hProp.m_HeatingControlMode);
+          json.add("ControlState", hProp.m_HeatingControlState);
 
           if (hProp.m_HeatingControlMode != HeatingControlModeIDPID) {
-            return failure("Not a PID controller");
+            return JSONWriter::failure("Not a PID controller");
           }
           if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
-            return failure("PID controller not running");
+            return JSONWriter::failure("PID controller not running");
           }
           memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
           hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
               hProp.m_HeatingControlDSUID, pZone->getID());
 
-          resultObj->addProperty("CtrlTRecent", (double) SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, hInternals.Trecent));
-          resultObj->addProperty("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
-          resultObj->addProperty("CtrlTError", (double) hInternals.TError * 0.025);
-          resultObj->addProperty("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
-          resultObj->addProperty("CtrlIntegral", (double) hInternals.Integral * 0.025);
-          resultObj->addProperty("CtrlYp", (double) hInternals.Yp * 0.01);
-          resultObj->addProperty("CtrlYi", (double) hInternals.Yi * 0.01);
-          resultObj->addProperty("CtrlYd", (double) hInternals.Yd *0.01);
-          resultObj->addProperty("CtrlY", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hInternals.Y));
-          resultObj->addProperty("CtrlAntiWindUp", (unsigned long int) hInternals.AntiWindUp);
+          json.add("CtrlTRecent", (double) SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, hInternals.Trecent));
+          json.add("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
+          json.add("CtrlTError", (double) hInternals.TError * 0.025);
+          json.add("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
+          json.add("CtrlIntegral", (double) hInternals.Integral * 0.025);
+          json.add("CtrlYp", (double) hInternals.Yp * 0.01);
+          json.add("CtrlYi", (double) hInternals.Yi * 0.01);
+          json.add("CtrlYd", (double) hInternals.Yd *0.01);
+          json.add("CtrlY", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hInternals.Y));
+          json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
 
-          return success(resultObj);
+          return json.successJSON();
 
         } else if(_request.getMethod() == "setSensorSource") {
           if (pZone->getID() == 0) {
-            return failure("Not allowed to assign sensor for zone 0");
+            return JSONWriter::failure("Not allowed to assign sensor for zone 0");
           }
           std::string dsuidStr = _request.getParameter("dsuid");
           if (dsuidStr.empty()) {
-            return failure("Missing parameter 'dsuid'");
+            return JSONWriter::failure("Missing parameter 'dsuid'");
           }
           dsuid_t dsuid = str2dsuid(dsuidStr);
 
           int type = strToIntDef(_request.getParameter("sensorType"), -1);
           if (type < 0) {
-            return failure("Missing or invalid parameter 'sensorType'");
+            return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
           boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(dsuid);
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.setZoneSensor(pZone, type, dev);
-          return success();
+          return JSONWriter::success();
         } else if(_request.getMethod() == "clearSensorSource") {
           if (pZone->getID() == 0) {
-            return success();
+            return JSONWriter::success();
           }
           int type = strToIntDef(_request.getParameter("sensorType"), -1);
           if (type < 0) {
-            return failure("Missing or invalid parameter 'sensorType'");
+            return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.resetZoneSensor(pZone, type);
-          return success();
+          return JSONWriter::success();
         } else if(_request.getMethod() == "getAssignedSensors") {
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-          boost::shared_ptr<JSONArrayBase> sensors = boost::make_shared<JSONArrayBase>();
-          resultObj->addElement("sensors", sensors);
+          JSONWriter json;
+          json.startArray("sensors");
           std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
           for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
               it != slist.end();
               it ++) {
-            boost::shared_ptr<JSONObject> sensor = boost::make_shared<JSONObject>();
+            json.startObject();
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-            sensors->addElement("", sensor);
-            sensor->addProperty("sensorType", devSensor->m_sensorType);
-            sensor->addProperty("dsuid", dsuid2str(devSensor->m_DSUID));
+            json.add("sensorType", devSensor->m_sensorType);
+            json.add("dsuid", dsuid2str(devSensor->m_DSUID));
+            json.endObject();
           }
-          return success(resultObj);
+          json.endArray();
+          return json.successJSON();
 
         } else if(_request.getMethod() == "getSensorValues") {
           ZoneSensorStatus_t sensorStatus = pZone->getSensorStatus();
-          boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
-          boost::shared_ptr<JSONArrayBase> values = boost::make_shared<JSONArrayBase>();
+          JSONWriter json;
 
-          resultObj->addProperty("id", pZone->getID());
-          resultObj->addProperty("name", pZone->getName());
-          resultObj->addElement("values", values);
+          json.add("id", pZone->getID());
+          json.add("name", pZone->getName());
+          json.startArray("values");
 
           if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
-            values->addElement("", svalue);
-            svalue->addProperty("TemperatureValue", sensorStatus.m_TemperatureValue);
-            svalue->addProperty("TemperatureValueTime", sensorStatus.m_TemperatureValueTS.toISO8601_ms());
+            json.startObject();
+            json.add("TemperatureValue", sensorStatus.m_TemperatureValue);
+            json.add("TemperatureValueTime", sensorStatus.m_TemperatureValueTS.toISO8601_ms());
+            json.endObject();
           }
           if (sensorStatus.m_HumidityValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
-            values->addElement("", svalue);
-            svalue->addProperty("HumidityValue", sensorStatus.m_HumidityValue);
-            svalue->addProperty("HumidityValueTime", sensorStatus.m_HumidityValueTS.toISO8601_ms());
+            json.startObject();
+            json.add("HumidityValue", sensorStatus.m_HumidityValue);
+            json.add("HumidityValueTime", sensorStatus.m_HumidityValueTS.toISO8601_ms());
+            json.endObject();
           }
           if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
-            values->addElement("", svalue);
-            svalue->addProperty("CO2concentrationValue", sensorStatus.m_CO2ConcentrationValue);
-            svalue->addProperty("CO2concentrationValueTime", sensorStatus.m_CO2ConcentrationValueTS.toISO8601_ms());
+            json.startObject();
+            json.add("CO2concentrationValue", sensorStatus.m_CO2ConcentrationValue);
+            json.add("CO2concentrationValueTime", sensorStatus.m_CO2ConcentrationValueTS.toISO8601_ms());
+            json.endObject();
           }
           if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate) {
-            boost::shared_ptr<JSONObject> svalue = boost::make_shared<JSONObject>();
-            values->addElement("", svalue);
-            svalue->addProperty("BrightnessValue", sensorStatus.m_BrightnessValue);
-            svalue->addProperty("BrightnessValueTime", sensorStatus.m_BrightnessValueTS.toISO8601_ms());
+            json.startObject();
+            json.add("BrightnessValue", sensorStatus.m_BrightnessValue);
+            json.add("BrightnessValueTime", sensorStatus.m_BrightnessValueTS.toISO8601_ms());
+            json.endObject();
           }
-          return success(resultObj);
+          json.endArray();
+          return json.successJSON();
 
         } else {
           throw std::runtime_error("Unhandled function");
@@ -703,9 +702,9 @@ namespace dss {
       }
     }
     if(!ok) {
-      return failure(errorMessage);
+      return JSONWriter::failure(errorMessage);
     } else {
-      return success(); // TODO: check this, we shouldn't get here
+      return JSONWriter::success(); // TODO: check this, we shouldn't get here
     }
   } // handleRequest
 

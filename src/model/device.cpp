@@ -2076,6 +2076,14 @@ namespace dss {
 
   void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
     boost::mutex::scoped_lock lock(m_deviceMutex);
+    PropertyNodePtr binaryInputNode;
+    if (m_pPropertyNode != NULL) {
+      binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
+      if (binaryInputNode != NULL) {
+        binaryInputNode->getParentNode()->removeChild(binaryInputNode);
+      }
+      binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
+    }
     m_binaryInputCount = 0;
     m_binaryInputs.clear();
     m_binaryInputStates.clear();
@@ -2100,13 +2108,8 @@ namespace dss {
       m_binaryInputStates.push_back(state);
 
       if (m_pPropertyNode != NULL) {
-        PropertyNodePtr binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
         std::string bpath = std::string("binaryInput") + intToString(m_binaryInputCount);
-        PropertyNodePtr entry = binaryInputNode->getPropertyByName(bpath);
-        if (entry != NULL) {
-          entry->getParentNode()->removeChild(entry);
-        }
-        entry = binaryInputNode->createProperty(bpath);
+        PropertyNodePtr entry = binaryInputNode->createProperty(bpath);
         entry->createProperty("targetGroupType")
                 ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupType));
         entry->createProperty("targetGroupId")
@@ -2147,6 +2150,14 @@ namespace dss {
 
   void Device::setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
     boost::mutex::scoped_lock lock(m_deviceMutex);
+    PropertyNodePtr sensorInputNode;
+    if (m_pPropertyNode != NULL) {
+      sensorInputNode = m_pPropertyNode->getPropertyByName("sensorInputs");
+      if (sensorInputNode != NULL) {
+        sensorInputNode->getParentNode()->removeChild(sensorInputNode);
+      }
+      sensorInputNode = m_pPropertyNode->createProperty("sensorInputs");
+    }
     m_sensorInputCount = 0;
     m_sensorInputs.clear();
 
@@ -2173,13 +2184,8 @@ namespace dss {
       m_sensorInputs.push_back(binput);
 
       if (m_pPropertyNode != NULL) {
-        PropertyNodePtr sensorInputNode = m_pPropertyNode->getPropertyByName("sensorInputs");
         std::string bpath = std::string("sensorInput") + intToString(m_sensorInputCount);
-        PropertyNodePtr entry = sensorInputNode->getPropertyByName(bpath);
-        if (entry != NULL) {
-          entry->getParentNode()->removeChild(entry);
-        }
-        entry = sensorInputNode->createProperty(bpath);
+        PropertyNodePtr entry = sensorInputNode->createProperty(bpath);
         entry->createProperty("type")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
         entry->createProperty("index")
@@ -2207,18 +2213,21 @@ namespace dss {
 
   void Device::setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels) {
     boost::mutex::scoped_lock lock(m_deviceMutex);
+    PropertyNodePtr outputChannelNode;
+    if (m_pPropertyNode != NULL) {
+      outputChannelNode = m_pPropertyNode->getPropertyByName("outputChannels");
+      if (outputChannelNode != NULL) {
+        outputChannelNode->getParentNode()->removeChild(outputChannelNode);
+      }
+      outputChannelNode = m_pPropertyNode->createProperty("outputChannels");
+    }
     m_outputChannelCount = 0;
     m_outputChannels.clear();
 
     // The first entry of the table describes the default channel. Do not add to channel list.
     if (_outputChannels.size() >= 1) {
-      PropertyNodePtr outputChannelNode = m_pPropertyNode->getPropertyByName("outputChannels");
       std::string bpath = std::string("outputChannelDefault");
-      PropertyNodePtr entry = outputChannelNode->getPropertyByName(bpath);
-      if (entry != NULL) {
-        entry->getParentNode()->removeChild(entry);
-      }
-      entry = outputChannelNode->createProperty(bpath);
+      PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
       entry->createProperty("channelID")->setIntegerValue(_outputChannels[0]);
     }
 
@@ -2233,13 +2242,8 @@ namespace dss {
       m_outputChannels.push_back(*it);
 
       if (m_pPropertyNode != NULL) {
-        PropertyNodePtr outputChannelNode = m_pPropertyNode->getPropertyByName("outputChannels");
         std::string bpath = std::string("outputChannel") + intToString(m_outputChannelCount);
-        PropertyNodePtr entry = outputChannelNode->getPropertyByName(bpath);
-        if (entry != NULL) {
-          entry->getParentNode()->removeChild(entry);
-        }
-        entry = outputChannelNode->createProperty(bpath);
+        PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
         entry->createProperty("channelID")
                 ->linkToProxy(PropertyProxyReference<int>(m_outputChannels[m_outputChannelCount]));
       }

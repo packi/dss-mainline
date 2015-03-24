@@ -21,8 +21,8 @@
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
-#include "web/json.h"
 #include "tests/dss_life_cycle.h"
+#include "src/web/webrequests.h"
 
 using namespace dss;
 
@@ -171,15 +171,21 @@ BOOST_AUTO_TEST_CASE(webservice_ms_json) {
   boost::shared_ptr<Event> pEvent;
 
   pEvent = boost::make_shared<Event>("aaaahhh");
-  BOOST_CHECK_THROW(MsHub::toJson(pEvent), DSSException);
+  {
+    JSONWriter json(JSONWriter::jsonNoneResult);
+    BOOST_CHECK_THROW(MsHub::toJson(pEvent, json), DSSException);
+  }
 
-  pEvent = boost::make_shared<Event>(EventName::DeviceSensorValue);
-  BOOST_CHECK_THROW(MsHub::toJson(pEvent), DSSException);
+  {
+    JSONWriter json(JSONWriter::jsonNoneResult);
+    pEvent = boost::make_shared<Event>(EventName::DeviceSensorValue);
+    BOOST_CHECK_THROW(MsHub::toJson(pEvent, json), DSSException);
+  }
 
   pEvent = boost::make_shared<Event>(EventName::HeatingControllerSetup);
-  JSONObject jsonOBJ;
-  BOOST_CHECK_NO_THROW(jsonOBJ = MsHub::toJson(pEvent));
-  BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 3);
+  JSONWriter json(JSONWriter::jsonNoneResult);
+  BOOST_CHECK_NO_THROW(MsHub::toJson(pEvent, json));
+  BOOST_CHECK_EQUAL(json.successJSON().substr(0, 90), std::string("{\"EventGroup\":\"ApartmentAndDevice\",\"EventCategory\":\"HeatingControllerSetup\",\"Timestamp\":\"2015-02-19T16:42:42.298Z\"}").substr(0, 90));
 }
 
 BOOST_AUTO_TEST_CASE(webservice_ds_json) {
@@ -187,16 +193,22 @@ BOOST_AUTO_TEST_CASE(webservice_ds_json) {
   DSSLifeCycle dss_instance;
   boost::shared_ptr<Event> pEvent;
 
-  pEvent = boost::make_shared<Event>("aaaahhh");
-  BOOST_CHECK_THROW(DsHub::toJson(pEvent), DSSException);
+  {
+    JSONWriter json(JSONWriter::jsonNoneResult);
+    pEvent = boost::make_shared<Event>("aaaahhh");
+    BOOST_CHECK_THROW(DsHub::toJson(pEvent, json), DSSException);
+  }
 
-  pEvent = boost::make_shared<Event>(EventName::DeviceSensorValue);
-  BOOST_CHECK_THROW(DsHub::toJson(pEvent), DSSException);
+  {
+    JSONWriter json(JSONWriter::jsonNoneResult);
+    pEvent = boost::make_shared<Event>(EventName::DeviceSensorValue);
+    BOOST_CHECK_THROW(DsHub::toJson(pEvent, json), DSSException);
+  }
 
   pEvent = boost::make_shared<Event>(EventName::HeatingControllerSetup);
-  JSONObject jsonOBJ;
-  BOOST_CHECK_NO_THROW(jsonOBJ = DsHub::toJson(pEvent));
-  BOOST_CHECK_EQUAL(jsonOBJ.getElementCount(), 2);
+  JSONWriter json(JSONWriter::jsonNoneResult);
+  BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent, json));
+  BOOST_CHECK_EQUAL(json.successJSON().substr(0, 126), std::string("{\"EventHeader\":{\"EventCategory\":\"HeatingControllerSetup\",\"EventGroup\":\"ApartmentAndDevice\",\"SequenceID\":0,\"SequenceIDSince\":\"2015-02-19T16:42:42Z\",\"Timestamp\":\"2015-02-19T16:42:42Z\",\"EventID\":\"a6f31327-098b-4c7e-bd50-bb8fb7e8b98b\",\"Source\":true},\"EventBody\":{}}").substr(0, 126));
 }
 
 class EventFactory {
@@ -243,7 +255,8 @@ BOOST_FIXTURE_TEST_CASE(test_mshub_tojson, EventFactory) {
       continue;
     }
 
-    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent));
+    JSONWriter json;
+    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent, json));
   }
 }
 
@@ -256,7 +269,8 @@ BOOST_FIXTURE_TEST_CASE(test_dshub_tojson, EventFactory) {
       continue;
     }
 
-    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent));
+    JSONWriter json;
+    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent, json));
   }
 }
 

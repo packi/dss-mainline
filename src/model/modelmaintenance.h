@@ -24,7 +24,7 @@
 #define MODELMAINTENANCE_H_
 
 #include <boost/shared_ptr.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/ptr_container/ptr_deque.hpp>
 #include <boost/filesystem.hpp>
 
 #include "dssfwd.h"
@@ -239,8 +239,9 @@ namespace dss {
     bool m_IsInitializing;
     bool m_IsDirty;
 
-    boost::ptr_vector<ModelEvent> m_ModelEvents;
-    Mutex m_ModelEventsMutex;
+    typedef boost::ptr_deque<ModelEvent> m_ModelEvents_t;
+    boost::ptr_deque<ModelEvent> m_ModelEvents;
+    boost::mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
     Apartment* m_pApartment;
     Metering* m_pMetering;

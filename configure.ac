@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([dss], [1.30.2], [http://redmine.digitalstrom.org])
+AC_INIT([dss], [1.30.6], [http://redmine.digitalstrom.org])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/dss.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -472,6 +472,15 @@ PKG_CHECK_MODULES([OSSP_UUID], [ossp-uuid], [],
     [
         AC_MSG_ERROR([$OSSP_UUID_PKG_ERRORS])
     ])
+    ])
+
+PKG_CHECK_MODULES([RAPIDJSON], [RapidJSON], [],
+    [
+        AC_MSG_WARN([$RAPIDJSON_PKG_ERRORS])
+        AC_CHECK_HEADERS([rapidjson/rapidjson.h], [],
+        [
+            AC_MSG_ERROR([Could not find required header rapidjson.h!])
+        ])
     ])
 
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
