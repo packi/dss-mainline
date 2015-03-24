@@ -1573,18 +1573,18 @@ namespace dss {
     std::string sOperator = triggerOperator->getAsString();
 
     Logger::getInstance()->log("SystemTrigger::checkSensor:: value: " + sValue +
-            ", event value: " + sensorValueFloat + ", operator " + sOperator, lsError);
+            ", event value: " + sensorValueFloat + ", operator " + sOperator);
 
     if (sOperator == "greater") {
       if (eventValueFloat > triggerValueFloat) {
         Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
-                ", event value: " + sensorValueFloat, lsError);
+                ", event value: " + sensorValueFloat);
         return true;
       }
     } else if (sOperator == "lower") {
       if (eventValueFloat < triggerValueFloat) {
         Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
-                ", event value: " + sensorValueFloat, lsError);
+                ", event value: " + sensorValueFloat);
         return true;
       }
     }
