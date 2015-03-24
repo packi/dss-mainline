@@ -1556,36 +1556,35 @@ namespace dss {
       return false;
     }
 
-    std::string sensorValueFloat = m_properties.get("sensorValueFloat");
-    double eventValueFloat = strToDouble(sensorValueFloat);
-    double triggerValueFloat;
-
     PropertyNodePtr triggerValue = _triggerProp->getPropertyByName("value");
     PropertyNodePtr triggerOperator = _triggerProp->getPropertyByName("operator");
 
-    std::string sValue;
-    std::string sOperator;
-    if (triggerValue) {
-      sValue = triggerValue->getAsString();
-      triggerValueFloat = strToDouble(sValue);
-    }
-    if (triggerOperator) {
-      sOperator = triggerOperator->getAsString();
+    if (!triggerValue || !triggerOperator) {
+      Logger::getInstance()->log("SystemTrigger::checkSensor:: value or operation node missing",
+                                 lsError);
+      return false;
     }
 
+    std::string sensorValueFloat = m_properties.get("sensorValueFloat");
+    double eventValueFloat = strToDouble(sensorValueFloat);
+
+    std::string sValue = triggerValue->getAsString();
+    double triggerValueFloat = strToDouble(sValue);
+    std::string sOperator = triggerOperator->getAsString();
+
     Logger::getInstance()->log("SystemTrigger::checkSensor:: value: " + sValue +
-            ", event value: " + sensorValueFloat + ", operator " + sOperator, lsError);
+            ", event value: " + sensorValueFloat + ", operator " + sOperator);
 
     if (sOperator == "greater") {
       if (eventValueFloat > triggerValueFloat) {
         Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
-                ", event value: " + sensorValueFloat, lsError);
+                ", event value: " + sensorValueFloat);
         return true;
       }
     } else if (sOperator == "lower") {
       if (eventValueFloat < triggerValueFloat) {
         Logger::getInstance()->log("SystemTrigger::checkSensor:: Match: value: " + sValue +
-                ", event value: " + sensorValueFloat, lsError);
+                ", event value: " + sensorValueFloat);
         return true;
       }
     }
