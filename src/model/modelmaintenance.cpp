@@ -425,275 +425,274 @@ namespace dss {
   } // handleDeferredModelEvents
 
   bool ModelMaintenance::handleModelEvents() {
-    if(!m_ModelEvents.empty()) {
-      bool eraseEventFromList = true;
-      ModelEvent& event = m_ModelEvents.front();
-      ModelEventWithDSID* pEventWithDSID =
-        dynamic_cast<ModelEventWithDSID*>(&event);
-      ModelEventWithStrings* pEventWithStrings =
-        dynamic_cast<ModelEventWithStrings*>(&event);
-      switch(event.getEventType()) {
-      case ModelEvent::etNewDevice:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 2) {
-          log("Expected exactly 2 parameter for ModelEvent::etNewDevice");
-        } else {
-          onAddDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
-        }
-        break;
-      case ModelEvent::etLostDevice:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 2) {
-          log("Expected exactly 2 parameter for ModelEvent::etLostDevice");
-        } else {
-          onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
-        }
-        break;
-      case ModelEvent::etDeviceChanged:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 1) {
-          log("Expected exactly 1 parameter for ModelEvent::etDeviceChanged");
-        } else {
-          rescanDevice(pEventWithDSID->getDSID(), event.getParameter(0));
-        }
-        break;
-      case ModelEvent::etDeviceConfigChanged:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 4) {
-          log("Expected exactly 4 parameter for ModelEvent::etDeviceConfigChanged");
-        } else {
-          onDeviceConfigChanged(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1),
-                                                           event.getParameter(2), event.getParameter(3));
-        }
-        break;
-      case ModelEvent::etCallSceneDevice:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() == 5) {
-          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), (callOrigin_t)event.getParameter(3), event.getParameter(4), event.getSingleStringParameter());
-        } else {
-          log("Unexpected parameter count for ModelEvent::etCallSceneDevice");
-        }
-        break;
-      case ModelEvent::etBlinkDevice:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() == 3) {
-          onDeviceBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), (callOrigin_t)event.getParameter(2), event.getSingleStringParameter());
-        } else {
-          log("Unexpected parameter count for ModelEvent::etBlinkDevice");
-        }
-        break;
-      case ModelEvent::etCallSceneDeviceLocal:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() == 5) {
-          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), (callOrigin_t)event.getParameter(3), event.getParameter(4), event.getSingleStringParameter());
-        } else {
-          log("Unexpected parameter count for ModelEvent::etCallSceneDeviceLocal");
-        }
-        break;
-      case ModelEvent::etButtonClickDevice:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 3) {
-          log("Expected exactly 3 parameter for ModelEvent::etButtonClickDevice");
-        } else {
-          onDeviceActionEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
-          onDeviceActionFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
-        }
-        break;
-      case ModelEvent::etCallSceneGroup:
-        assert(pEventWithDSID != NULL);
-        if (event.getParameterCount() == 6) {
-          onGroupCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), (callOrigin_t)event.getParameter(4), event.getParameter(5), event.getSingleStringParameter());
-          if (pEventWithDSID) {
-            onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), (callOrigin_t)event.getParameter(4), event.getParameter(5), event.getSingleStringParameter());
-          }
-        } else {
-          log("Expected 6 parameters for ModelEvent::etCallSceneGroup");
-        }
-        break;
-      case ModelEvent::etUndoSceneGroup:
-        if(event.getParameterCount() != 5) {
-          log("Expected 5 parameters for ModelEvent::etUndoSceneGroup");
-        } else {
-          onGroupUndoScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3), (callOrigin_t)event.getParameter(4), event.getSingleStringParameter());
-        }
-        break;
-      case ModelEvent::etBlinkGroup:
-        assert(pEventWithDSID != NULL);
-        if (event.getParameterCount() != 4) {
-          log("Expected at least 3 parameter for ModelEvent::etBlinkGroup");
-        } else {
-          onGroupBlink(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), (callOrigin_t)event.getParameter(3), event.getSingleStringParameter());
-        }
-        break;
-      case ModelEvent::etModelDirty:
-        eraseModelEventsFromQueue(ModelEvent::etModelDirty);
-        eraseEventFromList = false;
-        writeConfiguration();
-        if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
-          raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
-        }
-        break;
-      case ModelEvent::etModelOperationModeChanged:
-        eraseModelEventsFromQueue(ModelEvent::etModelOperationModeChanged);
-        eraseEventFromList = false;
-        writeConfiguration();
-        break;
-      case ModelEvent::etLostDSMeter:
-        assert(pEventWithDSID != NULL);
-        onLostDSMeter(pEventWithDSID->getDSID());
-        break;
-      case ModelEvent::etDS485DeviceDiscovered:
-        assert(pEventWithDSID != NULL);
-        onJoinedDSMeter(pEventWithDSID->getDSID());
-        break;
-      case ModelEvent::etDSMeterReady:
-        if(event.getParameterCount() != 0) {
-          log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
-        } else {
-          assert(pEventWithDSID != NULL);
-          dsuid_t meterID = pEventWithDSID->getDSID();
-          try{
-            boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(meterID);
-            mod->setIsConnected(true);
-            mod->setIsValid(false);
-          } catch(ItemNotFoundException& e) {
-            log("dSM is ready, but it is not yet known, re-discovering devices");
-            discoverDS485Devices();
-          }
-        }
-        break;
-      case ModelEvent::etBusReady:
-        log("Got bus ready event.", lsInfo);
-        discoverDS485Devices();
-        break;
-      case ModelEvent::etBusDown:
-        log("Got bus down event.", lsInfo);
-        try {
-          std::vector<boost::shared_ptr<DSMeter> > meters = m_pApartment->getDSMeters();
-          foreach(boost::shared_ptr<DSMeter> meter, meters) {
-            onLostDSMeter(meter->getDSID());
-          }
-        } catch(ItemNotFoundException& _e) {
-        }
-        break;
-      case ModelEvent::etMeteringValues:
-        if(event.getParameterCount() != 2) {
-          log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");
-        } else {
-          assert(pEventWithDSID != NULL);
-          dsuid_t meterID = pEventWithDSID->getDSID();
-          unsigned int power = event.getParameter(0);
-          unsigned int energy = event.getParameter(1);
-          try {
-            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
-            meter->setPowerConsumption(power);
-            meter->updateEnergyMeterValue(energy);
-            m_pMetering->postMeteringEvent(meter, power, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), DateTime());
-          } catch(ItemNotFoundException& _e) {
-          }
-        }
-        break;
-      case ModelEvent::etDeviceSensorEvent:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() < 2) {
-          log("Expected at least 2 parameter for ModelEvent::etDeviceSensorEvent");
-        } else {
-          onSensorEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
-        }
-        break;
-      case ModelEvent::etDeviceBinaryStateEvent:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() < 4) {
-          log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
-        } else {
-          onBinaryInputEvent(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
-        }
-        break;
-      case ModelEvent::etDeviceSensorValue:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() < 3) {
-          log("Expected at least 3 parameter for ModelEvent::etDeviceSensorValue");
-        } else {
-          onSensorValue(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
-        }
-        break;
-      case ModelEvent::etZoneSensorValue:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() < 5) {
-          log("Expected at least 5 parameter for ModelEvent::etZoneSensorValue");
-        } else {
-          onZoneSensorValue(pEventWithDSID->getDSID(), event.getSingleStringParameter(),
-              event.getParameter(0),
-              event.getParameter(1),
-              event.getParameter(2),
-              event.getParameter(3),
-              event.getParameter(4));
-        }
-        break;
-      case ModelEvent::etDeviceEANReady:
-        assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 9) {
-          log("Expected 8 parameters for ModelEvent::etDeviceEANReady");
-        } else {
-          onEANReady(pEventWithDSID->getDSID(),
-                     event.getParameter(0),
-                     (const DeviceOEMState_t)event.getParameter(1),
-                     (const DeviceOEMInetState_t)event.getParameter(2),
-                     ((unsigned long long)event.getParameter(3)) << 32 | ((unsigned long long)event.getParameter(4) & 0xFFFFFFFF),
-                     event.getParameter(5),
-                     event.getParameter(6),
-                     event.getParameter(7),
-                     event.getParameter(8));
-        }
-        break;
-      case ModelEvent::etDeviceOEMDataReady:
-        assert(pEventWithStrings != NULL);
-        if((event.getParameterCount() != 1) && (pEventWithStrings->getStringParameterCount() != 4)) {
-          log("Expected 5 parameters for ModelEvent::etDeviceOEMDataReady");
-        } else {
-          onOEMDataReady(pEventWithDSID->getDSID(),
-                         (DeviceOEMState_t)event.getParameter(0),
-                         pEventWithStrings->getStringParameter(0),
-                         pEventWithStrings->getStringParameter(1),
-                         pEventWithStrings->getStringParameter(2),
-                         pEventWithStrings->getStringParameter(3));
-        }
-        break;
-      case ModelEvent::etControllerConfig:
-        assert(pEventWithDSID != NULL);
-        onHeatingControllerConfig(
-            pEventWithDSID->getDSID(),
-            event.getParameter(0),
-            event.getSingleObjectParameter());
-        break;
-      case ModelEvent::etControllerState:
-        assert(pEventWithDSID != NULL);
-        onHeatingControllerState(
-            pEventWithDSID->getDSID(),
-            event.getParameter(0),
-            event.getParameter(1));
-        break;
-      case ModelEvent::etControllerValues:
-        assert(pEventWithDSID != NULL);
-        onHeatingControllerValues(
-            pEventWithDSID->getDSID(),
-            event.getParameter(0),
-            event.getSingleObjectParameter());
-        break;
-      default:
-        assert(false);
-        break;
-      }
+    m_ModelEvents_t::auto_type event;
 
-      if(eraseEventFromList) {
-        m_ModelEventsMutex.lock();
-        m_ModelEvents.erase(m_ModelEvents.begin());
-        m_ModelEventsMutex.unlock();
+    {
+      boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+      if (m_ModelEvents.empty()) {
+        lock.unlock();
+        return m_NewModelEvent.waitFor(m_EventTimeoutMS);
       }
-      return true;
-    } else {
-      return m_NewModelEvent.waitFor(m_EventTimeoutMS);
+      event = m_ModelEvents.pop_front();
     }
+
+    ModelEventWithDSID* pEventWithDSID =
+      dynamic_cast<ModelEventWithDSID*>(event.get());
+    ModelEventWithStrings* pEventWithStrings =
+      dynamic_cast<ModelEventWithStrings*>(event.get());
+
+    switch (event->getEventType()) {
+    case ModelEvent::etNewDevice:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 2) {
+        log("Expected exactly 2 parameter for ModelEvent::etNewDevice");
+      } else {
+        onAddDevice(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1));
+      }
+      break;
+    case ModelEvent::etLostDevice:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 2) {
+        log("Expected exactly 2 parameter for ModelEvent::etLostDevice");
+      } else {
+        onRemoveDevice(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1));
+      }
+      break;
+    case ModelEvent::etDeviceChanged:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 1) {
+        log("Expected exactly 1 parameter for ModelEvent::etDeviceChanged");
+      } else {
+        rescanDevice(pEventWithDSID->getDSID(), event->getParameter(0));
+      }
+      break;
+    case ModelEvent::etDeviceConfigChanged:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 4) {
+        log("Expected exactly 4 parameter for ModelEvent::etDeviceConfigChanged");
+      } else {
+        onDeviceConfigChanged(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1),
+                                                         event->getParameter(2), event->getParameter(3));
+      }
+      break;
+    case ModelEvent::etCallSceneDevice:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() == 5) {
+        onDeviceCallScene(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), (callOrigin_t)event->getParameter(3), event->getParameter(4), event->getSingleStringParameter());
+      } else {
+        log("Unexpected parameter count for ModelEvent::etCallSceneDevice");
+      }
+      break;
+    case ModelEvent::etBlinkDevice:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() == 3) {
+        onDeviceBlink(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), (callOrigin_t)event->getParameter(2), event->getSingleStringParameter());
+      } else {
+        log("Unexpected parameter count for ModelEvent::etBlinkDevice");
+      }
+      break;
+    case ModelEvent::etCallSceneDeviceLocal:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() == 5) {
+        onDeviceCallScene(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), (callOrigin_t)event->getParameter(3), event->getParameter(4), event->getSingleStringParameter());
+      } else {
+        log("Unexpected parameter count for ModelEvent::etCallSceneDeviceLocal");
+      }
+      break;
+    case ModelEvent::etButtonClickDevice:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 3) {
+        log("Expected exactly 3 parameter for ModelEvent::etButtonClickDevice");
+      } else {
+        onDeviceActionEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+        onDeviceActionFiltered(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+      break;
+    case ModelEvent::etCallSceneGroup:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() == 6) {
+        onGroupCallScene(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), event->getParameter(3), (callOrigin_t)event->getParameter(4), event->getParameter(5), event->getSingleStringParameter());
+        if (pEventWithDSID) {
+          onGroupCallSceneFiltered(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), event->getParameter(3), (callOrigin_t)event->getParameter(4), event->getParameter(5), event->getSingleStringParameter());
+        }
+      } else {
+        log("Expected 6 parameters for ModelEvent::etCallSceneGroup");
+      }
+      break;
+    case ModelEvent::etUndoSceneGroup:
+      if (event->getParameterCount() != 5) {
+        log("Expected 5 parameters for ModelEvent::etUndoSceneGroup");
+      } else {
+        onGroupUndoScene(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), event->getParameter(3), (callOrigin_t)event->getParameter(4), event->getSingleStringParameter());
+      }
+      break;
+    case ModelEvent::etBlinkGroup:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 4) {
+        log("Expected at least 3 parameter for ModelEvent::etBlinkGroup");
+      } else {
+        onGroupBlink(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), (callOrigin_t)event->getParameter(3), event->getSingleStringParameter());
+      }
+      break;
+    case ModelEvent::etModelDirty:
+      eraseModelEventsFromQueue(ModelEvent::etModelDirty);
+      writeConfiguration();
+      if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
+        raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
+      }
+      break;
+    case ModelEvent::etModelOperationModeChanged:
+      eraseModelEventsFromQueue(ModelEvent::etModelOperationModeChanged);
+      writeConfiguration();
+      break;
+    case ModelEvent::etLostDSMeter:
+      assert(pEventWithDSID != NULL);
+      onLostDSMeter(pEventWithDSID->getDSID());
+      break;
+    case ModelEvent::etDS485DeviceDiscovered:
+      assert(pEventWithDSID != NULL);
+      onJoinedDSMeter(pEventWithDSID->getDSID());
+      break;
+    case ModelEvent::etDSMeterReady:
+      if (event->getParameterCount() != 0) {
+        log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
+      } else {
+        assert(pEventWithDSID != NULL);
+        dsuid_t meterID = pEventWithDSID->getDSID();
+        try{
+          boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(meterID);
+          mod->setIsConnected(true);
+          mod->setIsValid(false);
+        } catch (ItemNotFoundException& e) {
+          log("dSM is ready, but it is not yet known, re-discovering devices");
+          discoverDS485Devices();
+        }
+      }
+      break;
+    case ModelEvent::etBusReady:
+      log("Got bus ready event.", lsInfo);
+      discoverDS485Devices();
+      break;
+    case ModelEvent::etBusDown:
+      log("Got bus down event.", lsInfo);
+      try {
+        std::vector<boost::shared_ptr<DSMeter> > meters = m_pApartment->getDSMeters();
+        foreach(boost::shared_ptr<DSMeter> meter, meters) {
+          onLostDSMeter(meter->getDSID());
+        }
+      } catch (ItemNotFoundException& _e) {
+      }
+      break;
+    case ModelEvent::etMeteringValues:
+      if (event->getParameterCount() != 2) {
+        log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");
+      } else {
+        assert(pEventWithDSID != NULL);
+        dsuid_t meterID = pEventWithDSID->getDSID();
+        unsigned int power = event->getParameter(0);
+        unsigned int energy = event->getParameter(1);
+        try {
+          boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
+          meter->setPowerConsumption(power);
+          meter->updateEnergyMeterValue(energy);
+          m_pMetering->postMeteringEvent(meter, power, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), DateTime());
+        } catch (ItemNotFoundException& _e) {
+        }
+      }
+      break;
+    case ModelEvent::etDeviceSensorEvent:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 2) {
+        log("Expected at least 2 parameter for ModelEvent::etDeviceSensorEvent");
+      } else {
+        onSensorEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1));
+      }
+      break;
+    case ModelEvent::etDeviceBinaryStateEvent:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 4) {
+        log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
+      } else {
+        onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), event->getParameter(3));
+      }
+      break;
+    case ModelEvent::etDeviceSensorValue:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 3) {
+        log("Expected at least 3 parameter for ModelEvent::etDeviceSensorValue");
+      } else {
+        onSensorValue(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+      break;
+    case ModelEvent::etZoneSensorValue:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 5) {
+        log("Expected at least 5 parameter for ModelEvent::etZoneSensorValue");
+      } else {
+        onZoneSensorValue(pEventWithDSID->getDSID(), event->getSingleStringParameter(),
+            event->getParameter(0),
+            event->getParameter(1),
+            event->getParameter(2),
+            event->getParameter(3),
+            event->getParameter(4));
+      }
+      break;
+    case ModelEvent::etDeviceEANReady:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 9) {
+        log("Expected 8 parameters for ModelEvent::etDeviceEANReady");
+      } else {
+        onEANReady(pEventWithDSID->getDSID(),
+                   event->getParameter(0),
+                   (const DeviceOEMState_t)event->getParameter(1),
+                   (const DeviceOEMInetState_t)event->getParameter(2),
+                   ((unsigned long long)event->getParameter(3)) << 32 | ((unsigned long long)event->getParameter(4) & 0xFFFFFFFF),
+                   event->getParameter(5),
+                   event->getParameter(6),
+                   event->getParameter(7),
+                   event->getParameter(8));
+      }
+      break;
+    case ModelEvent::etDeviceOEMDataReady:
+      assert(pEventWithStrings != NULL);
+      if ((event->getParameterCount() != 1) && (pEventWithStrings->getStringParameterCount() != 4)) {
+        log("Expected 5 parameters for ModelEvent::etDeviceOEMDataReady");
+      } else {
+        onOEMDataReady(pEventWithDSID->getDSID(),
+                       (DeviceOEMState_t)event->getParameter(0),
+                       pEventWithStrings->getStringParameter(0),
+                       pEventWithStrings->getStringParameter(1),
+                       pEventWithStrings->getStringParameter(2),
+                       pEventWithStrings->getStringParameter(3));
+      }
+      break;
+    case ModelEvent::etControllerConfig:
+      assert(pEventWithDSID != NULL);
+      onHeatingControllerConfig(
+          pEventWithDSID->getDSID(),
+          event->getParameter(0),
+          event->getSingleObjectParameter());
+      break;
+    case ModelEvent::etControllerState:
+      assert(pEventWithDSID != NULL);
+      onHeatingControllerState(
+          pEventWithDSID->getDSID(),
+          event->getParameter(0),
+          event->getParameter(1));
+      break;
+    case ModelEvent::etControllerValues:
+      assert(pEventWithDSID != NULL);
+      onHeatingControllerValues(
+          pEventWithDSID->getDSID(),
+          event->getParameter(0),
+          event->getSingleObjectParameter());
+      break;
+    default:
+      assert(false);
+      break;
+    }
+
+    return true;
   } // handleModelEvents
 
   void ModelMaintenance::setApartmentState() {
@@ -854,8 +853,8 @@ namespace dss {
 
   void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
     boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-    for(boost::ptr_vector<ModelEvent>::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end(); ) {
-      if(it->getEventType() == _type) {
+    for (m_ModelEvents_t::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end();) {
+      if (it->getEventType() == _type) {
         it = m_ModelEvents.erase(it);
       } else {
         ++it;
