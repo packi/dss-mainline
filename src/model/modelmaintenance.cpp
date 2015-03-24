@@ -857,8 +857,8 @@ namespace dss {
 
   void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
     boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-    for(boost::ptr_vector<ModelEvent>::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end(); ) {
-      if(it->getEventType() == _type) {
+    for (m_ModelEvents_t::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end();) {
+      if (it->getEventType() == _type) {
         it = m_ModelEvents.erase(it);
       } else {
         ++it;
