@@ -253,6 +253,10 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createGroupCallSceneEvent(createGroup(1), 1, 1, 1,
                                        callOrigin_t(2), dsuid_t(),
                                        "fake-token", false);
+  } else if (eventName == EventName::UndoScene) {
+    pEvent = createGroupUndoSceneEvent(createGroup(1), 1, 1, 1,
+                                       callOrigin_t(2), dsuid_t(),
+                                       "fake-token");
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");

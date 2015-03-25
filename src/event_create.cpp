@@ -127,4 +127,22 @@ createGroupCallSceneEvent(boost::shared_ptr<Group> group, int sceneID,
   return event;
 }
 
+boost::shared_ptr<Event>
+createGroupUndoSceneEvent(boost::shared_ptr<Group> group, int sceneID,
+                          int groupID, int zoneID,
+                          const callOrigin_t& callOrigin,
+                          const dsuid_t& originDSUID,
+                          const std::string& originToken)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::UndoScene, group);
+  event->setProperty("sceneID", intToString(sceneID));
+  event->setProperty("groupID", intToString(groupID));
+  event->setProperty("zoneID", intToString(zoneID));
+  event->setProperty("originDSUID", dsuid2str(originDSUID));
+  event->setProperty("callOrigin", intToString(callOrigin));
+  event->setProperty("originToken", originToken);
+  return event;
+}
+
 }

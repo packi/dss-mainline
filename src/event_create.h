@@ -62,5 +62,12 @@ boost::shared_ptr<Event>
                             const dsuid_t& originDsuid,
                             const std::string& originToken,
                             bool forced);
+
+boost::shared_ptr<Event>
+  createGroupUndoSceneEvent(boost::shared_ptr<Group> group, int sceneID,
+                            int groupID, int zoneID,
+                            const callOrigin_t& callOrigin,
+                            const dsuid_t& originDsuid,
+                            const std::string& originToken);
 }
 #endif

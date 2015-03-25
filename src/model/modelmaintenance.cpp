@@ -1065,20 +1065,15 @@ namespace dss {
           }
         }
 
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::UndoScene, group));
-        pEvent->setProperty("sceneID", intToString(_sceneID));
-        pEvent->setProperty("groupID", intToString(_groupID));
-        pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
-          DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
+          DeviceReference devRef = m_pApartment->getDevices().
+            getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
-        pEvent->setProperty("callOrigin", intToString(_origin));
-        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
-        pEvent->setProperty("originToken", _token);
-        raiseEvent(pEvent);
+        raiseEvent(createGroupUndoSceneEvent(group, _sceneID, _groupID,
+                                             _zoneID, _origin, originDSUID,
+                                             _token));
       } else {
         log("OnGroupUndoScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
       }
