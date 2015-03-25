@@ -64,4 +64,17 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> pDevRev, int
   return event;
 }
 
+boost::shared_ptr<Event>
+createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> pDevRev,
+                               int sensorIndex, int sensorType,
+                               const DateTime& timestamp)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::DeviceInvalidSensor, pDevRev);
+  event->setProperty("sensorIndex", intToString(sensorIndex));
+  event->setProperty("sensorType", intToString(sensorType));
+  event->setProperty("lastValueTS", timestamp.toISO8601_ms());
+  return event;
+}
+
 }
