@@ -326,8 +326,6 @@ namespace dss {
         int groupID = mEvent->getGroupID();
         int zoneID = mEvent->getZoneID();
         int originDeviceID = mEvent->getOriginDeviceID();
-        callOrigin_t callOrigin = mEvent->getCallOrigin();
-        std::string originToken = mEvent->getOriginToken();
 
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
@@ -339,37 +337,27 @@ namespace dss {
           }
 
           if (mEvent->isDue()) {
-            if (! (mEvent->isCalled())) {
-              boost::shared_ptr<Event> pEvent;
-              pEvent.reset(new Event(EventName::CallScene, group));
-              pEvent->setProperty("sceneID", intToString(sceneID));
-              pEvent->setProperty("groupID", intToString(groupID));
-              pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
-              pEvent->setProperty("callOrigin", intToString(callOrigin));
-              pEvent->setProperty("originToken", originToken);
-              if (mEvent->getForcedFlag()) {
-                pEvent->setProperty("forced", "true");
-              }
-              handleDeferredModelStateChanges(callOrigin, zoneID, groupID, sceneID);
-              raiseEvent(pEvent);
+            if (!mEvent->isCalled()) {
+              handleDeferredModelStateChanges(mEvent->getCallOrigin(), zoneID,
+                                              groupID, sceneID);
+              raiseEvent(createGroupCallSceneEvent(group, sceneID, groupID,
+                                                   zoneID,
+                                                   mEvent->getCallOrigin(),
+                                                   originDSUID,
+                                                   mEvent->getOriginToken(),
+                                                   mEvent->getForcedFlag()));
             }
             // finished deferred processing of this event
           } else if (SceneHelper::isDimSequence(sceneID)) {
-            if (! (mEvent->isCalled())) {
-              boost::shared_ptr<Event> pEvent;
-              pEvent.reset(new Event(EventName::CallScene, group));
-              pEvent->setProperty("sceneID", intToString(sceneID));
-              pEvent->setProperty("groupID", intToString(groupID));
-              pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
-              pEvent->setProperty("callOrigin", intToString(callOrigin));
-              pEvent->setProperty("originToken", originToken);
-              if (mEvent->getForcedFlag()) {
-                pEvent->setProperty("forced", "true");
-              }
-              handleDeferredModelStateChanges(callOrigin, zoneID, groupID, sceneID);
-              raiseEvent(pEvent);
+            if (!mEvent->isCalled()) {
+              handleDeferredModelStateChanges(mEvent->getCallOrigin(), zoneID,
+                                              groupID, sceneID);
+              raiseEvent(createGroupCallSceneEvent(group, sceneID, groupID,
+                                                   zoneID,
+                                                   mEvent->getCallOrigin(),
+                                                   originDSUID,
+                                                   mEvent->getOriginToken(),
+                                                   mEvent->getForcedFlag()));
               mEvent->setCalled();
             }
             m_DeferredEvents.push_back(mEvent);

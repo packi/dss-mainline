@@ -249,6 +249,10 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, "dev");
   } else if (eventName == EventName::ZoneSensorError) {
     pEvent = createZoneSensorErrorEvent(createGroup(1), 0, DateTime());
+  } else if (eventName == EventName::CallScene) {
+    pEvent = createGroupCallSceneEvent(createGroup(1), 1, 1, 1,
+                                       callOrigin_t(2), dsuid_t(),
+                                       "fake-token", false);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");

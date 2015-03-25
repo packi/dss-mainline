@@ -23,6 +23,9 @@
 #include "event.h"
 
 #include <boost/shared_ptr.hpp>
+#include <digitalSTROM/dsuid/dsuid.h>
+
+#include "model/deviceinterface.h"
 
 namespace dss {
 
@@ -52,5 +55,12 @@ boost::shared_ptr<Event>
   createZoneSensorErrorEvent(boost::shared_ptr<Group> group, int sensorType,
                              const DateTime& timestamp);
 
+boost::shared_ptr<Event>
+  createGroupCallSceneEvent(boost::shared_ptr<Group> group, int sceneID,
+                            int groupID, int zoneID,
+                            const callOrigin_t& callOrigin,
+                            const dsuid_t& originDsuid,
+                            const std::string& originToken,
+                            bool forced);
 }
 #endif
