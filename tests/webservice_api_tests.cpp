@@ -15,6 +15,7 @@
 #include "http_client.h"
 #include "model/apartment.h"
 #include "model/devicereference.h"
+#include "model/zone.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
 #include "src/event.h"
@@ -222,6 +223,12 @@ public:
     return boost::make_shared<DeviceReference>(dev, &apartment);
   }
 
+  boost::shared_ptr<Group> createGroup(int id) {
+    Apartment &apartment(DSS::getInstance()->getApartment());
+    boost::shared_ptr<Zone> zone = apartment.getZone(0);
+    return zone->getGroup(id);
+  }
+
 private:
   DSSLifeCycle m_dss_guard;
 };
@@ -238,6 +245,8 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createDeviceStatusEvent(createDevRef(), 0, 1);
   } else if (eventName == EventName::DeviceInvalidSensor) {
     pEvent = createDeviceInvalidSensorEvent(createDevRef(), 0, 1, DateTime());
+  } else if (eventName == EventName::ZoneSensorValue) {
+    pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, "dev");
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");

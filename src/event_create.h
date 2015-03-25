@@ -43,5 +43,10 @@ boost::shared_ptr<Event>
   createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> pDevRev,
                                  int sensorIndex, int sensorType,
                                  const DateTime& timestamp);
+
+boost::shared_ptr<Event>
+  createZoneSensorValueEvent(boost::shared_ptr<Group> group, int sensorType,
+                             int sensorValue, const std::string sourceDevice);
+
 }
 #endif

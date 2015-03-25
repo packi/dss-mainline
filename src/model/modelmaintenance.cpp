@@ -1780,19 +1780,14 @@ namespace dss {
                                            const int& _sensorValue,
                                            const int& _precision) {
     try {
-      boost::shared_ptr<Event> pEvent;
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
       double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
-      pEvent.reset(new Event(EventName::ZoneSensorValue, group));
-      pEvent->setProperty("sensorType", intToString(_sensorType));
-      pEvent->setProperty("sensorValue", intToString(_sensorValue));
-      pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
-      pEvent->setProperty("originDSID", _sourceDevice);
-      raiseEvent(pEvent);
+      raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue,
+                                            _sourceDevice));
     } catch(ItemNotFoundException& e) {
       log("onZoneSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
