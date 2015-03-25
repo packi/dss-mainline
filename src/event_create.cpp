@@ -93,4 +93,15 @@ createZoneSensorValueEvent(boost::shared_ptr<Group> group, int sensorType,
   return event;
 }
 
+boost::shared_ptr<Event>
+createZoneSensorErrorEvent(boost::shared_ptr<Group> group, int sensorType,
+                      const DateTime& timestamp)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::ZoneSensorError, group);
+  event->setProperty("sensorType", intToString(sensorType));
+  event->setProperty("lastValueTS", timestamp.toISO8601_ms());
+  return event;
+}
+
 }

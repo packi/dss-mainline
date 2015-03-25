@@ -247,6 +247,8 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createDeviceInvalidSensorEvent(createDevRef(), 0, 1, DateTime());
   } else if (eventName == EventName::ZoneSensorValue) {
     pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, "dev");
+  } else if (eventName == EventName::ZoneSensorError) {
+    pEvent = createZoneSensorErrorEvent(createGroup(1), 0, DateTime());
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");

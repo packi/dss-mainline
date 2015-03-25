@@ -52,10 +52,8 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
           " is too old: " + _ts.toISO8601_ms() +
           ", age in seconds is " + intToString(age), lsWarning);
       if (DSS::hasInstance()) {
-        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::ZoneSensorError, _group);
-        pEvent->setProperty("sensorType", intToString(_sensorType));
-        pEvent->setProperty("lastValueTS", _ts.toISO8601_ms());
-        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        DSS::getInstance()->getEventQueue().
+            pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
       }
       return true;
     }
