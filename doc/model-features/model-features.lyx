@@ -1,0 +1,755 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass docbook
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 0
+\use_package amssymb 0
+\use_package cancel 0
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 0
+\use_package mhchem 1
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language swedish
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+dSS Model Features
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+dontcare
+\end_layout
+
+\begin_layout Standard
+Show "Retain output when calling scene X" check box in scene properties
+ device configuration.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-scene-properties-dontcare.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+blink
+\end_layout
+
+\begin_layout Standard
+Show "Blink when calling scene X" check box in scene properties device configura
+tion.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-scene-properties-blink.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+ledauto
+\end_layout
+
+\begin_layout Standard
+Radiogroup "LED mode" in advanced scene properties device configuration
+ supports "auto" mode.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-scene-properties-advanced-ledauto.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+leddark
+\end_layout
+
+\begin_layout Standard
+Radiogroup "LED mode" in advanced scene properties device configuration
+ supports "dark" mode.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-scene-properties-advanced-leddark.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+transt
+\end_layout
+
+\begin_layout Standard
+Show "Transition time" radio group in advanced scene properties device configura
+tion dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-scene-properties-advanced-transt.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+outmode
+\end_layout
+
+\begin_layout Standard
+Show "Output mode" radio group in device properties dialog with "switched",
+ "dimmed" and "disabled" selections.
+ The "switched" parameter for this configuration has a value of 16.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-output-mode.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+outmodeswitch
+\end_layout
+
+\begin_layout Standard
+Show "Output mode" radio group in device properties dialog with only "switched"
+ and "disabled" selections.
+ The "switched" parameter for this configuration has a value of 35.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-output-mode-switched.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+outvalue8
+\end_layout
+
+\begin_layout Standard
+Influences the "Device Settings" dialog, the flag tells the UI that the
+ device has an 8-bit output value, however it has no direct influence on
+ how the device is read out, currently it is only used to decide if the
+ dialog should be enabled (device has an output value) or not.
+ For GR-KL there is a parallel logic which basically signals that the device
+ has 
+\begin_inset Quotes sld
+\end_inset
+
+another
+\begin_inset Quotes srd
+\end_inset
+
+ output value which is implicitly treated as 16bit and also influences the
+ state of the same dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename edit-device-value-on-off.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pushbutton
+\end_layout
+
+\begin_layout Standard
+Show push button settings in "Device properties" dialog.
+ Also check if multi-button settings for device pairing must be shown (depends
+ on various other parameters).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-pushbuttons.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pushbdevice
+\end_layout
+
+\begin_layout Standard
+This flag influences the contents of the "Push-button" drop down list, it
+ makes sure that a "device pushbutton" entry is present.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-device-pushbutton.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pushbsensor
+\end_layout
+
+\begin_layout Standard
+This flag influences the contents of the "Push-button" drop down list, it
+ makes sure that a "sensor" entry is present.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-pushbutton-sensor.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pushbarea
+\end_layout
+
+\begin_layout Standard
+This flag influences the contents of the "Push-button" drop down list, it
+ makes sure that a "Area-pushbutton" entry is present.
+ It also enables the area selection drop down.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-area-pushbutton.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pushbadvanced
+\end_layout
+
+\begin_layout Standard
+Enables the advanced push button configuration in the "Device Properties"
+ dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-pushbutton-advanced-view.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pushbcombined
+\end_layout
+
+\begin_layout Standard
+This flag influences the available items of the "Button-function" settings
+ in the "Device Properties" dialog.
+ When enabled the available items are "1-way" (button input mode "1way_combined"
+), "2-way" and "1-way + joker".
+ When disabled the items are "1-way" (button input mode "1way"), "2-way
+ off"/"2-way down", "2-way on"/"2-way up".
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-pushbutton-combined-on-off.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+shadeprops
+\end_layout
+
+\begin_layout Standard
+Enables the "Shade Device Properties" dialog for the given device in the
+ "Hardware" tab.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename grid-shade-properties.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+shadeposition
+\end_layout
+
+\begin_layout Standard
+This flag is somewhat logically related to the outvalue8 flag, it influences
+ the behavior of the "Device Settings" dialog.
+ When set, the device values are assumed to have a 16bit resolution, also
+ some labels will show "Position" instead of "Value".
+ The flags outvalue8 and shadeposition are exclusive, it should be noted
+ that when both are false the "Device value" dialog will be shown as disabled.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename edit-device-value-shadeposition.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+motiontimefins
+\end_layout
+
+\begin_layout Standard
+Shows "Turn time blades" and "Calibrate turn times" options in the "Device
+ Properties shade" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-shade-motiontime-fins.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+optypeconfig
+\end_layout
+
+\begin_layout Standard
+Show "Operation Type" settings in the "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-optype.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+shadebladeang
+\end_layout
+
+\begin_layout Standard
+Show "Set Blade Angle" option in the "Device Settings" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename edit-device-value-shadebladeang.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+highlevel
+\end_layout
+
+\begin_layout Standard
+This flag influences the contents of the "Push-button" dropdown list, it
+ makes sure that a "App button" entry is present.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-highlevel.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+consumption
+\end_layout
+
+\begin_layout Standard
+Enables the "Configure Consumption Event" dialog for the given device in
+ the "Hardware" tab.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename grid-consumption-event.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+jokerconfig
+\end_layout
+
+\begin_layout Standard
+Show "Joker" configuration settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-jokerconfig.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+akmsensor
+\end_layout
+
+\begin_layout Standard
+Show "Sensor function" settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-sensor-function.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+akminput
+\end_layout
+
+\begin_layout Standard
+Show AKM "Input" settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-akm-input.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+akmdelay
+\end_layout
+
+\begin_layout Standard
+Show AKM "Delay" settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-akm-delay.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+twowayconfig
+\end_layout
+
+\begin_layout Standard
+Shows the "Button function" settings in "Device Properties" dialog, depends
+ on "pushbutton" parameter.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-twoway.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+outputchannels
+\end_layout
+
+\begin_layout Standard
+Display "Hue" and "Saturation" setting in the "Device Settings" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename edit-device-value-outputchannels.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+heatinggroup
+\end_layout
+
+\begin_layout Standard
+Shows "Heating group" settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-heatinggroup.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+heatingoutmode
+\end_layout
+
+\begin_layout Standard
+Enables the "Output mode" radio group in "Device Properties" dialog and
+ influences its contents.
+ The presented options will be: "switched" (65), "pulse width modulation
+ (PWM)" (64) and "disabled" (0).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-heatingoutmode.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+heatingprops
+\end_layout
+
+\begin_layout Standard
+Enables the "Device Properties climate" dialog for the given device in the
+ "Hardware" tab.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename grid-heating-properties.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+pwmvalue
+\end_layout
+
+\begin_layout Standard
+Read out and display "Operation mode" in the "Device Settings" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename edit-device-value-opmode.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+valvetype
+\end_layout
+
+\begin_layout Standard
+Shows "Attached terminal device" settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-valvetype.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+extradimmer
+\end_layout
+
+\begin_layout Standard
+Enables the "Output mode" radio group in "Device Properties" dialog and
+ influences its contents.
+ The presented options will be: "switched" (16), "dimmed 0-10V", "dimmed
+ 1-10V" and "disabled".
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-extradimmer.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+umvrelay
+\end_layout
+
+\begin_layout Standard
+Shows "Relay Function" settings in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-umvrelay.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+blinkconfig
+\end_layout
+
+\begin_layout Standard
+Shows "Blink behavior for output on scene calls" settings in the advanced
+ "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-blinkconfig.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+umroutmode 
+\end_layout
+
+\begin_layout Standard
+Enables the "Output mode" radio group in "Device Properties" dialog and
+ influences its contents.
+ The presented options will be: "single switched" (35) for all dSUIDs and
+ "combined switched" (43), "combined two stage switched" (34), "combined
+ three stage switched" (38) and "disabled" (0).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-umroutmode.png
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

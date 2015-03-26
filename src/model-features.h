@@ -34,6 +34,11 @@
 
 namespace dss {
 
+/* documentation:
+   http://redmine.digitalstrom.org/attachments/download/6076/model-features.pdf
+   http://redmine.digitalstrom.org/projects/dss/wiki/Model_Features
+ */
+
 enum {
   mf_dontcare,
   mf_blink,
