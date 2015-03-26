@@ -37,6 +37,7 @@
 #include "model/modelconst.h"
 #include "model/modelmaintenance.h"
 #include "event.h"
+#include "event_create.h"
 
 namespace dss {
 
@@ -51,10 +52,8 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
           " is too old: " + _ts.toISO8601_ms() +
           ", age in seconds is " + intToString(age), lsWarning);
       if (DSS::hasInstance()) {
-        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::ZoneSensorError, _group);
-        pEvent->setProperty("sensorType", intToString(_sensorType));
-        pEvent->setProperty("lastValueTS", _ts.toISO8601_ms());
-        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        DSS::getInstance()->getEventQueue().
+            pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
       }
       return true;
     }
@@ -109,10 +108,9 @@ void SensorMonitorTask::run() {
 
           if (DSS::hasInstance()) {
             boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(device, m_Apartment);
-            boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::DeviceInvalidSensor, pDevRef);
-            pEvent->setProperty("sensorIndex", intToString(s));
-            pEvent->setProperty("sensorType", intToString(sensor->m_sensorType));
-            pEvent->setProperty("lastValueTS", sensor->m_sensorValueTS.toISO8601_ms());
+            boost::shared_ptr<Event> pEvent =
+                createDeviceInvalidSensorEvent(pDevRef, s, sensor->m_sensorType,
+                                               sensor->m_sensorValueTS);
             DSS::getInstance()->getEventQueue().pushEvent(pEvent);
           }
         }

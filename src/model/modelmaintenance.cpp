@@ -326,8 +326,6 @@ namespace dss {
         int groupID = mEvent->getGroupID();
         int zoneID = mEvent->getZoneID();
         int originDeviceID = mEvent->getOriginDeviceID();
-        callOrigin_t callOrigin = mEvent->getCallOrigin();
-        std::string originToken = mEvent->getOriginToken();
 
         try {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
@@ -339,37 +337,27 @@ namespace dss {
           }
 
           if (mEvent->isDue()) {
-            if (! (mEvent->isCalled())) {
-              boost::shared_ptr<Event> pEvent;
-              pEvent.reset(new Event(EventName::CallScene, group));
-              pEvent->setProperty("sceneID", intToString(sceneID));
-              pEvent->setProperty("groupID", intToString(groupID));
-              pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
-              pEvent->setProperty("callOrigin", intToString(callOrigin));
-              pEvent->setProperty("originToken", originToken);
-              if (mEvent->getForcedFlag()) {
-                pEvent->setProperty("forced", "true");
-              }
-              handleDeferredModelStateChanges(callOrigin, zoneID, groupID, sceneID);
-              raiseEvent(pEvent);
+            if (!mEvent->isCalled()) {
+              handleDeferredModelStateChanges(mEvent->getCallOrigin(), zoneID,
+                                              groupID, sceneID);
+              raiseEvent(createGroupCallSceneEvent(group, sceneID, groupID,
+                                                   zoneID,
+                                                   mEvent->getCallOrigin(),
+                                                   originDSUID,
+                                                   mEvent->getOriginToken(),
+                                                   mEvent->getForcedFlag()));
             }
             // finished deferred processing of this event
           } else if (SceneHelper::isDimSequence(sceneID)) {
-            if (! (mEvent->isCalled())) {
-              boost::shared_ptr<Event> pEvent;
-              pEvent.reset(new Event(EventName::CallScene, group));
-              pEvent->setProperty("sceneID", intToString(sceneID));
-              pEvent->setProperty("groupID", intToString(groupID));
-              pEvent->setProperty("zoneID", intToString(zoneID));
-              pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
-              pEvent->setProperty("callOrigin", intToString(callOrigin));
-              pEvent->setProperty("originToken", originToken);
-              if (mEvent->getForcedFlag()) {
-                pEvent->setProperty("forced", "true");
-              }
-              handleDeferredModelStateChanges(callOrigin, zoneID, groupID, sceneID);
-              raiseEvent(pEvent);
+            if (!mEvent->isCalled()) {
+              handleDeferredModelStateChanges(mEvent->getCallOrigin(), zoneID,
+                                              groupID, sceneID);
+              raiseEvent(createGroupCallSceneEvent(group, sceneID, groupID,
+                                                   zoneID,
+                                                   mEvent->getCallOrigin(),
+                                                   originDSUID,
+                                                   mEvent->getOriginToken(),
+                                                   mEvent->getForcedFlag()));
               mEvent->setCalled();
             }
             m_DeferredEvents.push_back(mEvent);
@@ -1077,20 +1065,15 @@ namespace dss {
           }
         }
 
-        boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event(EventName::UndoScene, group));
-        pEvent->setProperty("sceneID", intToString(_sceneID));
-        pEvent->setProperty("groupID", intToString(_groupID));
-        pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
         if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
-          DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
+          DeviceReference devRef = m_pApartment->getDevices().
+            getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
-        pEvent->setProperty("callOrigin", intToString(_origin));
-        pEvent->setProperty("originDSUID", dsuid2str(originDSUID));
-        pEvent->setProperty("originToken", _token);
-        raiseEvent(pEvent);
+        raiseEvent(createGroupUndoSceneEvent(group, _sceneID, _groupID,
+                                             _zoneID, _origin, originDSUID,
+                                             _token));
       } else {
         log("OnGroupUndoScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
       }
@@ -1780,19 +1763,14 @@ namespace dss {
                                            const int& _sensorValue,
                                            const int& _precision) {
     try {
-      boost::shared_ptr<Event> pEvent;
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
       double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
-      pEvent.reset(new Event(EventName::ZoneSensorValue, group));
-      pEvent->setProperty("sensorType", intToString(_sensorType));
-      pEvent->setProperty("sensorValue", intToString(_sensorValue));
-      pEvent->setProperty("sensorValueFloat", doubleToString(fValue));
-      pEvent->setProperty("originDSID", _sourceDevice);
-      raiseEvent(pEvent);
+      raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue,
+                                            _sourceDevice));
     } catch(ItemNotFoundException& e) {
       log("onZoneSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
