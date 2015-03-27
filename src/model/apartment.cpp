@@ -524,6 +524,7 @@ namespace dss {
         result.push_back(state);
       }
     }
+    regfree(&stateNameRegex);
     return result;
   } // getStates
 
