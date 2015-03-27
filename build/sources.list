@@ -165,6 +165,8 @@ libdsscore_a_SOURCES =  \
 	../src/util.h \
 	../src/vdc-connection.cpp \
 	../src/vdc-connection.h \
+	../src/protobufjson.cpp \
+	../src/protobufjson.h \
 	../src/watchdog.cpp \
 	../src/watchdog.h \
 	../src/web/handler/apartmentrequesthandler.cpp \
