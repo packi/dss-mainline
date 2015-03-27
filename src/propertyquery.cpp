@@ -24,6 +24,9 @@
   #include "config.h"
 #endif
 
+#include "dss.h"
+#include "model/apartment.h"
+#include "model/device.h"
 
 #include "src/propertyquery.h"
 #include "web/webrequests.h"
@@ -32,6 +35,7 @@
 #include <iostream>
 
 #include "src/propertysystem.h"
+#include "src/protobufjson.h"
 
 #include "src/foreach.h"
 #include "src/base.h"
@@ -277,5 +281,42 @@ namespace dss {
     }
     return;
   } // run2
+
+  void PropertyQuery::vdcquery(JSONWriter& json) {
+    if(beginsWith(m_Query, m_pProperty->getName())) {
+
+      PropertyContainerToProtobuf::ProtoData data = PropertyContainerToProtobuf::convertPropertyContainerToProtobuf(m_PartList);
+
+      uint8_t buffer_in [4096];
+      uint8_t buffer_out[4096];
+      uint16_t bs;
+
+      if (DSS::hasInstance()) {
+        memset(buffer_in,  0, sizeof(buffer_in));
+        memset(buffer_out, 0, sizeof(buffer_out));
+        if (!data.message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
+          throw std::runtime_error("could not serialize message");
+        }
+        boost::shared_ptr<Device> device = DSS::getInstance()->getApartment().getDeviceByDSID(data.deviceDsuid);
+        DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+            device->getDSMeterDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+      } else {
+        return;
+      }
+
+      data.message.Clear();
+      if (bs > sizeof(buffer_out)) {
+        throw std::runtime_error("incoming message too large, dropping");
+      }
+
+      if (!data.message.ParseFromArray(buffer_out, bs)) {
+        throw std::runtime_error("could not parse response message");
+      }
+
+      if (!ProtobufToJSon::protoPropertyToJson(data.message, json)) {
+        throw std::runtime_error("could not parse response message");
+      }
+    }
+  } // vdcquery;
 
 } // namespace dss

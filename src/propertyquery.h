@@ -71,6 +71,7 @@ namespace dss {
 
     void run(JSONWriter& json);
     void run2(JSONWriter& json);
+    void vdcquery(JSONWriter& json);
   private:
     void parseParts();
 
