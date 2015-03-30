@@ -85,13 +85,17 @@ namespace dss {
     void add(std::string _name, std::string _value);
     void add(std::string _name, const char* _value);
     void add(std::string _name, int _value);
+    void add(std::string _name, unsigned _value);
     void add(std::string _name, long long int _value);
+    void add(std::string _name, unsigned long long int _value);
     void add(std::string _name, bool _value);
     void add(std::string _name, double _value);
     void add(std::string _value);
     void add(const char* _value);
     void add(int _value);
-    void add(long int _value);
+    void add(unsigned _value);
+    void add(long long int _value);
+    void add(unsigned long long int _value);
     void add(bool _value);
     void add(double _value);
     void startArray(std::string _name);

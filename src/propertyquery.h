@@ -20,6 +20,9 @@
 
 */
 
+#ifndef PROPERTYQUERY_H_INCLUDED
+#define PROPERTYQUERY_H_INCLUDED
+
 #include <string>
 #include <vector>
 
@@ -32,6 +35,28 @@ namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class JSONWriter;
+
+  class KeyValueContainer {
+  public:
+    std::string name;
+    std::string value;
+    KeyValueContainer(std::string& _name, std::string& _value)
+    : name(_name), value(_value)
+    {}
+    KeyValueContainer(std::string& _name)
+    : name(_name), value("")
+    {}
+  }; // KeyValueContainer
+
+  class PropertyContainer {
+  public:
+    std::string name;
+    std::vector<KeyValueContainer> properties;
+    bool child;
+    PropertyContainer(std::string _name, std::vector<KeyValueContainer> _properties, bool _child)
+    : name(_name), properties(_properties), child(_child)
+    {}
+  }; // PropertyContainer
 
   class PropertyQuery {
     __DECL_LOG_CHANNEL__
@@ -46,23 +71,18 @@ namespace dss {
 
     void run(JSONWriter& json);
     void run2(JSONWriter& json);
-  private:
-    class part_t {
-    public:
-      std::string name;
-      std::vector<std::string> properties;
-      part_t(std::string _name, std::vector<std::string> _properties)
-      : name(_name), properties(_properties)
-      { }
-    }; // part_t
+    void vdcquery(JSONWriter& json);
   private:
     void parseParts();
+
+    std::vector<KeyValueContainer> splitKeyValue(std::vector<std::string> input);
+    std::vector<std::string> evalPropertyList(std::string& _input, std::string& _output_key);
 
     /**
      * Handles one level of the query
      *
      * query1 = ../part(property1,property2)/...
-     * qeury2 = ../part/...
+     * query2 = ../part/...
      *
      * property is what we are extracting, part is what needs to match
      * query2 will extract nothing at this level
@@ -79,7 +99,7 @@ namespace dss {
      * Handles one level of the query
      *
      * query1 = ../part(property1,property2)/...
-     * qeury2 = ../part/...
+     * query2 = ../part/...
      *
      * property is what we are extracting, part is what needs to match
      * query2 will extract nothing at this level
@@ -100,7 +120,7 @@ namespace dss {
      * @param _node element that should be filtered
      * @return JSON object with the added properties
      */
-    void addProperties(part_t& _part, JSONWriter& json, dss::PropertyNodePtr _node);
+    void addProperties(PropertyContainer& _part, JSONWriter& json, dss::PropertyNodePtr _node);
 
     /**
      * Read int/float/bool value from node and store
@@ -111,7 +131,11 @@ namespace dss {
 
     PropertyNodePtr m_pProperty;
     std::string m_Query;
-    std::vector<part_t> m_PartList;
+
+  protected:
+    std::vector<PropertyContainer> m_PartList;
   }; // PropertyQuery
 
 } // namespace dss
+
+#endif

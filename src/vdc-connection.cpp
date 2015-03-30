@@ -284,7 +284,6 @@ namespace dss {
 
   void VdcHelper::getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data) {
     vdcapi::Message message;
-    boost::shared_ptr<VdcSpec_t> ret = boost::make_shared<VdcSpec_t>();
 
     *size = 0;
     *data = NULL;
