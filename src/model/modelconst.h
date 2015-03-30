@@ -190,6 +190,9 @@ namespace dss {
   const int BinaryInputIDSun = 10;
   const int BinaryInputIDRoomThermostat = 11;
   const int BinaryInputIDBatteryLow = 12;
+  const int BinaryInputIDWindowContact = 13;
+  const int BinaryInputIDDoorContact = 14;
+  const int BinaryInputIDWindowTilt = 15;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
