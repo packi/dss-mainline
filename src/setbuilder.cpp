@@ -24,13 +24,13 @@
   #include "config.h"
 #endif
 
-
 #include "setbuilder.h"
 
 #include <vector>
 #include <stdexcept>
 #include <cassert>
-#include <digitalSTROM/dsuid/dsuid.h>
+
+#include <digitalSTROM/dsuid.h>
 
 #include "base.h"
 #include "src/model/set.h"

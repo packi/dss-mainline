@@ -24,12 +24,12 @@
   #include "config.h"
 #endif
 
-
 #include "busscanner.h"
 
 #include <vector>
-#include <digitalSTROM/dsuid/dsuid.h>
 #include <boost/make_shared.hpp>
+
+#include <digitalSTROM/dsuid.h>
 
 #include "src/businterface.h"
 #include "src/foreach.h"

@@ -24,10 +24,9 @@
   #include "config.h"
 #endif
 
-
 #include "zonerequesthandler.h"
 
-#include <digitalSTROM/dsuid/dsuid.h>
+#include <digitalSTROM/dsuid.h>
 
 #include "src/model/zone.h"
 #include "src/model/group.h"

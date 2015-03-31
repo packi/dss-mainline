@@ -24,15 +24,15 @@
   #include "config.h"
 #endif
 
+#include "structurerequesthandler.h"
 
 #include <unistd.h>
-#include "structurerequesthandler.h"
-#include <digitalSTROM/dsuid/dsuid.h>
+#include "foreach.h"
+#include <digitalSTROM/dsuid.h>
 
 #include "src/businterface.h"
-#include "src/structuremanipulator.h"
-#include "src/setbuilder.h"
-
+#include "src/ds485types.h"
+#include "jsonhelper.h"
 #include "src/model/apartment.h"
 #include "src/model/zone.h"
 #include "src/model/group.h"
@@ -42,12 +42,9 @@
 #include "src/model/devicereference.h"
 #include "src/model/modelmaintenance.h"
 #include "src/model/modelconst.h"
+#include "src/setbuilder.h"
 #include "src/stringconverter.h"
-#include "src/ds485types.h"
-
-#include "foreach.h"
-#include "jsonhelper.h"
-#include "foreach.h"
+#include "src/structuremanipulator.h"
 #include "util.h"
 
 /* TODO use const in src/model/modelconst */

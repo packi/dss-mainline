@@ -24,21 +24,19 @@
   #include "config.h"
 #endif
 
-
-#include <digitalSTROM/dsuid/dsuid.h>
 #include "circuitrequesthandler.h"
 
-#include "src/model/modulator.h"
-#include "src/model/apartment.h"
-#include "src/ds485types.h"
+#include <digitalSTROM/dsuid.h>
 
+#include "src/ds485types.h"
+#include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
-#include "src/structuremanipulator.h"
+#include "src/model/modulator.h"
 #include "src/stringconverter.h"
+#include "src/structuremanipulator.h"
 #include "src/util.h"
 
 namespace dss {
-
 
   //=========================================== CircuitRequestHandler
 
