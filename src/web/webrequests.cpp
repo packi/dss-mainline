@@ -111,7 +111,7 @@ namespace dss {
     m_writer.Int(_value);
   }
   void JSONWriter::add(unsigned _value) {
-     m_writer.Uint(_value);
+    m_writer.Uint(_value);
   }
   void JSONWriter::add(long long int _value) {
     m_writer.Int64(_value);

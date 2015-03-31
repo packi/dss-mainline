@@ -107,7 +107,7 @@ namespace dss {
         if (node->getValueType() == vTypeInteger) {
           json.add("value", node->getIntegerValue());
         } else {
-          json.add("value", (long long int)node->getUnsignedIntegerValue());
+          json.add("value", node->getUnsignedIntegerValue());
         }
         return json.successJSON();
       } catch(PropertyTypeMismatch& ex) {

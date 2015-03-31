@@ -312,7 +312,7 @@ namespace dss {
           json.add(dsuid2str(dsuid));
         }
         json.endArray();
-        json.add("value", (long long int)aggregatedValue);
+        json.add("value", static_cast<unsigned long long>(aggregatedValue));
         json.add("date", lastUpdateAll.toString());
         json.endObject();
       } catch (std::runtime_error&) {

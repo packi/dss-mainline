@@ -137,7 +137,7 @@ namespace dss {
       return JSONWriter::success();
     } else if(_request.getMethod() == "getConsumption") {
       JSONWriter json;
-      json.add("consumption", (long long int)_interface->getPowerConsumption());
+      json.add("consumption", static_cast<unsigned long long>(_interface->getPowerConsumption()));
       return json.successJSON();
     } else if(_request.getMethod() == "blink") {
       _interface->blink(coJSON, SceneAccess::stringToCategory(categoryStr), sessionToken);
