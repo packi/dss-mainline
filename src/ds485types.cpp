@@ -31,7 +31,8 @@
 #include <stdexcept>
 #include <string>
 #include <stdlib.h>
-#include <digitalSTROM/dsuid/dsuid.h>
+
+#include <digitalSTROM/dsuid.h>
 
 namespace dss {
 

@@ -22,9 +22,11 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
+
 #include <boost/test/unit_test.hpp>
+
 #include <digitalSTROM/ds.h>
-#include <digitalSTROM/dsuid/dsuid.h>
+#include <digitalSTROM/dsuid.h>
 
 #include "webfixture.h"
 

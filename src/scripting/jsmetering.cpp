@@ -25,12 +25,12 @@
   #include "config.h"
 #endif
 
-
 #include "jsmetering.h"
 
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
-#include <digitalSTROM/dsuid/dsuid.h>
+
+#include <digitalSTROM/dsuid.h>
 
 #include "src/dss.h"
 #include "src/logger.h"

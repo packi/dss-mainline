@@ -23,7 +23,7 @@
 #include "event.h"
 
 #include <boost/shared_ptr.hpp>
-#include <digitalSTROM/dsuid/dsuid.h>
+#include <digitalSTROM/dsuid.h>
 
 #include "model/deviceinterface.h"
 
