@@ -691,6 +691,10 @@ namespace dss {
     m_Interface.setZoneHeatingConfig(_ctrlDSUID, _zone->getID(), _spec);
   } // setZoneHeatingConfig
 
+  void StructureManipulator::clearZoneHeatingConfig(boost::shared_ptr<Zone> _zone) {
+    _zone->clearHeatingControlMode();
+  } // clearZoneHeatingConfig
+
   void StructureManipulator::setZoneSensor(boost::shared_ptr<Zone> _zone,
                                            const uint8_t _sensorType,
                                            boost::shared_ptr<Device> _dev) {

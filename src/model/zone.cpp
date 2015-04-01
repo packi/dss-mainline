@@ -182,9 +182,7 @@ namespace dss {
     }
     ZoneHeatingProperties_t prop = getHeatingProperties();
     if (IsEqualDsuid(prop.m_HeatingControlDSUID, _dsMeter->getDSID())) {
-      dsuid_t null;
-      SetNullDsuid(null);
-      setHeatingControlMode(0, 0, 0, 0, null);
+      clearHeatingControlMode();
     }
 
   } // removeFromDSMeter
@@ -264,6 +262,12 @@ namespace dss {
     m_HeatingProperties.m_CtrlOffset = _offset;
     m_HeatingProperties.m_HeatingMasterZone = _masterZone;
     m_HeatingProperties.m_ManualValue = _manualValue;
+  }
+
+  void Zone::clearHeatingControlMode() {
+    dsuid_t null;
+    SetNullDsuid(null);
+    setHeatingControlMode(0, 0, 0, 0, null);
   }
 
   void Zone::setHeatingControlState(int _ctrlState) {
