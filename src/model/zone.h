@@ -184,6 +184,7 @@ namespace dss {
 
     /** Set heating properties and runtime values */
     void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
+    void clearHeatingControlMode();
     void setHeatingControlState(int _ctrlState);
     void setHeatingOperationMode(int _operationMode);
     int getHeatingOperationMode() const;
