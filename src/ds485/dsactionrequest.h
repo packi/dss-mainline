@@ -23,7 +23,6 @@
 #ifndef DSACTIONREQUEST_H_
 #define DSACTIONREQUEST_H_
 
-#include <digitalSTROM/ds.h>
 #include "src/businterface.h"
 
 #include "dsbusinterfaceobj.h"

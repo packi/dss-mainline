@@ -25,7 +25,6 @@
 #define ADDRESSABLEMODELITEM_H
 
 #include <boost/enable_shared_from_this.hpp>
-#include <digitalSTROM/ds.h>
 
 #include "physicalmodelitem.h"
 #include "deviceinterface.h"

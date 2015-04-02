@@ -23,7 +23,6 @@
 #ifndef BUSSCANNER_H
 #define BUSSCANNER_H
 
-#include <digitalSTROM/ds.h>
 #include "src/logger.h"
 #include "src/ds485types.h"
 #include "src/businterface.h"

@@ -27,7 +27,7 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <digitalSTROM/ds.h>
+#include <digitalSTROM/dsuid.h>
 
 namespace dss {
 

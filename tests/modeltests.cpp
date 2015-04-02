@@ -25,7 +25,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/scoped_ptr.hpp>
-#include <digitalSTROM/ds.h>
 #include <iostream>
 #include <fstream>
 

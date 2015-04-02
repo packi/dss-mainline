@@ -25,7 +25,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <digitalSTROM/ds.h>
 #include <digitalSTROM/dsuid.h>
 
 #include "webfixture.h"
