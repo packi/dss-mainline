@@ -70,7 +70,7 @@ namespace dss {
     }
     int ret = ZoneModify_remove(m_DSMApiHandle, _dsMeterID, _zoneID);
 
-    if (IsBroadcastDsuid(_dsMeterID)) {
+    if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
     } else {
       DSBusInterface::checkResultCode(ret);
