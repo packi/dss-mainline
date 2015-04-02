@@ -331,7 +331,7 @@ namespace dss {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
           boost::shared_ptr<Group> group = zone->getGroup(groupID);
           dsuid_t originDSUID = mEvent->getSource();
-          if (!IsNullDsuid(originDSUID) && (originDeviceID != 0)) {
+          if ((originDSUID != DSUID_NULL) && (originDeviceID != 0)) {
             DeviceReference devRef = m_pApartment->getDevices().getByBusID(originDeviceID, mEvent->getSource());
             originDSUID = devRef.getDSID();
           }
@@ -1003,7 +1003,7 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
-        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
+        if ((_source != DSUID_NULL) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
@@ -1066,7 +1066,7 @@ namespace dss {
         }
 
         dsuid_t originDSUID = _source;
-        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
+        if ((_source != DSUID_NULL) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().
             getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
@@ -1092,7 +1092,7 @@ namespace dss {
 
     if (SceneHelper::isMultiTipSequence(_sceneID)) {
       // do not filter calls from myself
-      if (IsNullDsuid(_source)) {
+      if (_source == DSUID_NULL) {
         passThrough = true;
       }
       // do not filter calls to broadcast
@@ -1250,7 +1250,7 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
-        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
+        if ((_source != DSUID_NULL) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
@@ -1276,7 +1276,7 @@ namespace dss {
     bool passThrough = false;
 
     // do not filter calls from myself
-    if (IsNullDsuid(_source)) {
+    if (_source == DSUID_NULL) {
       passThrough = true;
     }
 

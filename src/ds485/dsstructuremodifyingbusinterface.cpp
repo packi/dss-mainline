@@ -107,7 +107,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    if (IsNullDsuid(_dsMeterID)) {
+    if (_dsMeterID == DSUID_NULL) {
       return;
     }
 

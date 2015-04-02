@@ -3047,7 +3047,7 @@ namespace dss {
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
       memset(&hConfig, 0, sizeof(hConfig));
-      if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         obj.setProperty<bool>("IsConfigured", false);
         return JS_TRUE;
       } else {
@@ -3117,7 +3117,7 @@ namespace dss {
       ZoneHeatingOperationModeSpec_t hOpValues;
 
       memset(&hOpValues, 0, sizeof(hOpValues));
-      if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         obj.setProperty<bool>("IsConfigured", false);
         return JS_TRUE;
       } else {
@@ -3198,7 +3198,7 @@ namespace dss {
       dsuid_from_string(ControlDSUID.c_str(), &hProp.m_HeatingControlDSUID);
 
       memset(&hConfig, 0, sizeof(hConfig));
-      if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         manipulator.clearZoneHeatingConfig(pZone);
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
@@ -3311,7 +3311,7 @@ namespace dss {
       }
 
       memset(&hOpValues, 0, sizeof(hOpValues));
-      if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: no controller dsuid configured");
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
         return JS_TRUE;

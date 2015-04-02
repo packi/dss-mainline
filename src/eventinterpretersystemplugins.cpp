@@ -1232,7 +1232,7 @@ namespace dss {
     dsuid_t dsuid = m_evtSrcDSID;
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
 
-    if (IsNullDsuid(dsuid)) {
+    if (dsuid == DSUID_NULL) {
       return false;
     }
 
@@ -1386,7 +1386,7 @@ namespace dss {
     std::string clickType = m_properties.get("clickType");
     std::string buttonIndex = m_properties.get("buttonIndex");
 
-    if (IsNullDsuid(dsuid)) {
+    if (dsuid == DSUID_NULL) {
       return false;
     }
 
@@ -3053,7 +3053,7 @@ namespace dss {
 
         // #2561: auto-reset fire if panic was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
-        if (!IsNullDsuid(dsuid) && (callOrigin == coDsmApi) &&
+        if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi) &&
             (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {
@@ -3069,7 +3069,7 @@ namespace dss {
 
         // #2561: auto-reset panic if fire was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
-        if (!IsNullDsuid(dsuid) && (callOrigin == coDsmApi)
+        if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi)
             && (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {

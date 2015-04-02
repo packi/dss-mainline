@@ -228,14 +228,14 @@ namespace dss {
     dsuid_t devDsid = _device->getDSID();
     devid_t shortAddr = _device->getShortAddress();
 
-    if (IsNullDsuid(dsmDsid)) {
+    if (dsmDsid == DSUID_NULL) {
       dsmDsid = _device->getLastKnownDSMeterDSID();
     }
     if (shortAddr == ShortAddressStaleDevice) {
       shortAddr = _device->getLastKnownShortAddress();
     }
 
-    if (IsNullDsuid(dsmDsid) || (shortAddr == ShortAddressStaleDevice)) {
+    if ((dsmDsid == DSUID_NULL) || (shortAddr == ShortAddressStaleDevice)) {
       throw std::runtime_error("Not enough data to delete device on dSM");
     }
 

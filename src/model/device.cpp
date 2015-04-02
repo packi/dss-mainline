@@ -123,7 +123,7 @@ namespace dss {
 
   void Device::removeFromPropertyTree() {
     if(m_pPropertyNode != NULL) {
-      if ((!IsNullDsuid(m_DSMeterDSID)) && (!IsNullDsuid(m_DSID))) {
+      if ((m_DSMeterDSID != DSUID_NULL) && (m_DSID != DSUID_NULL)) {
         std::string devicePath = "devices/" + dsuid2str(m_DSID);
         PropertyNodePtr dev = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
         dev->alias(PropertyNodePtr());
@@ -345,7 +345,7 @@ namespace dss {
           }
         }
 
-        if (!IsNullDsuid(m_DSMeterDSID)) {
+        if (m_DSMeterDSID != DSUID_NULL) {
           setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
         }
       }
@@ -1017,7 +1017,7 @@ namespace dss {
   void Device::setDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     PropertyNodePtr alias;
     std::string devicePath = "devices/" + dsuid2str(m_DSID);
-    if((m_pPropertyNode != NULL) && (!IsNullDsuid(m_DSMeterDSID))) {
+    if ((m_pPropertyNode != NULL) && (m_DSMeterDSID != DSUID_NULL)) {
       alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
     }
     m_DSMeterDSID = _dsMeter->getDSID();

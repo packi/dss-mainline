@@ -795,7 +795,7 @@ namespace dss {
       if ((hState.State == HeatingControlStateIDInternal) ||
           (hState.State == HeatingControlStateIDEmergency)) {
         if (hConfig.ControllerMode > 0) {
-            if (dsuid_is_null(&hProp.m_HeatingControlDSUID) ||
+            if ((hProp.m_HeatingControlDSUID == DSUID_NULL) ||
                 (hProp.m_HeatingControlDSUID == _dsMeter->getDSID())) {
             _zone->setHeatingControlMode(hConfig.ControllerMode,
                 hConfig.Offset, hConfig.SourceZoneId, hConfig.ManualValue,
