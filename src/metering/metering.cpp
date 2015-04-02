@@ -416,9 +416,13 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     // If the jump into the past is too big discard all data and start over.
 
     if (abs(deltaTime) > MAX_INTERPOLATION_INTERVAL) {
+      log(std::string("Metering DB at ") + _rrdFileName + " is out of date.", lsWarning);
       result = createDB(_rrdFileName, m_ConfigChain);
       if (result < 0) {
         log(rrd_get_error(), lsError);
+      }
+      if (system("killall -9 rrdcached") != 0) {
+        log("Restarting rrdcached was not successful.", lsWarning);
       }
     }
     return (result == 0);
