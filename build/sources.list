@@ -226,6 +226,7 @@ dsstests_SOURCES = \
 	../tests/dss_instance_tests.cpp \
 	../tests/dss_life_cycle.cpp \
 	../tests/dss_life_cycle.h \
+	../tests/dsuidtests.cpp \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
 	../tests/iconvtests.cpp \
