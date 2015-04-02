@@ -47,4 +47,13 @@ BOOST_AUTO_TEST_CASE(test_string_basic)
   BOOST_CHECK_EQUAL(dsuid_str, "0102030405060708090a0b0c0d0e0f1011");
 }
 
+BOOST_AUTO_TEST_CASE(test_copy_dsuid)
+{
+  dsuid_t dsuid;
+
+  dsuid = DSUID_NULL;
+  BOOST_CHECK(dsuid_is_null(&dsuid));
+  dsuid = DSUID_BROADCAST;
+  BOOST_CHECK(dsuid_is_broadcast(&dsuid));
+}
 BOOST_AUTO_TEST_SUITE_END()
