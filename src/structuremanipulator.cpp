@@ -26,6 +26,7 @@
 
 #include "structuremanipulator.h"
 
+#include <stdexcept>
 #include <boost/ref.hpp>
 
 #include "src/foreach.h"
@@ -40,13 +41,9 @@
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
-#include "src/dsidhelper.h"
 #include "src/util.h"
 #include "src/event.h"
 #include "src/dss.h"
-
-#include <stdexcept>
-#include <digitalSTROM/ds.h>
 
 namespace dss {
 

@@ -28,12 +28,12 @@
 #include <signal.h>
 #include <set>
 
-#include "eventinterpretersystemplugins.h"
-#include "internaleventrelaytarget.h"
-#include "logger.h"
 #include "base.h"
 #include "dss.h"
+#include "eventinterpretersystemplugins.h"
 #include "http_client.h"
+#include "internaleventrelaytarget.h"
+#include "logger.h"
 #include "model/set.h"
 #include "model/zone.h"
 #include "model/group.h"
@@ -43,11 +43,10 @@
 #include "model/modelconst.h"
 #include "model/scenehelper.h"
 #include "propertysystem.h"
-#include "systemcondition.h"
 #include "security/security.h"
-#include "src/dsidhelper.h"
-#include "util.h"
 #include "structuremanipulator.h"
+#include "systemcondition.h"
+#include "util.h"
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500

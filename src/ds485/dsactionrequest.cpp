@@ -27,9 +27,7 @@
 #include "dsactionrequest.h"
 #include "dsbusinterface.h"
 
-#include "src/dsidhelper.h"
 #include "src/logger.h"
-
 #include "src/model/group.h"
 #include "src/model/device.h"
 #include "src/model/scenehelper.h"

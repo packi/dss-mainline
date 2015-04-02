@@ -48,7 +48,6 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "src/ds485/dsbusinterface.h"
-#include "src/dsidhelper.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/web/webserver.h"

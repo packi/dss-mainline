@@ -28,7 +28,6 @@ libdsscore_a_SOURCES =  \
 	../src/ds485/dsstructurequerybusinterface.h \
 	../src/ds485types.cpp \
 	../src/ds485types.h \
-	../src/dsidhelper.h \
 	../src/dss.cpp \
 	../src/dssfwd.h \
 	../src/dss.h \
