@@ -197,8 +197,7 @@ namespace dss {
       }
     }
 
-    dsuid_t lastKnownDsMeter;
-    SetNullDsuid(lastKnownDsMeter);
+    dsuid_t lastKnownDsMeter = DSUID_NULL;
 
     if (lastmeter != NULL) {
       try {

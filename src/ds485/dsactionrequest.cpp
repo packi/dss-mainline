@@ -50,15 +50,13 @@ namespace dss {
 
     if(pGroup) {
       if(_force) {
-        ret = ZoneGroupActionRequest_action_force_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
+        ret = ZoneGroupActionRequest_action_force_call_scene(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       } else {
-        ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
+        ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       }
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        dsuid_t nullid;
-        SetNullDsuid(nullid);
-        m_pBusEventSink->onGroupCallScene(NULL, nullid, pGroup->getZoneID(),
+        m_pBusEventSink->onGroupCallScene(NULL, DSUID_NULL, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           _scene, _origin, _token, _force);
       }
@@ -89,12 +87,10 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_call_scene_min(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
+      ret = ZoneGroupActionRequest_action_call_scene_min(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        dsuid_t nullid;
-        SetNullDsuid(nullid);
-        m_pBusEventSink->onGroupCallScene(NULL, nullid, pGroup->getZoneID(),
+        m_pBusEventSink->onGroupCallScene(NULL, DSUID_NULL, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           _scene, _origin, _token, false);
       } else if(pDevice) {
@@ -115,7 +111,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_save_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
+      ret = ZoneGroupActionRequest_action_save_scene(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       ret = DeviceActionRequest_action_save_scene(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _scene);
@@ -134,7 +130,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_opc_inc(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
+      ret = ZoneGroupActionRequest_action_opc_inc(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       ret = DeviceActionRequest_action_opc_inc(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _channel);
@@ -152,7 +148,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_opc_dec(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
+      ret = ZoneGroupActionRequest_action_opc_dec(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       ret = DeviceActionRequest_action_opc_dec(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _channel);
@@ -170,7 +166,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_opc_stop(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
+      ret = ZoneGroupActionRequest_action_opc_stop(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _channel);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       ret = DeviceActionRequest_action_opc_stop(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _channel);
@@ -189,12 +185,10 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_undo_scene_number(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
+      ret = ZoneGroupActionRequest_action_undo_scene_number(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _scene);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        dsuid_t nullid;
-        SetNullDsuid(nullid);
-        m_pBusEventSink->onGroupUndoScene(NULL, nullid, pGroup->getZoneID(),
+        m_pBusEventSink->onGroupUndoScene(NULL, DSUID_NULL, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           _scene, true, _origin, _token);
       }
@@ -221,12 +215,10 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_undo_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0);
+      ret = ZoneGroupActionRequest_action_undo_scene(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        dsuid_t nullid;
-        SetNullDsuid(nullid);
-        m_pBusEventSink->onGroupUndoScene(NULL, nullid, pGroup->getZoneID(),
+        m_pBusEventSink->onGroupUndoScene(NULL, DSUID_NULL, pGroup->getZoneID(),
                                           pGroup->getID(), 0, _category,
                                           -1, false, _origin, _token);
       }
@@ -253,12 +245,10 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_blink(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _origin);
+      ret = ZoneGroupActionRequest_action_blink(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), _origin);
       DSBusInterface::checkBroadcastResultCode(ret);
       if (m_pBusEventSink) {
-        dsuid_t nullid;
-        SetNullDsuid(nullid);
-        m_pBusEventSink->onGroupBlink(NULL, nullid, pGroup->getZoneID(),
+        m_pBusEventSink->onGroupBlink(NULL, DSUID_NULL, pGroup->getZoneID(),
                                       pGroup->getID(), 0, _category, _origin,
                                       _token);
       }
@@ -284,7 +274,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_set_outval(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), 0, _value);
+      ret = ZoneGroupActionRequest_action_set_outval(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(), 0, _value);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle, pDevice->getDSMeterDSID(), pDevice->getShortAddress(), _value);
@@ -303,14 +293,12 @@ namespace dss {
       uint16_t convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
       uint8_t precisionvalue = SceneHelper::sensorToPrecision(_sensorType);
 
-      int ret = ZoneGroupSensorPush(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(),
+      int ret = ZoneGroupSensorPush(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(),
           _sourceID, _sensorType, convertedSensorValue, precisionvalue);
       DSBusInterface::checkBroadcastResultCode(ret);
 
       if (m_pBusEventSink) {
-        dsuid_t nullid;
-        SetNullDsuid(nullid);
-        m_pBusEventSink->onZoneSensorValue(NULL, nullid, dsuid2str(_sourceID),
+        m_pBusEventSink->onZoneSensorValue(NULL, DSUID_NULL, dsuid2str(_sourceID),
             pGroup->getZoneID(), pGroup->getID(), _sensorType,
             convertedSensorValue, precisionvalue,
             _category, _origin);

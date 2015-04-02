@@ -60,8 +60,8 @@ namespace dss {
     m_LastKnownShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_LastKnownZoneID(0),
-    m_DSMeterDSID(),
-    m_LastKnownMeterDSID(),
+    m_DSMeterDSID(DSUID_NULL),
+    m_LastKnownMeterDSID(DSUID_NULL),
     m_DSMeterDSIDstr(),
     m_LastKnownMeterDSIDstr(),
     m_FunctionID(0),
@@ -105,8 +105,6 @@ namespace dss {
     m_outputChannelCount(0),
     m_AKMInputProperty()
     {
-      SetNullDsuid(m_DSMeterDSID);
-      SetNullDsuid(m_LastKnownMeterDSID);
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
 

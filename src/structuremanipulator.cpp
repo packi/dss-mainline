@@ -205,9 +205,6 @@ namespace dss {
   void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     try {
-      dsuid_t broadcastDSID;
-      SetBroadcastDsuid(broadcastDSID);
-
       std::vector<boost::shared_ptr<const DSMeter> > meters = _zone->getDSMeters();
       for (size_t s = 0; s < meters.size(); s++) {
         boost::shared_ptr<dss::DSMeter> meter =
@@ -216,7 +213,7 @@ namespace dss {
           _zone->removeFromDSMeter(meter);
         }
       }
-      m_Interface.removeZone(broadcastDSID, _zone->getID());
+      m_Interface.removeZone(DSUID_BROADCAST, _zone->getID());
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
       }

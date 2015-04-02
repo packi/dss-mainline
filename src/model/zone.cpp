@@ -265,9 +265,7 @@ namespace dss {
   }
 
   void Zone::clearHeatingControlMode() {
-    dsuid_t null;
-    SetNullDsuid(null);
-    setHeatingControlMode(0, 0, 0, 0, null);
+    setHeatingControlMode(0, 0, 0, 0, DSUID_NULL);
   }
 
   void Zone::setHeatingControlState(int _ctrlState) {

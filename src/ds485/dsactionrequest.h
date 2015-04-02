@@ -33,11 +33,7 @@ namespace dss {
   class DSActionRequest : public DSBusInterfaceObj,
                           public ActionRequestInterface {
   public:
-    DSActionRequest()
-    : DSBusInterfaceObj(), m_pBusEventSink(NULL)
-    {
-      SetBroadcastDsuid(m_BroadcastDSID);
-    }
+    DSActionRequest() : DSBusInterfaceObj(), m_pBusEventSink(NULL) {}
 
     virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token, const bool _force);
     virtual void callSceneMin(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token);
@@ -52,7 +48,6 @@ namespace dss {
     virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token);
     void setBusEventSink(BusEventSink* _eventSink);
   private:
-    dsuid_t m_BroadcastDSID;
     BusEventSink* m_pBusEventSink;
   }; // DSActionRequest
 

@@ -2743,7 +2743,7 @@ namespace dss {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
           if (sDSID.length() == 0) {
-            SetNullDsuid(sourceDSID);
+            sourceDSID = DSUID_NULL;
           } else if (sDSID.length() == 24) {
             dsid_t dsid = str2dsid(sDSID);
             sourceDSID = dsuid_from_dsid(&dsid);
@@ -2806,7 +2806,7 @@ namespace dss {
           groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
           std::string sDSID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
           if (sDSID.length() == 0) {
-            SetNullDsuid(sourceDSID);
+            sourceDSID = DSUID_NULL;
           } else if (sDSID.length() == 24) {
             dsid_t dsid = str2dsid(sDSID);
             sourceDSID = dsuid_from_dsid(&dsid);

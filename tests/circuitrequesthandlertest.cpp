@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE(WebCircuit)
 class Fixture : public WebFixture {
 public:
   Fixture() {
-    SetNullDsuid(m_ValidDSUID);
+    m_ValidDSUID = DSUID_NULL;
     m_ValidDSUID.id[DSUID_SIZE-1] = 1;
     m_ValidDSID.id[12-1] = 1;
     m_ValidName = "mod";

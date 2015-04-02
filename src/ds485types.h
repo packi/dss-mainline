@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <string>
 #include <sstream>
-#include <digitalSTROM/ds.h>
+#include <digitalSTROM/dsuid.h>
 
 namespace dss {
 

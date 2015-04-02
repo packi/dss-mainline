@@ -23,6 +23,8 @@
 #ifndef DSMETERINGBUSINTERFACE_H_
 #define DSMETERINGBUSINTERFACE_H_
 
+#include <digitalSTROM/dsuid.h>
+
 #include "src/businterface.h"
 #include "dsbusinterfaceobj.h"
 
@@ -31,17 +33,11 @@ namespace dss {
   class DSMeteringBusInterface : public DSBusInterfaceObj,
                                  public MeteringBusInterface {
   public:
-    DSMeteringBusInterface()
-    : DSBusInterfaceObj()
-    {
-      SetBroadcastDsuid(m_BroadcastDSID);
-    }
+    DSMeteringBusInterface() : DSBusInterfaceObj() { }
 
     virtual void requestMeterData();
     virtual unsigned long getPowerConsumption(const dsuid_t& _dsMeterID);
     virtual unsigned long getEnergyMeterValue(const dsuid_t& _dsMeterID);
-  private:
-    dsuid_t m_BroadcastDSID;
   }; // DSMeteringBusInterface
 
 } // namespace dss
