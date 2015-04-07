@@ -25,12 +25,13 @@
   #include "config.h"
 #endif
 
-
 #include "devicerequesthandler.h"
 
-#include <boost/bind.hpp>
 #include <limits.h>
-#include <digitalSTROM/dsuid/dsuid.h>
+#include <boost/bind.hpp>
+#include "foreach.h"
+
+#include <digitalSTROM/dsuid.h>
 
 #include "src/model/apartment.h"
 #include "src/model/device.h"
@@ -43,7 +44,6 @@
 #include "src/comm-channel.h"
 #include "src/ds485types.h"
 #include "jsonhelper.h"
-#include "foreach.h"
 #include "util.h"
 
 namespace dss {
@@ -430,13 +430,11 @@ namespace dss {
       manipulator.deviceAddToGroup(pDevice, newGroup);
 
       JSONWriter json;
-      json.startObject("devices");
-      json.startArray();
+      json.startArray("devices");
       const DeviceReference d(pDevice, &m_Apartment);
       toJSON(d, json);
       json.endArray();
       json.add("action", "update");
-      json.endObject();
       return json.successJSON();
 
     } else if(_request.getMethod() == "setButtonID") {

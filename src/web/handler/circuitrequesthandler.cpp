@@ -24,21 +24,19 @@
   #include "config.h"
 #endif
 
-
-#include <digitalSTROM/dsuid/dsuid.h>
 #include "circuitrequesthandler.h"
 
-#include "src/model/modulator.h"
-#include "src/model/apartment.h"
-#include "src/ds485types.h"
+#include <digitalSTROM/dsuid.h>
 
+#include "src/ds485types.h"
+#include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
-#include "src/structuremanipulator.h"
+#include "src/model/modulator.h"
 #include "src/stringconverter.h"
+#include "src/structuremanipulator.h"
 #include "src/util.h"
 
 namespace dss {
-
 
   //=========================================== CircuitRequestHandler
 
@@ -90,14 +88,14 @@ namespace dss {
           return JSONWriter::failure("Metering not supported on this device");
         }
         JSONWriter json;
-        json.add("consumption", (long long int)dsMeter->getPowerConsumption());
+        json.add("consumption", static_cast<unsigned long long>(dsMeter->getPowerConsumption()));
         return json.successJSON();
       } else if(_request.getMethod() == "getEnergyMeterValue") {
         if (!dsMeter->getCapability_HasMetering()) {
           return JSONWriter::failure("Metering not supported on this device");
         }
         JSONWriter json;
-        json.add("meterValue", (long long int)dsMeter->getEnergyMeterValue());
+        json.add("meterValue", dsMeter->getEnergyMeterValue());
         return json.successJSON();
       } else if(_request.getMethod() == "rescan") {
         dsMeter->setIsValid(false);

@@ -24,10 +24,10 @@
   #include "config.h"
 #endif
 
-
 #include "modulator.h"
 
-#include <digitalSTROM/dsuid/dsuid.h>
+#include <digitalSTROM/dsuid.h>
+
 #include "src/dss.h"
 #include "src/logger.h"
 #include "src/businterface.h"

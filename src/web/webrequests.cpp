@@ -79,9 +79,17 @@ namespace dss {
   }
   void JSONWriter::add(std::string _name, int _value) {
     m_writer.String(_name);
+    m_writer.Int(_value);
+  }
+  void JSONWriter::add(std::string _name, unsigned _value) {
+    m_writer.String(_name);
     m_writer.Uint(_value);
   }
   void JSONWriter::add(std::string _name, long long int _value) {
+    m_writer.String(_name);
+    m_writer.Int64(_value);
+  }
+  void JSONWriter::add(std::string _name, unsigned long long int _value) {
     m_writer.String(_name);
     m_writer.Uint64(_value);
   }
@@ -100,9 +108,15 @@ namespace dss {
     m_writer.String(_value);
   }
   void JSONWriter::add(int _value) {
+    m_writer.Int(_value);
+  }
+  void JSONWriter::add(unsigned _value) {
     m_writer.Uint(_value);
   }
-  void JSONWriter::add(long int _value) {
+  void JSONWriter::add(long long int _value) {
+    m_writer.Int64(_value);
+  }
+  void JSONWriter::add(unsigned long long int _value) {
     m_writer.Uint64(_value);
   }
   void JSONWriter::add(bool _value) {

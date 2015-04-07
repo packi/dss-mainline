@@ -131,8 +131,7 @@ namespace dss {
   }; // State
 
   /** Represents a class for Device sensor value state.*/
-  class StateSensor : public State,
-                      public boost::noncopyable {
+  class StateSensor : public State {
   private:
     typedef enum {
       eComp_undef = 0,

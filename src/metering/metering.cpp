@@ -25,11 +25,24 @@
   #include "config.h"
 #endif
 
-
 #include "metering.h"
 
+#ifdef LOG_TIMING
+  #include <sstream>
+#endif
+
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <sys/types.h>
+#include <time.h>
+#include <rrd.h>
+#include <regex.h>
+
 #include <boost/filesystem.hpp>
-#include <digitalSTROM/dsuid/dsuid.h>
+#include "foreach.h"
+
+#include <digitalSTROM/dsuid.h>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -39,22 +52,6 @@
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
 #include "src/security/security.h"
-
-#include <algorithm>
-#include "foreach.h"
-#include <functional>
-#include <iterator>
-#include <time.h>
-
-#include <rrd.h>
-
-#include <sys/types.h>
-#include <regex.h>
-
-#ifdef LOG_TIMING
-  #include <sstream>
-#endif
-
 
 namespace dss {
   //================================================== Metering
@@ -419,9 +416,13 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     // If the jump into the past is too big discard all data and start over.
 
     if (abs(deltaTime) > MAX_INTERPOLATION_INTERVAL) {
+      log(std::string("Metering DB at ") + _rrdFileName + " is out of date.", lsWarning);
       result = createDB(_rrdFileName, m_ConfigChain);
       if (result < 0) {
         log(rrd_get_error(), lsError);
+      }
+      if (system("killall -9 rrdcached") != 0) {
+        log("Restarting rrdcached was not successful.", lsWarning);
       }
     }
     return (result == 0);

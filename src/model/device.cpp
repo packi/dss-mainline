@@ -24,13 +24,15 @@
   #include "config.h"
 #endif
 
+#include "device.h"
 
 #include <unistd.h>
-
-#include "device.h"
-#include <digitalSTROM/dsm-api-v2/dsm-api.h>
-#include <digitalSTROM/dsuid/dsuid.h>
 #include <math.h>
+
+#include <boost/shared_ptr.hpp>
+
+#include <digitalSTROM/dsuid.h>
+#include <digitalSTROM/dsm-api-v2/dsm-api.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -45,8 +47,6 @@
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
 #include "src/event.h"
-
-#include <boost/shared_ptr.hpp>
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {

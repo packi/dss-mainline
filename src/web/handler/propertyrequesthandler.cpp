@@ -44,14 +44,19 @@ namespace dss {
 
   WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
-    if (_request.getMethod() == "query" || _request.getMethod() == "query2") {
+    if (_request.getMethod() == "query" || _request.getMethod() == "query2" || _request.getMethod() == "vdcquery") {
       JSONWriter json;
       std::string query = _request.getParameter("query");
       if(query.empty()) {
         return JSONWriter::failure("Need parameter 'query'");
       }
+
       PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query);
-      if (_request.getMethod() == "query2") {
+      if (_request.getMethod() == "vdcquery") {
+        propertyQuery.vdcquery(json);
+        return json.successJSON();
+      }
+      else if (_request.getMethod() == "query2") {
         propertyQuery.run2(json);
         return json.successJSON();
       }
@@ -102,7 +107,7 @@ namespace dss {
         if (node->getValueType() == vTypeInteger) {
           json.add("value", node->getIntegerValue());
         } else {
-          json.add("value", (long long int)node->getUnsignedIntegerValue());
+          json.add("value", node->getUnsignedIntegerValue());
         }
         return json.successJSON();
       } catch(PropertyTypeMismatch& ex) {

@@ -24,28 +24,26 @@
   #include "config.h"
 #endif
 
-
 #include "systemrequesthandler.h"
 
 #include <locale>
-#include <digitalSTROM/dsuid/dsuid.h>
+#include <sstream>
+
 #include <boost/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 
+#include <digitalSTROM/dsuid.h>
+
 #include "src/datetools.h"
-
+#include "src/ds485types.h"
 #include "src/dss.h"
-#include "src/sessionmanager.h"
-#include "src/session.h"
-
+#include "src/propertysystem.h"
 #include "src/security/user.h"
 #include "src/security/security.h"
+#include "src/session.h"
+#include "src/sessionmanager.h"
 #include "src/stringconverter.h"
-
-#include "src/propertysystem.h"
-#include "src/ds485types.h"
 #include "util.h"
-#include <sstream>
 
 namespace dss {
 

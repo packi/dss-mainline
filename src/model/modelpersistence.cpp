@@ -26,11 +26,11 @@
   #include "config.h"
 #endif
 
-
 #include "modelpersistence.h"
 
 #include <stdexcept>
-#include <digitalSTROM/dsuid/dsuid.h>
+
+#include <digitalSTROM/dsuid.h>
 
 #include "src/foreach.h"
 #include "src/base.h"

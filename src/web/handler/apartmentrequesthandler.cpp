@@ -24,16 +24,16 @@
   #include "config.h"
 #endif
 
-
-#include <digitalSTROM/dsuid/dsuid.h>
 #include "apartmentrequesthandler.h"
 
+#include "foreach.h"
+
+#include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
-#include "src/foreach.h"
-#include "src/model/modelconst.h"
 
 #include "src/model/apartment.h"
 #include "src/model/zone.h"
+#include "src/model/modelconst.h"
 #include "src/model/modulator.h"
 #include "src/model/device.h"
 #include "src/model/deviceinterface.h"

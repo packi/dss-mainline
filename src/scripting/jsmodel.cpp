@@ -30,7 +30,8 @@
 
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
-#include <digitalSTROM/dsuid/dsuid.h>
+
+#include <digitalSTROM/dsuid.h>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -3188,13 +3189,18 @@ namespace dss {
       ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
       ZoneHeatingConfigSpec_t hConfig;
 
+      StructureManipulator manipulator(
+          *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
+          *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
+          ext->getApartment());
+
       std::string ControlDSUID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
       dsuid_from_string(ControlDSUID.c_str(), &hProp.m_HeatingControlDSUID);
 
       memset(&hConfig, 0, sizeof(hConfig));
       if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
-        JS_ReportWarning(cx, "Model.zone_setTemperatureControlConfiguration: no controller dsuid configured");
-        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
+        manipulator.clearZoneHeatingConfig(pZone);
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       } else {
         hConfig = ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
@@ -3262,10 +3268,6 @@ namespace dss {
         JS_free(cx, propKey);
       }
 
-      StructureManipulator manipulator(
-          *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
-          *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
-          ext->getApartment());
       manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
 
       JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
