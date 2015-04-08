@@ -22,6 +22,7 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_IGNORE_NON_ZERO_CHILD_CODE
 #include <boost/test/unit_test.hpp>
 
 #include "src/scripting/jsmodel.h"

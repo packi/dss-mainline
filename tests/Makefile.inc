@@ -1,4 +1,5 @@
-TESTS += dsstests
+TESTS += dsstests.sh
+EXTRA_DIST += dsstests.sh
 
 check_PROGRAMS += dsstests
 

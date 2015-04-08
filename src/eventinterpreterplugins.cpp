@@ -689,6 +689,8 @@ namespace dss {
 
   //================================================== EventInterpreterPluginSendmail
 
+  bool EventInterpreterPluginSendmail::m_active = false;
+
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sendmail", _pInterpreter)
   {
@@ -712,11 +714,11 @@ namespace dss {
     }
 
 #ifdef HAVE_SENDMAIL
-    pthread_t pid;
+    m_active = true;
     int err;
     (void) pthread_mutex_init(&m_Mutex, NULL);
     pthread_cond_init(&m_Condition, NULL);
-    if ((err = pthread_create(&pid, NULL, EventInterpreterPluginSendmail::run, this)) < 0) {
+    if ((err = pthread_create(&m_thread, NULL, EventInterpreterPluginSendmail::run, this)) < 0) {
       Logger::getInstance()->log("EventInterpreterPluginSendmail: failed to start mail thread, error " +
           intToString(err) + "[" + intToString(errno) + "]", lsFatal);
     } else {
@@ -731,6 +733,16 @@ namespace dss {
         "disabled by configuration, not sending any e-mail", lsWarning);
 #endif
   } // ctor
+
+  EventInterpreterPluginSendmail::~EventInterpreterPluginSendmail() {
+#ifdef HAVE_SENDMAIL
+    (void) pthread_mutex_lock(&m_Mutex);
+    m_active = false;
+    pthread_cond_signal(&m_Condition);
+    pthread_mutex_unlock(&m_Mutex);
+    pthread_join(m_thread, NULL);
+#endif
+  }
 
   void EventInterpreterPluginSendmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
 #if !defined(HAVE_SENDMAIL) && !defined(HAVE_MAILSPOOL)
@@ -865,6 +877,9 @@ namespace dss {
       (void) pthread_mutex_lock(&me->m_Mutex);
       while (me->m_MailFiles.size() == 0) {
         pthread_cond_wait(&me->m_Condition, &me->m_Mutex);
+        if (!m_active) {
+          return NULL;
+        }
       }
       mailFile = me->m_MailFiles.front();
       me->m_MailFiles.pop_front();
