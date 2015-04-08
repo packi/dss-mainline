@@ -92,24 +92,24 @@ namespace dss {
         ", Hash Model/dSM " + intToString(dsmHash, true) + "/" + intToString(hash.Hash, true) +
         ", ModCount Model/dSM " + intToString(dsmModCount, true) + "/" + intToString(hash.ModificationCount, true), lsInfo);
 
+    if (applyMeterSpec(_dsMeter)) {
+      if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
+        log("scanDSMeter: dSMeter is incompatible", lsWarning);
+        _dsMeter->setDatamodelHash(hash.Hash);
+        _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
+        _dsMeter->setIsPresent(false);
+        _dsMeter->setIsValid(true);
+        return true;
+      }
+    } else {
+      log("scanDSMeter: Error getting dSMSpecs", lsWarning);
+      return false;
+    }
+
     if (m_Maintenance.isInitializing() ||
         (_dsMeter->isInitialized() == false) ||
         (hash.Hash != dsmHash) ||
         (hash.ModificationCount != dsmModCount)) {
-
-      if (applyMeterSpec(_dsMeter)) {
-        if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
-          log("scanDSMeter: dSMeter is incompatible", lsWarning);
-          _dsMeter->setDatamodelHash(hash.Hash);
-          _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
-          _dsMeter->setIsPresent(false);
-          _dsMeter->setIsValid(true);
-          return true;
-        }
-      } else {
-        log("scanDSMeter: Error getting dSMSpecs", lsWarning);
-        return false;
-      }
 
       setMeterCapability(_dsMeter);
 
