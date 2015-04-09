@@ -102,6 +102,9 @@ namespace dss {
 
       if(bracketPos != std::string::npos) {
         std::size_t bracketEndPos = _input.find(')');
+        if (bracketEndPos == std::string::npos) {
+          throw std::runtime_error("illegal query: missing ')'");
+        }
         std::string propListStr = _input.substr(bracketPos + 1, bracketEndPos - bracketPos - 1);
         std::size_t eraseEnd = _input.find(',',bracketEndPos);
         if (eraseEnd == std::string::npos) {
