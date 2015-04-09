@@ -693,6 +693,7 @@ namespace dss {
 
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("sendmail", _pInterpreter)
+  , m_thread(0)
   {
     if (DSS::hasInstance()) {
       m_mailq_dir = DSS::getInstance()->getDataDirectory() + "/mail/";
@@ -878,6 +879,7 @@ namespace dss {
       while (me->m_MailFiles.size() == 0) {
         pthread_cond_wait(&me->m_Condition, &me->m_Mutex);
         if (!m_active) {
+          (void) pthread_mutex_unlock(&me->m_Mutex);
           return NULL;
         }
       }
