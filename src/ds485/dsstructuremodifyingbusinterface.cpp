@@ -82,7 +82,13 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
+    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment().getDSMeterByDSID(_dsMeterID);
+    int ret = 0;
+    if (pMeter->getApiVersion() >= 0x301) {
+      ret = DeviceGroupMembershipModify_add_sync(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID, 30);
+    } else {
+      ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
+    }
     sleep(1); // #2578 prevent dS485 bus flooding with multiple requests
     DSBusInterface::checkResultCode(ret);
   } // addToGroup
