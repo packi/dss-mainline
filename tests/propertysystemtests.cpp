@@ -543,6 +543,13 @@ BOOST_AUTO_TEST_CASE(testQueryAttributes) {
   BOOST_CHECK_EQUAL(json.successJSON(), "{\"test\":[{\"test1\":\"content1\",\"test2\":\"content2\"},{\"test1\":\"content3\"},{\"test2\":\"content4\"}]}");
 }
 
+BOOST_AUTO_TEST_CASE(testQueryMissingBracket) {
+  PropertySystem propSys;
+  propSys.createProperty("/test/test1")->setStringValue("content1");
+  propSys.createProperty("/test/test2")->setStringValue("content2");
+  BOOST_CHECK_THROW(PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2"), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_CASE(testQuerySubPropertyTwice) {
   PropertySystem propSys;
   propSys.createProperty("/test/test1")->setStringValue("content1");
