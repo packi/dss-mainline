@@ -104,9 +104,9 @@ namespace dss {
                                         .getDSMeterByDSID(_device.getDSMeterDSID());
     int ret;
     if (pMeter->getApiVersion() >= 0x301) {
-    ret = DeviceConfig_set_sync(m_DSMApiHandle, _device.getDSMeterDSID(),
-                                _device.getShortAddress(), _configClass,
-                                _configIndex, _value, 30);
+      ret = DeviceConfig_set_sync(m_DSMApiHandle, _device.getDSMeterDSID(),
+                                  _device.getShortAddress(), _configClass,
+                                  _configIndex, _value, 30);
     } else {
       ret = DeviceConfig_set(m_DSMApiHandle, _device.getDSMeterDSID(),
                              _device.getShortAddress(), _configClass,
