@@ -421,8 +421,11 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
       if (result < 0) {
         log(rrd_get_error(), lsError);
       }
-      if (system("killall -9 rrdcached") != 0) {
-        log("Restarting rrdcached was not successful.", lsWarning);
+      if (!m_RrdcachedPath.empty()) {
+        /* TODO sv restart rrdcached might hang */
+        if (system("killall -9 rrdcached") != 0) {
+          log("Restarting rrdcached was not successful.", lsWarning);
+        }
       }
     }
     return (result == 0);
