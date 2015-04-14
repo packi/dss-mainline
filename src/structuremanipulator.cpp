@@ -179,10 +179,9 @@ namespace dss {
       } catch(ItemNotFoundException&) {
         throw std::runtime_error("Inactive device '" + dsuid2str(inactiveDevice.DSID) + "' not known here.");
       }
-      dsuid_t tmp_last = dev->getLastKnownDSMeterDSID();
-      dsuid_t tmp_dsm = _dsMeter->getDSID();
-      if (!IsEqualDsuid(tmp_last, tmp_dsm)) {
-        m_Interface.removeDeviceFromDSMeter(_dsMeter->getDSID(), inactiveDevice.ShortAddress);
+      if (dev->getLastKnownDSMeterDSID() != _dsMeter->getDSID()) {
+        m_Interface.removeDeviceFromDSMeter(_dsMeter->getDSID(),
+                                            inactiveDevice.ShortAddress);
       } else {
         throw std::runtime_error("Inactive device '" + dsuid2str(inactiveDevice.DSID) + "' only known on this meter, can't remove it.");
       }
@@ -254,8 +253,7 @@ namespace dss {
     }
 
     DeviceSpec_t spec = m_QueryInterface.deviceGetSpec(shortAddr, dsmDsid);
-    dsuid_t tmp_dsid = _device->getDSID();
-    if (!IsEqualDsuid(spec.DSID, tmp_dsid)) {
+    if (spec.DSID != _device->getDSID()) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
     checkSensorsOnDeviceRemoval(m_Apartment.getZone(_device->getZoneID()),

@@ -29,11 +29,18 @@
 #include <digitalSTROM/dsuid.h>
 
 namespace dss {
-
-/** Bus id of a device */
-typedef uint16_t devid_t;
+  /** Bus id of a device */
+  typedef uint16_t devid_t;
 
   const devid_t ShortAddressStaleDevice = 0xFFFF;
+
+  inline bool operator==(const dsuid_t &l, const dsuid_t &r) {
+      return dsuid_equal(&l, &r);
+  }
+
+  inline bool operator!=(const dsuid_t &l, const dsuid_t &r) {
+      return !dsuid_equal(&l, &r);
+  }
 
   std::string dsuid2str(dsuid_t dsuid);
   dsuid_t str2dsuid(std::string dsuid_str);

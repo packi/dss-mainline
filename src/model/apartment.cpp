@@ -157,8 +157,7 @@ namespace dss {
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      dsuid_t dev_dsid = dev->getDSID();
-      if(IsEqualDsuid(dev_dsid,  _dsid)) {
+      if (dev->getDSID() == _dsid) {
         return dev;
       }
     }
@@ -168,8 +167,7 @@ namespace dss {
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      dsuid_t dev_dsid = dev->getDSID();
-      if(IsEqualDsuid(dev_dsid, _dsid)) {
+      if (dev->getDSID() == _dsid) {
         return dev;
       }
     }
@@ -235,8 +233,7 @@ namespace dss {
   boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
-      dsuid_t tmp_dsid = dsMeter->getDSID();
-      if(IsEqualDsuid(tmp_dsid, _dsid)) {
+      if (dsMeter->getDSID() == _dsid) {
         return dsMeter;
       }
     }
@@ -271,8 +268,7 @@ namespace dss {
     boost::shared_ptr<Device> pResult;
     // search for existing device
     foreach(boost::shared_ptr<Device> device, m_Devices) {
-      dsuid_t tmp_dsid = device->getDSID();
-      if(IsEqualDsuid(tmp_dsid, _dsid)) {
+      if (device->getDSID() == _dsid) {
         pResult = device;
         break;
       }
@@ -292,8 +288,7 @@ namespace dss {
   boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
-      dsuid_t tmp_dsid = dsMeter->getDSID();
-      if(IsEqualDsuid(tmp_dsid, _dsid)) {
+      if (dsMeter->getDSID() == _dsid) {
         return dsMeter;
       }
     }
@@ -358,8 +353,7 @@ namespace dss {
     for(std::vector<boost::shared_ptr<Device> >::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
         ipDevice != e; ++ipDevice) {
       boost::shared_ptr<Device> pDevice = *ipDevice;
-      dsuid_t tmp_dsid = pDevice->getDSID();
-      if(IsEqualDsuid(tmp_dsid, _device)) {
+      if (pDevice->getDSID() == _device) {
         // Remove from zone
         int zoneID = pDevice->getZoneID();
         DeviceReference devRef = DeviceReference(pDevice, this);
@@ -412,8 +406,7 @@ namespace dss {
     for(std::vector<boost::shared_ptr<DSMeter> >::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
         ipDSMeter != e; ++ipDSMeter) {
       boost::shared_ptr<DSMeter> pDSMeter = *ipDSMeter;
-      dsuid_t tmp_dsid = pDSMeter->getDSID();
-      if(IsEqualDsuid(tmp_dsid, _dsMeter)) {
+      if (pDSMeter->getDSID() == _dsMeter) {
         m_DSMeters.erase(ipDSMeter);
         return;
       }

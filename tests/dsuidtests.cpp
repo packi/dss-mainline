@@ -24,6 +24,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include <digitalSTROM/dsuid.h>
+#include "src/ds485types.h"
+
+using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(dsuid)
 
@@ -56,4 +59,38 @@ BOOST_AUTO_TEST_CASE(test_copy_dsuid)
   dsuid = DSUID_BROADCAST;
   BOOST_CHECK(dsuid_is_broadcast(&dsuid));
 }
+
+BOOST_AUTO_TEST_CASE(test_operator_equal)
+{
+  dsuid_t dsuid1(DSUID_NULL), dsuid2(DSUID_NULL);
+
+  BOOST_CHECK(dsuid1 == DSUID_NULL);
+  BOOST_CHECK(dsuid1 != DSUID_BROADCAST);
+  BOOST_CHECK(dsuid1 == dsuid2);
+}
+
+class ClassWithDSID {
+public:
+  ClassWithDSID() : m_dsuid(DSUID_NULL) {}
+  dsuid_t getDSID() { return m_dsuid; }
+  void setDSID(const dsuid_t& id) { m_dsuid = id; }
+private:
+  dsuid_t m_dsuid;
+};
+
+BOOST_AUTO_TEST_CASE(test_operator_equal_temporary)
+{
+  ClassWithDSID klass1, klass2;
+
+  /*
+   * gcc error:  error: taking address of temporary [-fpermissive]
+   * dsuid_equal(&klass1.getDSID(), &klass2.getDSID()));
+   */
+
+  BOOST_CHECK(klass1.getDSID() == klass2.getDSID());
+
+  klass1.setDSID(DSUID_BROADCAST);
+  BOOST_CHECK(klass1.getDSID() != klass2.getDSID());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -406,7 +406,8 @@ namespace dss {
 
     // compare ds meter. if attached on wrong dsmeter
     // -> reattach to correct one given by _dsMeter
-    if (!IsEqualDsuid(oldDSMeter->getDSID(), _dsMeter->getDSID())) {
+    // reference temporary
+    if (oldDSMeter->getDSID() != _dsMeter->getDSID()) {
       return initializeDeviceFromSpec(_dsMeter, _zone, _spec);
     }
 
@@ -735,7 +736,7 @@ namespace dss {
 
         // check if zone sensor already assigned
         boost::shared_ptr<Device> oldDev = _zone->getAssignedSensorDevice(idList[i]);
-        if (oldDev && !IsEqualDsuid(oldDev->getDSID(), sensorDevice)) {
+        if (oldDev && (oldDev->getDSID() != sensorDevice)) {
           log("Duplicate sensor type " + intToString(idList[i]) +
               " registration on zone " + intToString(_zone->getID()) +
               ": dsuid " + dsuid2str(oldDev->getDSID()) +
@@ -794,7 +795,8 @@ namespace dss {
       if ((hState.State == HeatingControlStateIDInternal) ||
           (hState.State == HeatingControlStateIDEmergency)) {
         if (hConfig.ControllerMode > 0) {
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID) || IsEqualDsuid(hProp.m_HeatingControlDSUID, _dsMeter->getDSID())) {
+            if (dsuid_is_null(&hProp.m_HeatingControlDSUID) ||
+                (hProp.m_HeatingControlDSUID == _dsMeter->getDSID())) {
             _zone->setHeatingControlMode(hConfig.ControllerMode,
                 hConfig.Offset, hConfig.SourceZoneId, hConfig.ManualValue,
                 _dsMeter->getDSID());
@@ -817,9 +819,7 @@ namespace dss {
       }
 
       // sync zone settings from the controlling dsm only
-      if (IsEqualDsuid(hProp.m_HeatingControlDSUID, _dsMeter->getDSID())) {
-        dsuid_t NullId;
-        SetNullDsuid(NullId);
+      if (hProp.m_HeatingControlDSUID == _dsMeter->getDSID()) {
         ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
         ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
         try {

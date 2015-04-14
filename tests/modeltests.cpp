@@ -29,6 +29,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "src/ds485types.h"
 #include "src/model/device.h"
 #include "src/model/apartment.h"
 #include "src/model/modulator.h"
@@ -220,13 +221,11 @@ BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
   boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsmeterDSID);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
-
-  BOOST_CHECK_EQUAL(dsuid2str(dev1->getLastKnownDSMeterDSID()), dsuid2str(DSUID_NULL));
+  BOOST_CHECK(dev1->getLastKnownDSMeterDSID() == DSUID_NULL);
 
   dev1->setDSMeter(mod);
-
-  BOOST_CHECK_EQUAL(dsuid2str(dev1->getDSMeterDSID()), dsuid2str(dsmeterDSID));
-  BOOST_CHECK_EQUAL(dsuid2str(dev1->getLastKnownDSMeterDSID()), dsuid2str(dsmeterDSID));
+  BOOST_CHECK(dev1->getDSMeterDSID() == dsmeterDSID);
+  BOOST_CHECK(dev1->getLastKnownDSMeterDSID() == dsmeterDSID);
 } // testDeviceLastKnownDSMeterDSIDWorks
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {

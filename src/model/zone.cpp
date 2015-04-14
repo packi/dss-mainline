@@ -181,7 +181,7 @@ namespace dss {
       }
     }
     ZoneHeatingProperties_t prop = getHeatingProperties();
-    if (IsEqualDsuid(prop.m_HeatingControlDSUID, _dsMeter->getDSID())) {
+    if (prop.m_HeatingControlDSUID == _dsMeter->getDSID()) {
       clearHeatingControlMode();
     }
 
@@ -440,8 +440,7 @@ namespace dss {
       if (!s) {
         continue;
       }
-      dsuid_t zone_dsuid = s->m_DSUID;
-      if (IsEqualDsuid(zone_dsuid, dev_dsuid)) {
+      if (s->m_DSUID == dev_dsuid) {
         ret->push_back(s->m_sensorType);
       }
     }

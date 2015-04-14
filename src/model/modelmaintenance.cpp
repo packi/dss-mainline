@@ -1123,8 +1123,8 @@ namespace dss {
         if (pEvent == NULL) {
           continue;
         }
-        dsuid_t tmp_dsuid = pEvent->getSource();
-        if (IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
+        if ((pEvent->getSource() == _source) &&
+            (pEvent->getOriginDeviceID() == _originDeviceID)) {
           pEvent->clearTimestamp();
         }
       }
@@ -1141,8 +1141,9 @@ namespace dss {
         continue;
       }
       if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
-        dsuid_t tmp_dsuid = pEvent->getSource();
-        if (IsEqualDsuid(tmp_dsuid, _source) && ((pEvent->getOriginDeviceID() == _originDeviceID) || (_originDeviceID == 0))) {
+        if ((pEvent->getSource() == _source) &&
+            ((pEvent->getOriginDeviceID() == _originDeviceID) ||
+             (_originDeviceID == 0))) {
           // dimming, adjust the old event's timestamp to keep it active
           if (SceneHelper::isDimSequence(_sceneID) && ((pEvent->getSceneID() == _sceneID) || (_sceneID == SceneDimArea))) {
             pEvent->setTimestamp();
@@ -1306,8 +1307,9 @@ namespace dss {
       if (pEvent == NULL) {
         continue;
       }
-      dsuid_t tmp_dsuid = pEvent->getSource();
-      if ((pEvent->getDeviceID() == _deviceID) && (pEvent->getButtonIndex() == _buttonNr) && IsEqualDsuid(tmp_dsuid, _source)) {
+      if ((pEvent->getDeviceID() == _deviceID) &&
+          (pEvent->getButtonIndex() == _buttonNr) &&
+          (pEvent->getSource() == _source)) {
         // holding, adjust the old event's timestamp to keep it active
         if ((_clickType == ClickTypeHR) &&
             ((pEvent->getClickType() == ClickTypeHS) || (pEvent->getClickType() == ClickTypeHR))) {

@@ -976,7 +976,7 @@ namespace dss {
   } // dirty
 
   bool Device::operator==(const Device& _other) const {
-    return IsEqualDsuid(_other.m_DSID, m_DSID);
+    return (_other.m_DSID == m_DSID);
   } // operator==
 
   devid_t Device::getShortAddress() const {
@@ -2345,9 +2345,6 @@ namespace dss {
 
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
   {
-    dsuid_t tmp_dev = _otherDev->getDSID();
-    dsuid_t tmp_meter = _otherDev->getDSMeterDSID();
-
     return ((m_OemState == DEVICE_OEM_VALID) &&
             !m_OemIsIndependent &&
             (m_OemSerialNumber > 0) &&
@@ -2355,8 +2352,8 @@ namespace dss {
             _otherDev->isPresent() &&
             !_otherDev->getOemIsIndependent() &&
             (_otherDev->getOemInfoState() == DEVICE_OEM_VALID) &&
-            (!IsEqualDsuid(tmp_dev, m_DSID)) &&
-            (!IsEqualDsuid(tmp_meter, m_DSMeterDSID)) &&
+            (_otherDev->getDSID() != m_DSID) &&
+            (_otherDev->getDSMeterDSID() != m_DSMeterDSID) &&
             (_otherDev->getOemEan() == m_OemEanNumber) &&
             (_otherDev->getOemSerialNumber() == m_OemSerialNumber));
   }
