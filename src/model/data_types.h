@@ -41,6 +41,16 @@ namespace dss {
   bool valid(CardinalDirection_t _direction);
   std::string toString(CardinalDirection_t _direction);
   bool parseCardinalDirection(const std::string &direction, CardinalDirection_t *_out);
+
+  typedef enum {
+    wpc_none = 0,
+    wpc_class_1 = 1,  //<  7.8m/s,
+    wpc_class_2 = 2,  //< 10.6m/s,
+    wpc_class_3 = 3,  //< 13.6m/s,
+  } WindProtectionClass_t;
+
+  bool valid(WindProtectionClass_t _class);
+  bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out);
 }
 
 #endif

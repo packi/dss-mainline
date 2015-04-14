@@ -361,4 +361,24 @@ BOOST_AUTO_TEST_CASE(testCardinalDirection) {
   BOOST_CHECK_EQUAL(toString(cd_north_west), "north west");
 }
 
+BOOST_AUTO_TEST_CASE(testWindProtection) {
+  WindProtectionClass_t out;
+
+  BOOST_CHECK(convertWindProtectionClass(wpc_class_3, &out));
+  BOOST_CHECK_EQUAL(out, wpc_class_3);
+  BOOST_CHECK(convertWindProtectionClass(wpc_class_2, &out));
+  BOOST_CHECK_EQUAL(out, wpc_class_2);
+  BOOST_CHECK(convertWindProtectionClass(wpc_class_1, &out));
+  BOOST_CHECK_EQUAL(out, wpc_class_1);
+
+  BOOST_CHECK(!convertWindProtectionClass(0, &out));
+  BOOST_CHECK(!convertWindProtectionClass(99, &out));
+
+  BOOST_CHECK(valid(wpc_class_1));
+  BOOST_CHECK(valid(wpc_class_2));
+  BOOST_CHECK(valid(wpc_class_3));
+  BOOST_CHECK(!valid(wpc_none));
+  BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(4)));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
