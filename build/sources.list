@@ -245,6 +245,7 @@ dsstests_SOURCES = \
 	../tests/scriptstest.cpp \
 	../tests/securitytests.cpp \
 	../tests/sensor_data_uploader.cpp \
+	../tests/statetests.cpp \
 	../tests/testrunner.cpp \
 	../tests/util/dss_instance_fixture.cpp \
 	../tests/util/dss_instance_fixture.h \

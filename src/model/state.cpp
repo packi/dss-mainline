@@ -40,7 +40,6 @@
 #include "modelmaintenance.h"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/smart_ptr.hpp>
 
 namespace dss {
 
@@ -225,14 +224,8 @@ namespace dss {
 
   std::string State::toString() const {
     if (!m_values.empty()) {
-      std::vector<std::string>::const_iterator item;
-      int index = 0;
-      for (item = m_values.begin(); item != m_values.end(); item++, index++) {
-        if ((int) m_state == index) {
-          return *item;
-        }
-      }
-      return std::string("invalid");
+      assert(m_state >= 0 && m_state < m_values.size());
+      return m_values[m_state];
     }
     switch(m_state) {
     case State_Unknown:
@@ -286,14 +279,14 @@ namespace dss {
       setState(_origin, State_Inactive);
     } else if (_state == "unknown") {
       setState(_origin, State_Unknown);
-    } else if (m_values.size() > 0) {
-      std::vector<std::string>::iterator item;
-      int index = 0;
-      for (item = m_values.begin(); item != m_values.end(); item++, index++) {
-        if (_state == *item) {
-          setState(_origin, index);
-        }
+    } else if (!m_values.empty()) {
+      ValueRange_t::iterator it = std::find(m_values.begin(), m_values.end(), _state);
+      if (it == m_values.end()) {
+        Logger::getInstance()->log("State " + m_name + ": invalid value" + _state,
+                                   lsWarning);
+        return;
       }
+      setState(_origin, it - m_values.begin());
     }
   }
 
