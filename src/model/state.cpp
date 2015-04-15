@@ -225,7 +225,7 @@ namespace dss {
 
   std::string State::toString() const {
     if (!m_values.empty()) {
-      std::list<std::string>::const_iterator item;
+      std::vector<std::string>::const_iterator item;
       int index = 0;
       for (item = m_values.begin(); item != m_values.end(); item++, index++) {
         if ((int) m_state == index) {
@@ -287,7 +287,7 @@ namespace dss {
     } else if (_state == "unknown") {
       setState(_origin, State_Unknown);
     } else if (m_values.size() > 0) {
-      std::list<std::string>::iterator item;
+      std::vector<std::string>::iterator item;
       int index = 0;
       for (item = m_values.begin(); item != m_values.end(); item++, index++) {
         if (_state == *item) {
@@ -297,7 +297,7 @@ namespace dss {
     }
   }
 
-  void State::setValueRange(std::list<std::string> _values) {
+  void State::setValueRange(const ValueRange_t &_values) {
     m_values = _values;
   }
 

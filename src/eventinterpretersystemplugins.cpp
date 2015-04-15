@@ -2654,7 +2654,7 @@ namespace dss {
     state->setState(coSystem, State_Active);
     state->setPersistence(true);
 
-    std::list<std::string> presenceValues;
+    State::ValueRange_t presenceValues;
     presenceValues.push_back("unknown");
     presenceValues.push_back("present");
     presenceValues.push_back("absent");
@@ -2664,7 +2664,7 @@ namespace dss {
     state = DSS::getInstance()->getApartment().allocateState(
         StateType_Service, "hibernation", "system_state");
     state->setPersistence(true);
-    std::list<std::string> sleepmodeValues;
+    State::ValueRange_t sleepmodeValues;
     sleepmodeValues.push_back("unknown");
     sleepmodeValues.push_back("awake");
     sleepmodeValues.push_back("sleeping");

@@ -75,7 +75,7 @@ namespace dss {
     boost::shared_ptr<Group> m_providerGroup;
 
     /** Custom values for a state */
-    std::list<std::string> m_values;
+    std::vector<std::string> m_values;
 
   private:
     void save();
@@ -103,7 +103,8 @@ namespace dss {
     bool getPersistence() const;
     void setPersistence(bool _persistent);
 
-    void setValueRange(const std::list<std::string> _values);
+    typedef std::vector<std::string> ValueRange_t;
+    void setValueRange(const ValueRange_t& _values);
 
     eStateType getType() const { return m_type; }
     PropertyNodePtr getPropertyNode() const { return m_pPropertyNode; }
