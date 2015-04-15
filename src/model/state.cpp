@@ -230,17 +230,13 @@ namespace dss {
     switch(m_state) {
     case State_Unknown:
       return std::string("unknown");
-      break;
     case State_Active:
       return std::string("active");
-      break;
     case State_Inactive:
       return std::string("inactive");
-      break;
     default:
-      break;
+      return std::string("invalid");
     }
-    return std::string("invalid");
   } // toString
 
   eState State::getState() const {
