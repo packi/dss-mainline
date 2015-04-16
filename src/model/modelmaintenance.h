@@ -58,7 +58,7 @@ namespace dss {
     virtual ~ModelDeferredEvent() {}
 
     dsuid_t getSource() { return m_Source; }
-    bool isOriginMyself() { return IsNullDsuid(m_Source); }
+    bool isOriginMyself() { return (m_Source == DSUID_NULL); }
     bool isDue() { time_t now = time(NULL); return (now - m_Timestamp >= kModelSceneTimeout); }
     bool isCalled() { return m_IsCalled; }
 

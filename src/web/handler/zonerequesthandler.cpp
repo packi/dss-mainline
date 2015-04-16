@@ -228,7 +228,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
           ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           }
 
@@ -271,7 +271,7 @@ namespace dss {
           ZoneHeatingConfigSpec_t hConfig;
 
           memset(&hConfig, 0, sizeof(hConfig));
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           } else {
             json.add("IsConfigured", true);
@@ -323,7 +323,7 @@ namespace dss {
           }
 
           memset(&hConfig, 0, sizeof(hConfig));
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           } else {
             json.add("IsConfigured", true);
@@ -393,7 +393,7 @@ namespace dss {
           ZoneHeatingOperationModeSpec_t hOpValues;
 
           memset(&hOpValues, 0, sizeof(hOpValues));
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           } else {
             json.add("IsConfigured", true);
@@ -459,7 +459,7 @@ namespace dss {
           }
 
           memset(&hOpValues, 0, sizeof(hOpValues));
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           } else {
             json.add("IsConfigured", true);
@@ -548,7 +548,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingStateSpec_t hState;
 
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           } else {
             json.add("IsConfigured", true);
@@ -583,7 +583,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingInternalsSpec_t hInternals;
 
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             return JSONWriter::failure("Not a heating control device");
           }
 

@@ -32,11 +32,7 @@ namespace dss {
   class DSStructureQueryBusInterface : public DSBusInterfaceObj,
                                        public StructureQueryBusInterface {
   public:
-    DSStructureQueryBusInterface()
-    : DSBusInterfaceObj()
-    {
-      SetBroadcastDsuid(m_BroadcastDSID);
-    }
+    DSStructureQueryBusInterface() : DSBusInterfaceObj() {}
 
     virtual std::vector<DSMeterSpec_t> getBusMembers();
     virtual DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID);
@@ -64,8 +60,6 @@ namespace dss {
     void updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateOutputChannelTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
-  private:
-    dsuid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface
 
 } // namespace dss

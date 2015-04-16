@@ -70,7 +70,7 @@ namespace dss {
     }
     int ret = ZoneModify_remove(m_DSMApiHandle, _dsMeterID, _zoneID);
 
-    if (IsBroadcastDsuid(_dsMeterID)) {
+    if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
     } else {
       DSBusInterface::checkResultCode(ret);
@@ -107,7 +107,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    if (IsNullDsuid(_dsMeterID)) {
+    if (_dsMeterID == DSUID_NULL) {
       return;
     }
 
@@ -121,9 +121,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsuid_t broadcastDSID;
-    SetBroadcastDsuid(broadcastDSID);
-    int ret = CircuitRemoveDevice_by_dsuid(m_DSMApiHandle, broadcastDSID, _deviceDSID);
+    int ret = CircuitRemoveDevice_by_dsuid(m_DSMApiHandle, DSUID_BROADCAST, _deviceDSID);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeDeviceFromDSMeters
 
@@ -133,7 +131,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     std::string nameStr = truncateUTF8String(_name, 19);
-    int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sceneNumber, (unsigned char*)nameStr.c_str());
+    int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _sceneNumber, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
   
@@ -162,10 +160,10 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupModify_add(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _standardGroupID);
+    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
     std::string nameStr = truncateUTF8String(_name, 19);
-    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
+    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
   } // createGroup
 
@@ -175,7 +173,7 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _standardGroupID);
+    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetStandardID
@@ -187,7 +185,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     std::string nameStr = truncateUTF8String(_name, 19);
-    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
+    ret = ZoneGroupProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetName
@@ -197,7 +195,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupModify_remove(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID);
+    int ret = ZoneGroupModify_remove(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
 
@@ -225,9 +223,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    dsuid_t broadcastDSUID;
-    SetBroadcastDsuid(broadcastDSUID);
-    int ret = ControllerHeating_set_config(m_DSMApiHandle, broadcastDSUID, _ZoneID,
+    int ret = ControllerHeating_set_config(m_DSMApiHandle, DSUID_BROADCAST, _ZoneID,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
     DSBusInterface::checkBroadcastResultCode(ret);
@@ -302,10 +298,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
 
-    dsuid_t broadcastDSUID;
-    SetBroadcastDsuid(broadcastDSUID);
-
-    int ret = ZoneProperties_set_zone_sensor(m_DSMApiHandle, broadcastDSUID,
+    int ret = ZoneProperties_set_zone_sensor(m_DSMApiHandle, DSUID_BROADCAST,
                                              _zoneID, _sensorType,
                                              _sensorDSUID);
     DSBusInterface::checkBroadcastResultCode(ret);
@@ -323,10 +316,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
 
-    dsuid_t broadcastDSUID;
-    SetBroadcastDsuid(broadcastDSUID);
-
-    int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, broadcastDSUID,
+    int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, DSUID_BROADCAST,
                                              _zoneID, _sensorType);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);

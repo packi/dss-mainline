@@ -30,10 +30,7 @@
 #include "dsdevicebusinterface.h"
 
 #include "dsbusinterface.h"
-
-#include "src/dsidhelper.h"
 #include "src/logger.h"
-
 #include "src/model/device.h"
 #include "src/model/modelevent.h"
 #include "src/model/modelmaintenance.h"

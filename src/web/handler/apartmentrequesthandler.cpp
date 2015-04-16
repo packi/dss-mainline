@@ -263,7 +263,7 @@ namespace dss {
           json.add("ControlMode", hProp.m_HeatingControlMode);
           json.add("ControlState", hProp.m_HeatingControlState);
           json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
           } else {
             json.add("IsConfigured", true);
@@ -312,7 +312,7 @@ namespace dss {
 
           ZoneHeatingConfigSpec_t hConfig;
           memset(&hConfig, 0, sizeof(hConfig));
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
             json.endObject();
             continue;
@@ -378,7 +378,7 @@ namespace dss {
           ZoneHeatingOperationModeSpec_t hOpValues;
           memset(&hOpValues, 0, sizeof(hOpValues));
 
-          if (IsNullDsuid(hProp.m_HeatingControlDSUID)) {
+          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
             json.endObject();
             continue;

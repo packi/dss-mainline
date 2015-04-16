@@ -1164,9 +1164,7 @@ Sample: {
           Logger::getInstance()->log(std::string("GetWeatherInformation: missing temperature value: "), lsInfo);
         } else if (1 /* TODO: && no local sensor set as source, see #7701 */) {
           Logger::getInstance()->log("GetWeatherInformation: Outdoor Temperature: " + doubleToString(valOutdoorTemperature), lsDebug);
-          dsuid_t null;
-          SetNullDsuid(null);
-          pZone->pushSensor(coSystem, SAC_MANUAL, null,
+          pZone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
               SensorIDTemperatureOutdoors, valOutdoorTemperature, "");
         }
       }

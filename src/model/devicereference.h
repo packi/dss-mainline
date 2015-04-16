@@ -67,7 +67,7 @@ namespace dss {
     /** Compares two device references.
      * Device references are considered equal if their DSID match. */
     bool operator==(const DeviceReference& _other) const {
-      return IsEqualDsuid(m_DSID, _other.m_DSID);
+      return (m_DSID == _other.m_DSID);
     }
 
     /** Returns the name of the referenced device.

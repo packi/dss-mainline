@@ -152,8 +152,7 @@ namespace dss {
   Set Set::getByDSMeter(const dsuid_t& _dsMeterDSID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      dsuid_t tmp_dsid = dev.getDevice()->getDSMeterDSID();
-      if (IsEqualDsuid(tmp_dsid, _dsMeterDSID)) {
+      if (dev.getDevice()->getDSMeterDSID() == _dsMeterDSID) {
         result.addDevice(dev);
       }
     }
@@ -163,8 +162,7 @@ namespace dss {
   Set Set::getByLastKnownDSMeter(const dsuid_t& _dsMeterDSID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      dsuid_t tmp_dsid = dev.getDevice()->getLastKnownDSMeterDSID();
-      if (IsEqualDsuid(tmp_dsid, _dsMeterDSID)) {
+      if (dev.getDevice()->getLastKnownDSMeterDSID() == _dsMeterDSID) {
         result.addDevice(dev);
       }
     }
@@ -233,9 +231,8 @@ namespace dss {
     virtual ~ByIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
-      dsuid_t tmp_dsid = _device->getDSMeterDSID();
-      return (_device->getShortAddress() == m_ID) &&
-             (IsEqualDsuid(tmp_dsid, m_DSMeterID));
+      return ((_device->getShortAddress() == m_ID) &&
+              (_device->getDSMeterDSID() == m_DSMeterID));
     }
   };
 
@@ -259,8 +256,7 @@ namespace dss {
     virtual ~ByDSIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
-      dsuid_t tmp_dsid = _device->getDSID();
-      return IsEqualDsuid(tmp_dsid, m_ID);
+      return (_device->getDSID() == m_ID);
     }
   };
 

@@ -24,7 +24,7 @@
 #define DEVICEINTERFACE_H
 
 #include <stdint.h>
-#include <digitalSTROM/ds.h>
+#include <digitalSTROM/dsuid.h>
 #include "sceneaccess.h"
 
 namespace dss {

@@ -25,7 +25,7 @@
 
 #include "ds485types.h"
 
-#include "base.h"
+#include <digitalSTROM/ds.h> // BusMemberDevice_t
 
 #include <string>
 #include <vector>
@@ -33,6 +33,7 @@
 #include <boost/shared_ptr.hpp>
 #include <limits.h>
 
+#include "base.h"
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
 

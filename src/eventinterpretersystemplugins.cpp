@@ -28,12 +28,12 @@
 #include <signal.h>
 #include <set>
 
-#include "eventinterpretersystemplugins.h"
-#include "internaleventrelaytarget.h"
-#include "logger.h"
 #include "base.h"
 #include "dss.h"
+#include "eventinterpretersystemplugins.h"
 #include "http_client.h"
+#include "internaleventrelaytarget.h"
+#include "logger.h"
 #include "model/set.h"
 #include "model/zone.h"
 #include "model/group.h"
@@ -43,11 +43,10 @@
 #include "model/modelconst.h"
 #include "model/scenehelper.h"
 #include "propertysystem.h"
-#include "systemcondition.h"
 #include "security/security.h"
-#include "src/dsidhelper.h"
-#include "util.h"
 #include "structuremanipulator.h"
+#include "systemcondition.h"
+#include "util.h"
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500
@@ -1232,7 +1231,7 @@ namespace dss {
     dsuid_t dsuid = m_evtSrcDSID;
     int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
 
-    if (IsNullDsuid(dsuid)) {
+    if (dsuid == DSUID_NULL) {
       return false;
     }
 
@@ -1386,7 +1385,7 @@ namespace dss {
     std::string clickType = m_properties.get("clickType");
     std::string buttonIndex = m_properties.get("buttonIndex");
 
-    if (IsNullDsuid(dsuid)) {
+    if (dsuid == DSUID_NULL) {
       return false;
     }
 
@@ -3053,7 +3052,7 @@ namespace dss {
 
         // #2561: auto-reset fire if panic was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "fire");
-        if (!IsNullDsuid(dsuid) && (callOrigin == coDsmApi) &&
+        if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi) &&
             (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {
@@ -3069,7 +3068,7 @@ namespace dss {
 
         // #2561: auto-reset panic if fire was reset by a button
         state = DSS::getInstance()->getApartment().getState(StateType_Service, "panic");
-        if (!IsNullDsuid(dsuid) && (callOrigin == coDsmApi)
+        if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi)
             && (state->getState() == State_Active)) {
           boost::shared_ptr<Zone> z = DSS::getInstance()->getApartment().getZone(0);
           if (z != NULL) {

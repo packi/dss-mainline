@@ -26,6 +26,7 @@
 
 #include "structuremanipulator.h"
 
+#include <stdexcept>
 #include <boost/ref.hpp>
 
 #include "src/foreach.h"
@@ -40,13 +41,9 @@
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
-#include "src/dsidhelper.h"
 #include "src/util.h"
 #include "src/event.h"
 #include "src/dss.h"
-
-#include <stdexcept>
-#include <digitalSTROM/ds.h>
 
 namespace dss {
 
@@ -179,10 +176,9 @@ namespace dss {
       } catch(ItemNotFoundException&) {
         throw std::runtime_error("Inactive device '" + dsuid2str(inactiveDevice.DSID) + "' not known here.");
       }
-      dsuid_t tmp_last = dev->getLastKnownDSMeterDSID();
-      dsuid_t tmp_dsm = _dsMeter->getDSID();
-      if (!IsEqualDsuid(tmp_last, tmp_dsm)) {
-        m_Interface.removeDeviceFromDSMeter(_dsMeter->getDSID(), inactiveDevice.ShortAddress);
+      if (dev->getLastKnownDSMeterDSID() != _dsMeter->getDSID()) {
+        m_Interface.removeDeviceFromDSMeter(_dsMeter->getDSID(),
+                                            inactiveDevice.ShortAddress);
       } else {
         throw std::runtime_error("Inactive device '" + dsuid2str(inactiveDevice.DSID) + "' only known on this meter, can't remove it.");
       }
@@ -205,9 +201,6 @@ namespace dss {
   void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     try {
-      dsuid_t broadcastDSID;
-      SetBroadcastDsuid(broadcastDSID);
-
       std::vector<boost::shared_ptr<const DSMeter> > meters = _zone->getDSMeters();
       for (size_t s = 0; s < meters.size(); s++) {
         boost::shared_ptr<dss::DSMeter> meter =
@@ -216,7 +209,7 @@ namespace dss {
           _zone->removeFromDSMeter(meter);
         }
       }
-      m_Interface.removeZone(broadcastDSID, _zone->getID());
+      m_Interface.removeZone(DSUID_BROADCAST, _zone->getID());
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
       }
@@ -232,14 +225,14 @@ namespace dss {
     dsuid_t devDsid = _device->getDSID();
     devid_t shortAddr = _device->getShortAddress();
 
-    if (IsNullDsuid(dsmDsid)) {
+    if (dsmDsid == DSUID_NULL) {
       dsmDsid = _device->getLastKnownDSMeterDSID();
     }
     if (shortAddr == ShortAddressStaleDevice) {
       shortAddr = _device->getLastKnownShortAddress();
     }
 
-    if (IsNullDsuid(dsmDsid) || (shortAddr == ShortAddressStaleDevice)) {
+    if ((dsmDsid == DSUID_NULL) || (shortAddr == ShortAddressStaleDevice)) {
       throw std::runtime_error("Not enough data to delete device on dSM");
     }
 
@@ -257,8 +250,7 @@ namespace dss {
     }
 
     DeviceSpec_t spec = m_QueryInterface.deviceGetSpec(shortAddr, dsmDsid);
-    dsuid_t tmp_dsid = _device->getDSID();
-    if (!IsEqualDsuid(spec.DSID, tmp_dsid)) {
+    if (spec.DSID != _device->getDSID()) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
     checkSensorsOnDeviceRemoval(m_Apartment.getZone(_device->getZoneID()),
