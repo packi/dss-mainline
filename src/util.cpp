@@ -32,6 +32,7 @@
 #include "model/apartment.h"
 #include "model/zone.h"
 #include "model/group.h"
+#include "model/cluster.h"
 #include "model/device.h"
 #include "model/modulator.h"
 #include "model/modelconst.h"
@@ -46,6 +47,25 @@
 namespace dss {
 
   void synchronizeGroups(Apartment* _apartment, StructureModifyingBusInterface* _interface) {
+    std::vector<boost::shared_ptr<Cluster> > clusters = _apartment->getClusters();
+    foreach(boost::shared_ptr<Cluster> pCluster, clusters) {
+      if (!pCluster->isSynchronized()) {
+
+        Logger::getInstance()->log("Forced configuration update in cluster " +
+            intToString(pCluster->getID()), lsInfo);
+
+        try {
+          _interface->clusterSetName(pCluster->getID(), pCluster->getName());
+          _interface->clusterSetStandardID(pCluster->getID(), pCluster->getStandardGroupID());
+          _interface->clusterSetProperties(pCluster->getID(), pCluster->getLocation(),
+                                           pCluster->getFloor(), pCluster->getProtectionClass());
+          _interface->clusterSetLockedScenes(pCluster->getID(), pCluster->getLockedScenes());
+          pCluster->setIsSynchronized(true);
+        } catch (BusApiError& e) {
+          Logger::getInstance()->log("Error updating configuration for cluster " + intToString(pCluster->getID()) +
+              ": " + e.what(), lsWarning);
+        }
+    }
     std::vector<boost::shared_ptr<Zone> > zones = _apartment->getZones();
     foreach(boost::shared_ptr<Zone> pZone, zones) {
       if (pZone->getID() == 0 || !pZone->isConnected()) {
@@ -53,30 +73,8 @@ namespace dss {
       }
       std::vector<boost::shared_ptr<Group> > groups = pZone->getGroups();
       foreach(boost::shared_ptr<Group> pGroup, groups) {
-        if (!pGroup->isSynchronized()) {
-
-          Logger::getInstance()->log("Forced user group configuration update in zone " +
-              intToString(pZone->getID()) + " and group " + intToString(pGroup->getID()), lsInfo);
-
-          // Special-User-Groups 16..23: get configuration from Zone-0
-          if (pGroup->getID() >= 16 && pGroup->getID() <= 23) {
-            try {
-              boost::shared_ptr<Group> refGroup = _apartment->getGroup(pGroup->getID());
-              _interface->groupSetName(pZone->getID(), refGroup->getID(),
-                  refGroup->getName());
-              _interface->groupSetStandardID(pZone->getID(), refGroup->getID(),
-                  refGroup->getStandardGroupID());
-              pGroup->setName(refGroup->getName());
-              pGroup->setStandardGroupID(refGroup->getStandardGroupID());
-              pGroup->setIsSynchronized(true);
-            } catch (BusApiError& e) {
-              Logger::getInstance()->log("Error updating user group configuration in zone " +
-                  intToString(pZone->getID()) + " and group " + intToString(pGroup->getID()) +
-                  ": " + e.what(), lsWarning);
-            }
-          }
-          // Regular-User-Groups >=24
-          if (pGroup->getID() >= 24 && pGroup->getID() <= 47) {
+          // Regular-User-Groups
+          if (isZoneUserGroup(pGroup->getID())) {
             try {
               _interface->createGroup(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID(), pGroup->getName());
