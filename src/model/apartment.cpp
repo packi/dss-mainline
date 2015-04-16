@@ -49,6 +49,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/modulator.h"
 #include "src/model/state.h"
 #include "src/metering/metering.h"
@@ -262,6 +263,26 @@ namespace dss {
     }
     throw ItemNotFoundException(intToString(_id));
   } // getGroup(id)
+
+  boost::shared_ptr<Cluster> Apartment::getCluster(const int _id) {
+    if (isAppUserGroup(_id)) {
+      boost::shared_ptr<Cluster> pResult = boost::dynamic_pointer_cast<Cluster>(getZone(0)->getGroup(_id));
+      if(pResult != NULL) {
+        return pResult;
+      }
+    }
+    throw ItemNotFoundException(intToString(_id));
+  } // getGroup(id)
+
+  std::vector<boost::shared_ptr<Cluster> > Apartment::getClusters() {
+    std::vector<boost::shared_ptr<Cluster> > result;
+    foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
+      if (isAppUserGroup(pGroup->getID())) {
+        result.push_back(boost::dynamic_pointer_cast<Cluster>(pGroup));
+      }
+    }
+    return result;
+  }
 
   boost::shared_ptr<Device> Apartment::allocateDevice(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
