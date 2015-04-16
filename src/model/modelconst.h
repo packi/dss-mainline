@@ -264,7 +264,7 @@ namespace dss {
   const int GroupIDReserved5 = 15;
   const int GroupIDStandardMax = 15;
   const int GroupIDAppUserMin = 16;
-  const int GroupIDAppUserMax = 23;
+  const int GroupIDAppUserMax = 39;
   const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
   const int GroupIDControlGroupMin = 48;
   const int GroupIDControlTemperature = 48;

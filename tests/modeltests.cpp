@@ -1118,7 +1118,7 @@ BOOST_AUTO_TEST_CASE(testPersistSet) {
   actionInterface.clearLog();
   set.callScene(coTest, SAC_MANUAL, 5, "");
 
-  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,24,5)");
+  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,40,5)");
 }
 
 BOOST_AUTO_TEST_CASE(testUnPersistSet) {
@@ -1174,7 +1174,7 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   manipulator.persistSet(set, setDescription);
   actionInterface.clearLog();
   set.callScene(coTest, SAC_MANUAL, 5, "");
-  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,24,5)");
+  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,40,5)");
 
   manipulator.unpersistSet(setDescription);
   actionInterface.clearLog();
