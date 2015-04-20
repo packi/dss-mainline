@@ -472,7 +472,16 @@ namespace dss {
       return JSONWriter::failure("Cannot modify inactive device");
     }
 
-    if(_request.hasParameter("groupID")) {
+    if(_request.hasParameter("clusterID")) {
+      std::string clusterIDStr = _request.getParameter("clusterID");
+      int clusterID = strToIntDef(clusterIDStr, -1);
+      try {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(0);
+        gr = zone->getGroup(clusterID);
+      } catch(ItemNotFoundException& e) {
+        gr = boost::shared_ptr<Group> ();
+      }
+    } else if(_request.hasParameter("groupID")) {
       std::string groupIDStr = _request.getParameter("groupID");
       int groupID = strToIntDef(groupIDStr, -1);
       try {
@@ -581,7 +590,16 @@ namespace dss {
       return JSONWriter::failure("Cannot modify inactive device");
     }
 
-    if(_request.hasParameter("groupID")) {
+    if(_request.hasParameter("clusterID")) {
+      std::string clusterIDStr = _request.getParameter("clusterID");
+      int clusterID = strToIntDef(clusterIDStr, -1);
+      try {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(0);
+        gr = zone->getGroup(clusterID);
+      } catch(ItemNotFoundException& e) {
+        gr = boost::shared_ptr<Group> ();
+      }
+    } else if(_request.hasParameter("groupID")) {
       std::string groupIDStr = _request.getParameter("groupID");
       int groupID = strToIntDef(groupIDStr, -1);
       try {
@@ -774,9 +792,9 @@ namespace dss {
       return addCluster(_request);
     } else if(_request.getMethod() == "removeCluster") {
       return removeCluster(_request);
-    } else if(_request.getMethod() == "groupAddDevice") {
+    } else if(_request.getMethod() == "groupAddDevice" || _request.getMethod() == "clusterAddDevice") {
       return groupAddDevice(_request);
-    } else if(_request.getMethod() == "groupRemoveDevice") {
+    } else if(_request.getMethod() == "groupRemoveDevice" || _request.getMethod() == "clusterRemoveDevice") {
       return groupRemoveDevice(_request);
     } else if(_request.getMethod() == "groupSetName") {
       return groupSetName(_request);
