@@ -36,6 +36,7 @@
 #include "src/model/apartment.h"
 #include "src/model/zone.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/device.h"
 #include "src/model/modulator.h"
@@ -311,6 +312,39 @@ namespace dss {
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();
   } // removeGroup
+
+  std::string StructureRequestHandler::addCluster(const RestfulRequest& _request) {
+    boost::shared_ptr<Cluster> pCluster;
+    int standardGroupID = 0;
+    std::string clusterName;
+
+    // find a group slot with unassigned state machine id
+    pCluster = m_Apartment.getEmptyCluster();
+
+    if (pCluster == NULL) {
+      return JSONWriter::failure("No free user groups");
+    }
+
+    if (_request.hasParameter("name")) {
+      StringConverter st("UTF-8", "UTF-8");
+      clusterName = st.convert(_request.getParameter("name"));
+      clusterName = escapeHTML(clusterName);
+    }
+    if (_request.hasParameter("color")) {
+      standardGroupID = strToIntDef(_request.getParameter("color"), 0);
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), standardGroupID, clusterName);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+    JSONWriter json;
+    json.add("clusterID", pCluster->getID());
+    json.add("name", clusterName);
+    json.add("color", standardGroupID);
+    return json.successJSON();
+  } // addCluster
 
   std::string StructureRequestHandler::addGroup(const RestfulRequest& _request) {
     boost::shared_ptr<Zone> zone;
@@ -684,6 +718,8 @@ namespace dss {
       return addGroup(_request);
     } else if(_request.getMethod() == "removeGroup") {
       return removeGroup(_request);
+    } else if(_request.getMethod() == "addCluster") {
+      return addCluster(_request);
     } else if(_request.getMethod() == "groupAddDevice") {
       return groupAddDevice(_request);
     } else if(_request.getMethod() == "groupRemoveDevice") {
