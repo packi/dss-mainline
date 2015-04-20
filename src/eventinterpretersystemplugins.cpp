@@ -2765,7 +2765,7 @@ namespace dss {
       std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
       for (size_t g = 0; g < groups.size(); g++) {
         boost::shared_ptr<Group> group = groups.at(g);
-        if ((group->getID() >= 16) && (group->getID() <= 23)) {
+        if (isAppUserGroup(group->getID())) {
             if (group->getStandardGroupID() == 2) {
               registerState("wind.group" + intToString(group->getID()), true);
             }
@@ -2996,21 +2996,21 @@ namespace dss {
     } else if (sceneId == SceneWindActive) {
       if (groupId == 0) {
         state = getOrRegisterState("wind");
-      } else if ((groupId >= 16) && (groupId <= 23)) {
+      } else if (isAppUserGroup(groupId)) {
         state = getOrRegisterState("wind.group" + intToString(groupId));
       }
       state->setState(coSystem, State_Active);
     } else if (sceneId == SceneWindInactive) {
       if (groupId == 0) {
         state = getOrRegisterState("wind");
-      } else if ((groupId >= 16) && (groupId <= 23)) {
+      } else if (isAppUserGroup(groupId)) {
         state = getOrRegisterState("wind.group" + intToString(groupId));
       }
       state->setState(coSystem, State_Inactive);
     } else if (sceneId == SceneRainActive) {
       if (groupId == 0) {
         state = getOrRegisterState("rain");
-      } else if ((groupId >= 16) && (groupId <= 23)) {
+      } else if (isAppUserGroup(groupId)) {
         state = getOrRegisterState("rain.group" + intToString(groupId));
       }
       state->setState(coSystem, State_Active);
@@ -3018,7 +3018,7 @@ namespace dss {
       if (groupId == 0) {
         state = getOrRegisterState("rain");
         state->setState(coSystem, State_Inactive);
-        for (size_t grp = 16; grp <= 23; grp++) {
+        for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
           try {
             state = DSS::getInstance()->getApartment().getState(
                                     StateType_Service,
@@ -3027,7 +3027,7 @@ namespace dss {
           } catch (ItemNotFoundException &ex) {
           }
         }
-      } else if ((groupId >= 16) && (groupId <= 23)) {
+      } else if (isAppUserGroup(groupId)) {
         state = getOrRegisterState("rain.group" + intToString(groupId));
         state->setState(coSystem, State_Inactive);
       }
