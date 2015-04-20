@@ -277,7 +277,7 @@ BOOST_FIXTURE_TEST_CASE(test_mshub_tojson, EventFactory) {
     }
 
     JSONWriter json;
-    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent, json));
+    BOOST_CHECK_NO_THROW(MsHub::toJson(pEvent, json));
   }
 }
 
