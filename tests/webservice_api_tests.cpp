@@ -280,6 +280,13 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     props.m_HeatingControlMode = HeatingControlModeIDPID;
     memset(&mode, 0xf7, sizeof(mode));
     pEvent = createHeatingControllerValue(1, DSUID_BROADCAST, props, mode);
+  } else if (eventName == EventName::HeatingControllerValueDsHub) {
+    ZoneHeatingProperties_t props;
+    ZoneHeatingStatus_t stat;
+    memset(&props, 0x5f, sizeof(props));
+    props.m_HeatingControlMode = HeatingControlModeIDPID;
+    stat.m_NominalValue = stat.m_ControlValue = 22;
+    pEvent = createHeatingControllerValueDsHub(1, 3, props, stat);
   } else if (eventName == EventName::HeatingControllerState) {
     pEvent = createHeatingControllerState(1, DSUID_BROADCAST, 0x7f);
   } else {

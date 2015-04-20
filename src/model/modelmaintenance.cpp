@@ -1887,26 +1887,9 @@ namespace dss {
         ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
 
     raiseEvent(createHeatingControllerValue(_zoneID, _dsMeterID, hProp, *values));
-
-    boost::shared_ptr<Event> pEventDsHub;
-    pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
-    pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
-    switch (zone->getHeatingOperationMode()) {
-    case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
-    case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
-    case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
-    case 3: pEventDsHub->setProperty("OperationMode", "NotUsed"); break;
-    case 4: pEventDsHub->setProperty("OperationMode", "Night"); break;
-    case 5: pEventDsHub->setProperty("OperationMode", "Holiday"); break;
-    }
-    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-      pEventDsHub->setProperty("NominalTemperature",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_NominalValue)));
-    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      pEventDsHub->setProperty("ControlValue",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValue)));
-    }
-    raiseEvent(pEventDsHub);
+    raiseEvent(createHeatingControllerValueDsHub(_zoneID,
+                                                 zone->getHeatingOperationMode(),
+                                                 hProp, hStatus));
   } // onHeatingControllerValues
 
   void ModelMaintenance::onHeatingControllerState(dsuid_t _dsMeterID, const int _zoneID, const int _State) {
