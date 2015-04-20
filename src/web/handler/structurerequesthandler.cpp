@@ -313,6 +313,29 @@ namespace dss {
     return JSONWriter::success();
   } // removeGroup
 
+  std::string StructureRequestHandler::removeCluster(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    int clusterID = -1;
+
+    if (!_request.getParameter<int>("clusterID", clusterID)) {
+      return JSONWriter::failure("Invalid clusterID : '" + _request.getParameter("clusterID") + "'");
+    }
+
+    if (m_Apartment.getCluster(clusterID) == NULL) {
+      return JSONWriter::failure("Group with clusterID : '" + _request.getParameter("clusterID") + "' does not exist");
+    }
+
+    if (!m_Apartment.getCluster(clusterID)->getDevices().isEmpty()) {
+      return JSONWriter::failure("Group with clusterID : '" + _request.getParameter("clusterID") + "' is not empty.");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.removeGroup(m_Apartment.getZone(0), clusterID);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return JSONWriter::success();
+  } // removeCluster
+
   std::string StructureRequestHandler::addCluster(const RestfulRequest& _request) {
     boost::shared_ptr<Cluster> pCluster;
     int standardGroupID = 0;
@@ -720,6 +743,8 @@ namespace dss {
       return removeGroup(_request);
     } else if(_request.getMethod() == "addCluster") {
       return addCluster(_request);
+    } else if(_request.getMethod() == "removeCluster") {
+      return removeCluster(_request);
     } else if(_request.getMethod() == "groupAddDevice") {
       return groupAddDevice(_request);
     } else if(_request.getMethod() == "groupRemoveDevice") {

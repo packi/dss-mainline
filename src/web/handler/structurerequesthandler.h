@@ -55,6 +55,7 @@ namespace dss {
     std::string addGroup(const RestfulRequest& _request);
     std::string removeGroup(const RestfulRequest& _request);
     std::string addCluster(const RestfulRequest& _request);
+    std::string removeCluster(const RestfulRequest& _request);
     std::string groupAddDevice(const RestfulRequest& _request);
     std::string groupRemoveDevice(const RestfulRequest& _request);
     std::string groupSetName(const RestfulRequest& _request);
