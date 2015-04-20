@@ -60,6 +60,7 @@ namespace dss {
     std::string groupRemoveDevice(const RestfulRequest& _request);
     std::string groupSetName(const RestfulRequest& _request);
     std::string groupSetColor(const RestfulRequest& _request);
+    std::string clusterSetColor(const RestfulRequest& _request);
   }; // StructureRequestHandler
 
 } // namespace dss

@@ -724,6 +724,35 @@ namespace dss {
     return JSONWriter::success();
   }
 
+  std::string StructureRequestHandler::clusterSetColor(const RestfulRequest& _request) {
+    boost::shared_ptr<Cluster> pCluster;
+    int clusterID = -1;
+
+    if(!_request.getParameter<int>("clusterID", clusterID)) {
+      return JSONWriter::failure("Required parameter clusterID missing");
+    }
+
+    pCluster = m_Apartment.getCluster(clusterID);
+    if ((clusterID < 1) || !pCluster) {
+      return JSONWriter::failure("Could not find pCluster with id : '" + _request.getParameter("clusterID") + "'");
+    }
+
+    int newColor;
+    if (!_request.getParameter<int>("newColor", newColor)) {
+      return JSONWriter::failure("missing parameter 'newColor'");
+    }
+
+    if (newColor < 0) {
+      return JSONWriter::failure("Invalid value for parameter newColor: '" + _request.getParameter("newColor") + "'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.groupSetStandardID(pCluster, newColor);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return JSONWriter::success();
+  }
+
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
@@ -753,6 +782,8 @@ namespace dss {
       return groupSetName(_request);
     } else if(_request.getMethod() == "groupSetColor") {
       return groupSetColor(_request);
+    } else if(_request.getMethod() == "clusterSetColor") {
+      return clusterSetColor(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }
