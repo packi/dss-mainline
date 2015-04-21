@@ -30,44 +30,42 @@
 namespace dss {
 
 boost::shared_ptr<Event>
-  createDeviceStatusEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                          int statusIndex, int statusValue);
+  createDeviceStatusEvent(boost::shared_ptr<DeviceReference> _devRef,
+                          int _index, int _value);
 
 boost::shared_ptr<Event>
-  createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                               int inputIndex, int inputType, int inputState);
+  createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> _devRef,
+                               int _index, int _type, int _state);
 
 boost::shared_ptr<Event>
-  createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                               int sensorIndex, int sensorType,
-                               int sensorValue);
+  createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
+                               int _index, int _type, int _value);
 
 boost::shared_ptr<Event>
-  createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                                 int sensorIndex, int sensorType,
-                                 const DateTime& timestamp);
+  createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
+                                 int _index, int _type, const DateTime& _ts);
 
 boost::shared_ptr<Event>
-  createZoneSensorValueEvent(boost::shared_ptr<Group> group, int sensorType,
-                             int sensorValue, const std::string sourceDevice);
+  createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
+                             int _value, const std::string _sourceDevice);
 
 boost::shared_ptr<Event>
-  createZoneSensorErrorEvent(boost::shared_ptr<Group> group, int sensorType,
-                             const DateTime& timestamp);
+  createZoneSensorErrorEvent(boost::shared_ptr<Group> _group, int _type,
+                             const DateTime& _ts);
 
 boost::shared_ptr<Event>
-  createGroupCallSceneEvent(boost::shared_ptr<Group> group, int sceneID,
-                            int groupID, int zoneID,
-                            const callOrigin_t& callOrigin,
-                            const dsuid_t& originDsuid,
-                            const std::string& originToken,
-                            bool forced);
+  createGroupCallSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
+                            int _groupID, int _zoneID,
+                            const callOrigin_t& _callOrigin,
+                            const dsuid_t& _originDSUID,
+                            const std::string& _originToken,
+                            bool _forced);
 
 boost::shared_ptr<Event>
-  createGroupUndoSceneEvent(boost::shared_ptr<Group> group, int sceneID,
-                            int groupID, int zoneID,
-                            const callOrigin_t& callOrigin,
-                            const dsuid_t& originDsuid,
-                            const std::string& originToken);
+  createGroupUndoSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
+                            int _groupID, int _zoneID,
+                            const callOrigin_t& _callOrigin,
+                            const dsuid_t& _originDSUID,
+                            const std::string& _originToken);
 }
 #endif
