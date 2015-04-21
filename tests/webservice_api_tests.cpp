@@ -267,6 +267,9 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createStateChangeEvent(createState(StateType_Device), State_Unknown, coTest);
   } else if (eventName == EventName::ExecutionDenied) {
     pEvent = createActionDenied("device-scene", "action-node", "unit-test", "testcase");
+  } else if (eventName == EventName::HeatingEnabled) {
+    // TODO created by javascript, sync paramter manually
+    pEvent = createHeatingEnabled(1, true);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");

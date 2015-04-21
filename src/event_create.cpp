@@ -180,4 +180,21 @@ createActionDenied(const std::string &_type, const std::string &_name,
   return event;
 }
 
+/**
+ * this function is used only by unit tests
+ * the real event is created from java script
+ * TODO: - add meta-event description of required fileds
+ *       - upon raise event verify event matches description
+ */
+boost::shared_ptr<Event>
+createHeatingEnabled(int _zoneID, bool _enabled)
+{
+  boost::shared_ptr<Event> event;
+
+  event = boost::make_shared<Event>(EventName::HeatingEnabled);
+  event->setProperty("zoneID", intToString(_zoneID));
+  event->setProperty("HeatingEnabled", _enabled ? "true" : "false");
+  return event;
+}
+
 }
