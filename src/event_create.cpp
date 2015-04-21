@@ -23,6 +23,7 @@
 
 #include "ds485types.h"
 #include "model/scenehelper.h"
+#include "model/state.h"
 
 namespace dss {
 
@@ -141,6 +142,27 @@ createGroupUndoSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
   event->setProperty("originDSUID", dsuid2str(_originDSUID));
   event->setProperty("callOrigin", intToString(_callOrigin));
   event->setProperty("originToken", _originToken);
+  return event;
+}
+
+boost::shared_ptr<Event>
+createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
+                       callOrigin_t _callOrigin)
+{
+  boost::shared_ptr<Event> event;
+
+  if (_state->getType() == StateType_Script) {
+    event = boost::make_shared<Event>(EventName::AddonStateChange, _state);
+    event->setProperty("scriptID", _state->getProviderService());
+  } else {
+    event = boost::make_shared<Event>(EventName::StateChange, _state);
+  }
+
+  event->setProperty("statename", _state->getName());
+  event->setProperty("state", _state->toString());
+  event->setProperty("value", intToString(_state->getState()));
+  event->setProperty("oldvalue", intToString(_oldstate));
+  event->setProperty("originDeviceID", intToString(_callOrigin));
   return event;
 }
 

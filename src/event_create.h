@@ -67,5 +67,10 @@ boost::shared_ptr<Event>
                             const callOrigin_t& _callOrigin,
                             const dsuid_t& _originDSUID,
                             const std::string& _originToken);
+
+boost::shared_ptr<Event>
+  createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
+                         callOrigin_t _callOrigin);
+
 }
 #endif
