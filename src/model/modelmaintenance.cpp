@@ -619,12 +619,13 @@ namespace dss {
       if (event->getParameterCount() < 5) {
         log("Expected at least 5 parameter for ModelEvent::etZoneSensorValue");
       } else {
-        onZoneSensorValue(pEventWithDSID->getDSID(), event->getSingleStringParameter(),
-            event->getParameter(0),
-            event->getParameter(1),
-            event->getParameter(2),
-            event->getParameter(3),
-            event->getParameter(4));
+        onZoneSensorValue(pEventWithDSID->getDSID(),
+                          str2dsuid(event->getSingleStringParameter()),
+                          event->getParameter(0),
+                          event->getParameter(1),
+                          event->getParameter(2),
+                          event->getParameter(3),
+                          event->getParameter(4));
       }
       break;
     case ModelEvent::etDeviceEANReady:
@@ -1772,8 +1773,8 @@ namespace dss {
     }
   } // onSensorValue
 
-  void ModelMaintenance::onZoneSensorValue(dsuid_t _meterID,
-                                           const std::string& _sourceDevice,
+  void ModelMaintenance::onZoneSensorValue(const dsuid_t& _meterID,
+                                           const dsuid_t& _sourceDevice,
                                            const int& _zoneID,
                                            const int& _groupID,
                                            const int& _sensorType,
@@ -1784,7 +1785,7 @@ namespace dss {
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
       double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
-      group->sensorPush(_sourceDevice, _sensorType, fValue);
+      group->sensorPush(dsuid2str(_sourceDevice), _sensorType, fValue);
 
       raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue,
                                             _sourceDevice));

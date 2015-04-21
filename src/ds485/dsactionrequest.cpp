@@ -296,7 +296,7 @@ namespace dss {
       DSBusInterface::checkBroadcastResultCode(ret);
 
       if (m_pBusEventSink) {
-        m_pBusEventSink->onZoneSensorValue(NULL, DSUID_NULL, dsuid2str(_sourceID),
+        m_pBusEventSink->onZoneSensorValue(NULL, DSUID_NULL, _sourceID,
             pGroup->getZoneID(), pGroup->getID(), _sensorType,
             convertedSensorValue, precisionvalue,
             _category, _origin);
