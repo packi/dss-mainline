@@ -1785,7 +1785,7 @@ namespace dss {
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
       double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
-      group->sensorPush(dsuid2str(_sourceDevice), _sensorType, fValue);
+      group->sensorPush(_sourceDevice, _sensorType, fValue);
 
       raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue,
                                             _sourceDevice));
