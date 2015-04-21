@@ -30,10 +30,7 @@
 #include "dsdevicebusinterface.h"
 
 #include "dsbusinterface.h"
-
-#include "src/dsidhelper.h"
 #include "src/logger.h"
-
 #include "src/model/device.h"
 #include "src/model/modelevent.h"
 #include "src/model/modelmaintenance.h"
@@ -104,9 +101,9 @@ namespace dss {
                                         .getDSMeterByDSID(_device.getDSMeterDSID());
     int ret;
     if (pMeter->getApiVersion() >= 0x301) {
-    ret = DeviceConfig_set_sync(m_DSMApiHandle, _device.getDSMeterDSID(),
-                                _device.getShortAddress(), _configClass,
-                                _configIndex, _value, 30);
+      ret = DeviceConfig_set_sync(m_DSMApiHandle, _device.getDSMeterDSID(),
+                                  _device.getShortAddress(), _configClass,
+                                  _configIndex, _value, 30);
     } else {
       ret = DeviceConfig_set(m_DSMApiHandle, _device.getDSMeterDSID(),
                              _device.getShortAddress(), _configClass,
@@ -192,10 +189,20 @@ namespace dss {
       return;
     }
 
-    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle,
-                                              _device.getDSMeterDSID(),
-                                              _device.getShortAddress(),
-                                              _groupID);
+    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment()
+                                        .getDSMeterByDSID(_device.getDSMeterDSID());
+    int ret = 0;
+    if (pMeter->getApiVersion() >= 0x301) {
+      ret = DeviceGroupMembershipModify_add_sync(m_DSMApiHandle,
+                                                 _device.getDSMeterDSID(),
+                                                 _device.getShortAddress(),
+                                                 _groupID, 30);
+    } else {
+      ret = DeviceGroupMembershipModify_add(m_DSMApiHandle,
+                                            _device.getDSMeterDSID(),
+                                            _device.getShortAddress(),
+                                            _groupID);
+    }
     if(ret == ERROR_WRONG_PARAMETER) {
       Logger::getInstance()->log("addGroup: dsm-api returned wrong parameter", lsWarning);
     } else {

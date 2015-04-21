@@ -197,8 +197,7 @@ namespace dss {
       }
     }
 
-    dsuid_t lastKnownDsMeter;
-    SetNullDsuid(lastKnownDsMeter);
+    dsuid_t lastKnownDsMeter = DSUID_NULL;
 
     if (lastmeter != NULL) {
       try {
@@ -770,7 +769,7 @@ namespace dss {
          << " inactiveSince=\""
          << _pDevice->getInactiveSince().toString() << "\"";
 
-    if(!IsNullDsuid(_pDevice->getLastKnownDSMeterDSID())) {
+    if (_pDevice->getLastKnownDSMeterDSID() != DSUID_NULL) {
       _ofs <<  " lastKnownDSMeter=\"" << dsuid2str(_pDevice->getLastKnownDSMeterDSID()) << "\"";
     }
     if(_pDevice->getLastKnownZoneID() != 0) {

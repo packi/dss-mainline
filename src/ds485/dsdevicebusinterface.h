@@ -24,12 +24,11 @@
 #ifndef DSDEVICEBUSINTERFACE_H_
 #define DSDEVICEBUSINTERFACE_H_
 
-#include "src/businterface.h"
+#include <boost/shared_ptr.hpp>
 
 #include "dsbusinterfaceobj.h"
-#include <boost/shared_ptr.hpp>
 #include "taskprocessor.h"
-#include "dsidhelper.h"
+#include "src/businterface.h"
 
 using boost::shared_ptr;
 

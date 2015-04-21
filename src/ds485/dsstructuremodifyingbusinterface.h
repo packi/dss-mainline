@@ -36,7 +36,6 @@ namespace dss {
     : DSBusInterfaceObj(),
       m_pModelMaintenance(NULL)
     {
-      SetBroadcastDsuid(m_BroadcastDSID);
     }
 
     virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
@@ -68,7 +67,6 @@ namespace dss {
 
     void setModelMaintenace(ModelMaintenance* _modelMaintenance);
 private:
-    dsuid_t m_BroadcastDSID;
     ModelMaintenance* m_pModelMaintenance;
   }; // DSStructureModifyingBusInterface
 

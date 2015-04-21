@@ -25,9 +25,6 @@
 #endif
 
 #include "dsmeteringbusinterface.h"
-
-#include "src/dsidhelper.h"
-
 #include "dsbusinterface.h"
 
 namespace dss {
@@ -52,7 +49,7 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       return;
     }
-    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, m_BroadcastDSID, NULL, NULL);
+    int ret = CircuitEnergyMeterValue_Ws_get(m_DSMApiHandle, DSUID_BROADCAST, NULL, NULL);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // requestPowerConsumption
 

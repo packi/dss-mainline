@@ -331,7 +331,7 @@ namespace dss {
           boost::shared_ptr<Zone> zone = m_pApartment->getZone(zoneID);
           boost::shared_ptr<Group> group = zone->getGroup(groupID);
           dsuid_t originDSUID = mEvent->getSource();
-          if (!IsNullDsuid(originDSUID) && (originDeviceID != 0)) {
+          if ((originDSUID != DSUID_NULL) && (originDeviceID != 0)) {
             DeviceReference devRef = m_pApartment->getDevices().getByBusID(originDeviceID, mEvent->getSource());
             originDSUID = devRef.getDSID();
           }
@@ -1003,7 +1003,7 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
-        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
+        if ((_source != DSUID_NULL) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
@@ -1066,7 +1066,7 @@ namespace dss {
         }
 
         dsuid_t originDSUID = _source;
-        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
+        if ((_source != DSUID_NULL) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().
             getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
@@ -1092,7 +1092,7 @@ namespace dss {
 
     if (SceneHelper::isMultiTipSequence(_sceneID)) {
       // do not filter calls from myself
-      if (IsNullDsuid(_source)) {
+      if (_source == DSUID_NULL) {
         passThrough = true;
       }
       // do not filter calls to broadcast
@@ -1123,8 +1123,8 @@ namespace dss {
         if (pEvent == NULL) {
           continue;
         }
-        dsuid_t tmp_dsuid = pEvent->getSource();
-        if (IsEqualDsuid(tmp_dsuid, _source) && (pEvent->getOriginDeviceID() == _originDeviceID)) {
+        if ((pEvent->getSource() == _source) &&
+            (pEvent->getOriginDeviceID() == _originDeviceID)) {
           pEvent->clearTimestamp();
         }
       }
@@ -1141,8 +1141,9 @@ namespace dss {
         continue;
       }
       if (pEvent->getZoneID() == _zoneID && pEvent->getGroupID() == _groupID) {
-        dsuid_t tmp_dsuid = pEvent->getSource();
-        if (IsEqualDsuid(tmp_dsuid, _source) && ((pEvent->getOriginDeviceID() == _originDeviceID) || (_originDeviceID == 0))) {
+        if ((pEvent->getSource() == _source) &&
+            ((pEvent->getOriginDeviceID() == _originDeviceID) ||
+             (_originDeviceID == 0))) {
           // dimming, adjust the old event's timestamp to keep it active
           if (SceneHelper::isDimSequence(_sceneID) && ((pEvent->getSceneID() == _sceneID) || (_sceneID == SceneDimArea))) {
             pEvent->setTimestamp();
@@ -1249,7 +1250,7 @@ namespace dss {
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
-        if ((!IsNullDsuid(_source)) && (_originDeviceID != 0)) {
+        if ((_source != DSUID_NULL) && (_originDeviceID != 0)) {
           DeviceReference devRef = m_pApartment->getDevices().getByBusID(_originDeviceID, _source);
           originDSUID = devRef.getDSID();
         }
@@ -1275,7 +1276,7 @@ namespace dss {
     bool passThrough = false;
 
     // do not filter calls from myself
-    if (IsNullDsuid(_source)) {
+    if (_source == DSUID_NULL) {
       passThrough = true;
     }
 
@@ -1306,8 +1307,9 @@ namespace dss {
       if (pEvent == NULL) {
         continue;
       }
-      dsuid_t tmp_dsuid = pEvent->getSource();
-      if ((pEvent->getDeviceID() == _deviceID) && (pEvent->getButtonIndex() == _buttonNr) && IsEqualDsuid(tmp_dsuid, _source)) {
+      if ((pEvent->getDeviceID() == _deviceID) &&
+          (pEvent->getButtonIndex() == _buttonNr) &&
+          (pEvent->getSource() == _source)) {
         // holding, adjust the old event's timestamp to keep it active
         if ((_clickType == ClickTypeHR) &&
             ((pEvent->getClickType() == ClickTypeHS) || (pEvent->getClickType() == ClickTypeHR))) {

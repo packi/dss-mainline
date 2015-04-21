@@ -73,9 +73,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3;
-  SetNullDsuid(dsuid1);
-  SetNullDsuid(dsuid2);
-  SetNullDsuid(dsuid3);
+  dsuid1 = dsuid2 = dsuid3 = DSUID_NULL;
   dsuid1.id[DSUID_SIZE - 1] = 10;
   dsuid2.id[DSUID_SIZE - 1] = 1;
   dsuid3.id[DSUID_SIZE - 1] = 2;
@@ -229,8 +227,7 @@ BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2;
-  SetNullDsuid(dsuid1);
-  SetNullDsuid(dsuid2);
+  dsuid1 = dsuid2 = DSUID_NULL;
   dsuid1.id[DSUID_SIZE - 1] = 0xa;
   dsuid2.id[DSUID_SIZE - 1] = 0xb;
 
@@ -505,8 +502,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
 BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  SetNullDsuid(dsuid1);
+  dsuid_t dsuid1(DSUID_NULL);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
@@ -528,8 +524,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
 BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  SetNullDsuid(dsuid1);
+  dsuid_t dsuid1(DSUID_NULL);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
@@ -552,8 +547,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
 BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  SetNullDsuid(dsuid1);
+  dsuid_t dsuid1(DSUID_NULL);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
@@ -579,8 +573,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   Apartment apt(NULL);
   
-  dsuid_t dsuid1;
-  SetNullDsuid(dsuid1);
+  dsuid_t dsuid1(DSUID_NULL);
   dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);

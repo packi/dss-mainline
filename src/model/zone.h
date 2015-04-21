@@ -51,9 +51,9 @@ namespace dss {
       m_HeatingControlState(0),
       m_HeatingMasterZone(0),
       m_CtrlOffset(0),
-      m_ManualValue(0)
+      m_ManualValue(0),
+      m_HeatingControlDSUID(DSUID_NULL)
       {
-        SetNullDsuid(m_HeatingControlDSUID);
       }
     int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value; 4=manual
     int m_HeatingControlState;     // Control state: 0=internal; 1=external; 2=exbackup; 3=emergency

@@ -168,7 +168,7 @@ namespace dss {
       std::string deviceIDStr = _request.getParameter("sourceDSID");
       std::string dsuidStr = _request.getParameter("sourceDSUID");
       if (deviceIDStr.empty() && dsuidStr.empty()) {
-        SetNullDsuid(sourceID);
+        sourceID = DSUID_NULL;
       } else {
         sourceID = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
       }

@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.30.7	15.04.2015
+	* support automatic heating controller selection, #9753
+
 v1.30.6	24.03.2015
 	* fix UMR configration issue, #9382
 

@@ -25,10 +25,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/scoped_ptr.hpp>
-#include <digitalSTROM/ds.h>
 #include <iostream>
 #include <fstream>
 
+#include "src/ds485types.h"
 #include "src/model/device.h"
 #include "src/model/apartment.h"
 #include "src/model/modulator.h"
@@ -212,24 +212,19 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1, nullid, dsmeterDSID;
+  dsuid_t dsuid1(DSUID_NULL), dsmeterDSID(DSUID_NULL);
 
-  SetNullDsuid(dsuid1);
-  SetNullDsuid(nullid);
-  SetNullDsuid(dsmeterDSID);
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsmeterDSID.id[DSUID_SIZE - 1] = 10;
   
   boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsmeterDSID);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
-
-  BOOST_CHECK_EQUAL(dsuid2str(dev1->getLastKnownDSMeterDSID()), dsuid2str(nullid));
+  BOOST_CHECK(dev1->getLastKnownDSMeterDSID() == DSUID_NULL);
 
   dev1->setDSMeter(mod);
-
-  BOOST_CHECK_EQUAL(dsuid2str(dev1->getDSMeterDSID()), dsuid2str(dsmeterDSID));
-  BOOST_CHECK_EQUAL(dsuid2str(dev1->getLastKnownDSMeterDSID()), dsuid2str(dsmeterDSID));
+  BOOST_CHECK(dev1->getDSMeterDSID() == dsmeterDSID);
+  BOOST_CHECK(dev1->getLastKnownDSMeterDSID() == dsmeterDSID);
 } // testDeviceLastKnownDSMeterDSIDWorks
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
@@ -424,10 +419,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3, dsuid4;
-  SetNullDsuid(dsuid1);
-  SetNullDsuid(dsuid2);
-  SetNullDsuid(dsuid3);
-  SetNullDsuid(dsuid4);
+  dsuid1 = dsuid2 = dsuid3 = dsuid4 = DSUID_NULL;
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;
   dsuid3.id[DSUID_SIZE - 1] = 3;
@@ -630,10 +622,7 @@ BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3, dsuid4;
-  SetNullDsuid(dsuid1);
-  SetNullDsuid(dsuid2);
-  SetNullDsuid(dsuid3);
-  SetNullDsuid(dsuid4);
+  dsuid1 = dsuid2 = dsuid3 = dsuid4 = DSUID_NULL;
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;
   dsuid3.id[DSUID_SIZE - 1] = 3;
@@ -990,9 +979,7 @@ public:
     return ZoneHeatingOperationModeSpec_t();
   }
   virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) {
-    dsuid_t dsuid;
-    SetNullDsuid(dsuid);
-    return dsuid;
+    return DSUID_NULL;
   }
   virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType, uint16_t *_sensorValue, uint32_t *_sensorAge) {
   }
@@ -1138,10 +1125,7 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   Apartment apt(NULL);
 
   dsuid_t dsuid1, dsuid2, dsuid3, meter1DSID;
-  SetNullDsuid(dsuid1);
-  SetNullDsuid(dsuid2);
-  SetNullDsuid(dsuid3);
-  SetNullDsuid(meter1DSID);
+  dsuid1 = dsuid2 = dsuid3 = meter1DSID = DSUID_NULL;
   meter1DSID.id[DSUID_SIZE - 1] = 10;
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsuid2.id[DSUID_SIZE - 1] = 2;

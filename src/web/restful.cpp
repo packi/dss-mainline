@@ -59,6 +59,17 @@ namespace dss {
   }
 
   template <>
+  bool RestfulRequest::getParameter<std::string>(const std::string& _name,
+                                                 std::string &out) const {
+    std::string tmp = getParameter(_name);
+    if (tmp.empty()) {
+      return false;
+    }
+    out = tmp;
+    return true;
+  }
+
+  template <>
   bool RestfulRequest::getParameter<int>(const std::string& _name,
                                          int &out) const
   {

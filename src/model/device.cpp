@@ -60,8 +60,8 @@ namespace dss {
     m_LastKnownShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_LastKnownZoneID(0),
-    m_DSMeterDSID(),
-    m_LastKnownMeterDSID(),
+    m_DSMeterDSID(DSUID_NULL),
+    m_LastKnownMeterDSID(DSUID_NULL),
     m_DSMeterDSIDstr(),
     m_LastKnownMeterDSIDstr(),
     m_FunctionID(0),
@@ -105,8 +105,6 @@ namespace dss {
     m_outputChannelCount(0),
     m_AKMInputProperty()
     {
-      SetNullDsuid(m_DSMeterDSID);
-      SetNullDsuid(m_LastKnownMeterDSID);
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
 
@@ -125,7 +123,7 @@ namespace dss {
 
   void Device::removeFromPropertyTree() {
     if(m_pPropertyNode != NULL) {
-      if ((!IsNullDsuid(m_DSMeterDSID)) && (!IsNullDsuid(m_DSID))) {
+      if ((m_DSMeterDSID != DSUID_NULL) && (m_DSID != DSUID_NULL)) {
         std::string devicePath = "devices/" + dsuid2str(m_DSID);
         PropertyNodePtr dev = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
         dev->alias(PropertyNodePtr());
@@ -347,7 +345,7 @@ namespace dss {
           }
         }
 
-        if (!IsNullDsuid(m_DSMeterDSID)) {
+        if (m_DSMeterDSID != DSUID_NULL) {
           setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
         }
       }
@@ -978,7 +976,7 @@ namespace dss {
   } // dirty
 
   bool Device::operator==(const Device& _other) const {
-    return IsEqualDsuid(_other.m_DSID, m_DSID);
+    return (_other.m_DSID == m_DSID);
   } // operator==
 
   devid_t Device::getShortAddress() const {
@@ -1019,7 +1017,7 @@ namespace dss {
   void Device::setDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     PropertyNodePtr alias;
     std::string devicePath = "devices/" + dsuid2str(m_DSID);
-    if((m_pPropertyNode != NULL) && (!IsNullDsuid(m_DSMeterDSID))) {
+    if ((m_pPropertyNode != NULL) && (m_DSMeterDSID != DSUID_NULL)) {
       alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
     }
     m_DSMeterDSID = _dsMeter->getDSID();
@@ -2347,9 +2345,6 @@ namespace dss {
 
   bool Device::isOemCoupledWith(boost::shared_ptr<Device> _otherDev)
   {
-    dsuid_t tmp_dev = _otherDev->getDSID();
-    dsuid_t tmp_meter = _otherDev->getDSMeterDSID();
-
     return ((m_OemState == DEVICE_OEM_VALID) &&
             !m_OemIsIndependent &&
             (m_OemSerialNumber > 0) &&
@@ -2357,8 +2352,8 @@ namespace dss {
             _otherDev->isPresent() &&
             !_otherDev->getOemIsIndependent() &&
             (_otherDev->getOemInfoState() == DEVICE_OEM_VALID) &&
-            (!IsEqualDsuid(tmp_dev, m_DSID)) &&
-            (!IsEqualDsuid(tmp_meter, m_DSMeterDSID)) &&
+            (_otherDev->getDSID() != m_DSID) &&
+            (_otherDev->getDSMeterDSID() != m_DSMeterDSID) &&
             (_otherDev->getOemEan() == m_OemEanNumber) &&
             (_otherDev->getOemSerialNumber() == m_OemSerialNumber));
   }

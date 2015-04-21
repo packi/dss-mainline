@@ -23,6 +23,7 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
+#include <cassert>
 #include <iosfwd>
 #include <bitset>
 #include <utility>
@@ -33,6 +34,7 @@
 
 #include "src/ds485types.h"
 #include "src/datetools.h"
+#include "src/model/data_types.h"
 #include "addressablemodelitem.h"
 #include "businterface.h"
 
@@ -302,6 +304,9 @@ namespace dss {
     std::string m_AKMInputProperty;
 
     mutable boost::mutex m_deviceMutex;
+
+    CardinalDirection_t m_cardinalDirection; //<  wind protection of blinds
+    WindProtectionClass_t m_windProtectionClass;
 
   protected:
     /** Sends the application a note that something has changed.
@@ -704,6 +709,22 @@ namespace dss {
     void setDeviceUMROnDelay(double delay);
     void setDeviceUMROffDelay(double delay);
     void getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay, uint8_t *_count);
+
+    void setCardinalDirection(CardinalDirection_t direction) {
+      assert(valid(direction));
+      m_cardinalDirection = direction;
+    }
+    CardinalDirection_t getCardinalDirection() const {
+      return m_cardinalDirection;
+    }
+
+    void setWindProtectionClass(WindProtectionClass_t _klass) {
+      assert(valid(_klass));
+      m_windProtectionClass = _klass;
+    }
+    WindProtectionClass_t getWindProtectionClass() const {
+      return m_windProtectionClass;
+    }
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
