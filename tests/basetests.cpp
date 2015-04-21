@@ -29,6 +29,7 @@
 
 #include "src/base.h"
 #include "src/datetools.h"
+#include "src/model/data_types.h"
 
 using namespace dss;
 
@@ -326,6 +327,58 @@ BOOST_AUTO_TEST_CASE(testTruncateUTF8String) {
   BOOST_CHECK_EQUAL(truncateUTF8String("bbä", 2), "bb");
   BOOST_CHECK_EQUAL(truncateUTF8String("bbä", 3), "bb");
   BOOST_CHECK_EQUAL(truncateUTF8String("bbä", 4), "bbä");
+}
+
+BOOST_AUTO_TEST_CASE(testCardinalDirection) {
+  std::string convert;
+  CardinalDirection_t dir;
+
+  BOOST_CHECK(parseCardinalDirection("north", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_north);
+  BOOST_CHECK(parseCardinalDirection("north east", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_north_east);
+  BOOST_CHECK(parseCardinalDirection("east", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_east);
+  BOOST_CHECK(parseCardinalDirection("south east", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_south_east);
+  BOOST_CHECK(parseCardinalDirection("south", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_south);
+  BOOST_CHECK(parseCardinalDirection("south west", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_south_west);
+  BOOST_CHECK(parseCardinalDirection("west", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_west);
+  BOOST_CHECK(parseCardinalDirection("north west", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_north_west);
+
+  BOOST_CHECK(!parseCardinalDirection("none", &dir));
+  BOOST_CHECK(!parseCardinalDirection("schlieren", &dir));
+
+  BOOST_CHECK(valid(cd_north));
+  BOOST_CHECK(valid(cd_north_west));
+  BOOST_CHECK(!valid(cd_none));
+  BOOST_CHECK(!valid(static_cast<CardinalDirection_t>(10)));
+
+  BOOST_CHECK_EQUAL(toString(cd_north_west), "north west");
+}
+
+BOOST_AUTO_TEST_CASE(testWindProtection) {
+  WindProtectionClass_t out;
+
+  BOOST_CHECK(convertWindProtectionClass(wpc_class_3, &out));
+  BOOST_CHECK_EQUAL(out, wpc_class_3);
+  BOOST_CHECK(convertWindProtectionClass(wpc_class_2, &out));
+  BOOST_CHECK_EQUAL(out, wpc_class_2);
+  BOOST_CHECK(convertWindProtectionClass(wpc_class_1, &out));
+  BOOST_CHECK_EQUAL(out, wpc_class_1);
+
+  BOOST_CHECK(!convertWindProtectionClass(0, &out));
+  BOOST_CHECK(!convertWindProtectionClass(99, &out));
+
+  BOOST_CHECK(valid(wpc_class_1));
+  BOOST_CHECK(valid(wpc_class_2));
+  BOOST_CHECK(valid(wpc_class_3));
+  BOOST_CHECK(!valid(wpc_none));
+  BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(4)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

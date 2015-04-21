@@ -61,6 +61,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/apartment.h \
 	../src/model/busscanner.cpp \
 	../src/model/busscanner.h \
+	../src/model/data_types.cpp \
+	../src/model/data_types.h \
 	../src/model/devicecontainer.cpp \
 	../src/model/devicecontainer.h \
 	../src/model/device.cpp \

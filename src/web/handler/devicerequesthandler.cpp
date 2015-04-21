@@ -34,6 +34,7 @@
 #include <digitalSTROM/dsuid.h>
 
 #include "src/model/apartment.h"
+#include "src/model/data_types.h"
 #include "src/model/device.h"
 #include "src/model/group.h"
 #include "src/model/set.h"
@@ -1662,6 +1663,44 @@ namespace dss {
       json.add("count", umr_count);
       json.add("ondelay", umr_ondelay);
       json.add("offdelay", umr_offdelay);
+      return json.successJSON();
+
+    } else if (_request.getMethod() == "setCardinalDirection") {
+      CardinalDirection_t direction;
+      JSONWriter json;
+      std::string tmp;
+
+      if (!_request.getParameter("direction", tmp)) {
+        return json.failure("missing paramter : direction");
+      }
+      if (!parseCardinalDirection(tmp, &direction)) {
+        return json.failure("invalid direction paramter : " + tmp);
+      }
+      pDevice->setCardinalDirection(direction);
+      return json.successJSON();
+
+    } else if (_request.getMethod() == "getCardinalDirection") {
+      JSONWriter json;
+      json.add("direction", toString(pDevice->getCardinalDirection()));
+      return json.successJSON();
+
+    } else if (_request.getMethod() == "setWindProtectionClass") {
+      WindProtectionClass_t protection;
+      JSONWriter json;
+      int tmp;
+
+      if (!_request.getParameter("class", tmp)) {
+        return json.failure("missing parameter : class");
+      }
+      if (!convertWindProtectionClass(tmp, &protection)) {
+        return json.failure("invalid protection class: " + intToString(tmp));
+      }
+      pDevice->setWindProtectionClass(protection);
+      return json.successJSON();
+
+    } else if (_request.getMethod() == "getWindProtectionClass") {
+      JSONWriter json;
+      json.add("class", intToString(pDevice->getWindProtectionClass()));
       return json.successJSON();
 
     } else {
