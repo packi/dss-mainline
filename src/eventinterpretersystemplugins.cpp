@@ -30,6 +30,7 @@
 
 #include "base.h"
 #include "dss.h"
+#include "event_create.h"
 #include "eventinterpretersystemplugins.h"
 #include "http_client.h"
 #include "internaleventrelaytarget.h"
@@ -227,14 +228,13 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeZoneScene: execution not allowed: " +
                     std::string(e.what()));
-      std::string action_name = getActionName(_actionNode);
-      boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event(EventName::ExecutionDenied));
-      pEvent->setProperty("action-type", "zone-scene");
-      pEvent->setProperty("action-name", action_name);
-      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
-      pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
+        boost::shared_ptr<Event> pEvent;
+        pEvent = createActionDenied("zone-scene",
+                                    getActionName(_actionNode),
+                                    m_properties.get("source-name", ""),
+                                    e.what());
+
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
@@ -293,14 +293,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeZoneUndoScene: execution not allowed: " +
                     std::string(e.what()));
-      std::string action_name = getActionName(_actionNode);
-      boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event(EventName::ExecutionDenied));
-      pEvent->setProperty("action-type", "zone-undo-scene");
-      pEvent->setProperty("action-name", action_name);
-      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
-      pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
+        boost::shared_ptr<Event> pEvent;
+        pEvent = createActionDenied("zone-undo-scene",
+                                    getActionName(_actionNode),
+                                    m_properties.get("source-name", ""),
+                                    e.what());
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
@@ -375,14 +373,12 @@ namespace dss {
       Logger::getInstance()->log("SystemEventActionExecute::"
                     "executeDeviceScene: execution not allowed: " +
                     std::string(e.what()));
-      std::string action_name = getActionName(_actionNode);
-      boost::shared_ptr<Event> pEvent;
-      pEvent.reset(new Event(EventName::ExecutionDenied));
-      pEvent->setProperty("action-type", "device-scene");
-      pEvent->setProperty("action-name", action_name);
-      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
-      pEvent->setProperty("reason", std::string(e.what()));
       if (DSS::hasInstance()) {
+        boost::shared_ptr<Event> pEvent;
+        pEvent = createActionDenied("device-scene",
+                                    getActionName(_actionNode),
+                                    m_properties.get("source-name", ""),
+                                    e.what());
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {

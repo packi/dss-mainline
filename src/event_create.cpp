@@ -166,4 +166,18 @@ createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
   return event;
 }
 
+boost::shared_ptr<Event>
+createActionDenied(const std::string &_type, const std::string &_name,
+                   const std::string &_source, const std::string &_reason)
+{
+  boost::shared_ptr<Event> event;
+
+  event = boost::make_shared<Event>(EventName::ExecutionDenied);
+  event->setProperty("action-type", _type);
+  event->setProperty("action-name", _name);
+  event->setProperty("source-name", _source);
+  event->setProperty("reason", _reason);
+  return event;
+}
+
 }

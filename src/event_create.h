@@ -72,5 +72,8 @@ boost::shared_ptr<Event>
   createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
                          callOrigin_t _callOrigin);
 
+boost::shared_ptr<Event>
+  createActionDenied(const std::string &_type, const std::string &_name,
+                     const std::string &_source, const std::string &_reason);
 }
 #endif
