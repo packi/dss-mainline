@@ -30,6 +30,7 @@
 #include "src/base.h"
 #include "src/datetools.h"
 #include "src/model/data_types.h"
+#include "src/util.h"
 
 using namespace dss;
 
@@ -400,6 +401,25 @@ BOOST_AUTO_TEST_CASE(testWindProtection) {
   BOOST_CHECK(!valid(wpc_last));
   BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(4)));
   BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(-1)));
+}
+
+BOOST_AUTO_TEST_CASE(testParseBitfield) {
+  uint8_t sceneLock[16] = {};
+  sceneLock[0 / 8] |= (1 << (0 % 8));
+  sceneLock[5 / 8] |= (1 << (5 % 8));
+  sceneLock[17 / 8] |= (1 << (17 % 8));
+  sceneLock[18 / 8] |= (1 << (18 % 8));
+  sceneLock[19 / 8] |= (1 << (19 % 8));
+  sceneLock[127 / 8] |= (1 << (127 % 8));
+
+  std::vector<int> vec = parseBitfield(sceneLock, 128);
+  BOOST_CHECK_EQUAL(vec.size(), 6);
+  BOOST_CHECK_EQUAL(vec[0], 0);
+  BOOST_CHECK_EQUAL(vec[1], 5);
+  BOOST_CHECK_EQUAL(vec[2], 17);
+  BOOST_CHECK_EQUAL(vec[3], 18);
+  BOOST_CHECK_EQUAL(vec[4], 19);
+  BOOST_CHECK_EQUAL(vec[5], 127);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

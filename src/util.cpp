@@ -204,5 +204,24 @@ static OutputChannelInfo kOutputChannels[] = {
 
     return ret;
   }
+
+  /**
+   * filters a bitarray for non-zero bits, and returns a vector
+   * containing the indices of the non-zero bits
+   *
+   *            0         1         2      +0, +10
+   * indices:   0123456789012345678901234  0-9 repeating
+   * bitmap:    0001110011100000000100100
+   * -> result: [ 3, 4, 5, 8, 9, 10, 19, 22 ]
+   */
+  std::vector<int> parseBitfield(const uint8_t *_bitfield, int _bits) {
+    std::vector<int> result;
+    for (int i = 0; i < _bits; ++i) {
+      if ((_bitfield[i / 8] & (1 << (i % 8))) != 0) {
+        result.push_back(i);
+      }
+    }
+    return result;
+  }
     
 } // namespace
