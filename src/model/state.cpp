@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "propertysystem.h"
 #include "event.h"
+#include "event_create.h"
 #include "model/state.h"
 #include "model/device.h"
 #include "model/group.h"
@@ -262,23 +263,9 @@ namespace dss {
         save();
       }
 
-      boost::shared_ptr<Event> pEvent;
-
-      if (m_type == StateType_Script) {
-        pEvent.reset(new Event(EventName::AddonStateChange, shared_from_this()));
-        pEvent->setProperty("scriptID", m_serviceName);
-      } else {
-        pEvent.reset(new Event(EventName::StateChange, shared_from_this()));
-      }
-
-      pEvent->setProperty("statename", m_name);
-      pEvent->setProperty("state", toString());
-      pEvent->setProperty("value", intToString((int) m_state));
-      pEvent->setProperty("oldvalue", intToString((int) oldstate));
-      pEvent->setProperty("originDeviceID", intToString((int) _origin));
-
       if (DSS::hasInstance()) {
-        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        DSS::getInstance()->getEventQueue()
+          .pushEvent(createStateChangeEvent(shared_from_this(), oldstate, _origin));
       }
     }
   } // setState

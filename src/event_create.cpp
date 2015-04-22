@@ -23,125 +23,177 @@
 
 #include "ds485types.h"
 #include "model/scenehelper.h"
+#include "model/state.h"
 
 namespace dss {
 
 boost::shared_ptr<Event>
-createDeviceStatusEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                        int statusIndex, int statusValue)
+createDeviceStatusEvent(boost::shared_ptr<DeviceReference> _devRef,
+                        int _index, int _value)
 {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::DeviceStatus, pDevRev);
-  event->setProperty("statusIndex", intToString(statusIndex));
-  event->setProperty("statusValue", intToString(statusValue));
+  event = boost::make_shared<Event>(EventName::DeviceStatus, _devRef);
+  event->setProperty("statusIndex", intToString(_index));
+  event->setProperty("statusValue", intToString(_value));
   return event;
 }
 
 boost::shared_ptr<Event>
-createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                             int inputIndex, int inputType, int inputState)
+createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> _devRef,
+                             int _index, int _type, int _state)
 {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::DeviceBinaryInputEvent, pDevRev);
-  event->setProperty("inputIndex", intToString(inputIndex));
-  event->setProperty("inputType", intToString(inputType));
-  event->setProperty("inputState", intToString(inputState));
+  event = boost::make_shared<Event>(EventName::DeviceBinaryInputEvent, _devRef);
+  event->setProperty("inputIndex", intToString(_index));
+  event->setProperty("inputType", intToString(_type));
+  event->setProperty("inputState", intToString(_state));
   return event;
 }
 
 boost::shared_ptr<Event>
-createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> pDevRev, int
-                             sensorIndex, int sensorType, int sensorValue)
+createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
+                             int _index, int _type, int _value)
 {
   boost::shared_ptr<Event> event;
   // TODO ensure sensorType valid or implement fallback
-  double floatValue = SceneHelper::sensorToFloat12(sensorType, sensorValue);
+  double floatValue = SceneHelper::sensorToFloat12(_type, _value);
 
-  event = boost::make_shared<Event>(EventName::DeviceSensorValue, pDevRev);
-  event->setProperty("sensorIndex", intToString(sensorIndex));
-  event->setProperty("sensorType", intToString(sensorType));
-  event->setProperty("sensorValue", intToString(sensorValue));
+  event = boost::make_shared<Event>(EventName::DeviceSensorValue, _devRef);
+  event->setProperty("sensorIndex", intToString(_index));
+  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
   return event;
 }
 
 boost::shared_ptr<Event>
-createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> pDevRev,
-                               int sensorIndex, int sensorType,
-                               const DateTime& timestamp)
+createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
+                               int _index, int _type, const DateTime& _ts)
 {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::DeviceInvalidSensor, pDevRev);
-  event->setProperty("sensorIndex", intToString(sensorIndex));
-  event->setProperty("sensorType", intToString(sensorType));
-  event->setProperty("lastValueTS", timestamp.toISO8601_ms());
+  event = boost::make_shared<Event>(EventName::DeviceInvalidSensor, _devRef);
+  event->setProperty("sensorIndex", intToString(_index));
+  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
 }
 
 boost::shared_ptr<Event>
-createZoneSensorValueEvent(boost::shared_ptr<Group> group, int sensorType,
-                           int sensorValue, const std::string sourceDevice)
+createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
+                           int _value, const std::string _sourceDevice)
 {
   boost::shared_ptr<Event> event;
   // TODO ensure sensorType valid or implement fallback
-  double floatValue = SceneHelper::sensorToFloat12(sensorType, sensorValue);
+  double floatValue = SceneHelper::sensorToFloat12(_type, _value);
 
-  event = boost::make_shared<Event>(EventName::ZoneSensorValue, group);
-  event->setProperty("sensorType", intToString(sensorType));
-  event->setProperty("sensorValue", intToString(sensorValue));
+  event = boost::make_shared<Event>(EventName::ZoneSensorValue, _group);
+  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
-  event->setProperty("originDSID", sourceDevice);
+  event->setProperty("originDSID", _sourceDevice);
   return event;
 }
 
 boost::shared_ptr<Event>
-createZoneSensorErrorEvent(boost::shared_ptr<Group> group, int sensorType,
-                      const DateTime& timestamp)
+createZoneSensorErrorEvent(boost::shared_ptr<Group> _group, int _type,
+                      const DateTime& _ts)
 {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::ZoneSensorError, group);
-  event->setProperty("sensorType", intToString(sensorType));
-  event->setProperty("lastValueTS", timestamp.toISO8601_ms());
+  event = boost::make_shared<Event>(EventName::ZoneSensorError, _group);
+  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
 }
 
 boost::shared_ptr<Event>
-createGroupCallSceneEvent(boost::shared_ptr<Group> group, int sceneID,
-                          int groupID, int zoneID,
-                          const callOrigin_t& callOrigin,
-                          const dsuid_t& originDSUID,
-                          const std::string& originToken,
-                          bool forced)
+createGroupCallSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
+                          int _groupID, int _zoneID,
+                          const callOrigin_t& _callOrigin,
+                          const dsuid_t& _originDSUID,
+                          const std::string& _originToken,
+                          bool _forced)
 {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::CallScene, group);
-  event->setProperty("sceneID", intToString(sceneID));
-  event->setProperty("groupID", intToString(groupID));
-  event->setProperty("zoneID", intToString(zoneID));
-  event->setProperty("originDSUID", dsuid2str(originDSUID));
-  event->setProperty("callOrigin", intToString(callOrigin));
-  event->setProperty("originToken", originToken);
-  if (forced) {
+  event = boost::make_shared<Event>(EventName::CallScene, _group);
+  event->setProperty("sceneID", intToString(_sceneID));
+  event->setProperty("groupID", intToString(_groupID));
+  event->setProperty("zoneID", intToString(_zoneID));
+  event->setProperty("originDSUID", dsuid2str(_originDSUID));
+  event->setProperty("callOrigin", intToString(_callOrigin));
+  event->setProperty("originToken", _originToken);
+  if (_forced) {
     event->setProperty("forced", "true");
   }
   return event;
 }
 
 boost::shared_ptr<Event>
-createGroupUndoSceneEvent(boost::shared_ptr<Group> group, int sceneID,
-                          int groupID, int zoneID,
-                          const callOrigin_t& callOrigin,
-                          const dsuid_t& originDSUID,
-                          const std::string& originToken)
+createGroupUndoSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
+                          int _groupID, int _zoneID,
+                          const callOrigin_t& _callOrigin,
+                          const dsuid_t& _originDSUID,
+                          const std::string& _originToken)
 {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::UndoScene, group);
-  event->setProperty("sceneID", intToString(sceneID));
-  event->setProperty("groupID", intToString(groupID));
-  event->setProperty("zoneID", intToString(zoneID));
-  event->setProperty("originDSUID", dsuid2str(originDSUID));
-  event->setProperty("callOrigin", intToString(callOrigin));
-  event->setProperty("originToken", originToken);
+  event = boost::make_shared<Event>(EventName::UndoScene, _group);
+  event->setProperty("sceneID", intToString(_sceneID));
+  event->setProperty("groupID", intToString(_groupID));
+  event->setProperty("zoneID", intToString(_zoneID));
+  event->setProperty("originDSUID", dsuid2str(_originDSUID));
+  event->setProperty("callOrigin", intToString(_callOrigin));
+  event->setProperty("originToken", _originToken);
+  return event;
+}
+
+boost::shared_ptr<Event>
+createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
+                       callOrigin_t _callOrigin)
+{
+  boost::shared_ptr<Event> event;
+
+  if (_state->getType() == StateType_Script) {
+    event = boost::make_shared<Event>(EventName::AddonStateChange, _state);
+    event->setProperty("scriptID", _state->getProviderService());
+  } else {
+    event = boost::make_shared<Event>(EventName::StateChange, _state);
+  }
+
+  event->setProperty("statename", _state->getName());
+  event->setProperty("state", _state->toString());
+  event->setProperty("value", intToString(_state->getState()));
+  event->setProperty("oldvalue", intToString(_oldstate));
+  event->setProperty("originDeviceID", intToString(_callOrigin));
+  return event;
+}
+
+boost::shared_ptr<Event>
+createActionDenied(const std::string &_type, const std::string &_name,
+                   const std::string &_source, const std::string &_reason)
+{
+  boost::shared_ptr<Event> event;
+
+  event = boost::make_shared<Event>(EventName::ExecutionDenied);
+  event->setProperty("action-type", _type);
+  event->setProperty("action-name", _name);
+  event->setProperty("source-name", _source);
+  event->setProperty("reason", _reason);
+  return event;
+}
+
+/**
+ * this function is used only by unit tests
+ * the real event is created from java script
+ * TODO: - add meta-event description of required fileds
+ *       - upon raise event verify event matches description
+ */
+boost::shared_ptr<Event>
+createHeatingEnabled(int _zoneID, bool _enabled)
+{
+  boost::shared_ptr<Event> event;
+
+  event = boost::make_shared<Event>(EventName::HeatingEnabled);
+  event->setProperty("zoneID", intToString(_zoneID));
+  event->setProperty("HeatingEnabled", _enabled ? "true" : "false");
   return event;
 }
 

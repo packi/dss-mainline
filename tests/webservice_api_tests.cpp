@@ -229,6 +229,10 @@ public:
     return zone->getGroup(id);
   }
 
+  boost::shared_ptr<State> createState(eStateType type) {
+      return boost::make_shared<State>(type, "dummy-state", "unit-test");
+  }
+
 private:
   DSSLifeCycle m_dss_guard;
 };
@@ -257,6 +261,15 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createGroupUndoSceneEvent(createGroup(1), 1, 1, 1,
                                        callOrigin_t(2), dsuid_t(),
                                        "fake-token");
+  } else if (eventName == EventName::AddonStateChange) {
+    pEvent = createStateChangeEvent(createState(StateType_Script), State_Unknown, coTest);
+  } else if (eventName == EventName::StateChange) {
+    pEvent = createStateChangeEvent(createState(StateType_Device), State_Unknown, coTest);
+  } else if (eventName == EventName::ExecutionDenied) {
+    pEvent = createActionDenied("device-scene", "action-node", "unit-test", "testcase");
+  } else if (eventName == EventName::HeatingEnabled) {
+    // TODO created by javascript, sync paramter manually
+    pEvent = createHeatingEnabled(1, true);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
@@ -277,7 +290,7 @@ BOOST_FIXTURE_TEST_CASE(test_mshub_tojson, EventFactory) {
     }
 
     JSONWriter json;
-    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent, json));
+    BOOST_CHECK_NO_THROW(MsHub::toJson(pEvent, json));
   }
 }
 
