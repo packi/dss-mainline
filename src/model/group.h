@@ -104,7 +104,7 @@ namespace dss {
     void setSceneName(int _sceneNumber, const std::string& _name);
     std::string getSceneName(int _sceneNumber);
 
-    void publishToPropertyTree();
+    virtual void publishToPropertyTree();
 
     void setOnState(const callOrigin_t _origin, const bool _on);
     void setOnState(const callOrigin_t _origin, const int _sceneId);

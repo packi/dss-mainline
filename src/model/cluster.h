@@ -1,0 +1,67 @@
+/*
+    Copyright (c) 2015 digitalSTROM.org, Zurich, Switzerland
+
+    Author: Christian Hitz, digitalSTROM AG <christian.hitz@digitalstrom.com>
+
+    This file is part of digitalSTROM Server.
+
+    digitalSTROM Server is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    digitalSTROM Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+#ifndef CLUSTER_H
+#define CLUSTER_H
+
+#include <map>
+#include <boost/thread/mutex.hpp>
+
+#include "modeltypes.h"
+#include "group.h"
+
+namespace dss {
+
+  /** Represents a apartmentwide cluster */
+  class Cluster : public Group {
+  private:
+    int m_Location;
+    int m_ProtectionClass;
+    int m_Floor;
+    std::vector<int> m_LockedScenes;
+    bool m_ConfigurationLocked;
+  public:
+    /** Constructs a cluster with the given id. */
+    Cluster(const int _id, Apartment& _apartment);
+    virtual ~Cluster() {};
+
+    virtual void publishToPropertyTree();
+
+    void setLocation(const int _location) { m_Location = _location; }
+    int getLocation() const { return m_Location; }
+
+    void setProtectionClass(const int _procetionClass) { m_ProtectionClass = _procetionClass; }
+    int getProtectionClass() const { return m_ProtectionClass; }
+
+    void setFloor(const int _floor) { m_Floor = _floor; }
+    int getFloor() const { return m_Floor; }
+
+    void setConfigurationLocked(const bool _configurationLocked) { m_ConfigurationLocked = _configurationLocked; }
+    bool isConfigurationLocked() const { return m_ConfigurationLocked; }
+
+    void setLockedScenes(const std::vector<int>& _locedScenes) { m_LockedScenes = _locedScenes; }
+    const std::vector<int>& getLockedScenes() const { return m_LockedScenes; }
+  }; // Group
+
+} // namespace dss
+
+#endif // CLUSTER_H

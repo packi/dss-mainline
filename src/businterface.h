@@ -64,6 +64,19 @@ namespace dss {
   } GroupSpec_t;
 
   typedef struct {
+    uint8_t GroupID;
+    uint8_t StandardGroupID;
+    bool canHaveStateMachine;
+    uint16_t NumberOfDevices;
+    std::string Name;
+    uint16_t protectionClass;
+    uint16_t location;
+    uint16_t floor;
+    bool configurationLocked;
+    std::vector<int> lockedScenes;
+  } ClusterSpec_t;
+
+  typedef struct {
     uint8_t TargetGroupType;
     uint8_t TargetGroup;
     uint8_t InputType;
