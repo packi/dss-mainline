@@ -276,6 +276,7 @@ namespace dss {
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
     virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) = 0;
 
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
     virtual std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
