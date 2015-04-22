@@ -343,7 +343,9 @@ const int MF_GR_KL220[] =
   mf_shadeprops,
   mf_shadeposition,
   mf_motiontimefins,
-  mf_shadebladeang
+  mf_shadebladeang,
+  mf_locationconfig,
+  mf_windprotectionconfig
 };
 
 const int MF_GR_KL230[] =
@@ -354,7 +356,9 @@ const int MF_GR_KL230[] =
   mf_shadeprops,
   mf_shadeposition,
   mf_motiontimefins,
-  mf_shadebladeang
+  mf_shadebladeang,
+  mf_locationconfig,
+  mf_windprotectionconfig
 };
 
 const int MF_GR_KL2[] =
@@ -367,7 +371,9 @@ const int MF_GR_KL2[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_shadeprops,
-  mf_shadeposition
+  mf_shadeposition,
+  mf_locationconfig,
+  mf_windprotectionconfig
 };
 
 const int MF_GR_TKM2[] =
@@ -808,6 +814,10 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_umroutmode;
   } else if (_name == "pushbsensor") {
     return mf_pushbsensor;
+  } else if (_name == "locationconfig") {
+    return mf_locationconfig;
+  } else if (_name == "windprotectionconfig") {
+    return mf_windprotectionconfig;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -889,6 +899,10 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "umroutmode";
     case mf_pushbsensor:
       return "pushbsensor";
+    case mf_locationconfig:
+      return "locationconfig";
+    case mf_windprotectionconfig:
+      return "windprotectionconfig";
     default:
       break;
   }
