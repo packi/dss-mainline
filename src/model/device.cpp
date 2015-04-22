@@ -103,7 +103,9 @@ namespace dss {
     m_binaryInputCount(0),
     m_sensorInputCount(0),
     m_outputChannelCount(0),
-    m_AKMInputProperty()
+    m_AKMInputProperty(),
+    m_cardinalDirection(cd_none),
+    m_windProtectionClass(wpc_none)
     {
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
