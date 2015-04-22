@@ -35,7 +35,8 @@ namespace dss {
     cd_south_west = 6,
     cd_west = 7,
     cd_north_west = 8,
-    cd_last = 9,
+
+    cd_last = 9, //< keep last
   } CardinalDirection_t;
 
   bool valid(CardinalDirection_t _direction);
@@ -47,6 +48,8 @@ namespace dss {
     wpc_class_1 = 1,  //<  7.8m/s,
     wpc_class_2 = 2,  //< 10.6m/s,
     wpc_class_3 = 3,  //< 13.6m/s,
+
+    wpc_last,  //< keep last
   } WindProtectionClass_t;
 
   bool valid(WindProtectionClass_t _class);

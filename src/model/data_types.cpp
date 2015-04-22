@@ -17,7 +17,7 @@ static const char cds_nw[] = "north west";
 
 bool valid(CardinalDirection_t _direction)
 {
-  return (cd_none < _direction && _direction < cd_last);
+  return (cd_none <= _direction && _direction < cd_last);
 }
 
 std::string toString(CardinalDirection_t _direction)
@@ -47,7 +47,10 @@ std::string toString(CardinalDirection_t _direction)
 bool parseCardinalDirection(const std::string &_direction, CardinalDirection_t *_out)
 {
   assert(_out != NULL);
-  if (_direction == cds_n) {
+  if (_direction == cds_none) {
+    *_out =  cd_none;
+    return true;
+  } else if (_direction == cds_n) {
     *_out =  cd_north;
     return true;
   } else if (_direction == cds_ne) {
@@ -78,13 +81,13 @@ bool parseCardinalDirection(const std::string &_direction, CardinalDirection_t *
 
 bool valid(WindProtectionClass_t _class)
 {
-  return (wpc_class_1 <= _class && _class <= wpc_class_3);
+  return (wpc_none <= _class && _class <= wpc_class_3);
 }
 
 bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out)
 {
   assert(_out);
-  if (_class < wpc_class_1 || wpc_class_3 < _class ) {
+  if (_class < wpc_none || wpc_class_3 < _class ) {
       return false;
   }
   *_out = static_cast<WindProtectionClass_t>(_class);

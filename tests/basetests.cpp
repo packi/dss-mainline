@@ -333,6 +333,8 @@ BOOST_AUTO_TEST_CASE(testCardinalDirection) {
   std::string convert;
   CardinalDirection_t dir;
 
+  BOOST_CHECK(parseCardinalDirection("none", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_none);
   BOOST_CHECK(parseCardinalDirection("north", &dir));
   BOOST_CHECK_EQUAL(dir, cd_north);
   BOOST_CHECK(parseCardinalDirection("north east", &dir));
@@ -350,15 +352,29 @@ BOOST_AUTO_TEST_CASE(testCardinalDirection) {
   BOOST_CHECK(parseCardinalDirection("north west", &dir));
   BOOST_CHECK_EQUAL(dir, cd_north_west);
 
-  BOOST_CHECK(!parseCardinalDirection("none", &dir));
+  BOOST_CHECK(!parseCardinalDirection("south south west", &dir));
+  BOOST_CHECK(!parseCardinalDirection("north south east", &dir));
   BOOST_CHECK(!parseCardinalDirection("schlieren", &dir));
 
   BOOST_CHECK(valid(cd_north));
+  BOOST_CHECK(valid(cd_north_east));
   BOOST_CHECK(valid(cd_north_west));
-  BOOST_CHECK(!valid(cd_none));
+  BOOST_CHECK(valid(cd_south));
+  BOOST_CHECK(valid(cd_south_east));
+  BOOST_CHECK(valid(cd_south_west));
+  BOOST_CHECK(valid(cd_east));
+  BOOST_CHECK(valid(cd_west));
+  BOOST_CHECK(!valid(cd_last));
   BOOST_CHECK(!valid(static_cast<CardinalDirection_t>(10)));
 
+  BOOST_CHECK_EQUAL(toString(cd_north), "north");
+  BOOST_CHECK_EQUAL(toString(cd_north_east), "north east");
   BOOST_CHECK_EQUAL(toString(cd_north_west), "north west");
+  BOOST_CHECK_EQUAL(toString(cd_south), "south");
+  BOOST_CHECK_EQUAL(toString(cd_south_east), "south east");
+  BOOST_CHECK_EQUAL(toString(cd_south_west), "south west");
+  BOOST_CHECK_EQUAL(toString(cd_east), "east");
+  BOOST_CHECK_EQUAL(toString(cd_west), "west");
 }
 
 BOOST_AUTO_TEST_CASE(testWindProtection) {
@@ -370,15 +386,20 @@ BOOST_AUTO_TEST_CASE(testWindProtection) {
   BOOST_CHECK_EQUAL(out, wpc_class_2);
   BOOST_CHECK(convertWindProtectionClass(wpc_class_1, &out));
   BOOST_CHECK_EQUAL(out, wpc_class_1);
+  BOOST_CHECK(convertWindProtectionClass(wpc_none, &out));
+  BOOST_CHECK_EQUAL(out, wpc_none);
 
-  BOOST_CHECK(!convertWindProtectionClass(0, &out));
   BOOST_CHECK(!convertWindProtectionClass(99, &out));
+  BOOST_CHECK(!convertWindProtectionClass(-1, &out));
 
+  BOOST_CHECK(valid(wpc_none));
   BOOST_CHECK(valid(wpc_class_1));
   BOOST_CHECK(valid(wpc_class_2));
   BOOST_CHECK(valid(wpc_class_3));
-  BOOST_CHECK(!valid(wpc_none));
+
+  BOOST_CHECK(!valid(wpc_last));
   BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(4)));
+  BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(-1)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
