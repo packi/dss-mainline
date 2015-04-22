@@ -191,164 +191,169 @@ namespace dss {
   }
 
   void Device::publishToPropertyTree() {
-    if(m_pPropertyNode == NULL) {
-      if(m_pApartment->getPropertyNode() != NULL) {
-        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + dsuid2str(m_DSID));
+    if (m_pPropertyNode != NULL) {
+      // already published
+      return;
+    }
 
-        dsid_t dsid;
-        if (dsuid_to_dsid(m_DSID, &dsid)) {
-          m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
-        } else {
-          m_pPropertyNode->createProperty("dSID")->setStringValue("");
+    if (m_pApartment->getPropertyNode() == NULL) {
+      // never happens
+      return;
+    }
+
+    m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + dsuid2str(m_DSID));
+
+    dsid_t dsid;
+    if (dsuid_to_dsid(m_DSID, &dsid)) {
+      m_pPropertyNode->createProperty("dSID")->setStringValue(dsid2str(dsid));
+    } else {
+      m_pPropertyNode->createProperty("dSID")->setStringValue("");
+    }
+    m_pPropertyNode->createProperty("DisplayID")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getDisplayID));
+
+    m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
+    m_pPropertyNode->createProperty("present")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
+    m_pPropertyNode->createProperty("name")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
+    if (!m_DSMeterDSIDstr.empty()) {
+      m_pPropertyNode->createProperty("DSMeterDSID")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSIDstr, false));
+    } else {
+      m_pPropertyNode->createProperty("DSMeterDSID")->setStringValue("");
+    }
+    m_pPropertyNode->createProperty("DSMeterDSUID")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSUIDstr, false));
+
+    m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
+    m_pPropertyNode->createProperty("functionID")
+      ->linkToProxy(PropertyProxyReference<int>(m_FunctionID, false));
+    m_pPropertyNode->createProperty("revisionID")
+      ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
+    m_pPropertyNode->createProperty("productID")
+      ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+    m_pPropertyNode->createProperty("vendorID")
+      ->linkToProxy(PropertyProxyReference<int>(m_VendorID, false));
+    m_pPropertyNode->createProperty("HWInfo")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
+    m_pPropertyNode->createProperty("GTIN")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
+    PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
+    oemNode->createProperty("ProductState")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
+    oemNode->createProperty("ProductName")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductName, false));
+    oemNode->createProperty("ProductIcon")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductIcon, false));
+    oemNode->createProperty("ProductURL")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductURL, false));
+    oemNode->createProperty("State")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemStateAsString));
+    oemNode->createProperty("EAN")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemEanAsString));
+    oemNode->createProperty("SerialNumber")
+      ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_OemSerialNumber, false));
+    oemNode->createProperty("PartNumber")
+      ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OemPartNumber, false));
+    oemNode->createProperty("isIndependent")
+      ->linkToProxy(PropertyProxyReference<bool>(m_OemIsIndependent, false));
+    oemNode->createProperty("InternetState")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemInetStateAsString));
+    oemNode->createProperty("configurationLocked")
+      ->linkToProxy(PropertyProxyReference<bool>(m_IsConfigLocked, false));
+
+    m_pPropertyNode->createProperty("isVdcDevice")
+      ->linkToProxy(PropertyProxyReference<bool>(m_isVdcDevice, false));
+    publishVdcToPropertyTree();
+
+    m_pPropertyNode->createProperty("lastKnownZoneID")
+      ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
+    m_pPropertyNode->createProperty("shortAddress")
+      ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_ShortAddress, false));
+    m_pPropertyNode->createProperty("lastKnownShortAddress")
+      ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_LastKnownShortAddress, false));
+    if (!m_LastKnownMeterDSIDstr.empty()) {
+      m_pPropertyNode->createProperty("lastKnownMeterDSID")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSIDstr, false));
+    } else {
+      m_pPropertyNode->createProperty("lastKnownMeterDSID")->setStringValue("");
+    }
+    m_pPropertyNode->createProperty("lastKnownMeterDSUID")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSUIDstr, false));
+    m_pPropertyNode->createProperty("firstSeen")
+      ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_FirstSeen, &DateTime::toString));
+    m_pPropertyNode->createProperty("lastDiscovered")
+      ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
+    m_pPropertyNode->createProperty("inactiveSince")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getInactiveSinceStr));
+    m_pPropertyNode->createProperty("locked")
+      ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
+    m_pPropertyNode->createProperty("outputMode")
+      ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OutputMode, false));
+    m_pPropertyNode->createProperty("button/id")
+      ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
+    m_pPropertyNode->createProperty("button/inputMode")
+      ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputMode, false));
+    m_pPropertyNode->createProperty("button/inputIndex")
+      ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputIndex, false));
+    m_pPropertyNode->createProperty("button/inputCount")
+      ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputCount, false));
+    m_pPropertyNode->createProperty("button/activeGroup")
+      ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
+    m_pPropertyNode->createProperty("button/groupMembership")
+      ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
+    m_pPropertyNode->createProperty("button/setsLocalPriority")
+      ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
+    m_pPropertyNode->createProperty("button/callsPresent")
+      ->linkToProxy(PropertyProxyReference<bool>(m_ButtonCallsPresent));
+    if (!m_pPropertyNode->getProperty("sensorEvents")) {
+      PropertyNodePtr sensorNode = m_pPropertyNode->createProperty("sensorEvents");
+    }
+    PropertyNodePtr binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
+    PropertyNodePtr sensorInputNode = m_pPropertyNode->createProperty("sensorInputs");
+    PropertyNodePtr outputChannelNode = m_pPropertyNode->createProperty("outputChannels");
+
+    m_pPropertyNode->createProperty("isValveType")
+      ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isValveDevice));
+
+    publishValveTypeToPropertyTree();
+
+    m_TagsNode = m_pPropertyNode->createProperty("tags");
+    m_TagsNode->setFlag(PropertyNode::Archive, true);
+
+    if (m_ZoneID != 0) {
+      std::string basePath = "zones/zone" + intToString(m_ZoneID) + "/devices";
+      if (m_pAliasNode == NULL) {
+        PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
+        if ((node == NULL) || ((node != NULL) && (node->size() == 0))) {
+          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + dsuid2str(m_DSID));
+          m_pAliasNode->alias(m_pPropertyNode);
         }
-        m_pPropertyNode->createProperty("DisplayID")
-              ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getDisplayID));
-
-        m_pPropertyNode->createProperty("dSUID")->setStringValue(dsuid2str(m_DSID));
-        m_pPropertyNode->createProperty("present")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
-        m_pPropertyNode->createProperty("name")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-        if (!m_DSMeterDSIDstr.empty()) {
-          m_pPropertyNode->createProperty("DSMeterDSID")
-            ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSIDstr, false));
-        } else {
-          m_pPropertyNode->createProperty("DSMeterDSID")->setStringValue("");
-        }
-        m_pPropertyNode->createProperty("DSMeterDSUID")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_DSMeterDSUIDstr, false));
-
-        m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
-        m_pPropertyNode->createProperty("functionID")
-          ->linkToProxy(PropertyProxyReference<int>(m_FunctionID, false));
-        m_pPropertyNode->createProperty("revisionID")
-          ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
-        m_pPropertyNode->createProperty("productID")
-          ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
-        m_pPropertyNode->createProperty("vendorID")
-          ->linkToProxy(PropertyProxyReference<int>(m_VendorID, false));
-        m_pPropertyNode->createProperty("HWInfo")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
-        m_pPropertyNode->createProperty("GTIN")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
-        PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
-        oemNode->createProperty("ProductState")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
-        oemNode->createProperty("ProductName")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductName, false));
-        oemNode->createProperty("ProductIcon")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductIcon, false));
-        oemNode->createProperty("ProductURL")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductURL, false));
-        oemNode->createProperty("State")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemStateAsString));
-        oemNode->createProperty("EAN")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemEanAsString));
-        oemNode->createProperty("SerialNumber")
-          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_OemSerialNumber, false));
-        oemNode->createProperty("PartNumber")
-          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OemPartNumber, false));
-        oemNode->createProperty("isIndependent")
-          ->linkToProxy(PropertyProxyReference<bool>(m_OemIsIndependent, false));
-        oemNode->createProperty("InternetState")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemInetStateAsString));
-        oemNode->createProperty("configurationLocked")
-          ->linkToProxy(PropertyProxyReference<bool>(m_IsConfigLocked, false));
-
-        m_pPropertyNode->createProperty("isVdcDevice")
-          ->linkToProxy(PropertyProxyReference<bool>(m_isVdcDevice, false));
-        publishVdcToPropertyTree();
-
-        m_pPropertyNode->createProperty("lastKnownZoneID")
-          ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
-        m_pPropertyNode->createProperty("shortAddress")
-          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_ShortAddress, false));
-        m_pPropertyNode->createProperty("lastKnownShortAddress")
-          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_LastKnownShortAddress, false));
-        if (!m_LastKnownMeterDSIDstr.empty()) {
-          m_pPropertyNode->createProperty("lastKnownMeterDSID")
-            ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSIDstr, false));
-        } else {
-          m_pPropertyNode->createProperty("lastKnownMeterDSID")->setStringValue("");
-        }
-        m_pPropertyNode->createProperty("lastKnownMeterDSUID")
-          ->linkToProxy(PropertyProxyReference<std::string>(m_LastKnownMeterDSUIDstr, false));
-        m_pPropertyNode->createProperty("firstSeen")
-          ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_FirstSeen, &DateTime::toString));
-        m_pPropertyNode->createProperty("lastDiscovered")
-          ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
-        m_pPropertyNode->createProperty("inactiveSince")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getInactiveSinceStr));
-        m_pPropertyNode->createProperty("locked")
-          ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
-        m_pPropertyNode->createProperty("outputMode")
-          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OutputMode, false));
-        m_pPropertyNode->createProperty("button/id")
-          ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
-        m_pPropertyNode->createProperty("button/inputMode")
-          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputMode, false));
-        m_pPropertyNode->createProperty("button/inputIndex")
-          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputIndex, false));
-        m_pPropertyNode->createProperty("button/inputCount")
-          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputCount, false));
-        m_pPropertyNode->createProperty("button/activeGroup")
-          ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
-        m_pPropertyNode->createProperty("button/groupMembership")
-          ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
-        m_pPropertyNode->createProperty("button/setsLocalPriority")
-          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
-        m_pPropertyNode->createProperty("button/callsPresent")
-          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonCallsPresent));
-        if (!m_pPropertyNode->getProperty("sensorEvents")) {
-          PropertyNodePtr sensorNode = m_pPropertyNode->createProperty("sensorEvents");
-        }
-        PropertyNodePtr binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
-        PropertyNodePtr sensorInputNode = m_pPropertyNode->createProperty("sensorInputs");
-        PropertyNodePtr outputChannelNode = m_pPropertyNode->createProperty("outputChannels");
-
-        m_pPropertyNode->createProperty("isValveType")
-          ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isValveDevice));
-
-        publishValveTypeToPropertyTree();
-
-        m_TagsNode = m_pPropertyNode->createProperty("tags");
-        m_TagsNode->setFlag(PropertyNode::Archive, true);
-
-        if (m_ZoneID != 0) {
-          std::string basePath = "zones/zone" + intToString(m_ZoneID) +
-                                 "/devices";
-          if(m_pAliasNode == NULL) {
-            PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
-            if ((node == NULL) || ((node != NULL) && (node->size() == 0))) {
-              m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + dsuid2str(m_DSID));
-              m_pAliasNode->alias(m_pPropertyNode);
-            }
-          } else {
-            PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);
-            if (base != NULL) {
-              base->addChild(m_pAliasNode);
-            }
-          }
-        }
-
-        for (int g = 1; g <= 63; g++) {
-          if (m_GroupBitmask.test(g-1)) {
-            std::string gPath = "zones/zone" + intToString(m_ZoneID) +
-                                "/groups/group" + intToString(g) + "/devices/" +
-                                dsuid2str(m_DSID);
-            PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
-            if (gnode) {
-              gnode->alias(m_pPropertyNode);
-            }
-            PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
-            gsubnode->createProperty("id")->setIntegerValue(g);
-          }
-        }
-
-        if (m_DSMeterDSID != DSUID_NULL) {
-          setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
+      } else {
+        PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);
+        if (base != NULL) {
+          base->addChild(m_pAliasNode);
         }
       }
+    }
+
+    for (int g = 1; g <= 63; g++) {
+      if (m_GroupBitmask.test(g-1)) {
+        std::string gPath = "zones/zone" + intToString(m_ZoneID) +
+                            "/groups/group" + intToString(g) + "/devices/" +
+                            dsuid2str(m_DSID);
+        PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
+        if (gnode) {
+          gnode->alias(m_pPropertyNode);
+        }
+        PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
+        gsubnode->createProperty("id")->setIntegerValue(g);
+      }
+    }
+
+    if (m_DSMeterDSID != DSUID_NULL) {
+      setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
     }
   } // publishToPropertyTree
 
@@ -1053,33 +1058,35 @@ namespace dss {
   } // getZoneID
 
   void Device::setZoneID(const int _value) {
-    if(_value != m_ZoneID) {
-      if(_value != 0) {
-        m_LastKnownZoneID = _value;
-      }
-      m_ZoneID = _value;
-      if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
-        std::string basePath = "zones/zone" + intToString(m_ZoneID) +
-                               "/devices";
-        if(m_pAliasNode == NULL) {
-          PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
-          if(node != NULL) {
-            Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
-            if(node->size() > 0) {
-              Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
-              return;
-            }
-          }
-          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + dsuid2str(m_DSID));
+    if (_value == m_ZoneID) {
+      // nothing to do
+      return;
+    }
 
-          m_pAliasNode->alias(m_pPropertyNode);
-        } else {
-          PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);
-          if(base == NULL) {
-            throw std::runtime_error("PropertyNode of the new zone does not exist");
+    if (_value != 0) {
+      m_LastKnownZoneID = _value;
+    }
+
+    m_ZoneID = _value;
+    if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
+      std::string basePath = "zones/zone" + intToString(m_ZoneID) + "/devices";
+      if (m_pAliasNode == NULL) {
+        PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
+        if (node != NULL) {
+          Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
+          if (node->size() > 0) {
+            Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
+            return;
           }
-          base->addChild(m_pAliasNode);
         }
+        m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + dsuid2str(m_DSID));
+        m_pAliasNode->alias(m_pPropertyNode);
+      } else {
+        PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);
+        if (base == NULL) {
+          throw std::runtime_error("PropertyNode of the new zone does not exist");
+        }
+        base->addChild(m_pAliasNode);
       }
     }
   } // setZoneID
