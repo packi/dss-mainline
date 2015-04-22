@@ -47,6 +47,9 @@
 
 namespace dss {
 
+  const char WindProtectionClass[] = "WindProtectionClass";
+  const char CardinalDirection[] = "CardinalDirection";
+
   ModelPersistence::ModelPersistence(Apartment& _apartment)
   : m_Apartment(_apartment), m_ignore(false), m_expectString(false),
                              m_level(0), m_state(ps_none), m_tempScene(-1)
@@ -80,6 +83,8 @@ namespace dss {
     const char *oemProdURL = NULL;
     const char *configLocked = NULL;
     const char *valve = NULL;
+    const char *cardinalDirection = NULL;
+    const char *windProtectionClass = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -127,6 +132,10 @@ namespace dss {
         configLocked = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "valveType") == 0) {
         valve = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], WindProtectionClass) == 0) {
+        windProtectionClass = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], CardinalDirection) == 0) {
+        cardinalDirection = _attrs[i + 1];
       }
     }
 
@@ -266,6 +275,17 @@ namespace dss {
       }
     }
     m_tempDevice->setOemInfoState(oemEanState);
+
+    CardinalDirection_t dir;
+    if (cardinalDirection && parseCardinalDirection(cardinalDirection, &dir)) {
+      m_tempDevice->setCardinalDirection(dir);
+    }
+
+    WindProtectionClass_t protection;
+    if (windProtectionClass &&
+        convertWindProtectionClass(strToInt(windProtectionClass), &protection)) {
+      m_tempDevice->setWindProtectionClass(protection);
+    }
 
     bool isConfigLocked = false;
     if (configLocked != NULL) {
@@ -760,6 +780,11 @@ namespace dss {
     return;
   } // readConfigurationFromXML
 
+  std::ostream& addAttribute(std::ostream &_ofs, const std::string &_name,
+                             const std::string &_value) {
+    return _ofs << " " << _name << "=\"" << _value << "\"";
+  }
+
   void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<device dsuid=\""
          << dsuid2str(_pDevice->getDSID()) << "\""
@@ -777,6 +802,12 @@ namespace dss {
     }
     if(_pDevice->getLastKnownShortAddress() != ShortAddressStaleDevice) {
       _ofs << " lastKnownShortAddress=\"" << intToString(_pDevice->getLastKnownShortAddress()) << "\"";
+    }
+    if (_pDevice->getCardinalDirection() != cd_none) {
+      addAttribute(_ofs, CardinalDirection, toString(_pDevice->getCardinalDirection()));
+    }
+    if (_pDevice->getWindProtectionClass() != wpc_none) {
+      addAttribute(_ofs, WindProtectionClass, intToString(_pDevice->getWindProtectionClass()));
     }
     if(_pDevice->getOemInfoState() == DEVICE_OEM_NONE) {
       _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
