@@ -138,6 +138,8 @@ namespace dss {
     boost::shared_ptr<Cluster> getCluster(const int _id);
     /** Returns a vector of Clusters. */
     std::vector<boost::shared_ptr<Cluster> > getClusters();
+    /** Return an Empty Cluster, if available. */
+    boost::shared_ptr<Cluster> getEmptyCluster();
 
     /** returns a vector of all states */
     std::vector<boost::shared_ptr<State> > getStates() const;

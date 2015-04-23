@@ -272,6 +272,16 @@ namespace dss {
     return result;
   }
 
+  boost::shared_ptr<Cluster> Apartment::getEmptyCluster() {
+    // find a group slot with unassigned state machine id
+    foreach (boost::shared_ptr<Cluster> pCluster, getClusters()) {
+      if (pCluster->getStandardGroupID() == 0) {
+        return pCluster;
+      }
+    }
+    return boost::shared_ptr<Cluster> ();
+  }
+
   boost::shared_ptr<Device> Apartment::allocateDevice(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     boost::shared_ptr<Device> pResult;
