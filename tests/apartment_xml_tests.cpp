@@ -35,6 +35,7 @@
 #include "src/model/devicereference.h"
 #include "src/model/zone.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/modelpersistence.h"
 #include "src/setbuilder.h"
@@ -84,10 +85,36 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
     "    </device>\n"
     "  </devices>\n"
     "  <zones>\n"
+    "    <zone id=\"0\">\n"
+    "      <groups>\n"
+    "        <group id=\"16\">\n"
+    "          <name>Jalousien</name>\n"
+    "          <color>2</color>\n"
+    "          <scenes>\n"
+    "          </scenes>\n"
+    "        </group>\n"
+    "      </groups>\n"
+    "    </zone>\n"
     "    <zone id=\"1\">\n"
     "      <name>garazh</name>\n"
     "    </zone>\n"
     "  </zones>\n"
+    "  <clusters>\n"
+    "    <cluster id=\"17\">\n"
+    "      <name>Jalousien2</name>\n"
+    "      <color>2</color>\n"
+    "      <location>4</location>\n"
+    "      <protectionClass>2</protectionClass>\n"
+    "      <floor>1</floor>\n"
+    "      <configurationLocked>0</configurationLocked>\n"
+    "      <lockedScenes>\n"
+    "        <lockedScene id=\"5\" />\n"
+    "        <lockedScene id=\"17\" />\n"
+    "        <lockedScene id=\"18\" />\n"
+    "        <lockedScene id=\"19\" />\n"
+    "      </lockedScenes>\n"
+    "    </cluster>\n"
+    "  </clusters>\n"
     "  <dsMeters>\n"
     "    <dsMeter id=\"3504175fe0000000ffc00010\">\n"
     "      <name>UMZ-451</name>\n"
@@ -128,6 +155,21 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   dev = apt.getDeviceByDSID(protID);
   BOOST_CHECK_EQUAL(dev->getCardinalDirection(), cd_north_west);
   BOOST_CHECK_EQUAL(dev->getWindProtectionClass(), wpc_class_3);
+
+  boost::shared_ptr<Cluster> pClust;
+  BOOST_CHECK_NO_THROW(pClust = apt.getCluster(16));
+  BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien");
+  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
+
+  BOOST_CHECK_NO_THROW(pClust = apt.getCluster(17));
+  BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien2");
+  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
+  BOOST_CHECK_EQUAL(pClust->getLocation(), 4);
+  BOOST_CHECK_EQUAL(pClust->getProtectionClass(), 2);
+  BOOST_CHECK_EQUAL(pClust->getFloor(), 1);
+  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
+  BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), false);
+  BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 4);
 
   boost::filesystem::remove_all(fileName);
 }
@@ -171,6 +213,58 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
 
   BOOST_CHECK_EQUAL(dev->getCardinalDirection(), cd_none);
   BOOST_CHECK_EQUAL(dev->getWindProtectionClass(), wpc_none);
+
+  unlink(filename.c_str());
+  rmdir(dirname);
+}
+
+BOOST_AUTO_TEST_CASE(testCluster) {
+  char *dirname, tmpl[] = "/tmp/dss‐persistence-test_XXXXXX";
+  std::string filename;
+
+  dirname = mkdtemp(tmpl);
+  if (dirname == NULL) {
+    BOOST_MESSAGE("Failed to create temporary folder\n");
+  }
+
+  {
+    // create apartment xml
+    Apartment apt1(NULL);
+    boost::shared_ptr<Cluster> pCluster;
+    boost::shared_ptr<Zone> zoneBroadcast = apt1.getZone(0);
+    pCluster.reset(new Cluster(39, apt1));
+    zoneBroadcast->addGroup(pCluster);
+
+    pCluster->setName("Testing");
+    pCluster->setStandardGroupID(4);
+    pCluster->setLocation(3);
+    pCluster->setProtectionClass(9);
+    pCluster->setFloor(13);
+    pCluster->setConfigurationLocked(true);
+    std::vector<int> scenes;
+    scenes.push_back(5);
+    scenes.push_back(43);
+    scenes.push_back(127);
+    pCluster->setLockedScenes(scenes);
+
+    ModelPersistence persist1(apt1);
+    filename = std::string(dirname) + "/cluster.xml";
+    persist1.writeConfigurationToXML(filename);
+  }
+
+  Apartment apt2(NULL);
+  ModelPersistence persist2(apt2);
+  persist2.readConfigurationFromXML(filename, "");
+
+  boost::shared_ptr<Cluster> pClust;
+  BOOST_CHECK_NO_THROW(pClust = apt2.getCluster(39));
+  BOOST_CHECK_EQUAL(pClust->getName(), "Testing");
+  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 4);
+  BOOST_CHECK_EQUAL(pClust->getLocation(), 3);
+  BOOST_CHECK_EQUAL(pClust->getProtectionClass(), 9);
+  BOOST_CHECK_EQUAL(pClust->getFloor(), 13);
+  BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), true);
+  BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 3);
 
   unlink(filename.c_str());
   rmdir(dirname);

@@ -389,16 +389,73 @@ namespace dss {
       return;
     }
 
+    if (m_tempZone->getID() > 0 && isAppUserGroup(groupID)) {
+      return;
+    }
+
     m_tempGroup.reset();
     m_tempGroup = m_tempZone->getGroup(groupID);
     if (m_tempGroup == NULL) {
-      m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+      if (m_tempZone->getID() == 0 && isAppUserGroup(groupID)) {
+        m_tempGroup.reset(new Cluster(groupID, m_Apartment));
+      } else {
+        m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+      }
       m_tempZone->addGroup(m_tempGroup);
     }
     if (grName) {
       m_tempGroup->setName(grName);
     }
     m_tempGroup->setIsValid(true);
+  }
+
+  void ModelPersistence::parseCluster(const char *_name, const char **_attrs) {
+    if (strcmp(_name, "cluster") != 0) {
+      return;
+    }
+
+    const char *id = NULL;
+    for (int i = 0; _attrs[i]; i += 2) {
+      if (strcmp(_attrs[i], "id") == 0) {
+        id = _attrs[i + 1];
+      }
+    }
+
+    if (id == NULL) {
+      return;
+    }
+    int groupID = strToIntDef(id, -1);
+    if (groupID == -1) {
+      return;
+    }
+
+    m_tempCluster.reset();
+    try {
+      m_tempCluster = boost::dynamic_pointer_cast<Cluster>(m_Apartment.getGroup(groupID));
+    } catch (ItemNotFoundException &e) {
+      m_tempCluster.reset(new Cluster(groupID, m_Apartment));
+      m_Apartment.getZone(0)->addGroup(m_tempCluster);
+    }
+
+    m_tempCluster->setIsValid(true);
+  }
+
+  void ModelPersistence::parseLockedScenes(const char *_name, const char **_attrs) {
+    if (m_tempCluster == NULL) {
+      return;
+    }
+
+    if (strcmp(_name, "lockedScene") != 0) {
+      return;
+    }
+
+    const char *sid = getSingleAttribute("id", _attrs);
+    if (sid == NULL) {
+      return;
+    }
+
+    int snum = strToIntDef(sid, -1);
+    m_tempCluster->addLockedScene(snum);
   }
 
   void ModelPersistence::parseScene(const char *_name, const char **_attrs) {
@@ -529,7 +586,7 @@ namespace dss {
         return;
       }
 
-      // level 1 supports only <apartment>, <devices>, <zones>, <dsMeters>
+      // level 1 supports only <apartment>, <devices>, <zones>, <dsMeters>, <clusters>
       if (m_level == 1) {
         if (strcmp(_name, "apartment") == 0) {
           m_state = ps_apartment;
@@ -537,6 +594,8 @@ namespace dss {
           m_state = ps_device;
         } else if (strcmp(_name, "zones") == 0) {
           m_state = ps_zone;
+        } else if (strcmp(_name, "clusters") == 0) {
+          m_state = ps_cluster;
         } else if ((strcmp(_name, "dsMeters") == 0) ||
                    (strcmp(_name, "modulators") == 0)) {
           m_state = ps_meter;
@@ -561,7 +620,7 @@ namespace dss {
         return;
       }
 
-      // level 2 supprts <device>, <zone>, <dsMeter>
+      // level 2 supports <device>, <zone>, <dsMeter>, <cluster>
       if (m_level == 2) {
         if ((m_state == ps_apartment) && (strcmp(_name, "name") == 0)) {
           m_expectString = true;
@@ -571,9 +630,11 @@ namespace dss {
           parseZone(_name, _attrs);
         } else if (m_state == ps_meter) {
           parseMeter(_name, _attrs);
+        } else if (m_state == ps_cluster) {
+          parseCluster(_name, _attrs);
         }
       // level 3 supports <name>, <properties>, <groups>, <datamodelHash>,
-      // <datamodelModification>, <sensors>
+      // <datamodelModification>, <sensors>, <lockedScenes>
       } else if (m_level == 3) {
         if (((m_state == ps_device) || (m_state == ps_zone)) &&
             (strcmp(_name, "name") == 0)) {
@@ -593,13 +654,27 @@ namespace dss {
             m_propParser->reset(m_tempDevice->getPropertyNode(), true);
             m_propParser->elementStartCb(_name, _attrs);
           }
+        } else if ((m_state == ps_cluster) &&
+              ((strcmp(_name, "name") == 0) ||
+               (strcmp(_name, "associatedSet") == 0) ||
+               (strcmp(_name, "color") == 0) ||
+               (strcmp(_name, "location") == 0) ||
+               (strcmp(_name, "protectionClass") == 0) ||
+               (strcmp(_name, "floor") == 0) ||
+               (strcmp(_name, "configurationLocked") == 0))) {
+            m_expectString = true;
+        } else if ((m_state == ps_cluster) &&
+            (strcmp(_name, "lockedScenes") == 0)) {
+          m_state = ps_lockedScenes;
         }
-      // level 4 supports <property>, <group>
+      // level 4 supports <property>, <group>, <sensor>, <lockedScene>
       } else if (m_level == 4) {
         if (m_state == ps_group) {
           parseGroup(_name, _attrs);
         } else if (m_state == ps_sensor) {
           parseSensor(_name, _attrs);
+        } else if (m_state == ps_lockedScenes) {
+          parseLockedScenes(_name, _attrs);
         }
       // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>
       } else if (m_level == 5) {
@@ -697,12 +772,35 @@ namespace dss {
               } else if (strcmp(_name, "deviceType") == 0) {
                 m_tempMeter->setBusMemberType((BusMemberDevice_t) strToInt(m_chardata));
               }
+            } else if ((m_state == ps_cluster) && (m_tempCluster != NULL)) {
+              if (strcmp(_name, "name") == 0) {
+                m_tempCluster->setName(m_chardata);
+              } else if (strcmp(_name, "associatedSet") == 0) {
+                m_tempCluster->setAssociatedSet(m_chardata);
+              } else if (strcmp(_name, "color") == 0) {
+                m_tempCluster->setStandardGroupID(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "location") == 0) {
+                m_tempCluster->setLocation(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "protectionClass") == 0) {
+                m_tempCluster->setProtectionClass(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "floor") == 0) {
+                m_tempCluster->setFloor(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "configurationLocked") == 0) {
+                bool isConfigurationLocked = false;
+                try {
+                  int p = strToUInt(m_chardata);
+                  isConfigurationLocked = p > 0;
+                } catch (std::invalid_argument&) {}
+                m_tempCluster->setConfigurationLocked(isConfigurationLocked);
+              }
             }
           }
           if ((m_state == ps_group) && (strcmp(_name, "groups") == 0)) {
             m_state = ps_zone;
           } else if ((m_state == ps_sensor) && (strcmp(_name, "sensors") == 0)) {
             m_state = ps_zone;
+          } else if ((m_state == ps_lockedScenes) && (strcmp(_name, "lockedScenes") == 0)) {
+            m_state = ps_cluster;
           }
         }
         break;
@@ -762,6 +860,7 @@ namespace dss {
     m_tempZone.reset();
     m_tempMeter.reset();
     m_tempGroup.reset();
+    m_tempCluster.reset();
     m_tempScene = -1;
 
     m_propParser.reset(new PropertyParserProxy());
