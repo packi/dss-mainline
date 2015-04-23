@@ -43,6 +43,7 @@
 #include "src/model/zone.h"
 #include "src/model/modulator.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/modelconst.h"
 
 namespace dss {
@@ -785,6 +786,10 @@ namespace dss {
     return _ofs << " " << _name << "=\"" << _value << "\"";
   }
 
+  std::ostream& addElementSimple(std::ostream &_ofs, int _indent, const std::string &_name, const std::string &_value) {
+    return _ofs << doIndent(_indent) << "<" << _name << ">" << XMLStringEscape(_value) << "</" << _name << ">" << std::endl;
+  }
+
   void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<device dsuid=\""
          << dsuid2str(_pDevice->getDSID()) << "\""
@@ -855,15 +860,6 @@ namespace dss {
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
-    if (isAppUserGroup(_pGroup->getID())) {
-      if (!_pGroup->getName().empty()) {
-        _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pGroup->getName()) << "</name>" << std::endl;
-      }
-      if (!_pGroup->getAssociatedSet().empty()) {
-        _ofs << doIndent(_indent + 1) << "<associatedSet>" << XMLStringEscape(_pGroup->getAssociatedSet()) << "</associatedSet>" << std::endl;
-      }
-      _ofs << doIndent(_indent + 1) << "<color>" << intToString(_pGroup->getStandardGroupID()) << "</color>" << std::endl;
-    }
     _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
     for (int iScene = 0; iScene < MaxSceneNumber; iScene++) {
       std::string name = _pGroup->getSceneName(iScene);
@@ -876,6 +872,30 @@ namespace dss {
     _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
     _ofs << doIndent(_indent) << "</group>" << std::endl;
   } // groupToXML
+
+  void clusterToXML(boost::shared_ptr<Cluster> _pCluster, std::ofstream& _ofs, const int _indent) {
+    _ofs << doIndent(_indent) << "<cluster id=\"" << intToString(_pCluster->getID()) << "\">" << std::endl;
+
+    if (!_pCluster->getName().empty()) {
+      addElementSimple(_ofs, _indent + 1, "name", _pCluster->getName());
+    }
+    if (!_pCluster->getAssociatedSet().empty()) {
+      addElementSimple(_ofs, _indent + 1, "associatedSet", _pCluster->getAssociatedSet());
+    }
+    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getStandardGroupID()));
+    addElementSimple(_ofs, _indent + 1, "location", intToString(_pCluster->getLocation()));
+    addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(_pCluster->getProtectionClass()));
+    addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
+    addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
+    _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
+    const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
+    for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {
+      _ofs << doIndent(_indent + 2) << "<lockedScene id=\"" << intToString(lockedScenes[iScene]) << "\" />" << std::endl;
+    }
+    _ofs << doIndent(_indent + 1) << "</lockedScenes>" << std::endl;
+
+    _ofs << doIndent(_indent) << "</cluster>" << std::endl;
+  } // clusterToXML
 
   void zoneSensorToXML(boost::shared_ptr<MainZoneSensor_t> _zoneSensor, std::ofstream& _ofs, const int _indent)
   {
@@ -891,16 +911,9 @@ namespace dss {
     if(!_pZone->getName().empty()) {
       _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pZone->getName()) << "</name>" << std::endl;
     }
-    _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
 
-    if (_pZone->getID() == 0) {
-      // store unique "apartment user-groups" in zone 0
-      foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-        if (isAppUserGroup(pGroup->getID())) {
-          groupToXML(pGroup, _ofs, _indent + 2);
-        }
-      }
-    } else {
+    _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
+    if (_pZone->getID() != 0) {
       // store real user-groups per zone
       foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
         groupToXML(pGroup, _ofs, _indent + 2);
@@ -978,6 +991,14 @@ namespace dss {
         zoneToXML(pZone, ofs, indent + 1);
       }
       ofs << doIndent(indent) << "</zones>" << std::endl;
+
+      // clusters
+      ofs << doIndent(indent) << "<clusters>" << std::endl;
+      // store unique "apartment user-groups" in zone 0
+      foreach(boost::shared_ptr<Cluster> pCluster, m_Apartment.getClusters()) {
+        clusterToXML(pCluster, ofs, indent + 1);
+      }
+      ofs << doIndent(indent) << "</clusters>" << std::endl;
 
       // dsMeters
       ofs << doIndent(indent) << "<dsMeters>" << std::endl;
