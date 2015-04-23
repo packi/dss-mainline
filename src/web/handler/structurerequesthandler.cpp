@@ -47,10 +47,6 @@
 #include "src/structuremanipulator.h"
 #include "util.h"
 
-/* TODO use const in src/model/modelconst */
-#define MIN_USER_GROUP_ID       24  // minimum allowed user group id
-#define MAX_USER_GROUP_ID       31
-
 namespace dss {
 
 
@@ -356,7 +352,7 @@ namespace dss {
 
     if (groupID == -1) {
       // find any free group slot
-      for (groupID = MIN_USER_GROUP_ID; pGroup == NULL && groupID < MAX_USER_GROUP_ID; groupID ++) {
+      for (groupID = GroupIDUserGroupStart; pGroup == NULL && groupID < GroupIDUserGroupEnd; groupID ++) {
         pGroup = zone->getGroup(groupID);
       }
     } else if (groupID == -2) {
