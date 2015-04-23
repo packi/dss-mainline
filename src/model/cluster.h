@@ -59,7 +59,7 @@ namespace dss {
     void setConfigurationLocked(const bool _configurationLocked) { m_ConfigurationLocked = _configurationLocked; }
     bool isConfigurationLocked() const { return m_ConfigurationLocked; }
 
-    void setLockedScenes(const std::vector<int>& _locedScenes) { m_LockedScenes = _locedScenes; }
+    void setLockedScenes(const std::vector<int>& _lockedScenes) { m_LockedScenes = _lockedScenes; }
     const std::vector<int>& getLockedScenes() const { return m_LockedScenes; }
 
     void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
