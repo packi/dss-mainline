@@ -43,6 +43,7 @@
 #include "modulator.h"
 #include "device.h"
 #include "group.h"
+#include "cluster.h"
 #include "apartment.h"
 #include "zone.h"
 #include "state.h"
@@ -130,6 +131,9 @@ namespace dss {
           if (!scanZone(_dsMeter, zone)) {
             return false;
           }
+        }
+        if (!scanClusters(_dsMeter)) {
+          return false;
         }
       }
 
@@ -219,6 +223,59 @@ namespace dss {
 
     return result;
   } // scanZone
+
+  bool BusScanner::scanClusters(boost::shared_ptr<DSMeter> _dsMeter) {
+    std::vector<ClusterSpec_t> clusters;
+    try {
+      clusters = m_Interface.getClusters(_dsMeter->getDSID());
+    } catch (BusApiError& e) {
+      log("scanDSMeter: Error getting getClusters", lsWarning);
+      return false;
+    }
+
+    foreach(ClusterSpec_t cluster, clusters) {
+      log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
+          " and devices: " + intToString(cluster.NumberOfDevices));
+
+      boost::shared_ptr<Cluster> pCluster;
+
+      try {
+        pCluster = boost::dynamic_pointer_cast<Cluster>(m_Apartment.getGroup(cluster.GroupID));
+      } catch (ItemNotFoundException&) {
+        boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
+        pCluster.reset(new Cluster(cluster.GroupID, m_Apartment));
+        zoneBroadcast->addGroup(pCluster);
+      }
+
+      /*
+       * if the configuration on the dSS and the dSM is different,
+       * synchronize the settings back to the dSMs
+       */
+      if (!pCluster->equalConfig(cluster)) {
+        pCluster->setIsSynchronized(false);
+      }
+
+      /*
+       * the dSM is the master source for this data. The dSS will take the data
+       * from the first dSM that has a non-zero configuration.
+       */
+      if ((pCluster->getStandardGroupID() == 0) ||
+          ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
+        pCluster->setStandardGroupID(cluster.StandardGroupID);
+        pCluster->setLocation(cluster.location);
+        pCluster->setProtectionClass(cluster.protectionClass);
+        pCluster->setConfigurationLocked(cluster.configurationLocked);
+        pCluster->setLockedScenes(cluster.lockedScenes);
+        pCluster->setReadFromDsm(true);
+      }
+
+      pCluster->setIsPresent(true);
+      pCluster->setIsConnected(true);
+      pCluster->setLastCalledScene(SceneOff);
+      pCluster->setIsValid(true);
+    }
+    return true;
+  } // scanGroupsOfZone
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
     if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
@@ -562,8 +619,8 @@ namespace dss {
     }
 
     foreach(GroupSpec_t group, groups) {
-      if (group.GroupID == 0) {
-        // ignore broadcast group
+      if ((group.GroupID == 0) || isAppUserGroup(group.GroupID)) {
+        // ignore broadcast group and clusters
         continue;
       }
 
@@ -601,50 +658,6 @@ namespace dss {
         pGroup->setIsConnected(true);
         pGroup->setLastCalledScene(SceneOff);
         pGroup->setIsValid(true);
-
-      } else if (isAppUserGroup(group.GroupID)) {
-        groupOnZone = _zone->getGroup(group.GroupID);
-        if (groupOnZone == NULL) {
-          log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
-          groupOnZone->setName(group.Name);
-          groupOnZone->setStandardGroupID(group.StandardGroupID);
-          _zone->addGroup(groupOnZone);
-        } else {
-          if (groupOnZone->getName() != group.Name ||
-              groupOnZone->getStandardGroupID() != group.StandardGroupID) {
-            groupOnZone->setIsSynchronized(false);
-          }
-        }
-        groupOnZone->setIsPresent(true);
-        groupOnZone->setIsConnected(true);
-        groupOnZone->setLastCalledScene(SceneOff);
-        groupOnZone->setIsValid(true);
-
-        try {
-          pGroup = m_Apartment.getGroup(group.GroupID);
-          // apartment-user-group has no color unassigned
-          if (pGroup->getStandardGroupID() == 0 && group.StandardGroupID > 0) {
-            pGroup->setName(group.Name);
-            pGroup->setStandardGroupID(group.StandardGroupID);
-          }
-        } catch (ItemNotFoundException&) {
-          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-          pGroup.reset(new Group(group.GroupID, zoneBroadcast, m_Apartment));
-          pGroup->setName(group.Name);
-          pGroup->setStandardGroupID(group.StandardGroupID);
-          zoneBroadcast->addGroup(pGroup);
-        }
-        pGroup->setIsPresent(true);
-        pGroup->setIsConnected(true);
-        pGroup->setLastCalledScene(SceneOff);
-        pGroup->setIsValid(true);
-
-        // this zone's apartment-user-group settings do not match the global group (zone 0)
-        if (groupOnZone->getName() != pGroup->getName() ||
-            groupOnZone->getStandardGroupID() != pGroup->getStandardGroupID()) {
-          groupOnZone->setIsSynchronized(false);
-        }
 
       } else {
 

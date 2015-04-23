@@ -28,6 +28,7 @@
 
 #include "modeltypes.h"
 #include "group.h"
+#include "businterface.h"
 
 namespace dss {
 
@@ -64,6 +65,8 @@ namespace dss {
 
     void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
     bool isReadFromDsm() const { return m_readFromDsm; }
+
+    bool equalConfig(const ClusterSpec_t &cluster);
   }; // Group
 
 } // namespace dss

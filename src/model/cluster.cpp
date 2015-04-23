@@ -65,4 +65,21 @@ namespace dss {
     }
   } // publishToPropertyTree
 
+  bool Cluster::equalConfig(const ClusterSpec_t &cluster) {
+    if (m_LockedScenes.size() != cluster.lockedScenes.size()) {
+      return false;
+    }
+    for (unsigned int i = 0; i < m_LockedScenes.size(); ++i) {
+      if (m_LockedScenes[i] != cluster.lockedScenes[i]) {
+        return false;
+      }
+    }
+    return ((getStandardGroupID() == cluster.StandardGroupID) &&
+            (getName() == cluster.Name) &&
+            (m_Location == cluster.location) &&
+            (m_ProtectionClass == cluster.protectionClass) &&
+            (m_Floor == cluster.floor) &&
+            (m_ConfigurationLocked == cluster.configurationLocked));
+  }
+
 } // namespace dss
