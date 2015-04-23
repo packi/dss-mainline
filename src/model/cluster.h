@@ -39,6 +39,7 @@ namespace dss {
     int m_Floor;
     std::vector<int> m_LockedScenes;
     bool m_ConfigurationLocked;
+    bool m_readFromDsm;
   public:
     /** Constructs a cluster with the given id. */
     Cluster(const int _id, Apartment& _apartment);
@@ -60,6 +61,9 @@ namespace dss {
 
     void setLockedScenes(const std::vector<int>& _locedScenes) { m_LockedScenes = _locedScenes; }
     const std::vector<int>& getLockedScenes() const { return m_LockedScenes; }
+
+    void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
+    bool isReadFromDsm() const { return m_readFromDsm; }
   }; // Group
 
 } // namespace dss

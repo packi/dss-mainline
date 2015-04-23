@@ -41,7 +41,8 @@ namespace dss {
     m_Location(0),
     m_ProtectionClass(0),
     m_Floor(0),
-    m_ConfigurationLocked(false)
+    m_ConfigurationLocked(false),
+    m_readFromDsm(false)
   {
   } // ctor
 
