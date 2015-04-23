@@ -60,13 +60,17 @@ namespace dss {
     void setConfigurationLocked(const bool _configurationLocked) { m_ConfigurationLocked = _configurationLocked; }
     bool isConfigurationLocked() const { return m_ConfigurationLocked; }
 
-    void setLockedScenes(const std::vector<int>& _lockedScenes) { m_LockedScenes = _lockedScenes; }
+    void setLockedScenes(const std::vector<int>& _lockedScenes) { m_LockedScenes = _lockedScenes; updateLockedScenes(); }
     const std::vector<int>& getLockedScenes() const { return m_LockedScenes; }
+    void addLockedScene(int _lockedScene) { m_LockedScenes.push_back(_lockedScene); updateLockedScenes(); }
 
     void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
     bool isReadFromDsm() const { return m_readFromDsm; }
 
     bool equalConfig(const ClusterSpec_t &cluster);
+
+  private:
+    void updateLockedScenes();
   }; // Group
 
 } // namespace dss

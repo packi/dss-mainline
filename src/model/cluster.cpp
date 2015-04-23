@@ -46,6 +46,21 @@ namespace dss {
   {
   } // ctor
 
+  void Cluster::updateLockedScenes() {
+    if (!m_pPropertyNode) {
+      return;
+    }
+    PropertyNodePtr pLockedScenes = m_pPropertyNode->getProperty("lockedScenes");
+    if (pLockedScenes) {
+      pLockedScenes->getParentNode()->removeChild(pLockedScenes);
+    }
+    pLockedScenes = m_pPropertyNode->createProperty("lockedScenes");
+    foreach (int scene, m_LockedScenes) {
+      PropertyNodePtr gsubnode = pLockedScenes->createProperty("scene" + intToString(scene));
+      gsubnode->createProperty("id")->setIntegerValue(scene);
+    }
+  }
+
   void Cluster::publishToPropertyTree() {
     Group::publishToPropertyTree();
     if (m_pPropertyNode != NULL) {
@@ -57,11 +72,7 @@ namespace dss {
             ->linkToProxy(PropertyProxyReference<int>(m_Floor, false));
       m_pPropertyNode->createProperty("ConfigurationLocked")
             ->linkToProxy(PropertyProxyReference<bool>(m_ConfigurationLocked, false));
-      PropertyNodePtr pLockedScenes = m_pPropertyNode->createProperty("lockedScenes");
-      foreach (int scene, m_LockedScenes) {
-        PropertyNodePtr gsubnode = pLockedScenes->createProperty("scene" + intToString(scene));
-        gsubnode->createProperty("id")->setIntegerValue(scene);
-      }
+      updateLockedScenes();
     }
   } // publishToPropertyTree
 
