@@ -1119,7 +1119,8 @@ namespace dss {
         m_Groups.push_back(_groupID);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // create alias in group list
-          std::string gPath = "zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          int zone = isAppUserGroup(_groupID) ? 0 : m_ZoneID;
+          std::string gPath = "zones/zone" + intToString(zone) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
           if (gnode) {
             gnode->alias(m_pPropertyNode);

@@ -41,9 +41,25 @@ namespace dss {
     m_Location(0),
     m_ProtectionClass(0),
     m_Floor(0),
-    m_ConfigurationLocked(false)
+    m_ConfigurationLocked(false),
+    m_readFromDsm(false)
   {
   } // ctor
+
+  void Cluster::updateLockedScenes() {
+    if (!m_pPropertyNode) {
+      return;
+    }
+    PropertyNodePtr pLockedScenes = m_pPropertyNode->getProperty("lockedScenes");
+    if (pLockedScenes) {
+      pLockedScenes->getParentNode()->removeChild(pLockedScenes);
+    }
+    pLockedScenes = m_pPropertyNode->createProperty("lockedScenes");
+    foreach (int scene, m_LockedScenes) {
+      PropertyNodePtr gsubnode = pLockedScenes->createProperty("scene" + intToString(scene));
+      gsubnode->createProperty("id")->setIntegerValue(scene);
+    }
+  }
 
   void Cluster::publishToPropertyTree() {
     Group::publishToPropertyTree();
@@ -56,12 +72,25 @@ namespace dss {
             ->linkToProxy(PropertyProxyReference<int>(m_Floor, false));
       m_pPropertyNode->createProperty("ConfigurationLocked")
             ->linkToProxy(PropertyProxyReference<bool>(m_ConfigurationLocked, false));
-      PropertyNodePtr pLockedScenes = m_pPropertyNode->createProperty("lockedScenes");
-      foreach (int scene, m_LockedScenes) {
-        PropertyNodePtr gsubnode = pLockedScenes->createProperty("scene" + intToString(scene));
-        gsubnode->createProperty("id")->setIntegerValue(scene);
-      }
+      updateLockedScenes();
     }
   } // publishToPropertyTree
+
+  bool Cluster::equalConfig(const ClusterSpec_t &cluster) {
+    if (m_LockedScenes.size() != cluster.lockedScenes.size()) {
+      return false;
+    }
+    for (unsigned int i = 0; i < m_LockedScenes.size(); ++i) {
+      if (m_LockedScenes[i] != cluster.lockedScenes[i]) {
+        return false;
+      }
+    }
+    return ((getStandardGroupID() == cluster.StandardGroupID) &&
+            (getName() == cluster.Name) &&
+            (m_Location == cluster.location) &&
+            (m_ProtectionClass == cluster.protectionClass) &&
+            (m_Floor == cluster.floor) &&
+            (m_ConfigurationLocked == cluster.configurationLocked));
+  }
 
 } // namespace dss

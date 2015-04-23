@@ -43,6 +43,7 @@
 #include "src/model/zone.h"
 #include "src/model/modulator.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/modelconst.h"
 
 namespace dss {
@@ -388,16 +389,73 @@ namespace dss {
       return;
     }
 
+    if (m_tempZone->getID() > 0 && isAppUserGroup(groupID)) {
+      return;
+    }
+
     m_tempGroup.reset();
     m_tempGroup = m_tempZone->getGroup(groupID);
     if (m_tempGroup == NULL) {
-      m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+      if (m_tempZone->getID() == 0 && isAppUserGroup(groupID)) {
+        m_tempGroup.reset(new Cluster(groupID, m_Apartment));
+      } else {
+        m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+      }
       m_tempZone->addGroup(m_tempGroup);
     }
     if (grName) {
       m_tempGroup->setName(grName);
     }
     m_tempGroup->setIsValid(true);
+  }
+
+  void ModelPersistence::parseCluster(const char *_name, const char **_attrs) {
+    if (strcmp(_name, "cluster") != 0) {
+      return;
+    }
+
+    const char *id = NULL;
+    for (int i = 0; _attrs[i]; i += 2) {
+      if (strcmp(_attrs[i], "id") == 0) {
+        id = _attrs[i + 1];
+      }
+    }
+
+    if (id == NULL) {
+      return;
+    }
+    int groupID = strToIntDef(id, -1);
+    if (groupID == -1) {
+      return;
+    }
+
+    m_tempCluster.reset();
+    try {
+      m_tempCluster = boost::dynamic_pointer_cast<Cluster>(m_Apartment.getGroup(groupID));
+    } catch (ItemNotFoundException &e) {
+      m_tempCluster.reset(new Cluster(groupID, m_Apartment));
+      m_Apartment.getZone(0)->addGroup(m_tempCluster);
+    }
+
+    m_tempCluster->setIsValid(true);
+  }
+
+  void ModelPersistence::parseLockedScenes(const char *_name, const char **_attrs) {
+    if (m_tempCluster == NULL) {
+      return;
+    }
+
+    if (strcmp(_name, "lockedScene") != 0) {
+      return;
+    }
+
+    const char *sid = getSingleAttribute("id", _attrs);
+    if (sid == NULL) {
+      return;
+    }
+
+    int snum = strToIntDef(sid, -1);
+    m_tempCluster->addLockedScene(snum);
   }
 
   void ModelPersistence::parseScene(const char *_name, const char **_attrs) {
@@ -528,7 +586,7 @@ namespace dss {
         return;
       }
 
-      // level 1 supports only <apartment>, <devices>, <zones>, <dsMeters>
+      // level 1 supports only <apartment>, <devices>, <zones>, <dsMeters>, <clusters>
       if (m_level == 1) {
         if (strcmp(_name, "apartment") == 0) {
           m_state = ps_apartment;
@@ -536,6 +594,8 @@ namespace dss {
           m_state = ps_device;
         } else if (strcmp(_name, "zones") == 0) {
           m_state = ps_zone;
+        } else if (strcmp(_name, "clusters") == 0) {
+          m_state = ps_cluster;
         } else if ((strcmp(_name, "dsMeters") == 0) ||
                    (strcmp(_name, "modulators") == 0)) {
           m_state = ps_meter;
@@ -560,7 +620,7 @@ namespace dss {
         return;
       }
 
-      // level 2 supprts <device>, <zone>, <dsMeter>
+      // level 2 supports <device>, <zone>, <dsMeter>, <cluster>
       if (m_level == 2) {
         if ((m_state == ps_apartment) && (strcmp(_name, "name") == 0)) {
           m_expectString = true;
@@ -570,9 +630,11 @@ namespace dss {
           parseZone(_name, _attrs);
         } else if (m_state == ps_meter) {
           parseMeter(_name, _attrs);
+        } else if (m_state == ps_cluster) {
+          parseCluster(_name, _attrs);
         }
       // level 3 supports <name>, <properties>, <groups>, <datamodelHash>,
-      // <datamodelModification>, <sensors>
+      // <datamodelModification>, <sensors>, <lockedScenes>
       } else if (m_level == 3) {
         if (((m_state == ps_device) || (m_state == ps_zone)) &&
             (strcmp(_name, "name") == 0)) {
@@ -592,13 +654,27 @@ namespace dss {
             m_propParser->reset(m_tempDevice->getPropertyNode(), true);
             m_propParser->elementStartCb(_name, _attrs);
           }
+        } else if ((m_state == ps_cluster) &&
+              ((strcmp(_name, "name") == 0) ||
+               (strcmp(_name, "associatedSet") == 0) ||
+               (strcmp(_name, "color") == 0) ||
+               (strcmp(_name, "location") == 0) ||
+               (strcmp(_name, "protectionClass") == 0) ||
+               (strcmp(_name, "floor") == 0) ||
+               (strcmp(_name, "configurationLocked") == 0))) {
+            m_expectString = true;
+        } else if ((m_state == ps_cluster) &&
+            (strcmp(_name, "lockedScenes") == 0)) {
+          m_state = ps_lockedScenes;
         }
-      // level 4 supports <property>, <group>
+      // level 4 supports <property>, <group>, <sensor>, <lockedScene>
       } else if (m_level == 4) {
         if (m_state == ps_group) {
           parseGroup(_name, _attrs);
         } else if (m_state == ps_sensor) {
           parseSensor(_name, _attrs);
+        } else if (m_state == ps_lockedScenes) {
+          parseLockedScenes(_name, _attrs);
         }
       // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>
       } else if (m_level == 5) {
@@ -696,12 +772,35 @@ namespace dss {
               } else if (strcmp(_name, "deviceType") == 0) {
                 m_tempMeter->setBusMemberType((BusMemberDevice_t) strToInt(m_chardata));
               }
+            } else if ((m_state == ps_cluster) && (m_tempCluster != NULL)) {
+              if (strcmp(_name, "name") == 0) {
+                m_tempCluster->setName(m_chardata);
+              } else if (strcmp(_name, "associatedSet") == 0) {
+                m_tempCluster->setAssociatedSet(m_chardata);
+              } else if (strcmp(_name, "color") == 0) {
+                m_tempCluster->setStandardGroupID(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "location") == 0) {
+                m_tempCluster->setLocation(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "protectionClass") == 0) {
+                m_tempCluster->setProtectionClass(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "floor") == 0) {
+                m_tempCluster->setFloor(strToUIntDef(m_chardata, 0));
+              } else if (strcmp(_name, "configurationLocked") == 0) {
+                bool isConfigurationLocked = false;
+                try {
+                  int p = strToUInt(m_chardata);
+                  isConfigurationLocked = p > 0;
+                } catch (std::invalid_argument&) {}
+                m_tempCluster->setConfigurationLocked(isConfigurationLocked);
+              }
             }
           }
           if ((m_state == ps_group) && (strcmp(_name, "groups") == 0)) {
             m_state = ps_zone;
           } else if ((m_state == ps_sensor) && (strcmp(_name, "sensors") == 0)) {
             m_state = ps_zone;
+          } else if ((m_state == ps_lockedScenes) && (strcmp(_name, "lockedScenes") == 0)) {
+            m_state = ps_cluster;
           }
         }
         break;
@@ -761,6 +860,7 @@ namespace dss {
     m_tempZone.reset();
     m_tempMeter.reset();
     m_tempGroup.reset();
+    m_tempCluster.reset();
     m_tempScene = -1;
 
     m_propParser.reset(new PropertyParserProxy());
@@ -783,6 +883,10 @@ namespace dss {
   std::ostream& addAttribute(std::ostream &_ofs, const std::string &_name,
                              const std::string &_value) {
     return _ofs << " " << _name << "=\"" << _value << "\"";
+  }
+
+  std::ostream& addElementSimple(std::ostream &_ofs, int _indent, const std::string &_name, const std::string &_value) {
+    return _ofs << doIndent(_indent) << "<" << _name << ">" << XMLStringEscape(_value) << "</" << _name << ">" << std::endl;
   }
 
   void deviceToXML(boost::shared_ptr<const Device> _pDevice, std::ofstream& _ofs, const int _indent) {
@@ -855,15 +959,6 @@ namespace dss {
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
-    if (isAppUserGroup(_pGroup->getID())) {
-      if (!_pGroup->getName().empty()) {
-        _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pGroup->getName()) << "</name>" << std::endl;
-      }
-      if (!_pGroup->getAssociatedSet().empty()) {
-        _ofs << doIndent(_indent + 1) << "<associatedSet>" << XMLStringEscape(_pGroup->getAssociatedSet()) << "</associatedSet>" << std::endl;
-      }
-      _ofs << doIndent(_indent + 1) << "<color>" << intToString(_pGroup->getStandardGroupID()) << "</color>" << std::endl;
-    }
     _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
     for (int iScene = 0; iScene < MaxSceneNumber; iScene++) {
       std::string name = _pGroup->getSceneName(iScene);
@@ -876,6 +971,30 @@ namespace dss {
     _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
     _ofs << doIndent(_indent) << "</group>" << std::endl;
   } // groupToXML
+
+  void clusterToXML(boost::shared_ptr<Cluster> _pCluster, std::ofstream& _ofs, const int _indent) {
+    _ofs << doIndent(_indent) << "<cluster id=\"" << intToString(_pCluster->getID()) << "\">" << std::endl;
+
+    if (!_pCluster->getName().empty()) {
+      addElementSimple(_ofs, _indent + 1, "name", _pCluster->getName());
+    }
+    if (!_pCluster->getAssociatedSet().empty()) {
+      addElementSimple(_ofs, _indent + 1, "associatedSet", _pCluster->getAssociatedSet());
+    }
+    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getStandardGroupID()));
+    addElementSimple(_ofs, _indent + 1, "location", intToString(_pCluster->getLocation()));
+    addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(_pCluster->getProtectionClass()));
+    addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
+    addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
+    _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
+    const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
+    for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {
+      _ofs << doIndent(_indent + 2) << "<lockedScene id=\"" << intToString(lockedScenes[iScene]) << "\" />" << std::endl;
+    }
+    _ofs << doIndent(_indent + 1) << "</lockedScenes>" << std::endl;
+
+    _ofs << doIndent(_indent) << "</cluster>" << std::endl;
+  } // clusterToXML
 
   void zoneSensorToXML(boost::shared_ptr<MainZoneSensor_t> _zoneSensor, std::ofstream& _ofs, const int _indent)
   {
@@ -891,16 +1010,9 @@ namespace dss {
     if(!_pZone->getName().empty()) {
       _ofs << doIndent(_indent + 1) << "<name>" << XMLStringEscape(_pZone->getName()) << "</name>" << std::endl;
     }
-    _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
 
-    if (_pZone->getID() == 0) {
-      // store unique "apartment user-groups" in zone 0
-      foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-        if (isAppUserGroup(pGroup->getID())) {
-          groupToXML(pGroup, _ofs, _indent + 2);
-        }
-      }
-    } else {
+    _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
+    if (_pZone->getID() != 0) {
       // store real user-groups per zone
       foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
         groupToXML(pGroup, _ofs, _indent + 2);
@@ -978,6 +1090,14 @@ namespace dss {
         zoneToXML(pZone, ofs, indent + 1);
       }
       ofs << doIndent(indent) << "</zones>" << std::endl;
+
+      // clusters
+      ofs << doIndent(indent) << "<clusters>" << std::endl;
+      // store unique "apartment user-groups" in zone 0
+      foreach(boost::shared_ptr<Cluster> pCluster, m_Apartment.getClusters()) {
+        clusterToXML(pCluster, ofs, indent + 1);
+      }
+      ofs << doIndent(indent) << "</clusters>" << std::endl;
 
       // dsMeters
       ofs << doIndent(indent) << "<dsMeters>" << std::endl;

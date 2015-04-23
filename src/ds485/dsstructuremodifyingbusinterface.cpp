@@ -32,6 +32,7 @@
 #include "dsbusinterface.h"
 #include "src/model/modulator.h"
 #include "src/model/apartment.h"
+#include "src/foreach.h"
 
 #define BROADCAST_SLEEP_MICROSECONDS    50000 // 50ms
 
@@ -329,4 +330,55 @@ namespace dss {
       m_pModelMaintenance = _modelMaintenance;
   }
 
-} // namespace dss
+  void DSStructureModifyingBusInterface::clusterSetName(uint8_t _clusterID, const std::string& _name) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    std::string nameStr = truncateUTF8String(_name, 19);
+    ret = ClusterProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, (unsigned char*)nameStr.c_str());
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  }
+
+  void DSStructureModifyingBusInterface::clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _standardGroupID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  }
+
+  void DSStructureModifyingBusInterface::clusterSetProperties(uint8_t _clusterID, uint16_t _location,
+                                                              uint16_t _floor, uint16_t _protectionClass) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ret = ClusterProperties_set_location_class(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _location, _floor, _protectionClass);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  }
+
+  void DSStructureModifyingBusInterface::clusterSetLockedScenes(uint8_t _clusterID,
+                                                                const std::vector<int> _lockedScenes) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    uint8_t lockedScenes[16] = {};
+    foreach (int scene, _lockedScenes) {
+      lockedScenes[scene / 8] |= 1 << (scene % 8);
+    }
+    ret = ClusterProperties_set_scene_lock(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, lockedScenes);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  }
+
+}  // namespace dss

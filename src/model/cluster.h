@@ -28,6 +28,7 @@
 
 #include "modeltypes.h"
 #include "group.h"
+#include "businterface.h"
 
 namespace dss {
 
@@ -39,6 +40,7 @@ namespace dss {
     int m_Floor;
     std::vector<int> m_LockedScenes;
     bool m_ConfigurationLocked;
+    bool m_readFromDsm;
   public:
     /** Constructs a cluster with the given id. */
     Cluster(const int _id, Apartment& _apartment);
@@ -58,8 +60,17 @@ namespace dss {
     void setConfigurationLocked(const bool _configurationLocked) { m_ConfigurationLocked = _configurationLocked; }
     bool isConfigurationLocked() const { return m_ConfigurationLocked; }
 
-    void setLockedScenes(const std::vector<int>& _locedScenes) { m_LockedScenes = _locedScenes; }
+    void setLockedScenes(const std::vector<int>& _lockedScenes) { m_LockedScenes = _lockedScenes; updateLockedScenes(); }
     const std::vector<int>& getLockedScenes() const { return m_LockedScenes; }
+    void addLockedScene(int _lockedScene) { m_LockedScenes.push_back(_lockedScene); updateLockedScenes(); }
+
+    void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
+    bool isReadFromDsm() const { return m_readFromDsm; }
+
+    bool equalConfig(const ClusterSpec_t &cluster);
+
+  private:
+    void updateLockedScenes();
   }; // Group
 
 } // namespace dss

@@ -276,6 +276,7 @@ namespace dss {
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
     virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) = 0;
 
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
     virtual std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
@@ -332,6 +333,11 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
+
+    virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) = 0;
+    virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) = 0;
+    virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
+    virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
 
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;

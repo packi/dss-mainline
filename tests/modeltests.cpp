@@ -82,6 +82,10 @@ public:
   }
   virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
   }
+  virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) {}
+  virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) {}
+  virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) {}
+  virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) {}
   virtual void sensorPush(uint16_t _zoneID, uint8_t groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
   }
   virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
@@ -944,6 +948,9 @@ public:
   }
   virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID) {
     return std::vector<GroupSpec_t>();
+  }
+  virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) {
+    return std::vector<ClusterSpec_t>();
   }
   virtual std::vector<std::pair<int,int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) {
     return std::vector<std::pair<int,int> >();
