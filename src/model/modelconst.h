@@ -266,6 +266,7 @@ namespace dss {
   const int GroupIDAppUserMin = 16;
   const int GroupIDAppUserMax = 39;
   const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
+  const int GroupIDUserGroupEnd = 47;
   const int GroupIDControlGroupMin = 48;
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
@@ -278,6 +279,10 @@ namespace dss {
 
   inline bool isAppUserGroup(int groupId) {
     return (groupId >= GroupIDAppUserMin && groupId <= GroupIDAppUserMax);
+  }
+
+  inline bool isZoneUserGroup(int groupId) {
+    return (groupId >= GroupIDUserGroupStart && groupId <= GroupIDUserGroupEnd);
   }
 
   inline bool isControlGroup(int groupId) {
