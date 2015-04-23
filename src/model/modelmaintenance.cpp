@@ -21,6 +21,7 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
+#include "cluster.h"
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -46,6 +47,7 @@
 #include "apartment.h"
 #include "zone.h"
 #include "group.h"
+#include "cluster.h"
 #include "device.h"
 #include "devicereference.h"
 #include "event_create.h"
@@ -675,6 +677,19 @@ namespace dss {
           event->getParameter(0),
           event->getSingleObjectParameter());
       break;
+    case ModelEvent::etClusterConfigLock:
+      onClusterConfigLock(event->getParameter(0), event->getParameter(1));
+      break;
+    case ModelEvent::etClusterLockedScenes:
+    {
+      uint8_t lockedScenes[16];
+      for (int i = 0; i < 16; ++i) {
+        lockedScenes[i] = event->getParameter(i + 1);
+      }
+      std::vector<int> pLockedScenes = parseBitfield(lockedScenes, 128);
+      onClusterLockedScenes(event->getParameter(0), pLockedScenes);
+      break;
+    }
     default:
       assert(false);
       break;
@@ -1960,6 +1975,24 @@ namespace dss {
     pEvent->setProperty("ControlState", intToString(_State));
     raiseEvent(pEvent);
   } // onHeatingControllerState
+
+  void ModelMaintenance::onClusterConfigLock(const int _clusterID, const bool _configurationLock) {
+    try {
+      boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
+      cluster->setConfigurationLocked(_configurationLock);
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error on cluster config lock change, cluster not found: ") + e.what(), lsWarning);
+    }
+  } // onClusterConfigLock
+
+  void ModelMaintenance::onClusterLockedScenes(const int _clusterID, const std::vector<int> &_lockedScenes) {
+    try {
+      boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
+      cluster->setLockedScenes(_lockedScenes);
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error on cluster locked scenes change, cluster not found: ") + e.what(), lsWarning);
+    }
+  } // onClusterConfigLock
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

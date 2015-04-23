@@ -1129,6 +1129,10 @@ namespace dss {
   void DSBusInterface::handleClusterSetConfigrationLock(uint8_t _clusterID,
                                                         uint8_t _configurationLock) {
     loginFromCallback();
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etClusterConfigLock);
+    pEvent->addParameter(_clusterID);
+    pEvent->addParameter(_configurationLock);
+    m_pModelMaintenance->addModelEvent(pEvent);
   } //handleClusterSetConfigrationLock
 
   void DSBusInterface::handleClusterSetConfigrationLockCallback(uint8_t _errorCode,
@@ -1145,6 +1149,12 @@ namespace dss {
   void DSBusInterface::handleClusterSetSceneLock(uint8_t _clusterID,
                                                  const uint8_t _lockedScenes[]) {
     loginFromCallback();
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etClusterLockedScenes);
+    pEvent->addParameter(_clusterID);
+    for (int i = 0; i < 16; ++i) {
+      pEvent->addParameter(_lockedScenes[i]);
+    }
+    m_pModelMaintenance->addModelEvent(pEvent);
   } //handleClusterSetSceneLock
 
   void DSBusInterface::handleClusterSetSceneLockCallback(uint8_t _errorCode,
