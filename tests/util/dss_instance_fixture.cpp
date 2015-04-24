@@ -57,9 +57,9 @@ static int createConfig(const std::string &fileName) {
   return 0;
 }
 
-__DEFINE_LOG_CHANNEL__(DSSLifeCycle, lsInfo);
+__DEFINE_LOG_CHANNEL__(DSSInstanceFixture, lsInfo);
 
-DSSLifeCycle::DSSLifeCycle() {
+DSSInstanceFixture::DSSInstanceFixture() {
   std::vector<std::string> properties;
   properties.push_back("/config/webrootdirectory=" + getTempDir());
 
@@ -78,7 +78,7 @@ DSSLifeCycle::DSSLifeCycle() {
   assert(m_incarnation);
 }
 
-DSSLifeCycle::~DSSLifeCycle() {
+DSSInstanceFixture::~DSSInstanceFixture() {
   // DSS::getInstance will create a new instance
   if ((m_instance != DSS::m_Instance) ||
       m_incarnation != DSS::s_InstanceGeneration) {
@@ -93,7 +93,7 @@ DSSLifeCycle::~DSSLifeCycle() {
   log("destructor - done", lsDebug);
 }
 
-void DSSLifeCycle::initPlugins() {
+void DSSInstanceFixture::initPlugins() {
   DSS::getInstance()->addDefaultInterpreterPlugins();
 }
 

@@ -72,7 +72,7 @@ namespace dss {
     */
   class DSS {
     __DECL_LOG_CHANNEL__
-    friend class DSSLifeCycle;
+    friend class DSSInstanceFixture;
   private:
     static DSS* m_Instance;
     /**

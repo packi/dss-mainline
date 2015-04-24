@@ -219,6 +219,7 @@ libunix_a_SOURCES = \
 	../unix/thread.cpp
 
 dsstests_SOURCES = \
+	../tests/000_dss_instance_fixture_test.cpp \
 	../tests/apartment_xml_tests.cpp \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
@@ -227,7 +228,6 @@ dsstests_SOURCES = \
 	../tests/deviceinterfacerequesthandlertest.cpp \
 	../tests/devicerequesthandlertest.cpp \
 	../tests/devicetests.cpp \
-	../tests/dss_instance_tests.cpp \
 	../tests/dsuidtests.cpp \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \

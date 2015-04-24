@@ -713,10 +713,8 @@ const char* kDsstestsFilesDirectory = WITH_DSSTEST_FILES;
 const char* kDsstestsFilesDirectory = TEST_TRIGGERS_PATH "data";
 #endif
 
-BOOST_AUTO_TEST_CASE(testSystemTriggerSpeed) {
+BOOST_FIXTURE_TEST_CASE(testSystemTriggerSpeed, DSSInstanceFixture) {
   PropertyParser parser;
-  boost::scoped_ptr<DSSLifeCycle> guard;
-  guard.reset(new DSSLifeCycle());
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   PropertyNodePtr prop = propSystem.createProperty("/");
   BOOST_CHECK_EQUAL(true, parser.loadFromXML(std::string(kDsstestsFilesDirectory) + std::string("/triggers.xml"), prop));

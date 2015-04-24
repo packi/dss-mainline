@@ -86,7 +86,7 @@ public:
     propSystem.createProperty(pp_websvc_mshub_active)->setBooleanValue(true);
   }
 
-  DSSLifeCycle m_dss_guard;
+  DSSInstanceFixture m_dssInstanceCtrl;
 };
 
 
@@ -158,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixtureReal) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
   // also starts event runner et. al
-  m_dss_guard.initPlugins();
+  m_dssInstanceCtrl.initPlugins();
 
   // check event subscriptions when webservice is enabled:
   // (ms-hub keepalive, event uploder mshub + dshub, weather downloader)
@@ -189,9 +189,8 @@ BOOST_AUTO_TEST_CASE(webservice_ms_json) {
   BOOST_CHECK_EQUAL(json.successJSON().substr(0, 90), std::string("{\"EventGroup\":\"ApartmentAndDevice\",\"EventCategory\":\"HeatingControllerSetup\",\"Timestamp\":\"2015-02-19T16:42:42.298Z\"}").substr(0, 90));
 }
 
-BOOST_AUTO_TEST_CASE(webservice_ds_json) {
+BOOST_FIXTURE_TEST_CASE(webservice_ds_json, DSSInstanceFixture) {
   /* DsHub::createHeader, requires instance */
-  DSSLifeCycle dss_instance;
   boost::shared_ptr<Event> pEvent;
 
   {
@@ -230,11 +229,11 @@ public:
   }
 
   boost::shared_ptr<State> createState(eStateType type) {
-      return boost::make_shared<State>(type, "dummy-state", "unit-test");
+    return boost::make_shared<State>(type, "dummy-state", "unit-test");
   }
 
 private:
-  DSSLifeCycle m_dss_guard;
+  DSSInstanceFixture m_dss_guard;
 };
 
 boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
