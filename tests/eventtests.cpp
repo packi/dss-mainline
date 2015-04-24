@@ -45,10 +45,11 @@
 #include "src/model/group.h"
 #include "src/model/set.h"
 #include "src/dss.h"
-#include "dss_life_cycle.h"
 #include "src/eventinterpretersystemplugins.h"
 #include "src/security/security.h"
 #include "src/security/user.h"
+
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 

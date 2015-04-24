@@ -20,12 +20,13 @@
 
 */
 
-#include "dss_life_cycle.h"
+#include "dss_instance_fixture.h"
 
 #include <fstream>
+#include <vector>
+
 #include <boost/filesystem.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <vector>
 
 #include "dss.h"
 #include "base.h"

@@ -38,7 +38,7 @@
 #include "src/security/privilege.h"
 #include "src/security/security.h"
 #include "dss.h"
-#include "tests/dss_life_cycle.h"
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 

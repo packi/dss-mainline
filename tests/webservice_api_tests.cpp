@@ -22,8 +22,8 @@
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
-#include "tests/dss_life_cycle.h"
 #include "src/web/webrequests.h"
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 
