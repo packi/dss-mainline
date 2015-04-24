@@ -36,6 +36,7 @@
 #include "src/model/apartment.h"
 #include "src/model/zone.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/device.h"
 #include "src/model/modulator.h"
@@ -312,6 +313,62 @@ namespace dss {
     return JSONWriter::success();
   } // removeGroup
 
+  std::string StructureRequestHandler::removeCluster(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    int clusterID = -1;
+
+    if (!_request.getParameter<int>("clusterID", clusterID)) {
+      return JSONWriter::failure("Invalid clusterID : '" + _request.getParameter("clusterID") + "'");
+    }
+
+    if (m_Apartment.getCluster(clusterID) == NULL) {
+      return JSONWriter::failure("Group with clusterID : '" + _request.getParameter("clusterID") + "' does not exist");
+    }
+
+    if (!m_Apartment.getCluster(clusterID)->getDevices().isEmpty()) {
+      return JSONWriter::failure("Group with clusterID : '" + _request.getParameter("clusterID") + "' is not empty.");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.removeGroup(m_Apartment.getZone(0), clusterID);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return JSONWriter::success();
+  } // removeCluster
+
+  std::string StructureRequestHandler::addCluster(const RestfulRequest& _request) {
+    boost::shared_ptr<Cluster> pCluster;
+    int standardGroupID = 0;
+    std::string clusterName;
+
+    // find a group slot with unassigned state machine id
+    pCluster = m_Apartment.getEmptyCluster();
+
+    if (pCluster == NULL) {
+      return JSONWriter::failure("No free user groups");
+    }
+
+    if (_request.hasParameter("name")) {
+      StringConverter st("UTF-8", "UTF-8");
+      clusterName = st.convert(_request.getParameter("name"));
+      clusterName = escapeHTML(clusterName);
+    }
+    if (_request.hasParameter("color")) {
+      standardGroupID = strToIntDef(_request.getParameter("color"), 0);
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), standardGroupID, clusterName);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+    JSONWriter json;
+    json.add("clusterID", pCluster->getID());
+    json.add("name", clusterName);
+    json.add("color", standardGroupID);
+    return json.successJSON();
+  } // addCluster
+
   std::string StructureRequestHandler::addGroup(const RestfulRequest& _request) {
     boost::shared_ptr<Zone> zone;
     boost::shared_ptr<Group> pGroup;
@@ -415,7 +472,16 @@ namespace dss {
       return JSONWriter::failure("Cannot modify inactive device");
     }
 
-    if(_request.hasParameter("groupID")) {
+    if(_request.hasParameter("clusterID")) {
+      std::string clusterIDStr = _request.getParameter("clusterID");
+      int clusterID = strToIntDef(clusterIDStr, -1);
+      try {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(0);
+        gr = zone->getGroup(clusterID);
+      } catch(ItemNotFoundException& e) {
+        gr = boost::shared_ptr<Group> ();
+      }
+    } else if(_request.hasParameter("groupID")) {
       std::string groupIDStr = _request.getParameter("groupID");
       int groupID = strToIntDef(groupIDStr, -1);
       try {
@@ -524,7 +590,16 @@ namespace dss {
       return JSONWriter::failure("Cannot modify inactive device");
     }
 
-    if(_request.hasParameter("groupID")) {
+    if(_request.hasParameter("clusterID")) {
+      std::string clusterIDStr = _request.getParameter("clusterID");
+      int clusterID = strToIntDef(clusterIDStr, -1);
+      try {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(0);
+        gr = zone->getGroup(clusterID);
+      } catch(ItemNotFoundException& e) {
+        gr = boost::shared_ptr<Group> ();
+      }
+    } else if(_request.hasParameter("groupID")) {
       std::string groupIDStr = _request.getParameter("groupID");
       int groupID = strToIntDef(groupIDStr, -1);
       try {
@@ -667,6 +742,35 @@ namespace dss {
     return JSONWriter::success();
   }
 
+  std::string StructureRequestHandler::clusterSetColor(const RestfulRequest& _request) {
+    boost::shared_ptr<Cluster> pCluster;
+    int clusterID = -1;
+
+    if(!_request.getParameter<int>("clusterID", clusterID)) {
+      return JSONWriter::failure("Required parameter clusterID missing");
+    }
+
+    pCluster = m_Apartment.getCluster(clusterID);
+    if ((clusterID < 1) || !pCluster) {
+      return JSONWriter::failure("Could not find pCluster with id : '" + _request.getParameter("clusterID") + "'");
+    }
+
+    int newColor;
+    if (!_request.getParameter<int>("newColor", newColor)) {
+      return JSONWriter::failure("missing parameter 'newColor'");
+    }
+
+    if (newColor < 0) {
+      return JSONWriter::failure("Invalid value for parameter newColor: '" + _request.getParameter("newColor") + "'");
+    }
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.groupSetStandardID(pCluster, newColor);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return JSONWriter::success();
+  }
+
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
@@ -684,14 +788,20 @@ namespace dss {
       return addGroup(_request);
     } else if(_request.getMethod() == "removeGroup") {
       return removeGroup(_request);
-    } else if(_request.getMethod() == "groupAddDevice") {
+    } else if(_request.getMethod() == "addCluster") {
+      return addCluster(_request);
+    } else if(_request.getMethod() == "removeCluster") {
+      return removeCluster(_request);
+    } else if(_request.getMethod() == "groupAddDevice" || _request.getMethod() == "clusterAddDevice") {
       return groupAddDevice(_request);
-    } else if(_request.getMethod() == "groupRemoveDevice") {
+    } else if(_request.getMethod() == "groupRemoveDevice" || _request.getMethod() == "clusterRemoveDevice") {
       return groupRemoveDevice(_request);
     } else if(_request.getMethod() == "groupSetName") {
       return groupSetName(_request);
     } else if(_request.getMethod() == "groupSetColor") {
       return groupSetColor(_request);
+    } else if(_request.getMethod() == "clusterSetColor") {
+      return clusterSetColor(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }

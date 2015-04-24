@@ -270,6 +270,23 @@ namespace dss {
                                          dsuid_t _destinationID,
                                          uint8_t flags);
 
+    void handleClusterSetConfigrationLock(uint8_t _clusterID,
+                                          uint8_t _configurationLock);
+    static void handleClusterSetConfigrationLockCallback(uint8_t _errorCode,
+                                                         void *_userData,
+                                                         dsuid_t _sourceID,
+                                                         dsuid_t _destinationID,
+                                                         uint8_t _clusterID,
+                                                         uint8_t _lock);
+    void handleClusterSetSceneLock(uint8_t _clusterID,
+                                   const uint8_t _lockedScenes[]);
+    static void handleClusterSetSceneLockCallback(uint8_t _errorCode,
+                                                  void *_userData,
+                                                  dsuid_t _sourceID,
+                                                  dsuid_t _destinationID,
+                                                  uint8_t _clusterID,
+                                                  const uint8_t _lockedScenes[]);
+
   protected:
     virtual void doStart();
   public:

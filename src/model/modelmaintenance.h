@@ -232,6 +232,9 @@ namespace dss {
     void onHeatingControllerValues(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);
     void onHeatingControllerState(dsuid_t _dsMeterID, const int _ZoneID, const int _State);
 
+    void onClusterConfigLock(const int _clusterID, const bool _configurationLock);
+    void onClusterLockedScenes(const int _clusterID, const std::vector<int> &_lockedScenes);
+
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);
