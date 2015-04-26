@@ -47,6 +47,8 @@
 using namespace std;
 using namespace dss;
 
+DSUID_DEFINE(dsuid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13);
+
 // wrapper class to access protected members
 class testMetering: public dss::Metering {
 public:
@@ -67,8 +69,6 @@ BOOST_AUTO_TEST_SUITE(Metering)
 
 BOOST_AUTO_TEST_CASE(seriesSizes) {
   Apartment apt(NULL);
-  dsuid_t dsuid;
-  dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
@@ -163,8 +163,6 @@ BOOST_AUTO_TEST_CASE(seriesSizes) {
 
 BOOST_AUTO_TEST_CASE(seriesRanges) {
   Apartment apt(NULL);
-  dsuid_t dsuid;
-  dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
@@ -289,8 +287,6 @@ BOOST_AUTO_TEST_CASE(seriesRanges) {
 
 BOOST_AUTO_TEST_CASE(seriesDateForward) {
   Apartment apt(NULL);
-  dsuid_t dsuid;
-  dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
@@ -346,8 +342,6 @@ BOOST_AUTO_TEST_CASE(seriesDateForward) {
 
 BOOST_AUTO_TEST_CASE(seriesDateReverse) {
   Apartment apt(NULL);
-  dsuid_t dsuid;
-  dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;
@@ -391,8 +385,6 @@ BOOST_AUTO_TEST_CASE(seriesDateReverse) {
 
 BOOST_AUTO_TEST_CASE(seriesDateCheckDbReset) {
   Apartment apt(NULL);
-  dsuid_t dsuid;
-  dsuid.id[DSUID_SIZE - 1] = 13;
   boost::shared_ptr<DSMeter> pMeter = apt.allocateDSMeter(dsuid);
   pMeter->setCapability_HasMetering(true);
   std::vector<boost::shared_ptr<DSMeter> > pMeters;

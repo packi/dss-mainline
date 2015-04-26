@@ -48,6 +48,14 @@
 
 using namespace dss;
 
+DSUID_DEFINE(dsuid1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+DSUID_DEFINE(dsuid2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2);
+DSUID_DEFINE(dsuid3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3);
+DSUID_DEFINE(dsuid4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4);
+DSUID_DEFINE(dsmeterDSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
+DSUID_DEFINE(meter1DSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
+DSUID_DEFINE(meter2DSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11);
+
 BOOST_AUTO_TEST_SUITE(Model)
 
 class DummyStructureModifyingInterface : public StructureModifyingBusInterface {
@@ -102,10 +110,6 @@ public:
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1, dsuid2;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid2);
@@ -121,12 +125,6 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
 
 BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   Apartment apt(NULL);
-
-  dsuid_t meter1DSID, meter2DSID, dsuid1, dsuid2;
-  meter1DSID.id[DSUID_SIZE - 1] = 10;
-  meter2DSID.id[DSUID_SIZE - 1]  = 11;
-  dsuid1.id[DSUID_SIZE - 1]  = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
 
   boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
   boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(meter2DSID);
@@ -150,10 +148,6 @@ BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
 
 BOOST_AUTO_TEST_CASE(testSetRemoveDevice) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
@@ -181,10 +175,6 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
   Apartment apt(NULL);
   PropertySystem propSys;
   apt.setPropertySystem(&propSys);
-
-  dsuid_t dsuid1, dsuid2;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->addTag("dev1");
@@ -234,9 +224,6 @@ BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setName("dev1");
 
@@ -246,9 +233,6 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 2;
-
   boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsuid1);
   mod->setName("mod1");
 
@@ -257,13 +241,6 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
 
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2, dsuid3, dsuid4, dsmeterDSID;
-  dsmeterDSID.id[DSUID_SIZE - 1] = 10;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
-  dsuid4.id[DSUID_SIZE - 1] = 4;
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
 
@@ -335,13 +312,6 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
 BOOST_AUTO_TEST_CASE(testSet) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2, dsuid3, dsuid4, dsmeterDSID;
-  dsmeterDSID.id[DSUID_SIZE - 1] = 10;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
-  dsuid4.id[DSUID_SIZE - 1] = 4;
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
 
@@ -421,13 +391,6 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2, dsuid3, dsuid4;
-  dsuid1 = dsuid2 = dsuid3 = dsuid4 = DSUID_NULL;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
-  dsuid4.id[DSUID_SIZE - 1] = 4;
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
@@ -557,13 +520,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 
 BOOST_AUTO_TEST_CASE(testSetBuilderDeviceByName) {
   Apartment apt(NULL);
-
   SetBuilder setBuilder(apt);
-
-  dsuid_t dsuid1, dsuid2, dsuid3;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setName("dev1");
@@ -594,10 +551,6 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
 
   SetBuilder setBuilder(apt);
 
-  dsuid_t dsuid1, dsuid2;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->addTag("dev1");
   dev1->addTag("device");
@@ -624,13 +577,6 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
 
 BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2, dsuid3, dsuid4;
-  dsuid1 = dsuid2 = dsuid3 = dsuid4 = DSUID_NULL;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
-  dsuid4.id[DSUID_SIZE - 1] = 4;
 
   apt.allocateDSMeter(dsuid1);
   apt.allocateDSMeter(dsuid2);
@@ -663,11 +609,6 @@ BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
 BOOST_AUTO_TEST_CASE(testRemoval) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1, meterDSID;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  meterDSID.id[DSUID_SIZE - 1] = 10;
-  
-
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
   dev1->getGroupBitmask().set(GroupIDYellow - 1);
@@ -694,17 +635,17 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
     BOOST_CHECK(true);
   }
 
-  apt.allocateDSMeter(meterDSID);
+  apt.allocateDSMeter(dsmeterDSID);
   try {
-    apt.getDSMeterByDSID(meterDSID);
+    apt.getDSMeterByDSID(dsmeterDSID);
     BOOST_CHECK(true);
   } catch(ItemNotFoundException&) {
     BOOST_CHECK_MESSAGE(false, "DSMeter not found");
   }
 
-  apt.removeDSMeter(meterDSID);
+  apt.removeDSMeter(dsmeterDSID);
   try {
-    apt.getDSMeterByDSID(meterDSID);
+    apt.getDSMeterByDSID(dsmeterDSID);
     BOOST_CHECK_MESSAGE(false, "DSMeter still exists");
   } catch(ItemNotFoundException&) {
     BOOST_CHECK(true);
@@ -785,8 +726,8 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   maintenance.setStructureModifyingBusInterface(new DummyStructureModifyingInterface());
   maintenance.initialize();
 
-  dsuid_t nonexistingDSMeterDSID;
-  nonexistingDSMeterDSID.id[DSUID_SIZE - 1] = 55;
+  DSUID_DEFINE(nonexistingDSMeterDSID,
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55);
 
   ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etMeteringValues, nonexistingDSMeterDSID);
   pEvent->addParameter(123); // power
@@ -807,9 +748,6 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
 BOOST_AUTO_TEST_CASE(testEnergyMeterZero) {
   Apartment apt(NULL);
 
-  dsuid_t dsmeterDSID;
-  dsmeterDSID.id[DSUID_SIZE - 1] = 10;
-
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
   meter->initializeEnergyMeterValue(0);
   meter->updateEnergyMeterValue(50);
@@ -818,9 +756,6 @@ BOOST_AUTO_TEST_CASE(testEnergyMeterZero) {
 
 BOOST_AUTO_TEST_CASE(testEnergyMeterWithMeteringData) {
   Apartment apt(NULL);
-
-  dsuid_t dsmeterDSID;
-  dsmeterDSID.id[DSUID_SIZE - 1] = 10;
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
   meter->initializeEnergyMeterValue(50);
@@ -831,9 +766,6 @@ BOOST_AUTO_TEST_CASE(testEnergyMeterWithMeteringData) {
 
 BOOST_AUTO_TEST_CASE(testEnergyMeterDropout) {
   Apartment apt(NULL);
-
-  dsuid_t dsmeterDSID;
-  dsmeterDSID.id[DSUID_SIZE - 1] = 10;
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
   meter->initializeEnergyMeterValue(50);
@@ -861,9 +793,6 @@ BOOST_AUTO_TEST_CASE(testTags) {
   Apartment apt(NULL);
   PropertySystem syst;
   apt.setPropertySystem(&syst);
-
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
 
@@ -899,10 +828,6 @@ BOOST_AUTO_TEST_CASE(testDeviceStateWhenRemovingMeter) {
   maintenance.setApartment(&apt);
   maintenance.setStructureModifyingBusInterface(new DummyStructureModifyingInterface());
   maintenance.initialize();
-
-  dsuid_t dsuid1, meter1DSID;
-  meter1DSID.id[DSUID_SIZE - 1] = 10;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
 
   boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
 
@@ -1076,12 +1001,6 @@ private:
 BOOST_AUTO_TEST_CASE(testPersistSet) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1, dsuid2, dsuid3, meter1DSID;
-  meter1DSID.id[DSUID_SIZE - 1] = 10;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
-
   boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
   boost::shared_ptr<Zone> zone1 = apt.allocateZone(1);
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
@@ -1130,13 +1049,6 @@ BOOST_AUTO_TEST_CASE(testPersistSet) {
 
 BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2, dsuid3, meter1DSID;
-  dsuid1 = dsuid2 = dsuid3 = meter1DSID = DSUID_NULL;
-  meter1DSID.id[DSUID_SIZE - 1] = 10;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-  dsuid3.id[DSUID_SIZE - 1] = 3;
 
   boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
   boost::shared_ptr<Zone> zone1 = apt.allocateZone(1);
