@@ -34,9 +34,9 @@ libdsscore_a_SOURCES =  \
 	../src/eventcollector.cpp \
 	../src/eventcollector.h \
 	../src/event.cpp \
-	../src/event.h \
 	../src/event_create.cpp \
 	../src/event_create.h \
+	../src/event.h \
 	../src/eventinterpreterplugins.cpp \
 	../src/eventinterpreterplugins.h \
 	../src/eventinterpretersystemplugins.cpp \
@@ -48,6 +48,8 @@ libdsscore_a_SOURCES =  \
 	../src/foreach.h \
 	../src/hasher.cpp \
 	../src/hasher.h \
+	../src/heatingregistering.cpp \
+	../src/heatingregistering.h \
 	../src/http_client.cpp \
 	../src/http_client.h \
 	../src/internaleventrelaytarget.h \
@@ -61,10 +63,10 @@ libdsscore_a_SOURCES =  \
 	../src/model/apartment.h \
 	../src/model/busscanner.cpp \
 	../src/model/busscanner.h \
-	../src/model/data_types.cpp \
-	../src/model/data_types.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
+	../src/model/data_types.cpp \
+	../src/model/data_types.h \
 	../src/model/devicecontainer.cpp \
 	../src/model/devicecontainer.h \
 	../src/model/device.cpp \
@@ -107,6 +109,8 @@ libdsscore_a_SOURCES =  \
 	../src/propertysystem_common_paths.h \
 	../src/propertysystem.cpp \
 	../src/propertysystem.h \
+	../src/protobufjson.cpp \
+	../src/protobufjson.h \
 	../src/sceneaccess.cpp \
 	../src/sceneaccess.h \
 	../src/scripting/jscurl-constants.h \
@@ -135,8 +139,6 @@ libdsscore_a_SOURCES =  \
 	../src/security/security.h \
 	../src/security/user.cpp \
 	../src/security/user.h \
-	../src/heatingregistering.cpp \
-	../src/heatingregistering.h \
 	../src/sensor_data_uploader.cpp \
 	../src/sensor_data_uploader.h \
 	../src/session.cpp \
@@ -168,8 +170,6 @@ libdsscore_a_SOURCES =  \
 	../src/util.h \
 	../src/vdc-connection.cpp \
 	../src/vdc-connection.h \
-	../src/protobufjson.cpp \
-	../src/protobufjson.h \
 	../src/watchdog.cpp \
 	../src/watchdog.h \
 	../src/web/handler/apartmentrequesthandler.cpp \
