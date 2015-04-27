@@ -29,14 +29,15 @@
 #include "modeltypes.h"
 #include "group.h"
 #include "businterface.h"
+#include "data_types.h"
 
 namespace dss {
 
   /** Represents a apartmentwide cluster */
   class Cluster : public Group {
   private:
-    int m_Location;
-    int m_ProtectionClass;
+    CardinalDirection_t m_Location;
+    WindProtectionClass_t m_ProtectionClass;
     int m_Floor;
     std::vector<int> m_LockedScenes;
     bool m_ConfigurationLocked;
@@ -48,11 +49,11 @@ namespace dss {
 
     virtual void publishToPropertyTree();
 
-    void setLocation(const int _location) { m_Location = _location; }
-    int getLocation() const { return m_Location; }
+    void setLocation(const CardinalDirection_t _location) { m_Location = _location; }
+    CardinalDirection_t getLocation() const { return m_Location; }
 
-    void setProtectionClass(const int _procetionClass) { m_ProtectionClass = _procetionClass; }
-    int getProtectionClass() const { return m_ProtectionClass; }
+    void setProtectionClass(const WindProtectionClass_t _protectionClass) { m_ProtectionClass = _protectionClass; }
+    WindProtectionClass_t getProtectionClass() const { return m_ProtectionClass; }
 
     void setFloor(const int _floor) { m_Floor = _floor; }
     int getFloor() const { return m_Floor; }

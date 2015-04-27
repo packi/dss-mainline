@@ -38,8 +38,8 @@ namespace dss {
 
   Cluster::Cluster(const int _id, Apartment& _apartment)
   : Group(_id, _apartment.getZone(0), _apartment),
-    m_Location(0),
-    m_ProtectionClass(0),
+    m_Location(cd_none),
+    m_ProtectionClass(wpc_none),
     m_Floor(0),
     m_ConfigurationLocked(false),
     m_readFromDsm(false)
@@ -64,10 +64,10 @@ namespace dss {
   void Cluster::publishToPropertyTree() {
     Group::publishToPropertyTree();
     if (m_pPropertyNode != NULL) {
-      m_pPropertyNode->createProperty("Location")
-        ->linkToProxy(PropertyProxyReference<int>(m_Location, false));
-      m_pPropertyNode->createProperty("ProtectionClass")
-            ->linkToProxy(PropertyProxyReference<int>(m_ProtectionClass, false));
+      m_pPropertyNode->createProperty("CardinalDirection")
+            ->linkToProxy(PropertyProxyToString<CardinalDirection_t>(m_Location));
+      m_pPropertyNode->createProperty("WindProtectionClass")
+            ->linkToProxy(PropertyProxyReference<int, WindProtectionClass_t>(m_ProtectionClass));
       m_pPropertyNode->createProperty("Floor")
             ->linkToProxy(PropertyProxyReference<int>(m_Floor, false));
       m_pPropertyNode->createProperty("ConfigurationLocked")

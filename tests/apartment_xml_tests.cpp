@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
     "    <cluster id=\"17\">\n"
     "      <name>Jalousien2</name>\n"
     "      <color>2</color>\n"
-    "      <location>4</location>\n"
+    "      <location>south east</location>\n"
     "      <protectionClass>2</protectionClass>\n"
     "      <floor>1</floor>\n"
     "      <configurationLocked>0</configurationLocked>\n"
@@ -164,8 +164,8 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   BOOST_CHECK_NO_THROW(pClust = apt.getCluster(17));
   BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien2");
   BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
-  BOOST_CHECK_EQUAL(pClust->getLocation(), 4);
-  BOOST_CHECK_EQUAL(pClust->getProtectionClass(), 2);
+  BOOST_CHECK_EQUAL(pClust->getLocation(), cd_south_east);
+  BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_class_2);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 1);
   BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
   BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), false);
@@ -237,8 +237,8 @@ BOOST_AUTO_TEST_CASE(testCluster) {
 
     pCluster->setName("Testing");
     pCluster->setStandardGroupID(4);
-    pCluster->setLocation(3);
-    pCluster->setProtectionClass(9);
+    pCluster->setLocation(cd_east);
+    pCluster->setProtectionClass(wpc_class_3);
     pCluster->setFloor(13);
     pCluster->setConfigurationLocked(true);
     std::vector<int> scenes;
@@ -260,8 +260,8 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   BOOST_CHECK_NO_THROW(pClust = apt2.getCluster(39));
   BOOST_CHECK_EQUAL(pClust->getName(), "Testing");
   BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 4);
-  BOOST_CHECK_EQUAL(pClust->getLocation(), 3);
-  BOOST_CHECK_EQUAL(pClust->getProtectionClass(), 9);
+  BOOST_CHECK_EQUAL(pClust->getLocation(), cd_east);
+  BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_class_3);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 13);
   BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), true);
   BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 3);

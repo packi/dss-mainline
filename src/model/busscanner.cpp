@@ -19,6 +19,7 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
+#include "data_types.h"
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -132,9 +133,7 @@ namespace dss {
             return false;
           }
         }
-        if (!scanClusters(_dsMeter)) {
-          return false;
-        }
+        scanClusters(_dsMeter);
       }
 
       _dsMeter->setIsInitialized(true);
@@ -262,8 +261,8 @@ namespace dss {
       if ((pCluster->getStandardGroupID() == 0) ||
           ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
         pCluster->setStandardGroupID(cluster.StandardGroupID);
-        pCluster->setLocation(cluster.location);
-        pCluster->setProtectionClass(cluster.protectionClass);
+        pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
+        pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
         pCluster->setLockedScenes(cluster.lockedScenes);
         pCluster->setReadFromDsm(true);
