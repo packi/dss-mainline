@@ -38,7 +38,7 @@
 #include "src/security/privilege.h"
 #include "src/security/security.h"
 #include "dss.h"
-#include "tests/dss_life_cycle.h"
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 
@@ -107,6 +107,9 @@ BOOST_AUTO_TEST_CASE(test_thread_specific_ptr) {
   BOOST_CHECK_EQUAL(Foo::ct, 0);
 }
 
+/*
+ * TODO Create DSSInstanceFixture and use DSS::getInstance
+ */
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
@@ -313,7 +316,7 @@ BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
-  DSSLifeCycle guard; /* event queue */
+  DSSInstanceFixture guard; /* event queue */
 
   std::string applicationToken = "fake-token-123467890";
 

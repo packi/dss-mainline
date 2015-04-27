@@ -35,10 +35,10 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(DeviceTests)
 
+DSUID_DEFINE(devdsid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+
 BOOST_AUTO_TEST_CASE(testGroups) {
   Apartment apt(NULL);
-  dsuid_t devdsid;
-  devdsid.id[DSUID_SIZE - 1] = 1;
   boost::shared_ptr<Device> dev = apt.allocateDevice(devdsid);
   BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);
   dev->resetGroups();
@@ -74,8 +74,6 @@ BOOST_AUTO_TEST_CASE(testGroups) {
 
 BOOST_AUTO_TEST_CASE(testGroupBoundaries) {
   Apartment apt(NULL);
-  dsuid_t devdsid;
-  devdsid.id[DSUID_SIZE - 1] = 1;
   boost::shared_ptr<Device> dev = apt.allocateDevice(devdsid);
   BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);
   dev->addToGroup(-1);

@@ -55,6 +55,8 @@ BOOST_AUTO_TEST_CASE(test_mktime_dst_modifies_gmtoff) {
 
   strptime("2014-01-02T12:00:00+0300", "%FT%T%z", &tmw);
   strptime("2014-07-02T12:00:00+0300", "%FT%T%z", &tms);
+
+  tmw.tm_isdst = tms.tm_isdst = -1; // valgrind
   mktime(&tmw);
   mktime(&tms);
 

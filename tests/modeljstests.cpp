@@ -46,6 +46,10 @@
 using namespace std;
 using namespace dss;
 
+DSUID_DEFINE(dsuid1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
+DSUID_DEFINE(dsuid2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+DSUID_DEFINE(dsuid3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2);
+
 BOOST_AUTO_TEST_SUITE(ModelJS)
 
 BOOST_AUTO_TEST_CASE(testBasics) {
@@ -71,12 +75,6 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 
 BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2, dsuid3;
-  dsuid1 = dsuid2 = dsuid3 = DSUID_NULL;
-  dsuid1.id[DSUID_SIZE - 1] = 10;
-  dsuid2.id[DSUID_SIZE - 1] = 1;
-  dsuid3.id[DSUID_SIZE - 1] = 2;
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
 
@@ -163,10 +161,6 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
   PropertySystem propSys;
   apt.setPropertySystem(&propSys);
 
-  dsuid_t dsuid1, dsuid2, dsuid3;
-  dsuid1.id[DSUID_SIZE - 1] = 10;
-  dsuid2.id[DSUID_SIZE - 1] = 1;
-  dsuid3.id[DSUID_SIZE - 1] = 2;
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid2);
@@ -198,10 +192,6 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDevices) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1, dsuid2;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-  dsuid2.id[DSUID_SIZE - 1] = 2;
-
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
   dev1->setName("dev1");
@@ -225,11 +215,6 @@ BOOST_AUTO_TEST_CASE(testDevices) {
 
 BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1, dsuid2;
-  dsuid1 = dsuid2 = DSUID_NULL;
-  dsuid1.id[DSUID_SIZE - 1] = 0xa;
-  dsuid2.id[DSUID_SIZE - 1] = 0xb;
 
   boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dsuid1);
   meter1->setName("meter1");
@@ -273,9 +258,6 @@ BOOST_AUTO_TEST_CASE(testSceneConstants) {
 
 BOOST_AUTO_TEST_CASE(testEvents) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
 
   boost::shared_ptr<Device> dev = apt.allocateDevice(dsuid1);
   dev->setShortAddress(1);
@@ -408,9 +390,6 @@ BOOST_AUTO_TEST_CASE(testTimedICalEvent) {
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 1;
-
   boost::shared_ptr<Device> dev = apt.allocateDevice(dsuid1);
   dev->setShortAddress(1);
   dev->setName("dev");
@@ -448,9 +427,6 @@ BOOST_AUTO_TEST_CASE(testSubscriptions) {
 BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 13;
-
   apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
@@ -467,9 +443,6 @@ BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
 BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
   Apartment apt(NULL);
   
-  dsuid_t dsuid1;
-  dsuid1.id[DSUID_SIZE - 1] = 13;
-
   apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
@@ -502,9 +475,6 @@ BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
 BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
   Apartment apt(NULL);
 
-  dsuid_t dsuid1(DSUID_NULL);
-  dsuid1.id[DSUID_SIZE - 1] = 13;
-
   apt.allocateDSMeter(dsuid1);
   apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
@@ -523,9 +493,6 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1(DSUID_NULL);
-  dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
   apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
@@ -546,9 +513,6 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesWs) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
   Apartment apt(NULL);
-
-  dsuid_t dsuid1(DSUID_NULL);
-  dsuid1.id[DSUID_SIZE - 1] = 13;
 
   apt.allocateDSMeter(dsuid1);
   apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
@@ -573,9 +537,6 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   Apartment apt(NULL);
   
-  dsuid_t dsuid1(DSUID_NULL);
-  dsuid1.id[DSUID_SIZE - 1] = 13;
-
   apt.allocateDSMeter(dsuid1);
   apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
