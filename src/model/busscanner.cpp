@@ -133,9 +133,7 @@ namespace dss {
             return false;
           }
         }
-        if (!scanClusters(_dsMeter)) {
-          return false;
-        }
+        scanClusters(_dsMeter);
       }
 
       _dsMeter->setIsInitialized(true);
