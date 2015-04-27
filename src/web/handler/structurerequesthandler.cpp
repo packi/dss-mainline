@@ -742,6 +742,33 @@ namespace dss {
     return JSONWriter::success();
   }
 
+  std::string StructureRequestHandler::clusterSetName(const RestfulRequest& _request) {
+    StringConverter st("UTF-8", "UTF-8");
+    boost::shared_ptr<Cluster> cluster;
+    int clusterID = -1;
+
+    if(!_request.getParameter<int>("clusterID", clusterID)) {
+      return JSONWriter::failure("Required parameter clusterID missing");
+    }
+
+    cluster = m_Apartment.getCluster(clusterID);
+    if (!cluster) {
+      return JSONWriter::failure("Could not find group with id : '" + _request.getParameter("clusterID") + "'");
+    }
+
+    std::string newName;
+    if (!_request.getParameter<std::string>("newName", newName)) {
+      return JSONWriter::failure("missing parameter 'newName'");
+    }
+    newName = escapeHTML(newName);
+
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.clusterSetName(cluster, newName);
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return JSONWriter::success();
+  }
+
   std::string StructureRequestHandler::clusterSetColor(const RestfulRequest& _request) {
     boost::shared_ptr<Cluster> pCluster;
     int clusterID = -1;
@@ -800,6 +827,8 @@ namespace dss {
       return groupSetName(_request);
     } else if(_request.getMethod() == "groupSetColor") {
       return groupSetColor(_request);
+    } else if(_request.getMethod() == "clusterSetName") {
+      return clusterSetName(_request);
     } else if(_request.getMethod() == "clusterSetColor") {
       return clusterSetColor(_request);
     } else {

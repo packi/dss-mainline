@@ -61,6 +61,7 @@ namespace dss {
     std::string groupSetName(const RestfulRequest& _request);
     std::string groupSetColor(const RestfulRequest& _request);
     std::string clusterSetColor(const RestfulRequest& _request);
+    std::string clusterSetName(const RestfulRequest& _request);
   }; // StructureRequestHandler
 
 } // namespace dss

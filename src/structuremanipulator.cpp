@@ -688,4 +688,16 @@ namespace dss {
       }
     }
   }
+
+  void StructureManipulator::clusterSetName(boost::shared_ptr<Cluster> _cluster,
+                                            const std::string& _name) {
+    if (isAppUserGroup(_cluster->getID())) {
+      _cluster->setName(_name);
+      m_Interface.clusterSetName(_cluster->getID(), _name);
+      return;
+    }
+
+    throw DSSException("Rename cluster: id " + intToString(_cluster->getID()) + " not a cluster");
+  } // clusterSetName
+
 } // namespace dss
