@@ -47,6 +47,7 @@
 #include "propertysystem.h"
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
+#include "handler/system_states.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
