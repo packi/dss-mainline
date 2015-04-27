@@ -21,7 +21,6 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "cluster.h"
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -1981,6 +1980,7 @@ namespace dss {
     try {
       boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
       cluster->setConfigurationLocked(_configurationLock);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on cluster config lock change, cluster not found: ") + e.what(), lsWarning);
     }
@@ -1990,6 +1990,7 @@ namespace dss {
     try {
       boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
       cluster->setLockedScenes(_lockedScenes);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on cluster locked scenes change, cluster not found: ") + e.what(), lsWarning);
     }
