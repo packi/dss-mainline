@@ -780,9 +780,15 @@ namespace dss {
               } else if (strcmp(_name, "color") == 0) {
                 m_tempCluster->setStandardGroupID(strToUIntDef(m_chardata, 0));
               } else if (strcmp(_name, "location") == 0) {
-                m_tempCluster->setLocation(strToUIntDef(m_chardata, 0));
+                CardinalDirection_t location = cd_none;
+                if (parseCardinalDirection(m_chardata, &location)) {
+                  m_tempCluster->setLocation(location);
+                }
               } else if (strcmp(_name, "protectionClass") == 0) {
-                m_tempCluster->setProtectionClass(strToUIntDef(m_chardata, 0));
+                WindProtectionClass_t protectionClass = wpc_none;
+                if (convertWindProtectionClass(strToUIntDef(m_chardata, 0), &protectionClass)) {
+                  m_tempCluster->setProtectionClass(protectionClass);
+                }
               } else if (strcmp(_name, "floor") == 0) {
                 m_tempCluster->setFloor(strToUIntDef(m_chardata, 0));
               } else if (strcmp(_name, "configurationLocked") == 0) {
@@ -982,8 +988,8 @@ namespace dss {
       addElementSimple(_ofs, _indent + 1, "associatedSet", _pCluster->getAssociatedSet());
     }
     addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getStandardGroupID()));
-    addElementSimple(_ofs, _indent + 1, "location", intToString(_pCluster->getLocation()));
-    addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(_pCluster->getProtectionClass()));
+    addElementSimple(_ofs, _indent + 1, "location", toString(_pCluster->getLocation()));
+    addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(static_cast<int>(_pCluster->getProtectionClass())));
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
     addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
     _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
