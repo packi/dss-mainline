@@ -24,26 +24,15 @@
 #define __EVENTINTERPRETERSYSTEMPLUGINS_H__
 
 #include "eventinterpreterplugins.h"
-#include "taskprocessor.h"
-
 #include <pthread.h>
-#include "src/ds485types.h"
+
+#include "ds485types.h"
+#include "handler/system_handlers.h"
 #include "scripting/jslogger.h"
 #include "model/deviceinterface.h"
 
 namespace dss {
   class Device;
-
-  class SystemEvent : public Task {
-    public:
-      SystemEvent();
-      virtual ~SystemEvent();
-      virtual void run() = 0;
-      virtual bool setup(Event& _event);
-      std::string getActionName(PropertyNodePtr _actionNode);
-    protected:
-      Properties m_properties;
-  };
 
   class SystemTrigger : public SystemEvent {
     public:
@@ -231,46 +220,6 @@ namespace dss {
       boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
       boost::shared_ptr<const State> m_raisedAtState;
   };
-
-  class EventInterpreterPluginSystemState : public TaskProcessor,
-                                            public EventInterpreterPlugin {
-    public:
-      EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter);
-      virtual ~EventInterpreterPluginSystemState();
-      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-  };
-
-  class SystemState : public SystemEvent {
-    public:
-      SystemState();
-      virtual ~SystemState();
-      virtual void run();
-      virtual bool setup(Event& _event);
-    private:
-      std::string m_evtName;
-
-      EventRaiseLocation m_evtRaiseLocation;
-      boost::shared_ptr<const Group> m_raisedAtGroup;
-      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
-      boost::shared_ptr<const State> m_raisedAtState;
-
-      boost::shared_ptr<State> registerState(std::string _name,
-                                             bool _persistent);
-      boost::shared_ptr<State> getOrRegisterState(std::string _name);
-      std::string getData(int *zoneId, int *groupId, int *sceneId,
-                          callOrigin_t *callOrigin);
-
-      void bootstrap();
-      void startup();
-      void callscene();
-      void undoscene();
-      void stateBinaryInputGeneric(std::string stateName,
-                                   int targetGroupType,
-                                   int targetGroupId);
-      void stateBinaryinput();
-      void stateApartment();
-  };
-
 }; // namespace
 
 #endif
