@@ -10,7 +10,8 @@
 #include <iostream>
 #include "foreach.h"
 
-#include "event_create.h"
+#include "event.h"
+#include "event/event_create.h"
 #include "eventinterpreterplugins.h"
 #include "http_client.h"
 #include "model/apartment.h"
@@ -18,7 +19,6 @@
 #include "model/zone.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
-#include "src/event.h"
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
