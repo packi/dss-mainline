@@ -52,7 +52,7 @@ namespace dss {
   } // ctor
 
   bool Group::isValid() const {
-    if (isAppUserGroup(m_GroupID)) {
+    if (isDefaultGroup(m_GroupID) || isAppUserGroup(m_GroupID)) {
       return m_IsValid && (m_StandardGroupID > 0);
     }
     return m_IsValid;
