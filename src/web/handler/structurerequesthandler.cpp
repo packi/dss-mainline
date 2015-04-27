@@ -792,7 +792,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetStandardID(pCluster, newColor);
+    manipulator.clusterSetStandardID(pCluster, newColor);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();

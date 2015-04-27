@@ -700,4 +700,15 @@ namespace dss {
     throw DSSException("Rename cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetName
 
+  void StructureManipulator::clusterSetStandardID(boost::shared_ptr<Cluster> _cluster,
+                                                const int _standardGroupNumber) {
+    if (isAppUserGroup(_cluster->getID())) {
+      _cluster->setStandardGroupID(_standardGroupNumber);
+      m_Interface.clusterSetStandardID(_cluster->getID(), _standardGroupNumber);
+      return;
+    }
+
+    throw DSSException("SetStandardColor cluster: id " + intToString(_cluster->getID()) + " not a cluster");
+  } // clusterSetStandardID
+
 } // namespace dss
