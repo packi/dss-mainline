@@ -47,7 +47,7 @@ boost::shared_ptr<Event>
 
 boost::shared_ptr<Event>
   createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
-                             int _value, const std::string _sourceDevice);
+                             int _value, const dsuid_t &_sourceDevice);
 
 boost::shared_ptr<Event>
   createZoneSensorErrorEvent(boost::shared_ptr<Group> _group, int _type,

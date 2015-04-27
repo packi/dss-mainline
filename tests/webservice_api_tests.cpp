@@ -250,7 +250,7 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
   } else if (eventName == EventName::DeviceInvalidSensor) {
     pEvent = createDeviceInvalidSensorEvent(createDevRef(), 0, 1, DateTime());
   } else if (eventName == EventName::ZoneSensorValue) {
-    pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, "dev");
+    pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, DSUID_NULL);
   } else if (eventName == EventName::ZoneSensorError) {
     pEvent = createZoneSensorErrorEvent(createGroup(1), 0, DateTime());
   } else if (eventName == EventName::CallScene) {

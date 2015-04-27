@@ -80,7 +80,7 @@ createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
 
 boost::shared_ptr<Event>
 createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
-                           int _value, const std::string _sourceDevice)
+                           int _value, const dsuid_t &_sourceDevice)
 {
   boost::shared_ptr<Event> event;
   // TODO ensure sensorType valid or implement fallback
@@ -90,7 +90,7 @@ createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
   event->setProperty("sensorType", intToString(_type));
   event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
-  event->setProperty("originDSID", _sourceDevice);
+  event->setProperty("originDSID", dsuid2str(_sourceDevice));
   return event;
 }
 

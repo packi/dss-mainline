@@ -163,8 +163,8 @@ namespace dss {
   }
 
   void DefaultBusEventSink::onZoneSensorValue(BusInterface* _source,
-      const dsuid_t _dsMeterID,
-      const std::string& _sourceDevice,
+      const dsuid_t &_dsMeterID,
+      const dsuid_t &_sourceDevice,
       const int& _zoneID,
       const int& _groupID,
       const int& _sensorType,
@@ -178,7 +178,7 @@ namespace dss {
     pEvent->addParameter(_sensorType);
     pEvent->addParameter(_sensorValue);
     pEvent->addParameter(_precision);
-    pEvent->setSingleStringParameter(_sourceDevice);
+    pEvent->setSingleStringParameter(dsuid2str(_sourceDevice));
     m_pModelMaintenance->addModelEvent(pEvent);
   } // onZoneSensorValue
 

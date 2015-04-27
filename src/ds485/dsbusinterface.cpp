@@ -928,7 +928,7 @@ namespace dss {
     loginFromCallback();
     if (m_pBusEventSink != NULL) {
       m_pBusEventSink->onZoneSensorValue(this,
-          _sourceID, dsuid2str(_dSUID),
+          _sourceID, _dSUID,
           _zoneID, _groupID, _SensorType, _Value, _Precision,
           SAC_MANUAL, coDsmApi);
     }
