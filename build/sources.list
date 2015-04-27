@@ -36,6 +36,8 @@ libdsscore_a_SOURCES =  \
 	../src/event.cpp \
 	../src/event/event_create.cpp \
 	../src/event/event_create.h \
+	../src/event/event_fields.cpp \
+	../src/event/event_fields.h \
 	../src/event.h \
 	../src/eventinterpreterplugins.cpp \
 	../src/eventinterpreterplugins.h \

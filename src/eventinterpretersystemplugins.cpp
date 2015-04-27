@@ -31,6 +31,7 @@
 #include "base.h"
 #include "dss.h"
 #include "event/event_create.h"
+#include "event/event_fields.h"
 #include "eventinterpretersystemplugins.h"
 #include "http_client.h"
 #include "internaleventrelaytarget.h"
@@ -1010,21 +1011,6 @@ namespace dss {
 
   }
 
-  static const std::string ss_callOrigin = "callOrigin";
-  static const std::string ss_originDSUID = "originDSUID";
-  static const std::string ss_zone = "zone";
-  static const std::string ss_group = "group";
-  static const std::string ss_scene = "scene";
-  static const std::string ss_sceneID = "sceneID";
-  static const std::string ss_dsuid = "dsuid";
-  static const std::string ss_forced = "forced";
-  static const std::string ss_sensorEvent = "sensorEvent";
-  static const std::string ss_sensorIndex = "sensorIndex";
-  static const std::string ss_eventid = "eventid";
-  static const std::string ss_evt = "evt";
-  static const std::string ss_triggers = "triggers";
-  static const std::string ss_type = "type";
-
   SystemTrigger::SystemTrigger()
     : SystemEvent(),
       m_evtSrcIsGroup(false),
@@ -1047,20 +1033,20 @@ namespace dss {
       return false;
     }
 
-    int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
+    int scene = strToIntDef(m_properties.get(ef_sceneID), -1);
     dsuid_t originDSUID;
-    if (m_properties.has(ss_originDSUID)) {
-      originDSUID = str2dsuid(m_properties.get(ss_originDSUID));
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = str2dsuid(m_properties.get(ef_originDSUID));
     }
     bool forced = false;
-    if (m_properties.has(ss_forced)) {
-      std::string sForced = m_properties.get(ss_forced);
+    if (m_properties.has(ef_forced)) {
+      std::string sForced = m_properties.get(ef_forced);
       forced = (sForced == "true");
     }
 
     int iZone;
     try {
-      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ef_zone);
       if (triggerZone) {
         iZone = triggerZone->getIntegerValue();
       } else {
@@ -1075,7 +1061,7 @@ namespace dss {
 
     int iGroup;
     try {
-      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
+      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ef_group);
       if (triggerGroup) {
         iGroup = triggerGroup->getIntegerValue();
       } else {
@@ -1090,7 +1076,7 @@ namespace dss {
 
     int iScene;
     try {
-      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
+      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ef_scene);
       if (triggerScene) {
         iScene = triggerScene->getIntegerValue();
       } else {
@@ -1103,7 +1089,7 @@ namespace dss {
       return false;
     }
     
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsuid);
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ef_dsuid);
     std::string iDevice;
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
@@ -1113,7 +1099,7 @@ namespace dss {
       }
     }
 
-    PropertyNodePtr forcedFlag = _triggerProp->getPropertyByName(ss_forced);
+    PropertyNodePtr forcedFlag = _triggerProp->getPropertyByName(ef_forced);
     if (forcedFlag) {
       try {
         bool iForced = forcedFlag->getBoolValue();
@@ -1147,20 +1133,20 @@ namespace dss {
       return false;
     }
 
-    int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
+    int scene = strToIntDef(m_properties.get(ef_sceneID), -1);
     dsuid_t originDSUID;
-    if (m_properties.has(ss_originDSUID)) {
-      originDSUID = str2dsuid(m_properties.get(ss_originDSUID));
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = str2dsuid(m_properties.get(ef_originDSUID));
     }
 
-    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+    PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ef_zone);
     if (triggerZone == NULL) {
       return false;
     }
 
     int iZone = -1;
     try {
-      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ss_zone);
+      PropertyNodePtr triggerZone = _triggerProp->getPropertyByName(ef_zone);
       if (triggerZone) {
         iZone = triggerZone->getIntegerValue();
       }
@@ -1173,7 +1159,7 @@ namespace dss {
 
     int iGroup = -1;
     try {
-      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ss_group);
+      PropertyNodePtr triggerGroup = _triggerProp->getPropertyByName(ef_group);
       if (triggerGroup) {
         iGroup = triggerGroup->getIntegerValue();
       }
@@ -1186,7 +1172,7 @@ namespace dss {
 
     int iScene = -1;
     try {
-      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ss_scene);
+      PropertyNodePtr triggerScene = _triggerProp->getPropertyByName(ef_scene);
       if (triggerScene) {
         iScene = triggerScene->getIntegerValue();
       }
@@ -1197,7 +1183,7 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsuid);
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ef_dsuid);
     std::string iDevice;
     if (triggerDSID != NULL) {
       iDevice = triggerDSID->getAsString();
@@ -1225,18 +1211,18 @@ namespace dss {
     }
 
     dsuid_t dsuid = m_evtSrcDSID;
-    int scene = strToIntDef(m_properties.get(ss_sceneID), -1);
+    int scene = strToIntDef(m_properties.get(ef_sceneID), -1);
 
     if (dsuid == DSUID_NULL) {
       return false;
     }
 
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsuid);
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ef_dsuid);
     if (triggerDSID == NULL) {
       return false;
     }
 
-    PropertyNodePtr triggerSCENE = _triggerProp->getPropertyByName(ss_scene);
+    PropertyNodePtr triggerSCENE = _triggerProp->getPropertyByName(ef_scene);
     if (triggerSCENE == NULL) {
       return false;
     }
@@ -1270,10 +1256,10 @@ namespace dss {
     }
     
     dsuid_t dsuid = m_evtSrcDSID;
-    std::string eventName = m_properties.get(ss_sensorEvent);
-    std::string eventIndex = m_properties.get(ss_sensorIndex);
+    std::string eventName = m_properties.get(ef_sensorEvent);
+    std::string eventIndex = m_properties.get(ef_sensorIndex);
 
-    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ss_dsuid);
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName(ef_dsuid);
     if (triggerDSID == NULL) {
       return false;
     }
@@ -1283,8 +1269,8 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr triggerEventId = _triggerProp->getPropertyByName(ss_eventid);
-    PropertyNodePtr triggerName = _triggerProp->getPropertyByName(ss_evt);
+    PropertyNodePtr triggerEventId = _triggerProp->getPropertyByName(ef_eventid);
+    PropertyNodePtr triggerName = _triggerProp->getPropertyByName(ef_evt);
 
     if (triggerEventId == NULL) {
       if (triggerName == NULL) {
@@ -1597,7 +1583,7 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr appTrigger = appProperty->getPropertyByName(ss_triggers);
+    PropertyNodePtr appTrigger = appProperty->getPropertyByName(ef_triggers);
     if (appTrigger == NULL) {
       return false;
     }
@@ -1608,7 +1594,7 @@ namespace dss {
         continue;
       }
 
-      PropertyNodePtr triggerType = triggerProp->getPropertyByName(ss_type);
+      PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
       if (triggerType == NULL) {
         continue;
       }
@@ -2352,13 +2338,13 @@ namespace dss {
     }
 
     std::string originDSUID;
-    if (m_properties.has(ss_originDSUID)) {
-      originDSUID = m_properties.get(ss_originDSUID);
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = m_properties.get(ef_originDSUID);
     }
 
     callOrigin_t callOrigin = coUnknown;
-    if (m_properties.has(ss_callOrigin)) {
-      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
     }
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
@@ -2401,13 +2387,13 @@ namespace dss {
     }
 
     std::string originDSUID;
-    if (m_properties.has(ss_originDSUID)) {
-      originDSUID = m_properties.get(ss_originDSUID);
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = m_properties.get(ef_originDSUID);
     }
 
     callOrigin_t callOrigin;
-    if (m_properties.has(ss_callOrigin)) {
-      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
     }
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
@@ -2442,13 +2428,13 @@ namespace dss {
     }
 
     std::string originDSUID;
-    if (m_properties.has(ss_originDSUID)) {
-      originDSUID = m_properties.get(ss_originDSUID);
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = m_properties.get(ef_originDSUID);
     }
 
     callOrigin_t callOrigin = coUnknown;
-    if (m_properties.has(ss_callOrigin)) {
-      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
     }
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
@@ -2855,8 +2841,8 @@ namespace dss {
     std::string originDSUID;
 
     *callOrigin = coUnknown;
-    if (m_properties.has(ss_callOrigin)) {
-        *callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ss_callOrigin), 0);
+    if (m_properties.has(ef_callOrigin)) {
+        *callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
     }
 
     if (!zoneId || !groupId || !sceneId) {
@@ -2871,8 +2857,8 @@ namespace dss {
         *sceneId = strToIntDef(m_properties.get("sceneID"), -1);
     }
 
-    if (m_properties.has(ss_originDSUID)) {
-      originDSUID = m_properties.get(ss_originDSUID);
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = m_properties.get(ef_originDSUID);
     }
 
     if (((m_evtRaiseLocation == erlGroup) ||

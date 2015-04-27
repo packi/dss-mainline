@@ -21,6 +21,7 @@
 
 #include <boost/make_shared.hpp>
 
+#include "event/event_fields.h"
 #include "ds485types.h"
 #include "model/scenehelper.h"
 #include "model/state.h"
@@ -59,7 +60,7 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
   double floatValue = SceneHelper::sensorToFloat12(_type, _value);
 
   event = boost::make_shared<Event>(EventName::DeviceSensorValue, _devRef);
-  event->setProperty("sensorIndex", intToString(_index));
+  event->setProperty(ef_sensorIndex, intToString(_index));
   event->setProperty("sensorType", intToString(_type));
   event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
@@ -72,7 +73,7 @@ createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceInvalidSensor, _devRef);
-  event->setProperty("sensorIndex", intToString(_index));
+  event->setProperty(ef_sensorIndex, intToString(_index));
   event->setProperty("sensorType", intToString(_type));
   event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
@@ -115,14 +116,14 @@ createGroupCallSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::CallScene, _group);
-  event->setProperty("sceneID", intToString(_sceneID));
+  event->setProperty(ef_sceneID, intToString(_sceneID));
   event->setProperty("groupID", intToString(_groupID));
   event->setProperty("zoneID", intToString(_zoneID));
-  event->setProperty("originDSUID", dsuid2str(_originDSUID));
-  event->setProperty("callOrigin", intToString(_callOrigin));
+  event->setProperty(ef_originDSUID, dsuid2str(_originDSUID));
+  event->setProperty(ef_callOrigin, intToString(_callOrigin));
   event->setProperty("originToken", _originToken);
   if (_forced) {
-    event->setProperty("forced", "true");
+    event->setProperty(ef_forced, "true");
   }
   return event;
 }
@@ -136,11 +137,11 @@ createGroupUndoSceneEvent(boost::shared_ptr<Group> _group, int _sceneID,
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::UndoScene, _group);
-  event->setProperty("sceneID", intToString(_sceneID));
+  event->setProperty(ef_sceneID, intToString(_sceneID));
   event->setProperty("groupID", intToString(_groupID));
   event->setProperty("zoneID", intToString(_zoneID));
-  event->setProperty("originDSUID", dsuid2str(_originDSUID));
-  event->setProperty("callOrigin", intToString(_callOrigin));
+  event->setProperty(ef_originDSUID, dsuid2str(_originDSUID));
+  event->setProperty(ef_callOrigin, intToString(_callOrigin));
   event->setProperty("originToken", _originToken);
   return event;
 }
