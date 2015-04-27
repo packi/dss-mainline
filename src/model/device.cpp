@@ -319,6 +319,12 @@ namespace dss {
     m_pPropertyNode->createProperty("isValveType")
       ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isValveDevice));
 
+    m_pPropertyNode->createProperty("CardinalDirection")
+      ->linkToProxy(PropertyProxyToString<CardinalDirection_t>(m_cardinalDirection));
+    m_pPropertyNode->createProperty("WindProtectionClass")
+      ->linkToProxy(PropertyProxyReference<int,
+                    WindProtectionClass_t>(m_windProtectionClass));
+
     publishValveTypeToPropertyTree();
 
     m_TagsNode = m_pPropertyNode->createProperty("tags");

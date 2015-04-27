@@ -239,6 +239,27 @@ namespace dss {
     }
   };
 
+  template<class ReferenceType>
+  class PropertyProxyToString : public PropertyProxy<std::string> {
+  private:
+    ReferenceType& m_Reference;
+  public:
+    /** Constructs a PropertyProxyReference.
+     * @param _reference The reference it gets linked to
+     */
+    PropertyProxyToString(ReferenceType& _reference)
+    : m_Reference(_reference)
+    { }
+
+    virtual ~PropertyProxyToString() { }
+    virtual std::string getValue() const { return toString(m_Reference); }
+    virtual void setValue(std::string _value) { /* read-only */ }
+
+    virtual PropertyProxyToString* clone() const {
+      return new PropertyProxyToString<ReferenceType>(m_Reference);
+    }
+  };
+
   /** PropertyProxy that links to a pointer of a variable. */
   template<class T>
   class PropertyProxyPointer: public PropertyProxy<T> {
