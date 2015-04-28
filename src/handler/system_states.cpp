@@ -355,10 +355,8 @@ void SystemState::callscene() {
       if (state->getState() == State_Active) {
         try {
           boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
-          }
+          boost::shared_ptr<Group> g = z->getGroup(0);
+          g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
         } catch (ItemNotFoundException &ex) {}
       }
     }
@@ -366,10 +364,8 @@ void SystemState::callscene() {
       if (state->getState() == State_Active) {
         try {
           boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
-          }
+          boost::shared_ptr<Group> g = z->getGroup(0);
+          g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
         } catch (ItemNotFoundException &ex) {}
       }
     }
@@ -468,10 +464,8 @@ void SystemState::undoscene() {
           (state->getState() == State_Active)) {
         try {
           boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
-          }
+          boost::shared_ptr<Group> g = z->getGroup(0);
+          g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
         } catch (ItemNotFoundException &ex) {}
       } // valid dSID && dSM API origin && state == active
     }
@@ -486,10 +480,8 @@ void SystemState::undoscene() {
           && (state->getState() == State_Active)) {
         try {
           boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
-          }
+          boost::shared_ptr<Group> g = z->getGroup(0);
+          g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
         } catch (ItemNotFoundException &ex) {}
       } // valid dSID && dSM API origin && state == active
     }
@@ -723,31 +715,25 @@ void SystemState::stateApartment() {
   if (statename == "fire") {
     if (iVal == 1) {
       boost::shared_ptr<Group> g = z->getGroup(0);
-      if (g != NULL) {
-        g->callScene(coSystem, SAC_MANUAL, SceneFire, "", false);
-      }
+      g->callScene(coSystem, SAC_MANUAL, SceneFire, "", false);
     }
   }
 
   if (statename.substr(0, 4) == "rain") {
     boost::shared_ptr<Group> g = z->getGroup(groupId);
-    if (g != NULL) {
-      if (iVal == 1) {
-        g->callScene(coSystem, SAC_MANUAL, SceneRainActive, "", false);
-      } else if (iVal == 2) {
-        g->callScene(coSystem, SAC_MANUAL, SceneRainInactive, "", false);
-      }
+    if (iVal == 1) {
+      g->callScene(coSystem, SAC_MANUAL, SceneRainActive, "", false);
+    } else if (iVal == 2) {
+      g->callScene(coSystem, SAC_MANUAL, SceneRainInactive, "", false);
     }
   }
 
   if (statename.substr(0, 4) == "wind") {
     boost::shared_ptr<Group> g = z->getGroup(groupId);
-    if (g != NULL) {
-      if (iVal == 1) {
-        g->callScene(coSystem, SAC_MANUAL, SceneWindActive, "", false);
-      } else if (iVal == 2) {
-        g->callScene(coSystem, SAC_MANUAL, SceneWindInactive, "", false);
-      }
+    if (iVal == 1) {
+      g->callScene(coSystem, SAC_MANUAL, SceneWindActive, "", false);
+    } else if (iVal == 2) {
+      g->callScene(coSystem, SAC_MANUAL, SceneWindInactive, "", false);
     }
   }
 }
