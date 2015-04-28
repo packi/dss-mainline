@@ -88,13 +88,10 @@ boost::shared_ptr<State> SystemState::getOrRegisterState(std::string _name) {
 void SystemState::bootstrap() {
   boost::shared_ptr<State> state;
 
-  state = m_apartment.allocateState(StateType_Service, "presence",
-                                    "system_state");
-
+  state = registerState("presence", true);
   // Default presence status is "present" - set default before loading
   // old status from persistent storage
   state->setState(coSystem, State_Active);
-  state->setPersistence(true);
 
   State::ValueRange_t presenceValues;
   presenceValues.push_back("unknown");
@@ -103,9 +100,8 @@ void SystemState::bootstrap() {
   presenceValues.push_back("invalid");
   state->setValueRange(presenceValues);
 
-  state = m_apartment.allocateState(StateType_Service, "hibernation",
-                                    "system_state");
-  state->setPersistence(true);
+  state = registerState("hibernation", true);
+
   State::ValueRange_t sleepmodeValues;
   sleepmodeValues.push_back("unknown");
   sleepmodeValues.push_back("awake");
