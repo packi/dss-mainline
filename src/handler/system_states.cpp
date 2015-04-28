@@ -189,7 +189,7 @@ void SystemState::startup() {
 
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
-        if (group->getStandardGroupID() == 2) {
+        if (group->getStandardGroupID() == GroupIDGray) {
           registerState("wind.group" + intToString(group->getID()), true);
         }
         continue;
