@@ -44,6 +44,7 @@ namespace dss {
       boost::shared_ptr<State> getOrRegisterState(std::string _name);
       std::string getData(int *zoneId, int *groupId, int *sceneId,
                           callOrigin_t *callOrigin);
+      Apartment &m_apartment;
 
       void bootstrap();
       void startup();
