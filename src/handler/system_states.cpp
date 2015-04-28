@@ -26,22 +26,15 @@
 #include "base.h"
 #include "dss.h"
 #include "event/event_fields.h"
-#include "http_client.h"
-#include "internaleventrelaytarget.h"
 #include "logger.h"
-#include "model/set.h"
 #include "model/zone.h"
 #include "model/group.h"
 #include "model/device.h"
 #include "model/apartment.h"
 #include "model/state.h"
 #include "model/modelconst.h"
-#include "model/scenehelper.h"
 #include "propertysystem.h"
 #include "security/security.h"
-#include "structuremanipulator.h"
-#include "systemcondition.h"
-#include "util.h"
 
 namespace dss {
 
