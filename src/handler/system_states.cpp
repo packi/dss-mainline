@@ -288,7 +288,8 @@ void SystemState::startup() {
   DSS::getInstance()->getEventQueue().pushEvent(event);
 }
 
-  std::string SystemState::getData(int *zoneId, int *groupId, int *sceneId, callOrigin_t *callOrigin) {
+std::string SystemState::getData(int *zoneId, int *groupId, int *sceneId,
+                                 callOrigin_t *callOrigin) {
   std::string originDSUID;
 
   *callOrigin = coUnknown;
@@ -533,39 +534,39 @@ void SystemState::undoscene() {
 void SystemState::stateBinaryInputGeneric(std::string stateName,
                                           int targetGroupType,
                                           int targetGroupId) {
-    try {
-      boost::shared_ptr<State> state =
-        m_apartment.getState(StateType_Service, stateName);
+  try {
+    boost::shared_ptr<State> state =
+      m_apartment.getState(StateType_Service, stateName);
 
-      PropertyNodePtr pNode =
-          DSS::getInstance()->getPropertySystem().getProperty(
-              "/scripts/system_state/" + stateName + "." +
-              intToString(targetGroupType) + "." +
-              intToString(targetGroupId));
-      if (pNode == NULL) {
-        pNode = DSS::getInstance()->getPropertySystem().createProperty(
-              "/scripts/system_state/" + stateName + "." +
-              intToString(targetGroupType) + "." +
-              intToString(targetGroupId));
-        pNode->setIntegerValue(0);
-      }
+    PropertyNodePtr pNode =
+        DSS::getInstance()->getPropertySystem().getProperty(
+            "/scripts/system_state/" + stateName + "." +
+            intToString(targetGroupType) + "." +
+            intToString(targetGroupId));
+    if (pNode == NULL) {
+      pNode = DSS::getInstance()->getPropertySystem().createProperty(
+            "/scripts/system_state/" + stateName + "." +
+            intToString(targetGroupType) + "." +
+            intToString(targetGroupId));
+      pNode->setIntegerValue(0);
+    }
 
-      if (m_properties.has("value")) {
-        std::string val = m_properties.get("value");
-        int iVal = strToIntDef(val, -1);
-        if (iVal == 1) {
-          pNode->setIntegerValue(pNode->getIntegerValue() + 1);
-          state->setState(coSystemBinaryInput, State_Active);
-        } else if (iVal == 2) {
-          if (pNode->getIntegerValue() > 0) {
-            pNode->setIntegerValue(pNode->getIntegerValue() - 1);
-          }
-          if (pNode->getIntegerValue() == 0) {
-            state->setState(coSystemBinaryInput, State_Inactive);
-          }
+    if (m_properties.has("value")) {
+      std::string val = m_properties.get("value");
+      int iVal = strToIntDef(val, -1);
+      if (iVal == 1) {
+        pNode->setIntegerValue(pNode->getIntegerValue() + 1);
+        state->setState(coSystemBinaryInput, State_Active);
+      } else if (iVal == 2) {
+        if (pNode->getIntegerValue() > 0) {
+          pNode->setIntegerValue(pNode->getIntegerValue() - 1);
         }
-      } // m_properties.has("value")
-    } catch (ItemNotFoundException &ex) {}
+        if (pNode->getIntegerValue() == 0) {
+          state->setState(coSystemBinaryInput, State_Inactive);
+        }
+      }
+    } // m_properties.has("value")
+  } catch (ItemNotFoundException &ex) {}
 }
 
 /**
