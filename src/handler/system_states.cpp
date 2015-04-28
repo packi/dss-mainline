@@ -137,7 +137,7 @@ void SystemState::startup() {
       if ((input->m_inputType == BinaryInputIDMovement) ||
           (input->m_inputType == BinaryInputIDMovementInDarkness)) {
         std::string stateName;
-        if (input->m_targetGroupId >= 16) {
+        if (input->m_targetGroupId >= GroupIDAppUserMin) {
           stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
                       ".motion";
         } else {
@@ -150,7 +150,7 @@ void SystemState::startup() {
       if ((input->m_inputType == BinaryInputIDPresence) ||
           (input->m_inputType == BinaryInputIDPresenceInDarkness)) {
         std::string stateName;
-        if (input->m_targetGroupId >= 16) {
+        if (input->m_targetGroupId >= GroupIDAppUserMin) {
           stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
                       ".presence";
         } else {
@@ -163,7 +163,7 @@ void SystemState::startup() {
       // wind monitor
       if (input->m_inputType == BinaryInputIDWindDetector) {
         std::string stateName = "wind";
-        if (input->m_targetGroupId >= 16) {
+        if (input->m_targetGroupId >= GroupIDAppUserMin) {
           stateName = stateName + ".group" +
                       intToString(input->m_targetGroupId);
           getOrRegisterState(stateName);
@@ -173,7 +173,7 @@ void SystemState::startup() {
       // rain monitor
       if (input->m_inputType == BinaryInputIDRainDetector) {
         std::string stateName = "rain";
-        if (input->m_targetGroupId >= 16) {
+        if (input->m_targetGroupId >= GroupIDAppUserMin) {
           stateName = stateName + ".group" +
                       intToString(input->m_targetGroupId);
           getOrRegisterState(stateName);
@@ -189,10 +189,10 @@ void SystemState::startup() {
 
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
-          if (group->getStandardGroupID() == 2) {
-            registerState("wind.group" + intToString(group->getID()), true);
-          }
-          continue;
+        if (group->getStandardGroupID() == GroupIDGray) {
+          registerState("wind.group" + intToString(group->getID()), true);
+        }
+        continue;
       }
 
       if (group->getLastCalledScene() == SceneAbsent) {
@@ -610,7 +610,7 @@ void SystemState::stateBinaryinput() {
   // motion
   if ((devInput->m_inputType == BinaryInputIDMovement) ||
       (devInput->m_inputType == BinaryInputIDMovementInDarkness)) {
-    if (devInput->m_targetGroupId >= 16) {
+    if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       // create state for a user group if it does not exist (new group?)
       statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".motion";
     } else {
@@ -625,7 +625,7 @@ void SystemState::stateBinaryinput() {
   // presence
   if ((devInput->m_inputType == BinaryInputIDPresence) ||
       (devInput->m_inputType == BinaryInputIDPresenceInDarkness)) {
-    if (devInput->m_targetGroupId >= 16) {
+    if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       // create state for a user group if it does not exist (new group?)
       statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".presence";
     } else {
@@ -656,7 +656,7 @@ void SystemState::stateBinaryinput() {
   if (devInput->m_inputType == BinaryInputIDWindDetector) {
     statename = "wind";
     // create state for a user group if it does not exist (new group?)
-    if (devInput->m_targetGroupId >= 16) {
+    if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       statename = statename + ".group" + intToString(devInput->m_targetGroupId);
       getOrRegisterState(statename);
     }
@@ -668,7 +668,7 @@ void SystemState::stateBinaryinput() {
   if (devInput->m_inputType == BinaryInputIDRainDetector) {
     statename = "rain";
     // create state for a user group if it does not exist (new group?)
-    if (devInput->m_targetGroupId >= 16) {
+    if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       statename = statename + ".group" + intToString(devInput->m_targetGroupId);
       getOrRegisterState(statename);
     }
