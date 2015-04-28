@@ -26,6 +26,7 @@
 #include "base.h"
 #include "dss.h"
 #include "event/event_fields.h"
+#include "foreach.h"
 #include "logger.h"
 #include "model/zone.h"
 #include "model/group.h"
@@ -125,20 +126,13 @@ void SystemState::startup() {
   bool alarm = false;
   bool sleeping = false;
 
-  std::vector<boost::shared_ptr<Device> > devices =
-          m_apartment.getDevicesVector();
-
-  for (size_t i = 0; i < devices.size(); i++) {
-    boost::shared_ptr<Device> device = devices.at(i);
+  foreach (boost::shared_ptr<Device> device, m_apartment.getDevicesVector()) {
     if (device == NULL) {
       continue;
     }
 
-    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > bInputs =
-        device->getBinaryInputs();
-    for (size_t j = 0; j < bInputs.size(); j++) {
-      boost::shared_ptr<DeviceBinaryInput_t> input = bInputs.at(j);
-
+    foreach (boost::shared_ptr<DeviceBinaryInput_t> input,
+             device->getBinaryInputs()) {
       // motion
       if ((input->m_inputType == BinaryInputIDMovement) ||
           (input->m_inputType == BinaryInputIDMovementInDarkness)) {
@@ -188,16 +182,12 @@ void SystemState::startup() {
     } // per device binary inputs for loop
   } // devices for loop
 
-  std::vector<boost::shared_ptr<Zone> > zones = m_apartment.getZones();
-  for (size_t z = 0; z < zones.size(); z++) {
-    boost::shared_ptr<Zone> zone = zones.at(z);
+  foreach (boost::shared_ptr<Zone> zone, m_apartment.getZones()) {
     if ((zone == NULL) || (!zone->isPresent())) {
       continue;
     }
 
-    std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
-    for (size_t g = 0; g < groups.size(); g++) {
-      boost::shared_ptr<Group> group = groups.at(g);
+    foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
           if (group->getStandardGroupID() == 2) {
             registerState("wind.group" + intToString(group->getID()), true);
