@@ -189,10 +189,10 @@ void SystemState::startup() {
 
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
-          if (group->getStandardGroupID() == 2) {
-            registerState("wind.group" + intToString(group->getID()), true);
-          }
-          continue;
+        if (group->getStandardGroupID() == 2) {
+          registerState("wind.group" + intToString(group->getID()), true);
+        }
+        continue;
       }
 
       if (group->getLastCalledScene() == SceneAbsent) {
