@@ -48,6 +48,7 @@ libdsscore_a_SOURCES =  \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
+	../src/handler/system_handlers.cpp \
 	../src/handler/system_handlers.h \
 	../src/handler/system_states.cpp \
 	../src/handler/system_states.h \
