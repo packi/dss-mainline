@@ -41,6 +41,7 @@ namespace dss {
 
       std::string formatZoneName(const std::string &_name, int _zoneId);
       std::string formatGroupName(const std::string &_name, int _groupId);
+      std::string formatGroupName2(const std::string &_name, int _groupId);
 
       boost::shared_ptr<State> registerState(std::string _name,
                                              bool _persistent);

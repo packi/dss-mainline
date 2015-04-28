@@ -80,6 +80,12 @@ std::string SystemState::formatGroupName(const std::string &_name, int _groupId)
   return "zone.0.group." + intToString(_groupId) + "." + _name;;
 }
 
+/* TODO why was formatGroupName insufficient */
+std::string SystemState::formatGroupName2(const std::string &_name, int _groupId) {
+  assert(_groupId >= GroupIDAppUserMin);
+  return _name + ".group." + intToString(_groupId);
+}
+
 boost::shared_ptr<State> SystemState::registerState(std::string _name,
                                                     bool _persistent) {
   boost::shared_ptr<State> state =
@@ -180,21 +186,15 @@ void SystemState::startup() {
 
       // wind monitor
       if (input->m_inputType == BinaryInputIDWindDetector) {
-        std::string stateName = "wind";
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = stateName + ".group" +
-                      intToString(input->m_targetGroupId);
-          getOrRegisterState(stateName);
+          getOrRegisterState(formatGroupName2("wind", input->m_targetGroupId));
         }
       }
 
       // rain monitor
       if (input->m_inputType == BinaryInputIDRainDetector) {
-        std::string stateName = "rain";
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = stateName + ".group" +
-                      intToString(input->m_targetGroupId);
-          getOrRegisterState(stateName);
+          getOrRegisterState(formatGroupName2("rain", input->m_targetGroupId));
         }
       }
     } // per device binary inputs for loop
@@ -208,7 +208,7 @@ void SystemState::startup() {
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
         if (group->getStandardGroupID() == GroupIDGray) {
-          registerState("wind.group" + intToString(group->getID()), true);
+          registerState(formatGroupName2("wind", group->getID()), true);
         }
         continue;
       }
@@ -413,21 +413,21 @@ void SystemState::callscene() {
     if (groupId == 0) {
       state = getOrRegisterState("wind");
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("wind.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("wind", groupId));
     }
     state->setState(coSystem, State_Active);
   } else if (sceneId == SceneWindInactive) {
     if (groupId == 0) {
       state = getOrRegisterState("wind");
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("wind.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("wind", groupId));
     }
     state->setState(coSystem, State_Inactive);
   } else if (sceneId == SceneRainActive) {
     if (groupId == 0) {
       state = getOrRegisterState("rain");
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("rain.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("rain", groupId));
     }
     state->setState(coSystem, State_Active);
   } else if (sceneId == SceneRainInactive) {
@@ -435,12 +435,12 @@ void SystemState::callscene() {
       state = getOrRegisterState("rain");
       state->setState(coSystem, State_Inactive);
       for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
-        if (lookupState(state, "rain.group" + intToString(groupId))) {
+        if (lookupState(state, formatGroupName2("rain", groupId))) {
           state->setState(coSystem, State_Inactive);
         }
       }
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("rain.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("rain", groupId));
       state->setState(coSystem, State_Inactive);
     }
   }
@@ -641,8 +641,7 @@ void SystemState::stateBinaryinput() {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = "wind";
-      statename = statename + ".group" + intToString(devInput->m_targetGroupId);
+      statename = formatGroupName2("wind", devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
@@ -657,8 +656,7 @@ void SystemState::stateBinaryinput() {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = "rain";
-      statename = statename + ".group" + intToString(devInput->m_targetGroupId);
+      statename = formatGroupName2("rain", devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
