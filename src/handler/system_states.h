@@ -52,7 +52,7 @@ namespace dss {
       void startup();
       void callscene();
       void undoscene();
-      void stateBinaryInputGeneric(std::string stateName,
+      void stateBinaryInputGeneric(State &_state,
                                    int targetGroupType,
                                    int targetGroupId);
       void stateBinaryinput();

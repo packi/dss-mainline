@@ -505,13 +505,11 @@ void SystemState::undoscene() {
   }
 }
 
-void SystemState::stateBinaryInputGeneric(std::string stateName,
+void SystemState::stateBinaryInputGeneric(State &_state,
                                           int targetGroupType,
                                           int targetGroupId) {
   try {
-    boost::shared_ptr<State> state =
-      m_apartment.getState(StateType_Service, stateName);
-
+    std::string stateName = _state.getName();
     PropertyNodePtr pNode =
         DSS::getInstance()->getPropertySystem().getProperty(
             "/scripts/system_state/" + stateName + "." +
@@ -530,13 +528,13 @@ void SystemState::stateBinaryInputGeneric(std::string stateName,
       int iVal = strToIntDef(val, -1);
       if (iVal == 1) {
         pNode->setIntegerValue(pNode->getIntegerValue() + 1);
-        state->setState(coSystemBinaryInput, State_Active);
+        _state.setState(coSystemBinaryInput, State_Active);
       } else if (iVal == 2) {
         if (pNode->getIntegerValue() > 0) {
           pNode->setIntegerValue(pNode->getIntegerValue() - 1);
         }
         if (pNode->getIntegerValue() == 0) {
-          state->setState(coSystemBinaryInput, State_Inactive);
+          _state.setState(coSystemBinaryInput, State_Inactive);
         }
       }
     } // m_properties.has("value")
@@ -601,8 +599,8 @@ void SystemState::stateBinaryinput() {
       // set motion state in the zone the dsuid is logical attached to
       statename = "zone." + intToString(pDev->getZoneID()) + ".motion";
     }
-    getOrRegisterState(statename);
-    stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
+    boost::shared_ptr<State> state = getOrRegisterState(statename);
+    stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                             devInput->m_targetGroupId);
   }
 
@@ -616,8 +614,8 @@ void SystemState::stateBinaryinput() {
       // set presence state in the zone the dsuid is logical attached to
       statename = "zone." + intToString(pDev->getZoneID()) + ".presence";
     }
-    getOrRegisterState(statename);
-    stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
+    boost::shared_ptr<State> state = getOrRegisterState(statename);
+    stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                             devInput->m_targetGroupId);
   }
 
@@ -637,26 +635,34 @@ void SystemState::stateBinaryinput() {
 
   // wind monitor
   if (devInput->m_inputType == BinaryInputIDWindDetector) {
-    statename = "wind";
+    boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
+      statename = "wind";
       statename = statename + ".group" + intToString(devInput->m_targetGroupId);
-      getOrRegisterState(statename);
+      state = getOrRegisterState(statename);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
+    } else if (lookupState(state, "wind")) {
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
     }
-    stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
-                            devInput->m_targetGroupId);
   }
 
   // rain monitor
   if (devInput->m_inputType == BinaryInputIDRainDetector) {
-    statename = "rain";
+    boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
+      statename = "rain";
       statename = statename + ".group" + intToString(devInput->m_targetGroupId);
-      getOrRegisterState(statename);
+      state = getOrRegisterState(statename);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
+    } else if (lookupState(state, "rain")) {
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+                              devInput->m_targetGroupId);
     }
-    stateBinaryInputGeneric(statename, devInput->m_targetGroupType,
-                            devInput->m_targetGroupId);
   }
 
   // zone thermostat
