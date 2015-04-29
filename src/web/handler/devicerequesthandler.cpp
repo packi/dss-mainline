@@ -762,7 +762,7 @@ namespace dss {
         std::string type = _request.getParameter("type");
 
         // Supported output states for the BL-KM200
-        if ((pDevice->getProductID() == ProductID_KM_200) &&
+        if (((pDevice->getProductID() == ProductID_KM_200) || (pDevice->getProductID() == ProductID_SDS_200)) &&
             (pDevice->getDeviceClass() == DEVICE_CLASS_BL)) {
           if (type == "pwmPriorityMode") {
             value = pDevice->getDeviceConfig(CfgClassRuntime, CfgRuntime_Valve_PwmPriorityMode);
