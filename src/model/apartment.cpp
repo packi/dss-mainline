@@ -342,6 +342,13 @@ namespace dss {
       result->publishToPropertyTree();
       addDefaultGroupsToZone(result);
       m_Zones.push_back(result);
+
+      if (_zoneID == 0) {
+        for (int i = GroupIDAppUserMin; i <= GroupIDAppUserMax; ++i) {
+          boost::shared_ptr<Cluster> pCluster = boost::make_shared<Cluster>(i, boost::ref<Apartment>(*this));
+          result->addGroup(pCluster);
+        }
+      }
     } else {
       result->publishToPropertyTree();
     }
