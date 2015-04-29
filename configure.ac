@@ -374,9 +374,6 @@ PKG_CHECK_MODULES([AVAHI], [avahi-client],
 
 MT_CHECK_REQUIRED_PACKAGE([librrd], [rrd], [rrd], [rrd_create_r], [-lrrd_th])
 
-MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
-                          [dsm-api-v2], [DsmApiOpen], [-lds485-client])
-
 MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
 PKG_CHECK_MODULES([JSONC], [json-c], [],
@@ -465,6 +462,9 @@ PKG_CHECK_MODULES([LIBDSUID], [libdsuid], [],
         echo
         AC_MSG_ERROR([$LIBDSUID_PKG_ERRORS])
     ])
+
+MT_CHECK_REQUIRED_PACKAGE([libdsm-api], [digitalSTROM/dsm-api-v2/dsm-api],
+                          [dsm-api-v2], [DsmApiOpen], [-lds485-client -ldsuid])
 
 PKG_CHECK_MODULES([OSSP_UUID], [ossp-uuid], [],
     [
