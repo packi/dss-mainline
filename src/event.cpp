@@ -54,32 +54,6 @@ using std::set;
 namespace dss {
   const std::string empty_string("");
 
-  namespace EventName {
-    const std::string CallScene = "callScene";
-    const std::string CallSceneBus = "callSceneBus";
-    const std::string DeviceSensorValue = "deviceSensorValue";
-    const std::string DeviceStatus = "deviceStatusEvent";
-    const std::string DeviceInvalidSensor = "deviceInvalidSensor";
-    const std::string DeviceBinaryInputEvent = "deviceBinaryInputEvent";
-    const std::string ExecutionDenied = "executionDenied";
-    const std::string Running = "running";
-    const std::string UndoScene = "undoScene";
-    const std::string ZoneSensorValue = "zoneSensorValue";
-    const std::string ZoneSensorError = "zoneSensorError";
-    const std::string StateChange = "stateChange";
-    const std::string AddonStateChange = "addonStateChange";
-    const std::string HeatingEnabled = "HeatingEnabled";
-    const std::string HeatingControllerSetup = "HeatingControllerSetup";
-    const std::string HeatingControllerValue = "HeatingControllerValue";
-    const std::string HeatingControllerValueDsHub = "HeatingControllerValueDsHub";
-    const std::string HeatingControllerState = "HeatingControllerState";
-    const std::string OldStateChange = "oldStateChange";
-    const std::string AddonToCloud = "AddonToCloud";
-    const std::string HeatingValveProtection = "execute_valve_protection";
-    const std::string DeviceHeatingTypeChanged = "DeviceHeatingTypeChanged";
-    const std::string LogFileData = "logFileData";
-  }
-
   namespace EventProperty {
     const char* Name = "name";
     const char* Location = "location";
