@@ -443,6 +443,14 @@ namespace dss {
                         EVENT_GENERIC, 0,
                         &callback_struct, NULL);
 
+      ZoneGroupActionRequest_action_extra_command_request_callback_t actionRequestExtraCmd = DSBusInterface::handleActionRequestExtraCmdCallback;
+      callback_struct.function = reinterpret_cast<void *>(actionRequestExtraCmd);
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        ZONE_GROUP_ACTION_REQUEST,
+                        ZONE_GROUP_ACTION_REQUEST_ACTION_EXTRA_COMMAND,
+                        &callback_struct, NULL);
+
       m_dsmApiReady = true;
     }
   }
@@ -1210,4 +1218,24 @@ namespace dss {
     }
   } // handleHeatingControllerStateEventCallback
 
+  void DSBusInterface::handleActionRequestExtraCmd(const dsuid_t &_sourceId,
+                                                   const dsuid_t &_destinationId,
+                                                   uint16_t _zoneId,
+                                                   uint8_t _groupId,
+                                                   uint16_t _originDeviceId,
+                                                   uint8_t _command) {
+  }
+
+  void DSBusInterface::handleActionRequestExtraCmdCallback(uint8_t _error_code,
+                                                           void *_arg,
+                                                           dsuid_t _sourceId,
+                                                           dsuid_t _destinationId,
+                                                           uint16_t _zoneId,
+                                                           uint8_t _groupId,
+                                                           uint16_t _originDeviceId,
+                                                           uint8_t _command) {
+      static_cast<DSBusInterface*>(_arg)
+          ->handleActionRequestExtraCmd(_sourceId, _destinationId, _zoneId,
+                                        _groupId, _originDeviceId, _command);
+  }
 } // namespace dss

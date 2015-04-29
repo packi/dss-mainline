@@ -286,6 +286,20 @@ namespace dss {
                                                   dsuid_t _destinationID,
                                                   uint8_t _clusterID,
                                                   const uint8_t _lockedScenes[]);
+    void handleActionRequestExtraCmd(const dsuid_t &_sourceId,
+                                     const dsuid_t &_destinationId,
+                                     uint16_t _zoneId,
+                                     uint8_t _groupId,
+                                     uint16_t _originDeviceId,
+                                     uint8_t _command);
+    static void handleActionRequestExtraCmdCallback(uint8_t _error_code,
+                                                    void *_arg,
+                                                    dsuid_t _sourceId,
+                                                    dsuid_t _destinationId,
+                                                    uint16_t _zoneId,
+                                                    uint8_t _groupId,
+                                                    uint16_t _originDeviceId,
+                                                    uint8_t _command);
 
     void handleGenericEvent(uint8_t _errorCode, dsuid_t _sourceID, dsuid_t _destinationID,
                             uint16_t _EventType, uint8_t _PayloadLength, const uint8_t _Payload[]);
