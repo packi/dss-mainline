@@ -329,7 +329,7 @@ BOOST_FIXTURE_TEST_CASE(testGetReturnsIfConnectionIsInterrupted, Fixture) {
   response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
   testOkIs(response, true);
   DateTime reqEnded;
-  BOOST_CHECK(reqEnded.difference(reqStarted) <= 2);
+  BOOST_CHECK_SMALL(reqEnded.difference(reqStarted), 3);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetDoesntReturnIfConnectionIsNotInterrupted, Fixture) {
@@ -348,7 +348,7 @@ BOOST_FIXTURE_TEST_CASE(testGetDoesntReturnIfConnectionIsNotInterrupted, Fixture
   response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
   testOkIs(response, true);
   DateTime reqEnded;
-  BOOST_CHECK(reqEnded.difference(reqStarted) <= 1);
+  BOOST_CHECK_SMALL(reqEnded.difference(reqStarted), 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
