@@ -2215,15 +2215,6 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
-        entry->createProperty("pollinterval")
-                ->linkToProxy(PropertyProxyReference<uint32_t>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
-        entry->createProperty("conversion")
-                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorPushConversionFlag));
-        entry->createProperty("broadcast")
-                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorBroadcastFlag));
-        entry->createProperty("valid")
-                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorValueValidity));
-
       }
 
       m_sensorInputCount ++;
