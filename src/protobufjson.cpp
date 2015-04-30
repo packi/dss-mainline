@@ -113,7 +113,7 @@ namespace dss {
       processGenericResponse(_message.generic_response(), _writer);
       break;
     default:
-      Logger::getInstance()->log("can not process protobuf message of type: " + _message.type(), lsWarning);
+      Logger::getInstance()->log("can not process protobuf message of type: " + intToString(_message.type()), lsWarning);
       return false;
     }
     return true;
