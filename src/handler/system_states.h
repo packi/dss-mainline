@@ -39,6 +39,13 @@ namespace dss {
       boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
       boost::shared_ptr<const State> m_raisedAtState;
 
+      std::string formatZoneName(const std::string &_name, int _zoneId);
+      std::string formatGroupName(const std::string &_name, int _groupId);
+      std::string formatGroupName2(const std::string &_name, int _groupId);
+
+      void callScene(int _zoneId, int _groupId, int _sceneId, callOrigin_t _origin);
+      void undoScene(int _zoneId, int _groupId, int _sceneId, callOrigin_t _origin);
+
       boost::shared_ptr<State> registerState(std::string _name,
                                              bool _persistent);
       boost::shared_ptr<State> getOrRegisterState(std::string _name);

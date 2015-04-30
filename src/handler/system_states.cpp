@@ -70,6 +70,22 @@ SystemState::SystemState() : SystemEvent(), m_evtRaiseLocation(erlState),
 SystemState::~SystemState() {
 }
 
+std::string SystemState::formatZoneName(const std::string &_name, int _zoneId) {
+  // set state in the zone the dsuid is logically attached
+  return "zone." + intToString(_zoneId) + "." + _name;
+}
+
+std::string SystemState::formatGroupName(const std::string &_name, int _groupId) {
+  assert(_groupId >= GroupIDAppUserMin);
+  return "zone.0.group." + intToString(_groupId) + "." + _name;;
+}
+
+/* TODO why was formatGroupName insufficient */
+std::string SystemState::formatGroupName2(const std::string &_name, int _groupId) {
+  assert(_groupId >= GroupIDAppUserMin);
+  return _name + ".group." + intToString(_groupId);
+}
+
 boost::shared_ptr<State> SystemState::registerState(std::string _name,
                                                     bool _persistent) {
   boost::shared_ptr<State> state =
@@ -95,6 +111,26 @@ bool SystemState::lookupState(boost::shared_ptr<State> &_state,
   } catch (ItemNotFoundException &ex) {
     return false;
   }
+}
+
+void SystemState::callScene(int _zoneId, int _groupId, int _sceneId,
+                            callOrigin_t _origin)
+{
+  try {
+    boost::shared_ptr<Zone> z = m_apartment.getZone(_zoneId);
+    boost::shared_ptr<Group> g = z->getGroup(_groupId);
+    g->callScene(_origin, SAC_MANUAL, _sceneId, "", false);
+  } catch (ItemNotFoundException &ex) {}
+}
+
+void SystemState::undoScene(int _zoneId, int _groupId, int _sceneId,
+                            callOrigin_t _origin)
+{
+  try {
+    boost::shared_ptr<Zone> z = m_apartment.getZone(_zoneId);
+    boost::shared_ptr<Group> g = z->getGroup(_groupId);
+    g->undoScene(_origin, SAC_MANUAL, _sceneId, "");
+  } catch (ItemNotFoundException &ex) {}
 }
 
 void SystemState::bootstrap() {
@@ -149,10 +185,9 @@ void SystemState::startup() {
           (input->m_inputType == BinaryInputIDMovementInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
-                      ".motion";
+          stateName = formatGroupName("motion", input->m_targetGroupId);
         } else {
-          stateName = "zone." + intToString(device->getZoneID()) + ".motion";
+          stateName = formatZoneName("motion", device->getZoneID());
         }
         getOrRegisterState(stateName);
       }
@@ -162,32 +197,24 @@ void SystemState::startup() {
           (input->m_inputType == BinaryInputIDPresenceInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
-                      ".presence";
+          stateName = formatGroupName("presence", input->m_targetGroupId);
         } else {
-          stateName = "zone." + intToString(device->getZoneID()) +
-                      ".presence";
+          stateName = formatZoneName("presence", device->getZoneID());
         }
         getOrRegisterState(stateName);
       }
 
       // wind monitor
       if (input->m_inputType == BinaryInputIDWindDetector) {
-        std::string stateName = "wind";
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = stateName + ".group" +
-                      intToString(input->m_targetGroupId);
-          getOrRegisterState(stateName);
+          getOrRegisterState(formatGroupName2("wind", input->m_targetGroupId));
         }
       }
 
       // rain monitor
       if (input->m_inputType == BinaryInputIDRainDetector) {
-        std::string stateName = "rain";
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = stateName + ".group" +
-                      intToString(input->m_targetGroupId);
-          getOrRegisterState(stateName);
+          getOrRegisterState(formatGroupName2("rain", input->m_targetGroupId));
         }
       }
     } // per device binary inputs for loop
@@ -201,7 +228,7 @@ void SystemState::startup() {
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
         if (group->getStandardGroupID() == GroupIDGray) {
-          registerState("wind.group" + intToString(group->getID()), true);
+          registerState(formatGroupName2("wind", group->getID()), true);
         }
         continue;
       }
@@ -346,24 +373,12 @@ void SystemState::callscene() {
     // #2561: auto-clear panic and fire
     if (lookupState(state, "panic")) {
       if (state->getState() == State_Active) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
-          }
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, ScenePanic, coSystem);
       }
     }
     if (lookupState(state, "fire")) {
       if (state->getState() == State_Active) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
-          }
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, SceneFire, coSystem);
       }
     }
   } else if ((groupId == 0) && (sceneId == ScenePresent)) {
@@ -406,21 +421,21 @@ void SystemState::callscene() {
     if (groupId == 0) {
       state = getOrRegisterState("wind");
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("wind.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("wind", groupId));
     }
     state->setState(coSystem, State_Active);
   } else if (sceneId == SceneWindInactive) {
     if (groupId == 0) {
       state = getOrRegisterState("wind");
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("wind.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("wind", groupId));
     }
     state->setState(coSystem, State_Inactive);
   } else if (sceneId == SceneRainActive) {
     if (groupId == 0) {
       state = getOrRegisterState("rain");
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("rain.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("rain", groupId));
     }
     state->setState(coSystem, State_Active);
   } else if (sceneId == SceneRainInactive) {
@@ -428,12 +443,12 @@ void SystemState::callscene() {
       state = getOrRegisterState("rain");
       state->setState(coSystem, State_Inactive);
       for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
-        if (lookupState(state, "rain.group" + intToString(groupId))) {
+        if (lookupState(state, formatGroupName2("rain", groupId))) {
           state->setState(coSystem, State_Inactive);
         }
       }
     } else if (isAppUserGroup(groupId)) {
-      state = getOrRegisterState("rain.group" + intToString(groupId));
+      state = getOrRegisterState(formatGroupName2("rain", groupId));
       state->setState(coSystem, State_Inactive);
     }
   }
@@ -459,13 +474,7 @@ void SystemState::undoscene() {
     if (lookupState(state, "fire")) {
       if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi) &&
           (state->getState() == State_Active)) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
-          }
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, SceneFire, coSystem);
       } // valid dSID && dSM API origin && state == active
     }
   } else if ((groupId == 0) && (sceneId == SceneFire)) {
@@ -477,13 +486,7 @@ void SystemState::undoscene() {
     if (lookupState(state, "panic")) {
       if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi)
           && (state->getState() == State_Active)) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          if (z != NULL) {
-            boost::shared_ptr<Group> g = z->getGroup(0);
-            g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
-          }
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, ScenePanic, coSystem);
       } // valid dSID && dSM API origin && state == active
     }
   } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
@@ -593,11 +596,9 @@ void SystemState::stateBinaryinput() {
   if ((devInput->m_inputType == BinaryInputIDMovement) ||
       (devInput->m_inputType == BinaryInputIDMovementInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      // create state for a user group if it does not exist (new group?)
-      statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".motion";
+      statename = formatGroupName("motion", devInput->m_targetGroupId);
     } else {
-      // set motion state in the zone the dsuid is logical attached to
-      statename = "zone." + intToString(pDev->getZoneID()) + ".motion";
+      statename = formatZoneName("motion", pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
     stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -608,11 +609,9 @@ void SystemState::stateBinaryinput() {
   if ((devInput->m_inputType == BinaryInputIDPresence) ||
       (devInput->m_inputType == BinaryInputIDPresenceInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      // create state for a user group if it does not exist (new group?)
-      statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".presence";
+      statename = formatGroupName("presence", devInput->m_targetGroupId);
     } else {
-      // set presence state in the zone the dsuid is logical attached to
-      statename = "zone." + intToString(pDev->getZoneID()) + ".presence";
+      statename = formatZoneName("presence", pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
     stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -638,8 +637,7 @@ void SystemState::stateBinaryinput() {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = "wind";
-      statename = statename + ".group" + intToString(devInput->m_targetGroupId);
+      statename = formatGroupName2("wind", devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
@@ -654,8 +652,7 @@ void SystemState::stateBinaryinput() {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = "rain";
-      statename = statename + ".group" + intToString(devInput->m_targetGroupId);
+      statename = formatGroupName2("rain", devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
@@ -667,9 +664,6 @@ void SystemState::stateBinaryinput() {
 
   // zone thermostat
   if (devInput->m_inputType == BinaryInputIDRoomThermostat) {
-    int zone = pDev->getZoneID();
-    boost::shared_ptr<Zone> pZone = m_apartment.getZone(zone);
-    boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDHeating);
     if (m_properties.has("value")) {
       std::string val = m_properties.get("value");
       int iVal = strToIntDef(val, -1);
@@ -677,7 +671,7 @@ void SystemState::stateBinaryinput() {
       if (iVal == 1) {
         sceneID = Scene1;
       }
-      pGroup->callScene(coSystemBinaryInput, SAC_MANUAL, sceneID, "", false);
+      callScene(pDev->getZoneID(), GroupIDHeating, sceneID, coSystemBinaryInput);
     }
   }
 }
@@ -705,7 +699,6 @@ void SystemState::stateApartment() {
     std::string id = statename.substr(groupName + 6);
     groupId = strToIntDef(id, 0);
   }
-  boost::shared_ptr<Zone> z = m_apartment.getZone(0);
 
   if (callOrigin == coSystem) {
     // ignore state change originated by server generated system level events,
@@ -721,32 +714,23 @@ void SystemState::stateApartment() {
 
   if (statename == "fire") {
     if (iVal == 1) {
-      boost::shared_ptr<Group> g = z->getGroup(0);
-      if (g != NULL) {
-        g->callScene(coSystem, SAC_MANUAL, SceneFire, "", false);
-      }
+      callScene(0, 0, SceneFire, coSystem);
     }
   }
 
   if (statename.substr(0, 4) == "rain") {
-    boost::shared_ptr<Group> g = z->getGroup(groupId);
-    if (g != NULL) {
-      if (iVal == 1) {
-        g->callScene(coSystem, SAC_MANUAL, SceneRainActive, "", false);
-      } else if (iVal == 2) {
-        g->callScene(coSystem, SAC_MANUAL, SceneRainInactive, "", false);
-      }
+    if (iVal == 1) {
+      callScene(0, groupId, SceneRainActive, coSystem);
+    } else if (iVal == 2) {
+      callScene(0, groupId, SceneRainInactive, coSystem);
     }
   }
 
   if (statename.substr(0, 4) == "wind") {
-    boost::shared_ptr<Group> g = z->getGroup(groupId);
-    if (g != NULL) {
-      if (iVal == 1) {
-        g->callScene(coSystem, SAC_MANUAL, SceneWindActive, "", false);
-      } else if (iVal == 2) {
-        g->callScene(coSystem, SAC_MANUAL, SceneWindInactive, "", false);
-      }
+    if (iVal == 1) {
+      callScene(0, groupId, SceneWindActive, coSystem);
+    } else if (iVal == 2) {
+      callScene(0, groupId, SceneWindInactive, coSystem);
     }
   }
 }
