@@ -628,6 +628,16 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_RT_TKM2, MF_ARRAY_SIZE(MF_RT_TKM2));
+  setFeatures(ColorIDRed, TKM2, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_RT_SDM2, MF_ARRAY_SIZE(MF_RT_SDM2));
+  setFeatures(ColorIDRed, SDM2, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_GR_KL220, MF_ARRAY_SIZE(MF_GR_KL220));
   setFeatures(ColorIDGray, KL220, fv);
   fv.reset();
