@@ -70,6 +70,16 @@ SystemState::SystemState() : SystemEvent(), m_evtRaiseLocation(erlState),
 SystemState::~SystemState() {
 }
 
+std::string SystemState::formatZoneName(const std::string &_name, int _zoneId) {
+  // set state in the zone the dsuid is logically attached
+  return "zone." + intToString(_zoneId) + "." + _name;
+}
+
+std::string SystemState::formatGroupName(const std::string &_name, int _groupId) {
+  assert(_groupId >= GroupIDAppUserMin);
+  return "zone.0.group." + intToString(_groupId) + "." + _name;;
+}
+
 boost::shared_ptr<State> SystemState::registerState(std::string _name,
                                                     bool _persistent) {
   boost::shared_ptr<State> state =
@@ -149,10 +159,9 @@ void SystemState::startup() {
           (input->m_inputType == BinaryInputIDMovementInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
-                      ".motion";
+          stateName = formatGroupName("motion", input->m_targetGroupId);
         } else {
-          stateName = "zone." + intToString(device->getZoneID()) + ".motion";
+          stateName = formatZoneName("motion", device->getZoneID());
         }
         getOrRegisterState(stateName);
       }
@@ -162,11 +171,9 @@ void SystemState::startup() {
           (input->m_inputType == BinaryInputIDPresenceInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = "zone.0.group." + intToString(input->m_targetGroupId) +
-                      ".presence";
+          stateName = formatGroupName("presence", input->m_targetGroupId);
         } else {
-          stateName = "zone." + intToString(device->getZoneID()) +
-                      ".presence";
+          stateName = formatZoneName("presence", device->getZoneID());
         }
         getOrRegisterState(stateName);
       }
@@ -593,11 +600,9 @@ void SystemState::stateBinaryinput() {
   if ((devInput->m_inputType == BinaryInputIDMovement) ||
       (devInput->m_inputType == BinaryInputIDMovementInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      // create state for a user group if it does not exist (new group?)
-      statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".motion";
+      statename = formatGroupName("motion", devInput->m_targetGroupId);
     } else {
-      // set motion state in the zone the dsuid is logical attached to
-      statename = "zone." + intToString(pDev->getZoneID()) + ".motion";
+      statename = formatZoneName("motion", pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
     stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -608,11 +613,9 @@ void SystemState::stateBinaryinput() {
   if ((devInput->m_inputType == BinaryInputIDPresence) ||
       (devInput->m_inputType == BinaryInputIDPresenceInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      // create state for a user group if it does not exist (new group?)
-      statename = "zone.0.group." + intToString(devInput->m_targetGroupId) + ".presence";
+      statename = formatGroupName("presence", devInput->m_targetGroupId);
     } else {
-      // set presence state in the zone the dsuid is logical attached to
-      statename = "zone." + intToString(pDev->getZoneID()) + ".presence";
+      statename = formatZoneName("presence", pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
     stateBinaryInputGeneric(*state, devInput->m_targetGroupType,

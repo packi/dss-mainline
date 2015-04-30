@@ -39,6 +39,9 @@ namespace dss {
       boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
       boost::shared_ptr<const State> m_raisedAtState;
 
+      std::string formatZoneName(const std::string &_name, int _zoneId);
+      std::string formatGroupName(const std::string &_name, int _groupId);
+
       boost::shared_ptr<State> registerState(std::string _name,
                                              bool _persistent);
       boost::shared_ptr<State> getOrRegisterState(std::string _name);
