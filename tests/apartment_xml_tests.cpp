@@ -107,6 +107,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
     "      <protectionClass>2</protectionClass>\n"
     "      <floor>1</floor>\n"
     "      <configurationLocked>0</configurationLocked>\n"
+    "      <automatic>1</automatic>\n"
     "      <lockedScenes>\n"
     "        <lockedScene id=\"5\" />\n"
     "        <lockedScene id=\"17\" />\n"
@@ -169,6 +170,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   BOOST_CHECK_EQUAL(pClust->getFloor(), 1);
   BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
   BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), false);
+  BOOST_CHECK_EQUAL(pClust->isAutomatic(), true);
   BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 4);
 
   boost::filesystem::remove_all(fileName);
@@ -241,6 +243,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
     pCluster->setProtectionClass(wpc_class_3);
     pCluster->setFloor(13);
     pCluster->setConfigurationLocked(true);
+    pCluster->setAutomatic(true);
     std::vector<int> scenes;
     scenes.push_back(5);
     scenes.push_back(43);
@@ -264,6 +267,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_class_3);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 13);
   BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), true);
+  BOOST_CHECK_EQUAL(pClust->isAutomatic(), true);
   BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 3);
 
   unlink(filename.c_str());
