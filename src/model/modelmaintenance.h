@@ -235,6 +235,8 @@ namespace dss {
     void onClusterConfigLock(const int _clusterID, const bool _configurationLock);
     void onClusterLockedScenes(const int _clusterID, const std::vector<int> &_lockedScenes);
 
+    void onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload);
+
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);

@@ -22,6 +22,7 @@
 #define __MODEL_DATA_TYPES__
 
 #include <string>
+#include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 
 namespace dss {
 
@@ -54,6 +55,19 @@ namespace dss {
 
   bool valid(WindProtectionClass_t _class);
   bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out);
+
+  typedef enum {
+    ge_none = 0,
+    ge_sun = 1,
+    ge_frost = 2,
+    ge_heating_mode = 3,
+  } GenericEventType_t;
+
+  typedef struct {
+    int length;
+    unsigned char payload[PAYLOAD_LEN];
+  } GenericEventPayload_t;
+
 }
 
 #endif

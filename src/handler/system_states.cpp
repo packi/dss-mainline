@@ -39,6 +39,12 @@
 
 namespace dss {
 
+namespace SystemStateName {
+  const std::string Sun = "sun";
+  const std::string Frost = "frost";
+  const std::string HeatingMode = "heating_mode";
+}
+
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
 : EventInterpreterPlugin("system_state", _pInterpreter)
 { }
@@ -165,6 +171,16 @@ void SystemState::bootstrap() {
   registerState("fire", true);
   registerState("wind", true);
   registerState("rain", true);
+
+  registerState(SystemStateName::Sun, true);
+  registerState(SystemStateName::Frost, true);
+  state = registerState(SystemStateName::HeatingMode, true);
+  State::ValueRange_t heatingModeValues;
+  heatingModeValues.push_back("off");
+  heatingModeValues.push_back("heating");
+  heatingModeValues.push_back("cooling");
+  heatingModeValues.push_back("auto");
+  state->setValueRange(heatingModeValues);
 }
 
 void SystemState::startup() {
