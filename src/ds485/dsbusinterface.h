@@ -287,6 +287,12 @@ namespace dss {
                                                   uint8_t _clusterID,
                                                   const uint8_t _lockedScenes[]);
 
+    void handleGenericEvent(uint8_t _errorCode, dsuid_t _sourceID, dsuid_t _destinationID,
+                            uint16_t _EventType, uint8_t _PayloadLength, const uint8_t _Payload[]);
+    static void handleGenericEventCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
+                                           dsuid_t _destinationID, uint16_t _EventType,
+                                           uint8_t _PayloadLength, const uint8_t _Payload[]);
+
   protected:
     virtual void doStart();
   public:

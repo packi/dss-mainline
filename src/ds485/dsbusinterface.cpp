@@ -27,6 +27,7 @@
 
 #include "dsbusinterface.h"
 
+#include <algorithm>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -433,6 +434,13 @@ namespace dss {
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         CLUSTER_PROPERTIES, CLUSTER_PROPERTIES_SET_SCENE_LOCK,
+                        &callback_struct, NULL);
+
+      EventGeneric_request_callback_t genericEventCallback = DSBusInterface::handleGenericEventCallback;
+      callback_struct.function = (void*)genericEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        EVENT_GENERIC, 0,
                         &callback_struct, NULL);
 
       m_dsmApiReady = true;
@@ -1167,5 +1175,39 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleClusterSetSceneLock(_clusterID,
                                                                        _lockedScenes);
   } // handleClusterSetConfigrationLockCallback
+
+  void DSBusInterface::handleGenericEvent(uint8_t _errorCode,
+                                          dsuid_t _sourceID, dsuid_t _destinationID,
+                                          uint16_t _EventType, uint8_t _PayloadLength,
+                                          const uint8_t _Payload[]) {
+    loginFromCallback();
+
+    if (_PayloadLength > PAYLOAD_LEN) {
+      log("Payload of GenericEvent exceeded allowed size.", lsWarning);
+      return;
+    }
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etGenericEvent, _sourceID);
+    pEvent->addParameter(_EventType);
+
+    boost::shared_ptr<GenericEventPayload_t> pPayload = boost::make_shared<GenericEventPayload_t>();
+    pPayload->length = _PayloadLength;
+    memcpy(pPayload->payload, _Payload, std::min(static_cast<unsigned long>(_PayloadLength),
+                                                 sizeof(pPayload->payload)));
+
+    pEvent->setSingleObjectParameter(pPayload);
+
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleHeatingControllerStateEvent
+
+  void DSBusInterface::handleGenericEventCallback(uint8_t _errorCode, void *_userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _EventType, uint8_t _PayloadLength, const uint8_t _Payload[]) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleGenericEvent(_errorCode, _sourceID, _destinationID,
+                             _EventType, _PayloadLength, _Payload);
+    }
+  } // handleHeatingControllerStateEventCallback
 
 } // namespace dss

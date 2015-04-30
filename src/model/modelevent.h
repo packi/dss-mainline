@@ -67,6 +67,7 @@ namespace dss {
                     etModelOperationModeChanged, /**< A parameter that will be stored in \c apartment.xml has been changed, but the cloud service should not be informed about it */
                     etClusterConfigLock, /** config lock of a cluster was changed */
                     etClusterLockedScenes, /** locked scenes of a cluster was changed */
+                    etGenericEvent, /** generic event for dSS/dSG communication */
                  } EventType;
   private:
     EventType m_EventType;
