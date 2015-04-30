@@ -26,6 +26,7 @@
   #include "config.h"
 #endif
 
+#include <boost/make_shared.hpp>
 
 #include "modelmaintenance.h"
 
@@ -64,6 +65,7 @@
 #include "util.h"
 #include "vdc-connection.h"
 #include "model-features.h"
+#include "handler/system_states.h"
 
 namespace dss {
 
@@ -690,6 +692,10 @@ namespace dss {
       onClusterLockedScenes(event->getParameter(0), pLockedScenes);
       break;
     }
+    case ModelEvent::etGenericEvent:
+      onGenericEvent(static_cast<GenericEventType_t>(event->getParameter(0)),
+                     boost::static_pointer_cast<GenericEventPayload_t>(event->getSingleObjectParameter()));
+      break;
     default:
       assert(false);
       break;
@@ -1995,6 +2001,37 @@ namespace dss {
       log(std::string("Error on cluster locked scenes change, cluster not found: ") + e.what(), lsWarning);
     }
   } // onClusterConfigLock
+
+  void ModelMaintenance::onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload) {
+    switch (_eventType) {
+      case ge_sun:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Sun);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
+      case ge_frost:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Frost);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
+      case ge_heating_mode:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::HeatingMode);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  } // onGenericEvent
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

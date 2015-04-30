@@ -25,6 +25,13 @@
 #include "model/deviceinterface.h"
 
 namespace dss {
+
+  namespace SystemStateName {
+    extern const std::string Sun;
+    extern const std::string Frost;
+    extern const std::string HeatingMode;
+  }
+
   class SystemState : public SystemEvent {
     public:
       SystemState();
