@@ -67,7 +67,6 @@ namespace dss {
       bool boolean;
       double floating;
     } actualValue;
-    int PropertyLevel;
   } aPropertyValue;
 
   std::string getBasePath(const std::string& _path);
