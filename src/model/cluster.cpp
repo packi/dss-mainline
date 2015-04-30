@@ -42,7 +42,8 @@ namespace dss {
     m_ProtectionClass(wpc_none),
     m_Floor(0),
     m_ConfigurationLocked(false),
-    m_readFromDsm(false)
+    m_readFromDsm(false),
+    m_automatic(false)
   {
   } // ctor
 
@@ -72,6 +73,8 @@ namespace dss {
             ->linkToProxy(PropertyProxyReference<int>(m_Floor, false));
       m_pPropertyNode->createProperty("ConfigurationLocked")
             ->linkToProxy(PropertyProxyReference<bool>(m_ConfigurationLocked, false));
+      m_pPropertyNode->createProperty("Automatic")
+            ->linkToProxy(PropertyProxyReference<bool>(m_automatic, false));
       updateLockedScenes();
     }
   } // publishToPropertyTree

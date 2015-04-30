@@ -661,7 +661,8 @@ namespace dss {
                (strcmp(_name, "location") == 0) ||
                (strcmp(_name, "protectionClass") == 0) ||
                (strcmp(_name, "floor") == 0) ||
-               (strcmp(_name, "configurationLocked") == 0))) {
+               (strcmp(_name, "configurationLocked") == 0) ||
+               (strcmp(_name, "automatic") == 0))) {
             m_expectString = true;
         } else if ((m_state == ps_cluster) &&
             (strcmp(_name, "lockedScenes") == 0)) {
@@ -798,6 +799,13 @@ namespace dss {
                   isConfigurationLocked = p > 0;
                 } catch (std::invalid_argument&) {}
                 m_tempCluster->setConfigurationLocked(isConfigurationLocked);
+              } else if (strcmp(_name, "automatic") == 0) {
+                bool isAutomatic = false;
+                try {
+                  int p = strToUInt(m_chardata);
+                  isAutomatic = p > 0;
+                } catch (std::invalid_argument&) {}
+                m_tempCluster->setAutomatic(isAutomatic);
               }
             }
           }
@@ -992,6 +1000,7 @@ namespace dss {
     addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(static_cast<int>(_pCluster->getProtectionClass())));
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
     addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
+    addElementSimple(_ofs, _indent + 1, "automatic", (_pCluster->isAutomatic() ? "1" : "0"));
     _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
     const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
     for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {
