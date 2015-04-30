@@ -113,6 +113,26 @@ bool SystemState::lookupState(boost::shared_ptr<State> &_state,
   }
 }
 
+void SystemState::callScene(int _zoneId, int _groupId, int _sceneId,
+                            callOrigin_t _origin)
+{
+  try {
+    boost::shared_ptr<Zone> z = m_apartment.getZone(_zoneId);
+    boost::shared_ptr<Group> g = z->getGroup(_groupId);
+    g->callScene(_origin, SAC_MANUAL, _sceneId, "", false);
+  } catch (ItemNotFoundException &ex) {}
+}
+
+void SystemState::undoScene(int _zoneId, int _groupId, int _sceneId,
+                            callOrigin_t _origin)
+{
+  try {
+    boost::shared_ptr<Zone> z = m_apartment.getZone(_zoneId);
+    boost::shared_ptr<Group> g = z->getGroup(_groupId);
+    g->undoScene(_origin, SAC_MANUAL, _sceneId, "");
+  } catch (ItemNotFoundException &ex) {}
+}
+
 void SystemState::bootstrap() {
   boost::shared_ptr<State> state;
 
@@ -353,20 +373,12 @@ void SystemState::callscene() {
     // #2561: auto-clear panic and fire
     if (lookupState(state, "panic")) {
       if (state->getState() == State_Active) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          boost::shared_ptr<Group> g = z->getGroup(0);
-          g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, ScenePanic, coSystem);
       }
     }
     if (lookupState(state, "fire")) {
       if (state->getState() == State_Active) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          boost::shared_ptr<Group> g = z->getGroup(0);
-          g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, SceneFire, coSystem);
       }
     }
   } else if ((groupId == 0) && (sceneId == ScenePresent)) {
@@ -462,11 +474,7 @@ void SystemState::undoscene() {
     if (lookupState(state, "fire")) {
       if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi) &&
           (state->getState() == State_Active)) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          boost::shared_ptr<Group> g = z->getGroup(0);
-          g->undoScene(coSystem, SAC_MANUAL, SceneFire, "");
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, SceneFire, coSystem);
       } // valid dSID && dSM API origin && state == active
     }
   } else if ((groupId == 0) && (sceneId == SceneFire)) {
@@ -478,11 +486,7 @@ void SystemState::undoscene() {
     if (lookupState(state, "panic")) {
       if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi)
           && (state->getState() == State_Active)) {
-        try {
-          boost::shared_ptr<Zone> z = m_apartment.getZone(0);
-          boost::shared_ptr<Group> g = z->getGroup(0);
-          g->undoScene(coSystem, SAC_MANUAL, ScenePanic, "");
-        } catch (ItemNotFoundException &ex) {}
+        undoScene(0, 0, ScenePanic, coSystem);
       } // valid dSID && dSM API origin && state == active
     }
   } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
@@ -660,9 +664,6 @@ void SystemState::stateBinaryinput() {
 
   // zone thermostat
   if (devInput->m_inputType == BinaryInputIDRoomThermostat) {
-    int zone = pDev->getZoneID();
-    boost::shared_ptr<Zone> pZone = m_apartment.getZone(zone);
-    boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDHeating);
     if (m_properties.has("value")) {
       std::string val = m_properties.get("value");
       int iVal = strToIntDef(val, -1);
@@ -670,7 +671,7 @@ void SystemState::stateBinaryinput() {
       if (iVal == 1) {
         sceneID = Scene1;
       }
-      pGroup->callScene(coSystemBinaryInput, SAC_MANUAL, sceneID, "", false);
+      callScene(pDev->getZoneID(), GroupIDHeating, sceneID, coSystemBinaryInput);
     }
   }
 }
@@ -698,7 +699,6 @@ void SystemState::stateApartment() {
     std::string id = statename.substr(groupName + 6);
     groupId = strToIntDef(id, 0);
   }
-  boost::shared_ptr<Zone> z = m_apartment.getZone(0);
 
   if (callOrigin == coSystem) {
     // ignore state change originated by server generated system level events,
@@ -714,26 +714,23 @@ void SystemState::stateApartment() {
 
   if (statename == "fire") {
     if (iVal == 1) {
-      boost::shared_ptr<Group> g = z->getGroup(0);
-      g->callScene(coSystem, SAC_MANUAL, SceneFire, "", false);
+      callScene(0, 0, SceneFire, coSystem);
     }
   }
 
   if (statename.substr(0, 4) == "rain") {
-    boost::shared_ptr<Group> g = z->getGroup(groupId);
     if (iVal == 1) {
-      g->callScene(coSystem, SAC_MANUAL, SceneRainActive, "", false);
+      callScene(0, groupId, SceneRainActive, coSystem);
     } else if (iVal == 2) {
-      g->callScene(coSystem, SAC_MANUAL, SceneRainInactive, "", false);
+      callScene(0, groupId, SceneRainInactive, coSystem);
     }
   }
 
   if (statename.substr(0, 4) == "wind") {
-    boost::shared_ptr<Group> g = z->getGroup(groupId);
     if (iVal == 1) {
-      g->callScene(coSystem, SAC_MANUAL, SceneWindActive, "", false);
+      callScene(0, groupId, SceneWindActive, coSystem);
     } else if (iVal == 2) {
-      g->callScene(coSystem, SAC_MANUAL, SceneWindInactive, "", false);
+      callScene(0, groupId, SceneWindInactive, coSystem);
     }
   }
 }
