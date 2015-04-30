@@ -34,6 +34,7 @@
 #include "src/model/device.h"
 #include "src/model/set.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/zone.h"
 #include "src/model/state.h"
 #include "src/model/apartment.h"
@@ -217,6 +218,30 @@ namespace dss {
     _json.endObject();
   } // toJSON(Group)
 
+  void toJSON(boost::shared_ptr<const Cluster> _cluster, JSONWriter& _json) {
+    _json.startObject();
+    _json.add("id", _cluster->getID());
+    _json.add("name", _cluster->getName());
+    _json.add("color", _cluster->getStandardGroupID());
+    _json.add("isPresent", _cluster->isPresent());
+    _json.add("isValid", _cluster->isValid());
+    _json.add("CardinalDirection", _cluster->getLocation());
+    _json.add("ProtectionClass", _cluster->getProtectionClass());
+    _json.add("isAutomatic", _cluster->isAutomatic());
+
+    _json.startArray("devices");
+    Set devices = _cluster->getDevices();
+    for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
+      if (devices[iDevice].getDevice()->is2WaySlave()) {
+        // do not render "slave" devices
+        continue;
+      }
+      _json.add(dsuid2str(devices[iDevice].getDSID()));
+    }
+    _json.endArray();
+    _json.endObject();
+  } // toJSON(Cluster)
+
   void toJSON(Zone& _zone, JSONWriter& _json, bool _includeDevices) {
     _json.startObject();
     _json.add("id", _zone.getID());
@@ -239,8 +264,15 @@ namespace dss {
 
   void toJSON(Apartment& _apartment, JSONWriter& _json) {
     _json.startObject("apartment");
-    _json.startArray("zones");
 
+    _json.startArray("clusters");
+    std::vector<boost::shared_ptr<Cluster> > clusters = _apartment.getClusters();
+    foreach (boost::shared_ptr<Cluster> pCluster, clusters) {
+      toJSON(static_cast<boost::shared_ptr<const Cluster> >(pCluster), _json);
+    }
+    _json.endArray();
+
+    _json.startArray("zones");
     std::vector<boost::shared_ptr<Zone> > zones = _apartment.getZones();
     foreach(boost::shared_ptr<Zone> pZone, zones) {
       toJSON(*pZone, _json);
