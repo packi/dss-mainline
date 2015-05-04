@@ -24,10 +24,6 @@
 #ifndef EVENTREQUESTHANDLER_H_
 #define EVENTREQUESTHANDLER_H_
 
-#include <deque>
-#include <map>
-#include <boost/ptr_container/ptr_map.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "src/web/webrequests.h"
