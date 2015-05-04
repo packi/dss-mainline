@@ -400,6 +400,21 @@ const int MF_BL_KM200[] =
   mf_valvetype
 };
 
+const int MF_BL_SDS200[] =
+{
+  mf_dontcare,
+  mf_ledauto,
+  mf_outvalue8,
+  mf_pushbutton,
+  mf_pushbdevice,
+  mf_pushbadvanced,
+  mf_heatinggroup,
+  mf_heatingoutmode,
+  mf_heatingprops,
+  mf_pwmvalue,
+  mf_valvetype
+};
+
 const int MF_BL_KL2[] =
 {
   mf_dontcare,
@@ -660,6 +675,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_BL_KM200, MF_ARRAY_SIZE(MF_BL_KM200));
   setFeatures(ColorIDBlue, KM200, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_BL_SDS200, MF_ARRAY_SIZE(MF_BL_SDS200));
+  setFeatures(ColorIDBlue, SDS2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();

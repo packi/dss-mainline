@@ -335,6 +335,7 @@ namespace dss {
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
   const uint16_t ProductID_KM_200 = 0x00C8;
+  const uint16_t ProductID_SDS_200 = 0x18C8;
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
   const uint16_t ProductID_KL_210 = 0x0CD2;
