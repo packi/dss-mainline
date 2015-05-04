@@ -1192,7 +1192,7 @@ namespace dss {
 
     boost::shared_ptr<GenericEventPayload_t> pPayload = boost::make_shared<GenericEventPayload_t>();
     pPayload->length = _PayloadLength;
-    memcpy(pPayload->payload, _Payload, std::min(static_cast<unsigned long>(_PayloadLength),
+    memcpy(pPayload->payload, _Payload, std::min(static_cast<size_t>(_PayloadLength),
                                                  sizeof(pPayload->payload)));
 
     pEvent->setSingleObjectParameter(pPayload);
