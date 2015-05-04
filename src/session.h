@@ -48,14 +48,19 @@ namespace dss {
     void touch();
     void markAsApplicationSession();
     boost::shared_ptr<EventSubscriptionSession> getEventSubscription(int _token);
-    boost::shared_ptr<EventSubscriptionSession>
-      createEventSubscription(EventInterpreter &interp, int _token);
-    void deleteEventSubscription(boost::shared_ptr<EventSubscriptionSession> subs);
+    void subscribeEventSubscription(EventInterpreter &interp, int _token, const std::string& _name);
+    void unsubscribeEventSubscription(int _token, const std::string& _name);
     void inheritUserFromSecurity();
     User* getUser() { return m_pUser; }
     bool isApplicationSession() { return m_IsApplicationSession; }
     unsigned int getIdleTime() { return m_LastTouched.secondsSinceEpoch(); }
+  private:
+    void deleteEventSubscription(boost::shared_ptr<EventSubscriptionSession> subs);
+    boost::shared_ptr<EventSubscriptionSession>
+      createEventSubscription(EventInterpreter &interp, int _token);
+
   protected:
+    boost::mutex m_SubscriptionMutex;
     const std::string m_Token;
     boost::mutex m_UseCountMutex;
     int m_UsageCount;
