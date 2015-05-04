@@ -25,11 +25,7 @@
   #include "config.h"
 #endif
 
-
 #include "eventrequesthandler.h"
-
-#include <boost/any.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include "src/base.h"
 

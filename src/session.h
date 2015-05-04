@@ -24,8 +24,6 @@
 #define SESSION_H_INCLUDED
 
 #include <string>
-#include <map>
-#include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
