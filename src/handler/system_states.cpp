@@ -249,20 +249,19 @@ void SystemState::startup() {
         continue;
       }
 
-      if (group->getLastCalledScene() == SceneAbsent) {
+      switch(group->getLastCalledScene()) {
+      case SceneAbsent:
         absent = true;
-      }
-
-      if (group->getLastCalledScene() == ScenePanic) {
+        break;
+      case ScenePanic:
         panic = true;
-      }
-
-      if (group->getLastCalledScene() == SceneAlarm) {
+        break;
+      case SceneAlarm:
         alarm = true;
-      }
-
-      if (group->getLastCalledScene() == SceneSleeping) {
+        break;
+      case SceneSleeping:
         sleeping = true;
+        break;
       }
     } // groups for loop
   } // zones for loop
@@ -384,7 +383,8 @@ void SystemState::callscene() {
   boost::shared_ptr<State> state;
 
   if (groupId == 0) {
-    if ((groupId == 0) && (sceneId == SceneAbsent)) {
+    switch (sceneId) {
+    case SceneAbsent:
       if (lookupState(state, "presence")) {
         state->setState(coSystem, "absent");
       }
@@ -399,76 +399,96 @@ void SystemState::callscene() {
           undoScene(0, 0, SceneFire, coSystem);
         }
       }
-    } else if ((groupId == 0) && (sceneId == ScenePresent)) {
+      break;
+    case ScenePresent:
       if (lookupState(state, "presence")) {
         state->setState(coSystem, "present");
       }
-    } else if ((groupId == 0) && (sceneId == SceneSleeping)) {
+      break;
+    case  SceneSleeping:
       if (lookupState(state, "hibernation")) {
         state->setState(coSystem, "sleeping");
       }
-    } else if ((groupId == 0) && (sceneId == SceneWakeUp)) {
+      break;
+    case SceneWakeUp:
       if (lookupState(state, "hibernation")) {
         state->setState(coSystem, "awake");
       }
-    } else if ((groupId == 0) && (sceneId == ScenePanic)) {
+      break;
+    case ScenePanic:
       if (lookupState(state, "panic")) {
         state->setState(coSystem, State_Active);
       }
-    } else if ((groupId == 0) && (sceneId == SceneFire)) {
+      break;
+    case SceneFire:
       if (lookupState(state, "fire")) {
         state->setState(coSystem, State_Active);
       }
-    } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
+      break;
+    case SceneAlarm:
       if (lookupState(state, "alarm")) {
         state->setState(coSystem, State_Active);
       }
-    } else if ((groupId == 0) && (sceneId == SceneAlarm2)) {
+      break;
+    case SceneAlarm2:
       if (lookupState(state, "alarm2")) {
         state->setState(coSystem, State_Active);
       }
-    } else if ((groupId == 0) && (sceneId == SceneAlarm3)) {
+      break;
+    case SceneAlarm3:
       if (lookupState(state, "alarm3")) {
         state->setState(coSystem, State_Active);
       }
-    } else if ((groupId == 0) && (sceneId == SceneAlarm4)) {
+      break;
+    case SceneAlarm4:
       if (lookupState(state, "alarm4")) {
         state->setState(coSystem, State_Active);
       }
-    } else if (sceneId == SceneWindActive) {
+      break;
+    case SceneWindActive:
       state = getOrRegisterState("wind");
       state->setState(coSystem, State_Active);
-    } else if (sceneId == SceneWindInactive) {
+      break;
+    case SceneWindInactive:
       state = getOrRegisterState("wind");
       state->setState(coSystem, State_Inactive);
-    } else if (sceneId == SceneRainActive) {
+      break;
+    case SceneRainActive:
       state = getOrRegisterState("rain");
       state->setState(coSystem, State_Active);
-    } else if (sceneId == SceneRainInactive) {
+      break;
+    case SceneRainInactive:
       state = getOrRegisterState("rain");
       state->setState(coSystem, State_Inactive);
+      // TODO cleanup this hack
       for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
         if (lookupState(state, formatGroupName2("rain", groupId))) {
           state->setState(coSystem, State_Inactive);
         }
       }
+      break;
     }
   } else if (isAppUserGroup(groupId)) {
     /*
      * wind/rain can be apartment wide or only to one facade
      */
-    if (sceneId == SceneWindActive) {
+    switch (sceneId) {
+    case SceneWindActive:
       state = getOrRegisterState(formatGroupName2("wind", groupId));
       state->setState(coSystem, State_Active);
-    } else if (sceneId == SceneWindInactive) {
+      break;
+    case SceneWindInactive:
       state = getOrRegisterState(formatGroupName2("wind", groupId));
       state->setState(coSystem, State_Inactive);
-    } else if (sceneId == SceneRainActive) {
+      break;
+    case SceneRainActive:
       state = getOrRegisterState(formatGroupName2("rain", groupId));
       state->setState(coSystem, State_Active);
-    } else if (sceneId == SceneRainInactive) {
+      break;
+    case SceneRainInactive:
       state = getOrRegisterState(formatGroupName2("rain", groupId));
       state->setState(coSystem, State_Inactive);
+      break;
     }
   }
 }
@@ -490,7 +510,9 @@ void SystemState::undoscene() {
     return;
   }
 
-  if ((groupId == 0) && (sceneId == ScenePanic)) {
+  assert(groupId == 0);
+  switch (sceneId) {
+  case ScenePanic:
     if (lookupState(state, "panic")) {
       state->setState(coSystem, State_Inactive);
     }
@@ -502,7 +524,8 @@ void SystemState::undoscene() {
         undoScene(0, 0, SceneFire, coSystem);
       } // valid dSID && dSM API origin && state == active
     }
-  } else if ((groupId == 0) && (sceneId == SceneFire)) {
+    break;
+  case SceneFire:
     if (lookupState(state, "fire")) {
       state->setState(coSystem, State_Inactive);
     }
@@ -514,22 +537,27 @@ void SystemState::undoscene() {
         undoScene(0, 0, ScenePanic, coSystem);
       } // valid dSID && dSM API origin && state == active
     }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
+    break;
+  case SceneAlarm:
     if (lookupState(state, "alarm")) {
       state->setState(coSystem, State_Inactive);
     }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm2)) {
+    break;
+  case SceneAlarm2:
     if (lookupState(state, "alarm2")) {
       state->setState(coSystem, State_Inactive);
     }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm3)) {
+    break;
+  case SceneAlarm3:
     if (lookupState(state, "alarm3")) {
       state->setState(coSystem, State_Inactive);
     }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm4)) {
+    break;
+  case SceneAlarm4:
     if (lookupState(state, "alarm4")) {
       state->setState(coSystem, State_Inactive);
     }
+    break;
   }
 }
 
