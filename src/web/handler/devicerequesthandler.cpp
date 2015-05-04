@@ -897,7 +897,11 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      pDevice->getDeviceSceneMode(id, config);
+      if (pDevice->getProductID() == ProductID_UMV_210) {
+        pDevice->getDeviceOutputChannelSceneConfig(id, config);
+      } else {
+        pDevice->getDeviceSceneMode(id, config);
+      }
       JSONWriter json;
       json.add("sceneID", id);
       json.add("dontCare", config.dontcare);
@@ -918,7 +922,11 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      pDevice->getDeviceSceneMode(id, config);
+      if (pDevice->getProductID() == ProductID_UMV_210) {
+        pDevice->getDeviceOutputChannelSceneConfig(id, config);
+      } else {
+        pDevice->getDeviceSceneMode(id, config);
+      }
 
       if(_request.hasParameter("dontCare"))
         config.dontcare = strToIntDef(_request.getParameter("dontCare"), config.dontcare);
@@ -932,7 +940,12 @@ namespace dss {
         config.ledconIndex = strToIntDef(_request.getParameter("ledconIndex"), config.ledconIndex);
       if(_request.hasParameter("dimtimeIndex"))
         config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
-      pDevice->setDeviceSceneMode(id, config);
+
+      if (pDevice->getProductID() == ProductID_UMV_210) {
+        pDevice->setDeviceOutputChannelSceneConfig(id, config);
+      } else {
+        pDevice->setDeviceSceneMode(id, config);
+      }
 
       return JSONWriter::success();
 

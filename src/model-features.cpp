@@ -58,6 +58,7 @@ const char *SDS2 =      "SDS:2"; // wildcard for all SDS-2*
 const char *ZWS2 =      "ZWS:2"; // wildcard for all ZWS-2*
 const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
+const char *UMV210 =    "UMV:210";
 const char *UMR200 =    "UMR:200";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
@@ -283,6 +284,22 @@ const int MF_GE_UMV200[] =
   mf_pushbadvanced,
   mf_extradimmer,
   mf_umvrelay
+};
+
+const int MF_GE_UMV210[] =
+{
+  mf_dontcare,
+  mf_blink,
+  mf_ledauto,
+  mf_transt,
+  mf_outvalue8,
+  mf_pushbutton,
+  mf_pushbdevice,
+  mf_pushbarea,
+  mf_pushbadvanced,
+  mf_extradimmer,
+  mf_umvrelay,
+  mf_outputchannels
 };
 
 const int MF_GN_KM2[] =
@@ -625,6 +642,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_GE_UMV200, MF_ARRAY_SIZE(MF_GE_UMV200));
   setFeatures(ColorIDYellow, UMV200, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_GE_UMV210, MF_ARRAY_SIZE(MF_GE_UMV210));
+  setFeatures(ColorIDYellow, UMV210, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
