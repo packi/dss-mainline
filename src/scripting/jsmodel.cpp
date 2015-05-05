@@ -484,8 +484,8 @@ namespace dss {
       try {
         boost::shared_ptr<State> state;
         state = ext->getApartment().getState(stateType, identifier, stateName);
+        ext->getApartment().removeState(state);
         state.reset();
-        ext->getApartment().removeState(stateName);
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       } catch(ItemNotFoundException& e) {

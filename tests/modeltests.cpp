@@ -58,6 +58,16 @@ DSUID_DEFINE(meter2DSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11);
 
 BOOST_AUTO_TEST_SUITE(Model)
 
+BOOST_AUTO_TEST_CASE(testCreateDestroyState) {
+  Apartment apt(NULL);
+  boost::shared_ptr<State> state = apt.allocateState(StateType_Apartment,
+                                                     "foo", "<test>");
+  BOOST_CHECK_EQUAL(state, apt.getState(StateType_Apartment, "<test>", "foo"));
+  apt.removeState(state);
+  BOOST_CHECK_THROW(apt.getState(StateType_Apartment, "foo", "<test>"),
+                    ItemNotFoundException);
+}
+
 class DummyStructureModifyingInterface : public StructureModifyingBusInterface {
 public:
   virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
