@@ -50,6 +50,7 @@ namespace dss {
 
   const char WindProtectionClass[] = "WindProtectionClass";
   const char CardinalDirection[] = "CardinalDirection";
+  const char Floor[] = "Floor";
 
   ModelPersistence::ModelPersistence(Apartment& _apartment)
   : m_Apartment(_apartment), m_ignore(false), m_expectString(false),
@@ -86,6 +87,7 @@ namespace dss {
     const char *valve = NULL;
     const char *cardinalDirection = NULL;
     const char *windProtectionClass = NULL;
+    const char *floorString = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -137,6 +139,8 @@ namespace dss {
         windProtectionClass = _attrs[i + 1];
       } else if (strcmp(_attrs[i], CardinalDirection) == 0) {
         cardinalDirection = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], Floor) == 0) {
+        floorString = _attrs[i + 1];
       }
     }
 
@@ -286,6 +290,10 @@ namespace dss {
     if (windProtectionClass &&
         convertWindProtectionClass(strToInt(windProtectionClass), &protection)) {
       m_tempDevice->setWindProtectionClass(protection);
+    }
+
+    if (floorString != NULL) {
+      m_tempDevice->setFloor(strToUIntDef(floorString, 0));
     }
 
     bool isConfigLocked = false;
@@ -926,6 +934,9 @@ namespace dss {
     }
     if (_pDevice->getWindProtectionClass() != wpc_none) {
       addAttribute(_ofs, WindProtectionClass, intToString(_pDevice->getWindProtectionClass()));
+    }
+    if (_pDevice->getFloor() != 0) {
+      addAttribute(_ofs, Floor, intToString(_pDevice->getFloor()));
     }
     if(_pDevice->getOemInfoState() == DEVICE_OEM_NONE) {
       _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";

@@ -105,7 +105,8 @@ namespace dss {
     m_outputChannelCount(0),
     m_AKMInputProperty(),
     m_cardinalDirection(cd_none),
-    m_windProtectionClass(wpc_none)
+    m_windProtectionClass(wpc_none),
+    m_floor(0)
     {
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
@@ -324,6 +325,8 @@ namespace dss {
     m_pPropertyNode->createProperty("WindProtectionClass")
       ->linkToProxy(PropertyProxyReference<int,
                     WindProtectionClass_t>(m_windProtectionClass));
+    m_pPropertyNode->createProperty("Floor")
+      ->linkToProxy(PropertyProxyReference<int>(m_floor));
 
     publishValveTypeToPropertyTree();
 
