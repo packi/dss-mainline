@@ -202,32 +202,31 @@ namespace dss {
   boost::atomic<int> PropertyNode::sm_NodeCounter;
 
   PropertyNode::PropertyNode(const char* _name, int _index)
-    : m_ParentNode(NULL),
-      m_Name(_name),
-      m_LinkedToProxy(false),
-      m_Aliased(false),
+    : m_Name(_name),
+      m_ChildNodes(NULL),
+      m_AliasedBy(NULL),
+      m_Listeners(NULL),
+      m_ParentNode(NULL),
       m_AliasTarget(NULL),
+      m_Privileges(NULL),
       m_Index(_index),
       m_Flags(Readable | Writeable)
   {
+    m_Proxy.iValue = 0;
     sm_NodeCounter++;
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
   } // ctor
 
   PropertyNode::~PropertyNode() {
-    log(std::string(__func__) + " " + m_Name.get(), lsDebug);
-
     // remove listeners
     boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-    for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
-        it != m_Listeners.end();)
-    {
-      (*it)->unregisterProperty(this);
-      it = m_Listeners.erase(it);
+    if (m_Listeners) {
+      for (std::vector<PropertyListener*>::iterator it = m_Listeners->begin(); it != m_Listeners->end();)
+      {
+        (*it)->unregisterProperty(this);
+        it = m_Listeners->erase(it);
+      }
     }
-
-    // clear privileges as they hold a shared_ptr on us
-    m_pPrivileges.reset();
 
     // tell our parent node that we're gone
     if(m_ParentNode != NULL) {
@@ -235,13 +234,15 @@ namespace dss {
     }
 
     // un-alias our aliases
-    for(std::vector<PropertyNode*>::iterator it = m_AliasedBy.begin();
-        it != m_AliasedBy.end();)
-    {
-      (*it)->alias(PropertyNodePtr());
+    if (m_AliasedBy) {
+      for (std::vector<PropertyNode*>::iterator it = m_AliasedBy->begin(); it != m_AliasedBy->end(); ) {
+        (*it)->alias(PropertyNodePtr());
+      }
+      delete m_AliasedBy;
+      m_AliasedBy = NULL;
     }
-    if(m_LinkedToProxy) {
-      m_LinkedToProxy = false;
+
+    if (IsLinkedToProxy()) {
       switch(m_PropVal.valueType) {
       case vTypeInteger:
         delete m_Proxy.intProxy;
@@ -257,28 +258,34 @@ namespace dss {
         break;
       case vTypeFloating:
         delete m_Proxy.floatingProxy;
+        break;
       case vTypeNone:
         break;
       }
+      m_Proxy.iValue = 0;
     }
+
     // remove from alias targets list
-    if(m_Aliased) {
-      m_Aliased = false;
-      std::vector<PropertyNode*>::iterator it = find(m_AliasTarget->m_AliasedBy.begin(), m_AliasTarget->m_AliasedBy.end(), this);
-      if(it != m_AliasTarget->m_AliasedBy.end()) {
-        m_AliasTarget->m_AliasedBy.erase(it);
+    if (m_AliasTarget && m_AliasTarget->m_AliasedBy) {
+      std::vector<PropertyNode*>::iterator it =
+          find(m_AliasTarget->m_AliasedBy->begin(), m_AliasTarget->m_AliasedBy->end(), this);
+      if (it != m_AliasTarget->m_AliasedBy->end()) {
+        m_AliasTarget->m_AliasedBy->erase(it);
       } else {
         assert(false); // we have to be in that list, or else something went horribly wrong
       }
       m_AliasTarget = NULL;
     }
+
     // remove all child nodes
-    for(PropertyList::iterator it = m_ChildNodes.begin();
-         it != m_ChildNodes.end();)
-    {
-      childRemoved(*it);
-      (*it)->m_ParentNode = NULL; // prevent the child-node from calling removeChild
-      it = m_ChildNodes.erase(it);
+    if (m_ChildNodes) {
+      for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes->begin(); it != m_ChildNodes->end();) {
+        childRemoved(*it);
+        (*it)->m_ParentNode = NULL; // prevent the child-node from calling removeChild
+        it = m_ChildNodes->erase(it);
+      }
+      delete m_ChildNodes;
+      m_ChildNodes = NULL;
     }
 
     clearValue();
@@ -286,13 +293,15 @@ namespace dss {
   } // dtor
 
   PropertyNodePtr PropertyNode::removeChild(PropertyNodePtr _childNode) {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->removeChild(_childNode);
+    } else if (NULL == m_ChildNodes) {
+      return PropertyNodePtr();
     } else {
       boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-      PropertyList::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
-      if(it != m_ChildNodes.end()) {
-        m_ChildNodes.erase(it);
+      PropertyList::iterator it = std::find(m_ChildNodes->begin(), m_ChildNodes->end(), _childNode);
+      if (it != m_ChildNodes->end()) {
+        m_ChildNodes->erase(it);
       }
       lock.unlock();
       _childNode->m_ParentNode = NULL;
@@ -303,7 +312,7 @@ namespace dss {
 
   void PropertyNode::addChild(PropertyNodePtr _childNode) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       m_AliasTarget->removeChild(_childNode);
     } else {
       if(_childNode.get() == this) {
@@ -315,16 +324,19 @@ namespace dss {
       if(_childNode->m_ParentNode != NULL) {
         _childNode->m_ParentNode->removeChild(_childNode);
       }
+      if (NULL == m_ChildNodes) {
+        m_ChildNodes = new (std::vector<PropertyNodePtr>);
+      }
       _childNode->m_ParentNode = this;
       int maxIndex = -1;
-      for(unsigned int iChild = 0; iChild < m_ChildNodes.size(); iChild++) {
-        if(m_ChildNodes[iChild]->getName() == _childNode->getName()) {
-          maxIndex = std::max(m_ChildNodes[iChild]->m_Index, maxIndex);
+      for(unsigned int iChild = 0; iChild < m_ChildNodes->size(); iChild++) {
+        if (m_ChildNodes->at(iChild)->getName() == _childNode->getName()) {
+          maxIndex = std::max(m_ChildNodes->at(iChild)->m_Index, maxIndex);
         }
       }
       _childNode->m_Index = maxIndex + 1;
       boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-      m_ChildNodes.push_back(_childNode);
+      m_ChildNodes->push_back(_childNode);
       lock.unlock();
       childAdded(_childNode);
     }
@@ -342,7 +354,7 @@ namespace dss {
   } // getDisplayName
 
   PropertyNodePtr PropertyNode::getProperty(const std::string& _propPath) {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getProperty(_propPath);
     } else {
       std::string propPath = _propPath;
@@ -367,7 +379,7 @@ namespace dss {
   } // getProperty
 
   int PropertyNode::getAndRemoveIndexFromPropertyName(std::string& _propName) {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getAndRemoveIndexFromPropertyName(_propName);
     } else {
       int result = 0;
@@ -387,8 +399,10 @@ namespace dss {
   } // getAndRemoveIndexFromPropertyName
 
   PropertyNodePtr PropertyNode::getPropertyByName(const std::string& _name) {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getPropertyByName(_name);
+    } else if (NULL == m_ChildNodes ) {
+      return PropertyNodePtr();
     } else {
       int index = 0;
       std::string propName = _name;
@@ -397,8 +411,8 @@ namespace dss {
       int lastMatch = -1;
       int numItem = 0;
       boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-      PropertyList::iterator it = m_ChildNodes.begin();
-      PropertyList::iterator end = m_ChildNodes.end();
+      PropertyList::iterator it = m_ChildNodes->begin();
+      PropertyList::iterator end = m_ChildNodes->end();
       for(; it != end; it++) {
         numItem++;
         if((*it)->m_Name == propName) {
@@ -410,7 +424,7 @@ namespace dss {
       }
       if(index == -1) {
         if(lastMatch != -1) {
-          return m_ChildNodes[ lastMatch ];
+          return m_ChildNodes->at(lastMatch);
         }
       }
       return PropertyNodePtr();
@@ -418,13 +432,15 @@ namespace dss {
   } // getPropertyName
 
   int PropertyNode::count(const std::string& _propertyName) {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->count(_propertyName);
+    } else if (NULL == m_ChildNodes ) {
+      return 0;
     } else {
       int result = 0;
       boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-      for(PropertyList::iterator it = m_ChildNodes.begin();
-           it != m_ChildNodes.end(); it++) {
+      for(PropertyList::iterator it = m_ChildNodes->begin();
+           it != m_ChildNodes->end(); it++) {
         PropertyNodePtr cur = *it;
         if(cur->m_Name == _propertyName) {
           result++;
@@ -435,7 +451,7 @@ namespace dss {
   } // count
 
   int PropertyNode::size() {
-    return m_ChildNodes.size();
+    return m_ChildNodes ? m_ChildNodes->size() : 0;
   } // size
 
   void PropertyNode::clearValue() {
@@ -447,10 +463,10 @@ namespace dss {
 
   void PropertyNode::setStringValue(const char* _value) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       m_AliasTarget->setStringValue(_value);
     } else {
-      if(m_LinkedToProxy) {
+      if (IsLinkedToProxy()) {
         if(m_PropVal.valueType == vTypeString) {
           m_Proxy.stringProxy->setValue(_value);
         } else {
@@ -474,10 +490,10 @@ namespace dss {
 
   void PropertyNode::setIntegerValue(const int _value) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       m_AliasTarget->setIntegerValue(_value);
     } else {
-      if(m_LinkedToProxy) {
+      if (IsLinkedToProxy()) {
         if(m_PropVal.valueType == vTypeInteger) {
           m_Proxy.intProxy->setValue(_value);
         } else {
@@ -495,10 +511,10 @@ namespace dss {
 
   void PropertyNode::setUnsignedIntegerValue(const uint32_t _value) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       m_AliasTarget->setUnsignedIntegerValue(_value);
     } else {
-      if(m_LinkedToProxy) {
+      if (IsLinkedToProxy()) {
         if(m_PropVal.valueType == vTypeUnsignedInteger) {
           m_Proxy.uintProxy->setValue(_value);
         } else {
@@ -516,10 +532,10 @@ namespace dss {
 
   void PropertyNode::setBooleanValue(const bool _value) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       m_AliasTarget->setBooleanValue(_value);
     } else {
-      if(m_LinkedToProxy) {
+      if (IsLinkedToProxy()) {
         if(m_PropVal.valueType == vTypeBoolean) {
           m_Proxy.boolProxy->setValue(_value);
         } else {
@@ -537,10 +553,10 @@ namespace dss {
 
   void PropertyNode::setFloatingValue(const double _value) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       m_AliasTarget->setFloatingValue(_value);
     } else {
-      if(m_LinkedToProxy) {
+      if (IsLinkedToProxy()) {
         if(m_PropVal.valueType == vTypeFloating) {
           m_Proxy.floatingProxy->setValue(_value);
         } else {
@@ -557,11 +573,11 @@ namespace dss {
   } // setBooleanValue
 
   std::string PropertyNode::getStringValue() {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getStringValue();
     } else {
       if(m_PropVal.valueType == vTypeString) {
-        if(m_LinkedToProxy) {
+        if (IsLinkedToProxy()) {
           return m_Proxy.stringProxy->getValue();
         } else {
           return m_PropVal.actualValue.pString;
@@ -574,11 +590,11 @@ namespace dss {
   } // getStringValue
 
   int PropertyNode::getIntegerValue() {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getIntegerValue();
     } else {
       if(m_PropVal.valueType == vTypeInteger) {
-        if(m_LinkedToProxy) {
+        if (IsLinkedToProxy()) {
           return m_Proxy.intProxy->getValue();
         } else {
           return m_PropVal.actualValue.integer;
@@ -591,11 +607,11 @@ namespace dss {
   } // getIntegerValue
 
   uint32_t PropertyNode::getUnsignedIntegerValue() {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getUnsignedIntegerValue();
     } else {
       if(m_PropVal.valueType == vTypeUnsignedInteger) {
-        if(m_LinkedToProxy) {
+        if (IsLinkedToProxy()) {
           return m_Proxy.uintProxy->getValue();
         } else {
           return m_PropVal.actualValue.unsignedinteger;
@@ -608,11 +624,11 @@ namespace dss {
   } // getUnsignedIntegerValue
 
   bool PropertyNode::getBoolValue() {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getBoolValue();
     } else {
       if(m_PropVal.valueType == vTypeBoolean) {
-        if(m_LinkedToProxy) {
+        if (IsLinkedToProxy()) {
           return m_Proxy.boolProxy->getValue();
         } else {
           return m_PropVal.actualValue.boolean;
@@ -625,11 +641,11 @@ namespace dss {
   } // getBoolValue
 
   double PropertyNode::getFloatingValue() {
-    if(m_Aliased) {
+    if (m_AliasTarget) {
       return m_AliasTarget->getFloatingValue();
     } else {
       if(m_PropVal.valueType == vTypeFloating) {
-        if(m_LinkedToProxy) {
+        if (IsLinkedToProxy()) {
           return m_Proxy.floatingProxy->getValue();
         } else {
           return m_PropVal.actualValue.floating;
@@ -643,118 +659,107 @@ namespace dss {
 
   void PropertyNode::alias(PropertyNodePtr _target) {
     checkWriteAccess();
-    if(m_ChildNodes.size() > 0) {
+    if(m_ChildNodes && m_ChildNodes->size() > 0) {
       throw std::runtime_error("Cannot alias node if it has children");
     }
-    if(m_LinkedToProxy) {
+    if (IsLinkedToProxy()) {
       throw std::runtime_error("Cannot alias node if it is linked to a proxy");
     }
-    if(_target == NULL) {
-      if(m_Aliased) {
-        if(m_AliasTarget != NULL) {
-          std::vector<PropertyNode*>::iterator it = find(m_AliasTarget->m_AliasedBy.begin(), m_AliasTarget->m_AliasedBy.end(), this);
-          if(it != m_AliasTarget->m_AliasedBy.end()) {
-            m_AliasTarget->m_AliasedBy.erase(it);
-          } else {
-            assert(false); // if we're not in that list something went horibly wrong
-          }
-          m_AliasTarget = NULL;
-          m_Aliased = false;
+    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
+    if (_target == NULL) {
+      if (m_AliasTarget) {
+        std::vector<PropertyNode*>::iterator it =
+            find(m_AliasTarget->m_AliasedBy->begin(), m_AliasTarget->m_AliasedBy->end(), this);
+        if (it != m_AliasTarget->m_AliasedBy->end()) {
+          m_AliasTarget->m_AliasedBy->erase(it);
         } else {
-          throw std::runtime_error("Node is flagged as aliased but m_AliasTarget is NULL");
+          assert(false); // if we're not in that list something went horibly wrong
         }
+        m_AliasTarget = NULL;
       }
     } else {
       clearValue();
       m_AliasTarget = _target.get();
-      m_Aliased = true;
-      m_AliasTarget->m_AliasedBy.push_back(this);
+      if (m_AliasTarget->m_AliasedBy == NULL) {
+        m_AliasTarget->m_AliasedBy = new (std::vector<PropertyNode*>);
+      }
+      m_AliasTarget->m_AliasedBy->push_back(this);
     }
   }
 
   bool PropertyNode::linkToProxy(const PropertyProxy<bool>& _proxy) {
-    if(m_LinkedToProxy || m_Aliased) {
+    if (IsLinkedToProxy() || m_AliasTarget) {
       return false;
     }
     m_Proxy.boolProxy = _proxy.clone();
-    m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeBoolean;
     return true;
   } // linkToProxy
 
   bool PropertyNode::linkToProxy(const PropertyProxy<int>& _proxy) {
-    if(m_LinkedToProxy || m_Aliased) {
+    if(IsLinkedToProxy() || m_AliasTarget) {
       return false;
     }
     m_Proxy.intProxy = _proxy.clone();
-    m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeInteger;
     return true;
   } // linkToProxy
 
   bool PropertyNode::linkToProxy(const PropertyProxy<std::string>& _proxy) {
-    if(m_LinkedToProxy || m_Aliased) {
+    if (IsLinkedToProxy() || m_AliasTarget) {
       return false;
     }
     m_Proxy.stringProxy = _proxy.clone();
-    m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeString;
     return true;
   } // linkToProxy
 
   bool PropertyNode::linkToProxy(const PropertyProxy<uint32_t>& _proxy) {
-    if(m_LinkedToProxy || m_Aliased) {
+    if (IsLinkedToProxy() || m_AliasTarget) {
       return false;
     }
     m_Proxy.uintProxy = _proxy.clone();
-    m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeUnsignedInteger;
     return true;
   } // linkToProxy
 
 
   bool PropertyNode::linkToProxy(const PropertyProxy<double>& _proxy) {
-    if(m_LinkedToProxy || m_Aliased) {
+    if (IsLinkedToProxy() || m_AliasTarget) {
       return false;
     }
     m_Proxy.floatingProxy = _proxy.clone();
-    m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeFloating;
     return true;
   } // linkToProxy
 
   bool PropertyNode::unlinkProxy(bool _recurse) {
-    if(_recurse) {
-      foreach(PropertyNodePtr pChild, m_ChildNodes) {
-        pChild->unlinkProxy(_recurse);
+    if(_recurse && m_ChildNodes) {
+      for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes->begin(); it != m_ChildNodes->end(); it++) {
+        (*it)->unlinkProxy(_recurse);
       }
     }
-    if(m_LinkedToProxy) {
+    if (IsLinkedToProxy()) {
       switch(getValueType()) {
         case vTypeString:
           delete m_Proxy.stringProxy;
-          m_Proxy.stringProxy = NULL;
           break;
         case vTypeInteger:
           delete m_Proxy.intProxy;
-          m_Proxy.intProxy = NULL;
           break;
         case vTypeUnsignedInteger:
           delete m_Proxy.uintProxy;
-          m_Proxy.uintProxy = NULL;
           break;
         case vTypeBoolean:
           delete m_Proxy.boolProxy;
-          m_Proxy.boolProxy = NULL;
           break;
         case vTypeFloating:
           delete m_Proxy.floatingProxy;
-          m_Proxy.floatingProxy = NULL;
           break;
         default:
           assert(false);
       }
-      m_LinkedToProxy = false;
+      m_Proxy.iValue = 0;
       return true;
     }
     return false;
@@ -762,7 +767,7 @@ namespace dss {
 
 
   aValueType PropertyNode::getValueType() {
-    return m_Aliased ? m_AliasTarget->m_PropVal.valueType : m_PropVal.valueType;
+    return m_AliasTarget ? m_AliasTarget->m_PropVal.valueType : m_PropVal.valueType;
   } // getValueType
 
   void PropertyNode::setFlag(Flag _flag, bool _value) {
@@ -775,7 +780,7 @@ namespace dss {
   } // setFlag
 
   std::string PropertyNode::getAsString() {
-    if(m_Aliased) {
+    if (m_AliasTarget != NULL) {
       return m_AliasTarget->getAsString();
     } else {
       std::string result;
@@ -809,13 +814,16 @@ namespace dss {
 
   void PropertyNode::addListener(PropertyListener* _listener) {
     _listener->registerProperty(this);
-    m_Listeners.push_back(_listener);
+    if (NULL == m_Listeners) {
+      m_Listeners = new (std::vector<PropertyListener*>);
+    }
+    m_Listeners->push_back(_listener);
   } // addListener
 
   void PropertyNode::removeListener(PropertyListener* _listener) {
-    std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
-    if(it != m_Listeners.end()) {
-      m_Listeners.erase(it);
+    std::vector<PropertyListener*>::iterator it = std::find(m_Listeners->begin(), m_Listeners->end(), _listener);
+    if(it != m_Listeners->end()) {
+      m_Listeners->erase(it);
       _listener->unregisterProperty(this);
     }
   } // removeListener
@@ -846,7 +854,7 @@ namespace dss {
 
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
     checkWriteAccess();
-    if(m_Aliased) {
+    if (m_AliasTarget != NULL) {
       return m_AliasTarget->createProperty(_propPath);
     } else {
       path_tokenizer pt = createPathTokenizer(_propPath);
@@ -870,7 +878,7 @@ namespace dss {
     if(hasFlag(Writeable)) {
       _ofs << " writeable=\"true\"";
     }
-    if (m_ChildNodes.empty() && (getValueType() == vTypeNone)) {
+    if ((m_ChildNodes && m_ChildNodes->empty()) && (getValueType() == vTypeNone)) {
       _ofs << "/>" << std::endl;
       return true;
     }
@@ -882,7 +890,7 @@ namespace dss {
     }
 
     bool result = true;
-    if (!m_ChildNodes.empty()) {
+    if (m_ChildNodes && !m_ChildNodes->empty()) {
       result = saveChildrenAsXML(_ofs, _indent + 1, _flagsMask);
     }
     _ofs << doIndent(_indent) << "</property>" << std::endl;
@@ -891,10 +899,12 @@ namespace dss {
   } // saveAsXML
 
   bool PropertyNode::saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
-    foreach(PropertyNodePtr pChild, m_ChildNodes) {
-      if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
-        if(!pChild->saveAsXML(_ofs, _indent, _flagsMask)) {
-          return false;
+    if (m_ChildNodes) {
+      foreach(PropertyNodePtr pChild, *m_ChildNodes) {
+        if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
+          if(!pChild->saveAsXML(_ofs, _indent, _flagsMask)) {
+            return false;
+          }
         }
       }
     }
@@ -903,9 +913,11 @@ namespace dss {
 
   bool PropertyNode::searchForFlag(Flag _flag) {
     if(!hasFlag(_flag)) {
-      foreach(PropertyNodePtr pChild, m_ChildNodes) {
-        if(pChild->searchForFlag(_flag)) {
-          return true;
+      if (m_ChildNodes) {
+        foreach(PropertyNodePtr pChild, *m_ChildNodes) {
+          if(pChild->searchForFlag(_flag)) {
+            return true;
+          }
         }
       }
       return false;
@@ -927,14 +939,14 @@ namespace dss {
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr,PropertyNodePtr), PropertyNodePtr _node) {
     bool notified = false;
-    if(!m_Listeners.empty()) {
+    if(m_Listeners && !m_Listeners->empty()) {
       // as the list might get modified in the listener code we need to iterate
       // over a copy of our listeners
-      std::vector<PropertyListener*> copy = m_Listeners;
+      std::vector<PropertyListener*> copy = *m_Listeners;
       std::vector<PropertyListener*>::iterator it;
       foreach(PropertyListener* pListener, copy) {
         // check if the original list still contains the listener
-        if(contains(m_Listeners, pListener)) {
+        if (contains(*m_Listeners, pListener)) {
           (pListener->*_callback)(shared_from_this(), _node);
           notified = true;
         }
@@ -951,8 +963,8 @@ namespace dss {
   } // notifyListeners
 
   void PropertyNode::checkWriteAccess() {
-    boost::shared_ptr<NodePrivileges> privileges = lookupPrivileges();
-    if (!privileges) {
+    NodePrivileges* privileges = lookupPrivileges();
+    if (privileges == NULL) {
       /* no restrictions implied */
       return;
     }
@@ -969,14 +981,14 @@ namespace dss {
     }
   } // checkWriteAccess
 
-  boost::shared_ptr<NodePrivileges> PropertyNode::lookupPrivileges() {
-    if (m_pPrivileges != NULL) {
-      return m_pPrivileges;
-    } else if (m_ParentNode == NULL) {
-      return boost::shared_ptr<NodePrivileges>();
+  NodePrivileges* PropertyNode::lookupPrivileges() {
+    if (m_Privileges != NULL) {
+      return m_Privileges;
     }
-
-    return m_ParentNode->lookupPrivileges();
+    if (m_ParentNode != NULL) {
+      return m_ParentNode->lookupPrivileges();
+    }
+    return NULL;
   }
 
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
