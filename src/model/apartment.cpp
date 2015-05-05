@@ -70,6 +70,11 @@ namespace dss {
   } // ctor
 
   Apartment::~Apartment() {
+    m_Zones.clear();
+    m_DSMeters.clear();
+    m_Devices.clear();
+    m_States.clear();
+
     m_pPropertyNode.reset();
     m_pBusInterface = NULL;
     m_pModelMaintenance = NULL;
