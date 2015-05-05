@@ -313,7 +313,7 @@ namespace dss {
   void PropertyNode::addChild(PropertyNodePtr _childNode) {
     checkWriteAccess();
     if (m_AliasTarget) {
-      m_AliasTarget->removeChild(_childNode);
+      m_AliasTarget->addChild(_childNode);
     } else {
       if(_childNode.get() == this) {
         throw std::runtime_error("Adding self as child node");
