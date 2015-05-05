@@ -501,7 +501,7 @@ const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 const static std::string evtCategory_ExecutionDenied = "ExecutionDenied";
 const static std::string evtCategory_LogFileData = "LogFileData";
 
-const static int dsEnum_SensorError_invalidValue = 1;
+//const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
 
 int getRandomUUID(std::string &str)
