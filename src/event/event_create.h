@@ -89,5 +89,8 @@ boost::shared_ptr<Event>
   createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
                                const ZoneHeatingProperties_t &_properties,
                                const ZoneHeatingOperationModeSpec_t &_mode);
+
+boost::shared_ptr<Event>
+  createHeatingControllerState(int _zoneID, const dsuid_t &_ctrlDsuid, int _ctrlState);
 }
 #endif

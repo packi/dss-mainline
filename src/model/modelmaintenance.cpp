@@ -1918,12 +1918,7 @@ namespace dss {
       log(std::string("Error on heating state event, item not found: ") + e.what(), lsWarning);
     }
 
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerState));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("ControlState", intToString(_State));
-    raiseEvent(pEvent);
+    raiseEvent(createHeatingControllerState(_zoneID, _dsMeterID, _State));
   } // onHeatingControllerState
 
   void ModelMaintenance::onClusterConfigLock(const int _clusterID, const bool _configurationLock) {

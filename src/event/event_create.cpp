@@ -294,4 +294,17 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
     }
     return event;
 }
+
+boost::shared_ptr<Event>
+  createHeatingControllerState(int _zoneID, const dsuid_t &_ctrlDsuid, int _ctrlState)
+{
+    boost::shared_ptr<Event> event;
+    event = boost::make_shared<Event>(EventName::HeatingControllerState);
+
+    event->setProperty("ZoneID", intToString(_zoneID));
+    event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+    event->setProperty("ControlState", intToString(_ctrlState));
+    return event;
+}
+
 }

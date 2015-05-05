@@ -280,6 +280,8 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     props.m_HeatingControlMode = HeatingControlModeIDPID;
     memset(&mode, 0xf7, sizeof(mode));
     pEvent = createHeatingControllerValue(1, DSUID_BROADCAST, props, mode);
+  } else if (eventName == EventName::HeatingControllerState) {
+    pEvent = createHeatingControllerState(1, DSUID_BROADCAST, 0x7f);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
