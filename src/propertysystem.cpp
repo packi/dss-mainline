@@ -324,6 +324,7 @@ namespace dss {
       if(_childNode->m_ParentNode != NULL) {
         _childNode->m_ParentNode->removeChild(_childNode);
       }
+      boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
       if (NULL == m_ChildNodes) {
         m_ChildNodes = new (std::vector<PropertyNodePtr>);
       }
@@ -335,7 +336,6 @@ namespace dss {
         }
       }
       _childNode->m_Index = maxIndex + 1;
-      boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
       m_ChildNodes->push_back(_childNode);
       lock.unlock();
       childAdded(_childNode);
@@ -734,6 +734,7 @@ namespace dss {
   } // linkToProxy
 
   bool PropertyNode::unlinkProxy(bool _recurse) {
+    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
     if(_recurse && m_ChildNodes) {
       for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes->begin(); it != m_ChildNodes->end(); it++) {
         (*it)->unlinkProxy(_recurse);
@@ -813,6 +814,7 @@ namespace dss {
   } // getAsString
 
   void PropertyNode::addListener(PropertyListener* _listener) {
+    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
     _listener->registerProperty(this);
     if (NULL == m_Listeners) {
       m_Listeners = new (std::vector<PropertyListener*>);
@@ -821,6 +823,7 @@ namespace dss {
   } // addListener
 
   void PropertyNode::removeListener(PropertyListener* _listener) {
+    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
     std::vector<PropertyListener*>::iterator it = std::find(m_Listeners->begin(), m_Listeners->end(), _listener);
     if(it != m_Listeners->end()) {
       m_Listeners->erase(it);
