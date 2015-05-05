@@ -26,6 +26,7 @@
 #include <digitalSTROM/dsuid.h>
 
 #include "model/deviceinterface.h"
+#include "businterface.h"
 
 namespace dss {
 
@@ -78,5 +79,9 @@ boost::shared_ptr<Event>
 
 boost::shared_ptr<Event>
   createHeatingEnabled(int _zoneID, bool _enabled);
+
+boost::shared_ptr<Event>
+  createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
+                              const ZoneHeatingConfigSpec_t &_config);
 }
 #endif

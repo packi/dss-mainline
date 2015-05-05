@@ -224,4 +224,35 @@ createHeatingEnabled(int _zoneID, bool _enabled)
   return event;
 }
 
+boost::shared_ptr<Event>
+createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
+                              const ZoneHeatingConfigSpec_t &_config)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::HeatingControllerSetup);
+
+  event->setProperty("ZoneID", intToString(_zoneID));
+  event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+  event->setProperty("ControlMode", intToString(_config.ControllerMode));
+  event->setProperty("EmergencyValue", intToString(_config.EmergencyValue - 100));
+  if (_config.ControllerMode == HeatingControlModeIDPID) {
+    event->setProperty("CtrlKp", doubleToString((double)_config.Kp * 0.025));
+    event->setProperty("CtrlTs", intToString(_config.Ts));
+    event->setProperty("CtrlTi", intToString(_config.Ti));
+    event->setProperty("CtrlKd", intToString(_config.Kd));
+    event->setProperty("CtrlImin", doubleToString((double)_config.Imin * 0.025));
+    event->setProperty("CtrlImax", doubleToString((double)_config.Imax * 0.025));
+    event->setProperty("CtrlYmin", intToString(_config.Ymin - 100));
+    event->setProperty("CtrlYmax", intToString(_config.Ymax - 100));
+    event->setProperty("CtrlAntiWindUp", (_config.AntiWindUp > 0) ? "true" : "false");
+    event->setProperty("CtrlKeepFloorWarm", (_config.KeepFloorWarm > 0) ? "true" : "false");
+  } else if (_config.ControllerMode == HeatingControlModeIDZoneFollower) {
+    event->setProperty("ReferenceZone", intToString(_config.SourceZoneId));
+    event->setProperty("CtrlOffset", intToString(_config.Offset));
+  } else if (_config.ControllerMode == HeatingControlModeIDManual) {
+    event->setProperty("ManualValue", intToString(_config.ManualValue - 100));
+  }
+  return event;
+}
+
 }
