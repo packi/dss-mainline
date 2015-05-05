@@ -42,4 +42,31 @@ BOOST_FIXTURE_TEST_CASE(ClusterInit, DSSInstanceFixture) {
   boost::shared_ptr<Cluster> cl = ap.getCluster(GroupIDAppUserMin);
 }
 
+BOOST_FIXTURE_TEST_CASE(ClusterOpLock, DSSInstanceFixture) {
+  Apartment &ap(DSS::getInstance()->getApartment());
+  PropertySystem &props(DSS::getInstance()->getPropertySystem());
+
+  boost::shared_ptr<Cluster> cl = ap.getCluster(GroupIDAppUserMin);
+
+  std::string opLockProp = "/usr/states/cluster." + intToString(cl->getID()) +
+    ".operation_lock";
+  BOOST_CHECK(props.getProperty(opLockProp) != NULL);
+
+  PropertyNodePtr n = props.getProperty(opLockProp);
+  BOOST_CHECK_EQUAL(n->getProperty("name")->getStringValue(),
+                    "cluster.16.operation_lock");
+
+  // default is unknown
+  BOOST_CHECK_EQUAL(n->getProperty("state")->getStringValue(), "unknown");
+  BOOST_CHECK_EQUAL(n->getProperty("value")->getIntegerValue(), 3);
+
+  cl->setOperationLock(false, coTest);
+  BOOST_CHECK_EQUAL(n->getProperty("state")->getStringValue(), "inactive");
+  BOOST_CHECK_EQUAL(n->getProperty("value")->getIntegerValue(), 2);
+
+  cl->setOperationLock(true, coTest);
+  BOOST_CHECK_EQUAL(n->getProperty("state")->getStringValue(), "active");
+  BOOST_CHECK_EQUAL(n->getProperty("value")->getIntegerValue(), 1);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
