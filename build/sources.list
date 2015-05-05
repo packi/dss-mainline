@@ -244,6 +244,7 @@ dsstests_SOURCES = \
 	../tests/jsproperty.cpp \
 	../tests/loggertests.cpp \
 	../tests/meteringtests.cpp \
+	../tests/model-cluster_tests.cpp \
 	../tests/modeljstests.cpp \
 	../tests/modeltests.cpp \
 	../tests/propertysystemtests.cpp \

@@ -170,7 +170,7 @@ namespace dss {
     void removeDevice(dsuid_t _device);
     void removeDSMeter(dsuid_t _dsMeter);
     void removeInactiveMeters();
-    void removeState(const std::string& _name);
+    void removeState(boost::shared_ptr<State> _state);
 
     ApartmentSensorStatus_t getSensorStatus() const;
     void setTemperature(double _value, DateTime& _ts);

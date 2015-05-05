@@ -70,6 +70,11 @@ namespace dss {
   } // ctor
 
   Apartment::~Apartment() {
+    m_Zones.clear();
+    m_DSMeters.clear();
+    m_Devices.clear();
+    m_States.clear();
+
     m_pPropertyNode.reset();
     m_pBusInterface = NULL;
     m_pModelMaintenance = NULL;
@@ -410,7 +415,7 @@ namespace dss {
         for (uint8_t i = 0; i < binaryInputCount; i++) {
           boost::shared_ptr<State> state = pDevice->getBinaryInputState(i);
           try {
-            removeState(state->getName());
+            removeState(state);
           } catch (ItemNotFoundException& e) {
             Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
           }
@@ -547,21 +552,9 @@ namespace dss {
     return result;
   } // getStates
 
-  void Apartment::removeState(const std::string& _name) {
-    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    if(m_pPropertyNode != NULL) {
-      m_pPropertyNode->checkWriteAccess();
-    }
-    for(std::vector<boost::shared_ptr<State> >::iterator ips = m_States.begin(), e = m_States.end();
-        ips != e; ++ips) {
-      boost::shared_ptr<State> pState = *ips;
-      if(pState->getName() == _name) {
-        m_States.erase(ips);
-        return;
-      }
-    }
-    throw ItemNotFoundException("State does not exist: " + _name);
-  } // removeState
+  void Apartment::removeState(boost::shared_ptr<State> _state) {
+    m_States.erase(std::remove(m_States.begin(), m_States.end(), _state));
+  }
 
   ActionRequestInterface* Apartment::getActionRequestInterface() {
     if(m_pBusInterface != NULL) {
