@@ -37,7 +37,8 @@ namespace dss {
     coTest = 6,
     coSystem = 7,
     coSystemBinaryInput = 8,
-    coDsmApi = 9
+    coDsmApi = 9,
+    coSystemStartup = 10,
   } callOrigin_t;
 
   /** Interface to a single or multiple devices.

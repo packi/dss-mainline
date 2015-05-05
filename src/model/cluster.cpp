@@ -45,7 +45,15 @@ namespace dss {
     m_readFromDsm(false),
     m_automatic(false)
   {
+    std::string name = "cluster." + intToString(_id) + ".operation_lock";
+    m_oplock_state = m_pApartment->allocateState(StateType_Group, name, "");
+    m_oplock_state->setState(coSystemStartup, State_Unknown);
   } // ctor
+
+  Cluster::~Cluster() {
+    // TODO unpublishPropertyTree
+    m_pApartment->removeState(m_oplock_state);
+  }
 
   void Cluster::updateLockedScenes() {
     if (!m_pPropertyNode) {
@@ -96,4 +104,12 @@ namespace dss {
             (m_ConfigurationLocked == cluster.configurationLocked));
   }
 
+  bool Cluster::isOperationLock() {
+    // unknown -> not locked
+    return m_oplock_state->getState() == State_Active;
+  }
+
+  void Cluster::setOperationLock(bool _locked, callOrigin_t _callOrigin) {
+    m_oplock_state->setState(_callOrigin, _locked ? State_Active : State_Inactive);
+  }
 } // namespace dss
