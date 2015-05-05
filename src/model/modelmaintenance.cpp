@@ -1886,39 +1886,7 @@ namespace dss {
     log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID) +
         ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
 
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerValue));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("NominalTemperature_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode0)));
-      pEvent->setProperty("NominalTemperature_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode1)));
-      pEvent->setProperty("NominalTemperature_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode2)));
-      pEvent->setProperty("NominalTemperature_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode3)));
-      pEvent->setProperty("NominalTemperature_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode4)));
-      pEvent->setProperty("NominalTemperature_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode5)));
-    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      pEvent->setProperty("ControlValue_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode0)));
-      pEvent->setProperty("ControlValue_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode1)));
-      pEvent->setProperty("ControlValue_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode2)));
-      pEvent->setProperty("ControlValue_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode3)));
-      pEvent->setProperty("ControlValue_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode4)));
-      pEvent->setProperty("ControlValue_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode5)));
-    }
-    raiseEvent(pEvent);
-
+    raiseEvent(createHeatingControllerValue(_zoneID, _dsMeterID, hProp, *values));
 
     boost::shared_ptr<Event> pEventDsHub;
     pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));

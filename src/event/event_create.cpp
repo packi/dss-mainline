@@ -255,4 +255,43 @@ createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
   return event;
 }
 
+boost::shared_ptr<Event>
+createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
+                             const ZoneHeatingProperties_t &_properties,
+                             const ZoneHeatingOperationModeSpec_t &_mode)
+{
+    boost::shared_ptr<Event> event;
+    event = boost::make_shared<Event>(EventName::HeatingControllerValue);
+
+    event->setProperty("ZoneID", intToString(_zoneID));
+    event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+    if (_properties.m_HeatingControlMode == HeatingControlModeIDPID) {
+      event->setProperty("NominalTemperature_Off",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode0)));
+      event->setProperty("NominalTemperature_Comfort",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode1)));
+      event->setProperty("NominalTemperature_Economy",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode2)));
+      event->setProperty("NominalTemperature_NotUsed",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode3)));
+      event->setProperty("NominalTemperature_Night",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
+      event->setProperty("NominalTemperature_Holiday",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
+    } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
+      event->setProperty("ControlValue_Off",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
+      event->setProperty("ControlValue_Comfort",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode1)));
+      event->setProperty("ControlValue_Economy",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode2)));
+      event->setProperty("ControlValue_NotUsed",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode3)));
+      event->setProperty("ControlValue_Night",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
+      event->setProperty("ControlValue_Holiday",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
+    }
+    return event;
+}
 }
