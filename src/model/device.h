@@ -307,6 +307,7 @@ namespace dss {
 
     CardinalDirection_t m_cardinalDirection; //<  wind protection of blinds
     WindProtectionClass_t m_windProtectionClass;
+    int m_floor;
 
   protected:
     /** Sends the application a note that something has changed.
@@ -730,6 +731,16 @@ namespace dss {
     }
     WindProtectionClass_t getWindProtectionClass() const {
       return m_windProtectionClass;
+    }
+
+    void setFloor(int _floor) {
+      if (m_floor != _floor) {
+        m_floor = _floor;
+        dirty();
+      }
+    }
+    int getFloor() const {
+      return m_floor;
     }
   }; // Device
 

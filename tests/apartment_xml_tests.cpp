@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
     "        </property>\n"
     "      </properties>\n"
     "    </device>\n"
-    "    <device dsuid=\"0000000000000000000000000000000001\" isPresent=\"0\" firstSeen=\"1429729274\" inactiveSince=\"1970-01-01 01:00:00\" CardinalDirection=\"north west\" WindProtectionClass=\"3\" configurationLocked=\"0\">\n"
+    "    <device dsuid=\"0000000000000000000000000000000001\" isPresent=\"0\" firstSeen=\"1429729274\" inactiveSince=\"1970-01-01 01:00:00\" CardinalDirection=\"north west\" WindProtectionClass=\"3\" configurationLocked=\"0\" Floor=\"13\">\n"
     "    </device>\n"
     "  </devices>\n"
     "  <zones>\n"
@@ -136,6 +136,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   BOOST_CHECK(dev != NULL);
   BOOST_CHECK_EQUAL(dev->getCardinalDirection(), cd_none);
   BOOST_CHECK_EQUAL(dev->getWindProtectionClass(), wpc_none);
+  BOOST_CHECK_EQUAL(dev->getFloor(), 0);
 
   boost::shared_ptr<DSMeter> meter = apt.getDSMeter("UMZ-451");
   BOOST_CHECK(meter != NULL);
@@ -156,6 +157,7 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   dev = apt.getDeviceByDSID(protID);
   BOOST_CHECK_EQUAL(dev->getCardinalDirection(), cd_north_west);
   BOOST_CHECK_EQUAL(dev->getWindProtectionClass(), wpc_class_3);
+  BOOST_CHECK_EQUAL(dev->getFloor(), 13);
 
   boost::shared_ptr<Cluster> pClust;
   BOOST_CHECK_NO_THROW(pClust = apt.getCluster(16));
@@ -191,6 +193,7 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
     dev1->setCardinalDirection(cd_west);
     dev1->setWindProtectionClass(wpc_class_2);
+    dev1->setFloor(42);
 
     // 2nd device without protecton calls, orientation
     boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
@@ -209,12 +212,14 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
 
   BOOST_CHECK_EQUAL(dev->getCardinalDirection(), cd_west);
   BOOST_CHECK_EQUAL(dev->getWindProtectionClass(), wpc_class_2);
+  BOOST_CHECK_EQUAL(dev->getFloor(), 42);
 
   BOOST_CHECK_NO_THROW(apt2.getDeviceByDSID(DSUID_BROADCAST));
   dev = apt2.getDeviceByDSID(DSUID_BROADCAST);
 
   BOOST_CHECK_EQUAL(dev->getCardinalDirection(), cd_none);
   BOOST_CHECK_EQUAL(dev->getWindProtectionClass(), wpc_none);
+  BOOST_CHECK_EQUAL(dev->getFloor(), 0);
 
   unlink(filename.c_str());
   rmdir(dirname);

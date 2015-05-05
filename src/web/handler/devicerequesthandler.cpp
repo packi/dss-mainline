@@ -1716,6 +1716,21 @@ namespace dss {
       json.add("class", intToString(pDevice->getWindProtectionClass()));
       return json.successJSON();
 
+    } else if (_request.getMethod() == "setFloor") {
+      int floor;
+      JSONWriter json;
+
+      if (!_request.getParameter("floor", floor)) {
+        return json.failure("missing parameter : floor");
+      }
+      pDevice->setFloor(floor);
+      return json.successJSON();
+
+    } else if (_request.getMethod() == "getFloor") {
+      JSONWriter json;
+      json.add("floor", intToString(pDevice->getFloor()));
+      return json.successJSON();
+
     } else {
       throw std::runtime_error("Unhandled function");
     }
