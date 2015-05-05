@@ -39,6 +39,7 @@
 #include "src/model/zone.h"
 #include "src/model/set.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
 #include "src/util.h"
@@ -349,7 +350,6 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
-    boost::shared_ptr<Group> pGroup;
 
     if (isDefaultGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
@@ -362,28 +362,9 @@ namespace dss {
       try {
         Logger::getInstance()->log("Configure user group " + intToString(_groupNumber) +
             " with standard-id " + intToString(_standardGroupNumber), lsInfo);
-        pGroup = m_Apartment.getGroup(_groupNumber);
-        pGroup->setName(_name);
-        pGroup->setStandardGroupID(_standardGroupNumber);
-        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
-        foreach(boost::shared_ptr<Zone> pZone, zones) {
-          if (pZone->getID() == 0 || !pZone->isConnected()) {
-            continue;
-          }
-          pGroup = pZone->getGroup(_groupNumber);
-          if (pGroup == NULL) {
-            pGroup = boost::make_shared<Group>(_groupNumber, m_Apartment.getZone(0), boost::ref<Apartment>(m_Apartment));
-            pGroup->setIsValid(true);
-            m_Apartment.getZone(0)->addGroup(pGroup);
-            m_Interface.createGroup(pZone->getID(), _groupNumber, _standardGroupNumber, _name);
-          } else {
-            pGroup->setIsValid(true);
-            m_Interface.groupSetName(pZone->getID(), _groupNumber, _name);
-            m_Interface.groupSetStandardID(pZone->getID(), _groupNumber, _standardGroupNumber);
-          }
-          pGroup->setName(_name);
-          pGroup->setStandardGroupID(_standardGroupNumber);
-        }
+        boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_groupNumber);
+        pCluster->setName(_name);
+        pCluster->setStandardGroupID(_standardGroupNumber);
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Datamodel-Error creating user group " + intToString(_groupNumber) +
             ": " + e.what(), lsWarning);
@@ -394,7 +375,8 @@ namespace dss {
       return;
     }
 
-    if (_groupNumber <= 31) {
+    boost::shared_ptr<Group> pGroup;
+    if (isZoneUserGroup(_groupNumber)) {
       try {
         pGroup = _zone->getGroup(_groupNumber);
         throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
@@ -415,39 +397,25 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
-    boost::shared_ptr<Group> pGroup;
 
     if (isDefaultGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
     if (isAppUserGroup(_groupNumber)) {
+      boost::shared_ptr<Cluster> pCluster;
       if (_zone->getID() != 0) {
         throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
       }
       try {
         Logger::getInstance()->log("Remove user group " + intToString(_groupNumber), lsInfo);
-        pGroup = m_Apartment.getGroup(_groupNumber);
+        pCluster = m_Apartment.getCluster(_groupNumber);
       } catch (ItemNotFoundException& e) {
         throw DSSException("Remove group: id " + intToString(_groupNumber) + " does not exist");
       }
       try {
-        pGroup->setName("");
-        pGroup->setStandardGroupID(0);
-        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
-        foreach(boost::shared_ptr<Zone> pZone, zones) {
-          if (pZone->getID() == 0 || !pZone->isConnected()) {
-            continue;
-          }
-          pGroup = pZone->getGroup(_groupNumber);
-          if (pGroup == NULL) {
-            continue;
-          }
-          pGroup->setName("");
-          pGroup->setStandardGroupID(0);
-          m_Interface.groupSetName(pZone->getID(), _groupNumber, "");
-          m_Interface.groupSetStandardID(pZone->getID(), _groupNumber, 0);
-        }
+        pCluster->setName("");
+        pCluster->setStandardGroupID(0);
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Datamodel-Error removing user group " + intToString(_groupNumber) +
             ": " + e.what(), lsWarning);
@@ -458,7 +426,8 @@ namespace dss {
       return;
     }
 
-    if (_groupNumber <= 31) {
+    if (isZoneUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
       try {
         pGroup = _zone->getGroup(_groupNumber);
       } catch (ItemNotFoundException& e) {
@@ -485,38 +454,13 @@ namespace dss {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (isAppUserGroup(_group->getID())) {
+    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID())) {
       _group->setName(_name);
-      try {
-        boost::shared_ptr<Group> pGroup;
-        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
-        foreach(boost::shared_ptr<Zone> pZone, zones) {
-          if (pZone->getID() == 0 || !pZone->isConnected()) {
-            continue;
-          }
-          pGroup = pZone->getGroup(_group->getID());
-          if (pGroup == NULL) {
-            continue;
-          }
-          pGroup->setName(_name);
-          m_Interface.groupSetName(pZone->getID(), _group->getID(), _name);
-        }
-      } catch (ItemNotFoundException& e) {
-        Logger::getInstance()->log("Datamodel-Error setting user group " + intToString(_group->getID()) +
-            " name: " + e.what(), lsWarning);
-      } catch (BusApiError& e) {
-        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_group->getID()) +
-            " name: " + e.what(), lsWarning);
-      }
+      m_Interface.groupSetName(_group->getZoneID(), _group->getID(), _name);
       return;
     }
 
-    if (_group->getID() <= 31) {
-      _group->setName(_name);
-      m_Interface.groupSetName(_group->getZoneID(), _group->getID(), _name);
-    }
-
-    throw DSSException("Remove group: id " + intToString(_group->getID()) + " too large");
+    throw DSSException("Rename group: id " + intToString(_group->getID()) + " too large");
   } // groupSetName
 
   void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
@@ -525,38 +469,13 @@ namespace dss {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (isAppUserGroup(_group->getID())) {
+    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID())) {
       _group->setStandardGroupID(_standardGroupNumber);
-      try {
-        boost::shared_ptr<Group> pGroup;
-        std::vector<boost::shared_ptr<Zone> > zones = m_Apartment.getZones();
-        foreach(boost::shared_ptr<Zone> pZone, zones) {
-          if (pZone->getID() == 0 || !pZone->isConnected()) {
-            continue;
-          }
-          pGroup = pZone->getGroup(_group->getID());
-          if (pGroup == NULL) {
-            continue;
-          }
-          pGroup->setStandardGroupID(_standardGroupNumber);
-          m_Interface.groupSetStandardID(pZone->getID(), _group->getID(), _standardGroupNumber);
-        }
-      } catch (ItemNotFoundException& e) {
-        Logger::getInstance()->log("Datamodel-Error setting user group " + intToString(_group->getID()) +
-            " name: " + e.what(), lsWarning);
-      } catch (BusApiError& e) {
-        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_group->getID()) +
-            " name: " + e.what(), lsWarning);
-      }
+      m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
       return;
     }
 
-    if (_group->getID() <= 31) {
-      _group->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
-    }
-
-    throw DSSException("Remove group: id " + intToString(_group->getID()) + " too large");
+    throw DSSException("SetStandardColor group: id " + intToString(_group->getID()) + " too large");
   } // groupSetStandardID
 
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group,
@@ -769,4 +688,27 @@ namespace dss {
       }
     }
   }
+
+  void StructureManipulator::clusterSetName(boost::shared_ptr<Cluster> _cluster,
+                                            const std::string& _name) {
+    if (isAppUserGroup(_cluster->getID())) {
+      _cluster->setName(_name);
+      m_Interface.clusterSetName(_cluster->getID(), _name);
+      return;
+    }
+
+    throw DSSException("Rename cluster: id " + intToString(_cluster->getID()) + " not a cluster");
+  } // clusterSetName
+
+  void StructureManipulator::clusterSetStandardID(boost::shared_ptr<Cluster> _cluster,
+                                                const int _standardGroupNumber) {
+    if (isAppUserGroup(_cluster->getID())) {
+      _cluster->setStandardGroupID(_standardGroupNumber);
+      m_Interface.clusterSetStandardID(_cluster->getID(), _standardGroupNumber);
+      return;
+    }
+
+    throw DSSException("SetStandardColor cluster: id " + intToString(_cluster->getID()) + " not a cluster");
+  } // clusterSetStandardID
+
 } // namespace dss

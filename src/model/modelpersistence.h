@@ -36,6 +36,7 @@ namespace dss {
   class Apartment;
   class Zone;
   class Group;
+  class Cluster;
   class Device;
   class DSMeter;
   class PropertyParserProxy;
@@ -62,7 +63,9 @@ namespace dss {
         ps_group,
         ps_scene,
         ps_properties,
-        ps_sensor
+        ps_sensor,
+        ps_cluster,
+        ps_lockedScenes
     };
     bool m_ignore;
     bool m_expectString;
@@ -74,14 +77,17 @@ namespace dss {
     boost::shared_ptr<DSMeter> m_tempMeter;
     boost::shared_ptr<Zone> m_tempZone;
     boost::shared_ptr<Group> m_tempGroup;
+    boost::shared_ptr<Cluster> m_tempCluster;
     boost::shared_ptr<PropertyParserProxy> m_propParser;
 
     void parseDevice(const char *_name, const char **_attrs);
     void parseZone(const char *_name, const char **_attrs);
     void parseGroup(const char *_name, const char **_attrs);
+    void parseCluster(const char *_name, const char **_attrs);
     void parseMeter(const char *_name, const char **_attrs);
     void parseScene(const char *_name, const char **_attrs);
     void parseSensor(const char *_name, const char **_attrs);
+    void parseLockedScenes(const char *_name, const char **_attrs);
     const char *getSingleAttribute(const char *_name, const char **_attrs);
     virtual void elementStart(const char *_name, const char **_attrs);
     virtual void elementEnd(const char *_name);

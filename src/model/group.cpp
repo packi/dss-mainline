@@ -52,7 +52,7 @@ namespace dss {
   } // ctor
 
   bool Group::isValid() const {
-    if (m_GroupID <= 23) {
+    if (isDefaultGroup(m_GroupID) || isAppUserGroup(m_GroupID)) {
       return m_IsValid && (m_StandardGroupID > 0);
     }
     return m_IsValid;
@@ -253,33 +253,33 @@ namespace dss {
     }
   } // publishToPropertyTree
 
-  void Group::sensorPush(const std::string& _sourceID, const int _sensorType, const double _sensorValue) {
+  void Group::sensorPush(const dsuid_t& _sourceID, int _type, double _value) {
     DateTime now;
     boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
 
     if (m_ZoneID == 0) {
-      switch (_sensorType) {
-        case SensorIDTemperatureOutdoors: m_pApartment->setTemperature(_sensorValue, now); break;
-        case SensorIDHumidityOutdoors: m_pApartment->setHumidityValue(_sensorValue, now); break;
-        case SensorIDBrightnessOutdoors: m_pApartment->setBrightnessValue(_sensorValue, now); break;
+      switch (_type) {
+        case SensorIDTemperatureOutdoors: m_pApartment->setTemperature(_value, now); break;
+        case SensorIDHumidityOutdoors: m_pApartment->setHumidityValue(_value, now); break;
+        case SensorIDBrightnessOutdoors: m_pApartment->setBrightnessValue(_value, now); break;
         default: break;
       }
     } else {
-      switch (_sensorType) {
-        case SensorIDTemperatureIndoors: pZone->setTemperature(_sensorValue, now); break;
-        case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_sensorValue, now); break;
-        case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_sensorValue, now); break;
-        case SensorIDHumidityIndoors: pZone->setHumidityValue(_sensorValue, now); break;
-        case SensorIDBrightnessIndoors: pZone->setBrightnessValue(_sensorValue, now); break;
-        case SensorIDCO2Concentration: pZone->setCO2ConcentrationValue(_sensorValue, now); break;
+      switch (_type) {
+        case SensorIDTemperatureIndoors: pZone->setTemperature(_value, now); break;
+        case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_value, now); break;
+        case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_value, now); break;
+        case SensorIDHumidityIndoors: pZone->setHumidityValue(_value, now); break;
+        case SensorIDBrightnessIndoors: pZone->setBrightnessValue(_value, now); break;
+        case SensorIDCO2Concentration: pZone->setCO2ConcentrationValue(_value, now); break;
         default: break;
       }
     }
 
     if (m_pPropertyNode != NULL) {
-      PropertyNodePtr node = m_pPropertyNode->createProperty("sensor/type" + intToString(_sensorType));
-      node->createProperty("value")->setFloatingValue(_sensorValue);
-      node->createProperty("sourcedsuid")->setStringValue(_sourceID);
+      PropertyNodePtr node = m_pPropertyNode->createProperty("sensor/type" + intToString(_type));
+      node->createProperty("value")->setFloatingValue(_value);
+      node->createProperty("sourcedsuid")->setStringValue(dsuid2str(_sourceID));
       node->createProperty("time")->setIntegerValue(now.secondsSinceEpoch());
       node->createProperty("timestamp")->setStringValue(now.toString());
     }

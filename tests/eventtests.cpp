@@ -45,10 +45,11 @@
 #include "src/model/group.h"
 #include "src/model/set.h"
 #include "src/dss.h"
-#include "dss_life_cycle.h"
 #include "src/eventinterpretersystemplugins.h"
 #include "src/security/security.h"
 #include "src/security/user.h"
+
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 
@@ -712,10 +713,8 @@ const char* kDsstestsFilesDirectory = WITH_DSSTEST_FILES;
 const char* kDsstestsFilesDirectory = TEST_TRIGGERS_PATH "data";
 #endif
 
-BOOST_AUTO_TEST_CASE(testSystemTriggerSpeed) {
+BOOST_FIXTURE_TEST_CASE(testSystemTriggerSpeed, DSSInstanceFixture) {
   PropertyParser parser;
-  boost::scoped_ptr<DSSLifeCycle> guard;
-  guard.reset(new DSSLifeCycle());
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   PropertyNodePtr prop = propSystem.createProperty("/");
   BOOST_CHECK_EQUAL(true, parser.loadFromXML(std::string(kDsstestsFilesDirectory) + std::string("/triggers.xml"), prop));

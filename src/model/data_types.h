@@ -22,6 +22,7 @@
 #define __MODEL_DATA_TYPES__
 
 #include <string>
+#include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 
 namespace dss {
 
@@ -35,7 +36,8 @@ namespace dss {
     cd_south_west = 6,
     cd_west = 7,
     cd_north_west = 8,
-    cd_last = 9,
+
+    cd_last = 9, //< keep last
   } CardinalDirection_t;
 
   bool valid(CardinalDirection_t _direction);
@@ -47,10 +49,25 @@ namespace dss {
     wpc_class_1 = 1,  //<  7.8m/s,
     wpc_class_2 = 2,  //< 10.6m/s,
     wpc_class_3 = 3,  //< 13.6m/s,
+
+    wpc_last,  //< keep last
   } WindProtectionClass_t;
 
   bool valid(WindProtectionClass_t _class);
   bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out);
+
+  typedef enum {
+    ge_none = 0,
+    ge_sun = 1,
+    ge_frost = 2,
+    ge_heating_mode = 3,
+  } GenericEventType_t;
+
+  typedef struct {
+    int length;
+    unsigned char payload[PAYLOAD_LEN];
+  } GenericEventPayload_t;
+
 }
 
 #endif

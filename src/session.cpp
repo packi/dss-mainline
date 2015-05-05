@@ -128,6 +128,27 @@ namespace dss {
     }
   }
 
+  void Session::subscribeEventSubscription(EventInterpreter &interp, int _token, const std::string& _name)
+  {
+    boost::mutex::scoped_lock lock(m_SubscriptionMutex);
+    boost::shared_ptr<EventSubscriptionSession> subscription =
+      createEventSubscription(interp, _token);
+    subscription->subscribe(_name);
+  }
+
+  void Session::unsubscribeEventSubscription(int _token, const std::string& _name)
+  {
+    boost::mutex::scoped_lock lock(m_SubscriptionMutex);
+    boost::shared_ptr<EventSubscriptionSession> sub;
+    try {
+      sub = getEventSubscription(_token);
+      sub->unsubscribe(_name);
+    } catch (std::exception& e) {
+    }
+
+    deleteEventSubscription(sub);
+  }
+
   void Session::deleteEventSubscription(boost::shared_ptr<EventSubscriptionSession> subs) {
     m_subscriptions.erase(std::remove(m_subscriptions.begin(),
                                       m_subscriptions.end(), subs),

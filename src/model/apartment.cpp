@@ -49,6 +49,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/modulator.h"
 #include "src/model/state.h"
 #include "src/metering/metering.h"
@@ -140,18 +141,6 @@ namespace dss {
     grp->setStandardGroupID(GroupIDControlTemperature);
     grp->setIsValid(true);
     _zone->addGroup(grp);
-    if (_zone->getID() != 0) {
-      foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
-        if ((pGroup->getID() >= GroupIDAppUserMin) && (pGroup->getID() <= GroupIDAppUserMax)) {
-            grp.reset(new Group(pGroup->getID(), _zone, *this));
-            grp->setName(pGroup->getName());
-            grp->setStandardGroupID(pGroup->getStandardGroupID());
-            grp->setIsValid(pGroup->isValid());
-            grp->setIsSynchronized(false);
-          _zone->addGroup(grp);
-        }
-      }
-    }
   } // addDefaultGroupsToZone
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) const {
@@ -263,6 +252,36 @@ namespace dss {
     throw ItemNotFoundException(intToString(_id));
   } // getGroup(id)
 
+  boost::shared_ptr<Cluster> Apartment::getCluster(const int _id) {
+    if (isAppUserGroup(_id)) {
+      boost::shared_ptr<Cluster> pResult = boost::dynamic_pointer_cast<Cluster>(getZone(0)->getGroup(_id));
+      if(pResult != NULL) {
+        return pResult;
+      }
+    }
+    throw ItemNotFoundException(intToString(_id));
+  } // getGroup(id)
+
+  std::vector<boost::shared_ptr<Cluster> > Apartment::getClusters() {
+    std::vector<boost::shared_ptr<Cluster> > result;
+    foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
+      if (isAppUserGroup(pGroup->getID())) {
+        result.push_back(boost::dynamic_pointer_cast<Cluster>(pGroup));
+      }
+    }
+    return result;
+  }
+
+  boost::shared_ptr<Cluster> Apartment::getEmptyCluster() {
+    // find a group slot with unassigned state machine id
+    foreach (boost::shared_ptr<Cluster> pCluster, getClusters()) {
+      if (pCluster->getStandardGroupID() == 0) {
+        return pCluster;
+      }
+    }
+    return boost::shared_ptr<Cluster> ();
+  }
+
   boost::shared_ptr<Device> Apartment::allocateDevice(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     boost::shared_ptr<Device> pResult;
@@ -323,6 +342,13 @@ namespace dss {
       result->publishToPropertyTree();
       addDefaultGroupsToZone(result);
       m_Zones.push_back(result);
+
+      if (_zoneID == 0) {
+        for (int i = GroupIDAppUserMin; i <= GroupIDAppUserMax; ++i) {
+          boost::shared_ptr<Cluster> pCluster = boost::make_shared<Cluster>(i, boost::ref<Apartment>(*this));
+          result->addGroup(pCluster);
+        }
+      }
     } else {
       result->publishToPropertyTree();
     }

@@ -95,8 +95,8 @@ namespace dss {
                                  const unsigned int _powerW,
                                  const unsigned int _energyWs);
     virtual void onZoneSensorValue(BusInterface* _source,
-                                   const dsuid_t _dsMeterID,
-                                   const std::string& _sourceDevice,
+                                   const dsuid_t& _dsMeterID,
+                                   const dsuid_t& _sourceDevice,
                                    const int& _zoneID,
                                    const int& _groupID,
                                    const int& _sensorType,

@@ -4,9 +4,6 @@
 
 #include <uuid.h>
 
-#include "webservice_api.h"
-#include "web/webrequests.h"
-
 #include <json.h>
 #include <stdio.h>
 #include <iostream>
@@ -14,8 +11,12 @@
 
 #include "dss.h"
 #include "event.h"
+#include "event/event_fields.h"
 #include "propertysystem.h"
 #include "model/group.h"
+#include "webservice_api.h"
+#include "web/webrequests.h"
+
 
 namespace dss {
 
@@ -50,7 +51,7 @@ const static std::string evtCategory_HeatingControllerState = "HeatingController
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
 const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 
-const static int dsEnum_SensorError_invalidValue = 1;
+//const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
 
 void appendCommon(JSONWriter& json, const std::string& group,
@@ -96,7 +97,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("SensorType", sensorType);
       json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-      propValue = event->getPropertyByName("sensorIndex");
+      propValue = event->getPropertyByName(ef_sensorIndex);
       if (!propValue.empty()) {
         json.add("SensorIndex", propValue);
       }
@@ -115,8 +116,8 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
                    event.get());
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
-      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      json.add("Force", event->hasPropertySet("forced"));
+      json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
+      json.add("Force", event->hasPropertySet(ef_forced));
       json.add("Origin", event->getPropertyByName("originDeviceID"));
     } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
@@ -124,7 +125,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
                    event.get());
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
-      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
+      json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
       json.add("Origin", event->getPropertyByName("originDeviceID"));
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
@@ -500,7 +501,7 @@ const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 const static std::string evtCategory_ExecutionDenied = "ExecutionDenied";
 const static std::string evtCategory_LogFileData = "LogFileData";
 
-const static int dsEnum_SensorError_invalidValue = 1;
+//const static int dsEnum_SensorError_invalidValue = 1;
 const static int dsEnum_SensorError_noValue = 2;
 
 int getRandomUUID(std::string &str)
@@ -612,8 +613,8 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.startObject("EventBody");
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
-      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
-      json.add("Force", event->hasPropertySet("forced"));
+      json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
+      json.add("Force", event->hasPropertySet(ef_forced));
       json.add("Origin", event->getPropertyByName("originDeviceID"));
       json.endObject();
     } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
@@ -623,7 +624,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.startObject("EventBody");
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
-      json.add("SceneID", strToInt(event->getPropertyByName("sceneID")));
+      json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
       json.add("Origin", event->getPropertyByName("originDeviceID"));
       json.endObject();
     } else if (event->getName() == EventName::StateChange) {

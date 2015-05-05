@@ -712,7 +712,10 @@ namespace dss {
 
     void setCardinalDirection(CardinalDirection_t direction) {
       assert(valid(direction));
-      m_cardinalDirection = direction;
+      if (m_cardinalDirection != direction) {
+          m_cardinalDirection = direction;
+          dirty();
+      }
     }
     CardinalDirection_t getCardinalDirection() const {
       return m_cardinalDirection;
@@ -720,7 +723,10 @@ namespace dss {
 
     void setWindProtectionClass(WindProtectionClass_t _klass) {
       assert(valid(_klass));
-      m_windProtectionClass = _klass;
+      if (m_windProtectionClass != _klass) {
+          m_windProtectionClass = _klass;
+          dirty();
+      }
     }
     WindProtectionClass_t getWindProtectionClass() const {
       return m_windProtectionClass;

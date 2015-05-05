@@ -32,12 +32,14 @@ namespace dss {
   class DeviceReference;
   class Set;
   class Group;
+  class Cluster;
   class Zone;
   class Apartment;
 
   void toJSON(const DeviceReference& _device, JSONWriter& _json);
   void toJSON(const Set& _set, JSONWriter& _json);
   void toJSON(boost::shared_ptr<const Group> _group, JSONWriter& _json);
+  void toJSON(boost::shared_ptr<const Cluster> _cluster, JSONWriter& _json);
   void toJSON(Zone& _zone, JSONWriter& _json, bool _includeDevices = true);
   void toJSON(Apartment& _apartment, JSONWriter& _json);
 

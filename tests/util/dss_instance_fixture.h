@@ -28,13 +28,13 @@
 namespace dss {
 
 /**
- * DSSLifeCycle - RAII like management of DSS instance
+ * DSSInstanceFixture - RAII like management of DSS instance
  *
  * why does it need to be FRIEND of DSS?
  *
- * boost::scoped_ptr<DSSLifeCycle> guard;
- * guard.reset(new DSSLifeCycle());
- * guard.reset(new DSSLifeCycle());
+ * boost::scoped_ptr<DSSInstanceFixture> guard;
+ * guard.reset(new DSSInstanceFixture());
+ * guard.reset(new DSSInstanceFixture());
  *
  * the second reset will fetch a refence of the old
  * instance then assign it to the guard, which already
@@ -47,14 +47,14 @@ namespace dss {
  *   to the one we created, requires access to m_Instance
  *
  * USE like this:
- * DSSLifeCycle guard;
- * std::scoped_ptr<DSSLifeCycle> guard
+ * DSSInstanceFixture guard;
+ * std::scoped_ptr<DSSInstanceFixture> guard
  */
-class DSSLifeCycle {
+class DSSInstanceFixture {
   __DECL_LOG_CHANNEL__
 public:
-  DSSLifeCycle();
-  ~DSSLifeCycle();
+  DSSInstanceFixture();
+  ~DSSInstanceFixture();
   void initPlugins();
 protected:
   DSS *m_instance;
@@ -63,5 +63,4 @@ protected:
 };
 
 }
-
 #endif

@@ -9,11 +9,12 @@
 #include <boost/test/unit_test.hpp>
 #include <set>
 
-#include "sensor_data_uploader.h"
+#include "src/sensor_data_uploader.h"
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 
-BOOST_AUTO_TEST_SUITE(SensorDataUploaderTest)
+BOOST_FIXTURE_TEST_SUITE(SensorDataUploaderTest, DSSInstanceFixture);
 
 struct EventFactory {
   enum {

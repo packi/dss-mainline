@@ -27,6 +27,7 @@
 
 #include "dsbusinterface.h"
 
+#include <algorithm>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -38,6 +39,7 @@
 #include "src/propertysystem.h"
 #include "src/foreach.h"
 #include "src/sceneaccess.h"
+#include "src/util.h"
 
 #include "src/model/modelevent.h"
 #include "src/model/modelconst.h"
@@ -418,6 +420,27 @@ namespace dss {
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
                         DSM_PROPERTIES, DSM_PROPERTIES_SET_FLAGS,
+                        &callback_struct, NULL);
+
+      ClusterProperties_set_configuration_lock_request_callback_t clusterSetConfigrationLockCallback = DSBusInterface::handleClusterSetConfigrationLockCallback;
+      callback_struct.function = (void*)clusterSetConfigrationLockCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        CLUSTER_PROPERTIES, CLUSTER_PROPERTIES_SET_CONFIGURATION_LOCK,
+                        &callback_struct, NULL);
+
+      ClusterProperties_set_scene_lock_request_callback_t clusterSetSceneLockCallback = DSBusInterface::handleClusterSetSceneLockCallback;
+      callback_struct.function = (void*)clusterSetSceneLockCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        CLUSTER_PROPERTIES, CLUSTER_PROPERTIES_SET_SCENE_LOCK,
+                        &callback_struct, NULL);
+
+      EventGeneric_request_callback_t genericEventCallback = DSBusInterface::handleGenericEventCallback;
+      callback_struct.function = (void*)genericEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                        EVENT_GENERIC, 0,
                         &callback_struct, NULL);
 
       m_dsmApiReady = true;
@@ -913,7 +936,7 @@ namespace dss {
     loginFromCallback();
     if (m_pBusEventSink != NULL) {
       m_pBusEventSink->onZoneSensorValue(this,
-          _sourceID, dsuid2str(_dSUID),
+          _sourceID, _dSUID,
           _zoneID, _groupID, _SensorType, _Value, _Precision,
           SAC_MANUAL, coDsmApi);
     }
@@ -1110,5 +1133,81 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleDsmSetFlags(_destinationID,
                                                         std::bitset<8>(_flags));
   } // handleDsmSetNameCallback
+
+  void DSBusInterface::handleClusterSetConfigrationLock(uint8_t _clusterID,
+                                                        uint8_t _configurationLock) {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etClusterConfigLock);
+    pEvent->addParameter(_clusterID);
+    pEvent->addParameter(_configurationLock);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } //handleClusterSetConfigrationLock
+
+  void DSBusInterface::handleClusterSetConfigrationLockCallback(uint8_t _errorCode,
+                                                                void *_userData,
+                                                                dsuid_t _sourceID,
+                                                                dsuid_t _destinationID,
+                                                                uint8_t _clusterID,
+                                                                uint8_t _lock) {
+
+    static_cast<DSBusInterface*>(_userData)->handleClusterSetConfigrationLock(_clusterID,
+                                                                              _lock);
+  } // handleClusterSetConfigrationLockCallback
+
+  void DSBusInterface::handleClusterSetSceneLock(uint8_t _clusterID,
+                                                 const uint8_t _lockedScenes[]) {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etClusterLockedScenes);
+    pEvent->addParameter(_clusterID);
+    for (int i = 0; i < 16; ++i) {
+      pEvent->addParameter(_lockedScenes[i]);
+    }
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } //handleClusterSetSceneLock
+
+  void DSBusInterface::handleClusterSetSceneLockCallback(uint8_t _errorCode,
+                                                         void *_userData,
+                                                         dsuid_t _sourceID,
+                                                         dsuid_t _destinationID,
+                                                         uint8_t _clusterID,
+                                                         const uint8_t _lockedScenes[]) {
+
+    static_cast<DSBusInterface*>(_userData)->handleClusterSetSceneLock(_clusterID,
+                                                                       _lockedScenes);
+  } // handleClusterSetConfigrationLockCallback
+
+  void DSBusInterface::handleGenericEvent(uint8_t _errorCode,
+                                          dsuid_t _sourceID, dsuid_t _destinationID,
+                                          uint16_t _EventType, uint8_t _PayloadLength,
+                                          const uint8_t _Payload[]) {
+    loginFromCallback();
+
+    if (_PayloadLength > PAYLOAD_LEN) {
+      log("Payload of GenericEvent exceeded allowed size.", lsWarning);
+      return;
+    }
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etGenericEvent, _sourceID);
+    pEvent->addParameter(_EventType);
+
+    boost::shared_ptr<GenericEventPayload_t> pPayload = boost::make_shared<GenericEventPayload_t>();
+    pPayload->length = _PayloadLength;
+    memcpy(pPayload->payload, _Payload, std::min(static_cast<size_t>(_PayloadLength),
+                                                 sizeof(pPayload->payload)));
+
+    pEvent->setSingleObjectParameter(pPayload);
+
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleHeatingControllerStateEvent
+
+  void DSBusInterface::handleGenericEventCallback(uint8_t _errorCode, void *_userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _EventType, uint8_t _PayloadLength, const uint8_t _Payload[]) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleGenericEvent(_errorCode, _sourceID, _destinationID,
+                             _EventType, _PayloadLength, _Payload);
+    }
+  } // handleHeatingControllerStateEventCallback
 
 } // namespace dss

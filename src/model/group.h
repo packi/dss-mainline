@@ -104,14 +104,14 @@ namespace dss {
     void setSceneName(int _sceneNumber, const std::string& _name);
     std::string getSceneName(int _sceneNumber);
 
-    void publishToPropertyTree();
+    virtual void publishToPropertyTree();
 
     void setOnState(const callOrigin_t _origin, const bool _on);
     void setOnState(const callOrigin_t _origin, const int _sceneId);
     eState getState();
 
     /** Published a sensor value to all devices of this zone */
-    void sensorPush(const std::string& _sourceID, const int _sensorType, const double _sensorValue);
+    void sensorPush(const dsuid_t& _sourceID, int _type, double _value);
 
     void addConnectedDevice();
     void removeConnectedDevice();

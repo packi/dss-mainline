@@ -24,10 +24,6 @@
 #ifndef EVENTREQUESTHANDLER_H_
 #define EVENTREQUESTHANDLER_H_
 
-#include <deque>
-#include <map>
-#include <boost/ptr_container/ptr_map.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "src/web/webrequests.h"
@@ -46,7 +42,6 @@ namespace dss {
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     EventInterpreter& m_EventInterpreter;
-    boost::mutex m_Mutex; // locking what?
 
     int validateArgs(boost::shared_ptr<Session> _session, const std::string &name,
                      const std::string &tokenStr);

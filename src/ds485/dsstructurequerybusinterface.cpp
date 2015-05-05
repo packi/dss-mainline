@@ -37,6 +37,7 @@
 #include "src/model/group.h"
 #include "src/model/modulator.h"
 #include "src/model/zone.h"
+#include "src/util.h"
 
 #include "dsbusinterface.h"
 
@@ -203,6 +204,38 @@ namespace dss {
       char nameStr[NAME_LEN];
       memcpy(nameStr, nameBuf, NAME_LEN);
       result.Name = nameStr;
+
+      gresult.push_back(result);
+    }
+    return gresult;
+  } // getGroups
+
+  std::vector<ClusterSpec_t> DSStructureQueryBusInterface::getClusters(const dsuid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    std::vector<ClusterSpec_t> gresult;
+
+    for (int iCluster = GroupIDAppUserMin; iCluster <= GroupIDAppUserMax; iCluster++) {
+      ClusterSpec_t result;
+      uint8_t nameBuf[NAME_LEN];
+      uint8_t sceneLock[16];
+      uint8_t configurationLock = 0;
+      uint8_t canHaveStateMachine = 0;
+
+      int ret = ClusterInfo_by_id(m_DSMApiHandle, _dsMeterID, iCluster,
+          &result.StandardGroupID, &canHaveStateMachine, &result.NumberOfDevices, nameBuf,
+          NULL, NULL, &configurationLock, sceneLock, &result.location, &result.floor, &result.protectionClass);
+      DSBusInterface::checkResultCode(ret);
+
+      result.GroupID = iCluster;
+      char nameStr[NAME_LEN];
+      memcpy(nameStr, nameBuf, NAME_LEN);
+      result.Name = nameStr;
+      result.canHaveStateMachine = (canHaveStateMachine == 1);
+      result.configurationLocked = (configurationLock == 1);
+      result.lockedScenes = parseBitfield(sceneLock, 128);
 
       gresult.push_back(result);
     }

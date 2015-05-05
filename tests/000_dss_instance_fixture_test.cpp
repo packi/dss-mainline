@@ -26,27 +26,35 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "tests/dss_life_cycle.h"
-#include "propertysystem.h"
+#include "src/propertysystem.h"
+#include "util/dss_instance_fixture.h"
 
 using namespace dss;
 
-BOOST_AUTO_TEST_SUITE(DssInstanceTests)
+BOOST_AUTO_TEST_SUITE(dss_instance_fixture)
 
-BOOST_AUTO_TEST_CASE(testInitTearDown) {
-  boost::scoped_ptr<DSSLifeCycle> guard;
+BOOST_AUTO_TEST_CASE(testFixtureOnStack) {
+  DSSInstanceFixture cycle;
+  BOOST_CHECK(DSS::hasInstance());
+}
 
-  BOOST_CHECK_NO_THROW(guard.reset(new DSSLifeCycle));
+BOOST_AUTO_TEST_CASE(testFixtureScopePtr) {
+  boost::scoped_ptr<DSSInstanceFixture> guard;
+
+  BOOST_CHECK_NO_THROW(guard.reset(new DSSInstanceFixture));
   guard.reset();
   BOOST_CHECK(DSS::hasInstance() == false);
 }
 
+BOOST_FIXTURE_TEST_CASE(testFixtureTest, DSSInstanceFixture) {
+  BOOST_CHECK(DSS::hasInstance());
+}
 
 BOOST_AUTO_TEST_CASE(testReinitPropertySystem) {
-  boost::scoped_ptr<DSSLifeCycle> guard;
+  boost::scoped_ptr<DSSInstanceFixture> guard;
   std::string websvc_url_authority_orig;
 
-  guard.reset(new DSSLifeCycle());
+  guard.reset(new DSSInstanceFixture());
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
   websvc_url_authority_orig =
@@ -58,7 +66,7 @@ BOOST_AUTO_TEST_CASE(testReinitPropertySystem) {
                  websvc_url_authority_orig);
 
   // destroy and recreate dss instance
-  guard.reset(new DSSLifeCycle());
+  guard.reset(new DSSInstanceFixture());
   PropertySystem &propSystem2 = DSS::getInstance()->getPropertySystem();
 
   BOOST_CHECK_EQUAL(propSystem2.getStringValue(pp_websvc_url_authority),

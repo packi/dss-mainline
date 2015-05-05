@@ -30,6 +30,7 @@
 #include "src/base.h"
 #include "src/datetools.h"
 #include "src/model/data_types.h"
+#include "src/util.h"
 
 using namespace dss;
 
@@ -333,6 +334,8 @@ BOOST_AUTO_TEST_CASE(testCardinalDirection) {
   std::string convert;
   CardinalDirection_t dir;
 
+  BOOST_CHECK(parseCardinalDirection("none", &dir));
+  BOOST_CHECK_EQUAL(dir, cd_none);
   BOOST_CHECK(parseCardinalDirection("north", &dir));
   BOOST_CHECK_EQUAL(dir, cd_north);
   BOOST_CHECK(parseCardinalDirection("north east", &dir));
@@ -350,15 +353,29 @@ BOOST_AUTO_TEST_CASE(testCardinalDirection) {
   BOOST_CHECK(parseCardinalDirection("north west", &dir));
   BOOST_CHECK_EQUAL(dir, cd_north_west);
 
-  BOOST_CHECK(!parseCardinalDirection("none", &dir));
+  BOOST_CHECK(!parseCardinalDirection("south south west", &dir));
+  BOOST_CHECK(!parseCardinalDirection("north south east", &dir));
   BOOST_CHECK(!parseCardinalDirection("schlieren", &dir));
 
   BOOST_CHECK(valid(cd_north));
+  BOOST_CHECK(valid(cd_north_east));
   BOOST_CHECK(valid(cd_north_west));
-  BOOST_CHECK(!valid(cd_none));
+  BOOST_CHECK(valid(cd_south));
+  BOOST_CHECK(valid(cd_south_east));
+  BOOST_CHECK(valid(cd_south_west));
+  BOOST_CHECK(valid(cd_east));
+  BOOST_CHECK(valid(cd_west));
+  BOOST_CHECK(!valid(cd_last));
   BOOST_CHECK(!valid(static_cast<CardinalDirection_t>(10)));
 
+  BOOST_CHECK_EQUAL(toString(cd_north), "north");
+  BOOST_CHECK_EQUAL(toString(cd_north_east), "north east");
   BOOST_CHECK_EQUAL(toString(cd_north_west), "north west");
+  BOOST_CHECK_EQUAL(toString(cd_south), "south");
+  BOOST_CHECK_EQUAL(toString(cd_south_east), "south east");
+  BOOST_CHECK_EQUAL(toString(cd_south_west), "south west");
+  BOOST_CHECK_EQUAL(toString(cd_east), "east");
+  BOOST_CHECK_EQUAL(toString(cd_west), "west");
 }
 
 BOOST_AUTO_TEST_CASE(testWindProtection) {
@@ -370,15 +387,39 @@ BOOST_AUTO_TEST_CASE(testWindProtection) {
   BOOST_CHECK_EQUAL(out, wpc_class_2);
   BOOST_CHECK(convertWindProtectionClass(wpc_class_1, &out));
   BOOST_CHECK_EQUAL(out, wpc_class_1);
+  BOOST_CHECK(convertWindProtectionClass(wpc_none, &out));
+  BOOST_CHECK_EQUAL(out, wpc_none);
 
-  BOOST_CHECK(!convertWindProtectionClass(0, &out));
   BOOST_CHECK(!convertWindProtectionClass(99, &out));
+  BOOST_CHECK(!convertWindProtectionClass(-1, &out));
 
+  BOOST_CHECK(valid(wpc_none));
   BOOST_CHECK(valid(wpc_class_1));
   BOOST_CHECK(valid(wpc_class_2));
   BOOST_CHECK(valid(wpc_class_3));
-  BOOST_CHECK(!valid(wpc_none));
+
+  BOOST_CHECK(!valid(wpc_last));
   BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(4)));
+  BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(-1)));
+}
+
+BOOST_AUTO_TEST_CASE(testParseBitfield) {
+  uint8_t sceneLock[16] = {};
+  sceneLock[0 / 8] |= (1 << (0 % 8));
+  sceneLock[5 / 8] |= (1 << (5 % 8));
+  sceneLock[17 / 8] |= (1 << (17 % 8));
+  sceneLock[18 / 8] |= (1 << (18 % 8));
+  sceneLock[19 / 8] |= (1 << (19 % 8));
+  sceneLock[127 / 8] |= (1 << (127 % 8));
+
+  std::vector<int> vec = parseBitfield(sceneLock, 128);
+  BOOST_CHECK_EQUAL(vec.size(), 6);
+  BOOST_CHECK_EQUAL(vec[0], 0);
+  BOOST_CHECK_EQUAL(vec[1], 5);
+  BOOST_CHECK_EQUAL(vec[2], 17);
+  BOOST_CHECK_EQUAL(vec[3], 18);
+  BOOST_CHECK_EQUAL(vec[4], 19);
+  BOOST_CHECK_EQUAL(vec[5], 127);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -217,7 +217,7 @@ namespace dss {
     void onSensorEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
     void onBinaryInputEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state);
     void onSensorValue(dsuid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
-    void onZoneSensorValue(dsuid_t _meterID, const std::string& _sourceDevice, const int& _zoneID, const int& _groupID, const int& _sensorType, const int& _sensorValue, const int& _precision);
+    void onZoneSensorValue(const dsuid_t &_meterID, const dsuid_t& _sourceDevice, const int& _zoneID, const int& _groupID, const int& _sensorType, const int& _sensorValue, const int& _precision);
     void onEANReady(dsuid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
                       const unsigned long long _eanNumber,
@@ -231,6 +231,11 @@ namespace dss {
     void onHeatingControllerConfig(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);
     void onHeatingControllerValues(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);
     void onHeatingControllerState(dsuid_t _dsMeterID, const int _ZoneID, const int _State);
+
+    void onClusterConfigLock(const int _clusterID, const bool _configurationLock);
+    void onClusterLockedScenes(const int _clusterID, const std::vector<int> &_lockedScenes);
+
+    void onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload);
 
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);

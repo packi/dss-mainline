@@ -25,6 +25,7 @@
 #define __DSS_UTIL_H_INCLUDED__
 
 #include <string>
+#include <vector>
 #include <inttypes.h>
 #include <boost/shared_ptr.hpp>
 
@@ -43,6 +44,7 @@ namespace dss {
   uint16_t convertToOutputChannelValue(uint8_t channel, double value);
   double convertFromOutputChannelValue(uint8_t channel, uint16_t value);
   bool saveValidatedXML(const std::string& _fileName, const std::string& _targetFile);
+  std::vector<int> parseBitfield(const uint8_t *_bitfield, int _bits);
 }
 
 #endif

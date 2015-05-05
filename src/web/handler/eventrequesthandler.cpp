@@ -25,11 +25,7 @@
   #include "config.h"
 #endif
 
-
 #include "eventrequesthandler.h"
-
-#include <boost/any.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include "src/base.h"
 
@@ -123,10 +119,7 @@ namespace dss {
       return JSONWriter::failure(e.what());
     }
 
-    boost::mutex::scoped_lock lock(m_Mutex);
-    boost::shared_ptr<EventSubscriptionSession> subscription =
-      _session->createEventSubscription(m_EventInterpreter, token);
-    subscription->subscribe(name);
+    _session->subscribeEventSubscription(m_EventInterpreter, token, name);
     return JSONWriter::success();
   }
 
@@ -143,17 +136,7 @@ namespace dss {
       return JSONWriter::failure(e.what());
     }
 
-    boost::mutex::scoped_lock lock(m_Mutex);
-    boost::shared_ptr<EventSubscriptionSession> sub;
-    try {
-      sub = _session->getEventSubscription(token);
-      sub->unsubscribe(name);
-    } catch (std::exception& e) {
-      // TODO still erase the subscription
-      return JSONWriter::failure(e.what());
-    }
-
-    _session->deleteEventSubscription(sub);
+    _session->unsubscribeEventSubscription(token, name);
     return JSONWriter::success();
   }
 
@@ -268,7 +251,6 @@ namespace dss {
       }
     }
 
-    boost::mutex::scoped_lock lock(m_Mutex);
     boost::shared_ptr<EventSubscriptionSession> subscriptionSession;
     try {
       subscriptionSession = _session->getEventSubscription(token);

@@ -40,6 +40,7 @@ namespace dss {
     virtual std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true);
     virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID);
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID);
     std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID);
     virtual bool getEnergyBorder(const dsuid_t& _dsMeterID, int& _lower, int& _upper);

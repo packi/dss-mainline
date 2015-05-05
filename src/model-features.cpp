@@ -58,6 +58,7 @@ const char *SDS2 =      "SDS:2"; // wildcard for all SDS-2*
 const char *ZWS2 =      "ZWS:2"; // wildcard for all ZWS-2*
 const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
+const char *UMV210 =    "UMV:210";
 const char *UMR200 =    "UMR:200";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
@@ -285,6 +286,22 @@ const int MF_GE_UMV200[] =
   mf_umvrelay
 };
 
+const int MF_GE_UMV210[] =
+{
+  mf_dontcare,
+  mf_blink,
+  mf_ledauto,
+  mf_transt,
+  mf_outvalue8,
+  mf_pushbutton,
+  mf_pushbdevice,
+  mf_pushbarea,
+  mf_pushbadvanced,
+  mf_extradimmer,
+  mf_umvrelay,
+  mf_outputchannels
+};
+
 const int MF_GN_KM2[] =
 {
   mf_dontcare,
@@ -343,7 +360,9 @@ const int MF_GR_KL220[] =
   mf_shadeprops,
   mf_shadeposition,
   mf_motiontimefins,
-  mf_shadebladeang
+  mf_shadebladeang,
+  mf_locationconfig,
+  mf_windprotectionconfig
 };
 
 const int MF_GR_KL230[] =
@@ -354,7 +373,9 @@ const int MF_GR_KL230[] =
   mf_shadeprops,
   mf_shadeposition,
   mf_motiontimefins,
-  mf_shadebladeang
+  mf_shadebladeang,
+  mf_locationconfig,
+  mf_windprotectionconfig
 };
 
 const int MF_GR_KL2[] =
@@ -367,7 +388,9 @@ const int MF_GR_KL2[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_shadeprops,
-  mf_shadeposition
+  mf_shadeposition,
+  mf_locationconfig,
+  mf_windprotectionconfig
 };
 
 const int MF_GR_TKM2[] =
@@ -380,6 +403,21 @@ const int MF_GR_TKM2[] =
 };
 
 const int MF_BL_KM200[] =
+{
+  mf_dontcare,
+  mf_ledauto,
+  mf_outvalue8,
+  mf_pushbutton,
+  mf_pushbdevice,
+  mf_pushbadvanced,
+  mf_heatinggroup,
+  mf_heatingoutmode,
+  mf_heatingprops,
+  mf_pwmvalue,
+  mf_valvetype
+};
+
+const int MF_BL_SDS200[] =
 {
   mf_dontcare,
   mf_ledauto,
@@ -607,6 +645,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_GE_UMV210, MF_ARRAY_SIZE(MF_GE_UMV210));
+  setFeatures(ColorIDYellow, UMV210, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_GN_KM2, MF_ARRAY_SIZE(MF_GN_KM2));
   setFeatures(ColorIDGreen, KM2, fv);
   fv.reset();
@@ -619,6 +662,16 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_RT_KM2, MF_ARRAY_SIZE(MF_RT_KM2));
   setFeatures(ColorIDRed, KM2, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_RT_TKM2, MF_ARRAY_SIZE(MF_RT_TKM2));
+  setFeatures(ColorIDRed, TKM2, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_RT_SDM2, MF_ARRAY_SIZE(MF_RT_SDM2));
+  setFeatures(ColorIDRed, SDM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
@@ -644,6 +697,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_BL_KM200, MF_ARRAY_SIZE(MF_BL_KM200));
   setFeatures(ColorIDBlue, KM200, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_BL_SDS200, MF_ARRAY_SIZE(MF_BL_SDS200));
+  setFeatures(ColorIDBlue, SDS2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
@@ -808,6 +866,10 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_umroutmode;
   } else if (_name == "pushbsensor") {
     return mf_pushbsensor;
+  } else if (_name == "locationconfig") {
+    return mf_locationconfig;
+  } else if (_name == "windprotectionconfig") {
+    return mf_windprotectionconfig;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -889,6 +951,10 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "umroutmode";
     case mf_pushbsensor:
       return "pushbsensor";
+    case mf_locationconfig:
+      return "locationconfig";
+    case mf_windprotectionconfig:
+      return "windprotectionconfig";
     default:
       break;
   }

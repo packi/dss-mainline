@@ -264,8 +264,9 @@ namespace dss {
   const int GroupIDReserved5 = 15;
   const int GroupIDStandardMax = 15;
   const int GroupIDAppUserMin = 16;
-  const int GroupIDAppUserMax = 23;
+  const int GroupIDAppUserMax = 39;
   const int GroupIDUserGroupStart = GroupIDAppUserMax + 1;
+  const int GroupIDUserGroupEnd = 47;
   const int GroupIDControlGroupMin = 48;
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
@@ -278,6 +279,10 @@ namespace dss {
 
   inline bool isAppUserGroup(int groupId) {
     return (groupId >= GroupIDAppUserMin && groupId <= GroupIDAppUserMax);
+  }
+
+  inline bool isZoneUserGroup(int groupId) {
+    return (groupId >= GroupIDUserGroupStart && groupId <= GroupIDUserGroupEnd);
   }
 
   inline bool isControlGroup(int groupId) {
@@ -330,11 +335,13 @@ namespace dss {
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
   const uint16_t ProductID_KM_200 = 0x00C8;
+  const uint16_t ProductID_SDS_200 = 0x18C8;
   const uint16_t ProductID_KL_200 = 0x0CC8;
   const uint16_t ProductID_KL_201 = 0x0CC9;
   const uint16_t ProductID_KL_210 = 0x0CD2;
   const uint16_t ProductID_KL_220 = 0x0CDC;
   const uint16_t ProductID_KL_230 = 0x0CE6;
+  const uint16_t ProductID_UMV_210 = 0x2CD2;
 
   const uint8_t MinimumOutputChannelID = 1;
   const uint8_t MaximumOutputChannelID = 10;

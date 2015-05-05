@@ -25,8 +25,9 @@
   #include "config.h"
 #endif
 
-
 #include "logger.h"
+#include "event.h"
+#include "event/event_create.h"
 #include "monitor_tasks.h"
 #include "model/device.h"
 #include "model/group.h"
@@ -36,8 +37,6 @@
 #include "model/state.h"
 #include "model/modelconst.h"
 #include "model/modelmaintenance.h"
-#include "event.h"
-#include "event_create.h"
 
 namespace dss {
 

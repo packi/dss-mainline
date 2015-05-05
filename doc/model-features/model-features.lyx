@@ -751,5 +751,40 @@ Enables the "Output mode" radio group in "Device Properties" dialog and
 
 \end_layout
 
+\begin_layout Section
+locationconfig
+\end_layout
+
+\begin_layout Standard
+Shows the "Location" configuration dropdown in "Device Properties" dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-location.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+windprotectionconfig
+\end_layout
+
+\begin_layout Standard
+Shows the "Wind protection" configuration dropdown in "Device Properties"
+ dialog.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename device-properties-wind-protection.png
+
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document

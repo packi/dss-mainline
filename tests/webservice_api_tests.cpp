@@ -10,7 +10,8 @@
 #include <iostream>
 #include "foreach.h"
 
-#include "event_create.h"
+#include "event.h"
+#include "event/event_create.h"
 #include "eventinterpreterplugins.h"
 #include "http_client.h"
 #include "model/apartment.h"
@@ -18,12 +19,11 @@
 #include "model/zone.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
-#include "src/event.h"
 #include "sessionmanager.h"
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
-#include "tests/dss_life_cycle.h"
 #include "src/web/webrequests.h"
+#include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
 
@@ -86,7 +86,7 @@ public:
     propSystem.createProperty(pp_websvc_mshub_active)->setBooleanValue(true);
   }
 
-  DSSLifeCycle m_dss_guard;
+  DSSInstanceFixture m_dssInstanceCtrl;
 };
 
 
@@ -158,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(test_WebscvEnableDisablePlugin, WebserviceFixtureReal) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
   // also starts event runner et. al
-  m_dss_guard.initPlugins();
+  m_dssInstanceCtrl.initPlugins();
 
   // check event subscriptions when webservice is enabled:
   // (ms-hub keepalive, event uploder mshub + dshub, weather downloader)
@@ -189,9 +189,8 @@ BOOST_AUTO_TEST_CASE(webservice_ms_json) {
   BOOST_CHECK_EQUAL(json.successJSON().substr(0, 90), std::string("{\"EventGroup\":\"ApartmentAndDevice\",\"EventCategory\":\"HeatingControllerSetup\",\"Timestamp\":\"2015-02-19T16:42:42.298Z\"}").substr(0, 90));
 }
 
-BOOST_AUTO_TEST_CASE(webservice_ds_json) {
+BOOST_FIXTURE_TEST_CASE(webservice_ds_json, DSSInstanceFixture) {
   /* DsHub::createHeader, requires instance */
-  DSSLifeCycle dss_instance;
   boost::shared_ptr<Event> pEvent;
 
   {
@@ -229,8 +228,12 @@ public:
     return zone->getGroup(id);
   }
 
+  boost::shared_ptr<State> createState(eStateType type) {
+    return boost::make_shared<State>(type, "dummy-state", "unit-test");
+  }
+
 private:
-  DSSLifeCycle m_dss_guard;
+  DSSInstanceFixture m_dss_guard;
 };
 
 boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
@@ -246,7 +249,7 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
   } else if (eventName == EventName::DeviceInvalidSensor) {
     pEvent = createDeviceInvalidSensorEvent(createDevRef(), 0, 1, DateTime());
   } else if (eventName == EventName::ZoneSensorValue) {
-    pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, "dev");
+    pEvent = createZoneSensorValueEvent(createGroup(1), 0, 1, DSUID_NULL);
   } else if (eventName == EventName::ZoneSensorError) {
     pEvent = createZoneSensorErrorEvent(createGroup(1), 0, DateTime());
   } else if (eventName == EventName::CallScene) {
@@ -257,6 +260,15 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createGroupUndoSceneEvent(createGroup(1), 1, 1, 1,
                                        callOrigin_t(2), dsuid_t(),
                                        "fake-token");
+  } else if (eventName == EventName::AddonStateChange) {
+    pEvent = createStateChangeEvent(createState(StateType_Script), State_Unknown, coTest);
+  } else if (eventName == EventName::StateChange) {
+    pEvent = createStateChangeEvent(createState(StateType_Device), State_Unknown, coTest);
+  } else if (eventName == EventName::ExecutionDenied) {
+    pEvent = createActionDenied("device-scene", "action-node", "unit-test", "testcase");
+  } else if (eventName == EventName::HeatingEnabled) {
+    // TODO created by javascript, sync paramter manually
+    pEvent = createHeatingEnabled(1, true);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
@@ -277,7 +289,7 @@ BOOST_FIXTURE_TEST_CASE(test_mshub_tojson, EventFactory) {
     }
 
     JSONWriter json;
-    BOOST_CHECK_NO_THROW(DsHub::toJson(pEvent, json));
+    BOOST_CHECK_NO_THROW(MsHub::toJson(pEvent, json));
   }
 }
 

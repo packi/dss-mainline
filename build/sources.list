@@ -34,9 +34,11 @@ libdsscore_a_SOURCES =  \
 	../src/eventcollector.cpp \
 	../src/eventcollector.h \
 	../src/event.cpp \
+	../src/event/event_create.cpp \
+	../src/event/event_create.h \
+	../src/event/event_fields.cpp \
+	../src/event/event_fields.h \
 	../src/event.h \
-	../src/event_create.cpp \
-	../src/event_create.h \
 	../src/eventinterpreterplugins.cpp \
 	../src/eventinterpreterplugins.h \
 	../src/eventinterpretersystemplugins.cpp \
@@ -46,8 +48,14 @@ libdsscore_a_SOURCES =  \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
+	../src/handler/system_handlers.cpp \
+	../src/handler/system_handlers.h \
+	../src/handler/system_states.cpp \
+	../src/handler/system_states.h \
 	../src/hasher.cpp \
 	../src/hasher.h \
+	../src/heatingregistering.cpp \
+	../src/heatingregistering.h \
 	../src/http_client.cpp \
 	../src/http_client.h \
 	../src/internaleventrelaytarget.h \
@@ -61,6 +69,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/apartment.h \
 	../src/model/busscanner.cpp \
 	../src/model/busscanner.h \
+	../src/model/cluster.cpp \
+	../src/model/cluster.h \
 	../src/model/data_types.cpp \
 	../src/model/data_types.h \
 	../src/model/devicecontainer.cpp \
@@ -105,6 +115,8 @@ libdsscore_a_SOURCES =  \
 	../src/propertysystem_common_paths.h \
 	../src/propertysystem.cpp \
 	../src/propertysystem.h \
+	../src/protobufjson.cpp \
+	../src/protobufjson.h \
 	../src/sceneaccess.cpp \
 	../src/sceneaccess.h \
 	../src/scripting/jscurl-constants.h \
@@ -133,8 +145,6 @@ libdsscore_a_SOURCES =  \
 	../src/security/security.h \
 	../src/security/user.cpp \
 	../src/security/user.h \
-	../src/heatingregistering.cpp \
-	../src/heatingregistering.h \
 	../src/sensor_data_uploader.cpp \
 	../src/sensor_data_uploader.h \
 	../src/session.cpp \
@@ -166,8 +176,6 @@ libdsscore_a_SOURCES =  \
 	../src/util.h \
 	../src/vdc-connection.cpp \
 	../src/vdc-connection.h \
-	../src/protobufjson.cpp \
-	../src/protobufjson.h \
 	../src/watchdog.cpp \
 	../src/watchdog.h \
 	../src/web/handler/apartmentrequesthandler.cpp \
@@ -217,6 +225,8 @@ libunix_a_SOURCES = \
 	../unix/thread.cpp
 
 dsstests_SOURCES = \
+	../tests/000_dss_instance_fixture_test.cpp \
+	../tests/apartment_xml_tests.cpp \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
 	../tests/curl_test.cpp \
@@ -224,9 +234,6 @@ dsstests_SOURCES = \
 	../tests/deviceinterfacerequesthandlertest.cpp \
 	../tests/devicerequesthandlertest.cpp \
 	../tests/devicetests.cpp \
-	../tests/dss_instance_tests.cpp \
-	../tests/dss_life_cycle.cpp \
-	../tests/dss_life_cycle.h \
 	../tests/dsuidtests.cpp \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
@@ -244,7 +251,10 @@ dsstests_SOURCES = \
 	../tests/scriptstest.cpp \
 	../tests/securitytests.cpp \
 	../tests/sensor_data_uploader.cpp \
+	../tests/statetests.cpp \
 	../tests/testrunner.cpp \
+	../tests/util/dss_instance_fixture.cpp \
+	../tests/util/dss_instance_fixture.h \
 	../tests/webfixture.h \
 	../tests/webserver.cpp \
 	../tests/webservice_api_tests.cpp

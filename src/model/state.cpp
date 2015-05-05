@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "propertysystem.h"
 #include "event.h"
+#include "event/event_create.h"
 #include "model/state.h"
 #include "model/device.h"
 #include "model/group.h"
@@ -39,7 +40,6 @@
 #include "modelmaintenance.h"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/smart_ptr.hpp>
 
 namespace dss {
 
@@ -224,29 +224,19 @@ namespace dss {
 
   std::string State::toString() const {
     if (!m_values.empty()) {
-      std::list<std::string>::const_iterator item;
-      int index = 0;
-      for (item = m_values.begin(); item != m_values.end(); item++, index++) {
-        if ((int) m_state == index) {
-          return *item;
-        }
-      }
-      return std::string("invalid");
+      assert(m_state >= 0 && m_state < m_values.size());
+      return m_values[m_state];
     }
     switch(m_state) {
     case State_Unknown:
       return std::string("unknown");
-      break;
     case State_Active:
       return std::string("active");
-      break;
     case State_Inactive:
       return std::string("inactive");
-      break;
     default:
-      break;
+      return std::string("invalid");
     }
-    return std::string("invalid");
   } // toString
 
   eState State::getState() const {
@@ -262,23 +252,9 @@ namespace dss {
         save();
       }
 
-      boost::shared_ptr<Event> pEvent;
-
-      if (m_type == StateType_Script) {
-        pEvent.reset(new Event(EventName::AddonStateChange, shared_from_this()));
-        pEvent->setProperty("scriptID", m_serviceName);
-      } else {
-        pEvent.reset(new Event(EventName::StateChange, shared_from_this()));
-      }
-
-      pEvent->setProperty("statename", m_name);
-      pEvent->setProperty("state", toString());
-      pEvent->setProperty("value", intToString((int) m_state));
-      pEvent->setProperty("oldvalue", intToString((int) oldstate));
-      pEvent->setProperty("originDeviceID", intToString((int) _origin));
-
       if (DSS::hasInstance()) {
-        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        DSS::getInstance()->getEventQueue()
+          .pushEvent(createStateChangeEvent(shared_from_this(), oldstate, _origin));
       }
     }
   } // setState
@@ -299,18 +275,18 @@ namespace dss {
       setState(_origin, State_Inactive);
     } else if (_state == "unknown") {
       setState(_origin, State_Unknown);
-    } else if (m_values.size() > 0) {
-      std::list<std::string>::iterator item;
-      int index = 0;
-      for (item = m_values.begin(); item != m_values.end(); item++, index++) {
-        if (_state == *item) {
-          setState(_origin, index);
-        }
+    } else if (!m_values.empty()) {
+      ValueRange_t::iterator it = std::find(m_values.begin(), m_values.end(), _state);
+      if (it == m_values.end()) {
+        Logger::getInstance()->log("State " + m_name + ": invalid value" + _state,
+                                   lsWarning);
+        return;
       }
+      setState(_origin, it - m_values.begin());
     }
   }
 
-  void State::setValueRange(std::list<std::string> _values) {
+  void State::setValueRange(const ValueRange_t &_values) {
     m_values = _values;
   }
 

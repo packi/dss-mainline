@@ -26,29 +26,31 @@
   #include "config.h"
 #endif
 
+#include <boost/make_shared.hpp>
 
 #include "modelmaintenance.h"
 
 #include <unistd.h>
 #include <json.h>
 
-#include "src/foreach.h"
-#include "src/base.h"
-#include "src/dss.h"
-#include "src/event.h"
-#include "src/businterface.h"
-#include "src/propertysystem.h"
-#include "src/model/modelconst.h"
-#include "src/metering/metering.h"
-#include "src/security/security.h"
-#include "src/structuremanipulator.h"
+#include "foreach.h"
+#include "base.h"
+#include "dss.h"
+#include "businterface.h"
+#include "propertysystem.h"
+#include "model/modelconst.h"
+#include "metering/metering.h"
+#include "security/security.h"
+#include "structuremanipulator.h"
 
 #include "apartment.h"
 #include "zone.h"
 #include "group.h"
+#include "cluster.h"
 #include "device.h"
 #include "devicereference.h"
-#include "event_create.h"
+#include "event.h"
+#include "event/event_create.h"
 #include "eventinterpreterplugins.h"
 #include "internaleventrelaytarget.h"
 #include "modulator.h"
@@ -63,6 +65,7 @@
 #include "util.h"
 #include "vdc-connection.h"
 #include "model-features.h"
+#include "handler/system_states.h"
 
 namespace dss {
 
@@ -617,12 +620,13 @@ namespace dss {
       if (event->getParameterCount() < 5) {
         log("Expected at least 5 parameter for ModelEvent::etZoneSensorValue");
       } else {
-        onZoneSensorValue(pEventWithDSID->getDSID(), event->getSingleStringParameter(),
-            event->getParameter(0),
-            event->getParameter(1),
-            event->getParameter(2),
-            event->getParameter(3),
-            event->getParameter(4));
+        onZoneSensorValue(pEventWithDSID->getDSID(),
+                          str2dsuid(event->getSingleStringParameter()),
+                          event->getParameter(0),
+                          event->getParameter(1),
+                          event->getParameter(2),
+                          event->getParameter(3),
+                          event->getParameter(4));
       }
       break;
     case ModelEvent::etDeviceEANReady:
@@ -674,6 +678,23 @@ namespace dss {
           pEventWithDSID->getDSID(),
           event->getParameter(0),
           event->getSingleObjectParameter());
+      break;
+    case ModelEvent::etClusterConfigLock:
+      onClusterConfigLock(event->getParameter(0), event->getParameter(1));
+      break;
+    case ModelEvent::etClusterLockedScenes:
+    {
+      uint8_t lockedScenes[16];
+      for (int i = 0; i < 16; ++i) {
+        lockedScenes[i] = event->getParameter(i + 1);
+      }
+      std::vector<int> pLockedScenes = parseBitfield(lockedScenes, 128);
+      onClusterLockedScenes(event->getParameter(0), pLockedScenes);
+      break;
+    }
+    case ModelEvent::etGenericEvent:
+      onGenericEvent(static_cast<GenericEventType_t>(event->getParameter(0)),
+                     boost::static_pointer_cast<GenericEventPayload_t>(event->getSingleObjectParameter()));
       break;
     default:
       assert(false);
@@ -1757,8 +1778,8 @@ namespace dss {
     }
   } // onSensorValue
 
-  void ModelMaintenance::onZoneSensorValue(dsuid_t _meterID,
-                                           const std::string& _sourceDevice,
+  void ModelMaintenance::onZoneSensorValue(const dsuid_t& _meterID,
+                                           const dsuid_t& _sourceDevice,
                                            const int& _zoneID,
                                            const int& _groupID,
                                            const int& _sensorType,
@@ -1960,6 +1981,57 @@ namespace dss {
     pEvent->setProperty("ControlState", intToString(_State));
     raiseEvent(pEvent);
   } // onHeatingControllerState
+
+  void ModelMaintenance::onClusterConfigLock(const int _clusterID, const bool _configurationLock) {
+    try {
+      boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
+      cluster->setConfigurationLocked(_configurationLock);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error on cluster config lock change, cluster not found: ") + e.what(), lsWarning);
+    }
+  } // onClusterConfigLock
+
+  void ModelMaintenance::onClusterLockedScenes(const int _clusterID, const std::vector<int> &_lockedScenes) {
+    try {
+      boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
+      cluster->setLockedScenes(_lockedScenes);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error on cluster locked scenes change, cluster not found: ") + e.what(), lsWarning);
+    }
+  } // onClusterConfigLock
+
+  void ModelMaintenance::onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload) {
+    switch (_eventType) {
+      case ge_sun:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Sun);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
+      case ge_frost:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Frost);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
+      case ge_heating_mode:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::HeatingMode);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  } // onGenericEvent
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner
