@@ -235,7 +235,7 @@ namespace dss {
       result.Name = nameStr;
       result.canHaveStateMachine = (canHaveStateMachine == 1);
       result.configurationLocked = (configurationLock == 1);
-      result.lockedScenes = parseBitfield(sceneLock, 128);
+      result.lockedScenes = parseBitfield(sceneLock, sizeof(sceneLock) * 8);
 
       gresult.push_back(result);
     }
@@ -265,27 +265,6 @@ namespace dss {
     }
     return result;
   } // getZones
-
-  // TODO: make this a private method of DSStructureQueryBusInterface
-  //       as soon as dsm-api-const.h has a header guard in testing branch
-  std::vector<int> extractGroupIDs(uint8_t _groups[GROUPS_LEN]) {
-    std::vector<int> result;
-    for(int iByte = 0; iByte < GROUPS_LEN; iByte++) {
-      uint8_t byte = _groups[iByte];
-      for(int iBit = 0; iBit < 8; iBit++) {
-        if(byte & (1 << iBit)) {
-          int groupID = (iByte * 8 + iBit);
-          if(groupID <= GroupIDMax) {
-            result.push_back(groupID);
-          } else {
-            Logger::getInstance()->log("Group ID out of bound (" +
-                                       intToString(groupID) + ")", lsWarning);
-          }
-        }
-      }
-    }
-    return result;
-  } // extractGroupIDs
 
   int DSStructureQueryBusInterface::getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -464,7 +443,7 @@ namespace dss {
           &spec.LTMode, groups, name, &spec.DSID);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
-      spec.Groups = extractGroupIDs(groups);
+      spec.Groups = parseBitfield(groups, sizeof(groups) * 8);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
       if (complete) {
@@ -500,7 +479,7 @@ namespace dss {
           &spec.LTMode, groups, name, &spec.DSID);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
-      spec.Groups = extractGroupIDs(groups);
+      spec.Groups = parseBitfield(groups, sizeof(groups) * 8);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
       updateButtonGroupFromMeter(_dsMeterID, spec);
@@ -531,7 +510,7 @@ namespace dss {
       throw BusApiError("DeviceInfo returned answer from a different device (" + intToString(_id) + " != " + intToString(result.ShortAddress) + ")");
     }
     result.Locked = (locked != 0);
-    result.Groups = extractGroupIDs(groups);
+    result.Groups = parseBitfield(groups, sizeof(groups) * 8);
     result.Name = std::string(reinterpret_cast<char*>(name));
 
     updateButtonGroupFromMeter(_dsMeterID, result);
