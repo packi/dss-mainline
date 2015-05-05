@@ -252,7 +252,7 @@ namespace dss {
         save();
       }
 
-      if (DSS::hasInstance()) {
+      if (DSS::hasInstance() && DSS::getInstance()->getState() == ssRunning) {
         DSS::getInstance()->getEventQueue()
           .pushEvent(createStateChangeEvent(shared_from_this(), oldstate, _origin));
       }
