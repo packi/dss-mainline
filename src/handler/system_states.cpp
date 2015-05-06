@@ -382,58 +382,66 @@ void SystemState::callscene() {
   }
 
   boost::shared_ptr<State> state;
-  if ((groupId == 0) && (sceneId == SceneAbsent)) {
-    if (lookupState(state, "presence")) {
-      state->setState(coSystem, "absent");
-    }
-    // #2561: auto-clear panic and fire
-    if (lookupState(state, "panic")) {
-      if (state->getState() == State_Active) {
-        undoScene(0, 0, ScenePanic, coSystem);
+
+  if (groupId == 0) {
+    if ((groupId == 0) && (sceneId == SceneAbsent)) {
+      if (lookupState(state, "presence")) {
+        state->setState(coSystem, "absent");
+      }
+      // #2561: auto-clear panic and fire
+      if (lookupState(state, "panic")) {
+        if (state->getState() == State_Active) {
+          undoScene(0, 0, ScenePanic, coSystem);
+        }
+      }
+      if (lookupState(state, "fire")) {
+        if (state->getState() == State_Active) {
+          undoScene(0, 0, SceneFire, coSystem);
+        }
+      }
+    } else if ((groupId == 0) && (sceneId == ScenePresent)) {
+      if (lookupState(state, "presence")) {
+        state->setState(coSystem, "present");
+      }
+    } else if ((groupId == 0) && (sceneId == SceneSleeping)) {
+      if (lookupState(state, "hibernation")) {
+        state->setState(coSystem, "sleeping");
+      }
+    } else if ((groupId == 0) && (sceneId == SceneWakeUp)) {
+      if (lookupState(state, "hibernation")) {
+        state->setState(coSystem, "awake");
+      }
+    } else if ((groupId == 0) && (sceneId == ScenePanic)) {
+      if (lookupState(state, "panic")) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneFire)) {
+      if (lookupState(state, "fire")) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
+      if (lookupState(state, "alarm")) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm2)) {
+      if (lookupState(state, "alarm2")) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm3)) {
+      if (lookupState(state, "alarm3")) {
+        state->setState(coSystem, State_Active);
+      }
+    } else if ((groupId == 0) && (sceneId == SceneAlarm4)) {
+      if (lookupState(state, "alarm4")) {
+        state->setState(coSystem, State_Active);
       }
     }
-    if (lookupState(state, "fire")) {
-      if (state->getState() == State_Active) {
-        undoScene(0, 0, SceneFire, coSystem);
-      }
-    }
-  } else if ((groupId == 0) && (sceneId == ScenePresent)) {
-    if (lookupState(state, "presence")) {
-      state->setState(coSystem, "present");
-    }
-  } else if ((groupId == 0) && (sceneId == SceneSleeping)) {
-    if (lookupState(state, "hibernation")) {
-      state->setState(coSystem, "sleeping");
-    }
-  } else if ((groupId == 0) && (sceneId == SceneWakeUp)) {
-    if (lookupState(state, "hibernation")) {
-      state->setState(coSystem, "awake");
-    }
-  } else if ((groupId == 0) && (sceneId == ScenePanic)) {
-    if (lookupState(state, "panic")) {
-      state->setState(coSystem, State_Active);
-    }
-  } else if ((groupId == 0) && (sceneId == SceneFire)) {
-    if (lookupState(state, "fire")) {
-      state->setState(coSystem, State_Active);
-    }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm)) {
-    if (lookupState(state, "alarm")) {
-      state->setState(coSystem, State_Active);
-    }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm2)) {
-    if (lookupState(state, "alarm2")) {
-      state->setState(coSystem, State_Active);
-    }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm3)) {
-    if (lookupState(state, "alarm3")) {
-      state->setState(coSystem, State_Active);
-    }
-  } else if ((groupId == 0) && (sceneId == SceneAlarm4)) {
-    if (lookupState(state, "alarm4")) {
-      state->setState(coSystem, State_Active);
-    }
-  } else if (sceneId == SceneWindActive) {
+  }
+
+  /*
+   * wind/rain can be apartment wide or only to one facade
+   */
+  if (sceneId == SceneWindActive) {
     if (groupId == 0) {
       state = getOrRegisterState("wind");
     } else if (isAppUserGroup(groupId)) {
@@ -479,8 +487,14 @@ void SystemState::undoscene() {
   boost::shared_ptr<State> state;
 
   originDSUID = getData(&zoneId, &groupId, &sceneId, &callOrigin);
-
   dsuid_t dsuid = str2dsuid(originDSUID);
+
+  if (groupId != 0) {
+    // panic/fire/alarm apply to broadcast group-0
+    // no undoscene for wind/rain
+    return;
+  }
+
   if ((groupId == 0) && (sceneId == ScenePanic)) {
     if (lookupState(state, "panic")) {
       state->setState(coSystem, State_Inactive);
