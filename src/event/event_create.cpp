@@ -224,4 +224,114 @@ createHeatingEnabled(int _zoneID, bool _enabled)
   return event;
 }
 
+boost::shared_ptr<Event>
+createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
+                              const ZoneHeatingConfigSpec_t &_config)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::HeatingControllerSetup);
+
+  event->setProperty("ZoneID", intToString(_zoneID));
+  event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+  event->setProperty("ControlMode", intToString(_config.ControllerMode));
+  event->setProperty("EmergencyValue", intToString(_config.EmergencyValue - 100));
+  if (_config.ControllerMode == HeatingControlModeIDPID) {
+    event->setProperty("CtrlKp", doubleToString((double)_config.Kp * 0.025));
+    event->setProperty("CtrlTs", intToString(_config.Ts));
+    event->setProperty("CtrlTi", intToString(_config.Ti));
+    event->setProperty("CtrlKd", intToString(_config.Kd));
+    event->setProperty("CtrlImin", doubleToString((double)_config.Imin * 0.025));
+    event->setProperty("CtrlImax", doubleToString((double)_config.Imax * 0.025));
+    event->setProperty("CtrlYmin", intToString(_config.Ymin - 100));
+    event->setProperty("CtrlYmax", intToString(_config.Ymax - 100));
+    event->setProperty("CtrlAntiWindUp", (_config.AntiWindUp > 0) ? "true" : "false");
+    event->setProperty("CtrlKeepFloorWarm", (_config.KeepFloorWarm > 0) ? "true" : "false");
+  } else if (_config.ControllerMode == HeatingControlModeIDZoneFollower) {
+    event->setProperty("ReferenceZone", intToString(_config.SourceZoneId));
+    event->setProperty("CtrlOffset", intToString(_config.Offset));
+  } else if (_config.ControllerMode == HeatingControlModeIDManual) {
+    event->setProperty("ManualValue", intToString(_config.ManualValue - 100));
+  }
+  return event;
+}
+
+boost::shared_ptr<Event>
+createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
+                             const ZoneHeatingProperties_t &_properties,
+                             const ZoneHeatingOperationModeSpec_t &_mode)
+{
+    boost::shared_ptr<Event> event;
+    event = boost::make_shared<Event>(EventName::HeatingControllerValue);
+
+    event->setProperty("ZoneID", intToString(_zoneID));
+    event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+    if (_properties.m_HeatingControlMode == HeatingControlModeIDPID) {
+      event->setProperty("NominalTemperature_Off",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode0)));
+      event->setProperty("NominalTemperature_Comfort",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode1)));
+      event->setProperty("NominalTemperature_Economy",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode2)));
+      event->setProperty("NominalTemperature_NotUsed",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode3)));
+      event->setProperty("NominalTemperature_Night",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
+      event->setProperty("NominalTemperature_Holiday",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
+    } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
+      event->setProperty("ControlValue_Off",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
+      event->setProperty("ControlValue_Comfort",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode1)));
+      event->setProperty("ControlValue_Economy",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode2)));
+      event->setProperty("ControlValue_NotUsed",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode3)));
+      event->setProperty("ControlValue_Night",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
+      event->setProperty("ControlValue_Holiday",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
+    }
+    return event;
+}
+
+boost::shared_ptr<Event>
+createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
+                                  const ZoneHeatingProperties_t &_props,
+                                  const ZoneHeatingStatus_t &_stat)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::HeatingControllerValueDsHub);
+
+  event->setProperty("ZoneID", intToString(_zoneID));
+  switch (_operationMode) {
+  case 0: event->setProperty("OperationMode", "Off"); break;
+  case 1: event->setProperty("OperationMode", "Comfort"); break;
+  case 2: event->setProperty("OperationMode", "Eco"); break;
+  case 3: event->setProperty("OperationMode", "NotUsed"); break;
+  case 4: event->setProperty("OperationMode", "Night"); break;
+  case 5: event->setProperty("OperationMode", "Holiday"); break;
+  }
+  if (_props.m_HeatingControlMode == HeatingControlModeIDPID) {
+    event->setProperty("NominalTemperature",
+                       doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_NominalValue)));
+  } else if (_props.m_HeatingControlMode == HeatingControlModeIDFixed) {
+    event->setProperty("ControlValue",
+                       doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_ControlValue)));
+  }
+  return event;
+}
+
+boost::shared_ptr<Event>
+  createHeatingControllerState(int _zoneID, const dsuid_t &_ctrlDsuid, int _ctrlState)
+{
+    boost::shared_ptr<Event> event;
+    event = boost::make_shared<Event>(EventName::HeatingControllerState);
+
+    event->setProperty("ZoneID", intToString(_zoneID));
+    event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+    event->setProperty("ControlState", intToString(_ctrlState));
+    return event;
+}
+
 }

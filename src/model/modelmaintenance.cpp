@@ -1864,31 +1864,7 @@ namespace dss {
 
     log(std::string("onHeatingControllerConfig:  dsMeter " + dsuid2str(_dsMeterID) +
         ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
-
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerSetup));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
-    pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue - 100));
-    if (config->ControllerMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("CtrlKp", doubleToString((double)config->Kp * 0.025));
-      pEvent->setProperty("CtrlTs", intToString(config->Ts));
-      pEvent->setProperty("CtrlTi", intToString(config->Ti));
-      pEvent->setProperty("CtrlKd", intToString(config->Kd));
-      pEvent->setProperty("CtrlImin", doubleToString((double)config->Imin * 0.025));
-      pEvent->setProperty("CtrlImax", doubleToString((double)config->Imax * 0.025));
-      pEvent->setProperty("CtrlYmin", intToString(config->Ymin - 100));
-      pEvent->setProperty("CtrlYmax", intToString(config->Ymax - 100));
-      pEvent->setProperty("CtrlAntiWindUp", (config->AntiWindUp > 0) ? "true" : "false");
-      pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
-    } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
-      pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
-      pEvent->setProperty("CtrlOffset", intToString(config->Offset));
-    } else if (config->ControllerMode == HeatingControlModeIDManual) {
-      pEvent->setProperty("ManualValue", intToString(config->ManualValue - 100));
-    }
-    raiseEvent(pEvent);
+    raiseEvent(createHeatingControllerConfig(_zoneID, _dsMeterID, *config));
   } // onHeatingControllerConfig
 
   void ModelMaintenance::onHeatingControllerValues(dsuid_t _dsMeterID, const int _zoneID, boost::shared_ptr<void> _spec) {
@@ -1910,59 +1886,10 @@ namespace dss {
     log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID) +
         ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
 
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerValue));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("NominalTemperature_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode0)));
-      pEvent->setProperty("NominalTemperature_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode1)));
-      pEvent->setProperty("NominalTemperature_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode2)));
-      pEvent->setProperty("NominalTemperature_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode3)));
-      pEvent->setProperty("NominalTemperature_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode4)));
-      pEvent->setProperty("NominalTemperature_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode5)));
-    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      pEvent->setProperty("ControlValue_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode0)));
-      pEvent->setProperty("ControlValue_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode1)));
-      pEvent->setProperty("ControlValue_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode2)));
-      pEvent->setProperty("ControlValue_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode3)));
-      pEvent->setProperty("ControlValue_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode4)));
-      pEvent->setProperty("ControlValue_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode5)));
-    }
-    raiseEvent(pEvent);
-
-
-    boost::shared_ptr<Event> pEventDsHub;
-    pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
-    pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
-    switch (zone->getHeatingOperationMode()) {
-    case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
-    case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
-    case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
-    case 3: pEventDsHub->setProperty("OperationMode", "NotUsed"); break;
-    case 4: pEventDsHub->setProperty("OperationMode", "Night"); break;
-    case 5: pEventDsHub->setProperty("OperationMode", "Holiday"); break;
-    }
-    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-      pEventDsHub->setProperty("NominalTemperature",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_NominalValue)));
-    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      pEventDsHub->setProperty("ControlValue",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValue)));
-    }
-    raiseEvent(pEventDsHub);
+    raiseEvent(createHeatingControllerValue(_zoneID, _dsMeterID, hProp, *values));
+    raiseEvent(createHeatingControllerValueDsHub(_zoneID,
+                                                 zone->getHeatingOperationMode(),
+                                                 hProp, hStatus));
   } // onHeatingControllerValues
 
   void ModelMaintenance::onHeatingControllerState(dsuid_t _dsMeterID, const int _zoneID, const int _State) {
@@ -1974,12 +1901,7 @@ namespace dss {
       log(std::string("Error on heating state event, item not found: ") + e.what(), lsWarning);
     }
 
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerState));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("ControlState", intToString(_State));
-    raiseEvent(pEvent);
+    raiseEvent(createHeatingControllerState(_zoneID, _dsMeterID, _State));
   } // onHeatingControllerState
 
   void ModelMaintenance::onClusterConfigLock(const int _clusterID, const bool _configurationLock) {
