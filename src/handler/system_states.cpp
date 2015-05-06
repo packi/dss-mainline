@@ -435,46 +435,22 @@ void SystemState::callscene() {
       if (lookupState(state, "alarm4")) {
         state->setState(coSystem, State_Active);
       }
-    }
-  }
-
-  /*
-   * wind/rain can be apartment wide or only to one facade
-   */
-  if (groupId == 0) {
-    if (sceneId == SceneWindActive) {
-      if (groupId == 0) {
-        state = getOrRegisterState("wind");
-      } else if (isAppUserGroup(groupId)) {
-        state = getOrRegisterState(formatGroupName2("wind", groupId));
-      }
+    } else if (sceneId == SceneWindActive) {
+      state = getOrRegisterState("wind");
       state->setState(coSystem, State_Active);
     } else if (sceneId == SceneWindInactive) {
-      if (groupId == 0) {
-        state = getOrRegisterState("wind");
-      } else if (isAppUserGroup(groupId)) {
-        state = getOrRegisterState(formatGroupName2("wind", groupId));
-      }
+      state = getOrRegisterState("wind");
       state->setState(coSystem, State_Inactive);
     } else if (sceneId == SceneRainActive) {
-      if (groupId == 0) {
-        state = getOrRegisterState("rain");
-      } else if (isAppUserGroup(groupId)) {
-        state = getOrRegisterState(formatGroupName2("rain", groupId));
-      }
+      state = getOrRegisterState("rain");
       state->setState(coSystem, State_Active);
     } else if (sceneId == SceneRainInactive) {
-      if (groupId == 0) {
-        state = getOrRegisterState("rain");
-        state->setState(coSystem, State_Inactive);
-        for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
-          if (lookupState(state, formatGroupName2("rain", groupId))) {
-            state->setState(coSystem, State_Inactive);
-          }
+      state = getOrRegisterState("rain");
+      state->setState(coSystem, State_Inactive);
+      for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
+        if (lookupState(state, formatGroupName2("rain", groupId))) {
+          state->setState(coSystem, State_Inactive);
         }
-      } else if (isAppUserGroup(groupId)) {
-        state = getOrRegisterState(formatGroupName2("rain", groupId));
-        state->setState(coSystem, State_Inactive);
       }
     }
   } else if (isAppUserGroup(groupId)) {
