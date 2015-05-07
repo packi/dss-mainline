@@ -220,16 +220,8 @@ namespace dss {
         m_pPropertyNode->createProperty("ZoneID")->setIntegerValue(m_ZoneID);
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
-        if (m_ZoneID > 0) {
-          m_pPropertyNode->createProperty("heating/");
-          m_pPropertyNode->createProperty("heating/OperationMode")
-            ->linkToProxy(PropertyProxyMemberFunction<Zone, int>(*this, &Zone::getHeatingOperationMode, &Zone::setHeatingOperationMode));
-          m_pPropertyNode->createProperty("heating/ControlMode")
-              ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlMode));
-          m_pPropertyNode->createProperty("heating/ControlState")
-              ->linkToProxy(PropertyProxyReference<int>(m_HeatingProperties.m_HeatingControlState));
-        }
         m_pPropertyNode->createProperty("devices/");
+
         foreach(boost::shared_ptr<Group> pGroup, m_Groups) {
           pGroup->publishToPropertyTree();
         }

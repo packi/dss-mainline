@@ -236,19 +236,12 @@ namespace dss {
         m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
         m_pPropertyNode->createProperty("color")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getStandardGroupID, &Group::setStandardGroupID));
-        m_pPropertyNode->createProperty("valid")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, bool>(*this, &Group::isValid, &Group::setIsValid));
-        m_pPropertyNode->createProperty("sync")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, bool>(*this, &Group::isSynchronized, &Group::setIsSynchronized));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
         m_pPropertyNode->createProperty("lastCalledScene")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
-        m_pPropertyNode->createProperty("devices");
-        m_pPropertyNode->createProperty("scenes");
-        m_pPropertyNode->createProperty("sensor");
       }
     }
   } // publishToPropertyTree
