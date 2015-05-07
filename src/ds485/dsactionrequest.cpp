@@ -307,4 +307,12 @@ namespace dss {
   void DSActionRequest::setBusEventSink(BusEventSink* _eventSink) {
       m_pBusEventSink = _eventSink;
   }
+
+  bool DSActionRequest::isOperationLock(const dsuid_t &_dSM, int _clusterId) {
+    uint8_t lockState;
+    int ret;
+    ret = ClusterProperties_get_operation_lock(m_DSMApiHandle, _dSM, _clusterId, &lockState);
+    DSBusInterface::checkResultCode(ret);
+    return (lockState == 1);
+  }
 } // namespace dss
