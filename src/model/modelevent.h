@@ -68,6 +68,7 @@ namespace dss {
                     etClusterConfigLock, /** config lock of a cluster was changed */
                     etClusterLockedScenes, /** locked scenes of a cluster was changed */
                     etGenericEvent, /** generic event for dSS/dSG communication */
+                    etOperationLock, /** scene calls ignored, no turn on/off lights, change blind positions, etc */
                  } EventType;
   private:
     EventType m_EventType;

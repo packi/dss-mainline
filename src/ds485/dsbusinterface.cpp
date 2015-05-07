@@ -1224,6 +1224,22 @@ namespace dss {
                                                    uint8_t _groupId,
                                                    uint16_t _originDeviceId,
                                                    uint8_t _command) {
+    switch (_command) {
+    case 0: // unlock
+    case 1: // lock
+    {
+      ModelEvent* pEvent = new ModelEvent(ModelEvent::etOperationLock);
+      pEvent->addParameter(_zoneId);
+      pEvent->addParameter(_groupId);
+      pEvent->addParameter(_command == 1);
+      pEvent->addParameter(coDsmApi);
+      m_pModelMaintenance->addModelEvent(pEvent);
+      break;
+    }
+    default:
+      log("Unknown Extra Command " + intToString(_command), lsInfo);
+      break;
+    }
   }
 
   void DSBusInterface::handleActionRequestExtraCmdCallback(uint8_t _error_code,
