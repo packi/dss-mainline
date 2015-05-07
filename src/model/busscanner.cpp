@@ -239,7 +239,8 @@ namespace dss {
       boost::shared_ptr<Cluster> pCluster;
 
       try {
-        pCluster = boost::dynamic_pointer_cast<Cluster>(m_Apartment.getGroup(cluster.GroupID));
+        assert(isAppUserGroup(cluster.GroupID));
+        pCluster = m_Apartment.getCluster(cluster.GroupID);
       } catch (ItemNotFoundException&) {
         boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
         pCluster.reset(new Cluster(cluster.GroupID, m_Apartment));
