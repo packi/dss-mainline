@@ -941,27 +941,25 @@ namespace dss {
   } // childRemoved
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr,PropertyNodePtr), PropertyNodePtr _node) {
-    bool notified = false;
-    if(m_Listeners && !m_Listeners->empty()) {
+    if (m_Listeners != NULL && m_Listeners->size() > 0) {
       // as the list might get modified in the listener code we need to iterate
       // over a copy of our listeners
-      std::vector<PropertyListener*> copy = *m_Listeners;
-      std::vector<PropertyListener*>::iterator it;
-      foreach(PropertyListener* pListener, copy) {
+      std::vector<PropertyListener*> copy(*m_Listeners);
+
+      std::vector<PropertyListener*>::iterator it, lit;
+      for (it = copy.begin(); it != copy.end(); it++) {
+
         // check if the original list still contains the listener
-        if (contains(*m_Listeners, pListener)) {
-          (pListener->*_callback)(shared_from_this(), _node);
-          notified = true;
+        lit = find(m_Listeners->begin(), m_Listeners->end(), *it);
+        if ((*lit) != NULL && lit != m_Listeners->end()) {
+          ((*lit)->*_callback)(shared_from_this(), _node);
         }
       }
     }
-    if(!notified) {
-      if(m_ParentNode != NULL) {
-        m_ParentNode->notifyListeners(_callback, _node);
-      }
-    }
-    foreach(PropertyNode* prop, m_AliasedBy) {
-      prop->notifyListeners(_callback, _node);
+
+    // notify all listeners on higher levels
+    if (m_ParentNode != NULL) {
+      m_ParentNode->notifyListeners(_callback, _node);
     }
   } // notifyListeners
 
