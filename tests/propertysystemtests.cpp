@@ -31,6 +31,7 @@
 #include <fstream>
 
 #include "src/logger.h"
+#include "src/datetools.h"
 #include "src/web/webrequests.h"
 
 int testGetter() {
@@ -568,5 +569,45 @@ BOOST_AUTO_TEST_CASE(testQuerySubProperty) {
   JSONWriter json(JSONWriter::jsonNoneResult);
   query.run(json);
   BOOST_CHECK_EQUAL(json.successJSON(), "{\"subnode\":[{\"content\":\"content1\"}]}");
+}
+
+BOOST_AUTO_TEST_CASE(testCreatePropertySpeed) {
+  std::string _path = "/foo/bar/baf/baz/tic/tac/toe";
+  std::string _id = "1234859";
+
+  TimeStamp tic, toc;
+
+  {
+    PropertySystem propSys;
+    PropertyNodePtr p = propSys.createProperty(_path);
+    tic.timestamp();
+    for (int i = 0; i < 1000 * 1000; i++) {
+      PropertyNodePtr q = p->getProperty(_id + "/time");
+      if (q == NULL) {
+        p->createProperty(_id + "/time")->setStringValue("abcdefghij");
+      } else {
+        q->setStringValue("abcdefghij");
+      }
+    }
+    toc.timestamp();
+  }
+  TimeStamp ts_get_set = toc - tic;
+
+  {
+    PropertySystem propSys;
+    PropertyNodePtr p = propSys.createProperty(_path);
+    tic.timestamp();
+    for (int i = 0; i < 1000 * 1000; i++) {
+      p->createProperty(_id + "/time")->setStringValue("abcdefghij");
+    }
+    toc.timestamp();
+  }
+  TimeStamp ts_create = toc - tic;
+
+  BOOST_CHECK_CLOSE(static_cast<double>(ts_create.toMicroSec()),
+                    static_cast<double>(ts_get_set.toMicroSec()), 20);
+
+  std::cout << ts_create.toMicroSec() / 1000 << " ms\n";
+  std::cout << ts_get_set.toMicroSec() / 1000 << " ms \n";
 }
 BOOST_AUTO_TEST_SUITE_END()
