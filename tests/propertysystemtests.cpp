@@ -602,7 +602,9 @@ BOOST_AUTO_TEST_CASE(testCreatePropertySpeed) {
   BOOST_CHECK_CLOSE(static_cast<double>(ts_create.toMicroSec()),
                     static_cast<double>(ts_get_set.toMicroSec()), 20);
 
+#if 0
   std::cout << ts_create.toMicroSec() / 1000 << " ms\n";
   std::cout << ts_get_set.toMicroSec() / 1000 << " ms \n";
+#endif
 }
 BOOST_AUTO_TEST_SUITE_END()
