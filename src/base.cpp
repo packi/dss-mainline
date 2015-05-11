@@ -450,19 +450,11 @@ namespace dss {
   //================================================== System utilities
 
   void sleepSeconds( const unsigned int _seconds ) {
-#ifdef WIN32
-    Sleep( _seconds * 1000 );
-#else
     sleep( _seconds );
-#endif
   } // sleepSeconds
 
   void sleepMS( const unsigned int _ms ) {
-#ifdef WIN32
-    Sleep( _ms );
-#else
     usleep( _ms * 1000 );
-#endif
   }
 
   std::string getTempDir() {
