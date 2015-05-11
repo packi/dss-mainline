@@ -827,30 +827,6 @@ namespace dss {
     }
   } // removeListener
 
-  PropertyNodePtr PropertyNode::createProperty(dss::path_tokenizer::const_iterator &it,
-                                               dss::path_tokenizer::const_iterator &end) {
-    std::string nextOne = std::string(*it);
-    PropertyNodePtr nextNode;
-    if ((nextNode = getPropertyByName(nextOne)) == NULL) {
-      /* s.back() needs -std=c++11 */
-      if (nextOne[ nextOne.length() - 1 ] == '+') {
-        nextOne.erase(nextOne.length() - 1, 1);
-      }
-
-      /* extract n from fieldName[n], if exists */
-      /* already called internally by getPropertyName, see above */
-      int index = getAndRemoveIndexFromPropertyName(nextOne);
-      if (index == 0) {
-        index = count(nextOne) + 1;
-      }
-
-      nextNode.reset(new PropertyNode(nextOne.c_str(), index));
-      addChild(nextNode);
-    }
-
-    return (++it == end) ? nextNode :  nextNode->createProperty(it, end);
-  }
-
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
     checkWriteAccess();
     if (m_AliasTarget != NULL) {
@@ -1430,11 +1406,6 @@ namespace dss {
 
 
   //=============================================== Utilities
-
-  path_tokenizer createPathTokenizer(const std::string &path) {
-    boost::char_separator<char> sep("/");
-    return boost::tokenizer<boost::char_separator<char> >(path, sep);
-  }
 
   std::string getBasePath(const std::string& _path) {
     std::string result = _path;
