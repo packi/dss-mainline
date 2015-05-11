@@ -330,6 +330,10 @@ BOOST_AUTO_TEST_CASE(testCarCdrPath) {
   path = "last";
   BOOST_CHECK_EQUAL(carCdrPath(path), "last");
   BOOST_CHECK_EQUAL(carCdrPath(path), "");
+
+  path = "last/";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "last");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
 }
 
 BOOST_AUTO_TEST_CASE(testTruncateUTF8String) {

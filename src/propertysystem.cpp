@@ -358,13 +358,10 @@ namespace dss {
       return m_AliasTarget->getProperty(_propPath);
     } else {
       std::string propPath = _propPath;
-      std::string propName = _propPath;
-      if(endsWith(propName, "/")) {
-        propName.erase(propName.size() - 1);
-      }
+
       std::string::size_type slashPos = propPath.find('/');
       if (slashPos != std::string::npos) {
-        propName = propPath.substr(0, slashPos);
+        std::string propName = propPath.substr(0, slashPos);
         propPath.erase(0, slashPos + 1);
         PropertyNodePtr child = getPropertyByName(propName);
         if (child != NULL) {
@@ -373,6 +370,10 @@ namespace dss {
           return PropertyNodePtr();
         }
       } else {
+        std::string propName = _propPath;
+        if (endsWith(propName, "/")) {
+          propName.erase(propName.size() - 1);
+        }
         return getPropertyByName(propName);
       }
     }
