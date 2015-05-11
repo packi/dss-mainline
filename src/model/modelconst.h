@@ -334,6 +334,9 @@ namespace dss {
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
+  const uint16_t TBVersion_OemEanConfig = 0x0350;
+  const uint16_t TBVersion_OemConfigLock = 0x0357;
+
   const uint16_t ProductID_KM_200 = 0x00C8;
   const uint16_t ProductID_SDS_200 = 0x18C8;
   const uint16_t ProductID_KL_200 = 0x0CC8;
