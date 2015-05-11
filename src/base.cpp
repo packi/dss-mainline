@@ -418,6 +418,23 @@ namespace dss {
     return sstream.str();
   } // join
 
+  /**
+   * car(/foo/bar/baz) -> ('foo', 'bar/baz')
+   * https://en.wikipedia.org/wiki/CAR_and_CDR
+   */
+  std::string carCdrPath(std::string &path) {
+    std::string car;
+    std::string::size_type slashPos = path.find('/');
+    if (slashPos != std::string::npos) {
+      car = path.substr(0, slashPos);
+      path.erase(0, slashPos + 1);
+    } else {
+      car = path;
+      path.clear();
+    }
+    return car;
+  }
+
   uint16_t update_crc(uint16_t _crc, const unsigned char& c) {
 	int i;
     uint16_t result = _crc ^ c;

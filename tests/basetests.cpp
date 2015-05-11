@@ -310,6 +310,28 @@ BOOST_AUTO_TEST_CASE(testSplitIntoKeyValue) {
   BOOST_CHECK_EQUAL(value, "equals=success");
 }
 
+BOOST_AUTO_TEST_CASE(testCarCdrPath) {
+  std::string path = "foo/bar/baz/baf/tic/tac/toe/";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "foo");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "bar");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "baz");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "baf");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "tic");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "tac");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "toe");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+
+  path = "";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+
+  path = "/";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+
+  path = "last";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "last");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+}
+
 BOOST_AUTO_TEST_CASE(testTruncateUTF8String) {
   BOOST_CHECK_EQUAL(truncateUTF8String("a", 2), "a");
   BOOST_CHECK_EQUAL(truncateUTF8String("a", 1), "a");
