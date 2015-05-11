@@ -371,7 +371,7 @@ namespace dss {
     dev->setIsConnected(true);
     dev->setIsValid(true);
 
-    if ((dev->getRevisionID() >= 0x355) &&
+    if ((dev->getRevisionID() >= TBVersion_OemConfigLock) &&
         (dev->getOemInfoState() == DEVICE_OEM_UNKOWN)){
         // will be reset in OEM Readout
         dev->setConfigLock(true);
@@ -429,7 +429,7 @@ namespace dss {
 
   void BusScanner::scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
-      if (_pDevice->getRevisionID() >= 0x0350) {
+      if (_pDevice->getRevisionID() >= TBVersion_OemEanConfig) {
         log("scheduleOEMReadout: schedule EAN readout for: " +
             dsuid2str(_pDevice->getDSID()));
         boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;

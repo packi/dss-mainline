@@ -37,6 +37,7 @@
 #include "src/model/device.h"
 #include "src/model/modelevent.h"
 #include "src/model/modelmaintenance.h"
+#include "src/model/modelconst.h"
 #include "dss.h"
 
 namespace dss {
@@ -533,7 +534,7 @@ namespace dss {
         state = DEVICE_OEM_VALID;
       }
 
-      if (m_revisionID >= 0x357) {
+      if (m_revisionID >= TBVersion_OemConfigLock) {
         if (std::bitset<8>(
                 getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
           isConfigLocked = true;
