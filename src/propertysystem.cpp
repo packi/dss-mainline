@@ -1407,25 +1407,6 @@ namespace dss {
 
   //=============================================== Utilities
 
-  std::string getBasePath(const std::string& _path) {
-    std::string result = _path;
-    if (result.length() > 1) {
-      std::string::size_type pos = result.rfind('/');
-      result.erase(pos, std::string::npos);
-    }
-    if (result.length() == 0) {
-      result = "/";
-    }
-    return result;
-  } // getBasePath
-
-  std::string getProperty(const std::string& _path) {
-    std::string result = _path;
-    std::string::size_type pos = result.rfind('/');
-    result.erase(0, pos + 1);
-    return result;
-  } // getProperty
-
   const char* getValueTypeAsString(aValueType _value) {
     switch(_value) {
       case vTypeNone:

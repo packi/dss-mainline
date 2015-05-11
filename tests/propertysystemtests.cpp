@@ -184,11 +184,6 @@ BOOST_AUTO_TEST_CASE(testPropertySystem) {
   propND3->addChild(propND5);
   BOOST_CHECK(propSys->getProperty("/config/UI/settings[ last ]") == propND5);
 
-  getBasePath("/bla/asdf");
-  getProperty("/bla/asdf");
-  getBasePath("/");
-  getProperty("/");
-
   BOOST_CHECK_EQUAL(2, propND3->count("settings"));
   BOOST_CHECK_EQUAL(0, propND3->count("asdf"));
   BOOST_CHECK_EQUAL(1, propSys->getRootNode()->count("config"));

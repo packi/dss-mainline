@@ -65,9 +65,6 @@ namespace dss {
     } actualValue;
   } aPropertyValue;
 
-  std::string getBasePath(const std::string& _path);
-  std::string getProperty(const std::string& _path);
-
   /**
    * Saves a subtree to XML.
    * @param _rootNode
