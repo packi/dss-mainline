@@ -70,7 +70,8 @@ enum {
   mf_extradimmer,
   mf_umvrelay,
   mf_blinkconfig,
-  mf_umroutmode
+  mf_umroutmode,
+  mf_impulseconfig
 };
 
 class ModelFeatures
