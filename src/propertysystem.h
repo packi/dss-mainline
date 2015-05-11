@@ -585,7 +585,7 @@ namespace dss {
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
-      if(m_AliasTarget) {
+      if (m_AliasTarget) {
         m_AliasTarget->foreachChildOf(_callback);
       } else if (NULL != m_ChildNodes) {
         for (PropertyList::iterator it = m_ChildNodes->begin(); it
@@ -600,7 +600,7 @@ namespace dss {
     /** @copydoc foreachChildOf */
     template<class Cls>
     void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode&)) {
-      if(m_AliasTarget) {
+      if (m_AliasTarget) {
         m_AliasTarget->foreachChildOf(_objRef, _callback);
       } else if (NULL != m_ChildNodes) {
         for (PropertyList::iterator it = m_ChildNodes->begin(); it
