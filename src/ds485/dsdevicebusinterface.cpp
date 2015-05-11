@@ -543,7 +543,6 @@ namespace dss {
     } catch (BusApiError& er) {
       // Bus error
       Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what(), lsWarning);
-      return;
     }
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceEANReady,
