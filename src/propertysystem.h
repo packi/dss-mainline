@@ -25,15 +25,11 @@
 #ifndef NEUROPROPERTYSYSTEM_H
 #define NEUROPROPERTYSYSTEM_H
 
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/and.hpp>
-#include <boost/type_traits/is_class.hpp>
-#include <boost/tokenizer.hpp>
-
 #include <stdexcept>
 #include <vector>
 #include <stack>
 #include <string>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -68,12 +64,6 @@ namespace dss {
       double floating;
     } actualValue;
   } aPropertyValue;
-
-  std::string getBasePath(const std::string& _path);
-  std::string getProperty(const std::string& _path);
-
-  typedef boost::tokenizer<boost::char_separator<char> > path_tokenizer;
-  path_tokenizer createPathTokenizer(const std::string &path);
 
   /**
    * Saves a subtree to XML.
@@ -512,8 +502,6 @@ namespace dss {
 
     /** Recursively adds a child-node. */
     PropertyNodePtr createProperty(const std::string& _propPath);
-    PropertyNodePtr createProperty(path_tokenizer::const_iterator & _propPath,
-                                   path_tokenizer::const_iterator &end);
 
     /** Returns a child node by name.
      * Or NULL if not found.*/

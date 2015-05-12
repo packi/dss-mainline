@@ -418,6 +418,23 @@ namespace dss {
     return sstream.str();
   } // join
 
+  /**
+   * car(/foo/bar/baz) -> ('foo', 'bar/baz')
+   * https://en.wikipedia.org/wiki/CAR_and_CDR
+   */
+  std::string carCdrPath(std::string &path) {
+    std::string car;
+    std::string::size_type slashPos = path.find('/');
+    if (slashPos != std::string::npos) {
+      car = path.substr(0, slashPos);
+      path.erase(0, slashPos + 1);
+    } else {
+      car = path;
+      path.clear();
+    }
+    return car;
+  }
+
   uint16_t update_crc(uint16_t _crc, const unsigned char& c) {
 	int i;
     uint16_t result = _crc ^ c;
@@ -450,19 +467,11 @@ namespace dss {
   //================================================== System utilities
 
   void sleepSeconds( const unsigned int _seconds ) {
-#ifdef WIN32
-    Sleep( _seconds * 1000 );
-#else
     sleep( _seconds );
-#endif
   } // sleepSeconds
 
   void sleepMS( const unsigned int _ms ) {
-#ifdef WIN32
-    Sleep( _ms );
-#else
     usleep( _ms * 1000 );
-#endif
   }
 
   std::string getTempDir() {

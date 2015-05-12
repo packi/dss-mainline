@@ -357,24 +357,20 @@ namespace dss {
     if (m_AliasTarget) {
       return m_AliasTarget->getProperty(_propPath);
     } else {
-      std::string propPath = _propPath;
-      std::string propName = _propPath;
-      if(endsWith(propName, "/")) {
-        propName.erase(propName.size() - 1);
+      if (_propPath.empty() || _propPath == "/") {
+        // it's us, stupid
+        return shared_from_this();
       }
-      std::string::size_type slashPos = propPath.find('/');
-      if (slashPos != std::string::npos) {
-        propName = propPath.substr(0, slashPos);
-        propPath.erase(0, slashPos + 1);
-        PropertyNodePtr child = getPropertyByName(propName);
-        if (child != NULL) {
-          return child->getProperty(propPath);
-        } else {
-          return PropertyNodePtr();
-        }
-      } else {
-        return getPropertyByName(propName);
+
+      std::string head, tail = _propPath;
+      head = carCdrPath(tail);
+      assert(!head.empty());
+
+      PropertyNodePtr child = getPropertyByName(head);
+      if (child == NULL) {
+        return PropertyNodePtr();
       }
+      return tail.empty() ? child : child->getProperty(tail);
     }
   } // getProperty
 
@@ -831,39 +827,33 @@ namespace dss {
     }
   } // removeListener
 
-  PropertyNodePtr PropertyNode::createProperty(dss::path_tokenizer::const_iterator &it,
-                                               dss::path_tokenizer::const_iterator &end) {
-    std::string nextOne = std::string(*it);
-    PropertyNodePtr nextNode;
-    if ((nextNode = getPropertyByName(nextOne)) == NULL) {
-      /* s.back() needs -std=c++11 */
-      if (nextOne[ nextOne.length() - 1 ] == '+') {
-        nextOne.erase(nextOne.length() - 1, 1);
-      }
-
-      /* extract n from fieldName[n], if exists */
-      /* already called internally by getPropertyName, see above */
-      int index = getAndRemoveIndexFromPropertyName(nextOne);
-      if (index == 0) {
-        index = count(nextOne) + 1;
-      }
-
-      nextNode.reset(new PropertyNode(nextOne.c_str(), index));
-      addChild(nextNode);
-    }
-
-    return (++it == end) ? nextNode :  nextNode->createProperty(it, end);
-  }
-
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
     checkWriteAccess();
     if (m_AliasTarget != NULL) {
       return m_AliasTarget->createProperty(_propPath);
     } else {
-      path_tokenizer pt = createPathTokenizer(_propPath);
-      path_tokenizer::const_iterator cur(pt.begin());
-      path_tokenizer::const_iterator end(pt.end());
-      return createProperty(cur, end);
+      if (_propPath.empty() || _propPath == "/") {
+        return shared_from_this();
+      }
+
+      std::string nextOne, tail = _propPath;
+      nextOne = carCdrPath(tail);
+      assert(!nextOne.empty());
+
+      PropertyNodePtr nextNode = getPropertyByName(nextOne);
+      if (nextNode == NULL) {
+        if (nextOne[nextOne.length() - 1] == '+') {
+          nextOne.erase(nextOne.length() - 1, 1);
+        }
+        int index = getAndRemoveIndexFromPropertyName(nextOne);
+        if (index == 0) {
+          index = count(nextOne) + 1;
+        }
+        nextNode = boost::make_shared<PropertyNode>(nextOne.c_str(), index);
+        addChild(nextNode);
+      }
+
+      return tail.empty() ? nextNode : nextNode->createProperty(tail);
     }
   } // createProperty
 
@@ -1416,30 +1406,6 @@ namespace dss {
 
 
   //=============================================== Utilities
-
-  path_tokenizer createPathTokenizer(const std::string &path) {
-    boost::char_separator<char> sep("/");
-    return boost::tokenizer<boost::char_separator<char> >(path, sep);
-  }
-
-  std::string getBasePath(const std::string& _path) {
-    std::string result = _path;
-    if (result.length() > 1) {
-      std::string::size_type pos = result.rfind('/');
-      result.erase(pos, std::string::npos);
-    }
-    if (result.length() == 0) {
-      result = "/";
-    }
-    return result;
-  } // getBasePath
-
-  std::string getProperty(const std::string& _path) {
-    std::string result = _path;
-    std::string::size_type pos = result.rfind('/');
-    result.erase(0, pos + 1);
-    return result;
-  } // getProperty
 
   const char* getValueTypeAsString(aValueType _value) {
     switch(_value) {

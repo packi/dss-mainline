@@ -81,6 +81,11 @@ namespace dss {
 
   std::string trim(const std::string& _str);
   std::string join(const std::vector<std::string>& _strings, const std::string& _delimiter);
+  /**
+   * car(/foo/bar/baz) -> ('foo', 'bar/baz')
+   * https://en.wikipedia.org/wiki/CAR_and_CDR
+   */
+  std::string carCdrPath(std::string &path);
 
   std::string urlDecode(const std::string& _in);
   std::string urlEncode(const std::string& _in);
