@@ -269,6 +269,16 @@ namespace dss {
         pCluster->setReadFromDsm(true);
       }
 
+      try {
+        ActionRequestInterface &actionRequest(*m_Apartment.getActionRequestInterface());
+        pCluster->setOperationLock(actionRequest.isOperationLock(_dsMeter->getDSID(),
+                                                                 cluster.GroupID),
+                                   coSystemStartup);
+      } catch (BusApiError &e) {
+        // leave State_Unknown or take lock value from other dsm's
+        log(std::string("OperationLock: ") + e.what(), lsWarning);
+      }
+
       pCluster->setIsPresent(true);
       pCluster->setIsConnected(true);
       pCluster->setLastCalledScene(SceneOff);

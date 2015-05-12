@@ -696,6 +696,12 @@ namespace dss {
       onGenericEvent(static_cast<GenericEventType_t>(event->getParameter(0)),
                      boost::static_pointer_cast<GenericEventPayload_t>(event->getSingleObjectParameter()));
       break;
+    case ModelEvent::etOperationLock:
+      // parm> 0:zoneId 1:groupId 2:lock 3:origin
+      onOperationLock(event->getParameter(0), event->getParameter(1),
+                      event->getParameter(2),
+                      static_cast<callOrigin_t>(event->getParameter(3)));
+      break;
     default:
       assert(false);
       break;
@@ -1954,6 +1960,19 @@ namespace dss {
         break;
     }
   } // onGenericEvent
+
+  void ModelMaintenance::onOperationLock(int _zoneID, int _groupID,
+                                         bool _lock, callOrigin_t _callOrigin) {
+    if (!isAppUserGroup(_groupID)) {
+      return;
+    }
+    try {
+      boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_groupID);
+      cluster->setOperationLock(_lock, _callOrigin);
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Unknown cluster: ") + e.what(), lsWarning);
+    }
+  }
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

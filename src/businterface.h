@@ -365,6 +365,8 @@ namespace dss {
     virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) = 0;
+    //< @ret true if locked
+    virtual bool isOperationLock(const dsuid_t &_dSM, int _clusterId) = 0;
   }; // ActionRequestInterface
 
   class MeteringBusInterface {
