@@ -32,5 +32,6 @@ namespace boost
 }
 
 #define foreach BOOST_FOREACH
+#define foreach_r BOOST_REVERSE_FOREACH
 
 #endif /* FOREACH_H_ */
