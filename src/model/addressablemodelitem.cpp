@@ -181,7 +181,7 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->stopOutputChannelValue(this, _origin, _category, _channel, _token);
   } // stopOutputChannelValue
 
-  void AddressableModelItem::pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, const uint8_t _sensorType, const float _sensorValueFloat, const std::string _token) {
+  void AddressableModelItem::pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, const uint8_t _sensorType, const double _sensorValueFloat, const std::string _token) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }

@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t _channel, const std::string _token)  {
       functionCalled("stopOutputChannelValue(" + intToString(_channel) + ")");
     }
-    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
+    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) {
       (void)SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
       functionCalled("pushSensorValue");
     }

@@ -251,6 +251,7 @@ dsstests_SOURCES = \
 	../tests/restfulapitests.cpp \
 	../tests/scriptstest.cpp \
 	../tests/securitytests.cpp \
+	../tests/sensorconversiontest.cpp \
 	../tests/sensor_data_uploader.cpp \
 	../tests/statetests.cpp \
 	../tests/testrunner.cpp \

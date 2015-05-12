@@ -2767,7 +2767,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        float sensorValueFloat = SceneHelper::sensorToFloat12(sensorType, sensorValue);
+        double sensorValueFloat = SceneHelper::sensorToFloat12(sensorType, sensorValue);
         pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));

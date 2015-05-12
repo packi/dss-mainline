@@ -142,7 +142,7 @@ namespace dss {
       getDevice()->stopOutputChannelValue(_origin, _category, _channel, _token);
   }
 
-  void DeviceReference::pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
+  void DeviceReference::pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) {
     getDevice()->pushSensor(_origin, _category, _sourceID, _sensorType, _sensorValueFloat, _token);
   }
 } // namespace dss
