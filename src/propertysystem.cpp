@@ -951,7 +951,7 @@ namespace dss {
 
         // check if the original list still contains the listener
         lit = find(m_Listeners->begin(), m_Listeners->end(), *it);
-        if ((*lit) != NULL && lit != m_Listeners->end()) {
+        if (lit != m_Listeners->end() && (*lit) != NULL) {
           ((*lit)->*_callback)(shared_from_this(), _node);
         }
       }
