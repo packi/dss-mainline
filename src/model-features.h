@@ -77,7 +77,8 @@ enum {
   mf_blinkconfig,
   mf_umroutmode,
   mf_locationconfig,
-  mf_windprotectionconfig
+  mf_windprotectionconfig,
+  mf_impulseconfig
 };
 
 class ModelFeatures
