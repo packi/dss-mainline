@@ -24,12 +24,15 @@
   #include "config.h"
 #endif
 
+#include <algorithm>
+
 #include "apartmentrequesthandler.h"
 
 #include "foreach.h"
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
+#include <boost/make_shared.hpp>
 
 #include "src/model/apartment.h"
 #include "src/model/zone.h"
@@ -38,6 +41,7 @@
 #include "src/model/device.h"
 #include "src/model/deviceinterface.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
 #include "src/model/scenehelper.h"
@@ -546,6 +550,75 @@ namespace dss {
           json.add(ModelFeatures::getInstance()->getFeatureName(all->at(a)), false);
         }
         json.endObject();
+
+        return json.successJSON();
+      } else if (_request.getMethod() == "getClusterLocks") {
+        JSONWriter json;
+
+        std::pair<std::vector<DeviceLock_t>, std::vector<ZoneLock_t> > locks;
+        std::vector<DeviceLock_t> lockedDevices;
+        std::vector<ZoneLock_t> lockedZones;
+
+        locks = m_Apartment.getClusterLocks();
+        lockedDevices = locks.first;
+        lockedZones = locks.second;
+
+        json.startArray("lockedDevices");
+
+        for (int i = 0; i < lockedDevices.size(); i++) {
+          json.startObject();
+          json.add("dsuid", dsuid2str(lockedDevices.at(i).dsuid));
+
+          json.startArray("lockedScenes");
+          for (int j = 0; j < lockedDevices.at(i).lockedScenes.size(); j++) {
+            json.add(lockedDevices.at(i).lockedScenes.at(j));
+          }
+          json.endArray();
+
+          json.endObject();
+        }
+        json.endArray();
+
+        // lockedZones: [ { zoneID: xx, deviceClasses: [ { deviceClass: 3, lockedScenes: [ 1, 2, 3 ] } ] }, ... ]
+        json.startArray("lockedZones");
+        for (int i = 0; i < lockedZones.size(); i++) {
+          ZoneLock_t zl = lockedZones.at(i);
+          std::set<int> lockedApartmentScenes;
+          json.startObject();
+          json.add("zoneID", zl.zoneID);
+
+          json.startArray("deviceClasses");
+          for (int k = 0; k < zl.deviceClassLocks.size(); k++) {
+            ClassLock_t cl = zl.deviceClassLocks.at(k);
+            json.startObject();
+            json.add("deviceClass", cl.deviceClass);
+            json.startArray("lockedScenes");
+            for (std::set<int>::iterator it = cl.lockedScenes.begin(); 
+                                         it != cl.lockedScenes.end(); it++) {
+              int scene = *it;
+              json.add(scene);
+              // collect apartment scenes
+              if (scene >= SceneAutoStandBy) {
+                  lockedApartmentScenes.insert(scene);
+              }
+            }
+            json.endArray();
+            json.endObject();
+          }
+          json.endArray();
+
+          json.startArray("lockedApartmentScenes");
+
+          for (std::set<int>::iterator it = lockedApartmentScenes.begin(); 
+                                       it != lockedApartmentScenes.end(); it++) {
+              json.add(*it);
+          }
+
+          json.endArray();
+
+          json.endObject();
+        }
+        json.endArray();
 
         return json.successJSON();
       } else {
