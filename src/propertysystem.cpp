@@ -856,10 +856,28 @@ namespace dss {
     if (m_AliasTarget != NULL) {
       return m_AliasTarget->createProperty(_propPath);
     } else {
-      path_tokenizer pt = createPathTokenizer(_propPath);
-      path_tokenizer::const_iterator cur(pt.begin());
-      path_tokenizer::const_iterator end(pt.end());
-      return createProperty(cur, end);
+      if (_propPath.empty() || _propPath == "/") {
+        return shared_from_this();
+      }
+
+      std::string nextOne, tail = _propPath;
+      nextOne = carCdrPath(tail);
+      assert(!nextOne.empty());
+
+      PropertyNodePtr nextNode = getPropertyByName(nextOne);
+      if (nextNode == NULL) {
+        if (nextOne[nextOne.length() - 1] == '+') {
+          nextOne.erase(nextOne.length() - 1, 1);
+        }
+        int index = getAndRemoveIndexFromPropertyName(nextOne);
+        if (index == 0) {
+          index = count(nextOne) + 1;
+        }
+        nextNode = boost::make_shared<PropertyNode>(nextOne.c_str(), index);
+        addChild(nextNode);
+      }
+
+      return tail.empty() ? nextNode : nextNode->createProperty(tail);
     }
   } // createProperty
 
