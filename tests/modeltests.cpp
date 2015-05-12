@@ -625,42 +625,20 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
 
   SetBuilder builder(apt);
   BOOST_CHECK_EQUAL(1, builder.buildSet(".yellow", boost::shared_ptr<Zone>()).length());
-
   apt.removeDevice(dev1->getDSID());
   BOOST_CHECK_EQUAL(0, builder.buildSet(".yellow", boost::shared_ptr<Zone>()).length());
 
   apt.allocateZone(1);
-  try {
-    apt.getZone(1);
-    BOOST_CHECK(true);
-  } catch(ItemNotFoundException&) {
-    BOOST_CHECK_MESSAGE(false, "Zone does not exist");
-  }
-
+  BOOST_CHECK_NO_THROW(apt.getZone(1));
   apt.removeZone(1);
-  try {
-    apt.getZone(1);
-    BOOST_CHECK_MESSAGE(false, "Zone still exists");
-  } catch(ItemNotFoundException&) {
-    BOOST_CHECK(true);
-  }
+  BOOST_CHECK_THROW(apt.getZone(1), ItemNotFoundException);
 
   apt.allocateDSMeter(dsmeterDSID);
-  try {
-    apt.getDSMeterByDSID(dsmeterDSID);
-    BOOST_CHECK(true);
-  } catch(ItemNotFoundException&) {
-    BOOST_CHECK_MESSAGE(false, "DSMeter not found");
-  }
-
+  BOOST_CHECK_NO_THROW(apt.getDSMeterByDSID(dsmeterDSID));
   apt.removeDSMeter(dsmeterDSID);
-  try {
-    apt.getDSMeterByDSID(dsmeterDSID);
-    BOOST_CHECK_MESSAGE(false, "DSMeter still exists");
-  } catch(ItemNotFoundException&) {
-    BOOST_CHECK(true);
-  }
+  BOOST_CHECK_THROW(apt.getDSMeterByDSID(dsmeterDSID), ItemNotFoundException);
 } // testRemoval
+
 /* TODO: libdsm
 BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   Apartment apt(NULL);
