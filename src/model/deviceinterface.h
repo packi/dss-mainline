@@ -96,7 +96,7 @@ namespace dss {
     virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token) = 0;
     virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token) = 0;
 
-    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) = 0;
+    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) = 0;
 
     virtual ~IDeviceInterface() {};
   }; // IDeviceInterface
