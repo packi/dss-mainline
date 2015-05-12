@@ -26,7 +26,9 @@
   #include "config.h"
 #endif
 
+#define BOOST_CHRONO_HEADER_ONLY
 #include <boost/make_shared.hpp>
+#include <boost/chrono.hpp>
 
 #include "modelmaintenance.h"
 
@@ -420,10 +422,13 @@ namespace dss {
 
     {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-      if (m_ModelEvents.empty()) {
-        lock.unlock();
-        return m_NewModelEvent.waitFor(m_EventTimeoutMS);
+      if (m_ModelEvents.empty() &&
+          (m_NewModelEvent.wait_for(lock, m_EventTimeoutMS) ==
+           boost::cv_status::timeout)) {
+        return false;
       }
+
+      assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
     }
 
@@ -936,11 +941,9 @@ namespace dss {
       m_IsDirty = true;
       delete _pEvent;
     } else {
-      {
-        boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-        m_ModelEvents.push_back(_pEvent);
-      }
-      m_NewModelEvent.signal();
+      boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+      m_ModelEvents.push_back(_pEvent);
+      m_NewModelEvent.notify_all();
     }
   } // addModelEvent
 
