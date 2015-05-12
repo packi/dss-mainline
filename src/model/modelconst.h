@@ -68,6 +68,7 @@ namespace dss {
   const uint8_t SceneOffE4 = 0x26;
   const uint8_t SceneOnE4 = 0x27;
   const uint8_t SceneAutoOff = 0x28;
+  const uint8_t SceneImpulse = 0x29;
   const uint8_t SceneDecA1 = 0x2A;
   const uint8_t SceneIncA1 = 0x2B;
   const uint8_t SceneDecA2 = 0x2C;
