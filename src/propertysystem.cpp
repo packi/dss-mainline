@@ -357,25 +357,20 @@ namespace dss {
     if (m_AliasTarget) {
       return m_AliasTarget->getProperty(_propPath);
     } else {
-      std::string propPath = _propPath;
-
-      std::string::size_type slashPos = propPath.find('/');
-      if (slashPos != std::string::npos) {
-        std::string propName = propPath.substr(0, slashPos);
-        propPath.erase(0, slashPos + 1);
-        PropertyNodePtr child = getPropertyByName(propName);
-        if (child != NULL) {
-          return child->getProperty(propPath);
-        } else {
-          return PropertyNodePtr();
-        }
-      } else {
-        std::string propName = _propPath;
-        if (endsWith(propName, "/")) {
-          propName.erase(propName.size() - 1);
-        }
-        return getPropertyByName(propName);
+      if (_propPath.empty() || _propPath == "/") {
+        // it's us, stupid
+        return shared_from_this();
       }
+
+      std::string head, tail = _propPath;
+      head = carCdrPath(tail);
+      assert(!head.empty());
+
+      PropertyNodePtr child = getPropertyByName(head);
+      if (child == NULL) {
+        return PropertyNodePtr();
+      }
+      return tail.empty() ? child : child->getProperty(tail);
     }
   } // getProperty
 
