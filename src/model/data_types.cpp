@@ -87,7 +87,7 @@ bool valid(WindProtectionClass_t _class)
 bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out)
 {
   assert(_out);
-  if (_class < wpc_none || wpc_class_3 < _class ) {
+  if (wpc_class_3 < _class) {
       return false;
   }
   *_out = static_cast<WindProtectionClass_t>(_class);
