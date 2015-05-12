@@ -742,6 +742,8 @@ namespace dss {
     int getFloor() const {
       return m_floor;
     }
+
+    std::vector<int> getLockedScenes();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

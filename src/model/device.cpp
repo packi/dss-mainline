@@ -46,6 +46,8 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
+#include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/event.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
@@ -2472,6 +2474,25 @@ namespace dss {
 
     uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
     *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
+  }
+
+
+  std::vector<int> Device::getLockedScenes() {
+    std::vector<int> ls;
+
+    for (int g = 0; g < getGroupsCount(); g++) {
+      boost::shared_ptr<Group> group = getGroupByIndex(g);
+      int gid = group->getID();
+      if (isAppUserGroup(gid)) {
+        boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
+        if (cluster->isConfigurationLocked()) {
+            const std::vector<int>& locks = cluster->getLockedScenes();
+            ls.insert(ls.end(), locks.begin(), locks.end());
+        }
+      }
+    }
+
+    return ls;
   }
 
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)

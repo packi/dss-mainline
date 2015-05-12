@@ -30,6 +30,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <regex.h>
+#include <set>
 
 #include "devicecontainer.h"
 #include "modeltypes.h"
@@ -37,13 +38,13 @@
 #include "src/base.h"
 #include "src/model/state.h"
 #include "src/datetools.h"
+#include "src/model/device.h"
 
 namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Zone;
   class DSMeter;
-  class Device;
   class Group;
   class Cluster;
   class Event;
@@ -76,6 +77,22 @@ namespace dss {
     DateTime m_WeatherTS;
   } ApartmentSensorStatus_t;
 
+
+typedef struct {
+    DeviceClasses_t deviceClass;
+    std::set<int> lockedScenes;
+} ClassLock_t;
+
+typedef struct {
+  int zoneID;
+  std::vector<ClassLock_t> deviceClassLocks;
+} ZoneLock_t;
+
+typedef struct {
+  dsuid_t dsuid;
+  std::vector<int> lockedScenes;
+} DeviceLock_t;
+  
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
@@ -177,6 +194,7 @@ namespace dss {
     void setHumidityValue(double _value, DateTime& _ts);
     void setBrightnessValue(double _value, DateTime& _ts);
     void setWeatherInformation(std::string& _iconId, std::string& _conditionId, std::string _serviceId, DateTime& _ts);
+    std::pair<std::vector<DeviceLock_t>, std::vector<ZoneLock_t> > getClusterLocks();
 
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
