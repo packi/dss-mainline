@@ -1660,6 +1660,64 @@ namespace dss {
       resultObj->addProperty("offdelay", umr_offdelay);
       return success(resultObj);
 
+    } else if (_request.getMethod() == "setOutputAfterImpulse") {
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+
+      std::string output = _request.getParameter("output");
+      int value = 0;
+      int dontcare = true;
+
+      if (output == "on") {
+        value = 255;
+        dontcare = false;
+      } else if (output == "off") {
+        value = 0;
+        dontcare = false;
+      } else if (output == "retain") {
+        value = 0;
+        dontcare = true;
+      } else {
+        return failure("invalid or missing \"output\" parameter");
+      }
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)SceneImpulse)) {
+        return failure("Device settings are being updated, please try again later");
+      }
+
+      DeviceSceneSpec_t config;
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
+
+      if (config.dontcare != dontcare) {
+        config.dontcare = dontcare;
+        pDevice->setDeviceSceneMode(SceneImpulse, config);
+      }
+
+      pDevice->setSceneValue(SceneImpulse, value);
+
+      return success(resultObj);
+    } else if (_request.getMethod() == "getOutputAfterImpulse") {
+      boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)SceneImpulse)) {
+        return failure("Device settings are being updated, please try again later");
+      }
+
+      DeviceSceneSpec_t config;
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
+
+      int value = pDevice->getSceneValue(SceneImpulse);
+
+      if ((config.dontcare == false) && (value <= 127)) {
+        resultObj->addProperty("output", "off");
+      } else if ((config.dontcare == false) && (value >= 128)) {
+        resultObj->addProperty("output", "on");
+      } else if ((config.dontcare == true) && (value <= 127)) {
+        resultObj->addProperty("output", "retain");
+      } else {
+        return failure("Encountered invalid output after impulse confiugration");
+      }
+
+      return success(resultObj);
     } else {
       throw std::runtime_error("Unhandled function");
     }
