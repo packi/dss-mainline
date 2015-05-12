@@ -26,11 +26,12 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_deque.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "dssfwd.h"
 #include "src/subsystem.h"
 #include "src/thread.h"
-#include "src/syncevent.h"
 #include "src/model/modelevent.h"
 #include "src/taskprocessor.h"
 #include "device.h"
@@ -247,10 +248,10 @@ namespace dss {
     typedef boost::ptr_deque<ModelEvent> m_ModelEvents_t;
     boost::ptr_deque<ModelEvent> m_ModelEvents;
     boost::mutex m_ModelEventsMutex;
-    SyncEvent m_NewModelEvent;
+    boost::condition_variable m_NewModelEvent;
     Apartment* m_pApartment;
     Metering* m_pMetering;
-    const int m_EventTimeoutMS;
+    const boost::chrono::milliseconds m_EventTimeoutMS;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
     StructureModifyingBusInterface* m_pStructureModifyingBusInterface;
 
