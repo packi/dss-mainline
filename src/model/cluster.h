@@ -27,6 +27,7 @@
 #include <boost/thread/mutex.hpp>
 
 #include "modeltypes.h"
+#include "device.h"
 #include "group.h"
 #include "businterface.h"
 #include "data_types.h"
@@ -76,6 +77,12 @@ namespace dss {
 
     bool isOperationLock();
     void setOperationLock(bool _locked, callOrigin_t _callOrigin);
+
+    bool releaseCluster();
+
+    void reset();
+
+    void removeDevice(Device& _device);
 
   private:
     void updateLockedScenes();
