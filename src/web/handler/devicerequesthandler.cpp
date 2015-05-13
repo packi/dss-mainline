@@ -477,6 +477,11 @@ namespace dss {
         return failure("This device does not support button pairing");
       }
 
+      if ((pDevice->getDeviceClass() == DEVICE_CLASS_SW) &&
+          (pDevice->getJokerGroup() == GroupIDBlack)) {
+        return failure("Joker devices must be set to a specific group for button pairing");
+      }
+
       dsuid_t next;
       dsuid_get_next_dsuid(pDevice->getDSID(), &next);
       boost::shared_ptr<Device> pPartnerDevice;
