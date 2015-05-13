@@ -256,6 +256,14 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_savedPropsDirectory = addTrailingBackslash(_value);
   } // setSavedPropsDirectory
 
+  bool DSS::drainModelChanges(int timeoutSecs) {
+    if (!m_pModelMaintenance) {
+      // nothing to sync
+      return true;
+    }
+    return m_pModelMaintenance->pendingChangesBarrier(timeoutSecs);
+  }
+
   bool DSS::parseProperties(const std::vector<std::string>& _properties) {
     foreach(std::string propLine, _properties) {
       std::string::size_type pos = propLine.find("=");

@@ -44,6 +44,11 @@ namespace dss {
 
   WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     StringConverter st("UTF-8", "UTF-8");
+
+    if (!DSS::getInstance()->drainModelChanges()) {
+        return JSONWriter::failure("Failed to access data model");
+    }
+
     if (_request.getMethod() == "query" || _request.getMethod() == "query2" || _request.getMethod() == "vdcquery") {
       JSONWriter json;
       std::string query = _request.getParameter("query");
