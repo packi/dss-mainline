@@ -1731,6 +1731,76 @@ namespace dss {
       json.add("floor", intToString(pDevice->getFloor()));
       return json.successJSON();
 
+    } else if (_request.getMethod() == "setOutputAfterImpulse") {
+      JSONWriter json;
+
+      std::string output = _request.getParameter("output");
+      int value = 0;
+      int dontcare = true;
+
+      if (output == "on") {
+        value = 255;
+        dontcare = false;
+      } else if (output == "off") {
+        value = 0;
+        dontcare = false;
+      } else if (output == "retain") {
+        value = 0;
+        dontcare = true;
+      } else {
+        return json.failure("invalid or missing \"output\" parameter");
+      }
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)SceneImpulse)) {
+        return json.failure("Device settings are being updated, please try again later");
+      }
+
+      DeviceSceneSpec_t config;
+      if (pDevice->getProductID() == ProductID_UMV_210) {
+        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
+      } else {
+        pDevice->getDeviceSceneMode(SceneImpulse, config);
+      }
+
+      if (config.dontcare != dontcare) {
+        config.dontcare = dontcare;
+        if (pDevice->getProductID() == ProductID_UMV_210) {
+          pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
+        } else {
+          pDevice->setDeviceSceneMode(SceneImpulse, config);
+        }
+      }
+
+      pDevice->setSceneValue(SceneImpulse, value);
+
+      return json.successJSON();
+    } else if (_request.getMethod() == "getOutputAfterImpulse") {
+      JSONWriter json;
+
+      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)SceneImpulse)) {
+        return json.failure("Device settings are being updated, please try again later");
+      }
+
+      DeviceSceneSpec_t config;
+      if (pDevice->getProductID() == ProductID_UMV_210) {
+        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
+      } else {
+        pDevice->getDeviceSceneMode(SceneImpulse, config);
+      }
+
+      int value = pDevice->getSceneValue(SceneImpulse);
+
+      if ((config.dontcare == false) && (value <= 127)) {
+        json.add("output", "off");
+      } else if ((config.dontcare == false) && (value >= 128)) {
+        json.add("output", "on");
+      } else if ((config.dontcare == true) && (value <= 127)) {
+        json.add("output", "retain");
+      } else {
+        return json.failure("Encountered invalid output after impulse confiugration");
+      }
+
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }
