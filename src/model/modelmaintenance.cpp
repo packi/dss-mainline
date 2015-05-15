@@ -70,6 +70,7 @@
 #include "model-features.h"
 #include "handler/system_states.h"
 
+
 namespace dss {
 
   //=============================================== ApartmentTreeListener
@@ -924,6 +925,15 @@ namespace dss {
           for (int i = 0; i < devices.length(); i++) {
             devices[i].getDevice()->setIsValid(true);
           }
+        }
+
+        AutoClusterMaintenance maintenance(m_pApartment);
+        maintenance.joinIdenticalClusters();
+        Set devices  = mod->getDevices();
+        for (int ctr = 0; ctr < devices.length(); ++ctr) {
+          DeviceReference& ref = devices.get(ctr);
+          boost::shared_ptr<Device> device = ref.getDevice();
+          maintenance.consistencyCheck(*device.get());
         }
 
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
