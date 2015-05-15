@@ -183,8 +183,8 @@ namespace dss {
         { return m_taskProcessor; }
   protected:
     virtual void doStart();
+    bool handleModelEvents(); //< access from unit test
   private:
-    bool handleModelEvents();
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
@@ -242,8 +242,11 @@ namespace dss {
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);
+
+  protected:
+    bool m_IsInitializing; //< allow to clear from unit test
+
   private:
-    bool m_IsInitializing;
     bool m_IsDirty;
 
     typedef boost::ptr_deque<ModelEvent> m_ModelEvents_t;

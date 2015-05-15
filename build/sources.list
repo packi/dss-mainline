@@ -262,6 +262,7 @@ dsstests_SOURCES = \
 	../tests/util/ds485-bus-mockups.h \
 	../tests/util/dss_instance_fixture.cpp \
 	../tests/util/dss_instance_fixture.h \
+	../tests/util/modelmaintenance-mockup.h \
 	../tests/webfixture.h \
 	../tests/webserver.cpp \
 	../tests/webservice_api_tests.cpp
