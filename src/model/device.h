@@ -314,6 +314,10 @@ namespace dss {
      * This will cause the \c apartment.xml to be updated. */
     void dirty();
 
+    /** Sends the application a note that the cluster for the given device
+     *  has to be checked and reassigned. */
+    void checkAutoCluster();
+
     void fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist);
     bool hasExtendendSceneTable();
     void calculateHWInfo();
@@ -711,24 +715,12 @@ namespace dss {
     void setDeviceUMROffDelay(double delay);
     void getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay, uint8_t *_count);
 
-    void setCardinalDirection(CardinalDirection_t direction) {
-      assert(valid(direction));
-      if (m_cardinalDirection != direction) {
-          m_cardinalDirection = direction;
-          dirty();
-      }
-    }
+    void setCardinalDirection(CardinalDirection_t _direction);
     CardinalDirection_t getCardinalDirection() const {
       return m_cardinalDirection;
     }
 
-    void setWindProtectionClass(WindProtectionClass_t _klass) {
-      assert(valid(_klass));
-      if (m_windProtectionClass != _klass) {
-          m_windProtectionClass = _klass;
-          dirty();
-      }
-    }
+    void setWindProtectionClass(WindProtectionClass_t _klass);
     WindProtectionClass_t getWindProtectionClass() const {
       return m_windProtectionClass;
     }
