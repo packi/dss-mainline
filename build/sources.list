@@ -69,6 +69,10 @@ libdsscore_a_SOURCES =  \
 	../src/model/apartment.h \
 	../src/model/busscanner.cpp \
 	../src/model/busscanner.h \
+	../src/model/autoclustermaintenance.h \
+	../src/model/autoclustermaintenance.cpp \
+	../src/model/data_types.cpp \
+	../src/model/data_types.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
 	../src/model/data_types.cpp \
