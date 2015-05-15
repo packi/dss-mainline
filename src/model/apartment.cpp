@@ -606,4 +606,65 @@ namespace dss {
     m_SensorStatus.m_WeatherTS = _ts;
   }
 
+  std::pair<std::vector<DeviceLock_t>, std::vector<ZoneLock_t> > Apartment::getClusterLocks() {
+
+    std::vector<DeviceLock_t> lockedDevices;
+    std::vector<ZoneLock_t> lockedZones;
+
+    std::vector<boost::shared_ptr<Zone> > zones = getZones();
+    // loop through all zones
+    for (int z = 0; z < zones.size(); z++) {
+
+      if (zones.at(z)->getID() == 0) {
+        continue;
+      }
+
+      Set devices = zones.at(z)->getDevices();
+
+      std::vector<ClassLock_t> classLocks;
+
+      // look for devices of each class in the zone
+      for (int c = DEVICE_CLASS_GE; c <= DEVICE_CLASS_WE; c++) {
+
+        if (c == DEVICE_CLASS_SW) {
+          // ignore unconfigured SW devices
+          continue;
+        }
+
+        std::set<int> lockedScenes;
+
+        Set devclass = devices.getByGroup(c);
+
+        // loop through all devices of a certain group
+        for (int d = 0; d < devclass.length(); d++) {
+          boost::shared_ptr<Device> device = devclass.get(d).getDevice();
+          std::vector<int> ls = device->getLockedScenes();
+          if (!ls.empty()) {
+            DeviceLock_t lockedDevice;
+            lockedDevice.dsuid = device->getDSID();
+            lockedDevice.lockedScenes = ls;
+            lockedDevices.push_back(lockedDevice);
+            lockedScenes.insert(ls.begin(), ls.end());
+          }
+        } // devices loop
+
+        if (!lockedScenes.empty()) {
+            ClassLock_t cl;
+            cl.deviceClass = static_cast<DeviceClasses_t>(c);
+            cl.lockedScenes = lockedScenes;
+            classLocks.push_back(cl);
+        }
+      } // device class loop
+
+      if (!classLocks.empty()) {
+        ZoneLock_t zl;
+        zl.zoneID = zones.at(z)->getID();
+        zl.deviceClassLocks = classLocks;
+        lockedZones.push_back(zl);
+      }
+    } // zone loop
+
+    return std::make_pair(lockedDevices, lockedZones);
+  }
+
 } // namespace dss
