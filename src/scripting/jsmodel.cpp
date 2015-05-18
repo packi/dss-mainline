@@ -1975,6 +1975,9 @@ namespace dss {
         case 9:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(dev->getDevice()->isPresent()));
           return JS_TRUE;
+        case 10:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice()->getOemEanAsString().c_str())));
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -2005,6 +2008,7 @@ namespace dss {
     {"revisionID", 7, 0, dev_JSGet, NULL},
     {"productID", 8, 0, dev_JSGet, NULL},
     {"isPresent", 9, 0, dev_JSGet, NULL},
+    {"productEAN", 10, 0, dev_JSGet, NULL},
     {NULL, 0, 0, NULL, NULL}
   };
 
