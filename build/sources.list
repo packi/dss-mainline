@@ -233,6 +233,7 @@ dsstests_SOURCES = \
 	../tests/apartment_xml_tests.cpp \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
+	../tests/model-autocluster_tests.cpp \
 	../tests/curl_test.cpp \
 	../tests/datetoolstests.cpp \
 	../tests/deviceinterfacerequesthandlertest.cpp \
