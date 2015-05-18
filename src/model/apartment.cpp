@@ -645,6 +645,12 @@ namespace dss {
             lockedDevice.lockedScenes = ls;
             lockedDevices.push_back(lockedDevice);
             lockedScenes.insert(ls.begin(), ls.end());
+          } else {
+            if (device->isInLockedCluster()) {
+              DeviceLock_t lockedDevice;
+              lockedDevice.dsuid = device->getDSID();
+              lockedDevices.push_back(lockedDevice);
+            }
           }
         } // devices loop
 
