@@ -32,6 +32,8 @@
 #include "src/foreach.h"
 
 #include "src/model/modelconst.h"
+#include "src/model/set.h"
+
 namespace dss {
 
     //============================================= Group
@@ -68,7 +70,7 @@ namespace dss {
       PropertyNodePtr gsubnode = pLockedScenes->createProperty("scene" + intToString(scene));
       gsubnode->createProperty("id")->setIntegerValue(scene);
     }
-  }
+  } // updateLockedScenes
 
   void Cluster::publishToPropertyTree() {
     Group::publishToPropertyTree();
@@ -102,6 +104,31 @@ namespace dss {
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
             (m_ConfigurationLocked == cluster.configurationLocked));
+  } // equalConfig
+
+  void Cluster::reset() {
+    setLocation(cd_none);
+    setProtectionClass(wpc_none);
+    setFloor(0);
+    m_LockedScenes.clear();
+    setConfigurationLocked(false);
+    setAutomatic(false);
+    setStandardGroupID(0);
+    setName("");
+  } // reset
+
+  void Cluster::removeDevice(Device& _device)
+  {
+    _device.removeFromGroup(getID());
+  } // removeDevice
+
+  bool Cluster::releaseCluster()
+  {
+    if (getDevices().isEmpty()) {
+      reset();
+      return true;
+    }
+    return false;
   }
 
   bool Cluster::isOperationLock() {

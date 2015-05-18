@@ -210,6 +210,8 @@ public:
     return false;
   }
 
+  virtual ~DummyActionRequestInterface(){};
+
   std::string getLog() {
     return m_Log;
   }

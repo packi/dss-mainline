@@ -41,6 +41,7 @@
 #include "businterface.h"
 #include "propertysystem.h"
 #include "model/modelconst.h"
+#include "model/autoclustermaintenance.h"
 #include "metering/metering.h"
 #include "security/security.h"
 #include "structuremanipulator.h"
@@ -68,6 +69,7 @@
 #include "vdc-connection.h"
 #include "model-features.h"
 #include "handler/system_states.h"
+
 
 namespace dss {
 
@@ -533,7 +535,7 @@ namespace dss {
     case ModelEvent::etModelDirty:
       eraseModelEventsFromQueue(ModelEvent::etModelDirty);
       writeConfiguration();
-      if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
+      if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
         raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
       }
       break;
@@ -706,6 +708,10 @@ namespace dss {
       onOperationLock(event->getParameter(0), event->getParameter(1),
                       event->getParameter(2),
                       static_cast<callOrigin_t>(event->getParameter(3)));
+      break;
+    case ModelEvent::etDeviceDirty:
+      assert(pEventWithDSID != NULL);
+      onAutoClusterMaintenance(pEventWithDSID->getDSID());
       break;
     default:
       assert(false);
@@ -921,6 +927,15 @@ namespace dss {
           }
         }
 
+        AutoClusterMaintenance maintenance(m_pApartment);
+        maintenance.joinIdenticalClusters();
+        Set devices  = mod->getDevices();
+        for (int ctr = 0; ctr < devices.length(); ++ctr) {
+          DeviceReference& ref = devices.get(ctr);
+          boost::shared_ptr<Device> device = ref.getDevice();
+          maintenance.consistencyCheck(*device.get());
+        }
+
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
         raiseEvent(dsMeterReadyEvent);
@@ -937,9 +952,13 @@ namespace dss {
 
   void ModelMaintenance::addModelEvent(ModelEvent* _pEvent) {
     // filter out dirty events, as this will rewrite apartment.xml
-    if(m_IsInitializing && (_pEvent->getEventType() == ModelEvent::etModelDirty)) {
-      m_IsDirty = true;
-      delete _pEvent;
+    if (m_IsInitializing) {
+      if (_pEvent->getEventType() == ModelEvent::etModelDirty) {
+        m_IsDirty = true;
+        delete _pEvent;
+      } else if (_pEvent->getEventType() == ModelEvent::etDeviceDirty) {
+        delete _pEvent;
+      }
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
       m_ModelEvents.push_back(_pEvent);
@@ -1974,6 +1993,18 @@ namespace dss {
       cluster->setOperationLock(_lock, _callOrigin);
     } catch(ItemNotFoundException& e) {
       log(std::string("Unknown cluster: ") + e.what(), lsWarning);
+    }
+  }
+
+  void ModelMaintenance::onAutoClusterMaintenance(dsuid_t _deviceID)
+  {
+    try {
+      boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(_deviceID);
+      AutoClusterMaintenance maintenance(m_pApartment);
+      maintenance.consistencyCheck(*device.get());
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);
     }
   }
 

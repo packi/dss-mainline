@@ -995,6 +995,13 @@ namespace dss {
     }
   } // dirty
 
+  void Device::checkAutoCluster() {
+    if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+      ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDirty, getDSID());
+      m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+    }
+  }
+
   bool Device::operator==(const Device& _other) const {
     return (_other.m_DSID == m_DSID);
   } // operator==
@@ -1163,6 +1170,14 @@ namespace dss {
           if (gnode) {
             gnode->getParentNode()->removeChild(gnode);
           }
+
+          // remove from zone 0
+          gPath = "zones/zone0/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
+          if (gnode) {
+            gnode->getParentNode()->removeChild(gnode);
+          }
+
           // remove property in device group list
           PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(_groupID));
           if (gsubnode) {
@@ -2623,4 +2638,25 @@ namespace dss {
     }
     return deviceIndex;
   }
+
+  void Device::setCardinalDirection(CardinalDirection_t _direction) {
+    assert(valid(_direction));
+
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    if (m_cardinalDirection != _direction) {
+      m_cardinalDirection = _direction;
+      checkAutoCluster();
+    }
+  }
+
+  void Device::setWindProtectionClass(WindProtectionClass_t _klass) {
+    assert(valid(_klass));
+
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    if (m_windProtectionClass != _klass) {
+      m_windProtectionClass = _klass;
+      checkAutoCluster();
+    }
+  }
+
 } // namespace dss

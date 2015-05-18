@@ -69,6 +69,7 @@ namespace dss {
                     etClusterLockedScenes, /** locked scenes of a cluster was changed */
                     etGenericEvent, /** generic event for dSS/dSG communication */
                     etOperationLock, /** scene calls ignored, no turn on/off lights, change blind positions, etc */
+                    etDeviceDirty /** A device has changed. Update the cluster assignment */
                  } EventType;
   private:
     EventType m_EventType;
@@ -83,7 +84,7 @@ namespace dss {
     ModelEvent(EventType _type)
     : m_EventType(_type)
     {}
-    
+
     virtual ~ModelEvent() { }
 
     /** Adds an integer parameter. */
@@ -106,11 +107,11 @@ namespace dss {
   // TODO: use boost::any for values and remove this class
   class ModelEventWithDSID : public ModelEvent {
   public:
-    ModelEventWithDSID(EventType _type, const dsuid_t& _dsid) 
+    ModelEventWithDSID(EventType _type, const dsuid_t& _dsid)
     : ModelEvent(_type),
       m_DSID(_dsid)
     { }
-    
+
     const dsuid_t& getDSID() { return m_DSID; }
   private:
     dsuid_t m_DSID;

@@ -168,7 +168,7 @@ namespace dss {
     void onGroupCallScene(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, std::string _token);
     void onGroupUndoScene(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const std::string _token);
 
-    void onDeviceNameChanged(dsuid_t _meterID, const devid_t _deviceID, 
+    void onDeviceNameChanged(dsuid_t _meterID, const devid_t _deviceID,
                              const std::string& _name);
     void onDsmNameChanged(dsuid_t _meterID, const std::string& _name);
     void onDsmFlagsChanged(dsuid_t _meterID, const std::bitset<8> _flags);
@@ -183,8 +183,8 @@ namespace dss {
         { return m_taskProcessor; }
   protected:
     virtual void doStart();
+    bool handleModelEvents(); //< access from unit test
   private:
-    bool handleModelEvents();
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
@@ -212,7 +212,7 @@ namespace dss {
     void onRemoveDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onJoinedDSMeter(const dsuid_t& _dsMeterID);
     void onLostDSMeter(const dsuid_t& _dsMeterID);
-    void onDeviceConfigChanged(const dsuid_t& _dsMeterID, int _deviceID, 
+    void onDeviceConfigChanged(const dsuid_t& _dsMeterID, int _deviceID,
                                int _configClass, int _configIndex, int _value);
     void rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID);
     void onSensorEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
@@ -238,11 +238,15 @@ namespace dss {
 
     void onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload);
     void onOperationLock(int _zoneID, int _groupID, bool _lock, callOrigin_t _callOrigin);
+    void onAutoClusterMaintenance(dsuid_t _deviceID);
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);
+
+  protected:
+    bool m_IsInitializing; //< allow to clear from unit test
+
   private:
-    bool m_IsInitializing;
     bool m_IsDirty;
 
     typedef boost::ptr_deque<ModelEvent> m_ModelEvents_t;
