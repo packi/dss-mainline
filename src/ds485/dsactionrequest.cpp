@@ -311,6 +311,12 @@ namespace dss {
   bool DSActionRequest::isOperationLock(const dsuid_t &_dSM, int _clusterId) {
     uint8_t lockState;
     int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      return false;
+    }
+
     ret = ClusterProperties_get_operation_lock(m_DSMApiHandle, _dSM, _clusterId, &lockState);
     DSBusInterface::checkResultCode(ret);
     return (lockState == 1);
