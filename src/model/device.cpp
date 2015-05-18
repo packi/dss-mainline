@@ -2495,6 +2495,21 @@ namespace dss {
     return ls;
   }
 
+  bool Device::isInLockedCluster() {
+    for (int g = 0; g < getGroupsCount(); g++) {
+      boost::shared_ptr<Group> group = getGroupByIndex(g);
+      int gid = group->getID();
+      if (isAppUserGroup(gid)) {
+        boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
+        if (cluster->isConfigurationLocked()) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
     : m_device(device) {
       if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {

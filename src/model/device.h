@@ -744,6 +744,7 @@ namespace dss {
     }
 
     std::vector<int> getLockedScenes();
+    bool isInLockedCluster();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
