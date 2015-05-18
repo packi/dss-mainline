@@ -198,6 +198,7 @@ BOOST_AUTO_TEST_CASE(testDevices) {
   boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid2);
   dev2->setShortAddress(2);
   dev2->setName("dev2");
+  dev2->setOemInfo(4290046000621ULL, 3, 4, DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL, true);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -209,6 +210,7 @@ BOOST_AUTO_TEST_CASE(testDevices) {
                       "var f = function(dev) {\n"
                       "  print(dev.name);\n"
                       "  print('lastCalledScene: ',dev.lastCalledScene);\n"
+                      "  print('productEAN: ',dev.productEAN);\n"
                       "}\n"
                       "devs.perform(f)\n");
 } // testDevices
