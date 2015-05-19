@@ -225,9 +225,10 @@ namespace dss {
     _json.add("color", _cluster->getStandardGroupID());
     _json.add("isPresent", _cluster->isPresent());
     _json.add("isValid", _cluster->isValid());
-    _json.add("CardinalDirection", _cluster->getLocation());
+    _json.add("CardinalDirection", toString(_cluster->getLocation()));
     _json.add("ProtectionClass", _cluster->getProtectionClass());
     _json.add("isAutomatic", _cluster->isAutomatic());
+    _json.add("configurationLock", _cluster->isConfigurationLocked());
 
     _json.startArray("devices");
     Set devices = _cluster->getDevices();
