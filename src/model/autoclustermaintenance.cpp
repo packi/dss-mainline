@@ -193,7 +193,8 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
     if ((cluster->getStandardGroupID() != 0) &&
         (cluster->getProtectionClass() == _protection) &&
-        (cluster->getLocation() == _cardinalDirection)) {
+        (cluster->getLocation() == _cardinalDirection) &&
+        (cluster->isAutomatic())) {
       return cluster;
     }
   }

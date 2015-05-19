@@ -533,4 +533,31 @@ BOOST_AUTO_TEST_CASE(joinCheckLocked) {
   }
 }
 
+class AccessAutoClusterMaintenance :
+  public AutoClusterMaintenance
+{
+  public:
+  AccessAutoClusterMaintenance(Apartment* _apartment) :
+    AutoClusterMaintenance(_apartment)
+  {}
+
+  virtual ~AccessAutoClusterMaintenance()
+  {};
+
+  boost::shared_ptr<Cluster> mockfindOrCreateCluster(CardinalDirection_t _cardinalDirection, WindProtectionClass_t _protection)
+  {
+    return AutoClusterMaintenance::findOrCreateCluster(_cardinalDirection, _protection);
+  }
+};
+
+BOOST_AUTO_TEST_CASE(getClusterUnassigned) {
+  Apartment apt1(NULL);
+  InstanceHelper helper(&apt1);
+  AccessAutoClusterMaintenance clusterMaint(&apt1);
+  boost::shared_ptr<Cluster> cluster = clusterMaint.mockfindOrCreateCluster(cd_none, wpc_none);
+  BOOST_CHECK_EQUAL(cluster->getLocation(), cd_none);
+  BOOST_CHECK_EQUAL(cluster->getProtectionClass(), wpc_none);
+  BOOST_CHECK_EQUAL(cluster->isAutomatic(), true);
+  BOOST_CHECK_EQUAL(cluster->getStandardGroupID(), DEVICE_CLASS_GR);
+}
 BOOST_AUTO_TEST_SUITE_END()
