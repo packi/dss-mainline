@@ -560,4 +560,42 @@ BOOST_AUTO_TEST_CASE(getClusterUnassigned) {
   BOOST_CHECK_EQUAL(cluster->isAutomatic(), true);
   BOOST_CHECK_EQUAL(cluster->getStandardGroupID(), DEVICE_CLASS_GR);
 }
+
+BOOST_AUTO_TEST_CASE(unassignmentCheck) {
+  Apartment apt1(NULL);
+  InstanceHelper helper(&apt1);
+  boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+
+  // Assign device to a cluster
+  dev1->setCardinalDirection(cd_none);
+  dev1->setWindProtectionClass(wpc_class_3);
+
+  while (helper.modelMaintenance->handleModelEvents())
+  {};
+
+  {
+    std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
+    std::vector<boost::shared_ptr<Cluster> > usedClusters;
+    std::vector<boost::shared_ptr<Cluster> > automaticClusters;
+    filterClusters(clusters, &usedClusters, &automaticClusters);
+    BOOST_CHECK_EQUAL(usedClusters.size(), 1);
+    BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
+    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_class_3);
+  }
+
+  dev1->setWindProtectionClass(wpc_none);
+  while (helper.modelMaintenance->handleModelEvents())
+  {};
+
+  {
+    // device unassigned. Make shure no cluster is assigned
+    std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
+    std::vector<boost::shared_ptr<Cluster> > usedClusters;
+    std::vector<boost::shared_ptr<Cluster> > automaticClusters;
+    filterClusters(clusters, &usedClusters, &automaticClusters);
+    BOOST_CHECK_EQUAL(usedClusters.size(), 0);
+    BOOST_CHECK_EQUAL(automaticClusters.size(), 0);
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
