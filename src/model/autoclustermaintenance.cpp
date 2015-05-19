@@ -60,24 +60,9 @@ void AutoClusterMaintenance::consistencyCheck(Device &_device)
 
   removeInvalidAssignments(_device);
 
-  int deviceAssignedInLockedCluster = 0;
-  std::vector<boost::shared_ptr<Cluster> > validClusters;
-  foreach (boost::shared_ptr<Cluster> cluster, m_pApartment->getClusters()) {
-    if (cluster->isAutomatic() &&
-        (cluster->getLocation() == _device.getCardinalDirection()) &&
-        (cluster->getProtectionClass() == _device.getWindProtectionClass()) &&
-        (_device.isInGroup(cluster->getID()))) {
-
-      if (cluster->isConfigurationLocked() &&
-          (deviceAssignedInLockedCluster == 0)) {
-        deviceAssignedInLockedCluster = cluster->getID();
-      }
-
-      if (!cluster->isConfigurationLocked()) {
-        validClusters.push_back(cluster);
-      }
-    }
-  }
+  // find assignment to locked and unlocked clusters
+  int deviceAssignedInLockedCluster = getFirstLockedClusterAssignment(_device);
+  std::vector<boost::shared_ptr<Cluster> > validClusters = getUnlockedClusterAssignment(_device);
 
   if (deviceAssignedInLockedCluster != 0) {
     // remove from all other automatic and unlocked clusters
@@ -85,7 +70,17 @@ void AutoClusterMaintenance::consistencyCheck(Device &_device)
       removeDeviceFromCluster(_device, cluster);
     }
   } else if (!validClusters.empty()) {
-    // keep first assignment
+    // check type assignment:
+    // if cd_none and wpc_none => no assignment to cluster
+    if ((_device.getCardinalDirection() == cd_none) &&
+        (_device.getWindProtectionClass() == wpc_none)) {
+      foreach (boost::shared_ptr<Cluster> cluster, validClusters) {
+        removeDeviceFromCluster(_device, cluster);
+      }
+      return;
+    }
+
+    // keep first assignment, remove the rest
     int deviceAssignedInCluster = validClusters[0]->getID();
     foreach(boost::shared_ptr<Cluster> cluster, validClusters) {
       if (cluster->getID() == deviceAssignedInCluster) {
@@ -94,7 +89,15 @@ void AutoClusterMaintenance::consistencyCheck(Device &_device)
       removeDeviceFromCluster(_device, cluster);
     }
   } else {
-    // No assignment. Try to create one
+    // No assignment.
+    if ((_device.getCardinalDirection() == cd_none) &&
+        (_device.getWindProtectionClass() == wpc_none)) {
+      log("The device with dsuid: "+
+          dsuid2str(_device.getDSID()) +
+          "is not configured. No assignment to cluster", lsInfo);
+      return;
+    }
+
     boost::shared_ptr<Cluster> cluster = findOrCreateCluster(_device.getCardinalDirection(),
                                                              _device.getWindProtectionClass());
     if (cluster == NULL) {
@@ -163,6 +166,15 @@ void AutoClusterMaintenance::removeInvalidAssignments(Device  &_device)
         // device must not be in cluster
         removeDeviceFromCluster(_device, cluster);
       }
+
+      // remove assignment to cluster with cd_none and wpc_none
+      if ((_device.getCardinalDirection() == cd_none) &&
+          (_device.getWindProtectionClass() == wpc_none) &&
+          (cluster->getLocation() == _device.getCardinalDirection()) &&
+          (cluster->getProtectionClass() == _device.getWindProtectionClass())) {
+        // device must not be in cluster
+        removeDeviceFromCluster(_device, cluster);
+      }
     }
   }
 } /* removeInvalidAssignments */
@@ -193,7 +205,8 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
     if ((cluster->getStandardGroupID() != 0) &&
         (cluster->getProtectionClass() == _protection) &&
-        (cluster->getLocation() == _cardinalDirection)) {
+        (cluster->getLocation() == _cardinalDirection) &&
+        (cluster->isAutomatic())) {
       return cluster;
     }
   }
@@ -214,6 +227,35 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   return cluster;
 } /* findOrCreateCluster */
+
+std::vector<boost::shared_ptr<Cluster> > AutoClusterMaintenance::getUnlockedClusterAssignment(Device &_device)
+{
+  std::vector<boost::shared_ptr<Cluster> > assignedClusters;
+  foreach (boost::shared_ptr<Cluster> cluster, m_pApartment->getClusters()) {
+    if (!cluster->isConfigurationLocked() &&
+        cluster->isAutomatic() &&
+        (cluster->getLocation() == _device.getCardinalDirection()) &&
+        (cluster->getProtectionClass() == _device.getWindProtectionClass()) &&
+        (_device.isInGroup(cluster->getID()))) {
+      assignedClusters.push_back(cluster);
+    }
+  }
+  return assignedClusters;
+} /* getUnlockedClusterAssignment */
+
+int AutoClusterMaintenance::getFirstLockedClusterAssignment(Device &_device)
+{
+  foreach (boost::shared_ptr<Cluster> cluster, m_pApartment->getClusters()) {
+    if (cluster->isConfigurationLocked() &&
+        cluster->isAutomatic() &&
+        (cluster->getLocation() == _device.getCardinalDirection()) &&
+        (cluster->getProtectionClass() == _device.getWindProtectionClass()) &&
+        (_device.isInGroup(cluster->getID()))) {
+      return cluster->getID();
+    }
+  }
+  return 0;
+} /* getFirstLockedClusterAssignment */
 
 void AutoClusterMaintenance::busAddToGroup(Device &_device, boost::shared_ptr<Cluster> _cluster)
 {

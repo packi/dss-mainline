@@ -50,12 +50,17 @@ public:
   void consistencyCheck(Device &_device);
   void joinIdenticalClusters();
 
+protected:
+  boost::shared_ptr<Cluster> findOrCreateCluster(CardinalDirection_t _cardinalDirection, WindProtectionClass_t _protection); // protected for unit tests
+
 private:
   void removeDeviceFromCluster(Device  &_device, boost::shared_ptr<Cluster> _cluster);
   void assignDeviceToCluster(Device &_device, boost::shared_ptr<Cluster> _cluster);
-  boost::shared_ptr<Cluster> findOrCreateCluster(CardinalDirection_t _cardinalDirection, WindProtectionClass_t _protection);
+
   void moveClusterDevices(boost::shared_ptr<Cluster> _clusterSource, boost::shared_ptr<Cluster> _clusterDestination);
   void removeInvalidAssignments(Device  &_device);
+  std::vector<boost::shared_ptr<Cluster> > getUnlockedClusterAssignment(Device &_device);
+  int getFirstLockedClusterAssignment(Device &_device);
 
   void busAddToGroup(Device &_device, boost::shared_ptr<Cluster> _cluster);
   void busRemoveFromGroup(Device &_device, boost::shared_ptr<Cluster> _cluster);
