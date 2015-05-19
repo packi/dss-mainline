@@ -598,4 +598,40 @@ BOOST_AUTO_TEST_CASE(unassignmentCheck) {
   }
 }
 
+
+BOOST_AUTO_TEST_CASE(checkCleanupEmptyCluster) {
+  Apartment apt1(NULL);
+  InstanceHelper helper(&apt1);
+  AccessAutoClusterMaintenance clusterMaint(&apt1);
+
+  // create empty automatic clusters
+  foreach (boost::shared_ptr<Cluster> cluster, apt1.getClusters()) {
+    cluster->setLocation(cd_east);
+    cluster->setProtectionClass(wpc_class_3);
+    cluster->setStandardGroupID(DEVICE_CLASS_GR);
+    cluster->setName("test");
+    cluster->setAutomatic(true);
+  }
+
+  {
+    std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
+    std::vector<boost::shared_ptr<Cluster> > usedClusters;
+    std::vector<boost::shared_ptr<Cluster> > automaticClusters;
+    filterClusters(clusters, &usedClusters, &automaticClusters);
+    BOOST_CHECK_EQUAL(usedClusters.size(), MAX_CLUSTERS);
+    BOOST_CHECK_EQUAL(automaticClusters.size(), MAX_CLUSTERS);
+  }
+
+  clusterMaint.cleanupEmptyCluster();
+
+  {
+    std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
+    std::vector<boost::shared_ptr<Cluster> > usedClusters;
+    std::vector<boost::shared_ptr<Cluster> > automaticClusters;
+    filterClusters(clusters, &usedClusters, &automaticClusters);
+    BOOST_CHECK_EQUAL(usedClusters.size(), 0);
+    BOOST_CHECK_EQUAL(automaticClusters.size(), 0);
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
