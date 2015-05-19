@@ -935,6 +935,7 @@ namespace dss {
           boost::shared_ptr<Device> device = ref.getDevice();
           maintenance.consistencyCheck(*device.get());
         }
+        maintenance.cleanupEmptyCluster();
 
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));

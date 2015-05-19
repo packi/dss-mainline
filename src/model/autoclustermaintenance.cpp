@@ -142,6 +142,15 @@ void AutoClusterMaintenance::joinIdenticalClusters ()
   }
 } /* joinIdenticalClusters */
 
+void AutoClusterMaintenance::cleanupEmptyCluster()
+{
+  assert(m_pApartment);
+  boost::recursive_mutex::scoped_lock scoped_lock(m_pApartment->getMutex());
+
+  removeEmptyAutomaticCluster();
+
+} /* removeEmptyAutomaticCluster */
+
 void AutoClusterMaintenance::moveClusterDevices(boost::shared_ptr<Cluster> _clusterSource, boost::shared_ptr<Cluster> _clusterDestination)
 {
   assert(m_pApartment);
@@ -183,12 +192,20 @@ void AutoClusterMaintenance::removeDeviceFromCluster(Device &_device, boost::sha
 {
   _cluster->removeDevice(_device);
   busRemoveFromGroup(_device, _cluster);
-
-  if (_cluster->releaseCluster()) {
-    busUpdateCluster(_cluster);
-  }
-
+  removeEmptyAutomaticCluster();
 } /* removeDeviceFromCluster */
+
+void AutoClusterMaintenance::removeEmptyAutomaticCluster()
+{
+  // remove empty, automatic and unlocked clusters
+  foreach (boost::shared_ptr<Cluster> cluster, m_pApartment->getClusters()) {
+    if (cluster->isAutomatic() && !cluster->isConfigurationLocked()) {
+      if (cluster->releaseCluster()) {
+        busUpdateCluster(cluster);
+      }
+    }
+  }
+} /* removeEmptyAutomaticCluster */
 
 void AutoClusterMaintenance::assignDeviceToCluster(Device &_device, boost::shared_ptr<Cluster> _cluster)
 {
