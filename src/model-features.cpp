@@ -100,7 +100,10 @@ const int MF_AVAILABLE[] =
   mf_umvrelay,
   mf_blinkconfig,
   mf_umroutmode,
-  mf_pushbsensor
+  mf_pushbsensor,
+  mf_locationconfig,
+  mf_windprotectionconfig,
+  mf_impulseconfig
 };
 
 // model features
@@ -548,6 +551,7 @@ const int MF_SW_UMR200[] =
   mf_akmsensor,
   mf_akmdelay,
   mf_blinkconfig,
+  mf_impulseconfig,
   mf_umroutmode
 };
 
@@ -862,6 +866,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_umvrelay;
   } else if (_name == "blinkconfig") {
     return mf_blinkconfig;
+  } else if (_name == "impulseconfig") {
+    return mf_impulseconfig;
   } else if (_name == "umroutmode") {
     return mf_umroutmode;
   } else if (_name == "pushbsensor") {
@@ -947,6 +953,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "umvrelay";
     case mf_blinkconfig:
       return "blinkconfig";
+    case mf_impulseconfig:
+      return "impulseconfig";
     case mf_umroutmode:
       return "umroutmode";
     case mf_pushbsensor:

@@ -46,6 +46,8 @@
 #include "src/model/modulator.h"
 #include "src/model/devicereference.h"
 #include "src/model/state.h"
+#include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/event.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
@@ -105,7 +107,8 @@ namespace dss {
     m_outputChannelCount(0),
     m_AKMInputProperty(),
     m_cardinalDirection(cd_none),
-    m_windProtectionClass(wpc_none)
+    m_windProtectionClass(wpc_none),
+    m_floor(0)
     {
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
@@ -324,6 +327,8 @@ namespace dss {
     m_pPropertyNode->createProperty("WindProtectionClass")
       ->linkToProxy(PropertyProxyReference<int,
                     WindProtectionClass_t>(m_windProtectionClass));
+    m_pPropertyNode->createProperty("Floor")
+      ->linkToProxy(PropertyProxyReference<int>(m_floor));
 
     publishValveTypeToPropertyTree();
 
@@ -990,6 +995,13 @@ namespace dss {
     }
   } // dirty
 
+  void Device::checkAutoCluster() {
+    if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+      ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDirty, getDSID());
+      m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+    }
+  }
+
   bool Device::operator==(const Device& _other) const {
     return (_other.m_DSID == m_DSID);
   } // operator==
@@ -1158,6 +1170,14 @@ namespace dss {
           if (gnode) {
             gnode->getParentNode()->removeChild(gnode);
           }
+
+          // remove from zone 0
+          gPath = "zones/zone0/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
+          if (gnode) {
+            gnode->getParentNode()->removeChild(gnode);
+          }
+
           // remove property in device group list
           PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(_groupID));
           if (gsubnode) {
@@ -2212,15 +2232,6 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
-        entry->createProperty("pollinterval")
-                ->linkToProxy(PropertyProxyReference<uint32_t>(m_sensorInputs[m_sensorInputCount]->m_sensorPollInterval));
-        entry->createProperty("conversion")
-                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorPushConversionFlag));
-        entry->createProperty("broadcast")
-                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorBroadcastFlag));
-        entry->createProperty("valid")
-                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorValueValidity));
-
       }
 
       m_sensorInputCount ++;
@@ -2480,6 +2491,40 @@ namespace dss {
     *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
   }
 
+
+  std::vector<int> Device::getLockedScenes() {
+    std::vector<int> ls;
+
+    for (int g = 0; g < getGroupsCount(); g++) {
+      boost::shared_ptr<Group> group = getGroupByIndex(g);
+      int gid = group->getID();
+      if (isAppUserGroup(gid)) {
+        boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
+        if (cluster->isConfigurationLocked()) {
+            const std::vector<int>& locks = cluster->getLockedScenes();
+            ls.insert(ls.end(), locks.begin(), locks.end());
+        }
+      }
+    }
+
+    return ls;
+  }
+
+  bool Device::isInLockedCluster() {
+    for (int g = 0; g < getGroupsCount(); g++) {
+      boost::shared_ptr<Group> group = getGroupByIndex(g);
+      int gid = group->getID();
+      if (isAppUserGroup(gid)) {
+        boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
+        if (cluster->isConfigurationLocked()) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
     : m_device(device) {
       if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {
@@ -2593,4 +2638,25 @@ namespace dss {
     }
     return deviceIndex;
   }
+
+  void Device::setCardinalDirection(CardinalDirection_t _direction) {
+    assert(valid(_direction));
+
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    if (m_cardinalDirection != _direction) {
+      m_cardinalDirection = _direction;
+      checkAutoCluster();
+    }
+  }
+
+  void Device::setWindProtectionClass(WindProtectionClass_t _klass) {
+    assert(valid(_klass));
+
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    if (m_windProtectionClass != _klass) {
+      m_windProtectionClass = _klass;
+      checkAutoCluster();
+    }
+  }
+
 } // namespace dss

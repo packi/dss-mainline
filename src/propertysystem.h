@@ -25,15 +25,11 @@
 #ifndef NEUROPROPERTYSYSTEM_H
 #define NEUROPROPERTYSYSTEM_H
 
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/and.hpp>
-#include <boost/type_traits/is_class.hpp>
-#include <boost/tokenizer.hpp>
-
 #include <stdexcept>
 #include <vector>
 #include <stack>
 #include <string>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -67,14 +63,7 @@ namespace dss {
       bool boolean;
       double floating;
     } actualValue;
-    int PropertyLevel;
   } aPropertyValue;
-
-  std::string getBasePath(const std::string& _path);
-  std::string getProperty(const std::string& _path);
-
-  typedef boost::tokenizer<boost::char_separator<char> > path_tokenizer;
-  path_tokenizer createPathTokenizer(const std::string &path);
 
   /**
    * Saves a subtree to XML.
@@ -409,35 +398,40 @@ namespace dss {
   /** The heart of the PropertySystem. */
   class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
     __DECL_LOG_CHANNEL__
+
   public:
     enum Flag {
       Readable = 1 << 0, /**< Node is readable */
       Writeable = 1 << 1, /**< Node is writeable */
       Archive = 1 << 2 /**< Node will get written to XML (hint only) */
     };
-  private:
-    aPropertyValue m_PropVal;
+
+  private:                                  /* Size: 32 64 bit */
+    aPropertyValue m_PropVal;                     /*  8  8 */
     union {
       PropertyProxy<bool>* boolProxy;
       PropertyProxy<int>* intProxy;
       PropertyProxy<uint32_t>* uintProxy;
       PropertyProxy<std::string>* stringProxy;
       PropertyProxy<double>* floatingProxy;
-    } m_Proxy;
-    PropertyList m_ChildNodes;
-    std::vector<PropertyNode*> m_AliasedBy;
-    std::vector<PropertyListener*> m_Listeners;
-    PropertyNode* m_ParentNode;
-    boost::flyweight<std::string> m_Name;
-    mutable std::string m_DisplayName;
-    bool m_LinkedToProxy;
-    bool m_Aliased;
-    PropertyNode* m_AliasTarget;
-    int m_Index;
-    int m_Flags;
-    boost::shared_ptr<NodePrivileges> m_pPrivileges;
+      int iValue;
+    } m_Proxy;                                    /*  4  8 */
+    boost::flyweight<std::string> m_Name;         /*  4  8 */
+    mutable std::string m_DisplayName;            /*  4  8 */
+    std::vector<PropertyNodePtr>* m_ChildNodes;   /*  4  8 */
+    std::vector<PropertyNode*>* m_AliasedBy;      /*  4  8 */
+    std::vector<PropertyListener*>* m_Listeners;  /*  4  8 */
+    PropertyNode* m_ParentNode;                   /*  4  8 */
+    PropertyNode* m_AliasTarget;                  /*  4  8 */
+    NodePrivileges* m_Privileges;                 /*  4  8 */
+
+    int32_t m_Index;                              /*  4  4 */
+    uint8_t m_Flags;                              /*  1  1 */
+    /* vtable */                                  /*  4  8 */
+
     static boost::recursive_mutex m_GlobalMutex;
     static boost::atomic<int> sm_NodeCounter;
+
   private:
     void clearValue();
 
@@ -451,7 +445,7 @@ namespace dss {
      * traverse towards root node and return first privileges found
      * @ret NodePrivileges or NULL if no restrictions implied
      */
-    boost::shared_ptr<NodePrivileges> lookupPrivileges();
+    NodePrivileges* lookupPrivileges();
   public:
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
@@ -508,8 +502,6 @@ namespace dss {
 
     /** Recursively adds a child-node. */
     PropertyNodePtr createProperty(const std::string& _propPath);
-    PropertyNodePtr createProperty(path_tokenizer::const_iterator & _propPath,
-                                   path_tokenizer::const_iterator &end);
 
     /** Returns a child node by name.
      * Or NULL if not found.*/
@@ -523,6 +515,7 @@ namespace dss {
     void setFlag(Flag _flag, bool _value);
 
     void alias(PropertyNodePtr _target);
+    bool IsAliased() { return m_AliasTarget != NULL; }
 
     // proxy support
     /** Links to the given proxy.
@@ -538,6 +531,7 @@ namespace dss {
     bool linkToProxy(const PropertyProxy<uint32_t>& _proxy);
     /** Unlinks from a proxy */
     bool unlinkProxy(bool _recurse = false);
+    bool IsLinkedToProxy() { return m_Proxy.iValue != 0; }
 
     /** Adds a listener. */
     void addListener(PropertyListener* _listener);
@@ -545,9 +539,19 @@ namespace dss {
     void removeListener(PropertyListener* _listener);
 
     /** Returns the count of the nodes children. */
-    int getChildCount() const { return m_Aliased ? m_AliasTarget->m_ChildNodes.size() : m_ChildNodes.size(); }
+    int getChildCount() const {
+      if (m_AliasTarget) {
+        return m_AliasTarget->m_ChildNodes ? m_AliasTarget->m_ChildNodes->size() : 0;
+      }
+      return m_ChildNodes ? m_ChildNodes->size() : 0;
+    }
     /** Returns a child node by index. */
-    PropertyNodePtr getChild(const int _index) { return m_Aliased ? m_AliasTarget->m_ChildNodes.at(_index) : m_ChildNodes.at(_index); }
+    PropertyNodePtr getChild(const int _index) {
+      if (m_AliasTarget) {
+        return m_AliasTarget->m_ChildNodes ? m_AliasTarget->m_ChildNodes->at(_index) : PropertyNodePtr();
+      }
+      return m_ChildNodes ? m_ChildNodes->at(_index) : PropertyNodePtr();
+    }
 
     /** Adds \a _childNode as a child to this node.
         If the node already has a parent, the node will be moved here. */
@@ -562,18 +566,18 @@ namespace dss {
     /** Notifies all listeners that the value of this property has changed */
     void propertyChanged();
 
-    boost::shared_ptr<NodePrivileges> getPrivileges() { return m_pPrivileges; }
-    void setPrivileges(boost::shared_ptr<NodePrivileges> _value) { m_pPrivileges = _value; }
+    NodePrivileges* getPrivileges() { return m_Privileges; }
+    void setPrivileges(NodePrivileges* _value) { m_Privileges = _value; }
 
     void checkWriteAccess();
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
-      if(m_Aliased) {
+      if (m_AliasTarget) {
         m_AliasTarget->foreachChildOf(_callback);
-      } else {
-        for (PropertyList::iterator it = m_ChildNodes.begin(); it
-            != m_ChildNodes.end(); ++it)
+      } else if (NULL != m_ChildNodes) {
+        for (PropertyList::iterator it = m_ChildNodes->begin(); it
+            != m_ChildNodes->end(); ++it)
         {
           (*_callback)(**it);
         }
@@ -584,11 +588,11 @@ namespace dss {
     /** @copydoc foreachChildOf */
     template<class Cls>
     void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode&)) {
-      if(m_Aliased) {
+      if (m_AliasTarget) {
         m_AliasTarget->foreachChildOf(_objRef, _callback);
-      } else {
-        for (PropertyList::iterator it = m_ChildNodes.begin(); it
-            != m_ChildNodes.end(); ++it)
+      } else if (NULL != m_ChildNodes) {
+        for (PropertyList::iterator it = m_ChildNodes->begin(); it
+            != m_ChildNodes->end(); ++it)
         {
           (_objRef.*_callback)(**it);
         }
@@ -599,6 +603,7 @@ namespace dss {
     bool saveAsXML(std::ostream& _os, const int _indent, const int _flagsMask);
     /** Saves the nodes children to XML */
     bool saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask);
+
   }; // PropertyNode
 
   /** Exception that gets thrown if a incompatible assignment would take place. */

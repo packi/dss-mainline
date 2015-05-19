@@ -206,13 +206,13 @@ void setupPrivileges(PropertySystem &propSys) {
   privilegeUser.reset(new Privilege(propSys.getProperty(pathUserRole)));
   privilegeUser->addRight(Privilege::Write);
 
-  boost::shared_ptr<NodePrivileges> privileges = boost::make_shared<NodePrivileges>();
+  NodePrivileges* privileges = new NodePrivileges;
   privileges->addPrivilege(privilegeSystem);
   privileges->addPrivilege(privilegeUser);
   propSys.getProperty("/")->setPrivileges(privileges);
 
   /* security: passwords and credentials */
-  boost::shared_ptr<NodePrivileges> privilegesSecurityNode = boost::make_shared<NodePrivileges>();
+  NodePrivileges* privilegesSecurityNode = new NodePrivileges;
   privilegesSecurityNode->addPrivilege(privilegeSystem);
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }

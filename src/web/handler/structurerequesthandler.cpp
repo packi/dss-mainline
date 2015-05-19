@@ -472,27 +472,26 @@ namespace dss {
       return JSONWriter::failure("Cannot modify inactive device");
     }
 
-    if(_request.hasParameter("clusterID")) {
-      std::string clusterIDStr = _request.getParameter("clusterID");
-      int clusterID = strToIntDef(clusterIDStr, -1);
+    int id;
+    if (!_request.getParameter("clusterID", id) && !_request.getParameter("groupID", id)) {
+      return JSONWriter::failure("Could not parse groupID or clusterID");
+    }
+    if (isAppUserGroup(id)) {
       try {
-        boost::shared_ptr<Zone> zone = m_Apartment.getZone(0);
-        gr = zone->getGroup(clusterID);
-      } catch(ItemNotFoundException& e) {
-        gr = boost::shared_ptr<Group> ();
+        gr = m_Apartment.getCluster(id);
+      } catch (ItemNotFoundException& e) {
+        return JSONWriter::failure("Invalid value for parameter clusterID : '" + intToString(id) + "'");
       }
-    } else if(_request.hasParameter("groupID")) {
-      std::string groupIDStr = _request.getParameter("groupID");
-      int groupID = strToIntDef(groupIDStr, -1);
+    } else {
       try {
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(dev->getZoneID());
-        gr = zone->getGroup(groupID);
-      } catch(ItemNotFoundException& e) {
-        gr = boost::shared_ptr<Group> ();
+        gr = zone->getGroup(id);
+        if (gr == NULL) {
+          return JSONWriter::failure("Invalid value for parameter groupID : '" + intToString(id) + "'");
+        }
+      } catch (ItemNotFoundException& e) {
+        return JSONWriter::failure("Could not get relevant zone.");
       }
-    }
-    if(!gr || !gr->isValid()) {
-      return JSONWriter::failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
     if (!(dev->getGroupBitmask().test(gr->getStandardGroupID()-1) ||
@@ -590,27 +589,26 @@ namespace dss {
       return JSONWriter::failure("Cannot modify inactive device");
     }
 
-    if(_request.hasParameter("clusterID")) {
-      std::string clusterIDStr = _request.getParameter("clusterID");
-      int clusterID = strToIntDef(clusterIDStr, -1);
+    int id;
+    if (!_request.getParameter("clusterID", id) && !_request.getParameter("groupID", id)) {
+      return JSONWriter::failure("Could not parse groupID or clusterID");
+    }
+    if (isAppUserGroup(id)) {
       try {
-        boost::shared_ptr<Zone> zone = m_Apartment.getZone(0);
-        gr = zone->getGroup(clusterID);
-      } catch(ItemNotFoundException& e) {
-        gr = boost::shared_ptr<Group> ();
+        gr = m_Apartment.getCluster(id);
+      } catch (ItemNotFoundException& e) {
+        return JSONWriter::failure("Invalid value for parameter clusterID : '" + intToString(id) + "'");
       }
-    } else if(_request.hasParameter("groupID")) {
-      std::string groupIDStr = _request.getParameter("groupID");
-      int groupID = strToIntDef(groupIDStr, -1);
+    } else {
       try {
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(dev->getZoneID());
-        gr = zone->getGroup(groupID);
-      } catch(ItemNotFoundException& e) {
-        gr = boost::shared_ptr<Group> ();
+        gr = zone->getGroup(id);
+        if (gr == NULL) {
+          return JSONWriter::failure("Invalid value for parameter groupID : '" + intToString(id) + "'");
+        }
+      } catch (ItemNotFoundException& e) {
+        return JSONWriter::failure("Could not get relevant zone.");
       }
-    }
-    if(!gr || !gr->isValid()) {
-      return JSONWriter::failure("Invalid value for parameter groupID : '" + _request.getParameter("groupID") + "'");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);

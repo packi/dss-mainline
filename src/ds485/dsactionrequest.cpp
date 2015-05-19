@@ -280,7 +280,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, float _sensorValueFloat, const std::string _token) {
+  void DSActionRequest::pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if (m_DSMApiHandle == NULL) {
       return;
@@ -306,5 +306,19 @@ namespace dss {
 
   void DSActionRequest::setBusEventSink(BusEventSink* _eventSink) {
       m_pBusEventSink = _eventSink;
+  }
+
+  bool DSActionRequest::isOperationLock(const dsuid_t &_dSM, int _clusterId) {
+    uint8_t lockState;
+    int ret;
+
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      return false;
+    }
+
+    ret = ClusterProperties_get_operation_lock(m_DSMApiHandle, _dSM, _clusterId, &lockState);
+    DSBusInterface::checkResultCode(ret);
+    return (lockState == 1);
   }
 } // namespace dss

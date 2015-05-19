@@ -70,6 +70,11 @@ namespace dss {
   } // ctor
 
   Apartment::~Apartment() {
+    m_Zones.clear();
+    m_DSMeters.clear();
+    m_Devices.clear();
+    m_States.clear();
+
     m_pPropertyNode.reset();
     m_pBusInterface = NULL;
     m_pModelMaintenance = NULL;
@@ -410,7 +415,7 @@ namespace dss {
         for (uint8_t i = 0; i < binaryInputCount; i++) {
           boost::shared_ptr<State> state = pDevice->getBinaryInputState(i);
           try {
-            removeState(state->getName());
+            removeState(state);
           } catch (ItemNotFoundException& e) {
             Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
           }
@@ -547,21 +552,9 @@ namespace dss {
     return result;
   } // getStates
 
-  void Apartment::removeState(const std::string& _name) {
-    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    if(m_pPropertyNode != NULL) {
-      m_pPropertyNode->checkWriteAccess();
-    }
-    for(std::vector<boost::shared_ptr<State> >::iterator ips = m_States.begin(), e = m_States.end();
-        ips != e; ++ips) {
-      boost::shared_ptr<State> pState = *ips;
-      if(pState->getName() == _name) {
-        m_States.erase(ips);
-        return;
-      }
-    }
-    throw ItemNotFoundException("State does not exist: " + _name);
-  } // removeState
+  void Apartment::removeState(boost::shared_ptr<State> _state) {
+    m_States.erase(std::remove(m_States.begin(), m_States.end(), _state));
+  }
 
   ActionRequestInterface* Apartment::getActionRequestInterface() {
     if(m_pBusInterface != NULL) {
@@ -611,6 +604,73 @@ namespace dss {
     m_SensorStatus.m_WeatherConditionId = _conditionId;
     m_SensorStatus.m_WeatherServiceId = _serviceId;
     m_SensorStatus.m_WeatherTS = _ts;
+  }
+
+  std::pair<std::vector<DeviceLock_t>, std::vector<ZoneLock_t> > Apartment::getClusterLocks() {
+
+    std::vector<DeviceLock_t> lockedDevices;
+    std::vector<ZoneLock_t> lockedZones;
+
+    std::vector<boost::shared_ptr<Zone> > zones = getZones();
+    // loop through all zones
+    for (int z = 0; z < zones.size(); z++) {
+
+      if (zones.at(z)->getID() == 0) {
+        continue;
+      }
+
+      Set devices = zones.at(z)->getDevices();
+
+      std::vector<ClassLock_t> classLocks;
+
+      // look for devices of each class in the zone
+      for (int c = DEVICE_CLASS_GE; c <= DEVICE_CLASS_WE; c++) {
+
+        if (c == DEVICE_CLASS_SW) {
+          // ignore unconfigured SW devices
+          continue;
+        }
+
+        std::set<int> lockedScenes;
+
+        Set devclass = devices.getByGroup(c);
+
+        // loop through all devices of a certain group
+        for (int d = 0; d < devclass.length(); d++) {
+          boost::shared_ptr<Device> device = devclass.get(d).getDevice();
+          std::vector<int> ls = device->getLockedScenes();
+          if (!ls.empty()) {
+            DeviceLock_t lockedDevice;
+            lockedDevice.dsuid = device->getDSID();
+            lockedDevice.lockedScenes = ls;
+            lockedDevices.push_back(lockedDevice);
+            lockedScenes.insert(ls.begin(), ls.end());
+          } else {
+            if (device->isInLockedCluster()) {
+              DeviceLock_t lockedDevice;
+              lockedDevice.dsuid = device->getDSID();
+              lockedDevices.push_back(lockedDevice);
+            }
+          }
+        } // devices loop
+
+        if (!lockedScenes.empty()) {
+            ClassLock_t cl;
+            cl.deviceClass = static_cast<DeviceClasses_t>(c);
+            cl.lockedScenes = lockedScenes;
+            classLocks.push_back(cl);
+        }
+      } // device class loop
+
+      if (!classLocks.empty()) {
+        ZoneLock_t zl;
+        zl.zoneID = zones.at(z)->getID();
+        zl.deviceClassLocks = classLocks;
+        lockedZones.push_back(zl);
+      }
+    } // zone loop
+
+    return std::make_pair(lockedDevices, lockedZones);
   }
 
 } // namespace dss

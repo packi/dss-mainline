@@ -26,7 +26,9 @@
   #include "config.h"
 #endif
 
+#define BOOST_CHRONO_HEADER_ONLY
 #include <boost/make_shared.hpp>
+#include <boost/chrono.hpp>
 
 #include "modelmaintenance.h"
 
@@ -39,6 +41,7 @@
 #include "businterface.h"
 #include "propertysystem.h"
 #include "model/modelconst.h"
+#include "model/autoclustermaintenance.h"
 #include "metering/metering.h"
 #include "security/security.h"
 #include "structuremanipulator.h"
@@ -66,6 +69,7 @@
 #include "vdc-connection.h"
 #include "model-features.h"
 #include "handler/system_states.h"
+
 
 namespace dss {
 
@@ -420,10 +424,13 @@ namespace dss {
 
     {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-      if (m_ModelEvents.empty()) {
-        lock.unlock();
-        return m_NewModelEvent.waitFor(m_EventTimeoutMS);
+      if (m_ModelEvents.empty() &&
+          (m_NewModelEvent.wait_for(lock, m_EventTimeoutMS) ==
+           boost::cv_status::timeout)) {
+        return false;
       }
+
+      assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
     }
 
@@ -528,7 +535,7 @@ namespace dss {
     case ModelEvent::etModelDirty:
       eraseModelEventsFromQueue(ModelEvent::etModelDirty);
       writeConfiguration();
-      if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
+      if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
         raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
       }
       break;
@@ -695,6 +702,16 @@ namespace dss {
     case ModelEvent::etGenericEvent:
       onGenericEvent(static_cast<GenericEventType_t>(event->getParameter(0)),
                      boost::static_pointer_cast<GenericEventPayload_t>(event->getSingleObjectParameter()));
+      break;
+    case ModelEvent::etOperationLock:
+      // parm> 0:zoneId 1:groupId 2:lock 3:origin
+      onOperationLock(event->getParameter(0), event->getParameter(1),
+                      event->getParameter(2),
+                      static_cast<callOrigin_t>(event->getParameter(3)));
+      break;
+    case ModelEvent::etDeviceDirty:
+      assert(pEventWithDSID != NULL);
+      onAutoClusterMaintenance(pEventWithDSID->getDSID());
       break;
     default:
       assert(false);
@@ -910,6 +927,15 @@ namespace dss {
           }
         }
 
+        AutoClusterMaintenance maintenance(m_pApartment);
+        maintenance.joinIdenticalClusters();
+        Set devices  = mod->getDevices();
+        for (int ctr = 0; ctr < devices.length(); ++ctr) {
+          DeviceReference& ref = devices.get(ctr);
+          boost::shared_ptr<Device> device = ref.getDevice();
+          maintenance.consistencyCheck(*device.get());
+        }
+
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
         raiseEvent(dsMeterReadyEvent);
@@ -926,15 +952,17 @@ namespace dss {
 
   void ModelMaintenance::addModelEvent(ModelEvent* _pEvent) {
     // filter out dirty events, as this will rewrite apartment.xml
-    if(m_IsInitializing && (_pEvent->getEventType() == ModelEvent::etModelDirty)) {
-      m_IsDirty = true;
-      delete _pEvent;
-    } else {
-      {
-        boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-        m_ModelEvents.push_back(_pEvent);
+    if (m_IsInitializing) {
+      if (_pEvent->getEventType() == ModelEvent::etModelDirty) {
+        m_IsDirty = true;
+        delete _pEvent;
+      } else if (_pEvent->getEventType() == ModelEvent::etDeviceDirty) {
+        delete _pEvent;
       }
-      m_NewModelEvent.signal();
+    } else {
+      boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+      m_ModelEvents.push_back(_pEvent);
+      m_NewModelEvent.notify_all();
     }
   } // addModelEvent
 
@@ -1864,31 +1892,7 @@ namespace dss {
 
     log(std::string("onHeatingControllerConfig:  dsMeter " + dsuid2str(_dsMeterID) +
         ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
-
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerSetup));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("ControlMode", intToString(config->ControllerMode));
-    pEvent->setProperty("EmergencyValue", intToString(config->EmergencyValue - 100));
-    if (config->ControllerMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("CtrlKp", doubleToString((double)config->Kp * 0.025));
-      pEvent->setProperty("CtrlTs", intToString(config->Ts));
-      pEvent->setProperty("CtrlTi", intToString(config->Ti));
-      pEvent->setProperty("CtrlKd", intToString(config->Kd));
-      pEvent->setProperty("CtrlImin", doubleToString((double)config->Imin * 0.025));
-      pEvent->setProperty("CtrlImax", doubleToString((double)config->Imax * 0.025));
-      pEvent->setProperty("CtrlYmin", intToString(config->Ymin - 100));
-      pEvent->setProperty("CtrlYmax", intToString(config->Ymax - 100));
-      pEvent->setProperty("CtrlAntiWindUp", (config->AntiWindUp > 0) ? "true" : "false");
-      pEvent->setProperty("CtrlKeepFloorWarm", (config->KeepFloorWarm > 0) ? "true" : "false");
-    } else if (config->ControllerMode == HeatingControlModeIDZoneFollower) {
-      pEvent->setProperty("ReferenceZone", intToString(config->SourceZoneId));
-      pEvent->setProperty("CtrlOffset", intToString(config->Offset));
-    } else if (config->ControllerMode == HeatingControlModeIDManual) {
-      pEvent->setProperty("ManualValue", intToString(config->ManualValue - 100));
-    }
-    raiseEvent(pEvent);
+    raiseEvent(createHeatingControllerConfig(_zoneID, _dsMeterID, *config));
   } // onHeatingControllerConfig
 
   void ModelMaintenance::onHeatingControllerValues(dsuid_t _dsMeterID, const int _zoneID, boost::shared_ptr<void> _spec) {
@@ -1910,59 +1914,10 @@ namespace dss {
     log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID) +
         ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
 
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerValue));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-      pEvent->setProperty("NominalTemperature_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode0)));
-      pEvent->setProperty("NominalTemperature_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode1)));
-      pEvent->setProperty("NominalTemperature_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode2)));
-      pEvent->setProperty("NominalTemperature_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode3)));
-      pEvent->setProperty("NominalTemperature_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode4)));
-      pEvent->setProperty("NominalTemperature_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, values->OpMode5)));
-    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      pEvent->setProperty("ControlValue_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode0)));
-      pEvent->setProperty("ControlValue_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode1)));
-      pEvent->setProperty("ControlValue_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode2)));
-      pEvent->setProperty("ControlValue_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode3)));
-      pEvent->setProperty("ControlValue_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode4)));
-      pEvent->setProperty("ControlValue_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, values->OpMode5)));
-    }
-    raiseEvent(pEvent);
-
-
-    boost::shared_ptr<Event> pEventDsHub;
-    pEventDsHub.reset(new Event(EventName::HeatingControllerValueDsHub));
-    pEventDsHub->setProperty("ZoneID", intToString(_zoneID));
-    switch (zone->getHeatingOperationMode()) {
-    case 0: pEventDsHub->setProperty("OperationMode", "Off"); break;
-    case 1: pEventDsHub->setProperty("OperationMode", "Comfort"); break;
-    case 2: pEventDsHub->setProperty("OperationMode", "Eco"); break;
-    case 3: pEventDsHub->setProperty("OperationMode", "NotUsed"); break;
-    case 4: pEventDsHub->setProperty("OperationMode", "Night"); break;
-    case 5: pEventDsHub->setProperty("OperationMode", "Holiday"); break;
-    }
-    if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-      pEventDsHub->setProperty("NominalTemperature",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_NominalValue)));
-    } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      pEventDsHub->setProperty("ControlValue",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValue)));
-    }
-    raiseEvent(pEventDsHub);
+    raiseEvent(createHeatingControllerValue(_zoneID, _dsMeterID, hProp, *values));
+    raiseEvent(createHeatingControllerValueDsHub(_zoneID,
+                                                 zone->getHeatingOperationMode(),
+                                                 hProp, hStatus));
   } // onHeatingControllerValues
 
   void ModelMaintenance::onHeatingControllerState(dsuid_t _dsMeterID, const int _zoneID, const int _State) {
@@ -1974,12 +1929,7 @@ namespace dss {
       log(std::string("Error on heating state event, item not found: ") + e.what(), lsWarning);
     }
 
-    boost::shared_ptr<Event> pEvent;
-    pEvent.reset(new Event(EventName::HeatingControllerState));
-    pEvent->setProperty("ZoneID", intToString(_zoneID));
-    pEvent->setProperty("ControlDSUID", dsuid2str(_dsMeterID));
-    pEvent->setProperty("ControlState", intToString(_State));
-    raiseEvent(pEvent);
+    raiseEvent(createHeatingControllerState(_zoneID, _dsMeterID, _State));
   } // onHeatingControllerState
 
   void ModelMaintenance::onClusterConfigLock(const int _clusterID, const bool _configurationLock) {
@@ -2032,6 +1982,31 @@ namespace dss {
         break;
     }
   } // onGenericEvent
+
+  void ModelMaintenance::onOperationLock(int _zoneID, int _groupID,
+                                         bool _lock, callOrigin_t _callOrigin) {
+    if (!isAppUserGroup(_groupID)) {
+      return;
+    }
+    try {
+      boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_groupID);
+      cluster->setOperationLock(_lock, _callOrigin);
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Unknown cluster: ") + e.what(), lsWarning);
+    }
+  }
+
+  void ModelMaintenance::onAutoClusterMaintenance(dsuid_t _deviceID)
+  {
+    try {
+      boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(_deviceID);
+      AutoClusterMaintenance maintenance(m_pApartment);
+      maintenance.consistencyCheck(*device.get());
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);
+    }
+  }
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

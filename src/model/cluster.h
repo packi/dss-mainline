@@ -27,6 +27,7 @@
 #include <boost/thread/mutex.hpp>
 
 #include "modeltypes.h"
+#include "device.h"
 #include "group.h"
 #include "businterface.h"
 #include "data_types.h"
@@ -46,7 +47,7 @@ namespace dss {
   public:
     /** Constructs a cluster with the given id. */
     Cluster(const int _id, Apartment& _apartment);
-    virtual ~Cluster() {};
+    virtual ~Cluster();
 
     virtual void publishToPropertyTree();
 
@@ -74,8 +75,18 @@ namespace dss {
 
     bool equalConfig(const ClusterSpec_t &cluster);
 
+    bool isOperationLock();
+    void setOperationLock(bool _locked, callOrigin_t _callOrigin);
+
+    bool releaseCluster();
+
+    void reset();
+
+    void removeDevice(Device& _device);
+
   private:
     void updateLockedScenes();
+    boost::shared_ptr<State> m_oplock_state;
   }; // Group
 
 } // namespace dss

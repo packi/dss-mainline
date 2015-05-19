@@ -68,6 +68,7 @@ namespace dss {
   const uint8_t SceneOffE4 = 0x26;
   const uint8_t SceneOnE4 = 0x27;
   const uint8_t SceneAutoOff = 0x28;
+  const uint8_t SceneImpulse = 0x29;
   const uint8_t SceneDecA1 = 0x2A;
   const uint8_t SceneIncA1 = 0x2B;
   const uint8_t SceneDecA2 = 0x2C;
@@ -333,6 +334,9 @@ namespace dss {
 
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
+
+  const uint16_t TBVersion_OemEanConfig = 0x0350;
+  const uint16_t TBVersion_OemConfigLock = 0x0357;
 
   const uint16_t ProductID_KM_200 = 0x00C8;
   const uint16_t ProductID_SDS_200 = 0x18C8;

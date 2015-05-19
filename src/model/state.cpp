@@ -120,23 +120,25 @@ namespace dss {
 
   void State::publishToPropertyTree() {
     removeFromPropertyTree();
-    std::string basepath;
+    std::string path;
     switch (m_type) {
       case StateType_Script:
       case StateType_SensorDevice:
       case StateType_SensorZone:
-        basepath = "/usr/addon-states/" + m_serviceName + "/";
+        path = "/usr/addon-states/" + m_serviceName + "/";
         break;
       default:
-        basepath = "/usr/states/";
+        path = "/usr/states/";
         break;
     }
+    path += m_name;
     if (m_pPropertyNode == NULL && DSS::hasInstance()) {
-      if (DSS::getInstance()->getPropertySystem().getProperty(basepath + m_name) != NULL) {
-        // avoid publishing duplicate state information when reading out devices multiple times
+      if (DSS::getInstance()->getPropertySystem().getProperty(path) != NULL) {
+        // avoid publishing duplicate state information when reading out
+        // devices multiple times
         return;
       }
-      m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(basepath + m_name);
+      m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(path);
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyReference<std::string>(m_name, false));
 
@@ -252,7 +254,7 @@ namespace dss {
         save();
       }
 
-      if (DSS::hasInstance()) {
+      if (DSS::hasInstance() && DSS::getInstance()->getState() == ssRunning) {
         DSS::getInstance()->getEventQueue()
           .pushEvent(createStateChangeEvent(shared_from_this(), oldstate, _origin));
       }

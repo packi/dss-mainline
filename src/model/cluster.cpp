@@ -32,6 +32,8 @@
 #include "src/foreach.h"
 
 #include "src/model/modelconst.h"
+#include "src/model/set.h"
+
 namespace dss {
 
     //============================================= Group
@@ -45,7 +47,15 @@ namespace dss {
     m_readFromDsm(false),
     m_automatic(false)
   {
+    std::string name = "cluster." + intToString(_id) + ".operation_lock";
+    m_oplock_state = m_pApartment->allocateState(StateType_Group, name, "");
+    m_oplock_state->setState(coSystemStartup, State_Unknown);
   } // ctor
+
+  Cluster::~Cluster() {
+    // TODO unpublishPropertyTree
+    m_pApartment->removeState(m_oplock_state);
+  }
 
   void Cluster::updateLockedScenes() {
     if (!m_pPropertyNode) {
@@ -60,7 +70,7 @@ namespace dss {
       PropertyNodePtr gsubnode = pLockedScenes->createProperty("scene" + intToString(scene));
       gsubnode->createProperty("id")->setIntegerValue(scene);
     }
-  }
+  } // updateLockedScenes
 
   void Cluster::publishToPropertyTree() {
     Group::publishToPropertyTree();
@@ -94,6 +104,39 @@ namespace dss {
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
             (m_ConfigurationLocked == cluster.configurationLocked));
+  } // equalConfig
+
+  void Cluster::reset() {
+    setLocation(cd_none);
+    setProtectionClass(wpc_none);
+    setFloor(0);
+    m_LockedScenes.clear();
+    setConfigurationLocked(false);
+    setAutomatic(false);
+    setStandardGroupID(0);
+    setName("");
+  } // reset
+
+  void Cluster::removeDevice(Device& _device)
+  {
+    _device.removeFromGroup(getID());
+  } // removeDevice
+
+  bool Cluster::releaseCluster()
+  {
+    if (getDevices().isEmpty()) {
+      reset();
+      return true;
+    }
+    return false;
   }
 
+  bool Cluster::isOperationLock() {
+    // unknown -> not locked
+    return m_oplock_state->getState() == State_Active;
+  }
+
+  void Cluster::setOperationLock(bool _locked, callOrigin_t _callOrigin) {
+    m_oplock_state->setState(_callOrigin, _locked ? State_Active : State_Inactive);
+  }
 } // namespace dss

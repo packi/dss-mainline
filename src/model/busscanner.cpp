@@ -239,7 +239,8 @@ namespace dss {
       boost::shared_ptr<Cluster> pCluster;
 
       try {
-        pCluster = boost::dynamic_pointer_cast<Cluster>(m_Apartment.getGroup(cluster.GroupID));
+        assert(isAppUserGroup(cluster.GroupID));
+        pCluster = m_Apartment.getCluster(cluster.GroupID);
       } catch (ItemNotFoundException&) {
         boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
         pCluster.reset(new Cluster(cluster.GroupID, m_Apartment));
@@ -266,6 +267,16 @@ namespace dss {
         pCluster->setConfigurationLocked(cluster.configurationLocked);
         pCluster->setLockedScenes(cluster.lockedScenes);
         pCluster->setReadFromDsm(true);
+      }
+
+      try {
+        ActionRequestInterface &actionRequest(*m_Apartment.getActionRequestInterface());
+        pCluster->setOperationLock(actionRequest.isOperationLock(_dsMeter->getDSID(),
+                                                                 cluster.GroupID),
+                                   coSystemStartup);
+      } catch (BusApiError &e) {
+        // leave State_Unknown or take lock value from other dsm's
+        log(std::string("OperationLock: ") + e.what(), lsWarning);
       }
 
       pCluster->setIsPresent(true);
@@ -418,7 +429,7 @@ namespace dss {
     dev->setIsConnected(true);
     dev->setIsValid(true);
 
-    if ((dev->getRevisionID() >= 0x355) &&
+    if ((dev->getRevisionID() >= TBVersion_OemConfigLock) &&
         (dev->getOemInfoState() == DEVICE_OEM_UNKOWN)){
         // will be reset in OEM Readout
         dev->setConfigLock(true);
@@ -477,7 +488,7 @@ namespace dss {
 
   void BusScanner::scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice) {
     if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
-      if (_pDevice->getRevisionID() >= 0x0350) {
+      if (_pDevice->getRevisionID() >= TBVersion_OemEanConfig) {
         log("scheduleOEMReadout: schedule EAN readout for: " +
             dsuid2str(_pDevice->getDSID()));
         boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> task;
