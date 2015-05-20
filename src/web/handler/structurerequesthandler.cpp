@@ -796,6 +796,38 @@ namespace dss {
     return JSONWriter::success();
   }
 
+  std::string StructureRequestHandler::clusterSetConfigLock(const RestfulRequest& _request) {
+    boost::shared_ptr<Cluster> pCluster;
+    int clusterID = -1;
+
+    if(!_request.getParameter<int>("clusterID", clusterID)) {
+      return JSONWriter::failure("Required parameter clusterID missing");
+    }
+
+    pCluster = m_Apartment.getCluster(clusterID);
+    if ((clusterID < 1) || !pCluster) {
+      return JSONWriter::failure("Could not find pCluster with id : '" + _request.getParameter("clusterID") + "'");
+    }
+
+    if (!isAppUserGroup(clusterID)) {
+      return JSONWriter::failure(" Id : '" + _request.getParameter("clusterID") + "' is not a cluster");
+    }
+
+    int lock;
+    if (!_request.getParameter<int>("lock", lock)) {
+      return JSONWriter::failure("missing parameter 'lock'");
+    }
+
+    if ((lock < 0) || (lock > 1)) {
+      return JSONWriter::failure("Invalid value for parameter lock: '" + _request.getParameter("lock") + "'");
+    }
+
+    boost::shared_ptr<Cluster> cluster = m_Apartment.getCluster(clusterID);
+    cluster->setConfigurationLocked(lock);
+    return JSONWriter::success();
+  }
+
+
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
@@ -829,6 +861,8 @@ namespace dss {
       return clusterSetName(_request);
     } else if(_request.getMethod() == "clusterSetColor") {
       return clusterSetColor(_request);
+    } else if(_request.getMethod() == "clusterSetConfigLock") {
+      return clusterSetConfigLock(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }
