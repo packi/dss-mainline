@@ -354,17 +354,16 @@ namespace dss {
   }
 
   bool ModelMaintenance::handleDeferredModelEvents() {
+    // TODO locking, seems events are only pushed from mainloop
     if (m_DeferredEvents.empty()) {
       return false;
     }
 
-    std::list<boost::shared_ptr<ModelDeferredEvent> > mDefEvents(m_DeferredEvents);
-    m_DeferredEvents.clear();
-    for(std::list<boost::shared_ptr<ModelDeferredEvent> >::iterator evt = mDefEvents.begin();
-        evt != mDefEvents.end();
-        evt++)
-    {
-      boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (*evt);
+    m_DeferredEvents_t mDefEvents;
+    mDefEvents.swap(m_DeferredEvents);
+
+    foreach (boost::shared_ptr<ModelDeferredEvent> evt, mDefEvents) {
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
       if (mEvent != NULL) {
         int sceneID = mEvent->getSceneID();
         int groupID = mEvent->getGroupID();
@@ -419,7 +418,7 @@ namespace dss {
         continue;
       }
 
-      boost::shared_ptr<ModelDeferredButtonEvent> bEvent = boost::dynamic_pointer_cast <ModelDeferredButtonEvent> (*evt);
+      boost::shared_ptr<ModelDeferredButtonEvent> bEvent = boost::dynamic_pointer_cast <ModelDeferredButtonEvent> (evt);
       if (bEvent != NULL) {
         int deviceID = bEvent->getDeviceID();
         int buttonIndex = bEvent->getButtonIndex();
