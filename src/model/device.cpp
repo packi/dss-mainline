@@ -412,6 +412,9 @@ namespace dss {
     } // setProductID
 
   int Device::getRevisionID() const {
+    if (isVdcDevice()) {
+      return 0;
+    }
     return m_RevisionID;
   } // getRevisionID
 
