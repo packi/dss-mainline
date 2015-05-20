@@ -613,7 +613,7 @@ namespace dss {
 
     std::vector<boost::shared_ptr<Zone> > zones = getZones();
     // loop through all zones
-    for (int z = 0; z < zones.size(); z++) {
+    for (size_t z = 0; z < zones.size(); z++) {
 
       if (zones.at(z)->getID() == 0) {
         continue;

@@ -565,12 +565,12 @@ namespace dss {
 
         json.startArray("lockedDevices");
 
-        for (int i = 0; i < lockedDevices.size(); i++) {
+        for (size_t i = 0; i < lockedDevices.size(); i++) {
           json.startObject();
           json.add("dsuid", dsuid2str(lockedDevices.at(i).dsuid));
 
           json.startArray("lockedScenes");
-          for (int j = 0; j < lockedDevices.at(i).lockedScenes.size(); j++) {
+          for (size_t j = 0; j < lockedDevices.at(i).lockedScenes.size(); j++) {
             json.add(lockedDevices.at(i).lockedScenes.at(j));
           }
           json.endArray();
@@ -581,14 +581,14 @@ namespace dss {
 
         // lockedZones: [ { zoneID: xx, deviceClasses: [ { deviceClass: 3, lockedScenes: [ 1, 2, 3 ] } ] }, ... ]
         json.startArray("lockedZones");
-        for (int i = 0; i < lockedZones.size(); i++) {
+        for (size_t i = 0; i < lockedZones.size(); i++) {
           ZoneLock_t zl = lockedZones.at(i);
           std::set<int> lockedApartmentScenes;
           json.startObject();
           json.add("zoneID", zl.zoneID);
 
           json.startArray("deviceClasses");
-          for (int k = 0; k < zl.deviceClassLocks.size(); k++) {
+          for (size_t k = 0; k < zl.deviceClassLocks.size(); k++) {
             ClassLock_t cl = zl.deviceClassLocks.at(k);
             json.startObject();
             json.add("deviceClass", cl.deviceClass);
