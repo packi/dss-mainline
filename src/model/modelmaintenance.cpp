@@ -535,7 +535,7 @@ namespace dss {
     case ModelEvent::etModelDirty:
       eraseModelEventsFromQueue(ModelEvent::etModelDirty);
       writeConfiguration();
-      if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
+      if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_enabled)) {
         raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
       }
       break;
