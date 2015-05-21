@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(testHandleModelEvent) {
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
   main.handleModelEvents(); // single call increments by 2!
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2);
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2); // bug
   BOOST_CHECK_EQUAL(main.handleModelEvents(), false);
 
   // same with heating state machine changes
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(testHandleModelEvent) {
   main.addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
   main.addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
   main.handleModelEvents(); // single call increments by 2!
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2);
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2); // bug
   BOOST_CHECK_EQUAL(main.handleModelEvents(), false);
 }
 
@@ -93,6 +93,48 @@ BOOST_AUTO_TEST_CASE(testProcessedEventRollover) {
   BOOST_CHECK(queuedEvents < eventCountInit); // rollover
   BOOST_CHECK_EQUAL(queuedEvents - eventCountInit, 30);
   BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 30);
+}
+
+BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
+  //
+  // erasing events from the queue is evil
+  //
+  // example
+  // queue = o o o d <o'> | d d d d:
+  // ct    = 1 2 3 4  5     6 7 8 9
+  // d = dirty, o = other event
+  //
+  // We want to be sure o' is processed before continuing, hence we wait for
+  // the processed counter >= 5.  Due to dirty events being erased but still
+  // counted, the event counter jumps from 4 to 8 when processing the first
+  // dirty event. Event o' still not processed.
+  //
+  // Counting erased events results in m_processedEvents not really reflecting
+  // processed events. Not counting events that can be erased, makes it more
+  // difficult to compute the index when o' is procesed. It means we have
+  // maintain a list of events that can be erased from the queue, and when
+  // computing what m_processed will be when o' is processed, skip those
+  //
+  // queue = o o o d <o'> | d d d d o:
+  // ct    = 1 2 3    4             5
+  //
+  ModelMaintenanceMock main;
+  unsigned eventCountInit = main.m_processedEvents;
+  int ct = 0;
+
+  // we want to be sure the etDummyEvent is executed
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // o'
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+  main.handleModelEvents(), ct++;
+  BOOST_CHECK_EQUAL(ct, 1);
+
+  // since the 2nd etModelDirty is erased, and counted the counter is
+  // already 2, hence from the counter it seems it's already executed
+
+  // TODO this is wrong it should actually be only one
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
