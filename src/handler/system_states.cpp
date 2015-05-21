@@ -464,7 +464,7 @@ void SystemState::callscene() {
       state->setState(coSystem, State_Inactive);
       // TODO cleanup this hack
       for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
-        if (lookupState(state, formatGroupName2("rain", groupId))) {
+        if (lookupState(state, formatGroupName2("rain", grp))) {
           state->setState(coSystem, State_Inactive);
         }
       }
