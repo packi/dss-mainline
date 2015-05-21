@@ -149,6 +149,7 @@ namespace dss {
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
+    m_processedEvents(UINT_MAX - 2), // force early wrap around
     m_IsDirty(false),
     m_pApartment(NULL),
     m_pMetering(NULL),
@@ -442,6 +443,7 @@ namespace dss {
 
       assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
+      m_processedEvents++;
     }
 
     ModelEventWithDSID* pEventWithDSID =
@@ -722,6 +724,8 @@ namespace dss {
     case ModelEvent::etDeviceDirty:
       assert(pEventWithDSID != NULL);
       onAutoClusterMaintenance(pEventWithDSID->getDSID());
+    case ModelEvent::etDummyEvent:
+      // unit test
       break;
     case ModelEvent::etClusterCleanup:
       onAutoClusterCleanup();
@@ -895,6 +899,7 @@ namespace dss {
     for (m_ModelEvents_t::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end();) {
       if (it->getEventType() == _type) {
         it = m_ModelEvents.erase(it);
+        m_processedEvents++;
       } else {
         ++it;
       }

@@ -70,7 +70,8 @@ namespace dss {
                     etGenericEvent, /** generic event for dSS/dSG communication */
                     etOperationLock, /** scene calls ignored, no turn on/off lights, change blind positions, etc */
                     etDeviceDirty, /** A device has changed. Update the cluster assignment */
-                    etClusterCleanup /** cleanup clusters, remove empty ones */
+                    etClusterCleanup, /** cleanup clusters, remove empty ones */
+                    etDummyEvent, /** for unit tests */
                  } EventType;
   private:
     EventType m_EventType;

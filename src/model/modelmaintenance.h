@@ -246,6 +246,7 @@ namespace dss {
 
   protected:
     bool m_IsInitializing; //< allow to clear from unit test
+    unsigned m_processedEvents; //< actually dequeued, increased before processing
 
   private:
     bool m_IsDirty;
@@ -254,6 +255,7 @@ namespace dss {
     boost::ptr_deque<ModelEvent> m_ModelEvents;
     boost::mutex m_ModelEventsMutex;
     boost::condition_variable m_NewModelEvent;
+
     Apartment* m_pApartment;
     Metering* m_pMetering;
     const boost::chrono::milliseconds m_EventTimeoutMS;
