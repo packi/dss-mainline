@@ -2366,7 +2366,7 @@ namespace dss {
       originDSUID = m_properties.get(ef_originDSUID);
     }
 
-    callOrigin_t callOrigin;
+    callOrigin_t callOrigin = coUnknown;
     if (m_properties.has(ef_callOrigin)) {
       callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
     }
