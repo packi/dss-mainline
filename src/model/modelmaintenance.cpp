@@ -245,10 +245,13 @@ namespace dss {
     if (m_pStructureQueryBusInterface != NULL) {
       try {
         std::vector<DSMeterSpec_t> busMembers = m_pStructureQueryBusInterface->getBusMembers();
+        BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         foreach (DSMeterSpec_t& spec, busMembers) {
           boost::shared_ptr<DSMeter> dsMeter;
           try{
             dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
+            scanner.synchronizeDSMeterData(dsMeter, spec);
+
             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
             if (!busMemberIsDSMeter(dsMeter->getBusMemberType())) {
               m_pApartment->removeDSMeter(spec.DSID);
