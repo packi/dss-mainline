@@ -62,18 +62,18 @@ namespace dss {
     __DECL_LOG_CHANNEL__
 
   public:
-    PropertyQuery(PropertyNodePtr _pProperty, const std::string& _query)
+    PropertyQuery(PropertyNodePtr _pProperty, const std::string& _query, bool trailingSeparator)
     : m_pProperty(_pProperty),
       m_Query(_query)
     {
-      parseParts();
+      parseParts(trailingSeparator);
     }
 
     void run(JSONWriter& json);
     void run2(JSONWriter& json);
     void vdcquery(JSONWriter& json);
   private:
-    void parseParts();
+    void parseParts(bool trailingSeparator);
 
     std::vector<KeyValueContainer> splitKeyValue(std::vector<std::string> input);
     std::vector<std::string> evalPropertyList(std::string& _input, std::string& _output_key);
