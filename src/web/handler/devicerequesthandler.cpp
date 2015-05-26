@@ -387,9 +387,7 @@ namespace dss {
                          dsuid2str(next) + "'");
         }
 
-        if (manipulator.setJokerGroup(pPartnerDevice, group)) {
-          modifiedDevices.push_back(pPartnerDevice);
-        }
+        manipulator.setJokerGroup(pPartnerDevice, group);
       }
 
       JSONWriter json;
