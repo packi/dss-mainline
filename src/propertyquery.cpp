@@ -290,8 +290,8 @@ namespace dss {
 
       PropertyContainerToProtobuf::ProtoData data = PropertyContainerToProtobuf::convertPropertyContainerToProtobuf(m_PartList);
 
-      uint8_t buffer_in [4096];
-      uint8_t buffer_out[4096];
+      uint8_t buffer_in [RESPONSE_LEN];
+      uint8_t buffer_out[REQUEST_LEN];
       uint16_t bs;
 
       if (DSS::hasInstance()) {
