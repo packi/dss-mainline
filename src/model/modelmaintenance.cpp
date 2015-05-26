@@ -1982,6 +1982,14 @@ namespace dss {
         }
         break;
       }
+      case ge_service:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Service);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
       default:
         break;
     }

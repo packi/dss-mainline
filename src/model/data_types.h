@@ -61,6 +61,7 @@ namespace dss {
     ge_sun = 1,
     ge_frost = 2,
     ge_heating_mode = 3,
+    ge_service = 4,
   } GenericEventType_t;
 
   typedef struct {
