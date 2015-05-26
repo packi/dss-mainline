@@ -43,6 +43,7 @@ namespace SystemStateName {
   const std::string Sun = "sun";
   const std::string Frost = "frost";
   const std::string HeatingMode = "heating_mode";
+  const std::string Service = "service";
 }
 
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
@@ -174,6 +175,7 @@ void SystemState::bootstrap() {
 
   registerState(SystemStateName::Sun, true);
   registerState(SystemStateName::Frost, true);
+  registerState(SystemStateName::Service, true);
   state = registerState(SystemStateName::HeatingMode, true);
   State::ValueRange_t heatingModeValues;
   heatingModeValues.push_back("off");
