@@ -51,15 +51,17 @@ namespace dss {
         return JSONWriter::failure("Need parameter 'query'");
       }
 
-      PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query);
       if (_request.getMethod() == "vdcquery") {
+        PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query, false);
         propertyQuery.vdcquery(json);
         return json.successJSON();
       }
       else if (_request.getMethod() == "query2") {
+        PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query, true);
         propertyQuery.run2(json);
         return json.successJSON();
       }
+      PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query, true);
       propertyQuery.run(json);
       return json.successJSON();
     }
