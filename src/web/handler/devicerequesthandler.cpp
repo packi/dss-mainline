@@ -385,9 +385,7 @@ namespace dss {
                          dsuid2str(next) + "'");
         }
 
-        if (manipulator.setJokerGroup(pPartnerDevice, group)) {
-          modifiedDevices.push_back(pPartnerDevice);
-        }
+        manipulator.setJokerGroup(pPartnerDevice, group);
       }
 
       boost::shared_ptr<JSONObject> resultObj = boost::make_shared<JSONObject>();
