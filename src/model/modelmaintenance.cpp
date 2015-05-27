@@ -150,6 +150,7 @@ namespace dss {
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
     m_IsDirty(false),
+    m_ModelEventsCounter(0),
     m_pApartment(NULL),
     m_pMetering(NULL),
     m_EventTimeoutMS(_eventTimeoutMS),
@@ -436,11 +437,10 @@ namespace dss {
           }
       }
 
-      if (m_ModelEvents.empty()) { //< debug _taw_
-        log("@wait: m_ModelEvents.size: " + intToString(m_ModelEvents.size()) +
-            "did wait: " + intToString(do_wait) +
-            "no timeout: " + intToString(stat == boost::cv_status::no_timeout), lsWarning);
-      }
+      log("@wait: m_ModelEvents.size: " + intToString(m_ModelEvents.size()) +
+          " ct: " + intToString(m_ModelEventsCounter) +
+          " did wait: " + intToString(do_wait) +
+          " no timeout: " + intToString(stat == boost::cv_status::no_timeout), lsWarning);
       assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
     }
@@ -893,7 +893,8 @@ namespace dss {
     for (m_ModelEvents_t::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end();) {
       if (it->getEventType() == _type) {
         it = m_ModelEvents.erase(it);
-        log("@erase : m_ModelEvents.size: " + intToString(m_ModelEvents.size()), lsWarning); //< debug _taw_
+        log("@erase : m_ModelEvents.size: " + intToString(m_ModelEvents.size()) +
+            " ct: " + intToString(++m_ModelEventsCounter), lsWarning); //< debug _taw_
       } else {
         ++it;
       }

@@ -253,6 +253,7 @@ namespace dss {
     boost::ptr_deque<ModelEvent> m_ModelEvents;
     boost::mutex m_ModelEventsMutex;
     boost::condition_variable m_NewModelEvent;
+    unsigned m_ModelEventsCounter;
     Apartment* m_pApartment;
     Metering* m_pMetering;
     const boost::chrono::milliseconds m_EventTimeoutMS;
