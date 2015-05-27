@@ -427,12 +427,20 @@ namespace dss {
 
     {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-      if (m_ModelEvents.empty() &&
-          (m_NewModelEvent.wait_for(lock, m_EventTimeoutMS) ==
-           boost::cv_status::timeout)) {
-        return false;
+      bool do_wait = m_ModelEvents.empty(); //< debug _taw_
+      boost::cv_status stat; //< debug _taw_
+      if (m_ModelEvents.empty()) {
+          stat = m_NewModelEvent.wait_for(lock, m_EventTimeoutMS);
+          if (stat == boost::cv_status::timeout) {
+              return false;
+          }
       }
 
+      if (m_ModelEvents.empty()) { //< debug _taw_
+        log("@wait: m_ModelEvents.size: " + intToString(m_ModelEvents.size()) +
+            "did wait: " + intToString(do_wait) +
+            "no timeout: " + intToString(stat == boost::cv_status::no_timeout), lsWarning);
+      }
       assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
     }
@@ -885,6 +893,7 @@ namespace dss {
     for (m_ModelEvents_t::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end();) {
       if (it->getEventType() == _type) {
         it = m_ModelEvents.erase(it);
+        log("@erase : m_ModelEvents.size: " + intToString(m_ModelEvents.size()), lsWarning); //< debug _taw_
       } else {
         ++it;
       }
@@ -966,6 +975,8 @@ namespace dss {
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
       m_ModelEvents.push_back(_pEvent);
+      log("@notify: m_ModelEvents.size: " + intToString(m_ModelEvents.size()), lsWarning); //< debug _taw_
+      assert(!m_ModelEvents.empty());
       m_NewModelEvent.notify_all();
     }
   } // addModelEvent
