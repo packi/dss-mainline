@@ -187,7 +187,6 @@ namespace dss {
   private:
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
-    void eraseModelEventsFromQueue(ModelEvent::EventType _type);
     void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void setApartmentState();
@@ -197,6 +196,8 @@ namespace dss {
 
     void readConfiguration();
     void writeConfiguration();
+    void scheduleConfigWrite();
+    void delayedConfigWrite();
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
@@ -250,6 +251,10 @@ namespace dss {
 
   private:
     bool m_IsDirty;
+    bool m_pendingSaveRequest;
+    DateTime m_pendingSaveRequestTS;
+    unsigned m_suppressSaveRequestNotify;
+    boost::mutex m_SaveRequestMutex;
 
     typedef boost::ptr_deque<ModelEvent> m_ModelEvents_t;
     boost::ptr_deque<ModelEvent> m_ModelEvents;

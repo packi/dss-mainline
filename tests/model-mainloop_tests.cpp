@@ -48,21 +48,22 @@ BOOST_AUTO_TEST_CASE(testHandleModelEvent) {
   BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 1);
   BOOST_CHECK_EQUAL(main.handleModelEvents(), false);
 
-  // 2 dirty events are combined, only one is executed but both must be counted
+  // dirty events were previously combined, which led to jumps in the processed
+  // event counter
   eventCountInit = main.m_processedEvents;
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-  main.handleModelEvents(); // single call increments by 2!
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2); // bug
-  BOOST_CHECK_EQUAL(main.handleModelEvents(), false);
+  main.handleModelEvents();
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 1);
+  BOOST_CHECK_EQUAL(main.handleModelEvents(), true);
 
   // same with heating state machine changes
   eventCountInit = main.m_processedEvents;
   main.addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
   main.addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
-  main.handleModelEvents(); // single call increments by 2!
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2); // bug
-  BOOST_CHECK_EQUAL(main.handleModelEvents(), false);
+  main.handleModelEvents();
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 1);
+  BOOST_CHECK_EQUAL(main.handleModelEvents(), true);
 }
 
 BOOST_AUTO_TEST_CASE(testProcessedEventRollover) {
@@ -88,11 +89,13 @@ BOOST_AUTO_TEST_CASE(testProcessedEventRollover) {
   // the queue is modified by eraseModelEventsFromQueue. This behaviour can
   // only be tested if more than 1 event is queued. Hence need to queue first,
   // then process them. Otherwise there was only ever one element in the queue
-  while (main.handleModelEvents());
+  int ct = 0;
+  while (main.handleModelEvents()) { ct++; };
 
   BOOST_CHECK(queuedEvents < eventCountInit); // rollover
   BOOST_CHECK_EQUAL(queuedEvents - eventCountInit, 30);
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 30);
+  BOOST_CHECK_EQUAL(ct, 30);
+  BOOST_CHECK_EQUAL(main.m_processedEvents, queuedEvents);
 }
 
 BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
@@ -118,6 +121,9 @@ BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
   // queue = o o o d <o'> | d d d d o:
   // ct    = 1 2 3    4             5
   //
+  // adopted solution: erase no events from the queue, but delay writing
+  // apartment.xml by 30s
+  //
   ModelMaintenanceMock main;
   unsigned eventCountInit = main.m_processedEvents;
   int ct = 0;
@@ -129,12 +135,7 @@ BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
 
   main.handleModelEvents(), ct++;
   BOOST_CHECK_EQUAL(ct, 1);
-
-  // since the 2nd etModelDirty is erased, and counted the counter is
-  // already 2, hence from the counter it seems it's already executed
-
-  // TODO this is wrong it should actually be only one
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 2);
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
