@@ -289,7 +289,7 @@ namespace dss {
     WindProtectionClass_t protection;
     if (windProtectionClass &&
         convertWindProtectionClass(strToInt(windProtectionClass), &protection)) {
-      m_tempDevice->setWindProtectionClass(protection);
+      m_tempDevice->setWindProtectionClass(protection, true);
     }
 
     if (floorString != NULL) {

@@ -115,6 +115,8 @@ BOOST_AUTO_TEST_SUITE(clustertest)
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+  dev1->setProductID(ProductID_KL_200);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
 
@@ -154,7 +156,7 @@ BOOST_AUTO_TEST_SUITE(clustertest)
 
   //----------------------------------------------------------------------------
   // assign protection, check one cluster is used
-  dev1->setWindProtectionClass(wpc_class_1);
+  dev1->setWindProtectionClass(wpc_blind_class_1);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -164,11 +166,11 @@ BOOST_AUTO_TEST_SUITE(clustertest)
     filterClusters(clusters, &usedClusters, &automaticClusters);
     BOOST_CHECK_EQUAL(usedClusters.size(), 1);
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
-    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_class_1);
+    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_blind_class_1);
   }
 
   // assign another protection, check one cluster is used
-  dev1->setWindProtectionClass(wpc_class_2);
+  dev1->setWindProtectionClass(wpc_blind_class_3);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -178,7 +180,7 @@ BOOST_AUTO_TEST_SUITE(clustertest)
     filterClusters(clusters, &usedClusters, &automaticClusters);
     BOOST_CHECK_EQUAL(usedClusters.size(), 1);
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
-    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_class_2);
+    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_blind_class_3);
   }
 }
 
@@ -186,7 +188,11 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+  dev1->setProductID(ProductID_KL_210);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
+  dev2->setFunctionID(0x2131);
+  dev2->setProductID(ProductID_KL_210);
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
 
   // check no cluster is assigned
@@ -245,8 +251,8 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
   //----------------------------------------------------------------------------
   // assign wind protection , check one cluster is used
 
-  dev1->setWindProtectionClass(wpc_class_2);
-  dev2->setWindProtectionClass(wpc_class_2);
+  dev1->setWindProtectionClass(wpc_awning_class_2);
+  dev2->setWindProtectionClass(wpc_awning_class_2);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -257,11 +263,11 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
     BOOST_CHECK_EQUAL(usedClusters.size(), 1);
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
     WindProtectionClass_t class1 = usedClusters.front()->getProtectionClass();
-    BOOST_CHECK(class1 == wpc_class_2);
+    BOOST_CHECK(class1 == wpc_awning_class_2);
   }
 
   // assign another wind protection class, check two clusters are used
-  dev1->setWindProtectionClass(wpc_class_3);
+  dev1->setWindProtectionClass(wpc_awning_class_3);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -273,12 +279,12 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
     BOOST_CHECK_EQUAL(automaticClusters.size(), 2);
     WindProtectionClass_t class1 = usedClusters.front()->getProtectionClass();
     WindProtectionClass_t class2 = usedClusters.front()->getProtectionClass();
-    BOOST_CHECK(class1 == wpc_class_3 || class1 == wpc_class_2);
-    BOOST_CHECK(class2 == wpc_class_3 || class2 == wpc_class_2);
+    BOOST_CHECK(class1 == wpc_awning_class_3 || class1 == wpc_awning_class_2);
+    BOOST_CHECK(class2 == wpc_awning_class_3 || class2 == wpc_awning_class_2);
   }
 
   // assign same cardinal direction to second device, check one cluster is used
-  dev2->setWindProtectionClass(wpc_class_3);
+  dev2->setWindProtectionClass(wpc_awning_class_3);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -289,7 +295,7 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
     BOOST_CHECK_EQUAL(usedClusters.size(), 1);
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
     WindProtectionClass_t class1 = usedClusters.front()->getProtectionClass();
-    BOOST_CHECK(class1 == wpc_class_3);
+    BOOST_CHECK(class1 == wpc_awning_class_3);
   }
 }
 
@@ -312,9 +318,11 @@ BOOST_AUTO_TEST_CASE(consistencyCheckUnlocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+   dev1->setProductID(ProductID_KL_200);
 
   // Assign device to a cluster
-  dev1->setWindProtectionClass(wpc_class_1);
+  dev1->setWindProtectionClass(wpc_blind_class_1);
   dev1->setCardinalDirection(cd_north);
   while (helper.modelMaintenance->handleModelEvents())
   {};
@@ -331,7 +339,7 @@ BOOST_AUTO_TEST_CASE(consistencyCheckUnlocked) {
 
   // make clusters inconsistent
   for (int ctr = 0; ctr < (MAX_CLUSTERS); ++ctr) {
-    makeClustersInconsistent(apt1, dev1, wpc_class_2, false);
+    makeClustersInconsistent(apt1, dev1, wpc_blind_class_2, false);
   }
 
   {
@@ -355,7 +363,7 @@ BOOST_AUTO_TEST_CASE(consistencyCheckUnlocked) {
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
 
     boost::shared_ptr<Cluster> testCluster = usedClusters.front();
-    BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_class_1);
+    BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_blind_class_1);
     BOOST_CHECK_EQUAL(testCluster->getLocation(), cd_north);
 
     int groupIdNew = 0;
@@ -372,9 +380,11 @@ BOOST_AUTO_TEST_CASE(consistencyCheckLocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+  dev1->setProductID(ProductID_KL_200);
 
   // Assign device to a cluster
-  dev1->setWindProtectionClass(wpc_class_1);
+  dev1->setWindProtectionClass(wpc_blind_class_1);
   dev1->setCardinalDirection(cd_north);
   while (helper.modelMaintenance->handleModelEvents())
   {};
@@ -388,7 +398,7 @@ BOOST_AUTO_TEST_CASE(consistencyCheckLocked) {
   BOOST_CHECK(groupId > 0);
   // make clusters inconsistent
   for (int ctr = 0; ctr < MAX_CLUSTERS; ++ctr) {
-    makeClustersInconsistent(apt1, dev1, wpc_class_2, true);
+    makeClustersInconsistent(apt1, dev1, wpc_blind_class_2, true);
   }
 
   {
@@ -414,9 +424,9 @@ BOOST_AUTO_TEST_CASE(consistencyCheckLocked) {
     foreach (boost::shared_ptr<Cluster> testCluster, automaticClusters) {
       BOOST_CHECK_EQUAL(testCluster->getLocation(), cd_north);
       if (testCluster->isConfigurationLocked()) {
-        BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_class_2);
+        BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_blind_class_2);
       } else {
-        BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_class_1);
+        BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_blind_class_1);
       }
     }
     for (int ctr = GroupIDAppUserMin; ctr <= GroupIDAppUserMax; ++ctr) {
@@ -430,13 +440,17 @@ BOOST_AUTO_TEST_CASE(joinCheckUnlocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+  dev1->setProductID(ProductID_KL_200);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
+  dev2->setFunctionID(0x2131);
+  dev2->setProductID(ProductID_KL_200);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_north);
-  dev1->setWindProtectionClass(wpc_class_3);
+  dev1->setWindProtectionClass(wpc_blind_class_3);
   dev2->setCardinalDirection(cd_north);
-  dev2->setWindProtectionClass(wpc_class_3);
+  dev2->setWindProtectionClass(wpc_blind_class_3);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -466,7 +480,7 @@ BOOST_AUTO_TEST_CASE(joinCheckUnlocked) {
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
     boost::shared_ptr<Cluster> testCluster = automaticClusters.front();
     BOOST_CHECK_EQUAL(testCluster->getLocation(), cd_north);
-    BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_class_3);
+    BOOST_CHECK_EQUAL(testCluster->getProtectionClass(), wpc_blind_class_3);
   }
 }
 
@@ -474,13 +488,17 @@ BOOST_AUTO_TEST_CASE(joinCheckLocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+  dev1->setProductID(ProductID_KL_200);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
+  dev2->setFunctionID(0x2131);
+  dev2->setProductID(ProductID_KL_200);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_north);
-  dev1->setWindProtectionClass(wpc_class_3);
+  dev1->setWindProtectionClass(wpc_blind_class_3);
   dev2->setCardinalDirection(cd_north);
-  dev2->setWindProtectionClass(wpc_class_3);
+  dev2->setWindProtectionClass(wpc_blind_class_3);
   while (helper.modelMaintenance->handleModelEvents())
   {};
 
@@ -512,7 +530,7 @@ BOOST_AUTO_TEST_CASE(joinCheckLocked) {
       if (cluster->isAutomatic()) {
         ++clusterAutomatic;
         BOOST_CHECK_EQUAL(cluster->getLocation(), cd_north);
-        BOOST_CHECK_EQUAL(cluster->getProtectionClass(), wpc_class_3);
+        BOOST_CHECK_EQUAL(cluster->getProtectionClass(), wpc_blind_class_3);
       }
     }
     BOOST_CHECK_EQUAL(clusterUsed, MAX_CLUSTERS);
@@ -528,7 +546,7 @@ BOOST_AUTO_TEST_CASE(joinCheckLocked) {
     BOOST_CHECK_EQUAL(automaticClusters.size(), MAX_CLUSTERS);
     foreach (boost::shared_ptr<Cluster> cluster, automaticClusters) {
       BOOST_CHECK_EQUAL(cluster->getLocation(), cd_north);
-      BOOST_CHECK_EQUAL(cluster->getProtectionClass(), wpc_class_3);
+      BOOST_CHECK_EQUAL(cluster->getProtectionClass(), wpc_blind_class_3);
     }
   }
 }
@@ -565,10 +583,12 @@ BOOST_AUTO_TEST_CASE(unassignmentCheck) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
+  dev1->setFunctionID(0x2131);
+  dev1->setProductID(ProductID_KL_200);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_none);
-  dev1->setWindProtectionClass(wpc_class_3);
+  dev1->setWindProtectionClass(wpc_blind_class_3);
 
   while (helper.modelMaintenance->handleModelEvents())
   {};
@@ -580,7 +600,7 @@ BOOST_AUTO_TEST_CASE(unassignmentCheck) {
     filterClusters(clusters, &usedClusters, &automaticClusters);
     BOOST_CHECK_EQUAL(usedClusters.size(), 1);
     BOOST_CHECK_EQUAL(automaticClusters.size(), 1);
-    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_class_3);
+    BOOST_CHECK_EQUAL(usedClusters.front()->getProtectionClass(), wpc_blind_class_3);
   }
 
   dev1->setWindProtectionClass(wpc_none);
@@ -607,7 +627,7 @@ BOOST_AUTO_TEST_CASE(checkCleanupEmptyCluster) {
   // create empty automatic clusters
   foreach (boost::shared_ptr<Cluster> cluster, apt1.getClusters()) {
     cluster->setLocation(cd_east);
-    cluster->setProtectionClass(wpc_class_3);
+    cluster->setProtectionClass(wpc_blind_class_3);
     cluster->setStandardGroupID(DEVICE_CLASS_GR);
     cluster->setName("test");
     cluster->setAutomatic(true);

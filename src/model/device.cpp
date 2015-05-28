@@ -2652,10 +2652,22 @@ namespace dss {
     }
   }
 
-  void Device::setWindProtectionClass(WindProtectionClass_t _klass) {
+  void Device::setWindProtectionClass(WindProtectionClass_t _klass, bool _initial) {
     assert(valid(_klass));
 
     boost::mutex::scoped_lock lock(m_deviceMutex);
+
+    if (!_initial) {
+      if (getDeviceClass() != DEVICE_CLASS_GR) {
+        throw std::runtime_error("Wind protection class can only be set on grey devices");
+      }
+      if ((getProductID() == ProductID_KL_210) && !(_klass <= wpc_awning_class_3)) {
+        throw std::runtime_error("Wind protection class " + intToString(_klass) + "not applicable for awning devices");
+      }
+      if ((getProductID() != ProductID_KL_210) && !((_klass == wpc_none) || (_klass >= wpc_blind_class_1))) {
+        throw std::runtime_error("Wind protection class " + intToString(_klass) + "not applicable for blinds devices");
+      }
+    }
     if (m_windProtectionClass != _klass) {
       m_windProtectionClass = _klass;
       checkAutoCluster();
