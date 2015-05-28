@@ -433,6 +433,13 @@ namespace dss {
         return false;
       }
 
+      if (m_ModelEvents.empty()) {
+        // man pthread_cond_wait -> Condition Wait Semantics
+        // condition needs to re-checked, really happens!
+        // observed wait to return without a prior notify call
+        return false;
+      }
+
       assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
     }
@@ -966,7 +973,7 @@ namespace dss {
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
       m_ModelEvents.push_back(_pEvent);
-      m_NewModelEvent.notify_all();
+      m_NewModelEvent.notify_one();
     }
   } // addModelEvent
 
