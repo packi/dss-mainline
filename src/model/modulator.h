@@ -29,8 +29,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <digitalSTROM/ds.h> // BusMemberDevice_t
-
 #include "devicecontainer.h"
 #include "physicalmodelitem.h"
 #include "src/ds485types.h"

@@ -23,9 +23,7 @@
 #ifndef BUSINTERFACE_H_
 #define BUSINTERFACE_H_
 
-#include "ds485types.h"
-
-#include <digitalSTROM/ds.h> // BusMemberDevice_t
+#include "businterface.h"
 
 #include <string>
 #include <vector>
@@ -34,6 +32,7 @@
 #include <limits.h>
 
 #include "base.h"
+#include "ds485types.h"
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
 
