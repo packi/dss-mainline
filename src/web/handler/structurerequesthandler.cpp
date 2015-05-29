@@ -72,7 +72,7 @@ namespace dss {
     }
 
     dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
-    
+
     boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
     if(!dev->isPresent()) {
       return JSONWriter::failure("cannot add nonexisting device to a zone");
@@ -227,7 +227,8 @@ namespace dss {
       toJSON(pPartnerDeviceRef, json);
       m_Apartment.removeDevice(pPartnerDevice->getDSID());
     }
-    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    // model dirty is called implicitly
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etClusterCleanup));
 
     json.endArray();
     json.add("action", "remove");
@@ -466,7 +467,7 @@ namespace dss {
     }
 
     dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
-    
+
     dev = m_Apartment.getDeviceByDSID(dsuid);
     if(!dev->isPresent()) {
       return JSONWriter::failure("Cannot modify inactive device");
