@@ -26,6 +26,7 @@
 
 #include "dss.h"
 #include "model/apartment.h"
+#include "model/modulator.h"
 #include "model/device.h"
 
 #include "src/propertyquery.h"
@@ -302,9 +303,19 @@ namespace dss {
         if (!data.message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
           throw std::runtime_error("could not serialize message");
         }
-        boost::shared_ptr<Device> device = DSS::getInstance()->getApartment().getDeviceByDSID(data.deviceDsuid);
-        DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-            device->getDSMeterDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+        try {
+          boost::shared_ptr<Device> device = DSS::getInstance()->getApartment().getDeviceByDSID(data.deviceDsuid);
+          DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+              device->getDSMeterDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+        } catch (ItemNotFoundException& ex) {
+          try {
+            boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(data.deviceDsuid);
+            DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+                meter->getDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+          } catch (ItemNotFoundException& ex) {
+            throw ItemNotFoundException("vdc or vdsd not found");
+          }
+        }
       } else {
         return;
       }
