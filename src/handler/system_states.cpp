@@ -462,7 +462,11 @@ void SystemState::callscene() {
     case SceneRainInactive:
       state = getOrRegisterState("rain");
       state->setState(coSystem, State_Inactive);
-      // TODO cleanup this hack
+      // cluster sensor and the global rain sensor could contradict each other,
+      // and we are not resolving that conflict. Currently we support either
+      // global or cluster-local states, but not both at the same time.
+      // In the presence of cluster rain states inactive-rain on group0 serves
+      // as a broadcast command only
       for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
         if (lookupState(state, formatGroupName2("rain", grp))) {
           state->setState(coSystem, State_Inactive);
