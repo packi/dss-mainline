@@ -942,12 +942,6 @@ namespace dss {
 
         AutoClusterMaintenance maintenance(m_pApartment);
         maintenance.joinIdenticalClusters();
-        Set devices  = mod->getDevices();
-        for (int ctr = 0; ctr < devices.length(); ++ctr) {
-          DeviceReference& ref = devices.get(ctr);
-          boost::shared_ptr<Device> device = ref.getDevice();
-          maintenance.consistencyCheck(*device.get());
-        }
         maintenance.cleanupEmptyCluster();
 
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
