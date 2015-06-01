@@ -239,6 +239,7 @@ namespace dss {
     void onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload);
     void onOperationLock(int _zoneID, int _groupID, bool _lock, callOrigin_t _callOrigin);
     void onAutoClusterMaintenance(dsuid_t _deviceID);
+    void onAutoClusterCleanup();
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);

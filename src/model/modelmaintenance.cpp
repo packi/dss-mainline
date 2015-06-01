@@ -723,6 +723,9 @@ namespace dss {
       assert(pEventWithDSID != NULL);
       onAutoClusterMaintenance(pEventWithDSID->getDSID());
       break;
+    case ModelEvent::etClusterCleanup:
+      onAutoClusterCleanup();
+      break;
     default:
       assert(false);
       break;
@@ -2021,6 +2024,16 @@ namespace dss {
       boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(_deviceID);
       AutoClusterMaintenance maintenance(m_pApartment);
       maintenance.consistencyCheck(*device.get());
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);
+    }
+  }
+
+  void ModelMaintenance::onAutoClusterCleanup() {
+    try {
+      AutoClusterMaintenance maintenance(m_pApartment);
+      maintenance.cleanupEmptyCluster();
       addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);

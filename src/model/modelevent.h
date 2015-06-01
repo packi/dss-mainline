@@ -69,7 +69,8 @@ namespace dss {
                     etClusterLockedScenes, /** locked scenes of a cluster was changed */
                     etGenericEvent, /** generic event for dSS/dSG communication */
                     etOperationLock, /** scene calls ignored, no turn on/off lights, change blind positions, etc */
-                    etDeviceDirty /** A device has changed. Update the cluster assignment */
+                    etDeviceDirty, /** A device has changed. Update the cluster assignment */
+                    etClusterCleanup /** cleanup clusters, remove empty ones */
                  } EventType;
   private:
     EventType m_EventType;
