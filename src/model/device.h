@@ -720,7 +720,7 @@ namespace dss {
       return m_cardinalDirection;
     }
 
-    void setWindProtectionClass(WindProtectionClass_t _klass);
+    void setWindProtectionClass(WindProtectionClass_t _klass, bool _initial = false);
     WindProtectionClass_t getWindProtectionClass() const {
       return m_windProtectionClass;
     }
