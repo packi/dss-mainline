@@ -17,6 +17,11 @@ class JSONWriter;
 namespace MsHub {
   std::vector<std::string> uploadEvents(void);
   void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json);
+
+  enum {
+    OK = 0,
+    RC_NOT_ENABLED = 7,
+  };
 }
 
 struct WebserviceReply {
