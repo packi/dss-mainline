@@ -111,7 +111,7 @@ namespace dss {
                                  std::string(err.what()), lsWarning);
       return result; // do not rethrow exception
     }
-    result.DeviceType = (BusMemberDevice_t) devType;
+    result.DeviceType = static_cast<BusMemberDevice_t>(devType);
 
     if (!busMemberIsDSMeter(result.DeviceType)) {
       Logger::getInstance()->log("DSStructureQueryBusInterface::"

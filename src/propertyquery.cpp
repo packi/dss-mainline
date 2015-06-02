@@ -26,6 +26,7 @@
 
 #include "dss.h"
 #include "model/apartment.h"
+#include "model/modulator.h"
 #include "model/device.h"
 
 #include "src/propertyquery.h"
@@ -55,7 +56,7 @@ namespace dss {
     return std::vector<std::string>();
   }
 
-  void PropertyQuery::parseParts() {
+  void PropertyQuery::parseParts(bool trailingSeparator) {
     std::vector<std::string> parts = splitString(m_Query, '/');
     foreach(std::string part, parts) {
       // if loop is run more than once: elements are on the same level.
@@ -71,7 +72,9 @@ namespace dss {
         child = false;
       } while(part.size());
     }
-    m_PartList.erase(m_PartList.begin());
+    if (trailingSeparator) {
+      m_PartList.erase(m_PartList.begin());
+    }
   } // parseParts
 
   std::vector<KeyValueContainer> PropertyQuery::splitKeyValue(std::vector<std::string> input) {
@@ -286,12 +289,12 @@ namespace dss {
   } // run2
 
   void PropertyQuery::vdcquery(JSONWriter& json) {
-    if(beginsWith(m_Query, m_pProperty->getName())) {
+    if (beginsWith(m_Query, "getProperty") || beginsWith(m_Query, "setProperty")) {
 
       PropertyContainerToProtobuf::ProtoData data = PropertyContainerToProtobuf::convertPropertyContainerToProtobuf(m_PartList);
 
-      uint8_t buffer_in [4096];
-      uint8_t buffer_out[4096];
+      uint8_t buffer_in [RESPONSE_LEN];
+      uint8_t buffer_out[REQUEST_LEN];
       uint16_t bs;
 
       if (DSS::hasInstance()) {
@@ -300,9 +303,19 @@ namespace dss {
         if (!data.message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
           throw std::runtime_error("could not serialize message");
         }
-        boost::shared_ptr<Device> device = DSS::getInstance()->getApartment().getDeviceByDSID(data.deviceDsuid);
-        DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-            device->getDSMeterDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+        try {
+          boost::shared_ptr<Device> device = DSS::getInstance()->getApartment().getDeviceByDSID(data.deviceDsuid);
+          DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+              device->getDSMeterDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+        } catch (ItemNotFoundException& ex) {
+          try {
+            boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(data.deviceDsuid);
+            DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+                meter->getDSID(), data.message.ByteSize(), buffer_in, &bs, buffer_out);
+          } catch (ItemNotFoundException& ex) {
+            throw ItemNotFoundException("vdc or vdsd not found");
+          }
+        }
       } else {
         return;
       }

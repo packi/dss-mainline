@@ -81,13 +81,13 @@ bool parseCardinalDirection(const std::string &_direction, CardinalDirection_t *
 
 bool valid(WindProtectionClass_t _class)
 {
-  return (wpc_none <= _class && _class <= wpc_class_3);
+  return (wpc_none <= _class && _class < wpc_last);
 }
 
 bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out)
 {
   assert(_out);
-  if (wpc_class_3 < _class) {
+  if (wpc_last <= _class) {
       return false;
   }
   *_out = static_cast<WindProtectionClass_t>(_class);

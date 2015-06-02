@@ -245,10 +245,13 @@ namespace dss {
     if (m_pStructureQueryBusInterface != NULL) {
       try {
         std::vector<DSMeterSpec_t> busMembers = m_pStructureQueryBusInterface->getBusMembers();
+        BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         foreach (DSMeterSpec_t& spec, busMembers) {
           boost::shared_ptr<DSMeter> dsMeter;
           try{
             dsMeter = m_pApartment->getDSMeterByDSID(spec.DSID);
+            scanner.synchronizeDSMeterData(dsMeter, spec);
+
             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
             if (!busMemberIsDSMeter(dsMeter->getBusMemberType())) {
               m_pApartment->removeDSMeter(spec.DSID);
@@ -430,6 +433,13 @@ namespace dss {
         return false;
       }
 
+      if (m_ModelEvents.empty()) {
+        // man pthread_cond_wait -> Condition Wait Semantics
+        // condition needs to re-checked, really happens!
+        // observed wait to return without a prior notify call
+        return false;
+      }
+
       assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
     }
@@ -535,7 +545,7 @@ namespace dss {
     case ModelEvent::etModelDirty:
       eraseModelEventsFromQueue(ModelEvent::etModelDirty);
       writeConfiguration();
-      if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue("/config/webservice-api/enabled")) {
+      if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_enabled)) {
         raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
       }
       break;
@@ -712,6 +722,9 @@ namespace dss {
     case ModelEvent::etDeviceDirty:
       assert(pEventWithDSID != NULL);
       onAutoClusterMaintenance(pEventWithDSID->getDSID());
+      break;
+    case ModelEvent::etClusterCleanup:
+      onAutoClusterCleanup();
       break;
     default:
       assert(false);
@@ -963,7 +976,7 @@ namespace dss {
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
       m_ModelEvents.push_back(_pEvent);
-      m_NewModelEvent.notify_all();
+      m_NewModelEvent.notify_one();
     }
   } // addModelEvent
 
@@ -1979,6 +1992,14 @@ namespace dss {
         }
         break;
       }
+      case ge_service:
+      {
+        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Service);
+        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
+          state->setState(coDsmApi, _pPayload->payload[0]);
+        }
+        break;
+      }
       default:
         break;
     }
@@ -2003,6 +2024,16 @@ namespace dss {
       boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(_deviceID);
       AutoClusterMaintenance maintenance(m_pApartment);
       maintenance.consistencyCheck(*device.get());
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);
+    }
+  }
+
+  void ModelMaintenance::onAutoClusterCleanup() {
+    try {
+      AutoClusterMaintenance maintenance(m_pApartment);
+      maintenance.cleanupEmptyCluster();
       addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);

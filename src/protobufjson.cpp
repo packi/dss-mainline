@@ -120,8 +120,6 @@ namespace dss {
   }
 
   void PropertyContainerToProtobuf::assignValue(vdcapi::PropertyElement* _element, std::string& _value) {
-    boost::algorithm::to_lower(_value);
-
     if (_value.compare("true") == 0) { // boolean
       vdcapi::PropertyValue* valueElement = _element->mutable_value();
       valueElement->set_v_bool(true);

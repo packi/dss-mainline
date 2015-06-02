@@ -407,12 +407,24 @@ BOOST_AUTO_TEST_CASE(testCardinalDirection) {
 BOOST_AUTO_TEST_CASE(testWindProtection) {
   WindProtectionClass_t out;
 
-  BOOST_CHECK(convertWindProtectionClass(wpc_class_3, &out));
-  BOOST_CHECK_EQUAL(out, wpc_class_3);
-  BOOST_CHECK(convertWindProtectionClass(wpc_class_2, &out));
-  BOOST_CHECK_EQUAL(out, wpc_class_2);
-  BOOST_CHECK(convertWindProtectionClass(wpc_class_1, &out));
-  BOOST_CHECK_EQUAL(out, wpc_class_1);
+  BOOST_CHECK(convertWindProtectionClass(wpc_awning_class_3, &out));
+  BOOST_CHECK_EQUAL(out, wpc_awning_class_3);
+  BOOST_CHECK(convertWindProtectionClass(wpc_awning_class_2, &out));
+  BOOST_CHECK_EQUAL(out, wpc_awning_class_2);
+  BOOST_CHECK(convertWindProtectionClass(wpc_awning_class_1, &out));
+  BOOST_CHECK_EQUAL(out, wpc_awning_class_1);
+  BOOST_CHECK(convertWindProtectionClass(wpc_blind_class_6, &out));
+  BOOST_CHECK_EQUAL(out, wpc_blind_class_6);
+  BOOST_CHECK(convertWindProtectionClass(wpc_blind_class_5, &out));
+  BOOST_CHECK_EQUAL(out, wpc_blind_class_5);
+  BOOST_CHECK(convertWindProtectionClass(wpc_blind_class_4, &out));
+  BOOST_CHECK_EQUAL(out, wpc_blind_class_4);
+  BOOST_CHECK(convertWindProtectionClass(wpc_blind_class_3, &out));
+  BOOST_CHECK_EQUAL(out, wpc_blind_class_3);
+  BOOST_CHECK(convertWindProtectionClass(wpc_blind_class_2, &out));
+  BOOST_CHECK_EQUAL(out, wpc_blind_class_2);
+  BOOST_CHECK(convertWindProtectionClass(wpc_blind_class_1, &out));
+  BOOST_CHECK_EQUAL(out, wpc_blind_class_1);
   BOOST_CHECK(convertWindProtectionClass(wpc_none, &out));
   BOOST_CHECK_EQUAL(out, wpc_none);
 
@@ -420,12 +432,18 @@ BOOST_AUTO_TEST_CASE(testWindProtection) {
   BOOST_CHECK(!convertWindProtectionClass(-1, &out));
 
   BOOST_CHECK(valid(wpc_none));
-  BOOST_CHECK(valid(wpc_class_1));
-  BOOST_CHECK(valid(wpc_class_2));
-  BOOST_CHECK(valid(wpc_class_3));
+  BOOST_CHECK(valid(wpc_blind_class_1));
+  BOOST_CHECK(valid(wpc_blind_class_2));
+  BOOST_CHECK(valid(wpc_blind_class_3));
+  BOOST_CHECK(valid(wpc_blind_class_4));
+  BOOST_CHECK(valid(wpc_blind_class_5));
+  BOOST_CHECK(valid(wpc_blind_class_6));
+  BOOST_CHECK(valid(wpc_awning_class_1));
+  BOOST_CHECK(valid(wpc_awning_class_2));
+  BOOST_CHECK(valid(wpc_awning_class_3));
 
   BOOST_CHECK(!valid(wpc_last));
-  BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(4)));
+  BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(99)));
   BOOST_CHECK(!valid(static_cast<WindProtectionClass_t>(-1)));
 }
 

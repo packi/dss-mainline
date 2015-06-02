@@ -46,9 +46,15 @@ namespace dss {
 
   typedef enum {
     wpc_none = 0,
-    wpc_class_1 = 1,  //<  7.8m/s,
-    wpc_class_2 = 2,  //< 10.6m/s,
-    wpc_class_3 = 3,  //< 13.6m/s,
+    wpc_awning_class_1 = 1,  //< awning 7.8m/s,
+    wpc_awning_class_2 = 2,  //< awning 10.6m/s,
+    wpc_awning_class_3 = 3,  //< awning 13.6m/s,
+    wpc_blind_class_1 = 4,  //< Blind 9.0m/s,
+    wpc_blind_class_2 = 5,  //< Blind 10.7m/s,
+    wpc_blind_class_3 = 6,  //< Blind 12.8m/s,
+    wpc_blind_class_4 = 7,  //< Blind 16.7m/s,
+    wpc_blind_class_5 = 8,  //< Blind 21.0m/s,
+    wpc_blind_class_6 = 9,  //< Blind 25.6m/s,
 
     wpc_last,  //< keep last
   } WindProtectionClass_t;
@@ -61,6 +67,7 @@ namespace dss {
     ge_sun = 1,
     ge_frost = 2,
     ge_heating_mode = 3,
+    ge_service = 4,
   } GenericEventType_t;
 
   typedef struct {

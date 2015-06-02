@@ -43,6 +43,7 @@ const char *KM220 =     "KM:220";
 const char *KM200 =     "KM:200";
 const char *KM2 =       "KM:2"; // wildcard for all KM-2*
 const char *KL200 =     "KL:200";
+const char *KL210 =     "KL:210";
 const char *KL220 =     "KL:220";
 const char *KL230 =     "KL:230";
 const char *KL2 =       "KL:2"; // wildcard for all KL-2*
@@ -102,7 +103,8 @@ const int MF_AVAILABLE[] =
   mf_umroutmode,
   mf_pushbsensor,
   mf_locationconfig,
-  mf_windprotectionconfig,
+  mf_windprotectionconfigawning,
+  mf_windprotectionconfigblind,
   mf_impulseconfig
 };
 
@@ -351,6 +353,21 @@ const int MF_RT_SDM2[] =
   mf_outvalue8
 };
 
+const int MF_GR_KL210[] =
+{
+  mf_dontcare,
+  mf_blink,
+  mf_ledauto,
+  mf_pushbutton,
+  mf_pushbdevice,
+  mf_pushbarea,
+  mf_pushbadvanced,
+  mf_shadeprops,
+  mf_shadeposition,
+  mf_locationconfig,
+  mf_windprotectionconfigawning
+};
+
 const int MF_GR_KL220[] =
 {
   mf_dontcare,
@@ -365,7 +382,7 @@ const int MF_GR_KL220[] =
   mf_motiontimefins,
   mf_shadebladeang,
   mf_locationconfig,
-  mf_windprotectionconfig
+  mf_windprotectionconfigblind
 };
 
 const int MF_GR_KL230[] =
@@ -378,7 +395,7 @@ const int MF_GR_KL230[] =
   mf_motiontimefins,
   mf_shadebladeang,
   mf_locationconfig,
-  mf_windprotectionconfig
+  mf_windprotectionconfigblind
 };
 
 const int MF_GR_KL2[] =
@@ -393,7 +410,7 @@ const int MF_GR_KL2[] =
   mf_shadeprops,
   mf_shadeposition,
   mf_locationconfig,
-  mf_windprotectionconfig
+  mf_windprotectionconfigblind
 };
 
 const int MF_GR_TKM2[] =
@@ -679,6 +696,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_GR_KL210, MF_ARRAY_SIZE(MF_GR_KL210));
+  setFeatures(ColorIDGray, KL210, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
   fv->assign(MF_GR_KL220, MF_ARRAY_SIZE(MF_GR_KL220));
   setFeatures(ColorIDGray, KL220, fv);
   fv.reset();
@@ -874,8 +896,10 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_pushbsensor;
   } else if (_name == "locationconfig") {
     return mf_locationconfig;
-  } else if (_name == "windprotectionconfig") {
-    return mf_windprotectionconfig;
+  } else if (_name == "windprotectionconfigblind") {
+    return mf_windprotectionconfigblind;
+  } else if (_name == "windprotectionconfigawning") {
+    return mf_windprotectionconfigawning;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -961,8 +985,10 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "pushbsensor";
     case mf_locationconfig:
       return "locationconfig";
-    case mf_windprotectionconfig:
-      return "windprotectionconfig";
+    case mf_windprotectionconfigawning:
+      return "windprotectionconfigawning";
+    case mf_windprotectionconfigblind:
+      return "windprotectionconfigblind";
     default:
       break;
   }

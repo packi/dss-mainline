@@ -23,7 +23,8 @@ RegisteringLog::~RegisteringLog()
 
 void RegisteringLog::done(RestTransferStatus_t status, WebserviceReply reply)
 {
-  if (!((REST_OK == status) && (0 == reply.code))) {
+  if (!((REST_OK == status) &&
+        ((MsHub::OK == reply.code) || (MsHub::RC_NOT_ENABLED == reply.code)))) {
     m_HeatingRegistering->startTimeout(500);
   }
 }

@@ -23,10 +23,10 @@
 #ifndef _DS485_TYPES_H_INCLUDED
 #define _DS485_TYPES_H_INCLUDED
 
-#include <stdint.h>
 #include <string>
-#include <sstream>
+
 #include <digitalSTROM/dsuid.h>
+#include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 
 namespace dss {
   /** Bus id of a device */

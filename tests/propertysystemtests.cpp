@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE(testIndicesWorkCorrectly) {
 
 BOOST_AUTO_TEST_CASE(testLoadingEmptyNodesWorks) {
   PropertySystem propSys;
-  
+
   std::string fileName = getTempDir() + "/testconfig.xml";
   std::ofstream ofs(fileName.c_str());
   ofs <<
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE(testLoadingEmptyNodesWorks) {
 
 BOOST_AUTO_TEST_CASE(testInvalidXML) {
   PropertySystem propSys;
-  
+
   std::string fileName = getTempDir() + "/testconfig.xml";
   std::ofstream ofs(fileName.c_str());
   ofs <<
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(testInvalidXML) {
 
 BOOST_AUTO_TEST_CASE(testExceptionWhileParsing) {
   PropertySystem propSys;
-  
+
   std::string fileName = getTempDir() + "/testconfig.xml";
   std::ofstream ofs(fileName.c_str());
   ofs <<
@@ -533,7 +533,7 @@ BOOST_AUTO_TEST_CASE(testQueryAttributes) {
   propSys.createProperty("/test/test2")->setStringValue("content2");
   propSys.createProperty("/test+/test1")->setStringValue("content3");
   propSys.createProperty("/test+/test2")->setStringValue("content4");
-  PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2)");
+  PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2)",true);
   JSONWriter json(JSONWriter::jsonNoneResult);
   query.run(json);
   BOOST_CHECK_EQUAL(json.successJSON(), "{\"test\":[{\"test1\":\"content1\",\"test2\":\"content2\"},{\"test1\":\"content3\"},{\"test2\":\"content4\"}]}");
@@ -543,7 +543,7 @@ BOOST_AUTO_TEST_CASE(testQueryMissingBracket) {
   PropertySystem propSys;
   propSys.createProperty("/test/test1")->setStringValue("content1");
   propSys.createProperty("/test/test2")->setStringValue("content2");
-  BOOST_CHECK_THROW(PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2"), std::runtime_error);
+  BOOST_CHECK_THROW(PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2", false), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(testQuerySubPropertyTwice) {
@@ -551,7 +551,7 @@ BOOST_AUTO_TEST_CASE(testQuerySubPropertyTwice) {
   propSys.createProperty("/test/test1")->setStringValue("content1");
   propSys.createProperty("/test/test2")->setStringValue("content2");
   propSys.createProperty("/test/content/text")->setStringValue("text1");
-  PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2)/content(text)");
+  PropertyQuery query(propSys.getProperty("/"), "/test(test1,test2)/content(text)", true);
   JSONWriter json(JSONWriter::jsonNoneResult);
   query.run(json);
   BOOST_CHECK_EQUAL(json.successJSON(), "{\"test\":[{\"test1\":\"content1\",\"test2\":\"content2\",\"content\":[{\"text\":\"text1\"}]}]}");
@@ -560,7 +560,7 @@ BOOST_AUTO_TEST_CASE(testQuerySubPropertyTwice) {
 BOOST_AUTO_TEST_CASE(testQuerySubProperty) {
   PropertySystem propSys;
   propSys.createProperty("/test/subnode/content")->setStringValue("content1");
-  PropertyQuery query(propSys.getProperty("/"), "/test/subnode(content)");
+  PropertyQuery query(propSys.getProperty("/"), "/test/subnode(content)", true);
   JSONWriter json(JSONWriter::jsonNoneResult);
   query.run(json);
   BOOST_CHECK_EQUAL(json.successJSON(), "{\"subnode\":[{\"content\":\"content1\"}]}");

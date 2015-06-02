@@ -590,17 +590,7 @@ namespace dss {
     try {
       DSMeterSpec_t spec;
       spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
-      _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
-      _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
-      _dsMeter->setHardwareVersion(spec.HardwareVersion);
-      _dsMeter->setApiVersion(spec.APIVersion);
-      _dsMeter->setPropertyFlags(spec.flags);
-      _dsMeter->setBusMemberType(spec.DeviceType);
-      _dsMeter->setApartmentState(spec.ApartmentState);
-
-      if (_dsMeter->getName().empty()) {
-        _dsMeter->setName(spec.Name);
-      }
+      synchronizeDSMeterData(_dsMeter, spec);
     } catch(BusApiError& e) {
       log("applyMeterSpec: Error getting dSMSpecs", lsWarning);
       return false;
@@ -904,6 +894,20 @@ namespace dss {
     boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
     pTP->addEvent(task);
   } // syncBinaryInputStates
+
+  void BusScanner::synchronizeDSMeterData(boost::shared_ptr<DSMeter> _dsMeter, DSMeterSpec_t &_spec)
+  {
+    _dsMeter->setArmSoftwareVersion(_spec.SoftwareRevisionARM);
+    _dsMeter->setDspSoftwareVersion(_spec.SoftwareRevisionDSP);
+    _dsMeter->setHardwareVersion(_spec.HardwareVersion);
+    _dsMeter->setApiVersion(_spec.APIVersion);
+    _dsMeter->setPropertyFlags(_spec.flags);
+    _dsMeter->setBusMemberType(_spec.DeviceType);
+    _dsMeter->setApartmentState(_spec.ApartmentState);
+    if (_dsMeter->getName().empty()) {
+      _dsMeter->setName(_spec.Name);
+    }
+  } // synchronizeDSMeterData
 
   void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
     Logger::getInstance()->log(_line, _severity);

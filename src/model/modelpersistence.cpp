@@ -289,7 +289,7 @@ namespace dss {
     WindProtectionClass_t protection;
     if (windProtectionClass &&
         convertWindProtectionClass(strToInt(windProtectionClass), &protection)) {
-      m_tempDevice->setWindProtectionClass(protection);
+      m_tempDevice->setWindProtectionClass(protection, true);
     }
 
     if (floorString != NULL) {
@@ -779,7 +779,7 @@ namespace dss {
               } else if (strcmp(_name, "datamodelModification") == 0) {
                 m_tempMeter->setDatamodelModificationcount(strToInt(m_chardata));
               } else if (strcmp(_name, "deviceType") == 0) {
-                m_tempMeter->setBusMemberType((BusMemberDevice_t) strToInt(m_chardata));
+                m_tempMeter->setBusMemberType(static_cast<BusMemberDevice_t>(strToInt(m_chardata)));
               }
             } else if ((m_state == ps_cluster) && (m_tempCluster != NULL)) {
               if (strcmp(_name, "name") == 0) {
