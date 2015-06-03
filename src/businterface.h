@@ -337,6 +337,7 @@ namespace dss {
     virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) = 0;
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
+    virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) = 0;
 
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
