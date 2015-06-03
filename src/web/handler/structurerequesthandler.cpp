@@ -824,7 +824,8 @@ namespace dss {
     }
 
     boost::shared_ptr<Cluster> cluster = m_Apartment.getCluster(clusterID);
-    cluster->setConfigurationLocked(lock);
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.clusterSetConfigurationLock(cluster, lock);
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();
   }

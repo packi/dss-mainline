@@ -702,7 +702,7 @@ namespace dss {
   } // clusterSetName
 
   void StructureManipulator::clusterSetStandardID(boost::shared_ptr<Cluster> _cluster,
-                                                const int _standardGroupNumber) {
+                                                  const int _standardGroupNumber) {
     if (isAppUserGroup(_cluster->getID())) {
       _cluster->setStandardGroupID(_standardGroupNumber);
       m_Interface.clusterSetStandardID(_cluster->getID(), _standardGroupNumber);
@@ -711,5 +711,17 @@ namespace dss {
 
     throw DSSException("SetStandardColor cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetStandardID
+
+
+  void StructureManipulator::clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster,
+                                                         bool _locked) {
+    if (isAppUserGroup(_cluster->getID())) {
+      _cluster->setConfigurationLocked(_locked);
+      m_Interface.clusterSetConfigurationLock(_cluster->getID(), _locked);
+      return;
+    }
+
+    throw DSSException("set cluster lock: id " + intToString(_cluster->getID()) + " not a cluster");
+  } // clusterSetLockedState
 
 } // namespace dss

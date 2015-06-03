@@ -71,6 +71,7 @@ namespace dss {
 
     void clusterSetName(boost::shared_ptr<Cluster> _cluster, const std::string& _name);
     void clusterSetStandardID(boost::shared_ptr<Cluster> _cluster, const int _standardGroupNumber);
+    void clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster, bool _locked);
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
     void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
