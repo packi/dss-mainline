@@ -251,6 +251,7 @@ dsstests_SOURCES = \
 	../tests/meteringtests.cpp \
 	../tests/model-cluster_tests.cpp \
 	../tests/modeljstests.cpp \
+	../tests/model-mainloop_tests.cpp \
 	../tests/modeltests.cpp \
 	../tests/propertysystemtests.cpp \
 	../tests/restfulapitests.cpp \
