@@ -56,6 +56,8 @@ namespace dss {
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID);
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
 
+    virtual void createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name);
+    virtual void removeCluster(uint8_t _clusterID);
     virtual void clusterSetName(uint8_t _clusterID, const std::string& _name);
     virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID);
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass);

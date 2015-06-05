@@ -365,6 +365,7 @@ namespace dss {
         boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_groupNumber);
         pCluster->setName(_name);
         pCluster->setStandardGroupID(_standardGroupNumber);
+        m_Interface.createCluster( _groupNumber, _standardGroupNumber, _name);
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Datamodel-Error creating user group " + intToString(_groupNumber) +
             ": " + e.what(), lsWarning);
@@ -414,8 +415,8 @@ namespace dss {
         throw DSSException("Remove group: id " + intToString(_groupNumber) + " does not exist");
       }
       try {
-        pCluster->setName("");
-        pCluster->setStandardGroupID(0);
+        pCluster->reset();
+        m_Interface.removeCluster(_groupNumber);
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Datamodel-Error removing user group " + intToString(_groupNumber) +
             ": " + e.what(), lsWarning);
