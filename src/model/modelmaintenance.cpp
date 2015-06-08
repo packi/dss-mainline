@@ -971,7 +971,7 @@ namespace dss {
 
         AutoClusterMaintenance maintenance(m_pApartment);
         maintenance.joinIdenticalClusters();
-        maintenance.cleanupEmptyCluster();
+
 
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));

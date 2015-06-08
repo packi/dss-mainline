@@ -54,6 +54,10 @@ public:
   }
   virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
   }
+  virtual void createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
+  }
+  virtual void removeCluster(uint8_t _clusterID) {
+  }
   virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
   }
   virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) {}
