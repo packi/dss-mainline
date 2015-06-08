@@ -476,7 +476,8 @@ namespace dss {
       }
 
       if ((pDevice->getDeviceClass() == DEVICE_CLASS_SW) &&
-          (pDevice->getJokerGroup() == GroupIDBlack)) {
+          (pDevice->getJokerGroup() == GroupIDBlack) &&
+          (value != BUTTONINPUT_1WAY)) {
         return failure("Joker devices must be set to a specific group for button pairing");
       }
 
