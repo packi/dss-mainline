@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.30.9	08.06.2015
+	* allow setting joker devices to 1-way button, #10288
+
 v1.30.8	03.06.2015
 	* add impulse configuration to UMR, #9677
 	* update model even if OEM readout failed, #9919
