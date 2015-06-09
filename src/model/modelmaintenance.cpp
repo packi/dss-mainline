@@ -927,6 +927,9 @@ namespace dss {
 
         setupWebUpdateEvent();
       }
+      AutoClusterMaintenance maintenance(m_pApartment);
+      maintenance.joinIdenticalClusters();
+      maintenance.cleanupEmptyCluster();
     }
   } // readOutPendingMeter
 
@@ -968,10 +971,6 @@ namespace dss {
             devices[i].getDevice()->setIsValid(true);
           }
         }
-
-        AutoClusterMaintenance maintenance(m_pApartment);
-        maintenance.joinIdenticalClusters();
-
 
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
