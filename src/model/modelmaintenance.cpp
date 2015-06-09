@@ -929,7 +929,6 @@ namespace dss {
       }
       AutoClusterMaintenance maintenance(m_pApartment);
       maintenance.joinIdenticalClusters();
-      maintenance.cleanupEmptyCluster();
     }
   } // readOutPendingMeter
 
