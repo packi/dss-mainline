@@ -105,7 +105,8 @@ const int MF_AVAILABLE[] =
   mf_locationconfig,
   mf_windprotectionconfigawning,
   mf_windprotectionconfigblind,
-  mf_impulseconfig
+  mf_impulseconfig,
+  mf_outmodegeneric
 };
 
 // model features
@@ -900,6 +901,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_windprotectionconfigblind;
   } else if (_name == "windprotectionconfigawning") {
     return mf_windprotectionconfigawning;
+  } else if (_name == "outmodedegeneric") {
+    return mf_outmodegeneric;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -989,6 +992,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "windprotectionconfigawning";
     case mf_windprotectionconfigblind:
       return "windprotectionconfigblind";
+    case mf_outmodegeneric:
+      return "outmodegeneric";
     default:
       break;
   }

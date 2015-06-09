@@ -79,7 +79,8 @@ enum {
   mf_locationconfig,
   mf_windprotectionconfigawning,
   mf_windprotectionconfigblind,
-  mf_impulseconfig
+  mf_impulseconfig,
+  mf_outmodegeneric
 };
 
 class ModelFeatures
