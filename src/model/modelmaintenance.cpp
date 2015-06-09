@@ -257,7 +257,7 @@ namespace dss {
             scanner.synchronizeDSMeterData(dsMeter, spec);
 
             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
-            if (!busMemberIsDSMeter(dsMeter->getBusMemberType())) {
+            if (dsMeter->isPresent() && !busMemberIsDSMeter(dsMeter->getBusMemberType())) {
               m_pApartment->removeDSMeter(spec.DSID);
               log ("removing uninteresting Bus Device: " + dsuid2str(dsMeter->getDSID()) + ", type:" + intToString(dsMeter->getBusMemberType()));
             }
