@@ -99,7 +99,7 @@ namespace dss {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
-      m_LastCalledScene = _sceneNr & 0x00ff;
+      setLastCalledScene(_sceneNr & 0x00ff);
     }
 
     AddressableModelItem::callScene(_origin, _category, _sceneNr, _token, _force);
