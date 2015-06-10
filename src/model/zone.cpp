@@ -263,6 +263,11 @@ namespace dss {
   }
 
   void Zone::setHeatingOperationMode(int _operationMode) {
+    if (_operationMode >= 16) {
+      Logger::getInstance()->log("Zone::setHeatingOperationMode: zone-id:" + intToString(m_ZoneID) +
+          " mode: " + intToString(_operationMode) + " is invalid", lsWarning);
+      return;
+    }
     m_HeatingStatus.m_OperationMode = _operationMode;
     dirty();
   }
