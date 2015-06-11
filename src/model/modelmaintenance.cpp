@@ -313,11 +313,6 @@ namespace dss {
     }
 
     writeConfiguration();
-
-    if (DSS::hasInstance()) {
-      PropertySystem &props(DSS::getInstance()->getPropertySystem());
-    }
-
     m_pendingSaveRequest = false;
   }
 
