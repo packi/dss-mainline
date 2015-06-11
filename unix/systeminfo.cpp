@@ -52,6 +52,9 @@
 #endif
 
 #include <cstring>
+#include <vector>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "src/logger.h"
 #include "src/dss.h"
@@ -422,5 +425,58 @@ void SystemInfo::enumerateInterfaces() {
   freeifaddrs(pIfAddrs);
 }
 #endif
+
+  std::vector<std::string> SystemInfo::sysinfo() {
+    std::vector<std::string> version;
+    std::string pline;
+    std::string filename;
+    try {
+      filename = "/proc/cpuinfo";
+      if (boost::filesystem::exists(filename)) {
+        std::ifstream in(filename.c_str());
+        if (in.is_open()) {
+          while (!in.eof()) {
+            std::getline(in, pline);
+            if (pline.substr(0, 8) == "Hardware") {
+              version.push_back("Hardware:" + pline.substr(pline.find(':') + 1));
+            } else if (pline.substr(0, 8) == "Revision") {
+              version.push_back("Revision:" + pline.substr(pline.find(':') + 1));
+            } else if (pline.substr(0, 6) == "Serial") {
+              version.push_back("Serial:" + pline.substr(pline.find(':') + 1));
+            }
+          }
+          in.close();
+        }
+      }
+      filename = "/sys/class/net/eth0/address";
+      if (boost::filesystem::exists(filename)) {
+        std::ifstream in(filename.c_str());
+        if (in.is_open()) {
+          std::getline(in, pline);
+          in.close();
+        }
+        version.push_back("EthernetID:" + pline);
+      }
+      filename = "/var/lib/dbus/machine-id";
+      if (boost::filesystem::exists(filename)) {
+        std::ifstream in(filename.c_str());
+        if (in.is_open()) {
+          std::getline(in, pline);
+          in.close();
+        }
+        version.push_back("MachineID:" + pline);
+      }
+      filename = "/proc/version";
+      if (boost::filesystem::exists(filename)) {
+        std::ifstream in(filename.c_str());
+        if (in.is_open()) {
+          std::getline(in, pline);
+          in.close();
+        }
+        version.push_back("Kernel:" + pline);
+      }
+    } catch (...) {}
+    return version;
+  }
 
 } // namespace dss

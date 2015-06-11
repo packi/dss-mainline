@@ -44,6 +44,7 @@
 #include "src/sessionmanager.h"
 #include "src/stringconverter.h"
 #include "util.h"
+#include "unix/systeminfo.h"
 
 namespace dss {
 
@@ -54,6 +55,14 @@ namespace dss {
     if(_request.getMethod() == "version") {
       JSONWriter json;
       json.add("version", DSS::getInstance()->versionString());
+      json.add("distroVersion", DSS::getInstance()->readDistroVersion());
+      SystemInfo info;
+      std::vector<std::string> hwv = info.sysinfo();
+      for (std::vector<std::string>::iterator it = hwv.begin(); it != hwv.end(); it++) {
+        std::string key = it->substr(0, it->find(':'));
+        std::string value = it->substr(it->find(':') + 1);
+        json.add(key, value);
+      }
       return json.successJSON();
     } else if ((_request.getMethod() == "getDSID") ||
                (_request.getMethod() == "getDSUID")) {

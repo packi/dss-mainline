@@ -23,6 +23,9 @@
 #ifndef SYSTEMINFO_H_
 #define SYSTEMINFO_H_
 
+#include <cstring>
+#include <vector>
+
 #include "src/logger.h"
 
 namespace dss {
@@ -48,6 +51,7 @@ namespace dss {
   public:
     void collect();
     void memory();
+    std::vector<std::string> sysinfo();
   private:
     void enumerateInterfaces();
 
