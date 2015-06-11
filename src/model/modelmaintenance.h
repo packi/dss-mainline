@@ -267,7 +267,8 @@ namespace dss {
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
     StructureModifyingBusInterface* m_pStructureModifyingBusInterface;
 
-    std::list<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents;
+    typedef std::vector<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents_t;
+    std::vector<boost::shared_ptr<ModelDeferredEvent> > m_DeferredEvents;
 
     void checkConfigFile(boost::filesystem::path _filename);
 
