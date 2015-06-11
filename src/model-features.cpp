@@ -901,7 +901,7 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_windprotectionconfigblind;
   } else if (_name == "windprotectionconfigawning") {
     return mf_windprotectionconfigawning;
-  } else if (_name == "outmodedegeneric") {
+  } else if (_name == "outmodegeneric") {
     return mf_outmodegeneric;
   }
 
