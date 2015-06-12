@@ -248,24 +248,30 @@ namespace dss {
   {
     std::vector<std::pair<std::string, unsigned> > result;
 
-    int len;
-    char line[1024];
     FILE *fp = fopen("/proc/meminfo", "r");
-
     if (NULL == fp) {
       return result;
     }
 
+    char line[1024];
     while (fgets(line, sizeof(line), fp) != 0) {
-      len = strlen(line);
-      if (line[len - 1] == '\n') {
-        line[--len] = 0;
+      int llen;
+
+      llen = strlen(line);
+      if (line[llen - 1] == '\n') {
+        line[--llen] = 0;
       }
+
       char field[64];
-      int len;
-      if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
+      int flen;
+      if (sscanf(line, "%63s %n", field, &flen) < 1) {
+        // no match
+        continue;
+      }
+
+      if  (*field && field[strlen(field) - 1] == ':') {
         int size;
-        if (sscanf(line + len, "%d kB", &size) == 1) {
+        if (sscanf(line + flen, "%d kB", &size) == 1) {
           if (!strcmp(field, "MemTotal:")) {
             result.push_back(std::make_pair("MemTotal", size));
           } else if (!strcmp(field, "MemFree:")) {
