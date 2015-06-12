@@ -221,6 +221,27 @@ namespace dss {
     }
   } // initialize
 
+  bool ModelMaintenance::pendingChangesBarrier(int waitSeconds) {
+    boost::mutex::scoped_lock lock(m_rvMut);
+
+    unsigned syncState = indexOfNextSyncState();
+    // rollover: syncState:2, m_processed:UINT_MAX -> 3 (0, 1, 2)
+    // if delta > INT_MAX, delta is negative
+    while (static_cast<int>(syncState - m_processedEvents) > 0) {
+      if (m_rvCond.wait_for(lock, boost::chrono::seconds(waitSeconds)) ==
+          boost::cv_status::timeout) {
+        // timeout, better throw an exception?
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void ModelMaintenance::notifyModelConsistent() {
+    boost::mutex::scoped_lock lock(m_rvMut);
+    m_rvCond.notify_all();
+  }
+
   void ModelMaintenance::doStart() {
     run();
   } // start
@@ -458,6 +479,7 @@ namespace dss {
       if (m_ModelEvents.empty() &&
           (m_NewModelEvent.wait_for(lock, m_EventTimeoutMS) ==
            boost::cv_status::timeout)) {
+        notifyModelConsistent(); // no pending changes
         return false;
       }
 
@@ -576,13 +598,15 @@ namespace dss {
         // hack: if difference > INT_MAX, than difference is negative
         if (static_cast<int>(m_processedEvents - m_suppressSaveRequestNotify) > 0) {
           raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
-          // skip all etModelDirty events already on the queue
+          // skip etModelDirty events already on the queue
           m_suppressSaveRequestNotify = m_processedEvents;
         }
       }
+      notifyModelConsistent(); //< some transaction completed
       scheduleConfigWrite();
       break;
     case ModelEvent::etModelOperationModeChanged:
+      notifyModelConsistent(); //< some transaction completed
       scheduleConfigWrite();
       break;
     case ModelEvent::etLostDSMeter:
@@ -925,6 +949,20 @@ namespace dss {
       maintenance.joinIdenticalClusters();
     }
   } // readOutPendingMeter
+
+  unsigned ModelMaintenance::indexOfNextSyncState() {
+    boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+    int count = m_processedEvents + m_ModelEvents.size();
+
+    // assume etModelDirty as sync states, ignore trailing events
+    foreach_r (ModelEvent evt, m_ModelEvents) {
+      if (evt.getEventType() == ModelEvent::etModelDirty) {
+        break;
+      }
+      count -= 1;
+    }
+    return count;
+  }
 
   void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
     log("Scanning dS485 bus device: " + dsuid2str(_dsMeterBusID), lsInfo);

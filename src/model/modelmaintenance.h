@@ -181,9 +181,23 @@ namespace dss {
 
     boost::shared_ptr<TaskProcessor> getTaskProcessor() const
         { return m_taskProcessor; }
+
+    /**
+     * When the UI triggers some changes, it typically re-reads the structure
+     * immediately to update its view. If we answer that request too early,
+     * e.g. before automatic clusters have been regrouped, the UI will not see
+     * the effect of its changes.u
+     * This call will scan the event queue for dirty events, as these mark
+     * the end of a set of changes. It will then block until that event has
+     * been processed.
+     * TODO the apartment model might still be inconsistent, since new changes
+     * might be scheduled, from another UI, app or ds485 event.
+     */
+    bool pendingChangesBarrier(int waitSeconds = 60);
   protected:
     virtual void doStart();
     bool handleModelEvents(); //< access from unit test
+    unsigned indexOfNextSyncState(); //< access form unit test
   private:
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
@@ -200,6 +214,7 @@ namespace dss {
     void delayedConfigWrite();
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
+    void notifyModelConsistent(); //< notifies pendingChangesBarrier
 
     void onDeviceCallScene(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
     void onDeviceBlink(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token);
@@ -276,6 +291,9 @@ namespace dss {
 
     static const std::string kWebUpdateEventName;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
+
+    boost::mutex m_rvMut;
+    boost::condition_variable m_rvCond;
   }; // ModelMaintenance
 
 }

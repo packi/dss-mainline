@@ -24,6 +24,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/thread/thread.hpp>
+
 #include "src/model/apartment.h"
 #include "src/model/modelconst.h"
 #include "src/model/modelmaintenance.h"
@@ -92,50 +94,152 @@ BOOST_AUTO_TEST_CASE(testProcessedEventRollover) {
   int ct = 0;
   while (main.handleModelEvents()) { ct++; };
 
-  BOOST_CHECK(queuedEvents < eventCountInit); // rollover
-  BOOST_CHECK_EQUAL(queuedEvents - eventCountInit, 30);
-  BOOST_CHECK_EQUAL(ct, 30);
+  BOOST_CHECK(queuedEvents < eventCountInit); // counter wrapped
   BOOST_CHECK_EQUAL(main.m_processedEvents, queuedEvents);
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, ct);
 }
 
 BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
   //
-  // erasing events from the queue is evil
+  // why is erasing events from the queue evil?
   //
-  // example
+  // fig1
   // queue = o o o d <o'> | d d d d:
   // ct    = 1 2 3 4  5     6 7 8 9
   // d = dirty, o = other event
   //
-  // We want to be sure o' is processed before continuing, hence we wait for
-  // the processed counter >= 5.  Due to dirty events being erased but still
-  // counted, the event counter jumps from 4 to 8 when processing the first
-  // dirty event. Event o' still not processed.
+  // We want to be sure o' is processed before continuing hence
+  // we wait until the processed counter is >= 5.
   //
-  // Counting erased events results in m_processedEvents not really reflecting
-  // processed events. Not counting events that can be erased, makes it more
-  // difficult to compute the index when o' is procesed. It means we have
-  // maintain a list of events that can be erased from the queue, and when
-  // computing what m_processed will be when o' is processed, skip those
+  // solution1: counting erased events
+  // when procesessing event 4, we also remove events 6, 7, 8, 9 see fig1 hence
+  // the processed counter increases to 10, o' not yet processed
   //
+  // fig2
   // queue = o o o d <o'> | d d d d o:
   // ct    = 1 2 3    4             5
   //
-  // adopted solution: erase no events from the queue, but delay writing
-  // apartment.xml by 30s
+  // solution2: not counting erased events
+  // computing the index when o' will be procesed, is more difficult. We
+  // we have maintain a list of events that must not be counted.
+  // maintaining that list will be error prone
+  //
+  // fig3
+  // queue = o o o d1 <o'> | d d d d:
+  // ct    = 1 2 3 4   5     6 7 8 9
+  //
+  // solution3(adopted): erase no events, but delay writing apartment.xml
+  // Writing apartment.xml to frequently is the intent why erasing events from
+  // the queue was introduced, that is solved by 30s delay. Downside is,
+  // that we expand the period we are vulnerable to power-fails or crashes
+  // -- use logging journal
+  //
+  // A SECOND PROBLEM is notifying observers about model changes.
+  // These must not be delayed by 30s!
+  // When d1 is processed, see fig3, we signal our observers, but mask
+  // such notifications for dirty events already queued (@6,7,8,9)
+  // The reason is that modifications happen synchronously from the caller,
+  // while only config write happens asynchronously.
+  // E.g onRemoveDevice directly removes the device from the model
+  // held in memory, but spawns etModelDirty to also save it persistently.
+  // Hence all etModelDirty events already queued hold no new information
+  // to be siganlled once they are processed
+  // EXCEPTION: etDeviceDirty restores some model invariants, then
+  // schedules etModelDirty when done
   //
   ModelMaintenanceMock main;
   unsigned eventCountInit = main.m_processedEvents;
-  int ct = 0;
 
   // we want to be sure the etDummyEvent is executed
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // o'
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
-  main.handleModelEvents(), ct++;
-  BOOST_CHECK_EQUAL(ct, 1);
-  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 1);
+  int ct = 0;
+  while (main.handleModelEvents()) { ct++; };
+  BOOST_CHECK_EQUAL(ct, 3);
+  BOOST_CHECK_EQUAL(main.m_processedEvents - eventCountInit, 3);
+}
+
+BOOST_AUTO_TEST_CASE(testIndexOfSyncState) {
+  ModelMaintenanceMock main;
+  unsigned eventCountInit = main.m_processedEvents;
+
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // 1
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty)); // 4
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty)); // 7
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // 10
+
+  BOOST_CHECK_EQUAL(main.indexOfNextSyncState(), 7 + eventCountInit);
+
+  // barrier will not let us pass until event 7
+  BOOST_CHECK_EQUAL(main.pendingChangesBarrier(0), false);
+  for (int i = 1; i < 7; i++) {
+    main.handleModelEvents();
+    BOOST_CHECK_EQUAL(main.pendingChangesBarrier(0), false);
+  }
+
+  main.handleModelEvents();
+  BOOST_CHECK_EQUAL(main.pendingChangesBarrier(0), true);
+
+  // no more dirty events on the queue
+  // -> barrier let's us pass immediately:
+  BOOST_CHECK_EQUAL(main.indexOfNextSyncState(), main.m_processedEvents);
+  BOOST_CHECK_EQUAL(main.pendingChangesBarrier(0), true);
+}
+
+void wait_barrier(ModelMaintenanceMock &m, bool &ret)
+{
+  ret = m.pendingChangesBarrier(60);
+}
+
+BOOST_AUTO_TEST_CASE(testChangesBarier) {
+  ModelMaintenanceMock main;
+
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // 1
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty)); // 4
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty)); // 7
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // 10
+
+  unsigned eventCountInit = main.m_processedEvents;
+  unsigned syncState = main.indexOfNextSyncState();
+  BOOST_CHECK_EQUAL(syncState, 7 + eventCountInit);
+
+  bool ret = false;
+  boost::thread t(wait_barrier, boost::ref(main), boost::ref(ret));
+  boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+
+  // these must be ignored, they arrived after we started waiting
+  // we only wait till #7
+  for (int i = 0; i < 10; i++) {
+    main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
+  }
+  main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+  while (ret == false && main.handleModelEvents()) {
+    boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+  }
+  t.join();
+
+  BOOST_CHECK_EQUAL(ret, true);
+  BOOST_CHECK_EQUAL(main.m_processedEvents, syncState);
+
+  // new dirty events arrived, barrier moved on
+  // -> we would have to wait again
+  BOOST_CHECK_NE(main.indexOfNextSyncState(), main.m_processedEvents);
+  BOOST_CHECK_EQUAL(main.pendingChangesBarrier(0), false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
