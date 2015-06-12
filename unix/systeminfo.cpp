@@ -280,6 +280,8 @@ namespace dss {
         }
       }
     }
+
+    fclose(fp);
     return result;
   }
 
