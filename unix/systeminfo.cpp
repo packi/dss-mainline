@@ -251,28 +251,31 @@ namespace dss {
     int len;
     char line[1024];
     FILE *fp = fopen("/proc/meminfo", "r");
-    if (NULL != fp) {
-      while (fgets(line, sizeof(line), fp) != 0) {
-        len = strlen(line);
-        if (line[len - 1] == '\n') {
-          line[--len] = 0;
-        }
-        char field[64];
-        int len;
-        if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
-          int size;
-          if (sscanf(line + len, "%d kB", &size) == 1) {
-            if (!strcmp(field, "MemTotal:")) {
-              result.push_back(std::make_pair("MemTotal", size));
-            } else if (!strcmp(field, "MemFree:")) {
-              result.push_back(std::make_pair("MemFree", size));
-            } else if (!strcmp(field, "MemAvailable:")) {
-              result.push_back(std::make_pair("MemAvailable", size));
-            } else if (!strcmp(field, "Buffers:")) {
-              result.push_back(std::make_pair("Buffers", size));
-            } else if (!strcmp(field, "Cached:")) {
-              result.push_back(std::make_pair("Cached", size));
-            }
+
+    if (NULL == fp) {
+      return result;
+    }
+
+    while (fgets(line, sizeof(line), fp) != 0) {
+      len = strlen(line);
+      if (line[len - 1] == '\n') {
+        line[--len] = 0;
+      }
+      char field[64];
+      int len;
+      if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
+        int size;
+        if (sscanf(line + len, "%d kB", &size) == 1) {
+          if (!strcmp(field, "MemTotal:")) {
+            result.push_back(std::make_pair("MemTotal", size));
+          } else if (!strcmp(field, "MemFree:")) {
+            result.push_back(std::make_pair("MemFree", size));
+          } else if (!strcmp(field, "MemAvailable:")) {
+            result.push_back(std::make_pair("MemAvailable", size));
+          } else if (!strcmp(field, "Buffers:")) {
+            result.push_back(std::make_pair("Buffers", size));
+          } else if (!strcmp(field, "Cached:")) {
+            result.push_back(std::make_pair("Cached", size));
           }
         }
       }
