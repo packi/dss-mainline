@@ -269,20 +269,22 @@ namespace dss {
         continue;
       }
 
-      if  (*field && field[strlen(field) - 1] == ':') {
-        int size;
-        if (sscanf(line + flen, "%d kB", &size) == 1) {
-          if (!strcmp(field, "MemTotal:")) {
-            result.push_back(std::make_pair("MemTotal", size));
-          } else if (!strcmp(field, "MemFree:")) {
-            result.push_back(std::make_pair("MemFree", size));
-          } else if (!strcmp(field, "MemAvailable:")) {
-            result.push_back(std::make_pair("MemAvailable", size));
-          } else if (!strcmp(field, "Buffers:")) {
-            result.push_back(std::make_pair("Buffers", size));
-          } else if (!strcmp(field, "Cached:")) {
-            result.push_back(std::make_pair("Cached", size));
-          }
+      if  (strlen(field) == 0 || field[strlen(field) - 1] != ':') {
+        continue;
+      }
+
+      int size;
+      if (sscanf(line + flen, "%d kB", &size) == 1) {
+        if (!strcmp(field, "MemTotal:")) {
+          result.push_back(std::make_pair("MemTotal", size));
+        } else if (!strcmp(field, "MemFree:")) {
+          result.push_back(std::make_pair("MemFree", size));
+        } else if (!strcmp(field, "MemAvailable:")) {
+          result.push_back(std::make_pair("MemAvailable", size));
+        } else if (!strcmp(field, "Buffers:")) {
+          result.push_back(std::make_pair("Buffers", size));
+        } else if (!strcmp(field, "Cached:")) {
+          result.push_back(std::make_pair("Cached", size));
         }
       }
     }
