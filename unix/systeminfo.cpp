@@ -273,6 +273,11 @@ namespace dss {
         continue;
       }
 
+      if (flen >= llen) {
+        // something fishy here
+        continue;
+      }
+
       int size;
       if (sscanf(line + flen, "%d kB", &size) == 1) {
         if (!strcmp(field, "MemTotal:")) {
