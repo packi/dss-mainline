@@ -49,7 +49,7 @@ namespace dss {
 
       std::string formatZoneName(const std::string &_name, int _zoneId);
       std::string formatGroupName(const std::string &_name, int _groupId);
-      std::string formatGroupName2(const std::string &_name, int _groupId);
+      std::string formatAppartmentStateName(const std::string &_name, int _groupId);
 
       void callScene(int _zoneId, int _groupId, int _sceneId, callOrigin_t _origin);
       void undoScene(int _zoneId, int _groupId, int _sceneId, callOrigin_t _origin);
