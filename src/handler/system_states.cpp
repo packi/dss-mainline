@@ -90,7 +90,7 @@ std::string SystemState::formatGroupName(const std::string &_name, int _groupId)
 /* TODO why was formatGroupName insufficient */
 std::string SystemState::formatGroupName2(const std::string &_name, int _groupId) {
   assert(_groupId >= GroupIDAppUserMin);
-  return _name + ".group." + intToString(_groupId);
+  return _name + ".group" + intToString(_groupId);
 }
 
 boost::shared_ptr<State> SystemState::registerState(std::string _name,
