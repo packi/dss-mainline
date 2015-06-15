@@ -56,6 +56,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include "src/foreach.h"
 #include "src/logger.h"
 #include "src/dss.h"
 #include "src/propertysystem.h"
@@ -243,6 +244,42 @@ namespace dss {
     return head;
   }
 
+  std::vector<std::pair<std::string, unsigned> > SystemInfo::parseProcMeminfo()
+  {
+    std::vector<std::pair<std::string, unsigned> > result;
+
+    int len;
+    char line[1024];
+    FILE *fp = fopen("/proc/meminfo", "r");
+    if (NULL != fp) {
+      while (fgets(line, sizeof(line), fp) != 0) {
+        len = strlen(line);
+        if (line[len - 1] == '\n') {
+          line[--len] = 0;
+        }
+        char field[64];
+        int len;
+        if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
+          int size;
+          if (sscanf(line + len, "%d kB", &size) == 1) {
+            if (!strcmp(field, "MemTotal:")) {
+              result.push_back(std::make_pair("MemTotal", size));
+            } else if (!strcmp(field, "MemFree:")) {
+              result.push_back(std::make_pair("MemFree", size));
+            } else if (!strcmp(field, "MemAvailable:")) {
+              result.push_back(std::make_pair("MemAvailable", size));
+            } else if (!strcmp(field, "Buffers:")) {
+              result.push_back(std::make_pair("Buffers", size));
+            } else if (!strcmp(field, "Cached:")) {
+              result.push_back(std::make_pair("Cached", size));
+            }
+          }
+        }
+      }
+    }
+    return result;
+  }
+
   void SystemInfo::updateMemoryUsage() {
     struct mapinfo *smaps;
     struct mapinfo *mi;
@@ -283,34 +320,10 @@ namespace dss {
     memoryNode->createProperty("RSS")->setIntegerValue(rss);
     memoryNode->createProperty("Size")->setIntegerValue(size);
 
-    char line[1024];
-    int len;
-    FILE *fp = fopen("/proc/meminfo", "r");
-    if (NULL != fp) {
-      while (fgets(line, sizeof(line), fp) != 0) {
-        len = strlen(line);
-        if (line[len - 1] == '\n') {
-          line[--len] = 0;
-        }
-        char field[64];
-        int len;
-        if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
-          int size;
-          if (sscanf(line + len, "%d kB", &size) == 1) {
-            if (!strcmp(field, "MemTotal:")) {
-              memoryNode->createProperty("MemTotal")->setIntegerValue(size);
-            } else if (!strcmp(field, "MemFree:")) {
-              memoryNode->createProperty("MemFree")->setIntegerValue(size);
-            } else if (!strcmp(field, "MemAvailable:")) {
-              memoryNode->createProperty("MemAvailable")->setIntegerValue(size);
-            } else if (!strcmp(field, "Buffers:")) {
-              memoryNode->createProperty("Buffers")->setIntegerValue(size);
-            } else if (!strcmp(field, "Cached:")) {
-              memoryNode->createProperty("Cached")->setIntegerValue(size);
-            }
-          }
-        }
-      }
+    // BOOST_FOREACH doesn't like it without typedef
+    typedef std::pair<std::string, unsigned> proc_meminfo_elt;
+    BOOST_FOREACH(proc_meminfo_elt elt, parseProcMeminfo()) {
+        memoryNode->createProperty(elt.first)->setIntegerValue(elt.second);
     }
   }
 

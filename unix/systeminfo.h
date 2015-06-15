@@ -52,6 +52,7 @@ namespace dss {
     void collect();
     void memory();
     std::vector<std::string> sysinfo();
+    std::vector<std::pair<std::string, unsigned> > parseProcMeminfo();
   private:
     void enumerateInterfaces();
 

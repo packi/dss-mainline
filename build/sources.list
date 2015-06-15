@@ -260,6 +260,7 @@ dsstests_SOURCES = \
 	../tests/sensor_data_uploader.cpp \
 	../tests/sensorconversiontest.cpp \
 	../tests/statetests.cpp \
+	../tests/systeminfo_tests.cpp \
 	../tests/testrunner.cpp \
 	../tests/util/ds485-bus-mockups.h \
 	../tests/util/dss_instance_fixture.cpp \
