@@ -84,7 +84,7 @@ std::string SystemState::formatZoneName(const std::string &_name, int _zoneId) {
 
 std::string SystemState::formatGroupName(const std::string &_name, int _groupId) {
   assert(_groupId >= GroupIDAppUserMin);
-  return "zone.0.group." + intToString(_groupId) + "." + _name;;
+  return "cluster." + intToString(_groupId) + "." + _name;
 }
 
 /* TODO why was formatGroupName insufficient */
