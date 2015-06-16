@@ -55,6 +55,7 @@
 #include "src/webservice_api.h"
 #include "src/subscription_profiler.h"
 #include "src/monitor_tasks.h"
+#include "unix/systeminfo.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -1456,6 +1457,43 @@ Sample: {
           new HeatingValveProtectionTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
       boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
       pTP->addEvent(task);
+    }
+  }
+
+  EventInterpreterDebugMonitorPlugin::EventInterpreterDebugMonitorPlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("EventInterpreterDebugMonitorPlugin", _pInterpreter) {}
+
+  __DEFINE_LOG_CHANNEL__(EventInterpreterDebugMonitorPlugin, lsInfo);
+
+  void EventInterpreterDebugMonitorPlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+    subscription.reset(new EventSubscription("model_ready",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+    subscription.reset(new EventSubscription(EventName::DebugMonitorUpdate,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterDebugMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+
+    try {
+      SystemInfo info;
+      info.memory();
+    } catch (...) {
+      Logger::getInstance()->log("EventInterpreterDebugMonitorPlugin: error executing memory update", lsWarning);
+    }
+
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::DebugMonitorUpdate);
+    pEvent->setProperty(EventProperty::Time, "+" + intToString(600));
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
     }
   }
 

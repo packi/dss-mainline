@@ -1,5 +1,16 @@
 dSS - digitalSTROM Server
 
+v1.30.9	08.06.2015
+	* allow setting joker devices to 1-way button, #10288
+
+v1.30.8	03.06.2015
+	* add impulse configuration to UMR, #9677
+	* update model even if OEM readout failed, #9919
+	* only reset buttonimput mode when switching from joker, #10151
+	* always update dSMInfo, #9620
+	* restart rrdcached when recreating metering databases. #5414
+	* lock blocks concurrent event/get and event/subscribe calls, #10045
+
 v1.30.7	15.04.2015
 	* support automatic heating controller selection, #9753
 

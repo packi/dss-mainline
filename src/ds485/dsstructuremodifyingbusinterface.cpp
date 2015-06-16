@@ -135,7 +135,7 @@ namespace dss {
     int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _sceneNumber, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
-  
+
   void DSStructureModifyingBusInterface::deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -167,6 +167,51 @@ namespace dss {
     ret = ZoneGroupProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
   } // createGroup
+
+  void DSStructureModifyingBusInterface::createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    // This does not work for zone id = 0
+    //int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, 0, _groupID, _standardGroupID);
+    //DSBusInterface::checkBroadcastResultCode(ret);
+    //usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, _standardGroupID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    std::string nameStr = truncateUTF8String(_name, 19);
+    ret = ClusterProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _groupID, (unsigned char*)nameStr.c_str());
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  } // createCluster
+
+  void DSStructureModifyingBusInterface::removeCluster(uint8_t _clusterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    // This does not work for zone id = 0
+    //int ret = ZoneGroupModify_remove(m_DSMApiHandle, DSUID_BROADCAST, 0, _clusterID);
+    //DSBusInterface::checkBroadcastResultCode(ret);
+    //usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    std::string nameStr = truncateUTF8String("", 19);
+    ret = ClusterProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, (unsigned char*) nameStr.c_str());
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_location_class(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0, 0, 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  } // removeCluster
 
   void DSStructureModifyingBusInterface::groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -377,6 +422,18 @@ namespace dss {
       lockedScenes[scene / 8] |= 1 << (scene % 8);
     }
     ret = ClusterProperties_set_scene_lock(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, lockedScenes);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+  }
+
+  void DSStructureModifyingBusInterface::clusterSetConfigurationLock(uint8_t _clusterID,
+                                                                     bool _lock) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    int ret;
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    ret = ClusterProperties_set_configuration_lock(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, (_lock ? 1 : 0));
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   }

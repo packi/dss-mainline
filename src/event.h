@@ -68,6 +68,7 @@ namespace dss {
     extern const std::string HeatingValveProtection;
     extern const std::string DeviceHeatingTypeChanged;
     extern const std::string LogFileData;
+    extern const std::string DebugMonitorUpdate;
   }
 
   namespace EventProperty {

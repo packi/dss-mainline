@@ -233,7 +233,6 @@ dsstests_SOURCES = \
 	../tests/apartment_xml_tests.cpp \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
-	../tests/model-autocluster_tests.cpp \
 	../tests/curl_test.cpp \
 	../tests/datetoolstests.cpp \
 	../tests/deviceinterfacerequesthandlertest.cpp \
@@ -249,16 +248,19 @@ dsstests_SOURCES = \
 	../tests/jsproperty.cpp \
 	../tests/loggertests.cpp \
 	../tests/meteringtests.cpp \
+	../tests/model-autocluster_tests.cpp \
 	../tests/model-cluster_tests.cpp \
+	../tests/model-mainloop_tests.cpp \
 	../tests/modeljstests.cpp \
 	../tests/modeltests.cpp \
 	../tests/propertysystemtests.cpp \
 	../tests/restfulapitests.cpp \
 	../tests/scriptstest.cpp \
 	../tests/securitytests.cpp \
-	../tests/sensorconversiontest.cpp \
 	../tests/sensor_data_uploader.cpp \
+	../tests/sensorconversiontest.cpp \
 	../tests/statetests.cpp \
+	../tests/systeminfo_tests.cpp \
 	../tests/testrunner.cpp \
 	../tests/util/ds485-bus-mockups.h \
 	../tests/util/dss_instance_fixture.cpp \

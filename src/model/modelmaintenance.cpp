@@ -149,7 +149,10 @@ namespace dss {
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
+    m_processedEvents(UINT_MAX - 2), // force early wrap around
     m_IsDirty(false),
+    m_pendingSaveRequest(false),
+    m_suppressSaveRequestNotify(m_processedEvents),
     m_pApartment(NULL),
     m_pMetering(NULL),
     m_EventTimeoutMS(_eventTimeoutMS),
@@ -234,9 +237,10 @@ namespace dss {
       = boost::shared_ptr<ApartmentTreeListener>(
           new ApartmentTreeListener(this, m_pApartment));
 
-    while(!m_Terminated) {
+    while (!m_Terminated) {
       handleModelEvents();
       handleDeferredModelEvents();
+      delayedConfigWrite();
       readOutPendingMeter();
     }
   } // execute
@@ -253,7 +257,7 @@ namespace dss {
             scanner.synchronizeDSMeterData(dsMeter, spec);
 
             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
-            if (!busMemberIsDSMeter(dsMeter->getBusMemberType())) {
+            if (dsMeter->isPresent() && !busMemberIsDSMeter(dsMeter->getBusMemberType())) {
               m_pApartment->removeDSMeter(spec.DSID);
               log ("removing uninteresting Bus Device: " + dsuid2str(dsMeter->getDSID()) + ", type:" + intToString(dsMeter->getBusMemberType()));
             }
@@ -291,11 +295,41 @@ namespace dss {
     }
   } // discoverDS485Devices
 
-  void ModelMaintenance::writeConfiguration() {
-    if(DSS::hasInstance()) {
-      ModelPersistence persistence(*m_pApartment);
-      persistence.writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+  void ModelMaintenance::scheduleConfigWrite()
+  {
+    boost::mutex::scoped_lock lock(m_SaveRequestMutex);
+    if (!m_pendingSaveRequest) {
+      m_pendingSaveRequest = true;
+      m_pendingSaveRequestTS = DateTime();
     }
+  }
+
+  void ModelMaintenance::delayedConfigWrite()
+  {
+    boost::mutex::scoped_lock lock(m_SaveRequestMutex);
+    if (!m_pendingSaveRequest ||
+        DateTime().difference(m_pendingSaveRequestTS) < 30) {
+      return;
+    }
+
+    writeConfiguration();
+
+    if (DSS::hasInstance()) {
+      PropertySystem &props(DSS::getInstance()->getPropertySystem());
+    }
+
+    m_pendingSaveRequest = false;
+  }
+
+  void ModelMaintenance::writeConfiguration() {
+    if (!DSS::hasInstance()) {
+      return;
+    }
+
+    PropertySystem &props(DSS::getInstance()->getPropertySystem());
+    ModelPersistence persistence(*m_pApartment);
+    persistence.writeConfigurationToXML(props.getStringValue(getConfigPropertyBasePath()
+                                                             + "configfile"));
   } // writeConfiguration
 
   void ModelMaintenance::handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID) {
@@ -320,17 +354,16 @@ namespace dss {
   }
 
   bool ModelMaintenance::handleDeferredModelEvents() {
+    // TODO locking, seems events are only pushed from mainloop
     if (m_DeferredEvents.empty()) {
       return false;
     }
 
-    std::list<boost::shared_ptr<ModelDeferredEvent> > mDefEvents(m_DeferredEvents);
-    m_DeferredEvents.clear();
-    for(std::list<boost::shared_ptr<ModelDeferredEvent> >::iterator evt = mDefEvents.begin();
-        evt != mDefEvents.end();
-        evt++)
-    {
-      boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (*evt);
+    m_DeferredEvents_t mDefEvents;
+    mDefEvents.swap(m_DeferredEvents);
+
+    foreach (boost::shared_ptr<ModelDeferredEvent> evt, mDefEvents) {
+      boost::shared_ptr<ModelDeferredSceneEvent> mEvent = boost::dynamic_pointer_cast <ModelDeferredSceneEvent> (evt);
       if (mEvent != NULL) {
         int sceneID = mEvent->getSceneID();
         int groupID = mEvent->getGroupID();
@@ -385,7 +418,7 @@ namespace dss {
         continue;
       }
 
-      boost::shared_ptr<ModelDeferredButtonEvent> bEvent = boost::dynamic_pointer_cast <ModelDeferredButtonEvent> (*evt);
+      boost::shared_ptr<ModelDeferredButtonEvent> bEvent = boost::dynamic_pointer_cast <ModelDeferredButtonEvent> (evt);
       if (bEvent != NULL) {
         int deviceID = bEvent->getDeviceID();
         int buttonIndex = bEvent->getButtonIndex();
@@ -442,6 +475,7 @@ namespace dss {
 
       assert(!m_ModelEvents.empty());
       event = m_ModelEvents.pop_front();
+      m_processedEvents++;
     }
 
     ModelEventWithDSID* pEventWithDSID =
@@ -543,15 +577,18 @@ namespace dss {
       }
       break;
     case ModelEvent::etModelDirty:
-      eraseModelEventsFromQueue(ModelEvent::etModelDirty);
-      writeConfiguration();
       if (DSS::hasInstance() && DSS::getInstance()->getPropertySystem().getBoolValue(pp_websvc_enabled)) {
-        raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
+        // hack: if difference > INT_MAX, than difference is negative
+        if (static_cast<int>(m_processedEvents - m_suppressSaveRequestNotify) > 0) {
+          raiseEvent(ModelChangedEvent::createApartmentChanged()); /* raiseTimedEvent */
+          // skip all etModelDirty events already on the queue
+          m_suppressSaveRequestNotify = m_processedEvents;
+        }
       }
+      scheduleConfigWrite();
       break;
     case ModelEvent::etModelOperationModeChanged:
-      eraseModelEventsFromQueue(ModelEvent::etModelOperationModeChanged);
-      writeConfiguration();
+      scheduleConfigWrite();
       break;
     case ModelEvent::etLostDSMeter:
       assert(pEventWithDSID != NULL);
@@ -722,6 +759,8 @@ namespace dss {
     case ModelEvent::etDeviceDirty:
       assert(pEventWithDSID != NULL);
       onAutoClusterMaintenance(pEventWithDSID->getDSID());
+    case ModelEvent::etDummyEvent:
+      // unit test
       break;
     case ModelEvent::etClusterCleanup:
       onAutoClusterCleanup();
@@ -887,19 +926,10 @@ namespace dss {
 
         setupWebUpdateEvent();
       }
+      AutoClusterMaintenance maintenance(m_pApartment);
+      maintenance.joinIdenticalClusters();
     }
   } // readOutPendingMeter
-
-  void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
-    boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-    for (m_ModelEvents_t::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end();) {
-      if (it->getEventType() == _type) {
-        it = m_ModelEvents.erase(it);
-      } else {
-        ++it;
-      }
-    }
-  } // eraseModelEventsFromQueue
 
   void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
     log("Scanning dS485 bus device: " + dsuid2str(_dsMeterBusID), lsInfo);
@@ -939,16 +969,6 @@ namespace dss {
             devices[i].getDevice()->setIsValid(true);
           }
         }
-
-        AutoClusterMaintenance maintenance(m_pApartment);
-        maintenance.joinIdenticalClusters();
-        Set devices  = mod->getDevices();
-        for (int ctr = 0; ctr < devices.length(); ++ctr) {
-          DeviceReference& ref = devices.get(ctr);
-          boost::shared_ptr<Device> device = ref.getDevice();
-          maintenance.consistencyCheck(*device.get());
-        }
-        maintenance.cleanupEmptyCluster();
 
         boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));

@@ -211,6 +211,16 @@ namespace dss {
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+  class EventInterpreterDebugMonitorPlugin : public EventInterpreterPlugin {
+    private:
+      __DECL_LOG_CHANNEL__
+    public:
+      EventInterpreterDebugMonitorPlugin(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterDebugMonitorPlugin() {};
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */
