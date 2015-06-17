@@ -13,6 +13,7 @@ class ModelMaintenanceMock : public ModelMaintenance
   };
 
   using ModelMaintenance::handleModelEvents;
+  using ModelMaintenance::indexOfNextSyncState;
   using ModelMaintenance::m_processedEvents;
 };
 }
