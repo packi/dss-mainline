@@ -237,11 +237,16 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
   cluster->setLocation(_cardinalDirection);
   cluster->setProtectionClass(_protection);
   cluster->setStandardGroupID(DEVICE_CLASS_GR);
-  cluster->setName(toString(_cardinalDirection) + "-" + intToString(_protection));
+
+  // Naming scheme: "<orientation> - Class <class>" (e.g. "South-West – Class 2")
+  // if no orientation is defined: only "Class x" (no "none"-Orientation)
+  if (cluster->getLocation() == cd_none) {
+    cluster->setName("Class " + intToString(_protection));
+  } else {
+    cluster->setName(toString(_cardinalDirection) + " - Class " + intToString(_protection));
+  }
   cluster->setAutomatic(true);
-
   busUpdateCluster(cluster);
-
   return cluster;
 } /* findOrCreateCluster */
 
