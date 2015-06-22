@@ -1149,6 +1149,7 @@ Sample: {
         Logger::getInstance()->log(std::string("GetWeatherInformation: invalid timestamp: ") + ex.what(), lsError);
       }
 
+      DSS::getInstance()->getSecurity().loginAsSystemUser("GetWeatherInformation needs system rights");
       Apartment& apt = DSS::getInstance()->getApartment();
       boost::shared_ptr<Zone> pZone = apt.getZone(0);
 
