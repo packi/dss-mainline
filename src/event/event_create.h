@@ -97,5 +97,9 @@ boost::shared_ptr<Event>
 
 boost::shared_ptr<Event>
   createHeatingControllerState(int _zoneID, const dsuid_t &_ctrlDsuid, int _ctrlState);
+
+boost::shared_ptr<Event>
+  createOldStateChange(const std::string &_scriptId, const std::string &_name,
+                       const std::string &_value, callOrigin_t _origin);
 }
 #endif
