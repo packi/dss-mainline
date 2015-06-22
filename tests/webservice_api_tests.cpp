@@ -301,7 +301,7 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = boost::make_shared<Event>(EventName::LogFileData);
   } else {
     // enable with '-l warning'
-    BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
+    BOOST_CHECK_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
     return pEvent;
   }
 
