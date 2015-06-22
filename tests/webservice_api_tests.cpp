@@ -291,6 +291,14 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createHeatingControllerState(1, DSUID_BROADCAST, 0x7f);
   } else if (eventName == EventName::OldStateChange) {
     pEvent = createOldStateChange("UT_ScriptID", "UT_Name", "UT_Value", coTest);
+  } else if (eventName == EventName::AddonToCloud) {
+    // created by addons! parameters might be out-of-sync
+    pEvent = boost::make_shared<Event>(EventName::AddonToCloud);
+    pEvent->setProperty("EventName", "ReturnTime");
+    pEvent->setProperty("returnOn", DateTime().toISO8601_ms());
+  } else if (eventName == EventName::LogFileData) {
+    // created by addons!
+    pEvent = boost::make_shared<Event>(EventName::LogFileData);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
