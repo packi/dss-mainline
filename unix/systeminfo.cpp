@@ -255,42 +255,26 @@ namespace dss {
 
     char line[1024];
     while (fgets(line, sizeof(line), fp) != 0) {
-      int llen;
-
-      llen = strlen(line);
-      if (line[llen - 1] == '\n') {
-        line[--llen] = 0;
-      }
-
       char field[64];
-      int flen;
-      if (sscanf(line, "%63s %n", field, &flen) < 1) {
+      long unsigned size;
+
+      if (sscanf(line, "%63s %lu kB", field, &size) < 1) {
         // no match
         continue;
       }
 
-      if  (strlen(field) == 0 || field[strlen(field) - 1] != ':') {
-        continue;
-      }
+      //printf("field:%18s size:%12lu -- line:%s\n", field, size, line);
 
-      if (flen >= llen) {
-        // something fishy here
-        continue;
-      }
-
-      int size;
-      if (sscanf(line + flen, "%d kB", &size) == 1) {
-        if (!strcmp(field, "MemTotal:")) {
+      if (!strcmp(field, "MemTotal:")) {
           result.push_back(std::make_pair("MemTotal", size));
-        } else if (!strcmp(field, "MemFree:")) {
+      } else if (!strcmp(field, "MemFree:")) {
           result.push_back(std::make_pair("MemFree", size));
-        } else if (!strcmp(field, "MemAvailable:")) {
+      } else if (!strcmp(field, "MemAvailable:")) {
           result.push_back(std::make_pair("MemAvailable", size));
-        } else if (!strcmp(field, "Buffers:")) {
+      } else if (!strcmp(field, "Buffers:")) {
           result.push_back(std::make_pair("Buffers", size));
-        } else if (!strcmp(field, "Cached:")) {
+      } else if (!strcmp(field, "Cached:")) {
           result.push_back(std::make_pair("Cached", size));
-        }
       }
     }
 
