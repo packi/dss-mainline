@@ -289,6 +289,8 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createHeatingControllerValueDsHub(1, 3, props, stat);
   } else if (eventName == EventName::HeatingControllerState) {
     pEvent = createHeatingControllerState(1, DSUID_BROADCAST, 0x7f);
+  } else if (eventName == EventName::OldStateChange) {
+    pEvent = createOldStateChange("UT_ScriptID", "UT_Name", "UT_Value", coTest);
   } else {
     // enable with '-l warning'
     BOOST_WARN_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");

@@ -335,4 +335,18 @@ boost::shared_ptr<Event>
     return event;
 }
 
+boost::shared_ptr<Event>
+  createOldStateChange(const std::string &_scriptId, const std::string &_name,
+                       const std::string &_value, callOrigin_t _origin)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::OldStateChange);
+
+  event->setProperty("scriptID", _scriptId);
+  event->setProperty("statename", _name);
+  event->setProperty("state", _value);
+  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
 }

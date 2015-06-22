@@ -30,6 +30,8 @@
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 
+#include "src/event.h"
+#include "src/event/event_create.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
 #include "src/propertysystem.h"
@@ -37,7 +39,6 @@
 #include "src/security/security.h"
 #include "src/stringconverter.h"
 #include "src/util.h"
-#include "src/event.h"
 #include "src/model/deviceinterface.h"
 #include "src/dss.h"
 
@@ -259,15 +260,12 @@ namespace dss {
     }
 
     try {
-      // send event
-      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::OldStateChange);
-      pEvent->setProperty("scriptID", ctx->getWrapper()->getIdentifier());
-      pEvent->setProperty("statename", node->getDisplayName());
-      pEvent->setProperty("state", valueNode->getStringValue());
-      pEvent->setProperty("originDeviceID", intToString((int) coJSScripting));
-
       if (DSS::hasInstance()) {
-        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+        EventQueue& queue(DSS::getInstance()->getEventQueue());
+        queue.pushEvent(createOldStateChange(ctx->getWrapper()->getIdentifier(),
+                                             node->getDisplayName(),
+                                             valueNode->getStringValue(),
+                                             coJSScripting));
       }
     } catch (...) {}
 
