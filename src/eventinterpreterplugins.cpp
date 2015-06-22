@@ -1355,18 +1355,18 @@ Sample: {
         sensorType = strToInt(strType);
       } else {
         try {
-          std::string strIndex = _event.getPropertyByName("sensorIndex");
-          boost::shared_ptr<DeviceSensor_t> pSensor = pDevRev->getDevice()->getSensor(strToInt(strIndex));
-          sensorType = pSensor->m_sensorType;
+          int index = strToInt(_event.getPropertyByName("sensorIndex"));
+          sensorType = pDevRev->getDevice()->getSensor(index)->m_sensorType;
         } catch (ItemNotFoundException& ex) {}
       }
 
-      std::string sName = "dev." + dsuid2str(pDevRev->getDSID()) + ".type" + strType + ".*";
-      std::vector<boost::shared_ptr<State> > sList = DSS::getInstance()->getApartment().getStates(sName);
-      foreach(boost::shared_ptr<State> state, sList) {
+      std::string sName = "dev." + dsuid2str(pDevRev->getDSID()) +
+        ".type" + intToString(sensorType) + ".*";
+
+      foreach(boost::shared_ptr<State> state,
+              DSS::getInstance()->getApartment().getStates(sName)) {
         double fValue = strToDouble(sensorValueFloat);
-        boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (state);
-        pSensor->newValue(coDsmApi, fValue);
+        boost::dynamic_pointer_cast<StateSensor>(state)->newValue(coDsmApi, fValue);
       }
       return;
     }
