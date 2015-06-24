@@ -221,19 +221,14 @@ static int createSmaps(const std::string &fileName) {
 
 BOOST_AUTO_TEST_CASE(testLoadSmaps) {
   SystemInfo info;
-  struct mapinfo *smaps, *it;
 
   std::string fileName = "/tmp/smaps.test"; // TODO mktemp
   createSmaps(fileName);
 
-  smaps = info.loadMaps(fileName);
-
   std::vector<std::string> headers;
-  BOOST_CHECK(smaps != NULL);
-  for (it = smaps; it; it = it->next) {
-    // TODO free(it)
-    //std::cout << boost::format("%s\n") % it->name;
-    headers.push_back(std::string(it->name));
+  BOOST_FOREACH(const mapinfo &it, info.parseSMaps(fileName)) {
+    std::cout << boost::format("%s\n") % it.name;
+    headers.push_back(std::string(it.name));
   }
   BOOST_CHECK_EQUAL(headers.size(), 6);
 }
@@ -244,7 +239,7 @@ BOOST_AUTO_TEST_CASE(testSumSmaps) {
   std::string fileName = "/tmp/smaps.test"; // TODO mktemp
   createSmaps(fileName);
 
-  struct mapinfo sum = info.sumSmaps(info.loadMaps(fileName));
+  struct mapinfo sum = info.sumSmaps(info.parseSMaps(fileName));
   std::cout << boost::format("PrivateClean: %4d kB\n") % sum.private_clean;
   std::cout << boost::format("PrivateDirty: %4d kB\n") % sum.private_dirty;
   std::cout << boost::format("SharedClean : %4d kB\n") % sum.shared_clean;

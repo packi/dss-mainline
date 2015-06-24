@@ -254,26 +254,40 @@ namespace dss {
   }
 
   // also frees smaps structure
-  struct mapinfo SystemInfo::sumSmaps(struct mapinfo *smaps)
+  struct mapinfo SystemInfo::sumSmaps(std::vector<mapinfo> smaps)
   {
-    struct mapinfo res, *mi;
+    mapinfo res;
     memset(&res, 0, sizeof(struct mapinfo));
     new (&res.name) std::string(""); // name was destroyed by memset
 
-    if (smaps == 0) {
+    BOOST_FOREACH(const mapinfo &mi, smaps) {
+      res.shared_clean += mi.shared_clean;
+      res.shared_dirty += mi.shared_dirty;
+      res.private_clean += mi.private_clean;
+      res.private_dirty += mi.private_dirty;
+      res.rss += mi.rss;
+      res.pss += mi.pss;
+      res.size += mi.size;
+    }
+
+    return res;
+  }
+
+  std::vector<struct mapinfo> SystemInfo::parseSMaps(const std::string &fpath)
+  {
+    std::vector<mapinfo> res;
+    struct mapinfo *ll_maps, *it;
+
+    ll_maps = loadMaps(fpath);
+    if (!ll_maps) {
       return res;
     }
-    for (mi = smaps; mi; ) {
-      struct mapinfo *last = mi;
-      res.shared_clean += mi->shared_clean;
-      res.shared_dirty += mi->shared_dirty;
-      res.private_clean += mi->private_clean;
-      res.private_dirty += mi->private_dirty;
-      res.rss += mi->rss;
-      res.pss += mi->pss;
-      res.size += mi->size;
-      mi = mi->next;
-      delete last;
+
+    for (it = ll_maps; it != NULL; ) {
+      struct mapinfo *next = it->next;
+      res.push_back(*it);
+      delete it;
+      it = next;
     }
 
     return res;
@@ -322,7 +336,7 @@ namespace dss {
     PropertyNodePtr debugNode = propSys.createProperty("/config/debug");
     PropertyNodePtr memoryNode = debugNode->createProperty("memory");
 
-    struct mapinfo sum = sumSmaps(loadMaps());
+    struct mapinfo sum = sumSmaps(parseSMaps());
     memoryNode->createProperty("PrivateClean")->setIntegerValue(sum.private_clean);
     memoryNode->createProperty("PrivateDirty")->setIntegerValue(sum.private_dirty);
     memoryNode->createProperty("SharedClean")->setIntegerValue(sum.shared_clean);

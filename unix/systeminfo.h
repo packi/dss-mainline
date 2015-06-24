@@ -52,12 +52,14 @@ namespace dss {
     void collect();
     void memory();
     std::vector<std::string> sysinfo();
+    std::vector<struct mapinfo>
+        parseSMaps(const std::string &smaps = "/proc/self/smaps");
     std::vector<std::pair<std::string, unsigned> > parseProcMeminfo();
-    struct mapinfo* loadMaps(const std::string &smaps = "/proc/self/smaps");
-    struct mapinfo sumSmaps(struct mapinfo *smaps);
+    struct mapinfo sumSmaps(std::vector<mapinfo> smaps);
   private:
     void enumerateInterfaces();
 
+    struct mapinfo *loadMaps(const std::string &smaps);
     int mapIsLibrary(const char *name);
     int parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi);
     int parseMapField(mapinfo* mi, const char* line);
