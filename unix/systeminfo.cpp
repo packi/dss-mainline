@@ -207,7 +207,7 @@ namespace dss {
     }
   }
 
-  struct mapinfo *SystemInfo::loadMaps()
+  struct mapinfo *SystemInfo::loadMaps(const std::string &smaps)
   {
     FILE *fp;
     struct mapinfo *head = NULL;
@@ -215,7 +215,7 @@ namespace dss {
     char line[1024];
     int len;
 
-    fp = fopen("/proc/self/smaps", "r");
+    fp = fopen(smaps.c_str(), "r");
     if (NULL == fp) {
       return 0;
     }

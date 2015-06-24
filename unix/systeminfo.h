@@ -53,6 +53,7 @@ namespace dss {
     void memory();
     std::vector<std::string> sysinfo();
     std::vector<std::pair<std::string, unsigned> > parseProcMeminfo();
+    struct mapinfo* loadMaps(const std::string &smaps = "/proc/self/smaps");
   private:
     void enumerateInterfaces();
 
@@ -60,7 +61,6 @@ namespace dss {
     int parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi);
     int parseMapField(mapinfo* mi, const char* line);
     void enqueueMapInfo(mapinfo **head, mapinfo *map, int sort_by_address, int coalesce_by_name);
-    struct mapinfo* loadMaps();
     void updateMemoryUsage();
   };
 }
