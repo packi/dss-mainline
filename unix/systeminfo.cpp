@@ -217,6 +217,7 @@ namespace dss {
 
     fp = fopen(smaps.c_str(), "r");
     if (NULL == fp) {
+      fprintf(stderr,"cannot get smaps\n");
       return 0;
     }
     while (fgets(line, sizeof(line), fp) != 0) {
@@ -242,6 +243,31 @@ namespace dss {
       return NULL;
     }
     return head;
+  }
+
+  // also frees smaps structure
+  struct mapinfo SystemInfo::sumSmaps(struct mapinfo *smaps)
+  {
+    struct mapinfo res, *mi;
+    memset(&res, 0, sizeof(struct mapinfo));
+
+    if (smaps == 0) {
+      return res;
+    }
+    for (mi = smaps; mi; ) {
+      struct mapinfo *last = mi;
+      res.shared_clean += mi->shared_clean;
+      res.shared_dirty += mi->shared_dirty;
+      res.private_clean += mi->private_clean;
+      res.private_dirty += mi->private_dirty;
+      res.rss += mi->rss;
+      res.pss += mi->pss;
+      res.size += mi->size;
+      mi = mi->next;
+      free(last);
+    }
+
+    return res;
   }
 
   std::vector<std::pair<std::string, unsigned> > SystemInfo::parseProcMeminfo()
@@ -283,44 +309,18 @@ namespace dss {
   }
 
   void SystemInfo::updateMemoryUsage() {
-    struct mapinfo *smaps;
-    struct mapinfo *mi;
-    unsigned shared_dirty = 0;
-    unsigned shared_clean = 0;
-    unsigned private_dirty = 0;
-    unsigned private_clean = 0;
-    unsigned rss = 0;
-    unsigned pss = 0;
-    unsigned size = 0;
-
-    smaps = loadMaps();
-    if (smaps == 0) {
-      fprintf(stderr,"cannot get smaps\n");
-      return;
-    }
-    for (mi = smaps; mi; ) {
-      struct mapinfo *last = mi;
-      shared_clean += mi->shared_clean;
-      shared_dirty += mi->shared_dirty;
-      private_clean += mi->private_clean;
-      private_dirty += mi->private_dirty;
-      rss += mi->rss;
-      pss += mi->pss;
-      size += mi->size;
-      mi = mi->next;
-      free(last);
-    }
-
     PropertySystem& propSys = DSS::getInstance()->getPropertySystem();
     PropertyNodePtr debugNode = propSys.createProperty("/config/debug");
     PropertyNodePtr memoryNode = debugNode->createProperty("memory");
-    memoryNode->createProperty("PrivateClean")->setIntegerValue(private_clean);
-    memoryNode->createProperty("PrivateDirty")->setIntegerValue(private_dirty);
-    memoryNode->createProperty("SharedClean")->setIntegerValue(shared_clean);
-    memoryNode->createProperty("SharedDirty")->setIntegerValue(shared_dirty);
-    memoryNode->createProperty("PSS")->setIntegerValue(pss);
-    memoryNode->createProperty("RSS")->setIntegerValue(rss);
-    memoryNode->createProperty("Size")->setIntegerValue(size);
+
+    struct mapinfo sum = sumSmaps(loadMaps());
+    memoryNode->createProperty("PrivateClean")->setIntegerValue(sum.private_clean);
+    memoryNode->createProperty("PrivateDirty")->setIntegerValue(sum.private_dirty);
+    memoryNode->createProperty("SharedClean")->setIntegerValue(sum.shared_clean);
+    memoryNode->createProperty("SharedDirty")->setIntegerValue(sum.shared_dirty);
+    memoryNode->createProperty("PSS")->setIntegerValue(sum.pss);
+    memoryNode->createProperty("RSS")->setIntegerValue(sum.rss);
+    memoryNode->createProperty("Size")->setIntegerValue(sum.size);
 
     // BOOST_FOREACH doesn't like it without typedef
     typedef std::pair<std::string, unsigned> proc_meminfo_elt;

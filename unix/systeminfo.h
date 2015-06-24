@@ -54,6 +54,7 @@ namespace dss {
     std::vector<std::string> sysinfo();
     std::vector<std::pair<std::string, unsigned> > parseProcMeminfo();
     struct mapinfo* loadMaps(const std::string &smaps = "/proc/self/smaps");
+    struct mapinfo sumSmaps(struct mapinfo *smaps);
   private:
     void enumerateInterfaces();
 

@@ -238,5 +238,29 @@ BOOST_AUTO_TEST_CASE(testLoadSmaps) {
   BOOST_CHECK_EQUAL(headers.size(), 6);
 }
 
+BOOST_AUTO_TEST_CASE(testSumSmaps) {
+  SystemInfo info;
+
+  std::string fileName = "/tmp/smaps.test"; // TODO mktemp
+  createSmaps(fileName);
+
+  struct mapinfo sum = info.sumSmaps(info.loadMaps(fileName));
+  std::cout << boost::format("PrivateClean: %4d kB\n") % sum.private_clean;
+  std::cout << boost::format("PrivateDirty: %4d kB\n") % sum.private_dirty;
+  std::cout << boost::format("SharedClean : %4d kB\n") % sum.shared_clean;
+  std::cout << boost::format("SharedDirty : %4d kB\n") % sum.shared_dirty;
+  std::cout << boost::format("PSS         : %4d kB\n") % sum.pss;
+  std::cout << boost::format("RSS         : %4d kB\n") % sum.rss;
+  std::cout << boost::format("Size        : %4d kB\n") % sum.size;
+
+  BOOST_CHECK_EQUAL(sum.private_clean, 1648);
+  BOOST_CHECK_EQUAL(sum.private_dirty, 48);
+  BOOST_CHECK_EQUAL(sum.shared_clean, 24);
+  BOOST_CHECK_EQUAL(sum.shared_dirty, 0);
+  BOOST_CHECK_EQUAL(sum.pss, 1703);
+  BOOST_CHECK_EQUAL(sum.rss, 1720);
+  BOOST_CHECK_EQUAL(sum.size, 4372);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
