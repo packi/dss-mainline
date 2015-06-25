@@ -44,6 +44,30 @@ std::string toString(CardinalDirection_t _direction)
   }
 }
 
+std::string toUIString(CardinalDirection_t _direction)
+{
+  switch (_direction) {
+  case cd_north:
+    return "North";
+  case cd_north_east:
+    return "North-East";
+  case cd_east:
+    return "East";
+  case cd_south_east:
+    return "South-East";
+  case cd_south:
+    return "South";
+  case cd_south_west:
+    return "South-West";
+  case cd_west:
+    return "West";
+  case cd_north_west:
+    return "North-West";
+  default:
+    return "none";
+  }
+}
+
 bool parseCardinalDirection(const std::string &_direction, CardinalDirection_t *_out)
 {
   assert(_out != NULL);
@@ -83,6 +107,33 @@ bool valid(WindProtectionClass_t _class)
 {
   return (wpc_none <= _class && _class < wpc_last);
 }
+
+std::string toUIString(WindProtectionClass_t _wpClass)
+{
+  switch (_wpClass) {
+  case wpc_awning_class_1:
+    return "Class 1 - 7.8m/s";
+  case wpc_awning_class_2:
+    return "Class 2 - 10.6m/s";
+  case wpc_awning_class_3:
+    return "Class 3 - 13.6m/s";
+  case wpc_blind_class_1:
+    return "Class 1 - 9.0m/s";
+  case wpc_blind_class_2:
+    return "Class 2 - 10.7m/s";
+  case wpc_blind_class_3:
+    return "Class 3 - 12.8m/s";
+  case wpc_blind_class_4:
+    return "Class 4 - 16.7/s";
+  case wpc_blind_class_5:
+    return "Class 5 - 21.0m/s";
+  case wpc_blind_class_6:
+    return "Class 6 - 25.6m/s";
+  default:
+    return "none";
+  }
+}
+
 
 bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out)
 {
