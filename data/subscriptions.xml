@@ -2,51 +2,28 @@
 <subscriptions version="1">
 
   <!-- EMail event handling --> 
-  <subscription event-name="sendmail" handler-name="sendmail">
-  </subscription>
+  <subscription event-name="sendmail" handler-name="sendmail" />
 
-  <subscription event-name="buttonClick" handler-name="system_trigger">
-  </subscription>
+  <subscription event-name="buttonClick" handler-name="system_trigger" />
+  <subscription event-name="deviceSensorEvent" handler-name="system_trigger" />
+  <subscription event-name="deviceBinaryInputEvent" handler-name="system_trigger" />
+  <subscription event-name="callScene" handler-name="system_trigger" />
+  <subscription event-name="callSceneBus" handler-name="system_trigger" />
+  <subscription event-name="undoScene" handler-name="system_trigger" />
+  <subscription event-name="stateChange" handler-name="system_trigger" />
+  <subscription event-name="addonStateChange" handler-name="system_trigger" />
 
-  <subscription event-name="deviceSensorEvent" handler-name="system_trigger">
-  </subscription>
+  <subscription event-name="action_execute" handler-name="action_execute" />
 
-  <subscription event-name="deviceBinaryInputEvent" handler-name="system_trigger">
-  </subscription>
+  <subscription event-name="highlevelevent" handler-name="highlevelevent" />
 
-  <subscription event-name="callScene" handler-name="system_trigger">
-  </subscription>
-
-  <subscription event-name="callSceneBus" handler-name="system_trigger">
-  </subscription>
-
-  <subscription event-name="undoScene" handler-name="system_trigger">
-  </subscription>
-
-  <subscription event-name="stateChange" handler-name="system_trigger">
-  </subscription>
-
-  <subscription event-name="addonStateChange" handler-name="system_trigger">
-  </subscription>
-
-  <subscription event-name="action_execute" handler-name="action_execute">
-  </subscription>
-
-  <subscription event-name="highlevelevent" handler-name="highlevelevent">
-  </subscription>
-
-  <subscription event-name="executionDenied" handler-name="execution_denied_digest">
-  </subscription>
-  <subscription event-name="execution_denied_digest_check" handler-name="execution_denied_digest">
-  </subscription>
+  <subscription event-name="executionDenied" handler-name="execution_denied_digest" />
+  <subscription event-name="execution_denied_digest_check" handler-name="execution_denied_digest" />
 
   <!-- Cloud notification -->
-  <subscription event-name="apartmentModelChanged" handler-name="apartment_model_change">
-  </subscription>
-  <subscription event-name="userDefinedActionChanged" handler-name="apartment_model_change">
-  </subscription>
-  <subscription event-name="timedEventChanged" handler-name="apartment_model_change">
-  </subscription>
+  <subscription event-name="apartmentModelChanged" handler-name="apartment_model_change" />
+  <subscription event-name="userDefinedActionChanged" handler-name="apartment_model_change" />
+  <subscription event-name="timedEventChanged" handler-name="apartment_model_change" />
 
   <!-- Export Subscription Timings to PropertyTree -->
   <subscription event-name="running" handler-name="subscription_benchmark_uploader"/>
