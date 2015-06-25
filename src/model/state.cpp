@@ -141,9 +141,8 @@ namespace dss {
       m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(path);
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyReference<std::string>(m_name, false));
-
       m_pPropertyNode->createProperty("value")
-        ->linkToProxy(PropertyProxyReference<int>((int &) m_state, false));
+        ->linkToProxy(PropertyProxyReference<int, eState>(m_state, false));
       m_pPropertyNode->createProperty("state")
         ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
 
