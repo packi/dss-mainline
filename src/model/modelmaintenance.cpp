@@ -766,8 +766,9 @@ namespace dss {
       break;
     }
     case ModelEvent::etGenericEvent:
-      onGenericEvent(static_cast<GenericEventType_t>(event->getParameter(0)),
-                     boost::static_pointer_cast<GenericEventPayload_t>(event->getSingleObjectParameter()));
+      onGenericEvent(static_cast<GenericEventType_t> (event->getParameter(0)),
+                     boost::static_pointer_cast<GenericEventPayload_t> (event->getSingleObjectParameter()),
+                     static_cast<callOrigin_t> (event->getParameter(1)));
       break;
     case ModelEvent::etOperationLock:
       // parm> 0:zoneId 1:groupId 2:lock 3:origin
@@ -2019,37 +2020,42 @@ namespace dss {
     }
   } // onClusterConfigLock
 
-  void ModelMaintenance::onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload) {
+  void ModelMaintenance::onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload, const callOrigin_t _origin) {
+    /*
+     * Generic Events
+        0 no event
+        1 Sun         {active=1, inactive=2} {direction}
+        2 Frost       {active=1, inactive=2}
+        3 HeatingMode {Off=0, Heat=1, Cold=2, Auto=3} sent by the heating system, indicates type of energy delivered into rooms
+        4 Service     {active=1, inactive=2}
+     */
     switch (_eventType) {
       case ge_sun:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Sun);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length == 2) {
+          raiseEvent(createGenericSignalSunshine(_pPayload->payload[0],
+              (CardinalDirection_t) _pPayload->payload[1], _origin));
         }
         break;
       }
       case ge_frost:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Frost);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length == 1) {
+          raiseEvent(createGenericSignalFrostProtection(_pPayload->payload[0], _origin));
         }
         break;
       }
       case ge_heating_mode:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::HeatingMode);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length == 1) {
+          raiseEvent(createGenericSignalHeatingModeSwitch(_pPayload->payload[0], _origin));
         }
         break;
       }
       case ge_service:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Service);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length == 1) {
+          raiseEvent(createGenericSignalBuildingService(_pPayload->payload[0], _origin));
         }
         break;
       }
