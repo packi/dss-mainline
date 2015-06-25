@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
+#include "model/data_types.h"
 #include "model/deviceinterface.h"
 #include "model/zone.h"
 #include "businterface.h"
@@ -101,5 +102,18 @@ boost::shared_ptr<Event>
 boost::shared_ptr<Event>
   createOldStateChange(const std::string &_scriptId, const std::string &_name,
                        const std::string &_value, callOrigin_t _origin);
+
+boost::shared_ptr<Event>
+  createGenericSignalSunshine(const uint8_t &_value, const CardinalDirection_t &_direction, callOrigin_t _origin);
+
+boost::shared_ptr<Event>
+  createGenericSignalFrostProtection(const uint8_t &_value, callOrigin_t _origin);
+
+boost::shared_ptr<Event>
+  createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin);
+
+boost::shared_ptr<Event>
+  createGenericSignalBuildingService(const uint8_t &_value, callOrigin_t _origin);
+
 }
 #endif
