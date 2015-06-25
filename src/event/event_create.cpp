@@ -29,6 +29,7 @@
 namespace dss {
 
 namespace EventName {
+  const std::string GenericSignal = "GenericSignal";
   const std::string CallScene = "callScene";
   const std::string CallSceneBus = "callSceneBus";
   const std::string DeviceSensorValue = "deviceSensorValue";
@@ -345,6 +346,51 @@ boost::shared_ptr<Event>
   event->setProperty("scriptID", _scriptId);
   event->setProperty("statename", _name);
   event->setProperty("state", _value);
+  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
+boost::shared_ptr<Event> createGenericSignalSunshine(const uint8_t &_value,
+    const CardinalDirection_t &_direction, callOrigin_t _origin) {
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::GenericSignal);
+
+  event->setProperty("signalname", "sunshine");
+  event->setProperty("value", intToString(_value));
+  event->setProperty("direction", toString(_direction));
+  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
+boost::shared_ptr<Event>
+  createGenericSignalFrostProtection(const uint8_t &_value, callOrigin_t _origin) {
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::GenericSignal);
+
+  event->setProperty("signalname", "frostprotection");
+  event->setProperty("value", intToString(_value));
+  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
+boost::shared_ptr<Event>
+  createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin) {
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::GenericSignal);
+
+  event->setProperty("signalname", "heating_mode_switch");
+  event->setProperty("value", intToString(_value));
+  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
+boost::shared_ptr<Event>
+  createGenericSignalBuildingService(const uint8_t &_value, callOrigin_t _origin) {
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::GenericSignal);
+
+  event->setProperty("signalname", "building_service");
+  event->setProperty("value", intToString(_value));
   event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
   return event;
 }
