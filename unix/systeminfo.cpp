@@ -220,18 +220,14 @@ namespace dss {
     struct mapinfo *head = NULL;
     struct mapinfo *current = NULL;
     char line[1024];
-    int len;
 
     fp = fopen(smaps.c_str(), "r");
     if (NULL == fp) {
       fprintf(stderr,"cannot get smaps\n");
       return 0;
     }
+
     while (fgets(line, sizeof(line), fp) != 0) {
-      len = strlen(line);
-      if (line[len - 1] == '\n') {
-        line[--len] = 0;
-      }
       if (current != NULL && !parseMapField(current, line)) {
         continue;
       }
@@ -244,7 +240,9 @@ namespace dss {
       fprintf(stderr, "warning: could not parse map info line: %s\n", line);
     }
     enqueueMapInfo(&head, current, 1, 1);
+
     fclose(fp);
+
     if (!head) {
       fprintf(stderr, "could not read /proc/%d/smaps\n", getpid());
       return NULL;
