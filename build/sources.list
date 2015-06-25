@@ -124,6 +124,8 @@ libdsscore_a_SOURCES =  \
 	../src/sceneaccess.cpp \
 	../src/sceneaccess.h \
 	../src/scripting/jscurl-constants.h \
+	../src/scripting/jscluster.h \
+	../src/scripting/jscluster.cpp \
 	../src/scripting/jscurl.cpp \
 	../src/scripting/jscurl.h \
 	../src/scripting/jscurl-options.h \
