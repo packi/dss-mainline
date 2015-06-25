@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "model/zone.h"
 #include "model/group.h"
+#include "model/cluster.h"
 #include "model/device.h"
 #include "model/apartment.h"
 #include "model/state.h"
@@ -38,13 +39,6 @@
 #include "security/security.h"
 
 namespace dss {
-
-namespace SystemStateName {
-  const std::string Sun = "sun";
-  const std::string Frost = "frost";
-  const std::string HeatingMode = "heating_mode";
-  const std::string Service = "service";
-}
 
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
 : EventInterpreterPlugin("system_state", _pInterpreter)
@@ -92,26 +86,36 @@ std::string SystemState::formatAppartmentStateName(const std::string &_name, int
   return _name + ".group" + intToString(_groupId);
 }
 
-boost::shared_ptr<State> SystemState::registerState(std::string _name,
-                                                    bool _persistent) {
-  boost::shared_ptr<State> state =
-    m_apartment.allocateState(StateType_Service, _name, "system_state");
+boost::shared_ptr<State> SystemState::registerState(std::string _name, bool _persistent) {
+  boost::shared_ptr<State> state = boost::make_shared<State> (StateType_Service, _name, "");
+  m_apartment.allocateState(state);
   state->setPersistence(_persistent);
   return state;
 }
 
 boost::shared_ptr<State> SystemState::getOrRegisterState(std::string _name) {
-  try {
-    return m_apartment.getState(StateType_Service, _name);
-  } catch (ItemNotFoundException &ex) {
-    return registerState(_name, true);
+  boost::shared_ptr<State> state;
+  if (lookupState(state, _name)) {
+    return state;
   }
+  return registerState(_name, true);
+}
+
+boost::shared_ptr<State> SystemState::loadPersistentState(eStateType _type, std::string _name) {
+  boost::shared_ptr<State> state = boost::make_shared <State> (_type, _name, "");
+  if (state->hasPersistentData()) {
+    state->setPersistence(true);
+    m_apartment.allocateState(state);
+  } else {
+    state.reset();
+  }
+  return state;
 }
 
 bool SystemState::lookupState(boost::shared_ptr<State> &_state,
                               const std::string &_name) {
   try {
-    _state = m_apartment.getState(StateType_Service, _name);
+    _state = m_apartment.getNonScriptState(_name);
     assert(_state != NULL);
     return true;
   } catch (ItemNotFoundException &ex) {
@@ -171,17 +175,7 @@ void SystemState::bootstrap() {
   registerState("fire", true);
   registerState("wind", true);
   registerState("rain", true);
-
-  registerState(SystemStateName::Sun, true);
-  registerState(SystemStateName::Frost, true);
-  registerState(SystemStateName::Service, true);
-  state = registerState(SystemStateName::HeatingMode, true);
-  State::ValueRange_t heatingModeValues;
-  heatingModeValues.push_back("off");
-  heatingModeValues.push_back("heating");
-  heatingModeValues.push_back("cooling");
-  heatingModeValues.push_back("auto");
-  state->setValueRange(heatingModeValues);
+  registerState("frost", true);
 }
 
 void SystemState::startup() {
@@ -234,6 +228,13 @@ void SystemState::startup() {
           getOrRegisterState(formatAppartmentStateName("rain", input->m_targetGroupId));
         }
       }
+
+      // frost monitor
+      if (input->m_inputType == BinaryInputIDFrostDetector) {
+        if (input->m_targetGroupId >= GroupIDAppUserMin) {
+          getOrRegisterState(formatAppartmentStateName("frost", input->m_targetGroupId));
+        }
+      }
     } // per device binary inputs for loop
   } // devices for loop
 
@@ -267,6 +268,7 @@ void SystemState::startup() {
     } // groups for loop
   } // zones for loop
 
+  // Restore apartment states from "lastCalledScene" ...
   boost::shared_ptr<State> state;
   if (lookupState(state, "presence")) {
     if ((absent == true) && (state->getState() == State_Inactive)) {
@@ -299,6 +301,15 @@ void SystemState::startup() {
       state->setState(coJSScripting, State_Inactive);
     }
   } // alarm state
+
+  // Restore states if they have been registered before, that reads: if a persistent data file exists
+  foreach (boost::shared_ptr<Cluster> cluster, m_apartment.getClusters()) {
+    if (cluster->getStandardGroupID() == GroupIDGray) {
+      loadPersistentState(StateType_Service, formatAppartmentStateName("wind", cluster->getID()));
+    }
+    loadPersistentState(StateType_Group, formatAppartmentStateName("operation_lock", cluster->getID()));
+  }
+  loadPersistentState(StateType_Service, "building_service");
 
   // clear fire alarm after 6h
   #define CLEAR_ALARM_URLENCODED_JSON "%7B%20%22name%22%3A%22FireAutoClear%22%2C%20%22id%22%3A%20%22system_state_fire_alarm_reset%22%2C%22triggers%22%3A%5B%7B%20%22type%22%3A%22state-change%22%2C%20%22name%22%3A%22fire%22%2C%20%22state%22%3A%22active%22%7D%5D%2C%22delay%22%3A21600%2C%22actions%22%3A%5B%7B%20%22type%22%3A%22undo-zone-scene%22%2C%20%22zone%22%3A0%2C%20%22group%22%3A0%2C%20%22scene%22%3A76%2C%20%22force%22%3A%22false%22%2C%20%22delay%22%3A0%20%7D%5D%2C%22conditions%22%3A%7B%20%22enabled%22%3Anull%2C%22weekdays%22%3Anull%2C%22timeframe%22%3Anull%2C%22zoneState%22%3Anull%2C%22systemState%22%3A%5B%7B%22name%22%3A%22fire%22%2C%22value%22%3A%221%22%7D%5D%2C%22addonState%22%3Anull%7D%2C%22scope%22%3A%22system_state.auto_cleanup%22%7D"
@@ -793,6 +804,71 @@ void SystemState::stateApartment() {
   }
 }
 
+void SystemState::doGenericSignal() {
+  if (!m_properties.has("signalname")) {
+    return;
+  }
+
+  std::string sname = m_properties.get("signalname");
+  if (sname.empty()) {
+    return;
+  }
+
+  try {
+    if (sname == "sunshine") {
+      std::string value = m_properties.get("value");
+      std::string direction = m_properties.get("direction");
+
+      // TODO: define algorithm for system states based on sun{shine,protection} inputs
+
+    } else if (sname == "frostprotection") {
+      boost::shared_ptr<State> state = getOrRegisterState("frost");
+      unsigned int value = strToInt(m_properties.get("value"));
+      if (value <= State_Unknown) {
+        state->setState(coDsmApi, value);
+      } else {
+        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
+            "frostprotection: " + m_properties.get("value"), lsWarning);
+      }
+
+    } else if (sname == "heating_mode_switch") {
+      boost::shared_ptr<State> state;
+      try {
+        state = m_apartment.getNonScriptState("heating_mode_ctrl");
+      } catch (ItemNotFoundException& ex) {
+        state = getOrRegisterState("heating_mode_ctrl");
+        State::ValueRange_t heatingModeValues;
+        heatingModeValues.push_back("off");
+        heatingModeValues.push_back("heating");
+        heatingModeValues.push_back("cooling");
+        heatingModeValues.push_back("auto");
+        state->setValueRange(heatingModeValues);
+      }
+      int value =  strToInt(m_properties.get("value"));
+      if (value < state->getValueRangeSize()) {
+        state->setState(coDsmApi, value);
+      } else {
+        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
+            "heating_mode_switch: " + m_properties.get("value"), lsWarning);
+      }
+
+    } else if (sname == "building_service") {
+      boost::shared_ptr<State> state = getOrRegisterState("building_service");
+      unsigned int value = strToInt(m_properties.get("value"));
+      if (value <= State_Unknown) {
+        state->setState(coDsmApi, value);
+      } else {
+        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
+            "building_service: " + m_properties.get("value"), lsWarning);
+      }
+
+    }
+  } catch(std::runtime_error& e) {
+    Logger::getInstance()->log("SystemState::doGenericSignal: event processing error: " +
+        std::string(e.what()), lsWarning);
+  }
+}
+
 bool SystemState::setup(Event& _event) {
   m_evtName = _event.getName();
   m_evtRaiseLocation = _event.getRaiseLocation();
@@ -830,6 +906,8 @@ void SystemState::run() {
       } else if (m_raisedAtState->getType() == StateType_Service) {
         stateApartment();
       }
+    } else if (m_evtName == EventName::GenericSignal) {
+      doGenericSignal();
     }
   } catch(ItemNotFoundException& ex) {
     Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
