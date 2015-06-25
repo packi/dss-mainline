@@ -148,29 +148,28 @@ namespace dss {
 
   int SystemInfo::parseMapField(mapinfo* mi, const char* line) {
     char field[64];
-    int len;
-    if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
-      int size;
-      if (sscanf(line + len, "%d kB", &size) == 1) {
-        if (!strcmp(field, "Size:")) {
-          mi->size = size;
-        } else if (!strcmp(field, "Rss:")) {
-          mi->rss = size;
-        } else if (!strcmp(field, "Pss:")) {
-          mi->pss = size;
-        } else if (!strcmp(field, "Shared_Clean:")) {
-          mi->shared_clean = size;
-        } else if (!strcmp(field, "Shared_Dirty:")) {
-          mi->shared_dirty = size;
-        } else if (!strcmp(field, "Private_Clean:")) {
-          mi->private_clean = size;
-        } else if (!strcmp(field, "Private_Dirty:")) {
-          mi->private_dirty = size;
-        }
-      }
-      return 0;
+    unsigned long size;
+    if (sscanf(line, "%63s %lu kB", field, &size) != 2) {
+      // printf("no-match : %s\n", line);
+      return -1;
     }
-    return -1;
+
+    if (!strcmp(field, "Size:")) {
+      mi->size = size;
+    } else if (!strcmp(field, "Rss:")) {
+      mi->rss = size;
+    } else if (!strcmp(field, "Pss:")) {
+      mi->pss = size;
+    } else if (!strcmp(field, "Shared_Clean:")) {
+      mi->shared_clean = size;
+    } else if (!strcmp(field, "Shared_Dirty:")) {
+      mi->shared_dirty = size;
+    } else if (!strcmp(field, "Private_Clean:")) {
+      mi->private_clean = size;
+    } else if (!strcmp(field, "Private_Dirty:")) {
+      mi->private_dirty = size;
+    }
+    return 0;
   }
 
   void SystemInfo::enqueueMapInfo(mapinfo **head, mapinfo *map, int sort_by_address, int coalesce_by_name) {
