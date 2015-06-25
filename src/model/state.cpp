@@ -224,6 +224,14 @@ namespace dss {
     m_IsPersistent = _persistent;
   } // setPersistence
 
+  bool State::hasPersistentData() {
+    std::string fname(getStorageName());
+    if (access(fname.c_str(), F_OK) == 0) {
+      return true;
+    }
+    return false;
+  } // hasPersistentData
+
   std::string State::toString() const {
     if (!m_values.empty()) {
       assert(m_state >= 0 && m_state < m_values.size());
