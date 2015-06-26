@@ -93,9 +93,9 @@ namespace dss {
       cluster->setStandardGroupID(deviceClass);
       cluster->setName(name);
       if (ext->busUpdateCluster(cx, cluster)) {
-        JS_SET_RVAL(cx, vp, JS_SET_RVAL(cx, vp, INT_TO_JSVAL(cluster->getID())));
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(cluster->getID()));
       } else {
-        JS_SET_RVAL(cx, vp, JS_SET_RVAL(cx, vp, INT_TO_JSVAL(-1)));
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(-1));
       }
       return JS_TRUE;
     } catch(ScriptException& e) {
