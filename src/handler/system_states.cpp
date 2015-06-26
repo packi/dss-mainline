@@ -229,7 +229,7 @@ void SystemState::startup() {
         }
       }
 
-      // frost monitor
+      // frost detector
       if (input->m_inputType == BinaryInputIDFrostDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
           getOrRegisterState(formatAppartmentStateName("frost", input->m_targetGroupId));
@@ -613,20 +613,6 @@ void SystemState::stateBinaryInputGeneric(State &_state,
   } catch (ItemNotFoundException &ex) {}
 }
 
-/**
-1 Präsenz
-2 Helligkeit (Raum)
-3 Präsenz bei Dunkelheit
-4 Dämmerung (Außen)
-5 Bewegung
-6 Bewegung bei Dunkelheit
-7 Rauchmelder
-8 Windwächter
-9 Regenwächter
-10 Sonneneinstrahlung
-11 Raumthermostat
-*/
-
 void SystemState::stateBinaryinput() {
   if (m_raisedAtState == NULL) {
     return;
@@ -741,6 +727,15 @@ void SystemState::stateBinaryinput() {
         sceneID = Scene1;
       }
       callScene(pDev->getZoneID(), GroupIDHeating, sceneID, coSystemBinaryInput);
+    }
+  }
+
+  // frost detector
+  if (devInput->m_inputType == BinaryInputIDFrostDetector) {
+    boost::shared_ptr<State> state;
+    if (lookupState(state, "frost")) {
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+          devInput->m_targetGroupId);
     }
   }
 }
