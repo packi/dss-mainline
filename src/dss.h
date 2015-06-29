@@ -176,7 +176,6 @@ namespace dss {
     void setSavedPropsDirectory(const std::string& _value);
     void publishDSID();
     int getUptime() const;
-    bool drainModelChanges(int timeoutSecs = 60);
   }; // DSS
 
 }
