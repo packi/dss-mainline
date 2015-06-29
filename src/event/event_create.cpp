@@ -54,6 +54,10 @@ namespace EventName {
   const std::string DeviceHeatingTypeChanged = "DeviceHeatingTypeChanged";
   const std::string LogFileData = "logFileData";
   const std::string DebugMonitorUpdate = "debugMonitorUpdate";
+  const std::string Sunshine = "sunshine";
+  const std::string FrostProtection = "frostprotection";
+  const std::string HeatingModeSwitch = "heating_mode_switch";
+  const std::string BuildingService = "building_service";
 }
 
 boost::shared_ptr<Event>

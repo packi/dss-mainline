@@ -40,6 +40,24 @@
 
 namespace dss {
 
+namespace StateName {
+  const std::string Alarm = "alarm";
+  const std::string Alarm2 = "alarm2";
+  const std::string Alarm3 = "alarm3";
+  const std::string Alarm4 = "alarm4";
+  const std::string BuildingService = "building_service";
+  const std::string Fire = "fire";
+  const std::string Frost = "frost";
+  const std::string HeatingModeControl = "heating_mode_ctrl";
+  const std::string Hibernation = "hibernation";
+  const std::string Panic = "panic";
+  const std::string Motion = "motion";
+  const std::string OperationLock = "operation_lock";
+  const std::string Presence = "presence";
+  const std::string Rain = "rain";
+  const std::string Wind = "wind";
+}
+
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
 : EventInterpreterPlugin("system_state", _pInterpreter)
 { }

@@ -27,6 +27,24 @@
 
 namespace dss {
 
+  namespace StateName {
+    extern const std::string Alarm;
+    extern const std::string Alarm2;
+    extern const std::string Alarm3;
+    extern const std::string Alarm4;
+    extern const std::string BuildingService;
+    extern const std::string Fire;
+    extern const std::string Frost;
+    extern const std::string HeatingModeControl;
+    extern const std::string Hibernation;
+    extern const std::string Panic;
+    extern const std::string Motion;
+    extern const std::string OperationLock;
+    extern const std::string Presence;
+    extern const std::string Rain;
+    extern const std::string Wind;
+  }
+
   class SystemState : public SystemEvent {
     public:
       SystemState();
