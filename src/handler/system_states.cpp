@@ -164,7 +164,7 @@ void SystemState::undoScene(int _zoneId, int _groupId, int _sceneId,
 void SystemState::bootstrap() {
   boost::shared_ptr<State> state;
 
-  state = registerState("presence", true);
+  state = registerState(StateName::Presence, true);
   // Default presence status is "present" - set default before loading
   // old status from persistent storage
   state->setState(coSystem, State_Active);
@@ -176,7 +176,7 @@ void SystemState::bootstrap() {
   presenceValues.push_back("invalid");
   state->setValueRange(presenceValues);
 
-  state = registerState("hibernation", true);
+  state = registerState(StateName::Hibernation, true);
 
   State::ValueRange_t sleepmodeValues;
   sleepmodeValues.push_back("unknown");
@@ -185,15 +185,15 @@ void SystemState::bootstrap() {
   sleepmodeValues.push_back("invalid");
   state->setValueRange(sleepmodeValues);
 
-  registerState("alarm", true);
-  registerState("alarm2", true);
-  registerState("alarm3", true);
-  registerState("alarm4", true);
-  registerState("panic", true);
-  registerState("fire", true);
-  registerState("wind", true);
-  registerState("rain", true);
-  registerState("frost", true);
+  registerState(StateName::Alarm, true);
+  registerState(StateName::Alarm2, true);
+  registerState(StateName::Alarm3, true);
+  registerState(StateName::Alarm4, true);
+  registerState(StateName::Panic, true);
+  registerState(StateName::Fire, true);
+  registerState(StateName::Wind, true);
+  registerState(StateName::Rain, true);
+  registerState(StateName::Frost, true);
 }
 
 void SystemState::startup() {
@@ -214,9 +214,9 @@ void SystemState::startup() {
           (input->m_inputType == BinaryInputIDMovementInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = formatGroupName("motion", input->m_targetGroupId);
+          stateName = formatGroupName(StateName::Motion, input->m_targetGroupId);
         } else {
-          stateName = formatZoneName("motion", device->getZoneID());
+          stateName = formatZoneName(StateName::Motion, device->getZoneID());
         }
         getOrRegisterState(stateName);
       }
@@ -226,9 +226,9 @@ void SystemState::startup() {
           (input->m_inputType == BinaryInputIDPresenceInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          stateName = formatGroupName("presence", input->m_targetGroupId);
+          stateName = formatGroupName(StateName::Presence, input->m_targetGroupId);
         } else {
-          stateName = formatZoneName("presence", device->getZoneID());
+          stateName = formatZoneName(StateName::Presence, device->getZoneID());
         }
         getOrRegisterState(stateName);
       }
@@ -236,21 +236,21 @@ void SystemState::startup() {
       // wind monitor
       if (input->m_inputType == BinaryInputIDWindDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          getOrRegisterState(formatAppartmentStateName("wind", input->m_targetGroupId));
+          getOrRegisterState(formatAppartmentStateName(StateName::Wind, input->m_targetGroupId));
         }
       }
 
       // rain monitor
       if (input->m_inputType == BinaryInputIDRainDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          getOrRegisterState(formatAppartmentStateName("rain", input->m_targetGroupId));
+          getOrRegisterState(formatAppartmentStateName(StateName::Rain, input->m_targetGroupId));
         }
       }
 
       // frost detector
       if (input->m_inputType == BinaryInputIDFrostDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
-          getOrRegisterState(formatAppartmentStateName("frost", input->m_targetGroupId));
+          getOrRegisterState(formatAppartmentStateName(StateName::Frost, input->m_targetGroupId));
         }
       }
     } // per device binary inputs for loop
@@ -264,7 +264,7 @@ void SystemState::startup() {
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
         if (group->getStandardGroupID() == GroupIDGray) {
-          registerState(formatAppartmentStateName("wind", group->getID()), true);
+          registerState(formatAppartmentStateName(StateName::Wind, group->getID()), true);
         }
         continue;
       }
@@ -288,7 +288,7 @@ void SystemState::startup() {
 
   // Restore apartment states from "lastCalledScene" ...
   boost::shared_ptr<State> state;
-  if (lookupState(state, "presence")) {
+  if (lookupState(state, StateName::Presence)) {
     if ((absent == true) && (state->getState() == State_Inactive)) {
       state->setState(coJSScripting, "absent");
     } else if (absent == false) {
@@ -296,7 +296,7 @@ void SystemState::startup() {
     }
   }
 
-  if (lookupState(state, "hibernation")) {
+  if (lookupState(state, StateName::Hibernation)) {
     if ((sleeping == true) && (state->getState() == State_Inactive)) {
       state->setState(coJSScripting, "sleeping");
     } else if (sleeping == false) {
@@ -304,7 +304,7 @@ void SystemState::startup() {
     }
   } // hibernation state
 
-  if (lookupState(state, "panic")) {
+  if (lookupState(state, StateName::Panic)) {
     if ((panic == true) && (state->getState() == State_Inactive)) {
       state->setState(coJSScripting, State_Active);
     } else if (panic == false) {
@@ -312,7 +312,7 @@ void SystemState::startup() {
     }
   } // panic state
 
-  if (lookupState(state, "alarm")) {
+  if (lookupState(state, StateName::Alarm)) {
     if ((alarm == true) && (state->getState() == State_Inactive)) {
       state->setState(coJSScripting, State_Active);
     } else if (alarm == false) {
@@ -323,11 +323,11 @@ void SystemState::startup() {
   // Restore states if they have been registered before, that reads: if a persistent data file exists
   foreach (boost::shared_ptr<Cluster> cluster, m_apartment.getClusters()) {
     if (cluster->getStandardGroupID() == GroupIDGray) {
-      loadPersistentState(StateType_Service, formatAppartmentStateName("wind", cluster->getID()));
+      loadPersistentState(StateType_Service, formatAppartmentStateName(StateName::Wind, cluster->getID()));
     }
-    loadPersistentState(StateType_Group, formatAppartmentStateName("operation_lock", cluster->getID()));
+    loadPersistentState(StateType_Group, formatAppartmentStateName(StateName::OperationLock, cluster->getID()));
   }
-  loadPersistentState(StateType_Service, "building_service");
+  loadPersistentState(StateType_Service, StateName::BuildingService);
 
   // clear fire alarm after 6h
   #define CLEAR_ALARM_URLENCODED_JSON "%7B%20%22name%22%3A%22FireAutoClear%22%2C%20%22id%22%3A%20%22system_state_fire_alarm_reset%22%2C%22triggers%22%3A%5B%7B%20%22type%22%3A%22state-change%22%2C%20%22name%22%3A%22fire%22%2C%20%22state%22%3A%22active%22%7D%5D%2C%22delay%22%3A21600%2C%22actions%22%3A%5B%7B%20%22type%22%3A%22undo-zone-scene%22%2C%20%22zone%22%3A0%2C%20%22group%22%3A0%2C%20%22scene%22%3A76%2C%20%22force%22%3A%22false%22%2C%20%22delay%22%3A0%20%7D%5D%2C%22conditions%22%3A%7B%20%22enabled%22%3Anull%2C%22weekdays%22%3Anull%2C%22timeframe%22%3Anull%2C%22zoneState%22%3Anull%2C%22systemState%22%3A%5B%7B%22name%22%3A%22fire%22%2C%22value%22%3A%221%22%7D%5D%2C%22addonState%22%3Anull%7D%2C%22scope%22%3A%22system_state.auto_cleanup%22%7D"
@@ -415,80 +415,80 @@ void SystemState::callscene() {
   if (groupId == 0) {
     switch (sceneId) {
     case SceneAbsent:
-      if (lookupState(state, "presence")) {
+      if (lookupState(state, StateName::Presence)) {
         state->setState(coSystem, "absent");
       }
       // #2561: auto-clear panic and fire
-      if (lookupState(state, "panic")) {
+      if (lookupState(state, StateName::Panic)) {
         if (state->getState() == State_Active) {
           undoScene(0, 0, ScenePanic, coSystem);
         }
       }
-      if (lookupState(state, "fire")) {
+      if (lookupState(state, StateName::Fire)) {
         if (state->getState() == State_Active) {
           undoScene(0, 0, SceneFire, coSystem);
         }
       }
       break;
     case ScenePresent:
-      if (lookupState(state, "presence")) {
+      if (lookupState(state, StateName::Presence)) {
         state->setState(coSystem, "present");
       }
       break;
     case  SceneSleeping:
-      if (lookupState(state, "hibernation")) {
+      if (lookupState(state, StateName::Hibernation)) {
         state->setState(coSystem, "sleeping");
       }
       break;
     case SceneWakeUp:
-      if (lookupState(state, "hibernation")) {
+      if (lookupState(state, StateName::Hibernation)) {
         state->setState(coSystem, "awake");
       }
       break;
     case ScenePanic:
-      if (lookupState(state, "panic")) {
+      if (lookupState(state, StateName::Panic)) {
         state->setState(coSystem, State_Active);
       }
       break;
     case SceneFire:
-      if (lookupState(state, "fire")) {
+      if (lookupState(state, StateName::Fire)) {
         state->setState(coSystem, State_Active);
       }
       break;
     case SceneAlarm:
-      if (lookupState(state, "alarm")) {
+      if (lookupState(state, StateName::Alarm)) {
         state->setState(coSystem, State_Active);
       }
       break;
     case SceneAlarm2:
-      if (lookupState(state, "alarm2")) {
+      if (lookupState(state, StateName::Alarm2)) {
         state->setState(coSystem, State_Active);
       }
       break;
     case SceneAlarm3:
-      if (lookupState(state, "alarm3")) {
+      if (lookupState(state, StateName::Alarm3)) {
         state->setState(coSystem, State_Active);
       }
       break;
     case SceneAlarm4:
-      if (lookupState(state, "alarm4")) {
+      if (lookupState(state, StateName::Alarm4)) {
         state->setState(coSystem, State_Active);
       }
       break;
     case SceneWindActive:
-      state = getOrRegisterState("wind");
+      state = getOrRegisterState(StateName::Wind);
       state->setState(coSystem, State_Active);
       break;
     case SceneWindInactive:
-      state = getOrRegisterState("wind");
+      state = getOrRegisterState(StateName::Wind);
       state->setState(coSystem, State_Inactive);
       break;
     case SceneRainActive:
-      state = getOrRegisterState("rain");
+      state = getOrRegisterState(StateName::Rain);
       state->setState(coSystem, State_Active);
       break;
     case SceneRainInactive:
-      state = getOrRegisterState("rain");
+      state = getOrRegisterState(StateName::Rain);
       state->setState(coSystem, State_Inactive);
       // cluster sensor and the global rain sensor could contradict each other,
       // and we are not resolving that conflict. Currently we support either
@@ -496,7 +496,7 @@ void SystemState::callscene() {
       // In the presence of cluster rain states inactive-rain on group0 serves
       // as a broadcast command only
       for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
-        if (lookupState(state, formatAppartmentStateName("rain", grp))) {
+        if (lookupState(state, formatAppartmentStateName(StateName::Rain, grp))) {
           state->setState(coSystem, State_Inactive);
         }
       }
@@ -508,19 +508,19 @@ void SystemState::callscene() {
      */
     switch (sceneId) {
     case SceneWindActive:
-      state = getOrRegisterState(formatAppartmentStateName("wind", groupId));
+      state = getOrRegisterState(formatAppartmentStateName(StateName::Wind, groupId));
       state->setState(coSystem, State_Active);
       break;
     case SceneWindInactive:
-      state = getOrRegisterState(formatAppartmentStateName("wind", groupId));
+      state = getOrRegisterState(formatAppartmentStateName(StateName::Wind, groupId));
       state->setState(coSystem, State_Inactive);
       break;
     case SceneRainActive:
-      state = getOrRegisterState(formatAppartmentStateName("rain", groupId));
+      state = getOrRegisterState(formatAppartmentStateName(StateName::Rain, groupId));
       state->setState(coSystem, State_Active);
       break;
     case SceneRainInactive:
-      state = getOrRegisterState(formatAppartmentStateName("rain", groupId));
+      state = getOrRegisterState(formatAppartmentStateName(StateName::Rain, groupId));
       state->setState(coSystem, State_Inactive);
       break;
     }
@@ -547,12 +547,12 @@ void SystemState::undoscene() {
   assert(groupId == 0);
   switch (sceneId) {
   case ScenePanic:
-    if (lookupState(state, "panic")) {
+    if (lookupState(state, StateName::Panic)) {
       state->setState(coSystem, State_Inactive);
     }
 
     // #2561: auto-reset fire if panic was reset by a button
-    if (lookupState(state, "fire")) {
+    if (lookupState(state, StateName::Fire)) {
       if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi) &&
           (state->getState() == State_Active)) {
         undoScene(0, 0, SceneFire, coSystem);
@@ -560,12 +560,12 @@ void SystemState::undoscene() {
     }
     break;
   case SceneFire:
-    if (lookupState(state, "fire")) {
+    if (lookupState(state, StateName::Fire)) {
       state->setState(coSystem, State_Inactive);
     }
 
     // #2561: auto-reset panic if fire was reset by a button
-    if (lookupState(state, "panic")) {
+    if (lookupState(state, StateName::Panic)) {
       if ((dsuid != DSUID_NULL) && (callOrigin == coDsmApi)
           && (state->getState() == State_Active)) {
         undoScene(0, 0, ScenePanic, coSystem);
@@ -573,22 +573,22 @@ void SystemState::undoscene() {
     }
     break;
   case SceneAlarm:
-    if (lookupState(state, "alarm")) {
+    if (lookupState(state, StateName::Alarm)) {
       state->setState(coSystem, State_Inactive);
     }
     break;
   case SceneAlarm2:
-    if (lookupState(state, "alarm2")) {
+    if (lookupState(state, StateName::Alarm2)) {
       state->setState(coSystem, State_Inactive);
     }
     break;
   case SceneAlarm3:
-    if (lookupState(state, "alarm3")) {
+    if (lookupState(state, StateName::Alarm3)) {
       state->setState(coSystem, State_Inactive);
     }
     break;
   case SceneAlarm4:
-    if (lookupState(state, "alarm4")) {
+    if (lookupState(state, StateName::Alarm4)) {
       state->setState(coSystem, State_Inactive);
     }
     break;
@@ -669,9 +669,9 @@ void SystemState::stateBinaryinput() {
   if ((devInput->m_inputType == BinaryInputIDMovement) ||
       (devInput->m_inputType == BinaryInputIDMovementInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = formatGroupName("motion", devInput->m_targetGroupId);
+      statename = formatGroupName(StateName::Motion, devInput->m_targetGroupId);
     } else {
-      statename = formatZoneName("motion", pDev->getZoneID());
+      statename = formatZoneName(StateName::Motion, pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
     stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -682,9 +682,9 @@ void SystemState::stateBinaryinput() {
   if ((devInput->m_inputType == BinaryInputIDPresence) ||
       (devInput->m_inputType == BinaryInputIDPresenceInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = formatGroupName("presence", devInput->m_targetGroupId);
+      statename = formatGroupName(StateName::Presence, devInput->m_targetGroupId);
     } else {
-      statename = formatZoneName("presence", pDev->getZoneID());
+      statename = formatZoneName(StateName::Presence, pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
     stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -694,7 +694,7 @@ void SystemState::stateBinaryinput() {
   // smoke detector
   if (devInput->m_inputType == BinaryInputIDSmokeDetector) {
     boost::shared_ptr<State> state;
-    if (lookupState(state, "fire")) {
+    if (lookupState(state, StateName::Fire)) {
       if (m_properties.has("value")) {
         std::string val = m_properties.get("value");
         int iVal = strToIntDef(val, -1);
@@ -710,11 +710,11 @@ void SystemState::stateBinaryinput() {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = formatAppartmentStateName("wind", devInput->m_targetGroupId);
+      statename = formatAppartmentStateName(StateName::Wind, devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
-    } else if (lookupState(state, "wind")) {
+    } else if (lookupState(state, StateName::Wind)) {
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
     }
@@ -725,11 +725,11 @@ void SystemState::stateBinaryinput() {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
-      statename = formatAppartmentStateName("rain", devInput->m_targetGroupId);
+      statename = formatAppartmentStateName(StateName::Rain, devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
-    } else if (lookupState(state, "rain")) {
+    } else if (lookupState(state, StateName::Rain)) {
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
                               devInput->m_targetGroupId);
     }
@@ -751,7 +751,7 @@ void SystemState::stateBinaryinput() {
   // frost detector
   if (devInput->m_inputType == BinaryInputIDFrostDetector) {
     boost::shared_ptr<State> state;
-    if (lookupState(state, "frost")) {
+    if (lookupState(state, StateName::Frost)) {
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
           devInput->m_targetGroupId);
     }
@@ -794,13 +794,13 @@ void SystemState::stateApartment() {
     iVal = strToIntDef(val, -1);
   }
 
-  if (statename == "fire") {
+  if (statename == StateName::Fire) {
     if (iVal == 1) {
       callScene(0, 0, SceneFire, coSystem);
     }
   }
 
-  if (statename.substr(0, 4) == "rain") {
+  if (statename.substr(0, 4) == StateName::Rain) {
     if (iVal == 1) {
       callScene(0, groupId, SceneRainActive, coSystem);
     } else if (iVal == 2) {
@@ -808,7 +808,7 @@ void SystemState::stateApartment() {
     }
   }
 
-  if (statename.substr(0, 4) == "wind") {
+  if (statename.substr(0, 4) == StateName::Wind) {
     if (iVal == 1) {
       callScene(0, groupId, SceneWindActive, coSystem);
     } else if (iVal == 2) {
@@ -828,28 +828,28 @@ void SystemState::doGenericSignal() {
   }
 
   try {
-    if (sname == "sunshine") {
+    if (sname == EventName::Sunshine) {
       std::string value = m_properties.get("value");
       std::string direction = m_properties.get("direction");
 
       // TODO: define algorithm for system states based on sun{shine,protection} inputs
 
-    } else if (sname == "frostprotection") {
-      boost::shared_ptr<State> state = getOrRegisterState("frost");
+    } else if (sname == EventName::FrostProtection) {
+      boost::shared_ptr<State> state = getOrRegisterState(StateName::Frost);
       unsigned int value = strToInt(m_properties.get("value"));
       if (value <= State_Unknown) {
         state->setState(coDsmApi, value);
       } else {
         Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            "frostprotection: " + m_properties.get("value"), lsWarning);
+            EventName::FrostProtection + ": " + m_properties.get("value"), lsWarning);
       }
 
-    } else if (sname == "heating_mode_switch") {
+    } else if (sname == EventName::HeatingModeSwitch) {
       boost::shared_ptr<State> state;
       try {
-        state = m_apartment.getNonScriptState("heating_mode_ctrl");
+        state = m_apartment.getNonScriptState(StateName::HeatingModeControl);
       } catch (ItemNotFoundException& ex) {
-        state = getOrRegisterState("heating_mode_ctrl");
+        state = getOrRegisterState(StateName::HeatingModeControl);
         State::ValueRange_t heatingModeValues;
         heatingModeValues.push_back("off");
         heatingModeValues.push_back("heating");
@@ -857,22 +857,22 @@ void SystemState::doGenericSignal() {
         heatingModeValues.push_back("auto");
         state->setValueRange(heatingModeValues);
       }
-      int value =  strToInt(m_properties.get("value"));
+      unsigned int value =  strToUInt(m_properties.get("value"));
       if (value < state->getValueRangeSize()) {
         state->setState(coDsmApi, value);
       } else {
         Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            "heating_mode_switch: " + m_properties.get("value"), lsWarning);
+            EventName::HeatingModeSwitch + ": " + m_properties.get("value"), lsWarning);
       }
 
-    } else if (sname == "building_service") {
-      boost::shared_ptr<State> state = getOrRegisterState("building_service");
+    } else if (sname == EventName::BuildingService) {
+      boost::shared_ptr<State> state = getOrRegisterState(StateName::BuildingService);
       unsigned int value = strToInt(m_properties.get("value"));
       if (value <= State_Unknown) {
         state->setState(coDsmApi, value);
       } else {
         Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            "building_service: " + m_properties.get("value"), lsWarning);
+            EventName::BuildingService + ": " + m_properties.get("value"), lsWarning);
       }
 
     }
