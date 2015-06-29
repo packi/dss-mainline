@@ -37,6 +37,7 @@ namespace dss {
   class Set;
   class Device;
   class Apartment;
+  class Cluster;
   class DSMeter;
   class Metering;
 
@@ -78,6 +79,12 @@ namespace dss {
      * @param _pZone Reference to the \a Zone being wrapped
      */
     JSObject* createJSZone(ScriptContext& _ctx, boost::shared_ptr<Zone> _pZone);
+
+    /** Creates a JSObject that wraps a Cluster
+     * @param _ctx Context in which to create the object
+     * @param _pCluster Reference to the \a Cluster being wrapped
+     */
+    JSObject* createJSCluster(ScriptContext& _ctx, boost::shared_ptr<Cluster> _pCluster);
 
     /** Creates a JSObject that wraps a State
      * @param _ctx Context in which to create the object

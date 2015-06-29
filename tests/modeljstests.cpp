@@ -31,6 +31,7 @@
 #include "event.h"
 #include "eventinterpreterplugins.h"
 #include "propertysystem.h"
+#include "structuremanipulator.h"
 #include "metering/metering.h"
 #include "model/apartment.h"
 #include "model/device.h"
@@ -38,13 +39,56 @@
 #include "model/modelconst.h"
 #include "model/zone.h"
 #include "model/group.h"
+#include "model/cluster.h"
 #include "scripting/jsmodel.h"
 #include "scripting/jsevent.h"
 #include "scripting/jsmetering.h"
 #include "scripting/scriptobject.h"
 
+#include "util/ds485-bus-mockups.h"
+#include "util/modelmaintenance-mockup.h"
+
 using namespace std;
 using namespace dss;
+
+class InstanceHelper
+{
+public:
+  InstanceHelper(Apartment* _apartment) :
+    modifyingInterface(new DummyStructureModifyingInterface()),
+    queryInterface(new DummyStructureQueryBusInterface()),
+    actionInterface(new DummyActionRequestInterface()),
+    busInterface(NULL),
+    manipulator(NULL),
+    modelMaintenance(new ModelMaintenanceMock()),
+    m_apartment(_apartment) {
+    busInterface = new DummyBusInterface(modifyingInterface, queryInterface, actionInterface);
+    manipulator = new StructureManipulator(*modifyingInterface, *queryInterface, *m_apartment);
+    m_apartment->setBusInterface(busInterface);
+    modelMaintenance->setApartment(m_apartment);
+    modelMaintenance->setStructureModifyingBusInterface(modifyingInterface);
+    modelMaintenance->initialize();
+  };
+
+  ~InstanceHelper() {
+    delete modifyingInterface;
+    delete queryInterface;
+    delete actionInterface;
+    delete busInterface;
+    delete manipulator;
+    delete modelMaintenance;
+  };
+
+public:
+  DummyStructureModifyingInterface* modifyingInterface;
+  DummyStructureQueryBusInterface* queryInterface;
+  DummyActionRequestInterface* actionInterface;
+  DummyBusInterface* busInterface;
+  StructureManipulator* manipulator;
+  ModelMaintenanceMock* modelMaintenance;
+
+  Apartment* m_apartment;
+};
 
 DSUID_DEFINE(dsuid1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
 DSUID_DEFINE(dsuid2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
@@ -444,7 +488,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
 
 BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
   Apartment apt(NULL);
-  
+
   apt.allocateDSMeter(dsuid1);
   Metering metering(NULL);
 
@@ -538,7 +582,7 @@ BOOST_AUTO_TEST_CASE(testMeteringGetValuesCount) {
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   Apartment apt(NULL);
-  
+
   apt.allocateDSMeter(dsuid1);
   apt.getDSMeterByDSID(dsuid1)->setCapability_HasMetering(true);
   Metering metering(NULL);
@@ -633,5 +677,82 @@ BOOST_AUTO_TEST_CASE(testStateSensors) {
   pSensor->newValue(coSystem, 25.0);
   BOOST_CHECK_EQUAL(pState->getState(), 1);
 } // testStates
+
+BOOST_AUTO_TEST_CASE(testCluster) {
+  Apartment apt(NULL);
+  InstanceHelper helper(&apt);
+
+  // create 2 clusters
+  boost::shared_ptr<Cluster> cluster1 = apt.getCluster(16);
+  cluster1->setLocation(cd_north);
+  cluster1->setStandardGroupID(3);
+  cluster1->setProtectionClass(wpc_awning_class_2);
+  cluster1->setFloor(2);
+  cluster1->setConfigurationLocked(true);
+  cluster1->setAutomatic(true);
+  cluster1->setOperationLock(true, coUnknown);
+  cluster1->setName("cluster1");
+
+  boost::shared_ptr<Cluster> cluster2 = apt.getCluster(38);
+  cluster2->setLocation(cd_south);
+  cluster2->setStandardGroupID(4);
+  cluster2->setProtectionClass(wpc_awning_class_1);
+  cluster2->setFloor(1);
+  cluster2->setConfigurationLocked(false);
+  cluster2->setAutomatic(false);
+  cluster2->setOperationLock(false, coUnknown);
+  cluster2->setName("cluster2");
+
+  std::vector<boost::shared_ptr<Cluster> > clusterVec;
+  clusterVec.push_back(cluster1);
+  clusterVec.push_back(cluster2);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  // Check number of clusters
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  int num = ctx->evaluate<int>("Apartment.getClusters().length");
+  BOOST_CHECK_EQUAL(num, 2);
+
+  for (int i = 0; i < clusterVec.size(); ++i) {
+    ctx->evaluate<void>(
+      "var clusters  = Apartment.getClusters();"
+      "var clusterIdx =" + intToString(i) +";"
+      "var cluster = clusters[clusterIdx];"
+      "var className = cluster.className;"
+      "var id = cluster.id;"
+      "var name = cluster.name;"
+      "var standardGroup = cluster.standardGroup;"
+      "var location = cluster.location;"
+      "var protectionClass = cluster.protectionClass;"
+      "var floor = cluster.floor;"
+      "var automatic = cluster.automatic;"
+      "var configurationLock = cluster.configurationLock;"
+      "var operationLock = cluster.operationLock;"
+      "print('Cluster:', className, ' ', id, ' ', name, ' ',standardGroup,' ', location, ' '\
+          , protectionClass,' ', floor, ' ',automatic,' ', configurationLock, ' ', operationLock);"
+      ""
+    );
+    boost::shared_ptr<Cluster> cluster = clusterVec.at(i);
+    JSContextThread thread(ctx);
+    std::string className(ctx->getRootObject().getProperty<std::string>("className"));
+    BOOST_CHECK_EQUAL(className.compare("Cluster") , 0);
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("id"), cluster->getID());
+    std::string name(ctx->getRootObject().getProperty<std::string>("name"));
+    BOOST_CHECK_EQUAL(name.compare(cluster->getName()), 0);
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("standardGroup"),      cluster->getStandardGroupID());
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("location"),           cluster->getLocation());
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("protectionClass"),    cluster->getProtectionClass());
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("floor"),              cluster->getFloor());
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("automatic"),         cluster->isAutomatic());
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("configurationLock"), cluster->isConfigurationLocked());
+    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("operationLock"),     cluster->isOperationLock());
+  }
+
+} // testCluster
 
 BOOST_AUTO_TEST_SUITE_END()

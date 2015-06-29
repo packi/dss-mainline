@@ -45,6 +45,7 @@
 #include "src/model/modulator.h"
 #include "src/model/modelconst.h"
 #include "src/model/group.h"
+#include "src/model/cluster.h"
 #include "src/model/zone.h"
 #include "src/model/state.h"
 #include "src/model/scenehelper.h"
@@ -284,6 +285,44 @@ namespace dss {
 
     return JS_TRUE;
   } // global_getZones
+
+  JSBool global_getClusters(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getClusters: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
+
+      std::size_t i = 0;
+      foreach (boost::shared_ptr<Cluster> cluster, ext->getApartment().getClusters()) {
+        if (cluster->getStandardGroupID() == 0) {
+          continue;
+        }
+        JSObject* clusterObj = ext->createJSCluster(*ctx, cluster);
+        jsval clusterJSVal = OBJECT_TO_JSVAL(clusterObj);
+        JSBool res = JS_SetElement(cx, resultObj, i, &clusterJSVal);
+        ++i;
+        if(!res) {
+          return JS_FALSE;
+        }
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_TRUE;
+  } // global_getClusters
 
   JSBool global_getZoneByID(JSContext* cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -646,6 +685,7 @@ namespace dss {
     JS_FS("getEnergyMeterValue", global_getEnergyMeterValue, 0, 0),
     JS_FS("getDSMeters", global_getDSMeters, 0, 0),
     JS_FS("getZones", global_getZones, 0, 0),
+    JS_FS("getClusters", global_getClusters, 0, 0),
     JS_FS("getZoneByID", global_getZoneByID, 0, 0),
     JS_FS("getState", global_getStateByName, 1, 0),
     JS_FS("registerState", global_registerState, 1, 0),
@@ -688,7 +728,7 @@ namespace dss {
         NULL,
         NULL,
         apartment_static_methods);
-  } // extendedJSContext
+  } // extendContext
 
   void finalize_set(JSContext *cx, JSObject *obj) {
     Set* pSet = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -708,7 +748,7 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // set_length
 
   JSBool set_combine(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -730,7 +770,7 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // set_combine
 
   JSBool set_remove(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1177,7 +1217,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // set_JSGet
 
   static JSClass set_class = {
     "Set", JSCLASS_HAS_PRIVATE,
@@ -1241,7 +1281,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_turn_on
 
   JSBool dev_turn_off(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1274,7 +1314,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_turn_off
 
   JSBool dev_blink(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1307,7 +1347,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_blink
 
   JSBool dev_increase_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1340,7 +1380,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_increase_value
 
   JSBool dev_decrease_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1374,7 +1414,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_decrease_value
 
   JSBool dev_set_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1761,7 +1801,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  } // dev_get_config
+  } // dev_set_config
 
   JSBool dev_get_output_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -2113,7 +2153,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // dev_JSGet
 
   void finalize_dev(JSContext *cx, JSObject *obj) {
     DeviceReference* pDevice = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
@@ -2205,7 +2245,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // dsmeter_JSGet
 
   static JSPropertySpec dsmeter_properties[] = {
     {"className", 0, 0, dsmeter_JSGet, NULL},
@@ -2369,6 +2409,90 @@ namespace dss {
     return result;
   } // createJSMeter
 
+  //=== JSCluster ===
+
+  struct cluster_wrapper {
+    boost::shared_ptr<Cluster> pCluster;
+  };
+
+  void finalize_cluster(JSContext *cx, JSObject *obj) {
+    struct cluster_wrapper* pCluster = static_cast<cluster_wrapper*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete pCluster;
+  } // finalize_cluster
+
+  static JSClass cluster_class = {
+    "Cluster", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub, finalize_cluster, JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  JSBool cluster_JSGet(JSContext *cx, JSObject *obj, jsid id, jsval *vp) {
+    boost::shared_ptr<Cluster> pCluster = static_cast<cluster_wrapper*>(JS_GetPrivate(cx, obj))->pCluster;
+    if(pCluster != NULL) {
+      int opt = JSID_TO_INT(id);
+      switch(opt) {
+        case 0:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "Cluster")));
+          return JS_TRUE;
+        case 1:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getID()));
+          return JS_TRUE;
+        case 2:
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, pCluster->getName().c_str())));
+          return JS_TRUE;
+        case 3:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getStandardGroupID()));
+          return JS_TRUE;
+        case 4:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getLocation()));
+          return JS_TRUE;
+        case 5:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getProtectionClass()));
+          return JS_TRUE;
+        case 6:
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getFloor()));
+          return JS_TRUE;
+        case 7:
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(pCluster->isAutomatic()));
+          return JS_TRUE;
+        case 8:
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(pCluster->isConfigurationLocked()));
+          return JS_TRUE;
+        case 9:
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(pCluster->isOperationLock()));
+          return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // cluster_JSGet
+
+  static JSPropertySpec cluster_properties[] = {
+    {"className",         0, 0, cluster_JSGet, NULL},
+    {"id",                1, 0, cluster_JSGet, NULL},
+    {"name",              2, 0, cluster_JSGet, NULL},
+    {"standardGroup",     3, 0, cluster_JSGet, NULL},
+    {"location",          4, 0, cluster_JSGet, NULL},
+    {"protectionClass",   5, 0, cluster_JSGet, NULL},
+    {"floor",             6, 0, cluster_JSGet, NULL},
+    {"automatic",         7, 0, cluster_JSGet, NULL},
+    {"configurationLock", 8, 0, cluster_JSGet, NULL},
+    {"operationLock",     9, 0, cluster_JSGet, NULL},
+    {NULL, 0, 0, NULL, NULL}
+  };
+
+  JSObject* ModelScriptContextExtension::createJSCluster(ScriptContext& _ctx, boost::shared_ptr<Cluster> _pCluster) {
+    JSObject* result = JS_NewObject(_ctx.getJSContext(), &cluster_class, NULL, NULL);
+    JS_DefineProperties(_ctx.getJSContext(), result, cluster_properties);
+    //JS_DefineFunctions(_ctx.getJSContext(), result, cluster_methods);
+    struct cluster_wrapper* wrapper = new cluster_wrapper;
+    wrapper->pCluster = _pCluster;
+    JS_SetPrivate(_ctx.getJSContext(), result, wrapper);
+    return result;
+  } // createJSCluster
+
   //=== JSZone ===
 
   struct zone_wrapper {
@@ -2379,7 +2503,7 @@ namespace dss {
     struct zone_wrapper* pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pZone;
-  } // finalize_meter
+  } // finalize_zone
 
   static JSClass zone_class = {
     "Zone", JSCLASS_HAS_PRIVATE,
@@ -3578,7 +3702,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // state_JSGet
 
   static JSPropertySpec state_properties[] = {
     {"className", 0, 0, state_JSGet, NULL},
