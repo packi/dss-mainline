@@ -51,6 +51,7 @@ namespace dss {
   const char WindProtectionClass[] = "WindProtectionClass";
   const char CardinalDirection[] = "CardinalDirection";
   const char Floor[] = "Floor";
+  const char VdcDevice[] = "VdcDevice";
 
   ModelPersistence::ModelPersistence(Apartment& _apartment)
   : m_Apartment(_apartment), m_ignore(false), m_expectString(false),
@@ -88,6 +89,7 @@ namespace dss {
     const char *cardinalDirection = NULL;
     const char *windProtectionClass = NULL;
     const char *floorString = NULL;
+    const char *vdcDevice = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -135,6 +137,8 @@ namespace dss {
         configLocked = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "valveType") == 0) {
         valve = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], VdcDevice) == 0) {
+        vdcDevice = _attrs[i + 1];
       } else if (strcmp(_attrs[i], WindProtectionClass) == 0) {
         windProtectionClass = _attrs[i + 1];
       } else if (strcmp(_attrs[i], CardinalDirection) == 0) {
@@ -307,6 +311,10 @@ namespace dss {
 
     if (valve != NULL) {
       m_tempDevice->setValveTypeAsString(valve, true);
+    }
+
+    if (vdcDevice != NULL) {
+      m_tempDevice->setVdcDevice(true);
     }
 
     m_tempDevice->setIsValid(true);
@@ -956,6 +964,9 @@ namespace dss {
     }
     _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
 
+    if (_pDevice->isVdcDevice()) {
+      addAttribute(_ofs, VdcDevice, "1");
+    }
     /*
      * Problem: we can't rely on isValveDevice, because the
      * corresponding DSM might not have been read out yet,
