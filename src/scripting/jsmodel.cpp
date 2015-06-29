@@ -688,7 +688,7 @@ namespace dss {
         NULL,
         NULL,
         apartment_static_methods);
-  } // extendedJSContext
+  } // extendContext
 
   void finalize_set(JSContext *cx, JSObject *obj) {
     Set* pSet = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -708,7 +708,7 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // set_length
 
   JSBool set_combine(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -730,7 +730,7 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // set_combine
 
   JSBool set_remove(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1177,7 +1177,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // set_JSGet
 
   static JSClass set_class = {
     "Set", JSCLASS_HAS_PRIVATE,
@@ -1241,7 +1241,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_turn_on
 
   JSBool dev_turn_off(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1274,7 +1274,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_turn_off
 
   JSBool dev_blink(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1307,7 +1307,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_blink
 
   JSBool dev_increase_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1340,7 +1340,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_increase_value
 
   JSBool dev_decrease_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1374,7 +1374,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  }
+  } // dev_decrease_value
 
   JSBool dev_set_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1761,7 +1761,7 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  } // dev_get_config
+  } // dev_set_config
 
   JSBool dev_get_output_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -2113,7 +2113,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // dev_JSGet
 
   void finalize_dev(JSContext *cx, JSObject *obj) {
     DeviceReference* pDevice = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
@@ -2205,7 +2205,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // dsmeter_JSGet
 
   static JSPropertySpec dsmeter_properties[] = {
     {"className", 0, 0, dsmeter_JSGet, NULL},
@@ -2379,7 +2379,7 @@ namespace dss {
     struct zone_wrapper* pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pZone;
-  } // finalize_meter
+  } // finalize_zone
 
   static JSClass zone_class = {
     "Zone", JSCLASS_HAS_PRIVATE,
@@ -3578,7 +3578,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // state_JSGet
 
   static JSPropertySpec state_properties[] = {
     {"className", 0, 0, state_JSGet, NULL},
