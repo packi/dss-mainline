@@ -227,6 +227,56 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
   rmdir(dirname);
 }
 
+DSUID_DEFINE(dsuid1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
+DSUID_DEFINE(dsuid2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+
+BOOST_AUTO_TEST_CASE(testPersistVdcDevice) {
+  char *dirname, tmpl[] = "/tmp/dss‐persistence-test_VDC_XXXXXX";
+  std::string filename;
+
+  dirname = mkdtemp(tmpl);
+  if (dirname == NULL) {
+    BOOST_MESSAGE("Failed to create temporary folder\n");
+  }
+
+  {
+    // create apartment xml
+    Apartment apt1(NULL);
+    boost::shared_ptr<Device> dev1 = apt1.allocateDevice(dsuid1);
+    dev1->setFunctionID(0x2131);
+    dev1->setProductID(ProductID_KL_210);
+    dev1->setVdcDevice(true);
+
+    // 2nd device without protecton calls, orientation
+    boost::shared_ptr<Device> dev2 = apt1.allocateDevice(dsuid2);
+    dev2->setFunctionID(0x2133);
+    dev2->setProductID(ProductID_KL_210);
+    dev2->setVdcDevice(false);
+
+    ModelPersistence persist1(apt1);
+    filename = std::string(dirname) + "/vdc_device.xml";
+    persist1.writeConfigurationToXML(filename);
+  }
+
+  Apartment apt2(NULL);
+  ModelPersistence persist2(apt2);
+  persist2.readConfigurationFromXML(filename, "");
+
+  BOOST_CHECK_NO_THROW(apt2.getDeviceByDSID(dsuid1));
+  boost::shared_ptr<Device> dev1 = apt2.getDeviceByDSID(dsuid1);
+
+  BOOST_CHECK_EQUAL(dev1->isVdcDevice(), true);
+
+  BOOST_CHECK_NO_THROW(apt2.getDeviceByDSID(dsuid2));
+  boost::shared_ptr<Device> dev2 = apt2.getDeviceByDSID(dsuid2);
+
+  BOOST_CHECK_EQUAL(dev2->isVdcDevice(), false);
+
+  unlink(filename.c_str());
+  rmdir(dirname);
+}
+
+
 BOOST_AUTO_TEST_CASE(testCluster) {
   char *dirname, tmpl[] = "/tmp/dss‐persistence-test_XXXXXX";
   std::string filename;
