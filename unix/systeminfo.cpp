@@ -91,18 +91,11 @@ namespace dss {
     return ipBuf;
   } // ipToString
 
-  int SystemInfo::mapIsLibrary(const char *name) {
-    int len = strlen(name);
-    return len >= 4 && name[0] == '/'
-        && name[len - 3] == '.' && name[len - 2] == 's' && name[len - 1] == 'o';
-  }
-
-  int SystemInfo::parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi) {
+  int SystemInfo::parseMapHeader(const char* line, mapinfo** mi) {
     unsigned long start;
     unsigned long end;
     char *_name = NULL; // sscanf will allocate, we free
     std::string name;
-    int is_bss = 0;
 
     *mi = NULL;
     int match = sscanf(line, "%lx-%lx %*s %*x %*x:%*x %*d %ms", &start, &end, &_name);
@@ -116,15 +109,7 @@ namespace dss {
       name = std::string(_name);
       free(_name);
     } else {
-      if (prev && start == prev->end && mapIsLibrary(prev->name.c_str())) {
-        // anonymous mappings immediately adjacent to shared libraries
-        // usually correspond to the library BSS segment, so we use the
-        // library's own name
-        name = prev->name;
-        is_bss = 1;
-      } else {
-        name = "[anon]";
-      }
+      name = "[anon]";
     }
 
     mapinfo *info;
@@ -138,7 +123,6 @@ namespace dss {
 
     info->start = start;
     info->end = end;
-    info->is_bss = is_bss;
     info->count = 1;
     info->name = name;
 
@@ -196,7 +180,7 @@ namespace dss {
         continue;
       }
       struct mapinfo *next;
-      if (!parseMapHeader(line, current, &next)) {
+      if (!parseMapHeader(line, &next)) {
         if (current) {
           enqueueMapInfo(&head, current);
         }
@@ -212,6 +196,9 @@ namespace dss {
     // process extracted mappings
     // - sort mapping by start addresses
     // - merge text/data/bss mappings into one mapping
+    // - anonymous mappings immediately adjacent to shared libraries
+    //   usually correspond to the library BSS segment, so we use the
+    //   library's own name
     // since we are summing up all the mapinfo this extra processing
     // would be lost, hence it is not implemented
     //

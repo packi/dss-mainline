@@ -42,7 +42,6 @@ namespace dss {
     unsigned shared_dirty;
     unsigned private_clean;
     unsigned private_dirty;
-    int is_bss;
     int count;
   };
 
@@ -60,8 +59,7 @@ namespace dss {
     void enumerateInterfaces();
 
     struct mapinfo *loadMaps(const std::string &smaps);
-    int mapIsLibrary(const char *name);
-    int parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi);
+    int parseMapHeader(const char* line, mapinfo** mi);
     int parseMapField(mapinfo* mi, const char* line);
     void enqueueMapInfo(mapinfo **head, mapinfo *map);
     void updateMemoryUsage();
