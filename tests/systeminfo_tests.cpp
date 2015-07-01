@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(testLoadSmaps) {
     std::cout << boost::format("%s\n") % it.name;
     headers.push_back(std::string(it.name));
   }
-  BOOST_CHECK_EQUAL(headers.size(), 6);
+  BOOST_CHECK_EQUAL(headers.size(), 11);
 }
 
 BOOST_AUTO_TEST_CASE(testSumSmaps) {

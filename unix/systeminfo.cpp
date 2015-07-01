@@ -172,46 +172,10 @@ namespace dss {
     return 0;
   }
 
-  void SystemInfo::enqueueMapInfo(mapinfo **head, mapinfo *map, int sort_by_address, int coalesce_by_name) {
-    mapinfo *prev = NULL;
-    mapinfo *current = *head;
-    if (!map) {
-      return;
-    }
-    for (;;) {
-      if (current && coalesce_by_name && (map->name == current->name)) {
-        current->size += map->size;
-        current->rss += map->rss;
-        current->pss += map->pss;
-        current->shared_clean += map->shared_clean;
-        current->shared_dirty += map->shared_dirty;
-        current->private_clean += map->private_clean;
-        current->private_dirty += map->private_dirty;
-        current->is_bss &= map->is_bss;
-        current->count++;
-        delete map;
-        break;
-      }
-      int order_before = 0;
-      if (current) {
-        if (sort_by_address) {
-          order_before = map->start < current->start || (map->start == current->start && map->end < current->end);
-        } else {
-          order_before = map->name < current->name;
-        }
-      }
-      if (!current || order_before) {
-        if (prev) {
-          prev->next = map;
-        } else {
-          *head = map;
-        }
-        map->next = current;
-        break;
-      }
-      prev = current;
-      current = current->next;
-    }
+  void SystemInfo::enqueueMapInfo(mapinfo **head, mapinfo *map) {
+    assert(map);
+    map->next = *head;
+    *head = map;
   }
 
   struct mapinfo *SystemInfo::loadMaps(const std::string &smaps)
@@ -233,15 +197,24 @@ namespace dss {
       }
       struct mapinfo *next;
       if (!parseMapHeader(line, current, &next)) {
-        enqueueMapInfo(&head, current, 1, 1);
+        if (current) {
+          enqueueMapInfo(&head, current);
+        }
         current = next;
         continue;
       }
       fprintf(stderr, "warning: could not parse map info line: %s\n", line);
     }
-    enqueueMapInfo(&head, current, 1, 1);
-
+    enqueueMapInfo(&head, current);
     fclose(fp);
+
+    //
+    // process extracted mappings
+    // - sort mapping by start addresses
+    // - merge text/data/bss mappings into one mapping
+    // since we are summing up all the mapinfo this extra processing
+    // would be lost, hence it is not implemented
+    //
 
     if (!head) {
       fprintf(stderr, "could not read /proc/%d/smaps\n", getpid());
