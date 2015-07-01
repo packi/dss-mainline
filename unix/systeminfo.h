@@ -31,7 +31,6 @@
 namespace dss {
 
   struct mapinfo {
-    struct mapinfo *next;
     std::string name;
     unsigned start;
     unsigned end;
@@ -42,7 +41,6 @@ namespace dss {
     unsigned shared_dirty;
     unsigned private_clean;
     unsigned private_dirty;
-    int count;
   };
 
   class SystemInfo {
@@ -61,7 +59,6 @@ namespace dss {
     struct mapinfo *loadMaps(const std::string &smaps);
     int parseMapHeader(const char* line, mapinfo** mi);
     int parseMapField(mapinfo* mi, const char* line);
-    void enqueueMapInfo(mapinfo **head, mapinfo *map);
     void updateMemoryUsage();
   };
 }

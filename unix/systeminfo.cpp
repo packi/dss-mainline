@@ -123,7 +123,6 @@ namespace dss {
 
     info->start = start;
     info->end = end;
-    info->count = 1;
     info->name = name;
 
     *mi = info;
@@ -156,23 +155,17 @@ namespace dss {
     return 0;
   }
 
-  void SystemInfo::enqueueMapInfo(mapinfo **head, mapinfo *map) {
-    assert(map);
-    map->next = *head;
-    *head = map;
-  }
-
-  struct mapinfo *SystemInfo::loadMaps(const std::string &smaps)
+  std::vector<struct mapinfo> SystemInfo::parseSMaps(const std::string &fpath)
   {
     FILE *fp;
-    struct mapinfo *head = NULL;
+    std::vector<mapinfo> res;
     struct mapinfo *current = NULL;
     char line[1024];
 
-    fp = fopen(smaps.c_str(), "r");
+    fp = fopen(fpath.c_str(), "r");
     if (NULL == fp) {
       fprintf(stderr,"cannot get smaps\n");
-      return 0;
+      return res;
     }
 
     while (fgets(line, sizeof(line), fp) != 0) {
@@ -182,14 +175,19 @@ namespace dss {
       struct mapinfo *next;
       if (!parseMapHeader(line, &next)) {
         if (current) {
-          enqueueMapInfo(&head, current);
+          res.push_back(*current);
+          delete current;
+          current = NULL;
         }
         current = next;
         continue;
       }
       fprintf(stderr, "warning: could not parse map info line: %s\n", line);
     }
-    enqueueMapInfo(&head, current);
+    if (current) {
+      res.push_back(*current);
+      delete current;
+    }
     fclose(fp);
 
     //
@@ -203,11 +201,11 @@ namespace dss {
     // would be lost, hence it is not implemented
     //
 
-    if (!head) {
+    if (res.empty()) {
       fprintf(stderr, "could not read /proc/%d/smaps\n", getpid());
-      return NULL;
     }
-    return head;
+
+    return res;
   }
 
   // also frees smaps structure
@@ -225,26 +223,6 @@ namespace dss {
       res.rss += mi.rss;
       res.pss += mi.pss;
       res.size += mi.size;
-    }
-
-    return res;
-  }
-
-  std::vector<struct mapinfo> SystemInfo::parseSMaps(const std::string &fpath)
-  {
-    std::vector<mapinfo> res;
-    struct mapinfo *ll_maps, *it;
-
-    ll_maps = loadMaps(fpath);
-    if (!ll_maps) {
-      return res;
-    }
-
-    for (it = ll_maps; it != NULL; ) {
-      struct mapinfo *next = it->next;
-      res.push_back(*it);
-      delete it;
-      it = next;
     }
 
     return res;
