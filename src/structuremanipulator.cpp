@@ -588,7 +588,7 @@ namespace dss {
       if (itGroup->getStandardGroupID() == newGroup->getID()) {
         continue;
       }
-      deviceRemoveFromGroup(device, newGroup);
+      deviceRemoveFromGroup(device, itGroup);
       modified = true;
     }
 

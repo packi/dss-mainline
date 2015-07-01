@@ -102,6 +102,7 @@ namespace dss {
 
     bool getPersistence() const;
     void setPersistence(bool _persistent);
+    bool hasPersistentData();
 
     typedef std::vector<std::string> ValueRange_t;
     void setValueRange(const ValueRange_t& _values);

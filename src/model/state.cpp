@@ -141,9 +141,8 @@ namespace dss {
       m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(path);
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyReference<std::string>(m_name, false));
-
       m_pPropertyNode->createProperty("value")
-        ->linkToProxy(PropertyProxyReference<int>((int &) m_state, false));
+        ->linkToProxy(PropertyProxyReference<int, eState>(m_state, false));
       m_pPropertyNode->createProperty("state")
         ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
 
@@ -223,6 +222,14 @@ namespace dss {
     }
     m_IsPersistent = _persistent;
   } // setPersistence
+
+  bool State::hasPersistentData() {
+    std::string fname(getStorageName());
+    if (access(fname.c_str(), F_OK) == 0) {
+      return true;
+    }
+    return false;
+  } // hasPersistentData
 
   std::string State::toString() const {
     if (!m_values.empty()) {

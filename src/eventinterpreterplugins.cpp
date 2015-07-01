@@ -43,6 +43,7 @@
 #include "src/scripting/jslogger.h"
 #include "src/scripting/jscurl.h"
 #include "src/scripting/jswebservice.h"
+#include "src/scripting/jscluster.h"
 #include "src/foreach.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
@@ -562,6 +563,9 @@ namespace dss {
       m_pEnvironment->addExtension(ext);
 
       ext = new ModelConstantsScriptExtension();
+      m_pEnvironment->addExtension(ext);
+
+      ext = new ClusterScriptExtension(DSS::getInstance()->getApartment());
       m_pEnvironment->addExtension(ext);
 
       setupCleanupEvent();
@@ -1149,6 +1153,7 @@ Sample: {
         Logger::getInstance()->log(std::string("GetWeatherInformation: invalid timestamp: ") + ex.what(), lsError);
       }
 
+      DSS::getInstance()->getSecurity().loginAsSystemUser("GetWeatherInformation needs system rights");
       Apartment& apt = DSS::getInstance()->getApartment();
       boost::shared_ptr<Zone> pZone = apt.getZone(0);
 
@@ -1355,18 +1360,18 @@ Sample: {
         sensorType = strToInt(strType);
       } else {
         try {
-          std::string strIndex = _event.getPropertyByName("sensorIndex");
-          boost::shared_ptr<DeviceSensor_t> pSensor = pDevRev->getDevice()->getSensor(strToInt(strIndex));
-          sensorType = pSensor->m_sensorType;
+          int index = strToInt(_event.getPropertyByName("sensorIndex"));
+          sensorType = pDevRev->getDevice()->getSensor(index)->m_sensorType;
         } catch (ItemNotFoundException& ex) {}
       }
 
-      std::string sName = "dev." + dsuid2str(pDevRev->getDSID()) + ".type" + strType + ".*";
-      std::vector<boost::shared_ptr<State> > sList = DSS::getInstance()->getApartment().getStates(sName);
-      foreach(boost::shared_ptr<State> state, sList) {
+      std::string sName = "dev." + dsuid2str(pDevRev->getDSID()) +
+        ".type" + intToString(sensorType) + ".*";
+
+      foreach(boost::shared_ptr<State> state,
+              DSS::getInstance()->getApartment().getStates(sName)) {
         double fValue = strToDouble(sensorValueFloat);
-        boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (state);
-        pSensor->newValue(coDsmApi, fValue);
+        boost::dynamic_pointer_cast<StateSensor>(state)->newValue(coDsmApi, fValue);
       }
       return;
     }

@@ -42,6 +42,7 @@ namespace dss {
 
   bool valid(CardinalDirection_t _direction);
   std::string toString(CardinalDirection_t _direction);
+  std::string toUIString(CardinalDirection_t _direction);
   bool parseCardinalDirection(const std::string &direction, CardinalDirection_t *_out);
 
   typedef enum {
@@ -60,6 +61,7 @@ namespace dss {
   } WindProtectionClass_t;
 
   bool valid(WindProtectionClass_t _class);
+  std::string toUIString(WindProtectionClass_t _wpClass);
   bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out);
 
   typedef enum {
