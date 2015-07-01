@@ -32,6 +32,7 @@ namespace dss {
 
   struct mapinfo {
     struct mapinfo *next;
+    std::string name;
     unsigned start;
     unsigned end;
     unsigned size;
@@ -43,7 +44,6 @@ namespace dss {
     unsigned private_dirty;
     int is_bss;
     int count;
-    char name[1];
   };
 
   class SystemInfo {

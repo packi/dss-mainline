@@ -100,40 +100,48 @@ namespace dss {
   int SystemInfo::parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi) {
     unsigned long start;
     unsigned long end;
-    char name[128];
-    int name_pos;
+    char *_name = NULL; // sscanf will allocate, we free
+    std::string name;
     int is_bss = 0;
 
     *mi = NULL;
-    if (sscanf(line, "%lx-%lx %*s %*x %*x:%*x %*d%n", &start, &end, &name_pos) != 2) {
+    int match = sscanf(line, "%lx-%lx %*s %*x %*x:%*x %*d %ms", &start, &end, &_name);
+    if (match < 2) {
       return -1;
     }
-    while (isspace(line[name_pos])) {
-      name_pos += 1;
-    }
-    if (line[name_pos]) {
-      strncpy(name, line + name_pos, sizeof(name));
+
+    assert(match <= 3); // start + end, evtl. name
+    if (match == 3) {
+      assert(_name);
+      name = std::string(_name);
+      free(_name);
     } else {
-      if (prev && start == prev->end && mapIsLibrary(prev->name)) {
+      if (prev && start == prev->end && mapIsLibrary(prev->name.c_str())) {
         // anonymous mappings immediately adjacent to shared libraries
         // usually correspond to the library BSS segment, so we use the
         // library's own name
-        strncpy(name, prev->name, sizeof(name));
+        name = prev->name;
         is_bss = 1;
       } else {
-        strncpy(name, "[anon]", sizeof(name));
+        name = "[anon]";
       }
     }
-    const int name_size = strlen(name) + 1;
-    struct mapinfo* info = (struct mapinfo*) calloc(1, sizeof(mapinfo) + name_size);
-    if (info == NULL) {
+
+    mapinfo *info;
+    try {
+      info = new mapinfo();
+      memset(info, 0, sizeof(*info));
+      new (&info->name) std::string(); // killed by memset
+    } catch (std::bad_alloc e) {
       return -1;
     }
+
     info->start = start;
     info->end = end;
     info->is_bss = is_bss;
     info->count = 1;
-    strncpy(info->name, name, name_size);
+    info->name = name;
+
     *mi = info;
     return 0;
   }
@@ -172,7 +180,7 @@ namespace dss {
       return;
     }
     for (;;) {
-      if (current && coalesce_by_name && !strcmp(map->name, current->name)) {
+      if (current && coalesce_by_name && (map->name == current->name)) {
         current->size += map->size;
         current->rss += map->rss;
         current->pss += map->pss;
@@ -182,7 +190,7 @@ namespace dss {
         current->private_dirty += map->private_dirty;
         current->is_bss &= map->is_bss;
         current->count++;
-        free(map);
+        delete map;
         break;
       }
       int order_before = 0;
@@ -190,7 +198,7 @@ namespace dss {
         if (sort_by_address) {
           order_before = map->start < current->start || (map->start == current->start && map->end < current->end);
         } else {
-          order_before = strcmp(map->name, current->name) < 0;
+          order_before = map->name < current->name;
         }
       }
       if (!current || order_before) {
@@ -250,6 +258,7 @@ namespace dss {
   {
     struct mapinfo res, *mi;
     memset(&res, 0, sizeof(struct mapinfo));
+    new (&res.name) std::string(""); // name was destroyed by memset
 
     if (smaps == 0) {
       return res;
@@ -264,7 +273,7 @@ namespace dss {
       res.pss += mi->pss;
       res.size += mi->size;
       mi = mi->next;
-      free(last);
+      delete last;
     }
 
     return res;
