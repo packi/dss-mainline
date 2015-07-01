@@ -132,6 +132,11 @@ namespace dss {
   int SystemInfo::parseMapField(mapinfo* mi, const char* line) {
     char field[64];
     unsigned long size;
+
+    if (!strncmp(line, "VmFlags:", 8)) {
+      // ignore
+      return 0;
+    }
     if (sscanf(line, "%63s %lu kB", field, &size) != 2) {
       // printf("no-match : %s\n", line);
       return -1;

@@ -257,5 +257,23 @@ BOOST_AUTO_TEST_CASE(testSumSmaps) {
   BOOST_CHECK_EQUAL(sum.size, 4372);
 }
 
+BOOST_AUTO_TEST_CASE(testProcSmaps) {
+  SystemInfo info;
+
+  // use /proc/self/smaps
+  std::vector<mapinfo> maps = info.parseSMaps();
+  BOOST_CHECK(!maps.empty());
+
+  // make sure we parsed something
+  struct mapinfo sum = info.sumSmaps(maps);
+  BOOST_CHECK_NE(sum.private_clean, 0);
+  BOOST_CHECK_NE(sum.private_dirty, 0);
+  BOOST_CHECK_NE(sum.shared_clean, 0);
+  BOOST_CHECK_EQUAL(sum.shared_dirty, 0); // typically 0
+  BOOST_CHECK_NE(sum.pss, 0);
+  BOOST_CHECK_NE(sum.rss, 0);
+  BOOST_CHECK_NE(sum.size, 0);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
