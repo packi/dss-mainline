@@ -862,14 +862,9 @@ void SystemState::run() {
       // TODO: define algorithm for system states based on sun{shine,protection} inputs
 
     } else if (m_evtName == EventName::FrostProtection) {
-      boost::shared_ptr<State> state = getOrRegisterState(StateName::Frost);
       unsigned int value = strToInt(m_properties.get("value"));
-      if (value <= State_Unknown) {
-        state->setState(coDsmApi, value);
-      } else {
-        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            EventName::FrostProtection + ": " + m_properties.get("value"), lsWarning);
-      }
+      assert(value == State_Active || value == State_Inactive);
+      getOrRegisterState(StateName::Frost)->setState(coDsmApi, value);
 
     } else if (m_evtName == EventName::HeatingModeSwitch) {
       boost::shared_ptr<State> state;
@@ -884,23 +879,16 @@ void SystemState::run() {
         heatingModeValues.push_back("auto");
         state->setValueRange(heatingModeValues);
       }
+
       unsigned int value =  strToUInt(m_properties.get("value"));
-      if (value < state->getValueRangeSize()) {
-        state->setState(coDsmApi, value);
-      } else {
-        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            EventName::HeatingModeSwitch + ": " + m_properties.get("value"), lsWarning);
-      }
+      assert(value < state->getValueRangeSize());
+      state->setState(coDsmApi, value);
 
     } else if (m_evtName == EventName::BuildingService) {
-      boost::shared_ptr<State> state = getOrRegisterState(StateName::BuildingService);
       unsigned int value = strToInt(m_properties.get("value"));
-      if (value <= State_Unknown) {
-        state->setState(coDsmApi, value);
-      } else {
-        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            EventName::BuildingService + ": " + m_properties.get("value"), lsWarning);
-      }
+      assert(value == State_Active || value == State_Inactive);
+      getOrRegisterState(StateName::BuildingService)->setState(coDsmApi, value);
+
     }
   } catch(ItemNotFoundException& ex) {
     Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
