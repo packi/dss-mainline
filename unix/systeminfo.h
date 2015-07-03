@@ -31,7 +31,7 @@
 namespace dss {
 
   struct mapinfo {
-    struct mapinfo *next;
+    std::string name;
     unsigned start;
     unsigned end;
     unsigned size;
@@ -41,9 +41,6 @@ namespace dss {
     unsigned shared_dirty;
     unsigned private_clean;
     unsigned private_dirty;
-    int is_bss;
-    int count;
-    char name[1];
   };
 
   class SystemInfo {
@@ -52,15 +49,16 @@ namespace dss {
     void collect();
     void memory();
     std::vector<std::string> sysinfo();
+    std::vector<struct mapinfo>
+        parseSMaps(const std::string &smaps = "/proc/self/smaps");
     std::vector<std::pair<std::string, unsigned> > parseProcMeminfo();
+    struct mapinfo sumSmaps(std::vector<mapinfo> smaps);
   private:
     void enumerateInterfaces();
 
-    int mapIsLibrary(const char *name);
-    int parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi);
+    struct mapinfo *loadMaps(const std::string &smaps);
+    int parseMapHeader(const char* line, mapinfo** mi);
     int parseMapField(mapinfo* mi, const char* line);
-    void enqueueMapInfo(mapinfo **head, mapinfo *map, int sort_by_address, int coalesce_by_name);
-    struct mapinfo* loadMaps();
     void updateMemoryUsage();
   };
 }

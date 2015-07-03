@@ -91,157 +91,146 @@ namespace dss {
     return ipBuf;
   } // ipToString
 
-  int SystemInfo::mapIsLibrary(const char *name) {
-    int len = strlen(name);
-    return len >= 4 && name[0] == '/'
-        && name[len - 3] == '.' && name[len - 2] == 's' && name[len - 1] == 'o';
-  }
-
-  int SystemInfo::parseMapHeader(const char* line, const mapinfo* prev, mapinfo** mi) {
+  int SystemInfo::parseMapHeader(const char* line, mapinfo** mi) {
     unsigned long start;
     unsigned long end;
-    char name[128];
-    int name_pos;
-    int is_bss = 0;
+    char *_name = NULL; // sscanf will allocate, we free
+    std::string name;
 
     *mi = NULL;
-    if (sscanf(line, "%lx-%lx %*s %*x %*x:%*x %*d%n", &start, &end, &name_pos) != 2) {
+    int match = sscanf(line, "%lx-%lx %*s %*x %*x:%*x %*d %ms", &start, &end, &_name);
+    if (match < 2) {
       return -1;
     }
-    while (isspace(line[name_pos])) {
-      name_pos += 1;
-    }
-    if (line[name_pos]) {
-      strncpy(name, line + name_pos, sizeof(name));
+
+    assert(match <= 3); // start + end, evtl. name
+    if (match == 3) {
+      assert(_name);
+      name = std::string(_name);
+      free(_name);
     } else {
-      if (prev && start == prev->end && mapIsLibrary(prev->name)) {
-        // anonymous mappings immediately adjacent to shared libraries
-        // usually correspond to the library BSS segment, so we use the
-        // library's own name
-        strncpy(name, prev->name, sizeof(name));
-        is_bss = 1;
-      } else {
-        strncpy(name, "[anon]", sizeof(name));
-      }
+      name = "[anon]";
     }
-    const int name_size = strlen(name) + 1;
-    struct mapinfo* info = (struct mapinfo*) calloc(1, sizeof(mapinfo) + name_size);
-    if (info == NULL) {
+
+    mapinfo *info;
+    try {
+      info = new mapinfo();
+      memset(info, 0, sizeof(*info));
+      new (&info->name) std::string(); // killed by memset
+    } catch (std::bad_alloc e) {
       return -1;
     }
+
     info->start = start;
     info->end = end;
-    info->is_bss = is_bss;
-    info->count = 1;
-    strncpy(info->name, name, name_size);
+    info->name = name;
+
     *mi = info;
     return 0;
   }
 
   int SystemInfo::parseMapField(mapinfo* mi, const char* line) {
     char field[64];
-    int len;
-    if (sscanf(line, "%63s %n", field, &len) == 1 && *field && field[strlen(field) - 1] == ':') {
-      int size;
-      if (sscanf(line + len, "%d kB", &size) == 1) {
-        if (!strcmp(field, "Size:")) {
-          mi->size = size;
-        } else if (!strcmp(field, "Rss:")) {
-          mi->rss = size;
-        } else if (!strcmp(field, "Pss:")) {
-          mi->pss = size;
-        } else if (!strcmp(field, "Shared_Clean:")) {
-          mi->shared_clean = size;
-        } else if (!strcmp(field, "Shared_Dirty:")) {
-          mi->shared_dirty = size;
-        } else if (!strcmp(field, "Private_Clean:")) {
-          mi->private_clean = size;
-        } else if (!strcmp(field, "Private_Dirty:")) {
-          mi->private_dirty = size;
-        }
-      }
+    unsigned long size;
+
+    if (!strncmp(line, "VmFlags:", 8)) {
+      // ignore
       return 0;
     }
-    return -1;
+    if (sscanf(line, "%63s %lu kB", field, &size) != 2) {
+      // printf("no-match : %s\n", line);
+      return -1;
+    }
+
+    if (!strcmp(field, "Size:")) {
+      mi->size = size;
+    } else if (!strcmp(field, "Rss:")) {
+      mi->rss = size;
+    } else if (!strcmp(field, "Pss:")) {
+      mi->pss = size;
+    } else if (!strcmp(field, "Shared_Clean:")) {
+      mi->shared_clean = size;
+    } else if (!strcmp(field, "Shared_Dirty:")) {
+      mi->shared_dirty = size;
+    } else if (!strcmp(field, "Private_Clean:")) {
+      mi->private_clean = size;
+    } else if (!strcmp(field, "Private_Dirty:")) {
+      mi->private_dirty = size;
+    }
+    return 0;
   }
 
-  void SystemInfo::enqueueMapInfo(mapinfo **head, mapinfo *map, int sort_by_address, int coalesce_by_name) {
-    mapinfo *prev = NULL;
-    mapinfo *current = *head;
-    if (!map) {
-      return;
-    }
-    for (;;) {
-      if (current && coalesce_by_name && !strcmp(map->name, current->name)) {
-        current->size += map->size;
-        current->rss += map->rss;
-        current->pss += map->pss;
-        current->shared_clean += map->shared_clean;
-        current->shared_dirty += map->shared_dirty;
-        current->private_clean += map->private_clean;
-        current->private_dirty += map->private_dirty;
-        current->is_bss &= map->is_bss;
-        current->count++;
-        free(map);
-        break;
-      }
-      int order_before = 0;
-      if (current) {
-        if (sort_by_address) {
-          order_before = map->start < current->start || (map->start == current->start && map->end < current->end);
-        } else {
-          order_before = strcmp(map->name, current->name) < 0;
-        }
-      }
-      if (!current || order_before) {
-        if (prev) {
-          prev->next = map;
-        } else {
-          *head = map;
-        }
-        map->next = current;
-        break;
-      }
-      prev = current;
-      current = current->next;
-    }
-  }
-
-  struct mapinfo *SystemInfo::loadMaps()
+  std::vector<struct mapinfo> SystemInfo::parseSMaps(const std::string &fpath)
   {
     FILE *fp;
-    struct mapinfo *head = NULL;
+    std::vector<mapinfo> res;
     struct mapinfo *current = NULL;
     char line[1024];
-    int len;
 
-    fp = fopen("/proc/self/smaps", "r");
+    fp = fopen(fpath.c_str(), "r");
     if (NULL == fp) {
-      return 0;
+      fprintf(stderr,"cannot get smaps\n");
+      return res;
     }
+
     while (fgets(line, sizeof(line), fp) != 0) {
-      len = strlen(line);
-      if (line[len - 1] == '\n') {
-        line[--len] = 0;
-      }
       if (current != NULL && !parseMapField(current, line)) {
         continue;
       }
       struct mapinfo *next;
-      if (!parseMapHeader(line, current, &next)) {
-        enqueueMapInfo(&head, current, 1, 1);
+      if (!parseMapHeader(line, &next)) {
+        if (current) {
+          res.push_back(*current);
+          delete current;
+          current = NULL;
+        }
         current = next;
         continue;
       }
       fprintf(stderr, "warning: could not parse map info line: %s\n", line);
     }
-    enqueueMapInfo(&head, current, 1, 1);
-    fclose(fp);
-    if (!head) {
-      fprintf(stderr, "could not read /proc/%d/smaps\n", getpid());
-      return NULL;
+    if (current) {
+      res.push_back(*current);
+      delete current;
     }
-    return head;
+    fclose(fp);
+
+    //
+    // process extracted mappings
+    // - sort mapping by start addresses
+    // - merge text/data/bss mappings into one mapping
+    // - anonymous mappings immediately adjacent to shared libraries
+    //   usually correspond to the library BSS segment, so we use the
+    //   library's own name
+    // since we are summing up all the mapinfo this extra processing
+    // would be lost, hence it is not implemented
+    //
+
+    if (res.empty()) {
+      fprintf(stderr, "could not read /proc/%d/smaps\n", getpid());
+    }
+
+    return res;
+  }
+
+  // also frees smaps structure
+  struct mapinfo SystemInfo::sumSmaps(std::vector<mapinfo> smaps)
+  {
+    mapinfo res;
+    memset(&res, 0, sizeof(struct mapinfo));
+    new (&res.name) std::string(""); // name was destroyed by memset
+
+    BOOST_FOREACH(const mapinfo &mi, smaps) {
+      res.shared_clean += mi.shared_clean;
+      res.shared_dirty += mi.shared_dirty;
+      res.private_clean += mi.private_clean;
+      res.private_dirty += mi.private_dirty;
+      res.rss += mi.rss;
+      res.pss += mi.pss;
+      res.size += mi.size;
+    }
+
+    return res;
   }
 
   std::vector<std::pair<std::string, unsigned> > SystemInfo::parseProcMeminfo()
@@ -283,44 +272,18 @@ namespace dss {
   }
 
   void SystemInfo::updateMemoryUsage() {
-    struct mapinfo *smaps;
-    struct mapinfo *mi;
-    unsigned shared_dirty = 0;
-    unsigned shared_clean = 0;
-    unsigned private_dirty = 0;
-    unsigned private_clean = 0;
-    unsigned rss = 0;
-    unsigned pss = 0;
-    unsigned size = 0;
-
-    smaps = loadMaps();
-    if (smaps == 0) {
-      fprintf(stderr,"cannot get smaps\n");
-      return;
-    }
-    for (mi = smaps; mi; ) {
-      struct mapinfo *last = mi;
-      shared_clean += mi->shared_clean;
-      shared_dirty += mi->shared_dirty;
-      private_clean += mi->private_clean;
-      private_dirty += mi->private_dirty;
-      rss += mi->rss;
-      pss += mi->pss;
-      size += mi->size;
-      mi = mi->next;
-      free(last);
-    }
-
     PropertySystem& propSys = DSS::getInstance()->getPropertySystem();
     PropertyNodePtr debugNode = propSys.createProperty("/config/debug");
     PropertyNodePtr memoryNode = debugNode->createProperty("memory");
-    memoryNode->createProperty("PrivateClean")->setIntegerValue(private_clean);
-    memoryNode->createProperty("PrivateDirty")->setIntegerValue(private_dirty);
-    memoryNode->createProperty("SharedClean")->setIntegerValue(shared_clean);
-    memoryNode->createProperty("SharedDirty")->setIntegerValue(shared_dirty);
-    memoryNode->createProperty("PSS")->setIntegerValue(pss);
-    memoryNode->createProperty("RSS")->setIntegerValue(rss);
-    memoryNode->createProperty("Size")->setIntegerValue(size);
+
+    struct mapinfo sum = sumSmaps(parseSMaps());
+    memoryNode->createProperty("PrivateClean")->setIntegerValue(sum.private_clean);
+    memoryNode->createProperty("PrivateDirty")->setIntegerValue(sum.private_dirty);
+    memoryNode->createProperty("SharedClean")->setIntegerValue(sum.shared_clean);
+    memoryNode->createProperty("SharedDirty")->setIntegerValue(sum.shared_dirty);
+    memoryNode->createProperty("PSS")->setIntegerValue(sum.pss);
+    memoryNode->createProperty("RSS")->setIntegerValue(sum.rss);
+    memoryNode->createProperty("Size")->setIntegerValue(sum.size);
 
     // BOOST_FOREACH doesn't like it without typedef
     typedef std::pair<std::string, unsigned> proc_meminfo_elt;
