@@ -233,8 +233,11 @@ namespace dss {
     }
 
     foreach(ClusterSpec_t cluster, clusters) {
-      log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
-          " and devices: " + intToString(cluster.NumberOfDevices));
+
+      if (cluster.StandardGroupID > 0) {
+        log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
+            " and devices: " + intToString(cluster.NumberOfDevices));
+      }
 
       boost::shared_ptr<Cluster> pCluster;
 
