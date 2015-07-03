@@ -737,12 +737,12 @@ namespace dss {
       pGroup->setOnState(coUnknown, states.test(GroupIDYellow-1));
     }
 
-    unsigned char idList[] = { SensorIDTemperatureIndoors,
+    uint8_t idList[] = { SensorIDTemperatureIndoors,
         SensorIDHumidityIndoors,
         SensorIDCO2Concentration,
         SensorIDBrightnessIndoors };
 
-    for (uint8_t i=0; i < sizeof(idList)/sizeof(unsigned char); i++) {
+    for (uint8_t i=0; i < sizeof(idList)/sizeof(uint8_t); i++) {
       dsuid_t sensorDevice;
       try {
         sensorDevice = m_Interface.getZoneSensor(_dsMeter->getDSID(), _zone->getID(), idList[i]);
