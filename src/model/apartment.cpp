@@ -473,12 +473,11 @@ namespace dss {
         break;
       }
     }
-
     if(result == NULL) {
       if (_scriptId.length()) {
-        result.reset(new State(_type, _stateName, _scriptId));
+        result = boost::make_shared<State> (_type, _stateName, _scriptId);
       } else {
-        result.reset(new State(_stateName));
+        result = boost::make_shared<State> (_stateName);
       }
       m_States.push_back(result);
     }

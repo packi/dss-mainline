@@ -271,9 +271,11 @@ namespace dss {
 
       try {
         ActionRequestInterface &actionRequest(*m_Apartment.getActionRequestInterface());
-        pCluster->setOperationLock(actionRequest.isOperationLock(_dsMeter->getDSID(),
-                                                                 cluster.GroupID),
-                                   coSystemStartup);
+        if (actionRequest.isOperationLock(_dsMeter->getDSID(), cluster.GroupID)) {
+          // only set operation lock if lock is really active,
+          // otherwise a state will be created, which is not wanted
+          pCluster->setOperationLock(true, coSystemStartup);
+        }
       } catch (BusApiError &e) {
         // leave State_Unknown or take lock value from other dsm's
         log(std::string("OperationLock: ") + e.what(), lsWarning);

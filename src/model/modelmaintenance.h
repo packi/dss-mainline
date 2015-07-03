@@ -252,7 +252,7 @@ namespace dss {
     void onClusterConfigLock(const int _clusterID, const bool _configurationLock);
     void onClusterLockedScenes(const int _clusterID, const std::vector<int> &_lockedScenes);
 
-    void onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload);
+    void onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload, const callOrigin_t _origin);
     void onOperationLock(int _zoneID, int _groupID, bool _lock, callOrigin_t _callOrigin);
     void onAutoClusterMaintenance(dsuid_t _deviceID);
     void onAutoClusterCleanup();

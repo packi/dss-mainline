@@ -1204,9 +1204,9 @@ namespace dss {
                                                  sizeof(pPayload->payload)));
 
     pEvent->setSingleObjectParameter(pPayload);
-
+    pEvent->addParameter(coDsmApi);
     m_pModelMaintenance->addModelEvent(pEvent);
-  } // handleHeatingControllerStateEvent
+  } // handleGenericEvent
 
   void DSBusInterface::handleGenericEventCallback(uint8_t _errorCode, void *_userData,
       dsuid_t _sourceID, dsuid_t _destinationID,
