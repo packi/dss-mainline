@@ -2030,37 +2030,86 @@ namespace dss {
         4 Service     {active=1, inactive=2}
      */
     switch (_eventType) {
-      case ge_sun:
+    case ge_sun:
       {
-        if (_pPayload->length == 2) {
-          raiseEvent(createGenericSignalSunshine(_pPayload->payload[0],
-              (CardinalDirection_t) _pPayload->payload[1], _origin));
+        if (_pPayload->length != 2) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+        CardinalDirection_t direction =
+          static_cast<CardinalDirection_t>(_pPayload->payload[1]);
+
+        // arg0: value {active=1, inactive=2}
+        // arg1: {direction}
+        if (!valid(direction) || value == 0 || value > 2) {
+          log(std::string("generic sunshine: invalid value: " + intToString(value) +
+                          " direction: " + intToString(direction)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalSunshine(value, direction, _origin));
       }
-      case ge_frost:
+      break;
+
+    case ge_frost:
       {
-        if (_pPayload->length == 1) {
-          raiseEvent(createGenericSignalFrostProtection(_pPayload->payload[0], _origin));
+        if (_pPayload->length != 1) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+
+        // arg0: {active=1, inactive=2}
+        if (value != 1 && value != 2) {
+          log(std::string("generic frost: invalid value: " + intToString(value)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalFrostProtection(value, _origin));
       }
-      case ge_heating_mode:
+      break;
+
+    case ge_heating_mode:
       {
-        if (_pPayload->length == 1) {
-          raiseEvent(createGenericSignalHeatingModeSwitch(_pPayload->payload[0], _origin));
+        if (_pPayload->length != 1) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+
+        // sent by the heating system, indicates type of energy delivered into rooms
+        // arg0: {Off=0, Heat=1, Cold=2, Auto=3}
+        if (value > 3) {
+          log(std::string("generic heating mode: invalid value: " + intToString(value)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalHeatingModeSwitch(value, _origin));
       }
-      case ge_service:
+      break;
+
+    case ge_service:
       {
-        if (_pPayload->length == 1) {
-          raiseEvent(createGenericSignalBuildingService(_pPayload->payload[0], _origin));
+        if (_pPayload->length != 1) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+
+        // arg0: {active=1, inactive=2}
+        if (value != 1 || value != 2) {
+          log(std::string("generic building service: invalid value: " + intToString(value)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalBuildingService(_pPayload->payload[0], _origin));
       }
-      default:
-        break;
+      break;
+
+    default:
+      log(std::string("unknwon generic event: " + intToString(_eventType)));
+      break;
     }
   } // onGenericEvent
 
