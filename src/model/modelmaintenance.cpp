@@ -766,16 +766,31 @@ namespace dss {
       break;
     }
     case ModelEvent::etGenericEvent:
+    {
+      unsigned origin = event->getParameter(1);
+      if (!validOrigin(origin)) {
+        log("etGenericEvent: invalid origin" + intToString(origin), lsNotice);
+        break;
+      }
       onGenericEvent(static_cast<GenericEventType_t> (event->getParameter(0)),
                      boost::static_pointer_cast<GenericEventPayload_t> (event->getSingleObjectParameter()),
                      static_cast<callOrigin_t> (event->getParameter(1)));
       break;
+    }
     case ModelEvent::etOperationLock:
+    {
+      unsigned origin = event->getParameter(1);
+      if (!validOrigin(origin)) {
+        log("etOperationLock: invalid origin" + intToString(origin), lsNotice);
+        break;
+      }
+
       // parm> 0:zoneId 1:groupId 2:lock 3:origin
       onOperationLock(event->getParameter(0), event->getParameter(1),
                       event->getParameter(2),
                       static_cast<callOrigin_t>(event->getParameter(3)));
       break;
+    }
     case ModelEvent::etDeviceDirty:
       assert(pEventWithDSID != NULL);
       onAutoClusterMaintenance(pEventWithDSID->getDSID());
