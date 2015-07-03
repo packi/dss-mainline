@@ -675,7 +675,7 @@ namespace dss {
       boost::shared_ptr<std::vector<int> > sUnasList =  zone->getUnassignedSensorTypes();
       try {
         for (size_t index = 0; index < sUnasList->size(); ++index) {
-            m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
+          m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
         }
 
         // reassign all assigned sensors in zone
