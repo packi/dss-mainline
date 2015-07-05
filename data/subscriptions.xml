@@ -93,7 +93,10 @@
   <subscription event-name="undoScene" handler-name="system_state"/>
   <subscription event-name="deviceBinaryInputEvent" handler-name="system_state"/>
   <subscription event-name="stateChange" handler-name="system_state"/>
-  <subscription event-name="GenericSignal" handler-name="system_state"/>
+  <subscription event-name="sunshine" handler-name="system_state"/>
+  <subscription event-name="frostprotection" handler-name="system_state"/>
+  <subscription event-name="heating_mode_switch" handler-name="system_state"/>
+  <subscription event-name="building_service" handler-name="system_state"/>
 
   <subscription event-name="model_ready" handler-name="system_event_log"/>
   <subscription event-name="running" handler-name="system_event_log"/>

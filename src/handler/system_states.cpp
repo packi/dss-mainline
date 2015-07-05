@@ -817,71 +817,6 @@ void SystemState::stateApartment() {
   }
 }
 
-void SystemState::doGenericSignal() {
-  if (!m_properties.has("signalname")) {
-    return;
-  }
-
-  std::string sname = m_properties.get("signalname");
-  if (sname.empty()) {
-    return;
-  }
-
-  try {
-    if (sname == EventName::Sunshine) {
-      std::string value = m_properties.get("value");
-      std::string direction = m_properties.get("direction");
-
-      // TODO: define algorithm for system states based on sun{shine,protection} inputs
-
-    } else if (sname == EventName::FrostProtection) {
-      boost::shared_ptr<State> state = getOrRegisterState(StateName::Frost);
-      unsigned int value = strToInt(m_properties.get("value"));
-      if (value <= State_Unknown) {
-        state->setState(coDsmApi, value);
-      } else {
-        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            EventName::FrostProtection + ": " + m_properties.get("value"), lsWarning);
-      }
-
-    } else if (sname == EventName::HeatingModeSwitch) {
-      boost::shared_ptr<State> state;
-      try {
-        state = m_apartment.getNonScriptState(StateName::HeatingModeControl);
-      } catch (ItemNotFoundException& ex) {
-        state = getOrRegisterState(StateName::HeatingModeControl);
-        State::ValueRange_t heatingModeValues;
-        heatingModeValues.push_back("off");
-        heatingModeValues.push_back("heating");
-        heatingModeValues.push_back("cooling");
-        heatingModeValues.push_back("auto");
-        state->setValueRange(heatingModeValues);
-      }
-      unsigned int value =  strToUInt(m_properties.get("value"));
-      if (value < state->getValueRangeSize()) {
-        state->setState(coDsmApi, value);
-      } else {
-        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            EventName::HeatingModeSwitch + ": " + m_properties.get("value"), lsWarning);
-      }
-
-    } else if (sname == EventName::BuildingService) {
-      boost::shared_ptr<State> state = getOrRegisterState(StateName::BuildingService);
-      unsigned int value = strToInt(m_properties.get("value"));
-      if (value <= State_Unknown) {
-        state->setState(coDsmApi, value);
-      } else {
-        Logger::getInstance()->log("SystemState::doGenericSignal: invalid value for " +
-            EventName::BuildingService + ": " + m_properties.get("value"), lsWarning);
-      }
-
-    }
-  } catch(std::runtime_error& e) {
-    Logger::getInstance()->log("SystemState::doGenericSignal: event processing error: " +
-        std::string(e.what()), lsWarning);
-  }
-}
-
 bool SystemState::setup(Event& _event) {
   m_evtName = _event.getName();
   m_evtRaiseLocation = _event.getRaiseLocation();
@@ -919,8 +854,41 @@ void SystemState::run() {
       } else if (m_raisedAtState->getType() == StateType_Service) {
         stateApartment();
       }
-    } else if (m_evtName == EventName::GenericSignal) {
-      doGenericSignal();
+
+    } else if (m_evtName == EventName::Sunshine) {
+      std::string value = m_properties.get("value");
+      std::string direction = m_properties.get("direction");
+
+      // TODO: define algorithm for system states based on sun{shine,protection} inputs
+
+    } else if (m_evtName == EventName::FrostProtection) {
+      unsigned int value = strToInt(m_properties.get("value"));
+      assert(value == State_Active || value == State_Inactive);
+      getOrRegisterState(StateName::Frost)->setState(coDsmApi, value);
+
+    } else if (m_evtName == EventName::HeatingModeSwitch) {
+      boost::shared_ptr<State> state;
+      try {
+        state = m_apartment.getNonScriptState(StateName::HeatingModeControl);
+      } catch (ItemNotFoundException& ex) {
+        state = getOrRegisterState(StateName::HeatingModeControl);
+        State::ValueRange_t heatingModeValues;
+        heatingModeValues.push_back("off");
+        heatingModeValues.push_back("heating");
+        heatingModeValues.push_back("cooling");
+        heatingModeValues.push_back("auto");
+        state->setValueRange(heatingModeValues);
+      }
+
+      unsigned int value =  strToUInt(m_properties.get("value"));
+      assert(value < state->getValueRangeSize());
+      state->setState(coDsmApi, value);
+
+    } else if (m_evtName == EventName::BuildingService) {
+      unsigned int value = strToInt(m_properties.get("value"));
+      assert(value == State_Active || value == State_Inactive);
+      getOrRegisterState(StateName::BuildingService)->setState(coDsmApi, value);
+
     }
   } catch(ItemNotFoundException& ex) {
     Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
