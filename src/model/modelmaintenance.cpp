@@ -2113,7 +2113,7 @@ namespace dss {
         unsigned value = _pPayload->payload[0];
 
         // arg0: {active=1, inactive=2}
-        if (value != 1 || value != 2) {
+        if (value != 1 && value != 2) {
           log(std::string("generic building service: invalid value: " + intToString(value)), lsInfo);
           break;
         }
