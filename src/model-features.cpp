@@ -50,7 +50,7 @@ const char *KL2 =       "KL:2"; // wildcard for all KL-2*
 const char *TKM210 =    "TKM:210";
 const char *TKM200 =    "TKM:200";
 const char *TKM2 =      "TKM:2"; // wildcard for all TKM-2*
-const char *SDM200 =    "SDM:200";
+const char *SDM20 =     "SDM:20"; // wildcard for all SDM-20*
 const char *SDM2 =      "SDM:2"; // wildcard for all SDM-2*
 const char *SDS210 =    "SDS:210";
 const char *SDS20 =     "SDS:20"; // wildcard for SDS-20*
@@ -175,7 +175,7 @@ const int MF_GE_TKM200[] =
   mf_pushbadvanced
 };
 
-const int MF_GE_SDM200[] =
+const int MF_GE_SDM20[] =
 {
   mf_dontcare,
   mf_blink,
@@ -641,8 +641,8 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_SDM200, MF_ARRAY_SIZE(MF_GE_SDM200));
-  setFeatures(ColorIDYellow, SDM200, fv);
+  fv->assign(MF_GE_SDM20, MF_ARRAY_SIZE(MF_GE_SDM20));
+  setFeatures(ColorIDYellow, SDM20, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
