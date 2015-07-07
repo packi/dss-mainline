@@ -287,6 +287,46 @@ BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   BOOST_CHECK_EQUAL(firstRecurr.getMinute() % 2, 0);
   BOOST_CHECK(firstRecurr.secondsSinceEpoch() - now.secondsSinceEpoch() <= 120);
 } // testDynamicScheduleICal
+
+BOOST_AUTO_TEST_CASE(testICalEvent) {
+  ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T150000Z", "20150707T170000Z");
+
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T150000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T160000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T170000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T180000Z")), false);
+  // next day
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T160000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T180000Z")), false);
+  // next month
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T160000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T180000Z")), false);
+  // next following year
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T160000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T180000Z")), false);
+  // the year after
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T160000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T180000Z")), false);
+} // testICalEvent
+
+BOOST_AUTO_TEST_CASE(testICalEventNight) {
+  ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T213000Z", "20150708T053000Z");
+
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T220000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T010000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T060000Z")), false);
+  // next night
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T130000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T220000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150709T010000Z")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150709T060000Z")), false);
+} // testICalEventNight
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()

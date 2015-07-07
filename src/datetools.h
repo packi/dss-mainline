@@ -261,6 +261,18 @@ namespace dss {
 
     virtual DateTime getNextOccurence(const DateTime& _from) ;
   }; // ICalSchedule
+
+  class ICalEvent {
+    __DECL_LOG_CHANNEL__
+  private:
+    struct icalrecurrencetype m_Recurrence;
+    struct icaltimetype m_StartDate;
+    struct icaldurationtype m_Duration;
+  public:
+    ICalEvent(const std::string& _rrule, const std::string& _startDate, const std::string& _endDate);
+    ~ICalEvent();
+    bool isDateInside(const DateTime& _date);
+  }; // ICalEvent
 #endif
 
   class TimeStamp {
