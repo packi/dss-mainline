@@ -50,6 +50,15 @@ dist_dssdataimages_DATA =  \
    ../data/images/sdm_green.png \
    ../data/images/sdm_grey.png \
    ../data/images/sdm_magenta.png \
+   ../data/images/sdm_plug_black.png \
+   ../data/images/sdm_plug_blue.png \
+   ../data/images/sdm_plug_cyan.png \
+   ../data/images/sdm_plug_green.png \
+   ../data/images/sdm_plug_grey.png \
+   ../data/images/sdm_plug_magenta.png \
+   ../data/images/sdm_plug_red.png \
+   ../data/images/sdm_plug_white.png \
+   ../data/images/sdm_plug_yellow.png \
    ../data/images/sdm_red.png \
    ../data/images/sdm_white.png \
    ../data/images/sdm_yellow.png \
