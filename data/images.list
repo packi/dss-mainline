@@ -72,6 +72,15 @@ dist_dssdataimages_DATA =  \
    ../data/images/sds_white.png \
    ../data/images/sds_yellow.png \
    ../data/images/sk_black_black.png \
+   ../data/images/ssl_black_black.png \
+   ../data/images/ssl_black_blue.png \
+   ../data/images/ssl_black_cyan.png \
+   ../data/images/ssl_black_green.png \
+   ../data/images/ssl_black_grey.png \
+   ../data/images/ssl_black_magenta.png \
+   ../data/images/ssl_black_red.png \
+   ../data/images/ssl_black_white.png \
+   ../data/images/ssl_black_yellow.png \
    ../data/images/star_black.png \
    ../data/images/star_blue.png \
    ../data/images/star_cyan.png \
