@@ -1683,6 +1683,8 @@ namespace dss {
       }
       if ((deviceType == DEVICE_TYPE_ZWS) && ((getDeviceNumber() == 213) || (getDeviceNumber() == 214))) {
         m_iconPath = "ssl";
+      } else if ((deviceType == DEVICE_TYPE_SDM) && ((getDeviceNumber() == 201) || (getDeviceNumber() == 202))) {
+        m_iconPath = "sdm_plug";
       } else {
         m_iconPath = getDeviceTypeString(deviceType);
         std::transform(m_iconPath.begin(), m_iconPath.end(), m_iconPath.begin(), ::tolower);
