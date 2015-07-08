@@ -622,6 +622,10 @@ namespace dss {
   }
 
   void StructureManipulator::autoAssignZoneSensors(boost::shared_ptr<Zone> _zone) {
+    if (!_zone) {
+      return;
+    }
+
     // don't assign sensor to zone zero
     if (_zone->getID() == 0) {
       return;
