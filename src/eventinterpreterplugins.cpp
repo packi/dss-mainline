@@ -1047,7 +1047,7 @@ namespace dss {
     std::string weatherIconID;
     std::string weatherConditionID;
     std::string weatherService;
-    double valOutdoorTemperature;
+    double valOutdoorTemperature = 0;
     bool valueSeen = false;
 
 /*
