@@ -495,7 +495,7 @@ void SystemState::callscene() {
       // global or cluster-local states, but not both at the same time.
       // In the presence of cluster rain states inactive-rain on group0 serves
       // as a broadcast command only
-      for (size_t grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
+      for (int grp = GroupIDAppUserMin; grp <= GroupIDAppUserMax; grp++) {
         if (lookupState(state, formatAppartmentStateName(StateName::Rain, grp))) {
           state->setState(coSystem, State_Inactive);
         }
