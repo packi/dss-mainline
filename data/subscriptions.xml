@@ -109,6 +109,7 @@
   <subscription event-name="deviceSensorValue" handler-name="system_event_log"/>
   <subscription event-name="zoneSensorValue" handler-name="system_event_log"/>
   <subscription event-name="stateChange" handler-name="system_event_log"/>
+  <subscription event-name="sunshine" handler-name="system_event_log"/>
 
   <!-- System Hail Handler -->
   <subscription event-name="running" handler-name="javascript">
