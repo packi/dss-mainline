@@ -12,6 +12,7 @@
   <subscription event-name="undoScene" handler-name="system_trigger" />
   <subscription event-name="stateChange" handler-name="system_trigger" />
   <subscription event-name="addonStateChange" handler-name="system_trigger" />
+  <subscription event-name="sunshine" handler-name="system_trigger"/>
 
   <subscription event-name="action_execute" handler-name="action_execute" />
 

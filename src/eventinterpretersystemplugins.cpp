@@ -1553,6 +1553,42 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkEvent(PropertyNodePtr _triggerProp) {
+
+    PropertyNodePtr triggerName = _triggerProp->getPropertyByName("name");
+
+    if (triggerName == NULL) {
+      //trigger structure is incomplete
+      return false;
+    }
+    std::string sName = triggerName->getAsString();
+    if (sName != m_evtName) {
+      // names do not match
+      return false;
+    }
+
+    PropertyNodePtr triggerParameters = _triggerProp->getPropertyByName("parameter");
+    if (triggerParameters != NULL) {
+      for (int i = 0; i < triggerParameters->getChildCount(); ++i) {
+        PropertyNodePtr triggerParameter = triggerParameters->getChild(i);
+        if (!m_properties.has(triggerParameter->getName())) {
+          // if the event is missing a parameter given in the trigger structure --> no match
+          return false;
+        }
+
+        std::string eventValue = m_properties.get(triggerParameter->getName());
+        std::string triggerValue = triggerParameter->getAsString();
+        if (eventValue != triggerValue) {
+          // given parameters must match
+          return false;
+        }
+      }
+    }
+
+    Logger::getInstance()->log("SystemTrigger::checkEvent:: Match event: " + sName);
+    return true;
+  }
+
   bool SystemTrigger::checkTrigger(std::string _path) {
     if (!DSS::hasInstance()) {
       return false;
@@ -1657,6 +1693,12 @@ namespace dss {
       } else if (m_evtName == EventName::AddonStateChange) {
         if (triggerValue == "addon-state-change") {
           if (checkState(triggerProp)) {
+            return true;
+          }
+        }
+      } else {
+        if (triggerValue == "event") {
+          if (checkEvent(triggerProp)) {
             return true;
           }
         }
