@@ -272,6 +272,27 @@ namespace dss {
         }
       }
 
+      PropertyNodePtr oDateNode = oBaseConditionNode->getPropertyByName("date");
+      if (oDateNode != NULL) {
+        bool fMatch = false;
+        for (int i = 0; i < oDateNode->getChildCount(); i++) {
+          PropertyNodePtr dateStartNode = oDateNode->getChild(i)->getPropertyByName("start");
+          PropertyNodePtr dateEndNode = oDateNode->getChild(i)->getPropertyByName("end");
+          PropertyNodePtr dateRruleNode = oDateNode->getChild(i)->getPropertyByName("rrule");
+          if (dateStartNode != NULL && dateEndNode != NULL && dateEndNode != NULL) {
+            DateTime nTime = DateTime();
+            ICalEvent icalEvent(dateRruleNode->getAsString(), dateStartNode->getAsString(), dateEndNode->getAsString());
+            if (icalEvent.isDateInside(nTime)) {
+              fMatch = true;
+              break;
+            }
+          }
+        }
+        if (!fMatch) {
+          return false;
+        }
+      }
+
     } // (oBaseConditionNode != NULL)
     return true;
   } // checkSystemCondition

@@ -289,44 +289,70 @@ BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
 } // testDynamicScheduleICal
 
 BOOST_AUTO_TEST_CASE(testICalEvent) {
-  ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T150000Z", "20150707T170000Z");
+  ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T150000", "20150707T170000");
 
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T150000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T160000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T170000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T180000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T150000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T170000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T180000")), false);
   // next day
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T160000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T180000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T180000")), false);
   // next month
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T160000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T180000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T160000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150808T180000")), false);
   // next following year
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T160000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T180000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20160707T180000")), false);
   // the year after
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T160000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T180000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T160000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20170707T180000")), false);
 } // testICalEvent
 
 BOOST_AUTO_TEST_CASE(testICalEventNight) {
-  ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T213000Z", "20150708T053000Z");
+  ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T213000", "20150708T053000");
 
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T220000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T010000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T060000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T220000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T010000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T060000")), false);
   // next night
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T130000Z")), false);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T220000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150709T010000Z")), true);
-  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150709T060000Z")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T130000")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150708T220000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150709T010000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150709T060000")), false);
 } // testICalEventNight
+
+BOOST_AUTO_TEST_CASE(testICalEventDST) {
+  ICalEvent event("FREQ=DAILY", "20150707T150000", "20150707T170000");
+
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T145900")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T170001")), false);
+
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20151025T145900")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20151025T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20151025T170001")), false);
+} // testICalEvent
+
+BOOST_AUTO_TEST_CASE(testICalEventTZ) {
+  ICalEvent event("FREQ=DAILY", "20150707T150000", "20150707T170000");
+
+  TZSwitcher s("Australia/Adelaide");
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T145900")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T170001")), false);
+
+  TZSwitcher t("America/Los_Angeles");
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T145900")), false);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T160000")), true);
+  BOOST_CHECK_EQUAL(event.isDateInside(DateTime::parseRFC2445("20150707T170001")), false);
+} // testICalEvent
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
