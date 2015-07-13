@@ -1697,6 +1697,11 @@ namespace dss {
     meter->setIsConnected(true);
     meter->setIsValid(false);
 
+    // synchronize dss with dsm zone sensors
+    // in case a dsm crashed during zone sensor assignment.
+    synchronizeZoneSensorAssignment();
+    autoAssignSensors();
+
     try {
       Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dSMeterID);
       for (int i = 0; i < devices.length(); i++) {
