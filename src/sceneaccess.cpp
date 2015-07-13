@@ -35,7 +35,9 @@
 #include "model/device.h"
 #include "model/apartment.h"
 #include "model/addressablemodelitem.h"
+#include "model/cluster.h"
 #include "model/group.h"
+#include "model/set.h"
 #include "model/state.h"
 #include "model/modelconst.h"
 
@@ -91,11 +93,10 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     /*
      * Partial Wind (in user groups): Prevent automatic actions in relevant user group.
      */
-    boost::shared_ptr<Group> gr;
-    for (int i = 16; i < 24; ++i) {
+    boost::shared_ptr<Cluster> gr;
+    for (int i = GroupIDAppUserMin; i <= GroupIDAppUserMax; ++i) {
       try {
-        gr.reset();
-        gr = apartment.getGroup(i);
+        gr = apartment.getCluster(i);
       } catch (ItemNotFoundException& e) {
         continue;
       }
