@@ -13,6 +13,9 @@
   <subscription event-name="stateChange" handler-name="system_trigger" />
   <subscription event-name="addonStateChange" handler-name="system_trigger" />
   <subscription event-name="sunshine" handler-name="system_trigger"/>
+  <subscription event-name="frostprotection" handler-name="system_trigger"/>
+  <subscription event-name="heating_mode_switch" handler-name="system_trigger"/>
+  <subscription event-name="building_service" handler-name="system_trigger"/>
 
   <subscription event-name="action_execute" handler-name="action_execute" />
 
