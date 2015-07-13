@@ -58,6 +58,7 @@ namespace dss {
       bool checkHighlevel(PropertyNodePtr _triggerProp);
       bool checkState(PropertyNodePtr _triggerProp);
       bool checkSensorValue(PropertyNodePtr _triggerProp);
+      bool checkEvent(PropertyNodePtr _triggerProp);
       bool checkTrigger(std::string _path);
       void relayTrigger(PropertyNodePtr _releay);
   };
