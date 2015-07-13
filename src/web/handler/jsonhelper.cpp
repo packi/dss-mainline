@@ -269,6 +269,9 @@ namespace dss {
     _json.startArray("clusters");
     std::vector<boost::shared_ptr<Cluster> > clusters = _apartment.getClusters();
     foreach (boost::shared_ptr<Cluster> pCluster, clusters) {
+      if (pCluster->getStandardGroupID() == 0) {
+        continue;
+      }
       toJSON(static_cast<boost::shared_ptr<const Cluster> >(pCluster), _json);
     }
     _json.endArray();
