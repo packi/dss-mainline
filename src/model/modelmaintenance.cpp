@@ -898,13 +898,7 @@ namespace dss {
     StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
                                      *m_pStructureQueryBusInterface,
                                      *m_pApartment);
-    std::vector<boost::shared_ptr<Zone> > zones = m_pApartment->getZones();
-    for (size_t i = 0; i < zones.size(); i++) {
-      boost::shared_ptr<Zone> zone = zones.at(i);
-      if (!zone) {
-        continue;
-      }
-
+    foreach (boost::shared_ptr<Zone> zone, m_pApartment->getZones()) {
       manipulator.autoAssignZoneSensors(zone);
     }
   }
@@ -1702,6 +1696,11 @@ namespace dss {
     meter->setIsPresent(true);
     meter->setIsConnected(true);
     meter->setIsValid(false);
+
+    // synchronize dss with dsm zone sensors
+    // in case a dsm crashed during zone sensor assignment.
+    synchronizeZoneSensorAssignment();
+    autoAssignSensors();
 
     try {
       Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dSMeterID);

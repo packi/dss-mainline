@@ -320,7 +320,6 @@ std::vector<std::string> SensorDataUploadMsHubPlugin::getSubscriptionEvents() {
 
 void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
                                               const EventSubscription& _subscription) {
-
   if (!WebserviceMsHub::isAuthorized()) {
     // no upload when webservice is disabled
     return;
@@ -360,6 +359,28 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
                _event.getName() == EventName::AddonToCloud) {
+
+      if (_event.getName() == EventName::ZoneSensorValue) {
+        log(std::string("SensorDataUploader ZoneSensorValue event ") +
+            std::string(" sensor dsuid: ") + _event.getPropertyByName("originDSID") +
+            std::string(" sensor type:  ") + std::string(_event.getPropertyByName("sensorType")) +
+            std::string(" sensor value: ") + _event.getPropertyByName("sensorValue") +
+            std::string(" sensor value: ") + _event.getPropertyByName("sensorValueFloat")
+            , lsDebug);
+      }
+
+      if (_event.getName() == EventName::DeviceSensorValue) {
+        boost::shared_ptr<const DeviceReference> pDeviceRef = _event.getRaisedAtDevice();
+
+        log(std::string("SensorDataUploader DeviceSensorValue event ") +
+            std::string(" sensor dsuid: ")  + dsuid2str(pDeviceRef->getDSID()) +
+            std::string(" sensor type:  ")  + _event.getPropertyByName("sensorType") +
+            std::string(" sensor index: ")  + _event.getPropertyByName("sensorIndex") +
+            std::string(" sensor value: ")  + _event.getPropertyByName("sensorValue") +
+            std::string(" sensor value: ")  + _event.getPropertyByName("sensorValueFloat")
+            , lsDebug);
+      }
+
       m_log->append(_event.getptr(), highPrio);
 
     } else if (_event.getName() == EventName::CallScene ||

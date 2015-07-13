@@ -646,6 +646,10 @@ namespace dss {
   }
 
   void StructureManipulator::autoAssignZoneSensors(boost::shared_ptr<Zone> _zone) {
+    if (!_zone) {
+      return;
+    }
+
     // don't assign sensor to zone zero
     if (_zone->getID() == 0) {
       return;
@@ -699,7 +703,7 @@ namespace dss {
       boost::shared_ptr<std::vector<int> > sUnasList =  zone->getUnassignedSensorTypes();
       try {
         for (size_t index = 0; index < sUnasList->size(); ++index) {
-            m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
+          m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
         }
 
         // reassign all assigned sensors in zone
