@@ -201,6 +201,19 @@ namespace dss {
           const std::string& _state,
           const std::string& _value,
           const std::string& _origin_device_id);
+      void logSunshine(boost::shared_ptr<ScriptLogger> _logger,
+                       std::string _value,
+                       std::string _direction,
+                       std::string _originDeviceID);
+      void logFrostProtection(boost::shared_ptr<ScriptLogger> _logger,
+                              std::string _value,
+                              std::string _originDeviceID);
+      void logHeatingModeSwitch(boost::shared_ptr<ScriptLogger> _logger,
+                                std::string _value,
+                                std::string _originDeviceID);
+      void logBuildingService(boost::shared_ptr<ScriptLogger> _logger,
+                              std::string _value,
+                              std::string _originDeviceID);
 
       void model_ready(boost::shared_ptr<ScriptLogger> _logger);
       void callScene(boost::shared_ptr<ScriptLogger> _logger);
@@ -212,6 +225,10 @@ namespace dss {
       void deviceSensorValue(boost::shared_ptr<ScriptLogger> _logger);
       void zoneSensorValue(boost::shared_ptr<ScriptLogger> _logger);
       void stateChange(boost::shared_ptr<ScriptLogger> _logger);
+      void sunshine(boost::shared_ptr<ScriptLogger> _logger);
+      void frostProtection(boost::shared_ptr<ScriptLogger> _logger);
+      void heatingModeSwitch(boost::shared_ptr<ScriptLogger> _logger);
+      void buildingService(boost::shared_ptr<ScriptLogger> _logger);
 
       std::string m_evtName;
 
