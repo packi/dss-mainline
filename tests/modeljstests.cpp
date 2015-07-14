@@ -718,7 +718,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   int num = ctx->evaluate<int>("Apartment.getClusters().length");
   BOOST_CHECK_EQUAL(num, 2);
 
-  for (int i = 0; i < clusterVec.size(); ++i) {
+  for (unsigned i = 0; i < clusterVec.size(); ++i) {
     ctx->evaluate<void>(
       "var clusters  = Apartment.getClusters();"
       "var clusterIdx =" + intToString(i) +";"

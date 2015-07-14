@@ -609,4 +609,48 @@ namespace dss {
   bool TimeStamp::operator<(const TimeStamp &o) const {
     return timespec_cmp(&m_stamp, &o.m_stamp, <);
   }
+
+  ICalEvent::ICalEvent(const std::string& _rrule, const std::string& _startDate, const std::string& _endDate) {
+    m_Recurrence = icalrecurrencetype_from_string(_rrule.c_str());
+    {
+      DateTime start = DateTime::parseRFC2445(_startDate);
+      time_t t0 = start.secondsSinceEpoch() + start.getTimezoneOffset();
+      m_StartDate = icaltime_from_timet(t0, 0);
+    }
+    {
+      DateTime end = DateTime::parseRFC2445(_endDate);
+      time_t t0 = end.secondsSinceEpoch() + end.getTimezoneOffset();
+      struct icaltimetype iEnd = icaltime_from_timet(t0, 0);
+      m_Duration = icaltime_subtract(iEnd, m_StartDate);
+    }
+  }
+
+  ICalEvent::~ICalEvent() {
+    icalrecurrencetype_clear(&m_Recurrence);
+  }
+
+  bool ICalEvent::isDateInside(const DateTime& _date) {
+    bool ret = false;
+    time_t t0 = _date.secondsSinceEpoch() + _date.getTimezoneOffset();
+    struct icaltimetype iDate = icaltime_from_timet(t0, 0);
+
+    icalrecur_iterator* iCalIterator = icalrecur_iterator_new(m_Recurrence, m_StartDate);
+    if (!iCalIterator) {
+      return false;
+    }
+    struct icaltimetype rule_time;
+
+    while (!icaltime_is_null_time(rule_time = icalrecur_iterator_next(iCalIterator))) {
+      if (icaltime_compare(iDate, rule_time) < 0) {
+        break;
+      }
+      if (icaltime_compare(iDate, rule_time) >= 0 && icaltime_compare(iDate, icaltime_add(rule_time, m_Duration)) <= 0) {
+        ret = true;
+        break;
+      }
+    }
+
+    icalrecur_iterator_free(iCalIterator);
+    return ret;
+  }
 }

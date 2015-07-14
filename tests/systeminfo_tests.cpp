@@ -45,4 +45,235 @@ BOOST_AUTO_TEST_CASE(testMemoryInfo) {
   BOOST_CHECK(info.parseProcMeminfo().size() >= 4);
 }
 
+static char smaps[] =
+   "00008000-0040c000 r-xp 00000000 00:0f 8774460    /usr/bin/dss\n"
+   "Size:               4112 kB\n"
+   "Rss:                1640 kB\n"
+   "Pss:                1640 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:      1640 kB\n"
+   "Private_Dirty:         0 kB\n"
+   "Referenced:         1640 kB\n"
+   "Anonymous:             0 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "00414000-00415000 r-xp 00404000 00:0f 8774460    /usr/bin/dss\n"
+   "Size:                  4 kB\n"
+   "Rss:                   4 kB\n"
+   "Pss:                   4 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         4 kB\n"
+   "Referenced:            4 kB\n"
+   "Anonymous:             4 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "00415000-00418000 rwxp 00405000 00:0f 8774460    /usr/bin/dss\n"
+   "Size:                 12 kB\n"
+   "Rss:                  12 kB\n"
+   "Pss:                  12 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         8 kB\n"
+   "Private_Dirty:         4 kB\n"
+   "Referenced:           12 kB\n"
+   "Anonymous:             4 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "00418000-0041a000 rwxp 00000000 00:00 0          [heap]\n"
+   "Size:                  8 kB\n"
+   "Rss:                   8 kB\n"
+   "Pss:                   8 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         8 kB\n"
+   "Referenced:            8 kB\n"
+   "Anonymous:             8 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "4000e000-4000f000 rwxp 00000000 00:00 0\n"
+   "Size:                  4 kB\n"
+   "Rss:                   4 kB\n"
+   "Pss:                   4 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         4 kB\n"
+   "Referenced:            4 kB\n"
+   "Anonymous:             4 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "40010000-4001d000 r-xp 00000000 00:0f 8773511    /usr/lib/libavahi-client.so.3.2.9\n"
+   "Size:                 52 kB\n"
+   "Rss:                  24 kB\n"
+   "Pss:                   7 kB\n"
+   "Shared_Clean:         24 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         0 kB\n"
+   "Referenced:           24 kB\n"
+   "Anonymous:             0 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "4001d000-40024000 ---p 0000d000 00:0f 8773511    /usr/lib/libavahi-client.so.3.2.9\n"
+   "Size:                 28 kB\n"
+   "Rss:                   0 kB\n"
+   "Pss:                   0 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         0 kB\n"
+   "Referenced:            0 kB\n"
+   "Anonymous:             0 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "40024000-40025000 rwxp 0000c000 00:0f 8773511    /usr/lib/libavahi-client.so.3.2.9\n"
+   "Size:                  4 kB\n"
+   "Rss:                   4 kB\n"
+   "Pss:                   4 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         4 kB\n"
+   "Referenced:            4 kB\n"
+   "Anonymous:             4 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "40025000-40027000 rwxp 00000000 00:00 0\n"
+   "Size:                  8 kB\n"
+   "Rss:                   8 kB\n"
+   "Pss:                   8 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         8 kB\n"
+   "Referenced:            8 kB\n"
+   "Anonymous:             8 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "beaa4000-beac5000 rw-p 00000000 00:00 0          [stack]\n"
+   "Size:                136 kB\n"
+   "Rss:                  12 kB\n"
+   "Pss:                  12 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:        12 kB\n"
+   "Referenced:           12 kB\n"
+   "Anonymous:            12 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n"
+   "ffff0000-ffff1000 r-xp 00000000 00:00 0          [vectors]\n"
+   "Size:                  4 kB\n"
+   "Rss:                   4 kB\n"
+   "Pss:                   4 kB\n"
+   "Shared_Clean:          0 kB\n"
+   "Shared_Dirty:          0 kB\n"
+   "Private_Clean:         0 kB\n"
+   "Private_Dirty:         4 kB\n"
+   "Referenced:            4 kB\n"
+   "Anonymous:             0 kB\n"
+   "AnonHugePages:         0 kB\n"
+   "Swap:                  0 kB\n"
+   "KernelPageSize:        4 kB\n"
+   "MMUPageSize:           4 kB\n"
+   "Locked:                0 kB\n" ;
+
+static int createSmaps(const std::string &fileName) {
+  std::ofstream ofs(fileName.c_str());
+  ofs << smaps;
+  ofs.close();
+  return 0;
+}
+
+BOOST_AUTO_TEST_CASE(testLoadSmaps) {
+  SystemInfo info;
+
+  std::string fileName = "/tmp/smaps.test"; // TODO mktemp
+  createSmaps(fileName);
+
+  std::vector<std::string> headers;
+  BOOST_FOREACH(const mapinfo &it, info.parseSMaps(fileName)) {
+    std::cout << boost::format("%s\n") % it.name;
+    headers.push_back(std::string(it.name));
+  }
+  BOOST_CHECK_EQUAL(headers.size(), 11);
+}
+
+BOOST_AUTO_TEST_CASE(testSumSmaps) {
+  SystemInfo info;
+
+  std::string fileName = "/tmp/smaps.test"; // TODO mktemp
+  createSmaps(fileName);
+
+  struct mapinfo sum = info.sumSmaps(info.parseSMaps(fileName));
+  std::cout << boost::format("PrivateClean: %4d kB\n") % sum.private_clean;
+  std::cout << boost::format("PrivateDirty: %4d kB\n") % sum.private_dirty;
+  std::cout << boost::format("SharedClean : %4d kB\n") % sum.shared_clean;
+  std::cout << boost::format("SharedDirty : %4d kB\n") % sum.shared_dirty;
+  std::cout << boost::format("PSS         : %4d kB\n") % sum.pss;
+  std::cout << boost::format("RSS         : %4d kB\n") % sum.rss;
+  std::cout << boost::format("Size        : %4d kB\n") % sum.size;
+
+  BOOST_CHECK_EQUAL(sum.private_clean, 1648);
+  BOOST_CHECK_EQUAL(sum.private_dirty, 48);
+  BOOST_CHECK_EQUAL(sum.shared_clean, 24);
+  BOOST_CHECK_EQUAL(sum.shared_dirty, 0);
+  BOOST_CHECK_EQUAL(sum.pss, 1703);
+  BOOST_CHECK_EQUAL(sum.rss, 1720);
+  BOOST_CHECK_EQUAL(sum.size, 4372);
+}
+
+BOOST_AUTO_TEST_CASE(testProcSmaps) {
+  SystemInfo info;
+
+  // use /proc/self/smaps
+  std::vector<mapinfo> maps = info.parseSMaps();
+  BOOST_CHECK(!maps.empty());
+
+  // make sure we parsed something
+  struct mapinfo sum = info.sumSmaps(maps);
+  BOOST_CHECK_NE(sum.private_clean, 0);
+  BOOST_CHECK_NE(sum.private_dirty, 0);
+  BOOST_CHECK_NE(sum.shared_clean, 0);
+  BOOST_CHECK_EQUAL(sum.shared_dirty, 0); // typically 0
+  BOOST_CHECK_NE(sum.pss, 0);
+  BOOST_CHECK_NE(sum.rss, 0);
+  BOOST_CHECK_NE(sum.size, 0);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

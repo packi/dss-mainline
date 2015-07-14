@@ -103,7 +103,7 @@ namespace dss {
       m_pPropertyNode->createProperty("present")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
       m_pPropertyNode->createProperty("busMemberType")
-        ->linkToProxy(PropertyProxyReference<int>((int &) m_DeviceType, false));
+        ->linkToProxy(PropertyProxyReference<int, BusMemberDevice_t>(m_DeviceType, false));
 
       PropertyNodePtr capNode = m_pPropertyNode->createProperty("capabilities");
       capNode->createProperty("devices")

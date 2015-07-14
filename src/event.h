@@ -45,7 +45,6 @@ namespace dss {
   //================================================== Constants
 
   namespace EventName {
-    extern const std::string GenericSignal;
     extern const std::string CallScene;
     extern const std::string CallSceneBus;
     extern const std::string DeviceSensorValue;
@@ -70,6 +69,10 @@ namespace dss {
     extern const std::string DeviceHeatingTypeChanged;
     extern const std::string LogFileData;
     extern const std::string DebugMonitorUpdate;
+    extern const std::string Sunshine;
+    extern const std::string FrostProtection;
+    extern const std::string HeatingModeSwitch;
+    extern const std::string BuildingService;
   }
 
   namespace EventProperty {

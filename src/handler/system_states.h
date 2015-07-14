@@ -22,15 +22,27 @@
 
 #include "event.h"
 #include "handler/system_handlers.h"
+#include "model/state.h"
 #include "model/deviceinterface.h"
 
 namespace dss {
 
-  namespace SystemStateName {
-    extern const std::string Sun;
+  namespace StateName {
+    extern const std::string Alarm;
+    extern const std::string Alarm2;
+    extern const std::string Alarm3;
+    extern const std::string Alarm4;
+    extern const std::string BuildingService;
+    extern const std::string Fire;
     extern const std::string Frost;
-    extern const std::string HeatingMode;
-    extern const std::string Service;
+    extern const std::string HeatingModeControl;
+    extern const std::string Hibernation;
+    extern const std::string Panic;
+    extern const std::string Motion;
+    extern const std::string OperationLock;
+    extern const std::string Presence;
+    extern const std::string Rain;
+    extern const std::string Wind;
   }
 
   class SystemState : public SystemEvent {
@@ -57,6 +69,8 @@ namespace dss {
       boost::shared_ptr<State> registerState(std::string _name,
                                              bool _persistent);
       boost::shared_ptr<State> getOrRegisterState(std::string _name);
+      boost::shared_ptr<State> loadPersistentState(eStateType _type, std::string _name);
+
       bool lookupState(boost::shared_ptr<State> &_state,
                        const std::string &_name);
       std::string getData(int *zoneId, int *groupId, int *sceneId,

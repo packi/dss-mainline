@@ -168,6 +168,7 @@ namespace dss {
   const int SensorIDWindDirection = 19;
   const int SensorIDPrecipitation = 20;
   const int SensorIDCO2Concentration = 21;
+  const int SensorIDSoundPressureLevel = 25;
   const int SensorIDRoomTemperatureSetpoint = 50;
   const int SensorIDRoomTemperatureControlVariable = 51;
   const int SensorIDReserved1 = 61;
@@ -188,12 +189,15 @@ namespace dss {
   const int BinaryInputIDSmokeDetector = 7;
   const int BinaryInputIDWindDetector = 8;
   const int BinaryInputIDRainDetector = 9;
-  const int BinaryInputIDSun = 10;
+  const int BinaryInputIDSunProtection = 10;
   const int BinaryInputIDRoomThermostat = 11;
   const int BinaryInputIDBatteryLow = 12;
   const int BinaryInputIDWindowContact = 13;
   const int BinaryInputIDDoorContact = 14;
   const int BinaryInputIDWindowTilt = 15;
+  const int BinaryInputIDGarageDoorContact = 16;
+  const int BinaryInputIDSunRadiation = 17;
+  const int BinaryInputIDFrostDetector = 18;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1

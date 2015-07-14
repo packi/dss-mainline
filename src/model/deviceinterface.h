@@ -33,13 +33,22 @@ namespace dss {
     coUnknown = 0,
     coJSScripting = 1,
     coJSON = 2,
+    // missing value here
     coSubscription = 4,
+    // missing value here
     coTest = 6,
     coSystem = 7,
     coSystemBinaryInput = 8,
     coDsmApi = 9,
     coSystemStartup = 10,
+
+    coLast = 11, // keep last
   } callOrigin_t;
+
+  inline bool validOrigin(unsigned int origin)
+  {
+    return (origin < coLast && origin != 5 && origin != 3);
+  }
 
   /** Interface to a single or multiple devices.
    */

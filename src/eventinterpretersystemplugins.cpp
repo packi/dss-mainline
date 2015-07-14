@@ -1553,6 +1553,42 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkEvent(PropertyNodePtr _triggerProp) {
+
+    PropertyNodePtr triggerName = _triggerProp->getPropertyByName("name");
+
+    if (triggerName == NULL) {
+      //trigger structure is incomplete
+      return false;
+    }
+    std::string sName = triggerName->getAsString();
+    if (sName != m_evtName) {
+      // names do not match
+      return false;
+    }
+
+    PropertyNodePtr triggerParameters = _triggerProp->getPropertyByName("parameter");
+    if (triggerParameters != NULL) {
+      for (int i = 0; i < triggerParameters->getChildCount(); ++i) {
+        PropertyNodePtr triggerParameter = triggerParameters->getChild(i);
+        if (!m_properties.has(triggerParameter->getName())) {
+          // if the event is missing a parameter given in the trigger structure --> no match
+          return false;
+        }
+
+        std::string eventValue = m_properties.get(triggerParameter->getName());
+        std::string triggerValue = triggerParameter->getAsString();
+        if (eventValue != triggerValue) {
+          // given parameters must match
+          return false;
+        }
+      }
+    }
+
+    Logger::getInstance()->log("SystemTrigger::checkEvent:: Match event: " + sName);
+    return true;
+  }
+
   bool SystemTrigger::checkTrigger(std::string _path) {
     if (!DSS::hasInstance()) {
       return false;
@@ -1657,6 +1693,12 @@ namespace dss {
       } else if (m_evtName == EventName::AddonStateChange) {
         if (triggerValue == "addon-state-change") {
           if (checkState(triggerProp)) {
+            return true;
+          }
+        }
+      } else {
+        if (triggerValue == "event") {
+          if (checkEvent(triggerProp)) {
             return true;
           }
         }
@@ -2271,6 +2313,35 @@ namespace dss {
     }
   }
 
+  void SystemEventLog::logSunshine(boost::shared_ptr<ScriptLogger> _logger,
+                                   std::string _value,
+                                   std::string _direction,
+                                   std::string _originDeviceID) {
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";Sunshine;" + _value + ";;" + _direction + ";;;;" + _originDeviceID + ";");
+  }
+
+  void SystemEventLog::logFrostProtection(boost::shared_ptr<ScriptLogger> _logger,
+                                          std::string _value,
+                                          std::string _originDeviceID) {
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";FrostProtection;" + _value + ";;;;;;" + _originDeviceID + ";");
+  }
+
+  void SystemEventLog::logHeatingModeSwitch(boost::shared_ptr<ScriptLogger> _logger,
+                                          std::string _value,
+                                          std::string _originDeviceID) {
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";HeatingModeSwitch;" + _value + ";;;;;;" + _originDeviceID + ";");
+  }
+
+  void SystemEventLog::logBuildingService(boost::shared_ptr<ScriptLogger> _logger,
+                                          std::string _value,
+                                          std::string _originDeviceID) {
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";BuildingService;" + _value + ";;;;;;" + _originDeviceID + ";");
+  }
+
   void SystemEventLog::model_ready(boost::shared_ptr<ScriptLogger> _logger) {
     _logger->logln("Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken");
 
@@ -2494,6 +2565,66 @@ namespace dss {
     }
   }
 
+  void SystemEventLog::sunshine(boost::shared_ptr<ScriptLogger> _logger) {
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+    std::string direction;
+    if (m_properties.has("direction")) {
+      direction = m_properties.get("direction");
+    }
+    std::string originDeviceID;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceID = m_properties.get("originDeviceID");
+    }
+    try {
+      logSunshine(_logger, value, direction, originDeviceID);
+    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+  }
+
+  void SystemEventLog::frostProtection(boost::shared_ptr<ScriptLogger> _logger) {
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+    std::string originDeviceID;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceID = m_properties.get("originDeviceID");
+    }
+    try {
+      logFrostProtection(_logger, value, originDeviceID);
+    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+  }
+
+  void SystemEventLog::heatingModeSwitch(boost::shared_ptr<ScriptLogger> _logger) {
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+    std::string originDeviceID;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceID = m_properties.get("originDeviceID");
+    }
+    try {
+      logHeatingModeSwitch(_logger, value, originDeviceID);
+    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+  }
+
+  void SystemEventLog::buildingService(boost::shared_ptr<ScriptLogger> _logger) {
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+    std::string originDeviceID;
+    if (m_properties.has("originDeviceID")) {
+      originDeviceID = m_properties.get("originDeviceID");
+    }
+    try {
+      logBuildingService(_logger, value, originDeviceID);
+    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+  }
+
   void SystemEventLog::run() {
     if (DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser(
@@ -2544,6 +2675,14 @@ namespace dss {
         return;
       }
       zoneSensorValue(logger);
+    } else if (m_evtName == EventName::Sunshine) {
+      sunshine(logger);
+    } else if (m_evtName == EventName::FrostProtection) {
+      frostProtection(logger);
+    } else if (m_evtName == EventName::HeatingModeSwitch) {
+      heatingModeSwitch(logger);
+    } else if (m_evtName == EventName::BuildingService) {
+      buildingService(logger);
     }
   }
 

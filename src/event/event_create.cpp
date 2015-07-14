@@ -29,7 +29,6 @@
 namespace dss {
 
 namespace EventName {
-  const std::string GenericSignal = "GenericSignal";
   const std::string CallScene = "callScene";
   const std::string CallSceneBus = "callSceneBus";
   const std::string DeviceSensorValue = "deviceSensorValue";
@@ -54,6 +53,10 @@ namespace EventName {
   const std::string DeviceHeatingTypeChanged = "DeviceHeatingTypeChanged";
   const std::string LogFileData = "logFileData";
   const std::string DebugMonitorUpdate = "debugMonitorUpdate";
+  const std::string Sunshine = "sunshine";
+  const std::string FrostProtection = "frostprotection";
+  const std::string HeatingModeSwitch = "heating_mode_switch";
+  const std::string BuildingService = "building_service";
 }
 
 boost::shared_ptr<Event>
@@ -327,13 +330,13 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
 boost::shared_ptr<Event>
   createHeatingControllerState(int _zoneID, const dsuid_t &_ctrlDsuid, int _ctrlState)
 {
-    boost::shared_ptr<Event> event;
-    event = boost::make_shared<Event>(EventName::HeatingControllerState);
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::HeatingControllerState);
 
-    event->setProperty("ZoneID", intToString(_zoneID));
-    event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
-    event->setProperty("ControlState", intToString(_ctrlState));
-    return event;
+  event->setProperty("ZoneID", intToString(_zoneID));
+  event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
+  event->setProperty("ControlState", intToString(_ctrlState));
+  return event;
 }
 
 boost::shared_ptr<Event>
@@ -353,9 +356,12 @@ boost::shared_ptr<Event>
 boost::shared_ptr<Event> createGenericSignalSunshine(const uint8_t &_value,
     const CardinalDirection_t &_direction, callOrigin_t _origin) {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::GenericSignal);
+  event = boost::make_shared<Event>(EventName::Sunshine);
 
-  event->setProperty("signalname", "sunshine");
+  // value: {active=1, inactive=2}
+  assert(_value == 1 || _value == 2);
+  assert(validOrigin(_origin));
+  assert(valid(_direction));
   event->setProperty("value", intToString(_value));
   event->setProperty("direction", toString(_direction));
   event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
@@ -365,9 +371,11 @@ boost::shared_ptr<Event> createGenericSignalSunshine(const uint8_t &_value,
 boost::shared_ptr<Event>
   createGenericSignalFrostProtection(const uint8_t &_value, callOrigin_t _origin) {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::GenericSignal);
+  event = boost::make_shared<Event>(EventName::FrostProtection);
 
-  event->setProperty("signalname", "frostprotection");
+  // value: {active=1, inactive=2}
+  assert(_value == 1 || _value == 2);
+  assert(validOrigin(_origin));
   event->setProperty("value", intToString(_value));
   event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
   return event;
@@ -376,9 +384,11 @@ boost::shared_ptr<Event>
 boost::shared_ptr<Event>
   createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin) {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::GenericSignal);
+  event = boost::make_shared<Event>(EventName::HeatingModeSwitch);
 
-  event->setProperty("signalname", "heating_mode_switch");
+  // value: {Off=0, Heat=1, Cold=2, Auto=3}
+  assert(_value <= 3);
+  assert(validOrigin(_origin));
   event->setProperty("value", intToString(_value));
   event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
   return event;
@@ -387,9 +397,11 @@ boost::shared_ptr<Event>
 boost::shared_ptr<Event>
   createGenericSignalBuildingService(const uint8_t &_value, callOrigin_t _origin) {
   boost::shared_ptr<Event> event;
-  event = boost::make_shared<Event>(EventName::GenericSignal);
+  event = boost::make_shared<Event>(EventName::BuildingService);
 
-  event->setProperty("signalname", "building_service");
+  // value: {active=1, inactive=2}
+  assert(_value == 1 || _value == 2);
+  assert(validOrigin(_origin));
   event->setProperty("value", intToString(_value));
   event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
   return event;

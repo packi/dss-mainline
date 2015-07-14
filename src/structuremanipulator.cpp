@@ -414,6 +414,9 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         throw DSSException("Remove group: id " + intToString(_groupNumber) + " does not exist");
       }
+      if (pCluster->isConfigurationLocked()) {
+        throw DSSException("The group is locked and cannot be modified");
+      }
       try {
         pCluster->reset();
         m_Interface.removeCluster(_groupNumber);
@@ -470,7 +473,17 @@ namespace dss {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID())) {
+    if (isAppUserGroup(_group->getID())) {
+      boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_group->getID());
+      if (pCluster->isConfigurationLocked()) {
+        throw DSSException("The group is locked and cannot be modified");
+      }
+      pCluster->setStandardGroupID(_standardGroupNumber);
+      m_Interface.groupSetStandardID(pCluster->getZoneID(), pCluster->getID(), _standardGroupNumber);
+      return;
+    }
+
+    if (isZoneUserGroup(_group->getID())) {
       _group->setStandardGroupID(_standardGroupNumber);
       m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
       return;
@@ -489,6 +502,11 @@ namespace dss {
   void StructureManipulator::deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
+
+    boost::shared_ptr<Cluster> cluster = boost::dynamic_pointer_cast<Cluster> (_group);
+    if (cluster && cluster->isConfigurationLocked()) {
+      throw DSSException("The group is locked and cannot be modified");  // note: translated in dss-websrc
     }
 
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
@@ -525,6 +543,12 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
+
+    boost::shared_ptr<Cluster> cluster = boost::dynamic_pointer_cast<Cluster> (_group);
+    if (cluster && cluster->isConfigurationLocked()) {
+      throw DSSException("The group is locked and cannot be modified");
+    }
+
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
 
@@ -622,6 +646,10 @@ namespace dss {
   }
 
   void StructureManipulator::autoAssignZoneSensors(boost::shared_ptr<Zone> _zone) {
+    if (!_zone) {
+      return;
+    }
+
     // don't assign sensor to zone zero
     if (_zone->getID() == 0) {
       return;
@@ -675,7 +703,7 @@ namespace dss {
       boost::shared_ptr<std::vector<int> > sUnasList =  zone->getUnassignedSensorTypes();
       try {
         for (size_t index = 0; index < sUnasList->size(); ++index) {
-            m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
+          m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
         }
 
         // reassign all assigned sensors in zone
@@ -705,6 +733,9 @@ namespace dss {
   void StructureManipulator::clusterSetStandardID(boost::shared_ptr<Cluster> _cluster,
                                                   const int _standardGroupNumber) {
     if (isAppUserGroup(_cluster->getID())) {
+      if (_cluster->isConfigurationLocked()) {
+        throw DSSException("The group is locked and cannot be modified");
+      }
       _cluster->setStandardGroupID(_standardGroupNumber);
       m_Interface.clusterSetStandardID(_cluster->getID(), _standardGroupNumber);
       return;

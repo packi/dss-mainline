@@ -233,8 +233,11 @@ namespace dss {
     }
 
     foreach(ClusterSpec_t cluster, clusters) {
-      log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
-          " and devices: " + intToString(cluster.NumberOfDevices));
+
+      if (cluster.StandardGroupID > 0) {
+        log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
+            " and devices: " + intToString(cluster.NumberOfDevices));
+      }
 
       boost::shared_ptr<Cluster> pCluster;
 
@@ -271,9 +274,11 @@ namespace dss {
 
       try {
         ActionRequestInterface &actionRequest(*m_Apartment.getActionRequestInterface());
-        pCluster->setOperationLock(actionRequest.isOperationLock(_dsMeter->getDSID(),
-                                                                 cluster.GroupID),
-                                   coSystemStartup);
+        if (actionRequest.isOperationLock(_dsMeter->getDSID(), cluster.GroupID)) {
+          // only set operation lock if lock is really active,
+          // otherwise a state will be created, which is not wanted
+          pCluster->setOperationLock(true, coSystemStartup);
+        }
       } catch (BusApiError &e) {
         // leave State_Unknown or take lock value from other dsm's
         log(std::string("OperationLock: ") + e.what(), lsWarning);
@@ -735,12 +740,12 @@ namespace dss {
       pGroup->setOnState(coUnknown, states.test(GroupIDYellow-1));
     }
 
-    unsigned char idList[] = { SensorIDTemperatureIndoors,
+    uint8_t idList[] = { SensorIDTemperatureIndoors,
         SensorIDHumidityIndoors,
         SensorIDCO2Concentration,
         SensorIDBrightnessIndoors };
 
-    for (uint8_t i=0; i < sizeof(idList)/sizeof(unsigned char); i++) {
+    for (uint8_t i=0; i < sizeof(idList)/sizeof(uint8_t); i++) {
       dsuid_t sensorDevice;
       try {
         sensorDevice = m_Interface.getZoneSensor(_dsMeter->getDSID(), _zone->getID(), idList[i]);

@@ -766,15 +766,31 @@ namespace dss {
       break;
     }
     case ModelEvent::etGenericEvent:
-      onGenericEvent(static_cast<GenericEventType_t>(event->getParameter(0)),
-                     boost::static_pointer_cast<GenericEventPayload_t>(event->getSingleObjectParameter()));
+    {
+      unsigned origin = event->getParameter(1);
+      if (!validOrigin(origin)) {
+        log("etGenericEvent: invalid origin" + intToString(origin), lsNotice);
+        break;
+      }
+      onGenericEvent(static_cast<GenericEventType_t> (event->getParameter(0)),
+                     boost::static_pointer_cast<GenericEventPayload_t> (event->getSingleObjectParameter()),
+                     static_cast<callOrigin_t> (event->getParameter(1)));
       break;
+    }
     case ModelEvent::etOperationLock:
+    {
+      unsigned origin = event->getParameter(1);
+      if (!validOrigin(origin)) {
+        log("etOperationLock: invalid origin" + intToString(origin), lsNotice);
+        break;
+      }
+
       // parm> 0:zoneId 1:groupId 2:lock 3:origin
       onOperationLock(event->getParameter(0), event->getParameter(1),
                       event->getParameter(2),
                       static_cast<callOrigin_t>(event->getParameter(3)));
       break;
+    }
     case ModelEvent::etDeviceDirty:
       assert(pEventWithDSID != NULL);
       onAutoClusterMaintenance(pEventWithDSID->getDSID());
@@ -882,13 +898,7 @@ namespace dss {
     StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
                                      *m_pStructureQueryBusInterface,
                                      *m_pApartment);
-    std::vector<boost::shared_ptr<Zone> > zones = m_pApartment->getZones();
-    for (size_t i = 0; i < zones.size(); i++) {
-      boost::shared_ptr<Zone> zone = zones.at(i);
-      if (!zone) {
-        continue;
-      }
-
+    foreach (boost::shared_ptr<Zone> zone, m_pApartment->getZones()) {
       manipulator.autoAssignZoneSensors(zone);
     }
   }
@@ -1687,6 +1697,11 @@ namespace dss {
     meter->setIsConnected(true);
     meter->setIsValid(false);
 
+    // synchronize dss with dsm zone sensors
+    // in case a dsm crashed during zone sensor assignment.
+    synchronizeZoneSensorAssignment();
+    autoAssignSensors();
+
     try {
       Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dSMeterID);
       for (int i = 0; i < devices.length(); i++) {
@@ -2019,42 +2034,96 @@ namespace dss {
     }
   } // onClusterConfigLock
 
-  void ModelMaintenance::onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload) {
+  void ModelMaintenance::onGenericEvent(const GenericEventType_t _eventType, const boost::shared_ptr<GenericEventPayload_t> &_pPayload, const callOrigin_t _origin) {
+    /*
+     * Generic Events
+        0 no event
+        1 Sun         {active=1, inactive=2} {direction}
+        2 Frost       {active=1, inactive=2}
+        3 HeatingMode {Off=0, Heat=1, Cold=2, Auto=3} sent by the heating system, indicates type of energy delivered into rooms
+        4 Service     {active=1, inactive=2}
+     */
     switch (_eventType) {
-      case ge_sun:
+    case ge_sun:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Sun);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length != 2) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+        CardinalDirection_t direction =
+          static_cast<CardinalDirection_t>(_pPayload->payload[1]);
+
+        // arg0: value {active=1, inactive=2}
+        // arg1: {direction}
+        if (!valid(direction) || value == 0 || value > 2) {
+          log(std::string("generic sunshine: invalid value: " + intToString(value) +
+                          " direction: " + intToString(direction)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalSunshine(value, direction, _origin));
       }
-      case ge_frost:
+      break;
+
+    case ge_frost:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Frost);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length != 1) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+
+        // arg0: {active=1, inactive=2}
+        if (value != 1 && value != 2) {
+          log(std::string("generic frost: invalid value: " + intToString(value)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalFrostProtection(value, _origin));
       }
-      case ge_heating_mode:
+      break;
+
+    case ge_heating_mode:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::HeatingMode);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length != 1) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+
+        // sent by the heating system, indicates type of energy delivered into rooms
+        // arg0: {Off=0, Heat=1, Cold=2, Auto=3}
+        if (value > 3) {
+          log(std::string("generic heating mode: invalid value: " + intToString(value)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalHeatingModeSwitch(value, _origin));
       }
-      case ge_service:
+      break;
+
+    case ge_service:
       {
-        boost::shared_ptr<State> state = m_pApartment->getState(StateType_Service, SystemStateName::Service);
-        if ((_pPayload->length == 1) && (_pPayload->payload[0] < state->getValueRangeSize())) {
-          state->setState(coDsmApi, _pPayload->payload[0]);
+        if (_pPayload->length != 1) {
+          break;
         }
-        break;
+
+        unsigned value = _pPayload->payload[0];
+
+        // arg0: {active=1, inactive=2}
+        if (value != 1 && value != 2) {
+          log(std::string("generic building service: invalid value: " + intToString(value)), lsInfo);
+          break;
+        }
+
+        raiseEvent(createGenericSignalBuildingService(_pPayload->payload[0], _origin));
       }
-      default:
-        break;
+      break;
+
+    default:
+      log(std::string("unknwon generic event: " + intToString(_eventType)));
+      break;
     }
   } // onGenericEvent
 
