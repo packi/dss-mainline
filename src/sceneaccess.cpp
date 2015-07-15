@@ -35,7 +35,9 @@
 #include "model/device.h"
 #include "model/apartment.h"
 #include "model/addressablemodelitem.h"
+#include "model/cluster.h"
 #include "model/group.h"
+#include "model/set.h"
 #include "model/state.h"
 #include "model/modelconst.h"
 
@@ -49,6 +51,11 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     return true;
   }
 
+  // "manual" scene calls are never blocked
+  if (_category == SAC_MANUAL) {
+    return true;
+  }
+
   Apartment& apartment = DSS::getInstance()->getApartment();
   PropertyNodePtr property = apartment.getPropertySystem()->getRootNode();
   {
@@ -57,12 +64,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
      */
     boost::shared_ptr<State> fire = apartment.getNonScriptState("fire");
     if (fire && (fire->getState() == State_Active)) {
-      switch (_category) {
-      case SAC_MANUAL:
-        break;
-      default:
-        throw SceneAccessException("Execution blocked: fire is active");
-      }
+      throw SceneAccessException("Execution blocked: fire is active");
     }
   }
 
@@ -75,23 +77,13 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
       const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
       if (pGroup != NULL) {
         if (DEVICE_CLASS_GR == pGroup->getID()) {
-          switch (_category) {
-          case SAC_MANUAL:
-            break;
-          default:
-            throw SceneAccessException("Execution blocked: wind is active");
-          }
+          throw SceneAccessException("Execution blocked: wind is active");
         }
       }
       const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
       if (pDevice != NULL) {
         if (pDevice->getGroupBitmask().test(DEVICE_CLASS_GR-1)) {
-          switch (_category) {
-          case SAC_MANUAL:
-            break;
-          default:
-            throw SceneAccessException("Execution blocked: wind is active");
-          }
+          throw SceneAccessException("Execution blocked: wind is active");
         }
       }
     }
@@ -101,11 +93,10 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     /*
      * Partial Wind (in user groups): Prevent automatic actions in relevant user group.
      */
-    boost::shared_ptr<Group> gr;
-    for (int i = 16; i < 24; ++i) {
+    boost::shared_ptr<Cluster> gr;
+    for (int i = GroupIDAppUserMin; i <= GroupIDAppUserMax; ++i) {
       try {
-        gr.reset();
-        gr = apartment.getGroup(i);
+        gr = apartment.getCluster(i);
       } catch (ItemNotFoundException& e) {
         continue;
       }
@@ -119,11 +110,15 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
         if (wind != NULL && (wind->getState() == State_Active)) {
           const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
           if (pGroup != NULL) {
+            // addressing the same cluster with an active wind alarm
             if (pGroup->getID() == i) {
-              switch (_category) {
-              case SAC_MANUAL:
-                break;
-              default:
+              throw SceneAccessException("Execution blocked: wind is active");
+            }
+            // addressing group 2 in a single zone (or all zones) with devices
+            // that are member of a cluster with an active wind alarm
+            if (pGroup->getID() == DEVICE_CLASS_GR) {
+              Set devsInZones = pGroup->getDevices().getByGroup(i);
+              if (devsInZones.length() > 0) {
                 throw SceneAccessException("Execution blocked: wind is active");
               }
             }
@@ -131,12 +126,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
           const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
           if (pDevice != NULL) {
             if (pDevice->getGroupBitmask().test(i-1)) {
-              switch (_category) {
-              case SAC_MANUAL:
-                break;
-              default:
-                throw SceneAccessException("Execution blocked: wind is active");
-              }
+              throw SceneAccessException("Execution blocked: wind is active");
             }
           }
         }
