@@ -110,11 +110,15 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
         if (wind != NULL && (wind->getState() == State_Active)) {
           const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
           if (pGroup != NULL) {
+            // addressing the same cluster with an active wind alarm
             if (pGroup->getID() == i) {
-              switch (_category) {
-              case SAC_MANUAL:
-                break;
-              default:
+              throw SceneAccessException("Execution blocked: wind is active");
+            }
+            // addressing group 2 in a single zone (or all zones) with devices
+            // that are member of a cluster with an active wind alarm
+            if (pGroup->getID() == DEVICE_CLASS_GR) {
+              Set devsInZones = pGroup->getDevices().getByGroup(i);
+              if (devsInZones.length() > 0) {
                 throw SceneAccessException("Execution blocked: wind is active");
               }
             }
