@@ -189,14 +189,14 @@ namespace dss {
   const int BinaryInputIDSmokeDetector = 7;
   const int BinaryInputIDWindDetector = 8;
   const int BinaryInputIDRainDetector = 9;
-  const int BinaryInputIDSunProtection = 10;
+  const int BinaryInputIDSunRadiation = 10;
   const int BinaryInputIDRoomThermostat = 11;
   const int BinaryInputIDBatteryLow = 12;
   const int BinaryInputIDWindowContact = 13;
   const int BinaryInputIDDoorContact = 14;
   const int BinaryInputIDWindowTilt = 15;
   const int BinaryInputIDGarageDoorContact = 16;
-  const int BinaryInputIDSunRadiation = 17;
+  const int BinaryInputIDSunProtection = 17;
   const int BinaryInputIDFrostDetector = 18;
 
   // Click type constants for devices
