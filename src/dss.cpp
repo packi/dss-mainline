@@ -172,12 +172,13 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     m_pEventQueue.reset();
     m_pEventRunner.reset();
 
-    m_pEventInterpreter.reset();
     m_pMetering.reset();
 
     m_pBusInterface.reset();
     m_pDefaultBusEventSink.reset();
     m_pModelMaintenance.reset();
+
+    m_pEventInterpreter.reset();
 
     m_pApartment.reset();
     WebserviceConnection::shutdown();
