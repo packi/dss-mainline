@@ -1,5 +1,36 @@
 dSS - digitalSTROM Server
 
+v1.31.0	20.07.2015
+	* date condition evaluation, add helper class for reoccurring ical events, #10481
+	* model event processing for generic events, 10331
+	* VdcDevice flag stored persistently, #10032
+	* add dss process memory info to property tree, #10084
+	* add more info and revisions to the /json/system/version, #10107
+	* Added method to retrieve locked devices and zones, #9788
+	* added support for configuration locks on clusters and scenes
+	* reduce property tree node size, #9369
+	* support new terminal block devices BL-SDS200, GE-UMV2i10, SW-UMR200
+	* support new dsm-api events sun, frost, service
+	* automatically create clusters based on device tags for location and protection class
+	* introduced cluster in the data model, #9792
+	* added wind protection classia and location to device model
+	* readout dSM Info regardless of configuration hash, #9620
+	* restart rrdcached when recreating metering databases, #5414
+	* adopt to ds485 stack changes, dsuid.h location changed
+	* Implement vDC API property wrappers in dSS and offer a JSON interface, #6838
+	* add trigger handler for device and zone sensor values, DevDay 2014a, #4858
+	* use the new sync calls for device property write and device move, #9095
+	* Added callSceneMin support to request handler, #8898
+	* Replace the custom made JSON generator with rapidJSON
+	* Check if resetting of the rrd database is needed, #7575
+	* reactivated dSHub event uploader
+	* use bbost flyweight for property node name string pooling, #9132
+	* Validate XML before overwriting the existing one, #9027
+	* added logDownloadHandler, #8694
+	* print logs with milliseconds resolution, #8698
+	* added model feature table
+	* dropped cygwin support
+
 v1.30.9	08.06.2015
 	* allow setting joker devices to 1-way button, #10288
 
