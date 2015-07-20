@@ -128,11 +128,15 @@ namespace dss {
 
   void Device::removeFromPropertyTree() {
     if (m_pPropertyNode != NULL) {
-      if ((m_DSMeterDSID != DSUID_NULL) && (m_DSID != DSUID_NULL)) {
-        std::string devicePath = "devices/" + dsuid2str(m_DSID);
-        PropertyNodePtr dev = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
-        dev->alias(PropertyNodePtr());
-        dev->getParentNode()->removeChild(dev);
+      try {
+        if ((m_DSMeterDSID != DSUID_NULL) && (m_DSID != DSUID_NULL)) {
+          std::string devicePath = "devices/" + dsuid2str(m_DSID);
+          PropertyNodePtr dev = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
+          dev->alias(PropertyNodePtr());
+          dev->getParentNode()->removeChild(dev);
+        }
+      } catch (std::runtime_error &err) {
+        Logger::getInstance()->log(err.what());
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
