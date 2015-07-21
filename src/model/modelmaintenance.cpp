@@ -779,7 +779,7 @@ namespace dss {
     }
     case ModelEvent::etOperationLock:
     {
-      unsigned origin = event->getParameter(1);
+      unsigned origin = event->getParameter(3);
       if (!validOrigin(origin)) {
         log("etOperationLock: invalid origin" + intToString(origin), lsNotice);
         break;
@@ -2121,7 +2121,7 @@ namespace dss {
       break;
 
     default:
-      log(std::string("unknwon generic event: " + intToString(_eventType)));
+      log(std::string("unknown generic event: " + intToString(_eventType)));
       break;
     }
   } // onGenericEvent
