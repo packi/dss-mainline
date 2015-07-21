@@ -48,11 +48,15 @@ namespace dss {
     extern const std::string CallScene;
     extern const std::string CallSceneBus;
     extern const std::string DeviceSensorValue;
+    extern const std::string DeviceSensorEvent;
     extern const std::string DeviceStatus;
     extern const std::string DeviceInvalidSensor;
     extern const std::string DeviceBinaryInputEvent;
+    extern const std::string DeviceButtonClick;
+    extern const std::string IdentifyBlink;
     extern const std::string ExecutionDenied;
     extern const std::string Running;
+    extern const std::string ModelReady;
     extern const std::string UndoScene;
     extern const std::string ZoneSensorValue;
     extern const std::string ZoneSensorError;
@@ -73,6 +77,7 @@ namespace dss {
     extern const std::string FrostProtection;
     extern const std::string HeatingModeSwitch;
     extern const std::string BuildingService;
+    extern const std::string OperationLock;
   }
 
   namespace EventProperty {

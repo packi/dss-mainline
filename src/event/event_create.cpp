@@ -32,11 +32,15 @@ namespace EventName {
   const std::string CallScene = "callScene";
   const std::string CallSceneBus = "callSceneBus";
   const std::string DeviceSensorValue = "deviceSensorValue";
+  const std::string DeviceSensorEvent = "deviceSensorEvent";
   const std::string DeviceStatus = "deviceStatusEvent";
   const std::string DeviceInvalidSensor = "deviceInvalidSensor";
   const std::string DeviceBinaryInputEvent = "deviceBinaryInputEvent";
+  const std::string DeviceButtonClick = "buttonClick";
+  const std::string IdentifyBlink = "blink";
   const std::string ExecutionDenied = "executionDenied";
   const std::string Running = "running";
+  const std::string ModelReady = "model_ready";
   const std::string UndoScene = "undoScene";
   const std::string ZoneSensorValue = "zoneSensorValue";
   const std::string ZoneSensorError = "zoneSensorError";
@@ -57,6 +61,7 @@ namespace EventName {
   const std::string FrostProtection = "frostprotection";
   const std::string HeatingModeSwitch = "heating_mode_switch";
   const std::string BuildingService = "building_service";
+  const std::string OperationLock = "operation_lock";
 }
 
 boost::shared_ptr<Event>
