@@ -2342,6 +2342,27 @@ namespace dss {
     _logger->logln(";BuildingService;" + _value + ";;;;;;" + _originDeviceID + ";");
   }
 
+  void SystemEventLog::logExecutionDenied(boost::shared_ptr<ScriptLogger> _logger,
+                                          std::string _action, std::string _reason) {
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";ExecutionDenied;" + _action + ";" + _reason + ";;;;;;");
+  }
+
+  void SystemEventLog::logOperationLock(boost::shared_ptr<ScriptLogger> _logger,
+                                        boost::shared_ptr<Zone> _zone,
+                                        int _groupId,
+                                        int _lock,
+                                        callOrigin_t _call_origin) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_zone->getGroup(_groupId));
+    std::string origName = getCallOrigin(_call_origin);
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";OperationLock;" +
+        intToString(_lock) + ";;" +
+        zoneName + ";" + groupName + ";" + origName + ";");
+  }
+
   void SystemEventLog::model_ready() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
         "system-event.log", NULL));
@@ -2649,7 +2670,51 @@ namespace dss {
       logBuildingService(logger, value, originDeviceID);
     } catch (std::exception &ex) {}
   }
+
+  void SystemEventLog::executionDenied() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
+    std::string action;
+    std::string reason;
+    if (m_properties.has("source-name")) {
+      action = m_properties.get("source-name");
+    }
+    if (action.empty()) {
+      if (m_properties.has("action-name")) {
+        action = m_properties.get("action-name");
+      }
+    }
+    if (m_properties.has("reason")) {
+      reason = m_properties.get("reason");
+    }
+
+    try {
+      logExecutionDenied(logger, action, reason);
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+  }
+
+  void SystemEventLog::operationLock() {
+    int lockStatus;
+    if (m_properties.has("lock")) {
+      lockStatus = strToInt(m_properties.get("lock"));
+    }
+
+    callOrigin_t callOrigin = coUnknown;
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
+    }
+
+    if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+      boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+          "system-event.log", NULL));
+      int groupId, zoneId;
+      try {
+        groupId = m_raisedAtGroup->getID();
+        zoneId = m_raisedAtGroup->getZoneID();
+        boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(zoneId);
+        logOperationLock(logger, zone, groupId, lockStatus, callOrigin);
+      } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+    }
   }
 
   void SystemEventLog::run() {

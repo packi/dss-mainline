@@ -215,6 +215,13 @@ namespace dss {
       void logBuildingService(boost::shared_ptr<ScriptLogger> _logger,
                               std::string _value,
                               std::string _originDeviceID);
+      void logExecutionDenied(boost::shared_ptr<ScriptLogger> _logger,
+                              std::string _action, std::string _reason);
+      void logOperationLock(boost::shared_ptr<ScriptLogger> _logger,
+                            boost::shared_ptr<Zone> _zone,
+                            int _groupId,
+                            int _lock,
+                            callOrigin_t _call_origin);
 
       void model_ready();
       void callScene();
@@ -230,6 +237,8 @@ namespace dss {
       void frostProtection();
       void heatingModeSwitch();
       void buildingService();
+      void executionDenied();
+      void operationLock();
 
       std::string m_evtName;
 
