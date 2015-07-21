@@ -458,6 +458,7 @@ namespace dss {
                          setCookieHeader, fs::basename(file_path));
           mg_send_file(_connection, fp, fs::file_size(file_path));
           fclose(fp);
+          break;
         }
       }
       if (!fileFound) {
