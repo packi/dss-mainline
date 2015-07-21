@@ -2600,6 +2600,23 @@ namespace dss {
       try {
         logStateChange(logger, m_raisedAtState, statename, state, value, originDSUID);
       } catch (std::exception &ex) {}
+
+      if (statename == "wind" ||
+          statename == "rain" ||
+          statename == "hail" ||
+          statename == "panic" ||
+          statename == "fire" ||
+          statename == "alarm" ||
+          statename == "alarm2" ||
+          statename == "alarm3" ||
+          statename == "alarm4") {
+        logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+            "system-protection.log", NULL));
+        try {
+          statename[0] = toupper(statename[0]);
+          logger->logln(statename + " is " + state);
+        } catch (std::exception &ex) {}
+      }
     }
   }
 
@@ -2621,6 +2638,21 @@ namespace dss {
     try {
       logSunshine(logger, value, direction, originDeviceID);
     } catch (std::exception &ex) {}
+
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      CardinalDirection_t dir;
+      parseCardinalDirection(direction, &dir);
+      logger->logln("Sun protection from " + toUIString(dir) + " is " + valueString);
+    } catch (std::exception &ex) {}
   }
 
   void SystemEventLog::frostProtection() {
@@ -2637,6 +2669,19 @@ namespace dss {
     try {
       logFrostProtection(logger, value, originDeviceID);
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      logger->logln("Frost protection is " + valueString);
+    } catch (std::exception &ex) {}
   }
 
   void SystemEventLog::heatingModeSwitch() {
@@ -2691,6 +2736,12 @@ namespace dss {
     try {
       logExecutionDenied(logger, action, reason);
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      logger->logln("Timer or automatic activity \"" + action + "\": " + reason);
+    } catch (std::exception &ex) {}
   }
 
   void SystemEventLog::operationLock() {
@@ -2713,6 +2764,18 @@ namespace dss {
         zoneId = m_raisedAtGroup->getZoneID();
         boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(zoneId);
         logOperationLock(logger, zone, groupId, lockStatus, callOrigin);
+      } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+
+      logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+          "system-protection.log", NULL));
+      try {
+        boost::shared_ptr<Group> group = DSS::getInstance()->getApartment().getZone(zoneId)->getGroup(groupId);
+        std::string lockString = lockStatus ? "active" : "inactive";
+        std::string gName = group->getName();
+        if (gName.empty()) {
+          gName = std::string("Cluster #") + intToString(groupId);
+        }
+        logger->logln("Operation lock " + lockString + " in " + gName);
       } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
     }
   }
@@ -2753,6 +2816,10 @@ namespace dss {
       heatingModeSwitch();
     } else if (m_evtName == EventName::BuildingService) {
       buildingService();
+    } else if (m_evtName == EventName::ExecutionDenied) {
+      executionDenied();
+    } else if (m_evtName == EventName::OperationLock) {
+      operationLock();
     }
   }
 
