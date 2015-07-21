@@ -115,5 +115,8 @@ boost::shared_ptr<Event>
 boost::shared_ptr<Event>
   createGenericSignalBuildingService(const uint8_t &_value, callOrigin_t _origin);
 
+boost::shared_ptr<Event>
+  createOperationLockEvent(boost::shared_ptr<Group> _group,
+      const int _zoneID, const int _groupID, const bool _lock, callOrigin_t _origin);
 }
 #endif

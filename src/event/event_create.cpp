@@ -412,4 +412,16 @@ boost::shared_ptr<Event>
   return event;
 }
 
+boost::shared_ptr<Event>
+createOperationLockEvent(boost::shared_ptr<Group> _group, const int _zoneID, const int _groupID,
+    const bool _lock, callOrigin_t _origin) {
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::OperationLock, _group);
+  event->setProperty("zoneID", intToString(_zoneID));
+  event->setProperty("groupID", intToString(_groupID));
+  event->setProperty("lock", intToString(_lock));
+  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
 }
