@@ -1447,54 +1447,60 @@ namespace dss {
   }
 
   bool Device::is2WayMaster() const {
-    bool ret = false;
 
+    if (!getFeatures().pairing) {
+      return false;
+    }
+
+    bool ret = false;
     try {
       if ((multiDeviceIndex() == 2) && (getDeviceType() == DEVICE_TYPE_UMR)) {
-        ret = (getFeatures().pairing &&
-               ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
-                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
-                (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
-               IsEvenDsuid(m_DSID)); // even dSID
+        ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH)   ||
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               IsEvenDsuid(m_DSID); // even dSID
       } else if (hasInput()) {
-        ret = (getFeatures().pairing &&
-              ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
+        ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
                (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
                (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
                  (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
-                IsEvenDsuid(m_DSID)))); // even dSID
+                IsEvenDsuid(m_DSID))); // even dSID
       }
     } catch (std::runtime_error &err) {
       Logger::getInstance()->log(err.what());
     }
-
     return ret;
   }
 
   bool Device::is2WaySlave() const {
-    bool ret = false;
 
     if (!(multiDeviceIndex() == 3) && (getDeviceType() == DEVICE_TYPE_UMR)) {
       if (!hasInput()) {
-        return ret;
+        return false;
       }
     }
 
+    bool ret = false;
     try {
       if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
         ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
-               (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH)   ||
                (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
                (!IsEvenDsuid(m_DSID)); // odd dSID
       } else if (hasInput()) {
-        ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
-               ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
-               !IsEvenDsuid(m_DSID))); // odd dSID
+        // Only devices of type SDS, TKM and UMR can be paired.
+        if ((getDeviceType() == DEVICE_TYPE_SDS) ||
+            (getDeviceType() == DEVICE_TYPE_TKM) ||
+            (getDeviceType() == DEVICE_TYPE_UMR)) {
+          ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
+                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
+                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
+                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
+                 ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
+                 !IsEvenDsuid(m_DSID))); // odd dSID
+        }
       }
     } catch (std::runtime_error &err) {
       Logger::getInstance()->log(err.what());
