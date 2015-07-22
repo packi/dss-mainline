@@ -215,21 +215,30 @@ namespace dss {
       void logBuildingService(boost::shared_ptr<ScriptLogger> _logger,
                               std::string _value,
                               std::string _originDeviceID);
+      void logExecutionDenied(boost::shared_ptr<ScriptLogger> _logger,
+                              std::string _action, std::string _reason);
+      void logOperationLock(boost::shared_ptr<ScriptLogger> _logger,
+                            boost::shared_ptr<Zone> _zone,
+                            int _groupId,
+                            int _lock,
+                            callOrigin_t _call_origin);
 
-      void model_ready(boost::shared_ptr<ScriptLogger> _logger);
-      void callScene(boost::shared_ptr<ScriptLogger> _logger);
-      void blink(boost::shared_ptr<ScriptLogger> _logger);
-      void undoScene(boost::shared_ptr<ScriptLogger> _logger);
-      void buttonClick(boost::shared_ptr<ScriptLogger> _logger);
-      void deviceBinaryInputEvent(boost::shared_ptr<ScriptLogger> _logger);
-      void deviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger);
-      void deviceSensorValue(boost::shared_ptr<ScriptLogger> _logger);
-      void zoneSensorValue(boost::shared_ptr<ScriptLogger> _logger);
-      void stateChange(boost::shared_ptr<ScriptLogger> _logger);
-      void sunshine(boost::shared_ptr<ScriptLogger> _logger);
-      void frostProtection(boost::shared_ptr<ScriptLogger> _logger);
-      void heatingModeSwitch(boost::shared_ptr<ScriptLogger> _logger);
-      void buildingService(boost::shared_ptr<ScriptLogger> _logger);
+      void model_ready();
+      void callScene();
+      void blink();
+      void undoScene();
+      void buttonClick();
+      void deviceBinaryInputEvent();
+      void deviceSensorEvent();
+      void deviceSensorValue();
+      void zoneSensorValue();
+      void stateChange();
+      void sunshine();
+      void frostProtection();
+      void heatingModeSwitch();
+      void buildingService();
+      void executionDenied();
+      void operationLock();
 
       std::string m_evtName;
 

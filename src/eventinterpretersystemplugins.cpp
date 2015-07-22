@@ -2342,8 +2342,32 @@ namespace dss {
     _logger->logln(";BuildingService;" + _value + ";;;;;;" + _originDeviceID + ";");
   }
 
-  void SystemEventLog::model_ready(boost::shared_ptr<ScriptLogger> _logger) {
-    _logger->logln("Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken");
+  void SystemEventLog::logExecutionDenied(boost::shared_ptr<ScriptLogger> _logger,
+                                          std::string _action, std::string _reason) {
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";ExecutionDenied;" + _action + ";" + _reason + ";;;;;;");
+  }
+
+  void SystemEventLog::logOperationLock(boost::shared_ptr<ScriptLogger> _logger,
+                                        boost::shared_ptr<Zone> _zone,
+                                        int _groupId,
+                                        int _lock,
+                                        callOrigin_t _call_origin) {
+    std::string zoneName = getZoneName(_zone);
+    std::string groupName = getGroupName(_zone->getGroup(_groupId));
+    std::string origName = getCallOrigin(_call_origin);
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";OperationLock;" +
+        intToString(_lock) + ";;" +
+        zoneName + ";" + groupName + ";" + origName + ";");
+  }
+
+  void SystemEventLog::model_ready() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
+
+    logger->logln("Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken");
 
     std::vector<boost::shared_ptr<Zone> > zones = DSS::getInstance()->getApartment().getZones();
     for (size_t z = 0; z < zones.size(); z++) {
@@ -2358,14 +2382,16 @@ namespace dss {
             (group_id == GroupIDControlTemperature)) {
           int scene_id = groups.at(g)->getLastCalledScene();
           if (scene_id >= 0) {
-            logLastScene(_logger, zones.at(z), groups.at(g), scene_id);
+            logLastScene(logger, zones.at(z), groups.at(g), scene_id);
           }
         }
       }
     }
   }
 
-  void SystemEventLog::callScene(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::callScene() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     int sceneId = -1;
     if (m_properties.has("sceneID")) {
         sceneId = strToIntDef(m_properties.get("sceneID"), -1);
@@ -2401,7 +2427,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
 
-        logZoneGroupScene(_logger, zone, groupId, sceneId, isForced,
+        logZoneGroupScene(logger, zone, groupId, sceneId, isForced,
                           originDSUID, callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     } else if ((m_evtRaiseLocation == erlDevice) &&
@@ -2410,7 +2436,7 @@ namespace dss {
 
       if (callOrigin == coUnknown) {
         // DeviceLocal Action Event
-        logDeviceLocalScene(_logger, sceneId,
+        logDeviceLocalScene(logger, sceneId,
                         dsuid2str(m_raisedAtDevice->getDevice()->getDSID()),
                         callOrigin);
       } else {
@@ -2418,14 +2444,16 @@ namespace dss {
         try {
           boost::shared_ptr<Zone> zone =
               DSS::getInstance()->getApartment().getZone(zoneId);
-          logDeviceScene(_logger, m_raisedAtDevice->getDevice(), zone, sceneId,
+          logDeviceScene(logger, m_raisedAtDevice->getDevice(), zone, sceneId,
                          isForced, originDSUID, callOrigin, token);
         } catch (ItemNotFoundException &ex) {}
       }
     }
   }
 
-  void SystemEventLog::blink(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::blink() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     int zoneId = -1;
     std::string token;
     if (m_properties.has("originToken")) {
@@ -2448,7 +2476,7 @@ namespace dss {
       try {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
-        logZoneGroupBlink(_logger, zone, groupId, originDSUID, callOrigin, token);
+        logZoneGroupBlink(logger, zone, groupId, originDSUID, callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     } else if ((m_evtRaiseLocation == erlDevice) &&
                (m_raisedAtDevice != NULL)) {
@@ -2456,13 +2484,15 @@ namespace dss {
       try {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
-        logDeviceBlink(_logger, m_raisedAtDevice->getDevice(), zone,
+        logDeviceBlink(logger, m_raisedAtDevice->getDevice(), zone,
                        originDSUID, callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     }
   }
 
-  void SystemEventLog::undoScene(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::undoScene() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     int sceneId = -1;
     if (m_properties.has("sceneID")) {
         sceneId = strToIntDef(m_properties.get("sceneID"), -1);
@@ -2489,46 +2519,52 @@ namespace dss {
       try {
         boost::shared_ptr<Zone> zone =
                             DSS::getInstance()->getApartment().getZone(zoneId);
-        logZoneGroupUndo(_logger, zone, groupId, sceneId, originDSUID,
+        logZoneGroupUndo(logger, zone, groupId, sceneId, originDSUID,
                          callOrigin, token);
       } catch (ItemNotFoundException &ex) {}
     }
   }
 
-  void SystemEventLog::buttonClick(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::buttonClick() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     if (m_raisedAtDevice != NULL) {
-      logDeviceButtonClick(_logger, m_raisedAtDevice->getDevice());
+      logDeviceButtonClick(logger, m_raisedAtDevice->getDevice());
     }
   }
 
-  void SystemEventLog::deviceBinaryInputEvent(
-                                    boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::deviceBinaryInputEvent() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     if (m_raisedAtDevice != NULL) {
-      logDeviceBinaryInput(_logger, m_raisedAtDevice->getDevice());
+      logDeviceBinaryInput(logger, m_raisedAtDevice->getDevice());
     }
   }
 
-  void SystemEventLog::deviceSensorEvent(
-                                    boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::deviceSensorEvent() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     if (m_raisedAtDevice != NULL) {
-      logDeviceSensorEvent(_logger, m_raisedAtDevice->getDevice());
+      logDeviceSensorEvent(logger, m_raisedAtDevice->getDevice());
     }
   }
 
-  void SystemEventLog::deviceSensorValue(
-                                    boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::deviceSensorValue() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-sensor.log", NULL));
     if (m_raisedAtDevice != NULL) {
       int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
       try {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
-        logDeviceSensorValue(_logger, m_raisedAtDevice->getDevice(), zone);
+        logDeviceSensorValue(logger, m_raisedAtDevice->getDevice(), zone);
       } catch (ItemNotFoundException &ex) {}
     }
   }
 
-  void SystemEventLog::zoneSensorValue(
-                                    boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::zoneSensorValue() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-sensor.log", NULL));
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
       // Zone Sensor Value
       int zoneId = m_raisedAtGroup->getZoneID();
@@ -2536,12 +2572,12 @@ namespace dss {
       try {
         boost::shared_ptr<Zone> zone =
             DSS::getInstance()->getApartment().getZone(zoneId);
-        logZoneSensorValue(_logger, zone, groupId);
+        logZoneSensorValue(logger, zone, groupId);
       } catch (ItemNotFoundException &ex) {}
     }
   }
 
-  void SystemEventLog::stateChange(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::stateChange() {
     std::string statename;
     if (m_properties.has("statename")) {
       statename = m_properties.get("statename");
@@ -2559,13 +2595,34 @@ namespace dss {
       originDSUID = m_properties.get("originDSUID");
     }
     if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
+      boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+          "system-event.log", NULL));
       try {
-        logStateChange(_logger, m_raisedAtState, statename, state, value, originDSUID);
-      } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+        logStateChange(logger, m_raisedAtState, statename, state, value, originDSUID);
+      } catch (std::exception &ex) {}
+
+      if (statename == "wind" ||
+          statename == "rain" ||
+          statename == "hail" ||
+          statename == "panic" ||
+          statename == "fire" ||
+          statename == "alarm" ||
+          statename == "alarm2" ||
+          statename == "alarm3" ||
+          statename == "alarm4") {
+        logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+            "system-protection.log", NULL));
+        try {
+          statename[0] = toupper(statename[0]);
+          logger->logln(statename + " is " + state);
+        } catch (std::exception &ex) {}
+      }
     }
   }
 
-  void SystemEventLog::sunshine(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::sunshine() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2579,11 +2636,28 @@ namespace dss {
       originDeviceID = m_properties.get("originDeviceID");
     }
     try {
-      logSunshine(_logger, value, direction, originDeviceID);
-    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+      logSunshine(logger, value, direction, originDeviceID);
+    } catch (std::exception &ex) {}
+
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      CardinalDirection_t dir;
+      parseCardinalDirection(direction, &dir);
+      logger->logln("Sun protection from " + toUIString(dir) + " is " + valueString);
+    } catch (std::exception &ex) {}
   }
 
-  void SystemEventLog::frostProtection(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::frostProtection() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2593,11 +2667,26 @@ namespace dss {
       originDeviceID = m_properties.get("originDeviceID");
     }
     try {
-      logFrostProtection(_logger, value, originDeviceID);
+      logFrostProtection(logger, value, originDeviceID);
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      logger->logln("Frost protection is " + valueString);
+    } catch (std::exception &ex) {}
   }
 
-  void SystemEventLog::heatingModeSwitch(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::heatingModeSwitch() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2607,11 +2696,13 @@ namespace dss {
       originDeviceID = m_properties.get("originDeviceID");
     }
     try {
-      logHeatingModeSwitch(_logger, value, originDeviceID);
-    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+      logHeatingModeSwitch(logger, value, originDeviceID);
+    } catch (std::exception &ex) {}
   }
 
-  void SystemEventLog::buildingService(boost::shared_ptr<ScriptLogger> _logger) {
+  void SystemEventLog::buildingService() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2621,8 +2712,72 @@ namespace dss {
       originDeviceID = m_properties.get("originDeviceID");
     }
     try {
-      logBuildingService(_logger, value, originDeviceID);
+      logBuildingService(logger, value, originDeviceID);
+    } catch (std::exception &ex) {}
+  }
+
+  void SystemEventLog::executionDenied() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
+    std::string action;
+    std::string reason;
+    if (m_properties.has("source-name")) {
+      action = m_properties.get("source-name");
+    }
+    if (action.empty()) {
+      if (m_properties.has("action-name")) {
+        action = m_properties.get("action-name");
+      }
+    }
+    if (m_properties.has("reason")) {
+      reason = m_properties.get("reason");
+    }
+
+    try {
+      logExecutionDenied(logger, action, reason);
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      logger->logln("Timer or automatic activity \"" + action + "\": " + reason);
+    } catch (std::exception &ex) {}
+  }
+
+  void SystemEventLog::operationLock() {
+    int lockStatus;
+    if (m_properties.has("lock")) {
+      lockStatus = strToInt(m_properties.get("lock"));
+    }
+
+    callOrigin_t callOrigin = coUnknown;
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
+    }
+
+    if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
+      boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+          "system-event.log", NULL));
+      int groupId, zoneId;
+      try {
+        groupId = m_raisedAtGroup->getID();
+        zoneId = m_raisedAtGroup->getZoneID();
+        boost::shared_ptr<Zone> zone = DSS::getInstance()->getApartment().getZone(zoneId);
+        logOperationLock(logger, zone, groupId, lockStatus, callOrigin);
+      } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+
+      logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+          "system-protection.log", NULL));
+      try {
+        boost::shared_ptr<Group> group = DSS::getInstance()->getApartment().getZone(zoneId)->getGroup(groupId);
+        std::string lockString = lockStatus ? "active" : "inactive";
+        std::string gName = group->getName();
+        if (gName.empty()) {
+          gName = std::string("Cluster #") + intToString(groupId);
+        }
+        logger->logln("Operation lock " + lockString + " in " + gName);
+      } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+    }
   }
 
   void SystemEventLog::run() {
@@ -2633,56 +2788,38 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(
-                                DSS::getInstance()->getJSLogDirectory(),
-                                "system-event.log", NULL));
-
-    if (logger == NULL) {
-      Logger::getInstance()->log("SystemEventLog::run(): could not init "
-                                 "logger!");
-      return;
-    }
-
-    if (m_evtName == "model_ready") {
-      model_ready(logger);
+    if (m_evtName == EventName::ModelReady) {
+      model_ready();
     } else if (m_evtName == EventName::CallScene) {
-      callScene(logger);
-    } else if (m_evtName == "blink") {
-      blink(logger);
+      callScene();
+    } else if (m_evtName == EventName::IdentifyBlink) {
+      blink();
     } else if (m_evtName == EventName::UndoScene) {
-      undoScene(logger);
-    } else if (m_evtName == "buttonClick") {
-      buttonClick(logger);
+      undoScene();
+    } else if (m_evtName == EventName::DeviceButtonClick) {
+      buttonClick();
     } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
-      deviceBinaryInputEvent(logger);
-    } else if (m_evtName == "deviceSensorEvent") {
-      deviceSensorEvent(logger);
+      deviceBinaryInputEvent();
+    } else if (m_evtName == EventName::DeviceSensorEvent) {
+      deviceSensorEvent();
     } else if (m_evtName == EventName::StateChange) {
-      stateChange(logger);
+      stateChange();
     } else if (m_evtName == EventName::DeviceSensorValue) {
-      logger.reset(new ScriptLogger(
-          DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
-      if (logger == NULL) {
-        Logger::getInstance()->log("SystemEventLog::run(): could not init logger!");
-        return;
-      }
-      deviceSensorValue(logger);
+      deviceSensorValue();
     } else if (m_evtName == EventName::ZoneSensorValue) {
-      logger.reset(new ScriptLogger(
-          DSS::getInstance()->getJSLogDirectory(), "system-sensor.log", NULL));
-      if (logger == NULL) {
-        Logger::getInstance()->log("SystemEventLog::run(): could not init logger!");
-        return;
-      }
-      zoneSensorValue(logger);
+      zoneSensorValue();
     } else if (m_evtName == EventName::Sunshine) {
-      sunshine(logger);
+      sunshine();
     } else if (m_evtName == EventName::FrostProtection) {
-      frostProtection(logger);
+      frostProtection();
     } else if (m_evtName == EventName::HeatingModeSwitch) {
-      heatingModeSwitch(logger);
+      heatingModeSwitch();
     } else if (m_evtName == EventName::BuildingService) {
-      buildingService(logger);
+      buildingService();
+    } else if (m_evtName == EventName::ExecutionDenied) {
+      executionDenied();
+    } else if (m_evtName == EventName::OperationLock) {
+      operationLock();
     }
   }
 

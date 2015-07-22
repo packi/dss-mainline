@@ -779,15 +779,14 @@ namespace dss {
     }
     case ModelEvent::etOperationLock:
     {
-      unsigned origin = event->getParameter(1);
+      unsigned origin = event->getParameter(3);
       if (!validOrigin(origin)) {
         log("etOperationLock: invalid origin" + intToString(origin), lsNotice);
         break;
       }
 
       // parm> 0:zoneId 1:groupId 2:lock 3:origin
-      onOperationLock(event->getParameter(0), event->getParameter(1),
-                      event->getParameter(2),
+      onOperationLock(event->getParameter(0), event->getParameter(1), event->getParameter(2),
                       static_cast<callOrigin_t>(event->getParameter(3)));
       break;
     }
@@ -2122,19 +2121,19 @@ namespace dss {
       break;
 
     default:
-      log(std::string("unknwon generic event: " + intToString(_eventType)));
+      log(std::string("unknown generic event: " + intToString(_eventType)));
       break;
     }
   } // onGenericEvent
 
-  void ModelMaintenance::onOperationLock(int _zoneID, int _groupID,
-                                         bool _lock, callOrigin_t _callOrigin) {
+  void ModelMaintenance::onOperationLock(const int _zoneID, const int _groupID, bool _lock, callOrigin_t _callOrigin) {
     if (!isAppUserGroup(_groupID)) {
       return;
     }
     try {
       boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_groupID);
       cluster->setOperationLock(_lock, _callOrigin);
+      raiseEvent(createOperationLockEvent(cluster, _zoneID, _groupID, _lock, _callOrigin));
     } catch(ItemNotFoundException& e) {
       log(std::string("Unknown cluster: ") + e.what(), lsWarning);
     }
