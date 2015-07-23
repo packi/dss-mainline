@@ -31,7 +31,7 @@
 
 #include "systeminfo.h"
 
-#ifdef linux
+#if defined(__linux__)
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -44,7 +44,7 @@
 
 #include <arpa/inet.h>
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #include <ifaddrs.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -213,7 +213,7 @@ else if (raisedEvent.name === "callScene")
             if (groupID === 0) {
                 state = getOrRegisterState('hail');
                 state.setValue('active', 7);
-            } else if (groupID >= 16 && groupID <= 23) {
+            } else if (groupID >= 16 && groupID <= 39) {
                 state = getOrRegisterState('hail.group' + groupID);
                 state.setValue('active', 7);
             }
@@ -222,14 +222,14 @@ else if (raisedEvent.name === "callScene")
             if (groupID === 0) {
                 state = getOrRegisterState('hail');
                 state.setValue('inactive', 7);
-                for (var grp = 16; grp <= 23; grp++) {
+                for (var grp = 16; grp <= 39; grp++) {
                     try {
                         state = getState('hail.group' + groupID, false);
                         state.setValue('inactive', 7);
                     } catch (e) {
                     }
                 }
-            } else if (groupID >= 16 && groupID <= 23) {
+            } else if (groupID >= 16 && groupID <= 39) {
                 state = getOrRegisterState('hail.group' + groupID);
                 state.setValue('inactive', 7);
             }
