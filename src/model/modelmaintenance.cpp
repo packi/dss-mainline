@@ -424,8 +424,14 @@ namespace dss {
     m_EventTimeoutMS(_eventTimeoutMS),
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
-    m_taskProcessor(boost::make_shared<TaskProcessor>())
+    m_taskProcessor(boost::make_shared<TaskProcessor>()),
+    m_pMeterMaintenance(boost::make_shared<MeterMaintenance>(_pDSS, "MeterMaintenance"))
   { }
+
+  void ModelMaintenance::shutdown() {
+    m_pMeterMaintenance->shutdown();
+    ThreadedSubsystem::shutdown();
+  }
 
   void ModelMaintenance::checkConfigFile(boost::filesystem::path _filename) {
     if (boost::filesystem::exists(_filename)) {
@@ -510,6 +516,7 @@ namespace dss {
 
   void ModelMaintenance::doStart() {
     run();
+    m_pMeterMaintenance->run();
   } // start
 
   void ModelMaintenance::execute() {
@@ -528,7 +535,6 @@ namespace dss {
       handleModelEvents();
       handleDeferredModelEvents();
       delayedConfigWrite();
-      readOutPendingMeter();
     }
   } // execute
 
@@ -1076,158 +1082,6 @@ namespace dss {
     return true;
   } // handleModelEvents
 
-  void ModelMaintenance::setApartmentState() {
-    if (!DSS::hasInstance()) {
-      return;
-    }
-
-    // logic discussed with mtr:
-    //
-    // if dSMs do not return the same state, then go with whatever is in
-    // the dSS
-    //
-    // dSMs that report "unknown" do not fall into consideration
-    //
-    // if all dSMs have the same state set (either present or absent but
-    // not unknown), then this state shall be set in the dSS
-    //
-    // if neither the dSMs nor the dSS have a valid known state, we will use
-    // "present" as default as defined by our PO. this case is extremely rare.
-    //
-    // "as defined above, the dSS keeps the last known state persistent and will
-    // set this state when starting up. So the dSS can always provide a state,
-    // even after a 3h break down.  We neither need another default state
-    // (except for the very first dSS startup where it should be present) nor a
-    // timeout."
-
-    // start with whatever state was saved in the dSS
-    uint8_t dssaptstate = DSM_APARTMENT_STATE_UNKNOWN;
-    boost::shared_ptr<State> state;
-    try {
-      state = m_pApartment->getState(StateType_Service, "presence");
-    } catch (ItemNotFoundException &ex) {
-      log("setApartmentState: error accessing apartment presence state", lsError);
-      return;
-    }
-    if (state->getState() == State_Active) {
-      dssaptstate = DSM_APARTMENT_STATE_PRESENT;
-    } else if (state->getState() == State_Inactive) {
-      dssaptstate = DSM_APARTMENT_STATE_ABSENT;
-    }
-
-    uint8_t lastdsmaptstate = DSM_APARTMENT_STATE_UNKNOWN;
-    boost::shared_ptr<DSMeter> pDSMeter;
-    for (size_t i = 0; i < m_pApartment->getDSMeters().size(); i++) {
-      pDSMeter = m_pApartment->getDSMeters().at(i);
-      if (pDSMeter->isPresent() && pDSMeter->isValid()) {
-        uint8_t dsmaptstate = pDSMeter->getApartmentState();
-
-        // dSMs that do not know their state will be ignored
-        if (dsmaptstate == DSM_APARTMENT_STATE_UNKNOWN) {
-          continue;
-        }
-
-        // remember last state in order to be able to compare the dSMs
-        if (lastdsmaptstate == DSM_APARTMENT_STATE_UNKNOWN) {
-          lastdsmaptstate = dsmaptstate;
-        }
-
-        // if dSMs disagree go with the dSS state
-        if (lastdsmaptstate != dsmaptstate) {
-          lastdsmaptstate = DSM_APARTMENT_STATE_UNKNOWN;
-          break;
-        }
-      }
-    }
-
-    // result from the dSMs was conclusive
-    if (lastdsmaptstate != DSM_APARTMENT_STATE_UNKNOWN) {
-      dssaptstate = lastdsmaptstate;
-    }
-
-    // dSS state is still not known and dSMs were inconclusive:
-    // use present as default as defined by the PO
-    if (dssaptstate == DSM_APARTMENT_STATE_UNKNOWN) {
-      dssaptstate = DSM_APARTMENT_STATE_PRESENT;
-    }
-
-    std::string strstate;
-    if (dssaptstate == DSM_APARTMENT_STATE_PRESENT) {
-      strstate = "present";
-    } else if (dssaptstate == DSM_APARTMENT_STATE_ABSENT) {
-      strstate = "absent";
-    }
-
-    log("setApartmentState: apartment state set to " + strstate, lsDebug);
-    state->setState(coSystem, strstate);
-  }
-
-  void ModelMaintenance::autoAssignSensors() {
-    StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
-                                     *m_pStructureQueryBusInterface,
-                                     *m_pApartment);
-    foreach (boost::shared_ptr<Zone> zone, m_pApartment->getZones()) {
-      manipulator.autoAssignZoneSensors(zone);
-    }
-  }
-
-  void ModelMaintenance::synchronizeZoneSensorAssignment() {
-
-    StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
-                                     *m_pStructureQueryBusInterface,
-                                     *m_pApartment);
-
-    manipulator.synchronizeZoneSensorAssignment(m_pApartment->getZones());
-  }
-
-  void ModelMaintenance::readOutPendingMeter() {
-    bool hadToUpdate = false;
-    foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
-      if (pDSMeter->isPresent() &&
-          (!pDSMeter->isValid())) {
-          dsMeterReady(pDSMeter->getDSID());
-          hadToUpdate = true;
-          break;
-      }
-    }
-
-    // If dSMeter configuration has changed we need to synchronize user-groups
-    if (hadToUpdate && !m_IsInitializing) {
-      synchronizeGroups(m_pApartment, m_pStructureModifyingBusInterface);
-    }
-
-    // If we didn't have to update for one cycle, assume that we're done
-    if (!hadToUpdate && m_IsInitializing) {
-      synchronizeGroups(m_pApartment, m_pStructureModifyingBusInterface);
-
-      log("******** Finished loading model from dSM(s)...", lsInfo);
-      m_IsInitializing = false;
-
-      if (m_IsDirty) {
-        m_IsDirty = false;
-        addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-      }
-
-      setApartmentState();
-      synchronizeZoneSensorAssignment();
-      autoAssignSensors();
-      {
-        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>("model_ready");
-        raiseEvent(readyEvent);
-        try {
-          CommChannel::getInstance()->resumeUpdateTask();
-          CommChannel::getInstance()->requestLockedScenes();
-        } catch (std::runtime_error &err) {
-          log(err.what(), lsError);
-        }
-
-        setupWebUpdateEvent();
-      }
-      AutoClusterMaintenance maintenance(m_pApartment);
-      maintenance.joinIdenticalClusters();
-    }
-  } // readOutPendingMeter
-
   unsigned ModelMaintenance::indexOfNextSyncState() {
     boost::mutex::scoped_lock lock(m_ModelEventsMutex);
     int count = m_processedEvents + m_ModelEvents.size();
@@ -1241,59 +1095,6 @@ namespace dss {
     }
     return count;
   }
-
-  void ModelMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
-    log("Scanning dS485 bus device: " + dsuid2str(_dsMeterBusID), lsInfo);
-    try {
-
-      boost::shared_ptr<DSMeter> mod;
-      try {
-        mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
-      } catch(ItemNotFoundException& e) {
-        log("Error scanning dS485 bus device: " + dsuid2str(_dsMeterBusID) + " not found in data model", lsError);
-        return; // nothing we could do here ...
-      }
-
-      try {
-        BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
-        if (!scanner.scanDSMeter(mod)) {
-          log("Error scanning dS485 device: " + dsuid2str(_dsMeterBusID) + ", data model incomplete", lsError);
-          return;
-        }
-
-        if (mod->getCapability_HasDevices()) {
-          Set devices = mod->getDevices();
-          for (int i = 0; i < devices.length(); i++) {
-            devices[i].getDevice()->setIsConnected(true);
-          }
-
-          // synchronize devices with binary inputs
-          if (mod->hasPendingEvents()) {
-            scanner.syncBinaryInputStates(mod, boost::shared_ptr<Device>());
-          } else {
-            log(std::string("Event counter match on dSM ") + dsuid2str(_dsMeterBusID), lsDebug);
-          }
-
-          // additionally set all previously connected device to valid now
-          devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dsMeterBusID);
-          for (int i = 0; i < devices.length(); i++) {
-            devices[i].getDevice()->setIsValid(true);
-          }
-        }
-
-        boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
-        dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
-        raiseEvent(dsMeterReadyEvent);
-
-      } catch(BusApiError& e) {
-        log(std::string("Bus error scanning dSM " + dsuid2str(_dsMeterBusID) + " : ") + e.what(), lsFatal);
-        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, _dsMeterBusID);
-        addModelEvent(pEvent);
-      }
-    } catch(ItemNotFoundException& e) {
-      log("dsMeterReady " + dsuid2str(_dsMeterBusID) + ": item not found: " + std::string(e.what()), lsError);
-    }
-  } // dsMeterReady
 
   void ModelMaintenance::addModelEvent(ModelEvent* _pEvent) {
     // filter out dirty events, as this will rewrite apartment.xml
@@ -1971,8 +1772,7 @@ namespace dss {
 
     // synchronize dss with dsm zone sensors
     // in case a dsm crashed during zone sensor assignment.
-    synchronizeZoneSensorAssignment();
-    autoAssignSensors();
+    m_pMeterMaintenance->triggerMeterSynchronization();
 
     try {
       Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dSMeterID);

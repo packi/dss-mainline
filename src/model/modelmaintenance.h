@@ -187,6 +187,8 @@ namespace dss {
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
 
+    virtual void shutdown();
+
     virtual void initialize();
 
     /** Adds a model event to the queue.
@@ -233,13 +235,7 @@ namespace dss {
   private:
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
-    void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void discoverDS485Devices();
-    void setApartmentState();
-    void autoAssignSensors();
-    void synchronizeZoneSensorAssignment();
-    void readOutPendingMeter();
-
     void readConfiguration();
     void writeConfiguration();
     void scheduleConfigWrite();
@@ -327,6 +323,9 @@ namespace dss {
 
     boost::mutex m_rvMut;
     boost::condition_variable m_rvCond;
+
+    boost::shared_ptr<MeterMaintenance> m_pMeterMaintenance;
+
   }; // ModelMaintenance
 
 }
