@@ -296,13 +296,13 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     rrd_clear_error();
     int result = rrd_update(starts.size(), argString);
     if (result < 0) {
-      log(rrd_get_error());
+      log(rrd_get_error(), lsWarning);
     }
   } // postMeteringEvent
 
   int Metering::createDB(std::string& _filename, boost::shared_ptr<MeteringConfigChain> _pChain)
   {
-    log("Creating new RRD database.", lsWarning);
+    log("Creating new RRD database.", lsInfo);
 
     /* create new DB */
     std::vector<std::string> lines;
