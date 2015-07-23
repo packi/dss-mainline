@@ -256,6 +256,7 @@ namespace dss {
     void onOperationLock(int _zoneID, int _groupID, bool _lock, callOrigin_t _callOrigin);
     void onAutoClusterMaintenance(dsuid_t _deviceID);
     void onAutoClusterCleanup();
+    void onMeterReady();
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);

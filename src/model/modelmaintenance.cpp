@@ -799,6 +799,9 @@ namespace dss {
     case ModelEvent::etClusterCleanup:
       onAutoClusterCleanup();
       break;
+    case ModelEvent::etMeterReady:
+      onMeterReady();
+      break;
     default:
       assert(false);
       break;
@@ -1034,6 +1037,10 @@ namespace dss {
         delete _pEvent;
       } else if (_pEvent->getEventType() == ModelEvent::etDeviceDirty) {
         delete _pEvent;
+      } else if (_pEvent->getEventType() == ModelEvent::etMeterReady) {
+        boost::mutex::scoped_lock lock(m_ModelEventsMutex);
+        m_ModelEvents.push_back(_pEvent);
+        m_NewModelEvent.notify_one();
       }
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
@@ -2158,6 +2165,13 @@ namespace dss {
       addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log(std::string("Error cluster consistency check,  item not found: ") + e.what(), lsWarning);
+    }
+  }
+
+  void ModelMaintenance::onMeterReady() {
+    if (m_IsInitializing) {
+      setupWebUpdateEvent();
+      m_IsInitializing = false;
     }
   }
 
