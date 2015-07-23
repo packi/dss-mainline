@@ -2745,7 +2745,7 @@ namespace dss {
   }
 
   void SystemEventLog::operationLock() {
-    int lockStatus;
+    int lockStatus = -1;
     if (m_properties.has("lock")) {
       lockStatus = strToInt(m_properties.get("lock"));
     }
@@ -2770,7 +2770,12 @@ namespace dss {
           "system-protection.log", NULL));
       try {
         boost::shared_ptr<Group> group = DSS::getInstance()->getApartment().getZone(zoneId)->getGroup(groupId);
-        std::string lockString = lockStatus ? "active" : "inactive";
+        std::string lockString;
+        switch (lockStatus) {
+          case 0: lockString = "inactive"; break;
+          case 1: lockString = "active"; break;
+          default: lockString = "unknown"; break;
+        }
         std::string gName = group->getName();
         if (gName.empty()) {
           gName = std::string("Cluster #") + intToString(groupId);
