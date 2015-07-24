@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
 
   dsuid1.id[DSUID_SIZE - 1] = 1;
   dsmeterDSID.id[DSUID_SIZE - 1] = 10;
-  
+
   boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsmeterDSID);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
@@ -676,6 +676,7 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   maintenance.addModelEvent(pEvent);
 
   maintenance.start();
+  maintenance.addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
   while(maintenance.isInitializing()) {
     sleepMS(2);
   }
@@ -781,6 +782,7 @@ BOOST_AUTO_TEST_CASE(testDeviceStateWhenRemovingMeter) {
   maintenance.addModelEvent(pEvent);
 
   maintenance.start();
+  maintenance.addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
   while(maintenance.isInitializing()) {
     sleepMS(2);
   }
