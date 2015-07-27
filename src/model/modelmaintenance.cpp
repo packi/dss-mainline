@@ -203,6 +203,8 @@ namespace dss {
 
   void MeterMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
+
+    int cntReadOutMeters = 0;
     foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
       if (pDSMeter->isPresent() &&
           (!pDSMeter->isValid())) {
@@ -210,15 +212,19 @@ namespace dss {
           hadToUpdate = true;
           break;
       }
+      if (pDSMeter->isPresent() && pDSMeter->isValid()) {
+        ++cntReadOutMeters;
+      }
     }
 
     // If dSMeter configuration has changed we need to synchronize user-groups
-    if (hadToUpdate && !m_IsInitializing) {
+    if (!m_IsInitializing && hadToUpdate) {
       synchronizeGroups(m_pApartment, m_pModifyingBusInterface);
     }
 
     // If we didn't have to update for one cycle, assume that we're done
-    if (!hadToUpdate && m_IsInitializing) {
+    if (m_IsInitializing && !hadToUpdate &&
+        (cntReadOutMeters == getBusMemberCount())) {
       synchronizeGroups(m_pApartment, m_pModifyingBusInterface);
 
       log("******** Finished loading model from dSM(s)...", lsInfo);
@@ -244,6 +250,25 @@ namespace dss {
       maintenance.joinIdenticalClusters();
     }
   } // readOutPendingMeter
+
+  int MeterMaintenance::getBusMemberCount() {
+    if (m_pQueryBusInterface== NULL) {
+      return -1;
+    }
+    int busMemberCount = 0;
+    try {
+      std::vector<DSMeterSpec_t> vecMeterSpec =  m_pQueryBusInterface->getBusMembers();
+      foreach (DSMeterSpec_t spec, vecMeterSpec) {
+        if (busMemberIsDSMeter(spec.DeviceType)) {
+          ++busMemberCount;
+        }
+      }
+      return busMemberCount;
+    } catch(BusApiError& e) {
+      log(std::string("Bus error getting bus member count. ") + e.what(), lsError);
+    }
+    return -1;
+  }
 
   void MeterMaintenance::dsMeterReady(const dsuid_t& _dsMeterBusID) {
     log("Scanning dS485 bus device: " + dsuid2str(_dsMeterBusID), lsInfo);
