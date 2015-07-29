@@ -71,6 +71,7 @@ namespace dss {
                     etOperationLock, /** scene calls ignored, no turn on/off lights, change blind positions, etc */
                     etDeviceDirty, /** A device has changed. Update the cluster assignment */
                     etClusterCleanup, /** cleanup clusters, remove empty ones */
+                    etMeterReady, /** ds meter ready */
                     etDummyEvent, /** for unit tests */
                  } EventType;
   private:

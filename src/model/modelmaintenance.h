@@ -117,6 +117,39 @@ namespace dss {
     void incRepeatCount() { m_HoldTime ++; }
   };
 
+
+  //----------------------------------------------------------------------------
+  class MeterMaintenance: public Thread {
+    __DECL_LOG_CHANNEL__
+  public:
+    MeterMaintenance(DSS* _pDSS, const std::string& _name);
+    virtual void shutdown() { Thread::terminate(); }
+    bool isRunning() { return Thread::isRunning(); }
+    void triggerMeterSynchronization();
+    /** Starts the event-processing */
+    virtual void execute();
+
+  private:
+    void synchronizeMeters();
+    void readOutPendingMeter();
+    void dsMeterReady(const dsuid_t& _dsMeterBusID);
+    void setApartmentState();
+    void autoAssignSensors();
+    void synchronizeZoneSensorAssignment();
+    void raiseEvent(boost::shared_ptr<Event> _pEvent);
+    int getBusMemberCount();
+
+  private:
+    DSS* m_pDSS;
+    Apartment* m_pApartment;
+    StructureModifyingBusInterface* m_pModifyingBusInterface;
+    StructureQueryBusInterface* m_pQueryBusInterface;
+    bool m_IsInitializing;
+    boost::mutex m_syncMutex;
+    bool m_triggerSynchronize;
+  };
+  //----------------------------------------------------------------------------
+
   class ModelMaintenance : public ThreadedSubsystem {
   public:
 
@@ -154,6 +187,8 @@ namespace dss {
 
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
+
+    virtual void shutdown();
 
     virtual void initialize();
 
@@ -201,13 +236,7 @@ namespace dss {
   private:
     bool handleDeferredModelEvents();
     void handleDeferredModelStateChanges(callOrigin_t _origin, int _zoneID, int _groupID, int _sceneID);
-    void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void discoverDS485Devices();
-    void setApartmentState();
-    void autoAssignSensors();
-    void synchronizeZoneSensorAssignment();
-    void readOutPendingMeter();
-
     void readConfiguration();
     void writeConfiguration();
     void scheduleConfigWrite();
@@ -256,6 +285,7 @@ namespace dss {
     void onOperationLock(int _zoneID, int _groupID, bool _lock, callOrigin_t _callOrigin);
     void onAutoClusterMaintenance(dsuid_t _deviceID);
     void onAutoClusterCleanup();
+    void onMeterReady();
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);
@@ -294,6 +324,9 @@ namespace dss {
 
     boost::mutex m_rvMut;
     boost::condition_variable m_rvCond;
+
+    boost::shared_ptr<MeterMaintenance> m_pMeterMaintenance;
+
   }; // ModelMaintenance
 
 }
