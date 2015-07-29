@@ -117,6 +117,38 @@ namespace dss {
     void incRepeatCount() { m_HoldTime ++; }
   };
 
+
+  //----------------------------------------------------------------------------
+  class MeterMaintenance: public Thread {
+    __DECL_LOG_CHANNEL__
+  public:
+    MeterMaintenance(DSS* _pDSS, const std::string& _name);
+    virtual void shutdown() { Thread::terminate(); }
+    bool isRunning() { return Thread::isRunning(); }
+    void triggerMeterSynchronization();
+    /** Starts the event-processing */
+    virtual void execute();
+
+  private:
+    void synchronizeMeters();
+    void readOutPendingMeter();
+    void dsMeterReady(const dsuid_t& _dsMeterBusID);
+    void setApartmentState();
+    void autoAssignSensors();
+    void synchronizeZoneSensorAssignment();
+    void raiseEvent(boost::shared_ptr<Event> _pEvent);
+
+  private:
+    DSS* m_pDSS;
+    Apartment* m_pApartment;
+    StructureModifyingBusInterface* m_pModifyingBusInterface;
+    StructureQueryBusInterface* m_pQueryBusInterface;
+    bool m_IsInitializing;
+    boost::mutex m_syncMutex;
+    bool m_triggerSynchronize;
+  };
+  //----------------------------------------------------------------------------
+
   class ModelMaintenance : public ThreadedSubsystem {
   public:
 
