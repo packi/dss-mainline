@@ -182,13 +182,13 @@ namespace dss {
     assert(pDevice != NULL);
     if(isDeviceInterfaceCall(_request)) {
       return handleDeviceInterfaceRequest(_request, pDevice, _session);
-    } else if(_request.getMethod() == "getSpec") {
+    } else if (_request.getMethod() == "getSpec") {
       JSONWriter json;
       json.add("functionID", pDevice->getFunctionID());
       json.add("productID", pDevice->getProductID());
       json.add("revisionID", pDevice->getRevisionID());
       return json.successJSON();
-    } else if(_request.getMethod() == "getGroups") {
+    } else if (_request.getMethod() == "getGroups") {
       JSONWriter json;
       int numGroups = pDevice->getGroupsCount();
 
@@ -209,15 +209,15 @@ namespace dss {
       }
       json.endArray();
       return json.successJSON();
-    } else if(_request.getMethod() == "getState") {
+    } else if (_request.getMethod() == "getState") {
       JSONWriter json;
       json.add("isOn", pDevice->isOn());
       return json.successJSON();
-    } else if(_request.getMethod() == "getName") {
+    } else if (_request.getMethod() == "getName") {
       JSONWriter json;
       json.add("name", pDevice->getName());
       return json.successJSON();
-    } else if(_request.getMethod() == "setName") {
+    } else if (_request.getMethod() == "setName") {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
         name = escapeHTML(name);
@@ -254,7 +254,7 @@ namespace dss {
       } else {
         return JSONWriter::failure("missing parameter 'newName'");
       }
-    } else if(_request.getMethod() == "addTag") {
+    } else if (_request.getMethod() == "addTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
         return JSONWriter::failure("missing parameter 'tag'");
@@ -264,14 +264,14 @@ namespace dss {
 
       pDevice->addTag(st.convert(tagName));
       return JSONWriter::success();
-    } else if(_request.getMethod() == "removeTag") {
+    } else if (_request.getMethod() == "removeTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
         return JSONWriter::failure("missing parameter 'tag'");
       }
       pDevice->removeTag(tagName);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "hasTag") {
+    } else if (_request.getMethod() == "hasTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
         return JSONWriter::failure("missing parameter 'tag'");
@@ -279,7 +279,7 @@ namespace dss {
       JSONWriter json;
       json.add("hasTag", pDevice->hasTag(tagName));
       return json.successJSON();
-    } else if(_request.getMethod() == "getTags") {
+    } else if (_request.getMethod() == "getTags") {
       JSONWriter json;
       json.startArray("tags");
       std::vector<std::string> tags = pDevice->getTags();
@@ -288,19 +288,19 @@ namespace dss {
       }
       json.endArray();
       return json.successJSON();
-    } else if(_request.getMethod() == "lock") {
+    } else if (_request.getMethod() == "lock") {
       if (!pDevice->isPresent()) {
         return JSONWriter::failure("Device is not present");
       }
       pDevice->lock();
       return JSONWriter::success();
-    } else if(_request.getMethod() == "unlock") {
+    } else if (_request.getMethod() == "unlock") {
       if (!pDevice->isPresent()) {
         return JSONWriter::failure("Device is not present");
       }
       pDevice->unlock();
       return JSONWriter::success();
-    } else if(_request.getMethod() == "setConfig") {
+    } else if (_request.getMethod() == "setConfig") {
       int value = strToIntDef(_request.getParameter("value"), -1);
       if((value  < 0) || (value > UCHAR_MAX)) {
         return JSONWriter::failure("Invalid or missing parameter 'value'");
@@ -317,7 +317,7 @@ namespace dss {
 
       pDevice->setDeviceConfig(configClass, configIndex, value);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "getConfig") {
+    } else if (_request.getMethod() == "getConfig") {
       int configClass = strToIntDef(_request.getParameter("class"), -1);
       if((configClass < 0) || (configClass > UCHAR_MAX)) {
         return JSONWriter::failure("Invalid or missing parameter 'class'");
@@ -335,7 +335,7 @@ namespace dss {
       json.add("value", value);
 
       return json.successJSON();
-    } else if(_request.getMethod() == "getConfigWord") {
+    } else if (_request.getMethod() == "getConfigWord") {
       int configClass = strToIntDef(_request.getParameter("class"), -1);
       if((configClass < 0) || (configClass > UCHAR_MAX)) {
         return JSONWriter::failure("Invalid or missing parameter 'class'");
@@ -403,7 +403,7 @@ namespace dss {
         json.add("action", "none");
       }
       return json.successJSON();
-    } else if(_request.getMethod() == "setHeatingGroup") {
+    } else if (_request.getMethod() == "setHeatingGroup") {
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
       if (!isDefaultGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
@@ -436,7 +436,7 @@ namespace dss {
       json.add("action", "update");
       return json.successJSON();
 
-    } else if(_request.getMethod() == "setButtonID") {
+    } else if (_request.getMethod() == "setButtonID") {
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
       if((value  < 0) || (value > 15)) {
         return JSONWriter::failure("Invalid or missing parameter 'buttonID'");
@@ -460,7 +460,7 @@ namespace dss {
         }
       }
       return JSONWriter::success();
-    } else if(_request.getMethod() == "setButtonInputMode") {
+    } else if (_request.getMethod() == "setButtonInputMode") {
       boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
       if (_request.hasParameter("modeID")) {
         return JSONWriter::failure("API has changed, parameter mode ID is no longer \
@@ -630,7 +630,7 @@ namespace dss {
         }
       }
       return json.successJSON();
-    } else if(_request.getMethod() == "setButtonActiveGroup") {
+    } else if (_request.getMethod() == "setButtonActiveGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -2);
       if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
           ((value < -1) || (value > 63))) {
@@ -655,7 +655,7 @@ namespace dss {
         }
       }
       return JSONWriter::success();
-    } else if(_request.getMethod() == "setOutputMode") {
+    } else if (_request.getMethod() == "setOutputMode") {
       int value = strToIntDef(_request.getParameter("modeID"), -1);
       if((value  < 0) || (value > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'modeID'");
@@ -739,7 +739,7 @@ namespace dss {
         }
       }
       return json.successJSON();
-    } else if(_request.getMethod() == "setProgMode") {
+    } else if (_request.getMethod() == "setProgMode") {
       uint8_t modeId;
       std::string pmode = _request.getParameter("mode");
       if(pmode.compare("enable") == 0) {
@@ -751,7 +751,7 @@ namespace dss {
       }
       pDevice->setProgMode(modeId);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "getTransmissionQuality") {
+    } else if (_request.getMethod() == "getTransmissionQuality") {
       std::pair<uint8_t, uint16_t> p = pDevice->getDeviceTransmissionQuality();
       uint8_t down = p.first;
       uint16_t up = p.second;
@@ -760,7 +760,7 @@ namespace dss {
       json.add("downstream", down);
       return json.successJSON();
 
-    } else if(_request.getMethod() == "getOutputValue") {
+    } else if (_request.getMethod() == "getOutputValue") {
       int value;
       if (_request.hasParameter("type")) {
         std::string type = _request.getParameter("type");
@@ -822,7 +822,7 @@ namespace dss {
         return json.successJSON();
       }
 
-    } else if(_request.getMethod() == "setOutputValue") {
+    } else if (_request.getMethod() == "setOutputValue") {
       int offset = strToIntDef(_request.getParameter("offset"), -1);
       if((offset  < 0) || (offset > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'offset'");
@@ -833,7 +833,7 @@ namespace dss {
       }
       pDevice->setDeviceOutputValue(offset, value);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "setSceneValue") {
+    } else if (_request.getMethod() == "setSceneValue") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 127)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
@@ -871,7 +871,7 @@ namespace dss {
       }
 
       return JSONWriter::success();
-    } else if(_request.getMethod() == "getSceneValue") {
+    } else if (_request.getMethod() == "getSceneValue") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 127)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
@@ -890,7 +890,7 @@ namespace dss {
       }
 
       return json.successJSON();
-    } else if(_request.getMethod() == "getSceneMode") {
+    } else if (_request.getMethod() == "getSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
@@ -915,7 +915,7 @@ namespace dss {
       json.add("ledconIndex", config.ledconIndex);
       json.add("dimtimeIndex", config.dimtimeIndex);
       return json.successJSON();
-    } else if(_request.getMethod() == "setSceneMode") {
+    } else if (_request.getMethod() == "setSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
@@ -953,7 +953,7 @@ namespace dss {
 
       return JSONWriter::success();
 
-    } else if(_request.getMethod() == "getTransitionTime") {
+    } else if (_request.getMethod() == "getTransitionTime") {
       int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
         return JSONWriter::failure("Invalid or missing parameter 'dimtimeIndex'");
@@ -965,7 +965,7 @@ namespace dss {
       json.add("up", up);
       json.add("down", down);
       return json.successJSON();
-    } else if(_request.getMethod() == "setTransitionTime") {
+    } else if (_request.getMethod() == "setTransitionTime") {
       int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
         return JSONWriter::failure("Invalid or missing parameter 'dimtimeIndex'");
@@ -975,7 +975,7 @@ namespace dss {
       pDevice->setDeviceTransitionTime(id, up, down);
       return JSONWriter::success();
 
-    } else if(_request.getMethod() == "getLedMode") {
+    } else if (_request.getMethod() == "getLedMode") {
       int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
         return JSONWriter::failure("Invalid or missing parameter 'ledconIndex'");
@@ -990,7 +990,7 @@ namespace dss {
       json.add("rgbMode", config.rgbMode);
       json.add("groupColorMode", config.groupColorMode);
       return json.successJSON();
-    } else if(_request.getMethod() == "setLedMode") {
+    } else if (_request.getMethod() == "setLedMode") {
       int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
         return JSONWriter::failure("Invalid or missing parameter 'ledconIndex'");
@@ -1010,7 +1010,7 @@ namespace dss {
       pDevice->setDeviceLedMode(id, config);
       return JSONWriter::success();
 
-    } else if(_request.getMethod() == "getBinaryInputs") {
+    } else if (_request.getMethod() == "getBinaryInputs") {
       JSONWriter json;
       json.startArray("inputs");
       std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
@@ -1027,7 +1027,7 @@ namespace dss {
       }
       json.endArray();
       return json.successJSON();
-    } else if(_request.getMethod() == "setBinaryInputType") {
+    } else if (_request.getMethod() == "setBinaryInputType") {
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
@@ -1038,7 +1038,7 @@ namespace dss {
       }
       pDevice->setDeviceBinaryInputType(index, type);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "setBinaryInputTarget") {
+    } else if (_request.getMethod() == "setBinaryInputTarget") {
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
@@ -1053,7 +1053,7 @@ namespace dss {
       }
       pDevice->setDeviceBinaryInputTarget(index, gtype, gid);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "setBinaryInputId") {
+    } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
@@ -1065,14 +1065,14 @@ namespace dss {
       pDevice->setDeviceBinaryInputId(index, id);
       return JSONWriter::success();
 
-    } else if(_request.getMethod() == "getAKMInputTimeouts") {
+    } else if (_request.getMethod() == "getAKMInputTimeouts") {
       JSONWriter json;
       int onDelay, offDelay;
       pDevice->getDeviceAKMInputTimeouts(onDelay, offDelay);
       json.add("ondelay", onDelay);
       json.add("offdelay", offDelay);
       return json.successJSON();
-    } else if(_request.getMethod() == "setAKMInputTimeouts") {
+    } else if (_request.getMethod() == "setAKMInputTimeouts") {
       int onDelay = strToIntDef(_request.getParameter("ondelay"), -1);
       if (onDelay > 6552000) { // ms
         return JSONWriter::failure("Invalid parameter 'ondelay', must be < 6552000");
@@ -1122,7 +1122,7 @@ namespace dss {
         return JSONWriter::failure("Unsupported mode: " + mode);
       }
       return JSONWriter::success();
-    } else if(_request.getMethod() == "getSensorValue") {
+    } else if (_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
@@ -1132,7 +1132,7 @@ namespace dss {
       json.add("sensorIndex", id);
       json.add("sensorValue", value);
       return json.successJSON();
-    } else if(_request.getMethod() == "getSensorType") {
+    } else if (_request.getMethod() == "getSensorType") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
@@ -1144,7 +1144,7 @@ namespace dss {
       json.add("sensorType", value);
       return json.successJSON();
 
-    } else if(_request.getMethod() == "getSensorEventTableEntry") {
+    } else if (_request.getMethod() == "getSensorEventTableEntry") {
       int id = strToIntDef(_request.getParameter("eventIndex"), -1);
       if((id < 0) || (id > 15)) {
         return JSONWriter::failure("Invalid or missing parameter 'eventIndex'");
@@ -1167,7 +1167,7 @@ namespace dss {
       }
       return json.successJSON();
 
-    } else if(_request.getMethod() == "setSensorEventTableEntry") {
+    } else if (_request.getMethod() == "setSensorEventTableEntry") {
       int id = strToIntDef(_request.getParameter("eventIndex"), -1);
       if((id < 0) || (id > 15)) {
         return JSONWriter::failure("Invalid or missing parameter 'eventIndex'");
@@ -1223,14 +1223,14 @@ namespace dss {
       }
       pDevice->setSensorEventEntry(id, event);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "addToArea") {
+    } else if (_request.getMethod() == "addToArea") {
       int areaScene = strToIntDef(_request.getParameter("areaScene"), -1);
       if (areaScene < 0) {
         return JSONWriter::failure("Missing parameter 'areaScene'");
       }
       pDevice->configureAreaMembership(areaScene, true);
       return JSONWriter::success();
-    } else if(_request.getMethod() == "removeFromArea") {
+    } else if (_request.getMethod() == "removeFromArea") {
       int areaScene = strToIntDef(_request.getParameter("areaScene"), -1);
       if (areaScene < 0) {
         return JSONWriter::failure("Missing parameter 'areaScene'");
