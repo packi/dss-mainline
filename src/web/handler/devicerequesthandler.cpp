@@ -1822,6 +1822,12 @@ namespace dss {
       pDevice->setFirstSeen(setTime.secondsSinceEpoch());
       JSONWriter json;
       return json.successJSON();
+    } else if (_request.getMethod() == "getFirstSeen") {
+      JSONWriter json;
+      DateTime firstSeen = pDevice->getFirstSeen();
+      std::string date = firstSeen.toISO8601();
+      json.add("time", date);
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }
