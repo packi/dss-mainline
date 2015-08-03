@@ -57,7 +57,8 @@ const char *SDS20 =     "SDS:20"; // wildcard for SDS-20*
 const char *SDS22 =     "SDS:22"; // wildcard for SDS-22*
 const char *SDS2 =      "SDS:2"; // wildcard for all SDS-2*
 const char *ZWS2 =      "ZWS:2"; // wildcard for all ZWS-2*
-const char *ZWS21 =     "ZWS:21"; // wildcard for all ZWS-21*
+const char *KL213 =     "KL:213";
+const char *KL214 =     "KL:214";
 const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
 const char *UMV210 =    "UMV:210";
@@ -523,7 +524,20 @@ const int MF_SW_ZWS2[] =
   mf_jokerconfig
 };
 
-const int MF_SW_ZWS21[] =
+const int MF_SW_KL213[] =
+{
+  mf_dontcare,
+  mf_blink,
+  mf_ledauto,
+  mf_transt,
+  mf_outvalue8,
+  mf_optypeconfig,
+  mf_highlevel,
+  mf_consumption,
+  mf_jokerconfig
+};
+
+const int MF_SW_KL214[] =
 {
   mf_dontcare,
   mf_blink,
@@ -776,8 +790,13 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_ZWS21, MF_ARRAY_SIZE(MF_SW_ZWS21));
-  setFeatures(ColorIDBlack, ZWS21, fv);
+  fv->assign(MF_SW_KL213, MF_ARRAY_SIZE(MF_SW_KL213));
+  setFeatures(ColorIDBlack, KL213, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_SW_KL214, MF_ARRAY_SIZE(MF_SW_KL214));
+  setFeatures(ColorIDBlack, KL214, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
