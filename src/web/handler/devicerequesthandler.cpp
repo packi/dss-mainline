@@ -1805,6 +1805,23 @@ namespace dss {
       }
 
       return json.successJSON();
+    } else if (_request.getMethod() == "setFirstSeen") {
+      if(!_request.hasParameter("time")) {
+        return JSONWriter::failure("missing parameter 'time'");
+      }
+      std::string  strTimestamp = _request.getParameter("time");
+      DateTime setTime = DateTime::parseISO8601(strTimestamp);
+      static const DateTime allowedDate = DateTime::parseISO8601("2000-01-01T00:00:00Z");
+      if (setTime < allowedDate) {
+        return JSONWriter::failure("can not set date. Date older than " +allowedDate.toString());
+      }
+      DateTime deviceFirstSeen = pDevice->getFirstSeen();
+      if (deviceFirstSeen > allowedDate) {
+        return JSONWriter::failure("can not set date. Device Date newer than " + allowedDate.toString());
+      }
+      pDevice->setFirstSeen(setTime.secondsSinceEpoch());
+      JSONWriter json;
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }
