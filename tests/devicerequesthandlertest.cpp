@@ -260,6 +260,25 @@ BOOST_FIXTURE_TEST_CASE(testSetFirstSeenRightDate, Fixture) {
   testOkIs(response, true);
 }
 
+BOOST_FIXTURE_TEST_CASE(testSetGetFirstSeenRightDate, Fixture) {
+  boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(m_ValidDSUID);
+  static const DateTime before = DateTime::parseISO8601("1990-01-01T00:00:00Z");
+  device->setFirstSeen(before);
+  std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
+  std::string date  = "2000-01-01T00:00:01Z";
+  {
+    params += "&time=" + date;
+    RestfulRequest req("device/setFirstSeen", params);
+    WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+    testOkIs(response, true);
+  }
+  {
+    RestfulRequest req("device/getFirstSeen", params);
+    WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+    checkPropertyEquals("time", date, response);
+  }
+}
+
 BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
   const std::string& kTagName = "justATag";
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
