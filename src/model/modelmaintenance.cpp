@@ -581,8 +581,11 @@ namespace dss {
             }
           } catch(ItemNotFoundException& e) {
             if (!busMemberIsDSMeter(spec.DeviceType)) {
-              log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
-              continue;
+              // recover old dSM11 fw < 1.8.3
+              if (!DsmApiIsdSM(spec.DSID)) {
+                log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
+                continue;
+              }
             }
             dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);

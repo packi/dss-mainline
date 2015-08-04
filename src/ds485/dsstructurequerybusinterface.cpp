@@ -109,7 +109,18 @@ namespace dss {
       Logger::getInstance()->log("DSStructureQueryBusInterface::"
                                  "getDSMeterSpec: BusMember_get_type: Bus api error: " +
                                  std::string(err.what()), lsWarning);
-      return result; // do not rethrow exception
+
+      // recover old dSM11. (firmware < 1.8.3)
+      if (DsmApiIsdSM(_dsMeterID)) {
+        DSUID_STR(dsuid_str);
+        dsuid_to_string(&_dsMeterID, dsuid_str);
+        Logger::getInstance()->log("DSStructureQueryBusInterface::"
+            "getDSMeterSpec: BusMember_get_type: recovering old dSM11 dsuid: " +
+            std::string(dsuid_str), lsInfo);
+        devType = BusMember_dSM11;
+      } else {
+        return result; // do not rethrow exception
+      }
     }
     result.DeviceType = static_cast<BusMemberDevice_t>(devType);
 
