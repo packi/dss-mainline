@@ -260,7 +260,10 @@ namespace dss {
       std::vector<DSMeterSpec_t> vecMeterSpec =  m_pQueryBusInterface->getBusMembers();
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
         if (busMemberIsDSMeter(spec.DeviceType)) {
-          ++busMemberCount;
+          // ignore dSMx with older api version
+          if (spec.APIVersion >= 0x300) {
+            ++busMemberCount;
+          }
         }
       }
       return busMemberCount;
@@ -581,8 +584,11 @@ namespace dss {
             }
           } catch(ItemNotFoundException& e) {
             if (!busMemberIsDSMeter(spec.DeviceType)) {
-              log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
-              continue;
+              // recover old dSM11 fw < 1.8.3
+              if (!DsmApiIsdSM(spec.DSID)) {
+                log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
+                continue;
+              }
             }
             dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
