@@ -260,7 +260,10 @@ namespace dss {
       std::vector<DSMeterSpec_t> vecMeterSpec =  m_pQueryBusInterface->getBusMembers();
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
         if (busMemberIsDSMeter(spec.DeviceType)) {
-          ++busMemberCount;
+          // ignore dSMx with older api version
+          if (spec.APIVersion >= 0x300) {
+            ++busMemberCount;
+          }
         }
       }
       return busMemberCount;
