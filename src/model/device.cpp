@@ -1691,7 +1691,7 @@ namespace dss {
         m_iconPath = "unknown.png";
         return;
       }
-      if ((deviceType == DEVICE_TYPE_ZWS) && ((getDeviceNumber() == 213) || (getDeviceNumber() == 214))) {
+      if ((deviceType == DEVICE_TYPE_KL) && ((getDeviceNumber() == 213) || (getDeviceNumber() == 214))) {
         m_iconPath = "ssl";
       } else if ((deviceType == DEVICE_TYPE_SDM) && ((getDeviceNumber() == 201) || (getDeviceNumber() == 202))) {
         m_iconPath = "sdm_plug";
