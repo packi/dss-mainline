@@ -81,6 +81,7 @@ namespace dss {
     extern const std::string CheckSensorValues;
     extern const std::string DeviceEvent;
     extern const std::string CheckHeatingGroups;
+    extern const std::string Signal;
   }
 
   namespace EventProperty {

@@ -65,6 +65,7 @@ namespace EventName {
   const std::string CheckSensorValues = "check_sensor_values";
   const std::string DeviceEvent = "DeviceEvent";
   const std::string CheckHeatingGroups = "check_heating_groups";
+  const std::string Signal = "SIGNAL";
 }
 
 boost::shared_ptr<Event>
