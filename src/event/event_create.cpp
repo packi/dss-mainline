@@ -64,6 +64,7 @@ namespace EventName {
   const std::string OperationLock = "operation_lock";
   const std::string CheckSensorValues = "check_sensor_values";
   const std::string DeviceEvent = "DeviceEvent";
+  const std::string CheckHeatingGroups = "check_heating_groups";
 }
 
 boost::shared_ptr<Event>

@@ -213,7 +213,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
 void HeatingMonitorTask::run() {
 
   if (m_event->getName() == EventName::ModelReady) {
-    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -221,7 +221,7 @@ void HeatingMonitorTask::run() {
     return;
   }
 
-  if (m_event->getName() == "check_heating_groups") {
+  if (m_event->getName() == EventName::CheckHeatingGroups) {
     try {
       bool atHome;
       boost::shared_ptr<State> presence;
@@ -254,7 +254,7 @@ void HeatingMonitorTask::run() {
       Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsWarning);
     }
 
-    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);

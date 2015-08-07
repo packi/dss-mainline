@@ -1417,7 +1417,7 @@ Sample: {
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription("check_heating_groups",
+    subscription.reset(new EventSubscription(EventName::CheckHeatingGroups,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
