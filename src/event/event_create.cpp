@@ -66,6 +66,11 @@ namespace EventName {
   const std::string DeviceEvent = "DeviceEvent";
   const std::string CheckHeatingGroups = "check_heating_groups";
   const std::string Signal = "SIGNAL";
+  const std::string WebSessionCleanup = "webSessionCleanup";
+  const std::string SendMail = "sendmail";
+  const std::string ButtonClickBus = "buttonClickBus";
+  const std::string DSMeterReady = "dsMeter_ready";
+  const std::string ExecutionDeniedDigestCheck = "execution_denied_digest_check";
 }
 
 boost::shared_ptr<Event>

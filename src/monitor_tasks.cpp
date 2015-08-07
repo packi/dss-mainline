@@ -273,7 +273,7 @@ void HeatingMonitorTask::run() {
           lsWarning);
       syncZone(zoneID);
     }
-  } else if (m_event->getName() == "dsMeter_ready") {
+  } else if (m_event->getName() == EventName::DSMeterReady) {
     dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("dsMeter"));
     boost::shared_ptr<DSMeter> pMeter = m_Apartment->getDSMeterByDSID(dsmdsuid);
     Set devList = pMeter->getDevices();

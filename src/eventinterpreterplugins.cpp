@@ -697,7 +697,7 @@ namespace dss {
   bool EventInterpreterPluginSendmail::m_active = false;
 
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
-  : EventInterpreterPlugin("sendmail", _pInterpreter)
+  : EventInterpreterPlugin(EventName::SendMail, _pInterpreter)
   , m_thread(0)
   {
     if (DSS::hasInstance()) {
@@ -954,7 +954,7 @@ namespace dss {
                << reason << "!" << std::endl << std::endl;
 
       if (!m_check_scheduled) {
-        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("execution_denied_digest_check");
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::ExecutionDeniedDigestCheck);
         pEvent->setProperty("time", "+60");
         if (DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -962,7 +962,7 @@ namespace dss {
         }
       }
 
-    } else if  (_event.getName() == "execution_denied_digest_check") {
+    } else if  (_event.getName() == EventName::ExecutionDeniedDigestCheck) {
       boost::mutex::scoped_lock lock(m_digest_mutex);
       m_check_scheduled = false;
 
@@ -976,7 +976,7 @@ namespace dss {
       if (m_digest.str().length() == 0) {
         return;
       }
-      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("sendmail");
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::SendMail);
       pEvent->setProperty("body", m_digest.str());
       pEvent->setProperty("subject",
                           "digitalSTROM server actions not executed");
@@ -1407,7 +1407,7 @@ Sample: {
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription("dsMeter_ready",
+    subscription.reset(new EventSubscription(EventName::DSMeterReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
