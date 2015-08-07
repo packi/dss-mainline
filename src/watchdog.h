@@ -36,6 +36,7 @@ public:
 private:
   virtual void initialize();
   virtual void execute();
+  void dumpLastEvent();
 protected:
   virtual void doStart();
 
