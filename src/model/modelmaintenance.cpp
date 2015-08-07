@@ -237,7 +237,7 @@ namespace dss {
 
       {
         m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
-        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>("model_ready");
+        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::ModelReady);
         raiseEvent(readyEvent);
         try {
           CommChannel::getInstance()->resumeUpdateTask();

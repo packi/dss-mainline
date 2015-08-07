@@ -212,7 +212,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
 
 void HeatingMonitorTask::run() {
 
-  if (m_event->getName() == "model_ready") {
+  if (m_event->getName() == EventName::ModelReady) {
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
@@ -300,7 +300,7 @@ size_t HeatingValveProtectionTask::m_zoneIndex = 0;
  */
 void HeatingValveProtectionTask::run() {
 
-  if (m_event->getName() == "model_ready") {
+  if (m_event->getName() == EventName::ModelReady) {
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::HeatingValveProtection);
     // randomize the valve protection over two hours
     int randomizeStartMinutes = rand() % 120;

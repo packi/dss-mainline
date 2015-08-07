@@ -1286,7 +1286,7 @@ Sample: {
   void EventInterpreterSensorMonitorPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1304,7 +1304,7 @@ Sample: {
     log("handle: " + _event.getName(), lsDebug);
 
     // start the sensor timeout detection with a delay to allow for synchronization to take place
-    if (_event.getName() == "model_ready") {
+    if (_event.getName() == EventName::ModelReady) {
       boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
       pEvent->setProperty("time", "+3600");
       if (DSS::hasInstance()) {
@@ -1402,7 +1402,7 @@ Sample: {
 
   void EventInterpreterHeatingMonitorPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1442,7 +1442,7 @@ Sample: {
 
   void EventInterpreterHeatingValveProtectionPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1472,7 +1472,7 @@ Sample: {
 
   void EventInterpreterDebugMonitorPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
