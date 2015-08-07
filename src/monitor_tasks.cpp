@@ -154,7 +154,7 @@ void SensorMonitorTask::run() {
     }
   } catch (...) {}
 
-  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_sensor_values");
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
   pEvent->setProperty("time", "+600");
   if (DSS::hasInstance()) {
       Logger::getInstance()->log("queued check_sensor_values event");

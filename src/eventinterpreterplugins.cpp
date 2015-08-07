@@ -1292,7 +1292,7 @@ Sample: {
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
 
-    subscription.reset(new EventSubscription("check_sensor_values",
+    subscription.reset(new EventSubscription(EventName::CheckSensorValues,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1305,7 +1305,7 @@ Sample: {
 
     // start the sensor timeout detection with a delay to allow for synchronization to take place
     if (_event.getName() == "model_ready") {
-      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_sensor_values");
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
       pEvent->setProperty("time", "+3600");
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
