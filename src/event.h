@@ -79,6 +79,7 @@ namespace dss {
     extern const std::string BuildingService;
     extern const std::string OperationLock;
     extern const std::string CheckSensorValues;
+    extern const std::string DeviceEvent;
   }
 
   namespace EventProperty {

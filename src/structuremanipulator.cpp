@@ -105,7 +105,7 @@ namespace dss {
 
     {
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "moved");
       mEvent->setProperty("id", intToString(_zone->getID())); //TODO: remove property in next release
       mEvent->setProperty("oldZoneID", intToString(oldZoneID));
@@ -267,7 +267,7 @@ namespace dss {
     {
       DeviceReference ref(_pDevice, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "name");
       mEvent->setProperty("name", _name);
       if(DSS::hasInstance()) {
@@ -530,7 +530,7 @@ namespace dss {
     {
       DeviceReference ref(_device, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "groupAdd");
       mEvent->setProperty("id", intToString(_group->getID()));
       if(DSS::hasInstance()) {
@@ -565,7 +565,7 @@ namespace dss {
     {
       DeviceReference ref(_device, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "groupRemove");
       mEvent->setProperty("id", intToString(_group->getID()));
       if(DSS::hasInstance()) {

@@ -63,6 +63,7 @@ namespace EventName {
   const std::string BuildingService = "building_service";
   const std::string OperationLock = "operation_lock";
   const std::string CheckSensorValues = "check_sensor_values";
+  const std::string DeviceEvent = "DeviceEvent";
 }
 
 boost::shared_ptr<Event>
