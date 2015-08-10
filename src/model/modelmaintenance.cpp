@@ -1735,8 +1735,10 @@ namespace dss {
     if (!m_IsInitializing) {
 
       boost::shared_ptr<Device> device;
+      boost::shared_ptr<DeviceReference> pDevRef;  
       try {
         DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
+        pDevRef = boost::make_shared<DeviceReference>(devRef);
         device = devRef.getDevice();
       } catch (ItemNotFoundException &ex) {
         log("Device with id " + intToString(_devID) +
@@ -1752,6 +1754,8 @@ namespace dss {
                                        *m_pStructureQueryBusInterface,
                                        *m_pApartment);
       manipulator.autoAssignZoneSensors(zone);
+
+      pollSensors(pDevRef);
     }
   } // onAddDevice
 
@@ -2550,5 +2554,34 @@ namespace dss {
     pEvent->setProperty("time", "+" + intToString(_interval));
     DSS::getInstance()->getEventInterpreter().getQueue().pushEvent(pEvent);
   } // sendCleanupEvent
+
+  void ModelMaintenance::pollSensors(boost::shared_ptr<DeviceReference> pDevRef) {
+    if (!pDevRef) {
+      return;
+    }
+
+    boost::shared_ptr<Device> device = pDevRef->getDevice();
+    if (!device) {
+      return;
+    }
+
+    boost::shared_ptr<Zone> zone = m_pApartment->getZone(device->getZoneID());
+    if (!zone) {
+      return;
+    }
+
+    if (device->getSensorCount()) {
+      DeviceBusInterface* busItf = m_pApartment->getBusInterface()->getDeviceBusInterface();
+
+      foreach (boost::shared_ptr<DeviceSensor_t> sensor, device->getSensors()) {
+        if (sensor->m_sensorPollInterval == 0) {
+          continue;
+        }
+        if (zone->isZoneSensor(device, sensor->m_sensorType)) {
+          busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+        }
+      }
+    }
+  } // pollSensors
 
 } // namespace dss

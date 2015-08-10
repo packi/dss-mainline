@@ -474,6 +474,21 @@ namespace dss {
     return boost::shared_ptr<Device> ();
   }
 
+  bool Zone::isZoneSensor(boost::shared_ptr<Device> _device, int _sensorType) const {
+    if (!_device) {
+      return false;
+    }
+
+    boost::shared_ptr<Device> zoneSensor = getAssignedSensorDevice(_sensorType);
+    if (!zoneSensor) {
+      return false;
+    }
+
+    dsuid_t dsuidDevice = _device->getDSID();
+    dsuid_t dsuidSensor = zoneSensor->getDSID();
+    return dsuid_equal (&dsuidDevice, &dsuidSensor);
+  }
+
   void Zone::dirty() {
     if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
       m_pApartment->getModelMaintenance()->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
