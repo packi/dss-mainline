@@ -48,6 +48,7 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
+#include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
@@ -802,7 +803,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         }
       }
       if (DSS::hasInstance()) {
-        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("SIGNAL");
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::Signal);
         pEvent->setProperty("signum", intToString(sig));
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }

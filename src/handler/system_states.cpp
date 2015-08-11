@@ -837,7 +837,7 @@ void SystemState::run() {
   try {
     if (m_evtName == EventName::Running) {
       bootstrap();
-    } else if (m_evtName == "model_ready") {
+    } else if (m_evtName == EventName::ModelReady) {
       startup();
     } else if (m_evtName == EventName::CallScene) {
       if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {

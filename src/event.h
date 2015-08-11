@@ -78,6 +78,15 @@ namespace dss {
     extern const std::string HeatingModeSwitch;
     extern const std::string BuildingService;
     extern const std::string OperationLock;
+    extern const std::string CheckSensorValues;
+    extern const std::string DeviceEvent;
+    extern const std::string CheckHeatingGroups;
+    extern const std::string Signal;
+    extern const std::string WebSessionCleanup;
+    extern const std::string SendMail;
+    extern const std::string ButtonClickBus;
+    extern const std::string DSMeterReady;
+    extern const std::string ExecutionDeniedDigestCheck;
   }
 
   namespace EventProperty {

@@ -257,7 +257,7 @@ namespace dss {
       if (m_pRelayTarget != NULL) {
         boost::shared_ptr<EventSubscription> signalSubscription(
                 new dss::EventSubscription(
-                    "SIGNAL",
+                    EventName::Signal,
                     EventInterpreterInternalRelay::getPluginName(),
                     m_EventInterpreter,
                     boost::shared_ptr<SubscriptionOptions>())
