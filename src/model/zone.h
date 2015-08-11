@@ -201,6 +201,8 @@ namespace dss {
     boost::shared_ptr<std::vector<int> > getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const;
 
     boost::shared_ptr<Device> getAssignedSensorDevice(int _sensorType) const;
+    bool isZoneSensor(boost::shared_ptr<Device> _device, int _sensorType) const;
+
     bool isDeviceZoneMember(const DeviceReference& _device) const;
     void removeInvalidZoneSensors();
 

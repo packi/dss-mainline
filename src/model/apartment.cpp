@@ -391,7 +391,7 @@ namespace dss {
 
         {
           boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
-          boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+          boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
           mEvent->setProperty("action", "deleted");
           if (DSS::hasInstance()) {
             DSS::getInstance()->getEventQueue().pushEvent(mEvent);

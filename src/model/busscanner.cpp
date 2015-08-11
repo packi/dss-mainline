@@ -442,7 +442,7 @@ namespace dss {
 
     {
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
-      boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       readyEvent->setProperty("action", "ready");
       if(DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
