@@ -1,5 +1,14 @@
 dSS - digitalSTROM Server
 
+v1.31.1	11.08.2015
+	* When a device is added, poll its sensors, #10464
+	* recover old dSM11 devices without BusMemberType support, #10417
+	* SSL is internally now a KL instead of a ZWS, #10808
+	* Migrate readoutPendingMeter funtionality to other thread, #10483
+	* Fix Pairing of devices, #10715
+	* generate system-protection.log, #10524
+	* getLatestLogs, only send one responses, #10709
+
 v1.31.0	20.07.2015
 	* date condition evaluation, add helper class for reoccurring ical events, #10481
 	* model event processing for generic events, 10331
