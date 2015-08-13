@@ -684,12 +684,20 @@ namespace dss {
   void StructureManipulator::setZoneSensor(boost::shared_ptr<Zone> _zone,
                                            const uint8_t _sensorType,
                                            boost::shared_ptr<Device> _dev) {
+    Logger::getInstance()->log("SensorAssignment: assign zone: " + intToString(_zone->getID()) +
+        ", type: " + intToString(_sensorType) +
+        " => " + dsuid2str(_dev->getDSID()), lsInfo);
+
     _zone->setSensor(_dev, _sensorType);
     m_Interface.setZoneSensor(_zone->getID(), _sensorType, _dev->getDSID());
   }
 
   void StructureManipulator::resetZoneSensor(boost::shared_ptr<Zone> _zone,
                                              const uint8_t _sensorType) {
+    Logger::getInstance()->log("SensorAssignment: reset zone: " + intToString(_zone->getID()) +
+        ", type: " + intToString(_sensorType) +
+        " => none", lsInfo);
+
     _zone->resetSensor(_sensorType);
     m_Interface.resetZoneSensor(_zone->getID(), _sensorType);
   }
@@ -711,6 +719,9 @@ namespace dss {
 
     boost::shared_ptr<std::vector<int> > unassigned_sensors =
        _zone->getUnassignedSensorTypes();
+
+    Logger::getInstance()->log("SensorAssignment: run auto-assignment for " +
+        intToString(unassigned_sensors->size()) + " sensor types:", lsInfo);
 
     // check if our set contains devices that with the matching sensor type
     // and assign the first device that we find automatically: UC 8.1
@@ -739,6 +750,8 @@ namespace dss {
 
   void StructureManipulator::synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones)
   {
+    Logger::getInstance()->log("SensorAssignment: run synchronize", lsInfo);
+
     for (size_t i = 0; i < _zones.size(); ++i) {
       boost::shared_ptr<Zone> zone = _zones.at(i);
       if (!zone) {
@@ -752,6 +765,11 @@ namespace dss {
       boost::shared_ptr<std::vector<int> > sUnasList =  zone->getUnassignedSensorTypes();
       try {
         for (size_t index = 0; index < sUnasList->size(); ++index) {
+          Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
+                  "zone: " + intToString(zone->getID()) +
+                  ", type: " + intToString(sUnasList->at(index)) +
+                  " => none", lsInfo);
+
           m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
         }
 
@@ -760,7 +778,11 @@ namespace dss {
         for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = sAsList.begin();
             it != sAsList.end();
             ++it) {
-            m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);
+          Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone->getID()) +
+                  ", type: " + intToString((*it)->m_sensorType) +
+                  " => " + dsuid2str((*it)->m_DSUID), lsInfo);
+
+          m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);
         }
       } catch (std::runtime_error &err) {
         Logger::getInstance()->log(std::string("StructureManipulator::synchronizeZoneSensorAssignment: can't synchronize zone sensors: ") + err.what(), lsWarning);
