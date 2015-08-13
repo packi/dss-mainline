@@ -496,14 +496,16 @@ namespace dss {
     }
 
     if (!(dev->getGroupBitmask().test(gr->getStandardGroupID()-1) ||
-          (dev->getDeviceType() == DEVICE_TYPE_AKM))) {
+          (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
+          (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
       return JSONWriter::failure("Devices does not match color of group (" + intToString(gr->getStandardGroupID()) + ")");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     try {
       if (((dev->getDeviceType() == DEVICE_TYPE_AKM) ||
-          ((dev->getDeviceType() == DEVICE_TYPE_TKM) && !dev->hasOutput()))
+          ((dev->getDeviceType() == DEVICE_TYPE_TKM) && !dev->hasOutput()) ||
+          ((dev->getDeviceType() == DEVICE_TYPE_UMR) && dev->hasInput()))
           && (dev->getGroupsCount() > 1)) {
         for (int g = 0; g < dev->getGroupsCount(); g++) {
           boost::shared_ptr<Group> oldGroup = dev->getGroupByIndex(g);

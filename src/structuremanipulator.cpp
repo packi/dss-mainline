@@ -518,7 +518,7 @@ namespace dss {
     _device->addToGroup(_group->getID());
 
     if (isAppUserGroup(_group->getID())) {
-      if ((_device->getDeviceType() == DEVICE_TYPE_AKM) && (_device->getBinaryInputCount() == 1)) {
+      if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
         _device->setDeviceBinaryInputTarget(0, 0, _group->getID());
         _device->setBinaryInputTarget(0, 0, _group->getID());
@@ -552,7 +552,7 @@ namespace dss {
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
 
-    if ((_device->getDeviceType() == DEVICE_TYPE_AKM) &&
+    if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) &&
         (_device->getBinaryInputCount() == 1) &&
         (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
       /* AKM with single input, active on removed group */
