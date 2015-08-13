@@ -18,7 +18,10 @@
       <value />
     </property>
 
-
+    <!-- debug -->
+    <property name="debug/storeInvalidXML" type="boolean">
+      <value>false</value>
+    </property>
 
   </property>
 </properties>

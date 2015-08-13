@@ -26,6 +26,7 @@
 #endif
 
 
+#include "dss.h"
 #include "util.h"
 #include "logger.h"
 #include "base.h"
@@ -42,7 +43,11 @@
 #include "expatparser.h"
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
 #include <math.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 
 namespace dss {
 
@@ -198,6 +203,11 @@ static OutputChannelInfo kOutputChannels[] = {
       Logger::getInstance()->log("XML not saved! Generated file '" +
             _fileName + "' is invalid, will not overwrite" +
             _targetFile, lsFatal);
+      if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/debug/storeInvalidXML")) {
+        std::string invalidDir("/var/log/invalid_xml/");
+        mkdir(invalidDir.c_str(), 0777);
+        rename(_fileName.c_str(), (invalidDir + boost::filesystem::path(_fileName).filename().string()).c_str());
+      }
     }
 
     return ret;
