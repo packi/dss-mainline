@@ -33,7 +33,7 @@
 #include "src/logger.h"
 #include "src/event.h"
 
-#define WATCHDOG_SLEEP_TIME 180 // in seconds, 3 minutes
+#define WATCHDOG_SLEEP_TIME 360 // in seconds, 3 minutes
 namespace dss {
 
 Watchdog::Watchdog(DSS* _pDSS) : ThreadedSubsystem(_pDSS, "Watchdog") {
