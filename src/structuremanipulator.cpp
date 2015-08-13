@@ -228,6 +228,12 @@ namespace dss {
 
     if (dsmDsid == DSUID_NULL) {
       dsmDsid = _device->getLastKnownDSMeterDSID();
+      // #10453 - unknown last dsmid
+      if (dsmDsid == DSUID_NULL) {
+        Logger::getInstance()->log("StructureManipulator::removeDevicefromDSMeter: device " +
+            dsuid2str(_device->getDSID()) + " has invalid dSM ID " + dsuid2str(dsmDsid), lsWarning);
+        return;
+      }
     }
     if (shortAddr == ShortAddressStaleDevice) {
       shortAddr = _device->getLastKnownShortAddress();
