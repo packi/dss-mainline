@@ -259,6 +259,49 @@ namespace dss {
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
+  std::vector<boost::shared_ptr<DeviceReference> > StructureManipulator::removeDevice(
+      boost::shared_ptr<Device> _pDevice) {
+    std::vector<boost::shared_ptr<DeviceReference> > result;
+    boost::shared_ptr<Device> pPartnerDevice;
+
+    if (_pDevice->is2WayMaster()) {
+      dsuid_t next;
+      dsuid_get_next_dsuid(_pDevice->getDSID(), &next);
+      try {
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+      } catch(ItemNotFoundException& e) {
+        Logger::getInstance()->log("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
+      }
+    }
+
+    try {
+      removeDeviceFromDSMeter(_pDevice);
+      if (pPartnerDevice != NULL) {
+        removeDeviceFromDSMeter(pPartnerDevice);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log(std::string("Could not remove device from "
+                                 "dSM: ") + e.what(), lsError);
+    }
+
+    boost::shared_ptr<DeviceReference> pDevRef =
+        boost::make_shared<DeviceReference> (_pDevice, &DSS::getInstance()->getApartment());
+    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_pDevice->getZoneID()), _pDevice);
+    m_Apartment.removeDevice(pDevRef->getDSID());
+    result.push_back(pDevRef);
+
+    if (pPartnerDevice != NULL) {
+      Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
+      boost::shared_ptr<DeviceReference> pPartnerDeviceRef =
+          boost::make_shared<DeviceReference> (pPartnerDevice, &DSS::getInstance()->getApartment());
+      checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDevice->getZoneID()), pPartnerDevice);
+      m_Apartment.removeDevice(pPartnerDeviceRef->getDSID());
+      result.push_back(pPartnerDeviceRef);
+    }
+
+    return result;
+  }
+
   void StructureManipulator::deviceSetName(boost::shared_ptr<Device> _pDevice,
                                            const std::string& _name) {
     m_Interface.deviceSetName(_pDevice->getDSMeterDSID(),
