@@ -260,8 +260,7 @@ namespace dss {
     if (spec.DSID != _device->getDSID()) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
-    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_device->getZoneID()),
-                                _device);
+
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
