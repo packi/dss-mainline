@@ -190,46 +190,37 @@ namespace dss {
     dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
 
     boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
-    if(dev->isPresent()) {
+    if (dev->isPresent()) {
       // ATTENTION: this is string is translated by the web UI
       return JSONWriter::failure("Cannot remove present device");
     }
 
-    JSONWriter json;
-    json.startArray("devices");
-
-    boost::shared_ptr<Device> pPartnerDevice;
-    if (dev->is2WayMaster()) {
-      dsuid_t next;
-      dsuid_get_next_dsuid(dev->getDSID(), &next);
-      try {
-        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-      } catch(ItemNotFoundException& e) {
-        Logger::getInstance()->log("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
-      }
-    }
+    std::vector<boost::shared_ptr<DeviceReference> > result;
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     try {
-      manipulator.removeDeviceFromDSMeter(dev);
-      if (pPartnerDevice != NULL) {
-        manipulator.removeDeviceFromDSMeter(pPartnerDevice);
-      }
+      result = manipulator.removeDevice(dev);
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log(std::string("Could not remove device from "
-                                 "dSM: ") + e.what(), lsError);
+      Logger::getInstance()->log(std::string("Could not remove device: ") + e.what(), lsError);
+      return JSONWriter::failure("Could not remove device");
     }
-    DeviceReference pDevRef(dev, &DSS::getInstance()->getApartment());
-    toJSON(pDevRef, json);
-    m_Apartment.removeDevice(dsuid);
-    if (pPartnerDevice != NULL) {
-      Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
-      DeviceReference pPartnerDeviceRef(pPartnerDevice, &DSS::getInstance()->getApartment());
-      toJSON(pPartnerDeviceRef, json);
-      m_Apartment.removeDevice(pPartnerDevice->getDSID());
-    }
+
     // model dirty is called implicitly
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etClusterCleanup));
 
+    // the devices in the returned list are no longer present in the apartment!
+    JSONWriter json;
+    json.startArray("devices");
+    foreach(boost::shared_ptr<DeviceReference> pDevRef, result) {
+      json.startObject();
+      dsid_t dsid;
+      if (dsuid_to_dsid(pDevRef->getDSID(), &dsid)) {
+        json.add("id", dsid2str(dsid));
+      } else {
+        json.add("id", "");
+      }
+      json.add("dSUID", dsuid2str(pDevRef->getDSID()));
+      json.endObject();
+    }
     json.endArray();
     json.add("action", "remove");
     return json.successJSON();
