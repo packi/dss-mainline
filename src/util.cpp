@@ -205,8 +205,8 @@ static OutputChannelInfo kOutputChannels[] = {
             _targetFile, lsFatal);
       if (DSS::getInstance()->getPropertySystem().getBoolValue("/config/debug/storeInvalidXML")) {
         std::string invalidDir("/var/log/invalid_xml/");
-        mkdir(invalidDir.c_str(), 0777);
-        rename(_fileName.c_str(), (invalidDir + boost::filesystem::path(_fileName).filename().string()).c_str());
+        (void)mkdir(invalidDir.c_str(), 0777); // can fail if the directory already exists
+        (void)rename(_fileName.c_str(), (invalidDir + boost::filesystem::path(_fileName).filename().string()).c_str());
       }
     }
 
