@@ -169,7 +169,7 @@ namespace dss {
     return result;
   } // getDeviceByName
 
-  WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     boost::shared_ptr<Device> pDevice;
     StringConverter st("UTF-8", "UTF-8");
     try {

@@ -39,7 +39,7 @@ namespace dss {
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
     EventRequestHandler(EventInterpreter& _queue);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
   private:
     EventInterpreter& m_EventInterpreter;
 

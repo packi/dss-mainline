@@ -849,7 +849,7 @@ namespace dss {
   }
 
 
-  WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
     } else if(_request.getMethod() == "removeDevice") {

@@ -37,7 +37,7 @@ namespace dss {
     std::string removeMeter(const RestfulRequest& _request);
     std::string removeInactiveMeters(const RestfulRequest& _request);
     std::string getReachableGroups(const RestfulRequest& _request);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
   private:
     Set getUnassignedDevices();
     Apartment& m_Apartment;

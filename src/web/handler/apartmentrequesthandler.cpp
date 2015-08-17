@@ -123,7 +123,7 @@ namespace dss {
     return JSONWriter::success();
   }
 
-  WebServerResponse ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     std::string errorMessage;
     if(_request.getMethod() == "getConsumption") {
       int accumulatedConsumption = 0;

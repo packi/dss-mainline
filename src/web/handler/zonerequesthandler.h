@@ -36,7 +36,7 @@ namespace dss {
     ZoneRequestHandler(Apartment& _apartment,
                        StructureModifyingBusInterface* _pBusInterface,
                        StructureQueryBusInterface* _pQueryBusInterface);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
   private:
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
