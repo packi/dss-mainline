@@ -25,6 +25,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "src/businterface.h"
+#include "src/model/devicereference.h"
 
 namespace dss {
 
@@ -56,7 +57,10 @@ namespace dss {
     void removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter);
     void removeZoneOnDSMeters(boost::shared_ptr<Zone>);
     void removeDeviceFromDSMeter(boost::shared_ptr<Device> _device);
-
+    /**
+     * @ret list of devices (slaves included) that have been deleted
+     */
+    std::vector<boost::shared_ptr<DeviceReference> > removeDevice(boost::shared_ptr<Device> _pDevice);
     void deviceSetName(boost::shared_ptr<Device> _pDevice, const std::string& _name);
     void meterSetName(boost::shared_ptr<DSMeter> _pMeter, const std::string& _name);
     int persistSet(Set& _set, const std::string& _originalSet);

@@ -154,7 +154,7 @@ void SensorMonitorTask::run() {
     }
   } catch (...) {}
 
-  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_sensor_values");
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
   pEvent->setProperty("time", "+600");
   if (DSS::hasInstance()) {
       Logger::getInstance()->log("queued check_sensor_values event");
@@ -212,8 +212,8 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
 
 void HeatingMonitorTask::run() {
 
-  if (m_event->getName() == "model_ready") {
-    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
+  if (m_event->getName() == EventName::ModelReady) {
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -221,7 +221,7 @@ void HeatingMonitorTask::run() {
     return;
   }
 
-  if (m_event->getName() == "check_heating_groups") {
+  if (m_event->getName() == EventName::CheckHeatingGroups) {
     try {
       bool atHome;
       boost::shared_ptr<State> presence;
@@ -254,7 +254,7 @@ void HeatingMonitorTask::run() {
       Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsWarning);
     }
 
-    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_heating_groups");
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -273,7 +273,7 @@ void HeatingMonitorTask::run() {
           lsWarning);
       syncZone(zoneID);
     }
-  } else if (m_event->getName() == "dsMeter_ready") {
+  } else if (m_event->getName() == EventName::DSMeterReady) {
     dsuid_t dsmdsuid = str2dsuid(m_event->getPropertyByName("dsMeter"));
     boost::shared_ptr<DSMeter> pMeter = m_Apartment->getDSMeterByDSID(dsmdsuid);
     Set devList = pMeter->getDevices();
@@ -300,7 +300,7 @@ size_t HeatingValveProtectionTask::m_zoneIndex = 0;
  */
 void HeatingValveProtectionTask::run() {
 
-  if (m_event->getName() == "model_ready") {
+  if (m_event->getName() == EventName::ModelReady) {
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::HeatingValveProtection);
     // randomize the valve protection over two hours
     int randomizeStartMinutes = rand() % 120;

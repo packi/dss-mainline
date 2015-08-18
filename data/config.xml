@@ -18,42 +18,10 @@
       <value />
     </property>
 
-
-    <!-- Examples for simluated devices -->
-    <!--
-    <property name="subsystems/DSSim/js-devices">
-      <property name="example">
-        <property name="script-file" type="string">
-          <value>data/simulated_device.js</value>
-        </property>
-        <property name="id" type="string">
-          <value>example.js-device</value>
-        </property>
-      </property>
-      <property name="slim_player">
-        <property name="script-file[0]" type="string">
-          <value>../jslib/dsid.js</value>
-        </property>
-        <property name="script-file[1]" type="string">
-          <value>../examples/plugins/js/slimplayer.js</value>
-        </property>
-        <property name="id" type="string">
-          <value>example.slim_player</value>
-        </property>
-      </property>
-      <property name="vlc_player">
-        <property name="script-file[0]" type="string">
-          <value>../jslib/dsid.js</value>
-        </property>
-        <property name="script-file[1]" type="string">
-          <value>../examples/plugins/js/vlc.js</value>
-        </property>
-        <property name="id" type="string">
-          <value>example.vlc_player</value>
-        </property>
-      </property>
+    <!-- debug -->
+    <property name="debug/storeInvalidXML" type="boolean">
+      <value>false</value>
     </property>
-    -->
 
   </property>
 </properties>

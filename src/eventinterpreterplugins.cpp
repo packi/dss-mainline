@@ -261,7 +261,12 @@ namespace dss {
       }
 
       // TODO: sanitize filename to prevent world-domination
-      return saveToXML(m_StoreDirectory + fileName + ".xml", pNode, PropertyNode::Archive);
+
+      std::string path = m_StoreDirectory + fileName + ".xml";
+      Logger::getInstance()->log("Writing script config to '" + path + "'", lsInfo);
+      bool result = saveToXML(path, pNode, PropertyNode::Archive);
+      Logger::getInstance()->log("Finished writing script config to '" + path + "'", lsDebug);
+      return result;
     }
 
     virtual bool load(ScriptContext* _context) {
@@ -697,7 +702,7 @@ namespace dss {
   bool EventInterpreterPluginSendmail::m_active = false;
 
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
-  : EventInterpreterPlugin("sendmail", _pInterpreter)
+  : EventInterpreterPlugin(EventName::SendMail, _pInterpreter)
   , m_thread(0)
   {
     if (DSS::hasInstance()) {
@@ -954,7 +959,7 @@ namespace dss {
                << reason << "!" << std::endl << std::endl;
 
       if (!m_check_scheduled) {
-        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("execution_denied_digest_check");
+        boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::ExecutionDeniedDigestCheck);
         pEvent->setProperty("time", "+60");
         if (DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -962,7 +967,7 @@ namespace dss {
         }
       }
 
-    } else if  (_event.getName() == "execution_denied_digest_check") {
+    } else if  (_event.getName() == EventName::ExecutionDeniedDigestCheck) {
       boost::mutex::scoped_lock lock(m_digest_mutex);
       m_check_scheduled = false;
 
@@ -976,7 +981,7 @@ namespace dss {
       if (m_digest.str().length() == 0) {
         return;
       }
-      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("sendmail");
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::SendMail);
       pEvent->setProperty("body", m_digest.str());
       pEvent->setProperty("subject",
                           "digitalSTROM server actions not executed");
@@ -1286,13 +1291,13 @@ Sample: {
   void EventInterpreterSensorMonitorPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
 
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
 
-    subscription.reset(new EventSubscription("check_sensor_values",
+    subscription.reset(new EventSubscription(EventName::CheckSensorValues,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1304,8 +1309,8 @@ Sample: {
     log("handle: " + _event.getName(), lsDebug);
 
     // start the sensor timeout detection with a delay to allow for synchronization to take place
-    if (_event.getName() == "model_ready") {
-      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("check_sensor_values");
+    if (_event.getName() == EventName::ModelReady) {
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
       pEvent->setProperty("time", "+3600");
       if (DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -1402,12 +1407,12 @@ Sample: {
 
   void EventInterpreterHeatingMonitorPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription("dsMeter_ready",
+    subscription.reset(new EventSubscription(EventName::DSMeterReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1417,7 +1422,7 @@ Sample: {
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
     getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription("check_heating_groups",
+    subscription.reset(new EventSubscription(EventName::CheckHeatingGroups,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1442,7 +1447,7 @@ Sample: {
 
   void EventInterpreterHeatingValveProtectionPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));
@@ -1472,7 +1477,7 @@ Sample: {
 
   void EventInterpreterDebugMonitorPlugin::subscribe() {
     boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription("model_ready",
+    subscription.reset(new EventSubscription(EventName::ModelReady,
                                              getName(),
                                              getEventInterpreter(),
                                              boost::shared_ptr<SubscriptionOptions>()));

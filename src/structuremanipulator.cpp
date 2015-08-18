@@ -105,7 +105,7 @@ namespace dss {
 
     {
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "moved");
       mEvent->setProperty("id", intToString(_zone->getID())); //TODO: remove property in next release
       mEvent->setProperty("oldZoneID", intToString(oldZoneID));
@@ -228,6 +228,12 @@ namespace dss {
 
     if (dsmDsid == DSUID_NULL) {
       dsmDsid = _device->getLastKnownDSMeterDSID();
+      // #10453 - unknown last dsmid
+      if (dsmDsid == DSUID_NULL) {
+        Logger::getInstance()->log("StructureManipulator::removeDevicefromDSMeter: device " +
+            dsuid2str(_device->getDSID()) + " has invalid dSM ID " + dsuid2str(dsmDsid), lsWarning);
+        return;
+      }
     }
     if (shortAddr == ShortAddressStaleDevice) {
       shortAddr = _device->getLastKnownShortAddress();
@@ -254,10 +260,52 @@ namespace dss {
     if (spec.DSID != _device->getDSID()) {
       throw std::runtime_error("Not deleting device - dSID mismatch between dSS model and dSM");
     }
-    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_device->getZoneID()),
-                                _device);
+
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
+
+  std::vector<boost::shared_ptr<DeviceReference> > StructureManipulator::removeDevice(
+      boost::shared_ptr<Device> _pDevice) {
+    std::vector<boost::shared_ptr<DeviceReference> > result;
+    boost::shared_ptr<Device> pPartnerDevice;
+
+    if (_pDevice->is2WayMaster()) {
+      dsuid_t next;
+      dsuid_get_next_dsuid(_pDevice->getDSID(), &next);
+      try {
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+      } catch(ItemNotFoundException& e) {
+        Logger::getInstance()->log("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
+      }
+    }
+
+    try {
+      removeDeviceFromDSMeter(_pDevice);
+      if (pPartnerDevice != NULL) {
+        removeDeviceFromDSMeter(pPartnerDevice);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log(std::string("Could not remove device from "
+                                 "dSM: ") + e.what(), lsError);
+    }
+
+    boost::shared_ptr<DeviceReference> pDevRef =
+        boost::make_shared<DeviceReference> (_pDevice, &DSS::getInstance()->getApartment());
+    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_pDevice->getZoneID()), _pDevice);
+    m_Apartment.removeDevice(pDevRef->getDSID());
+    result.push_back(pDevRef);
+
+    if (pPartnerDevice != NULL) {
+      Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
+      boost::shared_ptr<DeviceReference> pPartnerDeviceRef =
+          boost::make_shared<DeviceReference> (pPartnerDevice, &DSS::getInstance()->getApartment());
+      checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDevice->getZoneID()), pPartnerDevice);
+      m_Apartment.removeDevice(pPartnerDeviceRef->getDSID());
+      result.push_back(pPartnerDeviceRef);
+    }
+
+    return result;
+  }
 
   void StructureManipulator::deviceSetName(boost::shared_ptr<Device> _pDevice,
                                            const std::string& _name) {
@@ -267,7 +315,7 @@ namespace dss {
     {
       DeviceReference ref(_pDevice, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "name");
       mEvent->setProperty("name", _name);
       if(DSS::hasInstance()) {
@@ -518,7 +566,7 @@ namespace dss {
     _device->addToGroup(_group->getID());
 
     if (isAppUserGroup(_group->getID())) {
-      if ((_device->getDeviceType() == DEVICE_TYPE_AKM) && (_device->getBinaryInputCount() == 1)) {
+      if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
         _device->setDeviceBinaryInputTarget(0, 0, _group->getID());
         _device->setBinaryInputTarget(0, 0, _group->getID());
@@ -530,7 +578,7 @@ namespace dss {
     {
       DeviceReference ref(_device, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "groupAdd");
       mEvent->setProperty("id", intToString(_group->getID()));
       if(DSS::hasInstance()) {
@@ -552,7 +600,7 @@ namespace dss {
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
 
-    if ((_device->getDeviceType() == DEVICE_TYPE_AKM) &&
+    if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) &&
         (_device->getBinaryInputCount() == 1) &&
         (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
       /* AKM with single input, active on removed group */
@@ -565,7 +613,7 @@ namespace dss {
     {
       DeviceReference ref(_device, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
-      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+      boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
       mEvent->setProperty("action", "groupRemove");
       mEvent->setProperty("id", intToString(_group->getID()));
       if(DSS::hasInstance()) {
@@ -635,12 +683,20 @@ namespace dss {
   void StructureManipulator::setZoneSensor(boost::shared_ptr<Zone> _zone,
                                            const uint8_t _sensorType,
                                            boost::shared_ptr<Device> _dev) {
+    Logger::getInstance()->log("SensorAssignment: assign zone: " + intToString(_zone->getID()) +
+        ", type: " + intToString(_sensorType) +
+        " => " + dsuid2str(_dev->getDSID()), lsInfo);
+
     _zone->setSensor(_dev, _sensorType);
     m_Interface.setZoneSensor(_zone->getID(), _sensorType, _dev->getDSID());
   }
 
   void StructureManipulator::resetZoneSensor(boost::shared_ptr<Zone> _zone,
                                              const uint8_t _sensorType) {
+    Logger::getInstance()->log("SensorAssignment: reset zone: " + intToString(_zone->getID()) +
+        ", type: " + intToString(_sensorType) +
+        " => none", lsInfo);
+
     _zone->resetSensor(_sensorType);
     m_Interface.resetZoneSensor(_zone->getID(), _sensorType);
   }
@@ -662,6 +718,9 @@ namespace dss {
 
     boost::shared_ptr<std::vector<int> > unassigned_sensors =
        _zone->getUnassignedSensorTypes();
+
+    Logger::getInstance()->log("SensorAssignment: run auto-assignment for " +
+        intToString(unassigned_sensors->size()) + " sensor types:", lsInfo);
 
     // check if our set contains devices that with the matching sensor type
     // and assign the first device that we find automatically: UC 8.1
@@ -690,6 +749,8 @@ namespace dss {
 
   void StructureManipulator::synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones)
   {
+    Logger::getInstance()->log("SensorAssignment: run synchronize", lsInfo);
+
     for (size_t i = 0; i < _zones.size(); ++i) {
       boost::shared_ptr<Zone> zone = _zones.at(i);
       if (!zone) {
@@ -703,6 +764,11 @@ namespace dss {
       boost::shared_ptr<std::vector<int> > sUnasList =  zone->getUnassignedSensorTypes();
       try {
         for (size_t index = 0; index < sUnasList->size(); ++index) {
+          Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
+                  "zone: " + intToString(zone->getID()) +
+                  ", type: " + intToString(sUnasList->at(index)) +
+                  " => none", lsInfo);
+
           m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
         }
 
@@ -711,7 +777,11 @@ namespace dss {
         for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = sAsList.begin();
             it != sAsList.end();
             ++it) {
-            m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);
+          Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone->getID()) +
+                  ", type: " + intToString((*it)->m_sensorType) +
+                  " => " + dsuid2str((*it)->m_DSUID), lsInfo);
+
+          m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);
         }
       } catch (std::runtime_error &err) {
         Logger::getInstance()->log(std::string("StructureManipulator::synchronizeZoneSensorAssignment: can't synchronize zone sensors: ") + err.what(), lsWarning);

@@ -1339,7 +1339,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkDevice(PropertyNodePtr _triggerProp) {
-    if (m_evtName != "buttonClick") {
+    if (m_evtName != EventName::DeviceButtonClick) {
       return false;
     }
 
@@ -1642,7 +1642,7 @@ namespace dss {
           }
         }
 
-      } else if (m_evtName == "buttonClick") {
+      } else if (m_evtName == EventName::DeviceButtonClick) {
         if (triggerValue == "device-msg") {
           if (checkDevice(triggerProp)) {
             return true;

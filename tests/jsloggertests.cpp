@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
   fs::copy_file(getTempDir() + "blalog.log", getTempDir() + "blalog1.log");
   fs::remove(getTempDir() + "blalog.log");
 
-  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("SIGNAL");
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::Signal);
   pEvent->setProperty("signum", intToString(SIGUSR1));
   queue.pushEvent(pEvent);
 

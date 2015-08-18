@@ -58,7 +58,9 @@ namespace dss {
   public:
     void writeXML() {
       boost::mutex::scoped_lock lock(m_WriteXMLMutex);
+      log("Writing security config to '" + m_Path + "'", lsInfo);
       saveToXML(m_Path, m_pSecurityNode, PropertyNode::Archive);
+      log("Finished writing security config to '" + m_Path + "'", lsDebug);
     }
   protected:
     virtual void propertyChanged(PropertyNodePtr _caller,

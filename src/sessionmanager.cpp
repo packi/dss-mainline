@@ -94,7 +94,7 @@ namespace dss {
 
   void SessionManager::sendCleanupEvent() {
     DateTime now;
-    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("webSessionCleanup");
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::WebSessionCleanup);
     pEvent->setProperty(EventProperty::ICalStartTime, now.toRFC2445IcalDataTime());
     pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=" + intToString(kSessionCleanupInterval));
     m_EventQueue.pushEvent(pEvent);
@@ -109,7 +109,7 @@ namespace dss {
       if (m_pRelayTarget != NULL) {
         boost::shared_ptr<EventSubscription> cleanupEventSubscription(
                 new dss::EventSubscription(
-                    "webSessionCleanup",
+                    EventName::WebSessionCleanup,
                     EventInterpreterInternalRelay::getPluginName(),
                     m_EventInterpreter,
                     boost::shared_ptr<SubscriptionOptions>())

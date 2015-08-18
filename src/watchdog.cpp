@@ -33,7 +33,7 @@
 #include "src/logger.h"
 #include "src/event.h"
 
-#define WATCHDOG_SLEEP_TIME 180 // in seconds, 3 minutes
+#define WATCHDOG_SLEEP_TIME 360 // in seconds, 3 minutes
 namespace dss {
 
 Watchdog::Watchdog(DSS* _pDSS) : ThreadedSubsystem(_pDSS, "Watchdog") {
@@ -45,6 +45,36 @@ void Watchdog::initialize() {
 
 void Watchdog::doStart() {
   run();
+}
+
+void Watchdog::dumpLastEvent(void)
+{
+    if (!DSS::hasInstance()) {
+        log(std::string(__func__) + " no instance", lsNotice);
+        return;
+    }
+
+    PropertyNodePtr evtMonitor = getDSS().getPropertySystem().getProperty("/system/EventInterpreter");
+    if (!evtMonitor) {
+        log(std::string(__func__) + " no monitor", lsNotice);
+        return;
+    }
+
+    PropertyNodePtr time = evtMonitor->getProperty("running/time");
+    PropertyNodePtr event = evtMonitor->getProperty("running/event");
+
+    if (!time || !event) {
+        log(std::string(__func__) + " no current event", lsNotice);
+        return;
+    }
+
+    PropertyNodePtr handler = evtMonitor->getProperty("running/handler");
+    if (!handler) {
+        log(std::string(__func__) + " no current handler", lsNotice);
+        return;
+    }
+
+    log("Watchdog last event: " + event->getAsString() + " runtime: " + time->getAsString() + " handler: " + handler->getAsString(), lsFatal);
 }
 
 void Watchdog::execute() {
@@ -59,6 +89,7 @@ void Watchdog::execute() {
     if (getDSS().getEventInterpreter().getEventsProcessed() == eventCount) {
       log("Watchdog noticed event interpreter lockup, event count stuck at " +
               intToString(eventCount), lsFatal);
+      dumpLastEvent();
       abort();
     }
   }

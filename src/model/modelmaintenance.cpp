@@ -237,7 +237,7 @@ namespace dss {
 
       {
         m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
-        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>("model_ready");
+        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::ModelReady);
         raiseEvent(readyEvent);
         try {
           CommChannel::getInstance()->resumeUpdateTask();
@@ -313,7 +313,7 @@ namespace dss {
           }
         }
 
-        boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>("dsMeter_ready");
+        boost::shared_ptr<Event> dsMeterReadyEvent = boost::make_shared<Event>(EventName::DSMeterReady);
         dsMeterReadyEvent->setProperty("dsMeter", dsuid2str(mod->getDSID()));
         raiseEvent(dsMeterReadyEvent);
 
@@ -748,7 +748,7 @@ namespace dss {
           boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
 
           if (bEvent->isDue() || (clickType == ClickTypeHE)) {
-            boost::shared_ptr<Event> event = boost::make_shared<Event>("buttonClick", pDevRev);
+            boost::shared_ptr<Event> event = boost::make_shared<Event>(EventName::DeviceButtonClick, pDevRev);
             event->setProperty("clickType", intToString(clickType));
             event->setProperty("buttonIndex", intToString(buttonIndex));
             if (bEvent->getRepeatCount() > 0) {
@@ -1476,7 +1476,7 @@ namespace dss {
       if(group != NULL) {
         log("OnGroupBlink: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID));
         boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event("blink", group));
+        pEvent.reset(new Event(EventName::IdentifyBlink, group));
         pEvent->setProperty("groupID", intToString(_groupID));
         pEvent->setProperty("zoneID", intToString(_zoneID));
         dsuid_t originDSUID = _source;
@@ -1678,7 +1678,7 @@ namespace dss {
         log("OnDeviceBlink: dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID));
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
-        boost::shared_ptr<Event> event = boost::make_shared<Event>("blink", pDevRev);
+        boost::shared_ptr<Event> event = boost::make_shared<Event>(EventName::IdentifyBlink, pDevRev);
         event->setProperty("callOrigin", intToString(_origin));
         event->setProperty("originToken", _token);
         raiseEvent(event);
@@ -1698,7 +1698,7 @@ namespace dss {
       try {
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
-        boost::shared_ptr<Event> event = boost::make_shared<Event>("buttonClickBus", pDevRev);
+        boost::shared_ptr<Event> event = boost::make_shared<Event>(EventName::ButtonClickBus, pDevRev);
         event->setProperty("clickType", intToString(_clickType));
         event->setProperty("buttonIndex", intToString(_buttonNr));
         raiseEvent(event);
@@ -1717,7 +1717,7 @@ namespace dss {
       log("  DSID   : " +  dsuid2str(devRef.getDSID()));
       {
         boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
-        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
         mEvent->setProperty("action", "added");
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
@@ -1735,8 +1735,10 @@ namespace dss {
     if (!m_IsInitializing) {
 
       boost::shared_ptr<Device> device;
+      boost::shared_ptr<DeviceReference> pDevRef;  
       try {
         DeviceReference devRef = m_pApartment->getDSMeterByDSID(_dsMeterID)->getDevices().getByBusID(_devID, _dsMeterID);
+        pDevRef = boost::make_shared<DeviceReference>(devRef);
         device = devRef.getDevice();
       } catch (ItemNotFoundException &ex) {
         log("Device with id " + intToString(_devID) +
@@ -1752,6 +1754,8 @@ namespace dss {
                                        *m_pStructureQueryBusInterface,
                                        *m_pApartment);
       manipulator.autoAssignZoneSensors(zone);
+
+      pollSensors(pDevRef);
     }
   } // onAddDevice
 
@@ -1762,7 +1766,7 @@ namespace dss {
       log("  DSID   : " +  dsuid2str(devRef.getDSID()));
       {
         boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
-        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
         mEvent->setProperty("action", "removed");
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
@@ -1865,7 +1869,7 @@ namespace dss {
       }
       {
         boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
-        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
         mEvent->setProperty("action", "configure");
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
@@ -2550,5 +2554,34 @@ namespace dss {
     pEvent->setProperty("time", "+" + intToString(_interval));
     DSS::getInstance()->getEventInterpreter().getQueue().pushEvent(pEvent);
   } // sendCleanupEvent
+
+  void ModelMaintenance::pollSensors(boost::shared_ptr<DeviceReference> pDevRef) {
+    if (!pDevRef) {
+      return;
+    }
+
+    boost::shared_ptr<Device> device = pDevRef->getDevice();
+    if (!device) {
+      return;
+    }
+
+    boost::shared_ptr<Zone> zone = m_pApartment->getZone(device->getZoneID());
+    if (!zone) {
+      return;
+    }
+
+    if (device->getSensorCount()) {
+      DeviceBusInterface* busItf = m_pApartment->getBusInterface()->getDeviceBusInterface();
+
+      foreach (boost::shared_ptr<DeviceSensor_t> sensor, device->getSensors()) {
+        if (sensor->m_sensorPollInterval == 0) {
+          continue;
+        }
+        if (zone->isZoneSensor(device, sensor->m_sensorType)) {
+          busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+        }
+      }
+    }
+  } // pollSensors
 
 } // namespace dss

@@ -391,8 +391,10 @@ namespace dss {
 
         {
           boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
-          boost::shared_ptr<Event> mEvent = boost::make_shared<Event>("DeviceEvent", pDevRef);
+          boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
           mEvent->setProperty("action", "deleted");
+          mEvent->setProperty("dsuid", dsuid2str(pDevice->getDSID()));
+          mEvent->setProperty("zoneID", intToString(pDevice->getZoneID()));
           if (DSS::hasInstance()) {
             DSS::getInstance()->getEventQueue().pushEvent(mEvent);
           }

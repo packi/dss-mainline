@@ -52,7 +52,7 @@ void HeatingRegisteringPlugin::startTimeout(int _delay) {
 void HeatingRegisteringPlugin::subscribe() {
   boost::shared_ptr<EventSubscription> subscription;
 
-  subscription.reset(new EventSubscription("dsMeter_ready",
+  subscription.reset(new EventSubscription(EventName::DSMeterReady,
                                            getName(),
                                            getEventInterpreter(),
                                            boost::shared_ptr<SubscriptionOptions>()));
@@ -67,7 +67,7 @@ void HeatingRegisteringPlugin::subscribe() {
 
 void HeatingRegisteringPlugin::handleEvent(Event& _event,
                                            const EventSubscription& _subscription) {
-  if (_event.getName() == "dsMeter_ready") {
+  if (_event.getName() == EventName::DSMeterReady) {
     startTimeout(120);
   } else if (_event.getName() == EV_RETRY_REGISTRATION) {
     sendRegisterMessage();
