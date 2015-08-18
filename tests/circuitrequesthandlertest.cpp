@@ -63,21 +63,21 @@ protected:
 
 BOOST_FIXTURE_TEST_CASE(testMissingID, Fixture) {
   RestfulRequest req("circuit/bla", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testInvalidID, Fixture) {
   m_Params += "&id=asdfasdf";
   RestfulRequest req("circuit/bla", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testInvalidDSUID, Fixture) {
   m_Params += "&dsuid=asdfasdf";
   RestfulRequest req("circuit/bla", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, false);
 }
 
@@ -90,27 +90,27 @@ BOOST_FIXTURE_TEST_CASE(testInvalidDSUID, Fixture) {
 BOOST_FIXTURE_TEST_CASE(testInvalidFunctionValidDSUID, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("circuit/adasfaf", m_Params);
-  BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
+  BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(testValidID, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("circuit/getName", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, true);
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitGetName, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("circuit/getName", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   checkPropertyEquals("name", m_ValidName, response);
 }
 
 BOOST_FIXTURE_TEST_CASE(testCircuitSetNameMissingNewName, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("circuit/setName", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, false);
 }
 
@@ -119,11 +119,11 @@ BOOST_FIXTURE_TEST_CASE(testCircuitSetName, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   m_Params += "&newName=" + urlEncode(kNewName);
   RestfulRequest req("circuit/setName", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, true);
 
   RestfulRequest req2("circuit/getName", m_Params);
-  WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
+  WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>(), NULL);
 
 
   checkPropertyEquals("name", kNewName, response2);
@@ -133,7 +133,7 @@ BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
   m_Params += "&dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
   RestfulRequest req("circuit/rescan", m_Params);
   m_pApartment->getDSMeterByDSID(m_ValidDSUID)->setIsValid(true);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
   testOkIs(response, true);
 
   BOOST_CHECK_EQUAL(m_pApartment->getDSMeterByDSID(m_ValidDSUID)->isValid(), false);
@@ -146,14 +146,14 @@ BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
 
   RestfulRequest req("circuit/getConsumption", m_Params);
   m_pApartment->getDSMeterByDSID(m_ValidDSUID)->setPowerConsumption(kConsumption);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
 
   checkPropertyEquals("consumption", (int)kConsumption, response);
 
   // verify that power consumption for inactive devices is zero
   sleep(2);
   RestfulRequest req2("circuit/getConsumption", m_Params);
-  WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
+  WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>(), NULL);
 
   checkPropertyEquals("consumption", (int)kNullConsumption, response2);
 }
@@ -163,7 +163,7 @@ BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
   const long long unsigned int kMeterValue = 8888888;
   m_pApartment->getDSMeterByDSID(m_ValidDSUID)->initializeEnergyMeterValue(kMeterValue);
   RestfulRequest req("circuit/getEnergyMeterValue", m_Params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
 
 
   checkPropertyEquals("meterValue", (int)kMeterValue, response);

@@ -118,7 +118,8 @@ class DeviceInterfaceRequestHandlerValid : public DeviceInterfaceRequestHandler 
 public:
   virtual WebServerResponse jsonHandleRequest(
     const RestfulRequest& _request,
-    boost::shared_ptr<Session> _session) {
+    boost::shared_ptr<Session> _session,
+    const struct mg_connection* _connection) {
     std::string result;
     return result;
   }
