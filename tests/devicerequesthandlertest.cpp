@@ -227,55 +227,15 @@ BOOST_FIXTURE_TEST_CASE(testDeviceRemoveTagMissingTag, Fixture) {
   testOkIs(response, false);
 }
 
-BOOST_FIXTURE_TEST_CASE(testSetFirstSeenNoParam, Fixture) {
-  std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
-  RestfulRequest req("device/setFirstSeen", params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
-  testOkIs(response, false);
-}
-
-BOOST_FIXTURE_TEST_CASE(testSetFirstSeenWrongDate, Fixture) {
-  {
-    std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
-    params += "&time=10";
-    RestfulRequest req("device/setFirstSeen", params);
-    BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL), std::invalid_argument);
-  }
-  {
-    std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
-    params += "&time=2000-01-00T00:00:00Z";
-    RestfulRequest req("device/setFirstSeen", params);
-    BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL), std::invalid_argument);
-  }
-}
-
-BOOST_FIXTURE_TEST_CASE(testSetFirstSeenRightDate, Fixture) {
-  boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(m_ValidDSUID);
-  static const DateTime before = DateTime::parseISO8601("1990-01-01T00:00:00Z");
-  device->setFirstSeen(before);
-  std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
-  params += "&time=2000-01-01T00:00:01Z";
-  RestfulRequest req("device/setFirstSeen", params);
-  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
-  testOkIs(response, true);
-}
-
 BOOST_FIXTURE_TEST_CASE(testSetGetFirstSeenRightDate, Fixture) {
   boost::shared_ptr<Device> device = m_pApartment->getDeviceByDSID(m_ValidDSUID);
-  static const DateTime before = DateTime::parseISO8601("1990-01-01T00:00:00Z");
-  device->setFirstSeen(before);
+  static const DateTime date = DateTime::parseISO8601("2000-01-01T01:00:01Z");
+  device->setFirstSeen(date);
   std::string params = "dsuid=" + urlEncode(dsuid2str(m_ValidDSUID));
-  std::string date  = "2000-01-01T00:00:01Z";
-  {
-    params += "&time=" + date;
-    RestfulRequest req("device/setFirstSeen", params);
-    WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
-    testOkIs(response, true);
-  }
   {
     RestfulRequest req("device/getFirstSeen", params);
     WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>(), NULL);
-    checkPropertyEquals("time", date, response);
+    checkPropertyEquals("time", date.toISO8601(), response);
   }
 }
 
