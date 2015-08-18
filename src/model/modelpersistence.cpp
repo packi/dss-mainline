@@ -1152,5 +1152,6 @@ namespace dss {
 
       saveValidatedXML(tmpOut, _fileName);
     }
+    Logger::getInstance()->log("Finished writing apartment config to '" + _fileName + "'", lsDebug);
   } // writeConfigurationToXML
 }

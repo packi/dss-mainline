@@ -261,7 +261,12 @@ namespace dss {
       }
 
       // TODO: sanitize filename to prevent world-domination
-      return saveToXML(m_StoreDirectory + fileName + ".xml", pNode, PropertyNode::Archive);
+
+      std::string path = m_StoreDirectory + fileName + ".xml";
+      Logger::getInstance()->log("Writing script config to '" + path + "'", lsInfo);
+      bool result = saveToXML(path, pNode, PropertyNode::Archive);
+      Logger::getInstance()->log("Finished writing script config to '" + path + "'", lsDebug);
+      return result;
     }
 
     virtual bool load(ScriptContext* _context) {
