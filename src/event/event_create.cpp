@@ -71,6 +71,7 @@ namespace EventName {
   const std::string ButtonClickBus = "buttonClickBus";
   const std::string DSMeterReady = "dsMeter_ready";
   const std::string ExecutionDeniedDigestCheck = "execution_denied_digest_check";
+  const std::string DevicesFirstSeen = "devices_first_seen";
 }
 
 boost::shared_ptr<Event>

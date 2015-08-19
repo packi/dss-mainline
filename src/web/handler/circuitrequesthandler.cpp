@@ -48,7 +48,7 @@ namespace dss {
     m_pStructureQueryBusInterface(_pStructureQueryBusInterface)
   { }
 
-  WebServerResponse CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     std::string idString = _request.getParameter("id");
     std::string dsuidStr = _request.getParameter("dsuid");
     if (idString.empty() && dsuidStr.empty()) {

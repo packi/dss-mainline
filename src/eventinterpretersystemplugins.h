@@ -134,6 +134,7 @@ namespace dss {
       EventInterpreterPluginSystemEventLog(EventInterpreter* _pInterpreter);
       virtual ~EventInterpreterPluginSystemEventLog();
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+      virtual void subscribe();
   };
 
   class SystemEventLog : public SystemEvent {
@@ -222,6 +223,10 @@ namespace dss {
                             int _groupId,
                             int _lock,
                             callOrigin_t _call_origin);
+      void logDevicesFirstSeen(boost::shared_ptr<ScriptLogger> _logger,
+                               std::string& dateTime, 
+                               std::string& token,
+                               callOrigin_t _call_origin);
 
       void model_ready();
       void callScene();
@@ -239,6 +244,7 @@ namespace dss {
       void buildingService();
       void executionDenied();
       void operationLock();
+      void devicesFirstSeen();
 
       std::string m_evtName;
 

@@ -323,7 +323,7 @@ namespace dss {
     return json.successJSON();
   }
 
-  WebServerResponse MeteringRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse MeteringRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     if(_request.getMethod() == "getResolutions") {
       return getResolutions();
     } else if(_request.getMethod() == "getSeries") {

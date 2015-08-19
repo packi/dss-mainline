@@ -42,7 +42,7 @@ namespace dss {
   : m_PropertySystem(_propertySystem)
   { }
 
-  WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     StringConverter st("UTF-8", "UTF-8");
     if (_request.getMethod() == "query" || _request.getMethod() == "query2" || _request.getMethod() == "vdcquery") {
       JSONWriter json;

@@ -38,7 +38,7 @@ namespace dss {
     StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance,
                             StructureModifyingBusInterface& _interface,
                             StructureQueryBusInterface& _queryInterface);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
   private:
     Apartment& m_Apartment;
     ModelMaintenance& m_ModelMaintenance;

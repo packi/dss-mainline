@@ -34,12 +34,6 @@ namespace dss {
 
   //================================================== WebServerRequestHandlerJSON
 
-  std::string WebServerRequestHandlerJSON::handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    WebServerResponse response = jsonHandleRequest(_request, _session);
-    return response.getResponse();
-  } // handleRequest
-
-
   JSONWriter::JSONWriter(jsonResult_t _responseType) : m_writer(m_buffer), m_resultType(_responseType) {
     startObject();
     switch (m_resultType) {
