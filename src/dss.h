@@ -104,6 +104,7 @@ namespace dss {
     std::string m_webrootDirectory;
     std::string m_jsLogDirectory;
     std::string m_savedPropsDirectory;
+    std::string m_databaseDirectory;
     CommChannel *m_commChannel;
     boost::shared_ptr<WebserviceTreeListener> m_pWebserviceTreeListener;
 
@@ -168,12 +169,14 @@ namespace dss {
     const std::string& getWebrootDirectory() const { return m_webrootDirectory; }
     const std::string& getJSLogDirectory() const { return m_jsLogDirectory; }
     const std::string& getSavedPropsDirectory() const { return  m_savedPropsDirectory; }
+    const std::string& getDatabaseDirectory() const { return  m_databaseDirectory; }
     time_t getStartTime() const;
     void setDataDirectory(const std::string& _value);
     void setConfigDirectory(const std::string& _value);
     void setWebrootDirectory(const std::string& _value);
     void setJSLogDirectory(const std::string& _value);
     void setSavedPropsDirectory(const std::string& _value);
+    void setDatabaseDirectory(const std::string& _value);
     void publishDSID();
     int getUptime() const;
   }; // DSS

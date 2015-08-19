@@ -122,6 +122,8 @@ const char* kSavedPropsDirectory = DSS_SAVEDPROPSDIR;
 const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
+const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
+
   __DEFINE_LOG_CHANNEL__(DSS, lsInfo);
 
   bool DSS::s_shutdown;
@@ -160,6 +162,9 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
     m_pPropertySystem->createProperty("/config/debug/propertyNodeCount")->linkToProxy(
         PropertyProxyStaticFunction<int>(&PropertyNode::getNodeCount));
+    m_pPropertySystem->createProperty("/config/databasedirectory")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getDatabaseDirectory, &DSS::setDatabaseDirectory));
+
   } // ctor
 
   DSS::~DSS() {
@@ -223,6 +228,7 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     setWebrootDirectory(WebrootDirectory);
     setJSLogDirectory(JSLogDirectory);
     setSavedPropsDirectory(kSavedPropsDirectory);
+    setDatabaseDirectory(kDatabaseDirectory);
 #endif
   } // setupDirectories
 
@@ -257,6 +263,11 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
   void DSS::setSavedPropsDirectory(const std::string& _value) {
     m_savedPropsDirectory = addTrailingBackslash(_value);
   } // setSavedPropsDirectory
+
+  void DSS::setDatabaseDirectory(const std::string& _value) {
+    m_databaseDirectory = addTrailingBackslash(_value);
+  } // setDatabaseDirectory
+
 
   bool DSS::parseProperties(const std::vector<std::string>& _properties) {
     foreach(std::string propLine, _properties) {
@@ -424,6 +435,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
       log("Invalid saved-props directory specified: '" + m_savedPropsDirectory + "'", lsFatal);
       sane = false;
     }
+
+    if(!isSaneDirectory(m_databaseDirectory)) {
+      log("Invalid database directory specified: '" + m_databaseDirectory + "'", lsFatal);
+      sane = false;
+    }
+
     return sane;
   } // checkDirectoriesExist
 
@@ -590,11 +607,12 @@ const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
     log("DSS starting up....", lsInfo);
     log(versionString(), lsInfo);
     log("Configuration: ", lsInfo);
-    log("  data:      '" + getDataDirectory() + "'", lsInfo);
-    log("  config:    '" + getConfigDirectory() + "'", lsInfo);
-    log("  webroot:   '" + getWebrootDirectory() + "'", lsInfo);
-    log("  log dir:   '" + getJSLogDirectory() + "'", lsInfo);
-    log("  props dir: '" + getSavedPropsDirectory() + "'", lsInfo);
+    log("  data:         '" + getDataDirectory() + "'", lsInfo);
+    log("  config:       '" + getConfigDirectory() + "'", lsInfo);
+    log("  webroot:      '" + getWebrootDirectory() + "'", lsInfo);
+    log("  log dir:      '" + getJSLogDirectory() + "'", lsInfo);
+    log("  props dir:    '" + getSavedPropsDirectory() + "'", lsInfo);
+    log("  database dir: '" + getDatabaseDirectory() + "'", lsInfo);
 
     SystemInfo info;
     info.collect();

@@ -190,6 +190,8 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/apartmentrequesthandler.h \
 	../src/web/handler/circuitrequesthandler.cpp \
 	../src/web/handler/circuitrequesthandler.h \
+	../src/web/handler/databaserequesthandler.h \
+	../src/web/handler/databaserequesthandler.cc \
 	../src/web/handler/deviceinterfacerequesthandler.cpp \
 	../src/web/handler/deviceinterfacerequesthandler.h \
 	../src/web/handler/devicerequesthandler.cpp \
