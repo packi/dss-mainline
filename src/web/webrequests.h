@@ -35,6 +35,8 @@
 #include "src/logger.h"
 #include "src/dss.h"
 
+#include <external/mongoose/mongoose.h>
+
 using rapidjson::StringBuffer;
 using rapidjson::Writer;
 
@@ -115,10 +117,9 @@ namespace dss {
 
   class WebServerRequestHandlerJSON {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request,
-                                      boost::shared_ptr<Session> _session);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request,
-                                                boost::shared_ptr<Session> _session) = 0;
+                                                boost::shared_ptr<Session> _session, 
+                                                const struct mg_connection* _connection) = 0;
   protected:
     void log(const std::string& _line, aLogSeverity _severity = lsDebug) {
         Logger::getInstance()->log("RequestHandler: " + _line, _severity);

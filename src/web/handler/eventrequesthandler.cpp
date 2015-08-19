@@ -292,7 +292,7 @@ namespace dss {
     return buildEventResponse(subscriptionSession);
   }
 
-  WebServerResponse EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     if (_request.getMethod() == "raise") {
       return raise(_request);
     } else if (_request.getMethod() == "subscribe") {

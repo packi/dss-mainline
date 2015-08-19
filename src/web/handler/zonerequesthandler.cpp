@@ -53,7 +53,7 @@ namespace dss {
   { }
 
 
-  WebServerResponse ZoneRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse ZoneRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     StringConverter st("UTF-8", "UTF-8");
     bool ok = true;
     std::string errorMessage;

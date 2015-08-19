@@ -62,6 +62,7 @@ namespace EventName {
   const std::string HeatingModeSwitch = "heating_mode_switch";
   const std::string BuildingService = "building_service";
   const std::string OperationLock = "operation_lock";
+  const std::string ClusterConfigLock = "cluster_config_lock";
   const std::string CheckSensorValues = "check_sensor_values";
   const std::string DeviceEvent = "DeviceEvent";
   const std::string CheckHeatingGroups = "check_heating_groups";
@@ -71,6 +72,7 @@ namespace EventName {
   const std::string ButtonClickBus = "buttonClickBus";
   const std::string DSMeterReady = "dsMeter_ready";
   const std::string ExecutionDeniedDigestCheck = "execution_denied_digest_check";
+  const std::string DevicesFirstSeen = "devices_first_seen";
 }
 
 boost::shared_ptr<Event>
@@ -430,6 +432,18 @@ createOperationLockEvent(boost::shared_ptr<Group> _group, const int _zoneID, con
   event->setProperty("groupID", intToString(_groupID));
   event->setProperty("lock", intToString(_lock));
   event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  return event;
+}
+
+boost::shared_ptr<Event>
+createClusterConfigLockEvent(boost::shared_ptr<Group> _group, const int _zoneID, const int _groupID,
+    const bool _lock, callOrigin_t _origin) {
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::ClusterConfigLock, _group);
+  event->setProperty("zoneID", intToString(_zoneID));
+  event->setProperty("groupID", intToString(_groupID));
+  event->setProperty("lock", intToString(_lock));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 

@@ -34,6 +34,7 @@
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 #include <boost/make_shared.hpp>
 
+#include "src/event.h"
 #include "src/model/apartment.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
@@ -123,7 +124,7 @@ namespace dss {
     return JSONWriter::success();
   }
 
-  WebServerResponse ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     std::string errorMessage;
     if(_request.getMethod() == "getConsumption") {
       int accumulatedConsumption = 0;
@@ -621,6 +622,38 @@ namespace dss {
         json.endArray();
 
         return json.successJSON();
+      } else if (_request.getMethod() == "setDevicesFirstSeen") {
+
+        if (!_request.hasParameter("time")) {
+          return JSONWriter::failure("missing parameter 'time'");
+        }
+        std::string  strTimestamp = _request.getParameter("time");
+        DateTime setTime = DateTime::parseISO8601(strTimestamp);
+        if (!m_Apartment.setDevicesFirstSeen(setTime)) {
+          return JSONWriter::failure("can not set date. Date too old.");
+        }
+
+        // log X-DS-TrackingID
+        if (_connection) {
+          const char * data = mg_get_header(_connection, "X-DS-TrackingID");
+          std::string token;
+          if (data) {
+            token = data;
+
+            // create event, log entry ends in system-event.log
+            boost::shared_ptr<Event> evtDevicesFirstSeen = boost::make_shared<Event>(EventName::DevicesFirstSeen);
+            evtDevicesFirstSeen->setProperty("dateTime", setTime.toISO8601());
+            evtDevicesFirstSeen->setProperty("X-DS-TrackingID", token);
+            if (DSS::hasInstance()) {
+              DSS::getInstance()->getEventQueue().pushEvent(evtDevicesFirstSeen);
+            }
+
+            Logger::getInstance()->log("ApartmentRequestHandler: setDevicesFirstSeen: Date set to: " + 
+              setTime.toString() + "  X-DS-TrackingID: " + token, lsNotice);
+          }
+        }
+
+        return JSONWriter::success();
       } else {
         throw std::runtime_error("Unhandled function");
       }

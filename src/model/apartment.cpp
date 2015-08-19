@@ -674,4 +674,18 @@ namespace dss {
     return std::make_pair(lockedDevices, lockedZones);
   }
 
+  bool Apartment::setDevicesFirstSeen(const DateTime& dateTime) {
+    static const DateTime allowedDate = DateTime::parseISO8601("2011-01-01T00:00:00Z");
+    if (dateTime < allowedDate) {
+      return false;
+    }
+    foreach(boost::shared_ptr<Device> dev, m_Devices) {
+      const DateTime originDate = dev->getFirstSeen();
+      if (originDate < allowedDate) {
+        dev->setFirstSeen(dateTime);
+      }
+    }
+    return true;
+  }
+
 } // namespace dss

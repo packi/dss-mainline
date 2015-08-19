@@ -41,7 +41,7 @@ namespace dss {
     DeviceRequestHandler(Apartment& _apartment,
                          StructureModifyingBusInterface* _pStructureBusInterface,
                          StructureQueryBusInterface* _pStructureQueryBusInterface);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
 
     // parse string of semicolon separated integers, returns a pair of
     // channelid:valuesize

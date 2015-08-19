@@ -42,7 +42,7 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  WebServerResponse SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     if(_request.getMethod() == "fromApartment") {
       JSONWriter json;
       json.add("self", ".");

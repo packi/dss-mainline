@@ -1925,7 +1925,16 @@ namespace dss {
 
     addEvent(log);
   }
+  
+  void EventInterpreterPluginSystemEventLog::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
 
+    subscription.reset(new EventSubscription(EventName::DevicesFirstSeen,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
 
   SystemEventLog::SystemEventLog() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
   }
@@ -2363,6 +2372,14 @@ namespace dss {
         zoneName + ";" + groupName + ";" + origName + ";");
   }
 
+  void SystemEventLog::logDevicesFirstSeen(boost::shared_ptr<ScriptLogger> _logger,
+                                            std::string& _dateTime, 
+                                            std::string& _token,
+                                            callOrigin_t _call_origin) {
+    std::string origName = getCallOrigin(_call_origin);
+    _logger->logln(";SetDevicesFirstSeen;" + _dateTime + ";;" + _token + ";;;;" + origName + ";");
+  }
+
   void SystemEventLog::model_ready() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
         "system-event.log", NULL));
@@ -2388,6 +2405,8 @@ namespace dss {
       }
     }
   }
+
+
 
   void SystemEventLog::callScene() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
@@ -2744,7 +2763,7 @@ namespace dss {
     } catch (std::exception &ex) {}
   }
 
-  void SystemEventLog::operationLock() {
+  void SystemEventLog::operationLock(const std::string& _evtName) {
     int lockStatus = -1;
     if (m_properties.has("lock")) {
       lockStatus = strToInt(m_properties.get("lock"));
@@ -2780,9 +2799,38 @@ namespace dss {
         if (gName.empty()) {
           gName = std::string("Cluster #") + intToString(groupId);
         }
-        logger->logln("Operation lock " + lockString + " in " + gName);
+        if (_evtName == EventName::OperationLock) {
+          logger->logln("Operation lock " + lockString + " in " + gName);
+        } else if (_evtName == EventName::ClusterConfigLock) {
+          logger->logln("Configuration lock " + lockString + " in " + gName + " (from " + getCallOrigin(callOrigin) + ")");
+        }
       } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
     }
+  }
+
+  void SystemEventLog::devicesFirstSeen() {
+
+    std::string dateTime;
+    if (m_properties.has("dateTime")) {
+      dateTime = m_properties.get("dateTime");
+    }
+
+    std::string token;
+    if (m_properties.has("X-DS-TrackingID")) {
+      token = m_properties.get("X-DS-TrackingID");
+    }
+
+    callOrigin_t callOrigin = coUnknown;
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
+    }
+
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
+
+    try {
+      logDevicesFirstSeen(logger, dateTime, token, callOrigin);
+    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
   }
 
   void SystemEventLog::run() {
@@ -2823,8 +2871,10 @@ namespace dss {
       buildingService();
     } else if (m_evtName == EventName::ExecutionDenied) {
       executionDenied();
-    } else if (m_evtName == EventName::OperationLock) {
-      operationLock();
+    } else if (m_evtName == EventName::OperationLock || m_evtName == EventName::ClusterConfigLock) {
+      operationLock(m_evtName);
+    } else if (m_evtName == EventName::DevicesFirstSeen) {
+      devicesFirstSeen();
     }
   }
 

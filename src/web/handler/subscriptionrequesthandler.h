@@ -32,7 +32,7 @@ namespace dss {
   class SubscriptionRequestHandler : public WebServerRequestHandlerJSON {
   public:
     SubscriptionRequestHandler(EventInterpreter& _interpreter);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
   private:
     std::string list(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     std::string remove(const RestfulRequest& _request, boost::shared_ptr<Session> _session);

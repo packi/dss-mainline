@@ -169,7 +169,7 @@ namespace dss {
     return result;
   } // getDeviceByName
 
-  WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     boost::shared_ptr<Device> pDevice;
     StringConverter st("UTF-8", "UTF-8");
     try {
@@ -1803,24 +1803,6 @@ namespace dss {
       } else {
         return json.failure("Encountered invalid output after impulse confiugration");
       }
-
-      return json.successJSON();
-    } else if (_request.getMethod() == "setFirstSeen") {
-      if(!_request.hasParameter("time")) {
-        return JSONWriter::failure("missing parameter 'time'");
-      }
-      std::string  strTimestamp = _request.getParameter("time");
-      DateTime setTime = DateTime::parseISO8601(strTimestamp);
-      static const DateTime allowedDate = DateTime::parseISO8601("2000-01-01T00:00:00Z");
-      if (setTime < allowedDate) {
-        return JSONWriter::failure("can not set date. Date older than " +allowedDate.toString());
-      }
-      DateTime deviceFirstSeen = pDevice->getFirstSeen();
-      if (deviceFirstSeen > allowedDate) {
-        return JSONWriter::failure("can not set date. Device Date newer than " + allowedDate.toString());
-      }
-      pDevice->setFirstSeen(setTime.secondsSinceEpoch());
-      JSONWriter json;
       return json.successJSON();
     } else if (_request.getMethod() == "getFirstSeen") {
       JSONWriter json;

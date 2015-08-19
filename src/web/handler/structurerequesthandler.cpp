@@ -47,6 +47,8 @@
 #include "src/stringconverter.h"
 #include "src/structuremanipulator.h"
 #include "util.h"
+#include "event.h"
+#include "event/event_create.h"
 
 namespace dss {
 
@@ -835,12 +837,13 @@ namespace dss {
     boost::shared_ptr<Cluster> cluster = m_Apartment.getCluster(clusterID);
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     manipulator.clusterSetConfigurationLock(cluster, lock);
+    m_ModelMaintenance.getDSS().getEventQueue().pushEvent(createClusterConfigLockEvent(pCluster, 0, clusterID, lock, coJSON));
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();
   }
 
 
-  WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
     } else if(_request.getMethod() == "removeDevice") {

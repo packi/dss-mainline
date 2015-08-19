@@ -382,7 +382,7 @@ namespace dss {
           throw SecurityException("not logged in");
         }
         WebServerResponse response =
-          m_Handlers[request.getClass()]->jsonHandleRequest(request, _session);
+          m_Handlers[request.getClass()]->jsonHandleRequest(request, _session, _connection);
         std::string callback = request.getParameter("callback");
         if (callback.empty()) {
           result = response.getResponse();
