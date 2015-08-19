@@ -159,6 +159,8 @@ libdsscore_a_SOURCES =  \
 	../src/sessionmanager.h \
 	../src/setbuilder.cpp \
 	../src/setbuilder.h \
+	../src/sqlite3_wrapper.h \
+	../src/sqlite3_wrapper.cc \
 	../src/storagetools.cpp \
 	../src/storagetools.h \
 	../src/stringconverter.cpp \
