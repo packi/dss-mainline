@@ -35,7 +35,7 @@
 namespace dss
 {
 
-SQLite3::SQLite3(std::string db_file)
+SQLite3::SQLite3(std::string db_file, bool readonly)
 {
     boost::mutex::scoped_lock lock(m_mutex);
 
@@ -51,9 +51,18 @@ SQLite3::SQLite3(std::string db_file)
                 db_file + ": " + strerror(errno));
     }
 
-    int ret = sqlite3_open_v2(db_file.c_str(), &m_db,
-            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX,
-            NULL);
+    int flags = 0;
+
+    if (readonly)
+    {
+        flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX;
+    }
+    else
+    {
+        flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX;
+    }
+
+    int ret = sqlite3_open_v2(db_file.c_str(), &m_db, flags, NULL);
     if (ret != SQLITE_OK)
     {
         throw std::runtime_error("Could not open database " + db_file + ": " +
