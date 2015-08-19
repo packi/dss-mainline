@@ -78,6 +78,7 @@ namespace dss {
     extern const std::string HeatingModeSwitch;
     extern const std::string BuildingService;
     extern const std::string OperationLock;
+    extern const std::string ClusterConfigLock;
     extern const std::string CheckSensorValues;
     extern const std::string DeviceEvent;
     extern const std::string CheckHeatingGroups;
