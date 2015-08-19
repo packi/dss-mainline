@@ -74,7 +74,8 @@ dss_CXXFLAGS = \
             $(LIBPROTOBUF_CFLAGS) \
             $(LIBCOMMCHANNEL_CFLAGS) \
 			$(LIBDSUID_CFLAGS) \
-			$(OSSP_UUID_CFLAGS)
+			$(OSSP_UUID_CFLAGS) \
+			$(SQLITE3_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
@@ -103,7 +104,8 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(BOOST_FILESYSTEM_LIB) \
 			$(BOOST_PROGRAM_OPTIONS_LIB) \
 			$(BOOST_SYSTEM_LIB) \
-			$(BOOST_THREAD_LIB)
+			$(BOOST_THREAD_LIB) \
+			$(SQLITE3_LIBS)
 
 ../src/dss.cpp: build_info.h
 

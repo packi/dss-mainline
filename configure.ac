@@ -464,6 +464,11 @@ PKG_CHECK_MODULES([RAPIDJSON], [RapidJSON], [],
         ])
     ])
 
+PKG_CHECK_MODULES([SQLITE3], [sqlite3], [],
+    [
+        AC_MSG_ERROR([$SQLITE3_PKG_ERRORS])
+    ])
+
 eval PACKAGE_DATADIR="${datadir}/${PACKAGE}"
 eval PACKAGE_DATADIR="${PACKAGE_DATADIR}"
 AC_DEFINE_UNQUOTED(PACKAGE_DATADIR, "$PACKAGE_DATADIR", [data directory])
