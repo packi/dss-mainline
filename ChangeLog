@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.31.2	18.08.2015
+	* add configure lock changes to protection log, #10947
+	* add log messages for automatic sensor assignments, #10693
+	* remove device, check for a valid dsm id, #10453
+	* increase watchdog timeout to 6 minues, #10819
+
 v1.31.1	11.08.2015
 	* When a device is added, poll its sensors, #10464
 	* recover old dSM11 devices without BusMemberType support, #10417
