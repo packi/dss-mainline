@@ -196,6 +196,8 @@ typedef struct {
     void setWeatherInformation(std::string& _iconId, std::string& _conditionId, std::string _serviceId, DateTime& _ts);
     std::pair<std::vector<DeviceLock_t>, std::vector<ZoneLock_t> > getClusterLocks();
 
+    bool setDevicesFirstSeen(const DateTime& dateTime);
+
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
     BusInterface* getBusInterface() { return m_pBusInterface; }
