@@ -2125,6 +2125,7 @@ namespace dss {
     try {
       boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(_clusterID);
       cluster->setConfigurationLocked(_configurationLock);
+      raiseEvent(createClusterConfigLockEvent(cluster, 0, _clusterID, _configurationLock, coDsmApi));
       addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on cluster config lock change, cluster not found: ") + e.what(), lsWarning);

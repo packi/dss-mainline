@@ -119,6 +119,7 @@
   <subscription event-name="building_service" handler-name="system_event_log"/>
   <subscription event-name="executionDenied" handler-name="system_event_log"/>
   <subscription event-name="operation_lock" handler-name="system_event_log"/>
+  <subscription event-name="cluster_config_lock" handler-name="system_event_log"/>
 
   <!-- System Hail Handler -->
   <subscription event-name="running" handler-name="javascript">

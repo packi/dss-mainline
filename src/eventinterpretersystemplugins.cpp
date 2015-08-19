@@ -2763,7 +2763,7 @@ namespace dss {
     } catch (std::exception &ex) {}
   }
 
-  void SystemEventLog::operationLock() {
+  void SystemEventLog::operationLock(const std::string& _evtName) {
     int lockStatus = -1;
     if (m_properties.has("lock")) {
       lockStatus = strToInt(m_properties.get("lock"));
@@ -2799,7 +2799,11 @@ namespace dss {
         if (gName.empty()) {
           gName = std::string("Cluster #") + intToString(groupId);
         }
-        logger->logln("Operation lock " + lockString + " in " + gName);
+        if (_evtName == EventName::OperationLock) {
+          logger->logln("Operation lock " + lockString + " in " + gName);
+        } else if (_evtName == EventName::ClusterConfigLock) {
+          logger->logln("Configuration lock " + lockString + " in " + gName + " (from " + getCallOrigin(callOrigin) + ")");
+        }
       } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
     }
   }
@@ -2867,8 +2871,8 @@ namespace dss {
       buildingService();
     } else if (m_evtName == EventName::ExecutionDenied) {
       executionDenied();
-    } else if (m_evtName == EventName::OperationLock) {
-      operationLock();
+    } else if (m_evtName == EventName::OperationLock || m_evtName == EventName::ClusterConfigLock) {
+      operationLock(m_evtName);
     } else if (m_evtName == EventName::DevicesFirstSeen) {
       devicesFirstSeen();
     }

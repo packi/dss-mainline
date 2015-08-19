@@ -243,7 +243,7 @@ namespace dss {
       void heatingModeSwitch();
       void buildingService();
       void executionDenied();
-      void operationLock();
+      void operationLock(const std::string& _evtName);
       void devicesFirstSeen();
 
       std::string m_evtName;
