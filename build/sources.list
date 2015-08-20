@@ -129,6 +129,8 @@ libdsscore_a_SOURCES =  \
 	../src/scripting/jscurl.cpp \
 	../src/scripting/jscurl.h \
 	../src/scripting/jscurl-options.h \
+	../src/scripting/jsdatabase.h \
+	../src/scripting/jsdatabase.cpp \
 	../src/scripting/jsevent.cpp \
 	../src/scripting/jsevent.h \
 	../src/scripting/jshandler.cpp \

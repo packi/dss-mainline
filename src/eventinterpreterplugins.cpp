@@ -44,6 +44,7 @@
 #include "src/scripting/jscurl.h"
 #include "src/scripting/jswebservice.h"
 #include "src/scripting/jscluster.h"
+#include "src/scripting/jsdatabase.h"
 #include "src/foreach.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
@@ -571,6 +572,9 @@ namespace dss {
       m_pEnvironment->addExtension(ext);
 
       ext = new ClusterScriptExtension(DSS::getInstance()->getApartment());
+      m_pEnvironment->addExtension(ext);
+
+      ext = new DatabaseScriptExtension();
       m_pEnvironment->addExtension(ext);
 
       setupCleanupEvent();
