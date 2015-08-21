@@ -33,64 +33,62 @@
 namespace dss
 {
 
-class SQLite3
-{
+class SQLite3 {
 
 public:
-    /// \brief Initialize database using the specified location.
-    ///
-    /// If the database does not exist, it will be automatically created.
-    SQLite3(std::string db_file, bool readonly = false);
-    ~SQLite3();
+  /// \brief Initialize database using the specified location.
+  ///
+  /// If the database does not exist, it will be automatically created.
+  SQLite3(std::string db_file, bool readonly = false);
+  ~SQLite3();
 
-    /// \brief represents a "column cell" in the table, first pair element is
-    /// the column name, second pair element is the actual value
-    typedef struct
-    {
-        std::string name;
-        std::string data;
-        int type;
-    } cell;
+  /// \brief represents a "column cell" in the table, first pair element is
+  /// the column name, second pair element is the actual value
+  typedef struct {
+      std::string name;
+      std::string data;
+      int type;
+  } cell;
 
-    /// \brief represents a row in the database table
-    typedef std::vector<boost::shared_ptr<cell> > row_result;
+  /// \brief represents a row in the database table
+  typedef std::vector<boost::shared_ptr<cell> > row_result;
 
-    /// \brief represents a result of the query
-    typedef std::vector<boost::shared_ptr<row_result> > query_result;
+  /// \brief represents a result of the query
+  typedef std::vector<boost::shared_ptr<row_result> > query_result;
 
-    /// \brief Send a query to the database
-    /// \param q valid SQL query like:
-    ///     "SELECT \"value\" FROM \"dsa_internal\" where \"key\" = \"version\";
-    boost::shared_ptr<query_result> query(std::string q);
+  /// \brief Send a query to the database
+  /// \param q valid SQL query like:
+  ///     "SELECT \"value\" FROM \"dsa_internal\" where \"key\" = \"version\";
+  boost::shared_ptr<query_result> query(std::string q);
 
-    /// \brief Execute SQL on the active database, no response expected.
-    ///
-    /// Will throw an exception if anything goes wrong
-    void exec(std::string sql);
+  /// \brief Execute SQL on the active database, no response expected.
+  ///
+  /// Will throw an exception if anything goes wrong
+  void exec(std::string sql);
 
-    /// \brief Execute SQL on the active database, no response expected.
-    ///
-    /// Will throw an exception if anything goes wrong
-    long long int execAndGetRowId(std::string sql);
+  /// \brief Execute SQL on the active database, no response expected.
+  ///
+  /// Will throw an exception if anything goes wrong
+  long long int execAndGetRowId(std::string sql);
 
-    /// \brief Helper function for proper escaping of strings.
-    ///
-    /// All names or user input should be run through this function.
-    ///
-    /// \param str string that should be escaped
-    /// \param quotes adds quotes around the string (convenience parameter)
-    std::string escape(std::string str, bool quotes = false);
+  /// \brief Helper function for proper escaping of strings.
+  ///
+  /// All names or user input should be run through this function.
+  ///
+  /// \param str string that should be escaped
+  /// \param quotes adds quotes around the string (convenience parameter)
+  std::string escape(std::string str, bool quotes = false);
 
-    /// \brief Returns the Id of the last inserted row
-    long long int getLastInsertedRowId();
+  /// \brief Returns the Id of the last inserted row
+  long long int getLastInsertedRowId();
 
-    static bool isFatal(int error);
+  static bool isFatal(int error);
 private:
-    sqlite3 *m_db;
-    boost::mutex m_mutex;
+  sqlite3 *m_db;
+  boost::mutex m_mutex;
 
-    static int execCallback(void *arg, int columns, char **data, char **name);
-    void execInternal(std::string sql);
+  static int execCallback(void *arg, int columns, char **data, char **name);
+  void execInternal(std::string sql);
 };
 
 } // namespace
