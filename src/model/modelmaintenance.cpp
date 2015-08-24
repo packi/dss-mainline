@@ -457,6 +457,9 @@ namespace dss {
   { }
 
   void ModelMaintenance::shutdown() {
+    if (m_pendingSaveRequest) {
+      writeConfiguration();
+    }
     m_pMeterMaintenance->shutdown();
     ThreadedSubsystem::shutdown();
   }
