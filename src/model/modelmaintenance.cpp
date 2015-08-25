@@ -252,7 +252,7 @@ namespace dss {
   } // readOutPendingMeter
 
   int MeterMaintenance::getBusMemberCount() {
-    if (m_pQueryBusInterface== NULL) {
+    if (m_pQueryBusInterface == NULL) {
       return -1;
     }
     int busMemberCount = 0;
