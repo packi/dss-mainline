@@ -146,6 +146,9 @@ namespace dss {
  //=============================================== MeterMaintenance
   __DEFINE_LOG_CHANNEL__(MeterMaintenance, lsInfo);
 
+
+  static const int MAX_RETRY_COUNT = 30;
+
   MeterMaintenance::MeterMaintenance(DSS* _pDSS, const std::string& _name) :
     Thread(_name),
     m_pDSS(_pDSS),
@@ -153,7 +156,8 @@ namespace dss {
     m_pModifyingBusInterface(NULL),
     m_pQueryBusInterface(NULL),
     m_IsInitializing(true),
-    m_triggerSynchronize(false)
+    m_triggerSynchronize(false),
+    m_retryCount(0)
   {
   }
 
@@ -223,36 +227,49 @@ namespace dss {
     }
 
     // If we didn't have to update for one cycle, assume that we're done
-    if (m_IsInitializing && !hadToUpdate &&
-        (cntReadOutMeters == getBusMemberCount())) {
-      synchronizeGroups(m_pApartment, m_pModifyingBusInterface);
-
-      log("******** Finished loading model from dSM(s)...", lsInfo);
-      m_IsInitializing = false;
-
-      m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-
-      setApartmentState();
-      triggerMeterSynchronization();
-
-      {
-        m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
-        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::ModelReady);
-        raiseEvent(readyEvent);
-        try {
-          CommChannel::getInstance()->resumeUpdateTask();
-          CommChannel::getInstance()->requestLockedScenes();
-        } catch (std::runtime_error &err) {
-          log(err.what(), lsError);
-        }
+    if (m_IsInitializing && !hadToUpdate) {
+      if (cntReadOutMeters == getBusMemberCount()) {
+        setupInitializedState();
+      } else {
+        monitorInitialization();
       }
-      AutoClusterMaintenance maintenance(m_pApartment);
-      maintenance.joinIdenticalClusters();
     }
   } // readOutPendingMeter
 
+  void MeterMaintenance::setupInitializedState() {
+    synchronizeGroups(m_pApartment, m_pModifyingBusInterface);
+    log("******** Finished loading model from dSM(s)...", lsInfo);
+    m_IsInitializing = false;
+    m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    setApartmentState();
+    triggerMeterSynchronization();
+    {
+      m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
+      boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::ModelReady);
+      raiseEvent(readyEvent);
+      try {
+        CommChannel::getInstance()->resumeUpdateTask();
+        CommChannel::getInstance()->requestLockedScenes();
+      } catch (std::runtime_error &err) {
+        log(err.what(), lsError);
+      }
+    }
+    AutoClusterMaintenance maintenance(m_pApartment);
+    maintenance.joinIdenticalClusters();
+  } // setupInitializedState
+
+  void MeterMaintenance::monitorInitialization() {
+    ++m_retryCount;
+    if (m_retryCount >= MAX_RETRY_COUNT) {
+      m_retryCount  = 0;
+      log("", lsInfo);
+      ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
+      m_pDSS->getModelMaintenance().addModelEvent(pEvent);
+    }
+  } // monitorInitialization
+
   int MeterMaintenance::getBusMemberCount() {
-    if (m_pQueryBusInterface== NULL) {
+    if (m_pQueryBusInterface == NULL) {
       return -1;
     }
     int busMemberCount = 0;
@@ -457,6 +474,9 @@ namespace dss {
   { }
 
   void ModelMaintenance::shutdown() {
+    if (m_pendingSaveRequest) {
+      writeConfiguration();
+    }
     m_pMeterMaintenance->shutdown();
     ThreadedSubsystem::shutdown();
   }
@@ -1133,12 +1153,13 @@ namespace dss {
       if (_pEvent->getEventType() == ModelEvent::etModelDirty) {
         m_IsDirty = true;
         delete _pEvent;
-      } else if (_pEvent->getEventType() == ModelEvent::etDeviceDirty) {
-        delete _pEvent;
-      } else if (_pEvent->getEventType() == ModelEvent::etMeterReady) {
+      } else if ((_pEvent->getEventType() == ModelEvent::etMeterReady) ||
+                 (_pEvent->getEventType() == ModelEvent::etBusReady)) {
         boost::mutex::scoped_lock lock(m_ModelEventsMutex);
         m_ModelEvents.push_back(_pEvent);
         m_NewModelEvent.notify_one();
+      } else {
+        delete _pEvent;
       }
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);

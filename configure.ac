@@ -274,38 +274,19 @@ if test $ac_cv_func_clock_gettime = no; then
     AC_CHECK_LIB(rt, clock_gettime, [LIBS="-lrt $LIBS"])
 fi
 
-ASSUMED_BOOST_VER=146
 
-BOOST_REQUIRE([1.46],
+# Check for boost
+AC_CHECK_HEADERS([boost/algorithm/string/finder.hpp boost/algorithm/string.hpp boost/algorithm/string/replace.hpp boost/atomic.hpp boost/bind.hpp boost/chrono.hpp boost/enable_shared_from_this.hpp boost/filesystem.hpp boost/filesystem/operations.hpp boost/filesystem/path.hpp boost/flyweight.hpp boost/foreach.hpp boost/function.hpp boost/lambda/lambda.hpp boost/make_shared.hpp boost/make_shared.hpp boost/noncopyable.hpp boost/ptr_container/ptr_deque.hpp boost/ptr_container/ptr_map.hpp boost/ptr_container/ptr_vector.hpp boost/ref.hpp boost/scoped_ptr.hpp boost/shared_array.hpp boost/shared_ptr.hpp boost/smart_ptr.hpp boost/thread/condition_variable.hpp boost/thread.hpp boost/thread/locks.hpp boost/thread/mutex.hpp boost/thread/recursive_mutex.hpp boost/thread/thread.hpp boost/tuple/tuple.hpp boost/weak_ptr.hpp], [],
     [
-        unset boost_cv_version
-        unset boost_cv_inc_path
-        BOOST_REQUIRE([1.35],
-            [
-                AC_MSG_ERROR([could not find boost on your system])
-            ])
-        ASSUMED_BOOST_VER=135
+        AC_MSG_ERROR([required boost headers not found on your system!])
     ])
 
-if test $ASSUMED_BOOST_VER -eq 135; then
-    AC_DEFINE([BOOST_VERSION_135], [1], [boost 1.35 or higher])
-else
-    AC_DEFINE([BOOST_VERSION_146], [1], [boost 1.46 or higher])
-fi
-
-BOOST_ASIO
-BOOST_BIND
-BOOST_FOREACH
-BOOST_FUNCTION
-BOOST_LAMBDA
-BOOST_SMART_PTR
-BOOST_TUPLE
-
-BOOST_THREADS([mt-])
-BOOST_FILESYSTEM([mt-])
-BOOST_SYSTEM([mt-])
-BOOST_PROGRAM_OPTIONS([mt-])
-BOOST_TEST([mt-])
+AX_BOOST_BASE([1.44.0],[],[ AC_MSG_ERROR([boost was not found on your system])])
+AX_BOOST_SYSTEM()
+AX_BOOST_FILESYSTEM()
+AX_BOOST_PROGRAM_OPTIONS()
+AX_BOOST_THREAD()
+AX_BOOST_UNIT_TEST_FRAMEWORK()
 
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES([JS], [libjs >= 1.8.5], [],
