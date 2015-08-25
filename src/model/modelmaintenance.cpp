@@ -1133,12 +1133,13 @@ namespace dss {
       if (_pEvent->getEventType() == ModelEvent::etModelDirty) {
         m_IsDirty = true;
         delete _pEvent;
-      } else if (_pEvent->getEventType() == ModelEvent::etDeviceDirty) {
-        delete _pEvent;
-      } else if (_pEvent->getEventType() == ModelEvent::etMeterReady) {
+      } else if ((_pEvent->getEventType() == ModelEvent::etMeterReady) ||
+                 (_pEvent->getEventType() == ModelEvent::etBusReady)) {
         boost::mutex::scoped_lock lock(m_ModelEventsMutex);
         m_ModelEvents.push_back(_pEvent);
         m_NewModelEvent.notify_one();
+      } else {
+        delete _pEvent;
       }
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
