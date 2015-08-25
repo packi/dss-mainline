@@ -137,6 +137,7 @@ namespace dss {
     void autoAssignSensors();
     void synchronizeZoneSensorAssignment();
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
+    void setupInitializedState();
     int getBusMemberCount();
 
   private:

@@ -223,33 +223,34 @@ namespace dss {
     }
 
     // If we didn't have to update for one cycle, assume that we're done
-    if (m_IsInitializing && !hadToUpdate &&
-        (cntReadOutMeters == getBusMemberCount())) {
-      synchronizeGroups(m_pApartment, m_pModifyingBusInterface);
-
-      log("******** Finished loading model from dSM(s)...", lsInfo);
-      m_IsInitializing = false;
-
-      m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-
-      setApartmentState();
-      triggerMeterSynchronization();
-
-      {
-        m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
-        boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::ModelReady);
-        raiseEvent(readyEvent);
-        try {
-          CommChannel::getInstance()->resumeUpdateTask();
-          CommChannel::getInstance()->requestLockedScenes();
-        } catch (std::runtime_error &err) {
-          log(err.what(), lsError);
-        }
+    if (m_IsInitializing && !hadToUpdate) {
+      if (cntReadOutMeters == getBusMemberCount()) {
+        setupInitializedState();
       }
-      AutoClusterMaintenance maintenance(m_pApartment);
-      maintenance.joinIdenticalClusters();
     }
   } // readOutPendingMeter
+
+  void MeterMaintenance::setupInitializedState() {
+    synchronizeGroups(m_pApartment, m_pModifyingBusInterface);
+    log("******** Finished loading model from dSM(s)...", lsInfo);
+    m_IsInitializing = false;
+    m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    setApartmentState();
+    triggerMeterSynchronization();
+    {
+      m_pDSS->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etMeterReady));
+      boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::ModelReady);
+      raiseEvent(readyEvent);
+      try {
+        CommChannel::getInstance()->resumeUpdateTask();
+        CommChannel::getInstance()->requestLockedScenes();
+      } catch (std::runtime_error &err) {
+        log(err.what(), lsError);
+      }
+    }
+    AutoClusterMaintenance maintenance(m_pApartment);
+    maintenance.joinIdenticalClusters();
+  } // setupInitializedState
 
   int MeterMaintenance::getBusMemberCount() {
     if (m_pQueryBusInterface == NULL) {
