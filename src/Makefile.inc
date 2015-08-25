@@ -99,7 +99,11 @@ dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
 			$(LIBCOMMCHANNEL_LIBS) \
 			$(LIBDSUID_LIBS) \
 			$(OSSP_UUID_LIBS) \
-			$(LTLIBICONV)
+			$(LTLIBICONV) \
+			$(BOOST_FILESYSTEM_LIB) \
+			$(BOOST_PROGRAM_OPTIONS_LIB) \
+			$(BOOST_SYSTEM_LIB) \
+			$(BOOST_THREAD_LIB)
 
 ../src/dss.cpp: build_info.h
 
