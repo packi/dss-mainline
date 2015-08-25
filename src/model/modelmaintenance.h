@@ -138,6 +138,7 @@ namespace dss {
     void synchronizeZoneSensorAssignment();
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
     void setupInitializedState();
+    void monitorInitialization();
     int getBusMemberCount();
 
   private:
@@ -148,6 +149,7 @@ namespace dss {
     bool m_IsInitializing;
     boost::mutex m_syncMutex;
     bool m_triggerSynchronize;
+    int m_retryCount;
   };
   //----------------------------------------------------------------------------
 

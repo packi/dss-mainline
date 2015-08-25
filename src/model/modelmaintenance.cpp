@@ -146,6 +146,9 @@ namespace dss {
  //=============================================== MeterMaintenance
   __DEFINE_LOG_CHANNEL__(MeterMaintenance, lsInfo);
 
+
+  static const int MAX_RETRY_COUNT = 30;
+
   MeterMaintenance::MeterMaintenance(DSS* _pDSS, const std::string& _name) :
     Thread(_name),
     m_pDSS(_pDSS),
@@ -153,7 +156,8 @@ namespace dss {
     m_pModifyingBusInterface(NULL),
     m_pQueryBusInterface(NULL),
     m_IsInitializing(true),
-    m_triggerSynchronize(false)
+    m_triggerSynchronize(false),
+    m_retryCount(0)
   {
   }
 
@@ -226,6 +230,8 @@ namespace dss {
     if (m_IsInitializing && !hadToUpdate) {
       if (cntReadOutMeters == getBusMemberCount()) {
         setupInitializedState();
+      } else {
+        monitorInitialization();
       }
     }
   } // readOutPendingMeter
@@ -251,6 +257,16 @@ namespace dss {
     AutoClusterMaintenance maintenance(m_pApartment);
     maintenance.joinIdenticalClusters();
   } // setupInitializedState
+
+  void MeterMaintenance::monitorInitialization() {
+    ++m_retryCount;
+    if (m_retryCount >= MAX_RETRY_COUNT) {
+      m_retryCount  = 0;
+      log("", lsInfo);
+      ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
+      m_pDSS->getModelMaintenance().addModelEvent(pEvent);
+    }
+  } // monitorInitialization
 
   int MeterMaintenance::getBusMemberCount() {
     if (m_pQueryBusInterface == NULL) {
