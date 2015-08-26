@@ -173,6 +173,15 @@ AC_ARG_WITH(dss-saved-properties,
         fi
     ])
 
+AC_ARG_WITH(dss-databases,
+    AC_HELP_STRING([--with-dss-databases=DIR], [save dSS databases in DIR]),
+    [
+        if test "x$withval" != "x"; then
+            AC_DEFINE([WITH_DATABASEDIR], [1], [custom dSS databases directory set])
+            AC_DEFINE_UNQUOTED([DSS_DATABASEDIR], ["$withval"], [dSS databases directory])
+        fi
+    ])
+
 AC_ARG_WITH(js-pkgconfig,
     AC_HELP_STRING([--with-js-pkgconfig=DIR], [search for libjs.pc or mozjs185.c in DIR]),
     [

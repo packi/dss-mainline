@@ -122,7 +122,11 @@ const char* kSavedPropsDirectory = DSS_SAVEDPROPSDIR;
 const char* kSavedPropsDirectory = PACKAGE_DATADIR "/data/savedprops/";
 #endif
 
+#ifdef DSS_DATABASEDIR
+const char* kDatabaseDirectory = DSS_DATABASEDIR;
+#else
 const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
+#endif
 
   __DEFINE_LOG_CHANNEL__(DSS, lsInfo);
 
