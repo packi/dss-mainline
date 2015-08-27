@@ -250,6 +250,7 @@ dsstests_SOURCES = \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
 	../tests/iconvtests.cpp \
+	../tests/jsdatabase.cpp \
 	../tests/jshandlertests.cpp \
 	../tests/jsclustertests.cpp \
 	../tests/jsloggertests.cpp \
