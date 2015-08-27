@@ -1511,4 +1511,44 @@ Sample: {
     }
   }
 
+  EventInterpreterDatabaseUpdatePlugin::EventInterpreterDatabaseUpdatePlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("import_database", _pInterpreter) {}
+
+  void EventInterpreterDatabaseUpdatePlugin::subscribe() {
+  }
+
+  void EventInterpreterDatabaseUpdatePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+
+    std::string script_id;
+    std::string url;
+
+    if (_subscription.getOptions()->hasParameter("script_id")) {
+      script_id = _subscription.getOptions()->getParameter("script_id");
+    }
+
+    if (_subscription.getOptions()->hasParameter("url")) {
+      url = _subscription.getOptions()->getParameter("url");
+    }
+
+
+    if (script_id.empty()) {
+      Logger::getInstance()->log("EventInterpreterDatabaseUpdatePlugin: not "
+            "downloading database because script_id parameter is empty");
+      return;
+    }
+
+    if (url.empty()) {
+      Logger::getInstance()->log("EventInterpreterDatabaseUpdatePlugin: not "
+            "downloading database because url parameter is empty");
+      return;
+    }
+
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<ModelMaintenance::DatabaseDownload> task = boost::make_shared<ModelMaintenance::DatabaseDownload>(script_id, url);
+      boost::shared_ptr<TaskProcessor> tp = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
+      tp->addEvent(task);
+    }
+  }
 } // namespace dss
