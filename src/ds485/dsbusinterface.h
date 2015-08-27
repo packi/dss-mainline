@@ -73,8 +73,8 @@ namespace dss {
     static void busChangeCallback(void* _userData, dsuid_t *_id, int _flag);
     void handleBusChange(dsuid_t *_id, int _flag);
 
-    static void busStateCallback(void* _userData, bus_state_t _state);
-    void handleBusState(bus_state_t _state);
+    static void linkStateCallback(void* _userData, bool _link);
+    void handleLinkState(bool _link);
 
     static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode,
                                                     void* _userData,
