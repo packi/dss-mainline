@@ -89,6 +89,7 @@ namespace dss {
     extern const std::string DSMeterReady;
     extern const std::string ExecutionDeniedDigestCheck;
     extern const std::string DevicesFirstSeen;
+    extern const std::string DatabaseImported;
   }
 
   namespace EventProperty {

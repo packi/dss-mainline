@@ -188,6 +188,18 @@ namespace dss {
       boost::shared_ptr<Device> m_Device;
     };
 
+    class DatabaseDownload : public Task {
+    public:
+      DatabaseDownload(std::string _script_id, std::string _url);
+      virtual ~DatabaseDownload() {}
+      virtual void run();
+
+    private:
+      std::string m_scriptId;
+      std::string m_url;
+    };
+
+
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
 

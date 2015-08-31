@@ -221,6 +221,15 @@ namespace dss {
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+  class EventInterpreterDatabaseUpdatePlugin : public EventInterpreterPlugin {
+    public:
+      EventInterpreterDatabaseUpdatePlugin(EventInterpreter* _pInterpreter);
+      virtual ~EventInterpreterDatabaseUpdatePlugin() {};
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
+
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */
