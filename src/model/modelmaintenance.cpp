@@ -69,6 +69,7 @@
 #include "vdc-connection.h"
 #include "model-features.h"
 #include "handler/system_states.h"
+#include "sqlite3_wrapper.h"
 
 
 namespace dss {
@@ -2532,6 +2533,49 @@ namespace dss {
       }
     }
     free(data);
+  }
+
+  ModelMaintenance::DatabaseDownload::DatabaseDownload(std::string _script_id,
+                                                      std::string _url)
+    : Task(),
+      m_scriptId(_script_id), m_url(_url)
+  {}
+
+  void ModelMaintenance::DatabaseDownload::run()
+  {
+    if (m_scriptId.empty() || m_url.empty()) {
+        Logger::getInstance()->log("DatabaseDownload: invalid configuration, "
+                                   "missing parameters", lsError);
+      return;
+    }
+
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::DatabaseImported);
+
+    pEvent->setProperty("scripd_id", m_scriptId);
+    try {
+      HttpClient url;
+      std::string result;
+
+      long req = url.request(m_url, GET, &result);
+      if (req != 200) {
+        throw std::runtime_error("Could not download database from " + m_url +
+                                 ": HTTP code " + intToString(req));
+      }
+
+      std::string database = DSS::getInstance()->getDatabaseDirectory() +
+                             m_scriptId + ".db";
+      if (!result.empty()) {
+        SQLite3 sqlite(database, false);
+        sqlite.exec(result);
+        pEvent->setProperty("success", "1");
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    } catch (std::runtime_error &ex) {
+      Logger::getInstance()->log(std::string("Exception when importing "
+            "database: ") + ex.what(), lsError);
+      pEvent->setProperty("success", "0");
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
   }
 
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";

@@ -73,6 +73,7 @@ namespace EventName {
   const std::string DSMeterReady = "dsMeter_ready";
   const std::string ExecutionDeniedDigestCheck = "execution_denied_digest_check";
   const std::string DevicesFirstSeen = "devices_first_seen";
+  const std::string DatabaseImported = "database_imported";
 }
 
 boost::shared_ptr<Event>

@@ -51,6 +51,7 @@
 #include "src/web/restful.h"
 #include "src/web/webrequests.h"
 
+#include "src/web/handler/databaserequesthandler.h"
 #include "src/web/handler/systemrequesthandler.h"
 #include "src/web/handler/meteringrequesthandler.h"
 #include "src/web/handler/structurerequesthandler.h"
@@ -276,6 +277,7 @@ namespace dss {
   const char* kHandlerStructure = "structure";
   const char* kHandlerMetering = "metering";
   const char* kHandlerSubscription = "subscription";
+  const char* kHandlerDatabase = "database";
 
   void WebServer::instantiateHandlers() {
     m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment(), getDSS().getModelMaintenance());
@@ -306,6 +308,7 @@ namespace dss {
       );
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
+    m_Handlers[kHandlerDatabase] = new DatabaseRequestHandler();
   } // instantiateHandlers
 
   /**

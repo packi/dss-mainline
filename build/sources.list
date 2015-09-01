@@ -129,6 +129,8 @@ libdsscore_a_SOURCES =  \
 	../src/scripting/jscurl.cpp \
 	../src/scripting/jscurl.h \
 	../src/scripting/jscurl-options.h \
+	../src/scripting/jsdatabase.h \
+	../src/scripting/jsdatabase.cpp \
 	../src/scripting/jsevent.cpp \
 	../src/scripting/jsevent.h \
 	../src/scripting/jshandler.cpp \
@@ -159,6 +161,8 @@ libdsscore_a_SOURCES =  \
 	../src/sessionmanager.h \
 	../src/setbuilder.cpp \
 	../src/setbuilder.h \
+	../src/sqlite3_wrapper.h \
+	../src/sqlite3_wrapper.cc \
 	../src/storagetools.cpp \
 	../src/storagetools.h \
 	../src/stringconverter.cpp \
@@ -188,6 +192,8 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/apartmentrequesthandler.h \
 	../src/web/handler/circuitrequesthandler.cpp \
 	../src/web/handler/circuitrequesthandler.h \
+	../src/web/handler/databaserequesthandler.h \
+	../src/web/handler/databaserequesthandler.cc \
 	../src/web/handler/deviceinterfacerequesthandler.cpp \
 	../src/web/handler/deviceinterfacerequesthandler.h \
 	../src/web/handler/devicerequesthandler.cpp \
@@ -244,6 +250,7 @@ dsstests_SOURCES = \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
 	../tests/iconvtests.cpp \
+	../tests/jsdatabase.cpp \
 	../tests/jshandlertests.cpp \
 	../tests/jsclustertests.cpp \
 	../tests/jsloggertests.cpp \
