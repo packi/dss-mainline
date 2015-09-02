@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.31.3	02.09.2015
+	* fixed crash in propertysystem, #10819
+
 v1.31.2	18.08.2015
 	* add configure lock changes to protection log, #10947
 	* add log messages for automatic sensor assignments, #10693
