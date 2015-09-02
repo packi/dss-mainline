@@ -1769,6 +1769,7 @@ namespace dss {
     features.pairing = false;
     features.syncButtonID = false;
     features.hasOutputAngle = false;
+    features.posTimeMax = false;
 
     if ((m_ProductID == 0) || (m_FunctionID == 0)) {
         return features;
@@ -1800,9 +1801,14 @@ namespace dss {
       }
     }
 
-    if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL) &&
-        ((devNumber == 220) || (devNumber == 230))) {
-      features.hasOutputAngle = true;
+    if ((devCls == DEVICE_CLASS_GR) && (devType == DEVICE_TYPE_KL)) {
+      if (getRevisionID() >= 0x360) {
+        features.posTimeMax = true;
+      }
+
+      if ((devNumber == 220) || (devNumber == 230)) {
+        features.hasOutputAngle = true;
+      }
     }
 
     return features;
@@ -2687,6 +2693,32 @@ namespace dss {
       m_windProtectionClass = _klass;
       checkAutoCluster();
     }
+  }
+
+  uint16_t Device::getDeviceMaxMotionTime() {
+    DeviceFeatures_t features = getFeatures();
+    if (!features.posTimeMax) {
+      throw std::runtime_error("Maximum motion time setting not supported"
+                               "by this device");
+    }
+
+    uint16_t hw = getDeviceConfigWord(CfgClassFunction, CfgFunction_Shade_PosTimeMax);
+    // 100 halfwaves = 1 second
+    return (hw / 100);
+  }
+
+  void Device::setDeviceMaxMotionTime(uint16_t seconds) {
+    DeviceFeatures_t features = getFeatures();
+    if (!features.posTimeMax) {
+      throw std::runtime_error("Maximum motion time setting not supported"
+                               "by this device");
+    }
+
+    if ((seconds * 100) > USHRT_MAX) {
+      throw std::runtime_error("Seconds value unsupported: too large");
+    }
+
+    setDeviceConfig16(CfgClassFunction, CfgFunction_Shade_PosTimeMax, seconds * 100);
   }
 
 } // namespace dss
