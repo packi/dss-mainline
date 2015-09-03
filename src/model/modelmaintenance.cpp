@@ -2553,10 +2553,10 @@ namespace dss {
 
     pEvent->setProperty("scripd_id", m_scriptId);
     try {
-      HttpClient url;
+      HttpClient http;
       std::string result;
 
-      long req = url.request(m_url, GET, &result);
+      long req = http.get(m_url, &result);
       if (req != 200) {
         throw std::runtime_error("Could not download database from " + m_url +
                                  ": HTTP code " + intToString(req));

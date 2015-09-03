@@ -60,12 +60,11 @@ namespace dss {
       HttpClient(bool _reuse_handle = false);
       ~HttpClient();
 
-      long request(const std::string& url, RequestType type,
-                   std::string *result);
+      long get(const std::string& url, std::string *result);
 
-      long request(const std::string& url, RequestType type,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   std::string *result);
+      long get(const std::string& url,
+               boost::shared_ptr<HashMapStringString> headers,
+               std::string *result);
 
       /* TODO make postdata const-by-reference */
       long post(const std::string& url, std::string postdata,

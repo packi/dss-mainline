@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(testBase) {
   std::string url = "http://www.digitalstrom.com";
   std::string result;
 
-  BOOST_CHECK_EQUAL(httpClient->request(url, GET, &result), 200);
+  BOOST_CHECK_EQUAL(httpClient->get(url, &result), 200);
   BOOST_CHECK_EQUAL(httpClient->post(url, "", NULL), 200);
 
   HashMapStringString header;
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(testReuseHandle) {
   std::string result;
 
   for (int i = 0; i < 20; i++) {
-    BOOST_CHECK_EQUAL(httpClient.request(url, GET, &result), 200);
+    BOOST_CHECK_EQUAL(httpClient.get(url, &result), 200);
     BOOST_CHECK_EQUAL(httpClient.post(url, "", &result), 200);
   }
 }
@@ -83,7 +83,7 @@ void fetcher_do() {
    */
 
   for (int i = 0; i < 10; i++) {
-    int ret = httpClient.request(url, GET, NULL);
+    int ret = httpClient.get(url, NULL);
     if (ret != 200) {
       Logger::getInstance()->log("test_rentrantCalls 200 != "  +
                                  intToString(ret), lsInfo);

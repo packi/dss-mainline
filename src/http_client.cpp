@@ -134,16 +134,16 @@ size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, 
   return size * nmemb;
 }
 
-long HttpClient::request(const std::string& url, RequestType type, std::string *result)
+long HttpClient::get(const std::string& url, std::string *result)
 {
-  return internalRequest(url, type, headers_t(), std::string(), result);
+  return internalRequest(url, GET, headers_t(), std::string(), result);
 }
 
-long HttpClient::request(const std::string& url, RequestType type,
-                  boost::shared_ptr<HashMapStringString> headers,
-                  std::string *result)
+long HttpClient::get(const std::string& url,
+                     boost::shared_ptr<HashMapStringString> headers,
+                     std::string *result)
 {
-  return internalRequest(url, type, headers, std::string(), result);
+  return internalRequest(url, GET, headers, std::string(), result);
 }
 
 long HttpClient::post(const std::string& url, std::string postdata,
