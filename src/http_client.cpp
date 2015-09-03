@@ -136,11 +136,11 @@ size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, 
 
 long HttpClient::get(const std::string& url, std::string *result)
 {
-  return internalRequest(url, GET, headers_t(), std::string(), result);
+  return internalRequest(url, GET, HashMapStringString(), std::string(), result);
 }
 
 long HttpClient::get(const std::string& url,
-                     boost::shared_ptr<HashMapStringString> headers,
+                     const HashMapStringString& headers,
                      std::string *result)
 {
   return internalRequest(url, GET, headers, std::string(), result);
@@ -149,11 +149,11 @@ long HttpClient::get(const std::string& url,
 long HttpClient::post(const std::string& url, std::string postdata,
                       std::string *result)
 {
-  return internalRequest(url, POST, headers_t(), postdata, result);
+  return internalRequest(url, POST, HashMapStringString(), postdata, result);
 }
 
 long HttpClient::post(const std::string& url,
-                      boost::shared_ptr<HashMapStringString> headers,
+                      const HashMapStringString& headers,
                       std::string postdata, std::string *result)
 {
   return internalRequest(url, POST, headers, postdata, result);
@@ -261,9 +261,9 @@ struct data config;
 #endif
 
 long HttpClient::internalRequest(const std::string& url, RequestType type,
-                  boost::shared_ptr<HashMapStringString> headers,
-                  std::string postdata,
-                  std::string *result)
+                                 const HashMapStringString& headers,
+                                 std::string postdata,
+                                 std::string *result)
 {
   CURLcode res;
   URLResult outputCollector;
@@ -288,10 +288,9 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
 
   curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
 
-  HashMapStringString::iterator it;
-
-  if (headers.get() && !headers->empty()) {
-    for (it = headers->begin(); it != headers->end(); it++) {
+  HashMapStringString::const_iterator it;
+  if (!headers.empty()) {
+    for (it = headers.begin(); it != headers.end(); it++) {
       cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
     }
     curl_easy_setopt(m_curl_handle, CURLOPT_HTTPHEADER, cheaders);

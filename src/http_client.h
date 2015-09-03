@@ -36,8 +36,6 @@ namespace dss {
     POST,
   } RequestType;
 
-  typedef boost::shared_ptr<HashMapStringString> headers_t;
-
   /**
    * HttpRequest - Combine all data describing an HTTP request
    * @url: http://www.something.org/path/to/something?query1=foo&query2=bar
@@ -49,7 +47,7 @@ namespace dss {
   struct HttpRequest {
     std::string url;
     RequestType type;
-    headers_t headers;
+    HashMapStringString headers;
     std::string postdata;
   };
 
@@ -63,7 +61,7 @@ namespace dss {
       long get(const std::string& url, std::string *result);
 
       long get(const std::string& url,
-               boost::shared_ptr<HashMapStringString> headers,
+               const HashMapStringString& headers,
                std::string *result);
 
       /* TODO make postdata const-by-reference */
@@ -72,7 +70,7 @@ namespace dss {
 
       /* TODO make postdata const-by-reference */
       long post(const std::string& url,
-                boost::shared_ptr<HashMapStringString> headers,
+                const HashMapStringString& headers,
                 std::string postdata, std::string *result);
 
       long request(const HttpRequest &req, std::string *result);
@@ -83,9 +81,9 @@ namespace dss {
 
     private:
       long internalRequest(const std::string& url, RequestType type,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   std::string postdata,
-                   std::string *result);
+                           const HashMapStringString& headers,
+                           std::string postdata,
+                           std::string *result);
 
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
       bool m_reuse_handle;

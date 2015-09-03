@@ -340,7 +340,7 @@ bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
 
   WebserviceConnection::getInstanceMsHub()->request("public/dss/v1_0/DSSEventData/SaveEvent",
                                                     parameters,
-                                                    boost::make_shared<HashMapStringString>(sensorUploadHeaders),
+                                                    sensorUploadHeaders,
                                                     postdata,
                                                     mcb,
                                                     true);
@@ -876,7 +876,7 @@ bool WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
 
   WebserviceConnection::getInstanceDsHub()->request(url,
                                                     "",
-                                                    boost::make_shared<HashMapStringString>(sensorUploadHeaders),
+                                                    sensorUploadHeaders,
                                                     postdata,
                                                     mcb,
                                                     true);
