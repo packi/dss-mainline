@@ -2643,8 +2643,13 @@ namespace dss {
         if (sensor->m_sensorPollInterval == 0) {
           continue;
         }
-        if (zone->isZoneSensor(device, sensor->m_sensorType)) {
-          busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+        try {
+          if (zone->isZoneSensor(device, sensor->m_sensorType)) {
+            busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+          }
+        } catch (std::runtime_error& e) {
+          Logger::getInstance()->log("pollSensors: could not query sensor from " +
+          dsuid2str(device->getDSID()) + ", Message: " + e.what(), lsWarning);
         }
       }
     }
