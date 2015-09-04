@@ -35,6 +35,7 @@
 #include "src/foreach.h"
 
 #define BROADCAST_SLEEP_MICROSECONDS    50000 // 50ms
+#define BROADCAST_CLUSTER_SLEEP_MICROSECONDS  150000 // 150ms
 
 namespace dss {
 
@@ -183,12 +184,12 @@ namespace dss {
 
     int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
     std::string nameStr = truncateUTF8String(_name, 19);
     ret = ClusterProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   } // createCluster
 
   void DSStructureModifyingBusInterface::removeCluster(uint8_t _clusterID) {
@@ -204,16 +205,16 @@ namespace dss {
 
     int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
     std::string nameStr = truncateUTF8String("", 19);
     ret = ClusterProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, (unsigned char*) nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
     ret = ClusterProperties_set_location_class(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0, 0, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   } // removeCluster
 
   void DSStructureModifyingBusInterface::groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
@@ -387,7 +388,7 @@ namespace dss {
     std::string nameStr = truncateUTF8String(_name, 19);
     ret = ClusterProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
   void DSStructureModifyingBusInterface::clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) {
@@ -398,7 +399,7 @@ namespace dss {
     }
     ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
   void DSStructureModifyingBusInterface::clusterSetProperties(uint8_t _clusterID, uint16_t _location,
@@ -410,7 +411,7 @@ namespace dss {
     }
     ret = ClusterProperties_set_location_class(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _location, _floor, _protectionClass);
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
   void DSStructureModifyingBusInterface::clusterSetLockedScenes(uint8_t _clusterID,
@@ -426,7 +427,7 @@ namespace dss {
     }
     ret = ClusterProperties_set_scene_lock(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, lockedScenes);
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
   void DSStructureModifyingBusInterface::clusterSetConfigurationLock(uint8_t _clusterID,
@@ -438,7 +439,7 @@ namespace dss {
     }
     ret = ClusterProperties_set_configuration_lock(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, (_lock ? 1 : 0));
     DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
 }  // namespace dss
