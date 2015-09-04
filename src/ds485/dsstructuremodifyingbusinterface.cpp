@@ -163,9 +163,12 @@ namespace dss {
     }
     int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
     std::string nameStr = truncateUTF8String(_name, 19);
     ret = ZoneGroupProperties_set_name(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // createGroup
 
   void DSStructureModifyingBusInterface::createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
