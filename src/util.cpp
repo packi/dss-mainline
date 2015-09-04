@@ -78,8 +78,6 @@ namespace dss {
             try {
               _interface->createGroup(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID(), pGroup->getName());
-              _interface->groupSetName(pZone->getID(), pGroup->getID(),
-                  pGroup->getName());
               _interface->groupSetStandardID(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID());
               pGroup->setIsSynchronized(true);
