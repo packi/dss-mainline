@@ -24,13 +24,13 @@ BOOST_AUTO_TEST_CASE(testBase) {
   std::string result;
 
   BOOST_CHECK_EQUAL(httpClient->request(url, GET, &result), 200);
-  BOOST_CHECK_EQUAL(httpClient->request(url, POST, NULL), 200);
+  BOOST_CHECK_EQUAL(httpClient->post(url, "", NULL), 200);
 
   HashMapStringString header;
   header["bar"] = "dada";
-  BOOST_CHECK_EQUAL(httpClient->request(url, POST,
-                                        boost::make_shared<HashMapStringString>(header),
-                                        &result), 200);
+  BOOST_CHECK_EQUAL(httpClient->post(url,
+                                     boost::make_shared<HashMapStringString>(header),
+                                     "", &result), 200);
 }
 
 BOOST_AUTO_TEST_CASE(testReuseHandle) {
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(testReuseHandle) {
 
   for (int i = 0; i < 20; i++) {
     BOOST_CHECK_EQUAL(httpClient.request(url, GET, &result), 200);
-    BOOST_CHECK_EQUAL(httpClient.request(url, POST, &result), 200);
+    BOOST_CHECK_EQUAL(httpClient.post(url, "", &result), 200);
   }
 }
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(testEmptyHeaderMaps) {
   HttpClient httpClient(true);
 
   /* does it crash, is the test */
-  BOOST_CHECK_EQUAL(httpClient.request(url, headers, std::string(), NULL), 200);
+  BOOST_CHECK_EQUAL(httpClient.post(url, headers, std::string(), NULL), 200);
 }
 
 BOOST_AUTO_TEST_CASE(testEmptyHeaderAndFormPostMaps) {
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(testEmptyHeaderAndFormPostMaps) {
   HttpClient httpClient(true);
 
   /* does it crash, is the test */
-  BOOST_CHECK_EQUAL(httpClient.request(url, POST, headers, NULL), 200);
+  BOOST_CHECK_EQUAL(httpClient.post(url, headers, "", NULL), 200);
 }
 
 BOOST_AUTO_TEST_CASE(testStructHttpRequest) {

@@ -139,18 +139,24 @@ long HttpClient::request(const std::string& url, RequestType type, std::string *
   return internalRequest(url, type, headers_t(), std::string(), result);
 }
 
-long HttpClient::request(const std::string& url,
-                  boost::shared_ptr<HashMapStringString> headers,
-                  std::string postdata, std::string *result)
-{
-  return internalRequest(url, POST, headers, postdata, result);
-}
-
 long HttpClient::request(const std::string& url, RequestType type,
                   boost::shared_ptr<HashMapStringString> headers,
                   std::string *result)
 {
   return internalRequest(url, type, headers, std::string(), result);
+}
+
+long HttpClient::post(const std::string& url, std::string postdata,
+                      std::string *result)
+{
+  return internalRequest(url, POST, headers_t(), postdata, result);
+}
+
+long HttpClient::post(const std::string& url,
+                      boost::shared_ptr<HashMapStringString> headers,
+                      std::string postdata, std::string *result)
+{
+  return internalRequest(url, POST, headers, postdata, result);
 }
 
 long HttpClient::request(const HttpRequest &req, std::string *result) {

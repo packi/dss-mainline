@@ -63,13 +63,18 @@ namespace dss {
       long request(const std::string& url, RequestType type,
                    std::string *result);
 
-      long request(const std::string& url,
-                   boost::shared_ptr<HashMapStringString> headers,
-                   std::string postdata, std::string *result);
-
       long request(const std::string& url, RequestType type,
                    boost::shared_ptr<HashMapStringString> headers,
                    std::string *result);
+
+      /* TODO make postdata const-by-reference */
+      long post(const std::string& url, std::string postdata,
+                std::string *result);
+
+      /* TODO make postdata const-by-reference */
+      long post(const std::string& url,
+                boost::shared_ptr<HashMapStringString> headers,
+                std::string postdata, std::string *result);
 
       long request(const HttpRequest &req, std::string *result);
 
