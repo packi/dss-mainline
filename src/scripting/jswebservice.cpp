@@ -358,13 +358,13 @@ namespace dss {
         new WebserviceRequestCallback(ctx, fRoot, jsCallback, functionVal));
 
     if (reqtype == POST) {
-      WebserviceConnection::getInstanceMsHub()->request(url, params,
-        boost::make_shared<HashMapStringString>(headers), formdata, mcb,
-        authenticated);
+      WebserviceConnection::getInstanceMsHub()->request(url, params, headers,
+                                                        formdata, mcb,
+                                                        authenticated);
     } else {
       WebserviceConnection::getInstanceMsHub()->request(url, params, reqtype,
-          boost::make_shared<HashMapStringString>(headers),
-          mcb, authenticated);
+                                                        headers,
+                                                        mcb, authenticated);
     }
 
     return JS_TRUE;
