@@ -320,6 +320,7 @@ namespace dss {
   const uint8_t CfgFunction_Valve_EmergencyValue = 0x45;
   const uint8_t CfgFunction_Valve_EmergencyTimer = 0x46;
   const uint8_t CfgFunction_Valve_PwmPeriod = 0x48;
+  const uint8_t CfgFunction_Shade_PosTimeMax = 0x48;
   const uint8_t CfgFunction_Valve_PwmMinValue = 0x4a;
   const uint8_t CfgFunction_Valve_PwmMaxValue = 0x4b;
   const uint8_t CfgFunction_Valve_PwmMinY = 0x4c;

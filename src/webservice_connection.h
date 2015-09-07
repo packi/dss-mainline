@@ -52,15 +52,15 @@ public:
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
   void request(const std::string& url,
-               const std::string &parameters,
-               boost::shared_ptr<HashMapStringString> headers,
+               const std::string& parameters,
+               const HashMapStringString& headers,
                const std::string& postdata,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
   void request(const std::string& url,
                const std::string &parameters,
                RequestType type,
-               boost::shared_ptr<HashMapStringString> headers,
+               const HashMapStringString& headers,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
 

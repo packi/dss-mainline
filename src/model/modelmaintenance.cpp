@@ -2553,10 +2553,10 @@ namespace dss {
 
     pEvent->setProperty("scripd_id", m_scriptId);
     try {
-      HttpClient url;
+      HttpClient http;
       std::string result;
 
-      long req = url.request(m_url, GET, &result);
+      long req = http.get(m_url, &result);
       if (req != 200) {
         throw std::runtime_error("Could not download database from " + m_url +
                                  ": HTTP code " + intToString(req));
@@ -2643,8 +2643,13 @@ namespace dss {
         if (sensor->m_sensorPollInterval == 0) {
           continue;
         }
-        if (zone->isZoneSensor(device, sensor->m_sensorType)) {
-          busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+        try {
+          if (zone->isZoneSensor(device, sensor->m_sensorType)) {
+            busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+          }
+        } catch (std::runtime_error& e) {
+          Logger::getInstance()->log("pollSensors: could not query sensor from " +
+          dsuid2str(device->getDSID()) + ", Message: " + e.what(), lsWarning);
         }
       }
     }

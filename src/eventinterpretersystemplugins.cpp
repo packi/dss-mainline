@@ -39,6 +39,7 @@
 #include "model/set.h"
 #include "model/zone.h"
 #include "model/group.h"
+#include "model/cluster.h"
 #include "model/device.h"
 #include "model/apartment.h"
 #include "model/state.h"
@@ -569,8 +570,8 @@ namespace dss {
     Logger::getInstance()->log("SystemEventActionExecute::"
             "executeURL: " + oUrl);
 
-    boost::shared_ptr<HttpClient> url = boost::make_shared<HttpClient>();
-    long code = url->request(oUrl, GET, NULL);
+    boost::shared_ptr<HttpClient> http = boost::make_shared<HttpClient>();
+    long code = http->get(oUrl, NULL);
     std::ostringstream out;
     out << code;
 
@@ -2620,20 +2621,32 @@ namespace dss {
         logStateChange(logger, m_raisedAtState, statename, state, value, originDSUID);
       } catch (std::exception &ex) {}
 
-      if (statename == "wind" ||
-          statename == "rain" ||
-          statename == "hail" ||
-          statename == "panic" ||
-          statename == "fire" ||
-          statename == "alarm" ||
-          statename == "alarm2" ||
-          statename == "alarm3" ||
-          statename == "alarm4") {
+      std::string name = statename.substr(0, statename.find("."));
+      std::string location = statename.substr(statename.find(".") + 1);
+      if (name == "wind" ||
+          name == "rain" ||
+          name == "hail" ||
+          name == "panic" ||
+          name == "fire" ||
+          name == "alarm" ||
+          name == "alarm2" ||
+          name == "alarm3" ||
+          name == "alarm4") {
         logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
             "system-protection.log", NULL));
         try {
-          statename[0] = toupper(statename[0]);
-          logger->logln(statename + " is " + state);
+          name[0] = toupper(name[0]);
+          if (!location.empty()) {
+            int clusterID = strToInt(location.substr(location.find("group") + 5));
+            boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
+            std::string clusterName = cluster->getName();
+            if (clusterName.empty()) {
+              clusterName = "Cluster #" + intToString(clusterID);
+            }
+            logger->logln(name + " is " + state + " in " + clusterName);
+          } else {
+            logger->logln(name + " is " + state);
+          }
         } catch (std::exception &ex) {}
       }
     }

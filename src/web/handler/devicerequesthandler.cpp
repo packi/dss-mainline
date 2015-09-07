@@ -1810,6 +1810,48 @@ namespace dss {
       std::string date = firstSeen.toISO8601();
       json.add("time", date);
       return json.successJSON();
+    } else if (_request.getMethod() == "setMaxMotionTime") {
+      JSONWriter json;
+
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      DeviceFeatures_t features = device->getFeatures();
+      if (!features.posTimeMax) {
+        return JSONWriter::failure("maximum motion time setting not supported by "
+                            "this device");
+      }
+
+      int value = strToIntDef(_request.getParameter("seconds"), -1);
+      if((value  < 0) || (value > 655)) {
+        return JSONWriter::failure("missing or invalid 'seconds' parameter");
+      }
+
+      device->setDeviceMaxMotionTime(value);
+
+      return json.successJSON();
+    } else if (_request.getMethod() == "getMaxMotionTime") {
+      JSONWriter json;
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      uint16_t value = 0;
+      DeviceFeatures_t features = device->getFeatures();
+      if (features.posTimeMax) {
+        value = device->getDeviceMaxMotionTime();
+      }
+
+      json.add("supported", features.posTimeMax);
+      json.add("value", value);
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }

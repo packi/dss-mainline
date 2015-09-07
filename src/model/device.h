@@ -147,6 +147,7 @@ namespace dss {
     bool pairing;       // device supports pairing
     bool syncButtonID;  // sync button ID setting of slave with master
     bool hasOutputAngle;
+    bool posTimeMax; // device supports maximum positioning time
   } DeviceFeatures_t;
 
   typedef struct {
@@ -737,6 +738,9 @@ namespace dss {
 
     std::vector<int> getLockedScenes();
     bool isInLockedCluster();
+
+    uint16_t getDeviceMaxMotionTime();
+    void setDeviceMaxMotionTime(uint16_t seconds);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

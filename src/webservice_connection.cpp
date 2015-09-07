@@ -143,7 +143,7 @@ void WebserviceConnectionDsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
   std::string osptoken = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_dshub_token);
 
   if (!osptoken.empty()) {
-    (*req.headers)["Authorization"] =  "Bearer " + osptoken;
+    req.headers["Authorization"] =  "Bearer " + osptoken;
   } else {
     log("authentication parameters enabled, but token could not be "
         "fetched!", lsError);
@@ -251,7 +251,7 @@ void WebserviceConnection::request(const std::string& url,
 
 void WebserviceConnection::request(const std::string& url,
                                  const std::string &parameters,
-                                 boost::shared_ptr<HashMapStringString> headers,
+                                 const HashMapStringString& headers,
                                  const std::string& postdata,
                                  boost::shared_ptr<URLRequestCallback> cb,
                                  bool authenticated)
@@ -269,7 +269,7 @@ void WebserviceConnection::request(const std::string& url,
 void WebserviceConnection::request(const std::string& url,
                                 const std::string& parameters,
                                 RequestType type,
-                                boost::shared_ptr<HashMapStringString> headers,
+                                const HashMapStringString& headers,
                                 boost::shared_ptr<URLRequestCallback> cb,
                                 bool authenticated)
 {
