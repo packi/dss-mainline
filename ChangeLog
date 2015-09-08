@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.31.4 08.09.2015
+	* increase stability with lots of clusters, #11098
+	* add wind events in cluters to protection log, #11044
+
 v1.31.3	02.09.2015
 	* fixed crash in propertysystem, #10819
 
