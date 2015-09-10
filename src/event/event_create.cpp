@@ -211,7 +211,7 @@ createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
   event->setProperty("state", _state->toString());
   event->setProperty("value", intToString(_state->getState()));
   event->setProperty("oldvalue", intToString(_oldstate));
-  event->setProperty("originDeviceID", intToString(_callOrigin));
+  event->setProperty(ef_callOrigin, intToString(_callOrigin));
   return event;
 }
 
