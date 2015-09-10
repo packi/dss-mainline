@@ -2672,8 +2672,8 @@ namespace dss {
       direction = m_properties.get("direction");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logSunshine(logger, value, direction, originDeviceID);
@@ -2703,8 +2703,8 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logFrostProtection(logger, value, originDeviceID);
@@ -2732,8 +2732,8 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logHeatingModeSwitch(logger, value, originDeviceID);
@@ -2748,8 +2748,8 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logBuildingService(logger, value, originDeviceID);
