@@ -2734,6 +2734,19 @@ namespace dss {
     try {
       logBuildingService(logger, value, originDeviceID);
     } catch (std::exception &ex) {}
+    
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      logger->logln("Service protection is " + valueString);
+    } catch (std::exception &ex) {}
   }
 
   void SystemEventLog::executionDenied() {
