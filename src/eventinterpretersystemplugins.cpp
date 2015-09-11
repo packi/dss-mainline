@@ -2618,13 +2618,20 @@ namespace dss {
         try {
           name[0] = toupper(name[0]);
           if (!location.empty()) {
-            int clusterID = strToInt(location.substr(location.find("group") + 5));
-            boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
-            std::string clusterName = cluster->getName();
-            if (clusterName.empty()) {
-              clusterName = "Cluster #" + intToString(clusterID);
+            std::string groupName("group");
+            size_t groupPos = location.find(groupName);
+            if (std::string::npos != groupPos) {
+              groupPos += groupName.length();
+              int clusterID = strToInt(location.substr(groupPos));
+              boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
+              std::string clusterName = cluster->getName();
+              if (clusterName.empty()) {
+                clusterName = "Cluster #" + intToString(clusterID);
+              }
+              logger->logln(name + " is " + state + " in " + clusterName);
+            } else {
+              logger->logln(name + " is " + state);
             }
-            logger->logln(name + " is " + state + " in " + clusterName);
           } else {
             logger->logln(name + " is " + state);
           }
