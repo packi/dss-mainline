@@ -654,6 +654,46 @@ namespace dss {
         }
 
         return JSONWriter::success();
+      } else if (_request.getMethod() == "getDeviceBinaryInputs") {
+        JSONWriter json;
+
+        Apartment& apt = DSS::getInstance()->getApartment();
+        Set devices = apt.getZone(0)->getDevices();
+
+        json.startArray("devices");
+
+        for (int d = 0; d < devices.length(); d++) {
+          boost::shared_ptr<Device> device = devices.get(d).getDevice();
+          if ((device->getDeviceType() == DEVICE_TYPE_AKM) &&
+              (device->isPresent() == true)) {
+            const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = device->getBinaryInputs();
+
+            if (!binaryInputs.empty()) {
+              json.startObject();
+              json.add("dsuid", dsuid2str(device->getDSID()));
+
+              json.startArray("binaryInputs");
+
+              for (size_t i = 0; i < binaryInputs.size(); i++) {
+                boost::shared_ptr<DeviceBinaryInput_t> input = binaryInputs.at(i);
+                json.startObject();
+                json.add("targetGroupType", input->m_targetGroupType);
+                json.add("targetGroup", input->m_targetGroupId);
+                json.add("inputType", input->m_inputType);
+                json.add("inputId", input->m_inputId);
+                json.add("state",
+                        device->getBinaryInputState(input->m_inputIndex)->getState());
+                json.endObject();
+              }
+
+              json.endArray();
+              json.endObject();
+            }
+          }
+        }
+
+        json.endArray();
+        return json.successJSON();
       } else {
         throw std::runtime_error("Unhandled function");
       }

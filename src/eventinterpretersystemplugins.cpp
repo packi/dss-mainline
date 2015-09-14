@@ -1982,7 +1982,7 @@ namespace dss {
   }
 
   std::string SystemEventLog::getDeviceName(std::string _origin_dsuid) {
-    std::string devName = "Unknown";
+    std::string devName;
 
     if (!_origin_dsuid.empty()) {
       try {
@@ -1992,7 +1992,9 @@ namespace dss {
         if (device && (!device->getName().empty())) {
             devName = device->getName();
         }
-      } catch (ItemNotFoundException &ex) {};
+      } catch (ItemNotFoundException &ex) {
+        devName = "Unknown";
+      }
     }
 
     devName += ";" + _origin_dsuid;
@@ -2278,14 +2280,15 @@ namespace dss {
     void SystemEventLog::logStateChange(
       boost::shared_ptr<ScriptLogger> _logger,
       boost::shared_ptr<const State> _st,
-      const std::string& _statename, const std::string& _state,
-      const std::string& _value, const std::string& _origin_device_id) {
+      const std::string& _statename, const std::string& _state, const std::string& _value,
+      const std::string& _origin_device_id, const callOrigin_t _callOrigin) {
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken'');
 
     if (m_raisedAtState->getType() == StateType_Service) {
-      std::string origName = getDeviceName(_origin_device_id);
-      _logger->logln(";StateApartment;" + _statename + ";" + _value + ";" + _state  + ";;;;;" + origName + ";");
+      std::string devName = getDeviceName(_origin_device_id);
+      _logger->logln(";StateApartment;" + _statename + ";" + _value + ";" + _state  + ";;;;" +
+          devName + ";" + getCallOrigin(_callOrigin) + ";" );
 
     } else if (m_raisedAtState->getType() == StateType_Device) {
       boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
@@ -2318,8 +2321,9 @@ namespace dss {
           zoneName + ";" + groupName + ";;");
 
     } else {
-      std::string origName = getDeviceName(_origin_device_id);
-      _logger->logln(";StateScript;" + _statename + ";" + _value + ";" + _state + ";;;;;" + origName + ";");
+      std::string devName = getDeviceName(_origin_device_id);
+      _logger->logln(";StateScript;" + _statename + ";" + _value + ";" + _state + ";;;;" +
+          devName + ";" + getCallOrigin(_callOrigin) + ";" );
     }
   }
 
@@ -2611,14 +2615,18 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDSUID;
-    if (m_properties.has("originDSUID")) {
-      originDSUID = m_properties.get("originDSUID");
+    if (m_properties.has(ef_originDSUID)) {
+      originDSUID = m_properties.get(ef_originDSUID);
+    }
+    callOrigin_t callOrigin = coUnknown;
+    if (m_properties.has(ef_callOrigin)) {
+      callOrigin = (callOrigin_t)strToIntDef(m_properties.get(ef_callOrigin), 0);
     }
     if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
       boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
           "system-event.log", NULL));
       try {
-        logStateChange(logger, m_raisedAtState, statename, state, value, originDSUID);
+        logStateChange(logger, m_raisedAtState, statename, state, value, originDSUID, callOrigin);
       } catch (std::exception &ex) {}
 
       std::string name = statename.substr(0, statename.find("."));
@@ -2637,13 +2645,20 @@ namespace dss {
         try {
           name[0] = toupper(name[0]);
           if (!location.empty()) {
-            int clusterID = strToInt(location.substr(location.find("group") + 5));
-            boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
-            std::string clusterName = cluster->getName();
-            if (clusterName.empty()) {
-              clusterName = "Cluster #" + intToString(clusterID);
+            std::string groupName("group");
+            size_t groupPos = location.find(groupName);
+            if (std::string::npos != groupPos) {
+              groupPos += groupName.length();
+              int clusterID = strToInt(location.substr(groupPos));
+              boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
+              std::string clusterName = cluster->getName();
+              if (clusterName.empty()) {
+                clusterName = "Cluster #" + intToString(clusterID);
+              }
+              logger->logln(name + " is " + state + " in " + clusterName);
+            } else {
+              logger->logln(name + " is " + state);
             }
-            logger->logln(name + " is " + state + " in " + clusterName);
           } else {
             logger->logln(name + " is " + state);
           }
@@ -2664,8 +2679,8 @@ namespace dss {
       direction = m_properties.get("direction");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logSunshine(logger, value, direction, originDeviceID);
@@ -2695,8 +2710,8 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logFrostProtection(logger, value, originDeviceID);
@@ -2724,8 +2739,8 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logHeatingModeSwitch(logger, value, originDeviceID);
@@ -2740,11 +2755,24 @@ namespace dss {
       value = m_properties.get("value");
     }
     std::string originDeviceID;
-    if (m_properties.has("originDeviceID")) {
-      originDeviceID = m_properties.get("originDeviceID");
+    if (m_properties.has(ef_callOrigin)) {
+      originDeviceID = m_properties.get(ef_callOrigin);
     }
     try {
       logBuildingService(logger, value, originDeviceID);
+    } catch (std::exception &ex) {}
+    
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      logger->logln("Service protection is " + valueString);
     } catch (std::exception &ex) {}
   }
 

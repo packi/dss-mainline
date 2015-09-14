@@ -118,7 +118,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("GroupID", pGroup->getID());
       json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
       json.add("Force", event->hasPropertySet(ef_forced));
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
     } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       appendCommon(json, evtGroup_Activity, evtCategory_ZoneGroupUndoScene,
@@ -126,7 +126,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
       json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       switch (pState->getType()) {
@@ -149,12 +149,12 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       }
       json.add("StateName", pState->getName());
       json.add("StateValue", pState->toString());
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
     } else if (event->getName() == EventName::OldStateChange) {
       appendCommon(json, evtGroup_Activity, evtCategory_ApartmentState, event.get());
       json.add("StateName", event->getPropertyByName("statename"));
       json.add("StateValue", event->getPropertyByName("state"));
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
     } else if (event->getName() == EventName::AddonStateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       std::string addonName = event->getPropertyByName("scriptID");
@@ -615,7 +615,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("GroupID", pGroup->getID());
       json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
       json.add("Force", event->hasPropertySet(ef_forced));
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
       json.endObject();
     } else if ((event->getName() == EventName::UndoScene) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
@@ -625,7 +625,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
       json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
       json.endObject();
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
@@ -636,7 +636,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
         createHeader(json, evtGroup_Activity, evtCategory_ApartmentState,
                      event.get());
         json.startObject("EventBody");
-        json.add("Origin", event->getPropertyByName("originDeviceID"));
+        json.add("Origin", event->getPropertyByName(ef_callOrigin));
         break;
       case StateType_Group:
         createHeader(json, evtGroup_Activity, evtCategory_ZoneGroupState,
@@ -651,7 +651,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
                      event.get());
         json.startObject("EventBody");
         /* TODO Should DeviceStateChangeEvent contain device identifier field named 'DeviceId', or 'Origin'? */
-        json.add("Origin", event->getPropertyByName("originDeviceID"));
+        json.add("Origin", event->getPropertyByName(ef_callOrigin));
         break;
       default:
         break;
@@ -664,7 +664,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.startObject("EventBody");
       json.add("StateName", event->getPropertyByName("statename"));
       json.add("StateValue", event->getPropertyByName("state"));
-      json.add("Origin", event->getPropertyByName("originDeviceID"));
+      json.add("Origin", event->getPropertyByName(ef_callOrigin));
       json.endObject();
     } else if (event->getName() == EventName::AddonStateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();

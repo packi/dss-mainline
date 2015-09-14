@@ -211,7 +211,7 @@ createStateChangeEvent(boost::shared_ptr<State> _state, int _oldstate,
   event->setProperty("state", _state->toString());
   event->setProperty("value", intToString(_state->getState()));
   event->setProperty("oldvalue", intToString(_oldstate));
-  event->setProperty("originDeviceID", intToString(_callOrigin));
+  event->setProperty(ef_callOrigin, intToString(_callOrigin));
   return event;
 }
 
@@ -366,7 +366,7 @@ boost::shared_ptr<Event>
   event->setProperty("scriptID", _scriptId);
   event->setProperty("statename", _name);
   event->setProperty("state", _value);
-  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 
@@ -381,7 +381,7 @@ boost::shared_ptr<Event> createGenericSignalSunshine(const uint8_t &_value,
   assert(valid(_direction));
   event->setProperty("value", intToString(_value));
   event->setProperty("direction", toString(_direction));
-  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 
@@ -394,7 +394,7 @@ boost::shared_ptr<Event>
   assert(_value == 1 || _value == 2);
   assert(validOrigin(_origin));
   event->setProperty("value", intToString(_value));
-  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 
@@ -407,7 +407,7 @@ boost::shared_ptr<Event>
   assert(_value <= 3);
   assert(validOrigin(_origin));
   event->setProperty("value", intToString(_value));
-  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 
@@ -420,7 +420,7 @@ boost::shared_ptr<Event>
   assert(_value == 1 || _value == 2);
   assert(validOrigin(_origin));
   event->setProperty("value", intToString(_value));
-  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 
@@ -432,7 +432,7 @@ createOperationLockEvent(boost::shared_ptr<Group> _group, const int _zoneID, con
   event->setProperty("zoneID", intToString(_zoneID));
   event->setProperty("groupID", intToString(_groupID));
   event->setProperty("lock", intToString(_lock));
-  event->setProperty("originDeviceID", intToString(static_cast<int>(_origin)));
+  event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }
 

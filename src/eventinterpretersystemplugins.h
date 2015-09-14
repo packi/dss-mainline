@@ -202,7 +202,8 @@ namespace dss {
           const std::string& _statename,
           const std::string& _state,
           const std::string& _value,
-          const std::string& _origin_device_id);
+          const std::string& _origin_device_id,
+          const callOrigin_t _callOrigin);
       void logSunshine(boost::shared_ptr<ScriptLogger> _logger,
                        std::string _value,
                        std::string _direction,
