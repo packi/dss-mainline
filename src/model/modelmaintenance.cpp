@@ -2289,6 +2289,12 @@ namespace dss {
     if (m_IsInitializing) {
       setupWebUpdateEvent();
       m_IsInitializing = false;
+
+      // handle delayed model dirty
+      if (m_IsDirty) {
+        m_IsDirty = false;
+        addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      }
     }
   }
 
