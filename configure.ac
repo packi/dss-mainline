@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([dss], [1.31.4], [http://redmine.digitalstrom.org])
+AC_INIT([dss], [1.31.5], [http://redmine.digitalstrom.org])
 AC_CONFIG_AUX_DIR(configure_aux)
 AC_CONFIG_SRCDIR([src/dss.cpp])
 AC_CONFIG_HEADERS([config.h])
