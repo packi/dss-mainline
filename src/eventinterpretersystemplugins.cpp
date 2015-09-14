@@ -2645,13 +2645,20 @@ namespace dss {
         try {
           name[0] = toupper(name[0]);
           if (!location.empty()) {
-            int clusterID = strToInt(location.substr(location.find("group") + 5));
-            boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
-            std::string clusterName = cluster->getName();
-            if (clusterName.empty()) {
-              clusterName = "Cluster #" + intToString(clusterID);
+            std::string groupName("group");
+            size_t groupPos = location.find(groupName);
+            if (std::string::npos != groupPos) {
+              groupPos += groupName.length();
+              int clusterID = strToInt(location.substr(groupPos));
+              boost::shared_ptr<Cluster> cluster = DSS::getInstance()->getApartment().getCluster(clusterID);
+              std::string clusterName = cluster->getName();
+              if (clusterName.empty()) {
+                clusterName = "Cluster #" + intToString(clusterID);
+              }
+              logger->logln(name + " is " + state + " in " + clusterName);
+            } else {
+              logger->logln(name + " is " + state);
             }
-            logger->logln(name + " is " + state + " in " + clusterName);
           } else {
             logger->logln(name + " is " + state);
           }
@@ -2753,6 +2760,19 @@ namespace dss {
     }
     try {
       logBuildingService(logger, value, originDeviceID);
+    } catch (std::exception &ex) {}
+    
+    logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-protection.log", NULL));
+    try {
+      int v = strToInt(value);
+      std::string valueString;
+      switch(v) {
+        case 1: valueString = "active"; break;
+        case 2: valueString = "inactive"; break;
+        default: valueString = "unknown"; break;
+      }
+      logger->logln("Service protection is " + valueString);
     } catch (std::exception &ex) {}
   }
 
