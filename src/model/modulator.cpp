@@ -235,7 +235,8 @@ namespace dss {
     }
     if(!m_ReceivedMeterValue && (m_EnergyMeterValue > 0.1)) {
       // Do nothing, the first value is just to set a baseline
-    } else if(_value >= m_LastReportedEnergyMeterValue) {
+    } else if((_value >= m_LastReportedEnergyMeterValue) &&
+              ((_value - m_LastReportedEnergyMeterValue) < (32 * 250))) {
       m_EnergyMeterValue += _value - m_LastReportedEnergyMeterValue;
       m_EnergyMeterValueWh = m_EnergyMeterValue / 3600;
     }
