@@ -692,7 +692,7 @@ BOOST_AUTO_TEST_CASE(testEnergyMeterZero) {
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
   meter->initializeEnergyMeterValue(0);
   meter->updateEnergyMeterValue(50);
-  BOOST_CHECK_EQUAL(50, meter->getEnergyMeterValue());
+  BOOST_CHECK_EQUAL(50, meter->getCachedEnergyMeterValue());
 }
 
 BOOST_AUTO_TEST_CASE(testEnergyMeterWithMeteringData) {
@@ -702,7 +702,7 @@ BOOST_AUTO_TEST_CASE(testEnergyMeterWithMeteringData) {
   meter->initializeEnergyMeterValue(50);
   meter->updateEnergyMeterValue(11);
   meter->updateEnergyMeterValue(12);
-  BOOST_CHECK_EQUAL(51, meter->getEnergyMeterValue());
+  BOOST_CHECK_EQUAL(51, meter->getCachedEnergyMeterValue());
 }
 
 BOOST_AUTO_TEST_CASE(testEnergyMeterDropout) {
@@ -713,7 +713,7 @@ BOOST_AUTO_TEST_CASE(testEnergyMeterDropout) {
   meter->updateEnergyMeterValue(11);
   meter->updateEnergyMeterValue(0);
   meter->updateEnergyMeterValue(1);
-  BOOST_CHECK_EQUAL(51, meter->getEnergyMeterValue());
+  BOOST_CHECK_EQUAL(51, meter->getCachedEnergyMeterValue());
 }
 
 BOOST_AUTO_TEST_CASE(testApartmentCreatesRootNode) {
