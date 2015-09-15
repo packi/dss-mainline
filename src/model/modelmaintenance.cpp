@@ -2024,8 +2024,27 @@ namespace dss {
       double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
-      raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue,
-                                            _sourceDevice));
+      // check for a valid dsuid
+      dsuid_t devdsuid = _sourceDevice;
+      if (_sourceDevice.id[0] == 0x00) {
+        uint32_t dsuidType =
+            (_sourceDevice.id[10] << 24) |
+            (_sourceDevice.id[9] << 16) |
+            (_sourceDevice.id[8] << 8) |
+            (_sourceDevice.id[7]);
+        // the dsm sends a type "0" dsuid but with the serial number only,
+        // need to replace with the real sgtin, #10887
+        if (dsuidType == 0) {
+          try {
+            uint32_t serialNumber;
+            if (dsuid_get_serial_number(&devdsuid, &serialNumber) == 0) {
+              DeviceReference devRef = m_pApartment->getDevices().getBySerial(serialNumber);
+              devdsuid = devRef.getDSID();
+            }
+          } catch (ItemNotFoundException& e) {}
+        }
+      }
+      raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue, devdsuid));
     } catch(ItemNotFoundException& e) {
       log("onZoneSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
