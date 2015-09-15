@@ -24,6 +24,7 @@
 #ifndef MODULATOR_H
 #define MODULATOR_H
 
+#include <boost/enable_shared_from_this.hpp>
 #include <string>
 #include <bitset>
 
@@ -50,7 +51,8 @@ namespace dss {
   bool busMemberIsDSMeter(BusMemberDevice_t type);
 
   /** Represents a DSMeter */
-  class DSMeter : public DeviceContainer,
+  class DSMeter : public boost::enable_shared_from_this<DSMeter>,
+                  public DeviceContainer,
                   public PhysicalModelItem {
   private:
     dsuid_t m_DSID;
@@ -68,6 +70,7 @@ namespace dss {
     double m_EnergyMeterValueWh;
     unsigned long long m_LastReportedEnergyMeterValue;
     bool m_ReceivedMeterValue;
+    bool m_readStoredMeterValues;
     DateTime m_EnergyMeterValueTimeStamp;
     std::string m_HardwareVersion;
     int m_armSoftwareVersion;
