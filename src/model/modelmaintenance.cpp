@@ -1150,22 +1150,15 @@ namespace dss {
 
   void ModelMaintenance::addModelEvent(ModelEvent* _pEvent) {
     // filter out dirty events, as this will rewrite apartment.xml
-    if (m_IsInitializing) {
-      if (_pEvent->getEventType() == ModelEvent::etModelDirty) {
-        m_IsDirty = true;
-        delete _pEvent;
-      } else if ((_pEvent->getEventType() == ModelEvent::etMeterReady) ||
-                 (_pEvent->getEventType() == ModelEvent::etBusReady)) {
-        boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-        m_ModelEvents.push_back(_pEvent);
-        m_NewModelEvent.notify_one();
-      } else {
-        delete _pEvent;
-      }
+    if (m_IsInitializing && 
+       (_pEvent->getEventType() == ModelEvent::etModelDirty)) {
+      m_IsDirty = true;
+      delete _pEvent;
+      // notify_one not necessary, since event not added to m_ModelEvents
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
       m_ModelEvents.push_back(_pEvent);
-      m_NewModelEvent.notify_one();
+      m_NewModelEvent.notify_one(); // trigger m_NewModelEvent.wait_for
     }
   } // addModelEvent
 
@@ -2296,6 +2289,12 @@ namespace dss {
     if (m_IsInitializing) {
       setupWebUpdateEvent();
       m_IsInitializing = false;
+
+      // handle delayed model dirty
+      if (m_IsDirty) {
+        m_IsDirty = false;
+        addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      }
     }
   }
 
