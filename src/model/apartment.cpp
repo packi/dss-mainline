@@ -320,12 +320,6 @@ namespace dss {
     boost::shared_ptr<DSMeter> pResult = boost::make_shared<DSMeter>(_dsid, this);
     m_DSMeters.push_back(pResult);
 
-    // set initial meter value from metering subsystem
-    if(m_pMetering != NULL) {
-      unsigned long lastEnergyCounter = m_pMetering->getLastEnergyCounter(pResult);
-      pResult->initializeEnergyMeterValue(lastEnergyCounter);
-    }
-
     return pResult;
   } // allocateDSMeter
 
