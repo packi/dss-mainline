@@ -51,7 +51,7 @@ function registerTrigger(tPath, tEventName, tParamObj)
     Property.setProperty(triggerNode.getPath() + '/triggerPath', tPath)
     Property.setProperty(triggerNode.getPath() + '/relayedEventName', tEventName)
     if (tParamObj != null) {
-        tParamString="";
+        var tParamString = "";
         for (var sKey in tParamObj) {
             tParamString+=sKey+"=" + tParamObj[sKey] + "&";
         }
