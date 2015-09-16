@@ -1389,6 +1389,45 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkDirectDeviceAction(PropertyNodePtr _triggerProp) {
+    if (m_evtName != EventName::ButtonDeviceAction) {
+      return false;
+    }
+
+    dsuid_t dsuid = m_evtSrcDSID;
+    std::string action = m_properties.get("actionID");
+
+    if (dsuid == DSUID_NULL) {
+      return false;
+    }
+
+    if (action.empty() || (action == "-1")) {
+      return false;
+    }
+
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsuid");
+    if (triggerDSID == NULL) {
+      return false;
+    }
+
+    PropertyNodePtr actionNode =  _triggerProp->getPropertyByName("action");
+    if (actionNode == NULL) {
+      return false;
+    }
+    std::string sDSID = triggerDSID->getAsString();
+    std::string sAction = actionNode->getAsString();
+    if ((sDSID == "-1") || (sDSID == dsuid2str(dsuid))) {
+      if ((sAction == action) || (sAction == "-1")) {
+        Logger::getInstance()->log("SystemTrigger::"
+                "checkDevice:: Match: ButtonClick dSID: " + sDSID +
+                ", action: " + sAction);
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   bool SystemTrigger::checkHighlevel(PropertyNodePtr _triggerProp) {
       if (m_evtName != "highlevelevent") {
         return false;
@@ -1646,6 +1685,13 @@ namespace dss {
       } else if (m_evtName == EventName::DeviceButtonClick) {
         if (triggerValue == "device-msg") {
           if (checkDevice(triggerProp)) {
+            return true;
+          }
+        }
+
+      } else if (m_evtName == EventName::ButtonDeviceAction) {
+        if (triggerValue == "device-action") {
+          if (checkDirectDeviceAction(triggerProp)) {
             return true;
           }
         }
