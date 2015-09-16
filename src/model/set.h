@@ -126,6 +126,9 @@ namespace dss {
     /** Returns the device indicated by \a _dsid */
     DeviceReference getByDSID(const dsuid_t _dsid)  const;
 
+    /** Returns the device indicated by \a _serial */
+    DeviceReference getBySerial(const uint32_t _serial)  const;
+
     /** Returns the number of devices contained in this set */
     int length() const;
     /** Returns true if the set is empty */
