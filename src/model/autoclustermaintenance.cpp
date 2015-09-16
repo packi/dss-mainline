@@ -282,31 +282,45 @@ int AutoClusterMaintenance::getFirstLockedClusterAssignment(Device &_device)
 void AutoClusterMaintenance::busAddToGroup(Device &_device, boost::shared_ptr<Cluster> _cluster)
 {
   // operation can be overridden for testing.
-
-  m_pApartment->getBusInterface()->getStructureModifyingBusInterface()->addToGroup(
-        _device.getDSMeterDSID(),
-        _cluster->getID(),
-        _device.getShortAddress());
+  try {
+    m_pApartment->getBusInterface()->getStructureModifyingBusInterface()->addToGroup(
+          _device.getDSMeterDSID(),
+          _cluster->getID(),
+          _device.getShortAddress());
+  } catch (std::runtime_error & err) {
+    log("The device" + dsuid2str(_device.getDSID()) + " can not be added to the group:" + 
+      intToString(_cluster->getID()) + " Error is: " + err.what(), lsWarning);
+  }
 } /* busAddToGroup */
 
 void AutoClusterMaintenance::busRemoveFromGroup(Device &_device, boost::shared_ptr<Cluster> _cluster)
 {
-  // operation can be overridden for testing.
-  m_pApartment->getBusInterface()->getStructureModifyingBusInterface()->removeFromGroup(
+  try {
+    // operation can be overridden for testing.
+    m_pApartment->getBusInterface()->getStructureModifyingBusInterface()->removeFromGroup(
         _device.getDSMeterDSID(),
         _cluster->getID(),
         _device.getShortAddress());
+  } catch (std::runtime_error & err) {
+   log("The device" + dsuid2str(_device.getDSID()) + " can not be removed from the group:" + 
+      intToString(_cluster->getID()) + " Error is: " + err.what(), lsWarning);
+  }
 } /* busRemoveFromGroup */
 
 void AutoClusterMaintenance::busUpdateCluster(boost::shared_ptr<Cluster> _cluster)
 {
-  // operation can be overridden for testing.
-  StructureModifyingBusInterface* itf = m_pApartment->getBusInterface()->getStructureModifyingBusInterface();
-  itf->clusterSetName(_cluster->getID(), _cluster->getName());
-  itf->clusterSetStandardID(_cluster->getID(), _cluster->getStandardGroupID());
-  itf->clusterSetProperties(_cluster->getID(), _cluster->getLocation(),
-                            _cluster->getFloor(), _cluster->getProtectionClass());
-  itf->clusterSetLockedScenes(_cluster->getID(), _cluster->getLockedScenes());
+  try {
+    // operation can be overridden for testing.
+    StructureModifyingBusInterface* itf = m_pApartment->getBusInterface()->getStructureModifyingBusInterface();
+    itf->clusterSetName(_cluster->getID(), _cluster->getName());
+    itf->clusterSetStandardID(_cluster->getID(), _cluster->getStandardGroupID());
+    itf->clusterSetProperties(_cluster->getID(), _cluster->getLocation(),
+                              _cluster->getFloor(), _cluster->getProtectionClass());
+    itf->clusterSetLockedScenes(_cluster->getID(), _cluster->getLockedScenes());
+  } catch (std::runtime_error & err) {
+    log("The cluster" + intToString(_cluster->getID()) + " can not be updated:" + 
+    "Error is: " + err.what(), lsWarning);
+  }
 } /* busUpdateCluster */
 
 }
