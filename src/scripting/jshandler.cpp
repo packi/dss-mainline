@@ -549,7 +549,8 @@ namespace dss {
       raisePendingExceptions();
       // NOTE:do not throw an exception here
     }
-    return true;
+    JS_SET_RVAL(m_pContext, &rval, BOOLEAN_TO_JSVAL(true));
+    return rval;
   } // doEvaluateScript
 
   template <>
@@ -599,7 +600,8 @@ namespace dss {
       raisePendingExceptions();
       // NOTE: do not throw an exception here
     }
-    return true;
+    JS_SET_RVAL(m_pContext, &rval, BOOLEAN_TO_JSVAL(true));
+    return rval;
   } // doEvaluate
 
   template <>
