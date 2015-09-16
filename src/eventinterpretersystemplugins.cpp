@@ -2222,6 +2222,21 @@ namespace dss {
     }
   }
 
+  void SystemEventLog::logDirectDeviceAction(
+                                boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" +
+                          dsuid2str(_device->getDSID());
+    std::string action;
+    if (m_properties.has("actionID")) {
+      action = m_properties.get("actionID");
+    }
+
+    //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
+    _logger->logln(";DirectDeviceAction;Action " + action + ";" + action +
+                   ";;;;;" + devName + ";");
+  }
+
   void SystemEventLog::logDeviceBinaryInput(
                                 boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device) {
@@ -2603,6 +2618,14 @@ namespace dss {
     }
   }
 
+  void SystemEventLog::directDeviceAction() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        "system-event.log", NULL));
+    if (m_raisedAtDevice != NULL) {
+      logDirectDeviceAction(logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
   void SystemEventLog::deviceBinaryInputEvent() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
         "system-event.log", NULL));
@@ -2938,6 +2961,8 @@ namespace dss {
       undoScene();
     } else if (m_evtName == EventName::DeviceButtonClick) {
       buttonClick();
+    } else if (m_evtName == EventName::ButtonDeviceAction) {
+      directDeviceAction();
     } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
       deviceBinaryInputEvent();
     } else if (m_evtName == EventName::DeviceSensorEvent) {

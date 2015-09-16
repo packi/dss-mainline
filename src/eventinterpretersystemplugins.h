@@ -188,6 +188,8 @@ namespace dss {
                             std::string _origin_token);
       void logDeviceButtonClick(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device);
+      void logDirectDeviceAction(boost::shared_ptr<ScriptLogger> _logger,
+                                 boost::shared_ptr<const Device> _device);
       void logDeviceBinaryInput(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device);
       void logDeviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger,
@@ -235,6 +237,7 @@ namespace dss {
       void blink();
       void undoScene();
       void buttonClick();
+      void directDeviceAction();
       void deviceBinaryInputEvent();
       void deviceSensorEvent();
       void deviceSensorValue();
