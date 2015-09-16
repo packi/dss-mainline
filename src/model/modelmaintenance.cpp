@@ -891,6 +891,14 @@ namespace dss {
         onDeviceActionFiltered(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
       }
       break;
+    case ModelEvent::etButtonDirectActionDevice:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 2) {
+        log("Expected exactly 2 parameter for ModelEvent::etButtonDirectActionDevice");
+      } else {
+        onDeviceDirectActionEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1));
+      }
+      break;
     case ModelEvent::etCallSceneGroup:
       assert(pEventWithDSID != NULL);
       if (event->getParameterCount() == 6) {
@@ -1724,6 +1732,25 @@ namespace dss {
       log("onDeviceActionEvent: Could not find dsMeter with bus-id '" + dsuid2str(_dsMeterID) + "'", lsError);
     }
   } // onDeviceActionEvent
+
+  void ModelMaintenance::onDeviceDirectActionEvent(const dsuid_t& _dsMeterID, const int _deviceID, const int _actionID) {
+    try {
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      log("onDeviceDirectActionEvent: dsMeter-id '" + dsuid2str(_dsMeterID) + "' for device '" + intToString(_deviceID) +
+          "' action: " + intToString(_actionID));
+      try {
+        DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
+        boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+        boost::shared_ptr<Event> event = boost::make_shared<Event>(EventName::ButtonDeviceAction, pDevRev);
+        event->setProperty("actionID", intToString(_actionID));
+        raiseEvent(event);
+      } catch(ItemNotFoundException& e) {
+        log("onDeviceDirectActionEvent: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + dsuid2str(_dsMeterID), lsError);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onDeviceDirectActionEvent: Could not find dsMeter with bus-id '" + dsuid2str(_dsMeterID) + "'", lsError);
+    }
+  } // onDeviceDirectActionEvent
 
   void ModelMaintenance::onAddDevice(const dsuid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("Device discovered:");
