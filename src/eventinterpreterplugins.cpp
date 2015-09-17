@@ -599,7 +599,12 @@ namespace dss {
     );
     m_pRelayTarget->subscribeTo(cleanupEventSubscription);
     m_pRelayTarget->setCallback(boost::bind(&EventInterpreterPluginJavascript::cleanupTerminatedScripts, this, _1, _2));
-    sendCleanupEvent();
+
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(kCleanupScriptsEventName);
+    pEvent->setProperty(EventProperty::ICalStartTime, DateTime().toRFC2445IcalDataTime());
+    pEvent->setProperty(EventProperty::ICalRRule, "FREQ=SECONDLY;INTERVAL=20");
+    pEvent->setProperty(EventProperty::Unique, "Yes");
+    getEventInterpreter().getQueue().pushEvent(pEvent);
   } // setupCleanupEvent
 
   void EventInterpreterPluginJavascript::cleanupTerminatedScripts(Event& _event, const EventSubscription& _subscription) {
@@ -622,14 +627,7 @@ namespace dss {
         ++ipScriptContextWrapper;
       }
     }
-    sendCleanupEvent();
   } // cleanupTerminatedScripts
-
-  void EventInterpreterPluginJavascript::sendCleanupEvent() {
-    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(kCleanupScriptsEventName);
-    pEvent->setProperty("time", "+" + intToString(20));
-    getEventInterpreter().getQueue().pushEvent(pEvent);
-  } // sendCleanupEvent
 
   boost::shared_ptr<ScriptContextWrapper> EventInterpreterPluginJavascript::getContextWrapperForContext(ScriptContext* _pContext) {
     boost::shared_ptr<ScriptContextWrapper> result;

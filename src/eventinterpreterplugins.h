@@ -65,7 +65,6 @@ namespace dss {
     void initializeEnvironment();
     void setupCleanupEvent();
     void cleanupTerminatedScripts(Event& _event, const EventSubscription& _subscription);
-    void sendCleanupEvent();
   public:
     EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter);
     ~EventInterpreterPluginJavascript();
