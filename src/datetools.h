@@ -234,6 +234,7 @@ namespace dss {
       * @return \a DateTime::NullDate or a \a DateTime value after \a _from
       */
     virtual DateTime getNextOccurence(const DateTime& _from) = 0;
+    virtual bool hasRecurrence() const = 0;
   };
 
   /** Schedule that's scheduled on a specific DateTime */
@@ -244,6 +245,7 @@ namespace dss {
     StaticSchedule(const DateTime& _when) : m_When(_when) {}
     virtual ~StaticSchedule() {}
     virtual DateTime getNextOccurence(const DateTime& _from);
+    virtual bool hasRecurrence() const { return false; }
   };
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
@@ -260,6 +262,7 @@ namespace dss {
     virtual ~ICalSchedule();
 
     virtual DateTime getNextOccurence(const DateTime& _from) ;
+    virtual bool hasRecurrence() const { return true; }
   }; // ICalSchedule
 
   class ICalEvent {

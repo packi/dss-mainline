@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(testStaticSchedule) {
 
   StaticSchedule schedule(when);
   BOOST_CHECK_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
-  BOOST_CHECK_EQUAL(DateTime::NullDate, schedule.getNextOccurence(when.addMinute(1)));
+  BOOST_CHECK_EQUAL(when.addMinute(1), schedule.getNextOccurence(when.addMinute(1)));
 } // testStaticSchedule
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)

@@ -947,7 +947,7 @@ namespace dss {
           m_EventQueue->pushEvent(evt);
 
           // check if the event will be raised again
-          if(ipSchedEvt->getSchedule().getNextOccurence(nextSecond) == DateTime::NullDate) {
+          if (!ipSchedEvt->getSchedule().hasRecurrence() || (ipSchedEvt->getSchedule().getNextOccurence(nextSecond) == DateTime::NullDate)) {
             log("Runner: event " + ipSchedEvt->getID() + " has no further schedule");
             removeIDs.push_back(ipSchedEvt->getID());
           }

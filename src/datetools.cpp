@@ -474,8 +474,9 @@ namespace dss {
   DateTime StaticSchedule::getNextOccurence(const DateTime& _from) {
     if (_from <= m_When) {
       return m_When;
+    } else {
+      return _from;
     }
-    return DateTime::NullDate;
   } // getNextOccurence
 
   //================================================== ICalSchedule
