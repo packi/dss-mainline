@@ -206,19 +206,30 @@ namespace dss {
     }
   }
 
+  int MeterMaintenance::getNumValiddSMeters() const {
+    int cntReadOutMeters = 0;
+    foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
+      if (busMemberIsdSM(pDSMeter->getBusMemberType()) &&
+          pDSMeter->isPresent() &&
+          pDSMeter->isValid()) {
+        ++cntReadOutMeters;
+      }
+    }
+    return cntReadOutMeters;
+  }
+
   void MeterMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
-
-    int cntReadOutMeters = 0;
     foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
       if (pDSMeter->isPresent() &&
           (!pDSMeter->isValid())) {
-          dsMeterReady(pDSMeter->getDSID());
+        // call for all bus participants (vdc, dsm,..)
+        dsMeterReady(pDSMeter->getDSID());
+        // only for non virtual devices
+        if (busMemberIsdSM(pDSMeter->getBusMemberType())) {
           hadToUpdate = true;
           break;
-      }
-      if (pDSMeter->isPresent() && pDSMeter->isValid()) {
-        ++cntReadOutMeters;
+        }
       }
     }
 
@@ -229,7 +240,12 @@ namespace dss {
 
     // If we didn't have to update for one cycle, assume that we're done
     if (m_IsInitializing && !hadToUpdate) {
-      if (cntReadOutMeters == getBusMemberCount()) {
+      int cntReadOutMeters = getNumValiddSMeters();
+      int busMemberCount = getdSMBusMemberCount();
+      log("Initializing: ReadOutMeters: " +
+          intToString(cntReadOutMeters) +
+          " BusMemberCounts: " + intToString(busMemberCount), lsDebug);
+      if (cntReadOutMeters == busMemberCount) {
         setupInitializedState();
       } else {
         monitorInitialization();
@@ -269,7 +285,7 @@ namespace dss {
     }
   } // monitorInitialization
 
-  int MeterMaintenance::getBusMemberCount() {
+  int MeterMaintenance::getdSMBusMemberCount() {
     if (m_pQueryBusInterface == NULL) {
       return -1;
     }
@@ -277,16 +293,19 @@ namespace dss {
     try {
       std::vector<DSMeterSpec_t> vecMeterSpec =  m_pQueryBusInterface->getBusMembers();
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
-        if (busMemberIsDSMeter(spec.DeviceType)) {
+        log("getdSMBusMemberCount Device: " + dsuid2str(spec.DSID) + 
+            " Device Type: " + intToString(spec.DeviceType), lsDebug);
+        if (busMemberIsdSM(spec.DeviceType)) {
           // ignore dSMx with older api version
           if (spec.APIVersion >= 0x300) {
             ++busMemberCount;
+            log("getdSMBusMemberCount Device: " + dsuid2str(spec.DSID) + " counting.", lsDebug);
           }
         }
       }
       return busMemberCount;
     } catch(BusApiError& e) {
-      log(std::string("Bus error getting bus member count. ") + e.what(), lsError);
+      log(std::string("Bus error getting dSM bus member count. ") + e.what(), lsError);
     }
     return -1;
   }
