@@ -55,6 +55,7 @@ namespace dss {
       bool checkDeviceSensor(PropertyNodePtr _triggerProp);
       bool checkDeviceBinaryInput(PropertyNodePtr _triggerProp);
       bool checkDevice(PropertyNodePtr _tiggerProp);
+      bool checkDirectDeviceAction(PropertyNodePtr _triggerProp);
       bool checkHighlevel(PropertyNodePtr _triggerProp);
       bool checkState(PropertyNodePtr _triggerProp);
       bool checkSensorValue(PropertyNodePtr _triggerProp);
@@ -187,6 +188,8 @@ namespace dss {
                             std::string _origin_token);
       void logDeviceButtonClick(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device);
+      void logDirectDeviceAction(boost::shared_ptr<ScriptLogger> _logger,
+                                 boost::shared_ptr<const Device> _device);
       void logDeviceBinaryInput(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device);
       void logDeviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger,
@@ -234,6 +237,7 @@ namespace dss {
       void blink();
       void undoScene();
       void buttonClick();
+      void directDeviceAction();
       void deviceBinaryInputEvent();
       void deviceSensorEvent();
       void deviceSensorValue();

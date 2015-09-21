@@ -44,6 +44,7 @@ namespace dss {
                     etBlinkDevice, /**< A device was blinked */
                     etCallSceneDeviceLocal, /**< A device has changed the status locally */
                     etButtonClickDevice, /** < A button click on a device not handled by the dSMeter */
+                    etButtonDirectActionDevice, /** < A direct action from a device not handled by the dSMeter */
                     etNewDevice,       /**< A new device has been detected */
                     etLostDevice,       /**< A device became inactive */
                     etDeviceChanged,   /**< The device needs to be rescanned */
