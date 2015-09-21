@@ -49,6 +49,7 @@ namespace dss {
   };
 
   bool busMemberIsDSMeter(BusMemberDevice_t type);
+  bool busMemberIsdSM(BusMemberDevice_t type);
 
   /** Represents a DSMeter */
   class DSMeter : public boost::enable_shared_from_this<DSMeter>,
