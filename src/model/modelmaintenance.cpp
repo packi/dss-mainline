@@ -229,7 +229,11 @@ namespace dss {
 
     // If we didn't have to update for one cycle, assume that we're done
     if (m_IsInitializing && !hadToUpdate) {
-      if (cntReadOutMeters == getBusMemberCount()) {
+      int busMemberCount = getBusMemberCount();
+      log("Initializing: ReadOutMeters: " + 
+          intToString(cntReadOutMeters) + 
+          " BusMemberCounts: " + intToString(busMemberCount), lsDebug);
+      if (cntReadOutMeters == busMemberCount) {
         setupInitializedState();
       } else {
         monitorInitialization();
@@ -277,6 +281,8 @@ namespace dss {
     try {
       std::vector<DSMeterSpec_t> vecMeterSpec =  m_pQueryBusInterface->getBusMembers();
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
+        log("getBusMemberCount Device: " + dsuid2str(spec.DSID) + 
+            " Device Type: " + intToString(spec.DeviceType), lsDebug);
         if (busMemberIsDSMeter(spec.DeviceType)) {
           // ignore dSMx with older api version
           if (spec.APIVersion >= 0x300) {
