@@ -992,7 +992,7 @@ namespace dss {
       break;
     case ModelEvent::etMeteringValues:
       if (event->getParameterCount() != 2) {
-        log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");
+        log("Expected exactly 2 parameter for ModelEvent::etMeteringValues");
       } else {
         assert(pEventWithDSID != NULL);
         dsuid_t meterID = pEventWithDSID->getDSID();
