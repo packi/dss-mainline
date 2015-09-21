@@ -34,6 +34,7 @@
 #include "src/propertysystem.h"
 #include "set.h"
 #include "apartment.h"
+#include "src/metering/metering.h"
 
 namespace dss {
 
@@ -47,6 +48,14 @@ namespace dss {
     return false;
   }
 
+  bool busMemberIsdSM(BusMemberDevice_t type)
+  {
+    if ((type == BusMember_dSM11) ||
+        (type == BusMember_dSM12)) {
+      return true;
+    }
+    return false;
+  }
 
   //================================================== DSMeter
 
@@ -61,6 +70,7 @@ namespace dss {
     m_EnergyMeterValueWh(0),
     m_LastReportedEnergyMeterValue(0),
     m_ReceivedMeterValue(false),
+    m_readStoredMeterValues(false),
     m_HardwareVersion(""),
     m_armSoftwareVersion(0),
     m_dspSoftwareVersion(0),
@@ -221,9 +231,20 @@ namespace dss {
 
   void DSMeter::updateEnergyMeterValue(unsigned long _value)  {
     DateTime now;
-    if(!m_ReceivedMeterValue && (m_EnergyMeterValue != 0)) {
+    if (!m_readStoredMeterValues) {
+      // get the last/first value from the database
+      unsigned long lastEnergyCounter;
+      if (DSS::hasInstance()) {
+        lastEnergyCounter = DSS::getInstance()->getMetering().
+                                                getLastEnergyCounter(shared_from_this());
+        initializeEnergyMeterValue(lastEnergyCounter);
+        m_readStoredMeterValues = true;
+      }
+    }
+    if(!m_ReceivedMeterValue && (m_EnergyMeterValue > 0.1)) {
       // Do nothing, the first value is just to set a baseline
-    } else if(_value >= m_LastReportedEnergyMeterValue) {
+    } else if((_value >= m_LastReportedEnergyMeterValue) &&
+              ((_value - m_LastReportedEnergyMeterValue) < (32 * 250))) {
       m_EnergyMeterValue += _value - m_LastReportedEnergyMeterValue;
       m_EnergyMeterValueWh = m_EnergyMeterValue / 3600;
     }

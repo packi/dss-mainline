@@ -27,10 +27,17 @@ fi
 MT_OPTION([debug], [enable],
           [enable debug flags during compilation],
           [
-            CFLAGS="-g -Wall -O0"
-            CXXFLAGS="-g -Wall -O0"
+            CFLAGS="-D_DEBUG -g -Wall -O0"
+            CXXFLAGS="-D_DEBUG -g -Wall -O0"
           ],
           [])
+
+MT_OPTION([asserts], [disable],
+          [enable asserts during compilation (default: enabled)],
+          [],
+          [
+            AC_DEFINE(NDEBUG, [1], [asserts disabled])
+          ])
 
 GCOV_REPORT=
 MT_OPTION([test-coverage], [enable],

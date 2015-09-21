@@ -39,15 +39,19 @@
 #include "src/model/modelconst.h"
 #include "src/metering/metering.h"
 
+#include "util/dss_instance_fixture.h"
+
 #include <rrd.h>
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/filesystem.hpp>
 #include <memory>
 
 using namespace std;
 using namespace dss;
 
 DSUID_DEFINE(dsuid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13);
+DSUID_DEFINE(dsmeterDSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
 
 // wrapper class to access protected members
 class testMetering: public dss::Metering {
@@ -421,6 +425,43 @@ BOOST_AUTO_TEST_CASE(seriesDateCheckDbReset) {
     DateTime lastDbEntry(rrd_last_r(fileName.c_str()));
     int delta = lastDbEntry.difference(recentTS);
     BOOST_CHECK_NE(delta, 0);
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE(testEnergyMeterRestoreData, DSSInstanceFixture) {
+  Apartment apt(DSS::getInstance());
+  boost::shared_ptr<dss::Metering> pMetering = boost::make_shared<dss::Metering>(DSS::getInstance());
+  apt.setMetering(pMetering.get());
+
+  {
+    std::string fileName = pMetering->getStorageLocation() + dsuid2str(dsmeterDSID) + ".rrd";
+    boost::filesystem::remove(fileName);
+  }
+
+  DateTime now;
+  {
+    boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
+    meter->setCapability_HasMetering(true);
+    meter->updateEnergyMeterValue(100);
+    pMetering->postMeteringEvent(meter, 0, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), now);
+    meter->updateEnergyMeterValue(120);
+    pMetering->postMeteringEvent(meter, 0, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), now.addSeconds(1));
+    BOOST_CHECK_EQUAL(120, meter->getEnergyMeterValue());
+  }
+  apt.removeDSMeter(dsmeterDSID);
+  {
+    boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
+    meter->setCapability_HasMetering(true);
+    meter->updateEnergyMeterValue(10);
+    pMetering->postMeteringEvent(meter, 0, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), now.addSeconds(2));
+    meter->updateEnergyMeterValue(20);
+    pMetering->postMeteringEvent(meter, 0, (unsigned long long)(meter->getCachedEnergyMeterValue() + 0.5), now.addSeconds(3));
+    BOOST_CHECK_EQUAL(130, meter->getEnergyMeterValue());
+  }
+
+  {
+    std::string fileName = pMetering->getStorageLocation() + dsuid2str(dsmeterDSID) + ".rrd";
+    boost::filesystem::remove(fileName);
   }
 }
 

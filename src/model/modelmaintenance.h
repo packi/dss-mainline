@@ -131,6 +131,7 @@ namespace dss {
 
   private:
     void synchronizeMeters();
+    int getNumValiddSMeters() const;
     void readOutPendingMeter();
     void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void setApartmentState();
@@ -139,7 +140,7 @@ namespace dss {
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
     void setupInitializedState();
     void monitorInitialization();
-    int getBusMemberCount();
+    int getdSMBusMemberCount();
 
   private:
     DSS* m_pDSS;

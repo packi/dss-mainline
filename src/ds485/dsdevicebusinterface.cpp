@@ -93,13 +93,15 @@ namespace dss {
                                              uint8_t _configClass,
                                              uint8_t _configIndex,
                                              uint8_t _value) {
+
+    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment()
+                                        .getDSMeterByDSID(_device.getDSMeterDSID());
+
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
 
-    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment()
-                                        .getDSMeterByDSID(_device.getDSMeterDSID());
     int ret;
     if (pMeter->getApiVersion() >= 0x301) {
       ret = DeviceConfig_set_sync(m_DSMApiHandle, _device.getDSMeterDSID(),
@@ -185,13 +187,14 @@ namespace dss {
   } // getSensorValue
 
   void DSDeviceBusInterface::addGroup(const Device& _device, const int _groupID) {
+
+    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment()
+                                        .getDSMeterByDSID(_device.getDSMeterDSID());
+
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
-
-    boost::shared_ptr<DSMeter> pMeter = DSS::getInstance()->getApartment()
-                                        .getDSMeterByDSID(_device.getDSMeterDSID());
     int ret = 0;
     if (pMeter->getApiVersion() >= 0x301) {
       ret = DeviceGroupMembershipModify_add_sync(m_DSMApiHandle,

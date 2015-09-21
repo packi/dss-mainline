@@ -97,7 +97,8 @@ BOOST_AUTO_TEST_CASE(testExceptionHandling) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
 
   // verify that the local "throw x" exception is handled withing the engine itself
-  ctx->evaluate<double>("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; x = 5; throw x; x = 10;");
+  ctx->evaluate<std::string>
+    ("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; x = 5; throw x; x = 10;");
 
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("x"), 5);

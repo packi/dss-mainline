@@ -268,6 +268,33 @@ namespace dss {
     return resultSet.m_ContainedDevices.front();
   } // getByDSID
 
+  class BySerialSelector : public IDeviceSelector {
+  private:
+    const uint32_t m_serial;
+  public:
+    BySerialSelector(const uint32_t _serial) : m_serial(_serial) {}
+    virtual ~BySerialSelector() {};
+
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      dsuid_t dsuid = _device->getDSID();
+      if (!_device->isVdcDevice()) {
+        uint32_t serialNumber;
+        if (dsuid_get_serial_number(&dsuid, &serialNumber) == 0) {
+          return (serialNumber == m_serial);
+        }
+      }
+      return false;
+    }
+  };
+
+  DeviceReference Set::getBySerial(const uint32_t _serial) const {
+    Set resultSet = getSubset(BySerialSelector(_serial));
+    if(resultSet.length() == 0) {
+      throw ItemNotFoundException("with serial " + uintToString(_serial, true));
+    }
+    return resultSet.m_ContainedDevices.front();
+  } // getBySerial
+
   int Set::length() const {
     return m_ContainedDevices.size();
   } // length

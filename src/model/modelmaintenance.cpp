@@ -206,19 +206,30 @@ namespace dss {
     }
   }
 
+  int MeterMaintenance::getNumValiddSMeters() const {
+    int cntReadOutMeters = 0;
+    foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
+      if (busMemberIsdSM(pDSMeter->getBusMemberType()) &&
+          pDSMeter->isPresent() &&
+          pDSMeter->isValid()) {
+        ++cntReadOutMeters;
+      }
+    }
+    return cntReadOutMeters;
+  }
+
   void MeterMaintenance::readOutPendingMeter() {
     bool hadToUpdate = false;
-
-    int cntReadOutMeters = 0;
     foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
       if (pDSMeter->isPresent() &&
           (!pDSMeter->isValid())) {
-          dsMeterReady(pDSMeter->getDSID());
+        // call for all bus participants (vdc, dsm,..)
+        dsMeterReady(pDSMeter->getDSID());
+        // only for non virtual devices
+        if (busMemberIsdSM(pDSMeter->getBusMemberType())) {
           hadToUpdate = true;
           break;
-      }
-      if (pDSMeter->isPresent() && pDSMeter->isValid()) {
-        ++cntReadOutMeters;
+        }
       }
     }
 
@@ -229,7 +240,12 @@ namespace dss {
 
     // If we didn't have to update for one cycle, assume that we're done
     if (m_IsInitializing && !hadToUpdate) {
-      if (cntReadOutMeters == getBusMemberCount()) {
+      int cntReadOutMeters = getNumValiddSMeters();
+      int busMemberCount = getdSMBusMemberCount();
+      log("Initializing: ReadOutMeters: " +
+          intToString(cntReadOutMeters) +
+          " BusMemberCounts: " + intToString(busMemberCount), lsDebug);
+      if (cntReadOutMeters == busMemberCount) {
         setupInitializedState();
       } else {
         monitorInitialization();
@@ -269,7 +285,7 @@ namespace dss {
     }
   } // monitorInitialization
 
-  int MeterMaintenance::getBusMemberCount() {
+  int MeterMaintenance::getdSMBusMemberCount() {
     if (m_pQueryBusInterface == NULL) {
       return -1;
     }
@@ -277,16 +293,19 @@ namespace dss {
     try {
       std::vector<DSMeterSpec_t> vecMeterSpec =  m_pQueryBusInterface->getBusMembers();
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
-        if (busMemberIsDSMeter(spec.DeviceType)) {
+        log("getdSMBusMemberCount Device: " + dsuid2str(spec.DSID) + 
+            " Device Type: " + intToString(spec.DeviceType), lsDebug);
+        if (busMemberIsdSM(spec.DeviceType)) {
           // ignore dSMx with older api version
           if (spec.APIVersion >= 0x300) {
             ++busMemberCount;
+            log("getdSMBusMemberCount Device: " + dsuid2str(spec.DSID) + " counting.", lsDebug);
           }
         }
       }
       return busMemberCount;
     } catch(BusApiError& e) {
-      log(std::string("Bus error getting bus member count. ") + e.what(), lsError);
+      log(std::string("Bus error getting dSM bus member count. ") + e.what(), lsError);
     }
     return -1;
   }
@@ -973,7 +992,7 @@ namespace dss {
       break;
     case ModelEvent::etMeteringValues:
       if (event->getParameterCount() != 2) {
-        log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");
+        log("Expected exactly 2 parameter for ModelEvent::etMeteringValues");
       } else {
         assert(pEventWithDSID != NULL);
         dsuid_t meterID = pEventWithDSID->getDSID();
@@ -1150,22 +1169,15 @@ namespace dss {
 
   void ModelMaintenance::addModelEvent(ModelEvent* _pEvent) {
     // filter out dirty events, as this will rewrite apartment.xml
-    if (m_IsInitializing) {
-      if (_pEvent->getEventType() == ModelEvent::etModelDirty) {
-        m_IsDirty = true;
-        delete _pEvent;
-      } else if ((_pEvent->getEventType() == ModelEvent::etMeterReady) ||
-                 (_pEvent->getEventType() == ModelEvent::etBusReady)) {
-        boost::mutex::scoped_lock lock(m_ModelEventsMutex);
-        m_ModelEvents.push_back(_pEvent);
-        m_NewModelEvent.notify_one();
-      } else {
-        delete _pEvent;
-      }
+    if (m_IsInitializing && 
+       (_pEvent->getEventType() == ModelEvent::etModelDirty)) {
+      m_IsDirty = true;
+      delete _pEvent;
+      // notify_one not necessary, since event not added to m_ModelEvents
     } else {
       boost::mutex::scoped_lock lock(m_ModelEventsMutex);
       m_ModelEvents.push_back(_pEvent);
-      m_NewModelEvent.notify_one();
+      m_NewModelEvent.notify_one(); // trigger m_NewModelEvent.wait_for
     }
   } // addModelEvent
 
@@ -2031,8 +2043,27 @@ namespace dss {
       double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
-      raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue,
-                                            _sourceDevice));
+      // check for a valid dsuid
+      dsuid_t devdsuid = _sourceDevice;
+      if (_sourceDevice.id[0] == 0x00) {
+        uint32_t dsuidType =
+            (_sourceDevice.id[10] << 24) |
+            (_sourceDevice.id[9] << 16) |
+            (_sourceDevice.id[8] << 8) |
+            (_sourceDevice.id[7]);
+        // the dsm sends a type "0" dsuid but with the serial number only,
+        // need to replace with the real sgtin, #10887
+        if (dsuidType == 0) {
+          try {
+            uint32_t serialNumber;
+            if (dsuid_get_serial_number(&devdsuid, &serialNumber) == 0) {
+              DeviceReference devRef = m_pApartment->getDevices().getBySerial(serialNumber);
+              devdsuid = devRef.getDSID();
+            }
+          } catch (ItemNotFoundException& e) {}
+        }
+      }
+      raiseEvent(createZoneSensorValueEvent(group, _sensorType, _sensorValue, devdsuid));
     } catch(ItemNotFoundException& e) {
       log("onZoneSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
@@ -2296,6 +2327,12 @@ namespace dss {
     if (m_IsInitializing) {
       setupWebUpdateEvent();
       m_IsInitializing = false;
+
+      // handle delayed model dirty
+      if (m_IsDirty) {
+        m_IsDirty = false;
+        addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      }
     }
   }
 
