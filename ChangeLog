@@ -1,5 +1,25 @@
 dSS - digitalSTROM Server
 
+v1.32.0 22.09.2015
+	* dump invalid XML, #10666
+	* allow UMR input to be added to clusters, #10307
+	* log start and end times of XML write processes, #10904
+	* add setDevicesFirstSeen JSON command, #10836
+	* update m4 macro for boost, #10840
+	* write configuration on shutdown if save request is pending, #10951
+	* fix readOutPendingMeter loops endlessly, #11001
+	* sqlite datastore backend for add-ons, #10840
+	* maximum motion time of shade devices backend, #4924
+	* added missing exception handling for bus api error
+	* backend to quickly retrieve binary input information, #5260
+	* add field "callOrigin" to state change event, #11146
+	* metering: read last written values from rrd database on first write, #10705
+	* check zone sensor events for a valid originDSUID, #10887
+	* add configure option to disable asserts in release builds, #10794
+	* fix potential deadlock, #11204
+	* always execute delayed events scheduled with <time+x>, #11231
+	* take only dSM into consideration to determine state transition, #11254
+
 v1.31.5 14.09.2015
 	* fix protection log regression, #11165
 
