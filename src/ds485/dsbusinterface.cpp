@@ -240,9 +240,9 @@ namespace dss {
       DsmApiCallback_t callback_struct;
 
       // register callbacks
-      callback_struct.function = reinterpret_cast<void *>(DSBusInterface::linkStateCallback);
+      callback_struct.function = (void*)DSBusInterface::busStateCallback;
       callback_struct.arg = this;
-      DsmApiSetLinkStateCallback(m_dsmApiHandle, &callback_struct, NULL);
+      DsmApiSetBusStateCallback(m_dsmApiHandle, &callback_struct, NULL);
       callback_struct.function = (void*)DSBusInterface::busChangeCallback;
       callback_struct.arg = this;
       DsmApiSetBusChangeCallback(m_dsmApiHandle, &callback_struct, NULL);
@@ -496,18 +496,34 @@ namespace dss {
     }
   }
 
-  void DSBusInterface::linkStateCallback(void* _userData, bool _link) {
-    static_cast<DSBusInterface*>(_userData)->handleLinkState(_link);
+  void DSBusInterface::busStateCallback(void* _userData, bus_state_t _state) {
+    static_cast<DSBusInterface*>(_userData)->handleBusState(_state);
   }
 
-  void DSBusInterface::handleLinkState(bool _link) {
+  void DSBusInterface::handleBusState(bus_state_t _state) {
     loginFromCallback();
-    if (_link) {
-        log("dS485 link: present", lsWarning);
-        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusReady));
-    } else {
-        log("dS485 link: lost", lsError);
+    switch (_state) {
+      case DS485_STATE_ISOLATED:
+        log("dS485 BusState: ISOLATED", lsError);
         m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusDown));
+        break;
+      case DS485_STATE_DISCONNECTED:
+        log("dS485 BusState: DISCONNECTED", lsError);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusDown));
+        break;
+      case DS485_STATE_ACTIVE:
+        log("dS485 BusState: ACTIVE", lsWarning);
+        m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etBusReady));
+        break;
+      case DS485_STATE_CONNECTED:
+        log("dS485 BusState: CONNECTED");
+        break;
+      case DS485_STATE_JOIN:
+        log("dS485 BusState: JOIN");
+        break;
+      default:
+        log("dS485 BusState: UNKNOWN: " + intToString(_state));
+        break;
     }
   }
 
