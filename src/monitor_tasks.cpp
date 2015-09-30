@@ -40,24 +40,30 @@
 
 namespace dss {
 
-bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+bool SensorMonitorTask::checkZoneValueDueTime(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
   DateTime now;
   if (_ts != DateTime::NullDate) {
     int age = now.difference(_ts);
-    if (age > SensorMaxLifeTime) {
-      Logger::getInstance()->log(std::string("Sensor value (type: ") +
-          intToString(_sensorType) + ") for zone #" +
-          intToString(_group->getZoneID()) +
-          " is too old: " + _ts.toISO8601_ms() +
-          ", age in seconds is " + intToString(age), lsWarning);
-      if (DSS::hasInstance()) {
-        DSS::getInstance()->getEventQueue().
-            pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
-      }
-      return true;
-    }
+    return (age > SensorMaxLifeTime);
   }
   return false;
+}
+
+bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+  bool zoneTimeDue = checkZoneValueDueTime(_group, _sensorType, _ts);
+  if (zoneTimeDue) {
+    DateTime now;
+    Logger::getInstance()->log(std::string("Sensor value (type: ") +
+        intToString(_sensorType) + ") for zone #" +
+        intToString(_group->getZoneID()) +
+        " is too old: " + _ts.toISO8601_ms() +
+        ", age in seconds is " + intToString(now.difference(_ts)), lsWarning);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().
+          pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
+    }
+  }
+  return zoneTimeDue;
 }
 
 void SensorMonitorTask::run() {

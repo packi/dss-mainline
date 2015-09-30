@@ -36,6 +36,7 @@ public:
   virtual void run();
 private:
   Apartment *m_Apartment;
+  bool checkZoneValueDueTime(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts);
   bool checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts);
 };
 
