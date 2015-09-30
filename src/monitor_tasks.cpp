@@ -129,18 +129,12 @@ void SensorMonitorTask::run() {
       boost::shared_ptr<Zone> pZone = *it;
       if (pZone->getID() > 0) {
         ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_TemperatureValueTS)) {
-          pZone->setTemperature(hSensors.m_TemperatureValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityIndoors, hSensors.m_HumidityValueTS)) {
-          pZone->setHumidityValue(hSensors.m_HumidityValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_CO2ConcentrationValueTS)) {
-          pZone->setCO2ConcentrationValue(hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, hSensors.m_BrightnessValueTS)) {
-          pZone->setBrightnessValue(hSensors.m_BrightnessValue, DateTime::NullDate);
-        }
+
+        checkZoneSensor(pZone, SensorIDTemperatureIndoors, hSensors);
+        checkZoneSensor(pZone, SensorIDHumidityIndoors,    hSensors);
+        checkZoneSensor(pZone, SensorIDCO2Concentration,   hSensors);
+        checkZoneSensor(pZone, SensorIDBrightnessIndoors,  hSensors);
+
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
           pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
