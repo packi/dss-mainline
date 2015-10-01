@@ -216,6 +216,69 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
   }
 }
 
+DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSensors, const int _sensorType)
+{
+  switch (_sensorType) {
+  case SensorIDTemperatureIndoors: {
+    return _hSensors.m_TemperatureValueTS;
+  }
+  case SensorIDHumidityIndoors: {
+    return _hSensors.m_HumidityValueTS;
+  }
+  case SensorIDBrightnessIndoors: {
+    return _hSensors.m_BrightnessValueTS;
+  }
+  case SensorIDCO2Concentration: {
+    return _hSensors.m_CO2ConcentrationValueTS;
+  }
+  }
+  return DateTime::NullDate;
+}
+
+void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, const int _sensorType, const ZoneSensorStatus_t& _hSensors) {
+
+  boost::shared_ptr<Device> sensorDevice = _zone->getAssignedSensorDevice(_sensorType);
+
+  bool sensorFault = (sensorDevice && !sensorDevice->isPresent());
+
+  DateTime sensorTime = getDateTimeForSensor(_hSensors, _sensorType);
+  if (checkZoneValueDueTime(_zone->getGroup(GroupIDBroadcast), _sensorType, sensorTime)) {
+    sensorFault = true;
+    switch (_sensorType) {
+    case SensorIDTemperatureIndoors: {
+      _zone->setTemperature(_hSensors.m_TemperatureValue, DateTime::NullDate);
+      break;
+    }
+    case SensorIDHumidityIndoors: {
+      _zone->setHumidityValue(_hSensors.m_HumidityValue, DateTime::NullDate);
+      break;
+    }
+    case SensorIDBrightnessIndoors: {
+      _zone->setBrightnessValue(_hSensors.m_BrightnessValue, DateTime::NullDate);
+      break;
+    }
+    case SensorIDCO2Concentration: {
+      _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
+      break;
+    }
+    }
+  }
+
+  if (sensorFault) {
+    DateTime now;
+    Logger::getInstance()->log(std::string("Sensor not available, or value (type: ") +
+        intToString(_sensorType) + ") for zone #" +
+        intToString(_zone->getID()) +
+        " is too old: " + sensorTime.toISO8601_ms() +
+        ", age in seconds is " + intToString(now.difference(sensorTime)), lsWarning);
+
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().
+        pushEvent(createZoneSensorErrorEvent(_zone->getGroup(GroupIDBroadcast), _sensorType, DateTime::NullDate));
+    }
+  }
+}
+
 void HeatingMonitorTask::run() {
 
   if (m_event->getName() == EventName::ModelReady) {
