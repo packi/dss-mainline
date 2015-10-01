@@ -679,6 +679,7 @@ namespace dss {
         dev->setFirstSeen(dateTime);
       }
     }
+    m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return true;
   }
 
