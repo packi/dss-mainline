@@ -5,6 +5,7 @@
   <subscription event-name="sendmail" handler-name="sendmail" />
 
   <subscription event-name="buttonClick" handler-name="system_trigger" />
+  <subscription event-name="buttonDeviceAction" handler-name="system_trigger" />
   <subscription event-name="deviceSensorEvent" handler-name="system_trigger" />
   <subscription event-name="deviceBinaryInputEvent" handler-name="system_trigger" />
   <subscription event-name="callScene" handler-name="system_trigger" />
@@ -108,6 +109,7 @@
   <subscription event-name="blink" handler-name="system_event_log"/>
   <subscription event-name="undoScene" handler-name="system_event_log"/>
   <subscription event-name="buttonClick" handler-name="system_event_log"/>
+  <subscription event-name="buttonDeviceAction" handler-name="system_event_log"/>
   <subscription event-name="deviceBinaryInputEvent" handler-name="system_event_log"/>
   <subscription event-name="deviceSensorEvent" handler-name="system_event_log"/>
   <subscription event-name="deviceSensorValue" handler-name="system_event_log"/>

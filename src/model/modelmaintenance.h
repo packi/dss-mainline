@@ -264,6 +264,7 @@ namespace dss {
     void onDeviceCallScene(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
     void onDeviceBlink(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const callOrigin_t _origin, const std::string _token);
     void onDeviceActionEvent(const dsuid_t& _dsMeterID, const int _deviceID, const int _buttonNr, const int _clickType);
+    void onDeviceDirectActionEvent(const dsuid_t& _dsMeterID, const int _deviceID, const int _actionID);
 
     void onGroupCallSceneFiltered(dsuid_t _source, const int _zoneID, const int _groupID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
     void onDeviceActionFiltered(dsuid_t _source, const int _deviceID, const int _buttonNr, const int _clickType);

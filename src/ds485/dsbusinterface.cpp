@@ -451,6 +451,12 @@ namespace dss {
                         ZONE_GROUP_ACTION_REQUEST_ACTION_EXTRA_COMMAND,
                         &callback_struct, NULL);
 
+      EventDeviceDirectAction_event_callback_t directDeviceActionCallback= DSBusInterface::handleDirectDeviceActionCallback;
+      callback_struct.function = reinterpret_cast<void *>(directDeviceActionCallback);
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DEVICE_DIRECT_ACTION, 0, &callback_struct, NULL);
+
       m_dsmApiReady = true;
     }
   }
@@ -780,6 +786,21 @@ namespace dss {
     pEvent->addParameter(_deviceID);
     pEvent->addParameter(_buttonNr);
     pEvent->addParameter(_clickType);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
+
+  void DSBusInterface::handleDirectDeviceActionCallback(uint8_t _errorCode, void* _userData,
+                                                        dsuid_t _sourceID, dsuid_t _destinationID,
+                                                        uint16_t _deviceID, uint16_t _zoneID, uint8_t _groupID,
+                                                        uint16_t _actionID) {
+    static_cast<DSBusInterface*>(_userData)->handleDirectDeviceAction(_sourceID, _deviceID, _actionID);
+  }
+
+  void DSBusInterface::handleDirectDeviceAction(dsuid_t _dsMeterID, uint16_t _deviceID, uint16_t _actionID) {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etButtonDirectActionDevice, _dsMeterID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_actionID);
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 

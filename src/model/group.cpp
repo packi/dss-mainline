@@ -271,6 +271,7 @@ namespace dss {
 
     if (m_pPropertyNode != NULL) {
       PropertyNodePtr node = m_pPropertyNode->createProperty("sensor/type" + intToString(_type));
+      node->createProperty("type")->setIntegerValue(_type);
       node->createProperty("value")->setFloatingValue(_value);
       node->createProperty("sourcedsuid")->setStringValue(dsuid2str(_sourceID));
       node->createProperty("time")->setIntegerValue(now.secondsSinceEpoch());

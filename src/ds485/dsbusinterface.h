@@ -160,6 +160,12 @@ namespace dss {
                                         uint16_t _deviceID, uint16_t _zoneID, uint8_t _groupID,
                                         uint8_t _buttonNr, uint8_t _clickType);
 
+    static void handleDirectDeviceActionCallback(uint8_t _errorCode, void* _userData,
+                                                 dsuid_t _sourceID, dsuid_t _destinationID,
+                                                 uint16_t _deviceID, uint16_t _zoneID, uint8_t _groupID,
+                                                 uint16_t _actionID);
+    void handleDirectDeviceAction(dsuid_t _dsMeterID, uint16_t _deviceID, uint16_t _actionID);
+
     void handleDeviceCallScene(dsuid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID, bool _forced);
     static void handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
                                        dsuid_t _sourceID, dsuid_t _destinationID,

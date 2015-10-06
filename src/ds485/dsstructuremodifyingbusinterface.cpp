@@ -284,6 +284,7 @@ namespace dss {
         _spec.AntiWindUp, _spec.KeepFloorWarm, _spec.SourceZoneId,
         _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     DSBusInterface::checkResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();

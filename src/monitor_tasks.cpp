@@ -40,24 +40,30 @@
 
 namespace dss {
 
-bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+bool SensorMonitorTask::checkZoneValueDueTime(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
   DateTime now;
   if (_ts != DateTime::NullDate) {
     int age = now.difference(_ts);
-    if (age > SensorMaxLifeTime) {
-      Logger::getInstance()->log(std::string("Sensor value (type: ") +
-          intToString(_sensorType) + ") for zone #" +
-          intToString(_group->getZoneID()) +
-          " is too old: " + _ts.toISO8601_ms() +
-          ", age in seconds is " + intToString(age), lsWarning);
-      if (DSS::hasInstance()) {
-        DSS::getInstance()->getEventQueue().
-            pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
-      }
-      return true;
-    }
+    return (age > SensorMaxLifeTime);
   }
   return false;
+}
+
+bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+  bool zoneTimeDue = checkZoneValueDueTime(_group, _sensorType, _ts);
+  if (zoneTimeDue) {
+    DateTime now;
+    Logger::getInstance()->log(std::string("Sensor value (type: ") +
+        intToString(_sensorType) + ") for zone #" +
+        intToString(_group->getZoneID()) +
+        " is too old: " + _ts.toISO8601_ms() +
+        ", age in seconds is " + intToString(now.difference(_ts)), lsWarning);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().
+          pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
+    }
+  }
+  return zoneTimeDue;
 }
 
 void SensorMonitorTask::run() {
@@ -123,18 +129,12 @@ void SensorMonitorTask::run() {
       boost::shared_ptr<Zone> pZone = *it;
       if (pZone->getID() > 0) {
         ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_TemperatureValueTS)) {
-          pZone->setTemperature(hSensors.m_TemperatureValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityIndoors, hSensors.m_HumidityValueTS)) {
-          pZone->setHumidityValue(hSensors.m_HumidityValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureIndoors, hSensors.m_CO2ConcentrationValueTS)) {
-          pZone->setCO2ConcentrationValue(hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessIndoors, hSensors.m_BrightnessValueTS)) {
-          pZone->setBrightnessValue(hSensors.m_BrightnessValue, DateTime::NullDate);
-        }
+
+        checkZoneSensor(pZone, SensorIDTemperatureIndoors, hSensors);
+        checkZoneSensor(pZone, SensorIDHumidityIndoors,    hSensors);
+        checkZoneSensor(pZone, SensorIDCO2Concentration,   hSensors);
+        checkZoneSensor(pZone, SensorIDBrightnessIndoors,  hSensors);
+
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
           pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
@@ -157,7 +157,7 @@ void SensorMonitorTask::run() {
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
   pEvent->setProperty("time", "+600");
   if (DSS::hasInstance()) {
-      Logger::getInstance()->log("queued check_sensor_values event");
+    Logger::getInstance()->log("queued check_sensor_values event");
     DSS::getInstance()->getEventQueue().pushEvent(pEvent);
   }
 }
@@ -207,6 +207,69 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     }
   } catch (...) {
     Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsWarning);
+  }
+}
+
+DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSensors, const int _sensorType)
+{
+  switch (_sensorType) {
+  case SensorIDTemperatureIndoors: {
+    return _hSensors.m_TemperatureValueTS;
+  }
+  case SensorIDHumidityIndoors: {
+    return _hSensors.m_HumidityValueTS;
+  }
+  case SensorIDBrightnessIndoors: {
+    return _hSensors.m_BrightnessValueTS;
+  }
+  case SensorIDCO2Concentration: {
+    return _hSensors.m_CO2ConcentrationValueTS;
+  }
+  }
+  return DateTime::NullDate;
+}
+
+void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, const int _sensorType, const ZoneSensorStatus_t& _hSensors) {
+
+  boost::shared_ptr<Device> sensorDevice = _zone->getAssignedSensorDevice(_sensorType);
+
+  bool sensorFault = (sensorDevice && !sensorDevice->isPresent());
+
+  DateTime sensorTime = getDateTimeForSensor(_hSensors, _sensorType);
+  if (checkZoneValueDueTime(_zone->getGroup(GroupIDBroadcast), _sensorType, sensorTime)) {
+    sensorFault = true;
+    switch (_sensorType) {
+    case SensorIDTemperatureIndoors: {
+      _zone->setTemperature(_hSensors.m_TemperatureValue, DateTime::NullDate);
+      break;
+    }
+    case SensorIDHumidityIndoors: {
+      _zone->setHumidityValue(_hSensors.m_HumidityValue, DateTime::NullDate);
+      break;
+    }
+    case SensorIDBrightnessIndoors: {
+      _zone->setBrightnessValue(_hSensors.m_BrightnessValue, DateTime::NullDate);
+      break;
+    }
+    case SensorIDCO2Concentration: {
+      _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
+      break;
+    }
+    }
+  }
+
+  if (sensorFault) {
+    DateTime now;
+    Logger::getInstance()->log(std::string("Sensor not available, or value (type: ") +
+        intToString(_sensorType) + ") for zone #" +
+        intToString(_zone->getID()) +
+        " is too old: " + sensorTime.toISO8601_ms() +
+        ", age in seconds is " + intToString(now.difference(sensorTime)), lsWarning);
+
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().
+        pushEvent(createZoneSensorErrorEvent(_zone->getGroup(GroupIDBroadcast), _sensorType, DateTime::NullDate));
+    }
   }
 }
 

@@ -210,6 +210,17 @@ namespace dss {
           _zone->removeFromDSMeter(meter);
         }
       }
+
+      // the dSM removes the zone only, if the controller is disabled.
+      ZoneHeatingConfigSpec_t disableConfig;
+      memset(&disableConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
+      disableConfig.ControllerMode = 0;
+      m_Interface.setZoneHeatingConfig(
+        DSUID_BROADCAST,
+        _zone->getID(),
+        disableConfig
+      );
+
       m_Interface.removeZone(DSUID_BROADCAST, _zone->getID());
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
