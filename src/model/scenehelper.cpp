@@ -446,7 +446,7 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue - 100);
       break;
     case SensorIDWindDirection:
-      convertedSensorValue = (double) (_sensorValue * 2);
+      convertedSensorValue = (double) (_sensorValue * 0.5 / 4);
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     case SensorIDPrecipitation:
@@ -532,7 +532,7 @@ namespace dss {
       if (_sensorValue < 0 || _sensorValue > 511.875) {
         throw SensorOutOfRangeException("Value must be in range [0..511.875]");
       }
-      convertedSensorValue = (int) ((_sensorValue + 0.0625) / 2);
+      convertedSensorValue = (int) ((_sensorValue + 0.0625) * 8);
       break;
     case SensorIDPrecipitation:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
