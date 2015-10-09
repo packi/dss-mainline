@@ -438,6 +438,10 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
+    case SensorIDSoundPressureLevel:
+      convertedSensorValue = (double) (_sensorValue * 0.25 / 4);
+      convertedSensorValue= roundDigits(convertedSensorValue, 3);
+      break;
     case SensorIDRoomTemperatureControlVariable:
       convertedSensorValue = (double) (_sensorValue - 100);
       break;
@@ -512,6 +516,12 @@ namespace dss {
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
+    case SensorIDSoundPressureLevel:
+      if (_sensorValue < 0 || _sensorValue > 255.938) {
+        throw SensorOutOfRangeException("Value must be in range [0..255.938]");
+      }
+      convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.25);
+      break;
     case SensorIDRoomTemperatureControlVariable:
       if (_sensorValue < -100 || _sensorValue > 100) {
         throw SensorOutOfRangeException("Value must be in range [-100..100]");
@@ -574,6 +584,8 @@ namespace dss {
         _name = "Wind Speed"; break;
       case SensorIDWindDirection:
         _name = "Wind Direction"; break;
+      case SensorIDSoundPressureLevel:
+        _name = "Sound Pressure Level"; break;
       case SensorIDPrecipitation:
         _name = "Precipitation"; break;
       case SensorIDRoomTemperatureSetpoint:
