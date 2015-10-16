@@ -11077,11 +11077,15 @@ worker_thread_run(void *thread_func_param)
 			if (conn->client.rsa.sa.sa_family == AF_INET6) {
 				conn->request_info.remote_port =
 				    ntohs(conn->client.rsa.sin6.sin6_port);
+        conn->request_info.local_port =
+            ntohs(conn->client.lsa.sin6.sin6_port);
 			} else
 #endif
 			{
 				conn->request_info.remote_port =
 				    ntohs(conn->client.rsa.sin.sin_port);
+				conn->request_info.local_port =
+				    ntohs(conn->client.lsa.sin.sin_port);
 			}
 
 			sockaddr_to_string(conn->request_info.remote_addr,

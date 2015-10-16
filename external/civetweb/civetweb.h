@@ -23,6 +23,10 @@
 #ifndef CIVETWEB_HEADER_INCLUDED
 #define CIVETWEB_HEADER_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #define CIVETWEB_VERSION "1.8"
 
 #ifndef CIVETWEB_API
@@ -75,6 +79,7 @@ struct mg_request_info {
 	long long content_length; /* Length (in bytes) of the request body,
 	                             can be -1 if no length was given. */
 	int remote_port;          /* Client's port */
+	int local_port;           /* Incoming server port */
 	int is_ssl;               /* 1 if SSL-ed, 0 if not */
 	void *user_data;          /* User data pointer passed to mg_start() */
 	void *conn_data;          /* Connection-specific user data */
