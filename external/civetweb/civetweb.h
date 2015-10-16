@@ -792,6 +792,8 @@ CIVETWEB_API int mg_get_response(struct mg_connection *conn,
 */
 CIVETWEB_API unsigned mg_check_feature(unsigned feature);
 
+CIVETWEB_API int mg_connection_active(struct mg_connection *conn);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

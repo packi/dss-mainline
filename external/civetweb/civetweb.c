@@ -797,6 +797,9 @@ typedef int socklen_t;
 #define MGSQLEN (20)
 #endif
 
+#define SSL_ERROR_WANT_READ 2
+#define SSL_ERROR_WANT_WRITE 3
+
 #if defined(NO_SSL_DL)
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -839,6 +842,7 @@ struct ssl_func {
 #define SSL_pending (*(int (*)(SSL *))ssl_sw[18].ptr)
 #define SSL_CTX_set_verify (*(void (*)(SSL_CTX *, int, int))ssl_sw[19].ptr)
 #define SSL_shutdown (*(int (*)(SSL *))ssl_sw[20].ptr)
+#define SSL_peek (* (int (*)(SSL *,void *,int)) ssl_sw[11].ptr)
 
 #define CRYPTO_num_locks (*(int (*)(void))crypto_sw[0].ptr)
 #define CRYPTO_set_locking_callback                                            \
@@ -873,6 +877,7 @@ static struct ssl_func ssl_sw[] = {{"SSL_free", NULL},
                                    {"SSL_pending", NULL},
                                    {"SSL_CTX_set_verify", NULL},
                                    {"SSL_shutdown", NULL},
+                                   {"SSL_peek", NULL},
                                    {NULL, NULL}};
 
 /* Similar array as ssl_sw. These functions could be located in different
@@ -3068,9 +3073,9 @@ spawn_cleanup:
 #endif /* !NO_CGI */
 
 static int
-set_non_blocking_mode(SOCKET sock)
+set_blocking_mode(SOCKET sock, int block)
 {
-	unsigned long on = 1;
+  unsigned long on = block;
 	return ioctlsocket(sock, (long)FIONBIO, &on);
 }
 
@@ -3251,12 +3256,16 @@ spawn_process(struct mg_connection *conn,
 #endif /* !NO_CGI */
 
 static int
-set_non_blocking_mode(SOCKET sock)
+set_blocking_mode(SOCKET sock, int block)
 {
 	int flags;
 
 	flags = fcntl(sock, F_GETFL, 0);
-	(void)fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+	if(block) {
+	  (void) fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
+	} else {
+	  (void) fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+	}
 
 	return 0;
 }
@@ -6082,6 +6091,32 @@ mg_send_file(struct mg_connection *conn, const char *path)
 	} else {
 		send_http_error(conn, 404, "%s", "Error: File not found");
 	}
+}
+
+int mg_connection_active(struct mg_connection *conn) {
+  int tmp, res, err;
+  if (conn->ssl) {
+    set_blocking_mode(conn->client.sock, 0);
+    res = SSL_peek(conn->ssl, &tmp, 1);
+    set_blocking_mode(conn->client.sock, 1);
+    if (res <= 0) {
+      err = SSL_get_error(conn->ssl, res);
+      if ((err != SSL_ERROR_WANT_READ) && (err != SSL_ERROR_WANT_WRITE)) {
+        return 0;
+      }
+    }
+  } else {
+    res = recv(conn->client.sock, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
+    if (res == -1) {
+      if ((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
+        return 0;
+      }
+    } else if (res == 0) {
+      // if we were still connected, recv would return -1 with an errno listed above or 1
+      return 0;
+    }
+  }
+  return 1;
 }
 
 /* Parse HTTP headers from the given buffer, advance buffer to the point
@@ -10200,7 +10235,7 @@ close_socket_gracefully(struct mg_connection *conn)
 
 	/* Send FIN to the client */
 	shutdown(conn->client.sock, SHUT_WR);
-	set_non_blocking_mode(conn->client.sock);
+	set_blocking_mode(conn->client.sock, 0);
 
 #if defined(_WIN32)
 	/* Read and discard pending incoming data. If we do not do that and close
