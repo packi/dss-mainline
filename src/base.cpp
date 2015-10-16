@@ -290,7 +290,7 @@ namespace dss {
 
   /**
    * http://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_reserved_characters
-   * mongoose url_encode does not escape "$,;()";
+   * civetweb url_encode does not escape "$,;()";
    */
   std::string urlEncode(const std::string& _in) {
     static CURL *handle = NULL;
