@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.33.0 19.10.2015
+	* disable heating controller before removing a zone, #11242
+	* add sensor type to zone sensor node in proptree, #105311
+	* fix zone sensor checks, #10234
+	* trigger persisting of data model after setDevicesFirstSeen, #11303
+
 v1.32.0 22.09.2015
 	* dump invalid XML, #10666
 	* allow UMR input to be added to clusters, #10307

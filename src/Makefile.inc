@@ -26,7 +26,7 @@ BUILT_SOURCES += \
 			../src/messages/vdcapi.pb.h \
 	        ../src/messages/vdcapi.pb.cc
 
-noinst_LIBRARIES += libdsscore.a libmongoose.a libunix.a libprotomessages.a
+noinst_LIBRARIES += libdsscore.a libcivetweb.a libunix.a libprotomessages.a
 
 nodist_libprotomessages_a_SOURCES = \
 			../src/messages/messaging.pb.h \
@@ -77,7 +77,7 @@ dss_CXXFLAGS = \
 			$(OSSP_UUID_CFLAGS) \
 			$(SQLITE3_CFLAGS)
 
-dss_LDADD = libdsscore.a libunix.a libmongoose.a libprotomessages.a \
+dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
 			$(BOOST_SYSTEM_LIBS) \
 			$(BOOST_PROGRAM_OPTIONS_LIBS) \

@@ -26,7 +26,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-#include <external/mongoose/mongoose.h>
+#include <external/civetweb/civetweb.h>
 
 #include "src/base.h"
 #include "src/subsystem.h"
@@ -61,24 +61,23 @@ namespace dss {
     void instantiateHandlers();
     void publishJSLogfiles();
   protected:
-    void *httpBrowseProperties(struct mg_connection* _connection,
-                               RestfulRequest &request,
-                               const std::string &trustedSetCookie);
-    void *jsonHandler(struct mg_connection* _connection,
-                      RestfulRequest &request,
-                      const std::string &trustedSetCookie,
-                      boost::shared_ptr<Session> _session);
-    void *iconHandler(struct mg_connection* _connection,
-                      RestfulRequest &request,
-                      const std::string &trustedSetCookie,
-                      boost::shared_ptr<Session> _session);
-    void *logDownloadHandler(struct mg_connection* _connection,
+    int httpBrowseProperties(struct mg_connection* _connection,
                              RestfulRequest &request,
-                             const std::string &trustedSetCookie,
-                             boost::shared_ptr<Session> _session);
-    static void *httpRequestCallback(enum mg_event event, 
-                                     struct mg_connection* _connection,
-                                     const struct mg_request_info* _info);
+                             const std::string &trustedSetCookie);
+    int jsonHandler(struct mg_connection* _connection,
+                    RestfulRequest &request,
+                    const std::string &trustedSetCookie,
+                    boost::shared_ptr<Session> _session);
+    int iconHandler(struct mg_connection* _connection,
+                    RestfulRequest &request,
+                    const std::string &trustedSetCookie,
+                    boost::shared_ptr<Session> _session);
+    int logDownloadHandler(struct mg_connection* _connection,
+                           RestfulRequest &request,
+                           const std::string &trustedSetCookie,
+                           boost::shared_ptr<Session> _session);
+    static int httpRequestCallback(struct mg_connection* _connection,
+                                   void *cbdata);
 
   protected:
     virtual void doStart();
