@@ -15,7 +15,7 @@ dsstests_CXXFLAGS = \
 			-DTEST_TRIGGERS_PATH="\"$(abs_top_srcdir)/\""
 
 dsstests_LDADD = \
-			libdsscore.a libunix.a libmongoose.a libprotomessages.a \
+			libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(BOOST_THREAD_LIBS) \
 			$(BOOST_SYSTEM_LIBS) \
 			$(BOOST_PROGRAM_OPTIONS_LIBS) \

@@ -267,7 +267,7 @@ namespace dss {
     while (!timedOut && !haveEvents) {
       // check if we're still connected
       if (!_request.isActive()) {
-        Logger::getInstance()->log("EventRequestHanler::get: connection dropped");
+        Logger::getInstance()->log("EventRequestHandler::get: connection dropped");
         break;
       }
       // calculate the length of our wait

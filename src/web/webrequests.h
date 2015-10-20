@@ -35,7 +35,7 @@
 #include "src/logger.h"
 #include "src/dss.h"
 
-#include <external/mongoose/mongoose.h>
+#include <external/civetweb/civetweb.h>
 
 using rapidjson::StringBuffer;
 using rapidjson::Writer;

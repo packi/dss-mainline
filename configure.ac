@@ -278,7 +278,7 @@ AC_CHECK_HEADERS(execinfo.h,
     []
 )
 
-# For mongoose
+# For civetweb
 # Function dlsym() comes from the C library or -ldl
 AC_CHECK_FUNCS(
     [dlsym],

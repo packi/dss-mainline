@@ -227,9 +227,10 @@ libdsscore_a_SOURCES =  \
 	../src/web/webserver.cpp \
 	../src/web/webserver.h
 
-libmongoose_a_SOURCES = \
-	../external/mongoose/mongoose.c \
-	../external/mongoose/mongoose.h
+libcivetweb_a_SOURCES = \
+	../external/civetweb/civetweb.c \
+	../external/civetweb/civetweb.h \
+	../external/civetweb/md5.inl
 
 libunix_a_SOURCES = \
 	../unix/systeminfo.cpp \

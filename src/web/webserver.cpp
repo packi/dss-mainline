@@ -113,15 +113,6 @@ namespace dss {
     return header;
   }
 
-  static void emitHTTPHeader(struct mg_connection* _connection, int _code, int length,
-                             const std::string& _contentType,
-                             const std::string& _setCookie = "",
-                             const std::string& _contentName = "") {
-    std::string tmp = strprintf_HTTPHeader(_code, length, _contentType,
-                                           _setCookie, _contentName);
-    mg_write(_connection, tmp.c_str(), tmp.length());
-  }
-
   static void emitHTTPPacket(struct mg_connection* _connection, int _code,
                              const std::string& _contentType,
                              const std::string& _setCookie,
@@ -221,10 +212,16 @@ namespace dss {
       NULL
     };
 
-    m_mgContext = mg_start(&httpRequestCallback, mgOptions);
+    struct mg_callbacks callbacks;
+    memset(&callbacks, 0, sizeof(callbacks));
+
+    m_mgContext = mg_start(&callbacks, 0, mgOptions);
     if (m_mgContext == NULL) {
       throw std::runtime_error("Could not start webserver");
     }
+
+    mg_set_request_handler(m_mgContext, "**", &httpRequestCallback, 0);
+
     log("Webserver started", lsInfo);
   } // initialize
 
@@ -372,11 +369,12 @@ namespace dss {
     return header_s.substr(start, end - start);
   }
 
-  void *WebServer::jsonHandler(struct mg_connection* _connection,
-                               RestfulRequest &request,
-                               const std::string &trustedSetCookie,
-                               boost::shared_ptr<Session> _session) {
+  int WebServer::jsonHandler(struct mg_connection* _connection,
+                             RestfulRequest &request,
+                             const std::string &trustedSetCookie,
+                             boost::shared_ptr<Session> _session) {
     std::string result, setCookieHeader = trustedSetCookie;
+    int returnCode = 0;
 
     request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
     if(m_Handlers[request.getClass()] != NULL) {
@@ -402,33 +400,39 @@ namespace dss {
           // IGNORE, it doesn't happen and if so, we don't care either
         }
         log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 200, setCookieHeader, result);
+        returnCode = 200;
+        emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
       } catch(SecurityException& e) {
         result = JSONWriter::failure(e.what());
+        returnCode = 403;
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 403, setCookieHeader, result);;
+        emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);;
       } catch(std::runtime_error& e) {
         result = JSONWriter::failure(e.what());
+        returnCode = 500;
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
+        emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
       } catch(std::invalid_argument& e) {
         result = JSONWriter::failure(e.what());
+        returnCode = 500;
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
+        emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
       }
     } else {
       log("Unknown function '" + request.getUrlPath() + "'", lsError);
       result = JSONWriter::failure("Call to unknown function");
-      emitHTTPJsonPacket(_connection, 404, setCookieHeader, result);
+      returnCode = 404;
+      emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
     }
-    return _connection;
+    return returnCode;
   } // jsonHandler
 
-  void *WebServer::logDownloadHandler(struct mg_connection* _connection,
-                                      RestfulRequest &request,
-                                      const std::string &trustedSetCookie,
-                                      boost::shared_ptr<Session> _session) {
+  int WebServer::logDownloadHandler(struct mg_connection* _connection,
+                                    RestfulRequest &request,
+                                    const std::string &trustedSetCookie,
+                                    boost::shared_ptr<Session> _session) {
     std::string result, setCookieHeader = trustedSetCookie;
+    int returnCode = 0;
     static std::string logFileDirectory = "/var/log/collection";
 
     try {
@@ -454,35 +458,33 @@ namespace dss {
         }
         fileFound = true;
         log("Sending File: " + file_path.string());
-        FILE *fp = fopen(file_path.c_str(), "r");
-        if (fp != NULL)
-        {
-          emitHTTPHeader(_connection, 200, fs::file_size(file_path), "application/x-gzip",
-                         setCookieHeader, fs::basename(file_path));
-          mg_send_file(_connection, fp, fs::file_size(file_path));
-          fclose(fp);
-          break;
-        }
+        mg_send_file(_connection, file_path.c_str());
+        break;
       }
       if (!fileFound) {
-        emitHTTPTextPacket(_connection, 404, setCookieHeader, "File not found");
+        returnCode = 404;
+        emitHTTPTextPacket(_connection, returnCode, setCookieHeader, "File not found");
       }
     } catch(SecurityException& e) {
-      emitHTTPTextPacket(_connection, 500, setCookieHeader, e.what());
+      returnCode = 500;
+      emitHTTPTextPacket(_connection, returnCode, setCookieHeader, e.what());
     } catch(std::runtime_error& e) {
-      emitHTTPTextPacket(_connection, 500, setCookieHeader, e.what());
+      returnCode = 500;
+      emitHTTPTextPacket(_connection, returnCode, setCookieHeader, e.what());
     } catch(std::invalid_argument& e) {
-      emitHTTPTextPacket(_connection, 500, setCookieHeader, e.what());
+      returnCode = 500;
+      emitHTTPTextPacket(_connection, returnCode, setCookieHeader, e.what());
     }
 
-    return _connection;
+    return returnCode;
   } // logDownloadHandler
 
-  void *WebServer::iconHandler(struct mg_connection* _connection,
-                               RestfulRequest &request,
-                               const std::string &setCookieHeader,
-                               boost::shared_ptr<Session> _session) {
+  int WebServer::iconHandler(struct mg_connection* _connection,
+                             RestfulRequest &request,
+                             const std::string &setCookieHeader,
+                             boost::shared_ptr<Session> _session) {
     std::string result;
+    int returnCode = 0;
     try {
       if (_session == NULL) {
         throw SecurityException("not logged in");
@@ -520,35 +522,31 @@ namespace dss {
       icon = iconBasePath + icon;
       log("Using icon file: " + icon);
       if (boost::filesystem::exists(icon)) {
-        FILE *fp = fopen(icon.c_str(), "r");
-        if (fp != NULL) {
-          emitHTTPHeader(_connection, 200, fs::file_size(icon), "image/png",
-                         setCookieHeader);
-          mg_send_file(_connection, fp, fs::file_size(icon));
-          fclose(fp);
-        } else {
-          throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
-        }
+        returnCode = 200;
+        mg_send_file(_connection, icon.c_str());
       } else {
         throw std::runtime_error("icon file " + icon + " for device " + dsuid2str(deviceDSUID) + " not found");
       }
     } catch(SecurityException& e) {
       result = JSONWriter::failure(e.what());
-      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
+      returnCode = 500;
+      emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
     } catch(std::runtime_error& e) {
       result = JSONWriter::failure(e.what());
-      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
+      returnCode = 500;
+      emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
     } catch(std::invalid_argument& e) {
       result = JSONWriter::failure(e.what());
-      emitHTTPJsonPacket(_connection, 500, setCookieHeader, result);
+      returnCode = 500;
+      emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
     }
 
-    return _connection;
+    return returnCode;
   } // iconHandler
 
-  void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                        RestfulRequest &request,
-                                        const std::string &trustedSetCookie) {
+  int WebServer::httpBrowseProperties(struct mg_connection* _connection,
+                                      RestfulRequest &request,
+                                      const std::string &trustedSetCookie) {
     std::string path = request.getUrlPath();
     if (path.empty()) {
       path = "/";
@@ -601,38 +599,36 @@ namespace dss {
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
     emitHTTPTextPacket(_connection, 200, trustedSetCookie, tmp);
-    return _connection;
+    return 200;
   } // httpBrowseProperties
 
-  void *WebServer::httpRequestCallback(enum mg_event event,
-                                       struct mg_connection* _connection,
-                                       const struct mg_request_info* _info) {
+  int WebServer::httpRequestCallback(struct mg_connection* _connection,
+                                      void *cbdata) {
     std::string trustedLoginCookie;
+    const struct mg_request_info *_info = mg_get_request_info(_connection);
 
-    if (event != MG_NEW_REQUEST || !_info->uri || !_info->remote_ip) {
-      return NULL;
+    if (!_info->uri || strlen(_info->remote_addr) < 1) {
+      return 0;
     }
 
     std::string uri_path(_info->uri);
     size_t offset = uri_path.find('/', 1);
     if (std::string::npos == offset) {
-        return NULL;
+        return 0;
     }
     std::string toplevel = uri_path.substr(0, offset);
     std::string sublevel = uri_path.substr(offset);
 
     if (toplevel != "/browse" && toplevel != "/json" && toplevel != "/icons" && toplevel != "/getLatestLogs") {
       // quit early, not our request
-      return NULL;
+      return 0;
     }
 
     WebServer& self = DSS::getInstance()->getWebServer();
     self.m_SessionManager->getSecurity()->signOff(); // protect log call below
 
     {
-        struct in_addr remote;
-        remote.s_addr = htonl(_info->remote_ip);
-        std::string remote_s(std::string(inet_ntoa(remote)));
+        std::string remote_s(_info->remote_addr);
         std::string uri_path(_info->uri);
         if (_info->query_string) {
             uri_path += "?" + std::string(_info->query_string);
@@ -664,13 +660,13 @@ namespace dss {
         self.log("Logging-in from a trusted port as '" + userName + "'");
         if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
           self.log("Unknown user", lsInfo);
-          return NULL;
+          return 0;
         }
         if (session == NULL) {
           std::string newToken = self.m_SessionManager->registerSession();
           if (newToken.empty()) {
             self.log("Session limit reached", lsError);
-            return NULL;
+            return 0;
           }
           self.log("Registered new JSON session for trusted port (" + newToken + ")");
           session = self.m_SessionManager->getSession(newToken);
@@ -697,6 +693,6 @@ namespace dss {
       return self.logDownloadHandler(_connection, request, trustedLoginCookie, session);
     }
 
-    return NULL;
+    return 0;
   }
 }

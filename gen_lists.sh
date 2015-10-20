@@ -14,8 +14,8 @@ done
 echo >> $FILE
 echo >> $FILE
 
-echo -n "libmongoose_a_SOURCES =" >> $FILE
-for f in `find external/mongoose | egrep '\.(c?|h)$' | sort`
+echo -n "libcivetweb_a_SOURCES =" >> $FILE
+for f in `find external/civetweb | egrep '\.(c?|h|inl)$' | sort`
 do
     if (test -f $f); then
         echo " \\" >> $FILE
