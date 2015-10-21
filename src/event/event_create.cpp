@@ -55,6 +55,7 @@ namespace EventName {
   const std::string AddonToCloud = "AddonToCloud";
   const std::string HeatingValveProtection = "execute_valve_protection";
   const std::string DeviceHeatingTypeChanged = "DeviceHeatingTypeChanged";
+  const std::string UpdateAutoselect = "UpdateAutoselect";
   const std::string LogFileData = "logFileData";
   const std::string DebugMonitorUpdate = "debugMonitorUpdate";
   const std::string Sunshine = "sunshine";

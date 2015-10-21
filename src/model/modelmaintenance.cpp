@@ -1207,6 +1207,15 @@ namespace dss {
     }
   } // raiseEvent
 
+  void ModelMaintenance::synchronizeHeatingAssignment(const dsuid_t& _dSMeterID) {
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::UpdateAutoselect);
+    pEvent->setProperty("meterDSUID", dsuid2str(_dSMeterID));
+    log("synchronizeHeatingAssignment", lsNotice);
+    if (DSS::getInstance()) {
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+  } // synchronizeHeatingAssignment
+
   class SetLastCalledSceneAction : public IDeviceAction {
   protected:
     int m_SceneID;
@@ -1869,6 +1878,11 @@ namespace dss {
     // synchronize dss with dsm zone sensors
     // in case a dsm crashed during zone sensor assignment.
     m_pMeterMaintenance->triggerMeterSynchronization();
+
+    // synchronize vdc heating assignment in case of vdsm migration 
+    if (BusMember_vDC == meter->getBusMemberType()) {
+      synchronizeHeatingAssignment(_dSMeterID);
+    }
 
     try {
       Set devices = m_pApartment->getDevices().getByLastKnownDSMeter(_dSMeterID);
