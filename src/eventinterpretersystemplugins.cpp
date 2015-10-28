@@ -1635,7 +1635,7 @@ namespace dss {
     }
     PropertyNodePtr appProperty =
       DSS::getInstance()->getPropertySystem().getProperty(_path);
-    if (appProperty == false) {
+    if (appProperty == NULL) {
       return false;
     }
 
