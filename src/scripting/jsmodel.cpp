@@ -3628,6 +3628,99 @@ namespace dss {
     return JS_FALSE;
   } // zone_addStateSensor
 
+  // zone.addDevice(string dsuid)
+  JSBool zone_addDevice(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_addDevice: ext of wrong type");
+        return JS_FALSE;
+      }
+      if (argc < 1) {
+        JS_ReportError(cx, "Model.zone_addDevice: missing arguments");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      if (NULL == pZone) {
+        JS_ReportError(cx, "Model.zone_addDevice: zone object error");
+        return JS_FALSE;
+      }
+
+      StructureManipulator manipulator(
+          *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
+          *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
+          ext->getApartment());
+
+      dsuid_t dsuid;
+      try {
+        dsuid = str2dsuid(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]));
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      } catch (std::runtime_error& e) {
+        JS_ReportError(cx, e.what());
+        return JS_FALSE;
+      }
+
+      boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+      if(!dev->isPresent()) {
+        JS_ReportError(cx, "cannot add nonexisting device to a zone");
+        return JS_FALSE;
+      }
+
+      if (dev->getZoneID() == pZone->getID()) {
+        JS_ReportError(cx, "device is already in zone");
+        return JS_FALSE;
+      }
+
+      try {
+        manipulator.addDeviceToZone(dev, pZone);
+        if (dev->is2WayMaster()) {
+          dsuid_t next;
+          dsuid_get_next_dsuid(dev->getDSID(), &next);
+          try {
+            boost::shared_ptr<Device> pPartnerDevice;
+            pPartnerDevice = DSS::getInstance()->getApartment().getDeviceByDSID(next);
+            manipulator.addDeviceToZone(pPartnerDevice, pZone);
+          } catch(std::runtime_error& e) {
+            JS_ReportError(cx, "could not find partner device");
+            return JS_FALSE;
+          }
+        } else if (dev->getOemInfoState() == DEVICE_OEM_VALID) {
+          uint16_t serialNr = dev->getOemSerialNumber();
+          if ((serialNr > 0) & !dev->getOemIsIndependent()) {
+            std::vector<boost::shared_ptr<Device> > devices = DSS::getInstance()->getApartment().getDevicesVector();
+            foreach (const boost::shared_ptr<Device>& device, devices) {
+              if (dev->isOemCoupledWith(device)) {
+                manipulator.addDeviceToZone(device, pZone);
+              }
+            } // foreach
+          } // if serial
+        } // if OEM
+      } catch(ItemNotFoundException& ex) {
+        JS_ReportError(cx, ex.what());
+        return JS_FALSE;
+      }
+    } catch(ItemDuplicateException& ex) {
+      JS_ReportWarning(cx, "Item duplicate: %s", ex.what());
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_addDevice
+
+
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
     JS_FS("callScene", zone_callScene, 4, 0),
@@ -3649,6 +3742,7 @@ namespace dss {
     JS_FS("setTemperatureControlValues", zone_setTemperatureControlValues, 1, 0),
     JS_FS("getAssignedSensor", zone_getAssignedSensor, 1, 0),
     JS_FS("addStateSensor", zone_addStateSensor, 3, 0),
+    JS_FS("addDevice", zone_addDevice, 1, 0),
     JS_FS_END
   };
 
