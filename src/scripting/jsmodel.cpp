@@ -2152,6 +2152,88 @@ namespace dss {
     }
     return JS_FALSE;
   } // dev_set_joker_group
+
+  JSBool dev_set_button_id(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "ext of wrong type");
+        return JS_FALSE;
+      }
+
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDevice(intf->getDevice());
+        if(argc < 1) {
+          JS_ReportError(cx, "missing button id parameter");
+          return JS_FALSE;
+        }
+
+        int buttonId = -1;
+        try {
+          buttonId = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        } catch (ScriptException& ex) {
+          JS_ReportError(cx, "could not convert button id argument: %s",
+                         ex.what());
+          return JS_FALSE;
+        }
+
+        if ((buttonId  < 0) || (buttonId > 15)) {
+          JS_ReportError(cx, "invalid button id parameter");
+          return JS_FALSE;
+        }
+
+        jsrefcount ref = JS_SuspendRequest(cx);
+        try {
+          pDevice->setDeviceButtonID(buttonId);
+          if (pDevice->is2WayMaster()) {
+            DeviceFeatures_t features = pDevice->getFeatures();
+            if (!features.syncButtonID) {
+              JS_ResumeRequest(cx, ref);
+              return JS_TRUE;
+            }
+
+            dsuid_t next;
+            dsuid_get_next_dsuid(pDevice->getDSID(), &next);
+            try {
+              boost::shared_ptr<Device> pPartnerDevice;
+              pPartnerDevice = DSS::getInstance()->getApartment().getDeviceByDSID(next);
+              pPartnerDevice->setDeviceButtonID(buttonId);
+            } catch(ItemNotFoundException& e) {
+              JS_ResumeRequest(cx, ref);
+              JS_ReportError(cx, "could not find partner device");
+              return JS_FALSE;
+            }
+          }
+
+          JS_ResumeRequest(cx, ref);
+          return JS_TRUE;
+
+        } catch(const BusApiError& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
+        } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "General failure: %s", ex.what());
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_set_button_id
+
   JSFunctionSpec device_interface_methods[] = {
     JS_FS("turnOn", dev_turn_on, 0, 0),
     JS_FS("turnOff", dev_turn_off, 0, 0),
@@ -2174,6 +2256,7 @@ namespace dss {
     JS_FS("addStateSensor", dev_addStateSensor, 3, 0),
     JS_FS("getPropertyNode", dev_get_property_node, 0, 0),
     JS_FS("setJokerGroup", dev_set_joker_group, 1, 0),
+    JS_FS("setButtonID", dev_set_button_id, 1, 0),
     JS_FS_END
   };
 
