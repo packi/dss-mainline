@@ -1152,6 +1152,7 @@ namespace dss {
           // have to reuse it, otherwise we will generate an array wich is
           // not what we want. root level requires additional handling, this is
           // what the property system seems to expect
+          boost::recursive_mutex::scoped_lock lock(PropertyNode::m_GlobalMutex);
           if ((m_level == 1) && (m_currentNode->getName() == part)) {
             path = m_currentNode;
           } else {
