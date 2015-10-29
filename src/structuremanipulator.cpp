@@ -45,6 +45,7 @@
 #include "src/util.h"
 #include "src/event.h"
 #include "src/dss.h"
+#include "src/base.h"
 
 namespace dss {
 
@@ -556,6 +557,14 @@ namespace dss {
                                           const std::string& _name) {
     _group->setSceneName(_sceneNumber, _name);
     m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::SceneNameChanged);
+      pEvent->setProperty("zone", intToString(_group->getZoneID()));
+      pEvent->setProperty("group", intToString(_group->getID()));
+      pEvent->setProperty("sceneId", intToString(_sceneNumber));
+      pEvent->setProperty("newSceneName", _name);
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
   } // sceneSetName
 
   void StructureManipulator::deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
