@@ -1145,6 +1145,9 @@ namespace dss {
             start = NULL;
           }
           path.reset();
+
+          part = part.substr(0, part.find('['));
+
           // this is important, if a node with the same name already exists we
           // have to reuse it, otherwise we will generate an array wich is
           // not what we want. root level requires additional handling, this is
