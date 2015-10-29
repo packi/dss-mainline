@@ -76,6 +76,8 @@ namespace EventName {
   const std::string DevicesFirstSeen = "devices_first_seen";
   const std::string DatabaseImported = "database_imported";
   const std::string ButtonDeviceAction = "buttonDeviceAction";
+
+  const std::string SceneNameChanged = "scene_name_changed";
 }
 
 boost::shared_ptr<Event>
