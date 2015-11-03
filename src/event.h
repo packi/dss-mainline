@@ -71,6 +71,7 @@ namespace dss {
     extern const std::string AddonToCloud;
     extern const std::string HeatingValveProtection;
     extern const std::string DeviceHeatingTypeChanged;
+    extern const std::string UpdateAutoselect;
     extern const std::string LogFileData;
     extern const std::string DebugMonitorUpdate;
     extern const std::string Sunshine;
@@ -91,6 +92,7 @@ namespace dss {
     extern const std::string DevicesFirstSeen;
     extern const std::string DatabaseImported;
     extern const std::string ButtonDeviceAction;
+    extern const std::string SceneNameChanged;
   }
 
   namespace EventProperty {

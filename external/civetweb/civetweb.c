@@ -3513,6 +3513,10 @@ pull_all(FILE *fp, struct mg_connection *conn, char *buf, int len)
 	int n, nread = 0;
 	double timeout = -1.0;
 
+	if (!conn->ctx) {
+	  return 0;
+	}
+
 	if (conn->ctx->config[REQUEST_TIMEOUT]) {
 		timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
 	}
@@ -3803,7 +3807,7 @@ alloc_vprintf2(char **buf, const char *fmt, va_list ap)
 		va_copy(ap_copy, ap);
 		len = vsnprintf_impl(*buf, size - 1, fmt, ap_copy);
 		va_end(ap_copy);
-		*buf[size - 1] = 0;
+		(*buf)[size - 1] = 0;
 	}
 
 	return len;
@@ -8583,6 +8587,7 @@ mg_upload(struct mg_connection *conn, const char *destination_dir)
 		/* part_request_info is no longer valid after this operation */
 		/* assert(len >= headers_len); */
 		if (len < headers_len) {
+			fclose(fp);
 			break;
 		}
 		memmove(buf, &buf[headers_len], (size_t)(len - headers_len));
@@ -8614,8 +8619,8 @@ mg_upload(struct mg_connection *conn, const char *destination_dir)
 		} while (!eof && (n > 0));
 		fclose(fp);
 		if (eof) {
-			remove(path);
-			rename(tmp_path, path);
+			(void)remove(path);
+			(void)rename(tmp_path, path);
 			num_uploaded_files++;
 			if (conn && conn->ctx && conn->ctx->callbacks.upload != NULL) {
 				conn->ctx->callbacks.upload(conn, path);

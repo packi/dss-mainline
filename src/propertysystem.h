@@ -406,6 +406,8 @@ namespace dss {
       Archive = 1 << 2 /**< Node will get written to XML (hint only) */
     };
 
+    static boost::recursive_mutex m_GlobalMutex;
+
   private:                                  /* Size: 32 64 bit */
     aPropertyValue m_PropVal;                     /*  8  8 */
     union {
@@ -429,7 +431,6 @@ namespace dss {
     uint8_t m_Flags;                              /*  1  1 */
     /* vtable */                                  /*  4  8 */
 
-    static boost::recursive_mutex m_GlobalMutex;
     static boost::atomic<int> sm_NodeCounter;
 
   private:

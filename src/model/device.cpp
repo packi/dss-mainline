@@ -2240,7 +2240,7 @@ namespace dss {
       binput->m_sensorValue = 0;
       binput->m_sensorValueFloat = 0;
       binput->m_sensorValueTS = DateTime::NullDate;
-      binput->m_sensorValueValidity = true;
+      binput->m_sensorValueValidity = false;
       m_sensorInputs.push_back(binput);
 
       if (m_pPropertyNode != NULL) {
@@ -2250,6 +2250,8 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
+        entry->createProperty("valid")
+                ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorValueValidity));
         entry->createProperty("value")
                 ->linkToProxy(PropertyProxyReference<double>(m_sensorInputs[m_sensorInputCount]->m_sensorValueFloat));
         entry->createProperty("valueDS")

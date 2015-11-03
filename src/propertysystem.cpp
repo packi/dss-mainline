@@ -1145,10 +1145,14 @@ namespace dss {
             start = NULL;
           }
           path.reset();
+
+          part = part.substr(0, part.find('['));
+
           // this is important, if a node with the same name already exists we
           // have to reuse it, otherwise we will generate an array wich is
           // not what we want. root level requires additional handling, this is
           // what the property system seems to expect
+          boost::recursive_mutex::scoped_lock lock(PropertyNode::m_GlobalMutex);
           if ((m_level == 1) && (m_currentNode->getName() == part)) {
             path = m_currentNode;
           } else {

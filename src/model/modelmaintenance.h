@@ -307,6 +307,8 @@ namespace dss {
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);
     void pollSensors(boost::shared_ptr<DeviceReference> pDevRef);
+    void synchronizeHeatingAssignment(const dsuid_t& _dSMeterID);
+
 
   protected:
     bool m_IsInitializing; //< allow to clear from unit test
