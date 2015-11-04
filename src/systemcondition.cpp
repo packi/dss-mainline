@@ -37,6 +37,16 @@
 
 namespace dss {
 
+  static bool checkValueCondition(std::string& sValue, PropertyNodePtr valueNode, std::string& sName) {
+    if (sValue != valueNode->getAsString()) {
+      Logger::getInstance()->log("checkValueCondition: " +
+        sName + " failed: value is " + valueNode->getAsString() +
+        ", requested is " + sValue, lsDebug);
+      return false;
+    }
+    return true;
+  }
+
   bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode, int secNow) {
     int startSinceMidnight = 0;
     int endSinceMidnight = 24 * 60 * 60;
@@ -119,10 +129,7 @@ namespace dss {
             if (sName == nameNode->getAsString()) {
               fFound = true;
               // state found ...
-              if (sValue != valueNode->getAsString()) {
-                Logger::getInstance()->log("checkSystemCondition: " +
-                    sName + " failed: value is " + valueNode->getAsString() +
-                    ", requested is " + sValue, lsDebug);
+              if (!checkValueCondition(sValue, valueNode, sName)) {
                 return false;
               }
               break;
