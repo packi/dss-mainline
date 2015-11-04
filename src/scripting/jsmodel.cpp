@@ -3872,6 +3872,7 @@ namespace dss {
         JS_ReportError(cx, ex.what());
         return JS_FALSE;
       }
+      return JS_TRUE;
     } catch(ItemDuplicateException& ex) {
       JS_ReportWarning(cx, "Item duplicate: %s", ex.what());
     } catch(ItemNotFoundException& ex) {
