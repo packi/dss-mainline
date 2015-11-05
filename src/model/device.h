@@ -401,6 +401,7 @@ namespace dss {
     void setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup);
     void setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType);
     uint8_t getDeviceBinaryInputType(uint8_t _inputIndex);
+    bool hasBinaryInputType(int inputType) const;
     /** AKM2xx timeout settings */
     void setDeviceAKMInputTimeouts(int _onDelay, int _offDelay);
     void getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay);
