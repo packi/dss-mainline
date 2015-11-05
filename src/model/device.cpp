@@ -2738,7 +2738,15 @@ namespace dss {
   }
 
   void Device::setVisibility(bool _isVisible) {
+    bool wasVisible = m_visible;
     m_visible = _isVisible;
+    if (getDeviceType() == DEVICE_TYPE_TNY) {
+      if (wasVisible && !m_visible) {
+        removeFromPropertyTree();
+      } else if (!wasVisible && m_visible) {
+        publishToPropertyTree();
+      }
+    }
   }
 
   bool Device::isVisible() const {

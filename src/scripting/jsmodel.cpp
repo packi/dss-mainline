@@ -60,6 +60,22 @@
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
 
+  Set filterOutInvisibleDevices(Set set) {
+    Set invisible = Set();
+    for (int i = 0; i < set.length(); i++) {
+      const DeviceReference& d = set.get(i);
+      if (!d.getDevice()->isVisible()) {
+        invisible.addDevice(d);
+      }
+    }
+
+    if (!invisible.isEmpty()) {
+      return set.remove(invisible);
+    }
+
+    return set;
+  }
+
   ModelScriptContextExtension::ModelScriptContextExtension(Apartment& _apartment)
   : ScriptExtension(ModelScriptcontextExtensionName),
     m_Apartment(_apartment)
@@ -132,7 +148,7 @@ namespace dss {
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
 
       if(ext != NULL) {
-        Set devices = ext->getApartment().getDevices();
+        Set devices = filterOutInvisibleDevices(ext->getApartment().getDevices());
         JSObject* obj = ext->createJSSet(*ctx, devices);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
         return JS_TRUE;
@@ -2721,7 +2737,7 @@ namespace dss {
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       if(pZone != NULL) {
-        Set devices = pZone->getDevices();
+        Set devices = filterOutInvisibleDevices(pZone->getDevices());
         JSObject* obj = ext->createJSSet(*ctx, devices);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
         return JS_TRUE;
