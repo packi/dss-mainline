@@ -108,7 +108,9 @@ namespace dss {
     m_AKMInputProperty(),
     m_cardinalDirection(cd_none),
     m_windProtectionClass(wpc_none),
-    m_floor(0)
+    m_floor(0),
+    m_pairedDevices(0),
+    m_visible(false)
     {
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
@@ -2723,4 +2725,27 @@ namespace dss {
     setDeviceConfig16(CfgClassFunction, CfgFunction_Shade_PosTimeMax, seconds * 100);
   }
 
+  void Device::setPairedDevices(int _num) {
+    m_pairedDevices = _num;
+  }
+
+  int Device::getPairedDevices() const {
+    if (getDeviceType() == DEVICE_TYPE_TNY) {
+      return m_pairedDevices;
+    }
+
+    return 0;
+  }
+
+  void Device::setVisibility(bool _isVisible) {
+    m_visible = _isVisible;
+  }
+
+  bool Device::isVisible() const {
+    if (getDeviceType() == DEVICE_TYPE_TNY) {
+      return m_visible;
+    }
+
+    return true;
+  }
 } // namespace dss
