@@ -744,11 +744,12 @@ namespace dss {
     uint16_t getDeviceMaxMotionTime();
     void setDeviceMaxMotionTime(uint16_t seconds);
 
-    // currently only relevant for TNYs
+    // below functions are currently only supported by TNYs
     void setPairedDevices(int _num);
     int getPairedDevices() const;
     void setVisibility(bool _isVisible);
     bool isVisible() const;
+    bool isMainDevice() const;
 
   }; // Device
 
