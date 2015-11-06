@@ -3883,7 +3883,27 @@ namespace dss {
               }
             } // foreach
           } // if serial
-        } // if OEM
+        } else if (dev->isMainDevice() && (dev->getPairedDevices() > 0)) {
+           bool doSleep = false;
+           dsuid_t next;
+           dsuid_t current = dev->getDSID();
+           for (int p = 0; p < dev->getPairedDevices(); p++) {
+             dsuid_get_next_dsuid(current, &next);
+             current = next;
+             try {
+               boost::shared_ptr<Device> pPartnerDevice;
+               pPartnerDevice = DSS::getInstance()->getApartment().getDeviceByDSID(next);
+               if (!pPartnerDevice->isVisible()) {
+                 if (doSleep) {
+                   usleep(500 * 1000); // 500ms
+                 }
+                 manipulator.addDeviceToZone(pPartnerDevice, pZone);
+               }
+             } catch(std::runtime_error& e) {
+               Logger::getInstance()->log(std::string("JS: coult not find partner device widh dsuid ") + dsuid2str(next), lsError);
+             }
+           }
+         }
       } catch(ItemNotFoundException& ex) {
         JS_ReportError(cx, ex.what());
         return JS_FALSE;

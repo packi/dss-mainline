@@ -119,6 +119,26 @@ namespace dss {
                 }
               }
             }
+          } else if (dev->isMainDevice() && (dev->getPairedDevices() > 0)) {
+            bool doSleep = false;
+            dsuid_t next;
+            dsuid_t current = dev->getDSID();
+            for (int p = 0; p < dev->getPairedDevices(); p++) {
+              dsuid_get_next_dsuid(current, &next);
+              current = next;
+              try {
+                boost::shared_ptr<Device> pPartnerDevice;
+                pPartnerDevice = m_Apartment.getDeviceByDSID(next);
+                if (!pPartnerDevice->isVisible()) {
+                  if (doSleep) {
+                    usleep(500 * 1000); // 500ms
+                  }
+                  manipulator.addDeviceToZone(pPartnerDevice, zone);
+                }
+              } catch(std::runtime_error& e) {
+                Logger::getInstance()->log("Could not find partner device with dsuid '" + dsuid2str(next) + "'");
+              }
+            }
           }
 
           json.startArray("movedDevices");
