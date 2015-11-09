@@ -305,6 +305,10 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
       event->setProperty("NominalTemperature_Holiday",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
+      event->setProperty("NominalTemperature_Cooling",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode6)));
+      event->setProperty("NominalTemperature_CoolingOff",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode7)));
     } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
       event->setProperty("ControlValue_Off",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
@@ -318,6 +322,10 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
       event->setProperty("ControlValue_Holiday",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
+      event->setProperty("ControlValue_Cooling",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode6)));
+      event->setProperty("ControlValue_CoolingOff",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode7)));
     }
     return event;
 }
@@ -338,6 +346,8 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
   case 3: event->setProperty("OperationMode", "NotUsed"); break;
   case 4: event->setProperty("OperationMode", "Night"); break;
   case 5: event->setProperty("OperationMode", "Holiday"); break;
+  case 6: event->setProperty("OperationMode", "Cooling"); break;
+  case 7: event->setProperty("OperationMode", "CoolingOff"); break;
   }
   if (_props.m_HeatingControlMode == HeatingControlModeIDPID) {
     event->setProperty("NominalTemperature",
