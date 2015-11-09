@@ -49,6 +49,7 @@ const static std::string evtCategory_HeatingControllerSetup = "HeatingController
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
 const static std::string evtCategory_HeatingControllerState = "HeatingControllerState";
 const static std::string evtCategory_HeatingEnabled = "HeatingEnabled";
+const static std::string evtCategory_HeatingSystemCapability = "HeatingSystemCapability";
 const static std::string evtCategory_AddonToCloud = "AddOnToCloud";
 
 //const static int dsEnum_SensorError_invalidValue = 1;
@@ -76,6 +77,7 @@ std::vector<std::string> uploadEvents()
   events.push_back(EventName::StateChange);
   events.push_back(EventName::AddonStateChange);
   events.push_back(EventName::HeatingEnabled);
+  events.push_back(EventName::HeatingSystemCapability);
   events.push_back(EventName::HeatingControllerSetup);
   events.push_back(EventName::HeatingControllerValue);
   events.push_back(EventName::HeatingControllerState);
@@ -212,6 +214,11 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       json.add("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
       json.add("CoolingEnabled", event->getPropertyByName("CoolingEnabled"));
+    } else if (event->getName() == EventName::HeatingSystemCapability) {
+      appendCommon(json, evtGroup_ApartmentAndDevice,
+                   evtCategory_HeatingSystemCapability, event.get());
+      json.add("HeatingSupported", event->getPropertyByName("HeatingSupported"));
+      json.add("CoolingSupported", event->getPropertyByName("CoolingSupported"));
     } else if (event->getName() == EventName::AddonToCloud) {
       appendCommon(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
       json.add("EventName", event->getPropertyByName("EventName"));

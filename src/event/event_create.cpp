@@ -47,6 +47,7 @@ namespace EventName {
   const std::string StateChange = "stateChange";
   const std::string AddonStateChange = "addonStateChange";
   const std::string HeatingEnabled = "HeatingEnabled";
+  const std::string HeatingSystemCapability ="HeatingSystemCapability";
   const std::string HeatingControllerSetup = "HeatingControllerSetup";
   const std::string HeatingControllerValue = "HeatingControllerValue";
   const std::string HeatingControllerValueDsHub = "HeatingControllerValueDsHub";
@@ -248,6 +249,17 @@ createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled)
   event->setProperty("zoneID", intToString(_zoneID));
   event->setProperty("HeatingEnabled", _heatingEnabled ? "true" : "false");
   event->setProperty("CoolingEnabled", _coolingEnabled ? "true" : "false");
+  return event;
+}
+
+boost::shared_ptr<Event>
+  createHeatingSystemCapability(bool _heatingSupported, bool _coolingSupported)
+{
+  boost::shared_ptr<Event> event;
+
+  event = boost::make_shared<Event>(EventName::HeatingSystemCapability);
+  event->setProperty("HeatingSupported", _heatingSupported ? "true" : "false");
+  event->setProperty("CoolingSupported", _coolingSupported ? "true" : "false");
   return event;
 }
 

@@ -83,6 +83,9 @@ boost::shared_ptr<Event>
   createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled);
 
 boost::shared_ptr<Event>
+  createHeatingSystemCapability(bool _heatingSupported, bool _coolingSupported);
+
+boost::shared_ptr<Event>
   createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
                               const ZoneHeatingConfigSpec_t &_config);
 
