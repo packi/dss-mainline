@@ -304,6 +304,8 @@ namespace dss {
     void onAutoClusterMaintenance(dsuid_t _deviceID);
     void onAutoClusterCleanup();
     void onMeterReady();
+    void onDeviceDataReady(dsuid_t _meterID, const devid_t _deviceID,
+                        const int& _pairedDevices, const bool& _visible);
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);

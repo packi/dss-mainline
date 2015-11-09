@@ -507,6 +507,13 @@ namespace dss {
         _pDevice->setOemInfoState(DEVICE_OEM_NONE);
         _pDevice->setConfigLock(false);
       }
+    } else if (_pDevice->isPresent() && (_pDevice->getOemInfoState() != DEVICE_OEM_UNKOWN)) {
+      boost::shared_ptr<DSDeviceBusInterface::TNYConfigReader> task;
+      std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
+      task = boost::make_shared<DSDeviceBusInterface::TNYConfigReader>(connURI);
+      task->setup(_pDevice);
+      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+      pTP->addEvent(task);
     } else if (_pDevice->isPresent() &&
                 (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
                 ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&

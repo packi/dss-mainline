@@ -1155,6 +1155,15 @@ namespace dss {
     case ModelEvent::etMeterReady:
       onMeterReady();
       break;
+    case ModelEvent::etDeviceDataReady:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 3) {
+        log("Expected at least 3 parameter for ModelEvent::etDeviceDataReady");
+      } else {
+        onDeviceDataReady(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+
+      break;
     default:
       assert(false);
       break;
@@ -2382,6 +2391,24 @@ namespace dss {
       }
     }
   }
+
+  void ModelMaintenance::onDeviceDataReady(dsuid_t _meterID,
+                                       const devid_t _deviceID,
+                                       const int& _pairedDevices,
+                                       const bool& _visible) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+      boost::shared_ptr<Device> pDev = devRef.getDevice();
+
+      pDev->setPairedDevices(_pairedDevices);
+      pDev->setVisibility(_visible);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onDeviceDataReady
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner
