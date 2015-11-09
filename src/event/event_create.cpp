@@ -240,13 +240,14 @@ createActionDenied(const std::string &_type, const std::string &_name,
  *       - upon raise event verify event matches description
  */
 boost::shared_ptr<Event>
-createHeatingEnabled(int _zoneID, bool _enabled)
+createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled)
 {
   boost::shared_ptr<Event> event;
 
   event = boost::make_shared<Event>(EventName::HeatingEnabled);
   event->setProperty("zoneID", intToString(_zoneID));
-  event->setProperty("HeatingEnabled", _enabled ? "true" : "false");
+  event->setProperty("HeatingEnabled", _heatingEnabled ? "true" : "false");
+  event->setProperty("CoolingEnabled", _coolingEnabled ? "true" : "false");
   return event;
 }
 

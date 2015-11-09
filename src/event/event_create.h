@@ -80,7 +80,7 @@ boost::shared_ptr<Event>
                      const std::string &_source, const std::string &_reason);
 
 boost::shared_ptr<Event>
-  createHeatingEnabled(int _zoneID, bool _enabled);
+  createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled);
 
 boost::shared_ptr<Event>
   createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,

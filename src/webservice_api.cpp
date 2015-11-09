@@ -211,7 +211,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
                    evtCategory_HeatingEnabled, event.get());
       json.add("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       json.add("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
-
+      json.add("CoolingEnabled", event->getPropertyByName("CoolingEnabled"));
     } else if (event->getName() == EventName::AddonToCloud) {
       appendCommon(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
       json.add("EventName", event->getPropertyByName("EventName"));
@@ -736,7 +736,9 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingEnabled, event.get());
       json.startObject("EventBody");
+      json.add("ZoneID", strToInt(event->getPropertyByName("zoneID")));
       json.add("HeatingEnabled", event->getPropertyByName("HeatingEnabled"));
+      json.add("CoolingEnabled", event->getPropertyByName("CoolingEnabled"));
       json.endObject();
     } else if (event->getName() == EventName::AddonToCloud) {
       createHeader(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
