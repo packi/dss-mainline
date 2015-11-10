@@ -935,7 +935,16 @@ void SystemState::run() {
 
       unsigned int value =  strToUInt(m_properties.get("value"));
       assert(value < state->getValueRangeSize());
-      state->setState(coDsmApi, value);
+
+      callOrigin_t origin = coDsmApi;
+
+      if (m_properties.has("callOrigin")) {
+        std::string s = m_properties.get("callOrigin");
+        if (!s.empty()) {
+          origin = (callOrigin_t)strToInt(s);
+        }
+      }
+      state->setState(origin, value);
 
     } else if (m_evtName == EventName::BuildingService) {
       unsigned int value = strToInt(m_properties.get("value"));

@@ -60,6 +60,7 @@ namespace dss {
     PropertyNodePtr m_pPropertyNode;
     std::string m_name;
     bool m_IsPersistent;
+    callOrigin_t m_callOrigin;
 
     eState m_state;
     eStateType m_type;
