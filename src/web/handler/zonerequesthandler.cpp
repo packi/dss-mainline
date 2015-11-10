@@ -417,6 +417,10 @@ namespace dss {
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
             json.add("Holiday",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+            json.add("Cooling",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode6));
+            json.add("CoolingOff",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
@@ -433,6 +437,10 @@ namespace dss {
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
             json.add("Holiday",
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+            json.add("Cooling",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode6));
+            json.add("CoolingOff",
+                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
 
           }
@@ -530,6 +538,28 @@ namespace dss {
               try {
                 fValue = strToDouble(_request.getParameter("Holiday"));
                 hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("Cooling")) {
+            try {
+              iValue = strToUInt(_request.getParameter("Cooling"));
+              hOpValues.OpMode6 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("Cooling"));
+                hOpValues.OpMode6 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+              } catch(std::invalid_argument& e) {}
+            }
+          }
+          if (_request.hasParameter("CoolingOff")) {
+            try {
+              iValue = strToUInt(_request.getParameter("CoolingOff"));
+              hOpValues.OpMode7 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+            } catch(std::invalid_argument& e) {
+              try {
+                fValue = strToDouble(_request.getParameter("CoolingOff"));
+                hOpValues.OpMode7 = SceneHelper::sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
