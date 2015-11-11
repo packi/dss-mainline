@@ -268,7 +268,9 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createActionDenied("device-scene", "action-node", "unit-test", "testcase");
   } else if (eventName == EventName::HeatingEnabled) {
     // TODO created by javascript, sync paramter manually
-    pEvent = createHeatingEnabled(1, true);
+    pEvent = createHeatingEnabled(1, true, true);
+  } else if (eventName == EventName::HeatingSystemCapability) {
+    pEvent = createHeatingSystemCapability(true, true);
   } else if (eventName == EventName::HeatingControllerSetup) {
     ZoneHeatingConfigSpec_t spec;
     memset(&spec, 0x7f, sizeof(ZoneHeatingConfigSpec_t));

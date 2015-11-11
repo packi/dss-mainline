@@ -125,7 +125,7 @@ namespace dss {
     "Stop-Area4"
   };
 
-  const int SceneTableHeating_length = 6;
+  const int SceneTableHeating_length = 8;
   const char *SceneTableHeating[] =
   {
     "Off",
@@ -134,6 +134,8 @@ namespace dss {
     "NotUsed",
     "Night",
     "Holiday",
+    "Cooling",
+    "CoolingOff",
   };
 
   const int SceneTable1_length = 28;

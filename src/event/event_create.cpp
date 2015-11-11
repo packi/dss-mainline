@@ -47,6 +47,7 @@ namespace EventName {
   const std::string StateChange = "stateChange";
   const std::string AddonStateChange = "addonStateChange";
   const std::string HeatingEnabled = "HeatingEnabled";
+  const std::string HeatingSystemCapability ="HeatingSystemCapability";
   const std::string HeatingControllerSetup = "HeatingControllerSetup";
   const std::string HeatingControllerValue = "HeatingControllerValue";
   const std::string HeatingControllerValueDsHub = "HeatingControllerValueDsHub";
@@ -240,13 +241,25 @@ createActionDenied(const std::string &_type, const std::string &_name,
  *       - upon raise event verify event matches description
  */
 boost::shared_ptr<Event>
-createHeatingEnabled(int _zoneID, bool _enabled)
+createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled)
 {
   boost::shared_ptr<Event> event;
 
   event = boost::make_shared<Event>(EventName::HeatingEnabled);
   event->setProperty("zoneID", intToString(_zoneID));
-  event->setProperty("HeatingEnabled", _enabled ? "true" : "false");
+  event->setProperty("HeatingEnabled", _heatingEnabled ? "true" : "false");
+  event->setProperty("CoolingEnabled", _coolingEnabled ? "true" : "false");
+  return event;
+}
+
+boost::shared_ptr<Event>
+  createHeatingSystemCapability(bool _heatingSupported, bool _coolingSupported)
+{
+  boost::shared_ptr<Event> event;
+
+  event = boost::make_shared<Event>(EventName::HeatingSystemCapability);
+  event->setProperty("HeatingSupported", _heatingSupported ? "true" : "false");
+  event->setProperty("CoolingSupported", _coolingSupported ? "true" : "false");
   return event;
 }
 
@@ -304,6 +317,10 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
       event->setProperty("NominalTemperature_Holiday",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
+      event->setProperty("NominalTemperature_Cooling",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode6)));
+      event->setProperty("NominalTemperature_CoolingOff",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode7)));
     } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
       event->setProperty("ControlValue_Off",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
@@ -317,6 +334,10 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
       event->setProperty("ControlValue_Holiday",
           doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
+      event->setProperty("ControlValue_Cooling",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode6)));
+      event->setProperty("ControlValue_CoolingOff",
+          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode7)));
     }
     return event;
 }
@@ -337,6 +358,8 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
   case 3: event->setProperty("OperationMode", "NotUsed"); break;
   case 4: event->setProperty("OperationMode", "Night"); break;
   case 5: event->setProperty("OperationMode", "Holiday"); break;
+  case 6: event->setProperty("OperationMode", "Cooling"); break;
+  case 7: event->setProperty("OperationMode", "CoolingOff"); break;
   }
   if (_props.m_HeatingControlMode == HeatingControlModeIDPID) {
     event->setProperty("NominalTemperature",

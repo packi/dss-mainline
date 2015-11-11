@@ -28,6 +28,7 @@
 
 #include <unistd.h>
 #include <math.h>
+#include "foreach.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -2044,6 +2045,16 @@ namespace dss {
       throw ItemNotFoundException("Invalid binary input index");
     }
     return m_binaryInputs[_inputIndex]->m_inputType;
+  }
+
+  bool Device::hasBinaryInputType(int inputType) const {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    foreach(boost::shared_ptr<DeviceBinaryInput_t> binInput, m_binaryInputs) {
+      if (binInput->m_inputType == inputType) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {

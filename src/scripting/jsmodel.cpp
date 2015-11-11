@@ -3436,6 +3436,10 @@ namespace dss {
             SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
             SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+        obj.setProperty<double>("Cooling",
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode6));
+        obj.setProperty<double>("CoolingOff",
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode7));
         break;
       case HeatingControlModeIDZoneFollower:
         break;
@@ -3452,6 +3456,10 @@ namespace dss {
             SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
             SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+        obj.setProperty<double>("Cooling",
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode6));
+        obj.setProperty<double>("CoolingOff",
+            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode7));
         break;
       }
       return JS_TRUE;
@@ -3654,6 +3662,10 @@ namespace dss {
           hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "Holiday") {
           hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "Cooling") {
+          hOpValues.OpMode6 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+        } else if (propKey == "CoolingOff") {
+          hOpValues.OpMode7 = SceneHelper::sensorToSystem(SensorConversion, fValue);
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey.c_str());
         }
@@ -3872,6 +3884,7 @@ namespace dss {
         JS_ReportError(cx, ex.what());
         return JS_FALSE;
       }
+      return JS_TRUE;
     } catch(ItemDuplicateException& ex) {
       JS_ReportWarning(cx, "Item duplicate: %s", ex.what());
     } catch(ItemNotFoundException& ex) {
