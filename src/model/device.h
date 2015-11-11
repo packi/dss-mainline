@@ -309,6 +309,8 @@ namespace dss {
     CardinalDirection_t m_cardinalDirection; //<  wind protection of blinds
     WindProtectionClass_t m_windProtectionClass;
     int m_floor;
+    int m_pairedDevices; // currently relevant for TNY only
+    bool m_visible; // currently relevant for TNY only
 
   protected:
     /** Sends the application a note that something has changed.
@@ -742,6 +744,14 @@ namespace dss {
 
     uint16_t getDeviceMaxMotionTime();
     void setDeviceMaxMotionTime(uint16_t seconds);
+
+    // below functions are currently only supported by TNYs
+    void setPairedDevices(int _num);
+    int getPairedDevices() const;
+    void setVisibility(bool _isVisible);
+    bool isVisible() const;
+    bool isMainDevice() const;
+
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

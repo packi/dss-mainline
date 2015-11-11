@@ -1055,7 +1055,7 @@ namespace dss {
       break;
     case ModelEvent::etDeviceEANReady:
       assert(pEventWithDSID != NULL);
-      if (event->getParameterCount() != 9) {
+      if (event->getParameterCount() != 11) {
         log("Expected 8 parameters for ModelEvent::etDeviceEANReady");
       } else {
         onEANReady(pEventWithDSID->getDSID(),
@@ -1066,7 +1066,9 @@ namespace dss {
                    event->getParameter(5),
                    event->getParameter(6),
                    event->getParameter(7),
-                   event->getParameter(8));
+                   event->getParameter(8),
+                   event->getParameter(9),
+                   event->getParameter(10));
       }
       break;
     case ModelEvent::etDeviceOEMDataReady:
@@ -1152,6 +1154,15 @@ namespace dss {
       break;
     case ModelEvent::etMeterReady:
       onMeterReady();
+      break;
+    case ModelEvent::etDeviceDataReady:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 3) {
+        log("Expected at least 3 parameter for ModelEvent::etDeviceDataReady");
+      } else {
+        onDeviceDataReady(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+
       break;
     default:
       assert(false);
@@ -2118,7 +2129,9 @@ namespace dss {
                                         const int _serialNumber,
                                         const int _partNumber,
                                         const bool _isIndependent,
-                                        const bool _isConfigLocked) {
+                                        const bool _isConfigLocked,
+                                        const int _pairedDevices,
+                                        const bool _isVisible) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       if (_state == DEVICE_OEM_VALID) {
@@ -2134,6 +2147,8 @@ namespace dss {
       }
       devRef.getDevice()->setOemInfoState(_state);
       devRef.getDevice()->setConfigLock(_isConfigLocked);
+      devRef.getDevice()->setVisibility(_isVisible);
+      devRef.getDevice()->setPairedDevices(_pairedDevices);
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
@@ -2376,6 +2391,24 @@ namespace dss {
       }
     }
   }
+
+  void ModelMaintenance::onDeviceDataReady(dsuid_t _meterID,
+                                       const devid_t _deviceID,
+                                       const int& _pairedDevices,
+                                       const bool& _visible) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+      boost::shared_ptr<Device> pDev = devRef.getDevice();
+
+      pDev->setPairedDevices(_pairedDevices);
+      pDev->setVisibility(_visible);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    } catch(ItemNotFoundException& e) {
+      log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onDeviceDataReady
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

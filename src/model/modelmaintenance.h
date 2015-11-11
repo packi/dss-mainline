@@ -285,7 +285,8 @@ namespace dss {
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,
                       const unsigned long long _eanNumber,
                       const int _serialNumber, const int _partNumber,
-                      const bool _isIndependent, const bool _isConfigLocked);
+                      const bool _isIndependent, const bool _isConfigLocked,
+                      const int _pairedDevices, const bool _isVisible);
     void onOEMDataReady(dsuid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
@@ -303,6 +304,8 @@ namespace dss {
     void onAutoClusterMaintenance(dsuid_t _deviceID);
     void onAutoClusterCleanup();
     void onMeterReady();
+    void onDeviceDataReady(dsuid_t _meterID, const devid_t _deviceID,
+                        const int& _pairedDevices, const bool& _visible);
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
     void sendWebUpdateEvent(int _interval = 86400);

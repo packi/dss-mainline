@@ -523,8 +523,10 @@ namespace dss {
     uint64_t ean = 0;
     uint16_t serialNumber = 0;
     uint8_t partNumber = 0;
+    bool isVisible = false;
     bool isIndependent = false;
     bool isConfigLocked = false;
+    uint8_t pairedDevices = 0;
     DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
 
@@ -539,6 +541,14 @@ namespace dss {
     }
 
     try {
+      // read device-active data and EAN part number
+      uint16_t result0 = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1e);
+      partNumber = result0 & 0x7F;
+      isIndependent = (result0 & 0x80);
+      uint8_t upper = result0 >> 8;
+      isVisible = !(upper & (1 << 4));
+      pairedDevices = (upper >> 0) & ((1 << 3) - 1);
+
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
       uint16_t result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
       deviceInetState = (DeviceOEMInetState_t)(result >> 12);
@@ -557,10 +567,6 @@ namespace dss {
         ean |= ((long long unsigned int)result << 16);
 
         serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
-
-        partNumber = getDeviceConfig(m_dsmId, m_deviceAdress, 1, 0x1e);
-        isIndependent = (partNumber & 0x80);
-        partNumber &= 0x7F;
 
         state = DEVICE_OEM_VALID;
       }
@@ -588,6 +594,8 @@ namespace dss {
     pEvent->addParameter(partNumber);
     pEvent->addParameter(isIndependent);
     pEvent->addParameter(isConfigLocked);
+    pEvent->addParameter(pairedDevices);
+    pEvent->addParameter(isVisible);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     } else {
@@ -600,6 +608,50 @@ namespace dss {
     m_deviceAdress = _device->getShortAddress();
     m_dsmId = _device->getDSMeterDSID();
     m_revisionID = _device->getRevisionID();
+  }
+
+  DSDeviceBusInterface::TNYConfigReader::TNYConfigReader(const std::string& _busConnection) : OEMDataReader(_busConnection)
+  { }
+
+  DSDeviceBusInterface::TNYConfigReader::~TNYConfigReader()
+  { }
+
+  void DSDeviceBusInterface::TNYConfigReader::run()
+  {
+    bool isVisible = false;
+    uint8_t pairedDevices = 0;
+
+    m_dsmApiHandle = DsmApiInitialize();
+    if (!m_dsmApiHandle) {
+      throw std::runtime_error("TNYConfigReader: Unable to get dsmapi handle");
+    }
+
+    int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
+    if (result < 0) {
+      throw std::runtime_error(std::string("TNYConfigReader: Unable to open connection to: ") + m_busConnection);
+    }
+
+    try {
+      // read device-active data and EAN part number
+      uint16_t result0 = getDeviceConfig(m_dsmId, m_deviceAdress, 1, 0x1f);
+      isVisible = !(result0 & (1 << 4));
+      pairedDevices = (result0 >> 0) & ((1 << 3) - 1);
+
+    } catch (BusApiError& er) {
+      // Bus error
+      Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what(), lsWarning);
+    }
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDataReady,
+                                                m_dsmId);
+    pEvent->addParameter(m_deviceAdress);
+    pEvent->addParameter(pairedDevices);
+    pEvent->addParameter(isVisible);
+    if(DSS::hasInstance()) {
+      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    } else {
+      delete pEvent;
+    }
   }
 
 } // namespace dss

@@ -90,6 +90,8 @@ namespace dss {
     const char *windProtectionClass = NULL;
     const char *floorString = NULL;
     const char *vdcDevice = NULL;
+    const char *pairedDevices = NULL;
+    const char *visible = NULL;
 
     if (strcmp(_name, "device") != 0) {
       return;
@@ -137,6 +139,10 @@ namespace dss {
         configLocked = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "valveType") == 0) {
         valve = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "pairedDevices") == 0) {
+        pairedDevices = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "visible") == 0) {
+        visible = _attrs[i + 1];
       } else if (strcmp(_attrs[i], VdcDevice) == 0) {
         vdcDevice = _attrs[i + 1];
       } else if (strcmp(_attrs[i], WindProtectionClass) == 0) {
@@ -312,6 +318,26 @@ namespace dss {
     if (valve != NULL) {
       m_tempDevice->setValveTypeAsString(valve, true);
     }
+
+    bool numPairedDevices = 0;
+    if (pairedDevices != NULL) {
+      try {
+        int p = strToIntDef(pairedDevices, -1);
+        if (p > 0) {
+          numPairedDevices = p;
+        }
+      } catch(std::invalid_argument&) {}
+    }
+    m_tempDevice->setPairedDevices(numPairedDevices);
+
+    bool isVisible = true;
+    if (visible != NULL) {
+      try {
+        int p = strToUInt(visible);
+        isVisible = p > 0;
+      } catch(std::invalid_argument&) {}
+    }
+    m_tempDevice->setVisibility(isVisible);
 
     if (vdcDevice != NULL) {
       m_tempDevice->setVdcDevice(true);
@@ -963,6 +989,10 @@ namespace dss {
       }
     }
     _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
+    if (_pDevice->getDeviceType() == DEVICE_TYPE_TNY) {
+      _ofs << " visible=\"" << (_pDevice->isVisible() ? "1" : "0") << "\"";
+      _ofs << " pairedDevices=\"" << intToString(_pDevice->getPairedDevices()) << "\"";
+    }
 
     if (_pDevice->isVdcDevice()) {
       addAttribute(_ofs, VdcDevice, "1");
