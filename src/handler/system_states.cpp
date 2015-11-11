@@ -618,11 +618,13 @@ void SystemState::stateBinaryInputGeneric(State &_state,
     }
 
     if (m_properties.has("value")) {
+      boost::shared_ptr<Device> pDev = m_raisedAtState->getProviderDevice();
       std::string val = m_properties.get("value");
       int iVal = strToIntDef(val, -1);
       if (iVal == 1) {
         pNode->setIntegerValue(pNode->getIntegerValue() + 1);
         _state.setState(coSystemBinaryInput, State_Active);
+        _state.setOriginDeviceDSUID(pDev->getDSID());
       } else if (iVal == 2) {
         if (pNode->getIntegerValue() > 0) {
           pNode->setIntegerValue(pNode->getIntegerValue() - 1);
@@ -630,6 +632,7 @@ void SystemState::stateBinaryInputGeneric(State &_state,
         if (pNode->getIntegerValue() == 0) {
           _state.setState(coSystemBinaryInput, State_Inactive);
         }
+        _state.setOriginDeviceDSUID(pDev->getDSID());
       }
     } // m_properties.has("value")
   } catch (ItemNotFoundException &ex) {}
