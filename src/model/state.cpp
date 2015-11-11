@@ -48,6 +48,8 @@ namespace dss {
   State::State(const std::string& _name)
     : m_name(_name),
       m_IsPersistent(false),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Inactive),
       m_type(StateType_Apartment)
   {
@@ -58,6 +60,8 @@ namespace dss {
   State::State(const std::string& _name, eState _state)
     : m_name(_name),
       m_IsPersistent(false),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
       m_state(_state),
       m_type(StateType_Apartment)
   {
@@ -69,6 +73,8 @@ namespace dss {
                const std::string& _identifier)
   : m_name(_name),
     m_IsPersistent(false),
+    m_callOrigin(coUnknown),
+    m_originDeviceDSUID(DSUID_NULL),
     m_state(State_Inactive),
     m_type(_type),
     m_serviceName(_identifier)
@@ -80,6 +86,8 @@ namespace dss {
   State::State(boost::shared_ptr<Device> _device, int _inputIndex) :
       m_name("dev." + dsuid2str(_device->getDSID()) + "." + intToString(_inputIndex)),
       m_IsPersistent(true),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Invalid),
       m_type(StateType_Device),
       m_providerDev(_device),
