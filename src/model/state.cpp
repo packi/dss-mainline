@@ -154,8 +154,10 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<int, eState>(m_state, false));
       m_pPropertyNode->createProperty("state")
         ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
-      m_pPropertyNode->createProperty("callOrigin")
-        ->linkToProxy(PropertyProxyReference<int, callOrigin_t>(m_callOrigin, false));
+      if (m_callOrigin != coUnknown) {
+        m_pPropertyNode->createProperty("callOrigin")
+          ->linkToProxy(PropertyProxyReference<int, callOrigin_t>(m_callOrigin, false));
+      }
 
       // #5870 - keep compatibility for "presence" and "hibernation"
       if (m_name == "presence" || m_name == "hibernation") {
@@ -268,6 +270,11 @@ namespace dss {
       eState oldstate = m_state;
       m_state = _state;
       m_callOrigin = _origin;
+
+      if (m_pPropertyNode != NULL && DSS::hasInstance() && (m_callOrigin != coUnknown)) {
+        m_pPropertyNode->createProperty("callOrigin")
+          ->linkToProxy(PropertyProxyReference<int, callOrigin_t>(m_callOrigin, false));
+      }
 
       if (m_IsPersistent) {
         save();
