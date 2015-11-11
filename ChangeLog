@@ -1,5 +1,16 @@
 dSS - digitalSTROM Server
 
+v1.34.0 11.11.2015
+	* add sound pressure level sensor
+	* replace mongoose with civetweb
+	* Trigger synchronize heating, #11256
+	* add new JS methods, #11329, #11330
+	* fix xml parse and locking, #11571
+	* Render more sensor information in getStructure, #11418
+	* fix window handle states, #11426
+	* zone request handler: extend for cooling and coolingOff, #11638
+	* Extend heating controller value, #11639
+
 v1.33.0 19.10.2015
 	* disable heating controller before removing a zone, #11242
 	* add sensor type to zone sensor node in proptree, #105311
