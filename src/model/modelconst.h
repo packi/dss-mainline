@@ -198,6 +198,8 @@ namespace dss {
   const int BinaryInputIDGarageDoorContact = 16;
   const int BinaryInputIDSunProtection = 17;
   const int BinaryInputIDFrostDetector = 18;
+  const int BinaryInputIDHeatingSystem = 19;
+  const int BinaryInputIDHeatingSystemMode = 20;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
