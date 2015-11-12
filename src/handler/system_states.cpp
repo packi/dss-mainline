@@ -198,6 +198,17 @@ void SystemState::bootstrap() {
   registerState(StateName::Frost, true);
   registerState(StateName::HeatingSystem, true);
   registerState(StateName::HeatingSystemMode, true);
+
+  state = registerState(StateName::HeatingModeControl, true);
+  State::ValueRange_t heatingModeValues;
+  heatingModeValues.push_back("off");
+  heatingModeValues.push_back("heating");
+  heatingModeValues.push_back("cooling");
+  heatingModeValues.push_back("auto");
+  state->setValueRange(heatingModeValues);
+  if (!state->hasPersistentData()) {
+    state->setState(coSystemStartup, "heating");
+  }
 }
 
 void SystemState::startup() {
@@ -924,19 +935,8 @@ void SystemState::run() {
 
     } else if (m_evtName == EventName::HeatingModeSwitch) {
       boost::shared_ptr<State> state;
-      try {
-        state = m_apartment.getNonScriptState(StateName::HeatingModeControl);
-      } catch (ItemNotFoundException& ex) {
-        state = getOrRegisterState(StateName::HeatingModeControl);
-        State::ValueRange_t heatingModeValues;
-        heatingModeValues.push_back("off");
-        heatingModeValues.push_back("heating");
-        heatingModeValues.push_back("cooling");
-        heatingModeValues.push_back("auto");
-        state->setValueRange(heatingModeValues);
-      }
-
-      unsigned int value =  strToUInt(m_properties.get("value"));
+      state = getOrRegisterState(StateName::HeatingModeControl);
+      unsigned int value = strToUInt(m_properties.get("value"));
       assert(value < state->getValueRangeSize());
 
       callOrigin_t origin = coDsmApi;
