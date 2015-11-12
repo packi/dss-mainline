@@ -213,6 +213,10 @@ namespace dss {
       return;
     }
     fputc((int) m_state, fout);
+    fputc(static_cast<int>(m_callOrigin), fout);
+    for (int i = 0; i < DSUID_SIZE; i++) {
+      fputc(static_cast<int>(m_originDeviceDSUID.id[i]), fout);
+    }
     fclose(fout);
   } // save
 
@@ -222,12 +226,24 @@ namespace dss {
       return;
     }
     int value = fgetc(fin);
-    fclose(fin);
-    if (value >= 0) {
+    if (value != EOF) {
       m_state = (eState) value;
-    } else {
-      return;
     }
+    value = fgetc(fin);
+    if (value != EOF) {
+      m_callOrigin = static_cast<callOrigin_t>(value);
+    }
+    for (int i = 0; i < DSUID_SIZE; i++) {
+      value = fgetc(fin);
+      if (value != EOF) {
+        m_originDeviceDSUID.id[i] = static_cast<char>(value);
+      } else {
+        m_originDeviceDSUID = DSUID_NULL;
+        break;
+      }
+    }
+    fclose(fin);
+    return;
   } // load
 
   bool State::getPersistence() const {
