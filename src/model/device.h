@@ -749,6 +749,7 @@ namespace dss {
     void setPairedDevices(int _num);
     int getPairedDevices() const;
     void setVisibility(bool _isVisible);
+    void setDeviceVisibility(bool _isVisible);
     bool isVisible() const;
     bool isMainDevice() const;
 

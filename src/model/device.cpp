@@ -2760,6 +2760,24 @@ namespace dss {
     }
   }
 
+  void Device::setDeviceVisibility(bool _isVisible) {
+    if (getDeviceType() == DEVICE_TYPE_TNY) {
+      if (isMainDevice()) {
+        throw std::runtime_error("Visibility setting not allowed on main device");
+      }
+
+      uint8_t val = getDeviceConfig(CfgClassDevice, CfgFunction_DeviceActive);
+      uint8_t bit4 = val & (1 << 4);
+      if ((bool)bit4 != _isVisible) {
+        val ^= 1 << 4;
+        setDeviceConfig(CfgClassDevice, CfgFunction_DeviceActive, val);
+        setVisibility(_isVisible);
+      }
+    } else {
+      throw std::runtime_error("Visibility setting is not supported by this device");
+    }
+  }
+
   bool Device::isVisible() const {
     if (getDeviceType() == DEVICE_TYPE_TNY) {
       return m_visible;
