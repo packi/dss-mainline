@@ -60,6 +60,8 @@ namespace dss {
     PropertyNodePtr m_pPropertyNode;
     std::string m_name;
     bool m_IsPersistent;
+    callOrigin_t m_callOrigin;
+    dsuid_t m_originDeviceDSUID;
 
     eState m_state;
     eStateType m_type;
@@ -131,6 +133,9 @@ namespace dss {
 
     void publishToPropertyTree();
     void removeFromPropertyTree();
+
+    void setOriginDeviceDSUID(const dsuid_t _dsuid);
+    std::string getOriginDeviceDSUIDString() const { return dsuid2str(m_originDeviceDSUID); }
   }; // State
 
   /** Represents a class for Device sensor value state.*/
