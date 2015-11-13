@@ -2787,8 +2787,8 @@ namespace dss {
       }
 
       uint8_t val = getDeviceConfig(CfgClassDevice, CfgFunction_DeviceActive);
-      uint8_t bit4 = val & (1 << 4);
-      if ((bool)bit4 != _isVisible) {
+      uint8_t bit4 = ((val & (1 << 4)) == 0); // inverted logic, 0 is "active"
+      if (bit4 != _isVisible) {
         val ^= 1 << 4;
         setDeviceConfig(CfgClassDevice, CfgFunction_DeviceActive, val);
         setVisibility(_isVisible);
@@ -2816,7 +2816,6 @@ namespace dss {
         }
       }
     }
-
     return ret;
   }
 } // namespace dss
