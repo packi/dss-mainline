@@ -187,6 +187,23 @@ namespace dss {
       }
     }
     _json.add("sensorDataValid", sensorFlag);
+
+    // check if this is a "main" device, if yes render dSUIDs of all
+    // partner devices
+    _json.startArray("pairedDevices");
+    dsuid_t dsuid = _device.getDevice()->getDSID();
+    // exclude main device in the list
+    if (_device.getDevice()->isMainDevice() &&
+        (_device.getDevice()->getPairedDevices() > 0)) {
+      for (int pd = 0; pd < (_device.getDevice()->getPairedDevices() - 1); pd++) {
+          dsuid_t next;
+          dsuid_get_next_dsuid(dsuid, &next);
+          _json.add(dsuid2str(next));
+          dsuid = next;
+      }
+    }
+    _json.endArray();
+
     _json.endObject();
   } // toJSON(DeviceReference)
 

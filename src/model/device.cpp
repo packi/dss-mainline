@@ -2737,6 +2737,26 @@ namespace dss {
   }
 
   void Device::setPairedDevices(int _num) {
+    if (isMainDevice() && (m_pairedDevices != _num) &&
+        (m_pPropertyNode != NULL)) {
+      PropertyNodePtr paired = m_pPropertyNode->getPropertyByName("pairedDevices");
+      if (paired != NULL) {
+        m_pPropertyNode->removeChild(paired);
+      }
+
+      if (_num > 0) {
+        dsuid_t current = getDSID();
+        for (int i = 0; i < _num - 1; i++) {
+          PropertyNodePtr sub = m_pPropertyNode->
+              createProperty("pairedDevices/device" + intToString(i));
+         dsuid_t next;
+          dsuid_get_next_dsuid(current, &next);
+          sub->createProperty("dSUID")->setStringValue(dsuid2str(next));
+          current = next;
+        }
+      }
+    }
+
     m_pairedDevices = _num;
   }
 
