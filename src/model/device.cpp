@@ -2790,11 +2790,9 @@ namespace dss {
     bool ret = true;
     if (getDeviceType() == DEVICE_TYPE_TNY) {
       uint32_t serial;
-      if ((dsuid_get_serial_number(&m_DSID, &serial) == 0) &&
-          (m_pairedDevices != 0)) {
-        uint32_t ns = floor((serial/(double)m_pairedDevices) * m_pairedDevices);
-        if (serial != ns) {
-          ret = false;
+      if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
+        if ((serial % m_pairedDevices) != 0) {
+          return false;
         }
       }
     }
