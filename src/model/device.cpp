@@ -2807,7 +2807,10 @@ namespace dss {
   }
 
   bool Device::isMainDevice() const {
-    bool ret = true;
+    if (m_pairedDevices == 0) {
+      return true;
+    }
+
     if (getDeviceType() == DEVICE_TYPE_TNY) {
       uint32_t serial;
       if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
@@ -2816,6 +2819,6 @@ namespace dss {
         }
       }
     }
-    return ret;
+    return true;
   }
 } // namespace dss
