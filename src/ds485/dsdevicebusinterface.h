@@ -53,13 +53,21 @@ namespace dss {
                                 dev_t _device,
                                 uint8_t _configClass,
                                 uint8_t _configIndex) const;
-    private:
+    protected:
       std::string m_busConnection;
       DsmApiHandle_t m_dsmApiHandle;
       devid_t m_deviceAdress;
       dsuid_t m_dsmId;
       int m_revisionID;
     };
+
+    class TNYConfigReader : public OEMDataReader {
+    public:
+      TNYConfigReader(const std::string& _busConnection);
+      virtual ~TNYConfigReader();
+      virtual void run();
+    };
+
 
     DSDeviceBusInterface()
     : DSBusInterfaceObj()

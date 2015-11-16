@@ -197,6 +197,10 @@ namespace dss {
         // do not render "slave" devices
         continue;
       }
+      if (d.getDevice()->isVisible() != true) {
+        // do not render hidden TNY devices
+        continue;
+      }
       toJSON(d, _json);
     }
   } // toJSON(Set,Name)
@@ -214,6 +218,10 @@ namespace dss {
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
       if (devices[iDevice].getDevice()->is2WaySlave()) {
         // do not render "slave" devices
+        continue;
+      }
+      if (devices[iDevice].getDevice()->isVisible() != true) {
+        // do not render hidden TNY devices
         continue;
       }
       _json.add(dsuid2str(devices[iDevice].getDSID()));
@@ -239,6 +247,10 @@ namespace dss {
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
       if (devices[iDevice].getDevice()->is2WaySlave()) {
         // do not render "slave" devices
+        continue;
+      }
+      if (devices[iDevice].getDevice()->isVisible() != true) {
+        // do not render hidden TNY devices
         continue;
       }
       _json.add(dsuid2str(devices[iDevice].getDSID()));

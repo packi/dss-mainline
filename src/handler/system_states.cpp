@@ -56,6 +56,8 @@ namespace StateName {
   const std::string Presence = "presence";
   const std::string Rain = "rain";
   const std::string Wind = "wind";
+  const std::string HeatingSystem = "heating_system";
+  const std::string HeatingSystemMode = "heating_system_mode";
 }
 
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
@@ -194,6 +196,19 @@ void SystemState::bootstrap() {
   registerState(StateName::Wind, true);
   registerState(StateName::Rain, true);
   registerState(StateName::Frost, true);
+  registerState(StateName::HeatingSystem, true);
+  registerState(StateName::HeatingSystemMode, true);
+
+  state = registerState(StateName::HeatingModeControl, true);
+  State::ValueRange_t heatingModeValues;
+  heatingModeValues.push_back("off");
+  heatingModeValues.push_back("heating");
+  heatingModeValues.push_back("cooling");
+  heatingModeValues.push_back("auto");
+  state->setValueRange(heatingModeValues);
+  if (!state->hasPersistentData()) {
+    state->setState(coSystemStartup, "heating");
+  }
 }
 
 void SystemState::startup() {
@@ -614,11 +629,13 @@ void SystemState::stateBinaryInputGeneric(State &_state,
     }
 
     if (m_properties.has("value")) {
+      boost::shared_ptr<Device> pDev = m_raisedAtState->getProviderDevice();
       std::string val = m_properties.get("value");
       int iVal = strToIntDef(val, -1);
       if (iVal == 1) {
         pNode->setIntegerValue(pNode->getIntegerValue() + 1);
         _state.setState(coSystemBinaryInput, State_Active);
+        _state.setOriginDeviceDSUID(pDev->getDSID());
       } else if (iVal == 2) {
         if (pNode->getIntegerValue() > 0) {
           pNode->setIntegerValue(pNode->getIntegerValue() - 1);
@@ -626,6 +643,7 @@ void SystemState::stateBinaryInputGeneric(State &_state,
         if (pNode->getIntegerValue() == 0) {
           _state.setState(coSystemBinaryInput, State_Inactive);
         }
+        _state.setOriginDeviceDSUID(pDev->getDSID());
       }
     } // m_properties.has("value")
   } catch (ItemNotFoundException &ex) {}
@@ -756,6 +774,55 @@ void SystemState::stateBinaryinput() {
           devInput->m_targetGroupId);
     }
   }
+
+  // heating (on/off)
+  if (devInput->m_inputType == BinaryInputIDHeatingSystem) {
+    boost::shared_ptr<State> state;
+    if (lookupState(state, StateName::HeatingSystem)) {
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+          devInput->m_targetGroupId);
+    }
+  }
+
+  // heating mode: hot/cold
+  if (devInput->m_inputType == BinaryInputIDHeatingSystemMode) {
+    boost::shared_ptr<State> state;
+    if (lookupState(state, StateName::HeatingSystemMode)) {
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
+          devInput->m_targetGroupId);
+    }
+  }
+
+  // evaluate heating mode
+  if ((devInput->m_inputType == BinaryInputIDHeatingSystem) ||
+      (devInput->m_inputType == BinaryInputIDHeatingSystemMode)) {
+
+    boost::shared_ptr<State> heating;
+    boost::shared_ptr<State> heating_mode;
+
+    if (lookupState(heating, StateName::HeatingSystem) &&
+        lookupState(heating_mode, StateName::HeatingSystemMode))
+    {
+      std::string value; // value: {Off=0, Heat=1, Cold=2, Auto=3}
+      if (heating->getState() == State_Inactive) {
+        value = "0";
+      } else if (heating->getState() == State_Active) {
+        if (heating_mode->getState() == State_Active) {
+          value = "1";
+        } else if (heating_mode->getState() == State_Inactive) {
+          value = "2";
+        }
+      }
+
+      if (!value.empty()) {
+        boost::shared_ptr<Event> event;
+        event = boost::make_shared<Event>(EventName::HeatingModeSwitch);
+        event->setProperty("value", value);
+        event->setProperty(ef_callOrigin, intToString(coSystemBinaryInput));
+        DSS::getInstance()->getEventQueue().pushEvent(event);
+      }
+    }
+  }
 }
 
 void SystemState::stateApartment() {
@@ -868,21 +935,19 @@ void SystemState::run() {
 
     } else if (m_evtName == EventName::HeatingModeSwitch) {
       boost::shared_ptr<State> state;
-      try {
-        state = m_apartment.getNonScriptState(StateName::HeatingModeControl);
-      } catch (ItemNotFoundException& ex) {
-        state = getOrRegisterState(StateName::HeatingModeControl);
-        State::ValueRange_t heatingModeValues;
-        heatingModeValues.push_back("off");
-        heatingModeValues.push_back("heating");
-        heatingModeValues.push_back("cooling");
-        heatingModeValues.push_back("auto");
-        state->setValueRange(heatingModeValues);
-      }
-
-      unsigned int value =  strToUInt(m_properties.get("value"));
+      state = getOrRegisterState(StateName::HeatingModeControl);
+      unsigned int value = strToUInt(m_properties.get("value"));
       assert(value < state->getValueRangeSize());
-      state->setState(coDsmApi, value);
+
+      callOrigin_t origin = coDsmApi;
+
+      if (m_properties.has("callOrigin")) {
+        std::string s = m_properties.get("callOrigin");
+        if (!s.empty()) {
+          origin = (callOrigin_t)strToInt(s);
+        }
+      }
+      state->setState(origin, value);
 
     } else if (m_evtName == EventName::BuildingService) {
       unsigned int value = strToInt(m_properties.get("value"));

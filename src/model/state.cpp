@@ -48,6 +48,8 @@ namespace dss {
   State::State(const std::string& _name)
     : m_name(_name),
       m_IsPersistent(false),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Inactive),
       m_type(StateType_Apartment)
   {
@@ -58,6 +60,8 @@ namespace dss {
   State::State(const std::string& _name, eState _state)
     : m_name(_name),
       m_IsPersistent(false),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
       m_state(_state),
       m_type(StateType_Apartment)
   {
@@ -69,6 +73,8 @@ namespace dss {
                const std::string& _identifier)
   : m_name(_name),
     m_IsPersistent(false),
+    m_callOrigin(coUnknown),
+    m_originDeviceDSUID(DSUID_NULL),
     m_state(State_Inactive),
     m_type(_type),
     m_serviceName(_identifier)
@@ -80,6 +86,8 @@ namespace dss {
   State::State(boost::shared_ptr<Device> _device, int _inputIndex) :
       m_name("dev." + dsuid2str(_device->getDSID()) + "." + intToString(_inputIndex)),
       m_IsPersistent(true),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Invalid),
       m_type(StateType_Device),
       m_providerDev(_device),
@@ -92,6 +100,8 @@ namespace dss {
   State::State(boost::shared_ptr<Group> _group)
       :
     m_IsPersistent(false),
+    m_callOrigin(coUnknown),
+    m_originDeviceDSUID(DSUID_NULL),
     m_state(State_Unknown),
     m_type(StateType_Group),
     m_providerGroup(_group)
@@ -145,6 +155,14 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<int, eState>(m_state, false));
       m_pPropertyNode->createProperty("state")
         ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
+      if (m_callOrigin != coUnknown) {
+        m_pPropertyNode->createProperty("callOrigin")
+          ->linkToProxy(PropertyProxyReference<int, callOrigin_t>(m_callOrigin, false));
+      }
+      if (m_originDeviceDSUID != DSUID_NULL) {
+        m_pPropertyNode->createProperty("originDeviceDSUID")
+          ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::getOriginDeviceDSUIDString));
+      }
 
       // #5870 - keep compatibility for "presence" and "hibernation"
       if (m_name == "presence" || m_name == "hibernation") {
@@ -195,6 +213,10 @@ namespace dss {
       return;
     }
     fputc((int) m_state, fout);
+    fputc(static_cast<int>(m_callOrigin), fout);
+    for (int i = 0; i < DSUID_SIZE; i++) {
+      fputc(static_cast<int>(m_originDeviceDSUID.id[i]), fout);
+    }
     fclose(fout);
   } // save
 
@@ -204,12 +226,24 @@ namespace dss {
       return;
     }
     int value = fgetc(fin);
-    fclose(fin);
-    if (value >= 0) {
+    if (value != EOF) {
       m_state = (eState) value;
-    } else {
-      return;
     }
+    value = fgetc(fin);
+    if (value != EOF) {
+      m_callOrigin = static_cast<callOrigin_t>(value);
+    }
+    for (int i = 0; i < DSUID_SIZE; i++) {
+      value = fgetc(fin);
+      if (value != EOF) {
+        m_originDeviceDSUID.id[i] = static_cast<char>(value);
+      } else {
+        m_originDeviceDSUID = DSUID_NULL;
+        break;
+      }
+    }
+    fclose(fin);
+    return;
   } // load
 
   bool State::getPersistence() const {
@@ -256,6 +290,12 @@ namespace dss {
     if (_state != m_state) {
       eState oldstate = m_state;
       m_state = _state;
+      m_callOrigin = _origin;
+
+      if (m_pPropertyNode != NULL && DSS::hasInstance() && (m_callOrigin != coUnknown)) {
+        m_pPropertyNode->createProperty("callOrigin")
+          ->linkToProxy(PropertyProxyReference<int, callOrigin_t>(m_callOrigin, false));
+      }
 
       if (m_IsPersistent) {
         save();
@@ -297,6 +337,16 @@ namespace dss {
 
   void State::setValueRange(const ValueRange_t &_values) {
     m_values = _values;
+  }
+
+  void State::setOriginDeviceDSUID(const dsuid_t _dsuid) {
+    m_originDeviceDSUID = _dsuid;
+    if (m_pPropertyNode != NULL && DSS::hasInstance() &&
+        (m_originDeviceDSUID != DSUID_NULL) &&
+        m_pPropertyNode->getProperty("originDeviceDSUID") == NULL) {
+      m_pPropertyNode->createProperty("originDeviceDSUID")
+        ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::getOriginDeviceDSUIDString));
+    }
   }
 
   void StateSensor::parseCondition(const std::string& _input, eValueComparator& _comp, double& _threshold) {

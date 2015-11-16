@@ -74,6 +74,7 @@ namespace dss {
                     etClusterCleanup, /** cleanup clusters, remove empty ones */
                     etMeterReady, /** ds meter ready */
                     etDummyEvent, /** for unit tests */
+                    etDeviceDataReady, /** TNY configuration read out */
                  } EventType;
   private:
     EventType m_EventType;

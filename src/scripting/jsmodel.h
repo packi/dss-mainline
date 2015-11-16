@@ -45,6 +45,7 @@ namespace dss {
   class ModelScriptContextExtension : public ScriptExtension {
   private:
     Apartment& m_Apartment;
+
   public:
     /** Creates an instance that interfaces with \a _apartment */
     ModelScriptContextExtension(Apartment& _apartment);

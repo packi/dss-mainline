@@ -291,6 +291,34 @@ namespace dss {
       }
     }
 
+    if (_pDevice->isMainDevice() && (_pDevice->getPairedDevices() > 0)) {
+      bool doSleep = false;
+      dsuid_t next;
+      dsuid_t current = _pDevice->getDSID();
+      for (int p = 0; p < _pDevice->getPairedDevices(); p++) {
+        dsuid_get_next_dsuid(current, &next);
+        current = next;
+        try {
+          boost::shared_ptr<Device> pPartnerDev;
+          pPartnerDev = m_Apartment.getDeviceByDSID(next);
+          if (doSleep) {
+            usleep(500 * 1000); // 500ms
+          }
+          removeDeviceFromDSMeter(pPartnerDev);
+          doSleep = true;
+
+          if (pPartnerDev->isVisible()) {
+            boost::shared_ptr<DeviceReference> pPartnerDevRef =
+                boost::make_shared<DeviceReference> (pPartnerDev, &DSS::getInstance()->getApartment());
+
+            result.push_back(pPartnerDevRef);
+          }
+        } catch(std::runtime_error& e) {
+            Logger::getInstance()->log(std::string("Could not find partner device with dsuid '") + dsuid2str(next) + "'");
+        }
+      }
+    }
+
     try {
       removeDeviceFromDSMeter(_pDevice);
       if (pPartnerDevice != NULL) {

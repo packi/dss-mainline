@@ -60,6 +60,22 @@
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
 
+  Set filterOutInvisibleDevices(Set set) {
+    Set invisible = Set();
+    for (int i = 0; i < set.length(); i++) {
+      const DeviceReference& d = set.get(i);
+      if (!d.getDevice()->isVisible()) {
+        invisible.addDevice(d);
+      }
+    }
+
+    if (!invisible.isEmpty()) {
+      return set.remove(invisible);
+    }
+
+    return set;
+  }
+
   ModelScriptContextExtension::ModelScriptContextExtension(Apartment& _apartment)
   : ScriptExtension(ModelScriptcontextExtensionName),
     m_Apartment(_apartment)
@@ -132,7 +148,7 @@ namespace dss {
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
 
       if(ext != NULL) {
-        Set devices = ext->getApartment().getDevices();
+        Set devices = filterOutInvisibleDevices(ext->getApartment().getDevices());
         JSObject* obj = ext->createJSSet(*ctx, devices);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
         return JS_TRUE;
@@ -2721,7 +2737,7 @@ namespace dss {
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       if(pZone != NULL) {
-        Set devices = pZone->getDevices();
+        Set devices = filterOutInvisibleDevices(pZone->getDevices());
         JSObject* obj = ext->createJSSet(*ctx, devices);
         JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
         return JS_TRUE;
@@ -3879,7 +3895,27 @@ namespace dss {
               }
             } // foreach
           } // if serial
-        } // if OEM
+        } else if (dev->isMainDevice() && (dev->getPairedDevices() > 0)) {
+           bool doSleep = false;
+           dsuid_t next;
+           dsuid_t current = dev->getDSID();
+           for (int p = 0; p < dev->getPairedDevices(); p++) {
+             dsuid_get_next_dsuid(current, &next);
+             current = next;
+             try {
+               boost::shared_ptr<Device> pPartnerDevice;
+               pPartnerDevice = DSS::getInstance()->getApartment().getDeviceByDSID(next);
+               if (!pPartnerDevice->isVisible()) {
+                 if (doSleep) {
+                   usleep(500 * 1000); // 500ms
+                 }
+                 manipulator.addDeviceToZone(pPartnerDevice, pZone);
+               }
+             } catch(std::runtime_error& e) {
+               Logger::getInstance()->log(std::string("JS: coult not find partner device widh dsuid ") + dsuid2str(next), lsError);
+             }
+           }
+         }
       } catch(ItemNotFoundException& ex) {
         JS_ReportError(cx, ex.what());
         return JS_FALSE;

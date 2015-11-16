@@ -43,6 +43,8 @@ namespace dss {
     extern const std::string Presence;
     extern const std::string Rain;
     extern const std::string Wind;
+    extern const std::string HeatingSystem;
+    extern const std::string HeatingSystemMode;
   }
 
   class SystemState : public SystemEvent {

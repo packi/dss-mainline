@@ -34,97 +34,8 @@
 #include "logger.h"
 #include "datetools.h"
 #include "base.h"
-#include "model/device.h"
-#include "model/modelconst.h"
-#include "model/devicereference.h"
 
 namespace dss {
-
-  static bool isWindowHandle(PropertyNodePtr deviceNode)
-  {
-    if (!deviceNode) {
-      return false;
-    }
-
-    PropertyNodePtr dsuidNode = deviceNode->getPropertyByName("dSUID");
-    if (!dsuidNode) {
-      return false;
-    }
-
-    const std::string dsuid_str =dsuidNode->getAsString();
-    dsuid_t deviceDsuid  = str2dsuid(dsuid_str);
-    Apartment& apartment = DSS::getInstance()->getApartment();
-    const DeviceReference devRef(deviceDsuid, &apartment);
-
-    boost::shared_ptr<const Device> device = devRef.getDevice();
-    if (!device) {
-      return false;
-    }
-
-    return device->hasBinaryInputType(BinaryInputIDWindowTilt);
-  }
-
-  static bool checkWindowHandleCondition (PropertyNodePtr base, PropertyNodePtr oSystemStates, int targetValue) {
-    if (!base) {
-      Logger::getInstance()->log("deviceNode not valid:", lsError);
-      return false;
-    }
-
-    PropertyNodePtr deviceNode = base->getChild(0);
-    std::string baseName = deviceNode->getPropertyByName("dSUID")->getAsString();
-    std::string device1 = "dev." + baseName + ".0";
-    std::string device2 = "dev." + baseName + ".1";
-
-    // get value 1 and value 2 for window handle
-    int actualValue1 = 0;
-    int actualValue2 = 0;
-    for (int i = 0; i < oSystemStates->getChildCount(); ++i) {
-      PropertyNodePtr nameNode =
-          oSystemStates->getChild(i)->getPropertyByName("name");
-
-      PropertyNodePtr valueNode =
-          oSystemStates->getChild(i)->getPropertyByName("value");
-
-      if ((nameNode == NULL) || (valueNode == NULL)) {
-        Logger::getInstance()->log("checkSystemCondition: can not check"
-              " condition, missing name or value node!", lsError);
-        continue;
-      }
-      if (device1 == nameNode->getAsString()) {
-        actualValue1 = valueNode->getIntegerValue();
-      }
-      if (device2 == nameNode->getAsString()) {
-        actualValue2 = valueNode->getIntegerValue();
-      }
-      if ((actualValue1 != 0) && (actualValue2 != 0)) {
-        break;
-      }
-    }
-
-    PropertyNodePtr indexNode  = base->getPropertyByName("inputIndex");
-    int index = indexNode->getIntegerValue();
-
-    if ((index == 0) && (targetValue == 2)) { // closed state
-      return ((actualValue1 == 2) && (actualValue2 == 2));
-    } else if ((index == 1) && (targetValue == 2)) { // open state
-      return ((actualValue1 == 1) && (actualValue2 == 2));
-    } else if ((index == 1) && (targetValue == 1)) { // tilt state
-      return ((actualValue1 == 1) && (actualValue2 == 1));
-    }
-    Logger::getInstance()->log("checkWindowHandleCondition: can not check."
-      " Pattern of index and value not supported!", lsWarning);
-    return false;
-  }
-
-  static bool checkValueCondition(std::string& sValue, PropertyNodePtr valueNode, std::string& sName) {
-    if (sValue != valueNode->getAsString()) {
-      Logger::getInstance()->log("checkValueCondition: " +
-        sName + " failed: value is " + valueNode->getAsString() +
-        ", requested is " + sValue, lsDebug);
-      return false;
-    }
-    return true;
-  }
 
   bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode, int secNow) {
     int startSinceMidnight = 0;
@@ -207,16 +118,12 @@ namespace dss {
             // search for a requested state
             if (sName == nameNode->getAsString()) {
               fFound = true;
-              PropertyNodePtr base = oSystemStates->getChild(i)->getPropertyByName("device");
-              if (isWindowHandle(base->getChild(0)))
-              {
-                if (!checkWindowHandleCondition(base, oSystemStates, oStateNode->getChild(j)->getIntegerValue())) {
-                  return false;
-                }
-              } else {
-                if (!checkValueCondition(sValue, valueNode, sName)) {
-                  return false;
-                }
+              // state found ...
+              if (sValue != valueNode->getAsString()) {
+                Logger::getInstance()->log("checkSystemCondition: " +
+                    sName + " failed: value is " + valueNode->getAsString() +
+                    ", requested is " + sValue, lsDebug);
+                return false;
               }
               break;
             }
