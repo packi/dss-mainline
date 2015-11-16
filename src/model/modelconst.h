@@ -316,6 +316,7 @@ namespace dss {
   const uint8_t CfgFunction_FCount1 = 0x17;
   const uint8_t CfgFunction_LedConfig0 = 0x18;
   const uint8_t CfgFunction_LTMode = 0x1E;
+  const uint8_t CfgFunction_DeviceActive = 0x1F;
   const uint8_t CfgFunction_LTTimeoutOff = 0x22;
   const uint8_t CfgFunction_LTTimeoutOn = 0x24;
 

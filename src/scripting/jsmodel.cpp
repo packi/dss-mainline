@@ -691,6 +691,68 @@ namespace dss {
     return JS_FALSE;
   } // global_set_weatherInformation
 
+  JSBool global_set_deviceVisibility(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_setDeviceVisibility: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      if (argc < 2)
+      {
+          JS_ReportError(cx, "Model.global_setDeviceVisibility: wrong number of arguments");
+          return JS_FALSE;
+      }
+      dsuid_t dsuid;
+      try {
+        std::string id = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        if (id.length() <= 24) {
+          dsid_t dsid = str2dsid(id);
+          dsuid = dsuid_from_dsid(&dsid);
+        } else {
+          dsuid =  str2dsuid(id);
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      }
+
+      bool visibility;
+      try {
+        visibility = ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: visibility");
+        return JS_FALSE;
+      }
+
+      try {
+        boost::shared_ptr<Device> device = ext->getApartment().getDeviceByDSID(dsuid);
+        device->setDeviceVisibility(visibility);
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {
+        JS_ReportError(cx, "Device with given dSUID not found");
+        JS_SET_RVAL(cx, vp, JSVAL_NULL);
+        return JS_FALSE;
+      }
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_FALSE;
+  } // global_set_deviceVisibility
+
+
   JSFunctionSpec apartment_static_methods[] = {
     JS_FS("getName", global_get_name, 0, 0),
     JS_FS("setName", global_set_name, 1, 0),
@@ -707,6 +769,7 @@ namespace dss {
     JS_FS("registerState", global_registerState, 1, 0),
     JS_FS("getWeatherInformation", global_get_weatherInformation, 0, 0),
     JS_FS("setWeatherInformation", global_set_weatherInformation, 3, 0),
+    JS_FS("setDeviceVisibility", global_set_deviceVisibility, 2, 0),
     JS_FS_END
   };
 

@@ -1852,6 +1852,47 @@ namespace dss {
       json.add("supported", features.posTimeMax);
       json.add("value", value);
       return json.successJSON();
+    } else if (_request.getMethod() == "setVisibility") {
+      JSONWriter json;
+      std::string param;
+      if (!_request.getParameter("visibility", param)) {
+        return json.failure("missing parameter: visibility");
+      }
+
+      if ((param != "0") && (param != "1")) {
+        return json.failure("invalid value for visibility parameter");
+      }
+
+      int v = strToInt(param);
+
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      bool wasVisible = device->isVisible();
+      device->setDeviceVisibility(v);
+      bool isVisible = device->isVisible();
+
+      const DeviceReference d(device, &m_Apartment);
+      if (wasVisible && !isVisible) {
+        json.startArray("devices");
+
+        toJSON(d, json);
+        json.endArray();
+        json.add("action", "remove");
+      } else if (!wasVisible && isVisible) {
+        json.startArray("devices");
+        toJSON(d, json);
+        json.endArray();
+        json.add("action", "add");
+      } else {
+        json.add("action", "none");
+      }
+
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }

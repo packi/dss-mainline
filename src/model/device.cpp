@@ -2737,6 +2737,26 @@ namespace dss {
   }
 
   void Device::setPairedDevices(int _num) {
+    if (isMainDevice() && (m_pairedDevices != _num) &&
+        (m_pPropertyNode != NULL)) {
+      PropertyNodePtr paired = m_pPropertyNode->getPropertyByName("pairedDevices");
+      if (paired != NULL) {
+        m_pPropertyNode->removeChild(paired);
+      }
+
+      if (_num > 0) {
+        dsuid_t current = getDSID();
+        for (int i = 0; i < _num - 1; i++) {
+          PropertyNodePtr sub = m_pPropertyNode->
+              createProperty("pairedDevices/device" + intToString(i));
+         dsuid_t next;
+          dsuid_get_next_dsuid(current, &next);
+          sub->createProperty("dSUID")->setStringValue(dsuid2str(next));
+          current = next;
+        }
+      }
+    }
+
     m_pairedDevices = _num;
   }
 
@@ -2760,6 +2780,24 @@ namespace dss {
     }
   }
 
+  void Device::setDeviceVisibility(bool _isVisible) {
+    if (getDeviceType() == DEVICE_TYPE_TNY) {
+      if (isMainDevice()) {
+        throw std::runtime_error("Visibility setting not allowed on main device");
+      }
+
+      uint8_t val = getDeviceConfig(CfgClassDevice, CfgFunction_DeviceActive);
+      uint8_t bit4 = ((val & (1 << 4)) == 0); // inverted logic, 0 is "active"
+      if (bit4 != _isVisible) {
+        val ^= 1 << 4;
+        setDeviceConfig(CfgClassDevice, CfgFunction_DeviceActive, val);
+        setVisibility(_isVisible);
+      }
+    } else {
+      throw std::runtime_error("Visibility setting is not supported by this device");
+    }
+  }
+
   bool Device::isVisible() const {
     if (getDeviceType() == DEVICE_TYPE_TNY) {
       return m_visible;
@@ -2769,18 +2807,18 @@ namespace dss {
   }
 
   bool Device::isMainDevice() const {
-    bool ret = true;
+    if (m_pairedDevices == 0) {
+      return true;
+    }
+
     if (getDeviceType() == DEVICE_TYPE_TNY) {
       uint32_t serial;
-      if ((dsuid_get_serial_number(&m_DSID, &serial) == 0) &&
-          (m_pairedDevices != 0)) {
-        uint32_t ns = floor((serial/(double)m_pairedDevices) * m_pairedDevices);
-        if (serial != ns) {
-          ret = false;
+      if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
+        if ((serial % m_pairedDevices) != 0) {
+          return false;
         }
       }
     }
-
-    return ret;
+    return true;
   }
 } // namespace dss
