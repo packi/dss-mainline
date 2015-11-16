@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.34.1 16.11.2015
+	* fixed crash (reverted "fix window handle states)
+
 v1.34.0 11.11.2015
 	* add sound pressure level sensor
 	* replace mongoose with civetweb
