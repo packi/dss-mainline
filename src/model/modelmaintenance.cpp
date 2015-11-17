@@ -2169,6 +2169,14 @@ namespace dss {
         }
       }
       pDevice->setOemProductInfoState(_state);
+      {
+        boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(pDevice, m_pApartment);
+        boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
+        mEvent->setProperty("action", "oemDataChanged");
+        if(DSS::hasInstance()) {
+          DSS::getInstance()->getEventQueue().pushEvent(mEvent);
+        }
+      }
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }

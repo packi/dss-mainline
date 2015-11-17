@@ -547,7 +547,7 @@ namespace dss {
       isIndependent = (result0 & 0x80);
       uint8_t upper = result0 >> 8;
       isVisible = !(upper & (1 << 4));
-      pairedDevices = (upper >> 0) & ((1 << 3) - 1);
+      pairedDevices = (upper & 0x0f);
 
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
       uint16_t result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
@@ -632,11 +632,11 @@ namespace dss {
     }
 
     try {
-      // read device-active data and EAN part number
-      uint16_t result0 = getDeviceConfig(m_dsmId, m_deviceAdress, 1, 0x1f);
-      isVisible = !(result0 & (1 << 4));
-      pairedDevices = (result0 >> 0) & ((1 << 3) - 1);
-
+      // read device-active data and pairing data
+      uint16_t cfg = getDeviceConfig(m_dsmId, m_deviceAdress, 1,
+                                         CfgFunction_DeviceActive);
+      isVisible = !(cfg & (1 << 4));
+      pairedDevices = (cfg & 0x0f);
     } catch (BusApiError& er) {
       // Bus error
       Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what(), lsWarning);
