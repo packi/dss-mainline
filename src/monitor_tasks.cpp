@@ -193,9 +193,9 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
           if (hStatus.m_ControlValueTS != DateTime::NullDate) {
-            pZone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                              SensorIDRoomTemperatureControlVariable,
-                              hStatus.m_ControlValue, "");
+            pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
+                               SensorIDRoomTemperatureControlVariable,
+                               hStatus.m_ControlValue, "");
             usleep(1000 * 1000);
           }
 

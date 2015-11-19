@@ -870,7 +870,7 @@ namespace dss {
             _zone->setNominalValue(
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
           } else {
-            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureSetpoint,
+            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureSetpoint,
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
           }
         } catch (BusApiError& e) {
@@ -885,7 +885,7 @@ namespace dss {
             _zone->setControlValue(
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
           } else {
-            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureControlVariable,
+            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureControlVariable,
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
           }
         } catch (BusApiError& e) {
