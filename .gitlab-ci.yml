@@ -1,0 +1,18 @@
+image: dss-build:latest
+
+before_script:
+  - mkdir -p /usr/local/share/dss/data/store
+  - mkdir -p /usr/local/share/dss/data/logs
+  - mkdir -p /usr/local/share/dss/data/savedprops
+  - mkdir -p /usr/local/share/dss/data/databases
+  - ldconfig
+
+build:
+  script:
+    - autoreconf -i
+    - ./configure
+    - make -j4
+    - make check
+  tags:
+    - dss
+
