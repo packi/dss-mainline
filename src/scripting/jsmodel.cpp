@@ -752,6 +752,218 @@ namespace dss {
     return JS_FALSE;
   } // global_set_deviceVisibility
 
+  JSBool global_getDeviceConfig(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getDeviceConfig: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      if (argc < 3) {
+          JS_ReportError(cx, "Model.global_getDeviceConfig: wrong number of arguments");
+          return JS_FALSE;
+      }
+
+      dsuid_t dsuid;
+      try {
+        std::string id = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        if (id.length() <= 24) {
+          dsid_t dsid = str2dsid(id);
+          dsuid = dsuid_from_dsid(&dsid);
+        } else {
+          dsuid = str2dsuid(id);
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      }
+
+      int configClass;
+      int configIndex;
+      try {
+        configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+        configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
+      } catch (ScriptException& ex) {
+        JS_ReportError(cx, "Convert arguments: %s", ex.what());
+        return JS_FALSE;
+      }
+
+      jsrefcount ref = JS_SuspendRequest(cx);
+      try {
+        boost::shared_ptr<Device> device = ext->getApartment().getDeviceByDSID(dsuid);
+        uint8_t retValue = device->getDeviceConfig(configClass, configIndex);
+        JS_ResumeRequest(cx, ref);
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
+        return JS_TRUE;
+      } catch(const BusApiError& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "Bus failure: %s", ex.what());
+      } catch (DSSException& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "Failure: %s", ex.what());
+      } catch (std::exception& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "General Failure: %s", ex.what());
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // global_getDeviceConfig
+
+  JSBool global_getDeviceConfigWord(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_getDeviceConfigWord: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      if (argc < 3) {
+          JS_ReportError(cx, "Model.global_getDeviceConfigWord: wrong number of arguments");
+          return JS_FALSE;
+      }
+
+      dsuid_t dsuid;
+      try {
+        std::string id = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        if (id.length() <= 24) {
+          dsid_t dsid = str2dsid(id);
+          dsuid = dsuid_from_dsid(&dsid);
+        } else {
+          dsuid = str2dsuid(id);
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      }
+
+      int configClass;
+      int configIndex;
+      try {
+        configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+        configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
+      } catch (ScriptException& ex) {
+        JS_ReportError(cx, "Convert arguments: %s", ex.what());
+        return JS_FALSE;
+      }
+
+      jsrefcount ref = JS_SuspendRequest(cx);
+      try {
+        boost::shared_ptr<Device> device = ext->getApartment().getDeviceByDSID(dsuid);
+        uint16_t retValue= device->getDeviceConfigWord(configClass, configIndex);
+        JS_ResumeRequest(cx, ref);
+        JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
+        return JS_TRUE;
+      } catch(const BusApiError& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "Bus failure: %s", ex.what());
+      } catch (DSSException& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "Failure: %s", ex.what());
+      } catch (std::exception& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "General Failure: %s", ex.what());
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // global_getDeviceConfig
+
+  JSBool global_setDeviceConfig(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_setDeviceConfig: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      if (argc < 4) {
+          JS_ReportError(cx, "Model.global_setDeviceConfig: wrong number of arguments");
+          return JS_FALSE;
+      }
+
+      dsuid_t dsuid;
+      try {
+        std::string id = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        if (id.length() <= 24) {
+          dsid_t dsid = str2dsid(id);
+          dsuid = dsuid_from_dsid(&dsid);
+        } else {
+          dsuid = str2dsuid(id);
+        }
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      } catch(std::invalid_argument& e) {
+        JS_ReportError(cx, "Error converting dsuid string to dsuid");
+        return JS_FALSE;
+      }
+
+      int configClass;
+      int configIndex;
+      int configValue;
+
+      try {
+        configClass = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+        configIndex = ctx->convertTo<int>(JS_ARGV(cx, vp)[2]);
+        configValue = ctx->convertTo<int>(JS_ARGV(cx, vp)[3]);
+      } catch (ScriptException& ex) {
+        JS_ReportError(cx, "Convert arguments: %s", ex.what());
+        return JS_FALSE;
+      }
+      jsrefcount ref = JS_SuspendRequest(cx);
+
+      try {
+        boost::shared_ptr<Device> device = ext->getApartment().getDeviceByDSID(dsuid);
+        device->setDeviceConfig(configClass, configIndex, configValue);
+        JS_ResumeRequest(cx, ref);
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      } catch(const BusApiError& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "Bus failure: %s", ex.what());
+      } catch (DSSException& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "Failure: %s", ex.what());
+      } catch (std::exception& ex) {
+        JS_ResumeRequest(cx, ref);
+        JS_ReportError(cx, "General Failure: %s", ex.what());
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // global_setDeviceConfig
 
   JSFunctionSpec apartment_static_methods[] = {
     JS_FS("getName", global_get_name, 0, 0),
@@ -770,6 +982,9 @@ namespace dss {
     JS_FS("getWeatherInformation", global_get_weatherInformation, 0, 0),
     JS_FS("setWeatherInformation", global_set_weatherInformation, 3, 0),
     JS_FS("setDeviceVisibility", global_set_deviceVisibility, 2, 0),
+    JS_FS("getDeviceConfig", global_getDeviceConfig, 3, 0),
+    JS_FS("getDeviceConfigWord", global_getDeviceConfigWord, 3, 0),
+    JS_FS("setDeviceConfig", global_setDeviceConfig, 4, 0),
     JS_FS_END
   };
 
