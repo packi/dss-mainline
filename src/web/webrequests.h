@@ -106,6 +106,7 @@ namespace dss {
     void startObject(std::string _name);
     void startObject();
     void endObject();
+    std::string raw();
     static std::string success();
     static std::string success(std::string _message);
     static std::string failure(std::string _message);

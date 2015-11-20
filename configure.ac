@@ -495,6 +495,7 @@ AC_DEFINE([HAVE_BUILD_INFO_H], [1], [currently we are always generating the buil
 
 AC_DEFINE([USE_LIBXML], [1], [TODO: check why this is a define, libxml2 seems to be required anyway])
 
+AC_DEFINE([USE_WEBSOCKET], [1], [enable websockets in civetweb])
 
 AC_CONFIG_FILES([
     Makefile

@@ -169,4 +169,7 @@ namespace dss {
     return s.GetString();
   }
 
+  std::string JSONWriter::raw() {
+    return m_buffer.GetString();
+  }
 } // namespace dss

@@ -33,7 +33,7 @@
 
 #define WEB_SESSION_TIMEOUT_MINUTES 3
 #define WEB_SESSION_LIMIT 30
-
+#define WEB_SOCKET_TIMEOUT_S 300 // 5min
 namespace dss {
 
   class IDeviceInterface;
@@ -43,6 +43,18 @@ namespace dss {
   class WebServerRequestHandlerJSON;
   class Session;
   class SessionManager;
+
+  enum websocket_state {
+      ws_disconnected = 0,
+      ws_connected,
+      ws_ready
+  };
+
+  typedef struct {
+      struct mg_connection *connection;
+      uint8_t state;
+  } websocket_connection_t;
+
 
   std::string extractToken(const char *_cookie);
   std::string extractAuthenticatedUser(const char *_header);
@@ -56,6 +68,11 @@ namespace dss {
     HASH_MAP<std::string, WebServerRequestHandlerJSON*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
+    size_t m_max_ws_clients;
+    int m_ws_id;
+    std::list<boost::shared_ptr<websocket_connection_t> > m_websockets;
+    boost::mutex m_websocket_mutex;
+
   private:
     void setupAPI();
     void instantiateHandlers();
@@ -76,8 +93,22 @@ namespace dss {
                            RestfulRequest &request,
                            const std::string &trustedSetCookie,
                            boost::shared_ptr<Session> _session);
+
+    int WebSocketConnectHandler(const struct mg_connection* _connection,
+                                void *cbdata);
+    void WebSocketReadyHandler(struct mg_connection* _connection,
+                              void *cbdata);
+    void WebSocketCloseHandler(const struct mg_connection* _connection,
+                                       void *cbdata);
+
     static int httpRequestCallback(struct mg_connection* _connection,
                                    void *cbdata);
+    static int WebSocketConnectCallback(const struct mg_connection* _connection,
+                                       void *cbdata);
+    static void WebSocketReadyCallback(struct mg_connection* _connection,
+                                     void *cbdata);
+    static void WebSocketCloseCallback(const struct mg_connection* _connection,
+                                       void *cbdata);
 
   protected:
     virtual void doStart();
@@ -87,6 +118,8 @@ namespace dss {
 
     virtual void initialize();
     void setSessionManager(boost::shared_ptr<SessionManager> _pSessionManager);
+    void sendToWebSockets(std::string data);
+    size_t WebSocketClientCount();
   }; // WebServer
 
 }

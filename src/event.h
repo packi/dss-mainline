@@ -30,6 +30,7 @@
 #include "syncevent.h"
 #include "subsystem.h"
 #include "propertysystem.h"
+#include "model/modelmaintenance.h"
 
 #include <string>
 #include <deque>

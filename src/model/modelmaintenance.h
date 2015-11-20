@@ -200,6 +200,15 @@ namespace dss {
       std::string m_url;
     };
 
+    class WebSocketEvent : public Task {
+    public:
+      WebSocketEvent(boost::shared_ptr<Event> _event);
+      virtual ~WebSocketEvent() {}
+      virtual void run();
+
+    private:
+      boost::shared_ptr<Event> m_event;
+    };
 
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
@@ -212,6 +221,7 @@ namespace dss {
      * The ownership of the event will reside with the Apartment. ModelEvents arriving while initializing will be discarded.
      */
     void addModelEvent(ModelEvent* _pEvent);
+    void publishWebSocketEvent(boost::shared_ptr<Event> _event);
 
     /** Starts the event-processing */
     virtual void execute();
