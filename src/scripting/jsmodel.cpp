@@ -64,7 +64,7 @@ namespace dss {
     Set invisible = Set();
     for (int i = 0; i < set.length(); i++) {
       const DeviceReference& d = set.get(i);
-      if (!d.getDevice()->isVisible()) {
+      if (!d.getDevice()->isVisible() && d.getDevice()->isPresent()) {
         invisible.addDevice(d);
       }
     }
