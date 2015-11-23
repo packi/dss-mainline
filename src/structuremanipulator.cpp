@@ -305,12 +305,13 @@ namespace dss {
             usleep(500 * 1000); // 500ms
           }
           removeDeviceFromDSMeter(pPartnerDev);
+          boost::shared_ptr<DeviceReference> pPartnerDevRef =
+          boost::make_shared<DeviceReference> (pPartnerDev, &DSS::getInstance()->getApartment());
+          checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDev->getZoneID()), pPartnerDev);
+          m_Apartment.removeDevice(pPartnerDevRef->getDSID());
           doSleep = true;
 
           if (pPartnerDev->isVisible()) {
-            boost::shared_ptr<DeviceReference> pPartnerDevRef =
-                boost::make_shared<DeviceReference> (pPartnerDev, &DSS::getInstance()->getApartment());
-
             result.push_back(pPartnerDevRef);
           }
         } catch(std::runtime_error& e) {
