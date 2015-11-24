@@ -48,7 +48,7 @@ namespace StateName {
   const std::string BuildingService = "building_service";
   const std::string Fire = "fire";
   const std::string Frost = "frost";
-  const std::string HeatingModeControl = "heating_mode_ctrl";
+  const std::string HeatingModeControl = "heating_water_system";
   const std::string Hibernation = "hibernation";
   const std::string Panic = "panic";
   const std::string Motion = "motion";
