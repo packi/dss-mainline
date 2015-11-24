@@ -312,6 +312,22 @@ namespace dss {
     static void handleGenericEventCallback(uint8_t _errorCode, void *_userData, dsuid_t _sourceID,
                                            dsuid_t _destinationID, uint16_t _EventType,
                                            uint8_t _PayloadLength, const uint8_t _Payload[]);
+    void handleDsmStateChangeEvent(uint8_t _errorCode, dsuid_t _sourceID,
+                                   dsuid_t _destinationID, uint8_t _Hardware,
+                                   uint8_t _DSP, uint8_t _Temperature,
+                                   uint8_t _Config, uint8_t _dS485,
+                                   uint8_t _Line);
+
+    static void handleDsmStateChangeEventCallback(uint8_t _errorCode,
+                                                  void *_userData,
+                                                  dsuid_t _sourceID,
+                                                  dsuid_t _destinationID,
+                                                  uint8_t _Hardware,
+                                                  uint8_t _DSP,
+                                                  uint8_t _Temperature,
+                                                  uint8_t _Config,
+                                                  uint8_t _dS485,
+                                                  uint8_t _Line);
 
   protected:
     virtual void doStart();

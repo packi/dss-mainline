@@ -84,7 +84,8 @@ namespace dss {
     m_BinaryInputEventCount(dsuid2str(_dsid)),
     m_dSMPropertyFlags(0),
     m_IgnoreActionsFromNewDevices(false),
-    m_ApartmentState(DSM_APARTMENT_STATE_UNKNOWN)
+    m_ApartmentState(DSM_APARTMENT_STATE_UNKNOWN),
+    m_dSMState(DSM_STATE_UNKNOWN)
   {
     publishToPropertyTree();
   } // ctor
@@ -110,6 +111,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
       m_pPropertyNode->createProperty("isInitialized")
         ->linkToProxy(PropertyProxyReference<bool>(m_IsInitialized, false));
+      m_pPropertyNode->createProperty("state")
+        ->linkToProxy(PropertyProxyReference<int>(m_dSMState, false));
       m_pPropertyNode->createProperty("present")
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
       m_pPropertyNode->createProperty("busMemberType")

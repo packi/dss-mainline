@@ -47,6 +47,7 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dsuid_t _dsMeterID);
     virtual std::string getSceneName(dsuid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
     virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID);
+    virtual void getDSMeterState(const dsuid_t& _dsMeterID, uint8_t* state);
     virtual ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);
     virtual ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);
     virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID);

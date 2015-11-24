@@ -1162,8 +1162,16 @@ namespace dss {
       } else {
         onDeviceDataReady(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
       }
-
       break;
+    case ModelEvent::etDsmStateChange:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 1) {
+        log("Expected at least 1 parameter for ModelEvent::etDsmStateChange");
+      } else {
+        onDsmStateChange(pEventWithDSID->getDSID(), event->getParameter(0));
+      }
+      break;
+
     default:
       assert(false);
       break;
@@ -2416,6 +2424,17 @@ namespace dss {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   } // onDeviceDataReady
+
+  void ModelMaintenance::onDsmStateChange(dsuid_t _meterID,
+                                          const uint8_t& _state) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      pMeter->setState(_state);
+    } catch(ItemNotFoundException& e) {
+      log("onDsmStateChange: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onDsmStateChange
+
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

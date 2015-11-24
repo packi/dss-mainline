@@ -48,6 +48,12 @@ namespace dss {
     DSM_APARTMENT_STATE_UNKNOWN = 2
   };
 
+  enum {
+    DSM_STATE_IDLE          = 0,
+    DSM_STATE_REGISTRATION  = 1,
+    DSM_STATE_UNKNOWN       = 255
+  };
+
   bool busMemberIsDSMeter(BusMemberDevice_t type);
   bool busMemberIsdSM(BusMemberDevice_t type);
 
@@ -91,6 +97,7 @@ namespace dss {
     uint8_t m_ApartmentState;
     std::string m_VdcConfigURL;
     std::string m_softwareVersion;
+    int m_dSMState;
   private:
     void publishToPropertyTree();
   public:
@@ -186,6 +193,8 @@ namespace dss {
     uint8_t getApartmentState() const { return m_ApartmentState; }
     void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
+    int getState() const { return m_dSMState; }
+    void setState(uint8_t _state) { m_dSMState = _state; }
   }; // DSMeter
 
 

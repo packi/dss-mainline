@@ -457,6 +457,13 @@ namespace dss {
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_DEVICE_DIRECT_ACTION, 0, &callback_struct, NULL);
 
+      EventDsmStateChange_event_callback_t dsmStateChangeEventCallback = DSBusInterface::handleDsmStateChangeEventCallback;
+      callback_struct.function = (void*)dsmStateChangeEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DSM_STATE_CHANGE, 0,
+                        &callback_struct, NULL);
+
       m_dsmApiReady = true;
     }
   }
@@ -1222,6 +1229,43 @@ namespace dss {
                              _EventType, _PayloadLength, _Payload);
     }
   } // handleHeatingControllerStateEventCallback
+
+  void DSBusInterface::handleDsmStateChangeEvent(uint8_t _errorCode,
+                                                 dsuid_t _sourceID,
+                                                 dsuid_t _destinationID,
+                                                 uint8_t _Hardware,
+                                                 uint8_t _DSP,
+                                                 uint8_t _Temperature,
+                                                 uint8_t _Config,
+                                                 uint8_t _dS485,
+                                                 uint8_t _Line)
+  {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDsmStateChange,
+                                                _sourceID);
+    pEvent->addParameter(_Line);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
+
+  void DSBusInterface::handleDsmStateChangeEventCallback(uint8_t _errorCode,
+                                                         void *_userData,
+                                                         dsuid_t _sourceID,
+                                                         dsuid_t _destinationID,
+                                                         uint8_t _Hardware,
+                                                         uint8_t _DSP,
+                                                         uint8_t _Temperature,
+                                                         uint8_t _Config,
+                                                         uint8_t _dS485,
+                                                         uint8_t _Line)
+  {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+          handleDsmStateChangeEvent(_errorCode, _sourceID, _destinationID,
+                             _Hardware, _DSP, _Temperature, _Config, _dS485,
+                             _Line);
+    }
+
+  }
 
   void DSBusInterface::handleActionRequestExtraCmd(const dsuid_t &_sourceId,
                                                    const dsuid_t &_destinationId,
