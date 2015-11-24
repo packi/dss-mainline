@@ -358,6 +358,7 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
+               _event.getName() == EventName::HeatingSystemCapability ||
                _event.getName() == EventName::AddonToCloud) {
 
       if (_event.getName() == EventName::ZoneSensorValue) {
@@ -566,6 +567,7 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
                _event.getName() == EventName::HeatingControllerState ||
+               _event.getName() == EventName::HeatingSystemCapability ||
                _event.getName() == EventName::AddonToCloud ||
                _event.getName() == EventName::ExecutionDenied ||
                _event.getName() == EventName::LogFileData) {
