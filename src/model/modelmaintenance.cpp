@@ -2430,6 +2430,21 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       pMeter->setState(_state);
+      if (_state == DSM_STATE_IDLE) {
+        boost::mutex::scoped_lock lock(m_readoutTasksMutex);
+        std::vector<std::pair<dsuid_t, boost::shared_ptr<Task> > >::iterator it;
+        for (it = m_deviceReadoutTasks.begin(); it != m_deviceReadoutTasks.end();) {
+          dsuid_t id = (*it).first;
+          if (dsuid_equal(&id, &_meterID)) {
+            log("onDsmStateChange: scheduling device readout task on dSM " +
+                dsuid2str(_meterID));
+            m_taskProcessor->addEvent((*it).second);
+            it = m_deviceReadoutTasks.erase(it);
+          } else {
+            it++;
+          }
+        }
+      }
     } catch(ItemNotFoundException& e) {
       log("onDsmStateChange: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
@@ -2792,4 +2807,19 @@ namespace dss {
     }
   } // pollSensors
 
+  void ModelMaintenance::scheduleDeviceReadout(const dsuid_t &_dSMeterID,
+                                               boost::shared_ptr<Task> task) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_dSMeterID);
+      if (pMeter->getState() == DSM_STATE_IDLE) {
+        m_taskProcessor->addEvent(task);
+      } else {
+        boost::mutex::scoped_lock lock(m_readoutTasksMutex);
+        m_deviceReadoutTasks.push_back(std::make_pair(_dSMeterID, task));
+      }
+    } catch(ItemNotFoundException& e) {
+      log("scheduleDeviceReadou: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+
+  }
 } // namespace dss

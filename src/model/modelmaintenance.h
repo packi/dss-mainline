@@ -233,6 +233,8 @@ namespace dss {
     boost::shared_ptr<TaskProcessor> getTaskProcessor() const
         { return m_taskProcessor; }
 
+    void scheduleDeviceReadout(const dsuid_t& _dSMeterID,
+                               boost::shared_ptr<Task> task);
     /**
      * When the UI triggers some changes, it typically re-reads the structure
      * immediately to update its view. If we answer that request too early,
@@ -314,7 +316,6 @@ namespace dss {
     void pollSensors(boost::shared_ptr<DeviceReference> pDevRef);
     void synchronizeHeatingAssignment(const dsuid_t& _dSMeterID);
 
-
   protected:
     bool m_IsInitializing; //< allow to clear from unit test
     unsigned m_processedEvents; //< actually dequeued, increased before processing
@@ -351,6 +352,9 @@ namespace dss {
     boost::condition_variable m_rvCond;
 
     boost::shared_ptr<MeterMaintenance> m_pMeterMaintenance;
+
+    boost::mutex m_readoutTasksMutex;
+    std::vector<std::pair<dsuid_t, boost::shared_ptr<Task> > > m_deviceReadoutTasks;
 
   }; // ModelMaintenance
 
