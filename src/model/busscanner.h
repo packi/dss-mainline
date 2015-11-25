@@ -62,6 +62,7 @@ namespace dss {
     void setMeterCapability(boost::shared_ptr<DSMeter> _dsMeter);
     bool applyMeterSpec(boost::shared_ptr<DSMeter> _dsMeter);
     bool getMeterHash(boost::shared_ptr<DSMeter> _dsMeter, DSMeterHash_t& _hash);
+    bool getMeterState(boost::shared_ptr<DSMeter> _dsMeter, uint8_t *_state); 
 
   private:
     Apartment& m_Apartment;

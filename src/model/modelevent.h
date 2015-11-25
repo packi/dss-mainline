@@ -75,6 +75,7 @@ namespace dss {
                     etMeterReady, /** ds meter ready */
                     etDummyEvent, /** for unit tests */
                     etDeviceDataReady, /** TNY configuration read out */
+                    etDsmStateChange, /** dSM state has changed **/
                  } EventType;
   private:
     EventType m_EventType;

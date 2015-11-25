@@ -78,10 +78,6 @@ dss_CXXFLAGS = \
 			$(SQLITE3_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
-			$(BOOST_THREAD_LIBS) \
-			$(BOOST_SYSTEM_LIBS) \
-			$(BOOST_PROGRAM_OPTIONS_LIBS) \
-			$(BOOST_FILESYSTEM_LIBS) \
 			$(LIBDSM_API_LDFLAGS) \
 			$(JS_LIBS) \
 			$(ICAL_LIBS) \

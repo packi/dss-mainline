@@ -526,7 +526,7 @@ namespace dss {
       if (_sensorValue < -100 || _sensorValue > 100) {
         throw SensorOutOfRangeException("Value must be in range [-100..100]");
       }
-      convertedSensorValue = (int) (_sensorValue + 100);
+      convertedSensorValue = (int) (_sensorValue + 0.5 + 100);
       break;
     case SensorIDWindDirection:
       if (_sensorValue < 0 || _sensorValue > 511.875) {
@@ -552,6 +552,17 @@ namespace dss {
     }
     return convertedSensorValue;
   } // sensorToSystem
+
+  uint8_t SceneHelper::sensorToPrecision(const int _sensorType) {
+    switch (_sensorType) {
+      case SensorIDRoomTemperatureControlVariable:
+        return 1;
+      default:
+        return 0;
+    }
+    return 0;
+}
+
 
   std::string SceneHelper::sensorName(const int _sensorType) {
     std::string _name;

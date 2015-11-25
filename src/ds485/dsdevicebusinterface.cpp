@@ -542,7 +542,14 @@ namespace dss {
 
     try {
       // read device-active data and EAN part number
-      uint16_t result0 = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1e);
+      uint16_t result0;
+      try {
+        result0 = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1e);
+      } catch (BusApiError& er) {
+        if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+          result0 = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1e);
+        }
+      }
       partNumber = result0 & 0x7F;
       isIndependent = (result0 & 0x80);
       uint8_t upper = result0 >> 8;
@@ -550,7 +557,14 @@ namespace dss {
       pairedDevices = (upper & 0x0f);
 
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
-      uint16_t result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
+      uint16_t result;
+      try {
+        result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
+      } catch (BusApiError& er) {
+        if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+          result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
+        }
+      }
       deviceInetState = (DeviceOEMInetState_t)(result >> 12);
 
       if (deviceInetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED) {
@@ -560,31 +574,57 @@ namespace dss {
         // EAN programmed
         ean |= ((long long unsigned int)(result & 0xFFF) << 32);
 
-        result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2a);
+        try {
+          result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2a);
+        } catch (BusApiError& er) {
+          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+            result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2a);
+          }
+        }
         ean |= result;
 
-        result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2c);
+        try {
+          result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2c);
+        } catch (BusApiError& er) {
+          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+            result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2c);
+          }
+        }
         ean |= ((long long unsigned int)result << 16);
 
-        serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
+        try {
+          serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
+        } catch (BusApiError& er) {
+          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+            serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
+          }
+        }
 
         state = DEVICE_OEM_VALID;
       }
 
       if (m_revisionID >= TBVersion_OemConfigLock) {
-        if (std::bitset<8>(
-                getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f)).test(0)) {
+        uint8_t deviceActive;
+        try {
+          deviceActive = getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f);
+        } catch (BusApiError& er) {
+          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+            deviceActive = getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f);
+          }
+        }
+        if (std::bitset<8>(deviceActive).test(0)) {
           isConfigLocked = true;
         }
       }
 
     } catch (BusApiError& er) {
       // Bus error
-      Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what(), lsWarning);
+      Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what() +
+          " reading from dSM " + dsuid2str(m_dsmId) +
+          " DeviceId " + intToString(m_deviceAdress), lsWarning);
     }
 
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceEANReady,
-                                                m_dsmId);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceEANReady, m_dsmId);
     pEvent->addParameter(m_deviceAdress);
     pEvent->addParameter(state);
     pEvent->addParameter(deviceInetState);
@@ -596,7 +636,7 @@ namespace dss {
     pEvent->addParameter(isConfigLocked);
     pEvent->addParameter(pairedDevices);
     pEvent->addParameter(isVisible);
-    if(DSS::hasInstance()) {
+    if (DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     } else {
       delete pEvent;
@@ -633,24 +673,32 @@ namespace dss {
 
     try {
       // read device-active data and pairing data
-      uint16_t cfg = getDeviceConfig(m_dsmId, m_deviceAdress, 1,
-                                         CfgFunction_DeviceActive);
+      uint8_t cfg;
+      try {
+        cfg = getDeviceConfig(m_dsmId, m_deviceAdress, 1, CfgFunction_DeviceActive);
+      } catch (BusApiError& er) {
+        if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
+          cfg = getDeviceConfig(m_dsmId, m_deviceAdress, 1, CfgFunction_DeviceActive);
+        }
+      }
       isVisible = !(cfg & (1 << 4));
       pairedDevices = (cfg & 0x0f);
+
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDataReady, m_dsmId);
+      pEvent->addParameter(m_deviceAdress);
+      pEvent->addParameter(pairedDevices);
+      pEvent->addParameter(isVisible);
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+      } else {
+        delete pEvent;
+      }
+
     } catch (BusApiError& er) {
       // Bus error
-      Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what(), lsWarning);
-    }
-
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDataReady,
-                                                m_dsmId);
-    pEvent->addParameter(m_deviceAdress);
-    pEvent->addParameter(pairedDevices);
-    pEvent->addParameter(isVisible);
-    if(DSS::hasInstance()) {
-      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
-    } else {
-      delete pEvent;
+      Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what() +
+          " reading from dSM " + dsuid2str(m_dsmId) +
+          " DeviceId " + intToString(m_deviceAdress), lsWarning);
     }
   }
 

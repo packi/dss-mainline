@@ -111,7 +111,7 @@ namespace dss {
     m_windProtectionClass(wpc_none),
     m_floor(0),
     m_pairedDevices(0),
-    m_visible(false)
+    m_visible(true)
     {
       m_DSMeterDSUIDstr = dsuid2str(m_DSMeterDSID);
       m_LastKnownMeterDSUIDstr = dsuid2str(m_LastKnownMeterDSID);
@@ -210,6 +210,10 @@ namespace dss {
 
     if (m_pApartment->getPropertyNode() == NULL) {
       // never happens
+      return;
+    }
+
+    if (!m_visible) {
       return;
     }
 

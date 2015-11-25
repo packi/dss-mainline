@@ -214,8 +214,8 @@ namespace dss {
         // do not render "slave" devices
         continue;
       }
-      if (d.getDevice()->isVisible() != true) {
-        // do not render hidden TNY devices
+      if (!d.getDevice()->isVisible() && d.getDevice()->isPresent()) {
+        // do not render hidden TNY devices except for inactive ones
         continue;
       }
       toJSON(d, _json);

@@ -108,6 +108,12 @@ namespace dss {
       return false;
     }
 
+    // update powerline jumble state
+    uint8_t state = DSM_STATE_UNKNOWN;
+    if (busMemberIsdSM(_dsMeter->getBusMemberType()) && getMeterState(_dsMeter, &state)) {
+      _dsMeter->setState(state);
+    }
+
     if (m_Maintenance.isInitializing() ||
         (_dsMeter->isInitialized() == false) ||
         (hash.Hash != dsmHash) ||
@@ -500,8 +506,7 @@ namespace dss {
         std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
         task = boost::make_shared<DSDeviceBusInterface::OEMDataReader>(connURI);
         task->setup(_pDevice);
-        boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
-        pTP->addEvent(task);
+        m_Apartment.getModelMaintenance()->scheduleDeviceReadout(_pDevice->getDSMeterDSID(), task);
         _pDevice->setOemInfoState(DEVICE_OEM_LOADING);
       } else {
         _pDevice->setOemInfoState(DEVICE_OEM_NONE);
@@ -512,8 +517,7 @@ namespace dss {
       std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
       task = boost::make_shared<DSDeviceBusInterface::TNYConfigReader>(connURI);
       task->setup(_pDevice);
-      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
-      pTP->addEvent(task);
+      m_Apartment.getModelMaintenance()->scheduleDeviceReadout(_pDevice->getDSMeterDSID(), task);
     } else if (_pDevice->isPresent() &&
                 (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
                 ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&
@@ -613,6 +617,17 @@ namespace dss {
   bool BusScanner::getMeterHash(boost::shared_ptr<DSMeter> _dsMeter, DSMeterHash_t& _hash) {
     try {
       _hash = m_Interface.getDSMeterHash(_dsMeter->getDSID());
+    } catch(BusApiError& e) {
+      log("getMeterHash " + dsuid2str(_dsMeter->getDSID()) +
+          ": getDSMeterHash Error: " + e.what(), lsWarning);
+      return false;
+    }
+    return true;
+  }
+
+  bool BusScanner::getMeterState(boost::shared_ptr<DSMeter> _dsMeter, uint8_t *_state) {
+    try {
+      m_Interface.getDSMeterState(_dsMeter->getDSID(), _state);
     } catch(BusApiError& e) {
       log("getMeterHash " + dsuid2str(_dsMeter->getDSID()) +
           ": getDSMeterHash Error: " + e.what(), lsWarning);
@@ -870,7 +885,7 @@ namespace dss {
             _zone->setNominalValue(
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
           } else {
-            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureSetpoint,
+            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureSetpoint,
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
           }
         } catch (BusApiError& e) {
@@ -885,7 +900,7 @@ namespace dss {
             _zone->setControlValue(
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
           } else {
-            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureControlVariable,
+            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureControlVariable,
                 SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
           }
         } catch (BusApiError& e) {
