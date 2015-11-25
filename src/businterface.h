@@ -289,6 +289,7 @@ namespace dss {
 
     /** returns the hash over the dSMeter's datamodel */
     virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) = 0;
+    virtual void getDSMeterState(const dsuid_t& _dsMeterID, uint8_t *state) = 0;
 
     /** return heating controller data model */
     virtual ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;

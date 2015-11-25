@@ -122,6 +122,9 @@ public:
   virtual DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) {
     return DSMeterHash_t();
   }
+  virtual void getDSMeterState(const dsuid_t& _dsMeterID, uint8_t *_state) {
+    *_state = 0;
+  }
   virtual ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
     return ZoneHeatingConfigSpec_t();
   }

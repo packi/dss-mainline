@@ -606,6 +606,22 @@ namespace dss {
     return result;
   } // getDSMeterHash
 
+  void DSStructureQueryBusInterface::getDSMeterState(const dsuid_t& _dsMeterID,
+                                                     uint8_t* state) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    uint8_t result;
+    int ret = dSMState(m_DSMApiHandle, _dsMeterID, NULL, NULL, NULL, NULL, NULL,                       &result);
+    DSBusInterface::checkResultCode(ret);
+
+    if (state != NULL) {
+      *state = result;
+    }
+  } // getDSMeterState
+
+
   ZoneHeatingConfigSpec_t DSStructureQueryBusInterface::getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
