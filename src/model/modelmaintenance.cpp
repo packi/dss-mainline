@@ -2431,6 +2431,8 @@ namespace dss {
 
   void ModelMaintenance::onDsmStateChange(dsuid_t _meterID,
                                           const uint8_t& _state) {
+    log(std::string("dSM line state change: "
+        + dsuid2str(_meterID) + ": " + intToString(_state)), lsNotice);
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       pMeter->setState(_state);
