@@ -2323,6 +2323,10 @@ namespace dss {
           log(std::string("generic heating mode: invalid value: " + intToString(value)), lsInfo);
           break;
         }
+        if (value == 3) {
+          log("generic heating mode: prevent auto value", lsWarning);
+          break;
+        }
 
         raiseEvent(createGenericSignalHeatingModeSwitch(value, _origin));
       }
