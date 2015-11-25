@@ -636,7 +636,7 @@ namespace dss {
     pEvent->addParameter(isConfigLocked);
     pEvent->addParameter(pairedDevices);
     pEvent->addParameter(isVisible);
-    if(DSS::hasInstance()) {
+    if (DSS::hasInstance()) {
       DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
     } else {
       delete pEvent;
@@ -683,20 +683,22 @@ namespace dss {
       }
       isVisible = !(cfg & (1 << 4));
       pairedDevices = (cfg & 0x0f);
+
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDataReady, m_dsmId);
+      pEvent->addParameter(m_deviceAdress);
+      pEvent->addParameter(pairedDevices);
+      pEvent->addParameter(isVisible);
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+      } else {
+        delete pEvent;
+      }
+
     } catch (BusApiError& er) {
       // Bus error
-      Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what(), lsWarning);
-    }
-
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceDataReady,
-                                                m_dsmId);
-    pEvent->addParameter(m_deviceAdress);
-    pEvent->addParameter(pairedDevices);
-    pEvent->addParameter(isVisible);
-    if(DSS::hasInstance()) {
-      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
-    } else {
-      delete pEvent;
+      Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what() +
+          " reading from dSM " + dsuid2str(m_dsmId) +
+          " DeviceId " + intToString(m_deviceAdress), lsWarning);
     }
   }
 
