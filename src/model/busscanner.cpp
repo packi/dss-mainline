@@ -68,11 +68,6 @@ namespace dss {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
 
-    uint8_t state = DSM_STATE_UNKNOWN;
-    if (getMeterState(_dsMeter, &state)) {
-      _dsMeter->setState(state);
-    }
-
     DSMeterHash_t hash;
     if (!getMeterHash(_dsMeter, hash)) {
       if (!applyMeterSpec(_dsMeter)) {
@@ -111,6 +106,12 @@ namespace dss {
     } else {
       log("scanDSMeter: Error getting dSMSpecs", lsWarning);
       return false;
+    }
+
+    // update powerline jumble state
+    uint8_t state = DSM_STATE_UNKNOWN;
+    if (busMemberIsdSM(_dsMeter->getBusMemberType()) && getMeterState(_dsMeter, &state)) {
+      _dsMeter->setState(state);
     }
 
     if (m_Maintenance.isInitializing() ||
