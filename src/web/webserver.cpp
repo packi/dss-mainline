@@ -710,12 +710,85 @@ namespace dss {
     return 0;
   }
 
+  // return 1 to reject connection, return 0 to accept
   int WebServer::WebSocketConnectHandler(const struct mg_connection* _connection,
                               void* cbdata)
   {
     struct mg_context *ctx = mg_get_context(_connection);
 
+    const struct mg_request_info *_info = mg_get_request_info(_connection);
+
     WebServer& self = DSS::getInstance()->getWebServer();
+
+    if (!_info->uri || strlen(_info->remote_addr) < 1) {
+      self.log("Websocket connection refused: no origin information");
+      return 1;
+    }
+
+    std::string uri_path(_info->uri);
+    if (uri_path != "/websocket") {
+      // should actually never happen due to the specific uri based callback
+      self.log("Websocket connection refused: invalid uri path");
+      return 1;
+    }
+
+    self.m_SessionManager->getSecurity()->signOff();
+    {
+        std::string remote_s(_info->remote_addr);
+        std::string uri_path(_info->uri);
+        if (_info->query_string) {
+            uri_path += "?" + std::string(_info->query_string);
+        }
+        self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
+    }
+
+    RestfulRequest request("", _info->query_string ?: "");
+
+    boost::shared_ptr<Session> session;
+    std::string token = extractToken(mg_get_header(_connection, "Cookie"));
+    if (token.empty()) {
+      // ... used when not going through lighttpd
+      token = request.getParameter("token");
+    }
+    if (!token.empty()) {
+      session = self.m_SessionManager->getSession(token);
+    }
+
+    // lighttpd is proxying to our trusted port. We trust that it
+    // properly authenticated the user and just filter the HTTP
+    // Authorization header for the username
+    if (((session == NULL) || (session->getUser() == NULL)) &&
+        (_info->local_port == self.m_TrustedPort)) {
+      const char *auth_header = mg_get_header(_connection, "Authorization");
+      std::string userName = extractAuthenticatedUser(auth_header);
+
+      if (!userName.empty()) {
+        self.log("Logging-in from a trusted port as '" + userName + "'");
+        if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
+          self.log("Unknown user", lsInfo);
+          return 1;
+        }
+        if (session == NULL) {
+          std::string newToken = self.m_SessionManager->registerSession();
+          if (newToken.empty()) {
+            self.log("Session limit reached", lsError);
+            return 1;
+          }
+          self.log("Registered new JSON session for trusted port (" + newToken + ")");
+          session = self.m_SessionManager->getSession(newToken);
+          session->inheritUserFromSecurity();
+        }
+      }
+    }
+
+    if(session != NULL) {
+      session->touch();
+      self.m_SessionManager->getSecurity()->authenticate(session);
+    } else {
+      self.log("Authentication failed, rejecting websocket connection");
+      return 1;
+    }
+
 
     boost::mutex::scoped_lock lock(m_websocket_mutex);
     if (m_websockets.size() >= m_max_ws_clients) {
