@@ -755,4 +755,48 @@ BOOST_AUTO_TEST_CASE(testCluster) {
 
 } // testCluster
 
+BOOST_AUTO_TEST_CASE(testStateValueRange) {
+  // setup
+  Apartment apt(NULL);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  std::string scriptID("42");
+  bool uniqueNode = false;
+  PropertyNodePtr m_pScriptRootNode = propSys.createProperty("/config");
+  boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
+  ctx->attachWrapper(wrapper);
+  wrapper->init();
+
+  // call set value range
+  ctx->evaluate<void>(
+    "registerState('apartment_controller',true);"
+    " var states = [];"
+    "states.push('off');"
+    "states.push('heating');"
+    "states.push('cooling');"
+    "getState('apartment_controller').setValueRange(states);");
+
+  boost::shared_ptr<State>  state = apt.getState(StateType_Script, "apartment_controller");
+  BOOST_CHECK(state);
+
+  BOOST_CHECK_EQUAL(state->getValueRangeSize(), 3);
+
+  state->setState(coUnknown, 0);
+  std::string off("off");
+  BOOST_CHECK(off.compare(state->toString()) == 0);
+
+  state->setState(coUnknown, 1);
+  std::string heating("heating");
+  BOOST_CHECK(heating.compare(state->toString()) == 0);
+
+  state->setState(coUnknown, 2);
+  std::string cooling("cooling");
+  BOOST_CHECK(cooling.compare(state->toString()) == 0);
+} // testStateValueRange
+
 BOOST_AUTO_TEST_SUITE_END()
