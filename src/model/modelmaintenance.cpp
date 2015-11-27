@@ -2988,8 +2988,23 @@ namespace dss {
     } catch(ItemNotFoundException& e) {
       log("scheduleDeviceReadou: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
+  }
 
   void ModelMaintenance::publishWebSocketEvent(boost::shared_ptr<Event> _event) {
+    if ((_event->getName() == EventName::LogFileData) ||
+        (_event->getName() == EventName::DebugMonitorUpdate ) ||
+        (_event->getName() == EventName::Signal) ||
+        (_event->getName() == EventName::WebSessionCleanup) ||
+        (_event->getName() == EventName::ExecutionDeniedDigestCheck) ||
+        (_event->getName() == EventName::CheckSensorValues) ||
+        (_event->getName() == EventName::CheckHeatingGroups) ||
+        (_event->getName() == EventName::UpdateAutoselect) ||
+        (_event->getName() == EventName::ReexportTimings) ||
+        (_event->getName() == "EventInterpreterPluginJavascript_cleanupScripts") ||
+        (_event->getName() == EventName::SendMail)) {
+      return;
+    }
+
     boost::shared_ptr<WebSocketEvent> wse = boost::make_shared<WebSocketEvent>(_event);
     getTaskProcessor()->addEvent(wse);
   }
