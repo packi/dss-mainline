@@ -79,6 +79,8 @@ namespace EventName {
   const std::string ButtonDeviceAction = "buttonDeviceAction";
 
   const std::string SceneNameChanged = "scene_name_changed";
+
+  const std::string ReexportTimings = "reexport_timings";
 }
 
 boost::shared_ptr<Event>

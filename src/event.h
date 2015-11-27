@@ -95,6 +95,7 @@ namespace dss {
     extern const std::string DatabaseImported;
     extern const std::string ButtonDeviceAction;
     extern const std::string SceneNameChanged;
+    extern const std::string ReexportTimings;
   }
 
   namespace EventProperty {
