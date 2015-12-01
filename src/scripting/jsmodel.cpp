@@ -4397,10 +4397,69 @@ namespace dss {
     return JS_FALSE;
   } // state_get_property_node
 
+  JSBool state_set_value_range(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    try {
+      boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pState;
+      if (pState != NULL) {
+        if ((pState->getType() != StateType_Service) &&
+            (pState->getType() != StateType_Script)) {
+          JS_ReportError(cx, "State type is not allowed to be set by scripting");
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
+          return JS_FALSE;
+        }
+        if (pState->getProviderService() != ctx->getWrapper()->getIdentifier()) {
+          JS_ReportError(cx, "State is owned by %s", pState->getProviderService().c_str());
+          JS_SET_RVAL(cx, vp, JSVAL_NULL);
+          return JS_FALSE;
+        }
+        try {
+          if (argc >= 1) {
+            if (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[0]) &&
+              !JSVAL_IS_NULL(JS_ARGV(cx, vp)[0])) {
+              JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [0]);
+              if (JS_IsArrayObject(cx, configObj)) {
+                uint32_t lengthp = 0;
+                if (JS_GetArrayLength(cx, configObj, &lengthp)) {
+                  State::ValueRange_t vecValue;
+                  for (uint32_t indx = 0; indx < lengthp; ++indx) {
+                    jsval output;
+                    if (JS_LookupElement(cx, configObj, indx, &output)) {
+                      std::string value = ctx->convertTo<std::string>(output);
+                      vecValue.push_back(value);
+                    }
+                  }
+                  pState->setValueRange(vecValue);
+                }
+              }
+            }
+          }
+        } catch(ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch(std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+        return JS_TRUE;
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } //state_set_value_range
+
   JSFunctionSpec state_methods[] = {
     JS_FS("getValue", state_get_value, 0, 0),
     JS_FS("setValue", state_set_value, 0, 0),
     JS_FS("getPropertyNode", state_get_property_node, 0, 0),
+    JS_FS("setValueRange", state_set_value_range, 0, 0),
     JS_FS_END
   };
 
