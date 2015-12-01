@@ -2,6 +2,7 @@
 *.swp
 build/*.o
 build/*.a
+build-x86/
 Makefile.in
 Makefile
 m4
