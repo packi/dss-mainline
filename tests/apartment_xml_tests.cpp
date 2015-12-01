@@ -49,6 +49,12 @@
 
 using namespace dss;
 
+//TODO: upgrade code to use BOOST_TEST_MESSAGE.
+//Boost 1.53 is required anyway because of boost/atomic.h
+#if BOOST_VERSION > 105300
+#define BOOST_MESSAGE(msg) BOOST_TEST_MESSAGE(msg)
+#endif
+
 BOOST_AUTO_TEST_SUITE(apartment_xml)
 
 BOOST_AUTO_TEST_CASE(testApartmentXML) {
