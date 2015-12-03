@@ -125,18 +125,18 @@ namespace dss {
     "Stop-Area4"
   };
 
-  const int SceneTableHeating_length = 8;
   const char *SceneTableHeating[] =
   {
-    "Off",
-    "Comfort",
-    "Economy",
-    "NotUsed",
-    "Night",
-    "Holiday",
-    "Cooling",
-    "CoolingOff",
+    "Off",      //0
+    "Comfort",  //1
+    "Economy",  //2
+    "NotUsed",  //3
+    "Night",    //4
+    "Holiday",  //5
+    "Cooling",  //6
+    "CoolingOff",       //7
   };
+  const int SceneTableHeating_length = sizeof(SceneTableHeating) / sizeof(SceneTableHeating[0]);
 
   const int SceneTable1_length = 28;
   const char *SceneTable1[] =
