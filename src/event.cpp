@@ -48,6 +48,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <web/webserver.h>
 
 using std::set;
 
@@ -425,6 +426,14 @@ namespace dss {
               log(std::string("Interpreter: could not find handler '") + (*ipSubscription)->getHandlerName(), lsError);
             }
 
+          }
+        }
+
+        if (DSS::hasInstance()) {
+          // TODO: filter events
+          WebServer& webserver = getDSS().getWebServer();
+          if (webserver.WebSocketClientCount() > 0) {
+            getDSS().getModelMaintenance().publishWebSocketEvent(toProcess);
           }
         }
 
