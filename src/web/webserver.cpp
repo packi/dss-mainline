@@ -835,7 +835,7 @@ namespace dss {
     while (i != m_websockets.end()) {
       if ((*i).get() == client) {
         mg_lock_context(ctx);
-        mg_get_user_connection_data(NULL);
+        mg_set_user_connection_data(_connection, NULL);
         m_websockets.erase(i);
         mg_unlock_context(ctx);
         return;
