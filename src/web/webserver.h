@@ -69,7 +69,6 @@ namespace dss {
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
     size_t m_max_ws_clients;
-    int m_ws_id;
     std::list<boost::shared_ptr<websocket_connection_t> > m_websockets;
     boost::mutex m_websocket_mutex;
 
