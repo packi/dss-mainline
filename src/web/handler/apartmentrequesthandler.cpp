@@ -175,8 +175,11 @@ namespace dss {
           devices = getUnassignedDevices();
         }
 
+        bool showHidden = false;
+        _request.getParameter("showHidden", showHidden);
+
         JSONWriter json(JSONWriter::jsonArrayResult);
-        toJSON(devices, json);
+        toJSON(devices, json, showHidden);
         return json.successJSON();
       } else if(_request.getMethod() == "getCircuits") {
         JSONWriter json;
