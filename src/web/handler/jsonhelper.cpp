@@ -207,14 +207,14 @@ namespace dss {
     _json.endObject();
   } // toJSON(DeviceReference)
 
-  void toJSON(const Set& _set, JSONWriter& _json) {
+  void toJSON(const Set& _set, JSONWriter& _json, bool _showHidden) {
     for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
       const DeviceReference& d = _set.get(iDevice);
       if (d.getDevice()->is2WaySlave() == true) {
         // do not render "slave" devices
         continue;
       }
-      if (!d.getDevice()->isVisible() && d.getDevice()->isPresent()) {
+      if (!_showHidden && !d.getDevice()->isVisible() && d.getDevice()->isPresent()) {
         // do not render hidden TNY devices except for inactive ones
         continue;
       }
