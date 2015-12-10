@@ -842,7 +842,7 @@ struct ssl_func {
 #define SSL_pending (*(int (*)(SSL *))ssl_sw[18].ptr)
 #define SSL_CTX_set_verify (*(void (*)(SSL_CTX *, int, int))ssl_sw[19].ptr)
 #define SSL_shutdown (*(int (*)(SSL *))ssl_sw[20].ptr)
-#define SSL_peek (* (int (*)(SSL *,void *,int)) ssl_sw[11].ptr)
+#define SSL_peek (* (int (*)(SSL *,void *,int)) ssl_sw[21].ptr)
 
 #define CRYPTO_num_locks (*(int (*)(void))crypto_sw[0].ptr)
 #define CRYPTO_set_locking_callback                                            \
