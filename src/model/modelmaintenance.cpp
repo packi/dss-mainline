@@ -492,6 +492,7 @@ namespace dss {
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
     m_taskProcessor(boost::make_shared<TaskProcessor>()),
+    m_taskProcessorMaySleep(boost::make_shared<TaskProcessor>()),
     m_pMeterMaintenance(boost::make_shared<MeterMaintenance>(_pDSS, "MeterMaintenance"))
   { }
 
