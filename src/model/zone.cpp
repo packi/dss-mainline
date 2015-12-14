@@ -256,16 +256,27 @@ namespace dss {
     m_HeatingProperties = config;
   }
 
-  void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice) {
-    m_HeatingProperties.m_HeatingControlMode = _ctrlMode;
+  void Zone::setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec, dsuid_t ctrlDevice) {
+    m_HeatingProperties.m_HeatingControlMode = _spec.ControllerMode;
+    m_HeatingProperties.m_Kp = _spec.Kp;
+    m_HeatingProperties.m_Ts = _spec.Ts;
+    m_HeatingProperties.m_Ti = _spec.Ti;
+    m_HeatingProperties.m_Kd = _spec.Kd;
+    m_HeatingProperties.m_Imin = _spec.Imin;
+    m_HeatingProperties.m_Imax = _spec.Imax;
+    m_HeatingProperties.m_Ymin = _spec.Ymin;
+    m_HeatingProperties.m_Ymax = _spec.Ymax;
+    m_HeatingProperties.m_AntiWindUp = _spec.AntiWindUp;
+    m_HeatingProperties.m_KeepFloorWarm = _spec.KeepFloorWarm;
+    m_HeatingProperties.m_HeatingMasterZone = _spec.SourceZoneId;
+    m_HeatingProperties.m_CtrlOffset = _spec.Offset;
+    m_HeatingProperties.m_EmergencyValue = _spec.EmergencyValue;
+    m_HeatingProperties.m_ManualValue = _spec.ManualValue;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
-    m_HeatingProperties.m_CtrlOffset = _offset;
-    m_HeatingProperties.m_HeatingMasterZone = _masterZone;
-    m_HeatingProperties.m_ManualValue = _manualValue;
   }
 
   void Zone::clearHeatingControlMode() {
-    setHeatingControlMode(0, 0, 0, 0, DSUID_NULL);
+    m_HeatingProperties.reset();
   }
 
   void Zone::setHeatingControlState(int _ctrlState) {

@@ -34,6 +34,7 @@
 #include "nonaddressablemodelitem.h"
 #include "physicalmodelitem.h"
 #include "storagetools.h"
+#include "businterface.h"
 
 namespace dss {
   class Apartment;
@@ -96,7 +97,6 @@ namespace dss {
     uint8_t  m_Ymax;
     uint8_t  m_AntiWindUp;
     uint8_t  m_KeepFloorWarm;
-
     int m_HeatingControlState;     // Control state: 0=internal; 1=external; 2=exbackup; 3=emergency
     int m_HeatingMasterZone;       // only used for mode 2
     int m_CtrlOffset;              // only used for mode 2
@@ -222,7 +222,7 @@ namespace dss {
     bool isHeatingEnabled() const;
 
     /** Set heating properties and runtime values */
-    void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
+    void setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec, dsuid_t ctrlDevice);
     void clearHeatingControlMode();
     void setHeatingControlState(int _ctrlState);
     void setHeatingOperationMode(int _operationMode);

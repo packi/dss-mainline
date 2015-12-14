@@ -837,9 +837,7 @@ namespace dss {
         if (hConfig.ControllerMode > 0) {
             if ((hProp.m_HeatingControlDSUID == DSUID_NULL) ||
                 (hProp.m_HeatingControlDSUID == _dsMeter->getDSID())) {
-            _zone->setHeatingControlMode(hConfig.ControllerMode,
-                hConfig.Offset, hConfig.SourceZoneId, hConfig.ManualValue,
-                _dsMeter->getDSID());
+            _zone->setHeatingControlMode(hConfig, _dsMeter->getDSID());
               hProp = _zone->getHeatingProperties();
           } else {
             log("Heating controller conflict for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
