@@ -273,6 +273,7 @@ namespace dss {
     m_HeatingProperties.m_EmergencyValue = _spec.EmergencyValue;
     m_HeatingProperties.m_ManualValue = _spec.ManualValue;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
+    dirty();
   }
 
   void Zone::clearHeatingControlMode() {
@@ -281,6 +282,7 @@ namespace dss {
 
   void Zone::setHeatingControlState(int _ctrlState) {
     m_HeatingProperties.m_HeatingControlState = _ctrlState;
+    dirty();
   }
 
   void Zone::setHeatingOperationMode(int _operationMode) {
