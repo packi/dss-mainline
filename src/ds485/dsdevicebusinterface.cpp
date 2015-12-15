@@ -480,6 +480,13 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
+    // wait until dsm has finished device registrations
+    while (m_dsm && m_dsm->isPresent() && m_dsm->getState()) {
+      sleep(5);
+    }
+    if ((m_dsm == NULL) || !m_dsm->isPresent()) {
+      throw std::runtime_error("OEMDataReader: dsm is not present");
+    }
 
     uint16_t retVal;
     int ret = DeviceConfig_get_sync_16(m_dsmApiHandle, m_dsmId, m_deviceAdress, _configClass, _configIndex, 15, &retVal);
@@ -497,6 +504,13 @@ namespace dss {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
+    // wait until dsm has finished device registrations
+    while (m_dsm && m_dsm->isPresent() && m_dsm->getState()) {
+      sleep(5);
+    }
+    if ((m_dsm == NULL) || !m_dsm->isPresent()) {
+      throw std::runtime_error("OEMDataReader: dsm is not present");
+    }
 
     uint8_t retVal;
     int ret = DeviceConfig_get_sync_8(m_dsmApiHandle, m_dsmId, m_deviceAdress, _configClass, _configIndex, 15, &retVal);
@@ -603,6 +617,9 @@ namespace dss {
     m_deviceAdress = _device->getShortAddress();
     m_dsmId = _device->getDSMeterDSID();
     m_revisionID = _device->getRevisionID();
+    if (DSS::hasInstance()) {
+      m_dsm = DSS::getInstance()->getApartment().getDSMeterByDSID(m_dsmId);
+    }
   }
 
   DSDeviceBusInterface::TNYConfigReader::TNYConfigReader(const std::string& _busConnection) : OEMDataReader(_busConnection)
