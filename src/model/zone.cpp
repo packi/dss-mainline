@@ -248,6 +248,14 @@ namespace dss {
     return m_SensorStatus;
   }
 
+  bool Zone::isHeatingEnabled() const {
+    return (m_HeatingProperties.m_HeatingControlMode != 0); // 0 heating controller off
+  }
+
+  void Zone::setHeatingProperties(ZoneHeatingProperties_t& config) {
+    m_HeatingProperties = config;
+  }
+
   void Zone::setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice) {
     m_HeatingProperties.m_HeatingControlMode = _ctrlMode;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;

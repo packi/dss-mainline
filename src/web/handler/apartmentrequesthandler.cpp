@@ -318,47 +318,33 @@ namespace dss {
           json.add("name", pZone->getName());
           json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
 
-          ZoneHeatingConfigSpec_t hConfig;
-          memset(&hConfig, 0, sizeof(hConfig));
           if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
             json.endObject();
             continue;
           }
 
-          try {
-            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
-                hProp.m_HeatingControlDSUID, pZone->getID());
-          } catch (BusApiError& e) {
-            if (e.error == ERROR_ZONE_NOT_FOUND) {
-              json.add("IsConfigured", false);
-              json.endObject();
-              continue;
-            }
-            throw e;
-          }
-
           json.add("IsConfigured", true);
-          json.add("ControlMode", hConfig.ControllerMode);
-          json.add("EmergencyValue", hConfig.EmergencyValue - 100);
+          json.add("ControlMode", hProp.m_HeatingControlMode);
+          json.add("EmergencyValue", hProp.m_EmergencyValue - 100);
           switch (hProp.m_HeatingControlMode) {
             case HeatingControlModeIDOff:
               break;
             case HeatingControlModeIDPID:
-              json.add("CtrlKp", (double)hConfig.Kp * 0.025);
-              json.add("CtrlTs", hConfig.Ts);
-              json.add("CtrlTi", hConfig.Ti);
-              json.add("CtrlKd", hConfig.Kd);
-              json.add("CtrlImin", (double)hConfig.Imin * 0.025);
-              json.add("CtrlImax", (double)hConfig.Imax * 0.025);
-              json.add("CtrlYmin", hConfig.Ymin - 100);
-              json.add("CtrlYmax", hConfig.Ymax - 100);
-              json.add("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
-              json.add("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
+              json.add("CtrlKp", (double)hProp.m_Kp * 0.025);
+              json.add("CtrlTs", hProp.m_Ts);
+              json.add("CtrlTi", hProp.m_Ti);
+              json.add("CtrlKd", hProp.m_Kd);
+              json.add("CtrlImin", (double)hProp.m_Imin * 0.025);
+              json.add("CtrlImax", (double)hProp.m_Imax * 0.025);
+              json.add("CtrlYmin", hProp.m_Ymin - 100);
+              json.add("CtrlYmax", hProp.m_Ymax - 100);
+              json.add("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
+              json.add("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
               break;
             case HeatingControlModeIDZoneFollower:
-              json.add("ReferenceZone", hConfig.SourceZoneId);
-              json.add("CtrlOffset", hConfig.Offset);
+              json.add("ReferenceZone", hProp.m_HeatingMasterZone);
+              json.add("CtrlOffset", hProp.m_CtrlOffset);
               break;
             case HeatingControlModeIDFixed:
               break;

@@ -3629,44 +3629,40 @@ namespace dss {
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-      ZoneHeatingConfigSpec_t hConfig;
 
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      memset(&hConfig, 0, sizeof(hConfig));
       if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         obj.setProperty<bool>("IsConfigured", false);
         return JS_TRUE;
       } else {
         obj.setProperty<bool>("IsConfigured", true);
-        hConfig = ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
-            hProp.m_HeatingControlDSUID, pZone->getID());
       }
       obj.setProperty<std::string>("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
-      obj.setProperty<int>("ControlMode", hConfig.ControllerMode);
-      obj.setProperty<int>("EmergencyValue", hConfig.EmergencyValue - 100);
+      obj.setProperty<int>("ControlMode", hProp.m_HeatingControlMode);
+      obj.setProperty<int>("EmergencyValue", hProp.m_EmergencyValue - 100);
       switch (hProp.m_HeatingControlMode) {
         case HeatingControlModeIDOff:
           break;
         case HeatingControlModeIDPID:
-          obj.setProperty<double>("CtrlKp", (double)hConfig.Kp * 0.025);
-          obj.setProperty<int>("CtrlTs", hConfig.Ts);
-          obj.setProperty<int>("CtrlTi", hConfig.Ti);
-          obj.setProperty<int>("CtrlKd", hConfig.Kd);
-          obj.setProperty<double>("CtrlImin", (double)hConfig.Imin * 0.025);
-          obj.setProperty<double>("CtrlImax", (double)hConfig.Imax * 0.025);
-          obj.setProperty<int>("CtrlYmin", hConfig.Ymin - 100);
-          obj.setProperty<int>("CtrlYmax", hConfig.Ymax - 100);
-          obj.setProperty<bool>("CtrlAntiWindUp", (hConfig.AntiWindUp > 0));
-          obj.setProperty<bool>("CtrlKeepFloorWarm", (hConfig.KeepFloorWarm > 0));
+          obj.setProperty<double>("CtrlKp", (double)hProp.m_Kp * 0.025);
+          obj.setProperty<int>("CtrlTs", hProp.m_Ts);
+          obj.setProperty<int>("CtrlTi", hProp.m_Ti);
+          obj.setProperty<int>("CtrlKd", hProp.m_Kd);
+          obj.setProperty<double>("CtrlImin", (double)hProp.m_Imin * 0.025);
+          obj.setProperty<double>("CtrlImax", (double)hProp.m_Imax * 0.025);
+          obj.setProperty<int>("CtrlYmin", hProp.m_Ymin - 100);
+          obj.setProperty<int>("CtrlYmax", hProp.m_Ymax - 100);
+          obj.setProperty<bool>("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
+          obj.setProperty<bool>("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
           break;
         case HeatingControlModeIDZoneFollower:
-          obj.setProperty<int>("ReferenceZone", hConfig.SourceZoneId);
-          obj.setProperty<int>("CtrlOffset", hConfig.Offset);
+          obj.setProperty<int>("ReferenceZone", hProp.m_HeatingMasterZone);
+          obj.setProperty<int>("CtrlOffset", hProp.m_CtrlOffset);
           break;
         case HeatingControlModeIDManual:
-          obj.setProperty<int>("ManualValue", hConfig.ManualValue - 100);
+          obj.setProperty<int>("ManualValue", hProp.m_ManualValue - 100);
           break;
         case HeatingControlModeIDFixed:
           break;
