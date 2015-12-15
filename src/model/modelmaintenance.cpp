@@ -34,6 +34,8 @@
 
 #include <unistd.h>
 #include <json.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "foreach.h"
 #include "base.h"
@@ -70,7 +72,7 @@
 #include "model-features.h"
 #include "handler/system_states.h"
 #include "sqlite3_wrapper.h"
-
+#include "web/webserver.h"
 
 namespace dss {
 
@@ -490,6 +492,7 @@ namespace dss {
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
     m_taskProcessor(boost::make_shared<TaskProcessor>()),
+    m_taskProcessorMaySleep(boost::make_shared<TaskProcessor>()),
     m_pMeterMaintenance(boost::make_shared<MeterMaintenance>(_pDSS, "MeterMaintenance"))
   { }
 
@@ -1171,7 +1174,6 @@ namespace dss {
         onDsmStateChange(pEventWithDSID->getDSID(), event->getParameter(0));
       }
       break;
-
     default:
       assert(false);
       break;
@@ -2444,7 +2446,7 @@ namespace dss {
           if (dsuid_equal(&id, &_meterID)) {
             log("onDsmStateChange: scheduling device readout task on dSM " +
                 dsuid2str(_meterID));
-            m_taskProcessor->addEvent((*it).second);
+            m_taskProcessorMaySleep->addEvent((*it).second);
             it = m_deviceReadoutTasks.erase(it);
           } else {
             it++;
@@ -2736,6 +2738,167 @@ namespace dss {
     }
   }
 
+  ModelMaintenance::WebSocketEvent::WebSocketEvent(boost::shared_ptr<Event> _event)
+    : Task(),
+      m_event(_event)
+  {}
+
+  void ModelMaintenance::WebSocketEvent::run() {
+    if (m_event == NULL) {
+      return;
+    }
+
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> json(s);
+
+    json.StartObject();
+
+    json.String("name");
+    json.String(m_event->getName().c_str());
+
+    json.String("properties");
+    json.StartObject();
+
+    const dss::HashMapStringString& props =  m_event->getProperties().getContainer();
+    for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+      json.String((iParam->first).c_str());
+      json.String((iParam->second).c_str());
+    }
+    json.EndObject();
+
+    json.String("source");
+    json.StartObject();
+
+    EventRaiseLocation raiseLocation = m_event->getRaiseLocation();
+    if ((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
+      if (DSS::hasInstance()) {
+        boost::shared_ptr<const Group> group =
+            m_event->getRaisedAtGroup(DSS::getInstance()->getApartment());
+        json.String("set");
+        json.String((".zone(" + intToString(group->getZoneID())+
+                ").group(" + intToString(group->getID()) + ")").c_str());
+
+        json.String("groupID");
+        json.Int(group->getID());
+
+        json.String("zoneID");
+        json.Int(group->getZoneID());
+
+        json.String("isApartment");
+        json.Bool(raiseLocation == erlApartment);
+
+        json.String("isGroup");
+        json.Bool(raiseLocation == erlGroup);
+
+        json.String("isDevice");
+        json.Bool(false);
+      }
+    } else if (raiseLocation == erlDevice) {
+      boost::shared_ptr<const DeviceReference> device = m_event->getRaisedAtDevice();
+      try {
+        json.String("set");
+        json.String(("dsid(" + dsuid2str(device->getDSID()) + ")").c_str());
+
+        json.String("dsid");
+        json.String(dsuid2str(device->getDSID()).c_str());
+
+        json.String("zoneID");
+        json.Int(device->getDevice()->getZoneID());
+      } catch (ItemNotFoundException& e) {
+      }
+      json.String("isApartment");
+      json.Bool(false);
+
+      json.String("isGroup");
+      json.Bool(false);
+
+      json.String("isDevice");
+      json.Bool(true);
+    } else if (raiseLocation == erlState) {
+      boost::shared_ptr<const State> state = m_event->getRaisedAtState();
+      if (state->getType() == StateType_Device) {
+        boost::shared_ptr<Device> device = state->getProviderDevice();
+        dsid_t dsid;
+        if (dsuid_to_dsid(device->getDSID(), &dsid)) {
+          json.String("dsid");
+          json.String(dsid2str(dsid).c_str());
+        } else {
+          json.String("dsid");
+          json.String("");
+        }
+        json.String("dSUID");
+        json.String(dsuid2str(device->getDSID()).c_str());
+
+        json.String("zoneID");
+        json.Int(device->getZoneID());
+
+        json.String("isApartment");
+        json.Bool(false);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(true);
+      } else if (state->getType() == StateType_Apartment) {
+        json.String("isApartment");
+        json.Bool(true);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(false);
+      } else if (state->getType() == StateType_Group) {
+        boost::shared_ptr<Group> group = state->getProviderGroup();
+        json.String("isApartment");
+        json.Bool(false);
+
+        json.String("isGroup");
+        json.Bool(true);
+
+        json.String("isDevice");
+        json.Bool(false);
+
+        json.String("groupID");
+        json.Int(group->getID());
+
+        json.String("zoneID");
+        json.Bool(group->getZoneID());
+      } else if (state->getType() == StateType_Service) {
+        json.String("isService");
+        json.Bool(true);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(false);
+
+        json.String("serviceName");
+        json.String(state->getProviderService().c_str());
+      } else if (state->getType() == StateType_Script) {
+        json.String("isScript");
+        json.Bool(true);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(false);
+
+        json.String("serviceName");
+        json.String(state->getProviderService().c_str());
+      }
+    }
+
+    json.EndObject();
+    json.EndObject();
+
+    WebServer& webserver = DSS::getInstance()->getWebServer();
+    webserver.sendToWebSockets(s.GetString());
+  }
+
   const std::string ModelMaintenance::kWebUpdateEventName = "ModelMaintenace_updateWebData";
 
   void ModelMaintenance::setupWebUpdateEvent() {
@@ -2818,7 +2981,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_dSMeterID);
       if (pMeter->getState() == DSM_STATE_IDLE) {
-        m_taskProcessor->addEvent(task);
+        m_taskProcessorMaySleep->addEvent(task);
       } else {
         boost::mutex::scoped_lock lock(m_readoutTasksMutex);
         m_deviceReadoutTasks.push_back(std::make_pair(_dSMeterID, task));
@@ -2826,6 +2989,24 @@ namespace dss {
     } catch(ItemNotFoundException& e) {
       log("scheduleDeviceReadou: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
+  }
 
+  void ModelMaintenance::publishWebSocketEvent(boost::shared_ptr<Event> _event) {
+    if ((_event->getName() == EventName::LogFileData) ||
+        (_event->getName() == EventName::DebugMonitorUpdate ) ||
+        (_event->getName() == EventName::Signal) ||
+        (_event->getName() == EventName::WebSessionCleanup) ||
+        (_event->getName() == EventName::ExecutionDeniedDigestCheck) ||
+        (_event->getName() == EventName::CheckSensorValues) ||
+        (_event->getName() == EventName::CheckHeatingGroups) ||
+        (_event->getName() == EventName::UpdateAutoselect) ||
+        (_event->getName() == EventName::ReexportTimings) ||
+        (_event->getName() == "EventInterpreterPluginJavascript_cleanupScripts") ||
+        (_event->getName() == EventName::SendMail)) {
+      return;
+    }
+
+    boost::shared_ptr<WebSocketEvent> wse = boost::make_shared<WebSocketEvent>(_event);
+    getTaskProcessor()->addEvent(wse);
   }
 } // namespace dss

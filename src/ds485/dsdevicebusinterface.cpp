@@ -474,45 +474,49 @@ namespace dss {
     }
   }
 
-  uint16_t DSDeviceBusInterface::OEMDataReader::getDeviceConfigWord(const dsuid_t& _dsm,
-                                                                            dev_t _device,
-                                                                            uint8_t _configClass,
-                                                                            uint8_t _configIndex) const
+  uint16_t DSDeviceBusInterface::OEMDataReader::getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) const
   {
     if (m_dsmApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    uint16_t retVal;
+    // wait until dsm has finished device registrations
+    while (m_dsm && m_dsm->isPresent() && m_dsm->getState()) {
+      sleep(5);
+    }
+    if ((m_dsm == NULL) || !m_dsm->isPresent()) {
+      throw std::runtime_error("OEMDataReader: dsm is not present");
+    }
 
-    int ret = DeviceConfig_get_sync_16(m_dsmApiHandle, _dsm,
-                                           _device,
-                                           _configClass,
-                                           _configIndex,
-                                           30,
-                                           &retVal);
+    uint16_t retVal;
+    int ret = DeviceConfig_get_sync_16(m_dsmApiHandle, m_dsmId, m_deviceAdress, _configClass, _configIndex, 15, &retVal);
+    if (ret == ERROR_SYNC_RESPONSE_TIMEOUT || ret == ERROR_TIMEOUT) {
+      ret = DeviceConfig_get_sync_16(m_dsmApiHandle, m_dsmId, m_deviceAdress, _configClass, _configIndex, 15, &retVal);
+    }
     DSBusInterface::checkResultCode(ret);
 
     return retVal;
   }
 
-  uint8_t DSDeviceBusInterface::OEMDataReader::getDeviceConfig(const dsuid_t& _dsm,
-                                                                      dev_t _device,
-                                                                      uint8_t _configClass,
-                                                                      uint8_t _configIndex) const
+  uint8_t DSDeviceBusInterface::OEMDataReader::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) const
   {
     if (m_dsmApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
     }
 
-    uint8_t retVal;
+    // wait until dsm has finished device registrations
+    while (m_dsm && m_dsm->isPresent() && m_dsm->getState()) {
+      sleep(5);
+    }
+    if ((m_dsm == NULL) || !m_dsm->isPresent()) {
+      throw std::runtime_error("OEMDataReader: dsm is not present");
+    }
 
-    int ret = DeviceConfig_get_sync_8(m_dsmApiHandle, _dsm,
-                                      _device,
-                                      _configClass,
-                                      _configIndex,
-                                      30,
-                                      &retVal);
+    uint8_t retVal;
+    int ret = DeviceConfig_get_sync_8(m_dsmApiHandle, m_dsmId, m_deviceAdress, _configClass, _configIndex, 15, &retVal);
+    if (ret == ERROR_SYNC_RESPONSE_TIMEOUT || ret == ERROR_TIMEOUT) {
+      ret = DeviceConfig_get_sync_8(m_dsmApiHandle, m_dsmId, m_deviceAdress, _configClass, _configIndex, 15, &retVal);
+    }
     DSBusInterface::checkResultCode(ret);
 
     return retVal;
@@ -543,28 +547,19 @@ namespace dss {
     try {
       // read device-active data and EAN part number
       uint16_t result0;
-      try {
-        result0 = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1e);
-      } catch (BusApiError& er) {
-        if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-          result0 = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1e);
-        }
-      }
+      result0 = getDeviceConfigWord(1, 0x1e);
       partNumber = result0 & 0x7F;
       isIndependent = (result0 & 0x80);
       uint8_t upper = result0 >> 8;
       isVisible = !(upper & (1 << 4));
       pairedDevices = (upper & 0x0f);
 
+      // optimize readout time: avoid switching banks
+      serialNumber = getDeviceConfigWord(1, 0x1c);
+
       // check if EAN is programmed: Bank 3: 0x2e-0x2f 0x0000 < x < 0xffff
       uint16_t result;
-      try {
-        result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
-      } catch (BusApiError& er) {
-        if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-          result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2e);
-        }
-      }
+      result = getDeviceConfigWord(3, 0x2e);
       deviceInetState = (DeviceOEMInetState_t)(result >> 12);
 
       if (deviceInetState == DEVICE_OEM_EAN_NO_EAN_CONFIGURED) {
@@ -574,44 +569,18 @@ namespace dss {
         // EAN programmed
         ean |= ((long long unsigned int)(result & 0xFFF) << 32);
 
-        try {
-          result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2a);
-        } catch (BusApiError& er) {
-          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-            result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2a);
-          }
-        }
+        result = getDeviceConfigWord(3, 0x2a);
         ean |= result;
 
-        try {
-          result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2c);
-        } catch (BusApiError& er) {
-          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-            result = getDeviceConfigWord(m_dsmId, m_deviceAdress, 3, 0x2c);
-          }
-        }
+        result = getDeviceConfigWord(3, 0x2c);
         ean |= ((long long unsigned int)result << 16);
-
-        try {
-          serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
-        } catch (BusApiError& er) {
-          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-            serialNumber = getDeviceConfigWord(m_dsmId, m_deviceAdress, 1, 0x1c);
-          }
-        }
 
         state = DEVICE_OEM_VALID;
       }
 
       if (m_revisionID >= TBVersion_OemConfigLock) {
         uint8_t deviceActive;
-        try {
-          deviceActive = getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f);
-        } catch (BusApiError& er) {
-          if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-            deviceActive = getDeviceConfig(m_dsmId, m_deviceAdress, 3, 0x1f);
-          }
-        }
+        deviceActive = getDeviceConfig(3, 0x1f);
         if (std::bitset<8>(deviceActive).test(0)) {
           isConfigLocked = true;
         }
@@ -648,6 +617,9 @@ namespace dss {
     m_deviceAdress = _device->getShortAddress();
     m_dsmId = _device->getDSMeterDSID();
     m_revisionID = _device->getRevisionID();
+    if (DSS::hasInstance()) {
+      m_dsm = DSS::getInstance()->getApartment().getDSMeterByDSID(m_dsmId);
+    }
   }
 
   DSDeviceBusInterface::TNYConfigReader::TNYConfigReader(const std::string& _busConnection) : OEMDataReader(_busConnection)
@@ -674,13 +646,7 @@ namespace dss {
     try {
       // read device-active data and pairing data
       uint8_t cfg;
-      try {
-        cfg = getDeviceConfig(m_dsmId, m_deviceAdress, 1, CfgFunction_DeviceActive);
-      } catch (BusApiError& er) {
-        if (er.error == ERROR_SYNC_RESPONSE_TIMEOUT || er.error == ERROR_TIMEOUT) {
-          cfg = getDeviceConfig(m_dsmId, m_deviceAdress, 1, CfgFunction_DeviceActive);
-        }
-      }
+      cfg = getDeviceConfig(1, CfgFunction_DeviceActive);
       isVisible = !(cfg & (1 << 4));
       pairedDevices = (cfg & 0x0f);
 

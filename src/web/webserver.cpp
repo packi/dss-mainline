@@ -37,6 +37,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "src/logger.h"
 #include "src/dss.h"
@@ -141,7 +142,7 @@ namespace dss {
 
   WebServer::WebServer(DSS* _pDSS)
     : Subsystem(_pDSS, "WebServer"), m_mgContext(0),
-      m_TrustedPort(0)
+      m_TrustedPort(0), m_max_ws_clients(5)
   {
   } // ctor
 
@@ -159,6 +160,7 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "listen", "8080", true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "trustedPort", 0, true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "announcedport", 8080, true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "webSocketTimeoutSeconds", WEB_SOCKET_TIMEOUT_S, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
 
@@ -202,6 +204,11 @@ namespace dss {
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionLimit", WEB_SESSION_LIMIT, true, false);
     m_SessionManager->setMaxSessionCount(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionLimit"));
 
+
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "webSocketTimeoutSeconds", WEB_SOCKET_TIMEOUT_S, true, false);
+
+    int wsTimeout = DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "webSocketTimeoutSeconds");
+
     publishJSLogfiles();
     instantiateHandlers();
 
@@ -209,6 +216,7 @@ namespace dss {
       "document_root", configAliases.c_str(),
       "listening_ports", configPorts.c_str(),
       "ssl_certificate", sslCert.c_str(),
+      "websocket_timeout_ms", intToString(wsTimeout * 1000).c_str(), // s to ms
       NULL
     };
 
@@ -219,6 +227,12 @@ namespace dss {
     if (m_mgContext == NULL) {
       throw std::runtime_error("Could not start webserver");
     }
+
+    mg_set_websocket_handler(m_mgContext, "/websocket",
+                             &WebSocketConnectCallback,
+                             &WebSocketReadyCallback,
+                             NULL,
+                             &WebSocketCloseCallback, NULL);
 
     mg_set_request_handler(m_mgContext, "**", &httpRequestCallback, 0);
 
@@ -695,4 +709,189 @@ namespace dss {
 
     return 0;
   }
+
+  // return 1 to reject connection, return 0 to accept
+  int WebServer::WebSocketConnectHandler(const struct mg_connection* _connection,
+                              void* cbdata)
+  {
+    struct mg_context *ctx = mg_get_context(_connection);
+
+    const struct mg_request_info *_info = mg_get_request_info(_connection);
+
+    WebServer& self = DSS::getInstance()->getWebServer();
+
+    if (!_info->uri || strlen(_info->remote_addr) < 1) {
+      self.log("Websocket connection refused: no origin information");
+      return 1;
+    }
+
+    std::string uri_path(_info->uri);
+    if (uri_path != "/websocket") {
+      // should actually never happen due to the specific uri based callback
+      self.log("Websocket connection refused: invalid uri path");
+      return 1;
+    }
+
+    self.m_SessionManager->getSecurity()->signOff();
+    {
+        std::string remote_s(_info->remote_addr);
+        std::string uri_path(_info->uri);
+        if (_info->query_string) {
+            uri_path += "?" + std::string(_info->query_string);
+        }
+        self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
+    }
+
+    RestfulRequest request("", _info->query_string ?: "");
+
+    boost::shared_ptr<Session> session;
+    std::string token = extractToken(mg_get_header(_connection, "Cookie"));
+    if (token.empty()) {
+      // ... used when not going through lighttpd
+      token = request.getParameter("token");
+    }
+    if (!token.empty()) {
+      session = self.m_SessionManager->getSession(token);
+    }
+
+    // lighttpd is proxying to our trusted port. We trust that it
+    // properly authenticated the user and just filter the HTTP
+    // Authorization header for the username
+    if (((session == NULL) || (session->getUser() == NULL)) &&
+        (_info->local_port == self.m_TrustedPort)) {
+      const char *auth_header = mg_get_header(_connection, "Authorization");
+      std::string userName = extractAuthenticatedUser(auth_header);
+
+      if (!userName.empty()) {
+        self.log("Logging-in from a trusted port as '" + userName + "'");
+        if (!self.m_SessionManager->getSecurity()->impersonate(userName)) {
+          self.log("Unknown user", lsInfo);
+          return 1;
+        }
+        if (session == NULL) {
+          std::string newToken = self.m_SessionManager->registerSession();
+          if (newToken.empty()) {
+            self.log("Session limit reached", lsError);
+            return 1;
+          }
+          self.log("Registered new JSON session for trusted port (" + newToken + ")");
+          session = self.m_SessionManager->getSession(newToken);
+          session->inheritUserFromSecurity();
+        }
+      }
+    }
+
+    if(session != NULL) {
+      session->touch();
+      self.m_SessionManager->getSecurity()->authenticate(session);
+    } else {
+      self.log("Authentication failed, rejecting websocket connection");
+      return 1;
+    }
+
+
+    boost::mutex::scoped_lock lock(m_websocket_mutex);
+    if (m_websockets.size() >= m_max_ws_clients) {
+      self.log("Rejecting new websocket connection: maximum number of connections exceeded");
+      return 1; // reject connection
+    }
+
+    mg_lock_context(ctx);
+    boost::shared_ptr<websocket_connection_t> ws =
+        boost::make_shared<websocket_connection_t>();
+
+    ws->connection = (struct mg_connection *)_connection;
+    ws->state = ws_connected;
+    mg_set_user_connection_data(_connection, (void *)ws.get());
+    m_websockets.push_back(ws);
+    mg_unlock_context(ctx);
+
+    return 0;
+  }
+
+  void WebServer::WebSocketReadyHandler(struct mg_connection* _connection, void* cbdata)
+  {
+    const char *text = "{ \"ok\": true }";
+
+    websocket_connection_t *client =
+        (websocket_connection_t *)mg_get_user_connection_data(_connection);
+    if (client == NULL) {
+      return;
+    }
+
+    mg_websocket_write(_connection, WEBSOCKET_OPCODE_TEXT, text, strlen(text));
+    client->state = ws_ready;
+  }
+
+  void WebServer::WebSocketCloseHandler(const struct mg_connection* _connection, void* cbdata)
+  {
+    struct mg_context *ctx = mg_get_context(_connection);
+    websocket_connection_t *client = (websocket_connection_t *)mg_get_user_connection_data(_connection);
+
+    boost::mutex::scoped_lock lock(m_websocket_mutex);
+
+    std::list<boost::shared_ptr<websocket_connection_t> >::iterator i =
+        m_websockets.begin();
+    while (i != m_websockets.end()) {
+      if ((*i).get() == client) {
+        mg_lock_context(ctx);
+        mg_set_user_connection_data(_connection, NULL);
+        m_websockets.erase(i);
+        mg_unlock_context(ctx);
+        return;
+      }
+    }
+  }
+
+  void WebServer::sendToWebSockets(std::string data)
+  {
+    if (data.empty()) {
+      return;
+    }
+
+    boost::mutex::scoped_lock lock(m_websocket_mutex);
+
+    if (m_websockets.empty()) {
+      return;
+    }
+
+    mg_lock_context(m_mgContext);
+    std::list<boost::shared_ptr<websocket_connection_t> >::iterator i =
+                m_websockets.begin();
+    while (i != m_websockets.end()) {
+      boost::shared_ptr<websocket_connection_t> client = *i;
+      if (client->state == ws_ready) {
+        mg_websocket_write(client->connection, WEBSOCKET_OPCODE_TEXT,
+                           data.c_str(), data.size());
+      }
+      i++;
+    }
+    mg_unlock_context(m_mgContext);
+  }
+
+  int WebServer::WebSocketConnectCallback(const struct mg_connection* _connection,
+                              void* cbdata)
+  {
+    WebServer& self = DSS::getInstance()->getWebServer();
+    return self.WebSocketConnectHandler(_connection, cbdata);
+  }
+
+  void WebServer::WebSocketReadyCallback(struct mg_connection* _connection, void* cbdata)
+  {
+    WebServer& self = DSS::getInstance()->getWebServer();
+    self.WebSocketReadyHandler(_connection, cbdata);
+  }
+
+  void WebServer::WebSocketCloseCallback(const struct mg_connection* _connection, void* cbdata)
+  {
+    WebServer& self = DSS::getInstance()->getWebServer();
+    self.WebSocketCloseHandler(_connection, cbdata);
+  }
+
+  size_t WebServer::WebSocketClientCount()
+  {
+    boost::mutex::scoped_lock lock(m_websocket_mutex);
+    return m_websockets.size();
+  }
+
 }

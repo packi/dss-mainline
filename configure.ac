@@ -297,7 +297,7 @@ AC_CHECK_HEADERS([boost/algorithm/string/finder.hpp boost/algorithm/string.hpp b
         AC_MSG_ERROR([required boost headers not found on your system!])
     ])
 
-AX_BOOST_BASE([1.44.0],[],[ AC_MSG_ERROR([boost was not found on your system])])
+AX_BOOST_BASE([1.53.0],[],[ AC_MSG_ERROR([boost was not found on your system])])
 AX_BOOST_SYSTEM()
 AX_BOOST_FILESYSTEM()
 AX_BOOST_PROGRAM_OPTIONS()
@@ -495,6 +495,7 @@ AC_DEFINE([HAVE_BUILD_INFO_H], [1], [currently we are always generating the buil
 
 AC_DEFINE([USE_LIBXML], [1], [TODO: check why this is a define, libxml2 seems to be required anyway])
 
+AC_DEFINE([USE_WEBSOCKET], [1], [enable websockets in civetweb])
 
 AC_CONFIG_FILES([
     Makefile

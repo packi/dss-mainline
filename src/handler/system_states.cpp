@@ -864,6 +864,8 @@ void SystemState::stateApartment() {
   if (statename == StateName::Fire) {
     if (iVal == 1) {
       callScene(0, 0, SceneFire, coSystem);
+    } else if (iVal == 2) {
+      undoScene(0, 0, SceneFire, coSystem);
     }
   }
 

@@ -30,6 +30,7 @@
 #include "syncevent.h"
 #include "subsystem.h"
 #include "propertysystem.h"
+#include "model/modelmaintenance.h"
 
 #include <string>
 #include <deque>
@@ -94,6 +95,7 @@ namespace dss {
     extern const std::string DatabaseImported;
     extern const std::string ButtonDeviceAction;
     extern const std::string SceneNameChanged;
+    extern const std::string ReexportTimings;
   }
 
   namespace EventProperty {

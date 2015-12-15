@@ -58,25 +58,24 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
 
   Apartment& apartment = DSS::getInstance()->getApartment();
   PropertyNodePtr property = apartment.getPropertySystem()->getRootNode();
-  {
-    /*
-     * Fire: Prohibit all automatic actions.
-     */
-    boost::shared_ptr<State> fire = apartment.getNonScriptState("fire");
-    if (fire && (fire->getState() == State_Active)) {
-      throw SceneAccessException("Execution blocked: fire is active");
-    }
-  }
 
   {
     /*
-     * Wind: Prohibit automatic actions in group shade
+     * Fire & Wind: Prohibit automatic actions in group shade
+     *
+     * Behavior changed 2015/12/10:
+     * Fire should not block all groups, but only shades, see #11755
      */
+    boost::shared_ptr<State> fire = apartment.getNonScriptState("fire");
     boost::shared_ptr<State> wind = apartment.getNonScriptState("wind");
-    if (wind && (wind->getState() == State_Active)) {
+    bool protectionActive =
+        (wind && (wind->getState() == State_Active)) ||
+        (fire && (fire->getState() == State_Active));
+
+    if (protectionActive) {
       const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
       if (pGroup != NULL) {
-        if (DEVICE_CLASS_GR == pGroup->getID()) {
+        if (DEVICE_CLASS_GR == pGroup->getStandardGroupID()) {
           throw SceneAccessException("Execution blocked: wind is active");
         }
       }

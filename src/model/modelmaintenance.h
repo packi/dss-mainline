@@ -200,6 +200,15 @@ namespace dss {
       std::string m_url;
     };
 
+    class WebSocketEvent : public Task {
+    public:
+      WebSocketEvent(boost::shared_ptr<Event> _event);
+      virtual ~WebSocketEvent() {}
+      virtual void run();
+
+    private:
+      boost::shared_ptr<Event> m_event;
+    };
 
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
@@ -212,6 +221,7 @@ namespace dss {
      * The ownership of the event will reside with the Apartment. ModelEvents arriving while initializing will be discarded.
      */
     void addModelEvent(ModelEvent* _pEvent);
+    void publishWebSocketEvent(boost::shared_ptr<Event> _event);
 
     /** Starts the event-processing */
     virtual void execute();
@@ -230,8 +240,8 @@ namespace dss {
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
     void setStructureModifyingBusInterface(StructureModifyingBusInterface* _value);
 
-    boost::shared_ptr<TaskProcessor> getTaskProcessor() const
-        { return m_taskProcessor; }
+    boost::shared_ptr<TaskProcessor> getTaskProcessor() const { return m_taskProcessor; }
+    boost::shared_ptr<TaskProcessor> getTaskProcessorMaySleep() const { return m_taskProcessorMaySleep; }
 
     void scheduleDeviceReadout(const dsuid_t& _dSMeterID,
                                boost::shared_ptr<Task> task);
@@ -344,6 +354,7 @@ namespace dss {
     void checkConfigFile(boost::filesystem::path _filename);
 
     boost::shared_ptr<TaskProcessor> m_taskProcessor;
+    boost::shared_ptr<TaskProcessor> m_taskProcessorMaySleep;
 
     static const std::string kWebUpdateEventName;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;

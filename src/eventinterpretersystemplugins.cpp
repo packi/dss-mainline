@@ -125,18 +125,31 @@ namespace dss {
     "Stop-Area4"
   };
 
-  const int SceneTableHeating_length = 8;
+  static const char *Unknown = "Unknown";
   const char *SceneTableHeating[] =
   {
-    "Off",
-    "Comfort",
-    "Economy",
-    "NotUsed",
-    "Night",
-    "Holiday",
-    "Cooling",
-    "CoolingOff",
+    "Off",      //0
+    "Comfort",  //1
+    "Economy",  //2
+    "NotUsed",  //3
+    "Night",    //4
+    "Holiday",  //5
+    "Cooling",  //6
+    "CoolingOff",       //7
+    "Manual",    //8
+    Unknown,    //9
+    Unknown, Unknown, Unknown, Unknown, Unknown,    //14
+    Unknown, Unknown, Unknown, Unknown, Unknown,    //19
+    Unknown, Unknown, Unknown, Unknown, Unknown,    //24
+    Unknown,    //25
+    Unknown,    //26
+    Unknown,    //27
+    Unknown,    //28
+    "ClimateControlOn",    //29
+    "ClimateControlOff",    //30
+    "ValveProtection",    //31
   };
+  const int SceneTableHeating_length = sizeof(SceneTableHeating) / sizeof(SceneTableHeating[0]);
 
   const int SceneTable1_length = 28;
   const char *SceneTable1[] =
