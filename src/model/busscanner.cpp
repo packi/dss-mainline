@@ -831,27 +831,29 @@ namespace dss {
         return false;
       }
 
-      // is there a controller running for this zone?
-      if ((hState.State == HeatingControlStateIDInternal) ||
-          (hState.State == HeatingControlStateIDEmergency)) {
-        if (hConfig.ControllerMode > 0) {
-            if ((hProp.m_HeatingControlDSUID == DSUID_NULL) ||
-                (hProp.m_HeatingControlDSUID == _dsMeter->getDSID())) {
-            _zone->setHeatingControlMode(hConfig, _dsMeter->getDSID());
-              hProp = _zone->getHeatingProperties();
-          } else {
-            log("Heating controller conflict for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
-                ": active on dsm " + dsuid2str(hProp.m_HeatingControlDSUID) +
-                " and a second one this dsm " + dsuid2str(_dsMeter->getDSID()), lsError);
-            StructureManipulator manip(
-                *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
-                m_Interface,
-                m_Apartment);
-            ZoneHeatingConfigSpec_t disableConfig = hConfig;
-            disableConfig.ControllerMode = 0;
-            manip.setZoneHeatingConfig(_zone,
-                (const dsuid_t) _dsMeter->getDSID(),
-                (const ZoneHeatingConfigSpec_t) disableConfig);
+      if (!_zone->isHeatingPropertiesValid()) {
+        // is there a controller running for this zone?
+        if ((hState.State == HeatingControlStateIDInternal) ||
+            (hState.State == HeatingControlStateIDEmergency)) {
+          if (hConfig.ControllerMode > 0) {
+              if ((hProp.m_HeatingControlDSUID == DSUID_NULL) ||
+                  (hProp.m_HeatingControlDSUID == _dsMeter->getDSID())) {
+              _zone->setHeatingControlMode(hConfig, _dsMeter->getDSID());
+                hProp = _zone->getHeatingProperties();
+            } else {
+              log("Heating controller conflict for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
+                  ": active on dsm " + dsuid2str(hProp.m_HeatingControlDSUID) +
+                  " and a second one this dsm " + dsuid2str(_dsMeter->getDSID()), lsError);
+              StructureManipulator manip(
+                  *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
+                  m_Interface,
+                  m_Apartment);
+              ZoneHeatingConfigSpec_t disableConfig = hConfig;
+              disableConfig.ControllerMode = 0;
+              manip.setZoneHeatingConfig(_zone,
+                  (const dsuid_t) _dsMeter->getDSID(),
+                  (const ZoneHeatingConfigSpec_t) disableConfig);
+            }
           }
         }
       }

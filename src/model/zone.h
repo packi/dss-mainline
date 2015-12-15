@@ -163,6 +163,7 @@ namespace dss {
     ZoneSensorStatus_t m_SensorStatus;
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
+    bool m_HeatingPropValid;
 
   public:
     Zone(const int _id, Apartment* _pApartment);
@@ -251,6 +252,7 @@ namespace dss {
 
     /** Set heating properties */
     void setHeatingProperties(ZoneHeatingProperties_t& config);
+    bool isHeatingPropertiesValid() const;
 
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();

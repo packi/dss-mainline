@@ -55,7 +55,8 @@ namespace dss {
     m_HeatingOperationMode(
       HeatingSuffix+intToString(m_ZoneID),
       HeatingOperationModeInvalid),
-    m_pApartment(_pApartment)
+    m_pApartment(_pApartment),
+    m_HeatingPropValid(false)
   {}
 
   Zone::~Zone() {
@@ -254,6 +255,11 @@ namespace dss {
 
   void Zone::setHeatingProperties(ZoneHeatingProperties_t& config) {
     m_HeatingProperties = config;
+    m_HeatingPropValid = true;
+  }
+
+  bool Zone::isHeatingPropertiesValid() const {
+    return m_HeatingPropValid;
   }
 
   void Zone::setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec, dsuid_t ctrlDevice) {
@@ -273,6 +279,7 @@ namespace dss {
     m_HeatingProperties.m_EmergencyValue = _spec.EmergencyValue;
     m_HeatingProperties.m_ManualValue = _spec.ManualValue;
     m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
+    m_HeatingPropValid = true;
     dirty();
   }
 
