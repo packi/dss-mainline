@@ -492,6 +492,7 @@ namespace dss {
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
     m_taskProcessor(boost::make_shared<TaskProcessor>()),
+    m_taskProcessorMaySleep(boost::make_shared<TaskProcessor>()),
     m_pMeterMaintenance(boost::make_shared<MeterMaintenance>(_pDSS, "MeterMaintenance"))
   { }
 
@@ -2445,7 +2446,7 @@ namespace dss {
           if (dsuid_equal(&id, &_meterID)) {
             log("onDsmStateChange: scheduling device readout task on dSM " +
                 dsuid2str(_meterID));
-            m_taskProcessor->addEvent((*it).second);
+            m_taskProcessorMaySleep->addEvent((*it).second);
             it = m_deviceReadoutTasks.erase(it);
           } else {
             it++;
@@ -2980,7 +2981,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_dSMeterID);
       if (pMeter->getState() == DSM_STATE_IDLE) {
-        m_taskProcessor->addEvent(task);
+        m_taskProcessorMaySleep->addEvent(task);
       } else {
         boost::mutex::scoped_lock lock(m_readoutTasksMutex);
         m_deviceReadoutTasks.push_back(std::make_pair(_dSMeterID, task));

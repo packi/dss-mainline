@@ -34,6 +34,7 @@ using boost::shared_ptr;
 
 namespace dss {
   class Device;
+  class DSMeter;
 
   class DSDeviceBusInterface : public DSBusInterfaceObj,
                                public DeviceBusInterface {
@@ -45,20 +46,15 @@ namespace dss {
       virtual void run();
       virtual void setup(boost::shared_ptr<Device> _device);
 
-      uint16_t getDeviceConfigWord(const dsuid_t& _dsm,
-                                      dev_t _device,
-                                      uint8_t _configClass,
-                                      uint8_t _configIndex) const;
-      uint8_t getDeviceConfig(const dsuid_t& _dsm,
-                                dev_t _device,
-                                uint8_t _configClass,
-                                uint8_t _configIndex) const;
+      uint16_t getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) const;
+      uint8_t getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) const;
     protected:
       std::string m_busConnection;
       DsmApiHandle_t m_dsmApiHandle;
       devid_t m_deviceAdress;
       dsuid_t m_dsmId;
       int m_revisionID;
+      boost::shared_ptr<DSMeter> m_dsm;
     };
 
     class TNYConfigReader : public OEMDataReader {

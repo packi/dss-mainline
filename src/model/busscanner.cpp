@@ -918,7 +918,7 @@ namespace dss {
     std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
     task = boost::make_shared<BinaryInputScanner>(&m_Apartment, connURI);
     task->setup(_dsMeter, _device);
-    boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
+    boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessorMaySleep();
     pTP->addEvent(task);
   } // syncBinaryInputStates
 
@@ -1047,6 +1047,25 @@ namespace dss {
       uint16_t value = 0;
 
       try {
+
+        boost::shared_ptr<DSMeter> dsm;
+        try {
+          dsm = m_pApartment->getDSMeterByDSID(dev->getDSMeterDSID());
+        } catch (ItemNotFoundException& ex) {
+          Logger::getInstance()->log("BinaryInputScanner: dsm " + dsuid2str(dev->getDSMeterDSID())
+                        + " is unknown", lsWarning);
+          continue;
+        }
+
+        while (dsm->isPresent() && dsm->getState()) {
+          sleep(5);
+        }
+        if (!dsm->isPresent()) {
+          // ignore non-present dsm's, they will be discovered later with a new event
+          Logger::getInstance()->log("BinaryInputScanner: dsm " + dsuid2str(dev->getDSMeterDSID())
+                        + " is inactive", lsWarning);
+          continue;
+        }
 
         value = getDeviceSensorValue(dev->getDSMeterDSID(),
                                      dev->getShortAddress(), 0x20);

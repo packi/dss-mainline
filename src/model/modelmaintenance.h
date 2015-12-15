@@ -240,8 +240,8 @@ namespace dss {
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
     void setStructureModifyingBusInterface(StructureModifyingBusInterface* _value);
 
-    boost::shared_ptr<TaskProcessor> getTaskProcessor() const
-        { return m_taskProcessor; }
+    boost::shared_ptr<TaskProcessor> getTaskProcessor() const { return m_taskProcessor; }
+    boost::shared_ptr<TaskProcessor> getTaskProcessorMaySleep() const { return m_taskProcessorMaySleep; }
 
     void scheduleDeviceReadout(const dsuid_t& _dSMeterID,
                                boost::shared_ptr<Task> task);
@@ -354,6 +354,7 @@ namespace dss {
     void checkConfigFile(boost::filesystem::path _filename);
 
     boost::shared_ptr<TaskProcessor> m_taskProcessor;
+    boost::shared_ptr<TaskProcessor> m_taskProcessorMaySleep;
 
     static const std::string kWebUpdateEventName;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
