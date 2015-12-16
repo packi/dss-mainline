@@ -87,6 +87,7 @@ namespace dss {
     void parseMeter(const char *_name, const char **_attrs);
     void parseScene(const char *_name, const char **_attrs);
     void parseSensor(const char *_name, const char **_attrs);
+    void parseHeatingConfig(const char *_name, const char **_attrs);
     void parseLockedScenes(const char *_name, const char **_attrs);
     const char *getSingleAttribute(const char *_name, const char **_attrs);
     virtual void elementStart(const char *_name, const char **_attrs);
