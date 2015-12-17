@@ -873,7 +873,7 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxValue, _config.pwmMaxValue);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY, _config.pwmMinX);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY, _config.pwmMaxY);
-    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset, _config.pwmOffset);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset, static_cast<uint8_t>(_config.pwmOffset));
   } // setDeviceValvePwm
 
   void Device::getDeviceValvePwm(DeviceValvePwmSpec_t& _config) {
@@ -887,7 +887,7 @@ namespace dss {
     value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
     _config.pwmMinX = value & 0xff; // CfgFunction_Valve_PwmMinY
     _config.pwmMaxY = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxY
-    _config.pwmOffset = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+    _config.pwmOffset = static_cast<int8_t>(getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset));
   } // getDeviceValvePwm
 
   void Device::setDeviceValveControl(DeviceValveControlSpec_t _config) {
