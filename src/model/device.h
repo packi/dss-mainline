@@ -132,7 +132,7 @@ namespace dss {
     uint8_t pwmMaxValue;
     uint8_t pwmMinX;
     uint8_t pwmMaxY;
-    uint8_t pwmOffset;
+    int8_t pwmOffset;
   } DeviceValvePwmSpec_t;
 
   typedef struct {
