@@ -61,7 +61,7 @@ namespace dss {
   class MeterSetBuilder {
   public:
     MeterSetBuilder(Apartment& _apartment);
-    std::vector<boost::shared_ptr<DSMeter> > buildSet(const std::string& _setDescription);
+    std::vector<boost::shared_ptr<DSMeter> > buildSet(const std::string& _setDescription, bool _meteringCapability = false);
   private:
     Apartment& m_Apartment;
   };
