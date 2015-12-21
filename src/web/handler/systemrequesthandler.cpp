@@ -86,8 +86,12 @@ namespace dss {
       return json.successJSON();
     } else if (_request.getMethod() == "time") {
       JSONWriter json;
-      json.add("time",
-              static_cast<long long int>(DateTime().secondsSinceEpoch()));
+      time_t t0 = DateTime().secondsSinceEpoch();
+      struct tm* tnow = localtime(&t0);
+      json.add("time", static_cast<long long int> (t0));
+      json.add("offset", static_cast<long long int> (tnow->tm_gmtoff));
+      json.add("daylight", tnow->tm_isdst > 0);
+      json.add("timezone", tnow->tm_zone);
       return json.successJSON();
     } else if(_request.getMethod() == "login") {
       if(_session != NULL) {

@@ -891,10 +891,16 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
         }
     }
 
-    PropertyNodePtr dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsid);
-    dsidNode->setStringValue(dsid);
-    dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsuid);
-    dsidNode->setStringValue(dsuid);
+    PropertyNodePtr dsidNode = getPropertySystem().getProperty(pp_sysinfo_dsid);
+    if (NULL == dsidNode) {
+      dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsid);
+      dsidNode->setStringValue(dsid);
+    }
+    dsidNode = getPropertySystem().getProperty(pp_sysinfo_dsuid);
+    if (NULL == dsidNode) {
+      dsidNode = getPropertySystem().createProperty(pp_sysinfo_dsuid);
+      dsidNode->setStringValue(dsuid);
+    }
   }
 
   std::string DSS::getCurrentTime()

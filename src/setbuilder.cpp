@@ -38,6 +38,7 @@
 #include "src/model/apartment.h"
 #include "src/model/group.h"
 #include "src/model/modelconst.h"
+#include "src/model/modulator.h"
 
 using std::vector;
 
@@ -278,7 +279,7 @@ namespace dss {
   {
   } // ctor
 
-  std::vector<boost::shared_ptr<DSMeter> > MeterSetBuilder::buildSet(const std::string& _setDescription) {
+  std::vector<boost::shared_ptr<DSMeter> > MeterSetBuilder::buildSet(const std::string& _setDescription, bool _meteringCapability) {
     std::vector<boost::shared_ptr<DSMeter> > result;
     std::string from = _setDescription;
     if(from.find(".meters(") == 0) {
@@ -325,6 +326,18 @@ namespace dss {
 
       }
     }
+
+    if (_meteringCapability) {
+      std::vector<boost::shared_ptr<DSMeter> >::iterator iter = result.begin();
+      for ( ; iter != result.end(); ) {
+        if ((*iter)->getCapability_HasMetering() == false) {
+          iter = result.erase(iter);
+        } else {
+          iter ++;
+        }
+      }
+    }
+
     return result;
   } // buildSet
 
