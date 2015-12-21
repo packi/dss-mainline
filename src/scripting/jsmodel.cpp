@@ -979,6 +979,7 @@ namespace dss {
     JS_FS("getZoneByID", global_getZoneByID, 0, 0),
     JS_FS("getState", global_getStateByName, 1, 0),
     JS_FS("registerState", global_registerState, 1, 0),
+    JS_FS("unregisterState", global_unregisterState, 2, 0),
     JS_FS("getWeatherInformation", global_get_weatherInformation, 0, 0),
     JS_FS("setWeatherInformation", global_set_weatherInformation, 3, 0),
     JS_FS("setDeviceVisibility", global_set_deviceVisibility, 2, 0),
