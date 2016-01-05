@@ -86,6 +86,23 @@ namespace dss {
       m_ManualValue = 0;
       m_HeatingControlDSUID = DSUID_NULL;
     }
+    bool isEqual(const ZoneHeatingConfigSpec_t& _config) {
+      return ((_config.ControllerMode == m_HeatingControlMode) &&
+              (_config.Kp == m_Kp) &&
+              (_config.Ts == m_Ts) &&
+              (_config.Ti == m_Ti) &&
+              (_config.Kd == m_Kp) &&
+              (_config.Imin == m_Imin) &&
+              (_config.Imax == m_Imax) &&
+              (_config.Ymin == m_Ymin) &&
+              (_config.Ymax == m_Ymax) &&
+              (_config.AntiWindUp == m_AntiWindUp) &&
+              (_config.KeepFloorWarm == m_KeepFloorWarm) &&
+              (_config.SourceZoneId == m_HeatingMasterZone) &&
+              (_config.Offset == m_CtrlOffset) &&
+              (_config.EmergencyValue == m_EmergencyValue) &&
+              (_config.ManualValue == m_ManualValue));
+    }
     int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value; 4=manual
     uint16_t m_Kp;
     uint8_t  m_Ts;
