@@ -323,8 +323,7 @@ namespace dss {
             return JSONWriter::failure("Not a heating control device");
           } else {
             json.add("IsConfigured", true);
-            hConfig = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
-                hProp.m_HeatingControlDSUID, pZone->getID());
+            hConfig = pZone->getHeatingControlMode();
           }
 
           if (_request.hasParameter("ControlMode")) {
