@@ -34,6 +34,7 @@
 #include "nonaddressablemodelitem.h"
 #include "physicalmodelitem.h"
 #include "storagetools.h"
+#include "businterface.h"
 
 namespace dss {
   class Apartment;
@@ -48,17 +49,58 @@ namespace dss {
   typedef struct ZoneHeatingProperties {
     ZoneHeatingProperties() :
       m_HeatingControlMode(0),
+      m_Kp(0),
+      m_Ts(0),
+      m_Ti(0),
+      m_Kd(0),
+      m_Imin(0),
+      m_Imax(0),
+      m_Ymin(0),
+      m_Ymax(0),
+      m_AntiWindUp(0),
+      m_KeepFloorWarm(0),
       m_HeatingControlState(0),
       m_HeatingMasterZone(0),
       m_CtrlOffset(0),
+      m_EmergencyValue(0),
       m_ManualValue(0),
       m_HeatingControlDSUID(DSUID_NULL)
       {
       }
+    void reset() {
+      m_HeatingControlMode = 0;
+      m_Kp = 0;
+      m_Ts = 0;
+      m_Ti = 0;
+      m_Kd = 0;
+      m_Imin = 0;
+      m_Imax = 0;
+      m_Ymin =0;
+      m_Ymax = 0;
+      m_AntiWindUp =0;
+      m_KeepFloorWarm =0;
+      m_HeatingControlState = 0;
+      m_HeatingMasterZone = 0;
+      m_CtrlOffset = 0;
+      m_EmergencyValue = 0;
+      m_ManualValue = 0;
+      m_HeatingControlDSUID = DSUID_NULL;
+    }
     int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value; 4=manual
+    uint16_t m_Kp;
+    uint8_t  m_Ts;
+    uint16_t m_Ti;
+    uint16_t m_Kd;
+    int16_t  m_Imin;
+    int16_t  m_Imax;
+    uint8_t  m_Ymin;
+    uint8_t  m_Ymax;
+    uint8_t  m_AntiWindUp;
+    uint8_t  m_KeepFloorWarm;
     int m_HeatingControlState;     // Control state: 0=internal; 1=external; 2=exbackup; 3=emergency
     int m_HeatingMasterZone;       // only used for mode 2
     int m_CtrlOffset;              // only used for mode 2
+    uint8_t  m_EmergencyValue;
     int m_ManualValue;             // only used for mode 4
     dsuid_t m_HeatingControlDSUID; // DSUID of the meter or device or service running a controller for this zone
   } ZoneHeatingProperties_t;
@@ -121,6 +163,7 @@ namespace dss {
     ZoneSensorStatus_t m_SensorStatus;
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
+    bool m_HeatingPropValid;
 
   public:
     Zone(const int _id, Apartment* _pApartment);
@@ -177,9 +220,10 @@ namespace dss {
     ZoneHeatingProperties_t getHeatingProperties() const;
     ZoneHeatingStatus_t getHeatingStatus() const;
     ZoneSensorStatus_t getSensorStatus() const;
+    bool isHeatingEnabled() const;
 
     /** Set heating properties and runtime values */
-    void setHeatingControlMode(int _ctrlMode, int _offset, int _masterZone, int _manualValue, dsuid_t ctrlDevice);
+    void setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec, dsuid_t ctrlDevice);
     void clearHeatingControlMode();
     void setHeatingControlState(int _ctrlState);
     void setHeatingOperationMode(int _operationMode);
@@ -205,6 +249,10 @@ namespace dss {
 
     bool isDeviceZoneMember(const DeviceReference& _device) const;
     void removeInvalidZoneSensors();
+
+    /** Set heating properties */
+    void setHeatingProperties(ZoneHeatingProperties_t& config);
+    bool isHeatingPropertiesValid() const;
 
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();

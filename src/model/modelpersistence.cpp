@@ -381,6 +381,55 @@ namespace dss {
     }
   }
 
+  void ModelPersistence::parseHeatingConfig(const char *_name, const char **_attrs) {
+    if ((m_tempZone == NULL) && (strcmp(_name, "heatingConfig") != 0)) {
+      return;
+    }
+
+    ZoneHeatingProperties_t config;
+    for (int i = 0; _attrs[i]; i += 2)
+    {
+      const char *tempVal = 0;
+      tempVal = _attrs[i + 1];
+      if (strcmp(_attrs[i], "Mode") == 0) {
+        config.m_HeatingControlMode = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Kp") == 0) {
+        config.m_Kp = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Ts") == 0) {
+        config.m_Ts = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Ti") == 0) {
+        config.m_Ti = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Kd") == 0) {
+        config.m_Kd = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Imin") == 0) {
+        config.m_Imin = strToIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "IMax") == 0) {
+        config.m_Imax = strToIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Ymin") == 0) {
+        config.m_Ymin = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Ymax") == 0) {
+        config.m_Ymax = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "AntiWindup") == 0) {
+        config.m_AntiWindUp = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "FloorWarm") == 0) {
+        config.m_KeepFloorWarm = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "State") == 0) {
+        config.m_HeatingControlState = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "SourceZone") == 0) {
+        config.m_HeatingMasterZone = strToIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "Offset") == 0) {
+        config.m_CtrlOffset = strToIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "EmergencyVal") == 0) {
+        config.m_EmergencyValue = strToUIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "ManualVal") == 0) {
+        config.m_ManualValue = strToIntDef(tempVal, 0);
+      } else if (strcmp(_attrs[i], "controllerDSUID") == 0) {
+        config.m_HeatingControlDSUID = str2dsuid(tempVal);
+      }
+    }
+    m_tempZone->setHeatingProperties(config);
+  }
+
   void ModelPersistence::parseGroup(const char *_name, const char **_attrs) {
     if ((m_tempZone == NULL) || (strcmp(_name, "group") != 0)) {
       return;
@@ -661,6 +710,8 @@ namespace dss {
           m_state = ps_sensor;
         } else if ((m_state == ps_zone) && (strcmp(_name, "heatingOperation") == 0)) {
           m_expectString = true;
+        } else if ((m_state == ps_zone) && (strcmp(_name, "heatingConfig") == 0)) {
+          parseHeatingConfig(_name,_attrs);
         } else if (m_state == ps_meter) {
           m_expectString = true;
         } else if ((m_state == ps_device) &&
@@ -778,6 +829,8 @@ namespace dss {
                 m_tempZone->setName(m_chardata);
               } else if (strcmp(_name ,"heatingOperation") == 0) {
                 m_tempZone->setHeatingOperationMode(strToInt(m_chardata));
+              } else if (strcmp(_name ,"controllerMode") == 0) {
+                 m_tempZone->setHeatingOperationMode(strToInt(m_chardata));
               }
             } else if ((m_state == ps_meter) && (m_tempMeter != NULL)) {
               if (isName) {
@@ -1042,6 +1095,29 @@ namespace dss {
          << std::endl;
   } // zoneSensorToXML
 
+  void heatingConfigToXML(ZoneHeatingProperties_t heatingConfig, std::ofstream& _ofs, const int _indent)
+  {
+    _ofs << doIndent(_indent) << "<heatingConfig";
+    addAttribute(_ofs, "Mode", uintToString(heatingConfig.m_HeatingControlMode));
+    addAttribute(_ofs, "Kp", uintToString(heatingConfig.m_Kp));
+    addAttribute(_ofs, "Ts", uintToString(heatingConfig.m_Ts));
+    addAttribute(_ofs, "Ti", uintToString(heatingConfig.m_Ti));
+    addAttribute(_ofs, "Kd", uintToString(heatingConfig.m_Kd));
+    addAttribute(_ofs, "Imin", intToString(heatingConfig.m_Imin));
+    addAttribute(_ofs, "IMax", intToString(heatingConfig.m_Imax));
+    addAttribute(_ofs, "Ymin", uintToString(heatingConfig.m_Ymin));
+    addAttribute(_ofs, "Ymax", uintToString(heatingConfig.m_Ymax));
+    addAttribute(_ofs, "AntiWindup", uintToString(heatingConfig.m_AntiWindUp));
+    addAttribute(_ofs, "FloorWarm", uintToString(heatingConfig.m_KeepFloorWarm));
+    addAttribute(_ofs, "State", uintToString(heatingConfig.m_HeatingControlState));
+    addAttribute(_ofs, "SourceZone", uintToString(heatingConfig.m_HeatingMasterZone));
+    addAttribute(_ofs, "Offset",  intToString(heatingConfig.m_CtrlOffset));
+    addAttribute(_ofs, "EmergencyVal", uintToString(heatingConfig.m_EmergencyValue));
+    addAttribute(_ofs, "ManualVal", uintToString(heatingConfig.m_ManualValue));
+    addAttribute(_ofs, "controllerDSUID", dsuid2str(heatingConfig.m_HeatingControlDSUID));
+    _ofs << "/>" << std::endl;
+  } // heatingConfigToXML
+
   void zoneToXML(boost::shared_ptr<Zone> _pZone, std::ofstream& _ofs, const int _indent) {
     _ofs << doIndent(_indent) << "<zone id=\"" << intToString(_pZone->getID()) << "\">" << std::endl;
     if(!_pZone->getName().empty()) {
@@ -1072,6 +1148,15 @@ namespace dss {
         _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
       }
     }
+
+    // heating controller
+    if (_pZone->getID() != 0) {
+      if (_pZone->isHeatingEnabled()) {
+        ZoneHeatingProperties_t config =_pZone->getHeatingProperties();
+        heatingConfigToXML(config, _ofs, _indent+1);
+      }
+    }
+
     _ofs << doIndent(_indent) << "</zone>" << std::endl;
   } // zoneToXML
 

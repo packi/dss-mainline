@@ -1508,8 +1508,8 @@ namespace dss {
       value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
       json.add("pwmMinY", value & 0xff);
       json.add("pwmMaxY", (value >> 8) & 0xff);
-      value = device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
-      json.add("pwmOffset", value);
+      int8_t value8 = device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
+      json.add("pwmOffset", value8);
       return json.successJSON();
 
     } else if (_request.getMethod() == "getValvePwmState") {

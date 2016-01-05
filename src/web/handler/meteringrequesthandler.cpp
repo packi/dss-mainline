@@ -129,7 +129,7 @@ namespace dss {
     MeterSetBuilder builder(m_Apartment);
     std::vector<boost::shared_ptr<DSMeter> > meters;
     try {
-      meters = builder.buildSet(deviceDSIDStringSet);
+      meters = builder.buildSet(deviceDSIDStringSet, true);
     } catch(std::runtime_error& e) {
       return JSONWriter::failure(std::string("Couldn't parse parameter 'dsid': '") + e.what() + "'");
     }
@@ -258,7 +258,7 @@ namespace dss {
     MeterSetBuilder builder(m_Apartment);
     std::vector<boost::shared_ptr<DSMeter> > meters;
     try {
-      meters = builder.buildSet(from);
+      meters = builder.buildSet(from, true);
     } catch(std::runtime_error& e) {
       return JSONWriter::failure(std::string("Couldn't parse parameter 'from': '") + e.what() + "'");
     }
