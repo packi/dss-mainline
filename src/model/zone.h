@@ -62,7 +62,7 @@ namespace dss {
       m_HeatingControlState(0),
       m_HeatingMasterZone(0),
       m_CtrlOffset(0),
-      m_EmergencyValue(0),
+      m_EmergencyValue(175),
       m_ManualValue(0),
       m_HeatingControlDSUID(DSUID_NULL)
       {
@@ -82,7 +82,7 @@ namespace dss {
       m_HeatingControlState = 0;
       m_HeatingMasterZone = 0;
       m_CtrlOffset = 0;
-      m_EmergencyValue = 0;
+      m_EmergencyValue = 175;
       m_ManualValue = 0;
       m_HeatingControlDSUID = DSUID_NULL;
     }
