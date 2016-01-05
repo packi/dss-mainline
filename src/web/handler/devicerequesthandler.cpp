@@ -1878,8 +1878,27 @@ namespace dss {
 
       const DeviceReference d(device, &m_Apartment);
       if (wasVisible && !isVisible) {
-        json.startArray("devices");
+        dsuid_t main = device->getMainDeviceDSUID();
+        dsuid_t dsuid = device->getDSID();
 
+        if (!dsuid_equal(&dsuid, &main)) {
+          boost::shared_ptr<Device> main_device;
+          try {
+            main_device = m_Apartment.getDeviceByDSID(main);
+            if (m_pStructureBusInterface != NULL) {
+              StructureManipulator manipulator(*m_pStructureBusInterface,
+                                               *m_pStructureQueryBusInterface,
+                                                m_Apartment);
+
+              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                      main_device->getZoneID());
+              manipulator.addDeviceToZone(device, zone);
+            }
+          } catch (ItemNotFoundException &e) {
+            Logger::getInstance()->log("DeviceRequestHandler: could not move paired device into main devices\' zone");
+          }
+        }
+        json.startArray("devices");
         toJSON(d, json);
         json.endArray();
         json.add("action", "remove");
