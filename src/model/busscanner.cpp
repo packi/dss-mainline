@@ -803,12 +803,11 @@ namespace dss {
       uint16_t sensorValue;
       uint32_t sensorAge;
       DateTime now, age;
-      ZoneHeatingConfigSpec_t hConfig;
-      ZoneHeatingStateSpec_t hState;
+      ZoneHeatingConfigSpec_t hConfig = {};
+      ZoneHeatingStateSpec_t hState = {};
       ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
 
       try {
-        memset(&hConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
         hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
         hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
 
@@ -831,29 +830,47 @@ namespace dss {
         return false;
       }
 
-      if (!_zone->isHeatingPropertiesValid()) {
-        // is there a controller running for this zone?
+      StructureManipulator manip(
+                        *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
+                        m_Interface,
+                        m_Apartment);
+
+      if (_zone->isHeatingPropertiesValid()) {
+        // dss knows the zone heating configuration
+        if (hProp.m_HeatingControlDSUID == _dsMeter->getDSID()) {
+          // current dSMeter is the active controller for this zone
+          if (!hProp.isEqual(hConfig)) {
+            // dSMeter has diverging settings, overwrite from dSS settings
+            log(std::string("Heating config mismatch: Overwrite controller") +
+                " for zone " + intToString(_zone->getID()) +
+                " on dsm " + dsuid2str(_dsMeter->getDSID()) +
+                ": mode " + intToString(hConfig.ControllerMode), lsInfo);
+            manip.setZoneHeatingConfig(_zone,
+                (const dsuid_t) _dsMeter->getDSID(),
+                (const ZoneHeatingConfigSpec_t) _zone->getHeatingControlMode());
+          }
+        } else {
+          if (hConfig.ControllerMode > 0) {
+            log(std::string("Conflicting configuration: Reset controller") +
+                " for zone " + intToString(_zone->getID()) +
+                " on dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
+            ZoneHeatingConfigSpec_t disableConfig = hConfig;
+            disableConfig.ControllerMode = 0;
+            manip.setZoneHeatingConfig(_zone,
+                (const dsuid_t) _dsMeter->getDSID(),
+                (const ZoneHeatingConfigSpec_t) disableConfig);
+          }
+        }
+      } else {
+        // dSS has no configuration for this zone, take the first valid configuration
         if ((hState.State == HeatingControlStateIDInternal) ||
             (hState.State == HeatingControlStateIDEmergency)) {
           if (hConfig.ControllerMode > 0) {
-              if ((hProp.m_HeatingControlDSUID == DSUID_NULL) ||
-                  (hProp.m_HeatingControlDSUID == _dsMeter->getDSID())) {
-              _zone->setHeatingControlMode(hConfig, _dsMeter->getDSID());
-                hProp = _zone->getHeatingProperties();
-            } else {
-              log("Heating controller conflict for zone " + _zone->getName() + "/" + intToString(_zone->getID()) +
-                  ": active on dsm " + dsuid2str(hProp.m_HeatingControlDSUID) +
-                  " and a second one this dsm " + dsuid2str(_dsMeter->getDSID()), lsError);
-              StructureManipulator manip(
-                  *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface()),
-                  m_Interface,
-                  m_Apartment);
-              ZoneHeatingConfigSpec_t disableConfig = hConfig;
-              disableConfig.ControllerMode = 0;
-              manip.setZoneHeatingConfig(_zone,
-                  (const dsuid_t) _dsMeter->getDSID(),
-                  (const ZoneHeatingConfigSpec_t) disableConfig);
-            }
+            log(std::string("Store heating configuration") +
+                " for zone " + intToString(_zone->getID()) +
+                " from dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
+            _zone->setHeatingControlMode(hConfig, _dsMeter->getDSID());
+            hProp = _zone->getHeatingProperties();
           }
         }
       }

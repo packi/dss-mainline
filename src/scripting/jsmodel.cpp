@@ -3803,8 +3803,7 @@ namespace dss {
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       } else {
-        hConfig = ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
-            hProp.m_HeatingControlDSUID, pZone->getID());
+        hConfig = pZone->getHeatingControlMode();
       }
 
       JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [1]);
