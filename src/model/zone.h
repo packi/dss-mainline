@@ -91,7 +91,7 @@ namespace dss {
               (_config.Kp == m_Kp) &&
               (_config.Ts == m_Ts) &&
               (_config.Ti == m_Ti) &&
-              (_config.Kd == m_Kp) &&
+              (_config.Kd == m_Kd) &&
               (_config.Imin == m_Imin) &&
               (_config.Imax == m_Imax) &&
               (_config.Ymin == m_Ymin) &&
