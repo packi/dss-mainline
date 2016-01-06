@@ -2825,4 +2825,18 @@ namespace dss {
     }
     return true;
   }
+
+  dsuid_t Device::getMainDeviceDSUID() const {
+    if (!isMainDevice()) {
+      if (getDeviceType() == DEVICE_TYPE_TNY) {
+        dsuid_t main_dsuid;
+        if (dsuid_get_main_dsuid(&m_DSID, m_pairedDevices, &main_dsuid) == 0) {
+          return main_dsuid;
+        }
+      }
+    }
+
+    return getDSID();
+  }
+
 } // namespace dss

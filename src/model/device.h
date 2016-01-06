@@ -752,6 +752,7 @@ namespace dss {
     void setDeviceVisibility(bool _isVisible);
     bool isVisible() const;
     bool isMainDevice() const;
+    dsuid_t getMainDeviceDSUID() const;
 
   }; // Device
 
