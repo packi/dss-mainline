@@ -58,7 +58,7 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
         intToString(_sensorType) + ") for zone #" +
         intToString(_group->getZoneID()) +
         " is too old: " + _ts.toISO8601_ms() +
-        ", age in seconds is " + intToString(now.difference(_ts)), lsWarning);
+        ", age in seconds is " + intToString(now.difference(_ts)), lsInfo);
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().
           pushEvent(createZoneSensorErrorEvent(_group, _sensorType, _ts));
@@ -112,7 +112,7 @@ void SensorMonitorTask::run() {
           Logger::getInstance()->log(std::string("Sensor #") +
                     intToString(s) + " of device " + dsuid2str(device->getDSID()) +
                     " value is too old: " + sensor->m_sensorValueTS.toISO8601_ms() +
-                    ", age in seconds is " + intToString(age), lsWarning);
+                    ", age in seconds is " + intToString(age), lsInfo);
           device->setSensorDataValidity(s, false);
 
           if (DSS::hasInstance()) {
@@ -125,7 +125,11 @@ void SensorMonitorTask::run() {
         }
       }
     }
-  } catch (...) {}
+  } catch (std::exception& e) {
+    Logger::getInstance()->log("SensorMonitorTask: device sensor timeout exception: " + std::string(e.what()), lsWarning);
+  } catch (...) {
+    Logger::getInstance()->log("SensorMonitorTask: device sensor timeout error", lsError);
+  }
 
   try {
     std::vector<boost::shared_ptr<Zone> > zones = m_Apartment->getZones();
@@ -156,7 +160,11 @@ void SensorMonitorTask::run() {
         }
       }
     }
-  } catch (...) {}
+  } catch (std::exception& e) {
+    Logger::getInstance()->log("SensorMonitorTask: zone sensor timeout exception: " + std::string(e.what()), lsWarning);
+  } catch (...) {
+    Logger::getInstance()->log("SensorMonitorTask: zone sensor timeout error", lsError);
+  }
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
   pEvent->setProperty("time", "+600");
@@ -209,8 +217,10 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
       case HeatingControlModeIDOff:
         break;
     }
+  } catch (std::exception& e) {
+    Logger::getInstance()->log("HeatingMonitorTask: sync controller exception: " + std::string(e.what()), lsWarning);
   } catch (...) {
-    Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsWarning);
+    Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsError);
   }
 }
 
@@ -319,8 +329,10 @@ void HeatingMonitorTask::run() {
           group->callScene(coSystem, SAC_MANUAL, group->getLastCalledScene(), "", false);
         }
       }
+    } catch (std::exception& e) {
+      Logger::getInstance()->log("HeatingMonitorTask: check heating groups exception: " + std::string(e.what()), lsWarning);
     } catch (...) {
-      Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsWarning);
+      Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsError);
     }
 
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
@@ -408,8 +420,10 @@ void HeatingValveProtectionTask::run() {
       }
       m_zoneIndex = 0;
 
+    } catch (std::exception& e) {
+      Logger::getInstance()->log("HeatingValveProtectionTask: exception: " + std::string(e.what()), lsWarning);
     } catch (...) {
-      Logger::getInstance()->log("HeatingValveProtectionTask: error executing valve protection", lsWarning);
+      Logger::getInstance()->log("HeatingValveProtectionTask: execution error", lsError);
     }
   }
 }
