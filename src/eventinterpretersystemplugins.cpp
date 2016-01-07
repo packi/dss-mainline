@@ -108,7 +108,7 @@ namespace dss {
     "Off-Stimmung40",
     "On-Stimmung41",
     "Off-Automatic",
-    "N/A",
+    "Impuls",
     "Dec-Area1",
     "Inc-Area1",
     "Dec-Area2",
@@ -122,7 +122,8 @@ namespace dss {
     "Stop-Area1",
     "Stop-Area2",
     "Stop-Area3",
-    "Stop-Area4"
+    "Stop-Area4",
+    "Sunprotection"
   };
 
   static const char *Unknown = "Unknown";

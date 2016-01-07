@@ -2014,11 +2014,11 @@ namespace dss {
 
   void Device::setValveType(DeviceValveType_t _type) {
     m_ValveType = _type;
-    {
+    if (DSS::getInstance()) {
       boost::shared_ptr<Event> pEvent;
       pEvent.reset(new Event(EventName::DeviceHeatingTypeChanged));
       pEvent->setProperty("zoneID", intToString(getZoneID()));
-      if (DSS::getInstance()) {
+      if (!DSS::getInstance()->getModelMaintenance().isInitializing()) {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     }
@@ -2825,4 +2825,18 @@ namespace dss {
     }
     return true;
   }
+
+  dsuid_t Device::getMainDeviceDSUID() const {
+    if (!isMainDevice()) {
+      if (getDeviceType() == DEVICE_TYPE_TNY) {
+        dsuid_t main_dsuid;
+        if (dsuid_get_main_dsuid(&m_DSID, m_pairedDevices, &main_dsuid) == 0) {
+          return main_dsuid;
+        }
+      }
+    }
+
+    return getDSID();
+  }
+
 } // namespace dss

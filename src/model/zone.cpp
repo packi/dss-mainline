@@ -283,6 +283,26 @@ namespace dss {
     dirty();
   }
 
+  ZoneHeatingConfigSpec_t Zone::getHeatingControlMode() {
+    ZoneHeatingConfigSpec_t spec;
+    spec.ControllerMode = m_HeatingProperties.m_HeatingControlMode;
+    spec.Kp = m_HeatingProperties.m_Kp;
+    spec.Ts = m_HeatingProperties.m_Ts;
+    spec.Ti = m_HeatingProperties.m_Ti;
+    spec.Kd = m_HeatingProperties.m_Kd;
+    spec.Imin = m_HeatingProperties.m_Imin;
+    spec.Imax = m_HeatingProperties.m_Imax;
+    spec.Ymin = m_HeatingProperties.m_Ymin;
+    spec.Ymax = m_HeatingProperties.m_Ymax;
+    spec.AntiWindUp = m_HeatingProperties.m_AntiWindUp;
+    spec.KeepFloorWarm = m_HeatingProperties.m_KeepFloorWarm;
+    spec.SourceZoneId = m_HeatingProperties.m_HeatingMasterZone;
+    spec.Offset = m_HeatingProperties.m_CtrlOffset;
+    spec.EmergencyValue = m_HeatingProperties.m_EmergencyValue;
+    spec.ManualValue = m_HeatingProperties.m_ManualValue;
+    return spec;
+  }
+
   void Zone::clearHeatingControlMode() {
     m_HeatingProperties.reset();
   }

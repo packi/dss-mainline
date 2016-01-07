@@ -83,6 +83,7 @@ namespace dss {
   const uint8_t SceneStopA2 = 0x35;
   const uint8_t SceneStopA3 = 0x36;
   const uint8_t SceneStopA4 = 0x37;
+  const uint8_t SceneSunProtection = 0x38;
 
   // Apartment Scenes
   const uint8_t SceneAutoStandBy = 0x40;
@@ -238,6 +239,9 @@ namespace dss {
   const int HeatingOperationModeIDEconomy = 2;
   const int HeatingOperationModeIDNotUsed = 3;
   const int HeatingOperationModeIDNight = 4;
+  const int HeatingOperationModeIDHoliday = 5;
+  const int HeatingOperationModeIDCooling = 6;
+  const int HeatingOperationModeIDCoolingOff = 7;
   const int HeatingOperationModeInvalid = 0xff;
 
   const int HeatingOperationModeIDValveProtection = 31;

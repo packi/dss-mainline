@@ -734,7 +734,28 @@ namespace dss {
 
       try {
         boost::shared_ptr<Device> device = ext->getApartment().getDeviceByDSID(dsuid);
+        bool wasVisible = device->isVisible();
         device->setDeviceVisibility(visibility);
+        bool isVisible = device->isVisible();
+
+        if (wasVisible && !isVisible) {
+          dsuid_t main = device->getMainDeviceDSUID();
+          if (!dsuid_equal(&dsuid, &main)) {
+            boost::shared_ptr<Device> main_device;
+            try {
+              main_device = ext->getApartment().getDeviceByDSID(main);
+              StructureManipulator manipulator(
+                  *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
+                  *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
+                  ext->getApartment());
+              boost::shared_ptr<Zone> zone = ext->getApartment().getZone(
+                                                    main_device->getZoneID());
+              manipulator.addDeviceToZone(device, zone);
+            } catch(ItemNotFoundException& e) {
+               Logger::getInstance()->log("JS: could not determine main device", lsWarning);
+            }
+          }
+        }
         return JS_TRUE;
       } catch(ItemNotFoundException& e) {
         JS_ReportError(cx, "Device with given dSUID not found");
@@ -3803,8 +3824,7 @@ namespace dss {
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
         return JS_TRUE;
       } else {
-        hConfig = ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingConfig(
-            hProp.m_HeatingControlDSUID, pZone->getID());
+        hConfig = pZone->getHeatingControlMode();
       }
 
       JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [1]);
