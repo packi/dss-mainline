@@ -1967,6 +1967,9 @@ namespace dss {
         boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
         boost::shared_ptr<Event> mEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
         mEvent->setProperty("action", "configure");
+        mEvent->setProperty("configClass", intToString(_configClass));
+        mEvent->setProperty("configIndex", intToString(_configIndex));
+        mEvent->setProperty("configValue", intToString(_value));
         if(DSS::hasInstance()) {
           DSS::getInstance()->getEventQueue().pushEvent(mEvent);
         }
