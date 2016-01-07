@@ -29,6 +29,7 @@
 #include "event.h"
 #include "event/event_create.h"
 #include "monitor_tasks.h"
+#include "security/security.h"
 #include "model/device.h"
 #include "model/group.h"
 #include "model/modulator.h"
@@ -67,6 +68,9 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sen
 }
 
 void SensorMonitorTask::run() {
+
+  DSS::getInstance()->getSecurity().loginAsSystemUser("SensorMonitorTask needs system rights");
+
   try {
     std::vector<boost::shared_ptr<Device> > devices = m_Apartment->getDevicesVector();
     for (size_t i = 0; i < devices.size(); i++) {
@@ -284,6 +288,8 @@ void HeatingMonitorTask::run() {
     return;
   }
 
+  DSS::getInstance()->getSecurity().loginAsSystemUser("HeatingMonitorTask needs system rights");
+
   if (m_event->getName() == EventName::CheckHeatingGroups) {
     try {
       bool atHome;
@@ -376,6 +382,8 @@ void HeatingValveProtectionTask::run() {
     }
     return;
   }
+
+  DSS::getInstance()->getSecurity().loginAsSystemUser("HeatingValveProtectionTask needs system rights");
 
   if (m_event->getName() == EventName::HeatingValveProtection) {
     try {
