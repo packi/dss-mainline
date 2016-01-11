@@ -729,6 +729,11 @@ namespace dss {
       return m_windProtectionClass;
     }
 
+
+    uint8_t getSWThresholdAddress() const;
+    void setSwitchThreshold(uint8_t _threshold);
+    uint8_t getSwitchThreshold();
+
     void setFloor(int _floor) {
       if (m_floor != _floor) {
         m_floor = _floor;

@@ -324,6 +324,11 @@ namespace dss {
   const uint8_t CfgFunction_LTTimeoutOff = 0x22;
   const uint8_t CfgFunction_LTTimeoutOn = 0x24;
 
+  const uint8_t CfgFunction_KM_SWThreshold = 0x43;
+
+  const uint8_t CfgFunction_KL_SWThreshold = 0x3C;
+
+  const uint8_t CfgFunction_Valve_SWThreshold = CfgFunction_KM_SWThreshold;
   const uint8_t CfgFunction_Valve_EmergencyValue = 0x45;
   const uint8_t CfgFunction_Valve_EmergencyTimer = 0x46;
   const uint8_t CfgFunction_Valve_PwmPeriod = 0x48;
@@ -336,7 +341,12 @@ namespace dss {
   const uint8_t CfgFunction_Valve_PwmOffset = 0x4f;
   const uint8_t CfgFunction_Valve_ProtectionTimer = 0x52;
 
+  const uint8_t CfgFunction_UMV_SWThreshold = CfgFunction_KM_SWThreshold;
   const uint8_t CfgFunction_UMV_Relay_Config = 0x52;
+
+  const uint8_t CfgFunction_UMR_SWThreshold = 0x30;
+
+  const uint8_t CfgFunction_Tiny_SWThreshold = CfgFunction_UMR_SWThreshold;
 
   const uint8_t CfgRuntime_Shade_Position = 0x02;
   const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;

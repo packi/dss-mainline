@@ -108,7 +108,8 @@ const int MF_AVAILABLE[] =
   mf_windprotectionconfigawning,
   mf_windprotectionconfigblind,
   mf_impulseconfig,
-  mf_outmodegeneric
+  mf_outmodegeneric,
+  mf_outconfigswitch,
 };
 
 // model features
@@ -123,7 +124,8 @@ const int MF_GE_KM220[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_KM2[] =
@@ -137,7 +139,8 @@ const int MF_GE_KM2[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_KL200[] =
@@ -151,7 +154,8 @@ const int MF_GE_KL200[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_TKM210[] =
@@ -164,7 +168,8 @@ const int MF_GE_TKM210[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_TKM200[] =
@@ -187,7 +192,8 @@ const int MF_GE_SDM20[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_SDS210[] =
@@ -202,7 +208,8 @@ const int MF_GE_SDS210[] =
   mf_pushbdevice,
   mf_pushbarea,
   mf_pushbadvanced,
-  mf_twowayconfig
+  mf_twowayconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_SDS20[] =
@@ -218,7 +225,8 @@ const int MF_GE_SDS20[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_pushbcombined,
-  mf_twowayconfig
+  mf_twowayconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_SDS22[] =
@@ -234,7 +242,8 @@ const int MF_GE_SDS22[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_pushbcombined,
-  mf_twowayconfig
+  mf_twowayconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_SDS2[] =
@@ -249,7 +258,8 @@ const int MF_GE_SDS2[] =
   mf_pushbdevice,
   mf_pushbarea,
   mf_pushbadvanced,
-  mf_twowayconfig
+  mf_twowayconfig,
+  mf_outconfigswitch,
 };
 
 
@@ -263,7 +273,8 @@ const int MF_GE_ZWS2[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_UMV204[] =
@@ -276,7 +287,8 @@ const int MF_GE_UMV204[] =
   mf_pushbutton,
   mf_pushbdevice,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_UMV200[] =
@@ -291,7 +303,8 @@ const int MF_GE_UMV200[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_extradimmer,
-  mf_umvrelay
+  mf_umvrelay,
+  mf_outconfigswitch,
 };
 
 const int MF_GE_UMV210[] =
@@ -307,7 +320,8 @@ const int MF_GE_UMV210[] =
   mf_pushbadvanced,
   mf_extradimmer,
   mf_umvrelay,
-  mf_outputchannels
+  mf_outputchannels,
+  mf_outconfigswitch,
 };
 
 const int MF_GN_KM2[] =
@@ -504,7 +518,8 @@ const int MF_SW_KL2[] =
   mf_optypeconfig,
   mf_highlevel,
   mf_consumption,
-  mf_jokerconfig
+  mf_jokerconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_SW_ZWS2[] =
@@ -521,7 +536,8 @@ const int MF_SW_ZWS2[] =
   mf_optypeconfig,
   mf_highlevel,
   mf_consumption,
-  mf_jokerconfig
+  mf_jokerconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_SW_KL213[] =
@@ -534,7 +550,8 @@ const int MF_SW_KL213[] =
   mf_optypeconfig,
   mf_highlevel,
   mf_consumption,
-  mf_jokerconfig
+  mf_jokerconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_SW_KL214[] =
@@ -547,7 +564,8 @@ const int MF_SW_KL214[] =
   mf_optypeconfig,
   mf_highlevel,
   mf_consumption,
-  mf_jokerconfig
+  mf_jokerconfig,
+  mf_outconfigswitch,
 };
 
 const int MF_SW_SDS20[] =
@@ -598,7 +616,8 @@ const int MF_SW_UMR200[] =
   mf_akmdelay,
   mf_blinkconfig,
   mf_impulseconfig,
-  mf_umroutmode
+  mf_umroutmode,
+  mf_outconfigswitch,
 };
 
 ModelFeatures* ModelFeatures::createInstance()
@@ -941,6 +960,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_windprotectionconfigawning;
   } else if (_name == "outmodegeneric") {
     return mf_outmodegeneric;
+  } else if (_name == "outconfigswitch") {
+    return mf_outconfigswitch;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -1032,6 +1053,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "windprotectionconfigblind";
     case mf_outmodegeneric:
       return "outmodegeneric";
+    case mf_outconfigswitch:
+      return "outconfigswitch";
     default:
       break;
   }

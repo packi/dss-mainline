@@ -1912,6 +1912,37 @@ namespace dss {
       }
 
       return json.successJSON();
+    } else if (_request.getMethod() == "setSwitchThreshold") {
+      JSONWriter json;
+
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      int value = strToIntDef(_request.getParameter("threshold"), -1);
+      if((value  < 1) || (value > 254)) {
+        return JSONWriter::failure("missing or invalid 'threshold' parameter");
+      }
+
+      device->setSwitchThreshold(value);
+
+      return json.successJSON();
+    } else if (_request.getMethod() == "getSwitchThreshold") {
+      JSONWriter json;
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      uint8_t value = device->getSwitchThreshold();
+
+      json.add("threshold", value);
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }

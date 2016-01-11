@@ -80,7 +80,8 @@ enum {
   mf_windprotectionconfigawning,
   mf_windprotectionconfigblind,
   mf_impulseconfig,
-  mf_outmodegeneric
+  mf_outmodegeneric,
+  mf_outconfigswitch
 };
 
 class ModelFeatures
