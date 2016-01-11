@@ -2740,6 +2740,41 @@ namespace dss {
     setDeviceConfig16(CfgClassFunction, CfgFunction_Shade_PosTimeMax, seconds * 100);
   }
 
+  uint8_t Device::getSWThresholdAddress() const {
+    if (getDeviceType() == DEVICE_TYPE_KM || getDeviceType() == DEVICE_TYPE_SDM || getDeviceType() == DEVICE_TYPE_TKM) {
+      return CfgFunction_KM_SWThreshold;
+    }
+    if ((getDeviceType() == DEVICE_TYPE_KL || getDeviceType() == DEVICE_TYPE_ZWS) &&
+        (getDeviceClass() == DEVICE_CLASS_GE || getDeviceClass() == DEVICE_CLASS_SW)) {
+      return CfgFunction_KL_SWThreshold;
+    }
+    if (getDeviceType() == DEVICE_TYPE_UMV && getDeviceClass() == DEVICE_CLASS_GE) {
+      return CfgFunction_UMV_SWThreshold;
+    }
+    if (getDeviceType() == DEVICE_TYPE_TNY && getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
+      return CfgFunction_Tiny_SWThreshold;
+    }
+    if (getDeviceClass() == DEVICE_CLASS_BL) {
+      return CfgFunction_Valve_SWThreshold;
+    }
+    if (getDeviceType() == DEVICE_TYPE_UMR && getDeviceClass() == DEVICE_CLASS_SW) {
+      return CfgFunction_UMR_SWThreshold;
+    }
+    throw std::runtime_error("Device does not support changing the switching threshold");
+  }
+
+  void Device::setSwitchThreshold(uint8_t _threshold) {
+    if (_threshold == 0 || _threshold == 255) {
+      throw std::runtime_error("Threshold must not be 0 or 255");
+    }
+
+    setDeviceConfig(CfgClassFunction, getSWThresholdAddress(), _threshold);
+  }
+
+  uint8_t Device::getSwitchThreshold() {
+    return getDeviceConfig(CfgClassFunction, getSWThresholdAddress());
+  }
+
   void Device::setPairedDevices(int _num) {
     if (isMainDevice() && (m_pairedDevices != _num) &&
         (m_pPropertyNode != NULL)) {
