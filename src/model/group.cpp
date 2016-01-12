@@ -214,14 +214,14 @@ namespace dss {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
-        return state->getState();
+        return static_cast<eState>(state->getState());
       } catch (ItemNotFoundException& ex) {} // should never happen
     } else if (m_GroupID == GroupIDHeating) {
       try {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".heating");
-        return state->getState();
+        return static_cast<eState>(state->getState());
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
 

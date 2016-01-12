@@ -4381,7 +4381,7 @@ namespace dss {
               std::string value = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
               pState->setState(origin, value);
             } else if(JSVAL_IS_INT(JS_ARGV(cx, vp)[0])) {
-              eState svalue = (eState) ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+              int svalue = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
               pState->setState(origin, svalue);
             }
           }

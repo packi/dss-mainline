@@ -2056,8 +2056,8 @@ namespace dss {
           } catch (ItemNotFoundException& e) {
             continue;
           }
-          eState oldState = state->getState();
-          eState newState;
+          int oldState = state->getState();
+          int newState;
           if ((_sensorValue & (1 << index)) > 0) {
             newState = State_Active;
           } else {
