@@ -213,6 +213,21 @@ namespace dss {
     query->set_name("model");
     query = getprop->add_query();
     query->set_name("hardwareVersion");
+    query = getprop->add_query();
+    query->set_name("hardwareModelGuid");
+    query = getprop->add_query();
+    query->set_name("modelUID");
+    query = getprop->add_query();
+    query->set_name("vendorGuid");
+    query = getprop->add_query();
+    query->set_name("oemGuid");
+    query = getprop->add_query();
+    query->set_name("configURL");
+    query = getprop->add_query();
+    query->set_name("hardwareGuid");
+    query = getprop->add_query();
+    query->set_name("name");
+
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -275,6 +290,35 @@ namespace dss {
       } else if (el.name() == "hardwareVersion" && val.has_v_string()) {
         try {
           ret->hardwareVersion = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+        // FOKEL
+      } else if (el.name() == "hardwareModelGuid") {
+        try {
+          ret->hardwareModelGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "vendorGuid") {
+        try {
+          ret->vendorGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "oemGuid") {
+        try {
+          ret->oemGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "configURL") {
+        try {
+          ret->configURL = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "hardwareGuid") {
+        try {
+          ret->hardwareGuid = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "modelUID") {
+        try {
+          ret->modelUID = st.convert(val.v_string());
+        } catch (DSSException& e) {}
+      } else if (el.name() == "name") {
+        try {
+          ret->name = st.convert(val.v_string());
         } catch (DSSException& e) {}
       }
     }

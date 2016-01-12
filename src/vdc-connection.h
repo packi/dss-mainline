@@ -54,6 +54,13 @@ namespace dss {
     std::string model;
     std::string modelVersion;
     std::string hardwareVersion;
+    std::string hardwareGuid;
+    std::string hardwareModelGuid;
+    std::string modelUID;
+    std::string vendorGuid;
+    std::string oemGuid;
+    std::string configURL;
+    std::string name;
   } VdcSpec_t;
 
   struct VdcHelper
