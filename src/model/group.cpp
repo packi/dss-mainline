@@ -279,6 +279,15 @@ namespace dss {
     }
   } // sensorPush
 
+  void Group::sensorInvalid(int _type) {
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr node = m_pPropertyNode->getProperty("sensor/type" + intToString(_type));
+      if (node) {
+        node->getParentNode()->removeChild(node);
+      }
+    }
+  }
+
   boost::mutex Group::m_SceneNameMutex;
 
   void Group::addConnectedDevice() {

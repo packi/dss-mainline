@@ -118,6 +118,7 @@ namespace dss {
 
     /** Published a sensor value to all devices of this zone */
     void sensorPush(const dsuid_t& _sourceID, int _type, double _value);
+    void sensorInvalid(int _type);
 
     void addConnectedDevice();
     void removeConnectedDevice();
