@@ -155,7 +155,16 @@ namespace dss {
 
       m_pPropertyNode->createProperty("ConfigURL")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
-
+      m_pPropertyNode->createProperty("ModelUID")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelUID, false));
+      m_pPropertyNode->createProperty("HardwareGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareGuid, false));
+      m_pPropertyNode->createProperty("HardwareModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareModelGuid, false));
+      m_pPropertyNode->createProperty("VendorGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
+      m_pPropertyNode->createProperty("OemGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
     }
   } // publishToPropertyTree
 

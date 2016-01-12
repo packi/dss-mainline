@@ -96,6 +96,11 @@ namespace dss {
     bool m_IgnoreActionsFromNewDevices;
     uint8_t m_ApartmentState;
     std::string m_VdcConfigURL;
+    std::string m_VdcModelUID;
+    std::string m_VdcHardwareGuid;
+    std::string m_VdcHardwareModelGuid;
+    std::string m_VdcVendorGuid;
+    std::string m_VdcOemGuid;
     std::string m_softwareVersion;
     int m_dSMState;
   private:
@@ -193,6 +198,17 @@ namespace dss {
     uint8_t getApartmentState() const { return m_ApartmentState; }
     void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
+    void setVdcModelUID(const std::string& _value) { m_VdcModelUID = _value; }
+    const std::string& getVdcModelUID() const { return m_VdcModelUID; }
+    void setVdcHardwareGuid(const std::string& _value ) { m_VdcHardwareGuid = _value; }
+    const std::string& getVdcHardwareGuid() { return m_VdcHardwareGuid; }
+    void setVdcHardwareModelGuid(const std::string& _value ) { m_VdcHardwareModelGuid = _value; }
+    const std::string& getVdcHardwareModelGuid() { return m_VdcHardwareModelGuid; }
+    void setVdcVendorGuid(const std::string& _value ) { m_VdcVendorGuid = _value; }
+    const std::string& getVdcVendorGuid() { return m_VdcVendorGuid; }
+    void setVdcOemGuid(const std::string& _value ) { m_VdcOemGuid = _value; }
+    const std::string& getVdcOemGuid() { return m_VdcOemGuid; }
+
     int getState() const { return m_dSMState; }
     void setState(uint8_t _state) { m_dSMState = _state; }
   }; // DSMeter

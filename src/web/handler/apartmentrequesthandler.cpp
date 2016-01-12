@@ -210,6 +210,11 @@ namespace dss {
           json.add("hasDevices", dsMeter->getCapability_HasDevices());
           json.add("hasMetering", dsMeter->getCapability_HasMetering());
           json.add("VdcConfigURL", dsMeter->getVdcConfigURL());
+          json.add("VdcModelUID", dsMeter->getVdcModelUID());
+          json.add("VdcHardwareGuid", dsMeter->getVdcHardwareGuid());
+          json.add("VdcHardwareModelGuid", dsMeter->getVdcHardwareModelGuid());
+          json.add("VdcVendorGuid", dsMeter->getVdcVendorGuid());
+          json.add("VdcOemGuid", dsMeter->getVdcOemGuid());
           std::bitset<8> flags = dsMeter->getPropertyFlags();
           json.add("ignoreActionsFromNewDevices", flags.test(4));
           json.endObject();
