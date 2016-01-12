@@ -570,7 +570,8 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingSystemCapability ||
                _event.getName() == EventName::AddonToCloud ||
                _event.getName() == EventName::ExecutionDenied ||
-               _event.getName() == EventName::LogFileData) {
+               _event.getName() == EventName::LogFileData ||
+               _event.getName() == EventName::HeatingControllerValueDsHub) {
       m_log->append(_event.getptr(), highPrio);
     } else if (_event.getName() == EventName::CallScene ||
                _event.getName() == EventName::UndoScene) {
