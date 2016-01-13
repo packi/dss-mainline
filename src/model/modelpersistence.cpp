@@ -1047,18 +1047,25 @@ namespace dss {
   } // deviceToXML
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
-    _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
-    _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
+    bool headerWritten = false;
     for (int iScene = 0; iScene < MaxSceneNumber; iScene++) {
       std::string name = _pGroup->getSceneName(iScene);
       if (!name.empty()) {
+        if (!headerWritten) {
+          headerWritten = true;
+          _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
+          _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
+        }
         _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
         _ofs << doIndent(_indent + 3) << "<name>" << XMLStringEscape(name) << "</name>" << std::endl;
         _ofs << doIndent(_indent + 2) << "</scene>" << std::endl;
       }
     }
-    _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
-    _ofs << doIndent(_indent) << "</group>" << std::endl;
+
+    if (headerWritten) {
+      _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
+      _ofs << doIndent(_indent) << "</group>" << std::endl;
+    }
   } // groupToXML
 
   void clusterToXML(boost::shared_ptr<Cluster> _pCluster, std::ofstream& _ofs, const int _indent) {
