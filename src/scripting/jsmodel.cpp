@@ -597,7 +597,7 @@ namespace dss {
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
 
       if(ext != NULL) {
-        uint32_t result = 0;
+        unsigned long result = 0;
         foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
           try {
             result += pDSMeter->getPowerConsumption();
@@ -2751,6 +2751,11 @@ namespace dss {
     try {
       if(meter != NULL) {
         try {
+          if (!meter->getCapability_HasMetering()) {
+            JS_ReportWarning(cx, "DSMeter does not support energy metering: %s",
+                dsuid2str(meter->getDSID()).c_str());
+            return JS_TRUE;
+          }
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(meter->getPowerConsumption()));
           return JS_TRUE;
         } catch (BusApiError& ex) {
