@@ -1132,11 +1132,12 @@ namespace dss {
     }
 
     _ofs << doIndent(_indent + 1) << "<groups>" << std::endl;
-    if (_pZone->getID() != 0) {
-      // store real user-groups per zone
-      foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
-        groupToXML(pGroup, _ofs, _indent + 2);
+    // store real user-groups per zone
+    foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
+      if (_pZone->getID() == 0 && isAppUserGroup(pGroup->getID())) {
+        continue;  //This is cluster, do not serialize with groups
       }
+      groupToXML(pGroup, _ofs, _indent + 2);
     }
     _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
 
