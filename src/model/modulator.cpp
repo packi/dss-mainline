@@ -215,7 +215,7 @@ namespace dss {
     DateTime now;
     if (!(now.addSeconds(-1) < m_PowerConsumptionTimeStamp)) {
       unsigned long newvalue = 0;
-      if(isPresent()) {
+      if(isPresent() && getCapability_HasMetering()) {
         newvalue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(m_DSID);
       }
       setPowerConsumption(newvalue);
@@ -227,7 +227,7 @@ namespace dss {
     DateTime now;
     if (!(now.addSeconds(-1) < m_EnergyMeterValueTimeStamp)) {
       unsigned long long newValue;
-      if(isPresent()) {
+      if(isPresent() && getCapability_HasMetering()) {
         newValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
         updateEnergyMeterValue(newValue);
       }
