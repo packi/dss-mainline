@@ -2011,18 +2011,8 @@ namespace dss {
 
       raiseEvent(createDeviceBinaryInputEvent(pDevRev, _eventIndex, _eventType,
                                               _state));
-      boost::shared_ptr<State> pState;
-      try {
-        pState = devRef.getDevice()->getBinaryInputState(_eventIndex);
-      } catch(std::runtime_error& e) {}
 
-      if (pState != NULL) {
-        if (_state == 0) {
-          pState->setState(coSystem, State_Inactive);
-        } else if (_state == 1) {
-          pState->setState(coSystem, State_Active);
-        }
-      }
+      devRef.getDevice()->handleBinaryInputEvent(_eventIndex, _state);
 
       // increment event counter as last step to catch possible
       // data model exceptions in above sequence
@@ -2056,8 +2046,8 @@ namespace dss {
           } catch (ItemNotFoundException& e) {
             continue;
           }
-          eState oldState = state->getState();
-          eState newState;
+          int oldState = state->getState();
+          int newState;
           if ((_sensorValue & (1 << index)) > 0) {
             newState = State_Active;
           } else {

@@ -43,6 +43,14 @@ namespace dss {
   } eState;
 
   typedef enum {
+    StateWH_Invalid = 0,
+    StateWH_Closed = 1,
+    StateWH_Open = 2,
+    StateWH_Tilted = 3,
+    StateWH_Unknown = 4,
+  } eStateWindowHandle;
+
+  typedef enum {
     StateType_Apartment = 0,
     StateType_Device = 1,
     StateType_Service = 2,
@@ -63,7 +71,7 @@ namespace dss {
     callOrigin_t m_callOrigin;
     dsuid_t m_originDeviceDSUID;
 
-    eState m_state;
+    int m_state;
     eStateType m_type;
 
     /** State provider is a device */
@@ -94,8 +102,7 @@ namespace dss {
 
     virtual ~State();
 
-    eState getState() const;
-    void setState(const callOrigin_t _origin, const eState _state);
+    int getState() const;
     void setState(const callOrigin_t _origin, const int _state);
     void setState(const callOrigin_t _origin, const std::string& _state);
 
@@ -108,7 +115,7 @@ namespace dss {
 
     typedef std::vector<std::string> ValueRange_t;
     void setValueRange(const ValueRange_t& _values);
-    unsigned int getValueRangeSize() const { return (!m_values.empty()) ? m_values.size() : (State_Unknown + 1); }
+    unsigned int getValueRangeSize() const;
 
     eStateType getType() const { return m_type; }
     PropertyNodePtr getPropertyNode() const { return m_pPropertyNode; }

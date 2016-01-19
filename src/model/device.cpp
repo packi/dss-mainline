@@ -2151,6 +2151,47 @@ namespace dss {
     m_binaryInputStates.clear();
   }
 
+  void Device::assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state) {
+    // Window Tilt Binary Input
+    if (inputType == BinaryInputIDWindowTilt) {
+      State::ValueRange_t windowTiltValues;
+      windowTiltValues.push_back("invalid");
+      windowTiltValues.push_back("closed");
+      windowTiltValues.push_back("open");
+      windowTiltValues.push_back("tilted");
+      windowTiltValues.push_back("unknown");
+      state->setValueRange(windowTiltValues);
+    }
+    // other custom devices...
+  }
+
+  void Device::handleBinaryInputEvent(const int index, const int state) {
+    boost::shared_ptr<State> pState;
+    uint8_t inputType = 0;
+    try {
+      pState = getBinaryInputState(index);
+      inputType = getDeviceBinaryInputType(index);
+    } catch(std::runtime_error& e) {}
+
+    if (pState != NULL) {
+      if (inputType == BinaryInputIDWindowTilt) {
+        if (state == 0) {
+          pState->setState(coSystem, StateWH_Closed);
+        } else if (state == 1) {
+          pState->setState(coSystem, StateWH_Open);
+        } else if (state == 2) {
+          pState->setState(coSystem, StateWH_Tilted);
+        }
+      } else {
+        if (state == 0) {
+          pState->setState(coSystem, State_Inactive);
+        } else if (state == 1) {
+          pState->setState(coSystem, State_Active);
+        }
+      }
+    }
+  }
+
   void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
     boost::mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr binaryInputNode;
@@ -2177,6 +2218,8 @@ namespace dss {
       m_binaryInputs.push_back(binput);
 
       boost::shared_ptr<State> state = boost::make_shared<State>(me, m_binaryInputCount);
+      assignCustomBinaryInputValues(binput->m_inputType, state);
+
       try {
         getApartment().allocateState(state);
       } catch (ItemDuplicateException& ex) {

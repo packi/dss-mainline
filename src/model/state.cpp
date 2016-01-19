@@ -152,7 +152,7 @@ namespace dss {
       m_pPropertyNode->createProperty("name")
         ->linkToProxy(PropertyProxyReference<std::string>(m_name, false));
       m_pPropertyNode->createProperty("value")
-        ->linkToProxy(PropertyProxyReference<int, eState>(m_state, false));
+        ->linkToProxy(PropertyProxyReference<int, int>(m_state, false));
       m_pPropertyNode->createProperty("state")
         ->linkToProxy(PropertyProxyMemberFunction<State, std::string, false>(*this, &State::toString));
       if (m_callOrigin != coUnknown) {
@@ -282,13 +282,13 @@ namespace dss {
     }
   } // toString
 
-  eState State::getState() const {
+  int State::getState() const {
     return m_state;
   } // getState
 
-  void State::setState(const callOrigin_t _origin, const eState _state) {
+  void State::setState(const callOrigin_t _origin, const int _state) {
     if (_state != m_state) {
-      eState oldstate = m_state;
+      int oldstate = m_state;
       m_state = _state;
       m_callOrigin = _origin;
 
@@ -308,23 +308,8 @@ namespace dss {
     }
   } // setState
 
-  void State::setState(const callOrigin_t _origin, const int _state) {
-    switch (_state) {
-      case 1: setState(_origin, State_Active); break;
-      case 2: setState(_origin, State_Inactive); break;
-      case 3: setState(_origin, State_Unknown); break;
-      default: setState(_origin, (eState) _state); break;
-    }
-  }
-
   void State::setState(const callOrigin_t _origin, const std::string& _state) {
-    if (_state == "active") {
-      setState(_origin, State_Active);
-    } else if (_state == "inactive") {
-      setState(_origin, State_Inactive);
-    } else if (_state == "unknown") {
-      setState(_origin, State_Unknown);
-    } else if (!m_values.empty()) {
+    if (!m_values.empty()) {
       ValueRange_t::iterator it = std::find(m_values.begin(), m_values.end(), _state);
       if (it == m_values.end()) {
         Logger::getInstance()->log("State " + m_name + ": invalid value" + _state,
@@ -332,11 +317,21 @@ namespace dss {
         return;
       }
       setState(_origin, it - m_values.begin());
+    } else if (_state == "active") {
+      setState(_origin, State_Active);
+    } else if (_state == "inactive") {
+      setState(_origin, State_Inactive);
+    } else if (_state == "unknown") {
+      setState(_origin, State_Unknown);
     }
   }
 
   void State::setValueRange(const ValueRange_t &_values) {
     m_values = _values;
+  }
+
+  unsigned int State::getValueRangeSize() const {
+    return (!m_values.empty()) ? m_values.size() : (State_Unknown + 1);
   }
 
   void State::setOriginDeviceDSUID(const dsuid_t _dsuid) {
@@ -412,7 +407,7 @@ namespace dss {
       cond0 = false;
     }
 
-    eState oldState = getState();
+    int oldState = getState();
     if (oldState == State_Active) {
       if (cond1 == false && cond0 == true) {
         setState(_origin, State_Inactive);

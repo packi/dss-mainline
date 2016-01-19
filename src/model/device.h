@@ -326,6 +326,7 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
+    void assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state);
 
   public:
     /** Creates and initializes a device. */
@@ -759,6 +760,7 @@ namespace dss {
     bool isMainDevice() const;
     dsuid_t getMainDeviceDSUID() const;
 
+    void handleBinaryInputEvent(const int index, const int state);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
