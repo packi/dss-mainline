@@ -574,22 +574,20 @@ namespace dss {
               _dsMeter->setHardwareVersion(props->hardwareVersion);
               _dsMeter->setHardwareName(props->model);
               _dsMeter->setSoftwareVersion(props->modelVersion);
+              _dsMeter->setVdcModelUID(props->modelUID);
+              _dsMeter->setVdcConfigURL(props->configURL);
+              _dsMeter->setVdcHardwareGuid(props->hardwareGuid);
+              _dsMeter->setVdcHardwareModelGuid(props->hardwareModelGuid);
+              _dsMeter->setVdcVendorGuid(props->vendorGuid);
+              _dsMeter->setVdcOemGuid(props->oemGuid);
+              if (_dsMeter->getName().empty()) {
+                _dsMeter->setName(props->name);
+              }
             }
           } catch(std::runtime_error& e) {
           }
           _dsMeter->setCapability_HasDevices(true);
           _dsMeter->setCapability_HasTemperatureControl(true); // transparently trapped by the vdSM
-
-          boost::shared_ptr<VdsdSpec_t> spec;
-          try {
-            spec = VdcHelper::getSpec(_dsMeter->getDSID(), _dsMeter->getDSID());
-            if (spec) {
-              if (_dsMeter->getName().empty()) {
-                _dsMeter->setName(spec->name);
-              }
-              _dsMeter->setVdcConfigURL(spec->configURL);
-            }
-          } catch(std::runtime_error& e) {}
         }
         break;
       default:

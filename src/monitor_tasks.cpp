@@ -279,6 +279,7 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, const int
         intToString(_zone->getID()) +
         " is too old: " + sensorTime.toISO8601_ms() +
         ", age in seconds is " + intToString(now.difference(sensorTime)), lsWarning);
+    _zone->getGroup(GroupIDBroadcast)->sensorInvalid(_sensorType);
 
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().

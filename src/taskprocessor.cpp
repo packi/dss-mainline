@@ -30,6 +30,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdexcept>
+#include <cxxabi.h>
 #include "logger.h"
 
 namespace dss {
@@ -66,7 +67,9 @@ namespace dss {
     lockList();
     pthread_cond_signal(&m_eventWakeupCondition);
     unlockList();
+
     if (m_eventProcessorThread) {
+      pthread_cancel(m_eventProcessorThread);
       pthread_join(m_eventProcessorThread, NULL);
       m_eventProcessorThread = 0;
     }
@@ -120,6 +123,8 @@ namespace dss {
       } catch (std::runtime_error& ex) {
         Logger::getInstance()->log("TaskProcessor::eventProcessorThread "
             "caught exception: " + std::string(ex.what()), lsError);
+      } catch (abi::__forced_unwind& ex) {
+        throw;
       } catch (...) {
         Logger::getInstance()->log("TaskProcessor::eventProcessorThread "
             "caught exception", lsError);

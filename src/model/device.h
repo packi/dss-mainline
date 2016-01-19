@@ -326,6 +326,7 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
+    void assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state);
 
   public:
     /** Creates and initializes a device. */
@@ -729,6 +730,11 @@ namespace dss {
       return m_windProtectionClass;
     }
 
+
+    uint8_t getSWThresholdAddress() const;
+    void setSwitchThreshold(uint8_t _threshold);
+    uint8_t getSwitchThreshold();
+
     void setFloor(int _floor) {
       if (m_floor != _floor) {
         m_floor = _floor;
@@ -754,6 +760,7 @@ namespace dss {
     bool isMainDevice() const;
     dsuid_t getMainDeviceDSUID() const;
 
+    void handleBinaryInputEvent(const int index, const int state);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

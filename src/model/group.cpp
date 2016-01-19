@@ -164,14 +164,14 @@ namespace dss {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
-        state->setState(_origin, _on == true ? 1 : 2);
+        state->setState(_origin, _on == true ? State_Active : State_Inactive);
       } catch (ItemNotFoundException& ex) {} // should never happen
     } else if (m_GroupID == GroupIDHeating) {
       try {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".heating");
-        state->setState(_origin, _on == true ? 1 : 2);
+        state->setState(_origin, _on == true ? State_Active : State_Inactive);
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
   }
@@ -187,7 +187,7 @@ namespace dss {
           boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                  intToString(getZoneID()) +
                                                                 ".light");
-          state->setState(_origin, isOn == SceneHelper::True ? 1 : 2);
+          state->setState(_origin, isOn == SceneHelper::True ? State_Active : State_Inactive);
         } catch (ItemNotFoundException& ex) {} // should never happen
       }
     } else if (m_GroupID == GroupIDHeating) {
@@ -197,7 +197,7 @@ namespace dss {
           boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                  intToString(getZoneID()) +
                                                                 ".heating");
-          state->setState(_origin, isOn == SceneHelper::True ? 1 : 2);
+          state->setState(_origin, isOn == SceneHelper::True ? State_Active : State_Inactive);
         } catch (ItemNotFoundException& ex) {} // should never happen
       }
     }
@@ -214,14 +214,14 @@ namespace dss {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".light");
-        return state->getState();
+        return static_cast<eState>(state->getState());
       } catch (ItemNotFoundException& ex) {} // should never happen
     } else if (m_GroupID == GroupIDHeating) {
       try {
         boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
                                                intToString(getZoneID()) +
                                                                 ".heating");
-        return state->getState();
+        return static_cast<eState>(state->getState());
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
 
@@ -278,6 +278,15 @@ namespace dss {
       node->createProperty("timestamp")->setStringValue(now.toString());
     }
   } // sensorPush
+
+  void Group::sensorInvalid(int _type) {
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr node = m_pPropertyNode->getProperty("sensor/type" + intToString(_type));
+      if (node) {
+        node->getParentNode()->removeChild(node);
+      }
+    }
+  }
 
   boost::mutex Group::m_SceneNameMutex;
 
