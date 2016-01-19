@@ -43,6 +43,14 @@ namespace dss {
   } eState;
 
   typedef enum {
+    StateWH_Invalid = 0,
+    StateWH_Closed = 1,
+    StateWH_Open = 2,
+    StateWH_Tilted = 3,
+    StateWH_Unknown = 4,
+  } eStateWindowHandle;
+
+  typedef enum {
     StateType_Apartment = 0,
     StateType_Device = 1,
     StateType_Service = 2,
