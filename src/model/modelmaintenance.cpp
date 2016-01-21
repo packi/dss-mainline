@@ -247,7 +247,7 @@ namespace dss {
       log("Initializing: ReadOutMeters: " +
           intToString(cntReadOutMeters) +
           " BusMemberCounts: " + intToString(busMemberCount), lsDebug);
-      if (cntReadOutMeters == busMemberCount) {
+      if ((busMemberCount > 0) && (cntReadOutMeters == busMemberCount)) {
         setupInitializedState();
       } else {
         monitorInitialization();
