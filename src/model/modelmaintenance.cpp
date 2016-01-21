@@ -211,7 +211,7 @@ namespace dss {
   int MeterMaintenance::getNumValiddSMeters() const {
     int cntReadOutMeters = 0;
     foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
-      if (busMemberIsdSM(pDSMeter->getBusMemberType()) &&
+      if (busMemberIsDSMeter(pDSMeter->getBusMemberType()) &&
           pDSMeter->isPresent() &&
           pDSMeter->isValid()) {
         ++cntReadOutMeters;
@@ -228,7 +228,7 @@ namespace dss {
         // call for all bus participants (vdc, dsm,..)
         dsMeterReady(pDSMeter->getDSID());
         // only for non virtual devices
-        if (busMemberIsdSM(pDSMeter->getBusMemberType())) {
+        if (busMemberIsDSMeter(pDSMeter->getBusMemberType())) {
           hadToUpdate = true;
           break;
         }
@@ -297,7 +297,7 @@ namespace dss {
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
         log("getdSMBusMemberCount Device: " + dsuid2str(spec.DSID) + 
             " Device Type: " + intToString(spec.DeviceType), lsDebug);
-        if (busMemberIsdSM(spec.DeviceType)) {
+        if (busMemberIsDSMeter(spec.DeviceType)) {
           // ignore dSMx with older api version
           if (spec.APIVersion >= 0x300) {
             ++busMemberCount;
