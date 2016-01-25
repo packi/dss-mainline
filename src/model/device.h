@@ -736,6 +736,7 @@ namespace dss {
     uint8_t getSwitchThreshold();
 
     void setTemperatureOffset(int8_t _offset);
+    int8_t getTemperatureOffset();
 
     void setFloor(int _floor) {
       if (m_floor != _floor) {
