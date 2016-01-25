@@ -185,6 +185,10 @@ namespace dss {
     "HailN"
   };
 
+  const std::string ProtectionLog = "system-protection.log";
+  const std::string EventLog = "system-event.log";
+  const std::string SensorLog = "system-sensor.log";
+
   SystemEventActionExecute::SystemEventActionExecute() : SystemEvent() {
   }
 
@@ -2464,7 +2468,7 @@ namespace dss {
 
   void SystemEventLog::model_ready() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
 
     logger->logln("Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken");
 
@@ -2492,7 +2496,7 @@ namespace dss {
 
   void SystemEventLog::callScene() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     int sceneId = -1;
     if (m_properties.has("sceneID")) {
         sceneId = strToIntDef(m_properties.get("sceneID"), -1);
@@ -2554,7 +2558,7 @@ namespace dss {
 
   void SystemEventLog::blink() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     int zoneId = -1;
     std::string token;
     if (m_properties.has("originToken")) {
@@ -2593,7 +2597,7 @@ namespace dss {
 
   void SystemEventLog::undoScene() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     int sceneId = -1;
     if (m_properties.has("sceneID")) {
         sceneId = strToIntDef(m_properties.get("sceneID"), -1);
@@ -2628,7 +2632,7 @@ namespace dss {
 
   void SystemEventLog::buttonClick() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     if (m_raisedAtDevice != NULL) {
       logDeviceButtonClick(logger, m_raisedAtDevice->getDevice());
     }
@@ -2636,7 +2640,7 @@ namespace dss {
 
   void SystemEventLog::directDeviceAction() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     if (m_raisedAtDevice != NULL) {
       logDirectDeviceAction(logger, m_raisedAtDevice->getDevice());
     }
@@ -2644,7 +2648,7 @@ namespace dss {
 
   void SystemEventLog::deviceBinaryInputEvent() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     if (m_raisedAtDevice != NULL) {
       logDeviceBinaryInput(logger, m_raisedAtDevice->getDevice());
     }
@@ -2652,7 +2656,7 @@ namespace dss {
 
   void SystemEventLog::deviceSensorEvent() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     if (m_raisedAtDevice != NULL) {
       logDeviceSensorEvent(logger, m_raisedAtDevice->getDevice());
     }
@@ -2660,7 +2664,7 @@ namespace dss {
 
   void SystemEventLog::deviceSensorValue() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-sensor.log", NULL));
+        SensorLog, NULL));
     if (m_raisedAtDevice != NULL) {
       int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
       try {
@@ -2673,7 +2677,7 @@ namespace dss {
 
   void SystemEventLog::zoneSensorValue() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-sensor.log", NULL));
+        SensorLog, NULL));
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
       // Zone Sensor Value
       int zoneId = m_raisedAtGroup->getZoneID();
@@ -2709,7 +2713,7 @@ namespace dss {
     }
     if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
       boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-          "system-event.log", NULL));
+          EventLog, NULL));
       try {
         logStateChange(logger, m_raisedAtState, statename, state, value, originDSUID, callOrigin);
       } catch (std::exception &ex) {}
@@ -2726,7 +2730,7 @@ namespace dss {
           name == "alarm3" ||
           name == "alarm4") {
         logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-            "system-protection.log", NULL));
+            ProtectionLog, NULL));
         try {
           name[0] = toupper(name[0]);
           if (!location.empty()) {
@@ -2754,7 +2758,7 @@ namespace dss {
 
   void SystemEventLog::sunshine() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2772,7 +2776,7 @@ namespace dss {
     } catch (std::exception &ex) {}
 
     logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-protection.log", NULL));
+        ProtectionLog, NULL));
     try {
       int v = strToInt(value);
       std::string valueString;
@@ -2789,7 +2793,7 @@ namespace dss {
 
   void SystemEventLog::frostProtection() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2803,7 +2807,7 @@ namespace dss {
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
 
     logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-protection.log", NULL));
+        ProtectionLog, NULL));
     try {
       int v = strToInt(value);
       std::string valueString;
@@ -2818,7 +2822,7 @@ namespace dss {
 
   void SystemEventLog::heatingModeSwitch() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2834,7 +2838,7 @@ namespace dss {
 
   void SystemEventLog::buildingService() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     std::string value;
     if (m_properties.has("value")) {
       value = m_properties.get("value");
@@ -2848,7 +2852,7 @@ namespace dss {
     } catch (std::exception &ex) {}
     
     logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-protection.log", NULL));
+        ProtectionLog, NULL));
     try {
       int v = strToInt(value);
       std::string valueString;
@@ -2863,7 +2867,7 @@ namespace dss {
 
   void SystemEventLog::executionDenied() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
     std::string action;
     std::string reason;
     if (m_properties.has("source-name")) {
@@ -2883,7 +2887,7 @@ namespace dss {
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
 
     logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-protection.log", NULL));
+        ProtectionLog, NULL));
     try {
       logger->logln("Timer or automatic activity \"" + action + "\": " + reason);
     } catch (std::exception &ex) {}
@@ -2902,7 +2906,7 @@ namespace dss {
 
     if ((m_evtRaiseLocation == erlGroup) && (m_raisedAtGroup != NULL)) {
       boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-          "system-event.log", NULL));
+          EventLog, NULL));
       int groupId, zoneId;
       try {
         groupId = m_raisedAtGroup->getID();
@@ -2912,7 +2916,7 @@ namespace dss {
       } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
 
       logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-          "system-protection.log", NULL));
+          ProtectionLog, NULL));
       try {
         boost::shared_ptr<Group> group = DSS::getInstance()->getApartment().getZone(zoneId)->getGroup(groupId);
         std::string lockString;
@@ -2952,7 +2956,7 @@ namespace dss {
     }
 
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
-        "system-event.log", NULL));
+        EventLog, NULL));
 
     try {
       logDevicesFirstSeen(logger, dateTime, token, callOrigin);
