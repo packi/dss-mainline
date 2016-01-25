@@ -2728,7 +2728,8 @@ namespace dss {
           name == "alarm" ||
           name == "alarm2" ||
           name == "alarm3" ||
-          name == "alarm4") {
+          name == "alarm4" ||
+          name == "heating_water_system") {
         logger.reset(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
             ProtectionLog, NULL));
         try {
