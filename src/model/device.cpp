@@ -2784,7 +2784,10 @@ namespace dss {
   }
 
   uint8_t Device::getSWThresholdAddress() const {
-    if (getDeviceType() == DEVICE_TYPE_KM || getDeviceType() == DEVICE_TYPE_SDM || getDeviceType() == DEVICE_TYPE_TKM) {
+    if (getDeviceType() == DEVICE_TYPE_KM ||
+        getDeviceType() == DEVICE_TYPE_SDM ||
+        getDeviceType() == DEVICE_TYPE_SDS ||
+        getDeviceType() == DEVICE_TYPE_TKM) {
       return CfgFunction_KM_SWThreshold;
     }
     if ((getDeviceType() == DEVICE_TYPE_KL || getDeviceType() == DEVICE_TYPE_ZWS) &&
