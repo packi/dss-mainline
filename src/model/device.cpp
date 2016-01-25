@@ -2825,6 +2825,13 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_SK_TempOffsetExt, _offset);
   }
 
+  int8_t Device::getTemperatureOffset() {
+    if (getDeviceType() != DEVICE_TYPE_SK) {
+      throw std::runtime_error("Temperature offset setting is not supported by this device");
+    }
+    return getDeviceConfig(CfgClassFunction, CfgFunction_SK_TempOffsetExt);
+  }
+
   void Device::setPairedDevices(int _num) {
     if (isMainDevice() && (m_pairedDevices != _num) &&
         (m_pPropertyNode != NULL)) {
