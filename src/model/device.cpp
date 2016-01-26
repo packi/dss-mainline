@@ -2527,56 +2527,67 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_UMV_Relay_Config, _value);
   }
 
-  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
-    if (getDeviceType() != DEVICE_TYPE_UMR) {
-      throw std::runtime_error("unsupported configuration for this device");
+  bool Device::hasBlinkSettings() {
+    if ((getDeviceType() == DEVICE_TYPE_UMR) ||
+        (getDeviceClass() == DEVICE_CLASS_GE) ||
+        (((getDeviceType() == DEVICE_TYPE_KL) ||
+          (getDeviceType() == DEVICE_TYPE_ZWS)) &&
+         (getDeviceClass() == DEVICE_CLASS_SW))) {
+            return true;
     }
 
-    setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
+    return false;
+  }
+  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
+    if (hasBlinkSettings()) {
+      setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
+
+    } else {
+      throw std::runtime_error("unsupported configuration for this device");
+    }
   }
 
   void Device::setDeviceUMROnDelay(double _delay) {
-    if (getDeviceType() != DEVICE_TYPE_UMR) {
+    if (hasBlinkSettings()) {
+      _delay = _delay * 1000.0; // convert from seconds to ms
+
+      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
+        throw std::runtime_error("invalid delay value");
+      }
+      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
+      setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
+    } else {
       throw std::runtime_error("unsupported configuration for this device");
     }
-
-    _delay = _delay * 1000.0; // convert from seconds to ms
-
-    if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-      throw std::runtime_error("invalid delay value");
-    }
-    uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-    setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
   }
 
   void Device::setDeviceUMROffDelay(double _delay) {
-    if (getDeviceType() != DEVICE_TYPE_UMR) {
+    if (hasBlinkSettings()) {
+      _delay = _delay * 1000.0; // convert from seconds to ms
+
+      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
+        throw std::runtime_error("invalid delay value");
+      }
+      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
+      setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
+    } else {
       throw std::runtime_error("unsupported configuration for this device");
     }
-
-    _delay = _delay * 1000.0; // convert from seconds to ms
-
-    if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-      throw std::runtime_error("invalid delay value");
-    }
-    uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-    setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
   }
 
   void Device::getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay,
                                          uint8_t  *_count) {
-    if (getDeviceType() != DEVICE_TYPE_UMR) {
+    if (hasBlinkSettings()) {
+      uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
+      *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
+      *_count = (uint8_t)(value >> 8) & 0xff;
+
+      uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+      *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
+    } else {
       throw std::runtime_error("unsupported configuration for this device");
     }
-
-    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
-    *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
-    *_count = (uint8_t)(value >> 8) & 0xff;
-
-    uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
-    *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
   }
-
 
   std::vector<int> Device::getLockedScenes() {
     std::vector<int> ls;

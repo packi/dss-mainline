@@ -327,6 +327,7 @@ namespace dss {
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
     void assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state);
+    bool hasBlinkSettings();
 
   public:
     /** Creates and initializes a device. */

@@ -477,7 +477,7 @@ namespace dss {
         sceneAccess = SceneAccess::stringToCategory(oCategoryNode->getStringValue());
       }
 
-      target->blink(coJSScripting, sceneAccess, "");
+      target->callScene(coJSScripting, sceneAccess, SceneImpulse, "", true);
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
@@ -533,7 +533,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone;
         zone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Group> group = zone->getGroup(groupId);
-        group->blink(coJSScripting, sceneAccess, "");
+        group->callScene(coJSScripting, sceneAccess, SceneImpulse, "", true);
       }
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
