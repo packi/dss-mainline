@@ -202,8 +202,8 @@ void SystemState::bootstrap() {
   state = registerState(StateName::HeatingModeControl, true);
   State::ValueRange_t heatingModeValues;
   heatingModeValues.push_back("off");
-  heatingModeValues.push_back("heating");
-  heatingModeValues.push_back("cooling");
+  heatingModeValues.push_back("hot water");
+  heatingModeValues.push_back("cold water");
   heatingModeValues.push_back("auto");
   state->setValueRange(heatingModeValues);
   if (!state->hasPersistentData()) {
