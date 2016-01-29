@@ -96,7 +96,21 @@ namespace dss {
     int oldZoneID = _device->getZoneID();
     boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByDSID(_device->getDSMeterDSID());
     if(!_zone->registeredOnDSMeter(targetDSMeter)) {
-      createZone(targetDSMeter, _zone);
+      try {
+        createZone(targetDSMeter, _zone);
+      } catch (BusApiError &baer) {
+        // this is not fatal, just sync up the model in the dSS
+        if (baer.error == ERROR_ZONE_ALREADY_EXISTS) {
+          _zone->addToDSMeter(targetDSMeter);
+          _zone->setIsPresent(true);
+          _zone->setIsConnected(true);
+          std::vector<boost::shared_ptr<Group> > groupList = _zone->getGroups();
+          foreach(boost::shared_ptr<Group> group, groupList) {
+            group->setIsConnected(true);
+          }
+          synchronizeGroups(&m_Apartment, &m_Interface);
+        }
+      }
     }
 
     m_Interface.setZoneID(targetDSMeter->getDSID(), _device->getShortAddress(), _zone->getID());
