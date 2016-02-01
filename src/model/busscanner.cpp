@@ -446,6 +446,7 @@ namespace dss {
         dev->setConfigLock(true);
     }
 
+
     {
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
       boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
@@ -453,6 +454,18 @@ namespace dss {
       if(DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
       }
+    }
+
+    if (((dev->getDeviceType() == DEVICE_TYPE_AKM) ||
+         (dev->getDeviceType() == DEVICE_TYPE_TKM)) &&
+        (dev->getDeviceClass() == DEVICE_CLASS_SW)) {
+      if (dev->getDeviceNumber() == 200) {
+        dev->setPairedDevices(4);
+      } else if (dev->getDeviceNumber() == 210) {
+        dev->setPairedDevices(2);
+      }
+    } else if (dev->getDeviceType() == DEVICE_TYPE_SDS) {
+      dev->setPairedDevices(2);
     }
 
     scheduleDeviceReadout(dev);
