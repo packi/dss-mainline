@@ -63,6 +63,7 @@ const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
 const char *UMV210 =    "UMV:210";
 const char *UMR200 =    "UMR:200";
+const char *SK200 =     "SK:200";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
 // all available features
@@ -110,6 +111,7 @@ const int MF_AVAILABLE[] =
   mf_impulseconfig,
   mf_outmodegeneric,
   mf_outconfigswitch,
+  mf_temperatureoffset
 };
 
 // model features
@@ -126,6 +128,7 @@ const int MF_GE_KM220[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_KM2[] =
@@ -141,6 +144,7 @@ const int MF_GE_KM2[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_KL200[] =
@@ -156,6 +160,7 @@ const int MF_GE_KL200[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_TKM210[] =
@@ -170,6 +175,7 @@ const int MF_GE_TKM210[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_TKM200[] =
@@ -178,7 +184,8 @@ const int MF_GE_TKM200[] =
   mf_leddark,
   mf_pushbutton,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_blinkconfig
 };
 
 const int MF_GE_SDM20[] =
@@ -194,6 +201,7 @@ const int MF_GE_SDM20[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_SDS210[] =
@@ -210,6 +218,7 @@ const int MF_GE_SDS210[] =
   mf_pushbadvanced,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_SDS20[] =
@@ -227,6 +236,7 @@ const int MF_GE_SDS20[] =
   mf_pushbcombined,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_SDS22[] =
@@ -244,6 +254,7 @@ const int MF_GE_SDS22[] =
   mf_pushbcombined,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_SDS2[] =
@@ -260,6 +271,7 @@ const int MF_GE_SDS2[] =
   mf_pushbadvanced,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 
@@ -275,6 +287,7 @@ const int MF_GE_ZWS2[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_UMV204[] =
@@ -289,6 +302,7 @@ const int MF_GE_UMV204[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_UMV200[] =
@@ -305,6 +319,7 @@ const int MF_GE_UMV200[] =
   mf_extradimmer,
   mf_umvrelay,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GE_UMV210[] =
@@ -322,6 +337,7 @@ const int MF_GE_UMV210[] =
   mf_umvrelay,
   mf_outputchannels,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_GN_KM2[] =
@@ -489,7 +505,8 @@ const int MF_GE_TKM2[] =
   mf_leddark,
   mf_pushbutton,
   mf_pushbarea,
-  mf_pushbadvanced
+  mf_pushbadvanced,
+  mf_blinkconfig
 };
 
 const int MF_SW_TKM2[] =
@@ -520,6 +537,7 @@ const int MF_SW_KL2[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_SW_ZWS2[] =
@@ -538,6 +556,7 @@ const int MF_SW_ZWS2[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_SW_KL213[] =
@@ -552,6 +571,7 @@ const int MF_SW_KL213[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_SW_KL214[] =
@@ -566,6 +586,7 @@ const int MF_SW_KL214[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_blinkconfig
 };
 
 const int MF_SW_SDS20[] =
@@ -618,6 +639,11 @@ const int MF_SW_UMR200[] =
   mf_impulseconfig,
   mf_umroutmode,
   mf_outconfigswitch,
+};
+
+const int MF_SW_SK200[] =
+{
+    mf_temperatureoffset
 };
 
 ModelFeatures* ModelFeatures::createInstance()
@@ -837,6 +863,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv->assign(MF_SW_UMR200, MF_ARRAY_SIZE(MF_SW_UMR200));
   setFeatures(ColorIDBlack, UMR200, fv);
   fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_SW_SK200, MF_ARRAY_SIZE(MF_SW_SK200));
+  setFeatures(ColorIDBlack, SK200, fv);
+  fv.reset();
 }
 
 void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_ptr<std::vector<int> > _features) {
@@ -962,6 +993,8 @@ int ModelFeatures::nameToFeature(std::string _name) {
     return mf_outmodegeneric;
   } else if (_name == "outconfigswitch") {
     return mf_outconfigswitch;
+  } else if (_name == "temperatureoffset") {
+    return mf_temperatureoffset;
   }
 
   throw std::runtime_error("unknown feature encountered");
@@ -1055,6 +1088,8 @@ std::string ModelFeatures::getFeatureName(int _feature)
       return "outmodegeneric";
     case mf_outconfigswitch:
       return "outconfigswitch";
+    case mf_temperatureoffset:
+      return "temperatureoffset";
     default:
       break;
   }

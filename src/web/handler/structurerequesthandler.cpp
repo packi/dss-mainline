@@ -241,6 +241,7 @@ namespace dss {
         json.add("id", "");
       }
       json.add("dSUID", dsuid2str(pDevRef->getDSID()));
+      json.add("DisplayID", pDevRef->getDevice()->getDisplayID());
       json.endObject();
     }
     json.endArray();

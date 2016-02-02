@@ -327,6 +327,7 @@ namespace dss {
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
     void assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state);
+    bool hasBlinkSettings();
 
   public:
     /** Creates and initializes a device. */
@@ -734,6 +735,9 @@ namespace dss {
     uint8_t getSWThresholdAddress() const;
     void setSwitchThreshold(uint8_t _threshold);
     uint8_t getSwitchThreshold();
+
+    void setTemperatureOffset(int8_t _offset);
+    int8_t getTemperatureOffset();
 
     void setFloor(int _floor) {
       if (m_floor != _floor) {

@@ -1943,6 +1943,37 @@ namespace dss {
 
       json.add("threshold", value);
       return json.successJSON();
+    } else if (_request.getMethod() == "setTemperatureOffset") {
+      JSONWriter json;
+
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      int value = strToIntDef(_request.getParameter("offset"), -1);
+      if((value  < CHAR_MIN) || (value > CHAR_MAX)) {
+        return JSONWriter::failure("missing or invalid 'offset' parameter");
+      }
+
+      device->setTemperatureOffset(value);
+
+      return json.successJSON();
+    } else if (_request.getMethod() == "getTemperatureOffset") {
+      JSONWriter json;
+      boost::shared_ptr<Device> device;
+      try {
+        device = getDeviceByDSID(_request);
+      } catch(std::runtime_error& e) {
+        return JSONWriter::failure("no device for given dsuid");
+      }
+
+      int8_t value = device->getTemperatureOffset();
+
+      json.add("offset", value);
+      return json.successJSON();
     } else {
       throw std::runtime_error("Unhandled function");
     }
