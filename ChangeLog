@@ -1,5 +1,20 @@
 dSS - digitalSTROM Server
 
+v1.35.0	03.02.2016
+	* added support for TNY devices, #11556
+	* added global JS methods to read and write device configuration, #11774
+	* enable HeatingSystemCapability event upload, #11639
+	* render not present devices regardless of visibility flag, #11764
+	* remove paired devices from model, not only from the meter
+	* read out specific device configurations only on idle dSMs, #11764
+	* retry configuration readouts upon failures, #11819
+	* publish dSS events via a websocket connection, #11592
+	* move invisibe devices into the zone of the main device, #12150
+	* various heating related improvements and fixes
+	* only send metering requests to device that actually support it, #10760
+	* added JSON methods to calibrate temperature offset, #12012
+	* enable blink configuration for all GE-* and SW-KL/ZWS devices, #12013
+
 v1.34.1 16.11.2015
 	* fixed crash (reverted "fix window handle states)
 
