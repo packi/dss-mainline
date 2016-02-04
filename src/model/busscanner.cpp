@@ -854,9 +854,18 @@ namespace dss {
                 " on dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
             ZoneHeatingConfigSpec_t disableConfig = hConfig;
             disableConfig.ControllerMode = 0;
-            manip.setZoneHeatingConfig(_zone,
-                (const dsuid_t) _dsMeter->getDSID(),
-                (const ZoneHeatingConfigSpec_t) disableConfig);
+
+            // disable controller ONLY on dsMeter.
+            // keep configuration! Do not touch zone configuration!
+            try {
+              StructureModifyingBusInterface& modifyingItf = 
+                *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface());
+              modifyingItf.synchronizeZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID(), disableConfig);
+            } catch (std::runtime_error &err) {
+              Logger::getInstance()->log(std::string("BusScanner::scanStatusOfZone: can not disable heating zone on dsMeter: ") +
+              dsuid2str(_dsMeter->getDSID()) +
+              err.what(), lsWarning);
+            }
           }
         }
       } else {
