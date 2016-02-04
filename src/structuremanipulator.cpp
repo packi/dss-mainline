@@ -214,6 +214,22 @@ namespace dss {
     }
   } // removeZoneOnDSMeter
 
+  void StructureManipulator::wipeZoneOnMeter(dsuid_t _meterdSUID, int _zoneID) {
+    // check if the zone consists only of inactive devices and remove them
+    // if this is indeed the case, then retry to remove the zone
+    if (m_QueryInterface.getDevicesCountInZone(_meterdSUID, _zoneID, true) > 0) {
+      throw std::runtime_error("Can not remove zone " + intToString(_zoneID) +
+                               ": zone contains active devices");
+    }
+
+    std::vector<DeviceSpec_t> devices = m_QueryInterface.getDevicesInZone(
+            _meterdSUID, _zoneID, false);
+    for (size_t i = 0; i < devices.size(); i++) {
+      m_Interface.removeDeviceFromDSMeter(_meterdSUID, devices.at(i).ShortAddress);
+    }
+    m_Interface.removeZone(_meterdSUID, _zoneID);
+  } // wipeZoneOnMeter
+
   void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     try {
@@ -236,7 +252,15 @@ namespace dss {
         disableConfig
       );
 
-      m_Interface.removeZone(DSUID_BROADCAST, _zone->getID());
+      for (size_t s = 0; s < meters.size(); s++) {
+        try {
+          m_Interface.removeZone(meters.at(s)->getDSID(), _zone->getID());
+        } catch (BusApiError &be) {
+          if (be.error == ERROR_ZONE_NOT_EMPTY) {
+            wipeZoneOnMeter(meters.at(s)->getDSID(), _zone->getID());
+          }
+        }
+      }
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
       }
