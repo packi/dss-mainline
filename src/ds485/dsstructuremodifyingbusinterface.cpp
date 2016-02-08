@@ -301,7 +301,11 @@ namespace dss {
         _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax,
         _spec.AntiWindUp, _spec.KeepFloorWarm, _spec.SourceZoneId,
         _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
-    DSBusInterface::checkResultCode(ret);
+    if (_dsMeterID == DSUID_BROADCAST) {
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
     usleep(BROADCAST_SLEEP_MICROSECONDS);
 
     if (m_pModelMaintenance) {
