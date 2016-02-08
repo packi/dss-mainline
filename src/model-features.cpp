@@ -128,6 +128,7 @@ const int MF_GE_KM220[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -144,6 +145,7 @@ const int MF_GE_KM2[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -160,6 +162,7 @@ const int MF_GE_KL200[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -175,6 +178,7 @@ const int MF_GE_TKM210[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -185,6 +189,7 @@ const int MF_GE_TKM200[] =
   mf_pushbutton,
   mf_pushbarea,
   mf_pushbadvanced,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -201,6 +206,7 @@ const int MF_GE_SDM20[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -218,6 +224,7 @@ const int MF_GE_SDS210[] =
   mf_pushbadvanced,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -236,6 +243,7 @@ const int MF_GE_SDS20[] =
   mf_pushbcombined,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -254,6 +262,7 @@ const int MF_GE_SDS22[] =
   mf_pushbcombined,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -271,6 +280,7 @@ const int MF_GE_SDS2[] =
   mf_pushbadvanced,
   mf_twowayconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -287,6 +297,7 @@ const int MF_GE_ZWS2[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -302,6 +313,7 @@ const int MF_GE_UMV204[] =
   mf_pushbarea,
   mf_pushbadvanced,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -319,6 +331,7 @@ const int MF_GE_UMV200[] =
   mf_extradimmer,
   mf_umvrelay,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -337,6 +350,7 @@ const int MF_GE_UMV210[] =
   mf_umvrelay,
   mf_outputchannels,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -506,6 +520,7 @@ const int MF_GE_TKM2[] =
   mf_pushbutton,
   mf_pushbarea,
   mf_pushbadvanced,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -537,6 +552,7 @@ const int MF_SW_KL2[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -556,6 +572,7 @@ const int MF_SW_ZWS2[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -571,6 +588,7 @@ const int MF_SW_KL213[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
@@ -586,6 +604,7 @@ const int MF_SW_KL214[] =
   mf_consumption,
   mf_jokerconfig,
   mf_outconfigswitch,
+  mf_impulseconfig,
   mf_blinkconfig
 };
 
