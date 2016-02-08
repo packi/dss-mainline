@@ -68,21 +68,31 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
      */
     boost::shared_ptr<State> fire = apartment.getNonScriptState("fire");
     boost::shared_ptr<State> wind = apartment.getNonScriptState("wind");
-    bool protectionActive =
-        (wind && (wind->getState() == State_Active)) ||
-        (fire && (fire->getState() == State_Active));
+    bool windActive = (wind && (wind->getState() == State_Active));
+    bool fireActive = (fire && (fire->getState() == State_Active));
 
-    if (protectionActive) {
+    std::string protectionMessage("Execution blocked: ");
+    if (fireActive && windActive) {
+      protectionMessage += "fire and wind alarms are active";
+    }
+    else if (fireActive) {
+      protectionMessage += "fire is active";
+    }
+    else if (windActive) {
+      protectionMessage += "wind is active";
+    }
+
+    if (windActive || fireActive) {
       const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
       if (pGroup != NULL) {
         if (DEVICE_CLASS_GR == pGroup->getStandardGroupID()) {
-          throw SceneAccessException("Execution blocked: wind is active");
+          throw SceneAccessException(protectionMessage);
         }
       }
       const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
       if (pDevice != NULL) {
         if (pDevice->getGroupBitmask().test(DEVICE_CLASS_GR-1)) {
-          throw SceneAccessException("Execution blocked: wind is active");
+          throw SceneAccessException(protectionMessage);
         }
       }
     }
