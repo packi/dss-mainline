@@ -57,6 +57,21 @@ namespace dss {
     return false;
   }
 
+  bool busMemberTypeIsValid(BusMemberDevice_t type) {
+    if ((type == BusMember_ds485d) ||
+        (type == BusMember_ds485p) ||
+        (type == BusMember_dSM11)  ||
+        (type == BusMember_dSM12)  ||
+        (type == BusMember_vDSM)   ||
+        (type == BusMember_vDC)    ||
+        (type == BusMember_dSS)    ||
+        (type == BusMember_dSA)    ||
+        (type == BusMember_dSG)) {
+      return true;
+    }
+    return false;
+  }
+
   //================================================== DSMeter
 
   DSMeter::DSMeter(const dsuid_t _dsid, Apartment* _pApartment)
