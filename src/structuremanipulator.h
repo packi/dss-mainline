@@ -60,7 +60,7 @@ namespace dss {
     /**
      * @ret list of devices (slaves included) that have been deleted
      */
-    std::vector<boost::shared_ptr<DeviceReference> > removeDevice(boost::shared_ptr<Device> _pDevice);
+    std::vector<boost::shared_ptr<Device> > removeDevice(boost::shared_ptr<Device> _pDevice);
     void deviceSetName(boost::shared_ptr<Device> _pDevice, const std::string& _name);
     void meterSetName(boost::shared_ptr<DSMeter> _pMeter, const std::string& _name);
     int persistSet(Set& _set, const std::string& _originalSet);

@@ -217,7 +217,7 @@ namespace dss {
       return JSONWriter::failure("Cannot remove present device");
     }
 
-    std::vector<boost::shared_ptr<DeviceReference> > result;
+    std::vector<boost::shared_ptr<Device> > result;
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     try {
       result = manipulator.removeDevice(dev);
@@ -232,16 +232,16 @@ namespace dss {
     // the devices in the returned list are no longer present in the apartment!
     JSONWriter json;
     json.startArray("devices");
-    foreach(boost::shared_ptr<DeviceReference> pDevRef, result) {
+    foreach(boost::shared_ptr<Device> pDev, result) {
       json.startObject();
       dsid_t dsid;
-      if (dsuid_to_dsid(pDevRef->getDSID(), &dsid)) {
+      if (dsuid_to_dsid(pDev->getDSID(), &dsid)) {
         json.add("id", dsid2str(dsid));
       } else {
         json.add("id", "");
       }
-      json.add("dSUID", dsuid2str(pDevRef->getDSID()));
-      json.add("DisplayID", pDevRef->getDevice()->getDisplayID());
+      json.add("dSUID", dsuid2str(pDev->getDSID()));
+      json.add("DisplayID", pDev->getDisplayID());
       json.endObject();
     }
     json.endArray();
