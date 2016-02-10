@@ -446,6 +446,7 @@ namespace dss {
         dev->setConfigLock(true);
     }
 
+
     {
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(devRef);
       boost::shared_ptr<Event> readyEvent = boost::make_shared<Event>(EventName::DeviceEvent, pDevRef);
@@ -453,6 +454,18 @@ namespace dss {
       if(DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(readyEvent);
       }
+    }
+
+    if (((dev->getDeviceType() == DEVICE_TYPE_AKM) ||
+         (dev->getDeviceType() == DEVICE_TYPE_TKM)) &&
+        (dev->getDeviceClass() == DEVICE_CLASS_SW)) {
+      if (dev->getDeviceNumber() == 200) {
+        dev->setPairedDevices(4);
+      } else if (dev->getDeviceNumber() == 210) {
+        dev->setPairedDevices(2);
+      }
+    } else if (dev->getDeviceType() == DEVICE_TYPE_SDS) {
+      dev->setPairedDevices(2);
     }
 
     scheduleDeviceReadout(dev);
@@ -953,7 +966,10 @@ namespace dss {
     _dsMeter->setHardwareVersion(_spec.HardwareVersion);
     _dsMeter->setApiVersion(_spec.APIVersion);
     _dsMeter->setPropertyFlags(_spec.flags);
-    _dsMeter->setBusMemberType(_spec.DeviceType);
+
+    if (!busMemberTypeIsValid(_dsMeter->getBusMemberType())) {
+      _dsMeter->setBusMemberType(_spec.DeviceType);
+    }
 
     // recover old dSM11. (firmware < 1.8.3.)
     if ((_spec.DeviceType == BusMember_Unknown) && DsmApiIsdSM(_dsMeter->getDSID())) {

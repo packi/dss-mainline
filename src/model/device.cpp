@@ -2921,12 +2921,10 @@ namespace dss {
       return true;
     }
 
-    if (getDeviceType() == DEVICE_TYPE_TNY) {
-      uint32_t serial;
-      if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
-        if ((serial % m_pairedDevices) != 0) {
-          return false;
-        }
+    uint32_t serial;
+    if (dsuid_get_serial_number(&m_DSID, &serial) == 0) {
+      if ((serial % m_pairedDevices) != 0) {
+        return false;
       }
     }
     return true;
@@ -2934,11 +2932,9 @@ namespace dss {
 
   dsuid_t Device::getMainDeviceDSUID() const {
     if (!isMainDevice()) {
-      if (getDeviceType() == DEVICE_TYPE_TNY) {
-        dsuid_t main_dsuid;
-        if (dsuid_get_main_dsuid(&m_DSID, m_pairedDevices, &main_dsuid) == 0) {
-          return main_dsuid;
-        }
+      dsuid_t main_dsuid;
+      if (dsuid_get_main_dsuid(&m_DSID, m_pairedDevices, &main_dsuid) == 0) {
+        return main_dsuid;
       }
     }
 

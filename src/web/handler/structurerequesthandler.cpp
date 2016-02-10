@@ -183,11 +183,74 @@ namespace dss {
     }
     if(zoneID != -1) {
       try {
-        boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
-        if(zone->getDevices().length() > 0) {
-          return JSONWriter::failure("Cannot delete a non-empty zone");
-        }
         StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
+        Set set = zone->getDevices();
+        if(set.length() > 0) {
+          Set toMove;
+          Set toErase;
+          int i;
+
+          // check if the zone "appears" empty in the UI
+          for (i = 0; i < set.length(); i++) {
+            const DeviceReference& d = set.get(i);
+
+            if (!d.getDevice()->isVisible()) {
+              if (d.getDevice()->isPresent()) {
+                // invisible and not present devices are not rendered,
+                // the only possibility here are multi-dsid devices that are
+                // hidden
+                // this also means, that if we get a "main" device, then
+                // something is really wrong
+                if (d.getDevice()->isMainDevice()) {
+                  return JSONWriter::failure("Cannot delete a non-empty zone");
+                }
+                toMove.addDevice(d);
+              } else {
+                // invisible and not present devices can be erased
+                toErase.addDevice(d);
+              }
+            } else {
+              // if there are visible devices in the zone, removal is anyway
+              // forbidden
+              return JSONWriter::failure("Cannot delete a non-empty zone");
+            }
+          }
+
+          // not sure if this can ever happen since we actually try to sync
+          // the slaves when moving devices around
+          for (i = 0; i < toMove.length(); i++) {
+            const DeviceReference& d = set.get(i);
+            dsuid_t current = d.getDevice()->getDSID();
+            dsuid_t master = d.getDevice()->getMainDeviceDSUID();
+            if (dsuid_equal(&current, &master)) {
+              // this should never happen
+              return JSONWriter::failure("Cannot delete a non-empty zone");
+            }
+
+            boost::shared_ptr<Device> md = m_Apartment.getDeviceByDSID(master);
+            boost::shared_ptr<Zone> z = m_Apartment.getZone(md->getZoneID());
+            boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(current);
+            printf("MOVING DEVICE %s on meter %s to zone %d\n", dsuid2str(dev->getDSID()).c_str(), dsuid2str(dev->getDSMeterDSID()).c_str(), zone->getID());
+            manipulator.addDeviceToZone(dev, zone);
+          }
+
+          for (i = 0; i < toErase.length(); i++) {
+            const DeviceReference& d = set.get(i);
+            dsuid_t id = d.getDevice()->getDSID();
+            boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(id);
+            manipulator.removeDevice(dev);
+          }
+          if (toErase.length() > 0) {
+            m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etClusterCleanup));
+          }
+
+          // safeguard: if there is somehow still something left in the zone,
+          // we can't remove it
+          if (zone->getDevices().length() > 0) {
+            return JSONWriter::failure("Cannot delete a non-empty zone");
+          }
+        }
         manipulator.removeZoneOnDSMeters(zone);
 
         m_Apartment.removeZone(zoneID);
@@ -217,7 +280,7 @@ namespace dss {
       return JSONWriter::failure("Cannot remove present device");
     }
 
-    std::vector<boost::shared_ptr<DeviceReference> > result;
+    std::vector<boost::shared_ptr<Device> > result;
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     try {
       result = manipulator.removeDevice(dev);
@@ -232,16 +295,16 @@ namespace dss {
     // the devices in the returned list are no longer present in the apartment!
     JSONWriter json;
     json.startArray("devices");
-    foreach(boost::shared_ptr<DeviceReference> pDevRef, result) {
+    foreach(boost::shared_ptr<Device> pDev, result) {
       json.startObject();
       dsid_t dsid;
-      if (dsuid_to_dsid(pDevRef->getDSID(), &dsid)) {
+      if (dsuid_to_dsid(pDev->getDSID(), &dsid)) {
         json.add("id", dsid2str(dsid));
       } else {
         json.add("id", "");
       }
-      json.add("dSUID", dsuid2str(pDevRef->getDSID()));
-      json.add("DisplayID", pDevRef->getDevice()->getDisplayID());
+      json.add("dSUID", dsuid2str(pDev->getDSID()));
+      json.add("DisplayID", pDev->getDisplayID());
       json.endObject();
     }
     json.endArray();

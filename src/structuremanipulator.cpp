@@ -96,7 +96,21 @@ namespace dss {
     int oldZoneID = _device->getZoneID();
     boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByDSID(_device->getDSMeterDSID());
     if(!_zone->registeredOnDSMeter(targetDSMeter)) {
-      createZone(targetDSMeter, _zone);
+      try {
+        createZone(targetDSMeter, _zone);
+      } catch (BusApiError &baer) {
+        // this is not fatal, just sync up the model in the dSS
+        if (baer.error == ERROR_ZONE_ALREADY_EXISTS) {
+          _zone->addToDSMeter(targetDSMeter);
+          _zone->setIsPresent(true);
+          _zone->setIsConnected(true);
+          std::vector<boost::shared_ptr<Group> > groupList = _zone->getGroups();
+          foreach(boost::shared_ptr<Group> group, groupList) {
+            group->setIsConnected(true);
+          }
+          synchronizeGroups(&m_Apartment, &m_Interface);
+        }
+      }
     }
 
     m_Interface.setZoneID(targetDSMeter->getDSID(), _device->getShortAddress(), _zone->getID());
@@ -200,6 +214,22 @@ namespace dss {
     }
   } // removeZoneOnDSMeter
 
+  void StructureManipulator::wipeZoneOnMeter(dsuid_t _meterdSUID, int _zoneID) {
+    // check if the zone consists only of inactive devices and remove them
+    // if this is indeed the case, then retry to remove the zone
+    if (m_QueryInterface.getDevicesCountInZone(_meterdSUID, _zoneID, true) > 0) {
+      throw std::runtime_error("Can not remove zone " + intToString(_zoneID) +
+                               ": zone contains active devices");
+    }
+
+    std::vector<DeviceSpec_t> devices = m_QueryInterface.getDevicesInZone(
+            _meterdSUID, _zoneID, false);
+    for (size_t i = 0; i < devices.size(); i++) {
+      m_Interface.removeDeviceFromDSMeter(_meterdSUID, devices.at(i).ShortAddress);
+    }
+    m_Interface.removeZone(_meterdSUID, _zoneID);
+  } // wipeZoneOnMeter
+
   void StructureManipulator::removeZoneOnDSMeters(boost::shared_ptr<Zone> _zone) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     try {
@@ -222,7 +252,15 @@ namespace dss {
         disableConfig
       );
 
-      m_Interface.removeZone(DSUID_BROADCAST, _zone->getID());
+      for (size_t s = 0; s < meters.size(); s++) {
+        try {
+          m_Interface.removeZone(meters.at(s)->getDSID(), _zone->getID());
+        } catch (BusApiError &be) {
+          if (be.error == ERROR_ZONE_NOT_EMPTY) {
+            wipeZoneOnMeter(meters.at(s)->getDSID(), _zone->getID());
+          }
+        }
+      }
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
       }
@@ -276,9 +314,9 @@ namespace dss {
     m_Interface.removeDeviceFromDSMeters(devDsid);
   } // removeDevice
 
-  std::vector<boost::shared_ptr<DeviceReference> > StructureManipulator::removeDevice(
+  std::vector<boost::shared_ptr<Device> > StructureManipulator::removeDevice(
       boost::shared_ptr<Device> _pDevice) {
-    std::vector<boost::shared_ptr<DeviceReference> > result;
+    std::vector<boost::shared_ptr<Device> > result;
     boost::shared_ptr<Device> pPartnerDevice;
 
     if (_pDevice->is2WayMaster()) {
@@ -305,14 +343,12 @@ namespace dss {
             usleep(500 * 1000); // 500ms
           }
           removeDeviceFromDSMeter(pPartnerDev);
-          boost::shared_ptr<DeviceReference> pPartnerDevRef =
-          boost::make_shared<DeviceReference> (pPartnerDev, &DSS::getInstance()->getApartment());
           checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDev->getZoneID()), pPartnerDev);
-          m_Apartment.removeDevice(pPartnerDevRef->getDSID());
+          m_Apartment.removeDevice(pPartnerDev->getDSID());
           doSleep = true;
 
           if (pPartnerDev->isVisible()) {
-            result.push_back(pPartnerDevRef);
+            result.push_back(pPartnerDev);
           }
         } catch(std::runtime_error& e) {
             Logger::getInstance()->log(std::string("Could not find partner device with dsuid '") + dsuid2str(next) + "'");
@@ -330,19 +366,15 @@ namespace dss {
                                  "dSM: ") + e.what(), lsError);
     }
 
-    boost::shared_ptr<DeviceReference> pDevRef =
-        boost::make_shared<DeviceReference> (_pDevice, &DSS::getInstance()->getApartment());
     checkSensorsOnDeviceRemoval(m_Apartment.getZone(_pDevice->getZoneID()), _pDevice);
-    m_Apartment.removeDevice(pDevRef->getDSID());
-    result.push_back(pDevRef);
+    m_Apartment.removeDevice(_pDevice->getDSID());
+    result.push_back(_pDevice);
 
     if (pPartnerDevice != NULL) {
       Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
-      boost::shared_ptr<DeviceReference> pPartnerDeviceRef =
-          boost::make_shared<DeviceReference> (pPartnerDevice, &DSS::getInstance()->getApartment());
       checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDevice->getZoneID()), pPartnerDevice);
-      m_Apartment.removeDevice(pPartnerDeviceRef->getDSID());
-      result.push_back(pPartnerDeviceRef);
+      m_Apartment.removeDevice(pPartnerDevice->getDSID());
+      result.push_back(pPartnerDevice);
     }
 
     return result;

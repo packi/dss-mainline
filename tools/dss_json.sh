@@ -36,6 +36,8 @@ usage()
   echo "url, e.g. '/json/property/query2?query=/system/js/timings(*)/*(*)/*(*)'"
   echo "all options must come in front of url, incl. output"
   echo ""
+  echo "dss_json.sh -o - /json/system/version  | jq ."
+  echo ""
   echo "Troubleshoot:"
   echo "1. Are you running on the same box -> use trusted port, no options needed"
   echo "   dss_json query"
@@ -138,12 +140,12 @@ fetch_with_login()
 execute()
 {
   if [ -z "$PASSWD" ]; then
-    echo "Trusted port no login needed"
+    echo "Trusted port no login needed" > /dev/stderr
     fetch_trusted
   else
     fetch_with_login
   fi
-  echo "Result saved to ${OUTPUT}"
+  echo "Result saved to ${OUTPUT}" > /dev/stderr
 }
 
 execute
