@@ -277,13 +277,19 @@ namespace dss {
     return result;
   } // getZones
 
-  int DSStructureQueryBusInterface::getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID) {
+  int DSStructureQueryBusInterface::getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool _onlyActive) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
     uint16_t numberOfDevices;
-    int ret = ZoneDeviceCount_all(m_DSMApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
+    int ret;
+
+    if (_onlyActive) {
+      ret = ZoneDeviceCount_only_active(m_DSMApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
+    } else {
+      ret = ZoneDeviceCount_all(m_DSMApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
+    }
     DSBusInterface::checkResultCode(ret);
 
     return numberOfDevices;

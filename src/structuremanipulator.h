@@ -46,6 +46,7 @@ namespace dss {
     class StructureQueryBusInterface& m_QueryInterface;
     void checkSensorsOnDeviceRemoval(
           boost::shared_ptr<Zone> _zone, boost::shared_ptr<Device> _device);
+    void wipeZoneOnMeter(dsuid_t _meterDSUID, int _zoneID);
   public:
     StructureManipulator(StructureModifyingBusInterface& _interface,
                          StructureQueryBusInterface& _queryInterface , Apartment& _apartment)
