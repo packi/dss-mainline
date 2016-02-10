@@ -966,7 +966,10 @@ namespace dss {
     _dsMeter->setHardwareVersion(_spec.HardwareVersion);
     _dsMeter->setApiVersion(_spec.APIVersion);
     _dsMeter->setPropertyFlags(_spec.flags);
-    _dsMeter->setBusMemberType(_spec.DeviceType);
+
+    if (!busMemberTypeIsValid(_dsMeter->getBusMemberType())) {
+      _dsMeter->setBusMemberType(_spec.DeviceType);
+    }
 
     // recover old dSM11. (firmware < 1.8.3.)
     if ((_spec.DeviceType == BusMember_Unknown) && DsmApiIsdSM(_dsMeter->getDSID())) {
