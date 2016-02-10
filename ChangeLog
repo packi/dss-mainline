@@ -1,5 +1,14 @@
 dSS - digitalSTROM Server
 
+v1.35.1	10.02.2016
+	* sync heating controller when dSM becomes ready, #11784
+	* allow "output after impulse" setting for devices that support blink
+	  settings, #12013
+	* fixed fire alarm execution blocked message, #12594
+	* catch some model out of sync situations when moving and removing
+	  devices, #12329
+	* chek bus member validity, #12412
+
 v1.35.0	03.02.2016
 	* added support for TNY devices, #11556
 	* added global JS methods to read and write device configuration, #11774
