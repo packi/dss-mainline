@@ -139,35 +139,35 @@ namespace dss {
       if (el.name() == "hardwareModelGuid") {
         try {
           ret->hardwareModelGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "vendorGuid") {
         try {
           ret->vendorGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "oemGuid") {
         try {
           ret->oemGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "configURL") {
         try {
           ret->configURL = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "hardwareGuid") {
         try {
           ret->hardwareGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "model") {
         try {
           ret->hardwareInfo = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "modelUID") {
         try {
           ret->modelUID = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "hardwareVersion") {
         try {
           ret->hardwareVersion = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "modelFeatures") {
         for (int j = 0; j < el.elements_size(); j++) {
           vdcapi::PropertyElement feature = el.elements(j);
@@ -189,7 +189,7 @@ namespace dss {
       } else if (el.name() == "name") {
         try {
           ret->name = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       }
     }
 
@@ -282,44 +282,44 @@ namespace dss {
       } else if (el.name() == "modelVersion" && val.has_v_string()) {
         try {
           ret->modelVersion = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "model" && val.has_v_string()) {
         try {
           ret->model = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "hardwareVersion" && val.has_v_string()) {
         try {
           ret->hardwareVersion = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
         // FOKEL
       } else if (el.name() == "hardwareModelGuid") {
         try {
           ret->hardwareModelGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "vendorGuid") {
         try {
           ret->vendorGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "oemGuid") {
         try {
           ret->oemGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "configURL") {
         try {
           ret->configURL = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "hardwareGuid") {
         try {
           ret->hardwareGuid = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "modelUID") {
         try {
           ret->modelUID = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       } else if (el.name() == "name") {
         try {
           ret->name = st.convert(val.v_string());
-        } catch (DSSException& e) {}
+        } catch (std::exception& e) {}
       }
     }
 
