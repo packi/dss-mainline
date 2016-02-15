@@ -1325,7 +1325,7 @@ namespace dss {
       }
 
       JSONWriter json;
-      json.startObject("channels");
+      json.startArray("channels");
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
       for (int i = 0; i < pDevice->getOutputChannelCount(); i++) {
@@ -1336,7 +1336,7 @@ namespace dss {
         json.add("dontCare", ((value & (1 << i)) > 0));
         json.endObject();
       }
-      json.endObject();
+      json.endArray();
       return json.successJSON();
     } else if (_request.getMethod() == "getOutputChannelSceneValue") {
       std::string str_chan = _request.getParameter("channels");
