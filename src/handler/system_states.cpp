@@ -196,8 +196,16 @@ void SystemState::bootstrap() {
   registerState(StateName::Wind, true);
   registerState(StateName::Rain, true);
   registerState(StateName::Frost, true);
-  registerState(StateName::HeatingSystem, true);
-  registerState(StateName::HeatingSystemMode, true);
+
+  state = registerState(StateName::HeatingSystem, true);
+  if (!state->hasPersistentData()) {
+    state->setState(coSystemStartup, "active");
+  }
+
+  state = registerState(StateName::HeatingSystemMode, true);
+  if (!state->hasPersistentData()) {
+    state->setState(coSystemStartup, "active"); // heating
+  }
 
   state = registerState(StateName::HeatingModeControl, true);
   State::ValueRange_t heatingModeValues;
@@ -207,7 +215,7 @@ void SystemState::bootstrap() {
   heatingModeValues.push_back("auto");
   state->setValueRange(heatingModeValues);
   if (!state->hasPersistentData()) {
-    state->setState(coSystemStartup, "heating");
+    state->setState(coSystemStartup, "hot water");
   }
 }
 
