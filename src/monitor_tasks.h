@@ -70,6 +70,24 @@ private:
   static size_t m_zoneIndex;
 };
 
+class AutoClusterTask : public Task {
+public:
+  AutoClusterTask(Apartment* _apartment, boost::shared_ptr<Event> _event) :
+    m_Apartment(_apartment),
+    m_event(_event)
+    {
+      initPropertyTree();
+    };
+
+  virtual ~AutoClusterTask() {};
+  virtual void run();
+private:
+  void initPropertyTree();
+  Apartment *m_Apartment;
+  boost::shared_ptr<Event> m_event;
+  static const std::string propAutoConfigDelay;
+};
+
 }// namespace
 
 #endif//__DSS_MONITOR_TASKS_H__
