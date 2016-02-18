@@ -287,7 +287,7 @@ namespace dss {
 
     CardinalDirection_t dir;
     if (cardinalDirection && parseCardinalDirection(cardinalDirection, &dir)) {
-      m_tempDevice->setCardinalDirection(dir);
+      m_tempDevice->setCardinalDirection(dir, true);
     }
 
     WindProtectionClass_t protection;
