@@ -1549,4 +1549,37 @@ Sample: {
       tp->addEvent(task);
     }
   }
+
+  AutoclusterUpdatePlugin::AutoclusterUpdatePlugin(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("AutoclusterUpdatePlugin", _pInterpreter) {}
+
+  __DEFINE_LOG_CHANNEL__(AutoclusterUpdatePlugin, lsInfo);
+
+  void AutoclusterUpdatePlugin::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription(EventName::ModelReady,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+
+    subscription.reset(new EventSubscription(EventName::AutoClusterUpdate,
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void AutoclusterUpdatePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
+  {
+    log("handle: " + _event.getName(), lsDebug);
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<AutoClusterTask> task(
+          new AutoClusterTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
+      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
+      pTP->addEvent(task);
+    }
+  }
+
 } // namespace dss

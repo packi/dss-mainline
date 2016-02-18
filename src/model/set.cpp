@@ -120,6 +120,22 @@ namespace dss {
     }
   } // getByGroup(name)
 
+  class ByColorSelector : public IDeviceSelector {
+  private:
+    DeviceClasses_t m_color;
+  public:
+    ByColorSelector(const DeviceClasses_t _color) : m_color(_color) {}
+    virtual ~ByColorSelector() {};
+
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      return (_device->getDeviceClass() == m_color);
+    }
+  };
+
+  Set Set::getByColor(DeviceClasses_t _color) const {
+    return getSubset(ByColorSelector(_color));
+  }
+
   Set Set::getByZone(int _zoneID) const {
     if(_zoneID != 0) {
       Set result;

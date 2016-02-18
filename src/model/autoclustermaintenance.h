@@ -47,6 +47,8 @@ public:
   AutoClusterMaintenance(Apartment* _apartment);
   ~AutoClusterMaintenance();
 
+  void globalConsistencyCheck();
+
   void consistencyCheck(Device &_device);
   void joinIdenticalClusters();
   void cleanupEmptyCluster();
