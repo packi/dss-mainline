@@ -228,6 +228,15 @@ namespace dss {
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+  class AutoclusterUpdatePlugin : public EventInterpreterPlugin {
+      private:
+        __DECL_LOG_CHANNEL__
+      public:
+      AutoclusterUpdatePlugin(EventInterpreter* _pInterpreter);
+      virtual ~AutoclusterUpdatePlugin() {};
+      virtual void subscribe();
+      virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+  };
 
 } // namespace dss
 
