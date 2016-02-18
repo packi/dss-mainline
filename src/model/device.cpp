@@ -2736,13 +2736,15 @@ namespace dss {
     return deviceIndex;
   }
 
-  void Device::setCardinalDirection(CardinalDirection_t _direction) {
+  void Device::setCardinalDirection(CardinalDirection_t _direction, bool _initial) {
     assert(valid(_direction));
 
     boost::mutex::scoped_lock lock(m_deviceMutex);
     if (m_cardinalDirection != _direction) {
       m_cardinalDirection = _direction;
-      checkAutoCluster();
+      if (!_initial) {
+        checkAutoCluster();
+      }
     }
   }
 
@@ -2764,7 +2766,9 @@ namespace dss {
     }
     if (m_windProtectionClass != _klass) {
       m_windProtectionClass = _klass;
-      checkAutoCluster();
+      if (!_initial) {
+        checkAutoCluster();
+      }
     }
   }
 

@@ -721,7 +721,7 @@ namespace dss {
     void setDeviceUMROffDelay(double delay);
     void getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay, uint8_t *_count);
 
-    void setCardinalDirection(CardinalDirection_t _direction);
+    void setCardinalDirection(CardinalDirection_t _direction, bool _initial = false);
     CardinalDirection_t getCardinalDirection() const {
       return m_cardinalDirection;
     }

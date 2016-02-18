@@ -100,6 +100,9 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
+    if (_dsMeterID == DSUID_NULL) {
+      throw BusApiError("_dsMeterID is NULL");
+    }
     int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
     DSBusInterface::checkResultCode(ret);
   } // removeFromGroup
