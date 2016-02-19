@@ -81,6 +81,7 @@ namespace EventName {
   const std::string SceneNameChanged = "scene_name_changed";
 
   const std::string ReexportTimings = "reexport_timings";
+  const std::string AutoClusterUpdate = "autocluster_update";
 }
 
 boost::shared_ptr<Event>

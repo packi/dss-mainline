@@ -28,9 +28,10 @@
 #include "nonaddressablemodelitem.h"
 #include "modeltypes.h"
 
+#include "device.h"
+
 namespace dss {
 
-  class Device;
   class Group;
   class DSMeter;
 
@@ -91,6 +92,8 @@ namespace dss {
      * Note that these groups could be spanned over multiple dsMeters.
      */
     Set getByGroup(const std::string& _name) const;
+
+    Set getByColor(DeviceClasses_t _color) const;
 
     /** Returns a subset of the devices which have sensors of the given type */
     Set getBySensorType(int _type) const;

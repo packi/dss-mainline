@@ -516,6 +516,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterDatabaseUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());

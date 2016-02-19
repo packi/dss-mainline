@@ -1954,7 +1954,7 @@ namespace dss {
       }
 
       int value = strToIntDef(_request.getParameter("offset"), -1);
-      if((value  < CHAR_MIN) || (value > CHAR_MAX)) {
+      if((value  < -128) || (value > 127)) {
         return JSONWriter::failure("missing or invalid 'offset' parameter");
       }
 

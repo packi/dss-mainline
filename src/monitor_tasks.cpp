@@ -38,6 +38,7 @@
 #include "model/state.h"
 #include "model/modelconst.h"
 #include "model/modelmaintenance.h"
+#include "model/autoclustermaintenance.h"
 
 namespace dss {
 
@@ -426,6 +427,30 @@ void HeatingValveProtectionTask::run() {
     } catch (...) {
       Logger::getInstance()->log("HeatingValveProtectionTask: execution error", lsError);
     }
+  }
+}
+
+const std::string AutoClusterTask::propAutoConfigDelay = "/config/subsystems/EventInterpreter/autoconfigDelay";
+
+void AutoClusterTask::initPropertyTree() {
+    static const int defaultTimeOffset = 1800; // 30 min
+    DSS::getInstance()->getPropertySystem().setIntValue(propAutoConfigDelay, defaultTimeOffset, true, false);
+}
+
+void AutoClusterTask::run() {
+  if (m_event->getName() == EventName::ModelReady) {
+    boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::AutoClusterUpdate);
+    int timeOffset = DSS::getInstance()->getPropertySystem().getIntValue(propAutoConfigDelay);
+    std::string data = "+" + intToString(timeOffset);
+    pEvent->setProperty("time", data);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+    return;
+  }
+  if (m_event->getName() == EventName::AutoClusterUpdate) {
+    AutoClusterMaintenance maintenance(m_Apartment);
+    maintenance.globalConsistencyCheck();
   }
 }
 

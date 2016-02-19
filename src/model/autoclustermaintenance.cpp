@@ -53,6 +53,22 @@ AutoClusterMaintenance::~AutoClusterMaintenance()
   m_pApartment = NULL;
 } /* ~AutoClusterMaintenance */
 
+
+void AutoClusterMaintenance::globalConsistencyCheck()
+{
+  static const int SleepTimeBetweenChecks = 1000;
+  assert(m_pApartment);
+  Set deviceRefs = m_pApartment->getDevices();
+  Set greyDevices= deviceRefs.getByColor(DEVICE_CLASS_GR);
+
+  for (int i = 0; i < greyDevices.length(); ++i) {
+    const DeviceReference devRef = greyDevices.get(i);
+    Device* device = const_cast<Device*> (devRef.getDevice().get());
+    consistencyCheck(*device);
+    sleepMS(SleepTimeBetweenChecks);
+  }
+}
+
 void AutoClusterMaintenance::consistencyCheck(Device &_device)
 {
   assert(m_pApartment);

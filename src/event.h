@@ -96,6 +96,7 @@ namespace dss {
     extern const std::string ButtonDeviceAction;
     extern const std::string SceneNameChanged;
     extern const std::string ReexportTimings;
+    extern const std::string AutoClusterUpdate;
   }
 
   namespace EventProperty {
