@@ -513,6 +513,7 @@ namespace dss {
       }
 
       {
+        boost::recursive_mutex::scoped_lock glock(m_GlobalCurlMutex);
         ScriptLock lock(cb->ctx);
         JSContextThread thread(cb->cx);
         JSRequest req(cb->ctx);
@@ -524,11 +525,12 @@ namespace dss {
       }
 
       if (!getIsStopped()) {
-        ScriptLock lock(getContext());
+        boost::recursive_mutex::scoped_lock glock(m_GlobalCurlMutex);
+        ScriptLock lock(cb->ctx);
         {
-          JSContextThread req(getContext());
-          ScriptObject sobj(cb->obj, *getContext());
-          ScriptFunctionParameterList params(*getContext());
+          JSContextThread req(cb->ctx);
+          ScriptObject sobj(cb->obj, *cb->ctx);
+          ScriptFunctionParameterList params(*cb->ctx);
 
           if (c != CURLE_OK) {
               Logger::getInstance()->log(std::string("JavaScript: curl error ")+
@@ -559,7 +561,10 @@ namespace dss {
     }
   private:
       User* m_pRunAsUser;
+      static boost::recursive_mutex m_GlobalCurlMutex;
   };
+
+  boost::recursive_mutex SessionAttachedAsyncCurlObject::m_GlobalCurlMutex;
 
   static JSBool jscurl_perform(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext *ctx = static_cast<ScriptContext *> (JS_GetContextPrivate(cx));
