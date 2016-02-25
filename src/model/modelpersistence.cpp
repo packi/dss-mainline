@@ -1190,6 +1190,8 @@ namespace dss {
   } // dsMeterToXML
 
   void ModelPersistence::writeConfigurationToXML(const std::string& _fileName) {
+    boost::recursive_mutex::scoped_lock lock(PropertyNode::m_GlobalMutex);
+
     Logger::getInstance()->log("Writing apartment config to '" + _fileName + "'", lsInfo);
 
     std::string tmpOut = _fileName + ".tmp";
