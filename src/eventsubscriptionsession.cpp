@@ -39,7 +39,7 @@ namespace dss {
    * @subscribtion_id -- provided by client!!
    */
   EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
-                                                     int subscription_id)
+                                                     const std::string& subscription_id)
   : m_EventInterpreter(_eventInterpreter),
     m_subscription_id(subscription_id)
   { }
