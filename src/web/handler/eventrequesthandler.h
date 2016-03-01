@@ -43,8 +43,8 @@ namespace dss {
   private:
     EventInterpreter& m_EventInterpreter;
 
-    int validateArgs(boost::shared_ptr<Session> _session, const std::string &name,
-                     const std::string &tokenStr);
+    void validateArgs(boost::shared_ptr<Session> _session, const std::string &name,
+                      const std::string &tokenStr);
     std::string raise(const RestfulRequest& _request);
     std::string subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     std::string unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);

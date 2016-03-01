@@ -84,10 +84,9 @@ namespace dss {
     return JSONWriter::success();
   }
 
-  int EventRequestHandler::validateArgs(boost::shared_ptr<Session> _session,
-                                     const std::string &name,
-                                     const std::string &subscribtionID) {
-    int token;
+  void EventRequestHandler::validateArgs(boost::shared_ptr<Session> _session,
+                                         const std::string &name,
+                                         const std::string &subscribtionID) {
     if (_session == NULL) {
       throw std::runtime_error("Invalid session");
     }
@@ -97,12 +96,6 @@ namespace dss {
     if (subscribtionID.empty()) {
       throw std::runtime_error("Missing event subscription id");
     }
-    try {
-      token = strToInt(subscribtionID);
-    } catch (std::invalid_argument& err) {
-      throw std::runtime_error(std::string("Invalid event subscription id ") + subscribtionID);
-    }
-    return token;
   }
 
   // name=EventName&sid=EventSubscriptionID
@@ -111,15 +104,14 @@ namespace dss {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string tokenStr = _request.getParameter("subscriptionID");
-    int token;
 
     try {
-      token = validateArgs(_session, name, tokenStr);
-    } catch (std::runtime_error e) {
+      validateArgs(_session, name, tokenStr);
+    } catch (std::runtime_error& e) {
       return JSONWriter::failure(e.what());
     }
 
-    _session->subscribeEventSubscription(m_EventInterpreter, token, name);
+    _session->subscribeEventSubscription(m_EventInterpreter, tokenStr, name);
     return JSONWriter::success();
   }
 
@@ -128,15 +120,14 @@ namespace dss {
     StringConverter st("UTF-8", "UTF-8");
     std::string name = st.convert(_request.getParameter("name"));
     std::string subscribtionID = _request.getParameter("subscriptionID");
-    int token;
 
     try {
-      token = validateArgs(_session, name, subscribtionID);
-    } catch (std::runtime_error e) {
+      validateArgs(_session, name, subscribtionID);
+    } catch (std::runtime_error& e) {
       return JSONWriter::failure(e.what());
     }
 
-    _session->unsubscribeEventSubscription(token, name);
+    _session->unsubscribeEventSubscription(subscribtionID, name);
     return JSONWriter::success();
   }
 
@@ -235,11 +226,10 @@ namespace dss {
     std::string tokenStr = _request.getParameter("subscriptionID");
     std::string timeoutStr = _request.getParameter("timeout");
     int timeout = 0;
-    int token;
 
     try {
-      token = validateArgs(_session, "sentinel", tokenStr);
-    } catch (std::runtime_error e) {
+      validateArgs(_session, "sentinel", tokenStr);
+    } catch (std::runtime_error& e) {
       return JSONWriter::failure(e.what());
     }
 
@@ -253,7 +243,7 @@ namespace dss {
 
     boost::shared_ptr<EventSubscriptionSession> subscriptionSession;
     try {
-      subscriptionSession = _session->getEventSubscription(token);
+      subscriptionSession = _session->getEventSubscription(tokenStr);
     } catch (std::runtime_error& e) {
       return JSONWriter::failure(e.what());
     }

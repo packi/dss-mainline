@@ -40,7 +40,7 @@ namespace dss {
   class EventSubscriptionSession {
   public:
     EventSubscriptionSession(EventInterpreter& _eventInterpreter,
-                             int subscription_id);
+                             const std::string& subscription_id);
 
     std::string subscribe(const std::string& _eventName);
     void unsubscribe(const std::string& _eventName);
@@ -50,14 +50,14 @@ namespace dss {
      * blocks if no events are available
      */
     bool waitForEvent(const int _timeoutMS);
-    int subscriptionId() const { return m_subscription_id; }
+    const std::string& subscriptionId() const { return m_subscription_id; }
   private:
     boost::shared_ptr<EventCollector> m_pEventCollector;
     void createCollector();
     // name, subscriptionID
     std::map<std::string, std::string> m_subscriptionMap;
     EventInterpreter& m_EventInterpreter;
-    int m_subscription_id;
+    std::string m_subscription_id;
   };
 
   typedef boost::shared_ptr<EventSubscriptionSession> EventSubscriptionSession_t;
@@ -74,13 +74,13 @@ namespace dss {
 
   class EventSubscriptionSessionSelectById {
   public:
-    EventSubscriptionSessionSelectById(int subscription_id) :
+    EventSubscriptionSessionSelectById(const std::string& subscription_id) :
       m_subscription_id(subscription_id) {}
     bool operator()(const boost::shared_ptr<EventSubscriptionSession> &lhs) {
       return lhs->subscriptionId() == m_subscription_id;
     }
   private:
-    int m_subscription_id;
+    std::string m_subscription_id;
   };
 };
 
