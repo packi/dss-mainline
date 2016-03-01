@@ -35,8 +35,8 @@ BOOST_AUTO_TEST_SUITE(RestfulAPITests)
 BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribe) {
   dss::EventInterpreter interp(NULL);
 
-  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, 0x7f));
-  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, 0x7f));
+  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, "0x7f"));
+  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, "0x7f"));
   std::vector<dss::EventSubscriptionSession_t> coll;
 
   BOOST_CHECK(std::find(coll.begin(), coll.end(), subs) == coll.end());
@@ -62,22 +62,22 @@ BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribe) {
 BOOST_AUTO_TEST_CASE(testSubscribeUnsubscribeByTokenId) {
   dss::EventInterpreter interp(NULL);
 
-  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, 0x7f));
-  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, 0x7f));
-  dss::EventSubscriptionSession_t subs3(new dss::EventSubscriptionSession(interp, 0x17));
+  dss::EventSubscriptionSession_t subs(new dss::EventSubscriptionSession(interp, "0x7f"));
+  dss::EventSubscriptionSession_t subs2(new dss::EventSubscriptionSession(interp, "0x7f"));
+  dss::EventSubscriptionSession_t subs3(new dss::EventSubscriptionSession(interp, "0x17"));
   std::vector<dss::EventSubscriptionSession_t> coll;
 
   coll.push_back(subs);
   coll.push_back(subs2);
   coll.erase(std::remove_if(coll.begin(), coll.end(),
-                            dss::EventSubscriptionSessionSelectById(0x7f)), coll.end());
+                            dss::EventSubscriptionSessionSelectById("0x7f")), coll.end());
   BOOST_CHECK(coll.empty());
 
   coll.push_back(subs);
   coll.push_back(subs2);
   coll.push_back(subs3);
   coll.erase(std::remove_if(coll.begin(), coll.end(),
-                            dss::EventSubscriptionSessionSelectById(0x7f)), coll.end());
+                            dss::EventSubscriptionSessionSelectById("0x7f")), coll.end());
   BOOST_CHECK(std::find(coll.begin(), coll.end(), subs3) != coll.end());
   BOOST_CHECK(coll.size() == 1);
 }

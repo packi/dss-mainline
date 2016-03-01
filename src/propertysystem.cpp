@@ -67,6 +67,7 @@ namespace dss {
     assert(root != NULL);
 
     if (ofs) {
+      boost::recursive_mutex::scoped_lock lock(PropertyNode::m_GlobalMutex);
       int indent = 0;
 
       ofs << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
@@ -858,9 +859,6 @@ namespace dss {
   } // createProperty
 
   bool PropertyNode::saveAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
-
-    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-
     _ofs << doIndent(_indent) << "<property type=\"" << getValueTypeAsString(getValueType()) << "\"" <<
                                           " name=\"" << XMLStringEscape(getDisplayName()) << "\"";
 
@@ -894,8 +892,6 @@ namespace dss {
   } // saveAsXML
 
   bool PropertyNode::saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask) {
-    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
-
     if (m_ChildNodes) {
       foreach (PropertyNodePtr pChild, *m_ChildNodes) {
         if ((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {

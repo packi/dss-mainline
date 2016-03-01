@@ -103,18 +103,18 @@ namespace dss {
    * @ret subscription std::runtime_error if not found
    */
   boost::shared_ptr<EventSubscriptionSession>
-    Session::getEventSubscription(int _token)
+    Session::getEventSubscription(const std::string& _token)
   {
     subscriptions_t::iterator item = std::find_if(m_subscriptions.begin(), m_subscriptions.end(),
                                                   EventSubscriptionSessionSelectById(_token));
     if (item == m_subscriptions.end()) {
-        throw std::runtime_error(" Token " + intToString(_token) + " not found!");
+        throw std::runtime_error(" Token " + _token + " not found!");
     }
     return *item;
   }
 
   boost::shared_ptr<EventSubscriptionSession>
-    Session::createEventSubscription(EventInterpreter &interp, int _token)
+    Session::createEventSubscription(EventInterpreter &interp, const std::string& _token)
   {
     subscriptions_t::iterator item = std::find_if(m_subscriptions.begin(), m_subscriptions.end(),
                                                   EventSubscriptionSessionSelectById(_token));
@@ -128,7 +128,7 @@ namespace dss {
     }
   }
 
-  void Session::subscribeEventSubscription(EventInterpreter &interp, int _token, const std::string& _name)
+  void Session::subscribeEventSubscription(EventInterpreter &interp, const std::string& _token, const std::string& _name)
   {
     boost::mutex::scoped_lock lock(m_SubscriptionMutex);
     boost::shared_ptr<EventSubscriptionSession> subscription =
@@ -136,7 +136,7 @@ namespace dss {
     subscription->subscribe(_name);
   }
 
-  void Session::unsubscribeEventSubscription(int _token, const std::string& _name)
+  void Session::unsubscribeEventSubscription(const std::string& _token, const std::string& _name)
   {
     boost::mutex::scoped_lock lock(m_SubscriptionMutex);
     boost::shared_ptr<EventSubscriptionSession> sub;
