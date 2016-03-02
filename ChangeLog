@@ -1,5 +1,10 @@
 dSS - digitalSTROM Server
 
+v1.35.4	02.03.2016
+	* fix locking issue, #12747
+	* fix concurrency of scripting callback handlers
+	* fix subscription ID overflow, #2143
+
 v1.35.3	19.02.2016
 	* do not lose clusters upon startup, #12265
 	* fix temperature offset setting, #12729
