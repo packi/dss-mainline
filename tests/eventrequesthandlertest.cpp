@@ -203,7 +203,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscribeInvalidSubscriptionID, Fixture) {
   m_Params += "&subscriptionID=" + urlEncode(kSubscriptionID);
   RestfulRequest req("event/subscribe", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession, NULL);
-  testOkIs(response, false);
+  testOkIs(response, true);
 }
 
 BOOST_FIXTURE_TEST_CASE(testSubscribe, Fixture) {
@@ -243,7 +243,7 @@ BOOST_FIXTURE_TEST_CASE(testUnsubscribeInvalidSubscriptionID, Fixture) {
   m_Params += "&subscriptionID=" + urlEncode(kSubscriptionID);
   RestfulRequest req("event/unsubscribe", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession, NULL);
-  testOkIs(response, false);
+  testOkIs(response, true);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetNoSession, Fixture) {
