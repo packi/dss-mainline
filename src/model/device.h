@@ -200,7 +200,7 @@ namespace dss {
   } DeviceClasses_t;
 
   typedef enum {
-    DEVICE_OEM_UNKOWN,
+    DEVICE_OEM_UNKNOWN,
     DEVICE_OEM_NONE,
     DEVICE_OEM_LOADING,
     DEVICE_OEM_VALID,

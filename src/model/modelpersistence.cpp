@@ -241,7 +241,7 @@ namespace dss {
                                            ShortAddressStaleDevice);
     }
 
-    DeviceOEMState_t oemEanState = DEVICE_OEM_UNKOWN;
+    DeviceOEMState_t oemEanState = DEVICE_OEM_UNKNOWN;
     if (oemState != NULL) {
       oemEanState = m_tempDevice->getOemStateFromString(oemState);
     }
@@ -271,7 +271,7 @@ namespace dss {
       m_tempDevice->setOemInfo(oemEanNumber, oemSerialNumber, oemPartNumber,
                                oemInetState, isIndependent);
 
-      DeviceOEMState_t productInfoState = DEVICE_OEM_UNKOWN;
+      DeviceOEMState_t productInfoState = DEVICE_OEM_UNKNOWN;
       if (oemProdState != NULL) {
         productInfoState = m_tempDevice->getOemStateFromString(oemProdState);
       }

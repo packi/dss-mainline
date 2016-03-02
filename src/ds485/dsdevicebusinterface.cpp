@@ -552,7 +552,7 @@ namespace dss {
     bool isIndependent = false;
     bool isConfigLocked = false;
     uint8_t pairedDevices = 0;
-    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    DeviceOEMState_t state = DEVICE_OEM_UNKNOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
 
     m_dsmApiHandle = DsmApiInitialize();

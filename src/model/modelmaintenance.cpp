@@ -2511,7 +2511,7 @@ namespace dss {
     std::string productName;
     boost::filesystem::path iconFile;
     std::string defaultName;
-    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    DeviceOEMState_t state = DEVICE_OEM_UNKNOWN;
 
     if (code == 200) {
       Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: result: ") + result);
@@ -2920,7 +2920,7 @@ namespace dss {
     foreach(boost::shared_ptr<Device> device, deviceVec) {
       if ((device->getOemInfoState() == DEVICE_OEM_VALID) &&
            ((device->getOemProductInfoState() == DEVICE_OEM_VALID) ||
-            (device->getOemProductInfoState() == DEVICE_OEM_UNKOWN))) {
+            (device->getOemProductInfoState() == DEVICE_OEM_UNKNOWN))) {
         // query Webservice
         getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(device));
         device->setOemProductInfoState(DEVICE_OEM_LOADING);

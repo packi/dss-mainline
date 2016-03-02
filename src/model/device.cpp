@@ -92,11 +92,11 @@ namespace dss {
     m_OemSerialNumber(0),
     m_OemPartNumber(0),
     m_OemInetState(DEVICE_OEM_EAN_NO_EAN_CONFIGURED),
-    m_OemState(DEVICE_OEM_UNKOWN),
+    m_OemState(DEVICE_OEM_UNKNOWN),
     m_OemIsIndependent(true),
     m_HWInfo(),
     m_iconPath("unknown.png"),
-    m_OemProductInfoState(DEVICE_OEM_UNKOWN),
+    m_OemProductInfoState(DEVICE_OEM_UNKNOWN),
     m_OemProductName(),
     m_OemProductIcon(),
     m_OemProductURL(),
@@ -1872,7 +1872,7 @@ namespace dss {
   std::string Device::oemStateToString(const DeviceOEMState_t _state)
   {
     switch (_state) {
-    case DEVICE_OEM_UNKOWN:
+    case DEVICE_OEM_UNKNOWN:
       return "Unknown";
     case DEVICE_OEM_NONE:
       return "None";
@@ -1921,7 +1921,7 @@ namespace dss {
     } else if (strcmp(_string, "Valid") == 0) {
       return DEVICE_OEM_VALID;
     } else {
-      return DEVICE_OEM_UNKOWN;
+      return DEVICE_OEM_UNKNOWN;
     }
   }
 
