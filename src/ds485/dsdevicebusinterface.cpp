@@ -37,6 +37,7 @@
 #include "src/model/modulator.h"
 #include "src/model/apartment.h"
 #include "src/model/modelconst.h"
+#include "src/model/set.h"
 #include "dss.h"
 
 #define TASK_REQUE_ON_FAILURE_SLEEP_SECONDS 4
@@ -643,6 +644,16 @@ namespace dss {
           DsmApiCleanup(m_dsmApiHandle);
           m_dsmApiHandle = NULL;
 
+          if (m_dsm) {
+            boost::shared_ptr<Device> dev = m_dsm->getDevices().getByBusID(m_deviceAdress, m_dsm).getDevice();
+            // if the device was physically removed there is no point to
+            // reschedule, a new task will get queued when the device
+            // is readded
+            if (!dev->isPresent()) {
+              return;
+            }
+          }
+
           sleep(TASK_REQUE_ON_FAILURE_SLEEP_SECONDS);
           DSS::getInstance()->getModelMaintenance().scheduleDeviceReadout(m_dsmId, boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> (shared_from_this()));
       }
@@ -699,6 +710,16 @@ namespace dss {
           DsmApiClose(m_dsmApiHandle);
           DsmApiCleanup(m_dsmApiHandle);
           m_dsmApiHandle = NULL;
+
+          if (m_dsm) {
+            boost::shared_ptr<Device> dev = m_dsm->getDevices().getByBusID(999, m_dsm).getDevice();
+            // if the device was physically removed there is no point to
+            // reschedule, a new task will get queued when the device
+            // is readded
+            if (!dev->isPresent()) {
+              return;
+            }
+          }
 
           sleep(TASK_REQUE_ON_FAILURE_SLEEP_SECONDS);
           DSS::getInstance()->getModelMaintenance().scheduleDeviceReadout(m_dsmId, boost::shared_ptr<DSDeviceBusInterface::TNYConfigReader> (shared_from_this()));
