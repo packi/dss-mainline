@@ -626,6 +626,13 @@ namespace dss {
       }
     } catch (ItemNotFoundException& infe) {
       Logger::getInstance()->log("OEMDataReader::run: dSM not found or left, aborting readout\n");
+      if (DSS::hasInstance()) {
+        if (m_dsm) {
+          boost::shared_ptr<Device> dev = m_dsm->getDevices().getByBusID(m_deviceAdress, m_dsm).getDevice();
+          dev->setOemInfoState(DEVICE_OEM_UNKNOWN);
+          DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+        }
+      }
     } catch (std::runtime_error& er) {
       Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what() +
           " reading from dSM " + dsuid2str(m_dsmId) +

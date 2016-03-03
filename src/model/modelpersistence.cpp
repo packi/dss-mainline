@@ -244,6 +244,11 @@ namespace dss {
     DeviceOEMState_t oemEanState = DEVICE_OEM_UNKNOWN;
     if (oemState != NULL) {
       oemEanState = m_tempDevice->getOemStateFromString(oemState);
+      // device was in the loading state when dSS shut down, repeat the
+      // readout
+      if (oemEanState == DEVICE_OEM_LOADING) {
+        oemEanState = DEVICE_OEM_UNKNOWN;
+      }
     }
 
     unsigned long long oemEanNumber = 0;
@@ -999,7 +1004,9 @@ namespace dss {
     if (_pDevice->getFloor() != 0) {
       addAttribute(_ofs, Floor, intToString(_pDevice->getFloor()));
     }
-    if(_pDevice->getOemInfoState() == DEVICE_OEM_NONE) {
+    if ((_pDevice->getOemInfoState() == DEVICE_OEM_NONE) ||
+        (_pDevice->getOemInfoState() == DEVICE_OEM_UNKNOWN) ||
+        (_pDevice->getOemInfoState() == DEVICE_OEM_LOADING)) {
       _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
     } else if(_pDevice->getOemInfoState() == DEVICE_OEM_VALID) {
       _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
