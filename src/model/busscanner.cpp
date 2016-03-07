@@ -1100,7 +1100,7 @@ namespace dss {
           continue;
         }
 
-        while (dsm->isPresent() && dsm->getState()) {
+        while (dsm->isPresent() && (dsm->getState() == DSM_STATE_REGISTRATION)) {
           sleep(5);
         }
         if (!dsm->isPresent()) {
