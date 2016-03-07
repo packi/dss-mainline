@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.35.5	07.03.2016
+	* make reading out of the device configuration more robust,  #12854
+
 v1.35.4	02.03.2016
 	* fix locking issue, #12747
 	* fix concurrency of scripting callback handlers
