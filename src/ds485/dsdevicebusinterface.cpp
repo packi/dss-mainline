@@ -493,7 +493,7 @@ namespace dss {
     }
 
     // wait until dsm has finished device registrations
-    while (m_dsm && m_dsm->isPresent() && m_dsm->getState()) {
+    while (m_dsm && m_dsm->isPresent() && (m_dsm->getState() == DSM_STATE_REGISTRATION)) {
       sleep(5);
     }
     if ((m_dsm == NULL) || !m_dsm->isPresent()) {
@@ -517,7 +517,7 @@ namespace dss {
     }
 
     // wait until dsm has finished device registrations
-    while (m_dsm && m_dsm->isPresent() && m_dsm->getState()) {
+    while (m_dsm && m_dsm->isPresent() && (m_dsm->getState() == DSM_STATE_REGISTRATION)) {
       sleep(5);
     }
     if ((m_dsm == NULL) || !m_dsm->isPresent()) {
