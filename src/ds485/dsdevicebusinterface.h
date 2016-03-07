@@ -25,6 +25,7 @@
 #define DSDEVICEBUSINTERFACE_H_
 
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "dsbusinterfaceobj.h"
 #include "taskprocessor.h"
@@ -39,11 +40,12 @@ namespace dss {
   class DSDeviceBusInterface : public DSBusInterfaceObj,
                                public DeviceBusInterface {
   public:
-    class OEMDataReader : public Task {
+    class ConfigReaderHelper
+    {
     public:
-      OEMDataReader(const std::string& _busConnection);
-      virtual ~OEMDataReader();
-      virtual void run();
+      ConfigReaderHelper(const std::string& _busConnection);
+      ~ConfigReaderHelper();
+
       virtual void setup(boost::shared_ptr<Device> _device);
 
       uint16_t getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) const;
@@ -53,11 +55,19 @@ namespace dss {
       DsmApiHandle_t m_dsmApiHandle;
       devid_t m_deviceAdress;
       dsuid_t m_dsmId;
-      int m_revisionID;
       boost::shared_ptr<DSMeter> m_dsm;
+      int m_revisionID;
+    };
+    class OEMDataReader : public Task, public ConfigReaderHelper,
+                          public boost::enable_shared_from_this< OEMDataReader > {
+    public:
+      OEMDataReader(const std::string& _busConnection);
+      virtual ~OEMDataReader();
+      virtual void run();
     };
 
-    class TNYConfigReader : public OEMDataReader {
+    class TNYConfigReader : public Task, public ConfigReaderHelper,
+                            public boost::enable_shared_from_this< TNYConfigReader > {
     public:
       TNYConfigReader(const std::string& _busConnection);
       virtual ~TNYConfigReader();

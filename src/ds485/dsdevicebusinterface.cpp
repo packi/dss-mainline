@@ -37,8 +37,10 @@
 #include "src/model/modulator.h"
 #include "src/model/apartment.h"
 #include "src/model/modelconst.h"
+#include "src/model/set.h"
 #include "dss.h"
 
+#define TASK_REQUE_ON_FAILURE_SLEEP_SECONDS 4
 namespace dss {
 
   //================================================== DSDeviceBusInterface
@@ -456,7 +458,7 @@ namespace dss {
     return out;
   }
 
-  DSDeviceBusInterface::OEMDataReader::OEMDataReader(const std::string& _busConnection)
+  DSDeviceBusInterface::ConfigReaderHelper::ConfigReaderHelper(const std::string& _busConnection)
     : m_busConnection(_busConnection)
     , m_dsmApiHandle(NULL)
     , m_deviceAdress(0)
@@ -465,7 +467,7 @@ namespace dss {
   {
   }
 
-  DSDeviceBusInterface::OEMDataReader::~OEMDataReader()
+  DSDeviceBusInterface::ConfigReaderHelper::~ConfigReaderHelper()
   {
     if (m_dsmApiHandle != NULL) {
       DsmApiClose(m_dsmApiHandle);
@@ -474,7 +476,17 @@ namespace dss {
     }
   }
 
-  uint16_t DSDeviceBusInterface::OEMDataReader::getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) const
+  void DSDeviceBusInterface::ConfigReaderHelper::setup(boost::shared_ptr<Device> _device)
+  {
+    m_deviceAdress = _device->getShortAddress();
+    m_dsmId = _device->getDSMeterDSID();
+    m_revisionID = _device->getRevisionID();
+    if (DSS::hasInstance()) {
+      m_dsm = DSS::getInstance()->getApartment().getDSMeterByDSID(m_dsmId);
+    }
+  }
+
+  uint16_t DSDeviceBusInterface::ConfigReaderHelper::getDeviceConfigWord(uint8_t _configClass, uint8_t _configIndex) const
   {
     if (m_dsmApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
@@ -485,7 +497,7 @@ namespace dss {
       sleep(5);
     }
     if ((m_dsm == NULL) || !m_dsm->isPresent()) {
-      throw std::runtime_error("OEMDataReader: dsm is not present");
+      throw ItemNotFoundException("OEMDataReader: dsm is not present");
     }
 
     uint16_t retVal;
@@ -498,7 +510,7 @@ namespace dss {
     return retVal;
   }
 
-  uint8_t DSDeviceBusInterface::OEMDataReader::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) const
+  uint8_t DSDeviceBusInterface::ConfigReaderHelper::getDeviceConfig(uint8_t _configClass, uint8_t _configIndex) const
   {
     if (m_dsmApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
@@ -509,7 +521,7 @@ namespace dss {
       sleep(5);
     }
     if ((m_dsm == NULL) || !m_dsm->isPresent()) {
-      throw std::runtime_error("OEMDataReader: dsm is not present");
+      throw ItemNotFoundException("OEMDataReader: dsm is not present");
     }
 
     uint8_t retVal;
@@ -522,6 +534,16 @@ namespace dss {
     return retVal;
   }
 
+
+  DSDeviceBusInterface::OEMDataReader::OEMDataReader(const std::string& _busConnection)
+    : ConfigReaderHelper(_busConnection)
+  {
+  }
+
+  DSDeviceBusInterface::OEMDataReader::~OEMDataReader()
+  {
+  }
+
   void DSDeviceBusInterface::OEMDataReader::run()
   {
     uint64_t ean = 0;
@@ -531,7 +553,7 @@ namespace dss {
     bool isIndependent = false;
     bool isConfigLocked = false;
     uint8_t pairedDevices = 0;
-    DeviceOEMState_t state = DEVICE_OEM_UNKOWN;
+    DeviceOEMState_t state = DEVICE_OEM_UNKNOWN;
     DeviceOEMInetState_t deviceInetState = DEVICE_OEM_EAN_NO_EAN_CONFIGURED;
 
     m_dsmApiHandle = DsmApiInitialize();
@@ -586,43 +608,59 @@ namespace dss {
         }
       }
 
-    } catch (BusApiError& er) {
-      // Bus error
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceEANReady, m_dsmId);
+      pEvent->addParameter(m_deviceAdress);
+      pEvent->addParameter(state);
+      pEvent->addParameter(deviceInetState);
+      pEvent->addParameter(ean >> 32);
+      pEvent->addParameter(ean & 0xFFFFFFFF);
+      pEvent->addParameter(serialNumber);
+      pEvent->addParameter(partNumber);
+      pEvent->addParameter(isIndependent);
+      pEvent->addParameter(isConfigLocked);
+      pEvent->addParameter(pairedDevices);
+      pEvent->addParameter(isVisible);
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+      } else {
+        delete pEvent;
+      }
+    } catch (ItemNotFoundException& infe) {
+      Logger::getInstance()->log("OEMDataReader::run: dSM not found or left, aborting readout\n");
+      if (DSS::hasInstance()) {
+        if (m_dsm) {
+          boost::shared_ptr<Device> dev = m_dsm->getDevices().getByBusID(m_deviceAdress, m_dsm).getDevice();
+          dev->setOemInfoState(DEVICE_OEM_UNKNOWN);
+          DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+        }
+      }
+    } catch (std::runtime_error& er) {
       Logger::getInstance()->log(std::string("OEMDataReader::run: bus error: ") + er.what() +
           " reading from dSM " + dsuid2str(m_dsmId) +
-          " DeviceId " + intToString(m_deviceAdress), lsWarning);
-    }
+          " DeviceId " + intToString(m_deviceAdress) + ", requeueing task",
+          lsWarning);
+      if (DSS::hasInstance()) {
+          DsmApiClose(m_dsmApiHandle);
+          DsmApiCleanup(m_dsmApiHandle);
+          m_dsmApiHandle = NULL;
 
-    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceEANReady, m_dsmId);
-    pEvent->addParameter(m_deviceAdress);
-    pEvent->addParameter(state);
-    pEvent->addParameter(deviceInetState);
-    pEvent->addParameter(ean >> 32);
-    pEvent->addParameter(ean & 0xFFFFFFFF);
-    pEvent->addParameter(serialNumber);
-    pEvent->addParameter(partNumber);
-    pEvent->addParameter(isIndependent);
-    pEvent->addParameter(isConfigLocked);
-    pEvent->addParameter(pairedDevices);
-    pEvent->addParameter(isVisible);
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
-    } else {
-      delete pEvent;
-    }
-  }
+          if (m_dsm) {
+            boost::shared_ptr<Device> dev = m_dsm->getDevices().getByBusID(m_deviceAdress, m_dsm).getDevice();
+            // if the device was physically removed there is no point to
+            // reschedule, a new task will get queued when the device
+            // is readded
+            if (!dev->isPresent()) {
+              return;
+            }
+          }
 
-  void DSDeviceBusInterface::OEMDataReader::setup(boost::shared_ptr<Device> _device)
-  {
-    m_deviceAdress = _device->getShortAddress();
-    m_dsmId = _device->getDSMeterDSID();
-    m_revisionID = _device->getRevisionID();
-    if (DSS::hasInstance()) {
-      m_dsm = DSS::getInstance()->getApartment().getDSMeterByDSID(m_dsmId);
+          sleep(TASK_REQUE_ON_FAILURE_SLEEP_SECONDS);
+          DSS::getInstance()->getModelMaintenance().scheduleDeviceReadout(m_dsmId, boost::shared_ptr<DSDeviceBusInterface::OEMDataReader> (shared_from_this()));
+      }
     }
   }
 
-  DSDeviceBusInterface::TNYConfigReader::TNYConfigReader(const std::string& _busConnection) : OEMDataReader(_busConnection)
+  DSDeviceBusInterface::TNYConfigReader::TNYConfigReader(const std::string& _busConnection) : ConfigReaderHelper(_busConnection)
   { }
 
   DSDeviceBusInterface::TNYConfigReader::~TNYConfigReader()
@@ -659,12 +697,33 @@ namespace dss {
       } else {
         delete pEvent;
       }
-
-    } catch (BusApiError& er) {
+    } catch (ItemNotFoundException& infe) {
+      Logger::getInstance()->log("TNYConfigReader::run: dSM not found or left, aborting readout\n");
+    } catch (std::runtime_error& er) {
       // Bus error
       Logger::getInstance()->log(std::string("TNYConfigReader::run: bus error: ") + er.what() +
           " reading from dSM " + dsuid2str(m_dsmId) +
-          " DeviceId " + intToString(m_deviceAdress), lsWarning);
+          " DeviceId " + intToString(m_deviceAdress) + ", requeueing task",
+          lsWarning);
+
+      if (DSS::hasInstance()) {
+          DsmApiClose(m_dsmApiHandle);
+          DsmApiCleanup(m_dsmApiHandle);
+          m_dsmApiHandle = NULL;
+
+          if (m_dsm) {
+            boost::shared_ptr<Device> dev = m_dsm->getDevices().getByBusID(999, m_dsm).getDevice();
+            // if the device was physically removed there is no point to
+            // reschedule, a new task will get queued when the device
+            // is readded
+            if (!dev->isPresent()) {
+              return;
+            }
+          }
+
+          sleep(TASK_REQUE_ON_FAILURE_SLEEP_SECONDS);
+          DSS::getInstance()->getModelMaintenance().scheduleDeviceReadout(m_dsmId, boost::shared_ptr<DSDeviceBusInterface::TNYConfigReader> (shared_from_this()));
+      }
     }
   }
 

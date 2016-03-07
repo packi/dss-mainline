@@ -441,7 +441,7 @@ namespace dss {
     dev->setIsValid(true);
 
     if ((dev->getRevisionID() >= TBVersion_OemConfigLock) &&
-        (dev->getOemInfoState() == DEVICE_OEM_UNKOWN)){
+        (dev->getOemInfoState() == DEVICE_OEM_UNKNOWN)){
         // will be reset in OEM Readout
         dev->setConfigLock(true);
     }
@@ -511,7 +511,7 @@ namespace dss {
   } // initializeDeviceFromSpecQuick
 
   void BusScanner::scheduleDeviceReadout(const boost::shared_ptr<Device> _pDevice) {
-    if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKOWN)) {
+    if (_pDevice->isPresent() && (_pDevice->getOemInfoState() == DEVICE_OEM_UNKNOWN)) {
       if (_pDevice->getRevisionID() >= TBVersion_OemEanConfig) {
         log("scheduleOEMReadout: schedule EAN readout for: " +
             dsuid2str(_pDevice->getDSID()));
@@ -525,7 +525,10 @@ namespace dss {
         _pDevice->setOemInfoState(DEVICE_OEM_NONE);
         _pDevice->setConfigLock(false);
       }
-    } else if (_pDevice->isPresent() && (_pDevice->getOemInfoState() != DEVICE_OEM_UNKOWN) && (_pDevice->getDeviceType() == DEVICE_TYPE_TNY)) {
+    } else if (_pDevice->isPresent() &&
+              (_pDevice->getOemInfoState() != DEVICE_OEM_UNKNOWN) &&
+              (_pDevice->getOemInfoState() != DEVICE_OEM_LOADING) &&
+              (_pDevice->getDeviceType() == DEVICE_TYPE_TNY)) {
       boost::shared_ptr<DSDeviceBusInterface::TNYConfigReader> task;
       std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
       task = boost::make_shared<DSDeviceBusInterface::TNYConfigReader>(connURI);
