@@ -241,9 +241,14 @@ namespace dss {
                                            ShortAddressStaleDevice);
     }
 
-    DeviceOEMState_t oemEanState = DEVICE_OEM_UNKOWN;
+    DeviceOEMState_t oemEanState = DEVICE_OEM_UNKNOWN;
     if (oemState != NULL) {
       oemEanState = m_tempDevice->getOemStateFromString(oemState);
+      // device was in the loading state when dSS shut down, repeat the
+      // readout
+      if (oemEanState == DEVICE_OEM_LOADING) {
+        oemEanState = DEVICE_OEM_UNKNOWN;
+      }
     }
 
     unsigned long long oemEanNumber = 0;
@@ -271,7 +276,7 @@ namespace dss {
       m_tempDevice->setOemInfo(oemEanNumber, oemSerialNumber, oemPartNumber,
                                oemInetState, isIndependent);
 
-      DeviceOEMState_t productInfoState = DEVICE_OEM_UNKOWN;
+      DeviceOEMState_t productInfoState = DEVICE_OEM_UNKNOWN;
       if (oemProdState != NULL) {
         productInfoState = m_tempDevice->getOemStateFromString(oemProdState);
       }
@@ -999,7 +1004,9 @@ namespace dss {
     if (_pDevice->getFloor() != 0) {
       addAttribute(_ofs, Floor, intToString(_pDevice->getFloor()));
     }
-    if(_pDevice->getOemInfoState() == DEVICE_OEM_NONE) {
+    if ((_pDevice->getOemInfoState() == DEVICE_OEM_NONE) ||
+        (_pDevice->getOemInfoState() == DEVICE_OEM_UNKNOWN) ||
+        (_pDevice->getOemInfoState() == DEVICE_OEM_LOADING)) {
       _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
     } else if(_pDevice->getOemInfoState() == DEVICE_OEM_VALID) {
       _ofs << " oemState=\"" << _pDevice->getOemStateAsString() << "\"";
