@@ -161,14 +161,15 @@ namespace dss {
     public:
       class OEMWebQueryCallback : public URLRequestCallback {
       public:
-        OEMWebQueryCallback(dsuid_t _deviceDSUID);
+        OEMWebQueryCallback(dsuid_t _deviceDSUID, DeviceOEMState_t _oldState);
         virtual ~OEMWebQueryCallback() {}
         virtual void result(long code, const std::string &result);
       private:
         dsuid_t m_deviceDSUID;
+        DeviceOEMState_t m_oldOEMState;
       };
 
-      OEMWebQuery(boost::shared_ptr<Device> _device);
+      OEMWebQuery(boost::shared_ptr<Device> _device, DeviceOEMState_t _oldState);
       virtual ~OEMWebQuery() {}
       virtual void run();
 
@@ -177,6 +178,7 @@ namespace dss {
       uint16_t m_partNumber;
       dsuid_t m_deviceDSUID;
       uint16_t m_serialNumber;
+      DeviceOEMState_t m_oldOEMState;
     };
 
     class VdcDataQuery : public Task {
@@ -303,6 +305,8 @@ namespace dss {
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
                            const std::string& _defaultName);
+    void onDeviceOEMDataUpdateProductInfoState(dsuid_t _deviceID,
+                                               const DeviceOEMState_t _state);
 
     void onHeatingControllerConfig(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);
     void onHeatingControllerValues(dsuid_t _dsMeterID, const int _ZoneID, boost::shared_ptr<void> _spec);

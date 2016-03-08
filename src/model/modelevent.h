@@ -76,6 +76,7 @@ namespace dss {
                     etDummyEvent, /** for unit tests */
                     etDeviceDataReady, /** TNY configuration read out */
                     etDsmStateChange, /** dSM state has changed **/
+                    etDeviceOEMDataUpdateProductInfoState, /** only update devices OEM product info state without data */
                  } EventType;
   private:
     EventType m_EventType;
