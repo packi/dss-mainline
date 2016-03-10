@@ -538,7 +538,7 @@ namespace dss {
                 (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
                 ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&
                  (_pDevice->getOemProductInfoState() != DEVICE_OEM_LOADING))) {
-      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task = boost::make_shared<ModelMaintenance::OEMWebQuery>(_pDevice);
+      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task = boost::make_shared<ModelMaintenance::OEMWebQuery>(_pDevice, _pDevice->getOemProductInfoState());
       boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
       pTP->addEvent(task);
       _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);

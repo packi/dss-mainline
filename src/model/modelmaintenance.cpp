@@ -1087,6 +1087,16 @@ namespace dss {
                        pEventWithStrings->getStringParameter(3));
       }
       break;
+    case ModelEvent::etDeviceOEMDataUpdateProductInfoState:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() != 1) {
+        log("Expected 1 parameter for ModelEvent::etDeviceOEMDataUpdateProductInfoState");
+      } else {
+        onDeviceOEMDataUpdateProductInfoState(pEventWithDSID->getDSID(),
+                       (DeviceOEMState_t)event->getParameter(0));
+      }
+      break;
+
     case ModelEvent::etControllerConfig:
       assert(pEventWithDSID != NULL);
       onHeatingControllerConfig(
@@ -2142,7 +2152,7 @@ namespace dss {
         if ((_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
             (_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
           // query Webservice
-          getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice()));
+          getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice(), devRef.getDevice()->getOemProductInfoState()));
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
         } else {
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_NONE);
@@ -2184,6 +2194,20 @@ namespace dss {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
   } // onEANReady
+
+  void ModelMaintenance::onDeviceOEMDataUpdateProductInfoState(
+                                             dsuid_t _deviceID,
+                                             const DeviceOEMState_t _state) {
+    try {
+      boost::shared_ptr<Device> pDevice = m_pApartment->getDeviceByDSID(_deviceID);
+      pDevice->setOemProductInfoState(_state);
+      // do not queue the "oemDataChanged" event here, because the oem data
+      // has actually not changed in this case
+    } catch(std::runtime_error& e) {
+      log(std::string("Error updating OEM data state of device: ") + e.what(), lsWarning);
+    }
+  } // onEANReady
+
 
   void ModelMaintenance::onHeatingControllerConfig(dsuid_t _dsMeterID, const int _zoneID, boost::shared_ptr<void> _spec) {
     boost::shared_ptr<ZoneHeatingConfigSpec_t> config =
@@ -2491,8 +2515,8 @@ namespace dss {
     m_pStructureModifyingBusInterface = _value;
   } // setStructureModifyingBusInterface
 
-  ModelMaintenance::OEMWebQuery::OEMWebQuery(boost::shared_ptr<Device> _device)
-    : Task()
+  ModelMaintenance::OEMWebQuery::OEMWebQuery(boost::shared_ptr<Device> _device, DeviceOEMState_t _oldState)
+    : Task(), m_oldOEMState(_oldState)
   {
     m_deviceDSUID = _device->getDSID();
     m_EAN = _device->getOemEanAsString();
@@ -2500,8 +2524,8 @@ namespace dss {
     m_serialNumber = _device->getOemSerialNumber();
   }
 
-  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dsuid_t _deviceDSUID)
-    : m_deviceDSUID(_deviceDSUID)
+  ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dsuid_t _deviceDSUID, DeviceOEMState_t _oldState)
+    : m_deviceDSUID(_deviceDSUID), m_oldOEMState(_oldState)
   {
   }
 
@@ -2511,7 +2535,7 @@ namespace dss {
     std::string productName;
     boost::filesystem::path iconFile;
     std::string defaultName;
-    DeviceOEMState_t state = DEVICE_OEM_UNKNOWN;
+    DeviceOEMState_t state = m_oldOEMState;
 
     if (code == 200) {
       Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: result: ") + result);
@@ -2533,6 +2557,14 @@ namespace dss {
             errorMessage = json_object_get_string(obj);
           }
           Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: JSON-ERROR: ") + errorMessage, lsError);
+          ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceOEMDataUpdateProductInfoState, m_deviceDSUID);
+          pEvent->addParameter(m_oldOEMState); // switch back from LOADING state
+          if (DSS::hasInstance()) {
+            DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+          } else {
+            delete pEvent;
+          }
+          return;
         } else {
           json_object *response;
           if (!json_object_object_get_ex(json_request, "Response", &response)) {
@@ -2578,37 +2610,63 @@ namespace dss {
           return;
         }
 
+        boost::filesystem::path iconPathTemp = boost::filesystem::temp_directory_path() / remoteIconPath.filename().replace_extension(".tmp");
         boost::filesystem::path iconPath = iconBasePath / iconFile;
-        res = url.downloadFile(iconURL, iconPath.string());
+        res = url.downloadFile(iconURL, iconPathTemp.string());
         if (res != 200) {
           Logger::getInstance()->log("OEMWebQueryCallback::result: could not download OEM "
               "icon from: " + iconURL + std::string("; error: ") + intToString(res), lsWarning);
-          iconFile.clear();
+          if (m_oldOEMState != DEVICE_OEM_VALID) {
+            // we failed with this download, but if the device was valid
+            // we want to keep the old icon
+            iconFile.clear();
+          }
           try {
-            if (boost::filesystem::exists(iconPath)) {
-              boost::filesystem::remove(iconPath);
+            if (boost::filesystem::exists(iconPathTemp)) {
+              boost::filesystem::remove(iconPathTemp);
             }
           } catch (boost::filesystem::filesystem_error& e) {
             Logger::getInstance()->log("OEMWebQueryCallback::result: cannot delete "
                 "(incomplete) icon: " + std::string(e.what()), lsWarning);
           }
+        } else {
+          try {
+            if (boost::filesystem::exists(iconPathTemp)) {
+              boost::filesystem::copy_file(iconPathTemp, iconPath,
+                      boost::filesystem::copy_option::overwrite_if_exists);
+              boost::filesystem::remove(iconPathTemp);
+            }
+          } catch (boost::filesystem::filesystem_error& e) {
+            Logger::getInstance()->log("OEMWebQueryCallback::result: cannot move icon to target location: " +
+                                       std::string(e.what()), lsWarning);
+          }
         }
+      }
+
+      ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_deviceDSUID);
+      pEvent->addParameter(state);
+      pEvent->addStringParameter(productName);
+      pEvent->addStringParameter(iconFile.string());
+      pEvent->addStringParameter(productURL);
+      pEvent->addStringParameter(defaultName);
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+      } else {
+        delete pEvent;
       }
     } else {
       Logger::getInstance()->log("OEMWebQueryCallback::result: could not download OEM "
           "data. Error: " + intToString(code) + "Message: " + result, lsWarning);
-    }
-
-    ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataReady, m_deviceDSUID);
-    pEvent->addParameter(state);
-    pEvent->addStringParameter(productName);
-    pEvent->addStringParameter(iconFile.string());
-    pEvent->addStringParameter(productURL);
-    pEvent->addStringParameter(defaultName);
-    if(DSS::hasInstance()) {
-      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
-    } else {
-      delete pEvent;
+      // nothing was read out, just keep the old state; if the device
+      // has already been read out sometime earlier we do not want to
+      // invalidate the data
+      ModelEventWithStrings* pEvent = new ModelEventWithStrings(ModelEvent::etDeviceOEMDataUpdateProductInfoState, m_deviceDSUID);
+      pEvent->addParameter(m_oldOEMState); // switch back from LOADING state
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+      } else {
+        delete pEvent;
+      }
     }
   }
 
@@ -2626,7 +2684,7 @@ namespace dss {
                              "&countryCode=" + country +
                              "&languageCode=" + language;
 
-    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb = boost::make_shared<OEMWebQuery::OEMWebQueryCallback>(m_deviceDSUID);
+    boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb = boost::make_shared<OEMWebQuery::OEMWebQueryCallback>(m_deviceDSUID, m_oldOEMState);
     WebserviceConnection::getInstanceMsHub()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
   }
 
@@ -2922,7 +2980,8 @@ namespace dss {
            ((device->getOemProductInfoState() == DEVICE_OEM_VALID) ||
             (device->getOemProductInfoState() == DEVICE_OEM_UNKNOWN))) {
         // query Webservice
-        getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(device));
+        getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(device,
+                                            device->getOemProductInfoState()));
         device->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
     }
