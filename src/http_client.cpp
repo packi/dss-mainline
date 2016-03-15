@@ -134,33 +134,36 @@ size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, 
   return size * nmemb;
 }
 
-long HttpClient::get(const std::string& url, std::string *result)
+long HttpClient::get(const std::string& url, std::string *result, bool insecure)
 {
-  return internalRequest(url, GET, HashMapStringString(), std::string(), result);
+  return internalRequest(url, GET, HashMapStringString(), std::string(),
+                         result, insecure);
 }
 
 long HttpClient::get(const std::string& url,
                      const HashMapStringString& headers,
-                     std::string *result)
+                     std::string *result, bool insecure)
 {
-  return internalRequest(url, GET, headers, std::string(), result);
+  return internalRequest(url, GET, headers, std::string(), result, insecure);
 }
 
 long HttpClient::post(const std::string& url, std::string postdata,
                       std::string *result)
 {
-  return internalRequest(url, POST, HashMapStringString(), postdata, result);
+  return internalRequest(url, POST, HashMapStringString(), postdata, result,
+                         false);
 }
 
 long HttpClient::post(const std::string& url,
                       const HashMapStringString& headers,
                       std::string postdata, std::string *result)
 {
-  return internalRequest(url, POST, headers, postdata, result);
+  return internalRequest(url, POST, headers, postdata, result, false);
 }
 
 long HttpClient::request(const HttpRequest &req, std::string *result) {
-  return internalRequest(req.url, req.type, req.headers, req.postdata, result);
+  return internalRequest(req.url, req.type, req.headers, req.postdata, result,
+                         false);
 }
 
 #if CURL_DEEP_DEBUG
@@ -263,7 +266,7 @@ struct data config;
 long HttpClient::internalRequest(const std::string& url, RequestType type,
                                  const HashMapStringString& headers,
                                  std::string postdata,
-                                 std::string *result)
+                                 std::string *result, bool insecure)
 {
   CURLcode res;
   URLResult outputCollector;
@@ -288,6 +291,11 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
 
   curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
 
+  if (insecure) {
+    curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+  } else {
+    curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYPEER, 1L);
+  }
   HashMapStringString::const_iterator it;
   if (!headers.empty()) {
     for (it = headers.begin(); it != headers.end(); it++) {

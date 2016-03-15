@@ -591,7 +591,7 @@ namespace dss {
             "executeURL: " + oUrl);
 
     boost::shared_ptr<HttpClient> http = boost::make_shared<HttpClient>();
-    long code = http->get(oUrl, NULL);
+    long code = http->get(oUrl, NULL, true); // do not check certificates
     std::ostringstream out;
     out << code;
 

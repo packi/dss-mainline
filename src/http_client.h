@@ -58,11 +58,12 @@ namespace dss {
       HttpClient(bool _reuse_handle = false);
       ~HttpClient();
 
-      long get(const std::string& url, std::string *result);
+      long get(const std::string& url, std::string *result,
+               bool insecure = false);
 
       long get(const std::string& url,
                const HashMapStringString& headers,
-               std::string *result);
+               std::string *result, bool insecure = false);
 
       /* TODO make postdata const-by-reference */
       long post(const std::string& url, std::string postdata,
@@ -83,7 +84,7 @@ namespace dss {
       long internalRequest(const std::string& url, RequestType type,
                            const HashMapStringString& headers,
                            std::string postdata,
-                           std::string *result);
+                           std::string *result, bool insecure);
 
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
       bool m_reuse_handle;
