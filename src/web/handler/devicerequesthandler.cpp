@@ -1502,7 +1502,7 @@ namespace dss {
       JSONWriter json;
       uint16_t value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
       json.add("pwmPeriod", value);
-      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinValue);
+      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinX);
       json.add("pwmMinX", value & 0xff);
       json.add("pwmMaxX", (value >> 8) & 0xff);
       value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
