@@ -1134,7 +1134,13 @@ namespace dss {
         for (int index = 0; index < dev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state = dev->getBinaryInputState(index);
           assert(state != NULL);
-          state->setState(coSystem, State_Unknown);
+
+          uint8_t inputType = dev->getDeviceBinaryInputType(index);
+          if (inputType == BinaryInputIDWindowTilt) {
+            state->setState(coSystem, StateWH_Unknown);
+          } else {
+            state->setState(coSystem, State_Unknown);
+          }
         }
       }
     }
