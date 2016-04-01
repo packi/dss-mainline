@@ -104,6 +104,7 @@ namespace dss {
     std::string m_VdcOemGuid;
     std::string m_softwareVersion;
     int m_dSMState;
+    bool m_synchronized;
   private:
     void publishToPropertyTree();
   public:
@@ -212,6 +213,9 @@ namespace dss {
 
     int getState() const { return m_dSMState; }
     void setState(uint8_t _state) { m_dSMState = _state; }
+    
+    void setSynchronized() { m_synchronized = true; }
+    bool isSynchonized() const { return m_synchronized; }
   }; // DSMeter
 
 

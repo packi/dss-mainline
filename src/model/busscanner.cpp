@@ -984,6 +984,7 @@ namespace dss {
     if (_dsMeter->getName().empty()) {
       _dsMeter->setName(_spec.Name);
     }
+    _dsMeter->setSynchronized();
   } // synchronizeDSMeterData
 
   void BusScanner::log(const std::string& _line, aLogSeverity _severity) {

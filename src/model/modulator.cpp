@@ -100,7 +100,8 @@ namespace dss {
     m_dSMPropertyFlags(0),
     m_IgnoreActionsFromNewDevices(false),
     m_ApartmentState(DSM_APARTMENT_STATE_UNKNOWN),
-    m_dSMState(DSM_STATE_UNKNOWN)
+    m_dSMState(DSM_STATE_UNKNOWN),
+    m_synchronized(false)
   {
     publishToPropertyTree();
   } // ctor
