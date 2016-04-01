@@ -111,8 +111,16 @@ namespace dss {
 
     // update powerline jumble state
     uint8_t state = DSM_STATE_UNKNOWN;
-    if (busMemberIsdSM(_dsMeter->getBusMemberType()) && getMeterState(_dsMeter, &state)) {
-      _dsMeter->setState(state);
+    if (busMemberIsdSM(_dsMeter->getBusMemberType())) {
+      if (getMeterState(_dsMeter, &state)) {
+        _dsMeter->setState(state);
+      }
+    } else if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
+      _dsMeter->setState(DSM_STATE_IDLE);
+    } else if (!_dsMeter->isSynchonized()) {
+      log("scanDSMeter: dSMeter is not yet synchronized. Meter: " + 
+        dsuid2str(_dsMeter->getDSID()), lsWarning);
+      return false;
     }
 
     if (m_Maintenance.isInitializing() ||
@@ -971,6 +979,9 @@ namespace dss {
     _dsMeter->setApiVersion(_spec.APIVersion);
     _dsMeter->setPropertyFlags(_spec.flags);
 
+    log("synchronizeDSMeterData Meter: " + dsuid2str(_dsMeter->getDSID())
+        + " BusMemberType: " + intToString(_spec.DeviceType), lsDebug);
+
     if (!busMemberTypeIsValid(_dsMeter->getBusMemberType())) {
       _dsMeter->setBusMemberType(_spec.DeviceType);
     }
@@ -984,6 +995,7 @@ namespace dss {
     if (_dsMeter->getName().empty()) {
       _dsMeter->setName(_spec.Name);
     }
+
     _dsMeter->setSynchronized();
   } // synchronizeDSMeterData
 
