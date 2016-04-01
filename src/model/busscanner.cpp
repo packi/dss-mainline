@@ -92,7 +92,8 @@ namespace dss {
         ": Initializing " + intToString(m_Maintenance.isInitializing()) +
         ", Init Model " + intToString(_dsMeter->isInitialized()) +
         ", Hash Model/dSM " + intToString(dsmHash, true) + "/" + intToString(hash.Hash, true) +
-        ", ModCount Model/dSM " + intToString(dsmModCount, true) + "/" + intToString(hash.ModificationCount, true), lsInfo);
+        ", ModCount Model/dSM " + intToString(dsmModCount, true) + "/" + intToString(hash.ModificationCount, true) +
+        ", ds Meter Type " + intToString(_dsMeter->getBusMemberType()), lsInfo);
 
     if (applyMeterSpec(_dsMeter)) {
       if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
