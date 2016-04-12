@@ -634,6 +634,7 @@ namespace dss {
               }
             }
             dsMeter = m_pApartment->allocateDSMeter(spec.DSID);
+            scanner.synchronizeDSMeterData(dsMeter, spec);
             log ("dS485 Bus Device NEW: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
           }
 
