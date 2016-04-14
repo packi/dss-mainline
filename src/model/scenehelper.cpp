@@ -159,7 +159,6 @@ namespace dss {
     m_ZonesToIgnore.set(SceneEnergyOverload);
     m_ZonesToIgnore.set(SceneLocalOff);
     m_ZonesToIgnore.set(SceneLocalOn);
-    m_ZonesToIgnore.set(SceneImpulse);
   }
 
   bool SceneHelper::rememberScene(const unsigned int _scene) {
