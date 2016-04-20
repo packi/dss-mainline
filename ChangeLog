@@ -1,5 +1,11 @@
 dSS - digitalSTROM Server
 
+v1.35.6	20.04.2016
+	* do not invalidate already loaded OEM product information, #12912
+	* do not check certificates for URL requests via add-ons, #12091
+	* check for input type and set according input state, #12714
+	* cleanup climate settings, #13107
+
 v1.35.5	07.03.2016
 	* make reading out of the device configuration more robust,  #12854
 
