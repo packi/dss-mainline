@@ -965,6 +965,12 @@ namespace dss {
     if (m_Apartment.getName().empty()) {
       m_Apartment.setName("dSS");
     }
+
+    // #13192: always clear out name for zone 0
+    boost::shared_ptr<Zone> z = m_Apartment.getZone(0);
+    if (z) {
+      z->setName("");
+    }
     return;
   } // readConfigurationFromXML
 
