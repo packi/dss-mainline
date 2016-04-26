@@ -296,7 +296,7 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     rrd_clear_error();
     int result = rrd_update(starts.size(), argString);
     if (result < 0) {
-      log(rrd_get_error(), lsWarning);
+      log(rrd_get_error());
     }
   } // postMeteringEvent
 
