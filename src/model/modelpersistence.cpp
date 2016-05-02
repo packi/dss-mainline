@@ -1203,6 +1203,8 @@ namespace dss {
   } // dsMeterToXML
 
   void ModelPersistence::writeConfigurationToXML(const std::string& _fileName) {
+    // The correct lock order is: apartment -> property
+    boost::recursive_mutex::scoped_lock apartment_lock(m_Apartment.getMutex());
     boost::recursive_mutex::scoped_lock lock(PropertyNode::m_GlobalMutex);
 
     Logger::getInstance()->log("Writing apartment config to '" + _fileName + "'", lsInfo);
