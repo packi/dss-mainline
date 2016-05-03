@@ -1766,7 +1766,8 @@ namespace dss {
         pDevice->getDeviceSceneMode(SceneImpulse, config);
       }
 
-      if (config.dontcare != dontcare) {
+      if ((config.dontcare != dontcare) || (config.flashmode != 1)) {
+        config.flashmode = 1;
         config.dontcare = dontcare;
         if (pDevice->getProductID() == ProductID_UMV_210) {
           pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
