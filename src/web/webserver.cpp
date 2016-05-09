@@ -616,6 +616,23 @@ namespace dss {
     return 200;
   } // httpBrowseProperties
 
+  RestfulRequest WebServer::extractRequest (struct mg_connection* _connection,
+                                            std::string _sublevel,
+                                            const struct mg_request_info *_info) {
+    if (strcmp(_info->request_method, "POST") == 0) {
+      static const size_t size = 16*1024; // 16k
+      char post_data[size];
+      int post_data_len = mg_read(_connection, post_data, sizeof(post_data));
+      std::string requestData;
+      if (post_data_len > 0) {
+        requestData.assign(post_data, post_data_len);
+      }
+      return RestfulRequest(_sublevel, requestData);
+    } else {
+      return RestfulRequest(_sublevel, _info->query_string ?: "");
+    }
+  } // extractRequest
+
   int WebServer::httpRequestCallback(struct mg_connection* _connection,
                                       void *cbdata) {
     std::string trustedLoginCookie;
@@ -650,7 +667,7 @@ namespace dss {
         self.log("REST call from " + remote_s + ": " + uri_path, lsInfo);
     }
 
-    RestfulRequest request(sublevel, _info->query_string ?: "");
+    RestfulRequest request = extractRequest (_connection, sublevel, _info);
 
     boost::shared_ptr<Session> session;
     std::string token = extractToken(mg_get_header(_connection, "Cookie"));
