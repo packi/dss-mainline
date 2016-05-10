@@ -148,6 +148,9 @@ namespace dss {
           return json.successJSON();
         } else if(_request.getMethod() == "setName") {
           if (_request.hasParameter("newName")) {
+            if (pZone->getID() == 0) {
+              return JSONWriter::failure("changing name for zone 0 is not allowed");
+            }
             std::string newName = _request.getParameter("newName");
             newName = escapeHTML(newName);
             pZone->setName(newName);

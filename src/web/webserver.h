@@ -76,6 +76,10 @@ namespace dss {
     void setupAPI();
     void instantiateHandlers();
     void publishJSLogfiles();
+    static RestfulRequest extractRequest (struct mg_connection* _connection,
+                                          std::string _sublevel,
+                                          const struct mg_request_info *_info);
+
   protected:
     int httpBrowseProperties(struct mg_connection* _connection,
                              RestfulRequest &request,

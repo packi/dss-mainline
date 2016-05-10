@@ -11,7 +11,7 @@ build:
   script:
     - autoreconf -i
     - ./configure
-    - make -j4
+    - make
     - make check
   tags:
     - dss
