@@ -231,7 +231,6 @@ namespace dss {
             boost::shared_ptr<Device> md = m_Apartment.getDeviceByDSID(master);
             boost::shared_ptr<Zone> z = m_Apartment.getZone(md->getZoneID());
             boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(current);
-            printf("MOVING DEVICE %s on meter %s to zone %d\n", dsuid2str(dev->getDSID()).c_str(), dsuid2str(dev->getDSMeterDSID()).c_str(), zone->getID());
             manipulator.addDeviceToZone(dev, zone);
           }
 
