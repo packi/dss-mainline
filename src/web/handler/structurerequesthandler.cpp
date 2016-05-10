@@ -279,7 +279,16 @@ namespace dss {
       dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
     } catch (ItemNotFoundException &infe) {
       Logger::getInstance()->log(std::string("Device not removed: ") + infe.what(), lsWarning);
-      return JSONWriter::success();
+      JSONWriter json;
+      json.startArray("devices");
+      json.startObject();
+      json.add("id", dsuid2str(dsuid));
+      json.add("dSUID", dsuid2str(dsuid));
+      json.add("DisplayID", dsuid2str(dsuid));
+      json.endObject();
+      json.endArray();
+      json.add("action", "remove");
+      return json.successJSON();
     }
 
     if (dev->isPresent()) {
