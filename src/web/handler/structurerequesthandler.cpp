@@ -273,7 +273,15 @@ namespace dss {
 
     dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
 
-    boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+    boost::shared_ptr<Device> dev;
+    
+    try {
+      dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+    } catch (ItemNotFoundException &infe) {
+      Logger::getInstance()->log(std::string("Device not removed: ") + infe.what(), lsWarning);
+      return JSONWriter::success();
+    }
+
     if (dev->isPresent()) {
       // ATTENTION: this is string is translated by the web UI
       return JSONWriter::failure("Cannot remove present device");
