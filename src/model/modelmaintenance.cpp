@@ -2444,6 +2444,7 @@ namespace dss {
 
       pDev->setPairedDevices(_pairedDevices);
       pDev->setVisibility(_visible);
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
