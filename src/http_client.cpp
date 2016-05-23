@@ -293,8 +293,10 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
 
   if (insecure) {
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYHOST, 0L);
   } else {
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYHOST, 1L);
   }
   HashMapStringString::const_iterator it;
   if (!headers.empty()) {
