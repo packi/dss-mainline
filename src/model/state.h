@@ -162,9 +162,11 @@ namespace dss {
     void parseCondition(const std::string& _input, eValueComparator& _comp, double& _threshold);
 
   public:
-    StateSensor(const std::string& _identifier, boost::shared_ptr<Device> _dev, int _sensorType,
+    StateSensor(const std::string& _identifier, const std::string& _scriptId,
+        boost::shared_ptr<Device> _dev, int _sensorType,
         const std::string& activateCondition, const std::string& deactivateCondition);
-    StateSensor(const std::string& _identifier, boost::shared_ptr<Group> _group, int _sensorType,
+    StateSensor(const std::string& _identifier, const std::string& _scriptId,
+        boost::shared_ptr<Group> _group, int _sensorType,
         const std::string& activateCondition, const std::string& deactivateCondition);
     virtual ~StateSensor();
 
