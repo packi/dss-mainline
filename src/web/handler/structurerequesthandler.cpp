@@ -231,7 +231,6 @@ namespace dss {
             boost::shared_ptr<Device> md = m_Apartment.getDeviceByDSID(master);
             boost::shared_ptr<Zone> z = m_Apartment.getZone(md->getZoneID());
             boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(current);
-            printf("MOVING DEVICE %s on meter %s to zone %d\n", dsuid2str(dev->getDSID()).c_str(), dsuid2str(dev->getDSMeterDSID()).c_str(), zone->getID());
             manipulator.addDeviceToZone(dev, zone);
           }
 
@@ -274,7 +273,24 @@ namespace dss {
 
     dsuid_t dsuid = dsidOrDsuid2dsuid(deviceIDStr, dsuidStr);
 
-    boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+    boost::shared_ptr<Device> dev;
+    
+    try {
+      dev = DSS::getInstance()->getApartment().getDeviceByDSID(dsuid);
+    } catch (ItemNotFoundException &infe) {
+      Logger::getInstance()->log(std::string("Device not removed: ") + infe.what(), lsWarning);
+      JSONWriter json;
+      json.startArray("devices");
+      json.startObject();
+      json.add("id", dsuid2str(dsuid));
+      json.add("dSUID", dsuid2str(dsuid));
+      json.add("DisplayID", dsuid2str(dsuid));
+      json.endObject();
+      json.endArray();
+      json.add("action", "remove");
+      return json.successJSON();
+    }
+
     if (dev->isPresent()) {
       // ATTENTION: this is string is translated by the web UI
       return JSONWriter::failure("Cannot remove present device");
