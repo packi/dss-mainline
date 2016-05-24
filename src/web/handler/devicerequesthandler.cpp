@@ -299,6 +299,23 @@ namespace dss {
         return JSONWriter::failure("Device is not present");
       }
       pDevice->unlock();
+
+      if (pDevice->isMainDevice() && (pDevice->getPairedDevices() > 0)) {
+        dsuid_t next;
+        dsuid_t current = pDevice->getDSID();
+        for (int p = 0; p < pDevice->getPairedDevices(); p++) {
+          dsuid_get_next_dsuid(current, &next);
+          current = next;
+          try {
+            boost::shared_ptr<Device> pPartnerDev;
+            pPartnerDev = m_Apartment.getDeviceByDSID(next);
+            usleep(500 * 1000); // 500ms
+            pPartnerDev->unlock();
+          } catch(std::runtime_error& e) {
+            Logger::getInstance()->log(std::string("Could not find partner device with dsuid '") + dsuid2str(next) + "'");
+          }
+        }
+      }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setConfig") {
       int value = strToIntDef(_request.getParameter("value"), -1);
