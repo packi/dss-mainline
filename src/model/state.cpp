@@ -78,7 +78,8 @@ namespace dss {
     m_type(_type),
     m_serviceName(_identifier)
   {
-    assert((_name.length() > 0) && (_identifier.length() > 0));
+    // TODO: check if _identifier is valid, e.g. the prop tree does not like
+    //       an empty identifier
     load();
     publishToPropertyTree();
   }
