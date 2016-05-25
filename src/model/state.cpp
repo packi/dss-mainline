@@ -69,8 +69,7 @@ namespace dss {
     publishToPropertyTree();
   } // ctor
 
-  State::State(eStateType _type, const std::string& _name,
-               const std::string& _identifier)
+  State::State(eStateType _type, const std::string& _name, const std::string& _identifier)
   : m_name(_name),
     m_IsPersistent(false),
     m_callOrigin(coUnknown),
@@ -79,6 +78,7 @@ namespace dss {
     m_type(_type),
     m_serviceName(_identifier)
   {
+    assert((_name.length() > 0) && (_identifier.length() > 0));
     load();
     publishToPropertyTree();
   }
@@ -144,8 +144,7 @@ namespace dss {
     path += m_name;
     if (m_pPropertyNode == NULL && DSS::hasInstance()) {
       if (DSS::getInstance()->getPropertySystem().getProperty(path) != NULL) {
-        // avoid publishing duplicate state information when reading out
-        // devices multiple times
+        // avoid publishing duplicate state information when reading out devices multiple times
         return;
       }
       m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty(path);
@@ -267,7 +266,7 @@ namespace dss {
 
   std::string State::toString() const {
     if (!m_values.empty()) {
-      assert(m_state >= 0 && m_state < m_values.size());
+      assert(m_state >= 0 && m_state < (int) m_values.size());
       return m_values[m_state];
     }
     switch(m_state) {
@@ -364,9 +363,14 @@ namespace dss {
     }
   }
 
-  StateSensor::StateSensor(const std::string& _identifier, boost::shared_ptr<Device> _device, int _sensorType,
+  StateSensor::StateSensor(const std::string& _identifier, const std::string& _scriptId,
+      boost::shared_ptr<Device> _device, int _sensorType,
       const std::string& _activateCondition, const std::string& _deactivateCondition)
-  : State(StateType_SensorDevice, "dev." + dsuid2str(_device->getDSID()) + ".type" + intToString(_sensorType), _identifier),
+  : State(StateType_SensorDevice,
+      "dev." + dsuid2str(_device->getDSID()) +
+      ".type" + intToString(_sensorType) +
+      "." + _identifier,
+      _scriptId),
     m_activateCondition(_activateCondition),
     m_deactivateCondition(_deactivateCondition)
   {
@@ -375,12 +379,15 @@ namespace dss {
     setProviderDevice(_device);
   }
 
-  StateSensor::StateSensor(const std::string& _identifier, boost::shared_ptr<Group> _group, int _sensorType,
+  StateSensor::StateSensor(const std::string& _identifier, const std::string& _scriptId,
+      boost::shared_ptr<Group> _group, int _sensorType,
       const std::string& _activateCondition, const std::string& _deactivateCondition)
   : State(StateType_SensorZone,
       "zone.zone" + intToString(_group->getZoneID()) +
       ".group"  + intToString(_group->getID()) +
-      ".type" + intToString(_sensorType), _identifier),
+      ".type" + intToString(_sensorType) +
+      "." + _identifier,
+      _scriptId),
     m_activateCondition(_activateCondition),
     m_deactivateCondition(_deactivateCondition)
   {
