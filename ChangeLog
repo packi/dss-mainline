@@ -1,5 +1,16 @@
 dSS - digitalSTROM Server
 
+v1.36.0	27.05.2016
+	* change log level for rrdcached errors, #13249
+	* do not allow to change the name of zone 0 via JSON, #13192
+	* fix deadlock while writing apartment.xml, #13963
+	* ensure blink flag is set in impulse scene (41), #13064
+	* in case of http-post, create restful request based on given data, #13181
+	* ignore unknown devices when removing them via JSON API, #13349
+	* disable host verification for insecure http connections, #12091
+	* save number of paired TNYs in apartment.xml, #13524
+	* when main device is unlocked, unlock all paired devices as well, #13543
+
 v1.35.6	20.04.2016
 	* do not invalidate already loaded OEM product information, #12912
 	* do not check certificates for URL requests via add-ons, #12091
