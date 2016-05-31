@@ -171,4 +171,9 @@
     <property name="script_id" type="string">solar_computer</property>
   </state>
 
+  <state name="daynight_indoors">
+    <property name="value" type="boolean">false</property>
+    <property name="script_id" type="string">solar_computer</property>
+  </state>
+
 </subscriptions>
