@@ -647,7 +647,7 @@ BOOST_AUTO_TEST_CASE(testStateSensors) {
   std::string id = ctx->evaluate<std::string>(
       "var z = getZoneByID(42);\n"
       "var s = z.addStateSensor(0, 9, \"> ; 24.99\", \"< ; 20.0\");\n"
-      "print(s);\n");
+      "print(s); s; \n");
 
   /*
    * Pushing a sensor value is not supported by our testing environment:
@@ -657,7 +657,7 @@ BOOST_AUTO_TEST_CASE(testStateSensors) {
    * method of the state object.
    */
 
-  boost::shared_ptr<State> pState = apt.getState(StateType_SensorZone, "zone.zone42.group0.type9");
+  boost::shared_ptr<State> pState = apt.getState(StateType_SensorZone, id);
   BOOST_CHECK(pState != boost::shared_ptr<State> ());
   BOOST_CHECK_EQUAL(pState->getState(), 2);
 
