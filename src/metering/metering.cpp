@@ -599,10 +599,11 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
       std::transform(lines.begin(), lines.end(), std::back_inserter(starts), boost::mem_fn(&std::string::c_str));
       char** argString = (char**)&starts.front();
 
+      int noOutput = 1;
       rrd_clear_error();
       result = rrd_xport(starts.size(),
                          argString,
-                         0,
+                         &noOutput,
                          &start,
                          &end,
                          &step,
