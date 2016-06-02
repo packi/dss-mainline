@@ -198,10 +198,12 @@ namespace dss {
   } // removeFromPropertyTree
 
   std::string State::getStorageName() {
+    std::string dirname;
     if (!DSS::hasInstance()) {
-      return "";
+      dirname = "/tmp";
+    } else {
+      dirname = DSS::getInstance()->getSavedPropsDirectory();
     }
-    std::string dirname = DSS::getInstance()->getSavedPropsDirectory();
     std::string filename = "state." + getName();
     return dirname + "/" + filename;
   }

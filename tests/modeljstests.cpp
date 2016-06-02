@@ -659,7 +659,6 @@ BOOST_AUTO_TEST_CASE(testStateSensors) {
 
   boost::shared_ptr<State> pState = apt.getState(StateType_SensorZone, id);
   BOOST_CHECK(pState != boost::shared_ptr<State> ());
-  BOOST_CHECK_EQUAL(pState->getState(), 2);
 
   boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (pState);
   pSensor->newValue(coSystem, 25.0);
