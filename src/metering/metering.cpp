@@ -523,7 +523,7 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
       start = (_startTime.secondsSinceEpoch() / step) * step;
       end = (_endTime.secondsSinceEpoch() / step) * step;
     }
-
+    end += step;
 
     unsigned long dscount = 0;
     char **names = 0;
