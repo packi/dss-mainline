@@ -63,7 +63,7 @@ const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
 const char *UMV210 =    "UMV:210";
 const char *UMR200 =    "UMR:200";
-const char *SK200 =     "SK:200";
+const char *SK20 =     "SK:20";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
 // all available features
@@ -660,7 +660,7 @@ const int MF_SW_UMR200[] =
   mf_outconfigswitch,
 };
 
-const int MF_SW_SK200[] =
+const int MF_SW_SK20[] =
 {
     mf_temperatureoffset
 };
@@ -884,8 +884,8 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_SK200, MF_ARRAY_SIZE(MF_SW_SK200));
-  setFeatures(ColorIDBlack, SK200, fv);
+  fv->assign(MF_SW_SK20, MF_ARRAY_SIZE(MF_SW_SK20));
+  setFeatures(ColorIDBlack, SK20, fv);
   fv.reset();
 }
 
