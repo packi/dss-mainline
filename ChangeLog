@@ -1,5 +1,8 @@
 dSS - digitalSTROM Server
 
+v1.36.1	01.06.2016
+	* handle empty POST requests as GET, #13669
+
 v1.36.0	27.05.2016
 	* change log level for rrdcached errors, #13249
 	* do not allow to change the name of zone 0 via JSON, #13192

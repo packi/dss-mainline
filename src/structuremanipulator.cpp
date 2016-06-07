@@ -109,6 +109,14 @@ namespace dss {
             group->setIsConnected(true);
           }
           synchronizeGroups(&m_Apartment, &m_Interface);
+        } else if (baer.error == ERROR_NO_FURTHER_ZONES) {
+          // WARNING: do not change this string, it is used and translated in
+          // the UI
+          throw std::runtime_error("The dSM of this device can not handle more "
+                                   "rooms");
+        } else {
+          // do not ignore other errors that might happen
+          throw std::runtime_error(baer.what());
         }
       }
     }
@@ -809,20 +817,14 @@ namespace dss {
           devices.getBySensorType(unassigned_sensors->at(q));
       if (devicesBySensor.length() > 0) {
         // select an active sensor
-        bool assigned = false;
         for (int i = 0; i < devicesBySensor.length(); ++i) {
           if (devicesBySensor.get(i).getDevice()->isPresent()) {
             setZoneSensor(_zone, unassigned_sensors->at(q),
                           devicesBySensor.get(i).getDevice());
-            assigned = true;
             break;
           }
         }
-        if (!assigned) {
-          // all sensor inactive. take first one
-          setZoneSensor(_zone, unassigned_sensors->at(q),
-                        devicesBySensor.get(0).getDevice());
-        }
+        // #13433: removed code that assigned inactive sensors to a zone
       }
     }
   }

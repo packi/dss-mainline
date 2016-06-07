@@ -626,11 +626,12 @@ namespace dss {
       std::string requestData;
       if (post_data_len > 0) {
         requestData.assign(post_data, post_data_len);
+        return RestfulRequest(_sublevel, requestData);
       }
-      return RestfulRequest(_sublevel, requestData);
-    } else {
-      return RestfulRequest(_sublevel, _info->query_string ?: "");
     }
+    // #11669: current apps send POST but actually mean GET so the post_data is empty
+    // and the query string is filled. Fall back to the GET case.
+    return RestfulRequest(_sublevel, _info->query_string ?: "");
   } // extractRequest
 
   int WebServer::httpRequestCallback(struct mg_connection* _connection,

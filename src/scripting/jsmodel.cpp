@@ -2306,7 +2306,7 @@ namespace dss {
       int sensorType;
       std::string activateCondition;
       std::string deactivateCondition;
-      std::string creatorId;
+      std::string creatorId = "default";
 
       if (ext == NULL) {
         JS_ReportError(cx, "Model.dev_addStateSensor: ext of wrong type");
@@ -2350,14 +2350,14 @@ namespace dss {
 
       std::string identifier = ctx->getWrapper() ? ctx->getWrapper()->getIdentifier() : "";
       boost::shared_ptr<StateSensor> state = boost::make_shared<StateSensor> (
-          identifier, pDev, sensorType, activateCondition, deactivateCondition);
-      if (creatorId.length() > 0) {
-        state->setName(state->getName() + "." + creatorId);
-      }
-      state->setPersistence(true);
-      ext->getApartment().allocateState(state);
-
+          creatorId, identifier, pDev, sensorType, activateCondition, deactivateCondition);
       std::string sName = state->getName();
+      state->setPersistence(true);
+      try {
+        ext->getApartment().allocateState(state);
+      } catch(ItemDuplicateException& e) {
+        JS_ReportWarning(cx, "Device sensor state %s already exists: %s", sName.c_str(), e.what());
+      }
       JSString* str = JS_NewStringCopyN(cx, sName.c_str(), sName.size());
       JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
       return JS_TRUE;
@@ -4089,7 +4089,7 @@ namespace dss {
       int sensorType;
       std::string activateCondition;
       std::string deactivateCondition;
-      std::string creatorId;
+      std::string creatorId = "default";
 
       try {
         groupNumber = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
@@ -4110,14 +4110,14 @@ namespace dss {
       boost::shared_ptr<Group> pGroup = pZone->getGroup(groupNumber);
       std::string identifier = ctx->getWrapper() ? ctx->getWrapper()->getIdentifier() : "";
       boost::shared_ptr<StateSensor> state = boost::make_shared<StateSensor> (
-          identifier, pGroup, sensorType, activateCondition, deactivateCondition);
-      if (creatorId.length() > 0) {
-        state->setName(state->getName() + "." + creatorId);
-      }
-      state->setPersistence(true);
-      ext->getApartment().allocateState(state);
-
+          creatorId, identifier, pGroup, sensorType, activateCondition, deactivateCondition);
       std::string sName = state->getName();
+      state->setPersistence(true);
+      try {
+        ext->getApartment().allocateState(state);
+      } catch(ItemDuplicateException& e) {
+        JS_ReportWarning(cx, "Zone sensor state %s already exists: %s", sName.c_str(), e.what());
+      }
       JSString* str = JS_NewStringCopyN(cx, sName.c_str(), sName.size());
       JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
       return JS_TRUE;
