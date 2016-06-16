@@ -1,5 +1,12 @@
 dSS - digitalSTROM Server
 
+v1.36.2	16.06.2016
+	* do not assign inactive sensors as zone sensors, #13433
+	* adapt to librrd changes in regard to start/end time calculation, #12909
+	* improve message when maximum number of zones on a dSM has been
+	  reached, #13544
+	* add model features for SK20x devices, #13415
+
 v1.36.1	01.06.2016
 	* handle empty POST requests as GET, #13669
 
