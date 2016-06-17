@@ -48,7 +48,8 @@ const char *KL220 =     "KL:220";
 const char *KL230 =     "KL:230";
 const char *KL2 =       "KL:2"; // wildcard for all KL-2*
 const char *TKM210 =    "TKM:210";
-const char *TKM200 =    "TKM:200";
+const char *TKM220 =    "TKM:220";
+const char *TKM230 =    "TKM:230";
 const char *TKM2 =      "TKM:2"; // wildcard for all TKM-2*
 const char *SDM20 =     "SDM:20"; // wildcard for all SDM-20*
 const char *SDM2 =      "SDM:2"; // wildcard for all SDM-2*
@@ -182,14 +183,23 @@ const int MF_GE_TKM210[] =
   mf_blinkconfig
 };
 
-const int MF_GE_TKM200[] =
+const int MF_GE_TKM220[] =
 {
   mf_blink,
   mf_leddark,
   mf_pushbutton,
   mf_pushbarea,
   mf_pushbadvanced,
-  mf_impulseconfig,
+  mf_blinkconfig
+};
+
+const int MF_GE_TKM230[] =
+{
+  mf_blink,
+  mf_leddark,
+  mf_pushbutton,
+  mf_pushbarea,
+  mf_pushbadvanced,
   mf_blinkconfig
 };
 
@@ -714,8 +724,13 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_TKM200, MF_ARRAY_SIZE(MF_GE_TKM200));
-  setFeatures(ColorIDYellow, TKM200, fv);
+  fv->assign(MF_GE_TKM220, MF_ARRAY_SIZE(MF_GE_TKM220));
+  setFeatures(ColorIDYellow, TKM220, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<int> >();
+  fv->assign(MF_GE_TKM230, MF_ARRAY_SIZE(MF_GE_TKM230));
+  setFeatures(ColorIDYellow, TKM230, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
