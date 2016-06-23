@@ -697,7 +697,7 @@ namespace dss {
         if (session == NULL) {
           std::string newToken = self.m_SessionManager->registerSession();
           if (newToken.empty()) {
-            self.log("Session limit reached", lsError);
+            self.log("Session limit reached: " + request.getUrlPath(), lsError);
             return 0;
           }
           self.log("Registered new JSON session for trusted port (" + newToken + ")");
@@ -789,7 +789,7 @@ namespace dss {
         if (session == NULL) {
           std::string newToken = self.m_SessionManager->registerSession();
           if (newToken.empty()) {
-            self.log("Session limit reached", lsError);
+            self.log("Session limit reached: " + request.getUrlPath(), lsError);
             return 1;
           }
           self.log("Registered new JSON session for trusted port (" + newToken + ")");
