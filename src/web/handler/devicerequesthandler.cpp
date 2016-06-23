@@ -1680,6 +1680,23 @@ namespace dss {
       if (offDelay != -1) {
          device->setDeviceUMROffDelay(offDelay);
       }
+
+      DeviceSceneSpec_t config;
+      if (pDevice->getProductID() == ProductID_UMV_210) {
+        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
+      } else {
+        pDevice->getDeviceSceneMode(SceneImpulse, config);
+      }
+
+      if (config.flashmode != 1) {
+        config.flashmode = 1;
+        if (pDevice->getProductID() == ProductID_UMV_210) {
+          pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
+        } else {
+          pDevice->setDeviceSceneMode(SceneImpulse, config);
+        }
+      }
+
       return JSONWriter::success();
     } else if (_request.getMethod() == "getBlinkConfig") {
       boost::shared_ptr<Device> device;
