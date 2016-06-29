@@ -189,8 +189,7 @@ const int MF_GE_TKM220[] =
   mf_leddark,
   mf_pushbutton,
   mf_pushbarea,
-  mf_pushbadvanced,
-  mf_blinkconfig
+  mf_pushbadvanced
 };
 
 const int MF_GE_TKM230[] =
@@ -199,8 +198,7 @@ const int MF_GE_TKM230[] =
   mf_leddark,
   mf_pushbutton,
   mf_pushbarea,
-  mf_pushbadvanced,
-  mf_blinkconfig
+  mf_pushbadvanced
 };
 
 const int MF_GE_SDM20[] =
