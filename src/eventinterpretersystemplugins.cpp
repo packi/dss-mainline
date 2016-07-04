@@ -3020,4 +3020,123 @@ namespace dss {
     return SystemEvent::setup(_event);
   }
 
+  EventInterpreterPluginSystemZoneSensorForward::EventInterpreterPluginSystemZoneSensorForward(EventInterpreter* _pInterpreter)
+    : EventInterpreterPlugin("system_zonesensor_forward", _pInterpreter)
+    { }
+
+  EventInterpreterPluginSystemZoneSensorForward::~EventInterpreterPluginSystemZoneSensorForward()
+   { }
+
+  void EventInterpreterPluginSystemZoneSensorForward::subscribe() {
+    boost::shared_ptr<EventSubscription> subscription;
+
+    subscription.reset(new EventSubscription("deviceSensorValue",
+                                             getName(),
+                                             getEventInterpreter(),
+                                             boost::shared_ptr<SubscriptionOptions>()));
+    getEventInterpreter().subscribe(subscription);
+  }
+
+  void EventInterpreterPluginSystemZoneSensorForward::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    Logger::getInstance()->log("EventInterpreterPluginSystemZoneSensorForward::"
+            "handleEvent: processing event \'" + _event.getName() + "\'",
+            lsDebug);
+
+    boost::shared_ptr<SystemZoneSensorForward> handler(new SystemZoneSensorForward());
+
+    if (!handler->setup(_event)) {
+      Logger::getInstance()->log("EventInterpreterPluginSystemZoneSensorForward::"
+              "handleEvent: could not setup event data!");
+      return;
+    }
+
+    addEvent(handler);
+  }
+
+  SystemZoneSensorForward::SystemZoneSensorForward() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
+  }
+
+  SystemZoneSensorForward::~SystemZoneSensorForward() {
+  }
+
+  void SystemZoneSensorForward::run() {
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getSecurity().loginAsSystemUser(
+        "SystemZoneSensorForward needs system rights");
+    } else {
+      return;
+    }
+
+    if (m_evtName == "deviceSensorValue") {
+      deviceSensorValue();
+    }
+  }
+
+  bool SystemZoneSensorForward::setup(Event& _event) {
+    m_evtName = _event.getName();
+    m_evtRaiseLocation = _event.getRaiseLocation();
+    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+    m_raisedAtDevice = _event.getRaisedAtDevice();
+    m_raisedAtState = _event.getRaisedAtState();
+    return SystemEvent::setup(_event);
+  }
+
+  void SystemZoneSensorForward::deviceSensorValue() {
+    if (m_raisedAtDevice != NULL) {
+      try {
+        uint8_t sensorType = 255;
+        boost::shared_ptr<const Device> pDevice = m_raisedAtDevice->getDevice();
+
+        if (m_properties.has("sensorType")) {
+          sensorType = strToInt(m_properties.get("sensorType"));
+        } else {
+          try {
+            std::string sensorIndex("-1");
+            if (m_properties.has("sensorIndex")) {
+              sensorIndex = m_properties.get("sensorIndex");
+            }
+            boost::shared_ptr<DeviceSensor_t> pSensor = pDevice->getSensor(strToInt(sensorIndex));
+            sensorType = pSensor->m_sensorType;
+          } catch (ItemNotFoundException& ex) {}
+        }
+
+        // filter out sensor types that are handled by the (v)dSM
+        int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
+        switch (sensorType) {
+          case SensorIDTemperatureIndoors:
+          case SensorIDHumidityIndoors:
+          case SensorIDBrightnessIndoors:
+          case SensorIDCO2Concentration:
+            return;
+          case SensorIDTemperatureOutdoors:
+          case SensorIDBrightnessOutdoors:
+          case SensorIDHumidityOutdoors:
+          case SensorIDWindSpeed:
+          case SensorIDWindDirection:
+          case SensorIDGustSpeed:
+          case SensorIDGustDirection:
+          case SensorIDPrecipitation:
+          case SensorIDAirPressure:
+            zoneId = 0;
+            break;
+        }
+        boost::shared_ptr<Zone> pZone = DSS::getInstance()->getApartment().getZone(zoneId);
+        boost::shared_ptr<Device> sDevice = pZone->getAssignedSensorDevice(sensorType);
+
+        std::string sensorValue;
+        if (m_properties.has("sensorValue")) {
+          sensorValue = m_properties.get("sensorValue");
+        }
+        std::string sensorValueFloat;
+        if (m_properties.has("sensorValueFloat")) {
+          sensorValueFloat = m_properties.get("sensorValueFloat");
+        }
+
+        if (sDevice && sDevice->getDSID() == pDevice->getDSID()) {
+          pZone->pushSensor(coSystem, SAC_MANUAL, pDevice->getDSID(), sensorType, strToDouble(sensorValueFloat), "");
+        }
+      } catch (ItemNotFoundException &ex) {}
+    }
+  }
+
 } // namespace dss
