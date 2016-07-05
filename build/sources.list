@@ -208,6 +208,8 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/propertyrequesthandler.h \
 	../src/web/handler/setrequesthandler.cpp \
 	../src/web/handler/setrequesthandler.h \
+	../src/web/handler/staterequesthandler.cpp \
+	../src/web/handler/staterequesthandler.h \
 	../src/web/handler/structurerequesthandler.cpp \
 	../src/web/handler/structurerequesthandler.h \
 	../src/web/handler/subscriptionrequesthandler.cpp \
