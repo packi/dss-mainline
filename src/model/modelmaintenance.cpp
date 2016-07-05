@@ -2942,6 +2942,27 @@ namespace dss {
 
         json.String("serviceName");
         json.String(state->getProviderService().c_str());
+      } else if (state->getType() == StateType_Circuit) {
+        boost::shared_ptr<DSMeter> meter = state->getProviderDsm();
+        dsid_t dsid;
+        if (dsuid_to_dsid(meter->getDSID(), &dsid)) {
+          json.String("dsid");
+          json.String(dsid2str(dsid).c_str());
+        } else {
+          json.String("dsid");
+          json.String("");
+        }
+        json.String("dSUID");
+        json.String(dsuid2str(meter->getDSID()).c_str());
+
+        json.String("isApartment");
+        json.Bool(false);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(true);
       }
     }
 

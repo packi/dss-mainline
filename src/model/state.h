@@ -34,6 +34,7 @@ namespace dss {
   class Device;
   class Group;
   class Zone;
+  class DSMeter;
 
   typedef enum {
     State_Invalid = 0,
@@ -57,7 +58,8 @@ namespace dss {
     StateType_Group = 3,
     StateType_Script = 4,
     StateType_SensorZone = 5,
-    StateType_SensorDevice = 6
+    StateType_SensorDevice = 6,
+    StateType_Circuit = 7,
   } eStateType;
 
   /** Represents a common class for Device, Service and Apartment states.*/
@@ -78,6 +80,9 @@ namespace dss {
     boost::shared_ptr<Device> m_providerDev;
     int m_providerDevInput;
 
+    /** State provider is a dSM */
+    boost::shared_ptr<DSMeter> m_providerDsm;
+
     /** State provider is a web service or js script*/
     std::string m_serviceName;
 
@@ -96,9 +101,10 @@ namespace dss {
     /** Constructs a state. */
     State(const std::string& _name);
     State(const std::string& _name, eState _state);
-    State(boost::shared_ptr<Device>_device, int _inputIndex);
+    State(boost::shared_ptr<Device> _device, int _inputIndex);
     State(boost::shared_ptr<Group> _group);
     State(eStateType _type, const std::string& _name, const std::string& _identifier);
+    State(boost::shared_ptr<DSMeter> _meter, int _inputIndex);
 
     virtual ~State();
 
@@ -128,11 +134,14 @@ namespace dss {
     }
 
     boost::shared_ptr<Device> getProviderDevice() const { return m_providerDev; }
+    int getProviderDeviceInput() const { return m_providerDevInput; }
     void setProviderDevice(boost::shared_ptr<Device> _dev) {
       m_providerDev = _dev;
       removeFromPropertyTree();
       publishToPropertyTree();
     }
+
+    boost::shared_ptr<DSMeter> getProviderDsm() const { return m_providerDsm; }
 
     std::string getProviderService() const { return m_serviceName; }
 
