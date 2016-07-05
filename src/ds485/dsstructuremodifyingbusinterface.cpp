@@ -384,6 +384,21 @@ namespace dss {
     }
   }
 
+  void DSStructureModifyingBusInterface::setCircuitPowerStateConfig(const dsuid_t& _dsMeterID,
+                                                                    const int _index,
+                                                                    const int _setThreshold,
+                                                                    const int _resetThreshold) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+
+    int ret = CircuitPowerState_config(m_DSMApiHandle, _dsMeterID,
+                                       _index, _setThreshold,
+                                       _resetThreshold);
+    DSBusInterface::checkResultCode(ret);
+  }
+
   void DSStructureModifyingBusInterface::resetZoneSensor(
                                             const uint16_t _zoneID,
                                             const uint8_t _sensorType) {

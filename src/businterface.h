@@ -361,6 +361,8 @@ namespace dss {
     virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) = 0;
     virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) = 0;
 
+    virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) = 0;
+
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
 

@@ -74,6 +74,8 @@ namespace dss {
     virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t sensorType, const dsuid_t& sensorDSUID);
     virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t sensorType);
 
+    virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold);
+
     void setModelMaintenace(ModelMaintenance* _modelMaintenance);
 private:
     ModelMaintenance* m_pModelMaintenance;

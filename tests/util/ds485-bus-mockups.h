@@ -77,6 +77,7 @@ public:
   virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) {}
   virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) {}
   virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) {}
+  virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) {}
 };
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
