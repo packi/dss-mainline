@@ -102,6 +102,9 @@ public:
   virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) {
     return std::vector<ClusterSpec_t>();
   }
+  virtual std::vector<CircuitPowerStateSpec_t> getPowerStates(const dsuid_t& _dsMeterID) {
+    return std::vector<CircuitPowerStateSpec_t>();
+  }
   virtual std::vector<std::pair<int,int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) {
     return std::vector<std::pair<int,int> >();
   }
