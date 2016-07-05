@@ -242,6 +242,9 @@ namespace dss {
   bool BusScanner::scanPowerStates(boost::shared_ptr<DSMeter> _dsMeter) {
     std::vector<CircuitPowerStateSpec_t> powerStates;
 
+    if (!_dsMeter->getCapability_HasMetering()) {
+      return true;
+    }
     try {
       powerStates = m_Interface.getPowerStates(_dsMeter->getDSID());
       _dsMeter->setPowerStates(powerStates);
