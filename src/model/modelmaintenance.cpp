@@ -1043,6 +1043,14 @@ namespace dss {
         onSensorValue(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
       }
       break;
+    case ModelEvent::etCircuitPowerStateChange:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 3) {
+        log("Expected at least 3 parameter for ModelEvent::etCircuitPowerStateChange");
+      } else {
+        onCircuitPowerStateChange(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+      break;
     case ModelEvent::etZoneSensorValue:
       assert(pEventWithDSID != NULL);
       if (event->getParameterCount() < 5) {
@@ -2037,6 +2045,24 @@ namespace dss {
       log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   } // onBinaryInputEvent
+
+  void ModelMaintenance::onCircuitPowerStateChange(dsuid_t _meterID,
+                                                   const int& _baseIndex,
+                                                   const int& _stateMask,
+                                                   const int& _stateValue) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      for (int i = 0; i < 16; i++) {
+        if ((_stateMask & (1 << i)) == 0) {
+          continue;
+        }
+        boost::shared_ptr<State> pState = pMeter->getPowerState(i);
+        pState->setState(coSystem, ((_stateValue & (1 << i)) > 0) ? State_Active : State_Inactive);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onCircuitPowerStateChange: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onCircuitPowerStateChange
 
   void ModelMaintenance::onSensorValue(dsuid_t _meterID,
                                        const devid_t _deviceID,
