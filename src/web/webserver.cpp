@@ -64,6 +64,7 @@
 #include "src/web/handler/setrequesthandler.h"
 #include "src/web/handler/zonerequesthandler.h"
 #include "src/web/handler/subscriptionrequesthandler.h"
+#include "src/web/handler/staterequesthandler.h"
 
 #include "src/businterface.h"
 
@@ -289,6 +290,7 @@ namespace dss {
   const char* kHandlerMetering = "metering";
   const char* kHandlerSubscription = "subscription";
   const char* kHandlerDatabase = "database";
+  const char* kHandlerState = "state";
 
   void WebServer::instantiateHandlers() {
     m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment(), getDSS().getModelMaintenance());
@@ -320,6 +322,7 @@ namespace dss {
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
     m_Handlers[kHandlerDatabase] = new DatabaseRequestHandler();
+    m_Handlers[kHandlerState] = new StateRequestHandler(getDSS().getApartment());
   } // instantiateHandlers
 
   /**
@@ -697,7 +700,7 @@ namespace dss {
         if (session == NULL) {
           std::string newToken = self.m_SessionManager->registerSession();
           if (newToken.empty()) {
-            self.log("Session limit reached", lsError);
+            self.log("Session limit reached: " + request.getUrlPath(), lsError);
             return 0;
           }
           self.log("Registered new JSON session for trusted port (" + newToken + ")");
@@ -789,7 +792,7 @@ namespace dss {
         if (session == NULL) {
           std::string newToken = self.m_SessionManager->registerSession();
           if (newToken.empty()) {
-            self.log("Session limit reached", lsError);
+            self.log("Session limit reached: " + request.getUrlPath(), lsError);
             return 1;
           }
           self.log("Registered new JSON session for trusted port (" + newToken + ")");
