@@ -251,6 +251,7 @@ dsstests_SOURCES = \
 	../tests/dsuidtests.cpp \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
+	../tests/event_trigger_tests.cpp \
 	../tests/http_client_tests.cpp \
 	../tests/iconvtests.cpp \
 	../tests/jsdatabase.cpp \
