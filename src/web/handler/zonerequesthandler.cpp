@@ -658,6 +658,21 @@ namespace dss {
             return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
           boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(dsuid);
+
+          switch (type)  {
+            case SensorIDBrightnessOutdoors:
+            case SensorIDTemperatureOutdoors:
+            case SensorIDHumidityOutdoors:
+            case SensorIDWindSpeed:
+            case SensorIDWindDirection:
+            case SensorIDGustSpeed:
+            case SensorIDGustDirection:
+            case SensorIDPrecipitation:
+            case SensorIDAirPressure:
+              pZone = m_Apartment.getZone(0);
+              break;
+          }
+
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.setZoneSensor(pZone, type, dev);
           return JSONWriter::success();

@@ -361,6 +361,12 @@ namespace dss {
         case SensorIDTemperatureOutdoors:
         case SensorIDBrightnessOutdoors:
         case SensorIDHumidityOutdoors:
+        case SensorIDWindSpeed:
+        case SensorIDWindDirection:
+        case SensorIDGustSpeed:
+        case SensorIDGustDirection:
+        case SensorIDPrecipitation:
+        case SensorIDAirPressure:
           return true;
         default:
           return false;
@@ -449,16 +455,33 @@ namespace dss {
   }
 
   boost::shared_ptr<std::vector<int> > Zone::getUnassignedSensorTypes() const {
-    int sensorTypes[] = {
+    int sensorTypesIndoor[] = {
       SensorIDTemperatureIndoors,
       SensorIDBrightnessIndoors,
       SensorIDHumidityIndoors,
       SensorIDCO2Concentration
     };
+    int sensorTypesOutdoor[] = {
+      SensorIDTemperatureOutdoors,
+      SensorIDBrightnessOutdoors,
+      SensorIDHumidityOutdoors,
+      SensorIDWindSpeed,
+      SensorIDWindDirection,
+      SensorIDGustSpeed,
+      SensorIDGustDirection,
+      SensorIDPrecipitation,
+      SensorIDAirPressure
+    };
 
-    boost::shared_ptr<std::vector<int> >ret(
-        new std::vector<int>(sensorTypes,
-                        sensorTypes + sizeof(sensorTypes) / sizeof(int)));
+    boost::shared_ptr<std::vector<int> > ret;
+
+    if (m_ZoneID == 0) {
+      ret.reset(new std::vector<int>(sensorTypesOutdoor,
+          sensorTypesOutdoor + sizeof(sensorTypesOutdoor) / sizeof(int)));
+    } else {
+      ret.reset(new std::vector<int>(sensorTypesIndoor,
+          sensorTypesIndoor + sizeof(sensorTypesIndoor) / sizeof(int)));
+    }
 
     for (size_t i = 0; i < m_MainSensors.size(); i++) {
       boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);

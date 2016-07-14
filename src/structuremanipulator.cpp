@@ -794,11 +794,6 @@ namespace dss {
       return;
     }
 
-    // don't assign sensor to zone zero
-    if (_zone->getID() == 0) {
-      return;
-    }
-
     Set devices = _zone->getDevices();
     if (devices.isEmpty()) {
       return;
