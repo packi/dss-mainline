@@ -148,17 +148,6 @@ void SensorMonitorTask::run() {
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
           pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
         }
-      } else {
-        ApartmentSensorStatus_t aSensors = m_Apartment->getSensorStatus();
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDTemperatureOutdoors, aSensors.m_TemperatureValueTS)) {
-          pZone->setTemperature(aSensors.m_TemperatureValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDHumidityOutdoors, aSensors.m_HumidityValueTS)) {
-          pZone->setHumidityValue(aSensors.m_HumidityValue, DateTime::NullDate);
-        }
-        if (checkZoneValue(pZone->getGroup(GroupIDBroadcast), SensorIDBrightnessOutdoors, aSensors.m_BrightnessValueTS)) {
-          pZone->setBrightnessValue(aSensors.m_BrightnessValue,  DateTime::NullDate);
-        }
       }
     }
   } catch (std::exception& e) {
