@@ -165,6 +165,8 @@ namespace dss {
   const int SensorIDHumidityIndoors = 13;
   const int SensorIDHumidityOutdoors = 14;
   const int SensorIDAirPressure = 15;
+  const int SensorIDGustSpeed = 16;
+  const int SensorIDGustDirection = 17;
   const int SensorIDWindSpeed = 18;
   const int SensorIDWindDirection = 19;
   const int SensorIDPrecipitation = 20;
@@ -201,6 +203,7 @@ namespace dss {
   const int BinaryInputIDFrostDetector = 18;
   const int BinaryInputIDHeatingSystem = 19;
   const int BinaryInputIDHeatingSystemMode = 20;
+  const int BinaryInputIDPowerUp = 21;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1

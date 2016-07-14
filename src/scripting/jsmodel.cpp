@@ -629,25 +629,10 @@ namespace dss {
 
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
-
-      if (aStatus.m_TemperatureValueTS != DateTime::NullDate) {
-        obj.setProperty<double>("TemperatureValue", aStatus.m_TemperatureValue);
-        obj.setProperty<std::string>("TemperatureValueTime", aStatus.m_TemperatureValueTS.toISO8601_ms());
-      }
-      if (aStatus.m_BrightnessValueTS != DateTime::NullDate) {
-        obj.setProperty<double>("BrightnessValue", aStatus.m_BrightnessValue);
-        obj.setProperty<std::string>("BrightnessValueTime", aStatus.m_BrightnessValueTS.toISO8601_ms());
-      }
-      if (aStatus.m_HumidityValueTS != DateTime::NullDate) {
-        obj.setProperty<double>("HumidityValue", aStatus.m_HumidityValue);
-        obj.setProperty<std::string>("HumidityValueTime", aStatus.m_HumidityValueTS.toISO8601_ms());
-      }
-      if (aStatus.m_WeatherTS != DateTime::NullDate) {
-        obj.setProperty<std::string>("WeatherIconId", aStatus.m_WeatherIconId);
-        obj.setProperty<std::string>("WeatherConditionId", aStatus.m_WeatherConditionId);
-        obj.setProperty<std::string>("WeatherServiceId", aStatus.m_WeatherServiceId);
-        obj.setProperty<std::string>("WeatherServiceTime", aStatus.m_WeatherTS.toISO8601_ms());
-      }
+      obj.setProperty<std::string>("WeatherIconId", aStatus.m_WeatherIconId);
+      obj.setProperty<std::string>("WeatherConditionId", aStatus.m_WeatherConditionId);
+      obj.setProperty<std::string>("WeatherServiceId", aStatus.m_WeatherServiceId);
+      obj.setProperty<std::string>("WeatherServiceTime", aStatus.m_WeatherTS.toISO8601_ms());
       return JS_TRUE;
     }
     return JS_FALSE;

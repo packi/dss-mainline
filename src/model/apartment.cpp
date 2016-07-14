@@ -581,17 +581,47 @@ namespace dss {
 
   void Apartment::setTemperature(double _value, DateTime& _ts) {
     m_SensorStatus.m_TemperatureValue = _value;
-    m_SensorStatus.m_TemperatureValueTS = _ts;
+    m_SensorStatus.m_TemperatureTS = _ts;
   }
 
   void Apartment::setHumidityValue(double _value, DateTime& _ts) {
     m_SensorStatus.m_HumidityValue = _value;
-    m_SensorStatus.m_HumidityValueTS = _ts;
+    m_SensorStatus.m_HumidityTS = _ts;
   }
 
   void Apartment::setBrightnessValue(double _value, DateTime& _ts) {
     m_SensorStatus.m_BrightnessValue = _value;
-    m_SensorStatus.m_BrightnessValueTS = _ts;
+    m_SensorStatus.m_BrightnessTS = _ts;
+  }
+
+  void Apartment::setWindSpeed(double _value, DateTime& _ts) {
+    m_SensorStatus.m_WindSpeedValue = _value;
+    m_SensorStatus.m_WindSpeedTS = _ts;
+  }
+
+  void Apartment::setWindDirection(double _value, DateTime& _ts) {
+    m_SensorStatus.m_WindDirectionValue = _value;
+    m_SensorStatus.m_WindDirectionTS = _ts;
+  }
+
+  void Apartment::setGustSpeed(double _value, DateTime& _ts) {
+    m_SensorStatus.m_GustSpeedValue = _value;
+    m_SensorStatus.m_GustSpeedTS = _ts;
+  }
+
+  void Apartment::setGustDirection(double _value, DateTime& _ts) {
+    m_SensorStatus.m_GustDirectionValue = _value;
+    m_SensorStatus.m_GustDirectionTS = _ts;
+  }
+
+  void Apartment::setPrecipitation(double _value, DateTime& _ts) {
+    m_SensorStatus.m_PrecipitationValue = _value;
+    m_SensorStatus.m_PrecipitationTS = _ts;
+  }
+
+  void Apartment::setAirPressure(double _value, DateTime& _ts) {
+    m_SensorStatus.m_AirPressureValue = _value;
+    m_SensorStatus.m_AirPressureTS = _ts;
   }
 
   void Apartment::setWeatherInformation(std::string& _iconId, std::string& _conditionId, std::string _serviceId, DateTime& _ts) {
