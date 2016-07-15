@@ -613,7 +613,11 @@ namespace dss {
     ms->m_sensorType = _sensorType;
     ms->m_sensorIndex = _sensorIndex;
 
-    m_tempZone->setSensor(ms);
+    try {
+      m_tempZone->setSensor(ms);
+    } catch(std::runtime_error &ex) {
+      Logger::getInstance()->log("ModelPersistence: could not assign zone sensor " + std::string(dsuid) + ": " + ex.what(), lsError);
+    }
   }
 
   const char *ModelPersistence::getSingleAttribute(const char* _name,
@@ -1171,19 +1175,16 @@ namespace dss {
     _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
 
     // Zone sensors
-    if (_pZone->getID() != 0) {
-      std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = _pZone->getAssignedSensors();
-
-      if ( !slist.empty() ) {
-        _ofs << doIndent(_indent + 1) << "<sensors>" << std::endl;
-        for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
-            it != slist.end();
-            it ++) {
-          boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-          zoneSensorToXML(devSensor, _ofs, _indent+2);
-        }
-        _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
+    std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = _pZone->getAssignedSensors();
+    if ( !slist.empty() ) {
+      _ofs << doIndent(_indent + 1) << "<sensors>" << std::endl;
+      for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
+          it != slist.end();
+          it ++) {
+        boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+        zoneSensorToXML(devSensor, _ofs, _indent+2);
       }
+      _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
     }
 
     // heating controller

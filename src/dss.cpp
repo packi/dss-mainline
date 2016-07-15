@@ -502,6 +502,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterSensorMonitorPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterPluginSystemZoneSensorForward(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterHeatingMonitorPlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new SensorDataUploadMsHubPlugin(m_pEventInterpreter.get());

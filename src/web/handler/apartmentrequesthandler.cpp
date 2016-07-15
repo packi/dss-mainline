@@ -459,24 +459,71 @@ namespace dss {
         ApartmentSensorStatus_t aSensorStatus = m_Apartment.getSensorStatus();
         JSONWriter json;
 
-        if (aSensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
-          json.add("TemperatureValue", aSensorStatus.m_TemperatureValue);
-          json.add("TemperatureValueTime", aSensorStatus.m_TemperatureValueTS.toISO8601_ms());
-        }
-        if (aSensorStatus.m_HumidityValueTS != DateTime::NullDate) {
-          json.add("HumidityValue", aSensorStatus.m_HumidityValue);
-          json.add("HumidityValueTime", aSensorStatus.m_HumidityValueTS.toISO8601_ms());
-        }
-        if (aSensorStatus.m_BrightnessValueTS != DateTime::NullDate) {
-          json.add("BrightnessValue", aSensorStatus.m_BrightnessValue);
-          json.add("BrightnessValueTime", aSensorStatus.m_BrightnessValueTS.toISO8601_ms());
-        }
+        json.startObject("weather");
         if (aSensorStatus.m_WeatherTS != DateTime::NullDate) {
           json.add("WeatherIconId", aSensorStatus.m_WeatherIconId);
           json.add("WeatherConditionId", aSensorStatus.m_WeatherConditionId);
           json.add("WeatherServiceId", aSensorStatus.m_WeatherServiceId);
           json.add("WeatherServiceTime", aSensorStatus.m_WeatherTS.toISO8601_ms());
         }
+        json.endObject();
+
+        json.startObject("outdoor");
+        if (aSensorStatus.m_TemperatureTS != DateTime::NullDate) {
+          json.startObject("temperature");
+          json.add("value", aSensorStatus.m_TemperatureValue);
+          json.add("time", aSensorStatus.m_TemperatureTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_HumidityTS != DateTime::NullDate) {
+          json.startObject("humidity");
+          json.add("value", aSensorStatus.m_HumidityValue);
+          json.add("time", aSensorStatus.m_HumidityTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_BrightnessTS != DateTime::NullDate) {
+          json.startObject("brightness");
+          json.add("value", aSensorStatus.m_BrightnessValue);
+          json.add("time", aSensorStatus.m_BrightnessTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_WindSpeedTS != DateTime::NullDate) {
+          json.startObject("windspeed");
+          json.add("value", aSensorStatus.m_WindSpeedValue);
+          json.add("time", aSensorStatus.m_WindSpeedTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_WindDirectionTS != DateTime::NullDate) {
+          json.startObject("winddirection");
+          json.add("value", aSensorStatus.m_WindDirectionValue);
+          json.add("time", aSensorStatus.m_WindDirectionTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_GustSpeedTS != DateTime::NullDate) {
+          json.startObject("gustspeed");
+          json.add("value", aSensorStatus.m_GustSpeedValue);
+          json.add("time", aSensorStatus.m_GustSpeedTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_GustDirectionTS != DateTime::NullDate) {
+          json.startObject("gustdirection");
+          json.add("value", aSensorStatus.m_GustDirectionValue);
+          json.add("time", aSensorStatus.m_GustDirectionTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_PrecipitationTS != DateTime::NullDate) {
+          json.startObject("precipitation");
+          json.add("value", aSensorStatus.m_PrecipitationValue);
+          json.add("time", aSensorStatus.m_PrecipitationTS.toISO8601_ms());
+          json.endObject();
+        }
+        if (aSensorStatus.m_AirPressureTS != DateTime::NullDate) {
+          json.startObject("airpressure");
+          json.add("value", aSensorStatus.m_AirPressureValue);
+          json.add("time", aSensorStatus.m_AirPressureTS.toISO8601_ms());
+          json.endObject();
+        }
+        json.endObject();
 
         json.startArray("zones");
         std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();

@@ -58,19 +58,44 @@ namespace dss {
   typedef struct ApartmentSensorStatus {
     ApartmentSensorStatus() :
       m_TemperatureValue(0),
-      m_TemperatureValueTS(0),
+      m_TemperatureTS(0),
       m_HumidityValue(0),
-      m_HumidityValueTS(0),
+      m_HumidityTS(0),
       m_BrightnessValue(0),
-      m_BrightnessValueTS(0),
+      m_BrightnessTS(0),
+      m_WindSpeedValue(0),
+      m_WindSpeedTS(0),
+      m_WindDirectionValue(0),
+      m_WindDirectionTS(0),
+      m_GustSpeedValue(0),
+      m_GustSpeedTS(0),
+      m_GustDirectionValue(0),
+      m_GustDirectionTS(0),
+      m_PrecipitationValue(0),
+      m_PrecipitationTS(0),
+      m_AirPressureValue(0),
+      m_AirPressureTS(0),
       m_WeatherTS(0)
       {}
     double m_TemperatureValue;
-    DateTime m_TemperatureValueTS;
+    DateTime m_TemperatureTS;
     double m_HumidityValue;
-    DateTime m_HumidityValueTS;
+    DateTime m_HumidityTS;
     double m_BrightnessValue;
-    DateTime m_BrightnessValueTS;
+    DateTime m_BrightnessTS;
+    double m_WindSpeedValue;
+    DateTime m_WindSpeedTS;
+    double m_WindDirectionValue;
+    DateTime m_WindDirectionTS;
+    double m_GustSpeedValue;
+    DateTime m_GustSpeedTS;
+    double m_GustDirectionValue;
+    DateTime m_GustDirectionTS;
+    double m_PrecipitationValue;
+    DateTime m_PrecipitationTS;
+    double m_AirPressureValue;
+    DateTime m_AirPressureTS;
+
     std::string m_WeatherIconId;
     std::string m_WeatherConditionId;
     std::string m_WeatherServiceId;
@@ -193,6 +218,12 @@ typedef struct {
     void setTemperature(double _value, DateTime& _ts);
     void setHumidityValue(double _value, DateTime& _ts);
     void setBrightnessValue(double _value, DateTime& _ts);
+    void setWindSpeed(double _value, DateTime& _ts);
+    void setWindDirection(double _value, DateTime& _ts);
+    void setGustSpeed(double _value, DateTime& _ts);
+    void setGustDirection(double _value, DateTime& _ts);
+    void setPrecipitation(double _value, DateTime& _ts);
+    void setAirPressure(double _value, DateTime& _ts);
     void setWeatherInformation(std::string& _iconId, std::string& _conditionId, std::string _serviceId, DateTime& _ts);
     std::pair<std::vector<DeviceLock_t>, std::vector<ZoneLock_t> > getClusterLocks();
 
