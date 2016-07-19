@@ -255,6 +255,12 @@ namespace dss {
         case SensorIDTemperatureOutdoors: m_pApartment->setTemperature(_value, now); break;
         case SensorIDHumidityOutdoors: m_pApartment->setHumidityValue(_value, now); break;
         case SensorIDBrightnessOutdoors: m_pApartment->setBrightnessValue(_value, now); break;
+        case SensorIDWindSpeed: m_pApartment->setWindSpeed(_value, now); break;
+        case SensorIDWindDirection: m_pApartment->setWindDirection(_value, now); break;
+        case SensorIDGustSpeed: m_pApartment->setGustSpeed(_value, now); break;
+        case SensorIDGustDirection: m_pApartment->setGustDirection(_value, now); break;
+        case SensorIDPrecipitation: m_pApartment->setPrecipitation(_value, now); break;
+        case SensorIDAirPressure: m_pApartment->setAirPressure(_value, now); break;
         default: break;
       }
     } else {
