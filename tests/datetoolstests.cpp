@@ -101,6 +101,24 @@ BOOST_AUTO_TEST_CASE(testAddingHour) {
   BOOST_CHECK(!(dt >= dt2));
 }
 
+BOOST_AUTO_TEST_CASE(testDifference) {
+  DateTime dt, dt2;
+
+  dt2 = dt.addMinute(1);
+  BOOST_CHECK(dt2.difference(dt) == 60);
+  BOOST_CHECK(dt.difference(dt2) == -60);
+
+  dt2 = dt.addMinute(-dt.getHour() * 60);
+  BOOST_CHECK(dt2.getHour() == 0);
+
+  dt = dt.addMinute(-dt.getMinute());
+  BOOST_CHECK(dt.getMinute() == 0);
+  dt = dt.addSeconds(-(dt.getSecond() - 1));
+  BOOST_CHECK(dt.getSecond() == 1);
+  dt2 = dt.addSeconds(-2);
+  BOOST_CHECK(dt.difference(dt2) == 2);
+}
+
 BOOST_AUTO_TEST_CASE(testRFC2445) {
   DateTime dt = DateTime::parseRFC2445("20080506T080102");
   BOOST_CHECK_EQUAL(2008, dt.getYear());
@@ -356,4 +374,3 @@ BOOST_AUTO_TEST_CASE(testICalEventTZ) {
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
-
