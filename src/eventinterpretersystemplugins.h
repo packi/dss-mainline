@@ -49,6 +49,19 @@ namespace dss {
       int m_evtSrcGroup;
       dsuid_t m_evtSrcDSID;
 
+      /**
+       * checkTrigger() - visit the subtree, each child is a trigger
+       */
+      bool checkTrigger(std::string _path);
+
+      /**
+       * checkTriggerNode() - inspect single trigger node
+       * @_triggerProp - node with known structure
+       * @return true if match, false otherwise
+       */
+      bool checkTriggerNode(PropertyNodePtr _triggerProp);
+
+      /* subclasses of trigger type */
       bool checkSceneZone(PropertyNodePtr _triggerProp);
       bool checkUndoSceneZone(PropertyNodePtr _triggerProp);
       bool checkDeviceScene(PropertyNodePtr _triggerProp);
@@ -60,8 +73,12 @@ namespace dss {
       bool checkState(PropertyNodePtr _triggerProp);
       bool checkSensorValue(PropertyNodePtr _triggerProp);
       bool checkEvent(PropertyNodePtr _triggerProp);
-      bool checkTrigger(std::string _path);
+
+      /**
+       * If a trigger matches this will issue the action
+       */
       void relayTrigger(PropertyNodePtr _releay);
+
   };
 
   class SystemEventActionExecute : public SystemEvent {

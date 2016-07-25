@@ -1665,14 +1665,24 @@ namespace dss {
     }
 
     for (int i = 0; i < appTrigger->getChildCount(); i++) {
-      PropertyNodePtr triggerProp = appTrigger->getChild(i);
+      if (checkTriggerNode(appTrigger->getChild(i))) {
+        // done found a match
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool SystemTrigger::checkTriggerNode(PropertyNodePtr triggerProp)
+  {
       if (triggerProp == NULL) {
-        continue;
+        return false;
       }
 
       PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
       if (triggerType == NULL) {
-        continue;
+        return false;
       }
 
       std::string triggerValue = triggerType->getAsString();
@@ -1770,7 +1780,8 @@ namespace dss {
           }
         }
       }
-    } // for loop
+
+    // no trigger matched
     return false;
   }
 
