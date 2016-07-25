@@ -1676,110 +1676,110 @@ namespace dss {
 
   bool SystemTrigger::checkTriggerNode(PropertyNodePtr triggerProp)
   {
-      if (triggerProp == NULL) {
-        return false;
-      }
+    if (triggerProp == NULL) {
+      return false;
+    }
 
-      PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
-      if (triggerType == NULL) {
-        return false;
-      }
+    PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
+    if (triggerType == NULL) {
+      return false;
+    }
 
-      std::string triggerValue = triggerType->getAsString();
+    std::string triggerValue = triggerType->getAsString();
 
-      if (m_evtName == EventName::CallScene) {
-        if (triggerValue == "zone-scene") {
-          if (checkSceneZone(triggerProp)) {
-            return true;
-          }
-        } else if (triggerValue == "device-scene") {
-          if (checkDeviceScene(triggerProp)) {
-            return true;
-          }
+    if (m_evtName == EventName::CallScene) {
+      if (triggerValue == "zone-scene") {
+        if (checkSceneZone(triggerProp)) {
+          return true;
         }
-
-      } else if (m_evtName == EventName::CallSceneBus) {
-        if (triggerValue == "bus-zone-scene") {
-          if (checkSceneZone(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::UndoScene) {
-        if (triggerValue == "undo-zone-scene") {
-          if (checkUndoSceneZone(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::DeviceButtonClick) {
-        if (triggerValue == "device-msg") {
-          if (checkDevice(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::ButtonDeviceAction) {
-        if (triggerValue == "device-action") {
-          if (checkDirectDeviceAction(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "deviceSensorEvent") {
-        if (triggerValue == "device-sensor") {
-          if (checkDeviceSensor(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "deviceSensorValue") {
-        if (triggerValue == "device-sensor-value") {
-          if (checkSensorValue(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "zoneSensorValue") {
-        if (triggerValue == "zone-sensor-value") {
-          if (checkSensorValue(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
-        if (triggerValue == "device-binary-input") {
-          if (checkDeviceBinaryInput(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "highlevelevent") {
-        if (triggerValue == "custom-event") {
-          if (checkHighlevel(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::StateChange) {
-        if (triggerValue == "state-change") {
-          if (checkState(triggerProp)) {
-            return true;
-          }
-        }
-      } else if (m_evtName == EventName::AddonStateChange) {
-        if (triggerValue == "addon-state-change") {
-          if (checkState(triggerProp)) {
-            return true;
-          }
-        }
-      } else {
-        if (triggerValue == "event") {
-          if (checkEvent(triggerProp)) {
-            return true;
-          }
+      } else if (triggerValue == "device-scene") {
+        if (checkDeviceScene(triggerProp)) {
+          return true;
         }
       }
+
+    } else if (m_evtName == EventName::CallSceneBus) {
+      if (triggerValue == "bus-zone-scene") {
+        if (checkSceneZone(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::UndoScene) {
+      if (triggerValue == "undo-zone-scene") {
+        if (checkUndoSceneZone(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceButtonClick) {
+      if (triggerValue == "device-msg") {
+        if (checkDevice(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::ButtonDeviceAction) {
+      if (triggerValue == "device-action") {
+        if (checkDirectDeviceAction(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "deviceSensorEvent") {
+      if (triggerValue == "device-sensor") {
+        if (checkDeviceSensor(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "deviceSensorValue") {
+      if (triggerValue == "device-sensor-value") {
+        if (checkSensorValue(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "zoneSensorValue") {
+      if (triggerValue == "zone-sensor-value") {
+        if (checkSensorValue(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
+      if (triggerValue == "device-binary-input") {
+        if (checkDeviceBinaryInput(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "highlevelevent") {
+      if (triggerValue == "custom-event") {
+        if (checkHighlevel(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::StateChange) {
+      if (triggerValue == "state-change") {
+        if (checkState(triggerProp)) {
+          return true;
+        }
+      }
+    } else if (m_evtName == EventName::AddonStateChange) {
+      if (triggerValue == "addon-state-change") {
+        if (checkState(triggerProp)) {
+          return true;
+        }
+      }
+    } else {
+      if (triggerValue == "event") {
+        if (checkEvent(triggerProp)) {
+          return true;
+        }
+      }
+    }
 
     // no trigger matched
     return false;
