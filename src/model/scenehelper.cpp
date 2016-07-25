@@ -427,6 +427,7 @@ namespace dss {
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
+    case SensorIDCOConcentration:
       convertedSensorValue = (double) (pow(10, ((double) _sensorValue) / 800));
       convertedSensorValue = roundDigits(convertedSensorValue, 4);
       break;
@@ -436,6 +437,7 @@ namespace dss {
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     case SensorIDWindSpeed:
+    case SensorIDGustSpeed:
       convertedSensorValue = (double) (_sensorValue * 0.1 / 4);
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
@@ -447,6 +449,7 @@ namespace dss {
       convertedSensorValue = (double) (_sensorValue - 100);
       break;
     case SensorIDWindDirection:
+    case SensorIDGustDirection:
       convertedSensorValue = (double) (_sensorValue * 0.5 / 4);
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
@@ -499,6 +502,7 @@ namespace dss {
     case SensorIDBrightnessIndoors:
     case SensorIDBrightnessOutdoors:
     case SensorIDCO2Concentration:
+    case SensorIDCOConcentration:
       if (_sensorValue < 1 || _sensorValue > 131446.795) {
         throw SensorOutOfRangeException("Value must be in range [1..131446.795]");
       }
@@ -512,6 +516,7 @@ namespace dss {
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorIDWindSpeed:
+    case SensorIDGustSpeed:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
         throw SensorOutOfRangeException("Value must be in range [0..102.375]");
       }
@@ -530,6 +535,7 @@ namespace dss {
       convertedSensorValue = (int) (_sensorValue + 0.5 + 100);
       break;
     case SensorIDWindDirection:
+    case SensorIDGustDirection:
       if (_sensorValue < 0 || _sensorValue > 511.875) {
         throw SensorOutOfRangeException("Value must be in range [0..511.875]");
       }
@@ -562,8 +568,7 @@ namespace dss {
         return 0;
     }
     return 0;
-}
-
+  }
 
   std::string SceneHelper::sensorName(const int _sensorType) {
     std::string _name;
@@ -592,6 +597,10 @@ namespace dss {
         _name = "Humidity Outdoors"; break;
       case SensorIDAirPressure:
         _name = "Air Pressure"; break;
+      case SensorIDGustSpeed:
+        _name = "Gust Speed"; break;
+      case SensorIDGustDirection:
+        _name = "Gust Direction"; break;
       case SensorIDWindSpeed:
         _name = "Wind Speed"; break;
       case SensorIDWindDirection:
@@ -606,6 +615,8 @@ namespace dss {
         _name = "Temperature Control Value"; break;
       case SensorIDCO2Concentration:
         _name = "Carbon Dioxide Concentration"; break;
+      case SensorIDCOConcentration:
+        _name = "Carbon Monoxide Concentration"; break;
       case 255:
         _name = "Unknown Type"; break;
     default:
