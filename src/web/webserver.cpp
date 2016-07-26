@@ -498,15 +498,10 @@ namespace dss {
 
   int WebServer::iconHandler(struct mg_connection* _connection,
                              RestfulRequest &request,
-                             const std::string &setCookieHeader,
-                             boost::shared_ptr<Session> _session) {
+                             const std::string &setCookieHeader) {
     std::string result;
     int returnCode = 0;
     try {
-      if (_session == NULL) {
-        throw SecurityException("not logged in");
-      }
-
       if (request.getClass() != "getDeviceIcon") {
         throw std::runtime_error("unhandled function");
       }
@@ -697,7 +692,7 @@ namespace dss {
           self.log("Unknown user", lsInfo);
           return 0;
         }
-        if (session == NULL) {
+        if ((session == NULL) && (toplevel != "/icons")) {
           std::string newToken = self.m_SessionManager->registerSession();
           if (newToken.empty()) {
             self.log("Session limit reached: " + request.getUrlPath(), lsError);
@@ -723,7 +718,7 @@ namespace dss {
     } else if (toplevel == "/json") {
       return self.jsonHandler(_connection, request, trustedLoginCookie, session);
     } else if (toplevel == "/icons") {
-      return self.iconHandler(_connection, request, trustedLoginCookie, session);
+      return self.iconHandler(_connection, request, trustedLoginCookie);
     } else if (toplevel == "/getLatestLogs") {
       return self.logDownloadHandler(_connection, request, trustedLoginCookie, session);
     }
