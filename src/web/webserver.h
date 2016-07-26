@@ -90,8 +90,7 @@ namespace dss {
                     boost::shared_ptr<Session> _session);
     int iconHandler(struct mg_connection* _connection,
                     RestfulRequest &request,
-                    const std::string &trustedSetCookie,
-                    boost::shared_ptr<Session> _session);
+                    const std::string &trustedSetCookie);
     int logDownloadHandler(struct mg_connection* _connection,
                            RestfulRequest &request,
                            const std::string &trustedSetCookie,
