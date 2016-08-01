@@ -98,7 +98,7 @@ namespace dss {
     result.HardwareVersion = 0;
     result.SoftwareRevisionARM = 0;
     result.SoftwareRevisionDSP = 0;
-    result.ApartmentState = 0;
+    result.ApartmentState = 2;
     result.DeviceType = BusMember_Unknown;
     result.DSID = _dsMeterID;
 
@@ -148,26 +148,27 @@ namespace dss {
     memcpy(nameStr, nameBuf, NAME_LEN);
     result.Name = nameStr;
 
-    try {
-      ret = dSMProperties_get_flags(m_DSMApiHandle, _dsMeterID, &flags);
-      DSBusInterface::checkResultCode(ret);
-      result.flags = std::bitset<8>(flags);
-    } catch (BusApiError& err) {
-      Logger::getInstance()->log("DSStructureQueryBusInterface::"
-                                 "getDSMeterSpec: dSMProperties_get_flags: Bus api error: " +
-                                 std::string(err.what()), lsWarning);
-      throw; // rethrow exception
-    }
-
-    try {
-      ret = dSMProperties_get_apartment_state(m_DSMApiHandle, _dsMeterID,
-                                              &result.ApartmentState);
-      DSBusInterface::checkResultCode(ret);
-    } catch (BusApiError& err) {
-      Logger::getInstance()->log("DSStructureQueryBusInterface::"
-                                 "getDSMeterSpec: dSMProperties_get_apartment_state: Bus api error: " +
-                                 std::string(err.what()), lsWarning);
-      throw; // rethrow exception
+    if (result.APIVersion >= 0x0300) {
+      try {
+        ret = dSMProperties_get_flags(m_DSMApiHandle, _dsMeterID, &flags);
+        DSBusInterface::checkResultCode(ret);
+        result.flags = std::bitset<8>(flags);
+      } catch (BusApiError& err) {
+        Logger::getInstance()->log("DSStructureQueryBusInterface::"
+            "getDSMeterSpec: dSMProperties_get_flags: Bus api error: " +
+            std::string(err.what()), lsWarning);
+        throw; // rethrow exception
+      }
+      try {
+        ret = dSMProperties_get_apartment_state(m_DSMApiHandle, _dsMeterID,
+            &result.ApartmentState);
+        DSBusInterface::checkResultCode(ret);
+      } catch (BusApiError& err) {
+        Logger::getInstance()->log("DSStructureQueryBusInterface::"
+            "getDSMeterSpec: dSMProperties_get_apartment_state: Bus api error: " +
+            std::string(err.what()), lsWarning);
+        throw; // rethrow exception
+      }
     }
     return result;
   } // getDSMeterSpec
