@@ -559,6 +559,58 @@ namespace dss {
     return JS_FALSE;
   } // global_unregisterState
 
+  JSBool global_unregisterStateSensor(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.global_unregisterStateSensor: ext of wrong type");
+        return JS_FALSE;
+      }
+
+      std::string stateName;
+      try {
+        stateName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+      } catch(ScriptException& e) {
+        JS_ReportError(cx, "Error converting parameter: state name");
+        return JS_FALSE;
+      }
+
+      boost::shared_ptr<State> state;
+      std::string identifier = ctx->getWrapper()->getIdentifier();
+      try {
+        eStateType stateType = StateType_SensorDevice;
+        state = ext->getApartment().getState(stateType, identifier, stateName);
+        ext->getApartment().removeState(state);
+        state.reset();
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {}
+      try {
+        eStateType stateType = StateType_SensorZone;
+        state = ext->getApartment().getState(stateType, identifier, stateName);
+        ext->getApartment().removeState(state);
+        state.reset();
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      } catch(ItemNotFoundException& e) {}
+
+      JS_ReportError(cx, "StateSensor with given name not found");
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      return JS_FALSE;
+    } catch (SecurityException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: security exception: ") + ex.what(), lsError);
+    } catch (DSSException& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: dss exception: ") + ex.what(), lsError);
+    } catch (std::exception& ex) {
+      Logger::getInstance()->log(std::string("JS: scripting failure: general exception: ") + ex.what(), lsError);
+    }
+
+    return JS_FALSE;
+  } // global_unregisterStateSensor
+
   JSBool global_getEnergyMeterValue(JSContext *cx, uintN argc, jsval *vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -986,6 +1038,7 @@ namespace dss {
     JS_FS("getState", global_getStateByName, 1, 0),
     JS_FS("registerState", global_registerState, 1, 0),
     JS_FS("unregisterState", global_unregisterState, 2, 0),
+    JS_FS("unregisterStateSensor", global_unregisterStateSensor, 1, 0),
     JS_FS("getWeatherInformation", global_get_weatherInformation, 0, 0),
     JS_FS("setWeatherInformation", global_set_weatherInformation, 3, 0),
     JS_FS("setDeviceVisibility", global_set_deviceVisibility, 2, 0),
