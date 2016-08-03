@@ -196,6 +196,54 @@ namespace dss {
         } // oSystemAddonStates loop
       } // nodes NULL check
 
+      PropertyNodePtr oOrAddonStateNode = oBaseConditionNode->getPropertyByName("or-addon-states");
+
+      if ((oOrAddonStateNode != NULL)) {
+        bool fFound = false;
+        for (int j = 0; !fFound && j < oOrAddonStateNode->getChildCount(); j++) {
+          //assuming condi = /or-addon-states/<scriptID>/myFire=true
+          std::string sAddonID = oOrAddonStateNode->getChild(j)->getName();
+          PropertyNodePtr oOrAddonStateSubnode=oOrAddonStateNode->getChild(j);
+          // searching for a specific addon subpath in /usr/addon-states/<scriptid>
+          PropertyNodePtr oSystemAddonStates =
+              DSS::getInstance()->getPropertySystem().getProperty("/usr/addon-states/" + sAddonID);
+
+          if (oSystemAddonStates != NULL) {
+            for (int k = 0; !fFound && k < oOrAddonStateSubnode->getChildCount(); k++) {
+              std::string sName = oOrAddonStateSubnode->getChild(k)->getName();
+              std::string sValue = oOrAddonStateSubnode->getChild(k)->getAsString();
+              for (int i = 0; !fFound && i < oSystemAddonStates->getChildCount(); i++) {
+                PropertyNodePtr nameNode =
+                    oSystemAddonStates->getChild(i)->getPropertyByName("name");
+
+                PropertyNodePtr valueNode =
+                    oSystemAddonStates->getChild(i)->getPropertyByName("value");
+
+                if ((nameNode == NULL) || (valueNode == NULL)) {
+                  Logger::getInstance()->log("checkSystemAddonCondition: can not check"
+                          " addon condition, missing name or value node!", lsError);
+                  continue;
+                }
+
+                // search for a requested state
+                if (sName == nameNode->getAsString()) {
+                  // state found ...
+                  if (sValue == valueNode->getAsString()) {
+                    fFound = true;
+                  }
+                }
+              }
+            }
+          }
+        } // oOrSystemAddonStates loop
+
+        if (fFound == false) {
+          Logger::getInstance()->log("checkSystemCondition: "
+                  "or-addon-states: no states are matching", lsDebug);
+          return false;
+        }
+      } // nodes NULL check
+
       // at least one of the zone states must match
       PropertyNodePtr oZoneNode =
           oBaseConditionNode->getPropertyByName("zone-states");
