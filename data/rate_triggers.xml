@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<properties version="1">
+<property type="none" name="scripts">
+  <property type="none" name="foo">
+    <property type="none" name="entries">
+      <property type="none" name="0">
+        <property type="none" name="triggers">
+
+          <property type="none" name="0">
+            <property type="string" name="type">
+                <value>zone-scene</value>
+            </property>
+            <property type="integer" name="zone">
+                <value>0</value>
+            </property>
+            <property type="integer" name="group">
+                <value>1</value>
+            </property>
+            <property type="integer" name="scene">
+                <value>1</value>
+            </property>
+          </property>
+
+
+          <property type="none" name="damping">
+            <property type="integer" name="delay">
+                <value>10</value>
+            </property>
+            <property type="boolean" name="rewindTimer">
+                <value>false</value>
+            </property>
+          </property>
+
+          <!--property type="none" name="action_lag">
+            <property type="integer" name="delay">
+                <value>0</value>
+            </property>
+            <property type="boolean" name="rewindTimer">
+                <value>false</value>
+            </property>
+          </property-->
+
+        </property>
+      </property>
+    </property>
+  </property>
+</property>
+
+<property type="none" name="usr">
+  <property type="none" name="triggers">
+    <property type="none" name="0">
+
+        <property type="integer" name="id">
+            <value>0</value>
+        </property>
+        <property type="string" name="triggerPath">
+            <value>/scripts/foo/entries/0</value>
+        </property>
+        <property type="string" name="relayedEventName">
+            <value>action_execute</value>
+        </property>
+        <property type="string" name="additionalRelayingParameter">
+            <value></value>
+        </property>
+
+    </property>
+  </property>
+</property>
+</properties>

@@ -33,6 +33,7 @@
 #include "event/event_create.h"
 #include "event/event_fields.h"
 #include "eventinterpretersystemplugins.h"
+#include "handler/system_triggers.h"
 #include "http_client.h"
 #include "internaleventrelaytarget.h"
 #include "logger.h"
@@ -1653,124 +1654,200 @@ namespace dss {
     if (!DSS::hasInstance()) {
       return false;
     }
+
     PropertyNodePtr appProperty =
       DSS::getInstance()->getPropertySystem().getProperty(_path);
     if (appProperty == NULL) {
       return false;
     }
 
-    PropertyNodePtr appTrigger = appProperty->getPropertyByName(ef_triggers);
+    PropertyNodePtr appTrigger = appProperty->getPropertyByName(pn_triggers);
     if (appTrigger == NULL) {
       return false;
     }
 
+    PropertyNodePtr dampNode = appTrigger->getProperty(pn_damping);
+
     for (int i = 0; i < appTrigger->getChildCount(); i++) {
-      PropertyNodePtr triggerProp = appTrigger->getChild(i);
-      if (triggerProp == NULL) {
+
+      if (dampNode == appTrigger->getChild(i)) {
+        // ignore damper node
         continue;
       }
 
-      PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
-      if (triggerType == NULL) {
-        continue;
+      if (checkTriggerNode(appTrigger->getChild(i))) {
+
+        if (dampNode && damping(dampNode)) {
+          // trigger is rate-limited
+          return false;
+        }
+
+        return true;
+      }
+    }
+
+    // no trigger matched
+    return false;
+  }
+
+  bool SystemTrigger::checkTriggerNode(PropertyNodePtr triggerProp)
+  {
+    if (triggerProp == NULL) {
+      return false;
+    }
+
+    PropertyNodePtr triggerType = triggerProp->getPropertyByName(pn_type);
+    if (triggerType == NULL) {
+      return false;
+    }
+
+    std::string triggerValue = triggerType->getAsString();
+
+    if (m_evtName == EventName::CallScene) {
+      if (triggerValue == "zone-scene") {
+        if (checkSceneZone(triggerProp)) {
+          return true;
+        }
+      } else if (triggerValue == "device-scene") {
+        if (checkDeviceScene(triggerProp)) {
+          return true;
+        }
       }
 
-      std::string triggerValue = triggerType->getAsString();
-
-      if (m_evtName == EventName::CallScene) {
-        if (triggerValue == "zone-scene") {
-          if (checkSceneZone(triggerProp)) {
-            return true;
-          }
-        } else if (triggerValue == "device-scene") {
-          if (checkDeviceScene(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::CallSceneBus) {
-        if (triggerValue == "bus-zone-scene") {
-          if (checkSceneZone(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::UndoScene) {
-        if (triggerValue == "undo-zone-scene") {
-          if (checkUndoSceneZone(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::DeviceButtonClick) {
-        if (triggerValue == "device-msg") {
-          if (checkDevice(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::ButtonDeviceAction) {
-        if (triggerValue == "device-action") {
-          if (checkDirectDeviceAction(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "deviceSensorEvent") {
-        if (triggerValue == "device-sensor") {
-          if (checkDeviceSensor(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "deviceSensorValue") {
-        if (triggerValue == "device-sensor-value") {
-          if (checkSensorValue(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "zoneSensorValue") {
-        if (triggerValue == "zone-sensor-value") {
-          if (checkSensorValue(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
-        if (triggerValue == "device-binary-input") {
-          if (checkDeviceBinaryInput(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "highlevelevent") {
-        if (triggerValue == "custom-event") {
-          if (checkHighlevel(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::StateChange) {
-        if (triggerValue == "state-change") {
-          if (checkState(triggerProp)) {
-            return true;
-          }
-        }
-      } else if (m_evtName == EventName::AddonStateChange) {
-        if (triggerValue == "addon-state-change") {
-          if (checkState(triggerProp)) {
-            return true;
-          }
-        }
-      } else {
-        if (triggerValue == "event") {
-          if (checkEvent(triggerProp)) {
-            return true;
-          }
+    } else if (m_evtName == EventName::CallSceneBus) {
+      if (triggerValue == "bus-zone-scene") {
+        if (checkSceneZone(triggerProp)) {
+          return true;
         }
       }
-    } // for loop
+
+    } else if (m_evtName == EventName::UndoScene) {
+      if (triggerValue == "undo-zone-scene") {
+        if (checkUndoSceneZone(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceButtonClick) {
+      if (triggerValue == "device-msg") {
+        if (checkDevice(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::ButtonDeviceAction) {
+      if (triggerValue == "device-action") {
+        if (checkDirectDeviceAction(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "deviceSensorEvent") {
+      if (triggerValue == "device-sensor") {
+        if (checkDeviceSensor(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "deviceSensorValue") {
+      if (triggerValue == "device-sensor-value") {
+        if (checkSensorValue(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "zoneSensorValue") {
+      if (triggerValue == "zone-sensor-value") {
+        if (checkSensorValue(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
+      if (triggerValue == "device-binary-input") {
+        if (checkDeviceBinaryInput(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "highlevelevent") {
+      if (triggerValue == "custom-event") {
+        if (checkHighlevel(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::StateChange) {
+      if (triggerValue == "state-change") {
+        if (checkState(triggerProp)) {
+          return true;
+        }
+      }
+    } else if (m_evtName == EventName::AddonStateChange) {
+      if (triggerValue == "addon-state-change") {
+        if (checkState(triggerProp)) {
+          return true;
+        }
+      }
+    } else {
+      if (triggerValue == "event") {
+        if (checkEvent(triggerProp)) {
+          return true;
+        }
+      }
+    }
+
+    // no trigger matched
+    return false;
+  }
+
+  /**
+   * damping() - decide if trigger shall be damped or an event emitted
+   * @_path  property node structure specifying timeout/last_execution
+   * @return true if event shall be damped, false if no damping is applied
+   */
+  bool SystemTrigger::damping(PropertyNodePtr dampNode) {
+    if (dampNode == NULL) {
+      return false;
+    }
+
+    if (!dampNode->getProperty(pn_delay)) {
+      // no delay specified, nothing to do
+      return false;
+    }
+
+    if (!dampNode->getProperty(pn_last_matched)) {
+      // first trigger ever, no rate-limit possible
+      PropertyNodePtr tmp = dampNode->createProperty(pn_last_matched);
+      tmp->setStringValue(DateTime().toISO8601());
+      return false;
+    }
+
+    // delay in seconds
+    int delay = dampNode->getProperty(pn_delay)->getIntegerValue();
+    if (delay < 0) {
+      Logger::getInstance()->log("trigger::damping: invalid delay " +
+                                 intToString(delay), lsWarning);
+      return false;
+    }
+
+    PropertyNodePtr lastTsNode = dampNode->getProperty(pn_last_matched);
+    DateTime lastTS = DateTime::parseISO8601(lastTsNode->getAsString());
+
+    PropertyNodePtr rewindNode = dampNode->getProperty(pn_rewind_timer);
+    if (rewindNode && rewindNode->getBoolValue()) {
+      // extend rate-limit interval
+      lastTsNode->setStringValue(DateTime().toISO8601());
+    }
+
+    if (DateTime().difference(lastTS) < delay) {
+      // really damp
+      Logger::getInstance()->log("trigger:rate-limit", lsInfo);
+      return true;
+    }
+
+    // rate-limit interval expired, start new interval
+    lastTsNode->setStringValue(DateTime().toISO8601());
     return false;
   }
 
