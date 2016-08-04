@@ -17,19 +17,14 @@
  *  along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "src/event/event_fields.h"
+#include "src/handler/system_triggers.h"
 
 namespace dss {
-  const std::string ef_callOrigin = "callOrigin";
-  const std::string ef_originDSUID = "originDSUID";
-  const std::string ef_zone = "zone";
-  const std::string ef_group = "group";
-  const std::string ef_scene = "scene";
-  const std::string ef_sceneID = "sceneID";
-  const std::string ef_dsuid = "dsuid";
-  const std::string ef_forced = "forced";
-  const std::string ef_sensorEvent = "sensorEvent";
-  const std::string ef_sensorIndex = "sensorIndex";
-  const std::string ef_eventid = "eventid";
-  const std::string ef_evt = "evt";
+  const std::string pn_triggers = "triggers";
+  const std::string  pn_type = "type";
+
+  const std::string pn_damping = "damping";
+  const std::string  pn_last_matched = "lastTrigger";
+  const std::string  pn_delay = "delay";
+  const std::string  pn_rewind_timer = "rewindTimer";
 }

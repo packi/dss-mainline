@@ -35,8 +35,6 @@ namespace dss {
   extern const std::string ef_sensorIndex;
   extern const std::string ef_eventid;
   extern const std::string ef_evt;
-  extern const std::string ef_triggers;
-  extern const std::string ef_type;
 }
 
 #endif

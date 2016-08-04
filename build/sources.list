@@ -52,6 +52,8 @@ libdsscore_a_SOURCES =  \
 	../src/handler/system_handlers.h \
 	../src/handler/system_states.cpp \
 	../src/handler/system_states.h \
+	../src/handler/system_triggers.cpp \
+	../src/handler/system_triggers.h \
 	../src/hasher.cpp \
 	../src/hasher.h \
 	../src/heatingregistering.cpp \

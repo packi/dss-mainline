@@ -75,6 +75,13 @@ namespace dss {
       bool checkEvent(PropertyNodePtr _triggerProp);
 
       /**
+       * damping() - aggregate triggers do not raise an action each time
+       * @_dampProp property subtree with timeout/last_execution arguments
+       * @return true if event shall be damped, false if no damping is applied
+       */
+      bool damping(PropertyNodePtr _dampProp);
+
+      /**
        * If a trigger matches this will issue the action
        */
       void relayTrigger(PropertyNodePtr _releay);

@@ -33,6 +33,7 @@
 #include "event/event_create.h"
 #include "event/event_fields.h"
 #include "eventinterpretersystemplugins.h"
+#include "handler/system_triggers.h"
 #include "http_client.h"
 #include "internaleventrelaytarget.h"
 #include "logger.h"
@@ -1653,24 +1654,39 @@ namespace dss {
     if (!DSS::hasInstance()) {
       return false;
     }
+
     PropertyNodePtr appProperty =
       DSS::getInstance()->getPropertySystem().getProperty(_path);
     if (appProperty == NULL) {
       return false;
     }
 
-    PropertyNodePtr appTrigger = appProperty->getPropertyByName(ef_triggers);
+    PropertyNodePtr appTrigger = appProperty->getPropertyByName(pn_triggers);
     if (appTrigger == NULL) {
       return false;
     }
 
+    PropertyNodePtr dampNode = appTrigger->getProperty(pn_damping);
+
     for (int i = 0; i < appTrigger->getChildCount(); i++) {
+
+      if (dampNode == appTrigger->getChild(i)) {
+        // ignore damper node
+        continue;
+      }
+
       if (checkTriggerNode(appTrigger->getChild(i))) {
-        // done found a match
+
+        if (dampNode && damping(dampNode)) {
+          // trigger is rate-limited
+          return false;
+        }
+
         return true;
       }
     }
 
+    // no trigger matched
     return false;
   }
 
@@ -1680,7 +1696,7 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
+    PropertyNodePtr triggerType = triggerProp->getPropertyByName(pn_type);
     if (triggerType == NULL) {
       return false;
     }
@@ -1782,6 +1798,56 @@ namespace dss {
     }
 
     // no trigger matched
+    return false;
+  }
+
+  /**
+   * damping() - decide if trigger shall be damped or an event emitted
+   * @_path  property node structure specifying timeout/last_execution
+   * @return true if event shall be damped, false if no damping is applied
+   */
+  bool SystemTrigger::damping(PropertyNodePtr dampNode) {
+    if (dampNode == NULL) {
+      return false;
+    }
+
+    if (!dampNode->getProperty(pn_delay)) {
+      // no delay specified, nothing to do
+      return false;
+    }
+
+    if (!dampNode->getProperty(pn_last_matched)) {
+      // first trigger ever, no rate-limit possible
+      PropertyNodePtr tmp = dampNode->createProperty(pn_last_matched);
+      tmp->setStringValue(DateTime().toISO8601());
+      return false;
+    }
+
+    // delay in seconds
+    int delay = dampNode->getProperty(pn_delay)->getIntegerValue();
+    if (delay < 0) {
+      Logger::getInstance()->log("trigger::damping: invalid delay " +
+                                 intToString(delay), lsWarning);
+      return false;
+    }
+
+    PropertyNodePtr lastTsNode = dampNode->getProperty(pn_last_matched);
+    DateTime lastTS = DateTime::parseISO8601(lastTsNode->getAsString());
+
+    PropertyNodePtr rewindNode = dampNode->getProperty(pn_rewind_timer);
+    if (rewindNode && rewindNode->getBoolValue()) {
+      // extend rate-limit interval
+      lastTsNode->setStringValue(DateTime().toISO8601());
+    }
+
+    if (DateTime().difference(lastTS) < delay) {
+      // really damp
+      Logger::getInstance()->log("trigger:rate-limit", lsInfo);
+      return true;
+    }
+
+    // rate-limit interval expired, start new interval
+    lastTsNode->setStringValue(DateTime().toISO8601());
     return false;
   }
 

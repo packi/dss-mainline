@@ -17,19 +17,23 @@
  *  along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "src/event/event_fields.h"
+#pragma once
+
+#include <string>
 
 namespace dss {
-  const std::string ef_callOrigin = "callOrigin";
-  const std::string ef_originDSUID = "originDSUID";
-  const std::string ef_zone = "zone";
-  const std::string ef_group = "group";
-  const std::string ef_scene = "scene";
-  const std::string ef_sceneID = "sceneID";
-  const std::string ef_dsuid = "dsuid";
-  const std::string ef_forced = "forced";
-  const std::string ef_sensorEvent = "sensorEvent";
-  const std::string ef_sensorIndex = "sensorIndex";
-  const std::string ef_eventid = "eventid";
-  const std::string ef_evt = "evt";
+
+  /**
+   * property node structure to declare trigger
+   */
+
+  //< trigger conditions, what needs to match, zone, group, etc
+  extern const std::string pn_triggers;
+  extern const std::string  pn_type;
+
+  //< should every match raise a relay event?
+  extern const std::string pn_damping;
+  extern const std::string  pn_last_matched;
+  extern const std::string  pn_delay;
+  extern const std::string  pn_rewind_timer;
 }

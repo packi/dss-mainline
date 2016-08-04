@@ -29,6 +29,8 @@
 #include "config.h"
 
 #include "src/event.h"
+#include "src/event/event_create.h"
+#include "src/event/event_fields.h"
 #include "src/subscription.h"
 #include "src/propertysystem.h"
 #include "src/setbuilder.h"
@@ -37,6 +39,7 @@
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/set.h"
+#include "src/handler/system_triggers.h"
 #include "src/dss.h"
 #include "src/eventinterpretersystemplugins.h"
 #include "src/security/security.h"
@@ -91,6 +94,72 @@ BOOST_FIXTURE_TEST_CASE(testSpeed, DSSInstanceFixture) {
     trigger->run();
     BOOST_CHECK(DSS::getInstance()->getEventQueue().popEvent().get());
   }
+}
+
+
+// taken from webservice_api_tests
+boost::shared_ptr<Group> createGroup(int id) {
+  Apartment &apartment(DSS::getInstance()->getApartment());
+  boost::shared_ptr<Zone> zone = apartment.getZone(0);
+  return zone->getGroup(id);
+}
+
+BOOST_FIXTURE_TEST_CASE(testRateLimit, DSSInstanceFixture) {
+  PropertyParser parser;
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+
+  parser.loadFromXML(kDsstestsFilesDirectory + std::string("/rate_triggers.xml"),
+                     propSystem.createProperty("/"));
+
+  boost::shared_ptr<Event> pEvent;
+  pEvent = createGroupCallSceneEvent(createGroup(1), 1, 0, 1,
+                                     callOrigin_t(2), dsuid_t(),
+                                     "fake-token", false);
+
+  SystemTrigger trigger;
+  BOOST_CHECK(trigger.setup(*pEvent));
+
+  trigger.run();
+  trigger.run(); // should be damped
+
+  // TODO check for single event in event queue, for now check log output
+}
+
+BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
+  PropertyParser parser;
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+
+  parser.loadFromXML(kDsstestsFilesDirectory + std::string("/rate_triggers.xml"),
+                     propSystem.createProperty("/"));
+
+  // same as referenced by /usr/triggers/0/triggerPath
+  std::string triggerPath("/scripts/foo/entries/0/");
+  PropertyNodePtr dampNode =
+    propSystem.getProperty(triggerPath + pn_triggers + "/" + pn_damping);
+  BOOST_CHECK(dampNode);
+
+  DateTime fakeTS = DateTime().addSeconds(-dampNode->getProperty(pn_delay)->getIntegerValue() / 2);
+  dampNode->createProperty(pn_last_matched)->setStringValue(fakeTS.toISO8601());
+
+  boost::shared_ptr<Event> pEvent;
+  pEvent = createGroupCallSceneEvent(createGroup(1), 1, 0, 1,
+                                     callOrigin_t(2), dsuid_t(),
+                                     "fake-token", false);
+
+  SystemTrigger trigger;
+  trigger.setup(*pEvent);
+  trigger.run();
+
+  DateTime afterTS = DateTime::parseISO8601(dampNode->getProperty(pn_last_matched)->getStringValue());
+  BOOST_CHECK(fakeTS == afterTS);
+
+  // now rewind the damping timer with each event
+  dampNode->getProperty(pn_rewind_timer)->setBooleanValue(true);
+  trigger.run();
+
+  afterTS = DateTime::parseISO8601(dampNode->getProperty(pn_last_matched)->getStringValue());
+
+  BOOST_CHECK(fakeTS != afterTS);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
