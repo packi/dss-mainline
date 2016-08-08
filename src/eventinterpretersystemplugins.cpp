@@ -1870,12 +1870,15 @@ namespace dss {
       evt->setProperty(kv.first, kv.second);
     }
 
-    if (DSS::hasInstance()) {
-      Logger::getInstance()->log("SystemTrigger::"
-              "relayTrigger: relaying event \'" + evt->getName() + "\'");
-
-      DSS::getInstance()->getEventQueue().pushEvent(evt);
+    if (!DSS::hasInstance()) {
+      // some unit tests exit here
+      return;
     }
+
+    Logger::getInstance()->log("SystemTrigger::relayTrigger: relaying event \'" + evt->getName() + "\'");
+
+    DSS::getInstance()->getEventQueue().pushEvent(evt);
+
   }
 
   void SystemTrigger::run() {
