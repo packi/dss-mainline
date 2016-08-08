@@ -120,9 +120,13 @@ BOOST_FIXTURE_TEST_CASE(testRateLimit, DSSInstanceFixture) {
   BOOST_CHECK(trigger.setup(*pEvent));
 
   trigger.run();
-  trigger.run(); // should be damped
 
-  // TODO check for single event in event queue, for now check log output
+  // only one event in queue
+  EventQueue &queue(DSS::getInstance()->getEventQueue());
+  BOOST_CHECK(queue.popEvent() != NULL);
+
+  trigger.run(); // should be damped
+  BOOST_CHECK(queue.popEvent() == NULL);
 }
 
 BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
