@@ -51,8 +51,10 @@ namespace dss {
 
       /**
        * checkTrigger() - visit the subtree, each child is a trigger
+       * @_triggerProp - node with known structure containing parameters
+       * @return true if match, false otherwise
        */
-      bool checkTrigger(std::string _path);
+      bool checkTrigger(PropertyNodePtr _triggerProp);
 
       /**
        * checkTriggerNode() - inspect single trigger node

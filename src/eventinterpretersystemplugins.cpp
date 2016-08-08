@@ -1650,18 +1650,8 @@ namespace dss {
     return true;
   }
 
-  bool SystemTrigger::checkTrigger(std::string _path) {
-    if (!DSS::hasInstance()) {
-      return false;
-    }
-
-    PropertyNodePtr appProperty =
-      DSS::getInstance()->getPropertySystem().getProperty(_path);
-    if (appProperty == NULL) {
-      return false;
-    }
-
-    PropertyNodePtr appTrigger = appProperty->getPropertyByName(pn_triggers);
+  bool SystemTrigger::checkTrigger(PropertyNodePtr _triggerProp) {
+    PropertyNodePtr appTrigger = _triggerProp->getPropertyByName(pn_triggers);
     if (appTrigger == NULL) {
       return false;
     }
@@ -1909,17 +1899,17 @@ namespace dss {
     DSS::getInstance()->getSecurity().loginAsSystemUser(
         "EventInterpreterPluginSystemTrigger needs system rights");
 
-    PropertyNodePtr triggerProperty =
-        DSS::getInstance()->getPropertySystem().getProperty("/usr/triggers");
+    PropertySystem &propSystem(DSS::getInstance()->getPropertySystem());
+
+    PropertyNodePtr triggerProperty = propSystem.getProperty("/usr/triggers");
     if (triggerProperty == NULL) {
       return;
     }
 
-    int i;
     PropertyNodePtr triggerPathNode;
 
     try {
-      for (i = 0; i < triggerProperty->getChildCount(); i++) {
+      for (int i = 0; i < triggerProperty->getChildCount(); i++) {
         PropertyNodePtr triggerNode = triggerProperty->getChild(i);
         if (triggerNode == NULL) {
           continue;
@@ -1928,8 +1918,16 @@ namespace dss {
         if (triggerPathNode == NULL) {
           continue;
         }
+
+        PropertyNodePtr triggerParamNode =
+          propSystem.getProperty(triggerPathNode->getStringValue());
+        if (triggerParamNode == NULL) {
+          continue;
+        }
+
         std::string sTriggerPath = triggerPathNode->getStringValue();
-        if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
+
+        if (checkTrigger(triggerParamNode) && checkSystemCondition(sTriggerPath)) {
           relayTrigger(triggerNode);
         }
       } // for loop
