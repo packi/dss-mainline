@@ -27,4 +27,10 @@ namespace dss {
   const std::string  pn_last_matched = "lastTrigger";
   const std::string  pn_delay = "delay";
   const std::string  pn_rewind_timer = "rewindTimer";
+
+  const std::string ptn_action_lag = "lag";
+  const std::string  ptn_action_delay = "delay";
+  const std::string  ptn_action_reschedule = "reschedule";
+  const std::string  ptn_action_ts = "last_event_scheduled_at";
+  const std::string  ptn_action_eventid = "eventid";
 }

@@ -84,10 +84,19 @@ namespace dss {
       bool damping(PropertyNodePtr _dampProp);
 
       /**
-       * If a trigger matches this will issue the action
+       * rescheduleAction() - reschedule event if trigger fired again (optional)
+       * @_triggerNode - node in global lookup table (/usr/triggers)
+       * @_triggerParamNode - node with complete trigger parameters
+       * @return true if event was rescheduled
        */
-      void relayTrigger(PropertyNodePtr _releay);
+      bool rescheduleAction(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode);
 
+      /**
+       * relayTrigger() - If a trigger matches this will raise an event
+       * @_triggerNode - node in global lookup table (/usr/triggers)
+       * @_triggerParamNode - node with complete trigger parameters
+       */
+      void relayTrigger(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode);
   };
 
   class SystemEventActionExecute : public SystemEvent {

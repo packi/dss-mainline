@@ -25,6 +25,7 @@ namespace dss {
 
   /**
    * property node structure to declare trigger
+   * ptn = path trigger node
    */
 
   //< trigger conditions, what needs to match, zone, group, etc
@@ -36,4 +37,11 @@ namespace dss {
   extern const std::string  pn_last_matched;
   extern const std::string  pn_delay;
   extern const std::string  pn_rewind_timer;
+
+  //< delay the execution of the action?
+  extern const std::string ptn_action_lag;
+  extern const std::string  ptn_action_delay;
+  extern const std::string  ptn_action_reschedule;
+  extern const std::string  ptn_action_ts;
+  extern const std::string  ptn_action_eventid; //< already scheduled event
 }

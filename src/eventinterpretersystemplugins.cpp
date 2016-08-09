@@ -1828,7 +1828,50 @@ namespace dss {
     return false;
   }
 
-  void SystemTrigger::relayTrigger(PropertyNodePtr _relay) {
+  /**
+   * reschedule_action() - reschedule event if trigger fired again (optional)
+   * @_triggerParamNode complete trigger node with all parameters
+   * @return true if event was reschedule
+   */
+  bool SystemTrigger::rescheduleAction(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode) {
+
+    PropertyNodePtr lagNode = _triggerParamNode->getProperty(ptn_action_lag);
+
+    if (lagNode == NULL) {
+      return false;
+    }
+
+    if (!lagNode->getProperty(ptn_action_reschedule) ||
+        !lagNode->getProperty(ptn_action_reschedule)->getBoolValue() ||
+        !lagNode->getProperty(ptn_action_delay) ||
+        !lagNode->getProperty(ptn_action_eventid)) {
+      // rescheduling not enabled, or missing delay
+      return false;
+    }
+
+    int delay = lagNode->getProperty(ptn_action_delay)->getIntegerValue();
+
+    PropertyNodePtr lastTsNode = lagNode->getProperty(ptn_action_ts);
+    DateTime lastTS = DateTime::parseISO8601(lastTsNode->getAsString());
+
+    if (DateTime().difference(lastTS) > delay) {
+      // assume action was executed, or let it execute
+      // event queue has no interface to find out
+      return false;
+    }
+
+    EventRunner &runner(DSS::getInstance()->getEventRunner());
+    runner.removeEvent(lagNode->getProperty(ptn_action_eventid)->getStringValue());
+
+    // relayTrigger will do the same, nevermind:
+    lastTsNode->setStringValue(DateTime().toISO8601());
+    relayTrigger(_triggerNode, _triggerParamNode);
+
+    return true;
+  }
+
+  void SystemTrigger::relayTrigger(PropertyNodePtr _relay, PropertyNodePtr _triggerParamNode) {
+
     PropertyNodePtr triggerPath = _relay->getPropertyByName("triggerPath");
     PropertyNodePtr relayedEventName =
         _relay->getPropertyByName("relayedEventName");
@@ -1877,8 +1920,34 @@ namespace dss {
 
     Logger::getInstance()->log("SystemTrigger::relayTrigger: relaying event \'" + evt->getName() + "\'");
 
-    DSS::getInstance()->getEventQueue().pushEvent(evt);
+    PropertyNodePtr lagNode = _triggerParamNode->getProperty(ptn_action_lag);
+    if (!lagNode || !lagNode->getProperty(ptn_action_delay) ||
+        (lagNode->getProperty(ptn_action_delay)->getIntegerValue() == 0)) {
+        // no lag configured, immediately execute
+        DSS::getInstance()->getEventQueue().pushEvent(evt);
+        return;
+    }
 
+    if (lagNode->getProperty(ptn_action_delay)->getIntegerValue() < 0) {
+      Logger::getInstance()->log("SystemTrigger::relayTrigger: invalid lag paramter" +
+                                 lagNode->getProperty(ptn_action_delay)->getAsString(),
+                                 lsWarning);
+      return;
+    }
+
+    Logger::getInstance()->log("SystemTrigger::relayTrigger: action lag", lsWarning);
+
+    evt->setProperty("time", "+" + lagNode->getProperty(ptn_action_delay)->getAsString());
+
+    std::string id = DSS::getInstance()->getEventQueue().pushTimedEvent(evt);
+    if (id.empty()) {
+      // failed to schedule the event, invalid lag parameter
+      Logger::getInstance()->log("SystemTrigger::relayTrigger: dropping event after failure to queue it", lsWarning);
+      return;
+    }
+
+    lagNode->createProperty(ptn_action_eventid)->setStringValue(id);
+    lagNode->createProperty(ptn_action_ts)->setStringValue(DateTime().toISO8601());
   }
 
   void SystemTrigger::run() {
@@ -1919,12 +1988,35 @@ namespace dss {
 
         if (checkTrigger(triggerParamNode) && checkSystemCondition(sTriggerPath)) {
 
-          if (damping(triggerParamNode)) {
-            // trigger is rate-limited
+
+          PropertyNodePtr lagNode = triggerParamNode->getProperty(ptn_action_lag);
+          PropertyNodePtr dampNode = triggerParamNode->getProperty(pn_damping);
+
+          if ((lagNode && lagNode->getProperty(ptn_action_lag)) &&
+              (dampNode && dampNode->getProperty(pn_delay))) {
+            int dampInterval = dampNode->getProperty(pn_delay)->getIntegerValue();
+            int actionLag = lagNode->getProperty(ptn_action_lag)->getIntegerValue();
+
+            if (actionLag > dampInterval) {
+              // otherwise new events are scheduled before intial event fired
+              // we could end up rescheduling multiple events
+              Logger::getInstance()->log("Action lag should not exceed damping interval",
+                                         lsWarning);
+            }
+          }
+
+          if (rescheduleAction(triggerNode, triggerParamNode)) {
+            // no new actions spawned while rescheduling a pending event
             continue;
           }
 
-          relayTrigger(triggerNode);
+          if (damping(triggerParamNode)) {
+            // trigger is rate-limited, suppress spawning new event
+            continue;
+          }
+
+
+          relayTrigger(triggerNode, triggerParamNode);
         }
       } // for loop
     } catch (PropertyTypeMismatch& e) {
