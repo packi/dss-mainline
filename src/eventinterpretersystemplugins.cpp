@@ -1651,7 +1651,7 @@ namespace dss {
   }
 
   bool SystemTrigger::checkTrigger(PropertyNodePtr _triggerProp) {
-    PropertyNodePtr appTrigger = _triggerProp->getPropertyByName(pn_triggers);
+    PropertyNodePtr appTrigger = _triggerProp->getPropertyByName(ptn_triggers);
     if (appTrigger == NULL) {
       return false;
     }
@@ -1672,7 +1672,7 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr triggerType = triggerProp->getPropertyByName(pn_type);
+    PropertyNodePtr triggerType = triggerProp->getPropertyByName(ptn_type);
     if (triggerType == NULL) {
       return false;
     }
@@ -1783,41 +1783,41 @@ namespace dss {
    * @return true if event shall be damped, false if no damping is applied
    */
   bool SystemTrigger::damping(PropertyNodePtr _triggerParamNode) {
-    if (_triggerParamNode == NULL || !_triggerParamNode->getProperty(pn_damping)) {
+    if (_triggerParamNode == NULL || !_triggerParamNode->getProperty(ptn_damping)) {
       return false;
     }
 
-    PropertyNodePtr dampNode = _triggerParamNode ->getProperty(pn_damping);
-    if (!dampNode->getProperty(pn_delay)) {
+    PropertyNodePtr dampNode = _triggerParamNode ->getProperty(ptn_damping);
+    if (!dampNode->getProperty(ptn_damp_interval)) {
       // no delay specified, nothing to do
       return false;
     }
 
-    if (!dampNode->getProperty(pn_last_matched)) {
+    if (!dampNode->getProperty(ptn_damp_start_ts)) {
       // first trigger ever, no rate-limit possible
-      PropertyNodePtr tmp = dampNode->createProperty(pn_last_matched);
+      PropertyNodePtr tmp = dampNode->createProperty(ptn_damp_start_ts);
       tmp->setStringValue(DateTime().toISO8601());
       return false;
     }
 
     // delay in seconds
-    int delay = dampNode->getProperty(pn_delay)->getIntegerValue();
-    if (delay < 0) {
-      Logger::getInstance()->log("trigger::damping: invalid delay " +
-                                 intToString(delay), lsWarning);
+    int interval = dampNode->getProperty(ptn_damp_interval)->getIntegerValue();
+    if (interval < 0) {
+      Logger::getInstance()->log("trigger::damping: invalid interval " +
+                                 intToString(interval), lsWarning);
       return false;
     }
 
-    PropertyNodePtr lastTsNode = dampNode->getProperty(pn_last_matched);
+    PropertyNodePtr lastTsNode = dampNode->getProperty(ptn_damp_start_ts);
     DateTime lastTS = DateTime::parseISO8601(lastTsNode->getAsString());
 
-    PropertyNodePtr rewindNode = dampNode->getProperty(pn_rewind_timer);
+    PropertyNodePtr rewindNode = dampNode->getProperty(ptn_damp_rewind);
     if (rewindNode && rewindNode->getBoolValue()) {
       // extend rate-limit interval
       lastTsNode->setStringValue(DateTime().toISO8601());
     }
 
-    if (DateTime().difference(lastTS) < delay) {
+    if (DateTime().difference(lastTS) < interval) {
       // really damp
       Logger::getInstance()->log("trigger:rate-limit", lsInfo);
       return true;
@@ -1990,11 +1990,11 @@ namespace dss {
 
 
           PropertyNodePtr lagNode = triggerParamNode->getProperty(ptn_action_lag);
-          PropertyNodePtr dampNode = triggerParamNode->getProperty(pn_damping);
+          PropertyNodePtr dampNode = triggerParamNode->getProperty(ptn_damping);
 
           if ((lagNode && lagNode->getProperty(ptn_action_lag)) &&
-              (dampNode && dampNode->getProperty(pn_delay))) {
-            int dampInterval = dampNode->getProperty(pn_delay)->getIntegerValue();
+              (dampNode && dampNode->getProperty(ptn_damp_interval))) {
+            int dampInterval = dampNode->getProperty(ptn_damp_interval)->getIntegerValue();
             int actionLag = lagNode->getProperty(ptn_action_lag)->getIntegerValue();
 
             if (actionLag > dampInterval) {

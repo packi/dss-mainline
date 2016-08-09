@@ -112,7 +112,7 @@ BOOST_FIXTURE_TEST_CASE(testRateLimit, DSSInstanceFixture) {
                      propSystem.createProperty("/"));
 
   std::string triggerPath("/scripts/foo/entries/0");
-  PropertyNodePtr dampNode = propSystem.getProperty(triggerPath + "/" + pn_damping);
+  PropertyNodePtr dampNode = propSystem.getProperty(triggerPath + "/" + ptn_damping);
   BOOST_CHECK(dampNode);
 
   boost::shared_ptr<Event> pEvent;
@@ -134,7 +134,7 @@ BOOST_FIXTURE_TEST_CASE(testRateLimit, DSSInstanceFixture) {
 
   // expire damp interval -> new event schedule
   DateTime expiredTs = DateTime().addSeconds(-60);
-  dampNode->getProperty(pn_last_matched)->setStringValue(expiredTs.toISO8601());
+  dampNode->getProperty(ptn_damp_start_ts)->setStringValue(expiredTs.toISO8601());
 
   trigger.run();
   BOOST_CHECK(queue.popEvent() != NULL);
@@ -149,13 +149,13 @@ BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
 
   // same as referenced by /usr/triggers/0/triggerPath
   std::string triggerPath("/scripts/foo/entries/0");
-  PropertyNodePtr dampNode = propSystem.getProperty(triggerPath + "/" + pn_damping);
+  PropertyNodePtr dampNode = propSystem.getProperty(triggerPath + "/" + ptn_damping);
   BOOST_CHECK(dampNode);
 
 
-  dampNode->getProperty(pn_delay)->setIntegerValue(10);
+  dampNode->getProperty(ptn_damp_interval)->setIntegerValue(10);
   DateTime fakeTS = DateTime().addSeconds(-5);
-  dampNode->createProperty(pn_last_matched)->setStringValue(fakeTS.toISO8601());
+  dampNode->createProperty(ptn_damp_start_ts)->setStringValue(fakeTS.toISO8601());
 
   boost::shared_ptr<Event> pEvent;
   pEvent = createGroupCallSceneEvent(createGroup(1), 1, 0, 1,
@@ -166,21 +166,21 @@ BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
   trigger.setup(*pEvent);
 
   // disable rewinding -> no change
-  dampNode->getProperty(pn_rewind_timer)->setBooleanValue(false);
+  dampNode->getProperty(ptn_damp_rewind)->setBooleanValue(false);
   trigger.run();
-  BOOST_CHECK(fakeTS == DateTime::parseISO8601(dampNode->getProperty(pn_last_matched)->getStringValue()));
+  BOOST_CHECK(fakeTS == DateTime::parseISO8601(dampNode->getProperty(ptn_damp_start_ts)->getStringValue()));
 
   // enable rewinding -> interval timer is rewound with each event
-  dampNode->getProperty(pn_rewind_timer)->setBooleanValue(true);
+  dampNode->getProperty(ptn_damp_rewind)->setBooleanValue(true);
   trigger.run();
-  BOOST_CHECK(fakeTS != DateTime::parseISO8601(dampNode->getProperty(pn_last_matched)->getStringValue()));
+  BOOST_CHECK(fakeTS != DateTime::parseISO8601(dampNode->getProperty(ptn_damp_start_ts)->getStringValue()));
 
   // expire damping interval -> new interval is started
   fakeTS = DateTime().addMinute(-1);
-  dampNode->createProperty(pn_last_matched)->setStringValue(fakeTS.toISO8601());
-  dampNode->getProperty(pn_rewind_timer)->setBooleanValue(true);
+  dampNode->createProperty(ptn_damp_start_ts)->setStringValue(fakeTS.toISO8601());
+  dampNode->getProperty(ptn_damp_rewind)->setBooleanValue(true);
   trigger.run();
-  BOOST_CHECK(fakeTS != DateTime::parseISO8601(dampNode->getProperty(pn_last_matched)->getStringValue()));
+  BOOST_CHECK(fakeTS != DateTime::parseISO8601(dampNode->getProperty(ptn_damp_start_ts)->getStringValue()));
 }
 
 BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
@@ -199,7 +199,7 @@ BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
   PropertyNodePtr lagNode(propSystem.getProperty(triggerPath + "/" + ptn_action_lag));
   BOOST_CHECK(lagNode);
 
-  PropertyNodePtr dampNode(propSystem.getProperty(triggerPath + "/" + pn_damping));
+  PropertyNodePtr dampNode(propSystem.getProperty(triggerPath + "/" + ptn_damping));
   BOOST_CHECK(dampNode);
 
   boost::shared_ptr<Event> pEvent;
@@ -220,7 +220,7 @@ BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
   BOOST_CHECK(runner.getSize() == 0);
 
   // reset damping interval
-  dampNode->removeChild(dampNode->getProperty(pn_last_matched));
+  dampNode->removeChild(dampNode->getProperty(ptn_damp_start_ts));
 
   // 1s lag -> event is pending
   lagNode->getProperty(ptn_action_delay)->setIntegerValue(1);
@@ -235,7 +235,7 @@ BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
   // mark event expired, but still damping -> nothing changes
   DateTime expiredTs = DateTime().addSeconds(-3);
   lagNode->getProperty(ptn_action_ts)->setStringValue(expiredTs.toISO8601());
-  dampNode->getProperty(pn_last_matched)->setStringValue(expiredTs.toISO8601());
+  dampNode->getProperty(ptn_damp_start_ts)->setStringValue(expiredTs.toISO8601());
 
   trigger.run();
   BOOST_CHECK(queue.popEvent() == NULL);
@@ -244,7 +244,7 @@ BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
   // mark event expired, damping interval expired -> new event raised
   expiredTs = DateTime().addSeconds(-60);
   lagNode->getProperty(ptn_action_ts)->setStringValue(expiredTs.toISO8601());
-  dampNode->getProperty(pn_last_matched)->setStringValue(expiredTs.toISO8601());
+  dampNode->getProperty(ptn_damp_start_ts)->setStringValue(expiredTs.toISO8601());
 
   trigger.run();
   BOOST_CHECK(queue.popEvent() == NULL);
@@ -267,7 +267,7 @@ BOOST_FIXTURE_TEST_CASE(testActionReschedule, DSSInstanceFixture) {
   PropertyNodePtr lagNode(propSystem.getProperty(triggerPath + "/" + ptn_action_lag));
   BOOST_CHECK(lagNode);
 
-  PropertyNodePtr dampNode(propSystem.getProperty(triggerPath + "/" + pn_damping));
+  PropertyNodePtr dampNode(propSystem.getProperty(triggerPath + "/" + ptn_damping));
   BOOST_CHECK(dampNode);
 
   boost::shared_ptr<Event> pEvent;
@@ -301,7 +301,7 @@ BOOST_FIXTURE_TEST_CASE(testActionReschedule, DSSInstanceFixture) {
   // mark event expired, but still damping -> nothing changes
   DateTime expiredTs = DateTime().addSeconds(-3);
   lagNode->getProperty(ptn_action_ts)->setStringValue(expiredTs.toISO8601());
-  dampNode->getProperty(pn_last_matched)->setStringValue(expiredTs.toISO8601());
+  dampNode->getProperty(ptn_damp_start_ts)->setStringValue(expiredTs.toISO8601());
 
   id = lagNode->getProperty(ptn_action_eventid)->getStringValue();
   trigger.run();
@@ -312,7 +312,7 @@ BOOST_FIXTURE_TEST_CASE(testActionReschedule, DSSInstanceFixture) {
   id = lagNode->getProperty(ptn_action_eventid)->getStringValue();
   expiredTs = DateTime().addSeconds(-60);
   lagNode->getProperty(ptn_action_ts)->setStringValue(expiredTs.toISO8601());
-  dampNode->getProperty(pn_last_matched)->setStringValue(expiredTs.toISO8601());
+  dampNode->getProperty(ptn_damp_start_ts)->setStringValue(expiredTs.toISO8601());
 
   trigger.run();
   BOOST_CHECK(id != lagNode->getProperty(ptn_action_eventid)->getStringValue());

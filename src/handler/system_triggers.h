@@ -29,19 +29,19 @@ namespace dss {
    */
 
   //< trigger conditions, what needs to match, zone, group, etc
-  extern const std::string pn_triggers;
-  extern const std::string  pn_type;
+  extern const std::string ptn_triggers;
+  extern const std::string  ptn_type;
 
   //< should every match raise a relay event?
-  extern const std::string pn_damping;
-  extern const std::string  pn_last_matched;
-  extern const std::string  pn_delay;
-  extern const std::string  pn_rewind_timer;
+  extern const std::string ptn_damping;
+  extern const std::string  ptn_damp_interval;
+  extern const std::string  ptn_damp_rewind;
+  extern const std::string  ptn_damp_start_ts; //< runtime
 
   //< delay the execution of the action?
   extern const std::string ptn_action_lag;
   extern const std::string  ptn_action_delay;
   extern const std::string  ptn_action_reschedule;
-  extern const std::string  ptn_action_ts;
-  extern const std::string  ptn_action_eventid; //< already scheduled event
+  extern const std::string  ptn_action_ts;  //< runtime
+  extern const std::string  ptn_action_eventid; //< runtime, already scheduled event
 }

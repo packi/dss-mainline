@@ -31,7 +31,7 @@
         </property>
 
         <property type="none" name="damping">
-          <property type="integer" name="delay">
+          <property type="integer" name="interval">
               <value>10</value>
           </property>
           <property type="boolean" name="rewindTimer">
@@ -70,7 +70,7 @@
         </property>
 
         <property type="none" name="damping">
-          <property type="integer" name="delay">
+          <property type="integer" name="interval">
               <value>10</value>
           </property>
           <property type="boolean" name="rewindTimer">
