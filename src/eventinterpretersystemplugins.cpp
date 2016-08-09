@@ -1656,22 +1656,8 @@ namespace dss {
       return false;
     }
 
-    PropertyNodePtr dampNode = appTrigger->getProperty(pn_damping);
-
     for (int i = 0; i < appTrigger->getChildCount(); i++) {
-
-      if (dampNode == appTrigger->getChild(i)) {
-        // ignore damper node
-        continue;
-      }
-
       if (checkTriggerNode(appTrigger->getChild(i))) {
-
-        if (dampNode && damping(dampNode)) {
-          // trigger is rate-limited
-          return false;
-        }
-
         return true;
       }
     }
@@ -1793,14 +1779,15 @@ namespace dss {
 
   /**
    * damping() - decide if trigger shall be damped or an event emitted
-   * @_path  property node structure specifying timeout/last_execution
+   * @_triggerParamNode complete trigger parameter node
    * @return true if event shall be damped, false if no damping is applied
    */
-  bool SystemTrigger::damping(PropertyNodePtr dampNode) {
-    if (dampNode == NULL) {
+  bool SystemTrigger::damping(PropertyNodePtr _triggerParamNode) {
+    if (_triggerParamNode == NULL || !_triggerParamNode->getProperty(pn_damping)) {
       return false;
     }
 
+    PropertyNodePtr dampNode = _triggerParamNode ->getProperty(pn_damping);
     if (!dampNode->getProperty(pn_delay)) {
       // no delay specified, nothing to do
       return false;
@@ -1928,6 +1915,12 @@ namespace dss {
         std::string sTriggerPath = triggerPathNode->getStringValue();
 
         if (checkTrigger(triggerParamNode) && checkSystemCondition(sTriggerPath)) {
+
+          if (damping(triggerParamNode)) {
+            // trigger is rate-limited
+            continue;
+          }
+
           relayTrigger(triggerNode);
         }
       } // for loop

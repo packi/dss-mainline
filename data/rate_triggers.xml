@@ -5,6 +5,7 @@
     <property type="none" name="entries">
       <property type="none" name="0">
         <property type="none" name="triggers">
+          <!-- start array of trigger specifications -->
 
           <property type="none" name="0">
             <property type="string" name="type">
@@ -21,26 +22,31 @@
             </property>
           </property>
 
-
-          <property type="none" name="damping">
-            <property type="integer" name="delay">
-                <value>10</value>
-            </property>
-            <property type="boolean" name="rewindTimer">
-                <value>false</value>
-            </property>
+          <property type="none" name="1">
+            <!-- another trigger specification -->
           </property>
 
-          <!--property type="none" name="action_lag">
-            <property type="integer" name="delay">
-                <value>0</value>
-            </property>
-            <property type="boolean" name="rewindTimer">
-                <value>false</value>
-            </property>
-          </property-->
-
+          <!-- end of array of trigger specifications -->
         </property>
+
+        <property type="none" name="damping">
+          <property type="integer" name="delay">
+              <value>10</value>
+          </property>
+          <property type="boolean" name="rewindTimer">
+              <value>false</value>
+          </property>
+        </property>
+
+        <!--property type="none" name="action_lag">
+          <property type="integer" name="delay">
+              <value>0</value>
+          </property>
+          <property type="boolean" name="rewindTimer">
+              <value>false</value>
+          </property>
+        </property-->
+
       </property>
     </property>
   </property>

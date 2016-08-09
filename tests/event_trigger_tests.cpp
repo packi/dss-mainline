@@ -137,9 +137,9 @@ BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
                      propSystem.createProperty("/"));
 
   // same as referenced by /usr/triggers/0/triggerPath
-  std::string triggerPath("/scripts/foo/entries/0/");
+  std::string triggerPath("/scripts/foo/entries/0");
   PropertyNodePtr dampNode =
-    propSystem.getProperty(triggerPath + pn_triggers + "/" + pn_damping);
+    propSystem.getProperty(triggerPath + "/" + pn_damping);
   BOOST_CHECK(dampNode);
 
   DateTime fakeTS = DateTime().addSeconds(-dampNode->getProperty(pn_delay)->getIntegerValue() / 2);
