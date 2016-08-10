@@ -2181,12 +2181,16 @@ namespace dss {
           pState->setState(coSystem, StateWH_Open);
         } else if (state == 2) {
           pState->setState(coSystem, StateWH_Tilted);
+        } else if (state == -1) {
+          pState->setState(coSystem, StateWH_Unknown);
         }
       } else {
         if (state == 0) {
           pState->setState(coSystem, State_Inactive);
         } else if (state == 1) {
           pState->setState(coSystem, State_Active);
+        } else if (state == -1) {
+          pState->setState(coSystem, State_Unknown);
         }
       }
     }
