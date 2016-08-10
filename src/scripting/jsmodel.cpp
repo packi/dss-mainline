@@ -2922,12 +2922,67 @@ namespace dss {
     return JS_FALSE;
   } // dsmeter_get_property_node
 
+  JSBool dsmeter_setPowerStateConfig(JSContext* cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pMeter;
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if (self.is("DSMeter")) {
+        if (argc == 3) {
+          uint8_t index;
+          uint32_t setThreshold;
+          uint32_t resetThreshold;
+          try {
+            index = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[0]);
+            setThreshold = ctx->convertTo<uint32_t>(JS_ARGV(cx, vp)[1]);
+            resetThreshold = ctx->convertTo<uint32_t>(JS_ARGV(cx, vp)[2]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+                ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+            if (ext == NULL) {
+              JS_ReportError(cx, "Model.dsmeter_setPowerStateConfig: ext of wrong type");
+              return JS_FALSE;
+            }
+            StructureModifyingBusInterface *modInterface = ext->getApartment().getBusInterface()->getStructureModifyingBusInterface();
+            modInterface->setCircuitPowerStateConfig(meter->getDSID(), index, setThreshold, resetThreshold);
+            meter->setPowerState(index, setThreshold, resetThreshold);
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+            return JS_TRUE;
+          } catch (const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+        }
+      }
+    } catch (ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // global_getClusters
+
   JSFunctionSpec dsmeter_methods[] = {
     JS_FS("getPowerConsumption", dsmeter_getPowerConsumption, 0, 0),
     JS_FS("getEnergyMeterValue", dsmeter_getEnergyMeterValue, 0, 0),
     JS_FS("getCachedPowerConsumption", dsmeter_getCachedPowerConsumption, 0, 0),
     JS_FS("getCachedEnergyMeterValue", dsmeter_getCachedEnergyMeterValue, 0, 0),
     JS_FS("getPropertyNode", dsmeter_get_property_node, 0, 0),
+    JS_FS("setPowerStateConfig", dsmeter_setPowerStateConfig, 0, 0),
     JS_FS_END
   };
 
