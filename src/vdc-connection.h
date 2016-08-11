@@ -36,15 +36,21 @@ namespace dss {
   class JSONObject;
 
   typedef struct {
-    std::string hardwareModelGuid;
-    std::string modelUID;
+    // dS-Article Data
+    std::string oemGuid;          // instance id => e.g. gs1:sgtin
+    std::string oemModelGuid;     // class id => GTIN of the dS-Article
     std::string vendorGuid;
-    std::string oemGuid;
-    std::string configURL;
+    // Hardware Endpoint description
     std::string hardwareGuid;
+    std::string hardwareModelGuid;
+    // System ID's
+    std::string modelUID;         // device configuration id
+    // End-User Info
+    std::string name;
     std::string hardwareInfo;     // property: model
     std::string hardwareVersion;
-    std::string name;
+    // Configurator integration
+    std::string configURL;
     boost::shared_ptr<std::vector<int> > modelFeatures;
   } VdsdSpec_t;
 
@@ -60,6 +66,7 @@ namespace dss {
     std::string modelUID;
     std::string vendorGuid;
     std::string oemGuid;
+    std::string oemModelGuid;
     std::string configURL;
     std::string name;
   } VdcSpec_t;

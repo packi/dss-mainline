@@ -60,6 +60,8 @@ namespace dss {
     query = getprop->add_query();
     query->set_name("oemGuid");
     query = getprop->add_query();
+    query->set_name("oemModelGuid");
+    query = getprop->add_query();
     query->set_name("configURL");
     query = getprop->add_query();
     query->set_name("hardwareGuid");
@@ -148,6 +150,10 @@ namespace dss {
         try {
           ret->oemGuid = st.convert(val.v_string());
         } catch (std::exception& e) {}
+      } else if (el.name() == "oemModelGuid") {
+        try {
+          ret->oemModelGuid = st.convert(val.v_string());
+        } catch (std::exception& e) {}
       } else if (el.name() == "configURL") {
         try {
           ret->configURL = st.convert(val.v_string());
@@ -221,6 +227,8 @@ namespace dss {
     query->set_name("vendorGuid");
     query = getprop->add_query();
     query->set_name("oemGuid");
+    query = getprop->add_query();
+    query->set_name("oemModelGuid");
     query = getprop->add_query();
     query->set_name("configURL");
     query = getprop->add_query();
@@ -303,6 +311,10 @@ namespace dss {
       } else if (el.name() == "oemGuid") {
         try {
           ret->oemGuid = st.convert(val.v_string());
+        } catch (std::exception& e) {}
+      } else if (el.name() == "oemModelGuid") {
+        try {
+          ret->oemModelGuid = st.convert(val.v_string());
         } catch (std::exception& e) {}
       } else if (el.name() == "configURL") {
         try {

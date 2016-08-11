@@ -622,6 +622,7 @@ namespace dss {
               _dsMeter->setVdcHardwareModelGuid(props->hardwareModelGuid);
               _dsMeter->setVdcVendorGuid(props->vendorGuid);
               _dsMeter->setVdcOemGuid(props->oemGuid);
+              _dsMeter->setVdcOemModelGuid(props->oemModelGuid);
               if (_dsMeter->getName().empty()) {
                 _dsMeter->setName(props->name);
               }
