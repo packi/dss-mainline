@@ -102,6 +102,7 @@ namespace dss {
     std::string m_VdcHardwareModelGuid;
     std::string m_VdcVendorGuid;
     std::string m_VdcOemGuid;
+    std::string m_VdcOemModelGuid;
     std::string m_softwareVersion;
     int m_dSMState;
     bool m_synchronized;
@@ -210,6 +211,8 @@ namespace dss {
     const std::string& getVdcVendorGuid() { return m_VdcVendorGuid; }
     void setVdcOemGuid(const std::string& _value ) { m_VdcOemGuid = _value; }
     const std::string& getVdcOemGuid() { return m_VdcOemGuid; }
+    void setVdcOemModelGuid(const std::string& _value ) { m_VdcOemModelGuid = _value; }
+    const std::string& getVdcOemModelGuid() { return m_VdcOemModelGuid; }
 
     int getState() const { return m_dSMState; }
     void setState(uint8_t _state) { m_dSMState = _state; }

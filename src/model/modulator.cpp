@@ -181,6 +181,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       m_pPropertyNode->createProperty("OemGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
+      m_pPropertyNode->createProperty("OemModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemModelGuid, false));
     }
   } // publishToPropertyTree
 
