@@ -146,6 +146,10 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
         appendCommon(json, evtGroup_Activity, evtCategory_DeviceInputState,
                      event.get());
         break;
+      case StateType_Circuit:
+        appendCommon(json, evtGroup_Activity, evtCategory_DeviceInputState,
+                     event.get());
+        break;
       default:
         break;
       }
@@ -653,6 +657,14 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
         json.add("GroupId", event->getPropertyByName("groupId"));
         break;
       case StateType_Device:
+        /* TODO Does it correspond to DeviceStateChangeEvent in BOM? */
+        createHeader(json, evtGroup_Activity, evtCategory_DeviceInputState,
+                     event.get());
+        json.startObject("EventBody");
+        /* TODO Should DeviceStateChangeEvent contain device identifier field named 'DeviceId', or 'Origin'? */
+        json.add("Origin", event->getPropertyByName(ef_callOrigin));
+        break;
+      case StateType_Circuit:
         /* TODO Does it correspond to DeviceStateChangeEvent in BOM? */
         createHeader(json, evtGroup_Activity, evtCategory_DeviceInputState,
                      event.get());

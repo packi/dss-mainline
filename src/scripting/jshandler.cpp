@@ -226,6 +226,17 @@ namespace dss {
     throw ScriptException("Value is not of type number");
   }
 
+  template<>
+  uint32_t ScriptContext::convertTo(const jsval& _val) {
+    if (JSVAL_IS_NUMBER(_val)) {
+      uint32_t result;
+      if (JS_ValueToECMAUint32(m_pContext, _val, &result)) {
+        return result;
+      }
+    }
+    throw ScriptException("Value is not of type number");
+  }
+
   void ScriptContext::jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
     char *pointer=NULL;
     char *line=NULL;

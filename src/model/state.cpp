@@ -37,6 +37,7 @@
 #include "model/zone.h"
 #include "model/apartment.h"
 #include "model/modelconst.h"
+#include "model/modulator.h"
 #include "modelmaintenance.h"
 
 #include <boost/shared_ptr.hpp>
@@ -93,6 +94,20 @@ namespace dss {
       m_type(StateType_Device),
       m_providerDev(_device),
       m_providerDevInput(_inputIndex)
+  {
+    load();
+    publishToPropertyTree();
+  }
+
+  State::State(boost::shared_ptr<DSMeter> _meter, int _inputIndex) :
+      m_name("dsm." + dsuid2str(_meter->getDSID()) + "." + intToString(_inputIndex)),
+      m_IsPersistent(true),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
+      m_state(State_Invalid),
+      m_type(StateType_Circuit),
+      m_providerDevInput(_inputIndex),
+      m_providerDsm(_meter)
   {
     load();
     publishToPropertyTree();
@@ -176,6 +191,14 @@ namespace dss {
         PropertyNodePtr m_pAliasNode = m_pPropertyNode->createProperty("device/" + dsuid2str(m_providerDev->getDSID()));
         m_pAliasNode->alias(devNode);
         m_pPropertyNode->createProperty("device/inputIndex")
+          ->linkToProxy(PropertyProxyReference<int>(m_providerDevInput, false));
+      }
+
+      if (m_providerDsm != NULL) {
+        PropertyNodePtr devNode = m_providerDsm->getPropertyNode();
+        PropertyNodePtr m_pAliasNode = m_pPropertyNode->createProperty("dSMeter/" + dsuid2str(m_providerDsm->getDSID()));
+        m_pAliasNode->alias(devNode);
+        m_pPropertyNode->createProperty("dSMeter/inputIndex")
           ->linkToProxy(PropertyProxyReference<int>(m_providerDevInput, false));
       }
 

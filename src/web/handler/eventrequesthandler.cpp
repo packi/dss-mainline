@@ -37,6 +37,7 @@
 #include "src/model/apartment.h"
 #include "src/model/group.h"
 #include "src/model/device.h"
+#include "src/model/modulator.h"
 
 namespace dss {
 
@@ -211,6 +212,18 @@ namespace dss {
           json.add("isGroup", false);
           json.add("isDevice", false);
           json.add("serviceName", state->getProviderService());
+        }else if (state->getType() == StateType_Circuit) {
+          boost::shared_ptr<DSMeter> meter = state->getProviderDsm();
+          dsid_t dsid;
+          if (dsuid_to_dsid(meter->getDSID(), &dsid)) {
+            json.add("dsid", dsid2str(dsid));
+          } else {
+            json.add("dsid", "");
+          }
+          json.add("dSUID", dsuid2str(meter->getDSID()));
+          json.add("isApartment", false);
+          json.add("isGroup", false);
+          json.add("isDevice", true);
         }
       }
       json.endObject();

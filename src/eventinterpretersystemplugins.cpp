@@ -46,6 +46,7 @@
 #include "model/state.h"
 #include "model/modelconst.h"
 #include "model/scenehelper.h"
+#include "model/modulator.h"
 #include "propertysystem.h"
 #include "security/security.h"
 #include "structuremanipulator.h"
@@ -621,6 +622,12 @@ namespace dss {
     if (pState->getType() == StateType_Device) {
       Logger::getInstance()->log("SystemEventActionExecute::"
           "executeStateChange - cannot modify states of type \'device\'", lsError);
+      return;
+    }
+
+    if (pState->getType() == StateType_Circuit) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeStateChange - cannot modify dsm power states", lsError);
       return;
     }
 
@@ -2537,6 +2544,11 @@ namespace dss {
     } else if (m_raisedAtState->getType() == StateType_Device) {
       boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
       std::string devName = device->getName() + ";" + dsuid2str(device->getDSID());
+      _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state + ";;;;" + devName + ";");
+
+    } else if (m_raisedAtState->getType() == StateType_Circuit) {
+      boost::shared_ptr<DSMeter> meter = m_raisedAtState->getProviderDsm();
+      std::string devName = meter->getName() + ";" + dsuid2str(meter->getDSID());
       _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state + ";;;;" + devName + ";");
 
     } else if (m_raisedAtState->getType() == StateType_Group) {

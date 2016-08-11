@@ -149,6 +149,7 @@ namespace dss {
           }
         }
         scanClusters(_dsMeter);
+        scanPowerStates(_dsMeter);
       }
 
       _dsMeter->setIsInitialized(true);
@@ -237,6 +238,22 @@ namespace dss {
 
     return result;
   } // scanZone
+
+  bool BusScanner::scanPowerStates(boost::shared_ptr<DSMeter> _dsMeter) {
+    std::vector<CircuitPowerStateSpec_t> powerStates;
+
+    if (!_dsMeter->getCapability_HasMetering()) {
+      return true;
+    }
+    try {
+      powerStates = m_Interface.getPowerStates(_dsMeter->getDSID());
+      _dsMeter->setPowerStates(powerStates);
+    } catch(BusApiError& e) {
+      log("scanZone: Error scanPowerStates: " + std::string(e.what()), lsWarning);
+    }
+
+    return true;
+  }
 
   bool BusScanner::scanClusters(boost::shared_ptr<DSMeter> _dsMeter) {
     std::vector<ClusterSpec_t> clusters;

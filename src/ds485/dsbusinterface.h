@@ -329,6 +329,20 @@ namespace dss {
                                                   uint8_t _dS485,
                                                   uint8_t _Line);
 
+    void handleCircuitPowerStateChangedEvent(uint8_t _errorCode,
+                                             dsuid_t _sourceID,
+                                             dsuid_t _destinationID,
+                                             uint8_t _baseIndex,
+                                             uint16_t _stateMask,
+                                             uint16_t _stateValue);
+    static void handleCircuitPowerStateChangedEventCallback(uint8_t _errorCode,
+                                                            void* _userData,
+                                                            dsuid_t _sourceID,
+                                                            dsuid_t _destinationID,
+                                                            uint8_t _baseIndex,
+                                                            uint16_t _stateMask,
+                                                            uint16_t _stateValue);
+
   protected:
     virtual void doStart();
   public:

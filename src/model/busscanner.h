@@ -52,6 +52,7 @@ namespace dss {
   private:
     bool scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     bool scanClusters(boost::shared_ptr<DSMeter> _dsMeter);
+    bool scanPowerStates(boost::shared_ptr<DSMeter> _dsMeter);
     void scanDevicesOfZoneQuick(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     bool scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     bool scanStatusOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);

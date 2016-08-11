@@ -1043,6 +1043,14 @@ namespace dss {
         onSensorValue(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
       }
       break;
+    case ModelEvent::etCircuitPowerStateChange:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 3) {
+        log("Expected at least 3 parameter for ModelEvent::etCircuitPowerStateChange");
+      } else {
+        onCircuitPowerStateChange(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+      break;
     case ModelEvent::etZoneSensorValue:
       assert(pEventWithDSID != NULL);
       if (event->getParameterCount() < 5) {
@@ -2038,6 +2046,24 @@ namespace dss {
     }
   } // onBinaryInputEvent
 
+  void ModelMaintenance::onCircuitPowerStateChange(dsuid_t _meterID,
+                                                   const int& _baseIndex,
+                                                   const int& _stateMask,
+                                                   const int& _stateValue) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      for (int i = 0; i < 16; i++) {
+        if ((_stateMask & (1 << i)) == 0) {
+          continue;
+        }
+        boost::shared_ptr<State> pState = pMeter->getPowerState(i);
+        pState->setState(coSystem, ((_stateValue & (1 << i)) > 0) ? State_Active : State_Inactive);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onCircuitPowerStateChange: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onCircuitPowerStateChange
+
   void ModelMaintenance::onSensorValue(dsuid_t _meterID,
                                        const devid_t _deviceID,
                                        const int& _sensorIndex,
@@ -2942,6 +2968,27 @@ namespace dss {
 
         json.String("serviceName");
         json.String(state->getProviderService().c_str());
+      } else if (state->getType() == StateType_Circuit) {
+        boost::shared_ptr<DSMeter> meter = state->getProviderDsm();
+        dsid_t dsid;
+        if (dsuid_to_dsid(meter->getDSID(), &dsid)) {
+          json.String("dsid");
+          json.String(dsid2str(dsid).c_str());
+        } else {
+          json.String("dsid");
+          json.String("");
+        }
+        json.String("dSUID");
+        json.String(dsuid2str(meter->getDSID()).c_str());
+
+        json.String("isApartment");
+        json.Bool(false);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(true);
       }
     }
 
