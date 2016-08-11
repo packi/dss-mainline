@@ -119,6 +119,30 @@ BOOST_FIXTURE_TEST_CASE(testScheduledEvent, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), old);
 }
 
+BOOST_FIXTURE_TEST_CASE(testScheduledEventWithId, NonRunningFixture) {
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
+  pEvent->setProperty(EventProperty::Time, "+1");
+
+  std::string id = m_pQueue->pushTimedEvent(pEvent);
+  BOOST_CHECK(m_pRunner->getSize() == 1);
+
+  m_pRunner->removeEvent(id);
+  BOOST_CHECK(m_pRunner->getSize() == 0);
+}
+
+// with DSSInstanceFixture
+BOOST_FIXTURE_TEST_CASE(testScheduledEventWithId2, DSSInstanceFixture) {
+  boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
+  pEvent->setProperty(EventProperty::Time, "+1");
+
+  std::string id = DSS::getInstance()->getEventQueue().pushTimedEvent(pEvent);
+  EventRunner &runner(DSS::getInstance()->getEventRunner());
+  BOOST_CHECK(runner.getSize() == 1);
+
+  runner.removeEvent(id);
+  BOOST_CHECK(runner.getSize() == 0);
+}
+
 BOOST_FIXTURE_TEST_CASE(testSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);

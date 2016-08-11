@@ -20,11 +20,17 @@
 #include "src/handler/system_triggers.h"
 
 namespace dss {
-  const std::string pn_triggers = "triggers";
-  const std::string  pn_type = "type";
+  const std::string ptn_triggers = "triggers";
+  const std::string  ptn_type = "type";
 
-  const std::string pn_damping = "damping";
-  const std::string  pn_last_matched = "lastTrigger";
-  const std::string  pn_delay = "delay";
-  const std::string  pn_rewind_timer = "rewindTimer";
+  const std::string ptn_damping = "damping";
+  const std::string  ptn_damp_interval = "interval";
+  const std::string  ptn_damp_rewind = "rewindTimer";
+  const std::string  ptn_damp_start_ts = "lastTrigger";
+
+  const std::string ptn_action_lag = "lag";
+  const std::string  ptn_action_delay = "delay";
+  const std::string  ptn_action_reschedule = "reschedule";
+  const std::string  ptn_action_ts = "last_event_scheduled_at";
+  const std::string  ptn_action_eventid = "eventid";
 }
