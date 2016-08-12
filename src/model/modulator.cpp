@@ -338,7 +338,7 @@ namespace dss {
   }
 
   boost::shared_ptr<State> DSMeter::getPowerState(uint8_t _inputIndex) const {
-    if (_inputIndex > DSM_POWER_STATES || !m_powerStateConfigs[_inputIndex]) {
+    if (_inputIndex >= DSM_POWER_STATES || !m_powerStateConfigs[_inputIndex]) {
       throw ItemNotFoundException(std::string("DSMeter::getPowerState: index out of bounds"));
     }
     return m_pApartment->getNonScriptState(m_powerStateConfigs[_inputIndex]->m_name);
