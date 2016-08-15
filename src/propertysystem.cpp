@@ -237,7 +237,7 @@ namespace dss {
     // un-alias our aliases
     if (m_AliasedBy) {
       for (std::vector<PropertyNode*>::iterator it = m_AliasedBy->begin(); it != m_AliasedBy->end(); ) {
-        int prevSize = m_AliasedBy->size();
+        size_t prevSize = m_AliasedBy->size();
         (*it)->alias(PropertyNodePtr());
         if (m_AliasedBy->size() >= prevSize) {
           it = m_AliasedBy->erase(it);
