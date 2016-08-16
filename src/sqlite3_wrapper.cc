@@ -84,8 +84,7 @@ boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
   do {
     ret = sqlite3_step(statement);
     if (ret == SQLITE_ROW) {
-      boost::shared_ptr<SQLite3::row_result> row(
-                          new SQLite3::row_result());
+      SQLite3::row_result row;
       for (int i = 0; i < columns; i++) {
         int type = sqlite3_column_type(statement, i);
         const unsigned char *text = sqlite3_column_text(statement, i);
@@ -97,7 +96,7 @@ boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
         cell.data = data;
         cell.type = type;
 
-        row->push_back(cell);
+        row.push_back(cell);
       }
       results->push_back(row);
     }

@@ -79,7 +79,7 @@ namespace dss {
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
 
       for (size_t i = 0; i < q->size(); i++) {
-        boost::shared_ptr<SQLite3::row_result> rr = q->at(i);
+        SQLite3::row_result &rr(q->at(i));
         // row
         ScriptObject rowObj(*ctx, NULL);
         jsval rowVal = OBJECT_TO_JSVAL(rowObj.getJSObject());
@@ -89,8 +89,8 @@ namespace dss {
           return JS_FALSE;
         }
 
-        for (size_t j = 0; j < rr->size(); j++) {
-          SQLite3::cell &cell(rr->at(j));
+        for (size_t j = 0; j < rr.size(); j++) {
+          SQLite3::cell &cell(rr[j]);
           rowObj.setProperty<std::string>(cell.name, cell.data);
         }
       }

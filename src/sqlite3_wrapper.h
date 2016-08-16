@@ -54,7 +54,7 @@ public:
   typedef std::vector<cell> row_result;
 
   /// \brief represents a result of the query
-  typedef std::vector<boost::shared_ptr<row_result> > query_result;
+  typedef std::vector<row_result> query_result;
 
   /// \brief Send a query to the database
   /// \param q valid SQL query like:
