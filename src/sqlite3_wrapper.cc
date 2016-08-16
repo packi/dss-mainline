@@ -64,15 +64,14 @@ SQLite3::SQLite3(std::string db_file, bool readonly)
   }
 }
 
-boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
+SQLite3::query_result SQLite3::query(std::string q)
 {
   sqlite3_stmt *statement;
 
   int ret;
 
   boost::mutex::scoped_lock lock(m_mutex);
-  boost::shared_ptr<SQLite3::query_result> results(
-                        new SQLite3::query_result());
+  SQLite3::query_result results;
 
   ret = sqlite3_prepare_v2(m_db, q.c_str(), -1, &statement, 0);
   if (ret != SQLITE_OK) {
@@ -98,7 +97,7 @@ boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
 
         row.push_back(cell);
       }
-      results->push_back(row);
+      results.push_back(row);
     }
   } while (ret == SQLITE_ROW);
 

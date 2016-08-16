@@ -31,6 +31,7 @@
 #include <digitalSTROM/dsuid.h>
 
 
+#include "foreach.h"
 #include "jsdatabase.h"
 #include "sqlite3_wrapper.h"
 #include "scriptobject.h"
@@ -73,14 +74,13 @@ namespace dss {
                              ".db";
 
       boost::shared_ptr<SQLite3> sqlite = boost::make_shared<SQLite3>(database);
-      boost::shared_ptr<SQLite3::query_result> q = sqlite->query(sql);
+      SQLite3::query_result q = sqlite->query(sql);
 
       JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
 
-      for (size_t i = 0; i < q->size(); i++) {
-        SQLite3::row_result &rr(q->at(i));
-        // row
+      for (size_t i = 0; i < q.size(); i++) {
+        const SQLite3::row_result &row(q[i]);
         ScriptObject rowObj(*ctx, NULL);
         jsval rowVal = OBJECT_TO_JSVAL(rowObj.getJSObject());
         JSBool res = JS_SetElement(cx, resultObj, i, &rowVal);
@@ -89,8 +89,7 @@ namespace dss {
           return JS_FALSE;
         }
 
-        for (size_t j = 0; j < rr.size(); j++) {
-          SQLite3::cell &cell(rr[j]);
+        foreach (const SQLite3::cell &cell, row) {
           rowObj.setProperty<std::string>(cell.name, cell.data);
         }
       }
