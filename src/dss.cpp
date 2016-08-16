@@ -201,39 +201,12 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
   void DSS::setupDirectories()
   {
-#if defined(__CYGWIN__)
-    char AppDataDir[259];
-    char WebDir[259];
-    char JSLogDir[259];
-    char SavedPropsDir[259];
-    std::string aup = getenv("ALLUSERSPROFILE");
-
-    if (std::string::npos != aup.std::string::find("ProgramData")) {
-      sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
-    } else {
-      std::string apd = getenv("APPDATA");
-      int index = apd.std::string::find_last_of("\\");
-      aup.std::string::append(apd.std::string::substr(index));
-      sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
-    }
-
-    sprintf(WebDir, "%s\\webroot",AppDataDir);
-    sprintf(JSLogDir, "%s\\logs",AppDataDir);
-    sprintf(SavedPropsDir, "%s\\savedprops", AppDataDir);
-
-    setDataDirectory(AppDataDir);
-    setConfigDirectory(AppDataDir);
-    setWebrootDirectory(WebDir);
-    setJSLogDirectory(JSLogDir);
-    setSavedPropsDirectory(SavedPropsDir);
-#else
     setDataDirectory(DataDirectory);
     setConfigDirectory(ConfigDirectory);
     setWebrootDirectory(WebrootDirectory);
     setJSLogDirectory(JSLogDirectory);
     setSavedPropsDirectory(kSavedPropsDirectory);
     setDatabaseDirectory(kDatabaseDirectory);
-#endif
   } // setupDirectories
 
   int DSS::getUptime() const {
