@@ -90,8 +90,8 @@ namespace dss {
         }
 
         for (size_t j = 0; j < rr->size(); j++) {
-          boost::shared_ptr<SQLite3::cell> cell = rr->at(j);
-          rowObj.setProperty<std::string>(cell->name, cell->data);
+          SQLite3::cell &cell(rr->at(j));
+          rowObj.setProperty<std::string>(cell.name, cell.data);
         }
       }
 

@@ -51,7 +51,7 @@ public:
   } cell;
 
   /// \brief represents a row in the database table
-  typedef std::vector<boost::shared_ptr<cell> > row_result;
+  typedef std::vector<cell> row_result;
 
   /// \brief represents a result of the query
   typedef std::vector<boost::shared_ptr<row_result> > query_result;

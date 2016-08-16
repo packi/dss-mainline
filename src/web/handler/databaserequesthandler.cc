@@ -64,8 +64,8 @@ namespace dss {
         // row
         json.startObject();
           for (size_t j = 0; j < rr->size(); j++) {
-            boost::shared_ptr<SQLite3::cell> cell = rr->at(j);
-            json.add(cell->name, cell->data);
+            SQLite3::cell &cell(rr->at(j));
+            json.add(cell.name, cell.data);
           }
         json.endObject();
       }

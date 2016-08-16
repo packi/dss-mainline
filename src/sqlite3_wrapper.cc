@@ -92,12 +92,10 @@ boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
         std::string name = sqlite3_column_name(statement, i);
         std::string data = text ? (const char *)text : "";
 
-        boost::shared_ptr<SQLite3::cell> cell(
-          new SQLite3::cell());
-
-        cell->name = name;
-        cell->data = data;
-        cell->type = type;
+        SQLite3::cell cell;
+        cell.name = name;
+        cell.data = data;
+        cell.type = type;
 
         row->push_back(cell);
       }
