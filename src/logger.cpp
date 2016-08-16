@@ -35,10 +35,6 @@
 #include <boost/make_shared.hpp>
 #include <boost/thread/mutex.hpp>
 
-#if defined(__CYGWIN__)
-#include <time.h>
-#endif
-
 namespace dss {
 
   Logger* Logger::m_Instance = NULL;

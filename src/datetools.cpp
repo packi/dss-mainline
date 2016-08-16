@@ -357,7 +357,6 @@ namespace dss {
     }
 
     try {
-      // TODO __CYGWIN__ probably fails here
       return DateTime(convertTZ(tm, tm.tm_gmtoff));
     } catch (std::invalid_argument &e) {
       throw std::invalid_argument(std::string("ISO8601: ") + e.what() + " " + in);

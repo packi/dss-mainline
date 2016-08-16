@@ -37,11 +37,6 @@
 #include <netinet/in.h>
 #endif
 
-#if defined(__CYGWIN__)
-#include <sys/ioctl.h>
-#endif
-
-
 #include <arpa/inet.h>
 
 #if defined(__APPLE__)
