@@ -53,13 +53,13 @@ BOOST_AUTO_TEST_SUITE(Triggers)
 
 static std::string pathSystemUser = "/system/security/users/system";
 
-const char* kDsstestsFilesDirectory = ABS_SRCDIR "/data";
+const char* kDsstestsFilesDirectory = ABS_SRCDIR "/tests/data";
 
 BOOST_FIXTURE_TEST_CASE(testSpeed, DSSInstanceFixture) {
   PropertyParser parser;
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   PropertyNodePtr prop = propSystem.createProperty("/");
-  BOOST_CHECK_EQUAL(true, parser.loadFromXML(std::string(kDsstestsFilesDirectory) + std::string("/triggers.xml"), prop));
+  BOOST_CHECK_EQUAL(true, parser.loadFromXML(std::string(kDsstestsFilesDirectory) + std::string("/speed_triggers.xml"), prop));
   Security &security = DSS::getInstance()->getSecurity();
 
   {

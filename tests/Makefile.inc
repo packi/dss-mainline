@@ -1,5 +1,8 @@
 TESTS += dsstests.sh
-EXTRA_DIST += dsstests.sh
+EXTRA_DIST += \
+			$(top_srcdir)/build/dsstests.sh \
+			$(top_srcdir)/tests/data/speed_triggers.xml \
+			$(top_srcdir)/tests/data/rate_triggers.xml
 
 check_PROGRAMS += dsstests
 
