@@ -53,11 +53,7 @@ BOOST_AUTO_TEST_SUITE(Triggers)
 
 static std::string pathSystemUser = "/system/security/users/system";
 
-#ifdef WITH_DSSTEST_FILES
-const char* kDsstestsFilesDirectory = WITH_DSSTEST_FILES;
-#else
-const char* kDsstestsFilesDirectory = TEST_TRIGGERS_PATH "data";
-#endif
+const char* kDsstestsFilesDirectory = ABS_SRCDIR "/data";
 
 BOOST_FIXTURE_TEST_CASE(testSpeed, DSSInstanceFixture) {
   PropertyParser parser;

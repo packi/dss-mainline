@@ -12,7 +12,8 @@ dsstests_CXXFLAGS = \
 			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
 			$(GCOV_CFLAGS) \
-			-DTEST_TRIGGERS_PATH="\"$(abs_top_srcdir)/\""
+			-DABS_SRCDIR=\"@abs_top_srcdir@\" \
+			-DSRCDIR=\"@top_srcdir@\"
 
 dsstests_LDADD = \
 			libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
