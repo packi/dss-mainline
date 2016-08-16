@@ -254,6 +254,29 @@ namespace dss {
     return gresult;
   } // getGroups
 
+  std::vector<CircuitPowerStateSpec_t> DSStructureQueryBusInterface::getPowerStates(const dsuid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    std::vector<CircuitPowerStateSpec_t> gresult;
+
+    uint8_t maxCount;
+    int ret = CircuitPowerState_max_count(m_DSMApiHandle, _dsMeterID, &maxCount);
+    DSBusInterface::checkResultCode(ret);
+
+    for (int iPowerStateIdx = 0; iPowerStateIdx < maxCount; iPowerStateIdx++) {
+      CircuitPowerStateSpec_t result;
+
+      ret = CircuitPowerState_get(m_DSMApiHandle, _dsMeterID, iPowerStateIdx,
+          &result.Index, &result.State, &result.ActiveThreshold, &result.InactiveThreshold);
+      DSBusInterface::checkResultCode(ret);
+
+      gresult.push_back(result);
+    }
+    return gresult;
+  } // getPowerStates
+
   std::vector<int> DSStructureQueryBusInterface::getZones(const dsuid_t& _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {

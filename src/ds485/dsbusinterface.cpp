@@ -464,6 +464,13 @@ namespace dss {
                         EVENT_DSM_STATE_CHANGE, 0,
                         &callback_struct, NULL);
 
+      EventCircuitPowerStateChanged_event_callback_t circuitPowerStateChangedEventCallback = DSBusInterface::handleCircuitPowerStateChangedEventCallback;
+      callback_struct.function = (void*)circuitPowerStateChangedEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_CIRCUIT_POWER_STATE_CHANGED, 0,
+                        &callback_struct, NULL);
+
       m_dsmApiReady = true;
     }
   }
@@ -943,6 +950,35 @@ namespace dss {
                                _deviceID, _sensorIndex, _sensorValue);
     }
   }
+
+  void DSBusInterface::handleCircuitPowerStateChangedEvent(uint8_t _errorCode,
+                                                           dsuid_t _sourceID,
+                                                           dsuid_t _destinationID,
+                                                           uint8_t _baseIndex,
+                                                           uint16_t _stateMask,
+                                                           uint16_t _stateValue) {
+    loginFromCallback();
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCircuitPowerStateChange, _sourceID);
+    pEvent->addParameter(_baseIndex);
+    pEvent->addParameter(_stateMask);
+    pEvent->addParameter(_stateValue);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleSensorEvent
+
+  void DSBusInterface::handleCircuitPowerStateChangedEventCallback(uint8_t _errorCode,
+                                                                   void* _userData,
+                                                                   dsuid_t _sourceID,
+                                                                   dsuid_t _destinationID,
+                                                                   uint8_t _baseIndex,
+                                                                   uint16_t _stateMask,
+                                                                   uint16_t _stateValue) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleCircuitPowerStateChangedEvent(_errorCode, _sourceID, _destinationID,
+                                            _baseIndex, _stateMask, _stateValue);
+    }
+  }
+
 
   void DSBusInterface::handleZoneSensorValueEvent(uint8_t _errorCode,
                                                 dsuid_t _sourceID,

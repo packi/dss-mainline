@@ -77,6 +77,7 @@ namespace dss {
                     etDeviceDataReady, /** TNY configuration read out */
                     etDsmStateChange, /** dSM state has changed **/
                     etDeviceOEMDataUpdateProductInfoState, /** only update devices OEM product info state without data */
+                    etCircuitPowerStateChange, /** A dSM sent a power state change event */
                  } EventType;
   private:
     EventType m_EventType;

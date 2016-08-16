@@ -24,6 +24,8 @@
   #include "config.h"
 #endif
 
+#include <algorithm>
+
 #include "modulator.h"
 
 #include <digitalSTROM/dsuid.h>
@@ -181,6 +183,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       m_pPropertyNode->createProperty("OemGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
+      m_pPropertyNode->createProperty("OemModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemModelGuid, false));
     }
   } // publishToPropertyTree
 
@@ -331,5 +335,96 @@ namespace dss {
            intToString((m_armSoftwareVersion >> 16) & 0xFF) + "." +
            intToString((m_armSoftwareVersion >> 8) & 0xFF) + "." +
            intToString(m_armSoftwareVersion & 0xFF);
+  }
+
+  boost::shared_ptr<State> DSMeter::getPowerState(uint8_t _inputIndex) const {
+    if (_inputIndex >= DSM_POWER_STATES || !m_powerStateConfigs[_inputIndex]) {
+      throw ItemNotFoundException(std::string("DSMeter::getPowerState: index out of bounds"));
+    }
+    return m_pApartment->getNonScriptState(m_powerStateConfigs[_inputIndex]->m_name);
+  }
+
+  bool DSMeter::setPowerState(const int _index, const int _setThreshold, const int _resetThreshold) {
+    PropertyNodePtr binaryInputNode;
+    if (m_pPropertyNode != NULL) {
+      binaryInputNode = m_pPropertyNode->createProperty("powerStates");
+    }
+
+    boost::shared_ptr<CircuitPowerState_t>& powState = m_powerStateConfigs[_index];
+    boost::shared_ptr<State> state;
+    try {
+      state = getPowerState(_index);
+    } catch (ItemNotFoundException& e) {}
+
+    if (_setThreshold == 0 && _resetThreshold == 0) {
+      // unconfigure state
+      if (powState) {
+        m_powerStateConfigs[_index].reset();
+      }
+      if (state) {
+        m_pApartment->removeState(state);
+      }
+      std::string bpath = std::string("powerState") + intToString(_index);
+      PropertyNodePtr entry = binaryInputNode->getProperty(bpath);
+      if (entry) {
+        entry->getParentNode()->removeChild(entry);
+      }
+      return false;
+    }
+
+    if (!state) {
+      state = boost::make_shared<State>(shared_from_this(), _index);;
+      try {
+        m_pApartment->allocateState(state);
+      } catch (ItemDuplicateException& ex) {
+        state = m_pApartment->getNonScriptState(state->getName());
+      }
+    }
+
+    if (!powState) {
+      powState = boost::make_shared<CircuitPowerState_t>();
+      m_powerStateConfigs[_index] = powState;
+    }
+    powState->m_index = _index;
+    powState->m_activeValue = _setThreshold;
+    powState->m_inactiveValue = _resetThreshold;
+    powState->m_name = state->getName();
+
+    if (m_pPropertyNode != NULL) {
+      std::string bpath = std::string("powerState") + intToString(_index);
+      PropertyNodePtr entry = binaryInputNode->createProperty(bpath);
+      entry->createProperty("index")
+              ->linkToProxy(PropertyProxyReference<int>(m_powerStateConfigs[_index]->m_index));
+      entry->createProperty("activeThreshold")
+              ->linkToProxy(PropertyProxyReference<int>(m_powerStateConfigs[_index]->m_activeValue));
+      entry->createProperty("inactiveThreshold")
+              ->linkToProxy(PropertyProxyReference<int>(m_powerStateConfigs[_index]->m_inactiveValue));
+      PropertyNodePtr stateNode = state->getPropertyNode();
+      PropertyNodePtr stateValueNode = stateNode->getProperty("value");
+      if (stateValueNode != NULL) {
+        PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
+        stateValueAlias->alias(stateValueNode);
+      }
+    }
+    return true;
+  }
+
+  void DSMeter::setPowerStates(const std::vector<CircuitPowerStateSpec_t>& _powerStateConfigs) {
+    for (int i = 0; i < DSM_POWER_STATES; ++i) {
+      try {
+        m_pApartment->removeState(getPowerState(i));
+        m_powerStateConfigs[i].reset();
+      } catch (ItemNotFoundException& e) {
+
+      }
+    }
+
+    for (std::vector<CircuitPowerStateSpec_t>::const_iterator it = _powerStateConfigs.begin();
+        it != _powerStateConfigs.end();
+        ++it) {
+      if (setPowerState(it->Index, it->ActiveThreshold, it->InactiveThreshold)) {
+        getPowerState(it->Index)->setState(coSystemStartup, it->State);
+      }
+    }
   }
 } // namespace dss

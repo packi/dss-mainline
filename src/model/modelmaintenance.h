@@ -294,6 +294,7 @@ namespace dss {
     void onSensorEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
     void onBinaryInputEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state);
     void onSensorValue(dsuid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
+    void onCircuitPowerStateChange(dsuid_t _meterID, const int& _baseIndex, const int& _stateMask, const int& _stateValue);
     void onZoneSensorValue(const dsuid_t &_meterID, const dsuid_t& _sourceDevice, const int& _zoneID, const int& _groupID, const int& _sensorType, const int& _sensorValue, const int& _precision);
     void onEANReady(dsuid_t _dsMeterID, const devid_t _deviceID,
                       const DeviceOEMState_t _state, const DeviceOEMInetState_t _iNetState,

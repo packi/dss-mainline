@@ -37,32 +37,41 @@
 
 namespace dss {
 
-  bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode, int secNow) {
-    int startSinceMidnight = 0;
-    int endSinceMidnight = 24 * 60 * 60;
+/**
+ * convert hour:minute:seconds string to seconds
+ */
+bool secondsFromHMS(unsigned *ts, std::string string)
+{
+    std::vector<std::string> sTimeArr = splitString(string, ':');
+    unsigned tmp;
 
-    // TODO use DateTools instead of ad-hoc parsing
+    // TODO move function to DateTools or base.h
+
+    if (sTimeArr.size() != 3) {
+      return false;
+    }
+    // TODO throws exception
+    tmp = (strToInt(sTimeArr.at(0)) * 60 * 60) +
+      (strToInt(sTimeArr.at(1)) * 60) +
+      strToInt(sTimeArr.at(2));
+
+    *ts = tmp;
+    return true;
+}
+
+  bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode,
+                          unsigned int secNow) {
+    unsigned startSinceMidnight = 0;
+    unsigned endSinceMidnight = 24 * 60 * 60;
 
     if (timeStartNode != NULL) {
-      std::string sTime = timeStartNode->getAsString();
-      std::vector<std::string> sTimeArr = splitString(sTime, ':');
-      if (sTimeArr.size() == 3) {
-        startSinceMidnight =
-            (strToInt(sTimeArr.at(0)) * 60 * 60) +
-            (strToInt(sTimeArr.at(1)) * 60) +
-            strToInt(sTimeArr.at(2));
-      }
+      secondsFromHMS(&startSinceMidnight, timeStartNode->getAsString());
     }
+
     if (timeEndNode != NULL) {
-      std::string eTime = timeEndNode->getAsString();
-      std::vector<std::string> eTimeArr = splitString(eTime, ':');
-      if (eTimeArr.size() == 3) {
-        endSinceMidnight =
-            (strToInt(eTimeArr.at(0)) * 60 * 60) +
-            (strToInt(eTimeArr.at(1)) * 60) +
-            strToInt(eTimeArr.at(2));
-      }
+      secondsFromHMS(&endSinceMidnight, timeEndNode->getAsString());
     }
+
     Logger::getInstance()->log("checkTimeCondition: "
         "start: " + intToString(startSinceMidnight) + ", "
         "end: " + intToString(endSinceMidnight) + ", "
@@ -194,6 +203,54 @@ namespace dss {
               return false;
           }
         } // oSystemAddonStates loop
+      } // nodes NULL check
+
+      PropertyNodePtr oOrAddonStateNode = oBaseConditionNode->getPropertyByName("or-addon-states");
+
+      if ((oOrAddonStateNode != NULL)) {
+        bool fFound = false;
+        for (int j = 0; !fFound && j < oOrAddonStateNode->getChildCount(); j++) {
+          //assuming condi = /or-addon-states/<scriptID>/myFire=true
+          std::string sAddonID = oOrAddonStateNode->getChild(j)->getName();
+          PropertyNodePtr oOrAddonStateSubnode=oOrAddonStateNode->getChild(j);
+          // searching for a specific addon subpath in /usr/addon-states/<scriptid>
+          PropertyNodePtr oSystemAddonStates =
+              DSS::getInstance()->getPropertySystem().getProperty("/usr/addon-states/" + sAddonID);
+
+          if (oSystemAddonStates != NULL) {
+            for (int k = 0; !fFound && k < oOrAddonStateSubnode->getChildCount(); k++) {
+              std::string sName = oOrAddonStateSubnode->getChild(k)->getName();
+              std::string sValue = oOrAddonStateSubnode->getChild(k)->getAsString();
+              for (int i = 0; !fFound && i < oSystemAddonStates->getChildCount(); i++) {
+                PropertyNodePtr nameNode =
+                    oSystemAddonStates->getChild(i)->getPropertyByName("name");
+
+                PropertyNodePtr valueNode =
+                    oSystemAddonStates->getChild(i)->getPropertyByName("value");
+
+                if ((nameNode == NULL) || (valueNode == NULL)) {
+                  Logger::getInstance()->log("checkSystemAddonCondition: can not check"
+                          " addon condition, missing name or value node!", lsError);
+                  continue;
+                }
+
+                // search for a requested state
+                if (sName == nameNode->getAsString()) {
+                  // state found ...
+                  if (sValue == valueNode->getAsString()) {
+                    fFound = true;
+                  }
+                }
+              }
+            }
+          }
+        } // oOrSystemAddonStates loop
+
+        if (fFound == false) {
+          Logger::getInstance()->log("checkSystemCondition: "
+                  "or-addon-states: no states are matching", lsDebug);
+          return false;
+        }
       } // nodes NULL check
 
       // at least one of the zone states must match

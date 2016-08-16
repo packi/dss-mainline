@@ -49,6 +49,21 @@ namespace dss {
       int m_evtSrcGroup;
       dsuid_t m_evtSrcDSID;
 
+      /**
+       * checkTrigger() - visit the subtree, each child is a trigger
+       * @_triggerProp - node with known structure containing parameters
+       * @return true if match, false otherwise
+       */
+      bool checkTrigger(PropertyNodePtr _triggerProp);
+
+      /**
+       * checkTriggerNode() - inspect single trigger node
+       * @_triggerProp - node with known structure
+       * @return true if match, false otherwise
+       */
+      bool checkTriggerNode(PropertyNodePtr _triggerProp);
+
+      /* subclasses of trigger type */
       bool checkSceneZone(PropertyNodePtr _triggerProp);
       bool checkUndoSceneZone(PropertyNodePtr _triggerProp);
       bool checkDeviceScene(PropertyNodePtr _triggerProp);
@@ -60,8 +75,28 @@ namespace dss {
       bool checkState(PropertyNodePtr _triggerProp);
       bool checkSensorValue(PropertyNodePtr _triggerProp);
       bool checkEvent(PropertyNodePtr _triggerProp);
-      bool checkTrigger(std::string _path);
-      void relayTrigger(PropertyNodePtr _releay);
+
+      /**
+       * damping() - aggregate triggers do not raise an action each time
+       * @_dampProp property subtree with timeout/last_execution arguments
+       * @return true if event shall be damped, false if no damping is applied
+       */
+      bool damping(PropertyNodePtr _dampProp);
+
+      /**
+       * rescheduleAction() - reschedule event if trigger fired again (optional)
+       * @_triggerNode - node in global lookup table (/usr/triggers)
+       * @_triggerParamNode - node with complete trigger parameters
+       * @return true if event was rescheduled
+       */
+      bool rescheduleAction(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode);
+
+      /**
+       * relayTrigger() - If a trigger matches this will raise an event
+       * @_triggerNode - node in global lookup table (/usr/triggers)
+       * @_triggerParamNode - node with complete trigger parameters
+       */
+      void relayTrigger(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode);
   };
 
   class SystemEventActionExecute : public SystemEvent {

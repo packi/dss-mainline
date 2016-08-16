@@ -36,11 +36,15 @@
 #include "src/model/modeltypes.h"
 #include "src/datetools.h"
 #include "src/storagetools.h"
+#include "businterface.h"
+
+#define DSM_POWER_STATES 8
 
 namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Apartment;
+  class State;
 
   enum {
     DSM_APARTMENT_STATE_PRESENT = 0,
@@ -53,6 +57,13 @@ namespace dss {
     DSM_STATE_REGISTRATION  = 1,
     DSM_STATE_UNKNOWN       = 255
   };
+
+  typedef struct {
+    int m_index;              // power state index
+    int m_activeValue;        // active threshold
+    int m_inactiveValue;      // inactive threshold
+    std::string m_name;       // state name
+  } CircuitPowerState_t;
 
   bool busMemberIsDSMeter(BusMemberDevice_t type);
   bool busMemberIsdSM(BusMemberDevice_t type);
@@ -102,9 +113,11 @@ namespace dss {
     std::string m_VdcHardwareModelGuid;
     std::string m_VdcVendorGuid;
     std::string m_VdcOemGuid;
+    std::string m_VdcOemModelGuid;
     std::string m_softwareVersion;
     int m_dSMState;
     bool m_synchronized;
+    boost::shared_ptr<CircuitPowerState_t> m_powerStateConfigs[DSM_POWER_STATES];
   private:
     void publishToPropertyTree();
   public:
@@ -210,12 +223,18 @@ namespace dss {
     const std::string& getVdcVendorGuid() { return m_VdcVendorGuid; }
     void setVdcOemGuid(const std::string& _value ) { m_VdcOemGuid = _value; }
     const std::string& getVdcOemGuid() { return m_VdcOemGuid; }
+    void setVdcOemModelGuid(const std::string& _value ) { m_VdcOemModelGuid = _value; }
+    const std::string& getVdcOemModelGuid() { return m_VdcOemModelGuid; }
 
     int getState() const { return m_dSMState; }
     void setState(uint8_t _state) { m_dSMState = _state; }
     
     void setSynchronized() { m_synchronized = true; }
     bool isSynchonized() const { return m_synchronized; }
+
+    boost::shared_ptr<State> getPowerState(uint8_t _inputIndex) const;
+    bool setPowerState(const int _index, const int _setThreshold, const int _resetThreshold);
+    void setPowerStates(const std::vector<CircuitPowerStateSpec_t>& _powerStateConfigs);
   }; // DSMeter
 
 

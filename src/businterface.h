@@ -83,6 +83,13 @@ namespace dss {
   } DeviceBinaryInputSpec_t;
 
   typedef struct {
+    uint8_t Index;
+    uint8_t State;
+    uint32_t ActiveThreshold;
+    uint32_t InactiveThreshold;
+  } CircuitPowerStateSpec_t;
+
+  typedef struct {
     uint8_t SensorType;
     uint32_t SensorPollInterval;
     uint8_t SensorBroadcastFlag;
@@ -276,6 +283,7 @@ namespace dss {
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
     virtual std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
     virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) = 0;
+    virtual std::vector<CircuitPowerStateSpec_t> getPowerStates(const dsuid_t& _dsMeterID) = 0;
 
     virtual std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
     virtual std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) = 0;
@@ -352,6 +360,8 @@ namespace dss {
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) = 0;
     virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) = 0;
     virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) = 0;
+
+    virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface

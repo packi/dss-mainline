@@ -77,6 +77,7 @@ public:
   virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) {}
   virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) {}
   virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) {}
+  virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) {}
 };
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
@@ -101,6 +102,9 @@ public:
   }
   virtual std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) {
     return std::vector<ClusterSpec_t>();
+  }
+  virtual std::vector<CircuitPowerStateSpec_t> getPowerStates(const dsuid_t& _dsMeterID) {
+    return std::vector<CircuitPowerStateSpec_t>();
   }
   virtual std::vector<std::pair<int,int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) {
     return std::vector<std::pair<int,int> >();

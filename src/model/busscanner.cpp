@@ -149,6 +149,7 @@ namespace dss {
           }
         }
         scanClusters(_dsMeter);
+        scanPowerStates(_dsMeter);
       }
 
       _dsMeter->setIsInitialized(true);
@@ -237,6 +238,22 @@ namespace dss {
 
     return result;
   } // scanZone
+
+  bool BusScanner::scanPowerStates(boost::shared_ptr<DSMeter> _dsMeter) {
+    std::vector<CircuitPowerStateSpec_t> powerStates;
+
+    if (!_dsMeter->getCapability_HasMetering()) {
+      return true;
+    }
+    try {
+      powerStates = m_Interface.getPowerStates(_dsMeter->getDSID());
+      _dsMeter->setPowerStates(powerStates);
+    } catch(BusApiError& e) {
+      log("scanZone: Error scanPowerStates: " + std::string(e.what()), lsWarning);
+    }
+
+    return true;
+  }
 
   bool BusScanner::scanClusters(boost::shared_ptr<DSMeter> _dsMeter) {
     std::vector<ClusterSpec_t> clusters;
@@ -605,6 +622,7 @@ namespace dss {
               _dsMeter->setVdcHardwareModelGuid(props->hardwareModelGuid);
               _dsMeter->setVdcVendorGuid(props->vendorGuid);
               _dsMeter->setVdcOemGuid(props->oemGuid);
+              _dsMeter->setVdcOemModelGuid(props->oemModelGuid);
               if (_dsMeter->getName().empty()) {
                 _dsMeter->setName(props->name);
               }
@@ -1102,58 +1120,59 @@ namespace dss {
     // send a request to each binary input device to resend its current status
     foreach(boost::shared_ptr<Device> dev, devices) {
       uint16_t value = 0;
-
+      boost::shared_ptr<DSMeter> dsm;
       try {
+        dsm = m_pApartment->getDSMeterByDSID(dev->getDSMeterDSID());
+      } catch (ItemNotFoundException& ex) {
+        Logger::getInstance()->log("BinaryInputScanner: dsm " + dsuid2str(dev->getDSMeterDSID())
+            + " is unknown", lsWarning);
+        continue;
+      }
 
-        boost::shared_ptr<DSMeter> dsm;
+      while (dsm->isPresent() && (dsm->getState() == DSM_STATE_REGISTRATION)) {
+        sleep(5);
+      }
+      if (!dsm->isPresent()) {
+        // ignore non-present dsm's, they will be discovered later with a new event
+        Logger::getInstance()->log("BinaryInputScanner: dsm " + dsuid2str(dev->getDSMeterDSID())
+            + " is inactive", lsWarning);
+        continue;
+      }
+
+      if (! dev->isVdcDevice()) {
+        // Powerline Device
         try {
-          dsm = m_pApartment->getDSMeterByDSID(dev->getDSMeterDSID());
-        } catch (ItemNotFoundException& ex) {
-          Logger::getInstance()->log("BinaryInputScanner: dsm " + dsuid2str(dev->getDSMeterDSID())
-                        + " is unknown", lsWarning);
-          continue;
-        }
-
-        while (dsm->isPresent() && (dsm->getState() == DSM_STATE_REGISTRATION)) {
+          value = getDeviceSensorValue(dev->getDSMeterDSID(), dev->getShortAddress(), 0x20);
+          Logger::getInstance()->log("BinaryInputScanner: device " +
+              dsuid2str(dev->getDSID()) + ", state = " + intToString(value), lsDebug);
+          for (int index = 0; index < dev->getBinaryInputCount(); index++) {
+            dev->handleBinaryInputEvent(index, (value >> index) & 1);
+          }
+          // avoid powerline bus monopolization
           sleep(5);
-        }
-        if (!dsm->isPresent()) {
-          // ignore non-present dsm's, they will be discovered later with a new event
-          Logger::getInstance()->log("BinaryInputScanner: dsm " + dsuid2str(dev->getDSMeterDSID())
-                        + " is inactive", lsWarning);
-          continue;
-        }
-
-        value = getDeviceSensorValue(dev->getDSMeterDSID(),
-                                     dev->getShortAddress(), 0x20);
-        Logger::getInstance()->log("BinaryInputScanner: device " +
-                  dsuid2str(dev->getDSID()) + ", state = " + intToString(value), lsDebug);
-
-        for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-          boost::shared_ptr<State> state = dev->getBinaryInputState(index);
-          assert(state != NULL);
-          if ((value & (1 << index)) > 0) {
-            state->setState(coSystem, State_Active);
-          } else {
-            state->setState(coSystem, State_Inactive);
+        } catch (BusApiError& ex) {
+          Logger::getInstance()->log("BinaryInputScanner: device " + dsuid2str(dev->getDSID())
+              + " did not respond to input state query", lsWarning);
+          for (int index = 0; index < dev->getBinaryInputCount(); index++) {
+            dev->handleBinaryInputEvent(index, -1);
           }
         }
 
-        // avoid bus monopolization
-        sleep(5);
-
-      } catch (BusApiError& ex) {
-        Logger::getInstance()->log("BinaryInputScanner: device " + dsuid2str(dev->getDSID())
-              + " did not respond to input state query", lsWarning);
-        for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-          boost::shared_ptr<State> state = dev->getBinaryInputState(index);
-          assert(state != NULL);
-
-          uint8_t inputType = dev->getDeviceBinaryInputType(index);
-          if (inputType == BinaryInputIDWindowTilt) {
-            state->setState(coSystem, StateWH_Unknown);
-          } else {
-            state->setState(coSystem, State_Unknown);
+      } else {
+        // IP Device
+        try {
+          std::map<int,int64_t> sInput;
+          sInput = VdcHelper::getStateInputValue(dsm->getDSID(), dev->getDSID(), -1);
+          Logger::getInstance()->log("BinaryInputScanner: device " +
+              dsuid2str(dev->getDSID()) + ", state response fields = " + intToString(sInput.size()), lsDebug);
+          for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
+            dev->handleBinaryInputEvent(it->first, it->second);
+          }
+        } catch (std::runtime_error& e) {
+          Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
+              " failure: " + e.what(), lsWarning);
+          for (int index = 0; index < dev->getBinaryInputCount(); index++) {
+            dev->handleBinaryInputEvent(index, -1);
           }
         }
       }

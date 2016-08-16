@@ -17,19 +17,20 @@
  *  along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "src/event/event_fields.h"
+#include "src/handler/system_triggers.h"
 
 namespace dss {
-  const std::string ef_callOrigin = "callOrigin";
-  const std::string ef_originDSUID = "originDSUID";
-  const std::string ef_zone = "zone";
-  const std::string ef_group = "group";
-  const std::string ef_scene = "scene";
-  const std::string ef_sceneID = "sceneID";
-  const std::string ef_dsuid = "dsuid";
-  const std::string ef_forced = "forced";
-  const std::string ef_sensorEvent = "sensorEvent";
-  const std::string ef_sensorIndex = "sensorIndex";
-  const std::string ef_eventid = "eventid";
-  const std::string ef_evt = "evt";
+  const std::string ptn_triggers = "triggers";
+  const std::string  ptn_type = "type";
+
+  const std::string ptn_damping = "damping";
+  const std::string  ptn_damp_interval = "interval";
+  const std::string  ptn_damp_rewind = "rewindTimer";
+  const std::string  ptn_damp_start_ts = "lastTrigger";
+
+  const std::string ptn_action_lag = "lag";
+  const std::string  ptn_action_delay = "delay";
+  const std::string  ptn_action_reschedule = "reschedule";
+  const std::string  ptn_action_ts = "last_event_scheduled_at";
+  const std::string  ptn_action_eventid = "eventid";
 }

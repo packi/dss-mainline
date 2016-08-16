@@ -33,7 +33,8 @@
 
 namespace dss {
 
-  bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode, int secNow);
+  bool checkTimeCondition(PropertyNodePtr timeStartNode, PropertyNodePtr timeEndNode,
+                          unsigned int secNow);
   bool checkSystemCondition(std::string _path);
 
 };

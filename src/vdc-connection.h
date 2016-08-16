@@ -26,6 +26,7 @@
 #include "config.h"
 
 #include <string>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
@@ -35,15 +36,21 @@ namespace dss {
   class JSONObject;
 
   typedef struct {
-    std::string hardwareModelGuid;
-    std::string modelUID;
+    // dS-Article Data
+    std::string oemGuid;          // instance id => e.g. gs1:sgtin
+    std::string oemModelGuid;     // class id => GTIN of the dS-Article
     std::string vendorGuid;
-    std::string oemGuid;
-    std::string configURL;
+    // Hardware Endpoint description
     std::string hardwareGuid;
+    std::string hardwareModelGuid;
+    // System ID's
+    std::string modelUID;         // device configuration id
+    // End-User Info
+    std::string name;
     std::string hardwareInfo;     // property: model
     std::string hardwareVersion;
-    std::string name;
+    // Configurator integration
+    std::string configURL;
     boost::shared_ptr<std::vector<int> > modelFeatures;
   } VdsdSpec_t;
 
@@ -59,6 +66,7 @@ namespace dss {
     std::string modelUID;
     std::string vendorGuid;
     std::string oemGuid;
+    std::string oemModelGuid;
     std::string configURL;
     std::string name;
   } VdcSpec_t;
@@ -68,6 +76,8 @@ namespace dss {
     static boost::shared_ptr<VdsdSpec_t> getSpec(dsuid_t _vdsm, dsuid_t _device);
     static boost::shared_ptr<VdcSpec_t> getCapabilities(dsuid_t _vdsm);
     static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
+
+    static std::map<int,int64_t> getStateInputValue(dsuid_t _vdsm, dsuid_t _device, int index);
   };
 
 } // namespace

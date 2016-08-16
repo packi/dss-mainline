@@ -33,6 +33,7 @@
 #include "event/event_create.h"
 #include "event/event_fields.h"
 #include "eventinterpretersystemplugins.h"
+#include "handler/system_triggers.h"
 #include "http_client.h"
 #include "internaleventrelaytarget.h"
 #include "logger.h"
@@ -45,6 +46,7 @@
 #include "model/state.h"
 #include "model/modelconst.h"
 #include "model/scenehelper.h"
+#include "model/modulator.h"
 #include "propertysystem.h"
 #include "security/security.h"
 #include "structuremanipulator.h"
@@ -620,6 +622,12 @@ namespace dss {
     if (pState->getType() == StateType_Device) {
       Logger::getInstance()->log("SystemEventActionExecute::"
           "executeStateChange - cannot modify states of type \'device\'", lsError);
+      return;
+    }
+
+    if (pState->getType() == StateType_Circuit) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+          "executeStateChange - cannot modify dsm power states", lsError);
       return;
     }
 
@@ -1649,132 +1657,228 @@ namespace dss {
     return true;
   }
 
-  bool SystemTrigger::checkTrigger(std::string _path) {
-    if (!DSS::hasInstance()) {
-      return false;
-    }
-    PropertyNodePtr appProperty =
-      DSS::getInstance()->getPropertySystem().getProperty(_path);
-    if (appProperty == NULL) {
-      return false;
-    }
-
-    PropertyNodePtr appTrigger = appProperty->getPropertyByName(ef_triggers);
+  bool SystemTrigger::checkTrigger(PropertyNodePtr _triggerProp) {
+    PropertyNodePtr appTrigger = _triggerProp->getPropertyByName(ptn_triggers);
     if (appTrigger == NULL) {
       return false;
     }
 
     for (int i = 0; i < appTrigger->getChildCount(); i++) {
-      PropertyNodePtr triggerProp = appTrigger->getChild(i);
-      if (triggerProp == NULL) {
-        continue;
+      if (checkTriggerNode(appTrigger->getChild(i))) {
+        return true;
       }
+    }
 
-      PropertyNodePtr triggerType = triggerProp->getPropertyByName(ef_type);
-      if (triggerType == NULL) {
-        continue;
-      }
-
-      std::string triggerValue = triggerType->getAsString();
-
-      if (m_evtName == EventName::CallScene) {
-        if (triggerValue == "zone-scene") {
-          if (checkSceneZone(triggerProp)) {
-            return true;
-          }
-        } else if (triggerValue == "device-scene") {
-          if (checkDeviceScene(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::CallSceneBus) {
-        if (triggerValue == "bus-zone-scene") {
-          if (checkSceneZone(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::UndoScene) {
-        if (triggerValue == "undo-zone-scene") {
-          if (checkUndoSceneZone(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::DeviceButtonClick) {
-        if (triggerValue == "device-msg") {
-          if (checkDevice(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::ButtonDeviceAction) {
-        if (triggerValue == "device-action") {
-          if (checkDirectDeviceAction(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "deviceSensorEvent") {
-        if (triggerValue == "device-sensor") {
-          if (checkDeviceSensor(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "deviceSensorValue") {
-        if (triggerValue == "device-sensor-value") {
-          if (checkSensorValue(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "zoneSensorValue") {
-        if (triggerValue == "zone-sensor-value") {
-          if (checkSensorValue(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
-        if (triggerValue == "device-binary-input") {
-          if (checkDeviceBinaryInput(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == "highlevelevent") {
-        if (triggerValue == "custom-event") {
-          if (checkHighlevel(triggerProp)) {
-            return true;
-          }
-        }
-
-      } else if (m_evtName == EventName::StateChange) {
-        if (triggerValue == "state-change") {
-          if (checkState(triggerProp)) {
-            return true;
-          }
-        }
-      } else if (m_evtName == EventName::AddonStateChange) {
-        if (triggerValue == "addon-state-change") {
-          if (checkState(triggerProp)) {
-            return true;
-          }
-        }
-      } else {
-        if (triggerValue == "event") {
-          if (checkEvent(triggerProp)) {
-            return true;
-          }
-        }
-      }
-    } // for loop
+    // no trigger matched
     return false;
   }
 
-  void SystemTrigger::relayTrigger(PropertyNodePtr _relay) {
+  bool SystemTrigger::checkTriggerNode(PropertyNodePtr triggerProp)
+  {
+    if (triggerProp == NULL) {
+      return false;
+    }
+
+    PropertyNodePtr triggerType = triggerProp->getPropertyByName(ptn_type);
+    if (triggerType == NULL) {
+      return false;
+    }
+
+    std::string triggerValue = triggerType->getAsString();
+
+    if (m_evtName == EventName::CallScene) {
+      if (triggerValue == "zone-scene") {
+        if (checkSceneZone(triggerProp)) {
+          return true;
+        }
+      } else if (triggerValue == "device-scene") {
+        if (checkDeviceScene(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::CallSceneBus) {
+      if (triggerValue == "bus-zone-scene") {
+        if (checkSceneZone(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::UndoScene) {
+      if (triggerValue == "undo-zone-scene") {
+        if (checkUndoSceneZone(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceButtonClick) {
+      if (triggerValue == "device-msg") {
+        if (checkDevice(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::ButtonDeviceAction) {
+      if (triggerValue == "device-action") {
+        if (checkDirectDeviceAction(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "deviceSensorEvent") {
+      if (triggerValue == "device-sensor") {
+        if (checkDeviceSensor(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "deviceSensorValue") {
+      if (triggerValue == "device-sensor-value") {
+        if (checkSensorValue(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "zoneSensorValue") {
+      if (triggerValue == "zone-sensor-value") {
+        if (checkSensorValue(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
+      if (triggerValue == "device-binary-input") {
+        if (checkDeviceBinaryInput(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == "highlevelevent") {
+      if (triggerValue == "custom-event") {
+        if (checkHighlevel(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::StateChange) {
+      if (triggerValue == "state-change") {
+        if (checkState(triggerProp)) {
+          return true;
+        }
+      }
+    } else if (m_evtName == EventName::AddonStateChange) {
+      if (triggerValue == "addon-state-change") {
+        if (checkState(triggerProp)) {
+          return true;
+        }
+      }
+    } else {
+      if (triggerValue == "event") {
+        if (checkEvent(triggerProp)) {
+          return true;
+        }
+      }
+    }
+
+    // no trigger matched
+    return false;
+  }
+
+  /**
+   * damping() - decide if trigger shall be damped or an event emitted
+   * @_triggerParamNode complete trigger parameter node
+   * @return true if event shall be damped, false if no damping is applied
+   */
+  bool SystemTrigger::damping(PropertyNodePtr _triggerParamNode) {
+    if (_triggerParamNode == NULL || !_triggerParamNode->getProperty(ptn_damping)) {
+      return false;
+    }
+
+    PropertyNodePtr dampNode = _triggerParamNode ->getProperty(ptn_damping);
+    if (!dampNode->getProperty(ptn_damp_interval)) {
+      // no delay specified, nothing to do
+      return false;
+    }
+
+    if (!dampNode->getProperty(ptn_damp_start_ts)) {
+      // first trigger ever, no rate-limit possible
+      PropertyNodePtr tmp = dampNode->createProperty(ptn_damp_start_ts);
+      tmp->setStringValue(DateTime().toISO8601());
+      return false;
+    }
+
+    // delay in seconds
+    int interval = dampNode->getProperty(ptn_damp_interval)->getIntegerValue();
+    if (interval < 0) {
+      Logger::getInstance()->log("trigger::damping: invalid interval " +
+                                 intToString(interval), lsWarning);
+      return false;
+    }
+
+    PropertyNodePtr lastTsNode = dampNode->getProperty(ptn_damp_start_ts);
+    DateTime lastTS = DateTime::parseISO8601(lastTsNode->getAsString());
+
+    PropertyNodePtr rewindNode = dampNode->getProperty(ptn_damp_rewind);
+    if (rewindNode && rewindNode->getBoolValue()) {
+      // extend rate-limit interval
+      lastTsNode->setStringValue(DateTime().toISO8601());
+    }
+
+    if (DateTime().difference(lastTS) < interval) {
+      // really damp
+      Logger::getInstance()->log("trigger:rate-limit", lsInfo);
+      return true;
+    }
+
+    // rate-limit interval expired, start new interval
+    lastTsNode->setStringValue(DateTime().toISO8601());
+    return false;
+  }
+
+  /**
+   * reschedule_action() - reschedule event if trigger fired again (optional)
+   * @_triggerParamNode complete trigger node with all parameters
+   * @return true if event was reschedule
+   */
+  bool SystemTrigger::rescheduleAction(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode) {
+
+    PropertyNodePtr lagNode = _triggerParamNode->getProperty(ptn_action_lag);
+
+    if (lagNode == NULL) {
+      return false;
+    }
+
+    if (!lagNode->getProperty(ptn_action_reschedule) ||
+        !lagNode->getProperty(ptn_action_reschedule)->getBoolValue() ||
+        !lagNode->getProperty(ptn_action_delay) ||
+        !lagNode->getProperty(ptn_action_eventid)) {
+      // rescheduling not enabled, or missing delay
+      return false;
+    }
+
+    int delay = lagNode->getProperty(ptn_action_delay)->getIntegerValue();
+
+    PropertyNodePtr lastTsNode = lagNode->getProperty(ptn_action_ts);
+    DateTime lastTS = DateTime::parseISO8601(lastTsNode->getAsString());
+
+    if (DateTime().difference(lastTS) > delay) {
+      // assume action was executed, or let it execute
+      // event queue has no interface to find out
+      return false;
+    }
+
+    EventRunner &runner(DSS::getInstance()->getEventRunner());
+    runner.removeEvent(lagNode->getProperty(ptn_action_eventid)->getStringValue());
+
+    // relayTrigger will do the same, nevermind:
+    lastTsNode->setStringValue(DateTime().toISO8601());
+    relayTrigger(_triggerNode, _triggerParamNode);
+
+    return true;
+  }
+
+  void SystemTrigger::relayTrigger(PropertyNodePtr _relay, PropertyNodePtr _triggerParamNode) {
+
     PropertyNodePtr triggerPath = _relay->getPropertyByName("triggerPath");
     PropertyNodePtr relayedEventName =
         _relay->getPropertyByName("relayedEventName");
@@ -1816,12 +1920,41 @@ namespace dss {
       evt->setProperty(kv.first, kv.second);
     }
 
-    if (DSS::hasInstance()) {
-      Logger::getInstance()->log("SystemTrigger::"
-              "relayTrigger: relaying event \'" + evt->getName() + "\'");
-
-      DSS::getInstance()->getEventQueue().pushEvent(evt);
+    if (!DSS::hasInstance()) {
+      // some unit tests exit here
+      return;
     }
+
+    Logger::getInstance()->log("SystemTrigger::relayTrigger: relaying event \'" + evt->getName() + "\'");
+
+    PropertyNodePtr lagNode = _triggerParamNode->getProperty(ptn_action_lag);
+    if (!lagNode || !lagNode->getProperty(ptn_action_delay) ||
+        (lagNode->getProperty(ptn_action_delay)->getIntegerValue() == 0)) {
+        // no lag configured, immediately execute
+        DSS::getInstance()->getEventQueue().pushEvent(evt);
+        return;
+    }
+
+    if (lagNode->getProperty(ptn_action_delay)->getIntegerValue() < 0) {
+      Logger::getInstance()->log("SystemTrigger::relayTrigger: invalid lag paramter" +
+                                 lagNode->getProperty(ptn_action_delay)->getAsString(),
+                                 lsWarning);
+      return;
+    }
+
+    Logger::getInstance()->log("SystemTrigger::relayTrigger: action lag", lsWarning);
+
+    evt->setProperty("time", "+" + lagNode->getProperty(ptn_action_delay)->getAsString());
+
+    std::string id = DSS::getInstance()->getEventQueue().pushTimedEvent(evt);
+    if (id.empty()) {
+      // failed to schedule the event, invalid lag parameter
+      Logger::getInstance()->log("SystemTrigger::relayTrigger: dropping event after failure to queue it", lsWarning);
+      return;
+    }
+
+    lagNode->createProperty(ptn_action_eventid)->setStringValue(id);
+    lagNode->createProperty(ptn_action_ts)->setStringValue(DateTime().toISO8601());
   }
 
   void SystemTrigger::run() {
@@ -1832,17 +1965,17 @@ namespace dss {
     DSS::getInstance()->getSecurity().loginAsSystemUser(
         "EventInterpreterPluginSystemTrigger needs system rights");
 
-    PropertyNodePtr triggerProperty =
-        DSS::getInstance()->getPropertySystem().getProperty("/usr/triggers");
+    PropertySystem &propSystem(DSS::getInstance()->getPropertySystem());
+
+    PropertyNodePtr triggerProperty = propSystem.getProperty("/usr/triggers");
     if (triggerProperty == NULL) {
       return;
     }
 
-    int i;
     PropertyNodePtr triggerPathNode;
 
     try {
-      for (i = 0; i < triggerProperty->getChildCount(); i++) {
+      for (int i = 0; i < triggerProperty->getChildCount(); i++) {
         PropertyNodePtr triggerNode = triggerProperty->getChild(i);
         if (triggerNode == NULL) {
           continue;
@@ -1851,9 +1984,46 @@ namespace dss {
         if (triggerPathNode == NULL) {
           continue;
         }
+
+        PropertyNodePtr triggerParamNode =
+          propSystem.getProperty(triggerPathNode->getStringValue());
+        if (triggerParamNode == NULL) {
+          continue;
+        }
+
         std::string sTriggerPath = triggerPathNode->getStringValue();
-        if (checkTrigger(sTriggerPath) && checkSystemCondition(sTriggerPath)) {
-          relayTrigger(triggerNode);
+
+        if (checkTrigger(triggerParamNode) && checkSystemCondition(sTriggerPath)) {
+
+
+          PropertyNodePtr lagNode = triggerParamNode->getProperty(ptn_action_lag);
+          PropertyNodePtr dampNode = triggerParamNode->getProperty(ptn_damping);
+
+          if ((lagNode && lagNode->getProperty(ptn_action_lag)) &&
+              (dampNode && dampNode->getProperty(ptn_damp_interval))) {
+            int dampInterval = dampNode->getProperty(ptn_damp_interval)->getIntegerValue();
+            int actionLag = lagNode->getProperty(ptn_action_lag)->getIntegerValue();
+
+            if (actionLag > dampInterval) {
+              // otherwise new events are scheduled before intial event fired
+              // we could end up rescheduling multiple events
+              Logger::getInstance()->log("Action lag should not exceed damping interval",
+                                         lsWarning);
+            }
+          }
+
+          if (rescheduleAction(triggerNode, triggerParamNode)) {
+            // no new actions spawned while rescheduling a pending event
+            continue;
+          }
+
+          if (damping(triggerParamNode)) {
+            // trigger is rate-limited, suppress spawning new event
+            continue;
+          }
+
+
+          relayTrigger(triggerNode, triggerParamNode);
         }
       } // for loop
     } catch (PropertyTypeMismatch& e) {
@@ -2374,6 +2544,11 @@ namespace dss {
     } else if (m_raisedAtState->getType() == StateType_Device) {
       boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
       std::string devName = device->getName() + ";" + dsuid2str(device->getDSID());
+      _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state + ";;;;" + devName + ";");
+
+    } else if (m_raisedAtState->getType() == StateType_Circuit) {
+      boost::shared_ptr<DSMeter> meter = m_raisedAtState->getProviderDsm();
+      std::string devName = meter->getName() + ";" + dsuid2str(meter->getDSID());
       _logger->logln(";StateDevice;" + _statename + ";" + _value + ";" + _state + ";;;;" + devName + ";");
 
     } else if (m_raisedAtState->getType() == StateType_Group) {

@@ -17,24 +17,31 @@
  *  along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __EVENT_FIELDS___
-#define __EVENT_FIELDS___
+#pragma once
 
 #include <string>
 
 namespace dss {
-  extern const std::string ef_callOrigin;
-  extern const std::string ef_originDSUID;
-  extern const std::string ef_zone;
-  extern const std::string ef_group;
-  extern const std::string ef_scene;
-  extern const std::string ef_sceneID;
-  extern const std::string ef_dsuid;
-  extern const std::string ef_forced;
-  extern const std::string ef_sensorEvent;
-  extern const std::string ef_sensorIndex;
-  extern const std::string ef_eventid;
-  extern const std::string ef_evt;
-}
 
-#endif
+  /**
+   * property node structure to declare trigger
+   * ptn = path trigger node
+   */
+
+  //< trigger conditions, what needs to match, zone, group, etc
+  extern const std::string ptn_triggers;
+  extern const std::string  ptn_type;
+
+  //< should every match raise a relay event?
+  extern const std::string ptn_damping;
+  extern const std::string  ptn_damp_interval;
+  extern const std::string  ptn_damp_rewind;
+  extern const std::string  ptn_damp_start_ts; //< runtime
+
+  //< delay the execution of the action?
+  extern const std::string ptn_action_lag;
+  extern const std::string  ptn_action_delay;
+  extern const std::string  ptn_action_reschedule;
+  extern const std::string  ptn_action_ts;  //< runtime
+  extern const std::string  ptn_action_eventid; //< runtime, already scheduled event
+}

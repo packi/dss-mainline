@@ -363,6 +363,12 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pEventRunner = boost::make_shared<EventRunner>(m_pEventInterpreter.get(), eventMonitor);
     m_pEventQueue = boost::make_shared<EventQueue>(m_pEventInterpreter.get());
 
+    // setup the crazy circular dependencies
+    m_pEventRunner->setEventQueue(m_pEventQueue.get());
+    m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
+    m_pEventQueue->setEventRunner(m_pEventRunner.get());
+    m_pEventInterpreter->setEventQueue(m_pEventQueue.get());
+
     m_pSecurity.reset(
         new Security(m_pPropertySystem->createProperty("/system/security")));
     m_pSessionManager.reset(
@@ -520,11 +526,6 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-
-    m_pEventRunner->setEventQueue(m_pEventQueue.get());
-    m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
-    m_pEventQueue->setEventRunner(m_pEventRunner.get());
-    m_pEventInterpreter->setEventQueue(m_pEventQueue.get());
   }
 
   bool DSS::initSubsystems() {

@@ -1043,6 +1043,14 @@ namespace dss {
         onSensorValue(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
       }
       break;
+    case ModelEvent::etCircuitPowerStateChange:
+      assert(pEventWithDSID != NULL);
+      if (event->getParameterCount() < 3) {
+        log("Expected at least 3 parameter for ModelEvent::etCircuitPowerStateChange");
+      } else {
+        onCircuitPowerStateChange(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
+      }
+      break;
     case ModelEvent::etZoneSensorValue:
       assert(pEventWithDSID != NULL);
       if (event->getParameterCount() < 5) {
@@ -2038,6 +2046,24 @@ namespace dss {
     }
   } // onBinaryInputEvent
 
+  void ModelMaintenance::onCircuitPowerStateChange(dsuid_t _meterID,
+                                                   const int& _baseIndex,
+                                                   const int& _stateMask,
+                                                   const int& _stateValue) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      for (int i = 0; i < 16; i++) {
+        if ((_stateMask & (1 << i)) == 0) {
+          continue;
+        }
+        boost::shared_ptr<State> pState = pMeter->getPowerState(i);
+        pState->setState(coSystem, ((_stateValue & (1 << i)) > 0) ? State_Active : State_Inactive);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onCircuitPowerStateChange: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  } // onCircuitPowerStateChange
+
   void ModelMaintenance::onSensorValue(dsuid_t _meterID,
                                        const devid_t _deviceID,
                                        const int& _sensorIndex,
@@ -2708,6 +2734,33 @@ namespace dss {
       m_Device->setVdcHardwareInfo(props->hardwareInfo);
       m_Device->setVdcHardwareVersion(props->hardwareVersion);
 
+      if (beginsWith(props->oemModelGuid, "gs1:")) {
+        // For the time being assume that all IP Devices with an oemModelGuid/GTIN
+        // are registered at the dS-Article Db. This might be a configurable property in the future.
+        const DeviceOEMInetState_t iNetState = DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY;
+        try {
+          // format of oemModelGuid: gs1:(01)123456789
+          std::string eanString = props->oemModelGuid.substr(4);
+          if (beginsWith(eanString, "(01)")) {
+            eanString.erase(0, 4);
+          }
+          unsigned long long eanNumber = strToULongLong(eanString);
+          m_Device->setOemInfo(eanNumber, 0, 0, iNetState, true);
+          if ((iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
+              (iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
+            boost::shared_ptr<TaskProcessor> tp = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
+            tp->addEvent(boost::make_shared<OEMWebQuery>(m_Device, m_Device->getOemProductInfoState()));
+            m_Device->setOemProductInfoState(DEVICE_OEM_LOADING);
+          } else {
+            m_Device->setOemProductInfoState(DEVICE_OEM_NONE);
+          }
+          m_Device->setOemInfoState(DEVICE_OEM_VALID);
+        } catch (std::invalid_argument& e) {
+          Logger::getInstance()->log("VdcDataQuery: could not convert gtin for device " +
+              dsuid2str(m_Device->getDSID()) + ", oemModelGuid: " + props->oemModelGuid, lsWarning);
+        }
+      }
+
       try {
         ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), props->modelUID, props->modelFeatures);
       } catch (std::runtime_error& err) {
@@ -2942,6 +2995,27 @@ namespace dss {
 
         json.String("serviceName");
         json.String(state->getProviderService().c_str());
+      } else if (state->getType() == StateType_Circuit) {
+        boost::shared_ptr<DSMeter> meter = state->getProviderDsm();
+        dsid_t dsid;
+        if (dsuid_to_dsid(meter->getDSID(), &dsid)) {
+          json.String("dsid");
+          json.String(dsid2str(dsid).c_str());
+        } else {
+          json.String("dsid");
+          json.String("");
+        }
+        json.String("dSUID");
+        json.String(dsuid2str(meter->getDSID()).c_str());
+
+        json.String("isApartment");
+        json.Bool(false);
+
+        json.String("isGroup");
+        json.Bool(false);
+
+        json.String("isDevice");
+        json.Bool(true);
       }
     }
 
