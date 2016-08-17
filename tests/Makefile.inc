@@ -1,5 +1,8 @@
 TESTS += dsstests.sh
-EXTRA_DIST += dsstests.sh
+EXTRA_DIST += \
+			$(top_srcdir)/build/dsstests.sh \
+			$(top_srcdir)/tests/data/speed_triggers.xml \
+			$(top_srcdir)/tests/data/rate_triggers.xml
 
 check_PROGRAMS += dsstests
 
@@ -12,7 +15,8 @@ dsstests_CXXFLAGS = \
 			$(BOOST_CPPFLAGS) \
 			$(LIBDSM_API_CFLAGS) \
 			$(GCOV_CFLAGS) \
-			-DTEST_TRIGGERS_PATH="\"$(abs_top_srcdir)/\""
+			-DABS_SRCDIR=\"@abs_top_srcdir@\" \
+			-DSRCDIR=\"@top_srcdir@\"
 
 dsstests_LDADD = \
 			libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
