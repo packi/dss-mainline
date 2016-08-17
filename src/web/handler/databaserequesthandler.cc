@@ -25,6 +25,7 @@
 #include <boost/make_shared.hpp>
 
 #include "databaserequesthandler.h"
+#include "src/foreach.h"
 #include "src/stringconverter.h"
 #include "src/sqlite3_wrapper.h"
 
@@ -54,19 +55,16 @@ namespace dss {
       boost::shared_ptr<SQLite3> sqlite =
           boost::make_shared<SQLite3>(database, true);
 
-      boost::shared_ptr<SQLite3::query_result> q = sqlite->query(sql);
+      SQLite3::query_result q = sqlite->query(sql);
 
       JSONWriter json;
       json.startArray("data");
 
-      for (size_t i = 0; i < q->size(); i++) {
-        boost::shared_ptr<SQLite3::row_result> rr = q->at(i);
-        // row
+      foreach (const SQLite3::row_result &row,  q) {
         json.startObject();
-          for (size_t j = 0; j < rr->size(); j++) {
-            boost::shared_ptr<SQLite3::cell> cell = rr->at(j);
-            json.add(cell->name, cell->data);
-          }
+        foreach(const SQLite3::cell &cell, row) {
+          json.add(cell.name, cell.data);
+        }
         json.endObject();
       }
 

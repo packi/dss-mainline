@@ -64,15 +64,14 @@ SQLite3::SQLite3(std::string db_file, bool readonly)
   }
 }
 
-boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
+SQLite3::query_result SQLite3::query(std::string q)
 {
   sqlite3_stmt *statement;
 
   int ret;
 
   boost::mutex::scoped_lock lock(m_mutex);
-  boost::shared_ptr<SQLite3::query_result> results(
-                        new SQLite3::query_result());
+  SQLite3::query_result results;
 
   ret = sqlite3_prepare_v2(m_db, q.c_str(), -1, &statement, 0);
   if (ret != SQLITE_OK) {
@@ -84,24 +83,22 @@ boost::shared_ptr<SQLite3::query_result> SQLite3::query(std::string q)
   do {
     ret = sqlite3_step(statement);
     if (ret == SQLITE_ROW) {
-      boost::shared_ptr<SQLite3::row_result> row(
-                          new SQLite3::row_result());
+      results.push_back(SQLite3::row_result());
+      SQLite3::row_result &row(results.back());
+
       for (int i = 0; i < columns; i++) {
         int type = sqlite3_column_type(statement, i);
         const unsigned char *text = sqlite3_column_text(statement, i);
         std::string name = sqlite3_column_name(statement, i);
         std::string data = text ? (const char *)text : "";
 
-        boost::shared_ptr<SQLite3::cell> cell(
-          new SQLite3::cell());
+        row.push_back(SQLite3::cell());
+        SQLite3::cell &cell(row.back());
 
-        cell->name = name;
-        cell->data = data;
-        cell->type = type;
-
-        row->push_back(cell);
+        cell.name = name;
+        cell.data = data;
+        cell.type = type;
       }
-      results->push_back(row);
     }
   } while (ret == SQLITE_ROW);
 

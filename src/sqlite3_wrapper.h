@@ -51,15 +51,15 @@ public:
   } cell;
 
   /// \brief represents a row in the database table
-  typedef std::vector<boost::shared_ptr<cell> > row_result;
+  typedef std::vector<cell> row_result;
 
   /// \brief represents a result of the query
-  typedef std::vector<boost::shared_ptr<row_result> > query_result;
+  typedef std::vector<row_result> query_result;
 
   /// \brief Send a query to the database
   /// \param q valid SQL query like:
   ///     "SELECT \"value\" FROM \"dsa_internal\" where \"key\" = \"version\";
-  boost::shared_ptr<query_result> query(std::string q);
+  query_result query(std::string q);
 
   /// \brief Execute SQL on the active database, no response expected.
   ///
