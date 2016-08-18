@@ -12,7 +12,7 @@ enum Type {
     VDC_RESPONSE_GET_PROPERTY = 5;
 
     VDSM_REQUEST_SET_PROPERTY = 6;
-    VDC_RESPONSE_SET_PROPERTY = 7;
+    VDSM_GENERIC_REQUEST = 26;  // new in API v2c
 
     VDSM_SEND_PING = 8;
     VDC_SEND_PONG = 9;
@@ -23,7 +23,7 @@ enum Type {
     VDSM_SEND_BYE = 14;
     VDC_SEND_ANNOUNCE_VDC = 23; // new in API v2
 
-    
+
     VDSM_NOTIFICATION_CALL_SCENE = 15;
     VDSM_NOTIFICATION_SAVE_SCENE = 16;
     VDSM_NOTIFICATION_UNDO_SCENE = 17;
@@ -32,7 +32,7 @@ enum Type {
     VDSM_NOTIFICATION_IDENTIFY = 20;
     VDSM_NOTIFICATION_SET_CONTROL_VALUE = 21;
     VDSM_NOTIFICATION_DIM_CHANNEL = 24; // new in API v2
-    VDSM_NOTIFICATION_SET_OUTPUT_CHANNEL_VALUE = 25;
+    VDSM_NOTIFICATION_SET_OUTPUT_CHANNEL_VALUE = 25;  // new in API v2b
 
     VDC_SEND_IDENTIFY = 22;
 }
@@ -54,6 +54,7 @@ message Message {
 
     // expects generic response
     optional vdsm_RequestSetProperty vdsm_request_set_property = 104;
+    optional vdsm_GenericRequest vdsm_generic_request = 123; // new in API v2c
 
     // requests that only expect a response in case of error
     optional vdsm_SendPing vdsm_send_ping = 105;
@@ -74,7 +75,7 @@ message Message {
     optional vdsm_NotificationIdentify vdsm_send_identify = 117;
     optional vdsm_NotificationSetControlValue vdsm_send_set_control_value = 118;
     optional vdsm_NotificationDimChannel vdsm_send_dim_channel = 121; // new in API v2
-    optional vdsm_NotificationSetOutputChannelValue vdsm_send_output_channel_value = 122;
+    optional vdsm_NotificationSetOutputChannelValue vdsm_send_output_channel_value = 122; // new in API v2b
     optional vdc_SendIdentify vdc_send_identify = 119;
 }
 
