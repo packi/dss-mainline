@@ -2009,6 +2009,18 @@ namespace dss {
 
       json.add("offset", value);
       return json.successJSON();
+    } else if (_request.getMethod() == "getInfoStatic") {
+      return JSONWriter::failure("TODO");
+    } else if (_request.getMethod() == "getInfoCustom") {
+      return JSONWriter::failure("TODO");
+    } else if (_request.getMethod() == "getInfoOperational") {
+      return JSONWriter::failure("TODO");
+    } else if (_request.getMethod() == "setProperty") {
+      return JSONWriter::failure("TODO");
+    } else if (_request.getMethod() == "setCustomAction") {
+      return JSONWriter::failure("TODO");
+    } else if (_request.getMethod() == "callAction") {
+      return JSONWriter::failure("TODO");
     } else {
       throw std::runtime_error("Unhandled function");
     }
