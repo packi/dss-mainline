@@ -158,16 +158,6 @@ namespace dss {
     throw ItemNotFoundException(dsuid2str(_dsid));
   } // getDeviceByShortAddress const
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) {
-    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if (dev->getDSID() == _dsid) {
-        return dev;
-      }
-    }
-    throw ItemNotFoundException(dsuid2str(_dsid));
-  } // getDeviceByShortAddress
-
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
