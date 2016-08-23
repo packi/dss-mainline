@@ -36,6 +36,16 @@
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
 
+namespace google {
+  namespace protobuf {
+    template <typename T>
+    class RepeatedPtrField;
+  }
+}
+namespace vdcapi {
+  class PropertyElement;
+}
+
 namespace dss {
 
   class Device;
@@ -263,6 +273,11 @@ namespace dss {
 
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;
+
+    /** Invokes generic request on vdc device and waits for reply. */
+    virtual void genericRequest(const Device& _device, const std::string& methodName,
+                                const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params) = 0;
+
     virtual ~DeviceBusInterface() {}; // please the compiler (virtual dtor)
   }; // DeviceBusInterface
 

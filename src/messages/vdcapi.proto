@@ -65,6 +65,14 @@ message vdsm_RequestSetProperty {
     repeated PropertyElement properties = 2;
 }
 
+// expects generic response, new in API v2c
+message vdsm_GenericRequest {
+    optional string dSUID = 1;
+    optional string method_name = 2;
+    repeated PropertyElement params = 3;
+}
+
+
 message vdsm_SendPing {
     optional string dSUID = 1;
 }
@@ -72,6 +80,12 @@ message vdsm_SendPing {
 message vdc_SendPong {
     optional string dSUID = 1;
 }
+
+message vdc_SendPushProperty {
+    optional string dSUID = 1;
+    repeated PropertyElement properties = 2;
+}
+
 
 message vdsm_NotificationCallScene {
     repeated string dSUID = 1;
@@ -132,15 +146,9 @@ message vdsm_NotificationDimChannel {
     optional int32 zone_id = 6;
 }
 
-message vdc_SendPushProperty {
-    optional string dSUID = 1;
-    repeated PropertyElement properties = 2;
-}
-
 message vdsm_NotificationSetOutputChannelValue {
     repeated string dSUID = 1;
     optional bool apply_now = 2 [ default = true ];
     optional int32 channel = 3;
     optional double value = 4;
 }
-

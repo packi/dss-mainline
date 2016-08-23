@@ -765,6 +765,9 @@ namespace dss {
     dsuid_t getMainDeviceDSUID() const;
 
     void handleBinaryInputEvent(const int index, const int state);
+
+    /// Calls (invokes) device specific action.
+    void callAction(const std::string& actionId);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

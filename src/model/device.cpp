@@ -50,6 +50,7 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/event.h"
+#include "src/messages/vdcapi.pb.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -2947,6 +2948,21 @@ namespace dss {
     }
 
     return getDSID();
+  }
+
+  void Device::callAction(const std::string& actionId) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> params;
+    vdcapi::PropertyElement* param0 = params.Add();
+    param0->set_name("id");
+    param0->mutable_value()->set_v_string(actionId);
+    deviceBusInterface->genericRequest(*this, "callAction", params);
   }
 
 } // namespace dss
