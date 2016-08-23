@@ -274,7 +274,7 @@ namespace dss {
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;
 
-    /** Tells the dSM to lock the device if \a _lock is true. */
+    /** Invokes generic request on vdc device and waits for reply. */
     virtual void genericRequest(const Device& _device, const std::string& methodName,
                                 const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params) = 0;
 
