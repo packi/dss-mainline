@@ -76,7 +76,7 @@ namespace dss {
 
       long request(const HttpRequest &req, std::string *result);
 
-      long downloadFile(std::string url, std::string filename);
+      long downloadFile(const std::string &_url, const std::string &_filename);
 
       /* TODO evtl. URI wrapper easy appending/parsing of query options */
 

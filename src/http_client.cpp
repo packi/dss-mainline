@@ -363,7 +363,7 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
   return http_code;
 }
 
-long HttpClient::downloadFile(std::string url, std::string filename) {
+long HttpClient::downloadFile(const std::string &_url, const std::string &_filename) {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   long http_code = -1;
@@ -372,12 +372,12 @@ long HttpClient::downloadFile(std::string url, std::string filename) {
   if (!m_curl_handle) {
     m_curl_handle = curl_easy_init();
   }
-  curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(m_curl_handle, CURLOPT_URL, _url.c_str());
   curl_easy_setopt(m_curl_handle, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
-  data = fopen(filename.c_str(), "w");
+  data = fopen(_filename.c_str(), "w");
   if (data == NULL) {
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
@@ -388,10 +388,10 @@ long HttpClient::downloadFile(std::string url, std::string filename) {
 
   curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, data);
 
-  log("download : " + url, lsDebug);
+  log("download : " + _url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    log(std::string("Request failed: ") + "GET " + url +
+    log(std::string("Request failed: ") + "GET " + _url +
         ", Reason: " + error_buffer, lsError);
     fclose(data);
     if (!m_reuse_handle) {
