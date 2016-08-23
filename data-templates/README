@@ -1,6 +1,0 @@
-This directory contains configurations for particular setups. They
-should only contain files to be replaced in the base 'data' directory.
-
-To install, users should copy 'data' first, and then overwrite all
-files from the special data configuration directory to the 'data'
-directory.
