@@ -353,6 +353,7 @@ long HttpClient::internalRequest(const std::string& _url, RequestType _type,
     curl_slist_free_all(cheaders);
   }
 
+  // TODO file:// protocol will return '0' upon success
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
   log("return code: " + intToString(http_code), lsDebug);
 
