@@ -2020,7 +2020,12 @@ namespace dss {
     } else if (_request.getMethod() == "setCustomAction") {
       return JSONWriter::failure("TODO");
     } else if (_request.getMethod() == "callAction") {
-      return JSONWriter::failure("TODO");
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return JSONWriter::failure("missing parameter: id");
+      }
+      pDevice->callAction(id);
+      return JSONWriter::success();
     } else {
       throw std::runtime_error("Unhandled function");
     }
