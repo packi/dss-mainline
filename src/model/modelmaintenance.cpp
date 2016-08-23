@@ -491,8 +491,8 @@ namespace dss {
     m_EventTimeoutMS(_eventTimeoutMS),
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
-    m_taskProcessor(boost::make_shared<TaskProcessor>()),
-    m_taskProcessorMaySleep(boost::make_shared<TaskProcessor>()),
+    m_taskProcessor(),
+    m_taskProcessorMaySleep(),
     m_pMeterMaintenance(boost::make_shared<MeterMaintenance>(_pDSS, "MeterMaintenance"))
   { }
 
@@ -2179,7 +2179,7 @@ namespace dss {
         if ((_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
             (_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
           // query Webservice
-          getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice(), devRef.getDevice()->getOemProductInfoState()));
+          getTaskProcessor().addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice(), devRef.getDevice()->getOemProductInfoState()));
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
         } else {
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_NONE);
@@ -2491,7 +2491,7 @@ namespace dss {
           if (dsuid_equal(&id, &_meterID)) {
             log("onDsmStateChange: scheduling device readout task on dSM " +
                 dsuid2str(_meterID));
-            m_taskProcessorMaySleep->addEvent((*it).second);
+            m_taskProcessorMaySleep.addEvent((*it).second);
             it = m_deviceReadoutTasks.erase(it);
           } else {
             it++;
@@ -2748,8 +2748,8 @@ namespace dss {
           m_Device->setOemInfo(eanNumber, 0, 0, iNetState, true);
           if ((iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
               (iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
-            boost::shared_ptr<TaskProcessor> tp = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-            tp->addEvent(boost::make_shared<OEMWebQuery>(m_Device, m_Device->getOemProductInfoState()));
+            TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+            tp.addEvent(boost::make_shared<OEMWebQuery>(m_Device, m_Device->getOemProductInfoState()));
             m_Device->setOemProductInfoState(DEVICE_OEM_LOADING);
           } else {
             m_Device->setOemProductInfoState(DEVICE_OEM_NONE);
@@ -3056,8 +3056,7 @@ namespace dss {
            ((device->getOemProductInfoState() == DEVICE_OEM_VALID) ||
             (device->getOemProductInfoState() == DEVICE_OEM_UNKNOWN))) {
         // query Webservice
-        getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(device,
-                                            device->getOemProductInfoState()));
+        getTaskProcessor().addEvent(boost::make_shared<OEMWebQuery>(device, device->getOemProductInfoState()));
         device->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
     }
@@ -3109,7 +3108,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_dSMeterID);
       if (pMeter->getState() == DSM_STATE_IDLE) {
-        m_taskProcessorMaySleep->addEvent(task);
+        m_taskProcessorMaySleep.addEvent(task);
       } else {
         boost::mutex::scoped_lock lock(m_readoutTasksMutex);
         m_deviceReadoutTasks.push_back(std::make_pair(_dSMeterID, task));
@@ -3134,7 +3133,6 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<WebSocketEvent> wse = boost::make_shared<WebSocketEvent>(_event);
-    getTaskProcessor()->addEvent(wse);
+    getTaskProcessor().addEvent(boost::make_shared<WebSocketEvent>(_event));
   }
 } // namespace dss
