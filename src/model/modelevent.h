@@ -103,7 +103,7 @@ namespace dss {
     /** Returns the parameter count. */
     int getParameterCount() const { return m_Parameter.size(); }
     /** Returns the type of the event. */
-    EventType getEventType() { return m_EventType; }
+    EventType getEventType() const { return m_EventType; }
 
     void setSingleStringParameter(const std::string _param) { m_SingleStringParameter = _param; }
     std::string getSingleStringParameter() const { return m_SingleStringParameter; }
@@ -120,7 +120,7 @@ namespace dss {
       m_DSID(_dsid)
     { }
 
-    const dsuid_t& getDSID() { return m_DSID; }
+    const dsuid_t& getDSID() const { return m_DSID; }
   private:
     dsuid_t m_DSID;
   }; // ModelEventWithDSID
