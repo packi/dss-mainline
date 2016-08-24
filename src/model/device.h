@@ -283,11 +283,13 @@ namespace dss {
     std::string m_VdcModelUID;
     std::string m_VdcVendorGuid;
     std::string m_VdcOemGuid;
+    std::string m_VdcOemModelGuid;
     std::string m_VdcConfigURL;
     std::string m_VdcHardwareGuid;
     std::string m_VdcHardwareInfo;
     std::string m_VdcHardwareVersion;
     std::string m_VdcIconPath;
+    boost::shared_ptr<std::vector<int> > m_VdcModelFeatures;
 
     DeviceValveType_t m_ValveType;
 
@@ -673,6 +675,8 @@ namespace dss {
     const std::string& getVdcVendorGuid() const { return m_VdcVendorGuid; }
     void setVdcOemGuid(const std::string& _value) { m_VdcOemGuid = _value; }
     const std::string& getVdcOemGuid() const { return m_VdcOemGuid; }
+    void setVdcOemModelGuid(const std::string& _value) { m_VdcOemModelGuid = _value; }
+    const std::string& getVdcOemModelGuid() const { return m_VdcOemModelGuid; }
     void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
     void setVdcHardwareGuid(const std::string& _value) { m_VdcHardwareGuid = _value; }
@@ -687,6 +691,8 @@ namespace dss {
       m_VdcIconPath = _value; updateIconPath();
     }
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
+    void setVdcModelFeatures(const boost::shared_ptr<std::vector<int> >& _value) { m_VdcModelFeatures = _value; }
+    const boost::shared_ptr<std::vector<int> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
 
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
