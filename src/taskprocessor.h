@@ -42,6 +42,10 @@ namespace dss {
     TaskProcessor();
     virtual ~TaskProcessor();
     void addEvent(boost::shared_ptr<Task> event);
+
+  private:
+    TaskProcessor(const TaskProcessor& that);
+
   private:
     std::list<boost::shared_ptr<Task> > m_eventList;
     mutable pthread_mutex_t m_eventListMutex;

@@ -1321,9 +1321,8 @@ Sample: {
     }
 
     if (DSS::hasInstance()) {
-      boost::shared_ptr<SensorMonitorTask> task = boost::make_shared<SensorMonitorTask>(&(DSS::getInstance()->getApartment()));
-      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-      pTP->addEvent(task);
+      TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+      tp.addEvent(boost::make_shared<SensorMonitorTask>(&(DSS::getInstance()->getApartment())));
     }
   }
 
@@ -1435,10 +1434,8 @@ Sample: {
   {
     log("handle: " + _event.getName(), lsDebug);
     if (DSS::hasInstance()) {
-      boost::shared_ptr<HeatingMonitorTask> task(
-          new HeatingMonitorTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
-      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-      pTP->addEvent(task);
+      TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+      tp.addEvent(boost::make_shared<HeatingMonitorTask>(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
     }
   }
 
@@ -1465,10 +1462,8 @@ Sample: {
   {
     log("handle: " + _event.getName(), lsDebug);
     if (DSS::hasInstance()) {
-      boost::shared_ptr<HeatingValveProtectionTask> task(
-          new HeatingValveProtectionTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
-      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-      pTP->addEvent(task);
+      TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+      tp.addEvent(boost::make_shared<HeatingValveProtectionTask>(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
     }
   }
 
@@ -1544,9 +1539,8 @@ Sample: {
     }
 
     if (DSS::hasInstance()) {
-      boost::shared_ptr<ModelMaintenance::DatabaseDownload> task = boost::make_shared<ModelMaintenance::DatabaseDownload>(script_id, url);
-      boost::shared_ptr<TaskProcessor> tp = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-      tp->addEvent(task);
+      TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+      tp.addEvent(boost::make_shared<ModelMaintenance::DatabaseDownload>(script_id, url));
     }
   }
 
@@ -1575,10 +1569,8 @@ Sample: {
   {
     log("handle: " + _event.getName(), lsDebug);
     if (DSS::hasInstance()) {
-      boost::shared_ptr<AutoClusterTask> task(
-          new AutoClusterTask(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
-      boost::shared_ptr<TaskProcessor> pTP = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-      pTP->addEvent(task);
+      TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+      tp.addEvent(boost::make_shared<AutoClusterTask>(&(DSS::getInstance()->getApartment()), _event.shared_from_this()));
     }
   }
 
