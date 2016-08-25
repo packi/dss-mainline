@@ -108,6 +108,8 @@ namespace dss {
 
     virtual ~State();
 
+    static const std::string INVALID;
+
     int getState() const;
     void setState(const callOrigin_t _origin, const int _state);
     void setState(const callOrigin_t _origin, const std::string& _state);

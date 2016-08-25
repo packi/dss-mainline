@@ -46,6 +46,8 @@ namespace dss {
 
     //============================================= State
 
+  const std::string State::INVALID("invalid");
+
   State::State(const std::string& _name)
     : m_name(_name),
       m_IsPersistent(false),
@@ -303,7 +305,7 @@ namespace dss {
     case State_Inactive:
       return std::string("inactive");
     default:
-      return std::string("invalid");
+      return INVALID;
     }
   } // toString
 
