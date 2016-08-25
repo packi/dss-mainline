@@ -344,6 +344,7 @@ namespace dss {
       if (it == m_values.end()) {
         Logger::getInstance()->log("State " + m_name + ": invalid value" + _state,
                                    lsWarning);
+        setState(_origin, 0); // 0 is default (usually invalid) value
         return;
       }
       setState(_origin, it - m_values.begin());
