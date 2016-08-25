@@ -34,6 +34,7 @@
 #include "stringconverter.h"
 #include "logger.h"
 #include "model-features.h"
+#include "vdc-element-reader.h"
 
 namespace dss {
 
@@ -416,15 +417,17 @@ namespace dss {
     return;
   }
 
-  std::map<int,int64_t> VdcHelper::getStateInputValue(dsuid_t _vdsm, dsuid_t _device)
+  VdcHelper::State VdcHelper::getState(dsuid_t _vdsm, dsuid_t _device)
   {
     vdcapi::Message message;
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop = message.mutable_vdsm_request_get_property();
     getprop->set_dsuid(dsuid2str(_device));
 
-    vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("binaryInputStates");
+    {
+      vdcapi::PropertyElement *query = getprop->add_query();
+      query->set_name("binaryInputStates");
+    }
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -441,7 +444,7 @@ namespace dss {
       DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
           _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
-      return std::map<int,int64_t>();
+      return VdcHelper::State();
     }
 
     message.Clear();
@@ -459,76 +462,47 @@ namespace dss {
       throw std::runtime_error("received unexpected reply");
     }
 
+    Logger::getInstance()->log("VdcHelper::getState: message " + message.DebugString(), lsDebug);
     vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
+    VdcElement element(message.vdc_response_get_property().properties());
+    VdcElementReader reader = element.getReader();
 
-    std::map<int,int64_t> result;
-    for (int i = 0; i < response.properties_size(); i++) {
-      vdcapi::PropertyElement el = response.properties(i);
-      if (el.name() == "binaryInputStates") {
-        for (int j = 0; j < el.elements_size(); j++) {
-          vdcapi::PropertyElement iState = el.elements(j);
-          int sIndex = strToInt(iState.name());
-          // iterate over the parameter list: value, extendedValue, age, error
-          uint64_t iValue;
-          bool bValue;
-          bool hasValue = false;
-          bool hasExValue = false;
-          int error = 0;
-          for (int v = 0; v < iState.elements_size(); v++) {
-            vdcapi::PropertyElement iStateEl = iState.elements(v);
-            vdcapi::PropertyValue val = iStateEl.value();
-            if (iStateEl.name() == "extendedValue") {
-              hasExValue = true;
-              if (val.has_v_uint64()) {
-                iValue = val.v_uint64();
-              } else if (val.has_v_int64()) {
-                iValue = (uint64_t) val.v_int64();
-              } else {
-                Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
-                    dsuid2str(_device) + ": extendedValue has invalid type", lsWarning);
-                hasExValue = false;
-              }
-            } else if (iStateEl.name() == "value") {
-              hasValue = true;
-              if (val.has_v_bool()) {
-                bValue = val.v_bool();
-              } else if (val.has_v_uint64()) {
-                bValue = val.v_uint64() == 1;
-              } else if (val.has_v_int64()) {
-                bValue = val.v_int64() == 1;
-              } else {
-                Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
-                    dsuid2str(_device) + ": value has invalid type", lsWarning);
-                hasValue = false;
-              }
-            } else if (iStateEl.name() == "error") {
-              if (val.has_v_int64()) error = val.v_int64();
-              if (val.has_v_uint64()) error = val.v_uint64();
-            } else if (iStateEl.name() == "age") {
-              // age cannot be set
-            } else {
-              Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
-                  ": unknown value: " + iStateEl.name() + ", debug: " + val.DebugString(), lsWarning);
-            }
-          }
-          if (error != 0) {
-            Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
-                ": index " + intToString(j) + ": error code: " + intToString(error), lsWarning);
-          } else {
-            if (hasExValue) {
-              result[sIndex] = iValue;
-            } else if (hasValue) {
-              result[sIndex] = bValue ? State_Active : State_Inactive;
-            }
-          }
+    State state;
+    std::map<int,int64_t>& binaryInputStates = state.binaryInputStates;
+    VdcElementReader biStatesReader = reader["binaryInputStates"];
+    for (VdcElementReader::iterator it = biStatesReader.begin(); it != biStatesReader.end(); it++) {
+      VdcElementReader biStateReader = *it;
+      const std::string& biStateName = biStateReader.getName();
+      int biStateIndex = strToInt(biStateName);
+      {
+        VdcElementReader reader = biStateReader["error"];
+        if (reader.isValid()) {
+            Logger::getInstance()->log("VdcHelper::getStateInputValue: device:" + dsuid2str(_device) +
+                " name:" + biStateName + " error:" + reader.getValueAsString(), lsWarning);
+            continue;
+        }
+      }
+      {
+        VdcElementReader reader = biStateReader["value"];
+        if (reader.isValid()) {
+            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? State_Active : State_Inactive;
+            continue;
+        }
+      }
+      {
+        VdcElementReader reader = biStateReader["extendedValue"];
+        if (reader.isValid()) {
+            binaryInputStates[biStateIndex] = reader.getValueAsInt();
+            continue;
         }
       }
     }
-    for (std::map<int,int64_t>::const_iterator it = result.begin(); it != result.end(); ++it ) {
-      Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
+
+    for (std::map<int,int64_t>::const_iterator it = binaryInputStates.begin(); it != binaryInputStates.end(); ++it ) {
+      Logger::getInstance()->log("VdcHelper::getState: device " + dsuid2str(_device) +
           ": " + intToString(it->first) + "=" + intToString(it->second), lsDebug);
     }
-    return result;
+    return state;
   }
 
 }// namespace

@@ -1177,8 +1177,8 @@ namespace dss {
       } else {
         // IP Device
         try {
-          std::map<int,int64_t> sInput;
-          sInput = VdcHelper::getStateInputValue(dsm->getDSID(), dev->getDSID());
+          VdcHelper::State state = VdcHelper::getState(dsm->getDSID(), dev->getDSID());
+          const std::map<int,int64_t>& sInput = state.binaryInputStates;
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state response fields = " + intToString(sInput.size()), lsDebug);
           for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
