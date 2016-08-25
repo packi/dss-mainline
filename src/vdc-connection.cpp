@@ -20,6 +20,7 @@
 
 */
 
+#include "vdc-connection.h"
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
@@ -27,7 +28,6 @@
 #include <iostream>
 
 #include "base.h"
-#include "vdc-connection.h"
 #include "util.h"
 #include "ds485types.h"
 #include "dss.h"
