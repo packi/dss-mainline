@@ -2829,7 +2829,7 @@ namespace dss {
 
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::DatabaseImported);
 
-    pEvent->setProperty("scripd_id", m_scriptId);
+    pEvent->setProperty("script_id", m_scriptId);
     try {
       HttpClient http;
       std::string result;
