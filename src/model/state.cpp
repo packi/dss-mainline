@@ -294,8 +294,11 @@ namespace dss {
 
   std::string State::toString() const {
     if (!m_values.empty()) {
-      assert(m_state >= 0 && m_state < (int) m_values.size());
-      return m_values[m_state];
+      if (m_state >= 0 && m_state < (int) m_values.size()) {
+        return m_values[m_state];
+      } else {
+        return INVALID;
+      }
     }
     switch(m_state) {
     case State_Unknown:
