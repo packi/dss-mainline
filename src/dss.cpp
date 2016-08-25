@@ -48,6 +48,7 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
+#include "handler/db_fetch.h"
 #include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
@@ -498,6 +499,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     plugin = new EventInterpreterDatabaseUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new DbUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
   }
 

@@ -73,9 +73,14 @@ DSSInstanceFixture::DSSInstanceFixture() {
     throw std::runtime_error("DSS::getInstance failed");
   }
 
+  DSS::getInstance()->setDatabaseDirectory(ABS_SRCDIR "/tests/data/");
+
   m_instance = DSS::m_Instance;
   m_incarnation = DSS::s_InstanceGeneration;
   assert(m_incarnation);
+
+  // needed to initialize (EventInterpreter-) subsystem
+  m_instance->m_State = ssInitializingSubsystems;
 }
 
 DSSInstanceFixture::~DSSInstanceFixture() {

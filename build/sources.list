@@ -48,6 +48,8 @@ libdsscore_a_SOURCES =  \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
+	../src/handler/db_fetch.cpp \
+	../src/handler/db_fetch.h \
 	../src/handler/system_handlers.cpp \
 	../src/handler/system_handlers.h \
 	../src/handler/system_states.cpp \
@@ -247,6 +249,7 @@ dsstests_SOURCES = \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
 	../tests/datetoolstests.cpp \
+	../tests/db_fetcher.cpp \
 	../tests/deviceinterfacerequesthandlertest.cpp \
 	../tests/devicerequesthandlertest.cpp \
 	../tests/devicetests.cpp \

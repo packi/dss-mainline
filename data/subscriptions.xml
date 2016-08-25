@@ -34,6 +34,22 @@
   <subscription event-name="running" handler-name="subscription_benchmark_uploader"/>
   <subscription event-name="reexport_timings" handler-name="subscription_benchmark_uploader"/>
 
+  <!-- Update dSS sytem DB daily, (not addon-db's, e.g. LED-wizard, system-actions) -->
+  <subscription event-name="running" handler-name="raise_event">
+    <parameter>
+      <parameter name="iCalRRule_default">FREQ=DAILY</parameter>
+      <parameter name="iCalStartTime_default">20150101T030000</parameter>
+      <parameter name="event_name">dss_db_update</parameter>
+    </parameter>
+  </subscription>
+
+  <subscription event-name="running" handler-name="raise_event">
+    <parameter>
+      <parameter name="event_name">dss_db_update</parameter>
+    </parameter>
+  </subscription>
+  <subscription event-name="dss_db_update" handler-name="dss_db_update"/>
+
   <!-- Examples -->
   <!--
   <subscription event-name="callScene" handler-name="raise_event">
