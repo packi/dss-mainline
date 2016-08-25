@@ -147,18 +147,18 @@ long HttpClient::get(const std::string& url,
   return internalRequest(url, GET, headers, std::string(), result, insecure);
 }
 
-long HttpClient::post(const std::string& url, std::string postdata,
-                      std::string *result)
+long HttpClient::post(const std::string& _url, const std::string &_postdata,
+                      std::string *_result)
 {
-  return internalRequest(url, POST, HashMapStringString(), postdata, result,
+  return internalRequest(_url, POST, HashMapStringString(), _postdata, _result,
                          false);
 }
 
-long HttpClient::post(const std::string& url,
-                      const HashMapStringString& headers,
-                      std::string postdata, std::string *result)
+long HttpClient::post(const std::string& _url,
+                      const HashMapStringString& _headers,
+                      const std::string &_postdata, std::string *_result)
 {
-  return internalRequest(url, POST, headers, postdata, result, false);
+  return internalRequest(_url, POST, _headers, _postdata, _result, false);
 }
 
 long HttpClient::request(const HttpRequest &req, std::string *result) {
@@ -263,10 +263,10 @@ static int my_trace(CURL *handle, curl_infotype type,
 struct data config;
 #endif
 
-long HttpClient::internalRequest(const std::string& url, RequestType type,
-                                 const HashMapStringString& headers,
-                                 std::string postdata,
-                                 std::string *result, bool insecure)
+long HttpClient::internalRequest(const std::string& _url, RequestType _type,
+                                 const HashMapStringString& _headers,
+                                 const std::string &_postdata,
+                                 std::string *_result, bool _insecure)
 {
   CURLcode res;
   URLResult outputCollector;
@@ -289,9 +289,9 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
   curl_easy_setopt(m_curl_handle, CURLOPT_VERBOSE, 1);
 #endif
 
-  curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(m_curl_handle, CURLOPT_URL, _url.c_str());
 
-  if (insecure) {
+  if (_insecure) {
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYHOST, 0L);
   } else {
@@ -299,22 +299,22 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYHOST, 1L);
   }
   HashMapStringString::const_iterator it;
-  if (!headers.empty()) {
-    for (it = headers.begin(); it != headers.end(); it++) {
+  if (!_headers.empty()) {
+    for (it = _headers.begin(); it != _headers.end(); it++) {
       cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
     }
     curl_easy_setopt(m_curl_handle, CURLOPT_HTTPHEADER, cheaders);
   }
 
-  switch (type) {
+  switch (_type) {
   case GET:
     curl_easy_setopt(m_curl_handle, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(m_curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
     break;
   case POST:
     curl_easy_setopt(m_curl_handle, CURLOPT_POST, 1L);
-    if (!postdata.empty()) {
-      curl_easy_setopt(m_curl_handle, CURLOPT_COPYPOSTFIELDS, postdata.c_str());
+    if (!_postdata.empty()) {
+      curl_easy_setopt(m_curl_handle, CURLOPT_COPYPOSTFIELDS, _postdata.c_str());
     } else {
       // empty post is valid request, but not without this call
       curl_easy_setopt(m_curl_handle, CURLOPT_HTTPPOST, NULL);
@@ -322,7 +322,7 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
     break;
   }
 
-  if (result != NULL) {
+  if (_result != NULL) {
     /* send all data to this function  */
     curl_easy_setopt(m_curl_handle, CURLOPT_WRITEFUNCTION, URLResult::appendCallback);
     curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, &outputCollector);
@@ -333,10 +333,10 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
   curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
-  log("perform: " + std::string((type == POST) ? "POST " : " ") + url, lsDebug);
+  log("perform: " + std::string((_type == POST) ? "POST " : " ") + _url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    log(std::string("Request failed: ") + std::string((type == POST) ? "POST " : "GET ") + url +
+    log(std::string("Request failed: ") + std::string((_type == POST) ? "POST " : "GET ") + _url +
         ", Reason: " + error_buffer, lsError);
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
@@ -345,14 +345,15 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
     return http_code;
   }
 
-  if ((result != NULL) && (outputCollector.content() != NULL)) {
-      *result = outputCollector.content();
+  if ((_result != NULL) && (outputCollector.content() != NULL)) {
+      *_result = outputCollector.content();
   }
 
   if (cheaders) {
     curl_slist_free_all(cheaders);
   }
 
+  // TODO file:// protocol will return '0' upon success
   curl_easy_getinfo(m_curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
   log("return code: " + intToString(http_code), lsDebug);
 
@@ -363,7 +364,7 @@ long HttpClient::internalRequest(const std::string& url, RequestType type,
   return http_code;
 }
 
-long HttpClient::downloadFile(std::string url, std::string filename) {
+long HttpClient::downloadFile(const std::string &_url, const std::string &_filename) {
   CURLcode res;
   char error_buffer[CURL_ERROR_SIZE] = {'\0'};
   long http_code = -1;
@@ -372,12 +373,12 @@ long HttpClient::downloadFile(std::string url, std::string filename) {
   if (!m_curl_handle) {
     m_curl_handle = curl_easy_init();
   }
-  curl_easy_setopt(m_curl_handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(m_curl_handle, CURLOPT_URL, _url.c_str());
   curl_easy_setopt(m_curl_handle, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
-  data = fopen(filename.c_str(), "w");
+  data = fopen(_filename.c_str(), "w");
   if (data == NULL) {
     if (!m_reuse_handle) {
       curl_easy_cleanup(m_curl_handle);
@@ -388,10 +389,10 @@ long HttpClient::downloadFile(std::string url, std::string filename) {
 
   curl_easy_setopt(m_curl_handle, CURLOPT_WRITEDATA, data);
 
-  log("download : " + url, lsDebug);
+  log("download : " + _url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
   if (res != CURLE_OK) {
-    log(std::string("Request failed: ") + "GET " + url +
+    log(std::string("Request failed: ") + "GET " + _url +
         ", Reason: " + error_buffer, lsError);
     fclose(data);
     if (!m_reuse_handle) {
