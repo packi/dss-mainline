@@ -78,7 +78,7 @@ namespace dss {
     static boost::shared_ptr<VdcSpec_t> getCapabilities(dsuid_t _vdsm);
     static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
 
-    static std::map<int,int64_t> getStateInputValue(dsuid_t _vdsm, dsuid_t _device, int index);
+    static std::map<int,int64_t> getStateInputValue(dsuid_t _vdsm, dsuid_t _device);
   };
 
 } // namespace

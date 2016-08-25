@@ -416,7 +416,7 @@ namespace dss {
     return;
   }
 
-  std::map<int,int64_t> VdcHelper::getStateInputValue(dsuid_t _vdsm, dsuid_t _device, int index)
+  std::map<int,int64_t> VdcHelper::getStateInputValue(dsuid_t _vdsm, dsuid_t _device)
   {
     vdcapi::Message message;
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
@@ -425,12 +425,6 @@ namespace dss {
 
     vdcapi::PropertyElement *query = getprop->add_query();
     query->set_name("binaryInputStates");
-
-    // "index < 0" means get all, an index >= 0 requests only the single InputId
-    if (index >= 0) {
-      std::string sIndex = intToString(index);
-      query->add_elements()->set_name(sIndex.c_str());
-    }
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -474,59 +468,57 @@ namespace dss {
         for (int j = 0; j < el.elements_size(); j++) {
           vdcapi::PropertyElement iState = el.elements(j);
           int sIndex = strToInt(iState.name());
-          if (index < 0 || index == sIndex) {
-            // iterate over the parameter list: value, extendedValue, age, error
-            uint64_t iValue;
-            bool bValue;
-            bool hasValue = false;
-            bool hasExValue = false;
-            int error = 0;
-            for (int v = 0; v < iState.elements_size(); v++) {
-              vdcapi::PropertyElement iStateEl = iState.elements(v);
-              vdcapi::PropertyValue val = iStateEl.value();
-              if (iStateEl.name() == "extendedValue") {
-                hasExValue = true;
-                if (val.has_v_uint64()) {
-                  iValue = val.v_uint64();
-                } else if (val.has_v_int64()) {
-                  iValue = (uint64_t) val.v_int64();
-                } else {
-                  Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
-                      dsuid2str(_device) + ": extendedValue has invalid type", lsWarning);
-                  hasExValue = false;
-                }
-              } else if (iStateEl.name() == "value") {
-                hasValue = true;
-                if (val.has_v_bool()) {
-                  bValue = val.v_bool();
-                } else if (val.has_v_uint64()) {
-                  bValue = val.v_uint64() == 1;
-                } else if (val.has_v_int64()) {
-                  bValue = val.v_int64() == 1;
-                } else {
-                  Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
-                      dsuid2str(_device) + ": value has invalid type", lsWarning);
-                  hasValue = false;
-                }
-              } else if (iStateEl.name() == "error") {
-                if (val.has_v_int64()) error = val.v_int64();
-                if (val.has_v_uint64()) error = val.v_uint64();
-              } else if (iStateEl.name() == "age") {
-                // age cannot be set
+          // iterate over the parameter list: value, extendedValue, age, error
+          uint64_t iValue;
+          bool bValue;
+          bool hasValue = false;
+          bool hasExValue = false;
+          int error = 0;
+          for (int v = 0; v < iState.elements_size(); v++) {
+            vdcapi::PropertyElement iStateEl = iState.elements(v);
+            vdcapi::PropertyValue val = iStateEl.value();
+            if (iStateEl.name() == "extendedValue") {
+              hasExValue = true;
+              if (val.has_v_uint64()) {
+                iValue = val.v_uint64();
+              } else if (val.has_v_int64()) {
+                iValue = (uint64_t) val.v_int64();
               } else {
-                Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
-                    ": unknown value: " + iStateEl.name() + ", debug: " + val.DebugString(), lsWarning);
+                Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
+                    dsuid2str(_device) + ": extendedValue has invalid type", lsWarning);
+                hasExValue = false;
               }
-            }
-            if (error != 0) {
-              Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
-                  ": index " + intToString(j) + ": error code: " + intToString(error), lsWarning);
+            } else if (iStateEl.name() == "value") {
+              hasValue = true;
+              if (val.has_v_bool()) {
+                bValue = val.v_bool();
+              } else if (val.has_v_uint64()) {
+                bValue = val.v_uint64() == 1;
+              } else if (val.has_v_int64()) {
+                bValue = val.v_int64() == 1;
+              } else {
+                Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
+                    dsuid2str(_device) + ": value has invalid type", lsWarning);
+                hasValue = false;
+              }
+            } else if (iStateEl.name() == "error") {
+              if (val.has_v_int64()) error = val.v_int64();
+              if (val.has_v_uint64()) error = val.v_uint64();
+            } else if (iStateEl.name() == "age") {
+              // age cannot be set
             } else {
-              if (hasExValue) {
-                result[sIndex] = iValue;
-              } else if (hasValue) {
-                result[sIndex] = bValue ? State_Active : State_Inactive;
-              }
+              Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
+                  ": unknown value: " + iStateEl.name() + ", debug: " + val.DebugString(), lsWarning);
+            }
+          }
+          if (error != 0) {
+            Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
+                ": index " + intToString(j) + ": error code: " + intToString(error), lsWarning);
+          } else {
+            if (hasExValue) {
+              result[sIndex] = iValue;
+            } else if (hasValue) {
+              result[sIndex] = bValue ? State_Active : State_Inactive;
             }
           }
         }
