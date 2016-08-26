@@ -74,7 +74,7 @@ namespace dss {
 
   struct VdcHelper
   {
-    static boost::shared_ptr<VdsdSpec_t> getSpec(dsuid_t _vdsm, dsuid_t _device);
+    static VdsdSpec_t getSpec(dsuid_t _vdsm, dsuid_t _device);
     static boost::shared_ptr<VdcSpec_t> getCapabilities(dsuid_t _vdsm);
     static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
 

@@ -359,17 +359,17 @@ namespace dss {
     if (_dsMeter && _dsMeter->getBusMemberType() == BusMember_vDC) {
       dev->setVdcDevice(true);
       try {
-        boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
-        dev->setVdcHardwareModelGuid(props->hardwareModelGuid);
-        dev->setVdcModelUID(props->modelUID);
-        dev->setVdcVendorGuid(props->vendorGuid);
-        dev->setVdcOemGuid(props->oemGuid);
-        dev->setVdcOemModelGuid(props->oemModelGuid);
-        dev->setVdcConfigURL(props->configURL);
-        dev->setVdcHardwareGuid(props->hardwareGuid);
-        dev->setVdcHardwareInfo(props->hardwareInfo);
-        dev->setVdcHardwareVersion(props->hardwareVersion);
-        dev->setVdcModelFeatures(props->modelFeatures);
+        VdsdSpec_t props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
+        dev->setVdcHardwareModelGuid(props.hardwareModelGuid);
+        dev->setVdcModelUID(props.modelUID);
+        dev->setVdcVendorGuid(props.vendorGuid);
+        dev->setVdcOemGuid(props.oemGuid);
+        dev->setVdcOemModelGuid(props.oemModelGuid);
+        dev->setVdcConfigURL(props.configURL);
+        dev->setVdcHardwareGuid(props.hardwareGuid);
+        dev->setVdcHardwareInfo(props.hardwareInfo);
+        dev->setVdcHardwareVersion(props.hardwareVersion);
+        dev->setVdcModelFeatures(props.modelFeatures);
       } catch (const std::runtime_error &e) {
         log("VdcDataQuery: could not query properties from " +
           dsuid2str(dev->getDSID()) + ", Message: " + e.what(), lsWarning);

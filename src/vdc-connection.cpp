@@ -38,10 +38,8 @@
 
 namespace dss {
 
-  boost::shared_ptr<VdsdSpec_t> VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
+  VdsdSpec_t VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
     vdcapi::Message message;
-    boost::shared_ptr<VdsdSpec_t> ret = boost::make_shared<VdsdSpec_t>();
-
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop =
                                     message.mutable_vdsm_request_get_property();
@@ -85,7 +83,7 @@ namespace dss {
       DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
           _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
-      return ret;
+      throw std::runtime_error("!DSS::hasInstance()");
     }
 
     message.Clear();
@@ -106,20 +104,21 @@ namespace dss {
       throw std::runtime_error("received unexpected reply");
     }
 
+    VdsdSpec_t ret;
     VdcElementReader rootReader(message.vdc_response_get_property().properties());
-    ret->hardwareModelGuid = rootReader["hardwareModelGuid"].getValueAsString();
-    ret->vendorGuid = rootReader["vendorGuid"].getValueAsString();
-    ret->oemGuid = rootReader["oemGuid"].getValueAsString();
-    ret->oemModelGuid = rootReader["oemModelGuid"].getValueAsString();
-    ret->configURL = rootReader["configURL"].getValueAsString();
-    ret->hardwareGuid = rootReader["hardwareGuid"].getValueAsString();
-    ret->hardwareInfo = rootReader["model"].getValueAsString();
-    ret->modelUID = rootReader["modelUID"].getValueAsString();
-    ret->hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
-    ret->name= rootReader["name"].getValueAsString();
+    ret.hardwareModelGuid = rootReader["hardwareModelGuid"].getValueAsString();
+    ret.vendorGuid = rootReader["vendorGuid"].getValueAsString();
+    ret.oemGuid = rootReader["oemGuid"].getValueAsString();
+    ret.oemModelGuid = rootReader["oemModelGuid"].getValueAsString();
+    ret.configURL = rootReader["configURL"].getValueAsString();
+    ret.hardwareGuid = rootReader["hardwareGuid"].getValueAsString();
+    ret.hardwareInfo = rootReader["model"].getValueAsString();
+    ret.modelUID = rootReader["modelUID"].getValueAsString();
+    ret.hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
+    ret.name= rootReader["name"].getValueAsString();
 
-    ret->modelFeatures = boost::make_shared<std::vector<int> >();
-    std::vector<int>& features = *ret->modelFeatures;
+    ret.modelFeatures = boost::make_shared<std::vector<int> >();
+    std::vector<int>& features = *ret.modelFeatures;
     VdcElementReader featuresReader = rootReader["modelFeatures"];
     for (VdcElementReader::iterator it = featuresReader.begin(); it != featuresReader.end(); it++) {
       VdcElementReader featureReader = *it;
