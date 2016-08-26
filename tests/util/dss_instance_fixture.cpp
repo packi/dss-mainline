@@ -38,29 +38,6 @@ namespace dss {
 const std::string TEST_STATIC_DATADIR(ABS_SRCDIR "/tests/data");
 const std::string TEST_BUILD_DATADIR(ABS_BUILDDIR "/tests/data");
 
-static char config[] =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-    "<properties version=\"1\">\n"
-    "  <property name=\"config\">\n"
-    "    <!-- ds485d -->\n"
-    "    <property name=\"subsystems/DSBusInterface/connectionURI\" type=\"string\">\n"
-    "      <value>tcp://localhost:8442</value>\n"
-    "    </property>\n"
-    "    <!-- metering configuration -->\n"
-    "    <property name=\"subsystems/Metering/enabled\" type=\"boolean\">\n"
-    "      <value>true</value>\n"
-    "    </property>\n"
-    "  </property>\n"
-    "</properties>\n";
-
-
-static int createConfig(const std::string &fileName) {
-  std::ofstream ofs(fileName.c_str());
-  ofs << config;
-  ofs.close();
-  return 0;
-}
-
 __DEFINE_LOG_CHANNEL__(DSSInstanceFixture, lsInfo);
 
 DSSInstanceFixture::DSSInstanceFixture() {
@@ -76,11 +53,8 @@ DSSInstanceFixture::DSSInstanceFixture() {
   properties.push_back("/config/savedpropsdirectory=" + TEST_BUILD_DATADIR + "/tmp");
   properties.push_back("/config/databasedirectory=" + TEST_BUILD_DATADIR + "/tmp");
 
-  m_configFileName = getTempDir() + "config.xml";
-  createConfig(m_configFileName);
-
   DSS::shutdown();
-  if (DSS::getInstance()->initialize(properties, m_configFileName) == false) {
+  if (!DSS::getInstance()->initialize(properties, TEST_STATIC_DATADIR + "/config.xml")) {
     log("DSS::initialize failed", lsWarning);
     DSS::shutdown();
     throw std::runtime_error("DSS::getInstance failed");
