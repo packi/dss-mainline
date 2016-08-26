@@ -237,7 +237,8 @@ namespace dss {
     }
   }
 
-  vdcapi::Message PropertyContainerToProtobuf::propertyContainerToProtobuf(const bool _bSetProperty, std::vector<PropertyContainer> _parts, const dsuid_t& _deviceDsuid) {
+  vdcapi::Message PropertyContainerToProtobuf::propertyContainerToProtobuf(const bool _bSetProperty,
+      const std::vector<PropertyContainer>& _parts, const dsuid_t& _deviceDsuid) {
     vdcapi::Message message;
     if (_bSetProperty) {
       message.set_type(vdcapi::VDSM_REQUEST_SET_PROPERTY);

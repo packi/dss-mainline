@@ -66,7 +66,7 @@ namespace dss {
     static ProtoData convertPropertyContainerToProtobuf(std::vector<PropertyContainer> _parts);
 
     static vdcapi::Message propertyContainerToProtobuf(const bool _bSetProperty,
-                                                       std::vector<PropertyContainer> _parts,
+                                                       const std::vector<PropertyContainer>& _parts,
                                                        const dsuid_t& _deviceDsuid);
 
   private:
