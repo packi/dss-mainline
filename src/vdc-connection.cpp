@@ -81,9 +81,6 @@ namespace dss {
       throw std::runtime_error("could not serialize message");
     }
 
-    boost::shared_ptr<std::vector<int> > features = boost::make_shared<std::vector<int> >();
-    ret->modelFeatures = features;
-
     if (DSS::hasInstance()) {
       DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
           _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
@@ -109,91 +106,32 @@ namespace dss {
       throw std::runtime_error("received unexpected reply");
     }
 
-    vdcapi::vdc_ResponseGetProperty response =
-                                            message.vdc_response_get_property();
+    VdcElementReader rootReader(message.vdc_response_get_property().properties());
+    ret->hardwareModelGuid = rootReader["hardwareModelGuid"].getValueAsString();
+    ret->vendorGuid = rootReader["vendorGuid"].getValueAsString();
+    ret->oemGuid = rootReader["oemGuid"].getValueAsString();
+    ret->oemModelGuid = rootReader["oemModelGuid"].getValueAsString();
+    ret->configURL = rootReader["configURL"].getValueAsString();
+    ret->hardwareGuid = rootReader["hardwareGuid"].getValueAsString();
+    ret->hardwareInfo = rootReader["model"].getValueAsString();
+    ret->modelUID = rootReader["modelUID"].getValueAsString();
+    ret->hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
+    ret->name= rootReader["name"].getValueAsString();
 
-    for (int i = 0; i < response.properties_size(); i++) {
-      vdcapi::PropertyElement el = response.properties(i);
-
-      if (!el.has_name()) {
+    ret->modelFeatures = boost::make_shared<std::vector<int> >();
+    std::vector<int>& features = *ret->modelFeatures;
+    VdcElementReader featuresReader = rootReader["modelFeatures"];
+    for (VdcElementReader::iterator it = featuresReader.begin(); it != featuresReader.end(); it++) {
+      VdcElementReader featureReader = *it;
+      if (!featureReader.getValueAsBool()) {
         continue;
       }
-
-      // we are only expecting string property values here except for model
-      // features
-      if (el.name() != "modelFeatures") {
-        if (!el.has_value()) {
-          continue;
-        }
-      }
-
-      vdcapi::PropertyValue val = el.value();
-
-      if (el.name() != "modelFeatures") {
-        if (!val.has_v_string()) {
-          continue;
-        }
-      }
-
-      StringConverter st("UTF-8", "UTF-8");
-      if (el.name() == "hardwareModelGuid") {
-        try {
-          ret->hardwareModelGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "vendorGuid") {
-        try {
-          ret->vendorGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "oemGuid") {
-        try {
-          ret->oemGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "oemModelGuid") {
-        try {
-          ret->oemModelGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "configURL") {
-        try {
-          ret->configURL = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "hardwareGuid") {
-        try {
-          ret->hardwareGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "model") {
-        try {
-          ret->hardwareInfo = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "modelUID") {
-        try {
-          ret->modelUID = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "hardwareVersion") {
-        try {
-          ret->hardwareVersion = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "modelFeatures") {
-        for (int j = 0; j < el.elements_size(); j++) {
-          vdcapi::PropertyElement feature = el.elements(j);
-          if (feature.has_value()) {
-            vdcapi::PropertyValue fval = feature.value();
-            if (fval.has_v_bool() && fval.v_bool() == true) {
-              try {
-                ret->modelFeatures->push_back(
-                  ModelFeatures::getInstance()->nameToFeature(feature.name()));
-              } catch (std::runtime_error &ex) {
-                Logger::getInstance()->log("Ignoring feature '" +
-                                            feature.name() + "' from device " +
-                                            dsuid2str(_device));
-              }
-            }
-          }
-        }
-
-      } else if (el.name() == "name") {
-        try {
-          ret->name = st.convert(val.v_string());
-        } catch (std::exception& e) {}
+      const std::string& featureName = featureReader.getName();
+      try {
+        features.push_back(ModelFeatures::getInstance()->nameToFeature(featureName));
+      } catch (std::runtime_error &ex) {
+        Logger::getInstance()->log("Ignoring feature '" + featureName + "' from device " +
+                                    dsuid2str(_device));
       }
     }
 
