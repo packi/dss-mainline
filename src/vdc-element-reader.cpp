@@ -26,8 +26,21 @@
 
 namespace dss {
 
-VdcElementReader::VdcElementReader() : m_element(vdcapi::PropertyElement::default_instance()), m_isValid(false) {}
-VdcElementReader::VdcElementReader(const vdcapi::PropertyElement& element) : m_element(element), m_isValid(true) {}
+VdcElementReader::VdcElementReader()
+    : m_element(vdcapi::PropertyElement::default_instance())
+    , m_childElements(vdcapi::PropertyElement::default_instance().elements())
+    , m_isValid(false) {
+}
+VdcElementReader::VdcElementReader(const vdcapi::PropertyElement& element)
+    : m_element(element)
+    , m_childElements(element.elements())
+    , m_isValid(true) {
+}
+VdcElementReader::VdcElementReader(const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& childElements)
+    : m_element(vdcapi::PropertyElement::default_instance())
+    , m_childElements(childElements)
+    , m_isValid(true) {
+}
 
 std::string VdcElementReader::getValueAsString(const std::string& defaultValue) const {
   if (!m_element.has_value()) {
@@ -102,19 +115,14 @@ int VdcElementReader::getValueAsBool(bool defaultValue) const {
 }
 
 VdcElementReader VdcElementReader::operator [](const char* key) const {
-  const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& childElements = m_element.elements();
-  for (google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>::const_iterator it = childElements.begin(); it != childElements.end(); it++) {
+  for (google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>::const_iterator it = m_childElements.begin();
+       it != m_childElements.end(); it++) {
     const vdcapi::PropertyElement& childElement = *it;
     if (childElement.name() == key) {
       return VdcElementReader(childElement);
     }
   }
   return VdcElementReader();
-}
-
-VdcElement::VdcElement(const vdcapi::PropertyElement& element) { m_element.CopyFrom(element); }
-VdcElement::VdcElement(const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& elements) {
-  m_element.mutable_elements()->CopyFrom(elements);
 }
 
 }// namespace

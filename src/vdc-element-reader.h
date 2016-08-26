@@ -33,6 +33,7 @@ namespace dss {
   public:
     VdcElementReader();
     VdcElementReader(const vdcapi::PropertyElement& element);
+    VdcElementReader(const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& childElements);
 
     bool isValid() { return m_isValid; }
     const std::string& getName() { return m_element.name(); }
@@ -56,22 +57,13 @@ namespace dss {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>::const_iterator m_it;
     };
 
-    iterator begin() const { return m_element.elements().begin(); }
-    iterator end() const { return m_element.elements().end(); }
+    iterator begin() const { return m_childElements.begin(); }
+    iterator end() const { return m_childElements.end(); }
 
   private:
     const ::vdcapi::PropertyElement& m_element;
+    const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& m_childElements;
     bool m_isValid;
-  };
-
-  // Creates PropertyElement from list of elements and owns it.
-  class VdcElement {
-  public:
-    VdcElement(const vdcapi::PropertyElement& element);
-    VdcElement(const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& elements);
-    VdcElementReader getReader() { return VdcElementReader(m_element); }
-  private:
-    vdcapi::PropertyElement m_element;
   };
 
 } // namespace dss

@@ -1017,8 +1017,7 @@ namespace dss {
     VdceModelEvent* pEvent = new VdceModelEvent();
     pEvent->m_deviceDSID = str2dsuid(deviceDsuid);
 
-    VdcElement rootElement(pushPropertyMessage.properties());
-    VdcElementReader rootReader = rootElement.getReader();
+    VdcElementReader rootReader(pushPropertyMessage.properties());
     VdcElementReader deviceStatesReader = rootReader["deviceStates"];
     Properties& eventStates = pEvent->m_states;
     for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {

@@ -468,8 +468,7 @@ namespace dss {
 
     Logger::getInstance()->log("VdcHelper::getState: message " + message.DebugString(), lsDebug);
     vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
-    VdcElement element(message.vdc_response_get_property().properties());
-    VdcElementReader reader = element.getReader();
+    VdcElementReader reader(message.vdc_response_get_property().properties());
 
     State state;
     std::map<int,int64_t>& binaryInputStates = state.binaryInputStates;
