@@ -16,7 +16,9 @@ dsstests_CXXFLAGS = \
 			$(LIBDSM_API_CFLAGS) \
 			$(GCOV_CFLAGS) \
 			-DABS_SRCDIR=\"@abs_top_srcdir@\" \
-			-DSRCDIR=\"@top_srcdir@\"
+			-DSRCDIR=\"@top_srcdir@\" \
+			-DABS_BUILDDIR=\"@abs_top_builddir@\" \
+			-DBUILDDIR=\"@top_builddir@\"
 
 dsstests_LDADD = \
 			libdsscore.a libunix.a libcivetweb.a libprotomessages.a \

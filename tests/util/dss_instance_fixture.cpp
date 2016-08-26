@@ -34,6 +34,10 @@
 
 namespace dss {
 
+// equivalent of $PREFIX/share
+const std::string TEST_STATIC_DATADIR(ABS_SRCDIR "/tests/data");
+const std::string TEST_BUILD_DATADIR(ABS_BUILDDIR "/tests/data");
+
 static char config[] =
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<properties version=\"1\">\n"
@@ -61,7 +65,16 @@ __DEFINE_LOG_CHANNEL__(DSSInstanceFixture, lsInfo);
 
 DSSInstanceFixture::DSSInstanceFixture() {
   std::vector<std::string> properties;
-  properties.push_back("/config/webrootdirectory=" + getTempDir());
+
+  boost::filesystem::remove_all(TEST_BUILD_DATADIR + "/tmp");
+  boost::filesystem::create_directory(TEST_BUILD_DATADIR + "/tmp");
+
+  properties.push_back("/config/datadirectory=" + TEST_STATIC_DATADIR);
+  properties.push_back("/config/configdirectory=" + TEST_STATIC_DATADIR);
+  properties.push_back("/config/webrootdirectory=" + TEST_STATIC_DATADIR);
+  properties.push_back("/config/jslogdirectory=" + TEST_BUILD_DATADIR + "/tmp");
+  properties.push_back("/config/savedpropsdirectory=" + TEST_BUILD_DATADIR + "/tmp");
+  properties.push_back("/config/databasedirectory=" + TEST_BUILD_DATADIR + "/tmp");
 
   m_configFileName = getTempDir() + "config.xml";
   createConfig(m_configFileName);
@@ -72,8 +85,6 @@ DSSInstanceFixture::DSSInstanceFixture() {
     DSS::shutdown();
     throw std::runtime_error("DSS::getInstance failed");
   }
-
-  DSS::getInstance()->setDatabaseDirectory(ABS_SRCDIR "/tests/data/");
 
   m_instance = DSS::m_Instance;
   m_incarnation = DSS::s_InstanceGeneration;
