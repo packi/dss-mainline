@@ -35,10 +35,9 @@ namespace dss {
   class ProtobufToJSon
   {
   public:
-    static bool protoPropertyToJson(const vdcapi::Message& _message,
+    static void protoPropertyToJson(const vdcapi::Message& _message,
                                     JSONWriter& _writer);
 
-  private:
     static void processGenericResponse(const ::vdcapi::GenericResponse& _response,
                                        JSONWriter& _writer);
 
@@ -69,13 +68,13 @@ namespace dss {
                                                        const std::vector<PropertyContainer>& _parts,
                                                        const dsuid_t& _deviceDsuid);
 
-  private:
     static void assignValue(vdcapi::PropertyElement* _element,
                             std::string& _value);
 
     static void setupMessage(vdcapi::PropertyElement* _rootProp,
                              std::vector<PropertyContainer> _parts);
 
+  private:
     static void startSetupMessage(vdcapi::vdsm_RequestSetProperty* _prop,
                                   std::vector<PropertyContainer> _parts);
 

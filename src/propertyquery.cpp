@@ -329,9 +329,7 @@ namespace dss {
         throw std::runtime_error("could not parse response message");
       }
 
-      if (!ProtobufToJSon::protoPropertyToJson(data.message, json)) {
-        throw std::runtime_error("could not parse response message");
-      }
+      ProtobufToJSon::protoPropertyToJson(data.message, json);
     }
   } // vdcquery;
 

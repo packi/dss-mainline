@@ -94,7 +94,7 @@ namespace dss {
     _writer.endArray();
   }
 
-  bool ProtobufToJSon::protoPropertyToJson(const vdcapi::Message& _message, JSONWriter& _writer) {
+  void ProtobufToJSon::protoPropertyToJson(const vdcapi::Message& _message, JSONWriter& _writer) {
     switch (_message.type()) {
     case vdcapi::VDSM_REQUEST_GET_PROPERTY:
       _writer.add("RequestGetProperty");
@@ -114,9 +114,8 @@ namespace dss {
       break;
     default:
       Logger::getInstance()->log("can not process protobuf message of type: " + intToString(_message.type()), lsWarning);
-      return false;
+      throw std::runtime_error("could not parse response message");
     }
-    return true;
   }
 
   void PropertyContainerToProtobuf::assignValue(vdcapi::PropertyElement* _element, std::string& _value) {
