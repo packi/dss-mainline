@@ -46,12 +46,17 @@ DSSInstanceFixture::DSSInstanceFixture() {
   boost::filesystem::remove_all(TEST_BUILD_DATADIR + "/tmp");
   boost::filesystem::create_directory(TEST_BUILD_DATADIR + "/tmp");
 
-  properties.push_back("/config/datadirectory=" + TEST_STATIC_DATADIR);
-  properties.push_back("/config/configdirectory=" + TEST_STATIC_DATADIR);
-  properties.push_back("/config/webrootdirectory=" + TEST_STATIC_DATADIR);
-  properties.push_back("/config/jslogdirectory=" + TEST_BUILD_DATADIR + "/tmp");
-  properties.push_back("/config/savedpropsdirectory=" + TEST_BUILD_DATADIR + "/tmp");
-  properties.push_back("/config/databasedirectory=" + TEST_BUILD_DATADIR + "/tmp");
+  std::string staticDataDir =
+    boost::filesystem::canonical(TEST_STATIC_DATADIR).native();
+  std::string dynamicDataDir =
+    boost::filesystem::canonical(TEST_BUILD_DATADIR + "/tmp").native();
+
+  properties.push_back("/config/datadirectory=" + staticDataDir);
+  properties.push_back("/config/configdirectory=" + staticDataDir);
+  properties.push_back("/config/webrootdirectory=" + staticDataDir);
+  properties.push_back("/config/jslogdirectory=" + dynamicDataDir);
+  properties.push_back("/config/savedpropsdirectory=" + dynamicDataDir);
+  properties.push_back("/config/databasedirectory=" + dynamicDataDir);
 
   DSS::shutdown();
   if (!DSS::getInstance()->initialize(properties, TEST_STATIC_DATADIR + "/config.xml")) {
