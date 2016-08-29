@@ -28,8 +28,8 @@ CXXFLAGS="$CXXFLAGS -std=gnu++98"
 MT_OPTION([debug], [enable],
           [enable debug flags during compilation],
           [
-            CFLAGS="$CFLAGS -D_DEBUG -g -Wall -O0"
-            CXXFLAGS="$CXXFLAGS -D_DEBUG -g -Wall -O0"
+            CFLAGS="$CFLAGS -D_DEBUG -g -Wall -O1"
+            CXXFLAGS="$CXXFLAGS -D_DEBUG -g -Wall -O1"
           ],
           [])
 
@@ -46,8 +46,8 @@ MT_OPTION([test-coverage], [enable],
           [
             GCOV_CFLAGS="-fprofile-arcs -ftest-coverage"
             GCOV_LIBS="-lgcov"
-            CFLAGS="$CFLAGS -g -Wall -O0"
-            CXXFLAGS="$CXXFLAGS -g -Wall -O0"
+            CFLAGS="$CFLAGS -g -Wall -O1"
+            CXXFLAGS="$CXXFLAGS -g -Wall -O1"
             GCOV_REPORT=yes
           ],
           [])
