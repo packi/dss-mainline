@@ -465,6 +465,19 @@ namespace dss {
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);
     }
 
+    if (dev->isVdcDevice()) {
+      //TODO(soon): replace hard coded `states` by database lookup by dev->getVdcOemModelGuid()
+      std::vector<DeviceStateSpec_t> states;
+      {
+        states.push_back(DeviceStateSpec_t());
+        DeviceStateSpec_t& state = states.back();
+        state.Name = "operation";
+        state.Values.push_back("active");
+        state.Values.push_back("idle");
+      }
+      dev->initStates(dev, states);
+    }
+
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
       dev->setSensors(dev, _spec.sensorInputs);
@@ -1123,12 +1136,12 @@ namespace dss {
       }
     } else if (m_dsm != NULL) {
       Set D = m_dsm->getDevices();
-      BinaryInputDeviceFilter filter;
+      BinaryInputOrStateDeviceFilter filter;
       D.perform(filter);
       devices = filter.getDeviceList();
     } else {
       Set D = m_pApartment->getDevices();
-      BinaryInputDeviceFilter filter;
+      BinaryInputOrStateDeviceFilter filter;
       D.perform(filter);
       devices = filter.getDeviceList();
     }
@@ -1184,6 +1197,7 @@ namespace dss {
           for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
             dev->handleBinaryInputEvent(it->first, it->second);
           }
+          dev->setStateValues(state.deviceStates);
         } catch (std::runtime_error& e) {
           Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
               " failure: " + e.what(), lsWarning);

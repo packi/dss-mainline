@@ -93,6 +93,11 @@ namespace dss {
   } DeviceBinaryInputSpec_t;
 
   typedef struct {
+    std::string Name;
+    std::vector<std::string> Values;
+  } DeviceStateSpec_t;
+
+  typedef struct {
     uint8_t Index;
     uint8_t State;
     uint32_t ActiveThreshold;

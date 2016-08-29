@@ -2152,6 +2152,82 @@ namespace dss {
     m_binaryInputStates.clear();
   }
 
+  void Device::initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& stateSpecs) {
+    if (stateSpecs.empty()) {
+      return;
+    }
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    PropertyNodePtr node;
+    if (m_pPropertyNode != NULL) {
+      node = m_pPropertyNode->getPropertyByName("states");
+      if (node != NULL) {
+        node->getParentNode()->removeChild(node);
+      }
+      node = m_pPropertyNode->createProperty("states");
+    }
+    m_states.clear();
+
+    BOOST_FOREACH(const DeviceStateSpec_t& stateSpec, stateSpecs) {
+      const std::string& stateName = stateSpec.Name;
+      boost::shared_ptr<State> state = boost::make_shared<State>(me, stateName);
+      std::vector<std::string> values;
+      values.push_back(State::INVALID);
+      values.insert(values.end(), stateSpec.Values.begin(), stateSpec.Values.end());
+      state->setValueRange(values);
+      try {
+        getApartment().allocateState(state);
+      } catch (ItemDuplicateException& ex) {
+        state = getApartment().getNonScriptState(stateName);
+      }
+      m_states[stateName] = state;
+
+      if (m_pPropertyNode != NULL) {
+        PropertyNodePtr entry = node->createProperty(stateName);
+        PropertyNodePtr stateValueNode = state->getPropertyNode()->getProperty("value");
+        if (stateValueNode != NULL) {
+          PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
+          stateValueAlias->alias(stateValueNode);
+        }
+      }
+    }
+  }
+
+  void Device::clearStates() {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    BOOST_FOREACH(const States::value_type& state, m_states) {
+      try {
+        m_pApartment->removeState(state.second);
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
+      }
+    }
+    m_states.clear();
+  }
+
+  void Device::setStateValue(const std::string& name, const std::string& value) {
+    Logger::getInstance()->log("setStateValue name:" + name + " value:" + value, lsDebug);
+    BOOST_FOREACH(const States::value_type& state, m_states) {
+      if (state.first == name) {
+        state.second->setState(coDsmApi, value);
+      }
+    }
+  }
+
+  void Device::setStateValues(const std::vector<std::pair<std::string, std::string> >& values) {
+    BOOST_FOREACH(const States::value_type& state, m_states) {
+      const std::string* newValue = &State::INVALID;
+      typedef std::pair<std::string, std::string> StringStringPair;
+      BOOST_FOREACH(const StringStringPair& value, values) {
+        if (state.first == value.first) {
+          newValue = &(value.second);
+          break;
+        }
+      }
+      state.second->setState(coDsmApi, *newValue);
+    }
+  }
+
+
   void Device::assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state) {
     // Window Tilt Binary Input
     if (inputType == BinaryInputIDWindowTilt) {

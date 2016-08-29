@@ -324,6 +324,7 @@ namespace dss {
     void onDeviceDataReady(dsuid_t _meterID, const devid_t _deviceID,
                         const int& _pairedDevices, const bool& _visible);
     void onDsmStateChange(dsuid_t _meterID, const uint8_t& _state);
+    void onVdceEvent(const VdceModelEvent& event);
 
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);

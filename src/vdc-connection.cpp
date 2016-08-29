@@ -428,6 +428,10 @@ namespace dss {
       vdcapi::PropertyElement *query = getprop->add_query();
       query->set_name("binaryInputStates");
     }
+    {
+      vdcapi::PropertyElement *query = getprop->add_query();
+      query->set_name("deviceStates");
+    }
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -498,9 +502,21 @@ namespace dss {
       }
     }
 
+    std::vector<std::pair<std::string, std::string> >& deviceStates = state.deviceStates;
+    VdcElementReader deviceStatesReader = reader["deviceStates"];
+    for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
+      VdcElementReader reader = *it;
+      deviceStates.push_back({reader.getName(), reader["value"].getValueAsString()});
+    }
+
     for (std::map<int,int64_t>::const_iterator it = binaryInputStates.begin(); it != binaryInputStates.end(); ++it ) {
       Logger::getInstance()->log("VdcHelper::getState: device " + dsuid2str(_device) +
           ": " + intToString(it->first) + "=" + intToString(it->second), lsDebug);
+    }
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = deviceStates.begin();
+        it != deviceStates.end(); ++it ) {
+      Logger::getInstance()->log("VdcHelper::getState: device " + dsuid2str(_device) +
+          ": " + it->first + "=" + it->second, lsDebug);
     }
     return state;
   }

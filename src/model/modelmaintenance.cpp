@@ -1193,6 +1193,9 @@ namespace dss {
         onDsmStateChange(pEventWithDSID->getDSID(), event->getParameter(0));
       }
       break;
+    case ModelEvent::etVdceEvent:
+      onVdceEvent(*dynamic_cast<VdceModelEvent*>(event.get()));
+      break;
     default:
       assert(false);
       break;
@@ -2092,7 +2095,7 @@ namespace dss {
           }
           if (newState != oldState) {
             state->setState(coSystem, newState);
-            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
                                                     pDev->getDeviceBinaryInputType(index),
                                                     newState));
           }
@@ -2503,6 +2506,23 @@ namespace dss {
     }
   } // onDsmStateChange
 
+  void ModelMaintenance::onVdceEvent(const VdceModelEvent& event)
+  {
+    try {
+      boost::shared_ptr<Device> pDev = m_pApartment->getDeviceByDSID(event.m_deviceDSID);
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(pDev->getDSID(), &pDev->getApartment());
+
+      BOOST_FOREACH(HashMapStringString::value_type state, event.m_states.getContainer()) {
+        const std::string& name = state.first;
+        const std::string& value = state.second;
+
+        raiseEvent(createDeviceStateEvent(pDevRev, name, value));
+        pDev->setStateValue(name, value);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  }
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner

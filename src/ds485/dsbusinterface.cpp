@@ -56,6 +56,8 @@
 #include "dsstructuremodifyingbusinterface.h"
 
 #include <sstream>
+#include "messages/vdc-messages.pb.h"
+#include "vdc-element-reader.h"
 
 namespace dss {
 
@@ -469,6 +471,13 @@ namespace dss {
       callback_struct.arg = this;
       DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
                         EVENT_CIRCUIT_POWER_STATE_CHANGED, 0,
+                        &callback_struct, NULL);
+
+      EventUserProperty_event_callback_t eventUserPropertyEventCallback = DSBusInterface::handleUserPropertyEventCallback;
+      callback_struct.function = (void*)eventUserPropertyEventCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_USER_PROPERTY, 0,
                         &callback_struct, NULL);
 
       m_dsmApiReady = true;
@@ -979,6 +988,45 @@ namespace dss {
     }
   }
 
+  void DSBusInterface::handleUserPropertyEventCallback(uint8_t _errorCode, void* _userData, dsuid_t _sourceID,
+                                                  dsuid_t _destinationID,
+                                                  uint16_t _responseSize, const uint8_t *_responsePtr) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleUserPropertyEvent(_sourceID, _destinationID, _responseSize, _responsePtr);
+    }
+  }
+
+
+  void DSBusInterface::handleUserPropertyEvent(const dsuid_t& _sourceID, const dsuid_t& _destinationID,
+                                          uint16_t _responseSize, const uint8_t *_responsePtr) {
+    loginFromCallback();
+    // Traverse vdcapi puspProperty message and generate model events for each change
+    vdcapi::Message message;
+    if (!message.ParseFromArray(_responsePtr, _responseSize)) {
+        log("handleUserPropertyEvent parse failed", lsWarning);
+        return;
+    }
+    if (message.type() != vdcapi::VDC_SEND_PUSH_PROPERTY) {
+        log("handleUserPropertyEvent received invalid message" + intToString(message.type()), lsWarning);
+        return;
+    }
+    log("handleUserPropertyEvent" + message.DebugString(), lsInfo);
+    const vdcapi::vdc_SendPushProperty& pushPropertyMessage = message.vdc_send_push_property();
+    std::string deviceDsuid = pushPropertyMessage.dsuid();
+    VdceModelEvent* pEvent = new VdceModelEvent();
+    pEvent->m_deviceDSID = str2dsuid(deviceDsuid);
+
+    VdcElement rootElement(pushPropertyMessage.properties());
+    VdcElementReader rootReader = rootElement.getReader();
+    VdcElementReader deviceStatesReader = rootReader["deviceStates"];
+    Properties& eventStates = pEvent->m_states;
+    for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
+      VdcElementReader reader = *it;
+      eventStates.set(reader.getName(), reader["value"].getValueAsString());
+    }
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
 
   void DSBusInterface::handleZoneSensorValueEvent(uint8_t _errorCode,
                                                 dsuid_t _sourceID,

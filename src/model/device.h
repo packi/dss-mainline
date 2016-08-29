@@ -37,6 +37,7 @@
 #include "src/model/data_types.h"
 #include "addressablemodelitem.h"
 #include "businterface.h"
+#include "modelevent.h"
 
 #define DEV_PARAM_BUTTONINPUT_STANDARD              0
 #define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
@@ -298,6 +299,9 @@ namespace dss {
     uint8_t m_binaryInputCount;
     std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
     std::vector<boost::shared_ptr<State> > m_binaryInputStates;
+
+    typedef std::map<std::string, boost::shared_ptr<State> > States;
+    States m_states;
 
     uint8_t m_sensorInputCount;
     std::vector<boost::shared_ptr<DeviceSensor_t> > m_sensorInputs;
@@ -703,6 +707,12 @@ namespace dss {
     void setBinaryInputType(uint8_t _index, uint8_t _inputType);
     boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
     void clearBinaryInputStates();
+
+    void initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& specs);
+    const std::map<std::string, boost::shared_ptr<State> >& getStates() const { return m_states; }
+    void clearStates();
+    void setStateValue(const std::string& name, const std::string& value);
+    void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
     void setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _binaryInput);
     const uint8_t getSensorCount() const;

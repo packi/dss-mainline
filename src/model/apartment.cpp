@@ -408,6 +408,8 @@ namespace dss {
         }
         pDevice->clearBinaryInputStates();
 
+        pDevice->clearStates(); // calls apartment->removeState() from inside
+
         // Erase
         m_Devices.erase(ipDevice);
         return;

@@ -28,6 +28,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "src/ds485types.h"
+#include "base.h"
 
 namespace dss {
 
@@ -78,6 +79,7 @@ namespace dss {
                     etDsmStateChange, /** dSM state has changed **/
                     etDeviceOEMDataUpdateProductInfoState, /** only update devices OEM product info state without data */
                     etCircuitPowerStateChange, /** A dSM sent a power state change event */
+                    etVdceEvent, /** Device specific VDCE (vdce extension) event */
                  } EventType;
   private:
     EventType m_EventType;
@@ -136,6 +138,14 @@ namespace dss {
     int getStringParameterCount() const { return m_StringParameter.size(); }
   private:
     std::vector<std::string> m_StringParameter;
+  };
+
+  class VdceModelEvent : public ModelEvent {
+  public:
+    VdceModelEvent() : ModelEvent(ModelEvent::etVdceEvent) {}
+
+    dsuid_t m_deviceDSID;
+    Properties m_states;
   };
 
 } // namespace dss

@@ -101,6 +101,21 @@ namespace dss {
     publishToPropertyTree();
   }
 
+  State::State(boost::shared_ptr<Device> _device, const std::string& stateName) :
+      m_name("dev." + dsuid2str(_device->getDSID()) + "." + stateName),
+      m_IsPersistent(true),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
+      m_state(State_Invalid),
+      m_type(StateType_Device),
+      m_providerDev(_device),
+      m_providerDevInput(-1),
+      m_providerDevStateName(stateName)
+  {
+    load();
+    publishToPropertyTree();
+  }
+
   State::State(boost::shared_ptr<DSMeter> _meter, int _inputIndex) :
       m_name("dsm." + dsuid2str(_meter->getDSID()) + "." + intToString(_inputIndex)),
       m_IsPersistent(true),
@@ -192,8 +207,14 @@ namespace dss {
         PropertyNodePtr devNode = m_providerDev->getPropertyNode();
         PropertyNodePtr m_pAliasNode = m_pPropertyNode->createProperty("device/" + dsuid2str(m_providerDev->getDSID()));
         m_pAliasNode->alias(devNode);
-        m_pPropertyNode->createProperty("device/inputIndex")
-          ->linkToProxy(PropertyProxyReference<int>(m_providerDevInput, false));
+        if (m_providerDevInput != -1) {
+          m_pPropertyNode->createProperty("device/inputIndex")
+            ->linkToProxy(PropertyProxyReference<int>(m_providerDevInput, false));
+        }
+        if (!m_providerDevStateName.empty()) {
+          m_pPropertyNode->createProperty("device/stateName")
+            ->linkToProxy(PropertyProxyReference<std::string>(m_providerDevStateName, false));
+        }
       }
 
       if (m_providerDsm != NULL) {

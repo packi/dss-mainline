@@ -80,6 +80,7 @@ namespace dss {
 
     struct State {
       std::map<int,int64_t> binaryInputStates;
+      std::vector<std::pair<std::string, std::string> > deviceStates;
     };
     static State getState(dsuid_t _vdsm, dsuid_t _device);
   };
