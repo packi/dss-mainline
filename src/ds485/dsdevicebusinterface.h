@@ -145,6 +145,10 @@ namespace dss {
 
     virtual void genericRequest(const Device& _device, const std::string& methodName,
                                 const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params);
+    virtual void setProperty(const Device& _device,
+                             const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
+    virtual vdcapi::Message getProperty(const Device& _device,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
 
   }; // DSDeviceBusInterface
 

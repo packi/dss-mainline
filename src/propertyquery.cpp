@@ -333,4 +333,18 @@ namespace dss {
     }
   } // vdcquery;
 
+  vdcapi::PropertyElement PropertyQuery::parseToVdcapiElement(const std::string& query) {
+    PropertyQuery x(PropertyNodePtr(), query, false);
+    vdcapi::PropertyElement element;
+    PropertyContainerToProtobuf::setupMessage(&element, x.m_PartList);
+    return element;
+  }
+
+  vdcapi::PropertyElement PropertyQuery::parseValueToVdcapiElement(const std::string& value) {
+    vdcapi::PropertyElement element;
+    std::string valueCopy = value; // assignValue modifies the string
+    PropertyContainerToProtobuf::assignValue(&element, valueCopy);
+    return element;
+  }
+
 } // namespace dss

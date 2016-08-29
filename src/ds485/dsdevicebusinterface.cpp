@@ -486,7 +486,7 @@ namespace dss {
     if (!message.ParseFromArray(arrayIn, arrayInSize)) {
       throw std::runtime_error("ParseFromArray failed");
     }
-    if (!message.type() == vdcapi::GENERIC_RESPONSE) {
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
       throw std::runtime_error("Invalid vdc response");
     }
     const vdcapi::GenericResponse& response = message.generic_response();
@@ -496,6 +496,71 @@ namespace dss {
     }
   }
 
+  void DSDeviceBusInterface::setProperty(const Device& _device,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_SET_PROPERTY);
+    vdcapi::vdsm_RequestSetProperty* setPropertyRquest = message.mutable_vdsm_request_set_property();
+    setPropertyRquest->set_dsuid(dsuid2str(_device.getDSID()));
+    *setPropertyRquest->mutable_properties() = properties;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    int ret = UserProtobufMessageRequest(m_DSMApiHandle, _device.getDSMeterDSID(),
+                                         message.ByteSize(), arrayOut,
+                                         &arrayInSize, arrayIn);
+    DSBusInterface::checkResultCode(ret);
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    const vdcapi::GenericResponse& response = message.generic_response();
+    if (response.code() != vdcapi::ERR_OK) {
+      throw std::runtime_error(std::string("Vdc error code:") + intToString(response.code())
+          + " message:" + response.description());
+    }
+  }
+
+  vdcapi::Message DSDeviceBusInterface::getProperty(const Device& _device,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
+    vdcapi::vdsm_RequestGetProperty* getPropertyRequest = message.mutable_vdsm_request_get_property();
+    getPropertyRequest->set_dsuid(dsuid2str(_device.getDSID()));
+    *getPropertyRequest->mutable_query() = query;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    int ret = UserProtobufMessageRequest(m_DSMApiHandle, _device.getDSMeterDSID(),
+                                         message.ByteSize(), arrayOut,
+                                         &arrayInSize, arrayIn);
+    DSBusInterface::checkResultCode(ret);
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::VDC_RESPONSE_GET_PROPERTY) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    return message;
+  }
 
   DSDeviceBusInterface::ConfigReaderHelper::ConfigReaderHelper(const std::string& _busConnection)
     : m_busConnection(_busConnection)

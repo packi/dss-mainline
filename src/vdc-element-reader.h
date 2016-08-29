@@ -35,7 +35,10 @@ namespace dss {
     VdcElementReader(const vdcapi::PropertyElement& element);
     VdcElementReader(const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& childElements);
 
+
     bool isValid() { return m_isValid; }
+    const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& childElements() const { return m_childElements; }
+
     const std::string& getName() { return m_element.name(); }
     std::string getValueAsString(const std::string& defaultValue = std::string()) const;
     double getValueAsDouble(double defaultValue = 0) const;

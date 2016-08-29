@@ -30,6 +30,10 @@
 
 #include "src/logger.h"
 
+namespace vdcapi {
+  class PropertyElement;
+}
+
 namespace dss {
 
   class PropertyNode;
@@ -72,6 +76,10 @@ namespace dss {
     void run(JSONWriter& json);
     void run2(JSONWriter& json);
     void vdcquery(JSONWriter& json);
+
+    static vdcapi::PropertyElement parseToVdcapiElement(const std::string& query);
+    static vdcapi::PropertyElement parseValueToVdcapiElement(const std::string& value);
+
   private:
     void parseParts(bool trailingSeparator);
 

@@ -84,11 +84,15 @@
 #define OUTPUT_MODE_TWO_STAGE_SWITCH        34
 #define OUTPUT_MODE_BIPOLAR_SWITCH          43
 #define OUTPUT_MODE_THREE_STAGE_SWITCH      38
+namespace vdcapi {
+  class PropertyElement;
+}
 namespace dss {
 
   class Group;
   class State;
   class DSMeter;
+  class VdcElementReader;
 
   typedef struct {
     bool dontcare;
@@ -784,6 +788,11 @@ namespace dss {
 
     /// Calls (invokes) device specific action.
     void callAction(const std::string& actionId);
+
+    void setProperty(const vdcapi::PropertyElement& element); // element.name() is property id
+    void setCustomAction(const std::string& id, const std::string& title, const std::string& action,
+                         const vdcapi::PropertyElement& params);
+    vdcapi::Message getVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

@@ -50,7 +50,8 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/event.h"
-#include "src/messages/vdcapi.pb.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/vdc-element-reader.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -3039,6 +3040,71 @@ namespace dss {
     param0->set_name("id");
     param0->mutable_value()->set_v_string(actionId);
     deviceBusInterface->genericRequest(*this, "callAction", params);
+  }
+
+  void Device::setProperty(const vdcapi::PropertyElement& propertyElement) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> setPropertyParams;
+    vdcapi::PropertyElement* devicePropertiesElement = setPropertyParams.Add();
+    devicePropertiesElement->set_name("deviceProperties");
+    *devicePropertiesElement->add_elements() = propertyElement;
+    deviceBusInterface->setProperty(*this, setPropertyParams);
+  }
+
+  void Device::setCustomAction(const std::string& id, const std::string& title, const std::string& action,
+                               const vdcapi::PropertyElement& actionParams) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    if (!beginsWith(id, "custom.")) {
+      throw std::runtime_error("Custom action id must start with 'custom.'");
+    }
+
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> setPropertyParams;
+    vdcapi::PropertyElement* customActionsElement = setPropertyParams.Add();
+    customActionsElement->set_name("customActions");
+    vdcapi::PropertyElement* actionElement = customActionsElement->add_elements();
+    actionElement->set_name(id);
+    if (!action.empty()) { // empty action means remove
+      {
+        vdcapi::PropertyElement* element = actionElement->add_elements();
+        element->set_name("title");
+        element->mutable_value()->set_v_string(title);
+      }
+      {
+        vdcapi::PropertyElement* element = actionElement->add_elements();
+        element->set_name("action");
+        element->mutable_value()->set_v_string(action);
+      }
+      {
+        vdcapi::PropertyElement* element = actionElement->add_elements();
+        element->set_name("params");
+        *element->mutable_elements() = actionParams.elements();
+      }
+    }
+    deviceBusInterface->setProperty(*this, setPropertyParams);
+  }
+
+  vdcapi::Message Device::getVdcProperty(
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    return deviceBusInterface->getProperty(*this, query);
   }
 
 } // namespace dss
