@@ -24,11 +24,12 @@ if test -n "$MT_SEARCHPATH_PROGS"; then
     export PATH=$PATH:$MT_SEARCHPATH_PROGS
 fi
 
+CXXFLAGS="$CXXFLAGS -std=gnu++98"
 MT_OPTION([debug], [enable],
           [enable debug flags during compilation],
           [
-            CFLAGS="-D_DEBUG -g -Wall -O0"
-            CXXFLAGS="-D_DEBUG -g -Wall -O0"
+            CFLAGS="$CFLAGS -D_DEBUG -g -Wall -O0"
+            CXXFLAGS="$CXXFLAGS -D_DEBUG -g -Wall -O0"
           ],
           [])
 
@@ -45,8 +46,8 @@ MT_OPTION([test-coverage], [enable],
           [
             GCOV_CFLAGS="-fprofile-arcs -ftest-coverage"
             GCOV_LIBS="-lgcov"
-            CFLAGS="-g -Wall -O0"
-            CXXFLAGS="-g -Wall -O0"
+            CFLAGS="$CFLAGS -g -Wall -O0"
+            CXXFLAGS="$CXXFLAGS -g -Wall -O0"
             GCOV_REPORT=yes
           ],
           [])
