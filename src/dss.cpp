@@ -48,6 +48,7 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
+#include "handler/db_fetch.h"
 #include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
@@ -261,7 +262,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
           int val = strToInt(value);
           m_pPropertySystem->setIntValue(name, val, true);
           continue;
-        } catch(std::invalid_argument&) {
+        } catch(std::invalid_argument) {
+          // ignore. not int type, continue with bool...
         }
 
         if(value == "true") {
@@ -350,6 +352,7 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
                          m_pSecurity));
     m_pWebServer->setSessionManager(m_pSessionManager);
 
+    Logger::getInstance()->log("parse command line 1st time", lsWarning);
     parseProperties(_properties);
 
     // -- setup logging
@@ -360,6 +363,7 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
     // we need to parse the properties twice to ensure that command line
     // options override config.xml
+    Logger::getInstance()->log("parse command line 2nd time", lsWarning);
     parseProperties(_properties);
 
     WebserviceConnection::getInstanceMsHub();
@@ -498,6 +502,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     plugin = new EventInterpreterDatabaseUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new DbUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
   }
 

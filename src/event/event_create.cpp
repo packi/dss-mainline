@@ -82,6 +82,7 @@ namespace EventName {
 
   const std::string ReexportTimings = "reexport_timings";
   const std::string AutoClusterUpdate = "autocluster_update";
+  const std::string CheckDssDbUpdate = "dss_db_update_check";
 }
 
 boost::shared_ptr<Event>
