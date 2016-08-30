@@ -73,8 +73,9 @@ namespace dss {
       std::string database = DSS::getInstance()->getDatabaseDirectory() + id +
                              ".db";
 
-      boost::shared_ptr<SQLite3> sqlite = boost::make_shared<SQLite3>(database);
-      SQLite3::query_result q = sqlite->query(sql);
+      // TODO(security) database in readwrite mode needed?
+      SQLite3 sqlite(database, true, 0);
+      SQLite3::query_result q = sqlite.query(sql);
 
       JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(resultObj));
