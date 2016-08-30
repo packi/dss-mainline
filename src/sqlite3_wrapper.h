@@ -39,7 +39,7 @@ public:
   /// \brief Initialize database using the specified location.
   ///
   /// If the database does not exist, it will be automatically created.
-  SQLite3(std::string db_file, bool readwrite, int foo);
+  SQLite3(std::string db_file, bool readwrite = false);
   ~SQLite3();
 
   /// \brief represents a "column cell" in the table, first pair element is

@@ -74,7 +74,7 @@ namespace dss {
                              ".db";
 
       // TODO(security) database in readwrite mode needed?
-      SQLite3 sqlite(database, true, 0);
+      SQLite3 sqlite(database, true);
       SQLite3::query_result q = sqlite.query(sql);
 
       JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);

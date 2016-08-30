@@ -35,7 +35,7 @@
 namespace dss
 {
 
-SQLite3::SQLite3(std::string db_file, bool readwrite, int foo)
+SQLite3::SQLite3(std::string db_file, bool readwrite)
 {
   boost::mutex::scoped_lock lock(m_mutex);
 
