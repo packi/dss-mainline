@@ -129,13 +129,6 @@ void SQLite3::exec(std::string sql)
   execInternal(sql);
 }
 
-long long int SQLite3::execAndGetRowId(std::string sql)
-{
-  boost::mutex::scoped_lock lock(m_mutex);
-  execInternal(sql);
-  return (long long int)sqlite3_last_insert_rowid(m_db);
-}
-
 std::string SQLite3::escape(std::string str, bool quotes)
 {
   char *q;
@@ -147,12 +140,6 @@ std::string SQLite3::escape(std::string str, bool quotes)
   std::string ret = q;
   sqlite3_free(q);
   return ret;
-}
-
-long long int SQLite3::getLastInsertedRowId()
-{
-  boost::mutex::scoped_lock lock(m_mutex);
-  return (long long int)sqlite3_last_insert_rowid(m_db);
 }
 
 bool SQLite3::isFatal(int error)
