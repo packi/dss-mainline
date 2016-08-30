@@ -52,10 +52,8 @@ namespace dss {
         return JSONWriter::failure("Missing parameter 'sql'");
       }
 
-      boost::shared_ptr<SQLite3> sqlite =
-          boost::make_shared<SQLite3>(database, true);
-
-      SQLite3::query_result q = sqlite->query(sql);
+      SQLite3 sqlite(database, false);
+      SQLite3::query_result q = sqlite.query(sql);
 
       JSONWriter json;
       json.startArray("data");

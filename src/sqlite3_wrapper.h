@@ -39,7 +39,7 @@ public:
   /// \brief Initialize database using the specified location.
   ///
   /// If the database does not exist, it will be automatically created.
-  SQLite3(std::string db_file, bool readonly = false);
+  SQLite3(std::string db_file, bool readwrite = false);
   ~SQLite3();
 
   /// \brief represents a "column cell" in the table, first pair element is
@@ -66,11 +66,6 @@ public:
   /// Will throw an exception if anything goes wrong
   void exec(std::string sql);
 
-  /// \brief Execute SQL on the active database, no response expected.
-  ///
-  /// Will throw an exception if anything goes wrong
-  long long int execAndGetRowId(std::string sql);
-
   /// \brief Helper function for proper escaping of strings.
   ///
   /// All names or user input should be run through this function.
@@ -78,9 +73,6 @@ public:
   /// \param str string that should be escaped
   /// \param quotes adds quotes around the string (convenience parameter)
   std::string escape(std::string str, bool quotes = false);
-
-  /// \brief Returns the Id of the last inserted row
-  long long int getLastInsertedRowId();
 
   static bool isFatal(int error);
 private:

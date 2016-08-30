@@ -36,22 +36,27 @@ namespace dss {
 
 // equivalent of $PREFIX/share
 const std::string TEST_STATIC_DATADIR(ABS_SRCDIR "/tests/data");
-const std::string TEST_BUILD_DATADIR(ABS_BUILDDIR "/tests/data");
+const std::string TEST_DYNAMIC_DATADIR(ABS_BUILDDIR "/tests/data");
 
 __DEFINE_LOG_CHANNEL__(DSSInstanceFixture, lsInfo);
 
 DSSInstanceFixture::DSSInstanceFixture() {
   std::vector<std::string> properties;
 
-  boost::filesystem::remove_all(TEST_BUILD_DATADIR + "/tmp");
-  boost::filesystem::create_directory(TEST_BUILD_DATADIR + "/tmp");
+  boost::filesystem::remove_all(TEST_DYNAMIC_DATADIR + "/tmp");
+  boost::filesystem::create_directory(TEST_DYNAMIC_DATADIR + "/tmp");
 
-  properties.push_back("/config/datadirectory=" + TEST_STATIC_DATADIR);
-  properties.push_back("/config/configdirectory=" + TEST_STATIC_DATADIR);
-  properties.push_back("/config/webrootdirectory=" + TEST_STATIC_DATADIR);
-  properties.push_back("/config/jslogdirectory=" + TEST_BUILD_DATADIR + "/tmp");
-  properties.push_back("/config/savedpropsdirectory=" + TEST_BUILD_DATADIR + "/tmp");
-  properties.push_back("/config/databasedirectory=" + TEST_BUILD_DATADIR + "/tmp");
+  std::string staticDataDir =
+    boost::filesystem::canonical(TEST_STATIC_DATADIR).native();
+  std::string dynamicDataDir =
+    boost::filesystem::canonical(TEST_DYNAMIC_DATADIR + "/tmp").native();
+
+  properties.push_back("/config/datadirectory=" + staticDataDir);
+  properties.push_back("/config/configdirectory=" + staticDataDir);
+  properties.push_back("/config/webrootdirectory=" + staticDataDir);
+  properties.push_back("/config/jslogdirectory=" + dynamicDataDir);
+  properties.push_back("/config/savedpropsdirectory=" + dynamicDataDir);
+  properties.push_back("/config/databasedirectory=" + dynamicDataDir);
 
   DSS::shutdown();
   if (!DSS::getInstance()->initialize(properties, TEST_STATIC_DATADIR + "/config.xml")) {

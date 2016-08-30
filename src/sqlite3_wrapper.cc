@@ -35,7 +35,7 @@
 namespace dss
 {
 
-SQLite3::SQLite3(std::string db_file, bool readonly)
+SQLite3::SQLite3(std::string db_file, bool readwrite)
 {
   boost::mutex::scoped_lock lock(m_mutex);
 
@@ -49,12 +49,12 @@ SQLite3::SQLite3(std::string db_file, bool readonly)
         db_file + ": " + strerror(errno));
   }
 
-  int flags = 0;
+  int flags = SQLITE_OPEN_FULLMUTEX;
 
-  if (readonly) {
-    flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX;
+  if (readwrite) {
+    flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
   } else {
-    flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX;
+    flags |= SQLITE_OPEN_READONLY;
   }
 
   int ret = sqlite3_open_v2(db_file.c_str(), &m_db, flags, NULL);
@@ -129,13 +129,6 @@ void SQLite3::exec(std::string sql)
   execInternal(sql);
 }
 
-long long int SQLite3::execAndGetRowId(std::string sql)
-{
-  boost::mutex::scoped_lock lock(m_mutex);
-  execInternal(sql);
-  return (long long int)sqlite3_last_insert_rowid(m_db);
-}
-
 std::string SQLite3::escape(std::string str, bool quotes)
 {
   char *q;
@@ -147,12 +140,6 @@ std::string SQLite3::escape(std::string str, bool quotes)
   std::string ret = q;
   sqlite3_free(q);
   return ret;
-}
-
-long long int SQLite3::getLastInsertedRowId()
-{
-  boost::mutex::scoped_lock lock(m_mutex);
-  return (long long int)sqlite3_last_insert_rowid(m_db);
 }
 
 bool SQLite3::isFatal(int error)
