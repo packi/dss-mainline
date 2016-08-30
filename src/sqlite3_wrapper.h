@@ -79,7 +79,6 @@ private:
   sqlite3 *m_db;
   boost::mutex m_mutex;
 
-  static int execCallback(void *arg, int columns, char **data, char **name);
   void execInternal(std::string sql);
 };
 
