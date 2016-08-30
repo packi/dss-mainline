@@ -108,6 +108,17 @@ namespace dss {
     publishToPropertyTree();
   } // ctor
 
+  DSMeter::~DSMeter() {
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->unlinkProxy(true);
+      PropertyNode *parent = m_pPropertyNode->getParentNode();
+      if (parent != NULL) {
+        parent->removeChild(m_pPropertyNode);
+      }
+      m_pPropertyNode.reset();
+    }
+  }
+
   void DSMeter::publishToPropertyTree() {
     assert(m_pPropertyNode == NULL);
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
