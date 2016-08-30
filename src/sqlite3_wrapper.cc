@@ -142,22 +142,6 @@ std::string SQLite3::escape(std::string str, bool quotes)
   return ret;
 }
 
-bool SQLite3::isFatal(int error)
-{
-  switch (error) {
-    case SQLITE_READONLY:
-    case SQLITE_IOERR:
-    case SQLITE_CORRUPT:
-    case SQLITE_FULL:
-    case SQLITE_NOTADB:
-      return true;
-      break;
-    case SQLITE_OK:
-    default:
-      return false;
-  }
-}
-
 SQLite3::~SQLite3()
 {
   boost::mutex::scoped_lock lock(m_mutex);

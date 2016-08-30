@@ -74,7 +74,6 @@ public:
   /// \param quotes adds quotes around the string (convenience parameter)
   std::string escape(std::string str, bool quotes = false);
 
-  static bool isFatal(int error);
 private:
   sqlite3 *m_db;
   boost::mutex m_mutex;
