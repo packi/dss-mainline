@@ -34,14 +34,12 @@
 
 using namespace dss;
 
-static std::string testDataDir(ABS_SRCDIR "/tests/data/");
-
 BOOST_AUTO_TEST_SUITE(DB_FETCHER)
 
 BOOST_FIXTURE_TEST_CASE(fileFetch, DSSInstanceFixture) {
   EventQueue &queue(DSS::getInstance()->getEventQueue());
 
-  DbFetch fetcher("db-fetcher", "file://" + testDataDir + "db-fetch-ok.sql",
+  DbFetch fetcher("db-fetcher", "file://" + TEST_STATIC_DATADIR + "/db-fetch-ok.sql",
                   "unique-id");
 
   fetcher.run();
@@ -52,7 +50,7 @@ BOOST_FIXTURE_TEST_CASE(fileFetch, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(evt->getPropertyByName("id"), "unique-id");
   BOOST_CHECK(queue.popEvent() == NULL);
 
-  fetcher = DbFetch("db-fetcher", "file://" + testDataDir + "db-fetch-empty.sql",
+  fetcher = DbFetch("db-fetcher", "file://" + TEST_STATIC_DATADIR + "/db-fetch-empty.sql",
                     "unique-id");
   fetcher.run();
 
@@ -61,7 +59,7 @@ BOOST_FIXTURE_TEST_CASE(fileFetch, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(evt->getPropertyByName("success"), "0");
   BOOST_CHECK(queue.popEvent() == NULL);
 
-  fetcher = DbFetch("db-fetcher", "file://" + testDataDir + "db-fetch-throws.sql",
+  fetcher = DbFetch("db-fetcher", "file://" + TEST_STATIC_DATADIR + "/db-fetch-throws.sql",
           "unique-id");
   fetcher.run();
 
@@ -92,7 +90,7 @@ std::string addServiceConfig(bool valid = true)
 
   PropertyNodePtr service = props.createProperty(configPath);
   service->createProperty("name")->setStringValue(name);
-  service->createProperty("url")->setStringValue("file://" + testDataDir + "db-fetch-ok.sql");
+  service->createProperty("url")->setStringValue("file://" + TEST_STATIC_DATADIR + "/db-fetch-ok.sql");
 
   return configPath;
 }

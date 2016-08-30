@@ -36,20 +36,20 @@ namespace dss {
 
 // equivalent of $PREFIX/share
 const std::string TEST_STATIC_DATADIR(ABS_SRCDIR "/tests/data");
-const std::string TEST_BUILD_DATADIR(ABS_BUILDDIR "/tests/data");
+const std::string TEST_DYNAMIC_DATADIR(ABS_BUILDDIR "/tests/data");
 
 __DEFINE_LOG_CHANNEL__(DSSInstanceFixture, lsInfo);
 
 DSSInstanceFixture::DSSInstanceFixture() {
   std::vector<std::string> properties;
 
-  boost::filesystem::remove_all(TEST_BUILD_DATADIR + "/tmp");
-  boost::filesystem::create_directory(TEST_BUILD_DATADIR + "/tmp");
+  boost::filesystem::remove_all(TEST_DYNAMIC_DATADIR + "/tmp");
+  boost::filesystem::create_directory(TEST_DYNAMIC_DATADIR + "/tmp");
 
   std::string staticDataDir =
     boost::filesystem::canonical(TEST_STATIC_DATADIR).native();
   std::string dynamicDataDir =
-    boost::filesystem::canonical(TEST_BUILD_DATADIR + "/tmp").native();
+    boost::filesystem::canonical(TEST_DYNAMIC_DATADIR + "/tmp").native();
 
   properties.push_back("/config/datadirectory=" + staticDataDir);
   properties.push_back("/config/configdirectory=" + staticDataDir);

@@ -53,13 +53,11 @@ BOOST_AUTO_TEST_SUITE(Triggers)
 
 static std::string pathSystemUser = "/system/security/users/system";
 
-const char* kDsstestsFilesDirectory = ABS_SRCDIR "/tests/data";
-
 BOOST_FIXTURE_TEST_CASE(testSpeed, DSSInstanceFixture) {
   PropertyParser parser;
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   PropertyNodePtr prop = propSystem.createProperty("/");
-  BOOST_CHECK_EQUAL(true, parser.loadFromXML(std::string(kDsstestsFilesDirectory) + std::string("/speed_triggers.xml"), prop));
+  BOOST_CHECK(parser.loadFromXML(TEST_STATIC_DATADIR + "/speed_triggers.xml", prop));
   Security &security = DSS::getInstance()->getSecurity();
 
   {
@@ -104,8 +102,7 @@ BOOST_FIXTURE_TEST_CASE(testRateLimit, DSSInstanceFixture) {
   PropertyParser parser;
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
-  parser.loadFromXML(kDsstestsFilesDirectory + std::string("/rate_triggers.xml"),
-                     propSystem.createProperty("/"));
+  parser.loadFromXML(TEST_STATIC_DATADIR + "/rate_triggers.xml", propSystem.createProperty("/"));
 
   std::string triggerPath("/scripts/foo/entries/0");
   PropertyNodePtr dampNode = propSystem.getProperty(triggerPath + "/" + ptn_damping);
@@ -140,8 +137,7 @@ BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
   PropertyParser parser;
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
-  parser.loadFromXML(kDsstestsFilesDirectory + std::string("/rate_triggers.xml"),
-                     propSystem.createProperty("/"));
+  parser.loadFromXML(TEST_STATIC_DATADIR + "/rate_triggers.xml", propSystem.createProperty("/"));
 
   // same as referenced by /usr/triggers/0/triggerPath
   std::string triggerPath("/scripts/foo/entries/0");
@@ -183,8 +179,7 @@ BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
   PropertyParser parser;
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
-  parser.loadFromXML(kDsstestsFilesDirectory + std::string("/rate_triggers.xml"),
-                     propSystem.createProperty("/"));
+  parser.loadFromXML(TEST_STATIC_DATADIR + "/rate_triggers.xml", propSystem.createProperty("/"));
 
   PropertyNodePtr triggerNode(propSystem.getProperty("/usr/triggers/0"));
   BOOST_CHECK(triggerNode);
@@ -251,8 +246,7 @@ BOOST_FIXTURE_TEST_CASE(testActionReschedule, DSSInstanceFixture) {
   PropertyParser parser;
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
-  parser.loadFromXML(kDsstestsFilesDirectory + std::string("/rate_triggers.xml"),
-                     propSystem.createProperty("/"));
+  parser.loadFromXML(TEST_STATIC_DATADIR + "/rate_triggers.xml", propSystem.createProperty("/"));
 
   PropertyNodePtr triggerNode(propSystem.getProperty("/usr/triggers/0"));
   BOOST_CHECK(triggerNode);

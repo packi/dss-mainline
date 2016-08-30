@@ -19,13 +19,18 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
-
 #ifndef __DSS_LIFE_CYCLE__
 #define __DSS_LIFE_CYCLE__
 
 #include "dss.h"
 
 namespace dss {
+
+// test files under source control
+extern const std::string TEST_STATIC_DATADIR;
+
+// generated files shall go here
+extern const std::string TEST_DYNAMIC_DATADIR;
 
 /**
  * DSSInstanceFixture - RAII like management of DSS instance
