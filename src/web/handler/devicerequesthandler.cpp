@@ -47,7 +47,6 @@
 #include "jsonhelper.h"
 #include "util.h"
 #include "propertyquery.h"
-#include "vdc-element-reader.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/protobufjson.h"
 #include "src/vdc-element-reader.h"
@@ -2023,7 +2022,7 @@ namespace dss {
       VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
       json.add("customActions");
-      ProtobufToJSon::processElements(reader["customActions"].childElements(), json);
+      ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
@@ -2034,14 +2033,15 @@ namespace dss {
       VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
       json.add("states");
-      ProtobufToJSon::processElements(reader["deviceStates"].childElements(), json);
+      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
       json.add("sensors");
-      ProtobufToJSon::processElements(reader["sensorStates"].childElements(), json);
+      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
       json.add("properties");
-      ProtobufToJSon::processElements(reader["deviceProperties"].childElements(), json);
+      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
       return json.successJSON();
     } else if (_request.getMethod() == "setProperty") {
-      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=f5.55
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=name&value="new name"
       std::string id;
       if (!_request.getParameter("id", id)) {
         return JSONWriter::failure("missing parameter: id");
@@ -2050,12 +2050,12 @@ namespace dss {
       if (!_request.getParameter("value", value) ) {
         return JSONWriter::failure("missing parameter: value");
       }
-      vdcapi::PropertyElement element = PropertyQuery::parseValueToVdcapiElement(value);
+      vdcapi::PropertyElement element = ProtobufToJSon::jsonToElement(value);
       element.set_name(id);
       pDevice->setProperty(element);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setCustomAction") {
-      // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params=(duration=i17)
+      // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params={"duration":17}
       std::string id;
       if (!_request.getParameter("id", id)) {
         return JSONWriter::failure("missing parameter: id");
@@ -2073,11 +2073,8 @@ namespace dss {
         if (!_request.getParameter("params", params) ) {
           return JSONWriter::failure("missing parameter: params");
         }
-        parsedParamsElement = PropertyQuery::parseToVdcapiElement(params);
-        if (parsedParamsElement.elements_size() != 1) {
-          return JSONWriter::failure("Expecting exactly one group in parameter params");
-        }
-        paramsElement = &parsedParamsElement.elements(0);
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+        paramsElement = &parsedParamsElement;
       }
       pDevice->setCustomAction(id, title, action, *paramsElement);
       return JSONWriter::success();

@@ -44,6 +44,12 @@ namespace dss {
     static void processElements(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
                                 JSONWriter& _writer);
 
+    /// Converts PropertyValues to native json types, elements to json object if first element has name
+    static void processElementsPretty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
+                                JSONWriter& _writer);
+
+    static vdcapi::PropertyElement jsonToElement(const std::string& jsonText);
+
   private:
     // can not be instantiated
     ProtobufToJSon();
