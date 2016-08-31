@@ -53,7 +53,7 @@ namespace dss {
       }
 
       SQLite3 sqlite(database, false);
-      SQLite3::query_result q = sqlite.query(sql);
+      SQLite3::query_result q = sqlite.prepare(sql).fetchAll();
 
       JSONWriter json;
       json.startArray("data");
