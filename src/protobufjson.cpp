@@ -19,10 +19,10 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "protobufjson.h"
 #include "base.h"
 #include "foreach.h"
 #include "logger.h"
-#include "protobufjson.h"
 #include <boost/scope_exit.hpp>
 #include <boost/algorithm/string.hpp>
 #include <google/protobuf/descriptor.h>
