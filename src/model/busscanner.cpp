@@ -358,22 +358,6 @@ namespace dss {
 
     if (_dsMeter && _dsMeter->getBusMemberType() == BusMember_vDC) {
       dev->setVdcDevice(true);
-      try {
-        VdsdSpec_t props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
-        dev->setVdcHardwareModelGuid(props.hardwareModelGuid);
-        dev->setVdcModelUID(props.modelUID);
-        dev->setVdcVendorGuid(props.vendorGuid);
-        dev->setVdcOemGuid(props.oemGuid);
-        dev->setVdcOemModelGuid(props.oemModelGuid);
-        dev->setVdcConfigURL(props.configURL);
-        dev->setVdcHardwareGuid(props.hardwareGuid);
-        dev->setVdcHardwareInfo(props.hardwareInfo);
-        dev->setVdcHardwareVersion(props.hardwareVersion);
-        dev->setVdcModelFeatures(props.modelFeatures);
-      } catch (const std::runtime_error &e) {
-        log("VdcDataQuery: could not query properties from " +
-          dsuid2str(dev->getDSID()) + ", Message: " + e.what(), lsWarning);
-      }
     }
 
     DeviceReference devRef(dev, &m_Apartment);
@@ -466,6 +450,18 @@ namespace dss {
     }
 
     if (dev->isVdcDevice()) {
+      VdsdSpec_t props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
+      dev->setVdcHardwareModelGuid(props.hardwareModelGuid);
+      dev->setVdcModelUID(props.modelUID);
+      dev->setVdcVendorGuid(props.vendorGuid);
+      dev->setVdcOemGuid(props.oemGuid);
+      dev->setVdcOemModelGuid(props.oemModelGuid);
+      dev->setVdcConfigURL(props.configURL);
+      dev->setVdcHardwareGuid(props.hardwareGuid);
+      dev->setVdcHardwareInfo(props.hardwareInfo);
+      dev->setVdcHardwareVersion(props.hardwareVersion);
+      dev->setVdcModelFeatures(props.modelFeatures);
+
       //TODO(soon): replace hard coded `states` by database lookup by dev->getVdcOemModelGuid()
       std::vector<DeviceStateSpec_t> states;
       {
