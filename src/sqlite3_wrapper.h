@@ -27,6 +27,8 @@
 #include <string>
 #include <map>
 #include <vector>
+
+#include <boost/move/unique_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -40,7 +42,6 @@ public:
   ///
   /// If the database does not exist, it will be automatically created.
   SQLite3(std::string db_file, bool readwrite = false);
-  ~SQLite3();
 
   /// \brief represents a "column cell" in the table, first pair element is
   /// the column name, second pair element is the actual value
@@ -74,8 +75,15 @@ public:
   /// \param quotes adds quotes around the string (convenience parameter)
   std::string escape(std::string str, bool quotes = false);
 
+  operator ::sqlite3*() { return m_ptr.get(); }
+  ///< Default cast to raw sqlite3*.
+  ///< Allows to use this class in sqlite3 api not wrapped here.
 private:
-  sqlite3 *m_db;
+  struct Deleter {
+    void operator()(::sqlite3*);
+  };
+  boost::movelib::unique_ptr<sqlite3, Deleter> m_ptr;
+
   boost::mutex m_mutex;
 
   void execInternal(std::string sql);
