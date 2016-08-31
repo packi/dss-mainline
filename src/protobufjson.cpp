@@ -52,12 +52,12 @@ namespace dss {
                                        JSONWriter& _writer) {
     _writer.startArray();
     for (int i = 0; i < _elements.size(); ++i) {
-      ::vdcapi::PropertyElement tempElement = _elements.Get(i);
+      const ::vdcapi::PropertyElement& tempElement = _elements.Get(i);
 
       if (tempElement.has_value()) {
 
         _writer.startObject();
-        vdcapi::PropertyValue value = tempElement.value();
+        const vdcapi::PropertyValue& value = tempElement.value();
 
         if (tempElement.name().size() > 0) {
           _writer.add("name", tempElement.name().c_str());
