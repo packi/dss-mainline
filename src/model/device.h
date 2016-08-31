@@ -295,6 +295,7 @@ namespace dss {
     std::string m_VdcHardwareVersion;
     std::string m_VdcIconPath;
     boost::shared_ptr<std::vector<int> > m_VdcModelFeatures;
+    bool m_hasActions;
 
     DeviceValveType_t m_ValveType;
 
@@ -701,6 +702,9 @@ namespace dss {
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
     void setVdcModelFeatures(const boost::shared_ptr<std::vector<int> >& _value) { m_VdcModelFeatures = _value; }
     const boost::shared_ptr<std::vector<int> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
+
+    void setHasActions(bool x) { m_hasActions = x; }
+    bool getHasActions() const { return m_hasActions; }
 
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;

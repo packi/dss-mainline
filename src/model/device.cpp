@@ -103,6 +103,7 @@ namespace dss {
     m_OemProductIcon(),
     m_OemProductURL(),
     m_isVdcDevice(false),
+    m_hasActions(false),
     m_ValveType(DEVICE_VALVE_UNKNOWN),
     m_IsConfigLocked(false),
     m_binaryInputCount(0),
@@ -283,6 +284,8 @@ namespace dss {
 
     m_pPropertyNode->createProperty("isVdcDevice")
       ->linkToProxy(PropertyProxyReference<bool>(m_isVdcDevice, false));
+    m_pPropertyNode->createProperty("hasActions")
+      ->linkToProxy(PropertyProxyReference<bool>(m_hasActions, false));
     publishVdcToPropertyTree();
 
     m_pPropertyNode->createProperty("lastKnownZoneID")

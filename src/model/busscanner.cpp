@@ -464,14 +464,18 @@ namespace dss {
 
       //TODO(soon): replace hard coded `states` by database lookup by dev->getVdcOemModelGuid()
       std::vector<DeviceStateSpec_t> states;
-      {
+      bool hasActions = false;
+      const std::string& oemEan = dev->getOemEanAsString();
+      if (oemEan == "7640156791914") { // vzughome:MSLQ#12003123456
         states.push_back(DeviceStateSpec_t());
         DeviceStateSpec_t& state = states.back();
         state.Name = "operation";
         state.Values.push_back("active");
         state.Values.push_back("idle");
+        hasActions = true;
       }
       dev->initStates(dev, states);
+      dev->setHasActions(hasActions);
     }
 
     // synchronize sensor configuration
