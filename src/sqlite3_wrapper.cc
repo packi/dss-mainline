@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "sqlite3_wrapper.h"
+#include "src/logger.h"
 
 namespace dss {
 
@@ -68,32 +69,42 @@ SQLite3::SQLite3(std::string db_file, bool readwrite)
   }
 }
 
-SQLite3::query_result SQLite3::query(std::string q)
-{
-  sqlite3_stmt *statement;
+void SqlStatement::Deleter::operator()(::sqlite3_stmt* ptr) {
+  sqlite3_finalize(ptr);
+}
 
-  int ret;
-
-  boost::mutex::scoped_lock lock(m_mutex);
-  SQLite3::query_result results;
-
-  ret = sqlite3_prepare_v2(*this, q.c_str(), -1, &statement, 0);
+SqlStatement::SqlStatement(SQLite3& db, const std::string &sql) : m_db(db) {
+  boost::mutex::scoped_lock lock(m_db.m_mutex);
+  sqlite3_stmt* ptr = NULL;
+  const char *rem = NULL;
+  int ret = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &ptr, &rem);
+  m_ptr.reset(ptr); // call sqlite3_finalize in every case
   if (ret != SQLITE_OK) {
-    std::string msg = sqlite3_errmsg(*this);
-    throw std::runtime_error(msg);
+    throw std::runtime_error(sqlite3_errstr(ret));
   }
 
-  int columns = sqlite3_column_count(statement);
+  if (rem && *rem != '\0') {
+    Logger::getInstance()->log("sqlite3_wrapper: possible sql injection: '" + std::string(rem) + "'", lsWarning);
+  }
+}
+
+SQLite3::query_result SqlStatement::fetchAll()
+{
+  SQLite3::query_result results;
+  int ret;
+
+  boost::mutex::scoped_lock lock(m_db.m_mutex);
+  int columns = sqlite3_column_count(*this);
   do {
-    ret = sqlite3_step(statement);
+    ret = sqlite3_step(*this);
     if (ret == SQLITE_ROW) {
       results.push_back(SQLite3::row_result());
       SQLite3::row_result &row(results.back());
 
       for (int i = 0; i < columns; i++) {
-        int type = sqlite3_column_type(statement, i);
-        const unsigned char *text = sqlite3_column_text(statement, i);
-        std::string name = sqlite3_column_name(statement, i);
+        int type = sqlite3_column_type(*this, i);
+        const unsigned char *text = sqlite3_column_text(*this, i);
+        std::string name = sqlite3_column_name(*this, i);
         std::string data = text ? (const char *)text : "";
 
         row.push_back(SQLite3::cell());
@@ -106,7 +117,9 @@ SQLite3::query_result SQLite3::query(std::string q)
     }
   } while (ret == SQLITE_ROW);
 
-  sqlite3_finalize(statement);
+  if (ret != SQLITE_DONE) {
+    Logger::getInstance()->log("sqlite3_wrapper: sqlite3_step ret:" + std::string(sqlite3_errstr(ret)), lsWarning);
+  }
 
   return results;
 }

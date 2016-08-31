@@ -35,6 +35,8 @@
 namespace dss
 {
 
+class SqlStatement;
+
 class SQLite3 {
 
 public:
@@ -60,7 +62,7 @@ public:
   /// \brief Send a query to the database
   /// \param q valid SQL query like:
   ///     "SELECT \"value\" FROM \"dsa_internal\" where \"key\" = \"version\";
-  query_result query(std::string q);
+  SqlStatement prepare(const std::string &sql);
 
   /// \brief Execute SQL on the active database, no response expected.
   ///
@@ -87,7 +89,33 @@ private:
   boost::mutex m_mutex;
 
   void execInternal(std::string sql);
+
+  friend class SqlStatement;
 };
+
+class SqlStatement {
+public:
+  SqlStatement(SQLite3& db, const std::string &sql);
+  SqlStatement(const SqlStatement &that);
+
+  bool bind(int index, const std::string &arg);
+  SQLite3::query_result fetchAll();
+
+  operator sqlite3_stmt*() { return m_ptr.get(); }
+  ///< Default cast to raw sqlite3_stmt*.
+  ///< Allows to use this class in sqlite3 api not wrapped here
+
+private:
+  struct Deleter {
+    void operator()(::sqlite3_stmt*);
+  };
+  boost::movelib::unique_ptr<sqlite3_stmt, Deleter> m_ptr;
+  SQLite3 &m_db; // needed for m_lock
+};
+
+inline SqlStatement SQLite3::prepare(const std::string &sql) {
+  return SqlStatement(*this, sql);
+}
 
 } // namespace
 

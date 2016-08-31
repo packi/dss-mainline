@@ -51,7 +51,7 @@ BOOST_FIXTURE_TEST_CASE(testSimple, DSSInstanceFixture) {
   slurp(stmts, TEST_STATIC_DATADIR + "/db-fetch-ok.sql");
 
   db.exec(stmts);
-  SQLite3::query_result res = db.query("SELECT name FROM foo where id = 7");
+  SQLite3::query_result res = db.prepare("SELECT name FROM foo where id = 7").fetchAll();
   BOOST_CHECK_EQUAL(res.size(), 1);
   BOOST_CHECK_EQUAL(res[0][0].data, "bar");
 }
