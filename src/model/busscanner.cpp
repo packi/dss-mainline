@@ -474,6 +474,19 @@ namespace dss {
         state.Values.push_back("idle");
         hasActions = true;
       }
+      if (oemEan == "7640156791945") { // ikettle
+        states.push_back(DeviceStateSpec_t());
+        {
+          DeviceStateSpec_t& state = states.back();
+          state.Name = "operation";
+          state.Values.push_back("cooldown"); //just guessing. deviceStateDescriptions
+          state.Values.push_back("heating");
+          state.Values.push_back("keepwarm");
+          state.Values.push_back("ready");
+          state.Values.push_back("removed");
+        }
+        hasActions = true;
+      }
       dev->initStates(dev, states);
       dev->setHasActions(hasActions);
     }
