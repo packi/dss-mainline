@@ -2170,25 +2170,31 @@ namespace dss {
 
     BOOST_FOREACH(const DeviceStateSpec_t& stateSpec, stateSpecs) {
       const std::string& stateName = stateSpec.Name;
-      boost::shared_ptr<State> state = boost::make_shared<State>(me, stateName);
-      std::vector<std::string> values;
-      values.push_back(State::INVALID);
-      values.insert(values.end(), stateSpec.Values.begin(), stateSpec.Values.end());
-      state->setValueRange(values);
       try {
-        getApartment().allocateState(state);
-      } catch (ItemDuplicateException& ex) {
-        state = getApartment().getNonScriptState(stateName);
-      }
-      m_states[stateName] = state;
-
-      if (m_pPropertyNode != NULL) {
-        PropertyNodePtr entry = node->createProperty(stateName);
-        PropertyNodePtr stateValueNode = state->getPropertyNode()->getProperty("value");
-        if (stateValueNode != NULL) {
-          PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
-          stateValueAlias->alias(stateValueNode);
+        boost::shared_ptr<State> state = boost::make_shared<State>(me, stateName);
+        std::vector<std::string> values;
+        values.push_back(State::INVALID);
+        values.insert(values.end(), stateSpec.Values.begin(), stateSpec.Values.end());
+        state->setValueRange(values);
+        try {
+          getApartment().allocateState(state);
+        } catch (ItemDuplicateException& ex) {
+          state = getApartment().getNonScriptState(state->getName());
         }
+        m_states[stateName] = state;
+
+        if (m_pPropertyNode != NULL) {
+          PropertyNodePtr entry = node->createProperty(stateName);
+          PropertyNodePtr stateValueNode = state->getPropertyNode()->getProperty("value");
+          if (stateValueNode != NULL) {
+            PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
+            stateValueAlias->alias(stateValueNode);
+          }
+        }
+      } catch (std::runtime_error& ex) {
+          Logger::getInstance()->log("Device::initStates:" + dsuid2str(m_DSID)
+              + " state:" + stateName + " what:" + ex.what(), lsError);
+          throw ex;
       }
     }
   }
@@ -2206,25 +2212,37 @@ namespace dss {
   }
 
   void Device::setStateValue(const std::string& name, const std::string& value) {
-    Logger::getInstance()->log("setStateValue name:" + name + " value:" + value, lsDebug);
-    BOOST_FOREACH(const States::value_type& state, m_states) {
-      if (state.first == name) {
-        state.second->setState(coDsmApi, value);
+    Logger::getInstance()->log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
+    try {
+      BOOST_FOREACH(const States::value_type& state, m_states) {
+        if (state.first == name) {
+          state.second->setState(coDsmApi, value);
+        }
       }
+    } catch(std::runtime_error& e) {
+      Logger::getInstance()->log("Device::setStateValue name:" + name
+          + " value:" + value + " what:" + e.what(), lsWarning);
     }
   }
 
   void Device::setStateValues(const std::vector<std::pair<std::string, std::string> >& values) {
-    BOOST_FOREACH(const States::value_type& state, m_states) {
+    BOOST_FOREACH(const States::value_type& statePair, m_states) {
       const std::string* newValue = &State::INVALID;
-      typedef std::pair<std::string, std::string> StringStringPair;
-      BOOST_FOREACH(const StringStringPair& value, values) {
-        if (state.first == value.first) {
-          newValue = &(value.second);
-          break;
+      const std::string& stateName = statePair.first;
+      try {
+        typedef std::pair<std::string, std::string> StringStringPair;
+        BOOST_FOREACH(const StringStringPair& value, values) {
+          if (stateName == value.first) {
+            newValue = &(value.second);
+            break;
+          }
         }
+        Logger::getInstance()->log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
+        statePair.second->setState(coDsmApi, *newValue);
+      } catch(std::runtime_error& e) {
+        Logger::getInstance()->log("Device::setStateValues name:" + stateName
+            + " value:" + *newValue + " what:" + e.what(), lsWarning);
       }
-      state.second->setState(coDsmApi, *newValue);
     }
   }
 
