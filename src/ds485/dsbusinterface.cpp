@@ -1004,11 +1004,11 @@ namespace dss {
     // Traverse vdcapi puspProperty message and generate model events for each change
     vdcapi::Message message;
     if (!message.ParseFromArray(_responsePtr, _responseSize)) {
-        log("handleUserPropertyEvent parse failed", lsWarning);
+        log("handleUserPropertyEvent parse failed responseSize:" + intToString(_responseSize), lsError);
         return;
     }
     if (message.type() != vdcapi::VDC_SEND_PUSH_PROPERTY) {
-        log("handleUserPropertyEvent received invalid message" + intToString(message.type()), lsWarning);
+        log("handleUserPropertyEvent received invalid message" + intToString(message.type()), lsError);
         return;
     }
     log("handleUserPropertyEvent" + message.DebugString(), lsInfo);
