@@ -18,7 +18,8 @@ BOOST_FIXTURE_TEST_SUITE(SensorDataUploaderTest, DSSInstanceFixture);
 
 struct EventFactory {
   enum {
-    EventLimit = 10000,
+    // affects the size of the stack, due to recursion in tests cases
+    EventLimit = 2000,
   };
   void emit_priority_events(boost::shared_ptr<SensorLog> s, int count)
   {
@@ -306,6 +307,7 @@ BOOST_AUTO_TEST_CASE(test_sensor_data_trickle_high_prio) {
   f.emit_priority_events(s, 1);
 
   // will never stop until EventFactory limit reached
+  // NOTE: migth crash the stack due to deep recursion
   BOOST_CHECK_EQUAL(mu.m_events.size(),
                     static_cast<size_t>(EventFactory::EventLimit));
 }
