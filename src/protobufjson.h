@@ -35,15 +35,20 @@ namespace dss {
   class ProtobufToJSon
   {
   public:
-    static bool protoPropertyToJson(const vdcapi::Message& _message,
+    static void protoPropertyToJson(const vdcapi::Message& _message,
                                     JSONWriter& _writer);
 
-  private:
     static void processGenericResponse(const ::vdcapi::GenericResponse& _response,
                                        JSONWriter& _writer);
 
     static void processElements(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
                                 JSONWriter& _writer);
+
+    /// Converts PropertyValues to native json types, elements to json object if first element has name
+    static void processElementsPretty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
+                                JSONWriter& _writer);
+
+    static vdcapi::PropertyElement jsonToElement(const std::string& jsonText);
 
   private:
     // can not be instantiated
@@ -66,16 +71,16 @@ namespace dss {
     static ProtoData convertPropertyContainerToProtobuf(std::vector<PropertyContainer> _parts);
 
     static vdcapi::Message propertyContainerToProtobuf(const bool _bSetProperty,
-                                                       std::vector<PropertyContainer> _parts,
+                                                       const std::vector<PropertyContainer>& _parts,
                                                        const dsuid_t& _deviceDsuid);
 
-  private:
     static void assignValue(vdcapi::PropertyElement* _element,
                             std::string& _value);
 
     static void setupMessage(vdcapi::PropertyElement* _rootProp,
                              std::vector<PropertyContainer> _parts);
 
+  private:
     static void startSetupMessage(vdcapi::vdsm_RequestSetProperty* _prop,
                                   std::vector<PropertyContainer> _parts);
 

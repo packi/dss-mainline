@@ -50,7 +50,8 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/event.h"
-#include "src/messages/vdcapi.pb.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/vdc-element-reader.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -102,6 +103,7 @@ namespace dss {
     m_OemProductIcon(),
     m_OemProductURL(),
     m_isVdcDevice(false),
+    m_hasActions(false),
     m_ValveType(DEVICE_VALVE_UNKNOWN),
     m_IsConfigLocked(false),
     m_binaryInputCount(0),
@@ -282,6 +284,8 @@ namespace dss {
 
     m_pPropertyNode->createProperty("isVdcDevice")
       ->linkToProxy(PropertyProxyReference<bool>(m_isVdcDevice, false));
+    m_pPropertyNode->createProperty("hasActions")
+      ->linkToProxy(PropertyProxyReference<bool>(m_hasActions, false));
     publishVdcToPropertyTree();
 
     m_pPropertyNode->createProperty("lastKnownZoneID")
@@ -2152,6 +2156,100 @@ namespace dss {
     m_binaryInputStates.clear();
   }
 
+  void Device::initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& stateSpecs) {
+    if (stateSpecs.empty()) {
+      return;
+    }
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    PropertyNodePtr node;
+    if (m_pPropertyNode != NULL) {
+      node = m_pPropertyNode->getPropertyByName("states");
+      if (node != NULL) {
+        node->getParentNode()->removeChild(node);
+      }
+      node = m_pPropertyNode->createProperty("states");
+    }
+    m_states.clear();
+
+    BOOST_FOREACH(const DeviceStateSpec_t& stateSpec, stateSpecs) {
+      const std::string& stateName = stateSpec.Name;
+      try {
+        boost::shared_ptr<State> state = boost::make_shared<State>(me, stateName);
+        std::vector<std::string> values;
+        values.push_back(State::INVALID);
+        values.insert(values.end(), stateSpec.Values.begin(), stateSpec.Values.end());
+        state->setValueRange(values);
+        try {
+          getApartment().allocateState(state);
+        } catch (ItemDuplicateException& ex) {
+          state = getApartment().getNonScriptState(state->getName());
+        }
+        m_states[stateName] = state;
+
+        if (m_pPropertyNode != NULL) {
+          PropertyNodePtr entry = node->createProperty(stateName);
+          PropertyNodePtr stateValueNode = state->getPropertyNode()->getProperty("value");
+          if (stateValueNode != NULL) {
+            PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
+            stateValueAlias->alias(stateValueNode);
+          }
+        }
+      } catch (std::runtime_error& ex) {
+          Logger::getInstance()->log("Device::initStates:" + dsuid2str(m_DSID)
+              + " state:" + stateName + " what:" + ex.what(), lsError);
+          throw ex;
+      }
+    }
+  }
+
+  void Device::clearStates() {
+    boost::mutex::scoped_lock lock(m_deviceMutex);
+    BOOST_FOREACH(const States::value_type& state, m_states) {
+      try {
+        m_pApartment->removeState(state.second);
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
+      }
+    }
+    m_states.clear();
+  }
+
+  void Device::setStateValue(const std::string& name, const std::string& value) {
+    Logger::getInstance()->log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
+    try {
+      BOOST_FOREACH(const States::value_type& state, m_states) {
+        if (state.first == name) {
+          state.second->setState(coDsmApi, value);
+        }
+      }
+    } catch(std::runtime_error& e) {
+      Logger::getInstance()->log("Device::setStateValue name:" + name
+          + " value:" + value + " what:" + e.what(), lsWarning);
+    }
+  }
+
+  void Device::setStateValues(const std::vector<std::pair<std::string, std::string> >& values) {
+    BOOST_FOREACH(const States::value_type& statePair, m_states) {
+      const std::string* newValue = &State::INVALID;
+      const std::string& stateName = statePair.first;
+      try {
+        typedef std::pair<std::string, std::string> StringStringPair;
+        BOOST_FOREACH(const StringStringPair& value, values) {
+          if (stateName == value.first) {
+            newValue = &(value.second);
+            break;
+          }
+        }
+        Logger::getInstance()->log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
+        statePair.second->setState(coDsmApi, *newValue);
+      } catch(std::runtime_error& e) {
+        Logger::getInstance()->log("Device::setStateValues name:" + stateName
+            + " value:" + *newValue + " what:" + e.what(), lsWarning);
+      }
+    }
+  }
+
+
   void Device::assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state) {
     // Window Tilt Binary Input
     if (inputType == BinaryInputIDWindowTilt) {
@@ -2963,6 +3061,71 @@ namespace dss {
     param0->set_name("id");
     param0->mutable_value()->set_v_string(actionId);
     deviceBusInterface->genericRequest(*this, "callAction", params);
+  }
+
+  void Device::setProperty(const vdcapi::PropertyElement& propertyElement) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> setPropertyParams;
+    vdcapi::PropertyElement* devicePropertiesElement = setPropertyParams.Add();
+    devicePropertiesElement->set_name("deviceProperties");
+    *devicePropertiesElement->add_elements() = propertyElement;
+    deviceBusInterface->setProperty(*this, setPropertyParams);
+  }
+
+  void Device::setCustomAction(const std::string& id, const std::string& title, const std::string& action,
+                               const vdcapi::PropertyElement& actionParams) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    if (!beginsWith(id, "custom.")) {
+      throw std::runtime_error("Custom action id must start with 'custom.'");
+    }
+
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> setPropertyParams;
+    vdcapi::PropertyElement* customActionsElement = setPropertyParams.Add();
+    customActionsElement->set_name("customActions");
+    vdcapi::PropertyElement* actionElement = customActionsElement->add_elements();
+    actionElement->set_name(id);
+    if (!action.empty()) { // empty action means remove
+      {
+        vdcapi::PropertyElement* element = actionElement->add_elements();
+        element->set_name("title");
+        element->mutable_value()->set_v_string(title);
+      }
+      {
+        vdcapi::PropertyElement* element = actionElement->add_elements();
+        element->set_name("action");
+        element->mutable_value()->set_v_string(action);
+      }
+      {
+        vdcapi::PropertyElement* element = actionElement->add_elements();
+        element->set_name("params");
+        *element->mutable_elements() = actionParams.elements();
+      }
+    }
+    deviceBusInterface->setProperty(*this, setPropertyParams);
+  }
+
+  vdcapi::Message Device::getVdcProperty(
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("CallAction can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    return deviceBusInterface->getProperty(*this, query);
   }
 
 } // namespace dss

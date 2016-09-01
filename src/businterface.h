@@ -44,6 +44,7 @@ namespace google {
 }
 namespace vdcapi {
   class PropertyElement;
+  class Message;
 }
 
 namespace dss {
@@ -91,6 +92,11 @@ namespace dss {
     uint8_t InputType;
     uint8_t InputID;
   } DeviceBinaryInputSpec_t;
+
+  typedef struct {
+    std::string Name;
+    std::vector<std::string> Values;
+  } DeviceStateSpec_t;
 
   typedef struct {
     uint8_t Index;
@@ -277,6 +283,11 @@ namespace dss {
     /** Invokes generic request on vdc device and waits for reply. */
     virtual void genericRequest(const Device& _device, const std::string& methodName,
                                 const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params) = 0;
+
+    virtual void setProperty(const Device& _device,
+                                    const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) = 0;
+    virtual vdcapi::Message getProperty(const Device& _device,
+                                    const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) = 0;
 
     virtual ~DeviceBusInterface() {}; // please the compiler (virtual dtor)
   }; // DeviceBusInterface

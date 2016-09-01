@@ -343,6 +343,11 @@ namespace dss {
                                                             uint16_t _stateMask,
                                                             uint16_t _stateValue);
 
+    static void handleUserPropertyEventCallback(uint8_t errorCode, void* arg, dsuid_t sourceId, dsuid_t destinationId,
+                                          uint16_t responseSize, const uint8_t *responsePtr);
+    void handleUserPropertyEvent(const dsuid_t& _sourceId, const dsuid_t& _destinationId,
+                            uint16_t _responseSize, const uint8_t *_responsePtr);
+
   protected:
     virtual void doStart();
   public:

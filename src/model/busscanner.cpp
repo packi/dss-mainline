@@ -449,6 +449,48 @@ namespace dss {
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);
     }
 
+    if (dev->isVdcDevice()) {
+      VdsdSpec_t props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
+      dev->setVdcHardwareModelGuid(props.hardwareModelGuid);
+      dev->setVdcModelUID(props.modelUID);
+      dev->setVdcVendorGuid(props.vendorGuid);
+      dev->setVdcOemGuid(props.oemGuid);
+      dev->setVdcOemModelGuid(props.oemModelGuid);
+      dev->setVdcConfigURL(props.configURL);
+      dev->setVdcHardwareGuid(props.hardwareGuid);
+      dev->setVdcHardwareInfo(props.hardwareInfo);
+      dev->setVdcHardwareVersion(props.hardwareVersion);
+      dev->setVdcModelFeatures(props.modelFeatures);
+
+      //TODO(soon): replace hard coded `states` by database lookup by dev->getVdcOemModelGuid()
+      std::vector<DeviceStateSpec_t> states;
+      bool hasActions = false;
+      const std::string& oemEan = dev->getOemEanAsString();
+      if (oemEan == "7640156791914") { // vzughome:MSLQ#12003123456
+        states.push_back(DeviceStateSpec_t());
+        DeviceStateSpec_t& state = states.back();
+        state.Name = "operation";
+        state.Values.push_back("active");
+        state.Values.push_back("idle");
+        hasActions = true;
+      }
+      if (oemEan == "7640156791945") { // ikettle
+        states.push_back(DeviceStateSpec_t());
+        {
+          DeviceStateSpec_t& state = states.back();
+          state.Name = "operation";
+          state.Values.push_back("cooldown"); //just guessing. deviceStateDescriptions
+          state.Values.push_back("heating");
+          state.Values.push_back("keepwarm");
+          state.Values.push_back("ready");
+          state.Values.push_back("removed");
+        }
+        hasActions = true;
+      }
+      dev->initStates(dev, states);
+      dev->setHasActions(hasActions);
+    }
+
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
       dev->setSensors(dev, _spec.sensorInputs);
@@ -1105,12 +1147,12 @@ namespace dss {
       }
     } else if (m_dsm != NULL) {
       Set D = m_dsm->getDevices();
-      BinaryInputDeviceFilter filter;
+      BinaryInputOrStateDeviceFilter filter;
       D.perform(filter);
       devices = filter.getDeviceList();
     } else {
       Set D = m_pApartment->getDevices();
-      BinaryInputDeviceFilter filter;
+      BinaryInputOrStateDeviceFilter filter;
       D.perform(filter);
       devices = filter.getDeviceList();
     }
@@ -1159,13 +1201,14 @@ namespace dss {
       } else {
         // IP Device
         try {
-          std::map<int,int64_t> sInput;
-          sInput = VdcHelper::getStateInputValue(dsm->getDSID(), dev->getDSID(), -1);
+          VdcHelper::State state = VdcHelper::getState(dsm->getDSID(), dev->getDSID());
+          const std::map<int,int64_t>& sInput = state.binaryInputStates;
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state response fields = " + intToString(sInput.size()), lsDebug);
           for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
             dev->handleBinaryInputEvent(it->first, it->second);
           }
+          dev->setStateValues(state.deviceStates);
         } catch (std::runtime_error& e) {
           Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
               " failure: " + e.what(), lsWarning);

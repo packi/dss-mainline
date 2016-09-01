@@ -502,6 +502,46 @@ namespace dss {
     }
   }
 
+  void SystemEventActionExecute::executeDeviceAction(PropertyNodePtr _actionNode) {
+    try {
+      std::string id;
+      PropertyNodePtr idNode = _actionNode->getPropertyByName("id");
+      if (idNode == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                "executeDeviceAction: missing parameter id", lsError);
+        return;
+      } else {
+        id = idNode->getStringValue();
+      }
+
+      boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
+      if (target == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                 "executeDeviceScene: could not call scene on device - device "
+                 "was not found", lsError);
+        return;
+      }
+
+      target->callAction(id);
+
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeDeviceAction: execution not allowed: " +
+                    std::string(e.what()));
+      if (DSS::hasInstance()) {
+        boost::shared_ptr<Event> pEvent;
+        pEvent = createActionDenied("device-action",
+                                    getActionName(_actionNode),
+                                    m_properties.get("source-name", ""),
+                                    e.what());
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::executeDeviceAction failed: "
+          + std::string(e.what()));
+    }
+  }
+
   void SystemEventActionExecute::executeZoneBlink(PropertyNodePtr _actionNode) {
     try {
       int zoneId;
@@ -746,6 +786,9 @@ namespace dss {
           return ACTION_DURATION_DEVICE_VALUE;
         } else if (sActionType == "device-blink") {
           executeDeviceBlink(_actionNode);
+          return ACTION_DURATION_DEVICE_BLINK;
+        } else if (sActionType == "device-action") {
+          executeDeviceAction(_actionNode);
           return ACTION_DURATION_DEVICE_BLINK;
         } else if (sActionType == "zone-blink") {
           executeZoneBlink(_actionNode);

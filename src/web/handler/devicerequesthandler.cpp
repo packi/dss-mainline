@@ -46,6 +46,10 @@
 #include "src/ds485types.h"
 #include "jsonhelper.h"
 #include "util.h"
+#include "propertyquery.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/protobufjson.h"
+#include "src/vdc-element-reader.h"
 
 namespace dss {
 
@@ -2012,13 +2016,68 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       return JSONWriter::failure("TODO");
     } else if (_request.getMethod() == "getInfoCustom") {
-      return JSONWriter::failure("TODO");
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      query.Add()->set_name("customActions");
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+      JSONWriter json;
+      json.add("customActions");
+      ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+      return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
-      return JSONWriter::failure("TODO");
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      query.Add()->set_name("deviceStates");
+      query.Add()->set_name("sensorStates");
+      query.Add()->set_name("deviceProperties");
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+      JSONWriter json;
+      json.add("states");
+      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
+      json.add("sensors");
+      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
+      json.add("properties");
+      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
+      return json.successJSON();
     } else if (_request.getMethod() == "setProperty") {
-      return JSONWriter::failure("TODO");
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=name&value="new name"
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return JSONWriter::failure("missing parameter: id");
+      }
+      std::string value;
+      if (!_request.getParameter("value", value) ) {
+        return JSONWriter::failure("missing parameter: value");
+      }
+      vdcapi::PropertyElement element = ProtobufToJSon::jsonToElement(value);
+      element.set_name(id);
+      pDevice->setProperty(element);
+      return JSONWriter::success();
     } else if (_request.getMethod() == "setCustomAction") {
-      return JSONWriter::failure("TODO");
+      // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params={"duration":17}
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return JSONWriter::failure("missing parameter: id");
+      }
+      std::string action;
+      _request.getParameter("action", action);
+      std::string title;
+      vdcapi::PropertyElement parsedParamsElement;
+      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+      if (!action.empty()) {
+        if (!_request.getParameter("title", title)) {
+          return JSONWriter::failure("missing parameter: title");
+        }
+        std::string params;
+        if (!_request.getParameter("params", params) ) {
+          return JSONWriter::failure("missing parameter: params");
+        }
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+        paramsElement = &parsedParamsElement;
+      }
+      pDevice->setCustomAction(id, title, action, *paramsElement);
+      return JSONWriter::success();
     } else if (_request.getMethod() == "callAction") {
       std::string id;
       if (!_request.getParameter("id", id)) {

@@ -116,6 +116,7 @@ namespace dss {
       void executeDeviceScene(PropertyNodePtr _actionNode);
       void executeDeviceValue(PropertyNodePtr _actionNode);
       void executeDeviceBlink(PropertyNodePtr _actionNode);
+      void executeDeviceAction(PropertyNodePtr _actionNode);
       void executeZoneBlink(PropertyNodePtr _actionNode);
       void executeCustomEvent(PropertyNodePtr _actionNode);
       void executeURL(PropertyNodePtr _actionNode);

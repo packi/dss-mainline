@@ -1193,6 +1193,9 @@ namespace dss {
         onDsmStateChange(pEventWithDSID->getDSID(), event->getParameter(0));
       }
       break;
+    case ModelEvent::etVdceEvent:
+      onVdceEvent(*dynamic_cast<VdceModelEvent*>(event.get()));
+      break;
     default:
       assert(false);
       break;
@@ -2092,7 +2095,7 @@ namespace dss {
           }
           if (newState != oldState) {
             state->setState(coSystem, newState);
-            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
                                                     pDev->getDeviceBinaryInputType(index),
                                                     newState));
           }
@@ -2503,6 +2506,23 @@ namespace dss {
     }
   } // onDsmStateChange
 
+  void ModelMaintenance::onVdceEvent(const VdceModelEvent& event)
+  {
+    try {
+      boost::shared_ptr<Device> pDev = m_pApartment->getDeviceByDSID(event.m_deviceDSID);
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(pDev->getDSID(), &pDev->getApartment());
+
+      BOOST_FOREACH(HashMapStringString::value_type state, event.m_states.getContainer()) {
+        const std::string& name = state.first;
+        const std::string& value = state.second;
+
+        raiseEvent(createDeviceStateEvent(pDevRev, name, value));
+        pDev->setStateValue(name, value);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  }
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner
@@ -2724,23 +2744,14 @@ namespace dss {
   void ModelMaintenance::VdcDataQuery::run()
   {
     try {
-      boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
-      m_Device->setVdcHardwareModelGuid(props->hardwareModelGuid);
-      m_Device->setVdcModelUID(props->modelUID);
-      m_Device->setVdcVendorGuid(props->vendorGuid);
-      m_Device->setVdcOemGuid(props->oemGuid);
-      m_Device->setVdcConfigURL(props->configURL);
-      m_Device->setVdcHardwareGuid(props->hardwareGuid);
-      m_Device->setVdcHardwareInfo(props->hardwareInfo);
-      m_Device->setVdcHardwareVersion(props->hardwareVersion);
-
-      if (beginsWith(props->oemModelGuid, "gs1:")) {
+      const std::string& oemModelGuid = m_Device->getVdcOemModelGuid();
+      if (beginsWith(oemModelGuid, "gs1:")) {
         // For the time being assume that all IP Devices with an oemModelGuid/GTIN
         // are registered at the dS-Article Db. This might be a configurable property in the future.
         const DeviceOEMInetState_t iNetState = DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY;
         try {
           // format of oemModelGuid: gs1:(01)123456789
-          std::string eanString = props->oemModelGuid.substr(4);
+          std::string eanString = oemModelGuid.substr(4);
           if (beginsWith(eanString, "(01)")) {
             eanString.erase(0, 4);
           }
@@ -2757,12 +2768,13 @@ namespace dss {
           m_Device->setOemInfoState(DEVICE_OEM_VALID);
         } catch (std::invalid_argument& e) {
           Logger::getInstance()->log("VdcDataQuery: could not convert gtin for device " +
-              dsuid2str(m_Device->getDSID()) + ", oemModelGuid: " + props->oemModelGuid, lsWarning);
+              dsuid2str(m_Device->getDSID()) + ", oemModelGuid: " + oemModelGuid, lsWarning);
         }
       }
 
       try {
-        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), props->modelUID, props->modelFeatures);
+        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), m_Device->getVdcModelUID(),
+                                                  m_Device->getVdcModelFeatures());
       } catch (std::runtime_error& err) {
         Logger::getInstance()->log("Could not set model features for device " +
             dsuid2str(m_Device->getDSID()) + ", Message: " +

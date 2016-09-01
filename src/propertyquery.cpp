@@ -329,10 +329,22 @@ namespace dss {
         throw std::runtime_error("could not parse response message");
       }
 
-      if (!ProtobufToJSon::protoPropertyToJson(data.message, json)) {
-        throw std::runtime_error("could not parse response message");
-      }
+      ProtobufToJSon::protoPropertyToJson(data.message, json);
     }
   } // vdcquery;
+
+  vdcapi::PropertyElement PropertyQuery::parseToVdcapiElement(const std::string& query) {
+    PropertyQuery x(PropertyNodePtr(), query, false);
+    vdcapi::PropertyElement element;
+    PropertyContainerToProtobuf::setupMessage(&element, x.m_PartList);
+    return element;
+  }
+
+  vdcapi::PropertyElement PropertyQuery::parseValueToVdcapiElement(const std::string& value) {
+    vdcapi::PropertyElement element;
+    std::string valueCopy = value; // assignValue modifies the string
+    PropertyContainerToProtobuf::assignValue(&element, valueCopy);
+    return element;
+  }
 
 } // namespace dss

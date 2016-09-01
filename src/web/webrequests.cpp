@@ -119,6 +119,9 @@ namespace dss {
   void JSONWriter::add(double _value) {
     m_writer.Double(_value);
   }
+  void JSONWriter::addNull() {
+    m_writer.Null();
+  }
   void JSONWriter::startArray(std::string _name) {
     m_writer.String(_name);
     m_writer.StartArray();

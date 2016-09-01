@@ -81,6 +81,7 @@ namespace dss {
       _json.add("VdcHardwareGuid", _device.getDevice()->getVdcHardwareGuid());
       _json.add("VdcHardwareInfo", _device.getDevice()->getVdcHardwareInfo());
       _json.add("VdcHardwareVersion", _device.getDevice()->getVdcHardwareVersion());
+      _json.add("hasActions", bool(_device.getDevice()->getHasActions() ));
     }
     if (_device.getDevice()->isValveDevice()) {
       _json.add("ValveType", _device.getDevice()->getValveTypeAsString());

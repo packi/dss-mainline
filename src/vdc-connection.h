@@ -27,6 +27,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
@@ -73,11 +74,15 @@ namespace dss {
 
   struct VdcHelper
   {
-    static boost::shared_ptr<VdsdSpec_t> getSpec(dsuid_t _vdsm, dsuid_t _device);
+    static VdsdSpec_t getSpec(dsuid_t _vdsm, dsuid_t _device);
     static boost::shared_ptr<VdcSpec_t> getCapabilities(dsuid_t _vdsm);
     static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
 
-    static std::map<int,int64_t> getStateInputValue(dsuid_t _vdsm, dsuid_t _device, int index);
+    struct State {
+      std::map<int,int64_t> binaryInputStates;
+      std::vector<std::pair<std::string, std::string> > deviceStates;
+    };
+    static State getState(dsuid_t _vdsm, dsuid_t _device);
   };
 
 } // namespace
