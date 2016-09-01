@@ -416,16 +416,9 @@ namespace dss {
       int biStateIndex = strToInt(biStateName);
       {
         VdcElementReader reader = biStateReader["error"];
-        if (reader.isValid()) {
+        if (reader.getValueAsInt() != 0) {
             Logger::getInstance()->log("VdcHelper::getStateInputValue: device:" + dsuid2str(_device) +
                 " name:" + biStateName + " error:" + reader.getValueAsString(), lsWarning);
-            continue;
-        }
-      }
-      {
-        VdcElementReader reader = biStateReader["value"];
-        if (reader.isValid()) {
-            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? State_Active : State_Inactive;
             continue;
         }
       }
@@ -433,6 +426,13 @@ namespace dss {
         VdcElementReader reader = biStateReader["extendedValue"];
         if (reader.isValid()) {
             binaryInputStates[biStateIndex] = reader.getValueAsInt();
+            continue;
+        }
+      }
+      {
+        VdcElementReader reader = biStateReader["value"];
+        if (reader.isValid()) {
+            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? State_Active : State_Inactive;
             continue;
         }
       }
