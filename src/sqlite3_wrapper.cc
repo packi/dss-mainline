@@ -31,13 +31,9 @@
 #include <vector>
 
 #include "sqlite3_wrapper.h"
-#include "src/logger.h"
 
-namespace dss {
-
-void SQLite3::Deleter::operator()(::sqlite3* ptr) {
-  sqlite3_close_v2(ptr);
-}
+namespace dss
+{
 
 SQLite3::SQLite3(std::string db_file, bool readwrite)
 {
@@ -54,57 +50,46 @@ SQLite3::SQLite3(std::string db_file, bool readwrite)
   }
 
   int flags = SQLITE_OPEN_FULLMUTEX;
+
   if (readwrite) {
     flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
   } else {
     flags |= SQLITE_OPEN_READONLY;
   }
 
-  sqlite3* ptr = NULL;
-  int ret = sqlite3_open_v2(db_file.c_str(), &ptr, flags, NULL);
-  m_ptr.reset(ptr); // call sqlite3_close_v2 in every case
+  int ret = sqlite3_open_v2(db_file.c_str(), &m_db, flags, NULL);
   if (ret != SQLITE_OK) {
     throw std::runtime_error("Could not open database " + db_file + ": " +
-             sqlite3_errmsg(*this));
+             sqlite3_errmsg(m_db));
   }
 }
 
-void SqlStatement::Deleter::operator()(::sqlite3_stmt* ptr) {
-  sqlite3_finalize(ptr);
-}
-
-SqlStatement::SqlStatement(SQLite3& db, const std::string &sql) : m_db(db) {
-  boost::mutex::scoped_lock lock(m_db.m_mutex);
-  sqlite3_stmt* ptr = NULL;
-  const char *rem = NULL;
-  int ret = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &ptr, &rem);
-  m_ptr.reset(ptr); // call sqlite3_finalize in every case
-  if (ret != SQLITE_OK) {
-    throw std::runtime_error(sqlite3_errstr(ret));
-  }
-
-  if (rem && *rem != '\0') {
-    Logger::getInstance()->log("sqlite3_wrapper: possible sql injection: '" + std::string(rem) + "'", lsWarning);
-  }
-}
-
-SQLite3::query_result SqlStatement::fetchAll()
+SQLite3::query_result SQLite3::query(std::string q)
 {
-  SQLite3::query_result results;
+  sqlite3_stmt *statement;
+
   int ret;
 
-  boost::mutex::scoped_lock lock(m_db.m_mutex);
-  int columns = sqlite3_column_count(*this);
+  boost::mutex::scoped_lock lock(m_mutex);
+  SQLite3::query_result results;
+
+  ret = sqlite3_prepare_v2(m_db, q.c_str(), -1, &statement, 0);
+  if (ret != SQLITE_OK) {
+    std::string msg = sqlite3_errmsg(m_db);
+    throw std::runtime_error(msg);
+  }
+
+  int columns = sqlite3_column_count(statement);
   do {
-    ret = sqlite3_step(*this);
+    ret = sqlite3_step(statement);
     if (ret == SQLITE_ROW) {
       results.push_back(SQLite3::row_result());
       SQLite3::row_result &row(results.back());
 
       for (int i = 0; i < columns; i++) {
-        int type = sqlite3_column_type(*this, i);
-        const unsigned char *text = sqlite3_column_text(*this, i);
-        std::string name = sqlite3_column_name(*this, i);
+        int type = sqlite3_column_type(statement, i);
+        const unsigned char *text = sqlite3_column_text(statement, i);
+        std::string name = sqlite3_column_name(statement, i);
         std::string data = text ? (const char *)text : "";
 
         row.push_back(SQLite3::cell());
@@ -117,9 +102,7 @@ SQLite3::query_result SqlStatement::fetchAll()
     }
   } while (ret == SQLITE_ROW);
 
-  if (ret != SQLITE_DONE) {
-    Logger::getInstance()->log("sqlite3_wrapper: sqlite3_step ret:" + std::string(sqlite3_errstr(ret)), lsWarning);
-  }
+  sqlite3_finalize(statement);
 
   return results;
 }
@@ -132,7 +115,7 @@ void SQLite3::execInternal(std::string sql)
   char *errmsg = NULL;
   int ret;
 
-  ret = sqlite3_exec(*this, sql.c_str(), NULL, NULL, &errmsg);
+  ret = sqlite3_exec(m_db, sql.c_str(), NULL, NULL, &errmsg);
   if (ret != SQLITE_OK) {
     std::string msg = errmsg;
     sqlite3_free(errmsg);
@@ -157,6 +140,30 @@ std::string SQLite3::escape(std::string str, bool quotes)
   std::string ret = q;
   sqlite3_free(q);
   return ret;
+}
+
+bool SQLite3::isFatal(int error)
+{
+  switch (error) {
+    case SQLITE_READONLY:
+    case SQLITE_IOERR:
+    case SQLITE_CORRUPT:
+    case SQLITE_FULL:
+    case SQLITE_NOTADB:
+      return true;
+      break;
+    case SQLITE_OK:
+    default:
+      return false;
+  }
+}
+
+SQLite3::~SQLite3()
+{
+  boost::mutex::scoped_lock lock(m_mutex);
+  if (m_db) {
+    sqlite3_close(m_db);
+  }
 }
 
 } // namespace
