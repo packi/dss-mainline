@@ -280,7 +280,6 @@ dsstests_SOURCES = \
 	../tests/securitytests.cpp \
 	../tests/sensor_data_uploader.cpp \
 	../tests/sensorconversiontest.cpp \
-	../tests/sqlite3_wrapper.cpp \
 	../tests/statetests.cpp \
 	../tests/systeminfo_tests.cpp \
 	../tests/testrunner.cpp \
