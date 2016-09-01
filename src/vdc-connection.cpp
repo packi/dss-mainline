@@ -442,7 +442,7 @@ namespace dss {
     VdcElementReader deviceStatesReader = reader["deviceStates"];
     for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
       VdcElementReader reader = *it;
-      deviceStates.push_back({reader.getName(), reader["value"].getValueAsString()});
+      deviceStates.push_back(std::pair<std::string, std::string>(reader.getName(), reader["value"].getValueAsString()));
     }
 
     for (std::map<int,int64_t>::const_iterator it = binaryInputStates.begin(); it != binaryInputStates.end(); ++it ) {
