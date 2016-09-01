@@ -3060,7 +3060,7 @@ namespace dss {
     vdcapi::PropertyElement* param0 = params.Add();
     param0->set_name("id");
     param0->mutable_value()->set_v_string(actionId);
-    deviceBusInterface->genericRequest(*this, "callAction", params);
+    deviceBusInterface->genericRequest(*this, "invokeDeviceAction", params);
   }
 
   void Device::setProperty(const vdcapi::PropertyElement& propertyElement) {
