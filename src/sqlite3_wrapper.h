@@ -28,7 +28,11 @@
 #include <map>
 #include <vector>
 
-#include <boost/move/unique_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+// TODO replace by boost/move/unique_ptr
+//#include <boost/move/unique_ptr.hpp>
+// breaks jenkins, needs at least boost-1.57
+
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -84,7 +88,7 @@ private:
   struct Deleter {
     void operator()(::sqlite3*);
   };
-  boost::movelib::unique_ptr<sqlite3, Deleter> m_ptr;
+  boost::interprocess::unique_ptr<sqlite3, Deleter> m_ptr;
 
   boost::mutex m_mutex;
 
@@ -109,7 +113,7 @@ private:
   struct Deleter {
     void operator()(::sqlite3_stmt*);
   };
-  boost::movelib::unique_ptr<sqlite3_stmt, Deleter> m_ptr;
+  boost::interprocess::unique_ptr<sqlite3_stmt, Deleter> m_ptr;
   SQLite3 &m_db; // needed for m_lock
 };
 
