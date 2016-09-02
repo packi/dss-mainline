@@ -2027,15 +2027,12 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoOperational") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       query.Add()->set_name("deviceStates");
-      query.Add()->set_name("sensorStates");
       query.Add()->set_name("deviceProperties");
       vdcapi::Message message = pDevice->getVdcProperty(query);
       VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
       json.add("states");
       ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
-      json.add("sensors");
-      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
       json.add("properties");
       ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
       return json.successJSON();
