@@ -2014,7 +2014,7 @@ namespace dss {
       json.add("offset", value);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoStatic") {
-      return JSONWriter::failure("TODO");
+      return getInfoStatic(*pDevice);
     } else if (_request.getMethod() == "getInfoCustom") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       query.Add()->set_name("customActions");
@@ -2027,15 +2027,12 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoOperational") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       query.Add()->set_name("deviceStates");
-      query.Add()->set_name("sensorStates");
       query.Add()->set_name("deviceProperties");
       vdcapi::Message message = pDevice->getVdcProperty(query);
       VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
       json.add("states");
       ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
-      json.add("sensors");
-      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
       json.add("properties");
       ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
       return json.successJSON();
@@ -2090,4 +2087,197 @@ namespace dss {
     }
   } // jsonHandleRequest
 
+  std::string DeviceRequestHandler::getInfoStatic(const Device &device) {
+    const std::string& oemEan = device.getOemEanAsString();
+    if (oemEan == "7640156791914") { // vzughome:MSLQ#12003123456
+      return std::string(R"json(
+{
+  "result": {
+    "class": "oven",
+    "classVersion": 1,
+    "oemEanNumber": "7640156791914",
+    "model": "Combi-Steam MSLQ",
+    "modelVersion": "0.1",
+    "modelId": "gs1:(01)7640156791914",
+    "vendorId": "vendorname:V-Zug",
+    "vendorName": "V-Zug",
+    "stateDescriptions": {
+      "operation": {
+        "title": "State",
+        "options": {
+          "invalid": "Unknown",
+          "active": "Active",
+          "idle": "Active"
+        }
+      }
+    },
+    "propertyDescriptions": {
+      "currentTemperature": {
+        "title": "Current Temperature",
+        "readOnly": true
+      }
+    },
+    "actionDescriptions": {
+      "heat": {
+        "title": "Top and bottom heat",
+        "params": {
+          "duration": {
+            "title": "Duration [s]",
+            "default": 1800
+          },
+          "temperature": {
+            "title": "Temperature [degC]",
+            "default": 200
+          }
+        }
+      },
+      "hotair": {
+        "title": "Hot Air",
+        "params": {
+          "duration": {
+            "title": "Duration [s]",
+            "default": 1800
+          },
+          "temperature": {
+            "title": "Temperature [degC]",
+            "default": 180
+          }
+        }
+      },
+      "microwave": {
+        "title": "Microwave",
+        "params": {
+          "duration": {
+            "title": "Duration [s]",
+            "default": 60
+          },
+          "power": {
+            "title": "Power [W]",
+            "default": 500
+          }
+        }
+      },
+      "stop": {
+        "title": "Stop",
+        "params": {
+
+        }
+      }
+    },
+    "standardActions": {
+      "std.heat": {
+        "id": "heat",
+        "params": {
+        }
+      },
+      "std.hotair": {
+        "id": "hotair",
+        "params": {
+        }
+      },
+      "std.microwave": {
+        "id": "microwave",
+        "params": {
+        }
+      },
+      "std.stop": {
+        "id": "stop",
+        "params": {
+        }
+      }
+    }
+  },
+  "ok": true
+}
+      )json");
+    }
+    if (oemEan == "7640156791945") { // ikettle
+      return std::string(R"json(
+{
+  "class": "kettle ???",
+  "classVersion": 1,
+  "oemEanNumber": "7640156791945",
+  "model": "iKettle ???",
+  "modelVersion": "0.1",
+  "modelId": "gs1:(01)7640156791945",
+  "vendorId": "vendorname:smarter???",
+  "vendorName": "Smarter???",
+  "stateDescriptions": {
+    "operation": {
+      "title": "State",
+      "options": {
+        "invalid": "Unknown",
+        "cooldown": "Cool Down",
+        "heating": "Heating",
+        "keepwarm": "Keep Warm",
+        "ready": "Ready",
+        "removed": "Removed"
+      }
+    }
+  },
+  "propertyDescriptions": {
+    "currentTemperature": {
+      "title": "Current Temperature",
+      "readOnly": true
+    }
+  },
+  "actionDescriptions": {
+    "boilandcooldown": {
+      "title": "Boil and then cool down",
+      "params": {
+        "keepwarmtime": {
+          "title": "Keep warm time [s]",
+          "default": 600
+        },
+        "temperature": {
+          "title": "Temperature [degC]",
+          "default": 37
+        }
+      }
+    },
+    "heat": {
+      "title": "Heat up water",
+      "params": {
+        "keepwarmtime": {
+          "title": "Keep warm time [s]",
+          "default": 0
+        },
+        "temperature": {
+          "title": "Temperature [degC]",
+          "default": 100
+        }
+      }
+    },
+    "stop": {
+      "title": "Stop",
+      "params": {
+
+      }
+    }
+  },
+  "standardActions": {
+    "std.boilandcooldown": {
+      "id": "boilandcooldown",
+      "params": {
+
+      }
+    },
+    "std.heat": {
+      "id": "heat",
+      "params": {
+
+      }
+    },
+    "std.stop": {
+      "id": "stop",
+      "params": {
+
+      }
+    }
+  }
+}
+      )json");
+    }
+    return JSONWriter::failure("TODO");
+  }
 } // namespace dss

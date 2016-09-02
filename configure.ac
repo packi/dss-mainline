@@ -24,7 +24,7 @@ if test -n "$MT_SEARCHPATH_PROGS"; then
     export PATH=$PATH:$MT_SEARCHPATH_PROGS
 fi
 
-CXXFLAGS="$CXXFLAGS -std=gnu++98"
+CXXFLAGS="$CXXFLAGS -std=gnu++0x"
 MT_OPTION([debug], [enable],
           [enable debug flags during compilation],
           [
