@@ -54,6 +54,8 @@ namespace dss {
     boost::shared_ptr<Device> getDeviceFromRequest(const RestfulRequest& _request);
     boost::shared_ptr<Device> getDeviceByName(const RestfulRequest& _request);
     boost::shared_ptr<Device> getDeviceByDSID(const RestfulRequest& _request);
+
+    std::string getInfoStatic(const Device& device);
   private:
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
