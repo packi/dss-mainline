@@ -201,6 +201,7 @@ namespace dss {
   __DEFINE_LOG_CHANNEL__(PropertyNode, lsInfo);
 
   boost::atomic<int> PropertyNode::sm_NodeCounter;
+  std::vector<PropertyNodePtr> PropertyNode::sm_EmptyChildNodes;
 
   PropertyNode::PropertyNode(const char* _name, int _index)
     : m_Name(_name),
@@ -296,6 +297,11 @@ namespace dss {
     clearValue();
     sm_NodeCounter--;
   } // dtor
+
+  const std::vector<PropertyNodePtr>& PropertyNode::getChildNodes() const {
+    const std::vector<PropertyNodePtr>* pOut = m_AliasTarget ? m_AliasTarget->m_ChildNodes : m_ChildNodes;
+    return pOut ? *pOut : sm_EmptyChildNodes;
+  }
 
   PropertyNodePtr PropertyNode::removeChild(PropertyNodePtr _childNode) {
     if (m_AliasTarget) {
