@@ -492,8 +492,10 @@ namespace dss {
         dev->setHasActions(hasActions);
       }
     } catch (const std::runtime_error& e) {
-      log(std::string("initializeDeviceFromSpec() error:") + e.what());
-      //TODO(someday): device is not correctly initialized. We should throw here.
+      log(std::string("initializeDeviceFromSpec() error:") + e.what(), lsError);
+      // TODO(someday): device is not correctly initialized.
+      // We should throw here and fix the model discovery logic.
+      // It may be enough to catch std::runtime_error instead of BusError.
     }
 
     // synchronize sensor configuration
