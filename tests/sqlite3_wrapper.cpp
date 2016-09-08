@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "config.h"
+#include "src/base.h"
 #include "src/sqlite3_wrapper.h"
 
 #include "tests/util/dss_instance_fixture.h"
@@ -33,22 +34,10 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(SQL_WRAPPER)
 
-static void slurp(std::string& data, const std::string& filename) {
-  std::ifstream file(filename.c_str(), std::ios::ate | std::ios::in);
-  data.clear();
-  data.reserve(file.tellg());
-  file.seekg(0, std::ios::beg);
-  data.append(std::istreambuf_iterator<char>(file.rdbuf()),
-              std::istreambuf_iterator<char>());
-}
-
 BOOST_FIXTURE_TEST_CASE(testSimple, DSSInstanceFixture) {
-
   // db will be erased with each test run
   SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", true);
-
-  std::string stmts;
-  slurp(stmts, TEST_STATIC_DATADIR + "/db-fetch-ok.sql");
+  std::string stmts = readFile(TEST_STATIC_DATADIR + "/db-fetch-ok.sql");
 
   db.exec(stmts);
   SQLite3::query_result res = db.prepare("SELECT name FROM foo where id = 7").fetchAll();

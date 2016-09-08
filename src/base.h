@@ -106,6 +106,10 @@ namespace dss {
 
   bool rwAccess(const std::string& _filename);
 
+  ///< read whole file into string
+  /// throws exception
+  std::string readFile(const std::string& filename);
+
   //============================================= Helper classes
 
   class Properties {
