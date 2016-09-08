@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(testBasics) {
   apt.setName("my apartment");
 
 
-  auto_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  std::unique_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
   env->addExtension(ext);
