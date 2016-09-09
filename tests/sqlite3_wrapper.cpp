@@ -55,4 +55,75 @@ BOOST_FIXTURE_TEST_CASE(testSimple, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(res[0][0].data, "bar7");
 }
 
+BOOST_FIXTURE_TEST_CASE(testBindArgs, DSSInstanceFixture) {
+  // db will be erased with each test run
+  SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", true);
+  db.exec(sql_dump_ok);
+
+  auto find_by_key = db.prepare("SELECT name FROM foo WHERE id=?");
+  {
+    auto bindScope = find_by_key.bind(7);
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::ROW);
+    BOOST_CHECK_EQUAL(find_by_key.getColumn<std::string>(0), "bar7");
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
+    find_by_key.reset(); //< implicit call after 3.6.23.1,
+
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::ROW);
+    BOOST_CHECK_EQUAL(find_by_key.getColumn<std::string>(0), "bar7");
+    find_by_key.reset(); //< implicit call after 3.6.23.1,
+  }
+
+  {
+    // query is reusable
+    auto bindScope = find_by_key.bind(11);
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::ROW);
+    BOOST_CHECK_EQUAL(find_by_key.getColumn<std::string>(0), "bar11");
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
+    find_by_key.reset();
+  }
+
+  {
+    // no results without binding args
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
+    find_by_key.reset();
+  }
+
+  {
+    // reset bindScope by creating new binding
+    auto bindScope = find_by_key.bind(11);
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::ROW);
+    BOOST_CHECK_EQUAL(find_by_key.getColumn<std::string>(0), "bar11");
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
+    find_by_key.reset();
+
+#if 0
+    // TODO(soon) doesn't work
+    bindScope = find_by_key.bind(3);
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
+    BOOST_CHECK_EQUAL(find_by_key.getColumn<std::string>(0), "bar3");
+    BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
+#endif
+  }
+
+  auto find_by_name = db.prepare("SELECT id FROM foo WHERE name=?");
+  // same with string as argument, int as reply
+  {
+    auto bindScope = find_by_name.bind("bar7");
+    BOOST_CHECK(find_by_name.step() == SqlStatement::StepResult::ROW);
+    BOOST_CHECK_EQUAL(find_by_name.getColumn<int>(0), 7);
+    BOOST_CHECK(find_by_name.step() == SqlStatement::StepResult::DONE);
+    find_by_name.reset();
+  }
+
+  auto find_by_id_and_name = db.prepare("SELECT id FROM foo WHERE id=? AND name=?");
+  // same with two args
+  {
+    auto bindScope = find_by_id_and_name.bind(7, "bar7");
+    BOOST_CHECK(find_by_id_and_name.step() == SqlStatement::StepResult::ROW);
+    BOOST_CHECK_EQUAL(find_by_id_and_name.getColumn<int>(0), 7);
+    BOOST_CHECK(find_by_id_and_name.step() == SqlStatement::StepResult::DONE);
+    find_by_id_and_name.reset();
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

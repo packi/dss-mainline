@@ -80,12 +80,62 @@ SqlStatement::SqlStatement(SQLite3& db, const std::string &sql) : m_db(db) {
   int ret = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &ptr, &rem);
   m_ptr.reset(ptr); // call sqlite3_finalize in every case
   if (ret != SQLITE_OK) {
-    throw std::runtime_error(sqlite3_errstr(ret));
+    throw std::runtime_error(std::string(__func__) + ": " + sqlite3_errstr(ret));
   }
 
   if (rem && *rem != '\0') {
-    Logger::getInstance()->log("sqlite3_wrapper: possible sql injection: '" + std::string(rem) + "'", lsWarning);
+    Logger::getInstance()->log(std::string(__func__) + ": sql injection? :'" + std::string(rem) + "'", lsWarning);
   }
+}
+
+void SqlStatement::reset() {
+  int ret = sqlite3_reset(*this);
+  if (ret != SQLITE_OK) {
+    throw std::runtime_error(std::string(__func__) + ": " + sqlite3_errstr(ret));
+  }
+}
+
+void SqlStatement::BindDeleter::operator()(::sqlite3_stmt* ptr) {
+  int ret = sqlite3_clear_bindings(ptr);
+  if (ret != SQLITE_OK) {
+    // Ignore errors. It is bad idea to throw exceptions in destructor.
+    Logger::getInstance()->log(std::string(__func__) + ": " + sqlite3_errstr(ret), lsWarning);
+  }
+}
+
+SqlStatement::StepResult SqlStatement::step() {
+  int ret = sqlite3_step(*this);
+  if (ret == SQLITE_DONE) {
+    return StepResult::DONE;
+  }
+  if (ret != SQLITE_ROW) {
+    throw std::runtime_error(std::string(__func__) + ": " + sqlite3_errstr(ret));
+  }
+  return StepResult::ROW;
+}
+
+void SqlStatement::bindAt(int index, int value) {
+  int ret = sqlite3_bind_int(*this, index, value);
+  if (ret != SQLITE_OK) {
+    throw std::runtime_error(std::string(__func__) + ": " + sqlite3_errstr(ret));
+  }
+}
+
+void SqlStatement::bindAt(int index, const std::string &value) {
+  int ret = sqlite3_bind_text(*this, index, value.c_str(), value.size(), SQLITE_STATIC);
+  if (ret != SQLITE_OK) {
+    throw std::runtime_error(std::string(__func__) + ": " + sqlite3_errstr(ret));
+  }
+}
+
+template <>
+std::string SqlStatement::getColumn<std::string>(int i) {
+  return std::string(reinterpret_cast<const char *>(sqlite3_column_text(*this, i)));
+}
+
+template <>
+int SqlStatement::getColumn<int>(int i) {
+  return sqlite3_column_int(*this, i);
 }
 
 SQLite3::query_result SqlStatement::fetchAll()
