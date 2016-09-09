@@ -34,15 +34,25 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(SQL_WRAPPER)
 
+static std::string sql_dump_ok = R"sql(
+begin transaction;
+drop table if exists "foo";
+create table "foo"(id primary key,name);
+insert into foo values(3 , "bar3");
+insert into foo values(5 , "bar5");
+insert into foo values(7 , "bar7");
+insert into foo values(11 , "bar11");
+commit;
+)sql";
+
 BOOST_FIXTURE_TEST_CASE(testSimple, DSSInstanceFixture) {
   // db will be erased with each test run
   SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", true);
-  std::string stmts = readFile(TEST_STATIC_DATADIR + "/db-fetch-ok.sql");
+  db.exec(sql_dump_ok);
 
-  db.exec(stmts);
-  SQLite3::query_result res = db.prepare("SELECT name FROM foo where id = 7").fetchAll();
+  SQLite3::query_result res = db.prepare("SELECT name FROM foo WHERE id=7").fetchAll();
   BOOST_CHECK_EQUAL(res.size(), 1);
-  BOOST_CHECK_EQUAL(res[0][0].data, "bar");
+  BOOST_CHECK_EQUAL(res[0][0].data, "bar7");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
