@@ -126,4 +126,59 @@ BOOST_FIXTURE_TEST_CASE(testBindArgs, DSSInstanceFixture) {
   }
 }
 
+static std::string sql_update = R"sql(
+begin transaction;
+drop table if exists "foo";
+create table "foo"(id primary key,name);
+insert into foo values(31 , "bar3");
+insert into foo values(37 , "bar5");
+insert into foo values(41 , "bar7");
+insert into foo values(47 , "bar11");
+commit;
+)sql";
+
+void createDb(const std::string &filename, const std::string sql_dump) {
+  SQLite3 db(filename, true);
+  db.exec(sql_dump);
+}
+
+BOOST_FIXTURE_TEST_CASE(testConcurrentModification, DSSInstanceFixture) {
+  std::string filename =
+    DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db";
+
+  createDb(filename, sql_dump_ok);
+
+  SQLite3 db2(filename, true);
+  // use separate db handle, no common mutex
+
+  {
+    // update db, possible before step is called
+    SQLite3 db1(filename, false);
+    SqlStatement find = db1.prepare("SELECT id FROM foo WHERE id>7 ORDER BY id");
+    BOOST_CHECK_NO_THROW(db2.exec("DROP table foo;"));
+    BOOST_CHECK_THROW(find.step(), std::exception);
+    // SQL ERROR: SQL logic error or missing database
+  }
+
+  // restore db
+  createDb(filename, sql_dump_ok);
+
+  {
+    // update db prevent after step is called
+    SQLite3 db1(filename, false);
+    SqlStatement find = db1.prepare("SELECT id FROM foo WHERE id>7 ORDER BY id");
+    BOOST_CHECK(find.step() == SqlStatement::StepResult::ROW);
+    // no modifications after stop executed
+
+    BOOST_CHECK_THROW(db2.exec(sql_update), std::exception);
+    // no modification possible, if step executed
+    db2.exec("rollback;");
+
+    BOOST_CHECK_EQUAL(find.getColumn<int>(0), 11);
+    BOOST_CHECK(find.step() == SqlStatement::StepResult::DONE);
+    BOOST_CHECK_NO_THROW(db2.exec(sql_update));
+    // works after step been called
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
