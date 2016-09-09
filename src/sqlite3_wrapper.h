@@ -109,11 +109,12 @@ public:
 
   template <typename... Args>
   BindScope bind(Args&&... args) __attribute__((warn_unused_result));
-  // TODO(soon) warn_unused_result ignore
   ///< Binds arguments to statement.
-  ///< @return BindScope unbinding arguments in its descructor.
+  ///< @return BindScope unbinding arguments in its destructor.
   ///< All binded strings and blobs must be valid till BindScope is destroyed.
   ///< BindScope must be destroyed before another call to bind().
+  ///< TODO(someday) gcc ignores (warn_unused_result) for templates
+  ///< https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77542
 
   enum class StepResult { ROW, DONE };
   StepResult step();
