@@ -466,4 +466,22 @@ BOOST_AUTO_TEST_CASE(testParseBitfield) {
   BOOST_CHECK_EQUAL(vec[5], 127);
 }
 
+BOOST_AUTO_TEST_CASE(testReadFile) {
+    // tmpnam produces nasty link warning
+    // hence create tmpfile then delete it
+    char name[] = "/tmp/tmpfile.XXXXXX";
+    int fd = mkstemp(name);
+    std::string expect("a7d83559b6e2ea05ad646299e0a88c0c69174c99");
+    BOOST_CHECK(write(fd, expect.c_str(), expect.size()) != -1);
+    close(fd);
+
+    // check content is read correctly
+    std::string ret = readFile(name);
+    BOOST_CHECK(ret == expect);
+
+    // remove file, check that exception is thrown
+    BOOST_CHECK(unlink(name) != -1);
+    BOOST_CHECK_THROW(readFile(name), std::exception);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
