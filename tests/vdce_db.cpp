@@ -43,28 +43,6 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(VDCE)
 
-static bool importDb(const std::string dbName, const std::string &pathSqlDump) {
-  std::string dbFile = DSS::getInstance()->getDatabaseDirectory() + dbName;
-  if (!boost::algorithm::ends_with(dbFile, ".db")) {
-    dbFile += ".db";
-  }
-
-  std::string stmts = readFile(pathSqlDump);
-
-  try {
-
-    SQLite3 sqlite(dbFile, true);
-    sqlite.exec(stmts);
-
-  } catch (std::runtime_error &ex) {
-
-    Logger::getInstance()->log("createDB: db import failed: " + std::string(ex.what()), lsWarning);
-    return false;
-  }
-
-  return true;
-}
-
 static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   foreach (const DeviceStateSpec_t &state, states) {
     std::string values;
@@ -81,7 +59,6 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
 BOOST_FIXTURE_TEST_CASE(lookupStates, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-  importDb("vdc.db", TEST_STATIC_DATADIR + "/vdc-db.sql");
 
   std::string gtin("7640113394226");
   std::string no_gtin("invalid_gtin");
@@ -127,7 +104,6 @@ static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
 BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-  importDb("vdc.db", TEST_STATIC_DATADIR + "/vdc-db.sql");
 
   std::string gtin("7640113394226");
 
@@ -159,7 +135,6 @@ static void dumpActionDesc(const std::vector<VdcDb::ActionDesc> &actions) {
 BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-  importDb("vdc.db", TEST_STATIC_DATADIR + "/vdc-db.sql");
 
   std::string gtin("7640113394226");
 
@@ -194,7 +169,6 @@ static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
 BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-  importDb("vdc.db", TEST_STATIC_DATADIR + "/vdc-db.sql");
 
   std::string gtin("7640113394226");
 
@@ -216,7 +190,6 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
 BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-  importDb("vdc.db", TEST_STATIC_DATADIR + "/vdc-db.sql");
 
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(7640113394226, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
@@ -231,12 +204,12 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   BOOST_CHECK(ret == expect);
 }
 
-BOOST_FIXTURE_TEST_CASE(checkCorruptDb, DSSInstanceFixture) {
+BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-  // no import of DB
 
-  std::string gtin("7640113394226");
+  std::string gtin("0000000000000");
+  // invalid gtin
 
   VdcDb db;
   std::vector<DeviceStateSpec_t> states;

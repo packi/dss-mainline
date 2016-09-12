@@ -34,7 +34,7 @@ namespace dss {
 const std::string pcn_vdce_db = "/config/vdce/db";
 const std::string pcn_vdce_db_name = pcn_vdce_db + "/name";
 
-std::string get_dbfile() {
+static std::string get_dbfile() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
 
   if (!propSystem.getProperty(pcn_vdce_db_name)) {
@@ -49,13 +49,26 @@ std::string get_dbfile() {
   return propSystem.getProperty("/config/databasedirectory")->getAsString() + dbName;
 }
 
+static std::string get_fallback() {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  return propSystem.getProperty("/config/datadirectory")->getAsString() + "vdc-db.sql";
+}
+
 VdcDb::VdcDb() {
   try {
     m_db.reset(new SQLite3(get_dbfile(), false));
   } catch (std::exception &e) {
-    Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">");
     // database missing or corrupt
-    // return false for all lookup calls
+    Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
+    Logger::getInstance()->log(std::string(__func__) + "creating db from fallback sqldump: " + get_fallback(), lsWarning);
+
+    SQLite3 tmp(get_dbfile(), true);
+    // open in read-write mode
+    tmp.exec(readFile(get_fallback()));
+    // esceptions are not catched
+
+    m_db.reset(new SQLite3(get_dbfile(), false));
+    // retry or throw exception
   }
 }
 
@@ -84,10 +97,6 @@ bool VdcDb::lookupStates(const std::string &gtin, std::vector<DeviceStateSpec_t>
 bool VdcDb::lookupStates(const std::string &gtin, std::vector<StateDesc> *out, const std::string &langCode) {
   std::vector<StateDesc> &states(*out);
   states.clear();
-
-  if (!m_db) {
-    return false;
-  }
 
   try {
     std::string sql;
@@ -137,10 +146,6 @@ bool VdcDb::lookupProperties(const std::string &gtin, std::vector<PropertyDesc> 
   std::vector<PropertyDesc> &props(*out);
   props.clear();
 
-  if (!m_db) {
-    return false;
-  }
-
   try {
     std::string sql;
     if (!langCode.empty()) {
@@ -181,10 +186,6 @@ bool VdcDb::lookupProperties(const std::string &gtin, std::vector<PropertyDesc> 
 bool VdcDb::lookupActions(const std::string &gtin, std::vector<ActionDesc> *out, const std::string &langCode) {
   std::vector<ActionDesc> &actions(*out);
   actions.clear();
-
-  if (!m_db) {
-    return false;
-  }
 
   try {
     std::string sql;
@@ -235,10 +236,6 @@ bool VdcDb::lookupActions(const std::string &gtin, std::vector<ActionDesc> *out,
 bool VdcDb::lookupStandardActions(const std::string &gtin, std::vector<StandardActionDesc> *out, const std::string &langCode) {
   std::vector<StandardActionDesc> &desc(*out);
   desc.clear();
-
-  if (!m_db) {
-    return false;
-  }
 
   try {
     std::string sql;
