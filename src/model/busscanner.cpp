@@ -36,6 +36,7 @@
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
+#include "src/model/vdc-db.h"
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/ds485types.h"
@@ -463,33 +464,9 @@ namespace dss {
         dev->setVdcHardwareVersion(props.hardwareVersion);
         dev->setVdcModelFeatures(props.modelFeatures);
 
-        //TODO(soon): replace hard coded `states` by database lookup by dev->getVdcOemModelGuid()
-        std::vector<DeviceStateSpec_t> states;
-        bool hasActions = false;
-        const std::string& oemEan = dev->getOemEanAsString();
-        if (oemEan == "7640156791914") { // vzughome:MSLQ#12003123456
-            states.push_back(DeviceStateSpec_t());
-            DeviceStateSpec_t& state = states.back();
-            state.Name = "operation";
-            state.Values.push_back("active");
-            state.Values.push_back("idle");
-            hasActions = true;
-        }
-        if (oemEan == "7640156791945") { // ikettle
-            states.push_back(DeviceStateSpec_t());
-            {
-            DeviceStateSpec_t& state = states.back();
-            state.Name = "operation";
-            state.Values.push_back("cooldown"); //just guessing. deviceStateDescriptions
-            state.Values.push_back("heating");
-            state.Values.push_back("keepwarm");
-            state.Values.push_back("ready");
-            state.Values.push_back("removed");
-            }
-            hasActions = true;
-        }
-        dev->initStates(dev, states);
-        dev->setHasActions(hasActions);
+        VdcDb db;
+        dev->initStates(dev, db.getStatesLegacy(dev->getOemEanAsString())); // throws
+        dev->setHasActions(!db.getActions(dev->getOemEanAsString()).empty()); // throws
       }
     } catch (const std::runtime_error& e) {
       log(std::string("initializeDeviceFromSpec() error:") + e.what(), lsError);

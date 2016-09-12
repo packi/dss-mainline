@@ -77,7 +77,7 @@ void DbFetch::run() {
 
   try {
 
-    SQLite3 sqlite(database, true);
+    SQLite3 sqlite(database, SQLite3::Mode::ReadWrite);
     sqlite.exec(result);
     raiseNotificationEvent(true);
 

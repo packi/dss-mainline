@@ -33,6 +33,7 @@
 
 #include <digitalSTROM/dsuid.h>
 
+#include "src/businterface.h"
 #include "src/model/apartment.h"
 #include "src/model/data_types.h"
 #include "src/model/device.h"
@@ -40,6 +41,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
+#include "src/model/vdc-db.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
@@ -2014,7 +2016,9 @@ namespace dss {
       json.add("offset", value);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoStatic") {
-      return getInfoStatic(*pDevice);
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+      return getInfoStatic(*pDevice, langCode);
     } else if (_request.getMethod() == "getInfoCustom") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       query.Add()->set_name("customActions");
@@ -2087,197 +2091,98 @@ namespace dss {
     }
   } // jsonHandleRequest
 
-  std::string DeviceRequestHandler::getInfoStatic(const Device &device) {
+  std::string DeviceRequestHandler::getInfoStatic(const Device& device, const std::string &langCode) {
     const std::string& oemEan = device.getOemEanAsString();
-    if (oemEan == "7640156791914") { // vzughome:MSLQ#12003123456
-      return std::string(R"json(
-{
-  "result": {
-    "class": "oven",
-    "classVersion": 1,
-    "oemEanNumber": "7640156791914",
-    "model": "Combi-Steam MSLQ",
-    "modelVersion": "0.1",
-    "modelId": "gs1:(01)7640156791914",
-    "vendorId": "vendorname:V-Zug",
-    "vendorName": "V-Zug",
-    "stateDescriptions": {
-      "operation": {
-        "title": "State",
-        "options": {
-          "invalid": "Unknown",
-          "active": "Active",
-          "idle": "Active"
-        }
-      }
-    },
-    "propertyDescriptions": {
-      "currentTemperature": {
-        "title": "Current Temperature",
-        "readOnly": true
-      }
-    },
-    "actionDescriptions": {
-      "heat": {
-        "title": "Top and bottom heat",
-        "params": {
-          "duration": {
-            "title": "Duration [s]",
-            "default": 1800
-          },
-          "temperature": {
-            "title": "Temperature [degC]",
-            "default": 200
-          }
-        }
-      },
-      "hotair": {
-        "title": "Hot Air",
-        "params": {
-          "duration": {
-            "title": "Duration [s]",
-            "default": 1800
-          },
-          "temperature": {
-            "title": "Temperature [degC]",
-            "default": 180
-          }
-        }
-      },
-      "microwave": {
-        "title": "Microwave",
-        "params": {
-          "duration": {
-            "title": "Duration [s]",
-            "default": 60
-          },
-          "power": {
-            "title": "Power [W]",
-            "default": 500
-          }
-        }
-      },
-      "stop": {
-        "title": "Stop",
-        "params": {
+    VdcDb db;
+    JSONWriter json;
 
-        }
-      }
-    },
-    "standardActions": {
-      "std.heat": {
-        "id": "heat",
-        "params": {
-        }
-      },
-      "std.hotair": {
-        "id": "hotair",
-        "params": {
-        }
-      },
-      "std.microwave": {
-        "id": "microwave",
-        "params": {
-        }
-      },
-      "std.stop": {
-        "id": "stop",
-        "params": {
-        }
-      }
-    }
-  },
-  "ok": true
-}
-      )json");
-    }
-    if (oemEan == "7640156791945") { // ikettle
-      return std::string(R"json(
-{
-  "class": "kettle ???",
-  "classVersion": 1,
-  "oemEanNumber": "7640156791945",
-  "model": "iKettle ???",
-  "modelVersion": "0.1",
-  "modelId": "gs1:(01)7640156791945",
-  "vendorId": "vendorname:smarter???",
-  "vendorName": "Smarter???",
-  "stateDescriptions": {
-    "operation": {
-      "title": "State",
-      "options": {
-        "invalid": "Unknown",
-        "cooldown": "Cool Down",
-        "heating": "Heating",
-        "keepwarm": "Keep Warm",
-        "ready": "Ready",
-        "removed": "Removed"
-      }
-    }
-  },
-  "propertyDescriptions": {
-    "currentTemperature": {
-      "title": "Current Temperature",
-      "readOnly": true
-    }
-  },
-  "actionDescriptions": {
-    "boilandcooldown": {
-      "title": "Boil and then cool down",
-      "params": {
-        "keepwarmtime": {
-          "title": "Keep warm time [s]",
-          "default": 600
-        },
-        "temperature": {
-          "title": "Temperature [degC]",
-          "default": 37
-        }
-      }
-    },
-    "heat": {
-      "title": "Heat up water",
-      "params": {
-        "keepwarmtime": {
-          "title": "Keep warm time [s]",
-          "default": 0
-        },
-        "temperature": {
-          "title": "Temperature [degC]",
-          "default": 100
-        }
-      }
-    },
-    "stop": {
-      "title": "Stop",
-      "params": {
+    try {
+      auto states = db.getStates(oemEan, langCode);
 
-      }
-    }
-  },
-  "standardActions": {
-    "std.boilandcooldown": {
-      "id": "boilandcooldown",
-      "params": {
+      json.add("class", "oven (tbd)"); // TODO(soon) from vdc property
+      json.add("classVersion", "1 (tbd)"); // TODO(soon) vdc property
+      json.add("oemEanNumber", oemEan);
+      json.add("model", "Combi-Steam MSLQ (tbd)"); // TODO(soon) prop-node hwinfo
+      json.add("modelVersion", "0.1 (tbd)"); // TODO(soon) prop-node hwversion
+      json.add("modelId", "gs1:(01)7640156791914 (tbd)"); //TODO(soon) oemGUID
+      json.add("vendorId", "vendorname:V-Zug (tbd)"); //TODO(soon) vendorGUID
+      json.add("vendorName", "V-Zug (tbd)"); // TODO(soon) vdc property
 
+      json.startObject("stateDescriptions");
+      foreach (auto &state, states) {
+        json.startObject(state.name);
+        json.add("title", state.title);
+        json.startObject("options");
+        foreach (auto desc, state.values) {
+          json.add(desc.first, desc.second); // non-tranlated: translated
+        }
+        json.endObject();
+        json.endObject();
       }
-    },
-    "std.heat": {
-      "id": "heat",
-      "params": {
+      json.endObject();
 
-      }
-    },
-    "std.stop": {
-      "id": "stop",
-      "params": {
+    } catch (std::exception e) {
+      // TODO(soon) is it valid to assume every device has states?
+      Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
+      return JSONWriter::failure("unknown device");
+    }
 
+    try {
+      auto props = db.getProperties(oemEan, langCode); // throws
+      json.startObject("propertyDescriptions");
+
+      foreach (auto &prop, props) {
+        json.startObject(prop.name);
+        json.add("title", prop.title);
+        json.add("readOnly", prop.readonly);
+        json.endObject();
       }
+      json.endObject();
+    } catch (std::exception e) {
+      // no properties
     }
-  }
-}
-      )json");
+
+    try {
+      auto actions = db.getActions(oemEan, langCode);
+
+      json.startObject("actionDescriptions");
+      foreach (const VdcDb::ActionDesc &action, actions) {
+        json.startObject(action.name);
+        json.add("title", action.title);
+        json.startObject("params");
+        foreach (auto p, action.params) {
+          json.startObject(p.name);
+          json.add("title", p.title);
+          json.add("default", p.defaultValue);
+          json.endObject();
+        }
+        json.endObject();
+        json.endObject();
+      }
+      json.endObject();
+    } catch (std::exception e) {
+      // no actions
     }
-    return JSONWriter::failure("TODO");
+
+    try {
+      auto stdActions = db.getStandardActions(oemEan, langCode);
+
+      json.startObject("standardActions");
+      foreach (auto &action, stdActions) {
+        json.startObject(action.name);
+        json.add("title", action.title);
+        json.startObject("params");
+        foreach (auto arg, action.args) {
+          json.add(arg.first, arg.second);
+        }
+        json.endObject();
+        json.endObject();
+      }
+      json.endObject();
+    } catch (std::exception e) {
+      // no standard actions
+    }
+
+    return json.successJSON();
   }
 } // namespace dss

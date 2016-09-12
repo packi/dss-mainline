@@ -40,10 +40,13 @@ class SqlStatement;
 class SQLite3 {
 
 public:
+  enum class Mode { ReadOnly, ReadWrite };
+  // open db in mode
+
   /// \brief Initialize database using the specified location.
   ///
   /// If the database does not exist, it will be automatically created.
-  SQLite3(std::string db_file, bool readwrite = false);
+  SQLite3(std::string db_file, Mode mode);
 
   /// \brief represents a "column cell" in the table, first pair element is
   /// the column name, second pair element is the actual value

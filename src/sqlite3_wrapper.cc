@@ -39,7 +39,7 @@ void SQLite3::Deleter::operator()(::sqlite3* ptr) {
   sqlite3_close_v2(ptr);
 }
 
-SQLite3::SQLite3(std::string db_file, bool readwrite)
+SQLite3::SQLite3(std::string db_file, Mode mode)
 {
   boost::mutex::scoped_lock lock(m_mutex);
 
@@ -54,7 +54,7 @@ SQLite3::SQLite3(std::string db_file, bool readwrite)
   }
 
   int flags = SQLITE_OPEN_FULLMUTEX;
-  if (readwrite) {
+  if (mode == Mode::ReadWrite) {
     flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
   } else {
     flags |= SQLITE_OPEN_READONLY;

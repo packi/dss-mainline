@@ -47,7 +47,7 @@ commit;
 
 BOOST_FIXTURE_TEST_CASE(testSimple, DSSInstanceFixture) {
   // db will be erased with each test run
-  SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", true);
+  SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", SQLite3::Mode::ReadWrite);
   db.exec(sql_dump_ok);
 
   SQLite3::query_result res = db.prepare("SELECT name FROM foo WHERE id=7").fetchAll();
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_CASE(testSimple, DSSInstanceFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testBindArgs, DSSInstanceFixture) {
   // db will be erased with each test run
-  SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", true);
+  SQLite3 db(DSS::getInstance()->getDatabaseDirectory() + "/sqlite_wrapper.db", SQLite3::Mode::ReadWrite);
   db.exec(sql_dump_ok);
 
   auto find_by_key = db.prepare("SELECT name FROM foo WHERE id=?");
@@ -145,7 +145,7 @@ commit;
 )sql";
 
 void createDb(const std::string &filename, const std::string sql_dump) {
-  SQLite3 db(filename, true);
+  SQLite3 db(filename, SQLite3::Mode::ReadWrite);
   db.exec(sql_dump);
 }
 
@@ -155,12 +155,12 @@ BOOST_FIXTURE_TEST_CASE(testConcurrentModification, DSSInstanceFixture) {
 
   createDb(filename, sql_dump_ok);
 
-  SQLite3 db2(filename, true);
+  SQLite3 db2(filename, SQLite3::Mode::ReadWrite);
   // use separate db handle, no common mutex
 
   {
     // update db, possible before step is called
-    SQLite3 db1(filename, false);
+    SQLite3 db1(filename, SQLite3::Mode::ReadOnly);
     SqlStatement find = db1.prepare("SELECT id FROM foo WHERE id>7 ORDER BY id");
     BOOST_CHECK_NO_THROW(db2.exec("DROP table foo;"));
     BOOST_CHECK_THROW(find.step(), std::exception);
@@ -172,7 +172,7 @@ BOOST_FIXTURE_TEST_CASE(testConcurrentModification, DSSInstanceFixture) {
 
   {
     // update db prevent after step is called
-    SQLite3 db1(filename, false);
+    SQLite3 db1(filename, SQLite3::Mode::ReadOnly);
     SqlStatement find = db1.prepare("SELECT id FROM foo WHERE id>7 ORDER BY id");
     BOOST_CHECK(find.step() == SqlStatement::StepResult::ROW);
     // no modifications after stop executed

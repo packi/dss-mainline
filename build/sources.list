@@ -113,6 +113,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/set.h \
 	../src/model/state.cpp \
 	../src/model/state.h \
+	../src/model/vdc-db.cpp \
+	../src/model/vdc-db.h \
 	../src/model/zone.cpp \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
@@ -288,6 +290,7 @@ dsstests_SOURCES = \
 	../tests/util/dss_instance_fixture.cpp \
 	../tests/util/dss_instance_fixture.h \
 	../tests/util/modelmaintenance-mockup.h \
+	../tests/vdc-db.cpp \
 	../tests/webfixture.h \
 	../tests/webserver.cpp \
 	../tests/webservice_api_tests.cpp
