@@ -212,10 +212,10 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   // invalid gtin
 
   VdcDb db;
-  BOOST_CHECK_THROW(db.getStates(gtin), std::exception);
-  BOOST_CHECK_THROW(db.getProperties(gtin), std::exception);
-  BOOST_CHECK_THROW(db.getActions(gtin), std::exception);
-  BOOST_CHECK_THROW(db.getStandardActions(gtin, "de_DE"), std::exception);
+  BOOST_CHECK(db.getStates(gtin).empty());
+  BOOST_CHECK(db.getProperties(gtin).empty());
+  BOOST_CHECK(db.getActions(gtin).empty());
+  BOOST_CHECK(db.getStandardActions(gtin, "de_DE").empty());
 
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(strToInt(gtin), 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
@@ -223,7 +223,10 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   DeviceRequestHandler handler(DSS::getInstance()->getApartment(), NULL, NULL);
   std::string ret = handler.getInfoStatic(dev, "de_DE");
   //Logger::getInstance()->log("info: " + ret, lsWarning);
-  BOOST_CHECK(ret == R"expect({"ok":false,"message":"unknown device"})expect");
+
+  std::string expect = R"expect({"result":{"class":"oven (tbd)","classVersion":"1 (tbd)","oemEanNumber":"0","model":"Combi-Steam MSLQ (tbd)","modelVersion":"0.1 (tbd)","modelId":"gs1:(01)7640156791914 (tbd)","vendorId":"vendorname:V-Zug (tbd)","vendorName":"V-Zug (tbd)","stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{}},"ok":true})expect";
+  // empty states/properties/actions
+  BOOST_CHECK(ret == expect);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -120,10 +120,6 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
     states.back().values.push_back(value);
   }
 
-  if (states.size() == 0) {
-    throw std::runtime_error("no states for device: " + gtin);
-  }
-
   return states;
 }
 
@@ -150,10 +146,6 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
     props.back().name = findProps.getColumn<std::string>(0);
     props.back().title = findProps.getColumn<std::string>(1);
     props.back().readonly = static_cast<bool>(findProps.getColumn<int>(2));
-  }
-
-  if (props.empty()) {
-    throw std::runtime_error("no properties for device: " + gtin);
   }
 
   return props;
@@ -193,10 +185,6 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
     actions.back().params.back().defaultValue = findActions.getColumn<int>(4);
   }
 
-  if (actions.empty()) {
-    throw std::runtime_error("no actions for device: " + gtin);
-  }
-
   return actions;
 }
 
@@ -231,10 +219,6 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
     }
     auto arg = std::make_pair(find.getColumn<std::string>(3), find.getColumn<std::string>(4));
     desc.back().args.push_back(arg);
-  }
-
-  if (desc.empty()) {
-    throw std::runtime_error("no standard actions for device: " + gtin);
   }
 
   return desc;
