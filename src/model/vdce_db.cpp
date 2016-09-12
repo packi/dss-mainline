@@ -34,11 +34,12 @@ namespace dss {
 const std::string pcn_vdce_db = "/config/vdce/db";
 const std::string pcn_vdce_db_name = pcn_vdce_db + "/name";
 
-static std::string get_dbfile() {
+static std::string getDbFile() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string dbPath = propSystem.getProperty("/config/databasedirectory")->getAsString();
 
   if (!propSystem.getProperty(pcn_vdce_db_name)) {
-    return "";
+    return dbPath + "/vdc.db";
   }
 
   std::string dbName = propSystem.getProperty(pcn_vdce_db_name)->getAsString();
@@ -46,28 +47,28 @@ static std::string get_dbfile() {
     dbName += ".db";
   }
 
-  return propSystem.getProperty("/config/databasedirectory")->getAsString() + dbName;
+  return dbPath +  "/" + dbName;
 }
 
-static std::string get_fallback() {
+static std::string getFallbackSqlDump() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   return propSystem.getProperty("/config/datadirectory")->getAsString() + "vdc-db.sql";
 }
 
 VdcDb::VdcDb() {
   try {
-    m_db.reset(new SQLite3(get_dbfile(), false));
+    m_db.reset(new SQLite3(getDbFile(), false));
   } catch (std::exception &e) {
     // database missing or corrupt
     Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
-    Logger::getInstance()->log(std::string(__func__) + "creating db from fallback sqldump: " + get_fallback(), lsWarning);
+    Logger::getInstance()->log(std::string(__func__) + "creating db from fallback sqldump: " + getFallbackSqlDump(), lsWarning);
 
-    SQLite3 tmp(get_dbfile(), true);
+    SQLite3 tmp(getDbFile(), true);
     // open in read-write mode
-    tmp.exec(readFile(get_fallback()));
+    tmp.exec(readFile(getFallbackSqlDump()));
     // esceptions are not catched
 
-    m_db.reset(new SQLite3(get_dbfile(), false));
+    m_db.reset(new SQLite3(getDbFile(), false));
     // retry or throw exception
   }
 }
