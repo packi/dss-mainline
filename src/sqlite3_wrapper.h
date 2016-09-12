@@ -98,8 +98,33 @@ public:
   SqlStatement(SQLite3& db, const std::string &sql);
   SqlStatement(const SqlStatement &that);
 
-  bool bind(int index, const std::string &arg);
+  void reset();
+  ///< Calls sqlite3_reset
+
+  struct BindDeleter {
+    void operator()(::sqlite3_stmt*);
+  };
+  typedef std::unique_ptr<sqlite3_stmt, BindDeleter> BindScope;
+  ///< Calls sqlite3_clear_bindings after leaving your current scope
+
+  template <typename... Args>
+  BindScope bind(Args&&... args) __attribute__((warn_unused_result));
+  ///< Binds arguments to statement.
+  ///< @return BindScope unbinding arguments in its destructor.
+  ///< All binded strings and blobs must be valid till BindScope is destroyed.
+  ///< BindScope must be destroyed before another call to bind().
+  ///< TODO(someday) gcc ignores (warn_unused_result) for templates
+  ///< https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77542
+
+  enum class StepResult { ROW, DONE };
+  StepResult step();
+  ///< Calls sqlite3_step and returns StepResults. All other return values throw exception.
+
   SQLite3::query_result fetchAll();
+  ///< using step functions involves less copying
+
+  template <typename T>
+  T getColumn(int i);
 
   operator sqlite3_stmt*() { return m_ptr.get(); }
   ///< Default cast to raw sqlite3_stmt*.
@@ -110,11 +135,31 @@ private:
     void operator()(::sqlite3_stmt*);
   };
   std::unique_ptr<sqlite3_stmt, Deleter> m_ptr;
+
+  void bindRecursive(int column) {}
+
+  template <typename T, typename... Args>
+  void bindRecursive(int index, T&& value, Args&&... args) {
+    bindAt(index, std::forward<T>(value));
+    bindRecursive(index + 1, std::forward<Args>(args)...);
+  }
+
+  // Explicit bind overrided for types we care about.
+  void bindAt(int index, int value);
+  void bindAt(int index, const std::string &value);
+
   SQLite3 &m_db; // needed for m_lock
 };
 
 inline SqlStatement SQLite3::prepare(const std::string &sql) {
   return SqlStatement(*this, sql);
+}
+
+template <typename... Args>
+SqlStatement::BindScope SqlStatement::bind(Args&&... args) {
+  BindScope bindScope(*this);
+  bindRecursive(1, std::forward<Args>(args)...);
+  return std::move(bindScope);
 }
 
 } // namespace
