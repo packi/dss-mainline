@@ -57,18 +57,18 @@ static std::string getFallbackSqlDump() {
 
 VdcDb::VdcDb() {
   try {
-    m_db.reset(new SQLite3(getDbFile(), false));
+    m_db.reset(new SQLite3(getDbFile(), SQLite3::Mode::ReadOnly));
   } catch (std::exception &e) {
     // database missing or corrupt
     Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
     Logger::getInstance()->log(std::string(__func__) + "creating db from fallback sqldump: " + getFallbackSqlDump(), lsWarning);
 
-    SQLite3 tmp(getDbFile(), true);
+    SQLite3 tmp(getDbFile(), SQLite3::Mode::ReadWrite);
     // open in read-write mode
     tmp.exec(readFile(getFallbackSqlDump()));
     // esceptions are not catched
 
-    m_db.reset(new SQLite3(getDbFile(), false));
+    m_db.reset(new SQLite3(getDbFile(), SQLite3::Mode::ReadOnly));
     // retry or throw exception
   }
 }

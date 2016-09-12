@@ -52,7 +52,7 @@ namespace dss {
         return JSONWriter::failure("Missing parameter 'sql'");
       }
 
-      SQLite3 sqlite(database, false);
+      SQLite3 sqlite(database, SQLite3::Mode::ReadOnly);
       SQLite3::query_result q = sqlite.prepare(sql).fetchAll();
 
       JSONWriter json;

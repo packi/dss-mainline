@@ -2843,7 +2843,7 @@ namespace dss {
       std::string database = DSS::getInstance()->getDatabaseDirectory() +
                              m_scriptId + ".db";
       if (!result.empty()) {
-        SQLite3 sqlite(database, true);
+        SQLite3 sqlite(database, SQLite3::Mode::ReadWrite);
         sqlite.exec(result);
         pEvent->setProperty("success", "1");
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
