@@ -41,7 +41,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
-#include "src/model/vdce_db.h"
+#include "src/model/vdc-db.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"

@@ -18,7 +18,7 @@
  */
 
 #include "config.h"
-#include "src/model/vdce_db.h"
+#include "src/model/vdc-db.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 

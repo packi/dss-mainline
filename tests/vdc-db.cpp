@@ -32,7 +32,7 @@
 #include "src/sqlite3_wrapper.h"
 #include "src/foreach.h"
 #include "src/model/device.h"
-#include "src/model/vdce_db.h"
+#include "src/model/vdc-db.h"
 #include "src/propertysystem.h"
 #include "src/web/handler/devicerequesthandler.h"
 #include "tests/util/dss_instance_fixture.h"
@@ -41,7 +41,7 @@ using namespace dss;
 
 // http://db.aizo.net/vdc-db.php
 
-BOOST_AUTO_TEST_SUITE(VDCE)
+BOOST_AUTO_TEST_SUITE(VDC_DB)
 
 static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   foreach (const DeviceStateSpec_t &state, states) {
