@@ -31,8 +31,8 @@
 
 namespace dss {
 
-const std::string pcn_vdce_db = "/config/vdce/db";
-const std::string pcn_vdce_db_name = pcn_vdce_db + "/name";
+const char* pcn_vdce_db = "/config/vdce/db";
+const char* pcn_vdce_db_name = "/config/vdce/db/name";
 
 static std::string getDbFile() {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();

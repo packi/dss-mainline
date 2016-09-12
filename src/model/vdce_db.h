@@ -33,8 +33,8 @@ namespace dss {
  * property node structure to declare trigger
  * pcn_ = property config node
  */
-extern const std::string pcn_vdce_db;
-extern const std::string  pcn_vdce_db_name;
+extern const char* pcn_vdce_db;
+extern const char*  pcn_vdce_db_name;
 
 class VdcDb {
 public:
