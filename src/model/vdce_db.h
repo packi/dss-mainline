@@ -47,8 +47,8 @@ public:
     // pair: < value, translated value(=title) >
   };
 
-  bool lookupStates(const std::string &gtin, std::vector<DeviceStateSpec_t> *out);
-  bool lookupStates(const std::string &gtin, std::vector<StateDesc> *out, const std::string &langCode = "");
+  std::vector<DeviceStateSpec_t> getStatesLegacy(const std::string &gtin); // throws
+  std::vector<StateDesc> getStates(const std::string &gtin, const std::string &langCode = ""); // throws
 
   struct PropertyDesc {
     std::string name; // technical name
@@ -56,7 +56,7 @@ public:
     bool readonly;
   };
 
-  bool lookupProperties(const std::string &gtin, std::vector<PropertyDesc> *out, const std::string &langCode = "");
+  std::vector<PropertyDesc> getProperties(const std::string &gtin, const std::string &langCode = "");
 
   struct ActionParameter {
     std::string name;
@@ -70,7 +70,7 @@ public:
     std::vector<ActionParameter> params;
   };
 
-  bool lookupActions(const std::string &gtin, std::vector<ActionDesc> *out, const std::string &langCode = "");
+  std::vector<ActionDesc> getActions(const std::string &gtin, const std::string &langCode = "");
 
   struct StandardActionDesc {
     std::string name;
@@ -80,7 +80,7 @@ public:
     // pair <argument name, argument value>
   };
 
-  bool lookupStandardActions(const std::string &gtin, std::vector<StandardActionDesc> *out, const std::string &langCode = "");
+  std::vector<StandardActionDesc> getStandardActions(const std::string &gtin, const std::string &langCode = "");
 
 private:
   std::unique_ptr<SQLite3> m_db;

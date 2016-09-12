@@ -2094,41 +2094,43 @@ namespace dss {
   std::string DeviceRequestHandler::getInfoStatic(const Device& device, const std::string &langCode) {
     const std::string& oemEan = device.getOemEanAsString();
     VdcDb db;
-
-    std::vector<VdcDb::StateDesc> states;
-    if (!db.lookupStates(oemEan, &states, langCode)) {
-      return JSONWriter::failure("unknown device");
-    }
-
     JSONWriter json;
-    json.add("class", "oven (tbd)"); // TODO(soon) from vdc property
-    json.add("classVersion", "1 (tbd)"); // TODO(soon) vdc property
-    json.add("oemEanNumber", oemEan);
-    json.add("model", "Combi-Steam MSLQ (tbd)"); // TODO(soon) prop-node hwinfo
-    json.add("modelVersion", "0.1 (tbd)"); // TODO(soon) prop-node hwversion
-    json.add("modelId", "gs1:(01)7640156791914 (tbd)"); //TODO(soon) oemGUID
-    json.add("vendorId", "vendorname:V-Zug (tbd)"); //TODO(soon) vendorGUID
-    json.add("vendorName", "V-Zug (tbd)"); // TODO(soon) vdc property
 
-    {
-      // states already fetched
+    try {
+      auto states = db.getStates(oemEan, langCode);
+
+      json.add("class", "oven (tbd)"); // TODO(soon) from vdc property
+      json.add("classVersion", "1 (tbd)"); // TODO(soon) vdc property
+      json.add("oemEanNumber", oemEan);
+      json.add("model", "Combi-Steam MSLQ (tbd)"); // TODO(soon) prop-node hwinfo
+      json.add("modelVersion", "0.1 (tbd)"); // TODO(soon) prop-node hwversion
+      json.add("modelId", "gs1:(01)7640156791914 (tbd)"); //TODO(soon) oemGUID
+      json.add("vendorId", "vendorname:V-Zug (tbd)"); //TODO(soon) vendorGUID
+      json.add("vendorName", "V-Zug (tbd)"); // TODO(soon) vdc property
+
       json.startObject("stateDescriptions");
       foreach (auto &state, states) {
         json.startObject(state.name);
         json.add("title", state.title);
-          json.startObject("options");
-          foreach (auto desc, state.values) {
-            json.add(desc.first, desc.second); // non-tranlated: translated
-          }
-          json.endObject();
+        json.startObject("options");
+        foreach (auto desc, state.values) {
+          json.add(desc.first, desc.second); // non-tranlated: translated
+        }
+        json.endObject();
         json.endObject();
       }
       json.endObject();
+
+    } catch (std::exception e) {
+      // TODO(soon) is it valid to assume every device has states?
+      Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
+      return JSONWriter::failure("unknown device");
     }
 
-    std::vector<VdcDb::PropertyDesc> props;
-    if (db.lookupProperties(oemEan, &props, langCode)) {
+    try {
+      auto props = db.getProperties(oemEan, langCode); // throws
       json.startObject("propertyDescriptions");
+
       foreach (auto &prop, props) {
         json.startObject(prop.name);
         json.add("title", prop.title);
@@ -2136,10 +2138,13 @@ namespace dss {
         json.endObject();
       }
       json.endObject();
+    } catch (std::exception e) {
+      // no properties
     }
 
-    std::vector<VdcDb::ActionDesc> actions;
-    if (db.lookupActions(oemEan, &actions, langCode)) {
+    try {
+      auto actions = db.getActions(oemEan, langCode);
+
       json.startObject("actionDescriptions");
       foreach (const VdcDb::ActionDesc &action, actions) {
         json.startObject(action.name);
@@ -2155,10 +2160,13 @@ namespace dss {
         json.endObject();
       }
       json.endObject();
+    } catch (std::exception e) {
+      // no actions
     }
 
-    std::vector<VdcDb::StandardActionDesc> stdActions;
-    if (db.lookupStandardActions(oemEan, &stdActions, langCode)) {
+    try {
+      auto stdActions = db.getStandardActions(oemEan, langCode);
+
       json.startObject("standardActions");
       foreach (auto &action, stdActions) {
         json.startObject(action.name);
@@ -2171,6 +2179,8 @@ namespace dss {
         json.endObject();
       }
       json.endObject();
+    } catch (std::exception e) {
+      // no standard actions
     }
 
     return json.successJSON();

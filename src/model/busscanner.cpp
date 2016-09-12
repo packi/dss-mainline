@@ -465,15 +465,8 @@ namespace dss {
         dev->setVdcModelFeatures(props.modelFeatures);
 
         VdcDb db;
-        std::vector<DeviceStateSpec_t> states;
-        if (db.lookupStates(dev->getOemEanAsString(), &states)) {
-            dev->initStates(dev, states);
-            dev->setHasActions(true);
-        }
-        std::vector<VdcDb::ActionDesc> actions;
-        if (db.lookupActions(dev->getOemEanAsString(), &actions)) {
-            dev->setHasActions(true);
-        }
+        dev->initStates(dev, db.getStatesLegacy(dev->getOemEanAsString())); // throws
+        dev->setHasActions(!db.getActions(dev->getOemEanAsString()).empty()); // throws
       }
     } catch (const std::runtime_error& e) {
       log(std::string("initializeDeviceFromSpec() error:") + e.what(), lsError);

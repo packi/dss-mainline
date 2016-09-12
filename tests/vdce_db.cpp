@@ -56,7 +56,7 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupStates, DSSInstanceFixture) {
+BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
   PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
   propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
 
@@ -66,7 +66,7 @@ BOOST_FIXTURE_TEST_CASE(lookupStates, DSSInstanceFixture) {
   VdcDb db;
 
   std::vector<DeviceStateSpec_t> states_s;
-  BOOST_CHECK(db.lookupStates(gtin, &states_s));
+  BOOST_CHECK_NO_THROW(states_s = db.getStatesLegacy(gtin));
   dumpStates(states_s);
 
   BOOST_CHECK_EQUAL(states_s[1].Name, "operationMode");
@@ -76,7 +76,7 @@ BOOST_FIXTURE_TEST_CASE(lookupStates, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(states_s[2].Values[1], "running");
 
   std::vector<VdcDb::StateDesc> states_i;
-  BOOST_CHECK(db.lookupStates(gtin, &states_i, ""));
+  BOOST_CHECK_NO_THROW(states_i = db.getStates(gtin, ""));
   BOOST_CHECK_EQUAL(states_i[0].name, "fan");
   BOOST_CHECK_EQUAL(states_i[0].title, "fan");
   BOOST_CHECK_EQUAL(states_i[0].values.size(), 2);
@@ -86,7 +86,7 @@ BOOST_FIXTURE_TEST_CASE(lookupStates, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(states_i[2].values[1].first, "running");
   BOOST_CHECK_EQUAL(states_i[2].values[1].second, "running");
 
-  BOOST_CHECK(db.lookupStates(gtin, &states_i, "de_DE"));
+  BOOST_CHECK_NO_THROW(states_i = db.getStates(gtin, "de_DE"));
   BOOST_CHECK_EQUAL(states_i[1].name, "operationMode");
   BOOST_CHECK_EQUAL(states_i[1].title, "Betriebszustand");
   BOOST_CHECK_EQUAL(states_i[1].values[1].first, "steaming");
@@ -109,12 +109,12 @@ BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
 
   VdcDb db;
   std::vector<VdcDb::PropertyDesc> props;
-  BOOST_CHECK(db.lookupProperties(gtin, &props));
+  BOOST_CHECK_NO_THROW(props = db.getProperties(gtin));
   BOOST_CHECK(props[2].name == "temperature.sensor");
   BOOST_CHECK(props[2].title == "temperature.sensor");
   //dumpProperties(props);
 
-  BOOST_CHECK(db.lookupProperties(gtin, &props, "de_DE"));
+  BOOST_CHECK_NO_THROW(props = db.getProperties(gtin, "de_DE"));
   BOOST_CHECK(props[2].name == "temperature.sensor");
   BOOST_CHECK(props[2].title == "Garguttemperatur");
   BOOST_CHECK(!props[2].readonly);
@@ -140,14 +140,14 @@ BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
 
   VdcDb db;
   std::vector<VdcDb::ActionDesc> actions;
-  BOOST_CHECK(db.lookupActions(gtin, &actions, ""));
+  BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, ""));
   BOOST_CHECK(actions[1].name == "steam");
   BOOST_CHECK(actions[1].title == "steam");
   BOOST_CHECK(actions[1].params[1].name == "duration");
   BOOST_CHECK(actions[1].params[1].title == "duration");
   //dumpActionDesc(actions);
 
-  BOOST_CHECK(db.lookupActions(gtin, &actions, "de_DE"));
+  BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, "de_DE"));
   BOOST_CHECK(actions[1].name == "steam");
   BOOST_CHECK(actions[1].title == "Dampfen");
   BOOST_CHECK(actions[1].params[1].name == "duration");
@@ -174,13 +174,13 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
 
   VdcDb db;
   std::vector<VdcDb::StandardActionDesc> stdActions;
-  BOOST_CHECK(db.lookupStandardActions(gtin, &stdActions, "de_DE"));
+  BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, "de_DE"));
   //dumpDesc(stdActions);
   BOOST_CHECK(stdActions[1].name == "std.pizza");
   BOOST_CHECK(stdActions[1].title == "Pizza");
   BOOST_CHECK(stdActions[0].args[1].first == "duration");
 
-  BOOST_CHECK(db.lookupStandardActions(gtin, &stdActions, ""));
+  BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, ""));
   //dumpDesc(stdActions);
   BOOST_CHECK(stdActions[1].name == "std.pizza");
   BOOST_CHECK(stdActions[1].title == "std.pizza");
@@ -212,17 +212,10 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   // invalid gtin
 
   VdcDb db;
-  std::vector<DeviceStateSpec_t> states;
-  BOOST_CHECK(!db.lookupStates(gtin, &states));
-
-  std::vector<VdcDb::PropertyDesc> props;
-  BOOST_CHECK(!db.lookupProperties(gtin, &props));
-
-  std::vector<VdcDb::ActionDesc> actions;
-  BOOST_CHECK(!db.lookupActions(gtin, &actions));
-
-  std::vector<VdcDb::StandardActionDesc> stdActions;
-  BOOST_CHECK(!db.lookupStandardActions(gtin, &stdActions, "de_DE"));
+  BOOST_CHECK_THROW(db.getStates(gtin), std::exception);
+  BOOST_CHECK_THROW(db.getProperties(gtin), std::exception);
+  BOOST_CHECK_THROW(db.getActions(gtin), std::exception);
+  BOOST_CHECK_THROW(db.getStandardActions(gtin, "de_DE"), std::exception);
 
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(strToInt(gtin), 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
