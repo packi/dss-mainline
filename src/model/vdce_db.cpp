@@ -39,7 +39,7 @@ static std::string getDbFile() {
   std::string dbPath = propSystem.getProperty("/config/databasedirectory")->getAsString();
 
   if (!propSystem.getProperty(pcn_vdce_db_name)) {
-    return dbPath + "/vdc.db";
+    throw std::runtime_error(std::string(__func__) + ": config: vdc db filename missing");
   }
 
   std::string dbName = propSystem.getProperty(pcn_vdce_db_name)->getAsString();
