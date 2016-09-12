@@ -110,7 +110,7 @@ public:
     return std::vector<std::pair<int,int> >();
   }
   virtual std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) {
-      return std::bitset<7>(0);
+      return std::bitset<7>(0llu);
   }
 
   virtual bool getEnergyBorder(const dsuid_t& _dsMeterID, int& _lower, int& _upper) {
