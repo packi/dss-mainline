@@ -28,6 +28,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "src/ds485types.h"
+#include "base.h"
 
 namespace dss {
 
@@ -78,6 +79,7 @@ namespace dss {
                     etDsmStateChange, /** dSM state has changed **/
                     etDeviceOEMDataUpdateProductInfoState, /** only update devices OEM product info state without data */
                     etCircuitPowerStateChange, /** A dSM sent a power state change event */
+                    etVdceEvent, /** Device specific VDCE (vdce extension) event */
                  } EventType;
   private:
     EventType m_EventType;
@@ -103,7 +105,7 @@ namespace dss {
     /** Returns the parameter count. */
     int getParameterCount() const { return m_Parameter.size(); }
     /** Returns the type of the event. */
-    EventType getEventType() { return m_EventType; }
+    EventType getEventType() const { return m_EventType; }
 
     void setSingleStringParameter(const std::string _param) { m_SingleStringParameter = _param; }
     std::string getSingleStringParameter() const { return m_SingleStringParameter; }
@@ -120,7 +122,7 @@ namespace dss {
       m_DSID(_dsid)
     { }
 
-    const dsuid_t& getDSID() { return m_DSID; }
+    const dsuid_t& getDSID() const { return m_DSID; }
   private:
     dsuid_t m_DSID;
   }; // ModelEventWithDSID
@@ -136,6 +138,14 @@ namespace dss {
     int getStringParameterCount() const { return m_StringParameter.size(); }
   private:
     std::vector<std::string> m_StringParameter;
+  };
+
+  class VdceModelEvent : public ModelEvent {
+  public:
+    VdceModelEvent() : ModelEvent(ModelEvent::etVdceEvent) {}
+
+    dsuid_t m_deviceDSID;
+    Properties m_states;
   };
 
 } // namespace dss

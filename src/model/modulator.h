@@ -123,7 +123,7 @@ namespace dss {
   public:
     /** Constructs a dsMeter with the given dsid. */
     DSMeter(const dsuid_t _dsid, Apartment* _pApartment);
-    virtual ~DSMeter() {};
+    virtual ~DSMeter();
     virtual Set getDevices() const;
 
     /** Returns the DSID of the DSMeter */

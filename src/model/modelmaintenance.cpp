@@ -491,8 +491,8 @@ namespace dss {
     m_EventTimeoutMS(_eventTimeoutMS),
     m_pStructureQueryBusInterface(NULL),
     m_pStructureModifyingBusInterface(NULL),
-    m_taskProcessor(boost::make_shared<TaskProcessor>()),
-    m_taskProcessorMaySleep(boost::make_shared<TaskProcessor>()),
+    m_taskProcessor(),
+    m_taskProcessorMaySleep(),
     m_pMeterMaintenance(boost::make_shared<MeterMaintenance>(_pDSS, "MeterMaintenance"))
   { }
 
@@ -1192,6 +1192,9 @@ namespace dss {
       } else {
         onDsmStateChange(pEventWithDSID->getDSID(), event->getParameter(0));
       }
+      break;
+    case ModelEvent::etVdceEvent:
+      onVdceEvent(*dynamic_cast<VdceModelEvent*>(event.get()));
       break;
     default:
       assert(false);
@@ -2092,7 +2095,7 @@ namespace dss {
           }
           if (newState != oldState) {
             state->setState(coSystem, newState);
-            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
                                                     pDev->getDeviceBinaryInputType(index),
                                                     newState));
           }
@@ -2179,7 +2182,7 @@ namespace dss {
         if ((_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
             (_iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
           // query Webservice
-          getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice(), devRef.getDevice()->getOemProductInfoState()));
+          getTaskProcessor().addEvent(boost::make_shared<OEMWebQuery>(devRef.getDevice(), devRef.getDevice()->getOemProductInfoState()));
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_LOADING);
         } else {
           devRef.getDevice()->setOemProductInfoState(DEVICE_OEM_NONE);
@@ -2491,7 +2494,7 @@ namespace dss {
           if (dsuid_equal(&id, &_meterID)) {
             log("onDsmStateChange: scheduling device readout task on dSM " +
                 dsuid2str(_meterID));
-            m_taskProcessorMaySleep->addEvent((*it).second);
+            m_taskProcessorMaySleep.addEvent((*it).second);
             it = m_deviceReadoutTasks.erase(it);
           } else {
             it++;
@@ -2503,6 +2506,23 @@ namespace dss {
     }
   } // onDsmStateChange
 
+  void ModelMaintenance::onVdceEvent(const VdceModelEvent& event)
+  {
+    try {
+      boost::shared_ptr<Device> pDev = m_pApartment->getDeviceByDSID(event.m_deviceDSID);
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(pDev->getDSID(), &pDev->getApartment());
+
+      BOOST_FOREACH(HashMapStringString::value_type state, event.m_states.getContainer()) {
+        const std::string& name = state.first;
+        const std::string& value = state.second;
+
+        raiseEvent(createDeviceStateEvent(pDevRev, name, value));
+        pDev->setStateValue(name, value);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  }
 
   void ModelMaintenance::rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID) {
     BusScanner
@@ -2724,23 +2744,14 @@ namespace dss {
   void ModelMaintenance::VdcDataQuery::run()
   {
     try {
-      boost::shared_ptr<VdsdSpec_t> props = VdcHelper::getSpec(m_Device->getDSMeterDSID(), m_Device->getDSID());
-      m_Device->setVdcHardwareModelGuid(props->hardwareModelGuid);
-      m_Device->setVdcModelUID(props->modelUID);
-      m_Device->setVdcVendorGuid(props->vendorGuid);
-      m_Device->setVdcOemGuid(props->oemGuid);
-      m_Device->setVdcConfigURL(props->configURL);
-      m_Device->setVdcHardwareGuid(props->hardwareGuid);
-      m_Device->setVdcHardwareInfo(props->hardwareInfo);
-      m_Device->setVdcHardwareVersion(props->hardwareVersion);
-
-      if (beginsWith(props->oemModelGuid, "gs1:")) {
+      const std::string& oemModelGuid = m_Device->getVdcOemModelGuid();
+      if (beginsWith(oemModelGuid, "gs1:")) {
         // For the time being assume that all IP Devices with an oemModelGuid/GTIN
         // are registered at the dS-Article Db. This might be a configurable property in the future.
         const DeviceOEMInetState_t iNetState = DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY;
         try {
           // format of oemModelGuid: gs1:(01)123456789
-          std::string eanString = props->oemModelGuid.substr(4);
+          std::string eanString = oemModelGuid.substr(4);
           if (beginsWith(eanString, "(01)")) {
             eanString.erase(0, 4);
           }
@@ -2748,8 +2759,8 @@ namespace dss {
           m_Device->setOemInfo(eanNumber, 0, 0, iNetState, true);
           if ((iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
               (iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
-            boost::shared_ptr<TaskProcessor> tp = DSS::getInstance()->getModelMaintenance().getTaskProcessor();
-            tp->addEvent(boost::make_shared<OEMWebQuery>(m_Device, m_Device->getOemProductInfoState()));
+            TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
+            tp.addEvent(boost::make_shared<OEMWebQuery>(m_Device, m_Device->getOemProductInfoState()));
             m_Device->setOemProductInfoState(DEVICE_OEM_LOADING);
           } else {
             m_Device->setOemProductInfoState(DEVICE_OEM_NONE);
@@ -2757,12 +2768,13 @@ namespace dss {
           m_Device->setOemInfoState(DEVICE_OEM_VALID);
         } catch (std::invalid_argument& e) {
           Logger::getInstance()->log("VdcDataQuery: could not convert gtin for device " +
-              dsuid2str(m_Device->getDSID()) + ", oemModelGuid: " + props->oemModelGuid, lsWarning);
+              dsuid2str(m_Device->getDSID()) + ", oemModelGuid: " + oemModelGuid, lsWarning);
         }
       }
 
       try {
-        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), props->modelUID, props->modelFeatures);
+        ModelFeatures::getInstance()->setFeatures(m_Device->getDeviceClass(), m_Device->getVdcModelUID(),
+                                                  m_Device->getVdcModelFeatures());
       } catch (std::runtime_error& err) {
         Logger::getInstance()->log("Could not set model features for device " +
             dsuid2str(m_Device->getDSID()) + ", Message: " +
@@ -2831,7 +2843,7 @@ namespace dss {
       std::string database = DSS::getInstance()->getDatabaseDirectory() +
                              m_scriptId + ".db";
       if (!result.empty()) {
-        SQLite3 sqlite(database, false);
+        SQLite3 sqlite(database, SQLite3::Mode::ReadWrite);
         sqlite.exec(result);
         pEvent->setProperty("success", "1");
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
@@ -3056,8 +3068,7 @@ namespace dss {
            ((device->getOemProductInfoState() == DEVICE_OEM_VALID) ||
             (device->getOemProductInfoState() == DEVICE_OEM_UNKNOWN))) {
         // query Webservice
-        getTaskProcessor()->addEvent(boost::make_shared<OEMWebQuery>(device,
-                                            device->getOemProductInfoState()));
+        getTaskProcessor().addEvent(boost::make_shared<OEMWebQuery>(device, device->getOemProductInfoState()));
         device->setOemProductInfoState(DEVICE_OEM_LOADING);
       }
     }
@@ -3109,7 +3120,7 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_dSMeterID);
       if (pMeter->getState() == DSM_STATE_IDLE) {
-        m_taskProcessorMaySleep->addEvent(task);
+        m_taskProcessorMaySleep.addEvent(task);
       } else {
         boost::mutex::scoped_lock lock(m_readoutTasksMutex);
         m_deviceReadoutTasks.push_back(std::make_pair(_dSMeterID, task));
@@ -3134,7 +3145,6 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<WebSocketEvent> wse = boost::make_shared<WebSocketEvent>(_event);
-    getTaskProcessor()->addEvent(wse);
+    getTaskProcessor().addEvent(boost::make_shared<WebSocketEvent>(_event));
   }
 } // namespace dss

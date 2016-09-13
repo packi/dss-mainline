@@ -20,14 +20,11 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-  #include "config.h"
-#endif
+#include "vdc-connection.h"
 
 #include <iostream>
 
 #include "base.h"
-#include "vdc-connection.h"
 #include "util.h"
 #include "ds485types.h"
 #include "dss.h"
@@ -37,13 +34,12 @@
 #include "stringconverter.h"
 #include "logger.h"
 #include "model-features.h"
+#include "vdc-element-reader.h"
 
 namespace dss {
 
-  boost::shared_ptr<VdsdSpec_t> VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
+  VdsdSpec_t VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
     vdcapi::Message message;
-    boost::shared_ptr<VdsdSpec_t> ret = boost::make_shared<VdsdSpec_t>();
-
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop =
                                     message.mutable_vdsm_request_get_property();
@@ -58,6 +54,10 @@ namespace dss {
     query = getprop->add_query();
     query->set_name("vendorGuid");
     query = getprop->add_query();
+    query->set_name("vendorId");
+    query = getprop->add_query();
+    query->set_name("vendorName");
+    query = getprop->add_query();
     query->set_name("oemGuid");
     query = getprop->add_query();
     query->set_name("oemModelGuid");
@@ -68,9 +68,15 @@ namespace dss {
     query = getprop->add_query();
     query->set_name("model");
     query = getprop->add_query();
+    query->set_name("modelVersion");
+    query = getprop->add_query();
     query->set_name("hardwareVersion");
     query = getprop->add_query();
     query->set_name("name");
+    query = getprop->add_query();
+    query->set_name("deviceClass");
+    query = getprop->add_query();
+    query->set_name("deviceClassVersion");
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -83,14 +89,11 @@ namespace dss {
       throw std::runtime_error("could not serialize message");
     }
 
-    boost::shared_ptr<std::vector<int> > features = boost::make_shared<std::vector<int> >();
-    ret->modelFeatures = features;
-
     if (DSS::hasInstance()) {
       DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
           _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
-      return ret;
+      throw std::runtime_error("!DSS::hasInstance()");
     }
 
     message.Clear();
@@ -111,91 +114,38 @@ namespace dss {
       throw std::runtime_error("received unexpected reply");
     }
 
-    vdcapi::vdc_ResponseGetProperty response =
-                                            message.vdc_response_get_property();
+    VdsdSpec_t ret;
+    VdcElementReader rootReader(message.vdc_response_get_property().properties());
+    ret.hardwareModelGuid = rootReader["hardwareModelGuid"].getValueAsString();
+    ret.vendorGuid = rootReader["vendorGuid"].getValueAsString();
+    ret.oemGuid = rootReader["oemGuid"].getValueAsString();
+    ret.oemModelGuid = rootReader["oemModelGuid"].getValueAsString();
+    ret.configURL = rootReader["configURL"].getValueAsString();
+    ret.hardwareGuid = rootReader["hardwareGuid"].getValueAsString();
+    ret.model = rootReader["model"].getValueAsString();
+    ret.modelUID = rootReader["modelUID"].getValueAsString();
+    ret.hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
+    ret.name = rootReader["name"].getValueAsString();
+    ret.vendorId = rootReader["vendorId"].getValueAsString();
+    ret.vendorName = rootReader["vendorName"].getValueAsString();
+    ret.modelVersion = rootReader["modelVersion"].getValueAsString();
+    ret.deviceClass = rootReader["deviceClass"].getValueAsString();
+    ret.deviceClassVersion = rootReader["deviceClassVersion"].getValueAsString();
 
-    for (int i = 0; i < response.properties_size(); i++) {
-      vdcapi::PropertyElement el = response.properties(i);
-
-      if (!el.has_name()) {
+    ret.modelFeatures = boost::make_shared<std::vector<int> >();
+    std::vector<int>& features = *ret.modelFeatures;
+    VdcElementReader featuresReader = rootReader["modelFeatures"];
+    for (VdcElementReader::iterator it = featuresReader.begin(); it != featuresReader.end(); it++) {
+      VdcElementReader featureReader = *it;
+      if (!featureReader.getValueAsBool()) {
         continue;
       }
-
-      // we are only expecting string property values here except for model
-      // features
-      if (el.name() != "modelFeatures") {
-        if (!el.has_value()) {
-          continue;
-        }
-      }
-
-      vdcapi::PropertyValue val = el.value();
-
-      if (el.name() != "modelFeatures") {
-        if (!val.has_v_string()) {
-          continue;
-        }
-      }
-
-      StringConverter st("UTF-8", "UTF-8");
-      if (el.name() == "hardwareModelGuid") {
-        try {
-          ret->hardwareModelGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "vendorGuid") {
-        try {
-          ret->vendorGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "oemGuid") {
-        try {
-          ret->oemGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "oemModelGuid") {
-        try {
-          ret->oemModelGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "configURL") {
-        try {
-          ret->configURL = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "hardwareGuid") {
-        try {
-          ret->hardwareGuid = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "model") {
-        try {
-          ret->hardwareInfo = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "modelUID") {
-        try {
-          ret->modelUID = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "hardwareVersion") {
-        try {
-          ret->hardwareVersion = st.convert(val.v_string());
-        } catch (std::exception& e) {}
-      } else if (el.name() == "modelFeatures") {
-        for (int j = 0; j < el.elements_size(); j++) {
-          vdcapi::PropertyElement feature = el.elements(j);
-          if (feature.has_value()) {
-            vdcapi::PropertyValue fval = feature.value();
-            if (fval.has_v_bool() && fval.v_bool() == true) {
-              try {
-                ret->modelFeatures->push_back(
-                  ModelFeatures::getInstance()->nameToFeature(feature.name()));
-              } catch (std::runtime_error &ex) {
-                Logger::getInstance()->log("Ignoring feature '" +
-                                            feature.name() + "' from device " +
-                                            dsuid2str(_device));
-              }
-            }
-          }
-        }
-
-      } else if (el.name() == "name") {
-        try {
-          ret->name = st.convert(val.v_string());
-        } catch (std::exception& e) {}
+      const std::string& featureName = featureReader.getName();
+      try {
+        features.push_back(ModelFeatures::getInstance()->nameToFeature(featureName));
+      } catch (std::runtime_error &ex) {
+        Logger::getInstance()->log("Ignoring feature '" + featureName + "' from device " +
+                                    dsuid2str(_device));
       }
     }
 
@@ -419,20 +369,20 @@ namespace dss {
     return;
   }
 
-  std::map<int,int64_t> VdcHelper::getStateInputValue(dsuid_t _vdsm, dsuid_t _device, int index)
+  VdcHelper::State VdcHelper::getState(dsuid_t _vdsm, dsuid_t _device)
   {
     vdcapi::Message message;
     message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
     vdcapi::vdsm_RequestGetProperty *getprop = message.mutable_vdsm_request_get_property();
     getprop->set_dsuid(dsuid2str(_device));
 
-    vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("binaryInputStates");
-
-    // "index < 0" means get all, an index >= 0 requests only the single InputId
-    if (index >= 0) {
-      std::string sIndex = intToString(index);
-      query->add_elements()->set_name(sIndex.c_str());
+    {
+      vdcapi::PropertyElement *query = getprop->add_query();
+      query->set_name("binaryInputStates");
+    }
+    {
+      vdcapi::PropertyElement *query = getprop->add_query();
+      query->set_name("deviceStates");
     }
 
     uint8_t buffer_in[4096];
@@ -450,7 +400,7 @@ namespace dss {
       DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
           _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
     } else {
-      return std::map<int,int64_t>();
+      return VdcHelper::State();
     }
 
     message.Clear();
@@ -468,78 +418,58 @@ namespace dss {
       throw std::runtime_error("received unexpected reply");
     }
 
+    Logger::getInstance()->log("VdcHelper::getState: message " + message.DebugString(), lsDebug);
     vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
+    VdcElementReader reader(message.vdc_response_get_property().properties());
 
-    std::map<int,int64_t> result;
-    for (int i = 0; i < response.properties_size(); i++) {
-      vdcapi::PropertyElement el = response.properties(i);
-      if (el.name() == "binaryInputStates") {
-        for (int j = 0; j < el.elements_size(); j++) {
-          vdcapi::PropertyElement iState = el.elements(j);
-          int sIndex = strToInt(iState.name());
-          if (index < 0 || index == sIndex) {
-            // iterate over the parameter list: value, extendedValue, age, error
-            uint64_t iValue;
-            bool bValue;
-            bool hasValue = false;
-            bool hasExValue = false;
-            int error = 0;
-            for (int v = 0; v < iState.elements_size(); v++) {
-              vdcapi::PropertyElement iStateEl = iState.elements(v);
-              vdcapi::PropertyValue val = iStateEl.value();
-              if (iStateEl.name() == "extendedValue") {
-                hasExValue = true;
-                if (val.has_v_uint64()) {
-                  iValue = val.v_uint64();
-                } else if (val.has_v_int64()) {
-                  iValue = (uint64_t) val.v_int64();
-                } else {
-                  Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
-                      dsuid2str(_device) + ": extendedValue has invalid type", lsWarning);
-                  hasExValue = false;
-                }
-              } else if (iStateEl.name() == "value") {
-                hasValue = true;
-                if (val.has_v_bool()) {
-                  bValue = val.v_bool();
-                } else if (val.has_v_uint64()) {
-                  bValue = val.v_uint64() == 1;
-                } else if (val.has_v_int64()) {
-                  bValue = val.v_int64() == 1;
-                } else {
-                  Logger::getInstance()->log("VdcHelper::getStateInputValue: device " +
-                      dsuid2str(_device) + ": value has invalid type", lsWarning);
-                  hasValue = false;
-                }
-              } else if (iStateEl.name() == "error") {
-                if (val.has_v_int64()) error = val.v_int64();
-                if (val.has_v_uint64()) error = val.v_uint64();
-              } else if (iStateEl.name() == "age") {
-                // age cannot be set
-              } else {
-                Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
-                    ": unknown value: " + iStateEl.name() + ", debug: " + val.DebugString(), lsWarning);
-              }
-            }
-            if (error != 0) {
-              Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
-                  ": index " + intToString(j) + ": error code: " + intToString(error), lsWarning);
-            } else {
-              if (hasExValue) {
-                result[sIndex] = iValue;
-              } else if (hasValue) {
-                result[sIndex] = bValue ? State_Active : State_Inactive;
-              }
-            }
-          }
+    State state;
+    std::map<int,int64_t>& binaryInputStates = state.binaryInputStates;
+    VdcElementReader biStatesReader = reader["binaryInputStates"];
+    for (VdcElementReader::iterator it = biStatesReader.begin(); it != biStatesReader.end(); it++) {
+      VdcElementReader biStateReader = *it;
+      const std::string& biStateName = biStateReader.getName();
+      int biStateIndex = strToInt(biStateName);
+      {
+        VdcElementReader reader = biStateReader["error"];
+        if (reader.getValueAsInt() != 0) {
+            Logger::getInstance()->log("VdcHelper::getStateInputValue: device:" + dsuid2str(_device) +
+                " name:" + biStateName + " error:" + reader.getValueAsString(), lsWarning);
+            continue;
+        }
+      }
+      {
+        VdcElementReader reader = biStateReader["extendedValue"];
+        if (reader.isValid()) {
+            binaryInputStates[biStateIndex] = reader.getValueAsInt();
+            continue;
+        }
+      }
+      {
+        VdcElementReader reader = biStateReader["value"];
+        if (reader.isValid()) {
+            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? State_Active : State_Inactive;
+            continue;
         }
       }
     }
-    for (std::map<int,int64_t>::const_iterator it = result.begin(); it != result.end(); ++it ) {
-      Logger::getInstance()->log("VdcHelper::getStateInputValue: device " + dsuid2str(_device) +
+
+    std::vector<std::pair<std::string, std::string> >& deviceStates = state.deviceStates;
+    VdcElementReader deviceStatesReader = reader["deviceStates"];
+    for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
+      VdcElementReader reader = *it;
+      deviceStates.push_back(std::pair<std::string, std::string>(reader.getName(), reader["value"].getValueAsString()));
+    }
+
+    for (std::map<int,int64_t>::const_iterator it = binaryInputStates.begin(); it != binaryInputStates.end(); ++it ) {
+      Logger::getInstance()->log("VdcHelper::getState: device " + dsuid2str(_device) +
           ": " + intToString(it->first) + "=" + intToString(it->second), lsDebug);
     }
-    return result;
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = deviceStates.begin();
+        it != deviceStates.end(); ++it ) {
+      Logger::getInstance()->log("VdcHelper::getState: device " + dsuid2str(_device) +
+          ": " + it->first + "=" + it->second, lsDebug);
+    }
+    return state;
   }
 
 }// namespace

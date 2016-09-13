@@ -99,7 +99,7 @@ namespace dss {
     m_DatamodelHash(0),
     m_DatamoderModificationCount(0),
     m_BinaryInputEventCount(dsuid2str(_dsid)),
-    m_dSMPropertyFlags(0),
+    m_dSMPropertyFlags(0llu),
     m_IgnoreActionsFromNewDevices(false),
     m_ApartmentState(DSM_APARTMENT_STATE_UNKNOWN),
     m_dSMState(DSM_STATE_UNKNOWN),
@@ -107,6 +107,17 @@ namespace dss {
   {
     publishToPropertyTree();
   } // ctor
+
+  DSMeter::~DSMeter() {
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->unlinkProxy(true);
+      PropertyNode *parent = m_pPropertyNode->getParentNode();
+      if (parent != NULL) {
+        parent->removeChild(m_pPropertyNode);
+      }
+      m_pPropertyNode.reset();
+    }
+  }
 
   void DSMeter::publishToPropertyTree() {
     assert(m_pPropertyNode == NULL);

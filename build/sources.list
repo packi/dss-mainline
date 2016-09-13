@@ -29,16 +29,16 @@ libdsscore_a_SOURCES =  \
 	../src/ds485types.cpp \
 	../src/ds485types.h \
 	../src/dss.cpp \
-	../src/dssfwd.h \
 	../src/dss.h \
-	../src/eventcollector.cpp \
-	../src/eventcollector.h \
+	../src/dssfwd.h \
 	../src/event.cpp \
+	../src/event.h \
 	../src/event/event_create.cpp \
 	../src/event/event_create.h \
 	../src/event/event_fields.cpp \
 	../src/event/event_fields.h \
-	../src/event.h \
+	../src/eventcollector.cpp \
+	../src/eventcollector.h \
 	../src/eventinterpreterplugins.cpp \
 	../src/eventinterpreterplugins.h \
 	../src/eventinterpretersystemplugins.cpp \
@@ -48,6 +48,8 @@ libdsscore_a_SOURCES =  \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
+	../src/handler/db_fetch.cpp \
+	../src/handler/db_fetch.h \
 	../src/handler/system_handlers.cpp \
 	../src/handler/system_handlers.h \
 	../src/handler/system_states.cpp \
@@ -65,30 +67,30 @@ libdsscore_a_SOURCES =  \
 	../src/logger.h \
 	../src/metering/metering.cpp \
 	../src/metering/metering.h \
+	../src/model-features.cpp \
+	../src/model-features.h \
 	../src/model/addressablemodelitem.cpp \
 	../src/model/addressablemodelitem.h \
 	../src/model/apartment.cpp \
 	../src/model/apartment.h \
+	../src/model/autoclustermaintenance.cpp \
+	../src/model/autoclustermaintenance.h \
 	../src/model/busscanner.cpp \
 	../src/model/busscanner.h \
-	../src/model/autoclustermaintenance.h \
-	../src/model/autoclustermaintenance.cpp \
-	../src/model/data_types.cpp \
-	../src/model/data_types.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
 	../src/model/data_types.cpp \
+	../src/model/data_types.cpp \
 	../src/model/data_types.h \
-	../src/model/devicecontainer.cpp \
-	../src/model/devicecontainer.h \
+	../src/model/data_types.h \
 	../src/model/device.cpp \
 	../src/model/device.h \
+	../src/model/devicecontainer.cpp \
+	../src/model/devicecontainer.h \
 	../src/model/deviceinterface.cpp \
 	../src/model/deviceinterface.h \
 	../src/model/devicereference.cpp \
 	../src/model/devicereference.h \
-	../src/model-features.cpp \
-	../src/model-features.h \
 	../src/model/group.cpp \
 	../src/model/group.h \
 	../src/model/modelconst.h \
@@ -111,28 +113,30 @@ libdsscore_a_SOURCES =  \
 	../src/model/set.h \
 	../src/model/state.cpp \
 	../src/model/state.h \
+	../src/model/vdc-db.cpp \
+	../src/model/vdc-db.h \
 	../src/model/zone.cpp \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
 	../src/monitor_tasks.h \
 	../src/propertyquery.cpp \
 	../src/propertyquery.h \
-	../src/propertysystem_common_paths.cpp \
-	../src/propertysystem_common_paths.h \
 	../src/propertysystem.cpp \
 	../src/propertysystem.h \
+	../src/propertysystem_common_paths.cpp \
+	../src/propertysystem_common_paths.h \
 	../src/protobufjson.cpp \
 	../src/protobufjson.h \
 	../src/sceneaccess.cpp \
 	../src/sceneaccess.h \
-	../src/scripting/jscurl-constants.h \
-	../src/scripting/jscluster.h \
 	../src/scripting/jscluster.cpp \
+	../src/scripting/jscluster.h \
+	../src/scripting/jscurl-constants.h \
+	../src/scripting/jscurl-options.h \
 	../src/scripting/jscurl.cpp \
 	../src/scripting/jscurl.h \
-	../src/scripting/jscurl-options.h \
-	../src/scripting/jsdatabase.h \
 	../src/scripting/jsdatabase.cpp \
+	../src/scripting/jsdatabase.h \
 	../src/scripting/jsevent.cpp \
 	../src/scripting/jsevent.h \
 	../src/scripting/jshandler.cpp \
@@ -163,8 +167,8 @@ libdsscore_a_SOURCES =  \
 	../src/sessionmanager.h \
 	../src/setbuilder.cpp \
 	../src/setbuilder.h \
-	../src/sqlite3_wrapper.h \
 	../src/sqlite3_wrapper.cc \
+	../src/sqlite3_wrapper.h \
 	../src/storagetools.cpp \
 	../src/storagetools.h \
 	../src/stringconverter.cpp \
@@ -188,14 +192,16 @@ libdsscore_a_SOURCES =  \
 	../src/util.h \
 	../src/vdc-connection.cpp \
 	../src/vdc-connection.h \
+	../src/vdc-element-reader.cpp \
+	../src/vdc-element-reader.h \
 	../src/watchdog.cpp \
 	../src/watchdog.h \
 	../src/web/handler/apartmentrequesthandler.cpp \
 	../src/web/handler/apartmentrequesthandler.h \
 	../src/web/handler/circuitrequesthandler.cpp \
 	../src/web/handler/circuitrequesthandler.h \
-	../src/web/handler/databaserequesthandler.h \
 	../src/web/handler/databaserequesthandler.cc \
+	../src/web/handler/databaserequesthandler.h \
 	../src/web/handler/deviceinterfacerequesthandler.cpp \
 	../src/web/handler/deviceinterfacerequesthandler.h \
 	../src/web/handler/devicerequesthandler.cpp \
@@ -222,14 +228,14 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/zonerequesthandler.h \
 	../src/web/restful.cpp \
 	../src/web/restful.h \
-	../src/webservice_api.cpp \
-	../src/webservice_api.h \
-	../src/webservice_connection.cpp \
-	../src/webservice_connection.h \
 	../src/web/webrequests.cpp \
 	../src/web/webrequests.h \
 	../src/web/webserver.cpp \
-	../src/web/webserver.h
+	../src/web/webserver.h \
+	../src/webservice_api.cpp \
+	../src/webservice_api.h \
+	../src/webservice_connection.cpp \
+	../src/webservice_connection.h
 
 libcivetweb_a_SOURCES = \
 	../external/civetweb/civetweb.c \
@@ -247,18 +253,19 @@ dsstests_SOURCES = \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
 	../tests/datetoolstests.cpp \
+	../tests/db_fetcher.cpp \
 	../tests/deviceinterfacerequesthandlertest.cpp \
 	../tests/devicerequesthandlertest.cpp \
 	../tests/devicetests.cpp \
 	../tests/dsuidtests.cpp \
+	../tests/event_trigger_tests.cpp \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
-	../tests/event_trigger_tests.cpp \
 	../tests/http_client_tests.cpp \
 	../tests/iconvtests.cpp \
+	../tests/jsclustertests.cpp \
 	../tests/jsdatabase.cpp \
 	../tests/jshandlertests.cpp \
-	../tests/jsclustertests.cpp \
 	../tests/jsloggertests.cpp \
 	../tests/jsontests.cpp \
 	../tests/jsproperty.cpp \
@@ -275,6 +282,7 @@ dsstests_SOURCES = \
 	../tests/securitytests.cpp \
 	../tests/sensor_data_uploader.cpp \
 	../tests/sensorconversiontest.cpp \
+	../tests/sqlite3_wrapper.cpp \
 	../tests/statetests.cpp \
 	../tests/systeminfo_tests.cpp \
 	../tests/testrunner.cpp \
@@ -282,6 +290,7 @@ dsstests_SOURCES = \
 	../tests/util/dss_instance_fixture.cpp \
 	../tests/util/dss_instance_fixture.h \
 	../tests/util/modelmaintenance-mockup.h \
+	../tests/vdc-db.cpp \
 	../tests/webfixture.h \
 	../tests/webserver.cpp \
 	../tests/webservice_api_tests.cpp

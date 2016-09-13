@@ -53,6 +53,7 @@ namespace dss {
     extern const std::string DeviceStatus;
     extern const std::string DeviceInvalidSensor;
     extern const std::string DeviceBinaryInputEvent;
+    extern const std::string DeviceStateEvent;
     extern const std::string DeviceButtonClick;
     extern const std::string IdentifyBlink;
     extern const std::string ExecutionDenied;
@@ -97,6 +98,7 @@ namespace dss {
     extern const std::string SceneNameChanged;
     extern const std::string ReexportTimings;
     extern const std::string AutoClusterUpdate;
+    extern const std::string CheckDssDbUpdate;
   }
 
   namespace EventProperty {

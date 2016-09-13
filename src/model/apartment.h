@@ -151,8 +151,6 @@ typedef struct {
 
     /** Returns a reference to the device with the DSID \a _dsid */
     boost::shared_ptr<Device> getDeviceByDSID(const dsuid_t _dsid) const;
-    /** @copydoc getDeviceByDSID */
-    boost::shared_ptr<Device> getDeviceByDSID(const dsuid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
     boost::shared_ptr<Device> getDeviceByName(const std::string& _name);
     std::vector<boost::shared_ptr<Device> > getDevicesVector() { return m_Devices; }

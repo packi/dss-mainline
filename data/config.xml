@@ -18,6 +18,25 @@
       <value />
     </property>
 
+    <property name="db_update_service">
+      <property name="list">
+        <property name="vdc-db" type="string">
+            <value>/config/vdce/db</value>
+        </property>
+      </property>
+    </property>
+
+    <property name="vdce">
+      <property name="db">
+        <property name="name" type="string">
+          <value>vdce.db</value>
+        </property>
+        <property name="url" type="string">
+          <value>http://db.aizo.net/vdc-db.php</value>
+        </property>
+      </property>
+    </property>
+
     <!-- debug -->
     <property name="debug/storeInvalidXML" type="boolean">
       <value>false</value>

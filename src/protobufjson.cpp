@@ -19,13 +19,15 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "protobufjson.h"
 #include "base.h"
 #include "foreach.h"
 #include "logger.h"
-#include "protobufjson.h"
+#include <boost/scope_exit.hpp>
 #include <boost/algorithm/string.hpp>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
+#include <json.h>
 #include "ds485types.h"
 
 using namespace google::protobuf;
@@ -50,12 +52,12 @@ namespace dss {
                                        JSONWriter& _writer) {
     _writer.startArray();
     for (int i = 0; i < _elements.size(); ++i) {
-      ::vdcapi::PropertyElement tempElement = _elements.Get(i);
+      const ::vdcapi::PropertyElement& tempElement = _elements.Get(i);
 
       if (tempElement.has_value()) {
 
         _writer.startObject();
-        vdcapi::PropertyValue value = tempElement.value();
+        const vdcapi::PropertyValue& value = tempElement.value();
 
         if (tempElement.name().size() > 0) {
           _writer.add("name", tempElement.name().c_str());
@@ -94,7 +96,7 @@ namespace dss {
     _writer.endArray();
   }
 
-  bool ProtobufToJSon::protoPropertyToJson(const vdcapi::Message& _message, JSONWriter& _writer) {
+  void ProtobufToJSon::protoPropertyToJson(const vdcapi::Message& _message, JSONWriter& _writer) {
     switch (_message.type()) {
     case vdcapi::VDSM_REQUEST_GET_PROPERTY:
       _writer.add("RequestGetProperty");
@@ -114,9 +116,8 @@ namespace dss {
       break;
     default:
       Logger::getInstance()->log("can not process protobuf message of type: " + intToString(_message.type()), lsWarning);
-      return false;
+      throw std::runtime_error("could not parse response message");
     }
-    return true;
   }
 
   void PropertyContainerToProtobuf::assignValue(vdcapi::PropertyElement* _element, std::string& _value) {
@@ -237,7 +238,8 @@ namespace dss {
     }
   }
 
-  vdcapi::Message PropertyContainerToProtobuf::propertyContainerToProtobuf(const bool _bSetProperty, std::vector<PropertyContainer> _parts, const dsuid_t& _deviceDsuid) {
+  vdcapi::Message PropertyContainerToProtobuf::propertyContainerToProtobuf(const bool _bSetProperty,
+      const std::vector<PropertyContainer>& _parts, const dsuid_t& _deviceDsuid) {
     vdcapi::Message message;
     if (_bSetProperty) {
       message.set_type(vdcapi::VDSM_REQUEST_SET_PROPERTY);
@@ -282,6 +284,98 @@ namespace dss {
     data.message = propertyContainerToProtobuf(data.setProperty, _parts, data.deviceDsuid);
     return data;
   }
+
+  void ProtobufToJSon::processElementsPretty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
+        JSONWriter& _writer) {
+    bool isObject = _elements.size() == 0 || !_elements.Get(0).name().empty();
+    if (isObject) {
+      _writer.startObject();
+    } else {
+      _writer.startArray();
+    }
+    for (int i = 0; i < _elements.size(); ++i) {
+      const ::vdcapi::PropertyElement& tempElement = _elements.Get(i);
+      if (isObject) {
+        _writer.add(tempElement.name().c_str());
+      }
+
+      if (tempElement.has_value()) {
+        const vdcapi::PropertyValue& value = tempElement.value();
+        if (value.has_v_bool()) {
+          _writer.add(value.v_bool());
+        } else if (value.has_v_double()) {
+          _writer.add(value.v_double());
+        } else if (value.has_v_int64()) {
+          _writer.add((long long) value.v_int64());
+        } else if (value.has_v_uint64()) {
+          _writer.add((unsigned long long) value.v_uint64());
+        } else if (value.has_v_string()) {
+          _writer.add(value.v_string().c_str());
+        } else {
+          _writer.addNull();
+        }
+      } else if (tempElement.elements_size() == 0) {
+        _writer.addNull(); // should it be null, [] or {}?
+      } else {
+        processElementsPretty(tempElement.elements(), _writer);
+      }
+    }
+    if (isObject) {
+      _writer.endObject();
+    } else {
+      _writer.endArray();
+    }
+  }
+
+  static vdcapi::PropertyElement jsonToElementRecursive(json_object* jsonObject) {
+    vdcapi::PropertyElement vdcElement;
+    switch (json_object_get_type(jsonObject)) {
+      case json_type_null:
+        break;
+      case json_type_boolean:
+        vdcElement.mutable_value()->set_v_bool(json_object_get_boolean(jsonObject));
+        break;
+      case json_type_double:
+        vdcElement.mutable_value()->set_v_double(json_object_get_double(jsonObject));
+        break;
+      case json_type_int:
+        vdcElement.mutable_value()->set_v_int64(json_object_get_int64(jsonObject));
+        break;
+      case json_type_string:
+        vdcElement.mutable_value()->set_v_string(json_object_get_string(jsonObject));
+        break;
+      case json_type_object: {
+        json_object_object_foreach(jsonObject, key, value) {
+          *vdcElement.add_elements() = jsonToElementRecursive(value);
+          vdcElement.mutable_elements()->Mutable(vdcElement.elements_size() - 1)->set_name(key);
+        }
+        break;
+      }
+      case json_type_array:
+        for (int i = 0; i < json_object_array_length(jsonObject); i++) {
+          *vdcElement.add_elements() = jsonToElementRecursive(json_object_array_get_idx(jsonObject, i));
+        }
+        break;
+    }
+    return vdcElement;
+  }
+
+  vdcapi::PropertyElement ProtobufToJSon::jsonToElement(const std::string& jsonText) {
+    struct json_tokener* tok = json_tokener_new();
+    BOOST_SCOPE_EXIT(tok) {
+      json_tokener_free(tok);
+    } BOOST_SCOPE_EXIT_END
+    json_object* jsonObject = json_tokener_parse_ex(tok, jsonText.c_str(), -1);
+    if (!jsonObject) {
+      throw std::runtime_error(json_tokener_error_desc(json_tokener_get_error(tok)));
+    }
+    BOOST_SCOPE_EXIT(jsonObject) {
+      json_object_put(jsonObject);
+    } BOOST_SCOPE_EXIT_END
+
+    return jsonToElementRecursive(jsonObject);
+  }
+
 
 } //namespace
 

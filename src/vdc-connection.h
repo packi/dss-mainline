@@ -27,6 +27,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
@@ -35,24 +36,30 @@ namespace dss {
   class JSONElement;
   class JSONObject;
 
-  typedef struct {
+  struct VdsdSpec_t {
     // dS-Article Data
     std::string oemGuid;          // instance id => e.g. gs1:sgtin
     std::string oemModelGuid;     // class id => GTIN of the dS-Article
     std::string vendorGuid;
+    std::string vendorId;
     // Hardware Endpoint description
     std::string hardwareGuid;
     std::string hardwareModelGuid;
     // System ID's
     std::string modelUID;         // device configuration id
+    std::string deviceClass;
+    std::string deviceClassVersion;
     // End-User Info
     std::string name;
-    std::string hardwareInfo;     // property: model
+    std::string model;
     std::string hardwareVersion;
+    std::string modelVersion;
+    std::string vendorName;
+
     // Configurator integration
     std::string configURL;
     boost::shared_ptr<std::vector<int> > modelFeatures;
-  } VdsdSpec_t;
+  };
 
   typedef struct {
     bool hasDevices;
@@ -73,11 +80,15 @@ namespace dss {
 
   struct VdcHelper
   {
-    static boost::shared_ptr<VdsdSpec_t> getSpec(dsuid_t _vdsm, dsuid_t _device);
+    static VdsdSpec_t getSpec(dsuid_t _vdsm, dsuid_t _device);
     static boost::shared_ptr<VdcSpec_t> getCapabilities(dsuid_t _vdsm);
     static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
 
-    static std::map<int,int64_t> getStateInputValue(dsuid_t _vdsm, dsuid_t _device, int index);
+    struct State {
+      std::map<int,int64_t> binaryInputStates;
+      std::vector<std::pair<std::string, std::string> > deviceStates;
+    };
+    static State getState(dsuid_t _vdsm, dsuid_t _device);
   };
 
 } // namespace

@@ -242,8 +242,8 @@ namespace dss {
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
     void setStructureModifyingBusInterface(StructureModifyingBusInterface* _value);
 
-    boost::shared_ptr<TaskProcessor> getTaskProcessor() const { return m_taskProcessor; }
-    boost::shared_ptr<TaskProcessor> getTaskProcessorMaySleep() const { return m_taskProcessorMaySleep; }
+    TaskProcessor& getTaskProcessor() { return m_taskProcessor; }
+    TaskProcessor& getTaskProcessorMaySleep() { return m_taskProcessorMaySleep; }
 
     void scheduleDeviceReadout(const dsuid_t& _dSMeterID,
                                boost::shared_ptr<Task> task);
@@ -324,6 +324,7 @@ namespace dss {
     void onDeviceDataReady(dsuid_t _meterID, const devid_t _deviceID,
                         const int& _pairedDevices, const bool& _visible);
     void onDsmStateChange(dsuid_t _meterID, const uint8_t& _state);
+    void onVdceEvent(const VdceModelEvent& event);
 
     void setupWebUpdateEvent();
     void updateWebData(Event& _event, const EventSubscription& _subscription);
@@ -358,8 +359,8 @@ namespace dss {
 
     void checkConfigFile(boost::filesystem::path _filename);
 
-    boost::shared_ptr<TaskProcessor> m_taskProcessor;
-    boost::shared_ptr<TaskProcessor> m_taskProcessorMaySleep;
+    TaskProcessor m_taskProcessor;
+    TaskProcessor m_taskProcessorMaySleep;
 
     static const std::string kWebUpdateEventName;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;

@@ -71,14 +71,13 @@ namespace dss {
     ModelMaintenance& m_Maintenance;
   };
 
-  class BinaryInputDeviceFilter : public IDeviceAction {
+  class BinaryInputOrStateDeviceFilter : public IDeviceAction {
   private:
     std::vector<boost::shared_ptr<Device> > m_devs;
   public:
-    BinaryInputDeviceFilter() {}
-    virtual ~BinaryInputDeviceFilter() {}
     virtual bool perform(boost::shared_ptr<Device> _device) {
-      if (_device->isPresent() && (_device->getBinaryInputCount() > 0)) {
+      if (_device->isPresent()
+          && (_device->getBinaryInputCount() > 0 || !_device->getStates().empty())) {
         m_devs.push_back(_device);
       }
       return true;

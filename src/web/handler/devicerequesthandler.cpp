@@ -33,6 +33,7 @@
 
 #include <digitalSTROM/dsuid.h>
 
+#include "src/businterface.h"
 #include "src/model/apartment.h"
 #include "src/model/data_types.h"
 #include "src/model/device.h"
@@ -40,12 +41,18 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
+#include "src/model/vdc-db.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
 #include "src/ds485types.h"
 #include "jsonhelper.h"
 #include "util.h"
+#include "propertyquery.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/protobufjson.h"
+#include "src/vdc-element-reader.h"
+#include "src/vdc-connection.h"
 
 namespace dss {
 
@@ -2009,9 +2016,176 @@ namespace dss {
 
       json.add("offset", value);
       return json.successJSON();
+    } else if (_request.getMethod() == "getInfoStatic") {
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+      return getInfoStatic(*pDevice, langCode);
+    } else if (_request.getMethod() == "getInfoCustom") {
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      query.Add()->set_name("customActions");
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+      JSONWriter json;
+      json.add("customActions");
+      ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "getInfoOperational") {
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      query.Add()->set_name("deviceStates");
+      query.Add()->set_name("deviceProperties");
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+      JSONWriter json;
+      json.add("states");
+      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
+      json.add("properties");
+      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "setProperty") {
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=name&value="new name"
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return JSONWriter::failure("missing parameter: id");
+      }
+      std::string value;
+      if (!_request.getParameter("value", value) ) {
+        return JSONWriter::failure("missing parameter: value");
+      }
+      vdcapi::PropertyElement element = ProtobufToJSon::jsonToElement(value);
+      element.set_name(id);
+      pDevice->setProperty(element);
+      return JSONWriter::success();
+    } else if (_request.getMethod() == "setCustomAction") {
+      // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params={"duration":17}
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return JSONWriter::failure("missing parameter: id");
+      }
+      std::string action;
+      _request.getParameter("action", action);
+      std::string title;
+      vdcapi::PropertyElement parsedParamsElement;
+      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+      if (!action.empty()) {
+        if (!_request.getParameter("title", title)) {
+          return JSONWriter::failure("missing parameter: title");
+        }
+        std::string params;
+        if (!_request.getParameter("params", params) ) {
+          return JSONWriter::failure("missing parameter: params");
+        }
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+        paramsElement = &parsedParamsElement;
+      }
+      pDevice->setCustomAction(id, title, action, *paramsElement);
+      return JSONWriter::success();
+    } else if (_request.getMethod() == "callAction") {
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return JSONWriter::failure("missing parameter: id");
+      }
+      pDevice->callAction(id);
+      return JSONWriter::success();
     } else {
       throw std::runtime_error("Unhandled function");
     }
   } // jsonHandleRequest
 
+  std::string DeviceRequestHandler::getInfoStatic(const Device& device, const std::string &langCode) {
+    const std::string& oemEan = device.getOemEanAsString();
+    VdcDb db;
+    JSONWriter json;
+
+    try {
+      auto states = db.getStates(oemEan, langCode);
+      const auto& spec = device.getVdcSpec();
+
+      json.add("class", spec.deviceClass);
+      json.add("classVersion", spec.deviceClassVersion);
+      json.add("oemEanNumber", oemEan);
+      json.add("model", spec.model);
+      json.add("modelVersion", spec.modelVersion);
+      json.add("hardwareGuid", spec.hardwareGuid);
+      json.add("hardwareModelGuid", spec.hardwareModelGuid);
+      json.add("vendorId", spec.vendorId);
+      json.add("vendorName", spec.vendorName);
+
+      json.startObject("stateDescriptions");
+      foreach (auto &state, states) {
+        json.startObject(state.name);
+        json.add("title", state.title);
+        json.startObject("options");
+        foreach (auto desc, state.values) {
+          json.add(desc.first, desc.second); // non-tranlated: translated
+        }
+        json.endObject();
+        json.endObject();
+      }
+      json.endObject();
+
+    } catch (std::exception e) {
+      // TODO(soon) is it valid to assume every device has states?
+      Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
+      return JSONWriter::failure("unknown device");
+    }
+
+    try {
+      auto props = db.getProperties(oemEan, langCode); // throws
+      json.startObject("propertyDescriptions");
+
+      foreach (auto &prop, props) {
+        json.startObject(prop.name);
+        json.add("title", prop.title);
+        json.add("readOnly", prop.readonly);
+        json.endObject();
+      }
+      json.endObject();
+    } catch (std::exception e) {
+      // no properties
+    }
+
+    try {
+      auto actions = db.getActions(oemEan, langCode);
+
+      json.startObject("actionDescriptions");
+      foreach (const VdcDb::ActionDesc &action, actions) {
+        json.startObject(action.name);
+        json.add("title", action.title);
+        json.startObject("params");
+        foreach (auto p, action.params) {
+          json.startObject(p.name);
+          json.add("title", p.title);
+          json.add("default", p.defaultValue);
+          json.endObject();
+        }
+        json.endObject();
+        json.endObject();
+      }
+      json.endObject();
+    } catch (std::exception e) {
+      // no actions
+    }
+
+    try {
+      auto stdActions = db.getStandardActions(oemEan, langCode);
+
+      json.startObject("standardActions");
+      foreach (auto &action, stdActions) {
+        json.startObject(action.name);
+        json.add("title", action.title);
+        json.startObject("params");
+        foreach (auto arg, action.args) {
+          json.add(arg.first, arg.second);
+        }
+        json.endObject();
+        json.endObject();
+      }
+      json.endObject();
+    } catch (std::exception e) {
+      // no standard actions
+    }
+
+    return json.successJSON();
+  }
 } // namespace dss

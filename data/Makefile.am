@@ -1,10 +1,14 @@
 dssdatadir = $(pkgdatadir)/data
 dist_dssdata_DATA = \
 	$(top_srcdir)/data/config.xml \
-	$(top_srcdir)/data/subscriptions.xml
+	$(top_srcdir)/data/subscriptions.xml \
+	$(top_srcdir)/data/sqldumps/vdc-db.sql
 
 dssdataimagesdir = $(pkgdatadir)/data/images
 include $(top_srcdir)/data/images.list
+
+# TODO
+# sqldumpsdir = $(pkgdatadir)/data/sqldumps
 
 dssjsdir = $(pkgdatadir)/data/scripts
 dist_dssjs_DATA = \

@@ -142,6 +142,14 @@ namespace dss {
                                                      uint16_t _value);
     virtual uint16_t getDeviceOutputChannelDontCareFlags(const Device& _device,
                                                          uint8_t _scene);
+
+    virtual void genericRequest(const Device& _device, const std::string& methodName,
+                                const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params);
+    virtual void setProperty(const Device& _device,
+                             const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
+    virtual vdcapi::Message getProperty(const Device& _device,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
+
   }; // DSDeviceBusInterface
 
 

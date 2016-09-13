@@ -34,40 +34,32 @@
 
 namespace dss {
 
-static char config[] =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-    "<properties version=\"1\">\n"
-    "  <property name=\"config\">\n"
-    "    <!-- ds485d -->\n"
-    "    <property name=\"subsystems/DSBusInterface/connectionURI\" type=\"string\">\n"
-    "      <value>tcp://localhost:8442</value>\n"
-    "    </property>\n"
-    "    <!-- metering configuration -->\n"
-    "    <property name=\"subsystems/Metering/enabled\" type=\"boolean\">\n"
-    "      <value>true</value>\n"
-    "    </property>\n"
-    "  </property>\n"
-    "</properties>\n";
-
-
-static int createConfig(const std::string &fileName) {
-  std::ofstream ofs(fileName.c_str());
-  ofs << config;
-  ofs.close();
-  return 0;
-}
+// equivalent of $PREFIX/share
+const std::string TEST_STATIC_DATADIR(ABS_SRCDIR "/tests/data");
+const std::string TEST_DYNAMIC_DATADIR(ABS_BUILDDIR "/tests/data");
 
 __DEFINE_LOG_CHANNEL__(DSSInstanceFixture, lsInfo);
 
 DSSInstanceFixture::DSSInstanceFixture() {
   std::vector<std::string> properties;
-  properties.push_back("/config/webrootdirectory=" + getTempDir());
 
-  m_configFileName = getTempDir() + "config.xml";
-  createConfig(m_configFileName);
+  boost::filesystem::remove_all(TEST_DYNAMIC_DATADIR + "/tmp");
+  boost::filesystem::create_directory(TEST_DYNAMIC_DATADIR + "/tmp");
+
+  std::string staticDataDir =
+    boost::filesystem::canonical(TEST_STATIC_DATADIR).native();
+  std::string dynamicDataDir =
+    boost::filesystem::canonical(TEST_DYNAMIC_DATADIR + "/tmp").native();
+
+  properties.push_back("/config/datadirectory=" + staticDataDir);
+  properties.push_back("/config/configdirectory=" + staticDataDir);
+  properties.push_back("/config/webrootdirectory=" + staticDataDir);
+  properties.push_back("/config/jslogdirectory=" + dynamicDataDir);
+  properties.push_back("/config/savedpropsdirectory=" + dynamicDataDir);
+  properties.push_back("/config/databasedirectory=" + dynamicDataDir);
 
   DSS::shutdown();
-  if (DSS::getInstance()->initialize(properties, m_configFileName) == false) {
+  if (!DSS::getInstance()->initialize(properties, TEST_STATIC_DATADIR + "/config.xml")) {
     log("DSS::initialize failed", lsWarning);
     DSS::shutdown();
     throw std::runtime_error("DSS::getInstance failed");
@@ -76,6 +68,9 @@ DSSInstanceFixture::DSSInstanceFixture() {
   m_instance = DSS::m_Instance;
   m_incarnation = DSS::s_InstanceGeneration;
   assert(m_incarnation);
+
+  // needed to initialize (EventInterpreter-) subsystem
+  m_instance->m_State = ssInitializingSubsystems;
 }
 
 DSSInstanceFixture::~DSSInstanceFixture() {

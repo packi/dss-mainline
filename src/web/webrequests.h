@@ -100,6 +100,7 @@ namespace dss {
     void add(unsigned long long int _value);
     void add(bool _value);
     void add(double _value);
+    void addNull();
     void startArray(std::string _name);
     void startArray();
     void endArray();

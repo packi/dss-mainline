@@ -65,26 +65,25 @@ namespace dss {
                const HashMapStringString& headers,
                std::string *result, bool insecure = false);
 
-      /* TODO make postdata const-by-reference */
-      long post(const std::string& url, std::string postdata,
-                std::string *result);
+      long post(const std::string& _url, const std::string &_postdata,
+                std::string *_result);
 
       /* TODO make postdata const-by-reference */
-      long post(const std::string& url,
-                const HashMapStringString& headers,
-                std::string postdata, std::string *result);
+      long post(const std::string& _url,
+                const HashMapStringString& _headers,
+                const std::string &_postdata, std::string *_result);
 
       long request(const HttpRequest &req, std::string *result);
 
-      long downloadFile(std::string url, std::string filename);
+      long downloadFile(const std::string &_url, const std::string &_filename);
 
       /* TODO evtl. URI wrapper easy appending/parsing of query options */
 
     private:
-      long internalRequest(const std::string& url, RequestType type,
-                           const HashMapStringString& headers,
-                           std::string postdata,
-                           std::string *result, bool insecure);
+      long internalRequest(const std::string& _url, RequestType _type,
+                           const HashMapStringString& _headers,
+                           const std::string &_postdata,
+                           std::string *_result, bool _insecure);
 
       static size_t writeCallbackMute(void* contents, size_t size, size_t nmemb, void* userp);
       bool m_reuse_handle;

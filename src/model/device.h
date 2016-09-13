@@ -37,6 +37,7 @@
 #include "src/model/data_types.h"
 #include "addressablemodelitem.h"
 #include "businterface.h"
+#include "modelevent.h"
 
 #define DEV_PARAM_BUTTONINPUT_STANDARD              0
 #define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
@@ -83,11 +84,16 @@
 #define OUTPUT_MODE_TWO_STAGE_SWITCH        34
 #define OUTPUT_MODE_BIPOLAR_SWITCH          43
 #define OUTPUT_MODE_THREE_STAGE_SWITCH      38
+namespace vdcapi {
+  class PropertyElement;
+}
 namespace dss {
 
   class Group;
   class State;
   class DSMeter;
+  class VdcElementReader;
+  struct VdsdSpec_t;
 
   typedef struct {
     bool dontcare;
@@ -279,15 +285,19 @@ namespace dss {
     std::string m_OemProductURL;
 
     bool m_isVdcDevice;
+    std::unique_ptr<VdsdSpec_t> m_vdcSpec;
     std::string m_VdcHardwareModelGuid;
     std::string m_VdcModelUID;
     std::string m_VdcVendorGuid;
     std::string m_VdcOemGuid;
+    std::string m_VdcOemModelGuid;
     std::string m_VdcConfigURL;
     std::string m_VdcHardwareGuid;
     std::string m_VdcHardwareInfo;
     std::string m_VdcHardwareVersion;
     std::string m_VdcIconPath;
+    boost::shared_ptr<std::vector<int> > m_VdcModelFeatures;
+    bool m_hasActions;
 
     DeviceValveType_t m_ValveType;
 
@@ -296,6 +306,9 @@ namespace dss {
     uint8_t m_binaryInputCount;
     std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
     std::vector<boost::shared_ptr<State> > m_binaryInputStates;
+
+    typedef std::map<std::string, boost::shared_ptr<State> > States;
+    States m_states;
 
     uint8_t m_sensorInputCount;
     std::vector<boost::shared_ptr<DeviceSensor_t> > m_sensorInputs;
@@ -665,6 +678,8 @@ namespace dss {
     void publishVdcToPropertyTree();
     void setVdcDevice(bool _isVdcDevice);
     bool isVdcDevice() const { return m_isVdcDevice; }
+    const VdsdSpec_t& getVdcSpec() const { return *m_vdcSpec; }
+    void setVdcSpec(VdsdSpec_t &&x);
     void setVdcHardwareModelGuid(const std::string& _value) { m_VdcHardwareModelGuid = _value; }
     const std::string& getVdcHardwareModelGuid() const { return m_VdcHardwareModelGuid; }
     void setVdcModelUID(const std::string& _value) { m_VdcModelUID = _value; }
@@ -673,6 +688,8 @@ namespace dss {
     const std::string& getVdcVendorGuid() const { return m_VdcVendorGuid; }
     void setVdcOemGuid(const std::string& _value) { m_VdcOemGuid = _value; }
     const std::string& getVdcOemGuid() const { return m_VdcOemGuid; }
+    void setVdcOemModelGuid(const std::string& _value) { m_VdcOemModelGuid = _value; }
+    const std::string& getVdcOemModelGuid() const { return m_VdcOemModelGuid; }
     void setVdcConfigURL(const std::string& _value) { m_VdcConfigURL = _value; }
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
     void setVdcHardwareGuid(const std::string& _value) { m_VdcHardwareGuid = _value; }
@@ -687,6 +704,11 @@ namespace dss {
       m_VdcIconPath = _value; updateIconPath();
     }
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
+    void setVdcModelFeatures(const boost::shared_ptr<std::vector<int> >& _value) { m_VdcModelFeatures = _value; }
+    const boost::shared_ptr<std::vector<int> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
+
+    void setHasActions(bool x) { m_hasActions = x; }
+    bool getHasActions() const { return m_hasActions; }
 
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
@@ -697,6 +719,12 @@ namespace dss {
     void setBinaryInputType(uint8_t _index, uint8_t _inputType);
     boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
     void clearBinaryInputStates();
+
+    void initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& specs);
+    const std::map<std::string, boost::shared_ptr<State> >& getStates() const { return m_states; }
+    void clearStates();
+    void setStateValue(const std::string& name, const std::string& value);
+    void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
     void setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _binaryInput);
     const uint8_t getSensorCount() const;
@@ -765,6 +793,14 @@ namespace dss {
     dsuid_t getMainDeviceDSUID() const;
 
     void handleBinaryInputEvent(const int index, const int state);
+
+    /// Calls (invokes) device specific action.
+    void callAction(const std::string& actionId);
+
+    void setProperty(const vdcapi::PropertyElement& element); // element.name() is property id
+    void setCustomAction(const std::string& id, const std::string& title, const std::string& action,
+                         const vdcapi::PropertyElement& params);
+    vdcapi::Message getVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

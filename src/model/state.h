@@ -79,6 +79,7 @@ namespace dss {
     /** State provider is a device */
     boost::shared_ptr<Device> m_providerDev;
     int m_providerDevInput;
+    std::string m_providerDevStateName;
 
     /** State provider is a dSM */
     boost::shared_ptr<DSMeter> m_providerDsm;
@@ -102,11 +103,14 @@ namespace dss {
     State(const std::string& _name);
     State(const std::string& _name, eState _state);
     State(boost::shared_ptr<Device> _device, int _inputIndex);
+    State(boost::shared_ptr<Device> _device, const std::string& stateName);
     State(boost::shared_ptr<Group> _group);
     State(eStateType _type, const std::string& _name, const std::string& _identifier);
     State(boost::shared_ptr<DSMeter> _meter, int _inputIndex);
 
     virtual ~State();
+
+    static const std::string INVALID;
 
     int getState() const;
     void setState(const callOrigin_t _origin, const int _state);

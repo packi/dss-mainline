@@ -36,6 +36,7 @@
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
+#include "src/model/vdc-db.h"
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/ds485types.h"
@@ -449,6 +450,32 @@ namespace dss {
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);
     }
 
+    try {
+      if (dev->isVdcDevice()) {
+        VdsdSpec_t props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
+        dev->setVdcHardwareModelGuid(props.hardwareModelGuid);
+        dev->setVdcModelUID(props.modelUID);
+        dev->setVdcVendorGuid(props.vendorGuid);
+        dev->setVdcOemGuid(props.oemGuid);
+        dev->setVdcOemModelGuid(props.oemModelGuid);
+        dev->setVdcConfigURL(props.configURL);
+        dev->setVdcHardwareGuid(props.hardwareGuid);
+        dev->setVdcHardwareInfo(props.model);
+        dev->setVdcHardwareVersion(props.hardwareVersion);
+        dev->setVdcModelFeatures(props.modelFeatures);
+        dev->setVdcSpec(std::move(props));
+
+        VdcDb db;
+        dev->initStates(dev, db.getStatesLegacy(dev->getOemEanAsString())); // throws
+        dev->setHasActions(!db.getActions(dev->getOemEanAsString()).empty()); // throws
+      }
+    } catch (const std::runtime_error& e) {
+      log(std::string("initializeDeviceFromSpec() error:") + e.what(), lsError);
+      // TODO(someday): device is not correctly initialized.
+      // We should throw here and fix the model discovery logic.
+      // It may be enough to catch std::runtime_error instead of BusError.
+    }
+
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
       dev->setSensors(dev, _spec.sensorInputs);
@@ -564,9 +591,8 @@ namespace dss {
                 (_pDevice->getOemInfoState() == DEVICE_OEM_VALID) &&
                 ((_pDevice->getOemProductInfoState() != DEVICE_OEM_VALID) &&
                  (_pDevice->getOemProductInfoState() != DEVICE_OEM_LOADING))) {
-      boost::shared_ptr<ModelMaintenance::OEMWebQuery> task = boost::make_shared<ModelMaintenance::OEMWebQuery>(_pDevice, _pDevice->getOemProductInfoState());
-      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
-      pTP->addEvent(task);
+      TaskProcessor &tp(m_Apartment.getModelMaintenance()->getTaskProcessor());
+      tp.addEvent(boost::make_shared<ModelMaintenance::OEMWebQuery>(_pDevice, _pDevice->getOemProductInfoState()));
       _pDevice->setOemProductInfoState(DEVICE_OEM_LOADING);
     }
 
@@ -577,9 +603,8 @@ namespace dss {
     } catch (ItemNotFoundException& e) {
     }
     if (pMeter && pMeter->getBusMemberType() == BusMember_vDC) {
-      boost::shared_ptr<ModelMaintenance::VdcDataQuery> task = boost::make_shared<ModelMaintenance::VdcDataQuery>(_pDevice);
-      boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessor();
-      pTP->addEvent(task);
+      TaskProcessor &tp(m_Apartment.getModelMaintenance()->getTaskProcessor());
+      tp.addEvent(boost::make_shared<ModelMaintenance::VdcDataQuery>(_pDevice));
     }
   }
 
@@ -985,8 +1010,8 @@ namespace dss {
     std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
     task = boost::make_shared<BinaryInputScanner>(&m_Apartment, connURI);
     task->setup(_dsMeter, _device);
-    boost::shared_ptr<TaskProcessor> pTP = m_Apartment.getModelMaintenance()->getTaskProcessorMaySleep();
-    pTP->addEvent(task);
+    TaskProcessor &tp(m_Apartment.getModelMaintenance()->getTaskProcessorMaySleep());
+    tp.addEvent(task);
   } // syncBinaryInputStates
 
   void BusScanner::synchronizeDSMeterData(boost::shared_ptr<DSMeter> _dsMeter, DSMeterSpec_t &_spec)
@@ -1107,12 +1132,12 @@ namespace dss {
       }
     } else if (m_dsm != NULL) {
       Set D = m_dsm->getDevices();
-      BinaryInputDeviceFilter filter;
+      BinaryInputOrStateDeviceFilter filter;
       D.perform(filter);
       devices = filter.getDeviceList();
     } else {
       Set D = m_pApartment->getDevices();
-      BinaryInputDeviceFilter filter;
+      BinaryInputOrStateDeviceFilter filter;
       D.perform(filter);
       devices = filter.getDeviceList();
     }
@@ -1161,13 +1186,14 @@ namespace dss {
       } else {
         // IP Device
         try {
-          std::map<int,int64_t> sInput;
-          sInput = VdcHelper::getStateInputValue(dsm->getDSID(), dev->getDSID(), -1);
+          VdcHelper::State state = VdcHelper::getState(dsm->getDSID(), dev->getDSID());
+          const std::map<int,int64_t>& sInput = state.binaryInputStates;
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state response fields = " + intToString(sInput.size()), lsDebug);
           for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
             dev->handleBinaryInputEvent(it->first, it->second);
           }
+          dev->setStateValues(state.deviceStates);
         } catch (std::runtime_error& e) {
           Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
               " failure: " + e.what(), lsWarning);

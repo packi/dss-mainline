@@ -24,11 +24,12 @@ if test -n "$MT_SEARCHPATH_PROGS"; then
     export PATH=$PATH:$MT_SEARCHPATH_PROGS
 fi
 
+CXXFLAGS="$CXXFLAGS -std=gnu++0x"
 MT_OPTION([debug], [enable],
           [enable debug flags during compilation],
           [
-            CFLAGS="-D_DEBUG -g -Wall -O0"
-            CXXFLAGS="-D_DEBUG -g -Wall -O0"
+            CFLAGS="$CFLAGS -D_DEBUG -g -Wall -O1"
+            CXXFLAGS="$CXXFLAGS -D_DEBUG -g -Wall -O1"
           ],
           [])
 
@@ -45,8 +46,8 @@ MT_OPTION([test-coverage], [enable],
           [
             GCOV_CFLAGS="-fprofile-arcs -ftest-coverage"
             GCOV_LIBS="-lgcov"
-            CFLAGS="-g -Wall -O0"
-            CXXFLAGS="-g -Wall -O0"
+            CFLAGS="$CFLAGS -g -Wall -O1"
+            CXXFLAGS="$CXXFLAGS -g -Wall -O1"
             GCOV_REPORT=yes
           ],
           [])
@@ -206,15 +207,6 @@ AC_ARG_WITH(distro-version-file,
             AC_MSG_NOTICE([Will read distro version information from  $withval])
             DISTRO_VERSION_FILE="$withval"
             AC_DEFINE_UNQUOTED([DISTRO_VERSION_FILE], ["$withval"], [read distro version from here])
-        fi
-    ])
-
-AC_ARG_WITH(dsstests-files,
-    AC_HELP_STRING([--with-dsstests-files=DIR], [read dsstests input files from DIR]),
-    [
-        if test "x$withval" != "x"; then
-            AC_DEFINE([WITH_DSSTEST_FILES], [1], [custom dsstest files directory set])
-            AC_DEFINE_UNQUOTED([WITH_DSSTEST_FILES], ["$withval"], [dsstest files directory])
         fi
     ])
 

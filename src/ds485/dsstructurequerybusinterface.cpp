@@ -601,7 +601,7 @@ namespace dss {
     int ret = ZoneProperties_get_room_states(m_DSMApiHandle, _dsMeterID,
                 (uint16_t) _zoneID, &room, NULL, NULL, NULL, NULL);
     if (ret == ERROR_WRONG_MODIFIER) {
-      return std::bitset<7>(0);
+      return std::bitset<7>(0llu);
     }
     DSBusInterface::checkResultCode(ret);
     return std::bitset<7>(room);

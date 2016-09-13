@@ -48,6 +48,7 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
+#include "handler/db_fetch.h"
 #include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
@@ -201,39 +202,12 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
   void DSS::setupDirectories()
   {
-#if defined(__CYGWIN__)
-    char AppDataDir[259];
-    char WebDir[259];
-    char JSLogDir[259];
-    char SavedPropsDir[259];
-    std::string aup = getenv("ALLUSERSPROFILE");
-
-    if (std::string::npos != aup.std::string::find("ProgramData")) {
-      sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
-    } else {
-      std::string apd = getenv("APPDATA");
-      int index = apd.std::string::find_last_of("\\");
-      aup.std::string::append(apd.std::string::substr(index));
-      sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
-    }
-
-    sprintf(WebDir, "%s\\webroot",AppDataDir);
-    sprintf(JSLogDir, "%s\\logs",AppDataDir);
-    sprintf(SavedPropsDir, "%s\\savedprops", AppDataDir);
-
-    setDataDirectory(AppDataDir);
-    setConfigDirectory(AppDataDir);
-    setWebrootDirectory(WebDir);
-    setJSLogDirectory(JSLogDir);
-    setSavedPropsDirectory(SavedPropsDir);
-#else
     setDataDirectory(DataDirectory);
     setConfigDirectory(ConfigDirectory);
     setWebrootDirectory(WebrootDirectory);
     setJSLogDirectory(JSLogDirectory);
     setSavedPropsDirectory(kSavedPropsDirectory);
     setDatabaseDirectory(kDatabaseDirectory);
-#endif
   } // setupDirectories
 
   int DSS::getUptime() const {
@@ -288,7 +262,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
           int val = strToInt(value);
           m_pPropertySystem->setIntValue(name, val, true);
           continue;
-        } catch(std::invalid_argument&) {
+        } catch(std::invalid_argument) {
+          // ignore. not int type, continue with bool...
         }
 
         if(value == "true") {
@@ -377,6 +352,7 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
                          m_pSecurity));
     m_pWebServer->setSessionManager(m_pSessionManager);
 
+    Logger::getInstance()->log("parse command line 1st time", lsWarning);
     parseProperties(_properties);
 
     // -- setup logging
@@ -387,6 +363,7 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
     // we need to parse the properties twice to ensure that command line
     // options override config.xml
+    Logger::getInstance()->log("parse command line 2nd time", lsWarning);
     parseProperties(_properties);
 
     WebserviceConnection::getInstanceMsHub();
@@ -525,6 +502,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     plugin = new EventInterpreterDatabaseUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    plugin = new DbUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
   }
 
