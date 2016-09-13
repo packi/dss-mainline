@@ -115,7 +115,7 @@ namespace dss {
     ret.hardwareInfo = rootReader["model"].getValueAsString();
     ret.modelUID = rootReader["modelUID"].getValueAsString();
     ret.hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
-    ret.name= rootReader["name"].getValueAsString();
+    ret.name = rootReader["name"].getValueAsString();
 
     ret.modelFeatures = boost::make_shared<std::vector<int> >();
     std::vector<int>& features = *ret.modelFeatures;
