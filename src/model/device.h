@@ -93,6 +93,7 @@ namespace dss {
   class State;
   class DSMeter;
   class VdcElementReader;
+  struct VdsdSpec_t;
 
   typedef struct {
     bool dontcare;
@@ -284,6 +285,7 @@ namespace dss {
     std::string m_OemProductURL;
 
     bool m_isVdcDevice;
+    std::unique_ptr<VdsdSpec_t> m_vdcSpec;
     std::string m_VdcHardwareModelGuid;
     std::string m_VdcModelUID;
     std::string m_VdcVendorGuid;
@@ -676,6 +678,8 @@ namespace dss {
     void publishVdcToPropertyTree();
     void setVdcDevice(bool _isVdcDevice);
     bool isVdcDevice() const { return m_isVdcDevice; }
+    const VdsdSpec_t& getVdcSpec() const { return *m_vdcSpec; }
+    void setVdcSpec(VdsdSpec_t &&x);
     void setVdcHardwareModelGuid(const std::string& _value) { m_VdcHardwareModelGuid = _value; }
     const std::string& getVdcHardwareModelGuid() const { return m_VdcHardwareModelGuid; }
     void setVdcModelUID(const std::string& _value) { m_VdcModelUID = _value; }

@@ -460,9 +460,10 @@ namespace dss {
         dev->setVdcOemModelGuid(props.oemModelGuid);
         dev->setVdcConfigURL(props.configURL);
         dev->setVdcHardwareGuid(props.hardwareGuid);
-        dev->setVdcHardwareInfo(props.hardwareInfo);
+        dev->setVdcHardwareInfo(props.model);
         dev->setVdcHardwareVersion(props.hardwareVersion);
         dev->setVdcModelFeatures(props.modelFeatures);
+        dev->setVdcSpec(std::move(props));
 
         VdcDb db;
         dev->initStates(dev, db.getStatesLegacy(dev->getOemEanAsString())); // throws

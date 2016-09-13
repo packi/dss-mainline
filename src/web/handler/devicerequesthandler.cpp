@@ -52,6 +52,7 @@
 #include "src/messages/vdc-messages.pb.h"
 #include "src/protobufjson.h"
 #include "src/vdc-element-reader.h"
+#include "src/vdc-connection.h"
 
 namespace dss {
 
@@ -2098,15 +2099,17 @@ namespace dss {
 
     try {
       auto states = db.getStates(oemEan, langCode);
+      const auto& spec = device.getVdcSpec();
 
-      json.add("class", "oven (tbd)"); // TODO(soon) from vdc property
-      json.add("classVersion", "1 (tbd)"); // TODO(soon) vdc property
+      json.add("class", spec.deviceClass);
+      json.add("classVersion", spec.deviceClassVersion);
       json.add("oemEanNumber", oemEan);
-      json.add("model", "Combi-Steam MSLQ (tbd)"); // TODO(soon) prop-node hwinfo
-      json.add("modelVersion", "0.1 (tbd)"); // TODO(soon) prop-node hwversion
-      json.add("modelId", "gs1:(01)7640156791914 (tbd)"); //TODO(soon) oemGUID
-      json.add("vendorId", "vendorname:V-Zug (tbd)"); //TODO(soon) vendorGUID
-      json.add("vendorName", "V-Zug (tbd)"); // TODO(soon) vdc property
+      json.add("model", spec.model);
+      json.add("modelVersion", spec.modelVersion);
+      json.add("hardwareGuid", spec.hardwareGuid);
+      json.add("hardwareModelGuid", spec.hardwareModelGuid);
+      json.add("vendorId", spec.vendorId);
+      json.add("vendorName", spec.vendorName);
 
       json.startObject("stateDescriptions");
       foreach (auto &state, states) {

@@ -54,6 +54,10 @@ namespace dss {
     query = getprop->add_query();
     query->set_name("vendorGuid");
     query = getprop->add_query();
+    query->set_name("vendorId");
+    query = getprop->add_query();
+    query->set_name("vendorName");
+    query = getprop->add_query();
     query->set_name("oemGuid");
     query = getprop->add_query();
     query->set_name("oemModelGuid");
@@ -64,9 +68,15 @@ namespace dss {
     query = getprop->add_query();
     query->set_name("model");
     query = getprop->add_query();
+    query->set_name("modelVersion");
+    query = getprop->add_query();
     query->set_name("hardwareVersion");
     query = getprop->add_query();
     query->set_name("name");
+    query = getprop->add_query();
+    query->set_name("deviceClass");
+    query = getprop->add_query();
+    query->set_name("deviceClassVersion");
 
     uint8_t buffer_in[4096];
     uint8_t buffer_out[4096];
@@ -112,10 +122,15 @@ namespace dss {
     ret.oemModelGuid = rootReader["oemModelGuid"].getValueAsString();
     ret.configURL = rootReader["configURL"].getValueAsString();
     ret.hardwareGuid = rootReader["hardwareGuid"].getValueAsString();
-    ret.hardwareInfo = rootReader["model"].getValueAsString();
+    ret.model = rootReader["model"].getValueAsString();
     ret.modelUID = rootReader["modelUID"].getValueAsString();
     ret.hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
-    ret.name= rootReader["name"].getValueAsString();
+    ret.name = rootReader["name"].getValueAsString();
+    ret.vendorId = rootReader["vendorId"].getValueAsString();
+    ret.vendorName = rootReader["vendorName"].getValueAsString();
+    ret.modelVersion = rootReader["modelVersion"].getValueAsString();
+    ret.deviceClass = rootReader["deviceClass"].getValueAsString();
+    ret.deviceClassVersion = rootReader["deviceClassVersion"].getValueAsString();
 
     ret.modelFeatures = boost::make_shared<std::vector<int> >();
     std::vector<int>& features = *ret.modelFeatures;
