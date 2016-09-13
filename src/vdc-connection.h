@@ -48,7 +48,7 @@ namespace dss {
     std::string modelUID;         // device configuration id
     // End-User Info
     std::string name;
-    std::string hardwareInfo;     // property: model
+    std::string model;
     std::string hardwareVersion;
     // Configurator integration
     std::string configURL;

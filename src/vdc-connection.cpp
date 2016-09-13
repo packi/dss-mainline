@@ -112,7 +112,7 @@ namespace dss {
     ret.oemModelGuid = rootReader["oemModelGuid"].getValueAsString();
     ret.configURL = rootReader["configURL"].getValueAsString();
     ret.hardwareGuid = rootReader["hardwareGuid"].getValueAsString();
-    ret.hardwareInfo = rootReader["model"].getValueAsString();
+    ret.model = rootReader["model"].getValueAsString();
     ret.modelUID = rootReader["modelUID"].getValueAsString();
     ret.hardwareVersion = rootReader["hardwareVersion"].getValueAsString();
     ret.name = rootReader["name"].getValueAsString();
