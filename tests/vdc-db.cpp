@@ -34,6 +34,7 @@
 #include "src/model/device.h"
 #include "src/model/vdc-db.h"
 #include "src/propertysystem.h"
+#include "src/vdc-connection.h"
 #include "src/web/handler/devicerequesthandler.h"
 #include "tests/util/dss_instance_fixture.h"
 
@@ -193,12 +194,28 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
 
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(7640113394226, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
+  VdsdSpec_t vdcSpec;
+  vdcSpec.oemGuid = "x-oemGuid";
+  vdcSpec.oemModelGuid = "x-oemModelGuid";
+  vdcSpec.vendorGuid = "x-vendorGuid";
+  vdcSpec.vendorId = "x-vendorId";
+  vdcSpec.hardwareGuid = "x-hardwareGuid";
+  vdcSpec.hardwareModelGuid = "x-hardwareModelGuid";
+  vdcSpec.modelUID = "x-modelUID";
+  vdcSpec.deviceClass = "x-class";
+  vdcSpec.deviceClassVersion = "x-classVersion";
+  vdcSpec.name = "x-name";
+  vdcSpec.model = "x-model";
+  vdcSpec.hardwareVersion = "x-hardwareVersion";
+  vdcSpec.modelVersion = "x-modelVersion";
+  vdcSpec.vendorName = "x-vendorName";
+  dev.setVdcSpec(std::move(vdcSpec));
 
   DeviceRequestHandler handler(DSS::getInstance()->getApartment(), NULL, NULL);
   std::string ret = handler.getInfoStatic(dev, "de_DE");
-
-  std::string expect = R"expect({"result":{"class":"oven (tbd)","classVersion":"1 (tbd)","oemEanNumber":"7640113394226","model":"Combi-Steam MSLQ (tbd)","modelVersion":"0.1 (tbd)","modelId":"gs1:(01)7640156791914 (tbd)","vendorId":"vendorname:V-Zug (tbd)","vendorName":"V-Zug (tbd)","stateDescriptions":{"fan":{"title":"Ventilator","options":{"on":"an","off":"aus"}},"operationMode":{"title":"Betriebszustand","options":{"heating":"heizt","steaming":"dampft","off":"ausgeschaltet"}},"timer":{"title":"Wecker","options":{"inactive":"inaktiv","running":"l&auml;ft"}}},"propertyDescriptions":{"temperature":{"title":"Temperatur","readOnly":false},"duration":{"title":"Endzeit","readOnly":false},"temperature.sensor":{"title":"Garguttemperatur","readOnly":false}},"actionDescriptions":{"bake":{"title":"Backen","params":{"temperature":{"title":"Temperatur","default":180},"duration":{"title":"Zeit","default":30}}},"steam":{"title":"Dampfen","params":{"temperature":{"title":"Temperatur","default":180},"duration":{"title":"Zeit","default":30}}}},"standardActions":{"std.cake":{"title":"Kuchen","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"Pizza","params":{"duration":"1200","temperature":"180"}},"std.asparagus":{"title":"Spargel","params":{"temperature":"180","duration":"2520"}}}},"ok":true})expect";
   //Logger::getInstance()->log("info: " + ret, lsWarning);
+
+  std::string expect = R"expect({"result":{"class":"x-class","classVersion":"x-classVersion","oemEanNumber":"7640113394226","model":"x-model","modelVersion":"x-modelVersion","hardwareGuid":"x-hardwareGuid","hardwareModelGuid":"x-hardwareModelGuid","vendorId":"x-vendorId","vendorName":"x-vendorName","stateDescriptions":{"fan":{"title":"Ventilator","options":{"on":"an","off":"aus"}},"operationMode":{"title":"Betriebszustand","options":{"heating":"heizt","steaming":"dampft","off":"ausgeschaltet"}},"timer":{"title":"Wecker","options":{"inactive":"inaktiv","running":"l&auml;ft"}}},"propertyDescriptions":{"temperature":{"title":"Temperatur","readOnly":false},"duration":{"title":"Endzeit","readOnly":false},"temperature.sensor":{"title":"Garguttemperatur","readOnly":false}},"actionDescriptions":{"bake":{"title":"Backen","params":{"temperature":{"title":"Temperatur","default":180},"duration":{"title":"Zeit","default":30}}},"steam":{"title":"Dampfen","params":{"temperature":{"title":"Temperatur","default":180},"duration":{"title":"Zeit","default":30}}}},"standardActions":{"std.cake":{"title":"Kuchen","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"Pizza","params":{"duration":"1200","temperature":"180"}},"std.asparagus":{"title":"Spargel","params":{"temperature":"180","duration":"2520"}}}},"ok":true})expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
 
   BOOST_CHECK(ret == expect);
@@ -219,12 +236,14 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
 
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(strToInt(gtin), 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
+  dev.setVdcSpec(VdsdSpec_t());
 
   DeviceRequestHandler handler(DSS::getInstance()->getApartment(), NULL, NULL);
   std::string ret = handler.getInfoStatic(dev, "de_DE");
   //Logger::getInstance()->log("info: " + ret, lsWarning);
 
-  std::string expect = R"expect({"result":{"class":"oven (tbd)","classVersion":"1 (tbd)","oemEanNumber":"0","model":"Combi-Steam MSLQ (tbd)","modelVersion":"0.1 (tbd)","modelId":"gs1:(01)7640156791914 (tbd)","vendorId":"vendorname:V-Zug (tbd)","vendorName":"V-Zug (tbd)","stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{}},"ok":true})expect";
+  std::string expect = R"expect({"result":{"class":"","classVersion":"","oemEanNumber":"0","model":"","modelVersion":"","hardwareGuid":"","hardwareModelGuid":"","vendorId":"","vendorName":"","stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{}},"ok":true})expect";
+
   // empty states/properties/actions
   BOOST_CHECK(ret == expect);
 }
