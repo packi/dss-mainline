@@ -52,6 +52,7 @@
 #include "src/event.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
+#include "src/vdc-connection.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -3126,6 +3127,10 @@ namespace dss {
       throw std::runtime_error("Bus interface not available");
     }
     return deviceBusInterface->getProperty(*this, query);
+  }
+
+  void Device::setVdcSpec(VdsdSpec_t &&x) {
+    m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
   }
 
 } // namespace dss
