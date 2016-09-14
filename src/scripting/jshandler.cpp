@@ -48,6 +48,19 @@
 
 namespace dss {
 
+  struct JsDeleter {
+    JsDeleter(JSContext* cx) : m_cx(cx) {}
+    void operator()(void *x) { JS_free(m_cx, x); }
+  private:
+    JSContext *m_cx;
+  };
+  typedef std::unique_ptr<char, JsDeleter> JsCharPtr;
+
+  static std::string jsEncodeString(JSContext *cx, JSString *jsString) {
+    JsCharPtr s(JS_EncodeString(cx, jsString), JsDeleter(cx));
+    return s.get();
+  }
+
   //============================================= ScriptEnvironment
 
   ScriptEnvironment::ScriptEnvironment(Security* _pSecurity)
@@ -173,10 +186,7 @@ namespace dss {
     if( result == NULL) {
       throw ScriptException("Could not convert value to JSString");
     }
-    char* s = JS_EncodeString(m_pContext, result);
-    std::string sresult(s);
-    JS_free(m_pContext, s);
-    return sresult;
+    return jsEncodeString(m_pContext, result);
   }
 
   template<>
@@ -310,7 +320,6 @@ namespace dss {
 
   JSBool global_print(JSContext *cx, uintN argc, jsval *vp) {
     uint i;
-    char * src;
     JSString * unicode_str;
 
     if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, vp), "*"))
@@ -325,9 +334,7 @@ namespace dss {
       if (unicode_str == NULL)
         return JS_FALSE;
 
-      src = JS_EncodeString(cx, unicode_str);
-      sstream << std::string(src);
-      JS_free(cx, src);
+      sstream << jsEncodeString(cx, unicode_str);
     }
     Logger::getInstance()->log(sstream.str(), lsWarning);
 
@@ -635,9 +642,7 @@ namespace dss {
         JS_ClearPendingException(m_pContext);
         JSString* errstr = JS_ValueToString(m_pContext, exval);
         if(errstr != NULL) {
-          char* errmsgBytes = JS_EncodeString(m_pContext, errstr);
-          std::string errMsg(errmsgBytes);
-          JS_free(m_pContext, errmsgBytes);
+          std::string errMsg = jsEncodeString(m_pContext, errstr);
           throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errMsg, errMsg);
         }
       }
