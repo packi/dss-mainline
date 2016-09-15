@@ -248,4 +248,22 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   BOOST_CHECK(ret == expect);
 }
 
+BOOST_FIXTURE_TEST_CASE(checkDeviceSupport, DSSInstanceFixture) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
+
+  std::string gtins[] = {
+    "7640156791914", // V-Zug MSLQ - aktiv
+    "7640156791945" , // vDC smarter iKettle 2.0
+  };
+
+  VdcDb db;
+  foreach (auto gtin, gtins) {
+    BOOST_CHECK(!db.getStates(gtin, "de_DE").empty());
+    BOOST_CHECK(!db.getProperties(gtin, "de_DE").empty());
+    BOOST_CHECK(!db.getActions(gtin, "de_DE").empty());
+    BOOST_CHECK(!db.getStandardActions(gtin, "de_DE").empty());
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
