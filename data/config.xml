@@ -20,9 +20,9 @@
 
     <property name="db_update_service">
       <property name="list">
-        <property name="vdc-db" type="string">
+        <!--property name="vdc-db" type="string">
             <value>/config/vdce/db</value>
-        </property>
+        </property-->
       </property>
     </property>
 
