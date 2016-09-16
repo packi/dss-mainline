@@ -1514,11 +1514,17 @@ Sample: {
   {
     log("handle: " + _event.getName(), lsDebug);
 
-    std::string script_id;
+    std::string id;
     std::string url;
 
     if (_subscription.getOptions()->hasParameter("script_id")) {
-      script_id = _subscription.getOptions()->getParameter("script_id");
+      // legacy code
+      id = _subscription.getOptions()->getParameter("script_id");
+    }
+
+    if (_subscription.getOptions()->hasParameter("id")) {
+      // overwrites script_id
+      id = _subscription.getOptions()->getParameter("id");
     }
 
     if (_subscription.getOptions()->hasParameter("url")) {
@@ -1526,21 +1532,21 @@ Sample: {
     }
 
 
-    if (script_id.empty()) {
+    if (id.empty()) {
       Logger::getInstance()->log("EventInterpreterDatabaseUpdatePlugin: not "
-            "downloading database because script_id parameter is empty");
+            "downloading database because <id> parameter is empty");
       return;
     }
 
     if (url.empty()) {
       Logger::getInstance()->log("EventInterpreterDatabaseUpdatePlugin: not "
-            "downloading database because url parameter is empty");
+            "downloading database because <url> parameter is empty");
       return;
     }
 
     if (DSS::hasInstance()) {
       TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
-      tp.addEvent(boost::make_shared<ModelMaintenance::DatabaseDownload>(script_id, url));
+      tp.addEvent(boost::make_shared<ModelMaintenance::DatabaseDownload>(id, url));
     }
   }
 

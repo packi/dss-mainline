@@ -2098,9 +2098,7 @@ namespace dss {
     JSONWriter json;
 
     try {
-      auto states = db.getStates(oemEan, langCode);
       const auto& spec = device.getVdcSpec();
-
       json.add("class", spec.deviceClass);
       json.add("classVersion", spec.deviceClassVersion);
       json.add("oemEanNumber", oemEan);
@@ -2111,6 +2109,7 @@ namespace dss {
       json.add("vendorId", spec.vendorId);
       json.add("vendorName", spec.vendorName);
 
+      auto states = db.getStates(oemEan, langCode);
       json.startObject("stateDescriptions");
       foreach (auto &state, states) {
         json.startObject(state.name);
@@ -2124,13 +2123,6 @@ namespace dss {
       }
       json.endObject();
 
-    } catch (std::exception e) {
-      // TODO(soon) is it valid to assume every device has states?
-      Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
-      return JSONWriter::failure("unknown device");
-    }
-
-    try {
       auto props = db.getProperties(oemEan, langCode); // throws
       json.startObject("propertyDescriptions");
 
@@ -2141,13 +2133,8 @@ namespace dss {
         json.endObject();
       }
       json.endObject();
-    } catch (std::exception e) {
-      // no properties
-    }
 
-    try {
       auto actions = db.getActions(oemEan, langCode);
-
       json.startObject("actionDescriptions");
       foreach (const VdcDb::ActionDesc &action, actions) {
         json.startObject(action.name);
@@ -2163,13 +2150,8 @@ namespace dss {
         json.endObject();
       }
       json.endObject();
-    } catch (std::exception e) {
-      // no actions
-    }
 
-    try {
       auto stdActions = db.getStandardActions(oemEan, langCode);
-
       json.startObject("standardActions");
       foreach (auto &action, stdActions) {
         json.startObject(action.name);
