@@ -2019,7 +2019,10 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       std::string langCode("");
       _request.getParameter("lang", langCode);
-      return getInfoStatic(*pDevice, langCode);
+      JSONWriter json;
+      getVdcSpec(*pDevice, json);
+      getInfoStatic(*pDevice, langCode, false, json);
+      return json.successJSON();
     } else if (_request.getMethod() == "getInfoCustom") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       query.Add()->set_name("customActions");
@@ -2028,6 +2031,34 @@ namespace dss {
       JSONWriter json;
       json.add("customActions");
       ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "getActions") {
+      std::string action;
+      _request.getParameter("actionType", action);
+
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+
+      if (!action.empty() && (action != "standard") && (action != "custom")) {
+        return JSONWriter::failure("invalid actionType parameter");
+      }
+      JSONWriter json;
+
+      getVdcSpec(*pDevice, json);
+
+      if (action.empty() || (action == "standard")) {
+        getInfoStatic(*pDevice, langCode, true, json);
+      }
+
+      if (action.empty() || (action == "custom")) {
+        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+        query.Add()->set_name("customActions");
+        vdcapi::Message message = pDevice->getVdcProperty(query);
+        VdcElementReader reader(message.vdc_response_get_property().properties());
+        json.add("customActions");
+        ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+      }
+
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
@@ -2092,12 +2123,9 @@ namespace dss {
     }
   } // jsonHandleRequest
 
-  std::string DeviceRequestHandler::getInfoStatic(const Device& device, const std::string &langCode) {
-    const std::string& oemEan = device.getOemEanAsString();
-    VdcDb db;
-    JSONWriter json;
-
+  void DeviceRequestHandler::getVdcSpec(const Device& device, JSONWriter& json) {
     try {
+      const std::string& oemEan = device.getOemEanAsString();
       const auto& spec = device.getVdcSpec();
       json.add("class", spec.deviceClass);
       json.add("classVersion", spec.deviceClassVersion);
@@ -2108,31 +2136,42 @@ namespace dss {
       json.add("hardwareModelGuid", spec.hardwareModelGuid);
       json.add("vendorId", spec.vendorId);
       json.add("vendorName", spec.vendorName);
+    } catch (std::exception e) {
+      Logger::getInstance()->log("failed to retrieve vdc spec", lsError);
+    }
+  }
 
-      auto states = db.getStates(oemEan, langCode);
-      json.startObject("stateDescriptions");
-      foreach (auto &state, states) {
-        json.startObject(state.name);
-        json.add("title", state.title);
-        json.startObject("options");
-        foreach (auto desc, state.values) {
-          json.add(desc.first, desc.second); // non-tranlated: translated
+  void DeviceRequestHandler::getInfoStatic(const Device& device, const std::string& langCode, bool onlyActionDesc, JSONWriter& json ) {
+    const std::string& oemEan = device.getOemEanAsString();
+    VdcDb db;
+
+    try {
+      if (!onlyActionDesc) {
+        auto states = db.getStates(oemEan, langCode);
+        json.startObject("stateDescriptions");
+        foreach (auto &state, states) {
+          json.startObject(state.name);
+          json.add("title", state.title);
+          json.startObject("options");
+          foreach (auto desc, state.values) {
+            json.add(desc.first, desc.second); // non-tranlated: translated
+          }
+          json.endObject();
+          json.endObject();
         }
         json.endObject();
+
+        auto props = db.getProperties(oemEan, langCode); // throws
+        json.startObject("propertyDescriptions");
+
+        foreach (auto &prop, props) {
+          json.startObject(prop.name);
+          json.add("title", prop.title);
+          json.add("readOnly", prop.readonly);
+          json.endObject();
+        }
         json.endObject();
       }
-      json.endObject();
-
-      auto props = db.getProperties(oemEan, langCode); // throws
-      json.startObject("propertyDescriptions");
-
-      foreach (auto &prop, props) {
-        json.startObject(prop.name);
-        json.add("title", prop.title);
-        json.add("readOnly", prop.readonly);
-        json.endObject();
-      }
-      json.endObject();
 
       auto actions = db.getActions(oemEan, langCode);
       json.startObject("actionDescriptions");
@@ -2165,9 +2204,8 @@ namespace dss {
       }
       json.endObject();
     } catch (std::exception e) {
+      Logger::getInstance()->log("failed to retrieve static vdc info", lsError);
       // no standard actions
     }
-
-    return json.successJSON();
   }
 } // namespace dss
