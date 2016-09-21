@@ -218,7 +218,7 @@ namespace dss {
       pApplicationNameNode->setFlag(PropertyNode::Archive, true);
       PropertyNodePtr pUserNode = pRealToken->createProperty("user");
       pUserNode->setFlag(PropertyNode::Archive, true);
-      pUserNode->setStringValue(_pUser->getName());
+      pUserNode->setStringValue(_pUser ? _pUser->getName().c_str() : "dssadmin");
       pPendingTokens->removeChild(pToken);
       return true;
     }
