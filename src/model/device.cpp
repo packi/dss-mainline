@@ -3128,7 +3128,7 @@ namespace dss {
   vdcapi::Message Device::getVdcProperty(
       const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
     if (!m_isVdcDevice) {
-      throw std::runtime_error("CallAction can be called only on vdc devices.");
+      throw std::runtime_error("getVdcProperty can be called only on vdc devices.");
     }
     DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
     if (!deviceBusInterface) {
