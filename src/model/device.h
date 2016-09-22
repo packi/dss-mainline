@@ -803,6 +803,7 @@ namespace dss {
     void setCustomAction(const std::string& id, const std::string& title, const std::string& action,
                          const vdcapi::PropertyElement& params);
     vdcapi::Message getVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
+    void setVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

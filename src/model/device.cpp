@@ -3137,6 +3137,18 @@ namespace dss {
     return deviceBusInterface->getProperty(*this, query);
   }
 
+  void Device::setVdcProperty(
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("getVdcProperty can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    deviceBusInterface->setProperty(*this, query);
+  }
+
   void Device::setVdcSpec(VdsdSpec_t &&x) {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
   }
