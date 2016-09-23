@@ -120,12 +120,61 @@ void GetVdcStandardActions(const Device& device, const std::string& langCode, JS
 }
 
 void GetVdcCustomActions(Device& device, JSONWriter& json) {
-      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-      query.Add()->set_name("customActions");
-      vdcapi::Message message = device.getVdcProperty(query);
-      VdcElementReader reader(message.vdc_response_get_property().properties());
-      json.add("customActions");
-      ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+  if (!device.isPresent() || !device.isVdcDevice()) {
+    json.startObject("customActions");
+    json.endObject();
+    return;
+  }
+
+  google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+  query.Add()->set_name("customActions");
+  vdcapi::Message message = device.getVdcProperty(query);
+  VdcElementReader reader(message.vdc_response_get_property().properties());
+  json.add("customActions");
+  ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+}
+
+std::bitset<6> ParseVdcInfoFilter(const std::string& filterParam) {
+  std::bitset<6> filter;
+  std::vector<std::string> render = dss::splitString(filterParam, ',');
+  for (size_t i = 0; i < render.size(); i++) {
+    if (render.at(i) == "spec") {
+      filter.set(VdcInfoFilterSpec);
+    } else if (render.at(i) == "stateDesc") {
+      filter.set(VdcInfoFilterStateDesc);
+    } else if (render.at(i) == "propertyDesc") {
+      filter.set(VdcInfoFilterPropertyDesc);
+    } else if (render.at(i) == "actionDesc") {
+      filter.set(VdcInfoFilterActionDesc);
+    } else if (render.at(i) == "standardActions") {
+      filter.set(VdcInfoFilterStdActions);
+    } else if (render.at(i) == "customActions") {
+      filter.set(VdcInfoFilterCustomActions);
+    }
+  }
+  return filter;
+}
+
+void RenderVdcInfo(Device& device, const std::bitset<6>& filter,
+                   const std::string& langCode, JSONWriter& json) {
+  if (filter.test(VdcInfoFilterSpec)) {
+    GetVdcSpec(device, json);
+  }
+  if (filter.test(VdcInfoFilterStateDesc)) {
+    GetVdcStateDescriptions(device, langCode, json);
+  }
+  if (filter.test(VdcInfoFilterPropertyDesc)) {
+    GetVdcPropertyDescriptions(device, langCode, json);
+  }
+  if (filter.test(VdcInfoFilterActionDesc)) {
+    GetVdcActionDescriptions(device, langCode, json);
+  }
+  if (filter.test(VdcInfoFilterStdActions)) {
+    GetVdcStandardActions(device, langCode, json);
+  }
+  if (filter.test(VdcInfoFilterCustomActions)) {
+    GetVdcCustomActions(device, json);
+  }
 }
 
 } // namespace

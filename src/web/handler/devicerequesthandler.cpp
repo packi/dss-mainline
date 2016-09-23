@@ -2036,7 +2036,7 @@ namespace dss {
       // imho it should not silently ignore and still return a success JSON
       // if anything goes wrong, as it was done in the previous version
 
-      std::string filter;
+      std::string filterParam;
       // "filter" can be a comma separated combination of:
       // spec
       // stateDesc
@@ -2044,7 +2044,7 @@ namespace dss {
       // actionDesc
       // standardActions
       // customActions
-      _request.getParameter("filter", filter);
+      _request.getParameter("filter", filterParam);
 
       std::string langCode("");
       _request.getParameter("lang", langCode);
@@ -2052,22 +2052,9 @@ namespace dss {
 
       JSONWriter json;
 
-      std::vector<std::string> render = dss::splitString(filter, ',');
-      for (size_t i = 0; i < render.size(); i++) {
-		if (render.at(i) == "spec") {
-          GetVdcSpec(*pDevice, json);
-        } else if (render.at(i) == "stateDesc") {
-          GetVdcStateDescriptions(*pDevice, langCode, json);
-		} else if (render.at(i) == "propertyDesc") {
-          GetVdcPropertyDescriptions(*pDevice, langCode, json);
-        } else if (render.at(i) == "actionDesc") {
-          GetVdcActionDescriptions(*pDevice, langCode, json);
-        } else if (render.at(i) == "standardActions") {
-          GetVdcStandardActions(*pDevice, langCode, json);
-        } else if (render.at(i) == "customActions") {
-          GetVdcCustomActions(*pDevice, json);
-        }
-      }
+      std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
+
+      RenderVdcInfo(*pDevice, filter, langCode, json);
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
