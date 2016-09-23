@@ -51,8 +51,6 @@ namespace dss {
     boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > parseOutputChannelsWithValues(std::string _values);
 
     // access from unit test
-    void getVdcSpec(const Device& device, JSONWriter& json);
-    void getInfoStatic(const Device& device, const std::string &langCode, bool onlyActionDesc, JSONWriter& json);
   private:
     boost::shared_ptr<Device> getDeviceFromRequest(const RestfulRequest& _request);
     boost::shared_ptr<Device> getDeviceByName(const RestfulRequest& _request);

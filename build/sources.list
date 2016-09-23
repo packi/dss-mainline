@@ -224,6 +224,8 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/subscriptionrequesthandler.h \
 	../src/web/handler/systemrequesthandler.cpp \
 	../src/web/handler/systemrequesthandler.h \
+	../src/web/handler/vdchelper.h \
+	../src/web/handler/vdchelper.cpp \
 	../src/web/handler/zonerequesthandler.cpp \
 	../src/web/handler/zonerequesthandler.h \
 	../src/web/restful.cpp \
