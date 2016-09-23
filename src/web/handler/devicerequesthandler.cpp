@@ -2031,6 +2031,45 @@ namespace dss {
       JSONWriter json;
       GetVdcCustomActions(*pDevice, json);
       return json.successJSON();
+    } else if (_request.getMethod() == "getInfo") {
+      // exceptions will cause the call to abort with a JSON failure.
+      // imho it should not silently ignore and still return a success JSON
+      // if anything goes wrong, as it was done in the previous version
+
+      std::string filter;
+      // "filter" can be a comma separated combination of:
+      // spec
+      // stateDesc
+      // propertyDesc
+      // actionDesc
+      // standardActions
+      // customActions
+      _request.getParameter("filter", filter);
+
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+
+
+      JSONWriter json;
+
+      std::vector<std::string> render = dss::splitString(filter, ',');
+      for (size_t i = 0; i < render.size(); i++) {
+		if (render.at(i) == "spec") {
+          GetVdcSpec(*pDevice, json);
+        } else if (render.at(i) == "stateDesc") {
+          GetVdcStateDescriptions(*pDevice, langCode, json);
+		} else if (render.at(i) == "propertyDesc") {
+          GetVdcPropertyDescriptions(*pDevice, langCode, json);
+        } else if (render.at(i) == "actionDesc") {
+          GetVdcActionDescriptions(*pDevice, langCode, json);
+        } else if (render.at(i) == "standardActions") {
+          GetVdcStandardActions(*pDevice, langCode, json);
+        } else if (render.at(i) == "customActions") {
+          GetVdcCustomActions(*pDevice, json);
+        }
+      }
+
+      return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       query.Add()->set_name("deviceStates");
