@@ -458,7 +458,9 @@ namespace dss {
     PropertyNodePtr matchedNode;
     PropertyNodePtr baseNode = propertySystem.createProperty("/usr/triggers");
     int maxId = 0;
-    for (const auto& baseChildNode : baseNode->getChildNodes()) {
+    const auto& baseChildNodes = baseNode->getChildNodes();
+    for (auto it = baseChildNodes.begin(); it != baseChildNodes.end(); it++) {
+      const auto& baseChildNode = *it;
       maxId = std::max(maxId, strToIntDef(baseChildNode->getName(), 0));
       const auto& triggerPathNode = baseChildNode->getPropertyByName("triggerPath");
       if (!triggerPathNode) {
@@ -522,7 +524,9 @@ namespace dss {
         return JS_TRUE;
     }
     PropertyNodePtr matchedNode;
-    for (const auto& baseChildNode : baseNode->getChildNodes()) {
+    const auto& baseChildNodes = baseNode->getChildNodes();
+    for (auto it = baseChildNodes.begin(); it != baseChildNodes.end(); it++) {
+      const auto& baseChildNode = *it;
       const auto& triggerPathNode = baseChildNode->getPropertyByName("triggerPath");
       if (!triggerPathNode) {
         continue;
