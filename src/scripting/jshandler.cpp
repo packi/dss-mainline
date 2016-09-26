@@ -445,7 +445,7 @@ namespace dss {
     std::string path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
     std::string eventName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
     const jsval& paramValue = JS_ARGV(cx, vp)[2];
-    JSObject* paramObj = nullptr;
+    JSObject* paramObj = 0;
     if (!JSVAL_IS_NULL(paramValue)) {
       if (JS_ValueToObject(cx, paramValue, &paramObj) != JS_TRUE) {
         throw ScriptException("paramValue is not of type object");
