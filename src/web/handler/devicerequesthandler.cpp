@@ -53,6 +53,7 @@
 #include "src/protobufjson.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
+#include "vdchelper.h"
 
 namespace dss {
 
@@ -2019,15 +2020,42 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       std::string langCode("");
       _request.getParameter("lang", langCode);
-      return getInfoStatic(*pDevice, langCode);
-    } else if (_request.getMethod() == "getInfoCustom") {
-      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-      query.Add()->set_name("customActions");
-      vdcapi::Message message = pDevice->getVdcProperty(query);
-      VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
-      json.add("customActions");
-      ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
+      GetVdcSpec(*pDevice, json);
+      GetVdcStateDescriptions(*pDevice, langCode, json);
+      GetVdcPropertyDescriptions(*pDevice, langCode, json);
+      GetVdcActionDescriptions(*pDevice, langCode, json);
+      GetVdcStandardActions(*pDevice, langCode, json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "getInfoCustom") {
+      JSONWriter json;
+      GetVdcCustomActions(*pDevice, json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "getInfo") {
+      // exceptions will cause the call to abort with a JSON failure.
+      // imho it should not silently ignore and still return a success JSON
+      // if anything goes wrong, as it was done in the previous version
+
+      std::string filterParam;
+      // "filter" can be a comma separated combination of:
+      // spec
+      // stateDesc
+      // propertyDesc
+      // actionDesc
+      // standardActions
+      // customActions
+      _request.getParameter("filter", filterParam);
+
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+
+
+      JSONWriter json;
+
+      std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
+
+      RenderVdcInfo(*pDevice, filter, langCode, json);
+
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
@@ -2091,83 +2119,4 @@ namespace dss {
       throw std::runtime_error("Unhandled function");
     }
   } // jsonHandleRequest
-
-  std::string DeviceRequestHandler::getInfoStatic(const Device& device, const std::string &langCode) {
-    const std::string& oemEan = device.getOemEanAsString();
-    VdcDb db;
-    JSONWriter json;
-
-    try {
-      const auto& spec = device.getVdcSpec();
-      json.add("class", spec.deviceClass);
-      json.add("classVersion", spec.deviceClassVersion);
-      json.add("oemEanNumber", oemEan);
-      json.add("model", spec.model);
-      json.add("modelVersion", spec.modelVersion);
-      json.add("hardwareGuid", spec.hardwareGuid);
-      json.add("hardwareModelGuid", spec.hardwareModelGuid);
-      json.add("vendorId", spec.vendorId);
-      json.add("vendorName", spec.vendorName);
-
-      auto states = db.getStates(oemEan, langCode);
-      json.startObject("stateDescriptions");
-      foreach (auto &state, states) {
-        json.startObject(state.name);
-        json.add("title", state.title);
-        json.startObject("options");
-        foreach (auto desc, state.values) {
-          json.add(desc.first, desc.second); // non-tranlated: translated
-        }
-        json.endObject();
-        json.endObject();
-      }
-      json.endObject();
-
-      auto props = db.getProperties(oemEan, langCode); // throws
-      json.startObject("propertyDescriptions");
-
-      foreach (auto &prop, props) {
-        json.startObject(prop.name);
-        json.add("title", prop.title);
-        json.add("readOnly", prop.readonly);
-        json.endObject();
-      }
-      json.endObject();
-
-      auto actions = db.getActions(oemEan, langCode);
-      json.startObject("actionDescriptions");
-      foreach (const VdcDb::ActionDesc &action, actions) {
-        json.startObject(action.name);
-        json.add("title", action.title);
-        json.startObject("params");
-        foreach (auto p, action.params) {
-          json.startObject(p.name);
-          json.add("title", p.title);
-          json.add("default", p.defaultValue);
-          json.endObject();
-        }
-        json.endObject();
-        json.endObject();
-      }
-      json.endObject();
-
-      auto stdActions = db.getStandardActions(oemEan, langCode);
-      json.startObject("standardActions");
-      foreach (auto &action, stdActions) {
-        json.startObject(action.name);
-        json.add("title", action.title);
-        json.startObject("params");
-        foreach (auto arg, action.args) {
-          json.add(arg.first, arg.second);
-        }
-        json.endObject();
-        json.endObject();
-      }
-      json.endObject();
-    } catch (std::exception e) {
-      // no standard actions
-    }
-
-    return json.successJSON();
-  }
 } // namespace dss
