@@ -127,6 +127,8 @@ namespace dss {
       if (dsuid_to_dsid(m_LastKnownMeterDSID, &dsid)) {
         m_LastKnownMeterDSIDstr = dsid2str(dsid);
       }
+
+      m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t());
     } // ctor
 
   Device::~Device() {
