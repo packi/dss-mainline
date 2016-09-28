@@ -739,7 +739,7 @@ namespace dss {
 
         json.endArray();
         return json.successJSON();
-      } else if (_request.getMethod() == "getInfo") {
+      } else if (_request.getMethod() == "getDeviceInfo") {
         std::string filterParam;
         int onlyActive = 0;
         std::string activeStr;
