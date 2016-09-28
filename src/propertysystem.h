@@ -432,6 +432,7 @@ namespace dss {
     /* vtable */                                  /*  4  8 */
 
     static boost::atomic<int> sm_NodeCounter;
+    static std::vector<PropertyNodePtr> sm_EmptyChildNodes;
 
   private:
     void clearValue();
@@ -553,6 +554,8 @@ namespace dss {
       }
       return m_ChildNodes ? m_ChildNodes->at(_index) : PropertyNodePtr();
     }
+
+    const std::vector<PropertyNodePtr>& getChildNodes() const;
 
     /** Adds \a _childNode as a child to this node.
         If the node already has a parent, the node will be moved here. */

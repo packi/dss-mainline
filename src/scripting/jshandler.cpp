@@ -48,6 +48,19 @@
 
 namespace dss {
 
+  struct JsDeleter {
+    JsDeleter(JSContext* cx) : m_cx(cx) {}
+    void operator()(void *x) { JS_free(m_cx, x); }
+  private:
+    JSContext *m_cx;
+  };
+  typedef std::unique_ptr<char, JsDeleter> JsCharPtr;
+
+  static std::string jsEncodeString(JSContext *cx, JSString *jsString) {
+    JsCharPtr s(JS_EncodeString(cx, jsString), JsDeleter(cx));
+    return s.get();
+  }
+
   //============================================= ScriptEnvironment
 
   ScriptEnvironment::ScriptEnvironment(Security* _pSecurity)
@@ -173,10 +186,7 @@ namespace dss {
     if( result == NULL) {
       throw ScriptException("Could not convert value to JSString");
     }
-    char* s = JS_EncodeString(m_pContext, result);
-    std::string sresult(s);
-    JS_free(m_pContext, s);
-    return sresult;
+    return jsEncodeString(m_pContext, result);
   }
 
   template<>
@@ -310,7 +320,6 @@ namespace dss {
 
   JSBool global_print(JSContext *cx, uintN argc, jsval *vp) {
     uint i;
-    char * src;
     JSString * unicode_str;
 
     if (!JS_ConvertArguments(cx, argc, JS_ARGV(cx, vp), "*"))
@@ -325,9 +334,7 @@ namespace dss {
       if (unicode_str == NULL)
         return JS_FALSE;
 
-      src = JS_EncodeString(cx, unicode_str);
-      sstream << std::string(src);
-      JS_free(cx, src);
+      sstream << jsEncodeString(cx, unicode_str);
     }
     Logger::getInstance()->log(sstream.str(), lsWarning);
 
@@ -429,10 +436,118 @@ namespace dss {
     return JS_TRUE;
   } // global_setTimeout
 
+  JSBool global_registerTrigger(JSContext *cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    if(argc != 3) {
+      JS_ReportError(cx, "registerTrigger needs 3 parameters");
+      return JS_FALSE;
+    }
+    std::string path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+    std::string eventName = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+    const jsval& paramValue = JS_ARGV(cx, vp)[2];
+    JSObject* paramObj = 0;
+    if (!JSVAL_IS_NULL(paramValue)) {
+      if (JS_ValueToObject(cx, paramValue, &paramObj) != JS_TRUE) {
+        throw ScriptException("paramValue is not of type object");
+      }
+    }
+
+    Logger::getInstance()->log("global_registerTrigger path:" + path + "eventName:" + eventName, lsDebug);
+
+    PropertySystem& propertySystem = DSS::getInstance()->getPropertySystem();
+    PropertyNodePtr matchedNode;
+    PropertyNodePtr baseNode = propertySystem.createProperty("/usr/triggers");
+    int maxId = 0;
+    const auto& baseChildNodes = baseNode->getChildNodes();
+    for (auto it = baseChildNodes.begin(); it != baseChildNodes.end(); it++) {
+      const auto& baseChildNode = *it;
+      maxId = std::max(maxId, strToIntDef(baseChildNode->getName(), 0));
+      const auto& triggerPathNode = baseChildNode->getPropertyByName("triggerPath");
+      if (!triggerPathNode) {
+          continue;
+      }
+      if (triggerPathNode->getAsString() == path) {
+          matchedNode = baseChildNode;
+          break;
+      }
+    }
+    if (!matchedNode) {
+      int id = maxId + 1;
+      std::string matchedNodePath = "/usr/triggers/" + intToString(id);
+      matchedNode = propertySystem.createProperty(matchedNodePath);
+      matchedNode->createProperty("id")->setIntegerValue(id);
+    }
+    matchedNode->createProperty("triggerPath")->setStringValue(path);
+    matchedNode->createProperty("relayedEventName")->setStringValue(eventName);
+
+    if (paramObj) {
+      JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
+      jsid propId;
+      std::string paramString;
+      while(JS_NextProperty(cx, propIter, &propId) == JS_TRUE) {
+        if(JSID_IS_VOID(propId)) {
+          break;
+        }
+        if (!paramString.empty()) {
+          paramString += '&';
+        }
+        {
+          jsval val;
+          JS_IdToValue(cx, propId, &val);
+          paramString += ctx->convertTo<std::string>(val);
+        }
+        paramString += '=';
+        {
+          JSObject* obj;
+          jsval val;
+          JS_GetMethodById(cx, paramObj, propId, &obj, &val);
+          paramString += ctx->convertTo<std::string>(val);
+        }
+      }
+      matchedNode->createProperty("additionalRelayingParameter")->setStringValue(paramString);
+    }
+    return JS_TRUE;
+  } // registerTrigger
+
+  JSBool global_unregisterTrigger(JSContext *cx, uintN argc, jsval *vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    if(argc != 1) {
+      JS_ReportError(cx, "unregisterTrigger needs 1 parameter");
+      return JS_FALSE;
+    }
+    std::string path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+    Logger::getInstance()->log("global_unregisterTrigger path:" + path, lsDebug);
+
+    PropertySystem& propertySystem = DSS::getInstance()->getPropertySystem();
+    PropertyNodePtr baseNode = propertySystem.getProperty("/usr/triggers");
+    if (!baseNode) {
+        return JS_TRUE;
+    }
+    PropertyNodePtr matchedNode;
+    const auto& baseChildNodes = baseNode->getChildNodes();
+    for (auto it = baseChildNodes.begin(); it != baseChildNodes.end(); it++) {
+      const auto& baseChildNode = *it;
+      const auto& triggerPathNode = baseChildNode->getPropertyByName("triggerPath");
+      if (!triggerPathNode) {
+        continue;
+      }
+      if (triggerPathNode->getAsString() == path) {
+        matchedNode = baseChildNode;
+        break;
+      }
+    }
+    if (matchedNode) {
+      baseNode->removeChild(matchedNode);
+    }
+    return JS_TRUE;
+  } // unregisterTrigger
+
   JSFunctionSpec global_methods[] = {
     JS_FS("print", global_print, 1, 0),
     JS_FS("keepContext", global_keepContext, 0, 0),
     JS_FS("setTimeout", global_setTimeout, 2, 0),
+    JS_FS("registerTrigger", global_registerTrigger, 3, 0),
+    JS_FS("unregisterTrigger", global_unregisterTrigger, 1, 0),
     JS_FS_END
   };
 
@@ -531,9 +646,7 @@ namespace dss {
         JS_ClearPendingException(m_pContext);
         JSString* errstr = JS_ValueToString(m_pContext, exval);
         if(errstr != NULL) {
-          char* errmsgBytes = JS_EncodeString(m_pContext, errstr);
-          std::string errMsg(errmsgBytes);
-          JS_free(m_pContext, errmsgBytes);
+          std::string errMsg = jsEncodeString(m_pContext, errstr);
           throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errMsg, errMsg);
         }
       }

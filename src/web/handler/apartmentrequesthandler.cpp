@@ -50,6 +50,7 @@
 #include "src/model-features.h"
 #include "util.h"
 #include "jsonhelper.h"
+#include "vdchelper.h"
 
 namespace dss {
 
@@ -734,6 +735,58 @@ namespace dss {
               json.endObject();
             }
           }
+        }
+
+        json.endArray();
+        return json.successJSON();
+      } else if (_request.getMethod() == "getDeviceInfo") {
+        std::string filterParam;
+        int onlyActive = 0;
+        std::string activeStr;
+
+        // "filter" can be a comma separated combination of:
+        // spec
+        // stateDesc
+        // propertyDesc
+        // actionDesc
+        // standardActions
+        // customActions
+        _request.getParameter("filter", filterParam);
+        _request.getParameter("onlyActive", activeStr);
+        onlyActive = strToIntDef(activeStr, 0);
+
+        std::string langCode("");
+        _request.getParameter("lang", langCode);
+
+        std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
+
+        JSONWriter json;
+
+        Apartment& apt = DSS::getInstance()->getApartment();
+        // get all present devices
+        Set devices = apt.getZone(0)->getDevices();
+        if (onlyActive) {
+            devices = devices.getByPresence(true);
+        }
+
+        json.startArray("devices");
+
+        for (int d = 0; d < devices.length(); d++) {
+          boost::shared_ptr<Device> device = devices.get(d).getDevice();
+
+          if (!device->getHasActions()) {
+            continue;
+          }
+ 
+          json.startObject();
+          json.add("dSUID", dsuid2str(device->getDSID()));
+          // do not fail the whole set if one devices messes up
+          try {
+            RenderVdcInfo(*device, filter, langCode, json);
+          } catch (std::exception& e) {
+            Logger::getInstance()->log(std::string("Could get device properties for device ") + dsuid2str(device->getDSID()) + ": " + e.what(), lsError);
+          }
+          json.endObject();
         }
 
         json.endArray();
