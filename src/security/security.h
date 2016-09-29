@@ -99,6 +99,8 @@ namespace dss {
     /// @param user User authenticated be the roken. "dssadmin" for nullptr
     bool enableToken(const std::string& token, User* user = 0);
     bool revokeToken(const std::string& _token);
+
+    const PropertyNodePtr& getRootNode() { return m_pRootNode; }
   private:
     /**
      * HACK! Instead of

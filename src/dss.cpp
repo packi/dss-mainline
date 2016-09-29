@@ -86,6 +86,7 @@
 
 #include "webservice_connection.h"
 #include "model-features.h"
+#include "vdc-token.h"
 
 namespace dss {
 
@@ -141,7 +142,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
     /// Objects synchronized to ioService event loop
     struct IoServiceObjects {
-      IoServiceObjects(DSS& dss) {}
+      VdcToken m_vdcToken;
+      IoServiceObjects(DSS& dss) : m_vdcToken(dss) {}
     };
     std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
 

@@ -102,6 +102,7 @@ dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(BOOST_PROGRAM_OPTIONS_LIB) \
 			$(BOOST_SYSTEM_LIB) \
 			$(BOOST_THREAD_LIB) \
+			$(BOOST_CHRONO_LIB) \
 			$(SQLITE3_LIBS)
 
 ../src/dss.cpp: build_info.h

@@ -440,6 +440,26 @@ void WebserviceMsHub::doGetWeatherInformation(boost::shared_ptr<URLRequestCallba
   WebserviceConnection::getInstanceMsHub()->request(url, params, GET, callback, false);
 }
 
+void WebserviceMsHub::doVdcStoreVdcToken(const std::string &vdcToken, WebserviceCallDone_t callback) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+  std::string params;
+
+  if (!WebserviceMsHub::isAuthorized()) {
+    callback->done(NETWORK_ERROR, WebserviceReply({0, ""}));
+    return;
+  }
+
+  url += "public/vDC/v1_0/Device/StoreVDCToken";
+  params += "dssId=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  params += "&ospToken=" + propSystem.getStringValue(pp_websvc_rc_osptoken);
+  params += "&vdcToken=" + vdcToken;
+
+  // webservice is fire and forget, so use shared ptr for life cycle mgmt
+  boost::shared_ptr<MsHubReplyChecker> cont = boost::make_shared<MsHubReplyChecker>(callback);
+  WebserviceConnection::getInstanceMsHub()->request(url, params, POST, cont, false);
+}
+
 WebserviceReply WebserviceMsHub::parseReply(const char* buf) {
   WebserviceReply resp;
   bool return_code_seen = false;

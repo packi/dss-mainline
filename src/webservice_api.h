@@ -109,6 +109,8 @@ public:
   static bool doUploadSensorData(iterator begin, iterator end,
                                  WebserviceCallDone_t callback);
 
+  static void doVdcStoreVdcToken(const std::string &vdcToken, WebserviceCallDone_t callback);
+
   /**
    * Extract return code and message
    * @param json -- json encoded reply
