@@ -31,8 +31,7 @@ typedef boost::system::error_code error_code;
 
 namespace dss {
 
-
-static constexpr boost::chrono::seconds TOKEN_EXPIRE_TIME = boost::chrono::minutes(5); //TODO(now): 60*24*30;
+static constexpr boost::chrono::seconds TOKEN_EXPIRE_TIME = boost::chrono::minutes(60*24*30);
 static constexpr boost::chrono::seconds ASYNC_RETRY_TIMEOUT = boost::chrono::seconds(60);
 
 __DEFINE_LOG_CHANNEL__(VdcToken, lsInfo);
