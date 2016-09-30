@@ -135,6 +135,14 @@ void VdcToken::asyncPush() {
         }
         m_dss.getIoService().dispatch([this, token]() { onPushed(token); });
       })));
+  // The doVdcStoreVdcToken processing is not cancelled in asyncRestart.
+  // So the requests can queue in the worker thread if they take longer
+  // to finish than ASYNC_RETRY_TIMEOUT.
+  // The doVdcStoreVdcToken synchronous operation does not return any
+  // handle that can be used to cancel it :(.
+  // It is possible to block further doVdcStoreVdcToken calls until we get reply from previous one.
+  // But that is also risky, because we rely on the callback being called.
+  // It is not really the practice in WebserviceMsHub code.
 }
 
 void VdcToken::onPushed(const std::string& token) {
