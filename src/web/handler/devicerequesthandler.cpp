@@ -863,38 +863,49 @@ namespace dss {
       if((id  < 0) || (id > 127)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
       }
-
-      if (!_request.hasParameter("value") && !_request.hasParameter("angle")) {
-        return JSONWriter::failure("Must supply at least value or angle");
-      }
-      int value = strToIntDef(_request.getParameter("value"), -1);
-      int angle = strToIntDef(_request.getParameter("angle"), -1);
-      if ((value < 0) && (angle < 0)) {
-        return JSONWriter::failure("Invalid value and/or angle parameter");
-      }
-      if (value > 65535) {
-        return JSONWriter::failure("Invalid value parameter");
-      }
-      if (angle > 255) {
-        return JSONWriter::failure("Invalid angle parameter");
-      }
-
-      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
-        return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
-      }
-
-      if (angle != -1) {
-        DeviceFeatures_t features = pDevice->getFeatures();
-        if (!features.hasOutputAngle) {
-          return JSONWriter::failure("Device does not support output angle configuration");
+      if (_request.hasParameter("command")) {
+        std::string action = _request.getParameter("command");
+        if (!pDevice->isVdcDevice() || !pDevice->getHasActions()) {
+          return JSONWriter::failure("Device does not support action configuration");
         }
-        pDevice->setSceneAngle(id, angle);
+        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+        vdcapi::PropertyElement* e1 = query.Add();
+        e1->set_name("scenes");
+        vdcapi::PropertyElement* e2 = e1->add_elements();
+        e2->set_name(intToString(id));
+        vdcapi::PropertyElement* e3 = e2->add_elements();
+        e3->set_name("command");
+        e3->mutable_value()->set_v_string(action);
+        pDevice->setVdcProperty(query);
       }
+      if (_request.hasParameter("value") || _request.hasParameter("angle")) {
+        int value = strToIntDef(_request.getParameter("value"), -1);
+        int angle = strToIntDef(_request.getParameter("angle"), -1);
+        if ((value < 0) && (angle < 0)) {
+          return JSONWriter::failure("Invalid value and/or angle parameter");
+        }
+        if (value > 65535) {
+          return JSONWriter::failure("Invalid value parameter");
+        }
+        if (angle > 255) {
+          return JSONWriter::failure("Invalid angle parameter");
+        }
 
-      if (value != -1) {
-        pDevice->setSceneValue(id, value);
+        if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
+          return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
+        }
+
+        if (angle != -1) {
+          DeviceFeatures_t features = pDevice->getFeatures();
+          if (!features.hasOutputAngle) {
+            return JSONWriter::failure("Device does not support output angle configuration");
+          }
+          pDevice->setSceneAngle(id, angle);
+        }
+        if (value != -1) {
+          pDevice->setSceneValue(id, value);
+        }
       }
-
       return JSONWriter::success();
     } else if (_request.getMethod() == "getSceneValue") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
@@ -907,13 +918,24 @@ namespace dss {
       }
 
       JSONWriter json;
-      json.add("value", pDevice->getSceneValue(id));
+      if (pDevice->isVdcDevice()) {
+        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+        vdcapi::PropertyElement* e1 = query.Add();
+        e1->set_name("scenes");
+        vdcapi::PropertyElement* e2 = e1->add_elements();
+        e2->set_name(intToString(id));
+        vdcapi::Message message = pDevice->getVdcProperty(query);
+        VdcElementReader reader(message.vdc_response_get_property().properties());
+        json.add("scenes");
+        ProtobufToJSon::processElementsPretty(reader["scenes"].childElements(), json);
+        return json.successJSON();
+      }
 
+      json.add("value", pDevice->getSceneValue(id));
       DeviceFeatures_t features = pDevice->getFeatures();
       if (features.hasOutputAngle) {
         json.add("angle", pDevice->getSceneAngle(id));
       }
-
       return json.successJSON();
     } else if (_request.getMethod() == "getSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
