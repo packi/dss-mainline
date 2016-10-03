@@ -103,7 +103,12 @@ void VdcToken::asyncLoop() {
     // short timeout to retry push. We restart asyncLoop after successful push
     log("Token is expired, pushing new one.", lsNotice);
     timeout = ASYNC_RETRY_TIMEOUT;
-    asyncPush();
+    try {
+      asyncPush();
+    } catch (std::exception &e) {
+      //make sure to not stop the loop
+      log(std::string("asyncPush failed e.what():") + e.what(), lsError);
+    }
   } else {
     // Long timeout to push again when token expires.
     // We are lazy to calculate number of seconds till expiration.
