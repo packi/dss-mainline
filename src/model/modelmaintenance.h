@@ -167,6 +167,7 @@ namespace dss {
       private:
         dsuid_t m_deviceDSUID;
         DeviceOEMState_t m_oldOEMState;
+        std::string m_configLink;
       };
 
       OEMWebQuery(boost::shared_ptr<Device> _device, DeviceOEMState_t _oldState);
@@ -174,10 +175,11 @@ namespace dss {
       virtual void run();
 
     private:
+      dsuid_t m_deviceDSUID;
       std::string m_EAN;
       uint16_t m_partNumber;
-      dsuid_t m_deviceDSUID;
       uint16_t m_serialNumber;
+      bool m_queryConfigLink;
       DeviceOEMState_t m_oldOEMState;
     };
 
@@ -305,7 +307,8 @@ namespace dss {
     void onOEMDataReady(dsuid_t _deviceID,
                            const DeviceOEMState_t _state, const std::string& _productName,
                            const std::string& _iconPath, const std::string& _productURL,
-                           const std::string& _defaultName);
+                           const std::string& _defaultName,
+                           const std::string& _configLink);
     void onDeviceOEMDataUpdateProductInfoState(dsuid_t _deviceID,
                                                const DeviceOEMState_t _state);
 

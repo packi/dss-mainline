@@ -283,6 +283,7 @@ namespace dss {
     std::string m_OemProductName;
     std::string m_OemProductIcon;
     std::string m_OemProductURL;
+    std::string m_OemConfigLink;
 
     bool m_isVdcDevice;
     std::unique_ptr<VdsdSpec_t> m_vdcSpec;
@@ -664,13 +665,14 @@ namespace dss {
     DeviceOEMState_t getOemStateFromString(const char* _string) const;
     DeviceOEMInetState_t getOemInetStateFromString(const char* _string) const;
 
-    void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL);
+    void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL, const std::string& _configLink);
     void setOemProductInfoState(const DeviceOEMState_t _state);
     std::string getOemProductInfoStateAsString() const { return oemStateToString(m_OemProductInfoState); }
     const DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
     const std::string& getOemProductName() const { return m_OemProductName; }
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
+    const std::string& getOemConfigLink() const { return m_OemConfigLink; }
     bool isOemCoupledWith(boost::shared_ptr<Device> _otherDev);
     void setConfigLock(bool _lockConfig);
     bool isConfigLocked() const { return m_IsConfigLocked; }

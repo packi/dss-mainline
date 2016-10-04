@@ -224,4 +224,23 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
   return desc;
 }
 
+bool VdcDb::hasActionInterface(const std::string &gtin) {
+  Logger::getInstance()->log(std::string(__func__) + "check action interface for GTIN " + gtin);
+
+  bool result = false;
+  std::string sql = "SELECT name FROM device WHERE gtin=?";
+  SqlStatement find = m_db->prepare(sql);
+  SqlStatement::BindScope scope;
+  scope = find.bind(gtin);
+
+  while (find.step() == SqlStatement::StepResult::ROW) {
+    std::string name = find.getColumn<std::string>(0);
+    result = true;
+
+    Logger::getInstance()->log(std::string(__func__) + "found name for GTIN " + gtin + ": ", name);
+  }
+
+  return result;
+}
+
 } // dss namespace
