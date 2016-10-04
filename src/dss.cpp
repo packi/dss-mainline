@@ -151,6 +151,7 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     }
     ~Impl() {
       m_ioService.stop();
+      m_ioServiceThread.join();
     }
 
     void ioServiceThreadRun() {
