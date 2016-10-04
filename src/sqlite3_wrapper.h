@@ -46,7 +46,7 @@ public:
   /// \brief Initialize database using the specified location.
   ///
   /// If the database does not exist, it will be automatically created.
-  SQLite3(std::string db_file, Mode mode);
+  SQLite3(const std::string& db_file, Mode mode);
 
   /// \brief represents a "column cell" in the table, first pair element is
   /// the column name, second pair element is the actual value
@@ -70,7 +70,7 @@ public:
   /// \brief Execute SQL on the active database, no response expected.
   ///
   /// Will throw an exception if anything goes wrong
-  void exec(std::string sql);
+  void exec(const std::string& sql);
 
   /// \brief Helper function for proper escaping of strings.
   ///
@@ -78,7 +78,7 @@ public:
   ///
   /// \param str string that should be escaped
   /// \param quotes adds quotes around the string (convenience parameter)
-  std::string escape(std::string str, bool quotes = false);
+  std::string escape(const std::string& str, bool quotes = false);
 
   operator ::sqlite3*() { return m_ptr.get(); }
   ///< Default cast to raw sqlite3*.
@@ -91,7 +91,7 @@ private:
 
   boost::mutex m_mutex;
 
-  void execInternal(std::string sql);
+  void execInternal(const std::string& sql);
 
   friend class SqlStatement;
 };
