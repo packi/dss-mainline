@@ -1085,15 +1085,16 @@ namespace dss {
       break;
     case ModelEvent::etDeviceOEMDataReady:
       assert(pEventWithStrings != NULL);
-      if ((event->getParameterCount() != 1) && (pEventWithStrings->getStringParameterCount() != 4)) {
-        log("Expected 5 parameters for ModelEvent::etDeviceOEMDataReady");
+      if ((event->getParameterCount() != 1) && (pEventWithStrings->getStringParameterCount() != 5)) {
+        log("Expected 6 parameters for ModelEvent::etDeviceOEMDataReady");
       } else {
         onOEMDataReady(pEventWithDSID->getDSID(),
                        (DeviceOEMState_t)event->getParameter(0),
                        pEventWithStrings->getStringParameter(0),
                        pEventWithStrings->getStringParameter(1),
                        pEventWithStrings->getStringParameter(2),
-                       pEventWithStrings->getStringParameter(3));
+                       pEventWithStrings->getStringParameter(3),
+                       pEventWithStrings->getStringParameter(4));
       }
       break;
     case ModelEvent::etDeviceOEMDataUpdateProductInfoState:
@@ -2202,11 +2203,12 @@ namespace dss {
                                              const std::string& _productName,
                                              const std::string& _iconPath,
                                              const std::string& _productURL,
-                                             const std::string& _defaultName) {
+                                             const std::string& _defaultName,
+                                             const std::string& _configLink) {
     try {
       boost::shared_ptr<Device> pDevice = m_pApartment->getDeviceByDSID(_deviceID);
       if (_state == DEVICE_OEM_VALID) {
-        pDevice->setOemProductInfo(_productName, _iconPath, _productURL);
+        pDevice->setOemProductInfo(_productName, _iconPath, _productURL, _configLink);
         if (pDevice->getName().empty()) {
           pDevice->setName(_defaultName);
         }
@@ -2570,6 +2572,7 @@ namespace dss {
     m_EAN = _device->getOemEanAsString();
     m_partNumber = _device->getOemPartNumber();
     m_serialNumber = _device->getOemSerialNumber();
+    m_queryConfigLink = _device->getHasActions();
   }
 
   ModelMaintenance::OEMWebQuery::OEMWebQueryCallback::OEMWebQueryCallback(dsuid_t _deviceDSUID, DeviceOEMState_t _oldState)
@@ -2583,10 +2586,14 @@ namespace dss {
     std::string productName;
     boost::filesystem::path iconFile;
     std::string defaultName;
+    std::string serviceLink;
+    std::string infoLink;
+    std::string configLink;
     DeviceOEMState_t state = m_oldOEMState;
+    bool isGetBasicArticleDataResponse = false;
 
     if (code == 200) {
-      Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: result: ") + result);
+      Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: DSUID: ") + dsuid2str(m_deviceDSUID) + " = " + result);
       struct json_tokener* tok;
 
       tok = json_tokener_new();
@@ -2618,20 +2625,28 @@ namespace dss {
           if (!json_object_object_get_ex(json_request, "Response", &response)) {
             Logger::getInstance()->log(std::string("OEMWebQueryCallback::result: no 'Response' object in response"), lsError);
           } else {
+            json_object *article;
+            if (json_object_object_get_ex(response, "Article", &article)) {
+              isGetBasicArticleDataResponse = true;
+              if (json_object_object_get_ex(article, "ServiceLink", &obj)) {
+                serviceLink = json_object_get_string(obj);
+              }
+              if (json_object_object_get_ex(article, "Infolink", &obj)) {   // mind the "l"
+                infoLink = json_object_get_string(obj);
+              }
+              if (json_object_object_get_ex(article, "ConfigLink", &obj)) {
+                configLink = json_object_get_string(obj);
+              }
+            }
             if (json_object_object_get_ex(response, "ArticleName", &obj)) {
               productName = json_object_get_string(obj);
             }
-
             if (json_object_object_get_ex(response, "ArticleIcon", &obj)) {
               remoteIconPath = json_object_get_string(obj);
             }
-
-            if (json_object_object_get_ex(response,
-                                          "ArticleDescriptionForCustomer",
-                                          &obj)) {
+            if (json_object_object_get_ex(response, "ArticleDescriptionForCustomer", &obj)) {
               productURL = json_object_get_string(obj);
             }
-
             if (json_object_object_get_ex(response, "DefaultName", &obj)) {
               defaultName = json_object_get_string(obj);
             }
@@ -2640,6 +2655,12 @@ namespace dss {
       }
       json_object_put(json_request);
       json_tokener_free(tok);
+
+      if (isGetBasicArticleDataResponse) {
+        // done with the first response of GetBasicArticleData
+        m_configLink = configLink;
+        return;
+      }
 
       state = DEVICE_OEM_VALID;
       iconFile = remoteIconPath.filename();
@@ -2697,6 +2718,7 @@ namespace dss {
       pEvent->addStringParameter(iconFile.string());
       pEvent->addStringParameter(productURL);
       pEvent->addStringParameter(defaultName);
+      pEvent->addStringParameter(m_configLink);
       if(DSS::hasInstance()) {
         DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
       } else {
@@ -2724,15 +2746,21 @@ namespace dss {
     std::string mac = propSys.getStringValue("/system/host/interfaces/eth0/mac");
     std::string country = propSys.getStringValue("/config/geodata/country");
     std::string language = propSys.getStringValue("/system/language/locale");
-
-    std::string parameters = "ean=" + m_EAN +
-                             "&partNr=" + intToString(m_partNumber) +
-                             "&oemSerialNumber=" + intToString(m_serialNumber) +
-                             "&macAddress=" + mac +
-                             "&countryCode=" + country +
-                             "&languageCode=" + language;
-
+    std::string parameters;
     boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb = boost::make_shared<OEMWebQuery::OEMWebQueryCallback>(m_deviceDSUID, m_oldOEMState);
+
+    if (m_queryConfigLink) {
+      parameters = "ean=" + m_EAN +
+          "&countryCode=" + country +
+          "&languageCode=" + language;
+      WebserviceConnection::getInstanceMsHub()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetBasicArticleData", parameters, GET, cb, false);
+    }
+    parameters = "ean=" + m_EAN +
+        "&partNr=" + intToString(m_partNumber) +
+        "&oemSerialNumber=" + intToString(m_serialNumber) +
+        "&macAddress=" + mac +
+        "&countryCode=" + country +
+        "&languageCode=" + language;
     WebserviceConnection::getInstanceMsHub()->request("public/MasterDataManagement/Article/v1_0/ArticleData/GetArticleData", parameters, GET, cb, false);
   }
 

@@ -84,6 +84,7 @@ namespace dss {
     const char *oemProdName = NULL;
     const char *oemProdIcon = NULL;
     const char *oemProdURL = NULL;
+    const char *oemConfigLink = NULL;
     const char *configLocked = NULL;
     const char *valve = NULL;
     const char *cardinalDirection = NULL;
@@ -134,6 +135,8 @@ namespace dss {
         oemProdIcon = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "oemProductURL") == 0) {
         oemProdURL = _attrs[i + 1];
+      } else if (strcmp(_attrs[i], "oemConfigLink") == 0) {
+        oemConfigLink = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "configurationLocked") == 0) {
         configLocked = _attrs[i + 1];
       } else if (strcmp(_attrs[i], "valveType") == 0) {
@@ -285,8 +288,8 @@ namespace dss {
       }
 
       if (productInfoState == DEVICE_OEM_VALID) {
-        if (oemProdName != NULL && oemProdIcon != NULL && oemProdURL != NULL) {
-          m_tempDevice->setOemProductInfo(oemProdName, oemProdIcon, oemProdURL);
+        if (oemProdName != NULL && oemProdIcon != NULL && oemProdURL != NULL && oemConfigLink != NULL) {
+          m_tempDevice->setOemProductInfo(oemProdName, oemProdIcon, oemProdURL, oemConfigLink);
         }
         m_tempDevice->setOemProductInfoState(productInfoState);
       }
@@ -1042,6 +1045,7 @@ namespace dss {
         _ofs << " oemProductName=\"" << XMLStringEscape(_pDevice->getOemProductName()) << "\"";
         _ofs << " oemProductIcon=\"" << XMLStringEscape(_pDevice->getOemProductIcon()) << "\"";
         _ofs << " oemProductURL=\"" << XMLStringEscape(_pDevice->getOemProductURL()) << "\"";
+        _ofs << " oemConfigLink=\"" << XMLStringEscape(_pDevice->getOemConfigLink()) << "\"";
       }
     }
     _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
