@@ -2629,26 +2629,40 @@ namespace dss {
             if (json_object_object_get_ex(response, "Article", &article)) {
               isGetBasicArticleDataResponse = true;
               if (json_object_object_get_ex(article, "ServiceLink", &obj)) {
-                serviceLink = json_object_get_string(obj);
+                if (json_object_is_type(obj, json_type_string)) {
+                  serviceLink = json_object_get_string(obj);
+                }
               }
               if (json_object_object_get_ex(article, "Infolink", &obj)) {   // mind the "l"
-                infoLink = json_object_get_string(obj);
+                if (json_object_is_type(obj, json_type_string)) {
+                  infoLink = json_object_get_string(obj);
+                }
               }
               if (json_object_object_get_ex(article, "ConfigLink", &obj)) {
-                configLink = json_object_get_string(obj);
+                if (json_object_is_type(obj, json_type_string)) {
+                  configLink = json_object_get_string(obj);
+                }
               }
             }
             if (json_object_object_get_ex(response, "ArticleName", &obj)) {
-              productName = json_object_get_string(obj);
+              if (json_object_is_type(obj, json_type_string)) {
+                productName = json_object_get_string(obj);
+              }
             }
             if (json_object_object_get_ex(response, "ArticleIcon", &obj)) {
-              remoteIconPath = json_object_get_string(obj);
+              if (json_object_is_type(obj, json_type_string)) {
+                remoteIconPath = json_object_get_string(obj);
+              }
             }
             if (json_object_object_get_ex(response, "ArticleDescriptionForCustomer", &obj)) {
-              productURL = json_object_get_string(obj);
+              if (json_object_is_type(obj, json_type_string)) {
+                productURL = json_object_get_string(obj);
+              }
             }
             if (json_object_object_get_ex(response, "DefaultName", &obj)) {
-              defaultName = json_object_get_string(obj);
+              if (json_object_is_type(obj, json_type_string)) {
+                defaultName = json_object_get_string(obj);
+              }
             }
           }
         }
