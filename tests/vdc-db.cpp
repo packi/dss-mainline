@@ -32,7 +32,7 @@
 #include "src/sqlite3_wrapper.h"
 #include "src/foreach.h"
 #include "src/model/device.h"
-#include "src/model/vdc-db.h"
+#include "src/vdc-db.h"
 #include "src/propertysystem.h"
 #include "src/vdc-connection.h"
 #include "src/web/webrequests.h"

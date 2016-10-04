@@ -36,7 +36,7 @@
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
-#include "src/model/vdc-db.h"
+#include "src/vdc-db.h"
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/ds485types.h"

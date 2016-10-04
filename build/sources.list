@@ -113,8 +113,6 @@ libdsscore_a_SOURCES =  \
 	../src/model/set.h \
 	../src/model/state.cpp \
 	../src/model/state.h \
-	../src/model/vdc-db.cpp \
-	../src/model/vdc-db.h \
 	../src/model/zone.cpp \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
@@ -192,6 +190,8 @@ libdsscore_a_SOURCES =  \
 	../src/util.h \
 	../src/vdc-connection.cpp \
 	../src/vdc-connection.h \
+	../src/vdc-db.cpp \
+	../src/vdc-db.h \
 	../src/vdc-element-reader.cpp \
 	../src/vdc-element-reader.h \
 	../src/vdc-token.cpp \
