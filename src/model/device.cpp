@@ -198,6 +198,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       propNode->createProperty("OemGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
+      propNode->createProperty("OemModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemModelGuid, false));
       propNode->createProperty("ConfigURL")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
       propNode->createProperty("HardwareGuid")
