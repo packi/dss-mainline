@@ -95,6 +95,7 @@ void VdcToken::asyncRestart() {
 }
 
 void VdcToken::asyncLoop() {
+  m_dss.assertIoServiceThread();
   assert(m_enabled);
   auto isExpired = this->isExpired();
   boost::chrono::seconds timeout;

@@ -943,4 +943,9 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
   {
     return DateTime().getTimezoneOffset();
   }
+
+  void DSS::assertIoServiceThread() {
+    assert(m_impl->m_ioServiceThread.get_id() == std::this_thread::get_id());
+  }
+
 }
