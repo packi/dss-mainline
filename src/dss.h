@@ -89,7 +89,7 @@ namespace dss {
      */
     static int s_InstanceGeneration;
     struct Impl;
-    std::unique_ptr<Impl> m_impl; // PIMPL pattern
+    const std::unique_ptr<Impl> m_impl; // PIMPL pattern
     std::vector<Subsystem*> m_Subsystems;
     time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;
