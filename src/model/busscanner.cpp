@@ -465,9 +465,15 @@ namespace dss {
         dev->setVdcModelFeatures(props.modelFeatures);
         dev->setVdcSpec(std::move(props));
 
+        // cannot use getOemEanNumber here, the OEM/Data is not available/valid at this point
+        std::string eanString = dev->getVdcOemModelGuid();
+        if (beginsWith(eanString, "gs1:(01)")) {
+          eanString.erase(0, 8);
+        }
+
         VdcDb db;
-        dev->initStates(dev, db.getStatesLegacy(dev->getOemEanAsString())); // throws
-        dev->setHasActions(!db.getActions(dev->getOemEanAsString()).empty()); // throws
+        dev->initStates(dev, db.getStatesLegacy(eanString)); // throws
+        dev->setHasActions(db.hasActionInterface(eanString)); // throws
       }
     } catch (const std::runtime_error& e) {
       log(std::string("initializeDeviceFromSpec() error:") + e.what(), lsError);
