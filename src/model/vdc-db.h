@@ -81,6 +81,7 @@ public:
   };
 
   std::vector<StandardActionDesc> getStandardActions(const std::string &gtin, const std::string &langCode = "");
+  bool hasActionInterface(const std::string &gtin);
 
 private:
   std::unique_ptr<SQLite3> m_db;
