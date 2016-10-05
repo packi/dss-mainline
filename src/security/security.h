@@ -95,8 +95,12 @@ namespace dss {
     }
     void createApplicationToken(const std::string& _applicationName,
                                 const std::string& _token);
-    bool enableToken(const std::string& _token, User* _pUser);
+    /// Enable pending token created be \ref createApplicationToken.
+    /// @param user User authenticated be the roken. "dssadmin" for nullptr
+    bool enableToken(const std::string& token, User* user = 0);
     bool revokeToken(const std::string& _token);
+
+    const PropertyNodePtr& getRootNode() { return m_pRootNode; }
   private:
     /**
      * HACK! Instead of

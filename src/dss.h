@@ -38,6 +38,12 @@
 
 #include "comm-channel.h"
 
+namespace boost {
+namespace asio {
+  class io_service;
+} // namespace asio
+} // namespace boost
+
 namespace dss {
 
   class DSS;
@@ -82,6 +88,8 @@ namespace dss {
      * number to identify reliably
      */
     static int s_InstanceGeneration;
+    struct Impl;
+    std::unique_ptr<Impl> m_impl; // PIMPL pattern
     std::vector<Subsystem*> m_Subsystems;
     time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;
@@ -99,6 +107,7 @@ namespace dss {
     boost::shared_ptr<BonjourHandler> m_pBonjour;
     boost::shared_ptr<Watchdog> m_pWatchdog;
     boost::shared_ptr<BusEventSink> m_pDefaultBusEventSink;
+    boost::asio::io_service& m_ioService;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -163,6 +172,9 @@ namespace dss {
     SessionManager& getSessionManager() { return *m_pSessionManager; }
     Security& getSecurity() { return *m_pSecurity; }
     BonjourHandler& getBonjourHandler() { return *m_pBonjour; }
+
+    // ioService serving as single threaded even loop
+    boost::asio::io_service& getIoService() { return m_ioService; }
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }

@@ -42,6 +42,8 @@
 #endif
 
 #include <sys/resource.h>
+#include <boost/asio/io_service.hpp>
+#include <thread>
 
 #include "logger.h"
 #include "propertysystem.h"
@@ -84,6 +86,7 @@
 
 #include "webservice_connection.h"
 #include "model-features.h"
+#include "vdc-token.h"
 
 namespace dss {
 
@@ -133,8 +136,42 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
   bool DSS::s_shutdown;
 
+  struct DSS::Impl {
+    boost::asio::io_service m_ioService;
+    std::thread m_ioServiceThread;
+
+    /// Objects synchronized to ioService event loop
+    struct IoServiceObjects {
+      VdcToken m_vdcToken;
+      IoServiceObjects(DSS& dss) : m_vdcToken(dss) {}
+    };
+    std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
+
+    Impl() : m_ioServiceThread([&](){ ioServiceThreadRun(); }) {
+    }
+    ~Impl() {
+      m_ioService.stop();
+      m_ioServiceThread.join();
+    }
+
+    void ioServiceThreadRun() {
+      boost::asio::io_service::work work(m_ioService); // run until ioService is stopped.
+      while (1) {
+        try {
+          m_ioService.run();
+          break; //run() exited normally
+        } catch (std::exception &e) {
+          Logger::getInstance()->log(std::string("io_service") + e.what(), lsError);
+        }
+        m_ioServiceObjects.reset();
+      }
+    }
+  };
+
   DSS::DSS()
-  : m_commChannel(NULL)
+      : m_impl(new Impl())
+      , m_ioService(m_impl->m_ioService)
+      , m_commChannel(NULL)
   {
     m_ShutdownFlag = false;
     m_State = ssInvalid;
@@ -633,6 +670,11 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pBonjour = boost::make_shared<BonjourHandler>();
     m_pBonjour->run();
 #endif
+
+    m_impl->m_ioService.dispatch([this]() {
+      m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
+      m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
+    });
 
     if (!m_ShutdownFlag) {
       m_State = ssRunning;

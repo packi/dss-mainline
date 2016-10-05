@@ -194,6 +194,8 @@ libdsscore_a_SOURCES =  \
 	../src/vdc-connection.h \
 	../src/vdc-element-reader.cpp \
 	../src/vdc-element-reader.h \
+	../src/vdc-token.cpp \
+	../src/vdc-token.h \
 	../src/watchdog.cpp \
 	../src/watchdog.h \
 	../src/web/handler/apartmentrequesthandler.cpp \

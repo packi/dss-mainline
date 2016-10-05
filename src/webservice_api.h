@@ -51,6 +51,18 @@ public:
 
 typedef boost::shared_ptr<WebserviceCallDone> WebserviceCallDone_t;
 
+/// WebserviceCallDone storing std::function
+class WebserviceCallDoneFunction : public WebserviceCallDone {
+public:
+  typedef std::function<void (RestTransferStatus_t, WebserviceReply)> Function;
+  WebserviceCallDoneFunction(Function &&f) : m_f(std::move(f)) {}
+  void done(RestTransferStatus_t status, WebserviceReply reply) /* override */ {
+    m_f(status, reply);
+  }
+private:
+  Function m_f;
+};
+
 // --------------------------------------------------------------------
 // interface calls
 
@@ -96,6 +108,8 @@ public:
   template <class iterator>
   static bool doUploadSensorData(iterator begin, iterator end,
                                  WebserviceCallDone_t callback);
+
+  static void doVdcStoreVdcToken(const std::string &vdcToken, WebserviceCallDone_t callback);
 
   /**
    * Extract return code and message
