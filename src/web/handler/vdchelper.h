@@ -29,6 +29,7 @@ namespace dss {
 
   class Device;
   class JSONWriter;
+  class VdcDb;
 
   enum {
      VdcInfoFilterSpec          = 0,
@@ -40,13 +41,13 @@ namespace dss {
   };
 
   void GetVdcSpec(const Device& device, JSONWriter& json);
-  void GetVdcStateDescriptions(const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcPropertyDescriptions(const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcActionDescriptions(const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcStandardActions(const Device& device, const std::string& langCode, JSONWriter& json);
+  void GetVdcStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+  void GetVdcPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+  void GetVdcActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+  void GetVdcStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
   void GetVdcCustomActions(Device& device, JSONWriter& json);
   std::bitset<6> ParseVdcInfoFilter(const std::string& filterParam);
-  void RenderVdcInfo(Device& device, const std::bitset<6>& filter,
+  void RenderVdcInfo(VdcDb& db, Device& device, const std::bitset<6>& filter,
                      const std::string& langCode, JSONWriter& json);
 
 } // namespace

@@ -50,7 +50,6 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
-#include "handler/db_fetch.h"
 #include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
@@ -86,6 +85,7 @@
 
 #include "webservice_connection.h"
 #include "model-features.h"
+#include "vdc-db-fetcher.h"
 #include "vdc-token.h"
 
 namespace dss {
@@ -143,7 +143,11 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     /// Objects synchronized to ioService event loop
     struct IoServiceObjects {
       VdcToken m_vdcToken;
-      IoServiceObjects(DSS& dss) : m_vdcToken(dss) {}
+      VdcDbFetcher m_vdcDbFetcher;
+      IoServiceObjects(DSS& dss) :
+          m_vdcToken(dss),
+          m_vdcDbFetcher(dss) {
+      }
     };
     std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
 
@@ -539,8 +543,6 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     plugin = new EventInterpreterDatabaseUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
-    m_pEventInterpreter->addPlugin(plugin);
-    plugin = new DbUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
   }
 

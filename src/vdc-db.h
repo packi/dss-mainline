@@ -21,24 +21,19 @@
 
 #include <string>
 #include <vector>
-
 #include <memory>
+#include <mutex>
 
 #include "src/businterface.h"
 #include "src/sqlite3_wrapper.h"
 
 namespace dss {
 
-/**
- * property node structure to declare trigger
- * pcn_ = property config node
- */
-extern const char* pcn_vdce_db;
-extern const char*  pcn_vdce_db_name;
-
 class VdcDb {
 public:
-  VdcDb();
+  VdcDb(SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
+
+  SQLite3& getDb() { return m_db; }
 
   struct StateDesc {
     std::string name;
@@ -84,7 +79,9 @@ public:
   bool hasActionInterface(const std::string &gtin);
 
 private:
-  std::unique_ptr<SQLite3> m_db;
+  SQLite3 m_db;
+  static std::mutex s_mutex;
+  std::lock_guard<std::mutex> m_lock;
 };
 
 }

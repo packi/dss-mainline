@@ -31,46 +31,14 @@
 
 namespace dss {
 
-const char* pcn_vdce_db = "/config/vdce/db";
-const char* pcn_vdce_db_name = "/config/vdce/db/name";
+// Parallel readers and writers would introduce errors returned by sqlite.
+// It is possible to recover from these errors, but we don't aim for parallelism here.
+// We avoid concurrency errors by locking this static mutex in each VdcDb instance.
+std::mutex VdcDb::s_mutex;
 
-static std::string getDbFile() {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  std::string dbPath = propSystem.getProperty("/config/databasedirectory")->getAsString();
-
-  if (!propSystem.getProperty(pcn_vdce_db_name)) {
-    throw std::runtime_error(std::string(__func__) + ": config: vdc db filename missing");
-  }
-
-  std::string dbName = propSystem.getProperty(pcn_vdce_db_name)->getAsString();
-  if (!boost::algorithm::ends_with(dbName, ".db")) {
-    dbName += ".db";
-  }
-
-  return dbPath +  "/" + dbName;
-}
-
-static std::string getFallbackSqlDump() {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  return propSystem.getProperty("/config/datadirectory")->getAsString() + "vdc-db.sql";
-}
-
-VdcDb::VdcDb() {
-  try {
-    m_db.reset(new SQLite3(getDbFile(), SQLite3::Mode::ReadOnly));
-  } catch (std::exception &e) {
-    // database missing or corrupt
-    Logger::getInstance()->log(std::string(__func__) + " <" + e.what() + ">", lsWarning);
-    Logger::getInstance()->log(std::string(__func__) + "creating db from fallback sqldump: " + getFallbackSqlDump(), lsWarning);
-
-    SQLite3 tmp(getDbFile(), SQLite3::Mode::ReadWrite);
-    // open in read-write mode
-    tmp.exec(readFile(getFallbackSqlDump()));
-    // esceptions are not catched
-
-    m_db.reset(new SQLite3(getDbFile(), SQLite3::Mode::ReadOnly));
-    // retry or throw exception
-  }
+VdcDb::VdcDb(SQLite3::Mode mode):
+    m_db(DSS::getInstance()->getDatabaseDirectory() + "/vdce.db", mode),
+    m_lock(s_mutex) {
 }
 
 std::vector<DeviceStateSpec_t> VdcDb::getStatesLegacy(const std::string &gtin) {
@@ -98,7 +66,7 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
     sql = "SELECT s.name, s.name, e.value, e.value FROM device AS d INNER JOIN device_status AS s INNER JOIN device_status_enum AS e ON d.id == s.device_id AND s.id == e.device_id WHERE d.gtin=? ORDER BY s.name;";
   }
 
-  SqlStatement findStates = m_db->prepare(sql);
+  SqlStatement findStates = m_db.prepare(sql);
 
   SqlStatement::BindScope scope;
   if (langCode.empty()) {
@@ -132,7 +100,7 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   } else {
     sql = "SELECT p.name, p.name, p.readonly FROM device AS dev INNER JOIN device_properties AS p ON dev.id=p.device_id WHERE dev.gtin=?";
   }
-  SqlStatement findProps = m_db->prepare(sql);
+  SqlStatement findProps = m_db.prepare(sql);
 
   SqlStatement::BindScope scope;
   if (langCode.empty()) {
@@ -162,7 +130,7 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
   }
 
   // SqlStatement has broken move semantics
-  SqlStatement findActions = m_db->prepare(sql);
+  SqlStatement findActions = m_db.prepare(sql);
 
   SqlStatement::BindScope scope;
   if (langCode.empty()) {
@@ -199,7 +167,7 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
   }
 
   // SqlStatement has broken move semantics
-  SqlStatement find = m_db->prepare(sql);
+  SqlStatement find = m_db.prepare(sql);
 
   SqlStatement::BindScope scope;
   if (langCode.empty()) {
@@ -229,7 +197,7 @@ bool VdcDb::hasActionInterface(const std::string &gtin) {
 
   bool result = false;
   std::string sql = "SELECT name FROM device WHERE gtin=?";
-  SqlStatement find = m_db->prepare(sql);
+  SqlStatement find = m_db.prepare(sql);
   SqlStatement::BindScope scope;
   scope = find.bind(gtin);
 

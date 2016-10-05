@@ -33,6 +33,7 @@
 #include "src/foreach.h"
 #include "src/model/device.h"
 #include "src/vdc-db.h"
+#include "src/vdc-db-fetcher.h"
 #include "src/propertysystem.h"
 #include "src/vdc-connection.h"
 #include "src/web/webrequests.h"
@@ -60,12 +61,10 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
 }
 
 BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
   std::string gtin("7640156791914"); // VZug Steamer
   std::string no_gtin("invalid_gtin");
 
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
   VdcDb db;
 
   std::vector<DeviceStateSpec_t> states_s;
@@ -105,11 +104,9 @@ static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
 }
 
 BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
   std::string gtin("7640156791914"); // VZug Steamer
 
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
   VdcDb db;
   std::vector<VdcDb::PropertyDesc> props;
   BOOST_CHECK_NO_THROW(props = db.getProperties(gtin));
@@ -136,11 +133,9 @@ static void dumpActionDesc(const std::vector<VdcDb::ActionDesc> &actions) {
 }
 
 BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
   std::string gtin("7640156791914"); // VZug Steamer
 
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
   VdcDb db;
   std::vector<VdcDb::ActionDesc> actions;
   BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, ""));
@@ -170,11 +165,9 @@ static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
 }
 
 BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
   std::string gtin("7640156791914"); // VZug Steamer
 
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
   VdcDb db;
   std::vector<VdcDb::StandardActionDesc> stdActions;
   BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, "de_DE"));
@@ -191,9 +184,8 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb db;
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(7640156791914, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
   VdsdSpec_t vdcSpec;
@@ -215,10 +207,10 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
 
   JSONWriter json;
   GetVdcSpec(dev, json);
-  GetVdcStateDescriptions(dev, "de_DE", json);
-  GetVdcPropertyDescriptions(dev, "de_DE", json);
-  GetVdcActionDescriptions(dev, "de_DE", json);
-  GetVdcStandardActions(dev, "de_DE", json);
+  GetVdcStateDescriptions(db, dev, "de_DE", json);
+  GetVdcPropertyDescriptions(db, dev, "de_DE", json);
+  GetVdcActionDescriptions(db, dev, "de_DE", json);
+  GetVdcStandardActions(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
   //Logger::getInstance()->log("info: " + ret, lsWarning);
 
@@ -229,12 +221,10 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
   std::string gtin("0000000000000");
   // invalid gtin
 
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
   VdcDb db;
   BOOST_CHECK(db.getStates(gtin).empty());
   BOOST_CHECK(db.getProperties(gtin).empty());
@@ -247,10 +237,10 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
 
   JSONWriter json;
   GetVdcSpec(dev, json);
-  GetVdcStateDescriptions(dev, "de_DE", json);
-  GetVdcPropertyDescriptions(dev, "de_DE", json);
-  GetVdcActionDescriptions(dev, "de_DE", json);
-  GetVdcStandardActions(dev, "de_DE", json);
+  GetVdcStateDescriptions(db, dev, "de_DE", json);
+  GetVdcPropertyDescriptions(db, dev, "de_DE", json);
+  GetVdcActionDescriptions(db, dev, "de_DE", json);
+  GetVdcStandardActions(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
 
   std::string expect = R"expect({"result":{"class":"","classVersion":"","oemEanNumber":"0","model":"","modelVersion":"","hardwareGuid":"","hardwareModelGuid":"","vendorId":"","vendorName":"","stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{}},"ok":true})expect";
@@ -260,14 +250,12 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(checkDeviceSupport, DSSInstanceFixture) {
-  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
-  propSystem.createProperty(pcn_vdce_db_name)->setStringValue("vdc.db");
-
   std::string gtins[] = {
     "7640156791914", // V-Zug MSLQ - aktiv
     "7640156791945" , // vDC smarter iKettle 2.0
   };
 
+  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
   VdcDb db;
   foreach (auto gtin, gtins) {
     BOOST_CHECK(!db.getStates(gtin, "de_DE").empty());
