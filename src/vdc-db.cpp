@@ -37,7 +37,7 @@ namespace dss {
 std::mutex VdcDb::s_mutex;
 
 VdcDb::VdcDb(SQLite3::Mode mode):
-    m_db(DSS::getInstance()->getDatabaseDirectory() + "/vdce.db", mode),
+    m_db(DSS::getInstance()->getDatabaseDirectory() + "/vdc.db", mode),
     m_lock(s_mutex) {
 }
 
