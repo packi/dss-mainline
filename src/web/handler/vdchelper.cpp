@@ -22,7 +22,7 @@
 
 #include "src/web/webrequests.h"
 #include "src/model/device.h"
-#include "src/model/vdc-db.h"
+#include "src/vdc-db.h"
 #include "src/protobufjson.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
