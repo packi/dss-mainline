@@ -12,13 +12,13 @@ enum Type {
     VDC_RESPONSE_GET_PROPERTY = 5;
 
     VDSM_REQUEST_SET_PROPERTY = 6;
-    VDSM_GENERIC_REQUEST = 26;  // new in API v2c
+    VDSM_REQUEST_GENERIC_REQUEST = 26;  // new in API v2c
 
     VDSM_SEND_PING = 8;
     VDC_SEND_PONG = 9;
     VDC_SEND_ANNOUNCE_DEVICE = 10;
     VDC_SEND_VANISH = 11;
-    VDC_SEND_PUSH_PROPERTY = 12;
+    VDC_SEND_PUSH_NOTIFICATION = 12;
     VDSM_SEND_REMOVE = 13;
     VDSM_SEND_BYE = 14;
     VDC_SEND_ANNOUNCE_VDC = 23; // new in API v2
@@ -54,14 +54,14 @@ message Message {
 
     // expects generic response
     optional vdsm_RequestSetProperty vdsm_request_set_property = 104;
-    optional vdsm_GenericRequest vdsm_generic_request = 123; // new in API v2c
+    optional vdsm_RequestGenericRequest vdsm_request_generic_request = 123; // new in API v2c
 
     // requests that only expect a response in case of error
     optional vdsm_SendPing vdsm_send_ping = 105;
     optional vdc_SendPong vdc_send_pong = 106;
     optional vdc_SendAnnounceDevice vdc_send_announce_device = 107;
     optional vdc_SendVanish vdc_send_vanish = 108;
-    optional vdc_SendPushProperty vdc_send_push_property = 109;
+    optional vdc_SendPushNotification vdc_send_push_notification = 109;
     optional vdsm_SendRemove vdsm_send_remove = 110;
     optional vdsm_SendBye vdsm_send_bye = 111;
     optional vdc_SendAnnounceVdc vdc_send_announce_vdc = 120; // new in API v2

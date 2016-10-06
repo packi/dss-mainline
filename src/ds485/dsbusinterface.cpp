@@ -1007,17 +1007,17 @@ namespace dss {
         log("handleUserPropertyEvent parse failed responseSize:" + intToString(_responseSize), lsError);
         return;
     }
-    if (message.type() != vdcapi::VDC_SEND_PUSH_PROPERTY) {
+    if (message.type() != vdcapi::VDC_SEND_PUSH_NOTIFICATION) {
         log("handleUserPropertyEvent received invalid message" + intToString(message.type()), lsError);
         return;
     }
     log("handleUserPropertyEvent" + message.DebugString(), lsInfo);
-    const vdcapi::vdc_SendPushProperty& pushPropertyMessage = message.vdc_send_push_property();
+    const auto& pushPropertyMessage = message.vdc_send_push_notification();
     std::string deviceDsuid = pushPropertyMessage.dsuid();
     VdceModelEvent* pEvent = new VdceModelEvent();
     pEvent->m_deviceDSID = str2dsuid(deviceDsuid);
 
-    VdcElementReader rootReader(pushPropertyMessage.properties());
+    VdcElementReader rootReader(pushPropertyMessage.changedproperties());
     VdcElementReader deviceStatesReader = rootReader["deviceStates"];
     Properties& eventStates = pEvent->m_states;
     for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
