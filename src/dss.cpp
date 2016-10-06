@@ -661,6 +661,17 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     }
 
     m_State = ssStarting;
+
+    {
+      boost::packaged_task<void> task([=]() {
+        m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
+        m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
+      });
+      //dispatch task in io_service thread and block till it finishes.
+      m_impl->m_ioService.dispatch([&]() { task(); });
+      task.get_future().get();
+    }
+
     foreach (Subsystem *subsys, m_Subsystems) {
       log("Start subsystem \"" + subsys->getName() + "\"", lsDebug);
       subsys->start();
@@ -670,11 +681,6 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pBonjour = boost::make_shared<BonjourHandler>();
     m_pBonjour->run();
 #endif
-
-    m_impl->m_ioService.dispatch([this]() {
-      m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
-      m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
-    });
 
     if (!m_ShutdownFlag) {
       m_State = ssRunning;
