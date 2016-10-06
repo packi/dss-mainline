@@ -53,9 +53,11 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
       db.getDb().exec(readFile(m_dss.getDataDirectory() + "/vdc-db.sql"));
       log(std::string() + "Database (re)created. e.what():" + e.what(), lsNotice);
     } catch (std::exception &e2) {
-      log(std::string() + "Database missing or corrupt, recreate failed. e2.what():"
-          + e2.what() + " e.what():" + e.what(), lsError);
-      // Should we rather abort here? Parts of system will not work
+      // Opening db read-write leaves empty file.
+      // Delete the file so that read only open fails.
+      ::remove(VdcDb::getFilePath().c_str());
+      throw std::runtime_error(std::string() + "Database missing or corrupt, recreate failed. e2.what():"
+          + e2.what() + " e.what():" + e.what());
     }
   }
   asyncLoop();

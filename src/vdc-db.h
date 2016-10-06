@@ -33,6 +33,8 @@ class VdcDb {
 public:
   VdcDb(SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
 
+  static std::string getFilePath();
+
   SQLite3& getDb() { return m_db; }
 
   struct StateDesc {

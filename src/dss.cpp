@@ -669,9 +669,9 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
         m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
         m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
       });
-      //dispatch task in io_service thread and block till it finishes.
+      // dispatch task in io_service thread and block till it finishes.
       m_impl->m_ioService.dispatch([&]() { task(); });
-      task.get_future().get();
+      task.get_future().get();  // throws if task throws
     }
 
     foreach (Subsystem *subsys, m_Subsystems) {

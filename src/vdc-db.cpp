@@ -37,8 +37,12 @@ namespace dss {
 std::mutex VdcDb::s_mutex;
 
 VdcDb::VdcDb(SQLite3::Mode mode):
-    m_db(DSS::getInstance()->getDatabaseDirectory() + "/vdc.db", mode),
+    m_db(getFilePath(), mode),
     m_lock(s_mutex) {
+}
+
+std::string VdcDb::getFilePath() {
+  return DSS::getInstance()->getDatabaseDirectory() + "/vdc.db";
 }
 
 std::vector<DeviceStateSpec_t> VdcDb::getStatesLegacy(const std::string &gtin) {
