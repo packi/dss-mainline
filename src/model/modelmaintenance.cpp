@@ -2521,6 +2521,10 @@ namespace dss {
         raiseEvent(createDeviceStateEvent(pDevRev, name, value));
         pDev->setStateValue(name, value);
       }
+      for (auto it = event.m_events.begin(); it != event.m_events.end(); it++) {
+        const auto& deviceEvent = *it;
+        raiseEvent(createDeviceEventEvent(pDevRev, deviceEvent));
+      }
     } catch(ItemNotFoundException& e) {
       log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
     }

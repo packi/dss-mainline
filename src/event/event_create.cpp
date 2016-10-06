@@ -37,6 +37,7 @@ namespace EventName {
   const std::string DeviceInvalidSensor = "deviceInvalidSensor";
   const std::string DeviceBinaryInputEvent = "deviceBinaryInputEvent";
   const std::string DeviceStateEvent = "deviceStateEvent";
+  const std::string DeviceEventEvent = "deviceEventEvent";
   const std::string DeviceButtonClick = "buttonClick";
   const std::string IdentifyBlink = "blink";
   const std::string ExecutionDenied = "executionDenied";
@@ -117,6 +118,15 @@ createDeviceStateEvent(boost::shared_ptr<DeviceReference> _devRef,
   event = boost::make_shared<Event>(EventName::DeviceStateEvent, _devRef);
   event->setProperty("name", name);
   event->setProperty("value", value);
+  return event;
+}
+
+boost::shared_ptr<Event>
+createDeviceEventEvent(boost::shared_ptr<DeviceReference> _devRef, const std::string& name)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::DeviceEventEvent, _devRef);
+  event->setProperty("name", name);
   return event;
 }
 

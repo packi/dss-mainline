@@ -146,6 +146,7 @@ namespace dss {
 
     dsuid_t m_deviceDSID;
     Properties m_states;
+    std::vector<std::string> m_events;
   };
 
 } // namespace dss

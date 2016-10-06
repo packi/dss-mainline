@@ -1017,13 +1017,25 @@ namespace dss {
     VdceModelEvent* pEvent = new VdceModelEvent();
     pEvent->m_deviceDSID = str2dsuid(deviceDsuid);
 
-    VdcElementReader rootReader(pushPropertyMessage.changedproperties());
-    VdcElementReader deviceStatesReader = rootReader["deviceStates"];
-    Properties& eventStates = pEvent->m_states;
-    for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
-      VdcElementReader reader = *it;
-      eventStates.set(reader.getName(), reader["value"].getValueAsString());
+    {
+      VdcElementReader changePropertiesReader(pushPropertyMessage.changedproperties());
+      VdcElementReader deviceStatesReader = changePropertiesReader["deviceStates"];
+      Properties& eventStates = pEvent->m_states;
+      for (auto it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
+        VdcElementReader reader = *it;
+        eventStates.set(reader.getName(), reader["value"].getValueAsString());
+      }
     }
+
+    {
+      VdcElementReader deviceEventsReader(pushPropertyMessage.deviceevents());
+      std::vector<std::string>& eventEvents = pEvent->m_events;
+      for (auto it = deviceEventsReader.begin(); it != deviceEventsReader.end(); it++) {
+        VdcElementReader reader = *it;
+        eventEvents.emplace_back(reader.getName());
+      }
+    }
+
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
