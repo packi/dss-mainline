@@ -29,6 +29,7 @@
 namespace dss {
   class DSS;
 
+  /// Initialize vdc-db in constructor and schedule vdc-db updates after start and periodically.
   class VdcDbFetcher {
   public:
     static const char* PERIOD_SECONDS_PROPERTY_PATH;
