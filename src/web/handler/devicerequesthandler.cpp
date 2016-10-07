@@ -53,7 +53,7 @@
 #include "src/protobufjson.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
-#include "vdchelper.h"
+#include "vdc-info.h"
 
 namespace dss {
 
@@ -2022,15 +2022,16 @@ namespace dss {
       _request.getParameter("lang", langCode);
       VdcDb db;
       JSONWriter json;
-      GetVdcSpec(*pDevice, json);
-      GetVdcStateDescriptions(db, *pDevice, langCode, json);
-      GetVdcPropertyDescriptions(db, *pDevice, langCode, json);
-      GetVdcActionDescriptions(db, *pDevice, langCode, json);
-      GetVdcStandardActions(db, *pDevice, langCode, json);
+      vdcInfo::addSpec(*pDevice, json);
+      vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addActionDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addStandardActions(db, *pDevice, langCode, json);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoCustom") {
       JSONWriter json;
-      GetVdcCustomActions(*pDevice, json);
+      vdcInfo::addCustomActions(*pDevice, json);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfo") {
       // exceptions will cause the call to abort with a JSON failure.
@@ -2053,10 +2054,8 @@ namespace dss {
 
       VdcDb db;
       JSONWriter json;
-
-      std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
-
-      RenderVdcInfo(db, *pDevice, filter, langCode, json);
+      auto filter = vdcInfo::parseFilter(filterParam);
+      vdcInfo::addByFilter(db, *pDevice, filter, langCode, json);
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {

@@ -37,8 +37,8 @@
 #include "src/propertysystem.h"
 #include "src/vdc-connection.h"
 #include "src/web/webrequests.h"
-#include "src/web/handler/vdchelper.h"
 #include "src/web/handler/devicerequesthandler.h"
+#include "src/web/handler/vdc-info.h"
 #include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;
@@ -206,11 +206,11 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   dev.setVdcSpec(std::move(vdcSpec));
 
   JSONWriter json;
-  GetVdcSpec(dev, json);
-  GetVdcStateDescriptions(db, dev, "de_DE", json);
-  GetVdcPropertyDescriptions(db, dev, "de_DE", json);
-  GetVdcActionDescriptions(db, dev, "de_DE", json);
-  GetVdcStandardActions(db, dev, "de_DE", json);
+  vdcInfo::addSpec(dev, json);
+  vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addStandardActions(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
   //Logger::getInstance()->log("info: " + ret, lsWarning);
 
@@ -236,11 +236,11 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   dev.setVdcSpec(VdsdSpec_t());
 
   JSONWriter json;
-  GetVdcSpec(dev, json);
-  GetVdcStateDescriptions(db, dev, "de_DE", json);
-  GetVdcPropertyDescriptions(db, dev, "de_DE", json);
-  GetVdcActionDescriptions(db, dev, "de_DE", json);
-  GetVdcStandardActions(db, dev, "de_DE", json);
+  vdcInfo::addSpec(dev, json);
+  vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addStandardActions(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
 
   std::string expect = R"expect({"result":{"class":"","classVersion":"","oemEanNumber":"0","model":"","modelVersion":"","hardwareGuid":"","hardwareModelGuid":"","vendorId":"","vendorName":"","stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{}},"ok":true})expect";
