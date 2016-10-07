@@ -34,11 +34,11 @@ namespace dss {
 namespace vdcInfo {
 
 void addSpec(const Device& device, JSONWriter& json) {
-  const std::string& oemEan = device.getOemEanAsString();
+  const std::string& dsDeviceGTIN = device.getOemEanAsString();
   const auto& spec = device.getVdcSpec();
   json.add("class", spec.deviceClass);
   json.add("classVersion", spec.deviceClassVersion);
-  json.add("oemEanNumber", oemEan);
+  json.add("dsDeviceGTIN", dsDeviceGTIN);
   json.add("model", spec.model);
   json.add("modelVersion", spec.modelVersion);
   json.add("hardwareGuid", spec.hardwareGuid);
