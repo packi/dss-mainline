@@ -937,6 +937,27 @@ namespace dss {
         json.add("angle", pDevice->getSceneAngle(id));
       }
       return json.successJSON();
+
+    } else if (_request.getMethod() == "getSceneList") {
+      if (!pDevice->isVdcDevice() || !pDevice->getHasActions()) {
+        return JSONWriter::failure("Device does not support action configuration");
+      }
+
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      vdcapi::PropertyElement* e1 = query.Add();
+      e1->set_name("scenes");
+      for (int id = 64; id < 128; id++) {
+        vdcapi::PropertyElement* e2 = e1->add_elements();
+        e2->set_name(intToString(id));
+      }
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+
+      JSONWriter json;
+      json.add("scenes");
+      ProtobufToJSon::processElementsPretty(reader["scenes"].childElements(), json);
+      return json.successJSON();
+
     } else if (_request.getMethod() == "getSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
