@@ -96,12 +96,28 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
 }
 
 std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const std::string &langCode) {
-  // TODO(soon): we need new online database to finish this.
-  // Even if we modify the database locally, it would be overwritten by VdcDbFetcher by online version.
-  // BLOCKED
+  std::string sql;
+  if (!langCode.empty()) {
+    sql = "SELECT p.name, n_p.name FROM (device AS dev INNER JOIN (device_events AS p INNER JOIN name_device_events AS n_p ON p.id=n_p.reference_id) ON dev.id=p.device_id) where dev.gtin=? AND n_p.lang_code=?";
+  } else {
+    sql = "SELECT p.name, p.name FROM device AS dev INNER JOIN device_events AS p ON dev.id=p.device_id WHERE dev.gtin=?";
+  }
+  SqlStatement findEvents = m_db.prepare(sql);
+
+  SqlStatement::BindScope scope;
+  if (langCode.empty()) {
+    scope = findEvents.bind(gtin);
+  } else {
+    scope = findEvents.bind(gtin, langCode);
+  }
 
   std::vector<EventDesc> events;
-  events.push_back(EventDesc({std::string("released"), std::string("Released")}));
+  while (findEvents.step() != SqlStatement::StepResult::DONE) {
+    events.push_back(EventDesc());
+    events.back().name = findEvents.getColumn<std::string>(0);
+    events.back().title = findEvents.getColumn<std::string>(1);
+  }
+
   return events;
 }
 
