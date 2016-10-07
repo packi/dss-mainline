@@ -41,7 +41,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
-#include "src/model/vdc-db.h"
+#include "src/vdc-db.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
@@ -2020,12 +2020,13 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       std::string langCode("");
       _request.getParameter("lang", langCode);
+      VdcDb db;
       JSONWriter json;
       GetVdcSpec(*pDevice, json);
-      GetVdcStateDescriptions(*pDevice, langCode, json);
-      GetVdcPropertyDescriptions(*pDevice, langCode, json);
-      GetVdcActionDescriptions(*pDevice, langCode, json);
-      GetVdcStandardActions(*pDevice, langCode, json);
+      GetVdcStateDescriptions(db, *pDevice, langCode, json);
+      GetVdcPropertyDescriptions(db, *pDevice, langCode, json);
+      GetVdcActionDescriptions(db, *pDevice, langCode, json);
+      GetVdcStandardActions(db, *pDevice, langCode, json);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoCustom") {
       JSONWriter json;
@@ -2050,11 +2051,12 @@ namespace dss {
       _request.getParameter("lang", langCode);
 
 
+      VdcDb db;
       JSONWriter json;
 
       std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
 
-      RenderVdcInfo(*pDevice, filter, langCode, json);
+      RenderVdcInfo(db, *pDevice, filter, langCode, json);
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {

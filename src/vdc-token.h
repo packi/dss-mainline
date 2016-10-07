@@ -62,6 +62,8 @@ private:
   PropertyNodePtr m_enabledNode;
   PropertyNodePtr m_tokenNode;
   PropertyNodePtr m_issuedOnNode;
+  boost::chrono::seconds m_expirePeriod;
+  boost::chrono::seconds m_retryPeriod;
 };
 
 } // namespace dss

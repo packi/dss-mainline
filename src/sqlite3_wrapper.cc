@@ -39,7 +39,7 @@ void SQLite3::Deleter::operator()(::sqlite3* ptr) {
   sqlite3_close_v2(ptr);
 }
 
-SQLite3::SQLite3(std::string db_file, Mode mode)
+SQLite3::SQLite3(const std::string& db_file, Mode mode)
 {
   boost::mutex::scoped_lock lock(m_mutex);
 
@@ -177,7 +177,7 @@ SQLite3::query_result SqlStatement::fetchAll()
 // CAUTION: this function does not lock the mutex! it can be used as a helper
 // for API functions that need to perform more than one db operation
 // sequentially
-void SQLite3::execInternal(std::string sql)
+void SQLite3::execInternal(const std::string& sql)
 {
   char *errmsg = NULL;
   int ret;
@@ -190,13 +190,13 @@ void SQLite3::execInternal(std::string sql)
   }
 }
 
-void SQLite3::exec(std::string sql)
+void SQLite3::exec(const std::string& sql)
 {
   boost::mutex::scoped_lock lock(m_mutex);
   execInternal(sql);
 }
 
-std::string SQLite3::escape(std::string str, bool quotes)
+std::string SQLite3::escape(const std::string& str, bool quotes)
 {
   char *q;
   if (quotes) {

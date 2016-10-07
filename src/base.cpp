@@ -465,16 +465,20 @@ namespace dss {
 
   // throws exception
   std::string readFile(const std::string& filename) {
-    std::string data;
-    std::ifstream file(filename.c_str(), std::ios::ate | std::ios::in);
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+      std::string data;
+      std::ifstream file(filename.c_str(), std::ios::ate | std::ios::in);
+      file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-    data.clear();
-    data.reserve(file.tellg());
-    file.seekg(0, std::ios::beg);
-    data.append(std::istreambuf_iterator<char>(file.rdbuf()),
-                std::istreambuf_iterator<char>());
-    return data;
+      data.clear();
+      data.reserve(file.tellg());
+      file.seekg(0, std::ios::beg);
+      data.append(std::istreambuf_iterator<char>(file.rdbuf()),
+                  std::istreambuf_iterator<char>());
+      return data;
+    } catch (std::exception &e) {
+      throw std::runtime_error(std::string() + "Failed to read file:" + filename + " e.what():" + e.what());
+    }
   }
 
   //================================================== System utilities

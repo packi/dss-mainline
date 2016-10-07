@@ -48,6 +48,7 @@
 #include "src/model/scenehelper.h"
 #include "src/stringconverter.h"
 #include "src/model-features.h"
+#include "src/vdc-db.h"
 #include "util.h"
 #include "jsonhelper.h"
 #include "vdchelper.h"
@@ -760,6 +761,7 @@ namespace dss {
 
         std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
 
+        VdcDb db;
         JSONWriter json;
 
         Apartment& apt = DSS::getInstance()->getApartment();
@@ -782,7 +784,7 @@ namespace dss {
           json.add("dSUID", dsuid2str(device->getDSID()));
           // do not fail the whole set if one devices messes up
           try {
-            RenderVdcInfo(*device, filter, langCode, json);
+            RenderVdcInfo(db, *device, filter, langCode, json);
           } catch (std::exception& e) {
             Logger::getInstance()->log(std::string("Could get device properties for device ") + dsuid2str(device->getDSID()) + ": " + e.what(), lsError);
           }

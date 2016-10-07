@@ -18,22 +18,21 @@
       <value />
     </property>
 
-    <property name="db_update_service">
-      <property name="list">
-        <!--property name="vdc-db" type="string">
-            <value>/config/vdce/db</value>
-        </property-->
+    <property name="vdcToken">
+      <property name="expirePeriodSeconds" type="integer">
+        <value>2592000</value> <!-- 30 days -->
+      </property>
+      <property name="retryPeriodSeconds" type="integer">
+        <value>300</value> <!-- There is no hurry. The old one still works. -->
       </property>
     </property>
 
-    <property name="vdce">
-      <property name="db">
-        <property name="name" type="string">
-          <value>vdce.db</value>
-        </property>
-        <property name="url" type="string">
-          <value>http://db.aizo.net/vdc-db.php</value>
-        </property>
+    <property name="vdcDbFetcher">
+      <property name="periodSeconds" type="integer">
+        <value>86400</value><!-- 0 -> vdcDbFetcher is disabled -->
+      </property>
+      <property name="url" type="string">
+        <value>http://db.aizo.net/vdc-db.php</value>
       </property>
     </property>
 

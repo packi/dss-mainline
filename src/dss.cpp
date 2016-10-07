@@ -50,7 +50,6 @@
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
-#include "handler/db_fetch.h"
 #include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
@@ -86,6 +85,7 @@
 
 #include "webservice_connection.h"
 #include "model-features.h"
+#include "vdc-db-fetcher.h"
 #include "vdc-token.h"
 
 namespace dss {
@@ -143,7 +143,11 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     /// Objects synchronized to ioService event loop
     struct IoServiceObjects {
       VdcToken m_vdcToken;
-      IoServiceObjects(DSS& dss) : m_vdcToken(dss) {}
+      VdcDbFetcher m_vdcDbFetcher;
+      IoServiceObjects(DSS& dss) :
+          m_vdcToken(dss),
+          m_vdcDbFetcher(dss) {
+      }
     };
     std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
 
@@ -540,8 +544,6 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new DbUpdatePlugin(m_pEventInterpreter.get());
-    m_pEventInterpreter->addPlugin(plugin);
   }
 
   bool DSS::initSubsystems() {
@@ -661,6 +663,17 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     }
 
     m_State = ssStarting;
+
+    {
+      boost::packaged_task<void> task([=]() {
+        m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
+        m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
+      });
+      // dispatch task in io_service thread and block till it finishes.
+      m_impl->m_ioService.dispatch([&]() { task(); });
+      task.get_future().get();  // throws if task throws
+    }
+
     foreach (Subsystem *subsys, m_Subsystems) {
       log("Start subsystem \"" + subsys->getName() + "\"", lsDebug);
       subsys->start();
@@ -670,11 +683,6 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pBonjour = boost::make_shared<BonjourHandler>();
     m_pBonjour->run();
 #endif
-
-    m_impl->m_ioService.dispatch([this]() {
-      m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
-      m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
-    });
 
     if (!m_ShutdownFlag) {
       m_State = ssRunning;
@@ -943,4 +951,9 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
   {
     return DateTime().getTimezoneOffset();
   }
+
+  void DSS::assertIoServiceThread() {
+    assert(m_impl->m_ioServiceThread.get_id() == std::this_thread::get_id());
+  }
+
 }

@@ -98,7 +98,6 @@ namespace dss {
     extern const std::string SceneNameChanged;
     extern const std::string ReexportTimings;
     extern const std::string AutoClusterUpdate;
-    extern const std::string CheckDssDbUpdate;
   }
 
   namespace EventProperty {

@@ -31,12 +31,20 @@ typedef boost::system::error_code error_code;
 
 namespace dss {
 
-static constexpr boost::chrono::seconds TOKEN_EXPIRE_TIME = boost::chrono::minutes(60*24*30);
-static constexpr boost::chrono::seconds ASYNC_RETRY_TIMEOUT = boost::chrono::seconds(60);
-
 __DEFINE_LOG_CHANNEL__(VdcToken, lsInfo);
 
-VdcToken::VdcToken(DSS &dss) : m_dss(dss), m_timer(dss.getIoService()), m_enabled(false) {
+VdcToken::VdcToken(DSS &dss) :
+    m_dss(dss),
+    m_timer(dss.getIoService()),
+    m_enabled(false),
+    m_expirePeriod(boost::chrono::seconds(dss.getPropertySystem().getIntValue(
+        "/config/vdcToken/expirePeriodSeconds"))),
+    m_retryPeriod(boost::chrono::seconds(dss.getPropertySystem().getIntValue(
+        "/config/vdcToken/retryPeriodSeconds"))) {
+  assert(m_expirePeriod.count() != 0);
+  assert(m_retryPeriod.count() != 0);
+  log("VdcToken m_expirePeriod:" + intToString(m_expirePeriod.count())
+      + " m_retryPeriod:" + intToString(m_retryPeriod.count()), lsNotice);
   auto& propertySystem = m_dss.getPropertySystem();
 
   m_enabledNode = propertySystem.getProperty(pp_websvc_mshub_active);
@@ -57,7 +65,7 @@ VdcToken::VdcToken(DSS &dss) : m_dss(dss), m_timer(dss.getIoService()), m_enable
 bool VdcToken::isExpired() const {
   try {
     auto dateTime = DateTime::parseISO8601(m_issuedOnNode->getStringValue());
-    dateTime = dateTime.addSeconds(boost::chrono::duration_cast<boost::chrono::seconds>(TOKEN_EXPIRE_TIME).count());
+    dateTime = dateTime.addSeconds(boost::chrono::duration_cast<boost::chrono::seconds>(m_expirePeriod).count());
     if (dateTime > DateTime()) {
       return false;
     }
@@ -95,6 +103,7 @@ void VdcToken::asyncRestart() {
 }
 
 void VdcToken::asyncLoop() {
+  m_dss.assertIoServiceThread();
   assert(m_enabled);
   auto isExpired = this->isExpired();
   boost::chrono::seconds timeout;
@@ -102,7 +111,7 @@ void VdcToken::asyncLoop() {
   if (isExpired) {
     // short timeout to retry push. We restart asyncLoop after successful push
     log("Token is expired, pushing new one.", lsNotice);
-    timeout = ASYNC_RETRY_TIMEOUT;
+    timeout = m_retryPeriod;
     try {
       asyncPush();
     } catch (std::exception &e) {
@@ -115,7 +124,7 @@ void VdcToken::asyncLoop() {
     // It would be wrong anyway if system time changes in meantime.
     // We consider expiration only as a hint when to push new token.
     log("Token is valid.", lsDebug);
-    timeout = TOKEN_EXPIRE_TIME / 10;
+    timeout = m_expirePeriod / 10;
   }
   m_timer.expires_from_now(timeout);
   m_timer.async_wait([=](const error_code &e) {

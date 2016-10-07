@@ -89,7 +89,7 @@ namespace dss {
      */
     static int s_InstanceGeneration;
     struct Impl;
-    std::unique_ptr<Impl> m_impl; // PIMPL pattern
+    const std::unique_ptr<Impl> m_impl; // PIMPL pattern
     std::vector<Subsystem*> m_Subsystems;
     time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;
@@ -175,6 +175,8 @@ namespace dss {
 
     // ioService serving as single threaded even loop
     boost::asio::io_service& getIoService() { return m_ioService; }
+    // Assert that current thread is ioService thread
+    void assertIoServiceThread();
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }
