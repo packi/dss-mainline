@@ -64,6 +64,18 @@ void addStateDescriptions(VdcDb& db, const Device& device, const std::string& la
   json.endObject();
 }
 
+void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+  const std::string& oemEan = device.getOemEanAsString();
+  const auto& events = db.getEvents(oemEan, langCode);
+  json.startObject("eventDescriptions");
+  foreach (const auto& event, events) {
+    json.startObject(event.name);
+    json.add("title", event.title);
+    json.endObject();
+  }
+  json.endObject();
+}
+
 void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
   auto props = db.getProperties(oemEan, langCode); // throws
@@ -138,6 +150,8 @@ Filter parseFilter(const std::string& filterParam) {
       filter.spec = 1;
     } else if (item == "stateDesc") {
       filter.stateDesc = 1;
+    } else if (item == "eventDesc") {
+      filter.eventDesc = 1;
     } else if (item == "propertyDesc") {
       filter.propertyDesc = 1;
     } else if (item == "actionDesc") {
@@ -158,6 +172,9 @@ void addByFilter(VdcDb& db, Device& device, Filter filter,
   }
   if (filter.stateDesc) {
     addStateDescriptions(db, device, langCode, json);
+  }
+  if (filter.eventDesc) {
+    addEventDescriptions(db, device, langCode, json);
   }
   if (filter.propertyDesc) {
     addPropertyDescriptions(db, device, langCode, json);

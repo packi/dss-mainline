@@ -95,6 +95,16 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
   return states;
 }
 
+std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const std::string &langCode) {
+  // TODO(soon): we need new online database to finish this.
+  // Even if we modify the database locally, it would be overwritten by VdcDbFetcher by online version.
+  // BLOCKED
+
+  std::vector<EventDesc> events;
+  events.push_back(EventDesc({std::string("released"), std::string("Released")}));
+  return events;
+}
+
 std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, const std::string &langCode) {
   std::vector<PropertyDesc> props;
 

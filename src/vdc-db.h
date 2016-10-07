@@ -47,6 +47,13 @@ public:
   std::vector<DeviceStateSpec_t> getStatesLegacy(const std::string &gtin); // throws
   std::vector<StateDesc> getStates(const std::string &gtin, const std::string &langCode = ""); // throws
 
+  struct EventDesc {
+    std::string name;
+    std::string title; //< translated name
+  };
+
+  std::vector<EventDesc> getEvents(const std::string &gtin, const std::string &langCode = ""); // throws
+
   struct PropertyDesc {
     std::string name; // technical name
     std::string title; // translated name alt_label

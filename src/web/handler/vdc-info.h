@@ -35,6 +35,7 @@ namespace dss {
     struct Filter {
       bool spec : 1;
       bool stateDesc : 1;
+      bool eventDesc : 1;
       bool propertyDesc : 1;
       bool actionDesc : 1;
       bool stdActions : 1;
@@ -43,6 +44,7 @@ namespace dss {
 
     void addSpec(const Device& device, JSONWriter& json);
     void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);

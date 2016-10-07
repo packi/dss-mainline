@@ -2024,6 +2024,7 @@ namespace dss {
       JSONWriter json;
       vdcInfo::addSpec(*pDevice, json);
       vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addActionDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addStandardActions(db, *pDevice, langCode, json);
