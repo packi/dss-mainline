@@ -31,24 +31,27 @@ namespace dss {
   class JSONWriter;
   class VdcDb;
 
-  enum {
-     VdcInfoFilterSpec          = 0,
-     VdcInfoFilterStateDesc     = 1,
-     VdcInfoFilterPropertyDesc  = 2,
-     VdcInfoFilterActionDesc    = 3,
-     VdcInfoFilterStdActions    = 4,
-     VdcInfoFilterCustomActions = 5
-  };
+  namespace vdcInfo {
+    struct Filter {
+      bool spec : 1;
+      bool stateDesc : 1;
+      bool propertyDesc : 1;
+      bool actionDesc : 1;
+      bool stdActions : 1;
+      bool customActions : 1;
+    };
 
-  void GetVdcSpec(const Device& device, JSONWriter& json);
-  void GetVdcStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-  void GetVdcCustomActions(Device& device, JSONWriter& json);
-  std::bitset<6> ParseVdcInfoFilter(const std::string& filterParam);
-  void RenderVdcInfo(VdcDb& db, Device& device, const std::bitset<6>& filter,
-                     const std::string& langCode, JSONWriter& json);
+    void addSpec(const Device& device, JSONWriter& json);
+    void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addCustomActions(Device& device, JSONWriter& json);
+    Filter parseFilter(const std::string& filterParam);
+    void addByFilter(VdcDb& db, Device& device, Filter filter,
+                      const std::string& langCode, JSONWriter& json);
+
+  } // namespace vdcInfo
 
 } // namespace
 
