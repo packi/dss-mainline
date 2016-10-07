@@ -144,6 +144,16 @@ void addCustomActions(Device& device, JSONWriter& json) {
 
 Filter parseFilter(const std::string& filterParam) {
   Filter filter = {};
+  if (filterParam.empty()) {
+    filter.spec = 1;
+    filter.stateDesc = 1;
+    filter.eventDesc = 1;
+    filter.propertyDesc = 1;
+    filter.actionDesc = 1;
+    filter.stdActions = 1;
+    filter.customActions = 1;
+    return filter;
+  }
   std::vector<std::string> items = dss::splitString(filterParam, ',');
   BOOST_FOREACH(const auto& item, items) {
     if (item == "spec") {
