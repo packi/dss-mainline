@@ -86,17 +86,13 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
 
   void Metering::initialize() {
     Subsystem::initialize();
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation",
-                                                getDSS().getDataDirectory() + "metering/",
-                                                true,
-                                                false);
-    m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
+    auto config = getDSS().getPropertySystem().createProperty(getConfigPropertyBasePath());
+    m_MeteringStorageLocation = config->getOrCreateStringChild("storageLocation",
+        getDSS().getDataDirectory() + "metering/");
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress",
-                                                "unix:/var/run/rrdcached.sock", true, false);
-    m_RrdcachedPath = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "rrdDaemonAddress");
+    m_RrdcachedPath = config->getOrCreateStringChild("rrdDaemonAddress", "unix:/var/run/rrdcached.sock");
 
-    if (getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "enabled")) {
+    if (getEnabled()) {
       if (!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
         throw std::runtime_error("Metering directory " + boost::filesystem::system_complete(m_MeteringStorageLocation).string() + " does not exist!");
       }

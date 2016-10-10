@@ -8,15 +8,12 @@
     </property-->
 
     <!-- metering configuration -->
-    <property name="subsystems/Metering/enabled" type="boolean">
-      <value>true</value>
-    </property>
-    <property name="subsystems/Metering/storageLocation" type="string">
-      <value>data/metering/</value>
-    </property>
-    <property name="subsystems/Metering/rrdDaemonAddress" type="string">
-      <value />
-    </property>
+    <!--property name="subsystems/Metering/enabled" type="boolean">
+      <value>false</value>
+    </property-->
+    <!--property name="subsystems/Metering/rrdDaemonAddress" type="string">
+      <value>unix:/var/run/rrdcached.sock</value>
+    </property-->
 
     <!--property name="vdcDbFetcher">
       <property name="periodSeconds" type="integer">
