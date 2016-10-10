@@ -34,11 +34,11 @@ namespace dss {
 namespace vdcInfo {
 
 void addSpec(const Device& device, JSONWriter& json) {
-  const std::string& oemEan = device.getOemEanAsString();
+  const std::string& dsDeviceGTIN = device.getOemEanAsString();
   const auto& spec = device.getVdcSpec();
   json.add("class", spec.deviceClass);
   json.add("classVersion", spec.deviceClassVersion);
-  json.add("oemEanNumber", oemEan);
+  json.add("dsDeviceGTIN", dsDeviceGTIN);
   json.add("model", spec.model);
   json.add("modelVersion", spec.modelVersion);
   json.add("hardwareGuid", spec.hardwareGuid);
@@ -144,6 +144,16 @@ void addCustomActions(Device& device, JSONWriter& json) {
 
 Filter parseFilter(const std::string& filterParam) {
   Filter filter = {};
+  if (filterParam.empty()) {
+    filter.spec = 1;
+    filter.stateDesc = 1;
+    filter.eventDesc = 1;
+    filter.propertyDesc = 1;
+    filter.actionDesc = 1;
+    filter.stdActions = 1;
+    filter.customActions = 1;
+    return filter;
+  }
   std::vector<std::string> items = dss::splitString(filterParam, ',');
   BOOST_FOREACH(const auto& item, items) {
     if (item == "spec") {

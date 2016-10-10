@@ -2763,6 +2763,11 @@ namespace dss {
     std::string parameters;
     boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb = boost::make_shared<OEMWebQuery::OEMWebQueryCallback>(m_deviceDSUID, m_oldOEMState);
 
+    // MSHub expects only language code without country, and not "locale' code
+    if (language.find('_') != std::string::npos) {
+      language.erase(language.find('_'));
+    }
+
     if (m_queryConfigLink) {
       parameters = "ean=" + m_EAN +
           "&countryCode=" + country +
