@@ -283,12 +283,6 @@ if test $ac_cv_func_clock_gettime = no; then
 fi
 
 
-# Check for boost
-AC_CHECK_HEADERS([boost/algorithm/string/finder.hpp boost/algorithm/string.hpp boost/algorithm/string/replace.hpp boost/atomic.hpp boost/bind.hpp boost/chrono.hpp boost/enable_shared_from_this.hpp boost/filesystem.hpp boost/filesystem/operations.hpp boost/filesystem/path.hpp boost/flyweight.hpp boost/foreach.hpp boost/function.hpp boost/lambda/lambda.hpp boost/make_shared.hpp boost/make_shared.hpp boost/noncopyable.hpp boost/ptr_container/ptr_deque.hpp boost/ptr_container/ptr_map.hpp boost/ptr_container/ptr_vector.hpp boost/ref.hpp boost/scoped_ptr.hpp boost/shared_array.hpp boost/shared_ptr.hpp boost/smart_ptr.hpp boost/thread/condition_variable.hpp boost/thread.hpp boost/thread/locks.hpp boost/thread/mutex.hpp boost/thread/recursive_mutex.hpp boost/thread/thread.hpp boost/tuple/tuple.hpp boost/weak_ptr.hpp], [],
-    [
-        AC_MSG_ERROR([required boost headers not found on your system!])
-    ])
-
 AX_BOOST_BASE([1.53.0],[],[ AC_MSG_ERROR([boost was not found on your system])])
 AX_BOOST_SYSTEM()
 AX_BOOST_FILESYSTEM()
