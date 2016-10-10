@@ -3,9 +3,9 @@
   <property name="config">
 
     <!-- ds485d -->
-    <property name="subsystems/DSBusInterface/connectionURI" type="string">
-      <value>tcp://localhost:8442</value>
-    </property>
+    <!--property name="subsystems/DSBusInterface/connectionURI" type="string">
+      <value>tcp://localhost:8440</value>
+    </property-->
 
     <!-- metering configuration -->
     <property name="subsystems/Metering/enabled" type="boolean">
