@@ -1,10 +1,21 @@
 dSS - digitalSTROM Server
 
+v1.37.0	10.10.2016
+	* fix window handle state synchronization, #13800
+	* advanced sensorhandling: retrigger with action lag, #13935
+	* add dSM state support, #13931
+	* query oemModelGuid from vDCs and IP devices, #13445
+	* fix some compiler warnings
+	* improve sqlite wrapper
+	* iplement vdc database update service, #14118
+	* add support for device states, #14115
+	* extend JSON API with vDC specific calls, #14122
+
 v1.36.3 09.08.2016
-    * fix UI dialogs for GE-TKM devices, #13769
-    * ensure blink flag is set in impulse scene, #13064
-    * Unprotect icon handler, #13083
-    * make dSM's with old firmware visible, #13949
+	* fix UI dialogs for GE-TKM devices, #13769
+	* ensure blink flag is set in impulse scene, #13064
+	* Unprotect icon handler, #13083
+	* make dSM's with old firmware visible, #13949
 
 v1.36.2	16.06.2016
 	* do not assign inactive sensors as zone sensors, #13433
