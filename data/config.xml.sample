@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Template for local config.xml.
+  Copy to your dss data folder as config.xml and add your local modifications.
+-->
 <properties version="1">
   <property name="config">
 
