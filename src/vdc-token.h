@@ -59,6 +59,7 @@ private:
   DSS& m_dss;
   boost::asio::basic_waitable_timer<boost::chrono::steady_clock>  m_timer;
   bool m_enabled; //thread local copy of m_enabledNode value
+  PropertyNodePtr m_configNode;
   PropertyNodePtr m_enabledNode;
   PropertyNodePtr m_tokenNode;
   PropertyNodePtr m_issuedOnNode;

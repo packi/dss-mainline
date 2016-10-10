@@ -37,10 +37,12 @@ VdcToken::VdcToken(DSS &dss) :
     m_dss(dss),
     m_timer(dss.getIoService()),
     m_enabled(false),
-    m_expirePeriod(boost::chrono::seconds(dss.getPropertySystem().getIntValue(
-        "/config/vdcToken/expirePeriodSeconds"))),
-    m_retryPeriod(boost::chrono::seconds(dss.getPropertySystem().getIntValue(
-        "/config/vdcToken/retryPeriodSeconds"))) {
+    m_configNode(dss.getPropertySystem().createProperty("/config/vdcToken")),
+    m_expirePeriod(boost::chrono::seconds(m_configNode->getOrCreateIntChild(
+        "expirePeriodSeconds", 30 * 24 * 60 * 60))),
+    m_retryPeriod(boost::chrono::seconds(m_configNode->getOrCreateIntChild(
+        "retryPeriodSeconds", 300))) {
+
   assert(m_expirePeriod.count() != 0);
   assert(m_retryPeriod.count() != 0);
   log("VdcToken m_expirePeriod:" + intToString(m_expirePeriod.count())
