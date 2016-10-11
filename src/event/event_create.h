@@ -41,6 +41,9 @@ boost::shared_ptr<Event>
                                int _index, int _type, int _state);
 
 boost::shared_ptr<Event>
+  createDeviceActionEvent(boost::shared_ptr<DeviceReference> _devRef,
+                             const std::string& name);
+boost::shared_ptr<Event>
   createDeviceStateEvent(boost::shared_ptr<DeviceReference> _devRef,
                              const std::string& name, const std::string& value);
 boost::shared_ptr<Event>
