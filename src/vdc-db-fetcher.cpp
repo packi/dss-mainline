@@ -38,7 +38,7 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
     m_dss(dss),
     m_timer(dss.getIoService()),
     m_configNode(dss.getPropertySystem().createProperty("/config/vdcDbFetcher")),
-    m_enabled(m_configNode->getOrCreateBoolChild("enabled", true)),
+    m_enabled(m_configNode->getOrCreateBoolChild("enabled", false)),
     m_period(boost::chrono::seconds(m_configNode->getOrCreateIntChild("periodSeconds", 24 * 60 * 60))),
     m_url(m_configNode->getOrCreateStringChild("url", "http://db.aizo.net/vdc-db.php")) {
   log("VdcDbFetcher m_enabled:" + intToString(m_enabled) + " m_period:" + intToString(m_period.count())
