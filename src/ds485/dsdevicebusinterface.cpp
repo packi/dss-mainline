@@ -468,10 +468,10 @@ namespace dss {
     }
 
     vdcapi::Message message;
-    message.set_type(vdcapi::VDSM_GENERIC_REQUEST);
-    vdcapi::vdsm_GenericRequest* genericRequest = message.mutable_vdsm_generic_request();
+    message.set_type(vdcapi::VDSM_REQUEST_GENERIC_REQUEST);
+    auto genericRequest = message.mutable_vdsm_request_generic_request();
     genericRequest->set_dsuid(dsuid2str(_device.getDSID()));
-    genericRequest->set_method_name(methodName);
+    genericRequest->set_methodname(methodName);
     *genericRequest->mutable_params() = params;
     uint8_t arrayOut[REQUEST_LEN];
     if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
