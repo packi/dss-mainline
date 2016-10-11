@@ -67,7 +67,7 @@ namespace dss {
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
 
     std::string getName() { return m_Name; }
-    bool getEnabled() const { return m_Enabled; }
+    bool isEnabled() const { return m_Enabled; }
   };
 
   class ThreadedSubsystem: public Subsystem, protected Thread {

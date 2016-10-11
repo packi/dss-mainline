@@ -92,7 +92,7 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
     m_RrdcachedPath = config->getOrCreateStringChild("rrdDaemonAddress", "unix:/var/run/rrdcached.sock");
 
-    if (getEnabled()) {
+    if (isEnabled()) {
       if (!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
         throw std::runtime_error("Metering directory " + boost::filesystem::system_complete(m_MeteringStorageLocation).string() + " does not exist!");
       }
