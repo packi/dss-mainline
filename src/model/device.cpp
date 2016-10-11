@@ -50,6 +50,7 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/event.h"
+#include "src/event/event_create.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
@@ -3070,6 +3071,10 @@ namespace dss {
     param0->set_name("id");
     param0->mutable_value()->set_v_string(actionId);
     deviceBusInterface->genericRequest(*this, "invokeDeviceAction", params);
+
+    //action finished with success -> raise event
+    auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
+    DSS::getInstance()->getEventQueue().pushEvent(createDeviceActionEvent(deviceReference, actionId));
   }
 
   void Device::setProperty(const vdcapi::PropertyElement& propertyElement) {
