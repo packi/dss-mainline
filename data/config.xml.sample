@@ -20,8 +20,11 @@
     </property-->
 
     <!--property name="vdcDbFetcher">
+      <property name="enabled" type="boolean">
+        <value >true</value>
+      </property>
       <property name="periodSeconds" type="integer">
-        <value comment="0 -> vdcDbFetcher is disabled">86400</value>
+        <value >86400</value>
       </property>
       <property name="url" type="string">
         <value>http://db.aizo.net/vdc-db.php</value>

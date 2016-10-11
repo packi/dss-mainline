@@ -38,9 +38,11 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
     m_dss(dss),
     m_timer(dss.getIoService()),
     m_configNode(dss.getPropertySystem().createProperty("/config/vdcDbFetcher")),
+    m_enabled(m_configNode->getOrCreateBoolChild("enabled", true)),
     m_period(boost::chrono::seconds(m_configNode->getOrCreateIntChild("periodSeconds", 24 * 60 * 60))),
     m_url(m_configNode->getOrCreateStringChild("url", "http://db.aizo.net/vdc-db.php")) {
-  log("VdcDbFetcher m_period:" + intToString(m_period.count()) + " m_url:" + m_url, lsNotice);
+  log("VdcDbFetcher m_enabled:" + intToString(m_enabled) + " m_period:" + intToString(m_period.count())
+      + " m_url:" + m_url, lsNotice);
   try {
     // Check that VdcDb is usable, (re)create if not.
     //
@@ -65,10 +67,11 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
 }
 
 void VdcDbFetcher::asyncLoop() {
-  if (m_period.count() == 0) {
+  if (!m_enabled) {
     log("VdcDbFetcher disabled", lsNotice);
     return;
   }
+  assert(m_period.count() != 0);
   m_dss.assertIoServiceThread();
   m_timer.expires_from_now(m_period);
   m_timer.async_wait([=](const error_code &e) {

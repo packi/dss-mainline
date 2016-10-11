@@ -41,6 +41,7 @@ namespace dss {
     boost::asio::basic_waitable_timer<boost::chrono::steady_clock>  m_timer;
     TaskScope m_taskScope;
     PropertyNodePtr m_configNode;
+    bool m_enabled;
     boost::chrono::seconds m_period;
     std::string m_url;
 
