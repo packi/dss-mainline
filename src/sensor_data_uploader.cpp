@@ -569,6 +569,7 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::HeatingEnabled ||
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
+               _event.getName() == EventName::HeatingControllerValueDsHub ||
                _event.getName() == EventName::HeatingControllerState ||
                _event.getName() == EventName::HeatingSystemCapability ||
                _event.getName() == EventName::AddonToCloud ||
