@@ -7,19 +7,25 @@
   <property name="config">
 
     <!-- ds485d -->
-    <!--property name="subsystems/DSBusInterface/connectionURI" type="string">
+    <!--
+    <property name="subsystems/DSBusInterface/connectionURI" type="string">
       <value>tcp://localhost:8440</value>
-    </property-->
+    </property>
+    -->
 
     <!-- metering configuration -->
-    <!--property name="subsystems/Metering/enabled" type="boolean">
+    <!--
+    <property name="subsystems/Metering/enabled" type="boolean">
       <value>false</value>
-    </property-->
-    <!--property name="subsystems/Metering/rrdDaemonAddress" type="string">
+    </property>
+    <property name="subsystems/Metering/rrdDaemonAddress" type="string">
       <value>unix:/var/run/rrdcached.sock</value>
-    </property-->
+    </property>
+    -->
 
-    <!--property name="vdcDbFetcher">
+    <!-- vdcDbFetcher -->
+    <!--
+    <property name="vdcDbFetcher">
       <property name="enabled" type="boolean">
         <value >true</value>
       </property>
@@ -29,12 +35,15 @@
       <property name="url" type="string">
         <value>http://db.aizo.net/vdc-db.php</value>
       </property>
-    </property-->
+    </property>
+    -->
 
     <!-- debug -->
-    <!--property name="debug/storeInvalidXML" type="boolean">
+    <!--
+    <property name="debug/storeInvalidXML" type="boolean">
       <value>false</value>
-    </property-->
+    </property>
+    -->
 
   </property>
 </properties>
