@@ -938,7 +938,7 @@ namespace dss {
       }
       return json.successJSON();
 
-    } else if (_request.getMethod() == "getSceneList") {
+    } else if (_request.getMethod() == "getApartmentScenes") {
       if (!pDevice->isVdcDevice() || !pDevice->getHasActions()) {
         return JSONWriter::failure("Device does not support action configuration");
       }
