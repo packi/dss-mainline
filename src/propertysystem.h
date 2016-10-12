@@ -602,6 +602,13 @@ namespace dss {
         }
       }
     }
+
+    /// Get the value of a child property if exists
+    /// or create the child property with default value otherwise
+    int getOrCreateIntChild(const std::string& childPath, const int defaultValue);
+    bool getOrCreateBoolChild(const std::string& childPath, const bool defaultValue);
+    std::string getOrCreateStringChild(const std::string& childPath, const std::string& defaultValue);
+
   public:
     /** Writes the node to XML */
     bool saveAsXML(std::ostream& _os, const int _indent, const int _flagsMask);

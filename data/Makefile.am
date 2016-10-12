@@ -1,6 +1,6 @@
 dssdatadir = $(pkgdatadir)/data
 dist_dssdata_DATA = \
-	$(top_srcdir)/data/config.xml \
+	$(top_srcdir)/data/config.xml.sample \
 	$(top_srcdir)/data/subscriptions.xml \
 	$(top_srcdir)/data/vdc-db.sql
 

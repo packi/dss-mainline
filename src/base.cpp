@@ -477,6 +477,7 @@ namespace dss {
                   std::istreambuf_iterator<char>());
       return data;
     } catch (std::exception &e) {
+      // rethrow with more meaningful message that includes filename.
       throw std::runtime_error(std::string() + "Failed to read file:" + filename + " e.what():" + e.what());
     }
   }

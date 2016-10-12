@@ -992,6 +992,31 @@ namespace dss {
     return NULL;
   }
 
+  int PropertyNode::getOrCreateIntChild(const std::string& childPath, const int defaultValue) {
+    auto child = getProperty(childPath);
+    if (!child) {
+      child = createProperty(childPath);
+      child->setIntegerValue(defaultValue);
+    }
+    return child->getIntegerValue();
+  }
+  bool PropertyNode::getOrCreateBoolChild(const std::string& childPath, const bool defaultValue) {
+    auto child = getProperty(childPath);
+    if (!child) {
+      child = createProperty(childPath);
+      child->setBooleanValue(defaultValue);
+    }
+    return child->getBoolValue();
+  }
+  std::string PropertyNode::getOrCreateStringChild(const std::string& childPath, const std::string& defaultValue) {
+    auto child = getProperty(childPath);
+    if (!child) {
+      child = createProperty(childPath);
+      child->setStringValue(defaultValue);
+    }
+    return child->getStringValue();
+  }
+
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
 
   //=============================================== PropertyParser

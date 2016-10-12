@@ -23,6 +23,7 @@
 #include <atomic>
 #include "logger.h"
 #include "taskprocessor.h"
+#include "propertysystem.h"
 #include "sqlite3_wrapper.h"
 #include "vdc-db.h"
 
@@ -32,9 +33,6 @@ namespace dss {
   /// Initialize vdc-db in constructor and schedule vdc-db updates after start and periodically.
   class VdcDbFetcher {
   public:
-    static const char* PERIOD_SECONDS_PROPERTY_PATH;
-    static const char* URL_PROPERTY_PATH;
-
     VdcDbFetcher(DSS &dss);
 
   private:
@@ -42,6 +40,8 @@ namespace dss {
     DSS& m_dss;
     boost::asio::basic_waitable_timer<boost::chrono::steady_clock>  m_timer;
     TaskScope m_taskScope;
+    PropertyNodePtr m_configNode;
+    bool m_enabled;
     boost::chrono::seconds m_period;
     std::string m_url;
 
