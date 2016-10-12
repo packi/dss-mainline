@@ -55,6 +55,7 @@ namespace dss {
     extern const std::string DeviceBinaryInputEvent;
     extern const std::string DeviceStateEvent;
     extern const std::string DeviceEventEvent;
+    extern const std::string DeviceActionEvent;
     extern const std::string DeviceButtonClick;
     extern const std::string IdentifyBlink;
     extern const std::string ExecutionDenied;
