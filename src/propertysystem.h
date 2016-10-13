@@ -483,21 +483,21 @@ namespace dss {
 
     /** Returns the string value.
      * Throws an exception if the value-types don't match. */
-    std::string getStringValue();
+    std::string getStringValue() const;
     /** Returns the integer value.
      * Throws an exception if the value-types don't match. */
-    int getIntegerValue();
+    int getIntegerValue() const;
 
     /** Returns the integer value.
      * Throws an exception if the value-types don't match. */
-    uint32_t getUnsignedIntegerValue();
+    uint32_t getUnsignedIntegerValue() const;
 
     /** Returns the boolean value.
      * Throws an exception if the value-types don't match. */
-    bool getBoolValue();
+    bool getBoolValue() const;
     /** Returns the floating value.
      * Throws an exception if the value-types don't match. */
-    double getFloatingValue();
+    double getFloatingValue() const;
 
     /** Returns the value as string, regardless of it's value-type.*/
     std::string getAsString();
@@ -533,7 +533,7 @@ namespace dss {
     bool linkToProxy(const PropertyProxy<uint32_t>& _proxy);
     /** Unlinks from a proxy */
     bool unlinkProxy(bool _recurse = false);
-    bool IsLinkedToProxy() { return m_Proxy.iValue != 0; }
+    bool IsLinkedToProxy() const { return m_Proxy.iValue != 0; }
 
     /** Adds a listener. */
     void addListener(PropertyListener* _listener);
