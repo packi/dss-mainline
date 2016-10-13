@@ -87,10 +87,10 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
   void Metering::initialize() {
     Subsystem::initialize();
     auto config = getDSS().getPropertySystem().createProperty(getConfigPropertyBasePath());
-    m_MeteringStorageLocation = config->getOrCreateStringChild("storageLocation",
+    m_MeteringStorageLocation = config->getOrCreateChildValue<std::string>("storageLocation",
         getDSS().getDataDirectory() + "metering/");
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
-    m_RrdcachedPath = config->getOrCreateStringChild("rrdDaemonAddress", "unix:/var/run/rrdcached.sock");
+    m_RrdcachedPath = config->getOrCreateChildValue<std::string>("rrdDaemonAddress", "unix:/var/run/rrdcached.sock");
 
     if (isEnabled()) {
       if (!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
