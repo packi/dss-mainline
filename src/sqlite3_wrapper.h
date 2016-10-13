@@ -99,7 +99,6 @@ private:
 class SqlStatement {
 public:
   SqlStatement(SQLite3& db, const std::string &sql);
-  SqlStatement(const SqlStatement &that);
 
   void reset();
   ///< Calls sqlite3_reset
