@@ -52,13 +52,15 @@ VdcToken::VdcToken(DSS &dss) :
   m_enabledNode = propertySystem.getProperty(pp_websvc_mshub_active);
   m_enabledNode->addListener(this);
 
-  const auto& securityNode = m_dss.getSecurity().getRootNode();
   // security property tree is persistent and it is loaded at this point
-
-  auto node = securityNode->createProperty("vdcToken");
-  m_tokenNode = node->createProperty("value");
+  //
+  // make sure not to overwrite node values if they already exist
+  dss.getPropertySystem().setStringValue("/system/security/vdcToken/value", "", true, false);
+  m_tokenNode = dss.getPropertySystem().getProperty("/system/security/vdcToken/value");
   m_tokenNode->setFlag(PropertyNode::Archive, true);
-  m_issuedOnNode = node->createProperty("issuedOn");
+
+  dss.getPropertySystem().setStringValue("/system/security/vdcToken/issuedOn", "", true, false);
+  m_issuedOnNode = dss.getPropertySystem().getProperty("/system/security/vdcToken/issuedOn");
   m_issuedOnNode->setFlag(PropertyNode::Archive, true);
 
   asyncRestart();
