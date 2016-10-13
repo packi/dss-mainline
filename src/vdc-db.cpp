@@ -196,7 +196,6 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
     sql = "SELECT p.name, p.name, a.command, ap.name, pp.value FROM device AS d INNER JOIN device_actions AS a INNER JOIN device_actions_predefined AS p INNER JOIN device_actions_predefined_parameter AS pp INNER JOIN device_actions_parameter AS ap ON d.id=a.device_id AND a.id=p.device_actions_id AND p.id=pp.device_actions_predefined_id AND pp.device_actions_parameter_id=ap.id WHERE gtin=? ORDER BY a.command;";
   }
 
-  // SqlStatement has broken move semantics
   SqlStatement find = m_db.prepare(sql);
 
   SqlStatement::BindScope scope;
