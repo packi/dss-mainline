@@ -54,9 +54,10 @@ void addStateDescriptions(VdcDb& db, const Device& device, const std::string& la
   foreach (auto &state, states) {
     json.startObject(state.name);
     json.add("title", state.title);
+    json.add("tags", state.tags);
     json.startObject("options");
     foreach (auto desc, state.values) {
-      json.add(desc.first, desc.second); // non-tranlated: translated
+      json.add(desc.first, desc.second); // non-translated: translated
     }
     json.endObject();
     json.endObject();
@@ -84,7 +85,27 @@ void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string&
   foreach (auto &prop, props) {
     json.startObject(prop.name);
     json.add("title", prop.title);
-    json.add("readOnly", prop.readonly);
+    switch (prop.typeId) {
+      case VdcDb::propertyTypeId::integer:
+      case VdcDb::propertyTypeId::numeric:
+        json.add("type", "numeric");
+        json.add("min", prop.minValue);
+        json.add("max", prop.maxValue);
+        json.add("resolution", prop.resolution);
+        json.add("siunit", prop.siUnit);
+        json.add("default", prop.defaultValue);
+        break;
+      case VdcDb::propertyTypeId::string:
+        json.add("type", "string");
+        json.add("default", prop.defaultValue);
+        break;
+      case VdcDb::propertyTypeId::enumeration:
+        json.add("type", "enumeration");
+        json.add("default", prop.defaultValue);
+        //TODO: add option list
+        break;
+    }
+    json.add("tags", prop.tags);
     json.endObject();
   }
   json.endObject();
@@ -101,7 +122,27 @@ void addActionDescriptions(VdcDb& db, const Device& device, const std::string& l
     foreach (auto p, action.params) {
       json.startObject(p.name);
       json.add("title", p.title);
-      json.add("default", p.defaultValue);
+      switch (p.typeId) {
+        case VdcDb::propertyTypeId::integer:
+        case VdcDb::propertyTypeId::numeric:
+          json.add("type", "numeric");
+          json.add("min", p.minValue);
+          json.add("max", p.maxValue);
+          json.add("resolution", p.resolution);
+          json.add("siunit", p.siUnit);
+          json.add("default", p.defaultValue);
+          break;
+        case VdcDb::propertyTypeId::string:
+          json.add("type", "string");
+          json.add("default", p.defaultValue);
+          break;
+        case VdcDb::propertyTypeId::enumeration:
+          json.add("type", "enumeration");
+          json.add("default", p.defaultValue);
+          //TODO: add option list
+          break;
+      }
+      json.add("tags", p.tags);
       json.endObject();
     }
     json.endObject();
