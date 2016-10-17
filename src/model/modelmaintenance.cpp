@@ -280,10 +280,14 @@ namespace dss {
   void MeterMaintenance::monitorInitialization() {
     ++m_retryCount;
     if (m_retryCount >= MAX_RETRY_COUNT) {
-      m_retryCount  = 0;
-      log("", lsInfo);
-      ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
-      m_pDSS->getModelMaintenance().addModelEvent(pEvent);
+      if (getdSMBusMemberCount() == 0) {
+        setupInitializedState();
+      } else {
+        m_retryCount  = 0;
+        log("", lsInfo);
+        ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
+        m_pDSS->getModelMaintenance().addModelEvent(pEvent);
+      }
     }
   } // monitorInitialization
 
