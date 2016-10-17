@@ -59,6 +59,7 @@ static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop,
 void addSpec(const Device& device, JSONWriter& json) {
   const std::string& dsDeviceGTIN = device.getOemEanAsString();
   const auto& spec = device.getVdcSpec();
+  json.startObject("spec");
   json.add("class", spec.deviceClass);
   json.add("classVersion", spec.deviceClassVersion);
   json.add("dsDeviceGTIN", dsDeviceGTIN);
@@ -68,6 +69,7 @@ void addSpec(const Device& device, JSONWriter& json) {
   json.add("hardwareModelGuid", spec.hardwareModelGuid);
   json.add("vendorId", spec.vendorId);
   json.add("vendorName", spec.vendorName);
+  json.endObject();
 }
 
 void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
