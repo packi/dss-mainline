@@ -27,7 +27,7 @@
 
 using namespace dss;
 
-static const char *websvc_url_authority_test = "https://testdsservices.aizo.com/";
+static const char *websvc_url_authority_test = "https://devdsservices.aizo.com/";
 static const char *websvc_osp_token_test = "76sdf9786f7d6fsd78f6asd7f6sd78f6sdf896as";
 
 BOOST_AUTO_TEST_SUITE(WebserviceTest)
@@ -299,8 +299,13 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent->setProperty("EventName", "ReturnTime");
     pEvent->setProperty("returnOn", DateTime().toISO8601_ms());
   } else if (eventName == EventName::LogFileData) {
-    // created by addons!
     pEvent = boost::make_shared<Event>(EventName::LogFileData);
+  } else if (eventName == EventName::DeviceActionEvent) {
+    pEvent = createDeviceActionEvent(createDevRef(), "blah");
+  } else if (eventName == EventName::DeviceEventEvent) {
+    pEvent = createDeviceEventEvent(createDevRef(), "blub");
+  } else if (eventName == EventName::DeviceStateEvent) {
+    pEvent = createDeviceStateEvent(createDevRef(), "state", "foo");
   } else {
     // enable with '-l warning'
     BOOST_CHECK_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
