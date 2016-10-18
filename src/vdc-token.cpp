@@ -38,9 +38,9 @@ VdcToken::VdcToken(DSS &dss) :
     m_timer(dss.getIoService()),
     m_enabled(false),
     m_configNode(dss.getPropertySystem().createProperty("/config/vdcToken")),
-    m_expirePeriod(boost::chrono::seconds(m_configNode->getOrCreateIntChild(
+    m_expirePeriod(boost::chrono::seconds(m_configNode->getOrCreateChildValue<int>(
         "expirePeriodSeconds", 30 * 24 * 60 * 60))),
-    m_retryPeriod(boost::chrono::seconds(m_configNode->getOrCreateIntChild(
+    m_retryPeriod(boost::chrono::seconds(m_configNode->getOrCreateChildValue<int>(
         "retryPeriodSeconds", 300))) {
 
   assert(m_expirePeriod.count() != 0);
@@ -52,15 +52,13 @@ VdcToken::VdcToken(DSS &dss) :
   m_enabledNode = propertySystem.getProperty(pp_websvc_mshub_active);
   m_enabledNode->addListener(this);
 
+  const auto& securityNode = m_dss.getSecurity().getRootNode();
   // security property tree is persistent and it is loaded at this point
-  //
-  // make sure not to overwrite node values if they already exist
-  dss.getPropertySystem().setStringValue("/system/security/vdcToken/value", "", true, false);
-  m_tokenNode = dss.getPropertySystem().getProperty("/system/security/vdcToken/value");
-  m_tokenNode->setFlag(PropertyNode::Archive, true);
 
-  dss.getPropertySystem().setStringValue("/system/security/vdcToken/issuedOn", "", true, false);
-  m_issuedOnNode = dss.getPropertySystem().getProperty("/system/security/vdcToken/issuedOn");
+  auto node = securityNode->createProperty("vdcToken");
+  m_tokenNode = node->getOrCreateChild<std::string>("value", std::string());
+  m_tokenNode->setFlag(PropertyNode::Archive, true);
+  m_issuedOnNode = node->getOrCreateChild<std::string>("issuedOn", std::string());
   m_issuedOnNode->setFlag(PropertyNode::Archive, true);
 
   asyncRestart();

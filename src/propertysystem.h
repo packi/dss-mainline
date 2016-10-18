@@ -481,23 +481,29 @@ namespace dss {
     /** Sets the value as floating. */
     void setFloatingValue(const double _value);
 
+    template <typename T>
+    void setValue(const T& value);
+
     /** Returns the string value.
      * Throws an exception if the value-types don't match. */
-    std::string getStringValue();
+    std::string getStringValue() const;
     /** Returns the integer value.
      * Throws an exception if the value-types don't match. */
-    int getIntegerValue();
+    int getIntegerValue() const;
 
     /** Returns the integer value.
      * Throws an exception if the value-types don't match. */
-    uint32_t getUnsignedIntegerValue();
+    uint32_t getUnsignedIntegerValue() const;
 
     /** Returns the boolean value.
      * Throws an exception if the value-types don't match. */
-    bool getBoolValue();
+    bool getBoolValue() const;
     /** Returns the floating value.
      * Throws an exception if the value-types don't match. */
-    double getFloatingValue();
+    double getFloatingValue() const;
+
+    template <typename T>
+    T getValue() const;
 
     /** Returns the value as string, regardless of it's value-type.*/
     std::string getAsString();
@@ -533,7 +539,7 @@ namespace dss {
     bool linkToProxy(const PropertyProxy<uint32_t>& _proxy);
     /** Unlinks from a proxy */
     bool unlinkProxy(bool _recurse = false);
-    bool IsLinkedToProxy() { return m_Proxy.iValue != 0; }
+    bool IsLinkedToProxy() const { return m_Proxy.iValue != 0; }
 
     /** Adds a listener. */
     void addListener(PropertyListener* _listener);
@@ -603,11 +609,25 @@ namespace dss {
       }
     }
 
-    /// Get the value of a child property if exists
+    /// Return child property if it exists
     /// or create the child property with default value otherwise
-    int getOrCreateIntChild(const std::string& childPath, const int defaultValue);
-    bool getOrCreateBoolChild(const std::string& childPath, const bool defaultValue);
-    std::string getOrCreateStringChild(const std::string& childPath, const std::string& defaultValue);
+    template <typename T>
+    PropertyNodePtr getOrCreateChild(const std::string& childPath, const T& defaultValue) {
+      auto child = getProperty(childPath);
+      if (!child) {
+        child = createProperty(childPath);
+        child->setValue<T>(defaultValue);
+      }
+      // TODO(someday): verify that the property is of given type
+      return child;
+    }
+
+    /// Return child property value if it exists
+    /// or create the child property with default value and return its value.
+    template <typename T>
+    T getOrCreateChildValue(const std::string& childPath, const T& defaultValue) {
+      return getOrCreateChild<T>(childPath, defaultValue)->getValue<T>();
+    }
 
   public:
     /** Writes the node to XML */
@@ -616,6 +636,24 @@ namespace dss {
     bool saveChildrenAsXML(std::ostream& _ofs, const int _indent, const int _flagsMask);
 
   }; // PropertyNode
+
+  template <>
+  inline void PropertyNode::setValue<std::string>(const std::string& value) { setStringValue(value); }
+  template <>
+  inline void PropertyNode::setValue<int>(const int& value) { setIntegerValue(value); }
+  template <>
+  inline void PropertyNode::setValue<bool>(const bool& value) { setBooleanValue(value); }
+  template <>
+  inline void PropertyNode::setValue<double>(const double& value) { setFloatingValue(value); }
+
+  template <>
+  inline std::string PropertyNode::getValue<std::string>() const { return getStringValue(); }
+  template <>
+  inline int PropertyNode::getValue<int>() const { return getIntegerValue(); }
+  template <>
+  inline bool PropertyNode::getValue<bool>() const { return getBoolValue(); }
+  template <>
+  inline double PropertyNode::getValue<double>() const { return getFloatingValue(); }
 
   /** Exception that gets thrown if a incompatible assignment would take place. */
   class PropertyTypeMismatch : public std::runtime_error {

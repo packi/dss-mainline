@@ -579,7 +579,7 @@ namespace dss {
     }
   } // setBooleanValue
 
-  std::string PropertyNode::getStringValue() {
+  std::string PropertyNode::getStringValue() const {
     if (m_AliasTarget) {
       return m_AliasTarget->getStringValue();
     } else {
@@ -596,7 +596,7 @@ namespace dss {
     }
   } // getStringValue
 
-  int PropertyNode::getIntegerValue() {
+  int PropertyNode::getIntegerValue() const {
     if (m_AliasTarget) {
       return m_AliasTarget->getIntegerValue();
     } else {
@@ -613,7 +613,7 @@ namespace dss {
     }
   } // getIntegerValue
 
-  uint32_t PropertyNode::getUnsignedIntegerValue() {
+  uint32_t PropertyNode::getUnsignedIntegerValue() const {
     if (m_AliasTarget) {
       return m_AliasTarget->getUnsignedIntegerValue();
     } else {
@@ -630,7 +630,7 @@ namespace dss {
     }
   } // getUnsignedIntegerValue
 
-  bool PropertyNode::getBoolValue() {
+  bool PropertyNode::getBoolValue() const {
     if (m_AliasTarget) {
       return m_AliasTarget->getBoolValue();
     } else {
@@ -647,7 +647,7 @@ namespace dss {
     }
   } // getBoolValue
 
-  double PropertyNode::getFloatingValue() {
+  double PropertyNode::getFloatingValue() const {
     if (m_AliasTarget) {
       return m_AliasTarget->getFloatingValue();
     } else {
@@ -990,31 +990,6 @@ namespace dss {
       return m_ParentNode->lookupPrivileges();
     }
     return NULL;
-  }
-
-  int PropertyNode::getOrCreateIntChild(const std::string& childPath, const int defaultValue) {
-    auto child = getProperty(childPath);
-    if (!child) {
-      child = createProperty(childPath);
-      child->setIntegerValue(defaultValue);
-    }
-    return child->getIntegerValue();
-  }
-  bool PropertyNode::getOrCreateBoolChild(const std::string& childPath, const bool defaultValue) {
-    auto child = getProperty(childPath);
-    if (!child) {
-      child = createProperty(childPath);
-      child->setBooleanValue(defaultValue);
-    }
-    return child->getBoolValue();
-  }
-  std::string PropertyNode::getOrCreateStringChild(const std::string& childPath, const std::string& defaultValue) {
-    auto child = getProperty(childPath);
-    if (!child) {
-      child = createProperty(childPath);
-      child->setStringValue(defaultValue);
-    }
-    return child->getStringValue();
   }
 
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
