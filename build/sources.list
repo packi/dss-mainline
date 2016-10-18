@@ -261,6 +261,7 @@ dsstests_SOURCES = \
 	../tests/devicerequesthandlertest.cpp \
 	../tests/devicetests.cpp \
 	../tests/dsuidtests.cpp \
+	../tests/event_systemcondition_test.cpp \
 	../tests/event_trigger_tests.cpp \
 	../tests/eventrequesthandlertest.cpp \
 	../tests/eventtests.cpp \
