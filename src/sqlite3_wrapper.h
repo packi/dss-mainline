@@ -99,6 +99,7 @@ private:
 class SqlStatement {
 public:
   SqlStatement(SQLite3& db, const std::string &sql);
+  SqlStatement(SqlStatement &&) = default; // gcc4.5 does not generate it
 
   void reset();
   ///< Calls sqlite3_reset
