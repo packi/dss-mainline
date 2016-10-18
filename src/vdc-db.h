@@ -42,6 +42,7 @@ public:
     std::string title; //< translated name
     std::vector<std::pair<std::string, std::string>> values;
     // pair: < value, translated value(=title) >
+    std::string tags;
   };
 
   std::vector<DeviceStateSpec_t> getStatesLegacy(const std::string &gtin); // throws
@@ -54,24 +55,26 @@ public:
 
   std::vector<EventDesc> getEvents(const std::string &gtin, const std::string &langCode = ""); // throws
 
+  enum propertyTypeId { integer, numeric, enumeration, string };
+
   struct PropertyDesc {
     std::string name; // technical name
     std::string title; // translated name alt_label
-    bool readonly;
+    propertyTypeId typeId;
+    std::string defaultValue;
+    std::string minValue;
+    std::string maxValue;
+    std::string resolution;
+    std::string siUnit;
+    std::string tags;
   };
 
   std::vector<PropertyDesc> getProperties(const std::string &gtin, const std::string &langCode = "");
 
-  struct ActionParameter {
-    std::string name;
-    std::string title;
-    int defaultValue;
-  };
-
   struct ActionDesc {
     std::string name;
     std::string title;
-    std::vector<ActionParameter> params;
+    std::vector<PropertyDesc> params;
   };
 
   std::vector<ActionDesc> getActions(const std::string &gtin, const std::string &langCode = "");

@@ -33,9 +33,33 @@
 namespace dss {
 namespace vdcInfo {
 
+static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop, JSONWriter& json) {
+  switch (prop.typeId) {
+    case VdcDb::propertyTypeId::integer:
+    case VdcDb::propertyTypeId::numeric:
+      json.add("type", "numeric");
+      json.add("min", prop.minValue);
+      json.add("max", prop.maxValue);
+      json.add("resolution", prop.resolution);
+      json.add("siunit", prop.siUnit);
+      json.add("default", prop.defaultValue);
+      break;
+    case VdcDb::propertyTypeId::string:
+      json.add("type", "string");
+      json.add("default", prop.defaultValue);
+      break;
+    case VdcDb::propertyTypeId::enumeration:
+      json.add("type", "enumeration");
+      json.add("default", prop.defaultValue);
+      //TODO: add option list
+      break;
+  }
+}
+
 void addSpec(const Device& device, JSONWriter& json) {
   const std::string& dsDeviceGTIN = device.getOemEanAsString();
   const auto& spec = device.getVdcSpec();
+  json.startObject("spec");
   json.add("class", spec.deviceClass);
   json.add("classVersion", spec.deviceClassVersion);
   json.add("dsDeviceGTIN", dsDeviceGTIN);
@@ -45,6 +69,7 @@ void addSpec(const Device& device, JSONWriter& json) {
   json.add("hardwareModelGuid", spec.hardwareModelGuid);
   json.add("vendorId", spec.vendorId);
   json.add("vendorName", spec.vendorName);
+  json.endObject();
 }
 
 void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
@@ -54,9 +79,10 @@ void addStateDescriptions(VdcDb& db, const Device& device, const std::string& la
   foreach (auto &state, states) {
     json.startObject(state.name);
     json.add("title", state.title);
+    json.add("tags", state.tags);
     json.startObject("options");
     foreach (auto desc, state.values) {
-      json.add(desc.first, desc.second); // non-tranlated: translated
+      json.add(desc.first, desc.second); // non-translated: translated
     }
     json.endObject();
     json.endObject();
@@ -80,11 +106,11 @@ void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string&
   const std::string& oemEan = device.getOemEanAsString();
   auto props = db.getProperties(oemEan, langCode); // throws
   json.startObject("propertyDescriptions");
-
   foreach (auto &prop, props) {
     json.startObject(prop.name);
     json.add("title", prop.title);
-    json.add("readOnly", prop.readonly);
+    json.add("tags", prop.tags);
+    addParameterDescriptions(db, prop, json);
     json.endObject();
   }
   json.endObject();
@@ -101,7 +127,8 @@ void addActionDescriptions(VdcDb& db, const Device& device, const std::string& l
     foreach (auto p, action.params) {
       json.startObject(p.name);
       json.add("title", p.title);
-      json.add("default", p.defaultValue);
+      json.add("tags", p.tags);
+      addParameterDescriptions(db, p, json);
       json.endObject();
     }
     json.endObject();
