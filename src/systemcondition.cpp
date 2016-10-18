@@ -114,28 +114,40 @@ bool secondsFromHMS(unsigned *ts, std::string string)
           bool fFound = false;
           std::string sName = oStateNode->getChild(j)->getName();
           std::string sValue = oStateNode->getChild(j)->getAsString();
+
           for (int i = 0; i < oSystemStates->getChildCount(); i++) {
             PropertyNodePtr nameNode =
                 oSystemStates->getChild(i)->getPropertyByName("name");
             PropertyNodePtr valueNode =
                 oSystemStates->getChild(i)->getPropertyByName("value");
-            if ((nameNode == NULL) || (valueNode == NULL)) {
-              Logger::getInstance()->log("checkSystemCondition: can not check"
-                    " condition, missing name or value node!", lsError);
+
+            if (!nameNode) {
+              Logger::getInstance()->log("checkSystemCondition: missing dedicated node for name of system state: " + oStateNode->getName(), lsWarning);
               continue;
             }
-            // search for a requested state
-            if (sName == nameNode->getAsString()) {
-              fFound = true;
-              // state found ...
-              if (sValue != valueNode->getAsString()) {
-                Logger::getInstance()->log("checkSystemCondition: " +
-                    sName + " failed: value is " + valueNode->getAsString() +
-                    ", requested is " + sValue, lsDebug);
-                return false;
-              }
-              break;
+
+            if (sName != nameNode->getValue<std::string>()) {
+              continue;
             }
+
+            // state found ...
+            fFound = true;
+
+            if (valueNode == NULL) {
+              Logger::getInstance()->log("checkSystemCondition: can not check"
+                    " condition, missing value node!", lsError);
+              continue;
+            }
+
+            if (sValue != valueNode->getAsString()) {
+              Logger::getInstance()->log("checkSystemCondition: " +
+                  sName + " failed: value is " + valueNode->getAsString() +
+                  ", requested is " + sValue, lsDebug);
+              return false;
+            }
+
+            // continue with outer loop, next filter state
+            break;
           } // oSystemStates loop
           // state was requested as active - but not found in /usr/states
           if (fFound == false) {
@@ -355,4 +367,3 @@ bool secondsFromHMS(unsigned *ts, std::string string)
   } // checkSystemCondition
 
 }; // namespace
-
