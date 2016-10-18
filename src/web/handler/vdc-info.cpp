@@ -144,6 +144,7 @@ void addStandardActions(VdcDb& db, const Device& device, const std::string& lang
   foreach (auto &action, stdActions) {
     json.startObject(action.name);
     json.add("title", action.title);
+    json.add("action", action.action_name);
     json.startObject("params");
     foreach (auto arg, action.args) {
       json.add(arg.first, arg.second);

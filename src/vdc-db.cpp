@@ -66,7 +66,11 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
   std::string sql;
   if (!langCode.empty()) {
     sql = "SELECT s.name, n_s.name, e.value, n_e.name, s.tags "
-        "FROM device AS d INNER JOIN (device_status AS s INNER JOIN name_device_status AS n_s ON s.id=n_s.reference_id) INNER JOIN (device_status_enum AS e INNER JOIN name_device_status_enum AS n_e ON e.id=n_e.reference_id) "
+        "FROM device AS d "
+        "INNER JOIN (device_status AS s "
+        "INNER JOIN name_device_status AS n_s ON s.id=n_s.reference_id) "
+        "INNER JOIN (device_status_enum AS e "
+        "INNER JOIN name_device_status_enum AS n_e ON e.id=n_e.reference_id) "
         "ON d.id=s.device_id AND s.id=e.device_id WHERE d.gtin=? AND n_e.lang_code=? ORDER BY s.name;";
   } else {
     sql = "SELECT s.name, s.name, e.value, e.value, s.tags "
@@ -103,7 +107,11 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
 std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const std::string &langCode) {
   std::string sql;
   if (!langCode.empty()) {
-    sql = "SELECT p.name, n_p.name FROM (device AS dev INNER JOIN (device_events AS p INNER JOIN name_device_events AS n_p ON p.id=n_p.reference_id) ON dev.id=p.device_id) where dev.gtin=? AND n_p.lang_code=?";
+    sql = "SELECT p.name, n_p.name "
+        "FROM (device AS dev "
+          "INNER JOIN (device_events AS p "
+            "INNER JOIN name_device_events AS n_p ON p.id=n_p.reference_id) ON dev.id=p.device_id) "
+        "WHERE dev.gtin=? AND n_p.lang_code=?";
   } else {
     sql = "SELECT p.name, p.name FROM device AS dev INNER JOIN device_events AS p ON dev.id=p.device_id WHERE dev.gtin=?";
   }
@@ -132,10 +140,16 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   std::string sql;
   if (!langCode.empty()) {
     sql = "SELECT p.name, n_p.alt_label, p.type_id, p.default_value, p.min_value, p.max_value, p.resolution, p.si_unit, p.tags "
-        " FROM (device AS dev INNER JOIN (device_properties AS p INNER JOIN name_device_properties AS n_p "
-        " ON p.id=n_p.reference_id) ON dev.id=p.device_id) where dev.gtin=? AND n_p.lang_code=?";
+        "FROM (device AS dev "
+          "INNER JOIN (device_properties AS p "
+          "INNER JOIN name_device_properties AS n_p ON p.id=n_p.reference_id) "
+            "ON dev.id=p.device_id) "
+        "WHERE dev.gtin=? AND n_p.lang_code=?";
   } else {
-    sql = "SELECT p.name, p.name, p.readonly FROM device AS dev INNER JOIN device_properties AS p ON dev.id=p.device_id WHERE dev.gtin=?";
+    sql = "SELECT p.name, p.name, p.type_id, p.default_value, p.min_value, p.max_value, p.resolution, p.si_unit, p.tags "
+        "FROM device AS dev "
+          "INNER JOIN device_properties AS p ON dev.id=p.device_id "
+        "WHERE dev.gtin=?";
   }
   SqlStatement findProps = m_db.prepare(sql);
 
@@ -181,12 +195,17 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
 
   std::string sql;
   if (!langCode.empty()) {
-    sql = "SELECT a.command, n_a.name, p.name, n_p.name, p.type_id, p.default_value, p.min_value, p.max_value, p.resolution, p.si_unit, p.tags "
-        " FROM (device AS dev INNER JOIN (device_actions AS a INNER JOIN name_device_actions AS n_a "
-        " ON a.id=n_a.reference_id) ON dev.id=a.device_id) INNER JOIN (device_actions_parameter AS p INNER JOIN name_device_actions_parameter AS n_p ON p.id=n_p.reference_id) "
-        " ON a.id = p.device_actions_id where dev.gtin=? AND n_a.lang_code=? AND n_p.lang_code=? ORDER BY a.command";
+    sql = "SELECT a.command, n_a.name, p.name, n_p.name, p.type_id, p.default_value, p.min_value, p.max_value, p.resolution, p.si_unit, p.tags, CASE WHEN p.type_id is NULL THEN \"true\" ELSE \"false\" END AS paramexists "
+        "FROM (device AS dev "
+          "INNER JOIN (device_actions AS a INNER JOIN name_device_actions AS n_a ON a.id=n_a.reference_id) ON dev.id=a.device_id) "
+          "LEFT JOIN (device_actions_parameter AS p INNER JOIN name_device_actions_parameter AS n_p ON p.id=n_p.reference_id) ON a.id=p.device_actions_id "
+        "WHERE dev.gtin=? AND n_a.lang_code=? AND (n_p.lang_code=? OR paramexists=\"true\") "
+        "ORDER BY a.command";
   } else {
-    sql = "SELECT a.command, a.command, p.name, p.name, p.default_value FROM device AS d JOIN device_actions AS a JOIN device_actions_parameter AS p WHERE gtin=? AND d.id=a.device_id AND a.id=p.device_actions_id ORDER BY a.command";
+    sql = "SELECT a.command, a.command, p.name, p.name, p.type_id, p.default_value, p.min_value, p.max_value, p.resolution, p.si_unit, p.tags FROM device AS d "
+          "JOIN (device_actions AS a "
+          "LEFT JOIN device_actions_parameter AS p ON a.id=p.device_actions_id) ON d.id=a.device_id "
+        "WHERE gtin=? ORDER BY a.command";
   }
 
   // SqlStatement has broken move semantics
@@ -207,30 +226,32 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
       actions.back().name = cur = name;
       actions.back().title = findActions.getColumn<std::string>(1);
     }
-    actions.back().params.push_back(PropertyDesc());
-    actions.back().params.back().name = findActions.getColumn<std::string>(2);
-    actions.back().params.back().title = findActions.getColumn<std::string>(3);
-    switch (findActions.getColumn<int>(4)) {
-      case 1:
-      case 2:
-        actions.back().params.back().typeId = propertyTypeId::integer;
-        break;
-      case 3:
-        actions.back().params.back().typeId = propertyTypeId::numeric;
-        break;
-      case 4:
-        actions.back().params.back().typeId = propertyTypeId::string;
-        break;
-      case 5:
-        actions.back().params.back().typeId = propertyTypeId::enumeration;
-        break;
+    if (sqlite3_column_type(findActions, 2) != SQLITE_NULL) {
+      actions.back().params.push_back(PropertyDesc());
+      actions.back().params.back().name = findActions.getColumn<std::string>(2);
+      actions.back().params.back().title = findActions.getColumn<std::string>(3);
+      switch (findActions.getColumn<int>(4)) {
+        case 1:
+        case 2:
+          actions.back().params.back().typeId = propertyTypeId::integer;
+          break;
+        case 3:
+          actions.back().params.back().typeId = propertyTypeId::numeric;
+          break;
+        case 4:
+          actions.back().params.back().typeId = propertyTypeId::string;
+          break;
+        case 5:
+          actions.back().params.back().typeId = propertyTypeId::enumeration;
+          break;
+      }
+      actions.back().params.back().defaultValue = findActions.getColumn<std::string>(5);
+      actions.back().params.back().minValue = findActions.getColumn<std::string>(6);
+      actions.back().params.back().maxValue = findActions.getColumn<std::string>(7);
+      actions.back().params.back().resolution = findActions.getColumn<std::string>(8);
+      actions.back().params.back().siUnit = findActions.getColumn<std::string>(9);
+      actions.back().params.back().tags = findActions.getColumn<std::string>(10);
     }
-    actions.back().params.back().defaultValue = findActions.getColumn<std::string>(5);
-    actions.back().params.back().minValue = findActions.getColumn<std::string>(6);
-    actions.back().params.back().maxValue = findActions.getColumn<std::string>(7);
-    actions.back().params.back().resolution = findActions.getColumn<std::string>(8);
-    actions.back().params.back().siUnit = findActions.getColumn<std::string>(9);
-    actions.back().params.back().tags = findActions.getColumn<std::string>(10);
   }
 
   return actions;
@@ -241,9 +262,23 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
 
   std::string sql;
   if (!langCode.empty()) {
-    sql = "SELECT p.name, n_p.name, a.command, ap.name, pp.value FROM device AS d INNER JOIN device_actions AS a INNER JOIN (device_actions_predefined AS p INNER JOIN name_device_actions_predefined AS n_p) INNER JOIN device_actions_predefined_parameter AS pp INNER JOIN device_actions_parameter AS ap ON d.id=a.device_id AND a.id=p.device_actions_id AND p.id=pp.device_actions_predefined_id AND pp.device_actions_parameter_id=ap.id AND p.id=n_p.reference_id WHERE gtin=? AND n_p.lang_code=? ORDER BY a.command;";
+    sql = "SELECT p.name, n_p.name, a.command, ap.name, pp.value, CASE WHEN ap.type_id is NULL THEN \"true\" ELSE \"false\" END AS paramexists "
+        "FROM device AS d INNER JOIN ((device_actions AS a "
+          "INNER JOIN (device_actions_predefined AS p INNER JOIN name_device_actions_predefined AS n_p ON p.id=n_p.reference_id) ON a.id=p.device_actions_id) "
+          "LEFT JOIN (device_actions_parameter AS ap INNER JOIN device_actions_predefined_parameter AS pp ON pp.device_actions_parameter_id=ap.id) "
+          "ON a.id=p.device_actions_id AND p.id=pp.device_actions_predefined_id) "
+          "ON d.id=a.device_id "
+        "WHERE gtin=? AND (n_p.lang_code=? OR paramexists=\"true\") "
+        "ORDER BY a.command;";
   } else {
-    sql = "SELECT p.name, p.name, a.command, ap.name, pp.value FROM device AS d INNER JOIN device_actions AS a INNER JOIN device_actions_predefined AS p INNER JOIN device_actions_predefined_parameter AS pp INNER JOIN device_actions_parameter AS ap ON d.id=a.device_id AND a.id=p.device_actions_id AND p.id=pp.device_actions_predefined_id AND pp.device_actions_parameter_id=ap.id WHERE gtin=? ORDER BY a.command;";
+    sql = "SELECT p.name, p.name, a.command, ap.name, pp.value "
+        "FROM device AS d INNER JOIN ((device_actions AS a "
+          "INNER JOIN device_actions_predefined AS p ON a.id=p.device_actions_id) "
+          "LEFT JOIN (device_actions_predefined_parameter AS pp "
+          "INNER JOIN device_actions_parameter AS ap ON pp.device_actions_parameter_id=ap.id) "
+          "ON a.id=p.device_actions_id AND p.id=pp.device_actions_predefined_id) "
+          "ON d.id=a.device_id "
+        "WHERE gtin=? ORDER BY a.command;";
   }
 
   SqlStatement find = m_db.prepare(sql);
@@ -264,8 +299,10 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
       desc.back().title = find.getColumn<std::string>(1);
       desc.back().action_name = find.getColumn<std::string>(2);
     }
-    auto arg = std::make_pair(find.getColumn<std::string>(3), find.getColumn<std::string>(4));
-    desc.back().args.push_back(arg);
+    if (sqlite3_column_type(find, 3) != SQLITE_NULL) {
+      auto arg = std::make_pair(find.getColumn<std::string>(3), find.getColumn<std::string>(4));
+      desc.back().args.push_back(arg);
+    }
   }
 
   return desc;
