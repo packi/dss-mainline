@@ -21,53 +21,60 @@
 
 #include <string>
 #include <vector>
-
 #include <memory>
+#include <mutex>
 
 #include "src/businterface.h"
 #include "src/sqlite3_wrapper.h"
 
 namespace dss {
 
-/**
- * property node structure to declare trigger
- * pcn_ = property config node
- */
-extern const char* pcn_vdce_db;
-extern const char*  pcn_vdce_db_name;
-
 class VdcDb {
 public:
-  VdcDb();
+  VdcDb(SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
+
+  static std::string getFilePath();
+
+  SQLite3& getDb() { return m_db; }
 
   struct StateDesc {
     std::string name;
     std::string title; //< translated name
     std::vector<std::pair<std::string, std::string>> values;
     // pair: < value, translated value(=title) >
+    std::string tags;
   };
 
   std::vector<DeviceStateSpec_t> getStatesLegacy(const std::string &gtin); // throws
   std::vector<StateDesc> getStates(const std::string &gtin, const std::string &langCode = ""); // throws
 
+  struct EventDesc {
+    std::string name;
+    std::string title; //< translated name
+  };
+
+  std::vector<EventDesc> getEvents(const std::string &gtin, const std::string &langCode = ""); // throws
+
+  enum propertyTypeId { integer, numeric, enumeration, string };
+
   struct PropertyDesc {
     std::string name; // technical name
     std::string title; // translated name alt_label
-    bool readonly;
+    propertyTypeId typeId;
+    std::string defaultValue;
+    std::string minValue;
+    std::string maxValue;
+    std::string resolution;
+    std::string siUnit;
+    std::string tags;
   };
 
   std::vector<PropertyDesc> getProperties(const std::string &gtin, const std::string &langCode = "");
 
-  struct ActionParameter {
-    std::string name;
-    std::string title;
-    int defaultValue;
-  };
-
   struct ActionDesc {
     std::string name;
     std::string title;
-    std::vector<ActionParameter> params;
+    std::vector<PropertyDesc> params;
   };
 
   std::vector<ActionDesc> getActions(const std::string &gtin, const std::string &langCode = "");
@@ -81,9 +88,12 @@ public:
   };
 
   std::vector<StandardActionDesc> getStandardActions(const std::string &gtin, const std::string &langCode = "");
+  bool hasActionInterface(const std::string &gtin);
 
 private:
-  std::unique_ptr<SQLite3> m_db;
+  SQLite3 m_db;
+  static std::mutex s_mutex;
+  std::lock_guard<std::mutex> m_lock;
 };
 
 }

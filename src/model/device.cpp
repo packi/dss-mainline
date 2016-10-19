@@ -50,6 +50,7 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/event.h"
+#include "src/event/event_create.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
@@ -103,6 +104,7 @@ namespace dss {
     m_OemProductName(),
     m_OemProductIcon(),
     m_OemProductURL(),
+    m_OemConfigLink(),
     m_isVdcDevice(false),
     m_hasActions(false),
     m_ValveType(DEVICE_VALVE_UNKNOWN),
@@ -197,6 +199,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       propNode->createProperty("OemGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemGuid, false));
+      propNode->createProperty("OemModelGuid")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcOemModelGuid, false));
       propNode->createProperty("ConfigURL")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcConfigURL, false));
       propNode->createProperty("HardwareGuid")
@@ -270,6 +274,8 @@ namespace dss {
       ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductIcon, false));
     oemNode->createProperty("ProductURL")
       ->linkToProxy(PropertyProxyReference<std::string>(m_OemProductURL, false));
+    oemNode->createProperty("ConfigLink")
+      ->linkToProxy(PropertyProxyReference<std::string>(m_OemConfigLink, false));
     oemNode->createProperty("State")
       ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemStateAsString));
     oemNode->createProperty("EAN")
@@ -1933,11 +1939,12 @@ namespace dss {
     }
   }
 
-  void Device::setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL)
+  void Device::setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL, const std::string& _configLink)
   {
     m_OemProductName = _productName;
     m_OemProductIcon = _iconPath;
     m_OemProductURL = _productURL;
+    m_OemConfigLink = _configLink;
   }
 
   void Device::setOemProductInfoState(const DeviceOEMState_t _state)
@@ -3064,6 +3071,10 @@ namespace dss {
     param0->set_name("id");
     param0->mutable_value()->set_v_string(actionId);
     deviceBusInterface->genericRequest(*this, "invokeDeviceAction", params);
+
+    //action finished with success -> raise event
+    auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
+    DSS::getInstance()->getEventQueue().pushEvent(createDeviceActionEvent(deviceReference, actionId));
   }
 
   void Device::setProperty(const vdcapi::PropertyElement& propertyElement) {
@@ -3122,13 +3133,25 @@ namespace dss {
   vdcapi::Message Device::getVdcProperty(
       const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
     if (!m_isVdcDevice) {
-      throw std::runtime_error("CallAction can be called only on vdc devices.");
+      throw std::runtime_error("getVdcProperty can be called only on vdc devices.");
     }
     DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
     if (!deviceBusInterface) {
       throw std::runtime_error("Bus interface not available");
     }
     return deviceBusInterface->getProperty(*this, query);
+  }
+
+  void Device::setVdcProperty(
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    if (!m_isVdcDevice) {
+      throw std::runtime_error("getVdcProperty can be called only on vdc devices.");
+    }
+    DeviceBusInterface* deviceBusInterface = m_pApartment->getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    deviceBusInterface->setProperty(*this, query);
   }
 
   void Device::setVdcSpec(VdsdSpec_t &&x) {

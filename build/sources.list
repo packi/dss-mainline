@@ -48,8 +48,6 @@ libdsscore_a_SOURCES =  \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
-	../src/handler/db_fetch.cpp \
-	../src/handler/db_fetch.h \
 	../src/handler/system_handlers.cpp \
 	../src/handler/system_handlers.h \
 	../src/handler/system_states.cpp \
@@ -113,8 +111,6 @@ libdsscore_a_SOURCES =  \
 	../src/model/set.h \
 	../src/model/state.cpp \
 	../src/model/state.h \
-	../src/model/vdc-db.cpp \
-	../src/model/vdc-db.h \
 	../src/model/zone.cpp \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
@@ -192,8 +188,14 @@ libdsscore_a_SOURCES =  \
 	../src/util.h \
 	../src/vdc-connection.cpp \
 	../src/vdc-connection.h \
+	../src/vdc-db.cpp \
+	../src/vdc-db.h \
+	../src/vdc-db-fetcher.cpp \
+	../src/vdc-db-fetcher.h \
 	../src/vdc-element-reader.cpp \
 	../src/vdc-element-reader.h \
+	../src/vdc-token.cpp \
+	../src/vdc-token.h \
 	../src/watchdog.cpp \
 	../src/watchdog.h \
 	../src/web/handler/apartmentrequesthandler.cpp \
@@ -224,8 +226,8 @@ libdsscore_a_SOURCES =  \
 	../src/web/handler/subscriptionrequesthandler.h \
 	../src/web/handler/systemrequesthandler.cpp \
 	../src/web/handler/systemrequesthandler.h \
-	../src/web/handler/vdchelper.h \
-	../src/web/handler/vdchelper.cpp \
+	../src/web/handler/vdc-info.h \
+	../src/web/handler/vdc-info.cpp \
 	../src/web/handler/zonerequesthandler.cpp \
 	../src/web/handler/zonerequesthandler.h \
 	../src/web/restful.cpp \
@@ -255,7 +257,6 @@ dsstests_SOURCES = \
 	../tests/basetests.cpp \
 	../tests/circuitrequesthandlertest.cpp \
 	../tests/datetoolstests.cpp \
-	../tests/db_fetcher.cpp \
 	../tests/deviceinterfacerequesthandlertest.cpp \
 	../tests/devicerequesthandlertest.cpp \
 	../tests/devicetests.cpp \
@@ -278,6 +279,7 @@ dsstests_SOURCES = \
 	../tests/model-mainloop_tests.cpp \
 	../tests/modeljstests.cpp \
 	../tests/modeltests.cpp \
+	../tests/property_xmlparser_tests.cpp \
 	../tests/propertysystemtests.cpp \
 	../tests/restfulapitests.cpp \
 	../tests/scriptstest.cpp \

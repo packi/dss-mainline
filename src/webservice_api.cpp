@@ -440,6 +440,26 @@ void WebserviceMsHub::doGetWeatherInformation(boost::shared_ptr<URLRequestCallba
   WebserviceConnection::getInstanceMsHub()->request(url, params, GET, callback, false);
 }
 
+void WebserviceMsHub::doVdcStoreVdcToken(const std::string &vdcToken, WebserviceCallDone_t callback) {
+  PropertySystem &propSystem = DSS::getInstance()->getPropertySystem();
+  std::string url;
+  std::string params;
+
+  if (!WebserviceMsHub::isAuthorized()) {
+    callback->done(NETWORK_ERROR, WebserviceReply({0, ""}));
+    return;
+  }
+
+  url += "public/vDC/v1_0/Device/StoreVDCToken";
+  params += "dssId=" + propSystem.getStringValue(pp_sysinfo_dsid);
+  params += "&ospToken=" + propSystem.getStringValue(pp_websvc_rc_osptoken);
+  params += "&vdcToken=" + vdcToken;
+
+  // webservice is fire and forget, so use shared ptr for life cycle mgmt
+  boost::shared_ptr<MsHubReplyChecker> cont = boost::make_shared<MsHubReplyChecker>(callback);
+  WebserviceConnection::getInstanceMsHub()->request(url, params, POST, cont, false);
+}
+
 WebserviceReply WebserviceMsHub::parseReply(const char* buf) {
   WebserviceReply resp;
   bool return_code_seen = false;
@@ -503,6 +523,9 @@ const static std::string evtCategory_DeviceBinaryInput = "DeviceBinaryInput";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
+const static std::string evtCategory_DeviceActionEvent = "DeviceActionEvent";
+const static std::string evtCategory_DeviceEventEvent = "DeviceEventEvent";
+const static std::string evtCategory_DeviceStateEvent = "DeviceStateEvent";
 const static std::string evtCategory_ZoneSensorError = "ZoneSensorError";
 const static std::string evtCategory_HeatingControllerSetup = "HeatingControllerSetup";
 const static std::string evtCategory_HeatingControllerValue = "HeatingControllerValue";
@@ -574,6 +597,9 @@ std::vector<std::string> uploadEvents()
   events.push_back(EventName::DeviceSensorValue);
   events.push_back(EventName::DeviceStatus);
   events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::DeviceActionEvent);
+  events.push_back(EventName::DeviceEventEvent);
+  events.push_back(EventName::DeviceStateEvent);
   events.push_back(EventName::ExecutionDenied);
   events.push_back(EventName::ZoneSensorValue);
   events.push_back(EventName::ZoneSensorError);
@@ -712,6 +738,28 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.add("SensorType", strToInt(event->getPropertyByName("sensorType")));
       json.add("StatusCode", dsEnum_SensorError_noValue);
+      json.endObject();
+    } else if ((event->getName() == EventName::DeviceActionEvent) && (event->getRaiseLocation() == erlDevice)) {
+      pDeviceRef = event->getRaisedAtDevice();
+      createHeader(json, evtGroup_Activity, evtCategory_DeviceActionEvent, event.get());
+      json.startObject("EventBody");
+      json.add("Name", event->getPropertyByName("name"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.endObject();
+    } else if ((event->getName() == EventName::DeviceEventEvent) && (event->getRaiseLocation() == erlDevice)) {
+      pDeviceRef = event->getRaisedAtDevice();
+      createHeader(json, evtGroup_Activity, evtCategory_DeviceEventEvent, event.get());
+      json.startObject("EventBody");
+      json.add("Name", event->getPropertyByName("name"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.endObject();
+    } else if ((event->getName() == EventName::DeviceStateEvent) && (event->getRaiseLocation() == erlDevice)) {
+      pDeviceRef = event->getRaisedAtDevice();
+      createHeader(json, evtGroup_Activity, evtCategory_DeviceStateEvent, event.get());
+      json.startObject("EventBody");
+      json.add("Name", event->getPropertyByName("name"));
+      json.add("Value", event->getPropertyByName("value"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.endObject();
     } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();

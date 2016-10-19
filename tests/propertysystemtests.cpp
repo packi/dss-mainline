@@ -34,6 +34,14 @@
 #include "src/datetools.h"
 #include "src/web/webrequests.h"
 
+#include "src/base.h"
+#include "src/propertysystem.h"
+#include "src/propertyquery.h"
+
+using namespace dss;
+
+BOOST_AUTO_TEST_SUITE(PropertySystemTests)
+
 int testGetter() {
 #ifdef VERBOSE_TESTS
   cout << "testGetter() called" << endl;
@@ -81,14 +89,6 @@ public:
     return m_Value;
   }
 };
-
-#include "src/base.h"
-#include "src/propertysystem.h"
-#include "src/propertyquery.h"
-
-using namespace dss;
-
-BOOST_AUTO_TEST_SUITE(PropertySystemTests)
 
 BOOST_AUTO_TEST_CASE(testBoolProxy) {
   PropertySystem propSys;
@@ -607,4 +607,32 @@ BOOST_AUTO_TEST_CASE(testCreatePropertySpeed) {
   std::cout << ts_get_set.toMicroSec() / 1000 << " ms \n";
 #endif
 }
+
+BOOST_AUTO_TEST_CASE(testGetSetValue) {
+  PropertySystem ps;
+  auto node = ps.createProperty("/leaf");
+
+  node->setValue<bool>(true);
+  BOOST_CHECK_EQUAL(node->getValue<bool>(), true);
+  node->setValue<bool>(false);
+  BOOST_CHECK_EQUAL(node->getValue<bool>(), false);
+
+  node->setValue<int>(0);
+  BOOST_CHECK_EQUAL(node->getValue<int>(), 0);
+  node->setValue<int>(-1);
+  BOOST_CHECK_EQUAL(node->getValue<int>(), -1);
+
+  node->setValue<unsigned int>(1);
+  BOOST_CHECK_EQUAL(node->getValue<unsigned int>(), 1);
+  // TOOD(someday) funny that this works
+  node->setValue<unsigned int>(-1);
+  BOOST_CHECK_EQUAL(node->getValue<unsigned int>(), -1);
+
+  node->setValue<double>(1e+6);
+  BOOST_CHECK_EQUAL(node->getValue<double>(), 1e+6);
+
+  node->setValue<std::string>("lorum ipsum");
+  BOOST_CHECK_EQUAL(node->getValue<std::string>(), "lorum ipsum");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

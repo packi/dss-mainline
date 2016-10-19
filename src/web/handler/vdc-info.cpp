@@ -20,44 +20,69 @@
 
 */
 
-#include "src/web/webrequests.h"
+#include "vdc-info.h"
 #include "src/model/device.h"
-#include "src/model/vdc-db.h"
+#include "src/vdc-db.h"
 #include "src/protobufjson.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "foreach.h"
-#include "vdchelper.h"
 
 
 namespace dss {
+namespace vdcInfo {
 
-void GetVdcSpec(const Device& device, JSONWriter& json) {
-  const std::string& oemEan = device.getOemEanAsString();
+static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop, JSONWriter& json) {
+  switch (prop.typeId) {
+    case VdcDb::propertyTypeId::integer:
+    case VdcDb::propertyTypeId::numeric:
+      json.add("type", "numeric");
+      json.add("min", prop.minValue);
+      json.add("max", prop.maxValue);
+      json.add("resolution", prop.resolution);
+      json.add("siunit", prop.siUnit);
+      json.add("default", prop.defaultValue);
+      break;
+    case VdcDb::propertyTypeId::string:
+      json.add("type", "string");
+      json.add("default", prop.defaultValue);
+      break;
+    case VdcDb::propertyTypeId::enumeration:
+      json.add("type", "enumeration");
+      json.add("default", prop.defaultValue);
+      //TODO: add option list
+      break;
+  }
+}
+
+void addSpec(const Device& device, JSONWriter& json) {
+  const std::string& dsDeviceGTIN = device.getOemEanAsString();
   const auto& spec = device.getVdcSpec();
+  json.startObject("spec");
   json.add("class", spec.deviceClass);
   json.add("classVersion", spec.deviceClassVersion);
-  json.add("oemEanNumber", oemEan);
+  json.add("dsDeviceGTIN", dsDeviceGTIN);
   json.add("model", spec.model);
   json.add("modelVersion", spec.modelVersion);
   json.add("hardwareGuid", spec.hardwareGuid);
   json.add("hardwareModelGuid", spec.hardwareModelGuid);
   json.add("vendorId", spec.vendorId);
   json.add("vendorName", spec.vendorName);
+  json.endObject();
 }
 
-void GetVdcStateDescriptions(const Device& device, const std::string& langCode, JSONWriter& json) {
-  VdcDb db;
+void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
   auto states = db.getStates(oemEan, langCode);
   json.startObject("stateDescriptions");
   foreach (auto &state, states) {
     json.startObject(state.name);
     json.add("title", state.title);
+    json.add("tags", state.tags);
     json.startObject("options");
     foreach (auto desc, state.values) {
-      json.add(desc.first, desc.second); // non-tranlated: translated
+      json.add(desc.first, desc.second); // non-translated: translated
     }
     json.endObject();
     json.endObject();
@@ -65,23 +90,33 @@ void GetVdcStateDescriptions(const Device& device, const std::string& langCode, 
   json.endObject();
 }
 
-void GetVdcPropertyDescriptions(const Device& device, const std::string& langCode, JSONWriter& json) {
-  VdcDb db;
+void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
-  auto props = db.getProperties(oemEan, langCode); // throws
-  json.startObject("propertyDescriptions");
-
-  foreach (auto &prop, props) {
-    json.startObject(prop.name);
-    json.add("title", prop.title);
-    json.add("readOnly", prop.readonly);
+  const auto& events = db.getEvents(oemEan, langCode);
+  json.startObject("eventDescriptions");
+  foreach (const auto& event, events) {
+    json.startObject(event.name);
+    json.add("title", event.title);
     json.endObject();
   }
   json.endObject();
 }
 
-void GetVdcActionDescriptions(const Device& device, const std::string& langCode, JSONWriter& json) {
-  VdcDb db;
+void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+  const std::string& oemEan = device.getOemEanAsString();
+  auto props = db.getProperties(oemEan, langCode); // throws
+  json.startObject("propertyDescriptions");
+  foreach (auto &prop, props) {
+    json.startObject(prop.name);
+    json.add("title", prop.title);
+    json.add("tags", prop.tags);
+    addParameterDescriptions(db, prop, json);
+    json.endObject();
+  }
+  json.endObject();
+}
+
+void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
   auto actions = db.getActions(oemEan, langCode);
   json.startObject("actionDescriptions");
@@ -92,7 +127,8 @@ void GetVdcActionDescriptions(const Device& device, const std::string& langCode,
     foreach (auto p, action.params) {
       json.startObject(p.name);
       json.add("title", p.title);
-      json.add("default", p.defaultValue);
+      json.add("tags", p.tags);
+      addParameterDescriptions(db, p, json);
       json.endObject();
     }
     json.endObject();
@@ -101,14 +137,14 @@ void GetVdcActionDescriptions(const Device& device, const std::string& langCode,
   json.endObject();
 }
 
-void GetVdcStandardActions(const Device& device, const std::string& langCode, JSONWriter& json) {
-  VdcDb db;
+void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
   auto stdActions = db.getStandardActions(oemEan, langCode);
   json.startObject("standardActions");
   foreach (auto &action, stdActions) {
     json.startObject(action.name);
     json.add("title", action.title);
+    json.add("action", action.action_name);
     json.startObject("params");
     foreach (auto arg, action.args) {
       json.add(arg.first, arg.second);
@@ -119,7 +155,7 @@ void GetVdcStandardActions(const Device& device, const std::string& langCode, JS
   json.endObject();
 }
 
-void GetVdcCustomActions(Device& device, JSONWriter& json) {
+void addCustomActions(Device& device, JSONWriter& json) {
   if (!device.isPresent() || !device.isVdcDevice()) {
     json.startObject("customActions");
     json.endObject();
@@ -134,48 +170,64 @@ void GetVdcCustomActions(Device& device, JSONWriter& json) {
   ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
 }
 
-std::bitset<6> ParseVdcInfoFilter(const std::string& filterParam) {
-  std::bitset<6> filter;
-  std::vector<std::string> render = dss::splitString(filterParam, ',');
-  for (size_t i = 0; i < render.size(); i++) {
-    if (render.at(i) == "spec") {
-      filter.set(VdcInfoFilterSpec);
-    } else if (render.at(i) == "stateDesc") {
-      filter.set(VdcInfoFilterStateDesc);
-    } else if (render.at(i) == "propertyDesc") {
-      filter.set(VdcInfoFilterPropertyDesc);
-    } else if (render.at(i) == "actionDesc") {
-      filter.set(VdcInfoFilterActionDesc);
-    } else if (render.at(i) == "standardActions") {
-      filter.set(VdcInfoFilterStdActions);
-    } else if (render.at(i) == "customActions") {
-      filter.set(VdcInfoFilterCustomActions);
+Filter parseFilter(const std::string& filterParam) {
+  Filter filter = {};
+  if (filterParam.empty()) {
+    filter.spec = 1;
+    filter.stateDesc = 1;
+    filter.eventDesc = 1;
+    filter.propertyDesc = 1;
+    filter.actionDesc = 1;
+    filter.stdActions = 1;
+    filter.customActions = 1;
+    return filter;
+  }
+  std::vector<std::string> items = dss::splitString(filterParam, ',');
+  BOOST_FOREACH(const auto& item, items) {
+    if (item == "spec") {
+      filter.spec = 1;
+    } else if (item == "stateDesc") {
+      filter.stateDesc = 1;
+    } else if (item == "eventDesc") {
+      filter.eventDesc = 1;
+    } else if (item == "propertyDesc") {
+      filter.propertyDesc = 1;
+    } else if (item == "actionDesc") {
+      filter.actionDesc = 1;
+    } else if (item == "standardActions") {
+      filter.stdActions = 1;
+    } else if (item == "customActions") {
+      filter.customActions = 1;
     }
   }
   return filter;
 }
 
-void RenderVdcInfo(Device& device, const std::bitset<6>& filter,
+void addByFilter(VdcDb& db, Device& device, Filter filter,
                    const std::string& langCode, JSONWriter& json) {
-  if (filter.test(VdcInfoFilterSpec)) {
-    GetVdcSpec(device, json);
+  if (filter.spec) {
+    addSpec(device, json);
   }
-  if (filter.test(VdcInfoFilterStateDesc)) {
-    GetVdcStateDescriptions(device, langCode, json);
+  if (filter.stateDesc) {
+    addStateDescriptions(db, device, langCode, json);
   }
-  if (filter.test(VdcInfoFilterPropertyDesc)) {
-    GetVdcPropertyDescriptions(device, langCode, json);
+  if (filter.eventDesc) {
+    addEventDescriptions(db, device, langCode, json);
   }
-  if (filter.test(VdcInfoFilterActionDesc)) {
-    GetVdcActionDescriptions(device, langCode, json);
+  if (filter.propertyDesc) {
+    addPropertyDescriptions(db, device, langCode, json);
   }
-  if (filter.test(VdcInfoFilterStdActions)) {
-    GetVdcStandardActions(device, langCode, json);
+  if (filter.actionDesc) {
+    addActionDescriptions(db, device, langCode, json);
   }
-  if (filter.test(VdcInfoFilterCustomActions)) {
-    GetVdcCustomActions(device, json);
+  if (filter.stdActions) {
+    addStandardActions(db, device, langCode, json);
+  }
+  if (filter.customActions) {
+    addCustomActions(device, json);
   }
 }
 
+} // namespace vdcInfo
 } // namespace
 

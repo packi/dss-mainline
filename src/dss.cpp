@@ -42,13 +42,14 @@
 #endif
 
 #include <sys/resource.h>
+#include <boost/asio/io_service.hpp>
+#include <thread>
 
 #include "logger.h"
 #include "propertysystem.h"
 #include "eventinterpreterplugins.h"
 #include "eventinterpretersystemplugins.h"
 #include "handler/system_states.h"
-#include "handler/db_fetch.h"
 #include "src/event.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/model/apartment.h"
@@ -84,6 +85,8 @@
 
 #include "webservice_connection.h"
 #include "model-features.h"
+#include "vdc-db-fetcher.h"
+#include "vdc-token.h"
 
 namespace dss {
 
@@ -133,8 +136,46 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
 
   bool DSS::s_shutdown;
 
+  struct DSS::Impl {
+    boost::asio::io_service m_ioService;
+    std::thread m_ioServiceThread;
+
+    /// Objects synchronized to ioService event loop
+    struct IoServiceObjects {
+      VdcToken m_vdcToken;
+      VdcDbFetcher m_vdcDbFetcher;
+      IoServiceObjects(DSS& dss) :
+          m_vdcToken(dss),
+          m_vdcDbFetcher(dss) {
+      }
+    };
+    std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
+
+    Impl() : m_ioServiceThread([&](){ ioServiceThreadRun(); }) {
+    }
+    ~Impl() {
+      m_ioService.stop();
+      m_ioServiceThread.join();
+    }
+
+    void ioServiceThreadRun() {
+      boost::asio::io_service::work work(m_ioService); // run until ioService is stopped.
+      while (1) {
+        try {
+          m_ioService.run();
+          break; //run() exited normally
+        } catch (std::exception &e) {
+          Logger::getInstance()->log(std::string("io_service") + e.what(), lsError);
+        }
+        m_ioServiceObjects.reset();
+      }
+    }
+  };
+
   DSS::DSS()
-  : m_commChannel(NULL)
+      : m_impl(new Impl())
+      , m_ioService(m_impl->m_ioService)
+      , m_commChannel(NULL)
   {
     m_ShutdownFlag = false;
     m_State = ssInvalid;
@@ -503,8 +544,6 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new AutoclusterUpdatePlugin(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new DbUpdatePlugin(m_pEventInterpreter.get());
-    m_pEventInterpreter->addPlugin(plugin);
   }
 
   bool DSS::initSubsystems() {
@@ -624,6 +663,17 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     }
 
     m_State = ssStarting;
+
+    {
+      boost::packaged_task<void> task([=]() {
+        m_pSecurity->loginAsSystemUser("Event loop thread needs system privileges");
+        m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
+      });
+      // dispatch task in io_service thread and block till it finishes.
+      m_impl->m_ioService.dispatch([&]() { task(); });
+      task.get_future().get();  // throws if task throws
+    }
+
     foreach (Subsystem *subsys, m_Subsystems) {
       log("Start subsystem \"" + subsys->getName() + "\"", lsDebug);
       subsys->start();
@@ -901,4 +951,9 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
   {
     return DateTime().getTimezoneOffset();
   }
+
+  void DSS::assertIoServiceThread() {
+    assert(m_impl->m_ioServiceThread.get_id() == std::this_thread::get_id());
+  }
+
 }

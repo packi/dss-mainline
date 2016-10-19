@@ -41,7 +41,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
-#include "src/model/vdc-db.h"
+#include "src/vdc-db.h"
 #include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
@@ -53,7 +53,7 @@
 #include "src/protobufjson.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
-#include "vdchelper.h"
+#include "vdc-info.h"
 
 namespace dss {
 
@@ -863,38 +863,49 @@ namespace dss {
       if((id  < 0) || (id > 127)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
       }
-
-      if (!_request.hasParameter("value") && !_request.hasParameter("angle")) {
-        return JSONWriter::failure("Must supply at least value or angle");
-      }
-      int value = strToIntDef(_request.getParameter("value"), -1);
-      int angle = strToIntDef(_request.getParameter("angle"), -1);
-      if ((value < 0) && (angle < 0)) {
-        return JSONWriter::failure("Invalid value and/or angle parameter");
-      }
-      if (value > 65535) {
-        return JSONWriter::failure("Invalid value parameter");
-      }
-      if (angle > 255) {
-        return JSONWriter::failure("Invalid angle parameter");
-      }
-
-      if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
-        return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
-      }
-
-      if (angle != -1) {
-        DeviceFeatures_t features = pDevice->getFeatures();
-        if (!features.hasOutputAngle) {
-          return JSONWriter::failure("Device does not support output angle configuration");
+      if (_request.hasParameter("command")) {
+        std::string action = _request.getParameter("command");
+        if (!pDevice->isVdcDevice() || !pDevice->getHasActions()) {
+          return JSONWriter::failure("Device does not support action configuration");
         }
-        pDevice->setSceneAngle(id, angle);
+        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+        vdcapi::PropertyElement* e1 = query.Add();
+        e1->set_name("scenes");
+        vdcapi::PropertyElement* e2 = e1->add_elements();
+        e2->set_name(intToString(id));
+        vdcapi::PropertyElement* e3 = e2->add_elements();
+        e3->set_name("command");
+        e3->mutable_value()->set_v_string(action);
+        pDevice->setVdcProperty(query);
       }
+      if (_request.hasParameter("value") || _request.hasParameter("angle")) {
+        int value = strToIntDef(_request.getParameter("value"), -1);
+        int angle = strToIntDef(_request.getParameter("angle"), -1);
+        if ((value < 0) && (angle < 0)) {
+          return JSONWriter::failure("Invalid value and/or angle parameter");
+        }
+        if (value > 65535) {
+          return JSONWriter::failure("Invalid value parameter");
+        }
+        if (angle > 255) {
+          return JSONWriter::failure("Invalid angle parameter");
+        }
 
-      if (value != -1) {
-        pDevice->setSceneValue(id, value);
+        if (DSS::hasInstance() && CommChannel::getInstance()->isSceneLocked((uint32_t)id)) {
+          return JSONWriter::failure("Device settings are being updated for selected activity, please try again later");
+        }
+
+        if (angle != -1) {
+          DeviceFeatures_t features = pDevice->getFeatures();
+          if (!features.hasOutputAngle) {
+            return JSONWriter::failure("Device does not support output angle configuration");
+          }
+          pDevice->setSceneAngle(id, angle);
+        }
+        if (value != -1) {
+          pDevice->setSceneValue(id, value);
+        }
       }
-
       return JSONWriter::success();
     } else if (_request.getMethod() == "getSceneValue") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
@@ -907,14 +918,46 @@ namespace dss {
       }
 
       JSONWriter json;
-      json.add("value", pDevice->getSceneValue(id));
+      if (pDevice->isVdcDevice()) {
+        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+        vdcapi::PropertyElement* e1 = query.Add();
+        e1->set_name("scenes");
+        vdcapi::PropertyElement* e2 = e1->add_elements();
+        e2->set_name(intToString(id));
+        vdcapi::Message message = pDevice->getVdcProperty(query);
+        VdcElementReader reader(message.vdc_response_get_property().properties());
+        json.add("scenes");
+        ProtobufToJSon::processElementsPretty(reader["scenes"].childElements(), json);
+        return json.successJSON();
+      }
 
+      json.add("value", pDevice->getSceneValue(id));
       DeviceFeatures_t features = pDevice->getFeatures();
       if (features.hasOutputAngle) {
         json.add("angle", pDevice->getSceneAngle(id));
       }
-
       return json.successJSON();
+
+    } else if (_request.getMethod() == "getApartmentScenes") {
+      if (!pDevice->isVdcDevice() || !pDevice->getHasActions()) {
+        return JSONWriter::failure("Device does not support action configuration");
+      }
+
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      vdcapi::PropertyElement* e1 = query.Add();
+      e1->set_name("scenes");
+      for (int id = 64; id < 128; id++) {
+        vdcapi::PropertyElement* e2 = e1->add_elements();
+        e2->set_name(intToString(id));
+      }
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+
+      JSONWriter json;
+      json.add("scenes");
+      ProtobufToJSon::processElementsPretty(reader["scenes"].childElements(), json);
+      return json.successJSON();
+
     } else if (_request.getMethod() == "getSceneMode") {
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
@@ -2020,16 +2063,18 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       std::string langCode("");
       _request.getParameter("lang", langCode);
+      VdcDb db;
       JSONWriter json;
-      GetVdcSpec(*pDevice, json);
-      GetVdcStateDescriptions(*pDevice, langCode, json);
-      GetVdcPropertyDescriptions(*pDevice, langCode, json);
-      GetVdcActionDescriptions(*pDevice, langCode, json);
-      GetVdcStandardActions(*pDevice, langCode, json);
+      vdcInfo::addSpec(*pDevice, json);
+      vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addActionDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addStandardActions(db, *pDevice, langCode, json);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoCustom") {
       JSONWriter json;
-      GetVdcCustomActions(*pDevice, json);
+      vdcInfo::addCustomActions(*pDevice, json);
       return json.successJSON();
     } else if (_request.getMethod() == "getInfo") {
       // exceptions will cause the call to abort with a JSON failure.
@@ -2050,11 +2095,10 @@ namespace dss {
       _request.getParameter("lang", langCode);
 
 
+      VdcDb db;
       JSONWriter json;
-
-      std::bitset<6> filter = ParseVdcInfoFilter(filterParam);
-
-      RenderVdcInfo(*pDevice, filter, langCode, json);
+      auto filter = vdcInfo::parseFilter(filterParam);
+      vdcInfo::addByFilter(db, *pDevice, filter, langCode, json);
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {

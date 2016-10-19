@@ -1,1 +1,1 @@
-../../data/sqldumps/vdc-db.sql
+../../data/vdc-db.sql
