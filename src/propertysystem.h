@@ -642,6 +642,8 @@ namespace dss {
   template <>
   inline void PropertyNode::setValue<int>(const int& value) { setIntegerValue(value); }
   template <>
+  inline void PropertyNode::setValue<unsigned int>(const unsigned int& value) { setUnsignedIntegerValue(value); }
+  template <>
   inline void PropertyNode::setValue<bool>(const bool& value) { setBooleanValue(value); }
   template <>
   inline void PropertyNode::setValue<double>(const double& value) { setFloatingValue(value); }
@@ -650,6 +652,8 @@ namespace dss {
   inline std::string PropertyNode::getValue<std::string>() const { return getStringValue(); }
   template <>
   inline int PropertyNode::getValue<int>() const { return getIntegerValue(); }
+  template <>
+  inline unsigned int PropertyNode::getValue<unsigned int>() const { return getUnsignedIntegerValue(); }
   template <>
   inline bool PropertyNode::getValue<bool>() const { return getBoolValue(); }
   template <>

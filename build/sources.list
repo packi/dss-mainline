@@ -279,6 +279,7 @@ dsstests_SOURCES = \
 	../tests/model-mainloop_tests.cpp \
 	../tests/modeljstests.cpp \
 	../tests/modeltests.cpp \
+	../tests/property_xmlparser_tests.cpp \
 	../tests/propertysystemtests.cpp \
 	../tests/restfulapitests.cpp \
 	../tests/scriptstest.cpp \
