@@ -120,6 +120,7 @@ bool secondsFromHMS(unsigned *ts, std::string string)
                 oSystemStates->getChild(i)->getPropertyByName("name");
             PropertyNodePtr valueNode =
                 oSystemStates->getChild(i)->getPropertyByName("value");
+            auto stateDescNode = oSystemStates->getChild(i)->getPropertyByName("state");
 
             if (!nameNode) {
               Logger::getInstance()->log("checkSystemCondition: missing dedicated node for name of system state: " + oStateNode->getName(), lsWarning);
@@ -133,21 +134,27 @@ bool secondsFromHMS(unsigned *ts, std::string string)
             // state found ...
             fFound = true;
 
-            if (valueNode == NULL) {
-              Logger::getInstance()->log("checkSystemCondition: can not check"
-                    " condition, missing value node!", lsError);
+            if (!valueNode && !stateDescNode) {
+              Logger::getInstance()->log("checkSystemCondition: missing state value and description can not check state: " + oStateNode->getName(), lsWarning);
               continue;
             }
 
-            if (sValue != valueNode->getAsString()) {
-              Logger::getInstance()->log("checkSystemCondition: " +
-                  sName + " failed: value is " + valueNode->getAsString() +
-                  ", requested is " + sValue, lsDebug);
-              return false;
+            if ((valueNode && (sValue == valueNode->getAsString())) ||
+                (stateDescNode && (sValue == stateDescNode->getValue<std::string>()))) {
+              // continue with outer loop, next filter state
+              break;
             }
+            std::string value_desc;
+            if (valueNode) {
+              value_desc += "index:" + valueNode->getAsString();
+            }
+            if (stateDescNode) {
+              value_desc += " desc:" + stateDescNode->getValue<std::string>();
+            }
+            Logger::getInstance()->log("checkSystemCondition: match failed for state:" + sName + "/value:" + sValue + " current system state:<" + value_desc + ">", lsDebug);
 
-            // continue with outer loop, next filter state
-            break;
+            return false;
+
           } // oSystemStates loop
           // state was requested as active - but not found in /usr/states
           if (fFound == false) {

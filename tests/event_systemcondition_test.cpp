@@ -104,4 +104,46 @@ R"xml(<?xml version="1.0" encoding="utf-8"?>
   BOOST_CHECK(!checkSystemCondition("/test"));
 }
 
+BOOST_FIXTURE_TEST_CASE(testSystemStatesString, DSSInstanceFixture) {
+    const char xml[] =
+R"xml(<?xml version="1.0" encoding="utf-8"?>
+<properties version="1">
+  <property name="test">
+    <property name="conditions">
+      <property type="boolean" name="enabled">
+        <value>true</value>
+      </property>
+      <property name="states">
+        <property type="string" name="state0">
+          <value>heating</value>
+        </property>
+      </property>
+    </property>
+  </property>
+  <property name="usr">
+    <property name="states">
+      <property type="string" name="state0">
+        <!-- mind the extra name/value properties -->
+        <property type="string" name="name">
+          <value>state0</value>
+        </property>
+        <property type="string" name="state">
+          <value>heating</value>
+        </property>
+        <property type="integer" name="value">
+          <value>1</value>
+        </property>
+      </property>
+    </property>
+  </property>
+</properties>)xml";
+
+  initPropertyTree(xml);
+  BOOST_CHECK(checkSystemCondition("/test"));
+
+  PropertySystem &ps = DSS::getInstance()->getPropertySystem();
+  ps.setStringValue("/usr/states/state0/state", "cake");
+  BOOST_CHECK(!checkSystemCondition("/test"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
