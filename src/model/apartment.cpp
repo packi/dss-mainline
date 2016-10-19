@@ -521,11 +521,6 @@ namespace dss {
     throw ItemNotFoundException(_stateName);
   }
 
-  std::vector<boost::shared_ptr<State> > Apartment::getStates() const {
-    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    return m_States;
-  } // getStates
-
   std::vector<boost::shared_ptr<State> > Apartment::getStates(const std::string& _filter) const {
     std::vector<boost::shared_ptr<State> > result;
     regex_t stateNameRegex;

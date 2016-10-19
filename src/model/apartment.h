@@ -181,8 +181,6 @@ typedef struct {
     /** Return an Empty Cluster, if available. */
     boost::shared_ptr<Cluster> getEmptyCluster();
 
-    /** returns a vector of all states */
-    std::vector<boost::shared_ptr<State> > getStates() const;
     /** returns a vector of all states that match the given name (filter expression with regex) */
     std::vector<boost::shared_ptr<State> > getStates(const std::string& _filter) const;
     /** Returns the State by name and type */
