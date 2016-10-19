@@ -1240,6 +1240,8 @@ namespace dss {
       ModelPersistence persistence(*m_pApartment);
       if (boost::filesystem::exists(configFileName)) {
         persistence.readConfigurationFromXML(configFileName, backupFileName);
+      } else {
+        m_pApartment->setName("dSS");
       }
       log("processed apartment.xml", lsNotice);
     }
