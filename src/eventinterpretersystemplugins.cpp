@@ -2256,23 +2256,28 @@ namespace dss {
     Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
             "handleEvent " + _event.getName(), lsDebug);
 
-
     boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
     if (trigger->setup(_event) == false) {
       Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
               "handleEvent: could not setup event data for SystemTrigger!");
       return;
     }
-
     boost::shared_ptr<SystemEventHighlevel> hl = boost::make_shared<SystemEventHighlevel>();
     if (hl->setup(_event) == false) {
       Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
         "handleEvent: could not setup event data for SystemEventHighlevel!");
       return;
     }
-
     addEvent(trigger);
     addEvent(hl);
+
+    boost::shared_ptr<SystemEventLog> log = boost::make_shared<SystemEventLog>();
+    if (!log->setup(_event)) {
+      Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
+              "handleEvent: could not setup event data SystemEventLog!");
+      return;
+    }
+    addEvent(log);
   }
 
   EventInterpreterPluginSystemEventLog::EventInterpreterPluginSystemEventLog(EventInterpreter* _pInterpreter)
@@ -2296,16 +2301,6 @@ namespace dss {
     }
 
     addEvent(log);
-  }
-  
-  void EventInterpreterPluginSystemEventLog::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-
-    subscription.reset(new EventSubscription(EventName::DevicesFirstSeen,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
   }
 
   SystemEventLog::SystemEventLog() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
@@ -2562,6 +2557,47 @@ namespace dss {
                    ";;;;;" + devName + ";");
   }
 
+  void SystemEventLog::logDeviceNamedAction(
+                                boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" + dsuid2str(_device->getDSID());
+    std::string actionName;
+    if (m_properties.has("name")) {
+      actionName = m_properties.get("name");
+    }
+    _logger->logln(";DeviceNamedAction;" + actionName + ";" + actionName + ";;;;;" + devName + ";");
+  }
+
+  void SystemEventLog::logDeviceNamedEvent(
+                                boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" + dsuid2str(_device->getDSID());
+    std::string evtName;
+    if (m_properties.has("name")) {
+      evtName = m_properties.get("name");
+    }
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+    _logger->logln(";DeviceNamedEvent;" + evtName + ";" + value + ";;;;;" + devName + ";");
+  }
+
+  void SystemEventLog::logDeviceNamedState(
+                                boost::shared_ptr<ScriptLogger> _logger,
+                                boost::shared_ptr<const Device> _device) {
+    std::string devName = _device->getName() + ";" + dsuid2str(_device->getDSID());
+    std::string stateName;
+    if (m_properties.has("name")) {
+      stateName = m_properties.get("name");
+    }
+    std::string value;
+    if (m_properties.has("value")) {
+      value = m_properties.get("value");
+    }
+    _logger->logln(";DeviceNamedState;" + stateName + ";" + value + ";;;;;" + devName + ";");
+  }
+
   void SystemEventLog::logDeviceBinaryInput(
                                 boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device) {
@@ -2776,6 +2812,12 @@ namespace dss {
     _logger->logln(";SetDevicesFirstSeen;" + _dateTime + ";;" + _token + ";;;;" + origName + ";");
   }
 
+  void SystemEventLog::logHighLevelEvent(boost::shared_ptr<ScriptLogger> _logger,
+                                          std::string& _id,
+                                          std::string& _name) {
+    _logger->logln(";UserDefinedAction;" + _id + ";" + _name + ";;;;;;");
+  }
+
   void SystemEventLog::model_ready() {
     boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
         EventLog, NULL));
@@ -2953,6 +2995,30 @@ namespace dss {
         EventLog, NULL));
     if (m_raisedAtDevice != NULL) {
       logDirectDeviceAction(logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
+  void SystemEventLog::deviceNamedAction() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        EventLog, NULL));
+    if (m_raisedAtDevice != NULL) {
+      logDeviceNamedAction(logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
+  void SystemEventLog::deviceNamedEvent() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        EventLog, NULL));
+    if (m_raisedAtDevice != NULL) {
+      logDeviceNamedEvent(logger, m_raisedAtDevice->getDevice());
+    }
+  }
+
+  void SystemEventLog::deviceNamedState() {
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        EventLog, NULL));
+    if (m_raisedAtDevice != NULL) {
+      logDeviceNamedState(logger, m_raisedAtDevice->getDevice());
     }
   }
 
@@ -3274,6 +3340,27 @@ namespace dss {
     } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
   }
 
+  void SystemEventLog::highlevelevent() {
+    std::string evtId;
+    if (m_properties.has("id")) {
+      evtId = m_properties.get("id");
+    }
+
+    std::string evtName;
+    PropertySystem &propSystem(DSS::getInstance()->getPropertySystem());
+    PropertyNodePtr triggerProperty = propSystem.getProperty("/scripts/system-addon-user-defined-actions/" + evtId + "/name");
+    if (triggerProperty) {
+      evtName = triggerProperty->getAsString();
+    }
+
+    boost::shared_ptr<ScriptLogger> logger(new ScriptLogger(DSS::getInstance()->getJSLogDirectory(),
+        EventLog, NULL));
+
+    try {
+      logHighLevelEvent(logger, evtId, evtName);
+    } catch (ItemNotFoundException &ex) {} catch (std::exception &ex) {}
+  }
+
   void SystemEventLog::run() {
     if (DSS::hasInstance()) {
       DSS::getInstance()->getSecurity().loginAsSystemUser(
@@ -3294,6 +3381,12 @@ namespace dss {
       buttonClick();
     } else if (m_evtName == EventName::ButtonDeviceAction) {
       directDeviceAction();
+    } else if (m_evtName == EventName::DeviceActionEvent) {
+      deviceNamedAction();
+    } else if (m_evtName == EventName::DeviceEventEvent) {
+      deviceNamedEvent();
+    } else if (m_evtName == EventName::DeviceStateEvent) {
+      deviceNamedState();
     } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
       deviceBinaryInputEvent();
     } else if (m_evtName == EventName::DeviceSensorEvent) {
@@ -3318,6 +3411,8 @@ namespace dss {
       operationLock(m_evtName);
     } else if (m_evtName == EventName::DevicesFirstSeen) {
       devicesFirstSeen();
+    } else if (m_evtName == EventName::HighLevelEvent) {
+      highlevelevent();
     }
   }
 
