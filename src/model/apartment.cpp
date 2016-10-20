@@ -28,7 +28,6 @@
 #include "apartment.h"
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/ref.hpp>
 #include <boost/thread/thread.hpp>
@@ -529,9 +528,10 @@ namespace dss {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     // A single sensor can have multiple states, by setting different on/off threshold
     // TODO(someday) SensorState should have a field to identify the input sensor
-    auto prefix = boost::format("dev.%1%.type%2%") % dsuid2str(dsuid) % sensorType;
+    std::string prefix("dev." + dsuid2str(dsuid) + ".type" + intToString(sensorType));
+
     foreach (boost::shared_ptr<State> state, m_States) {
-      if (boost::starts_with(state->getName(), prefix.str())) {
+      if (boost::starts_with(state->getName(), prefix)) {
         boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
       }
     }
@@ -543,9 +543,10 @@ namespace dss {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     // A single sensor can have multiple states, by setting different on/off threshold
     // TODO(someday) SensorState should have a field to identify the input sensor
-    auto prefix = boost::format("zone.zone%1%.group%2%.type%3%") % zoneId % groupId % sensorType;
+    std::string prefix("zone.zone" + intToString(zoneId) + ".group" + intToString(groupId) + ".type" + intToString(sensorType));
+
     foreach (boost::shared_ptr<State> state, m_States) {
-      if (boost::starts_with(state->getName(), prefix.str())) {
+      if (boost::starts_with(state->getName(), prefix)) {
         boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
       }
     }
