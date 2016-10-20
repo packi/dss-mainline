@@ -124,15 +124,17 @@ BOOST_AUTO_TEST_CASE(updateDeviceSensor)
 BOOST_AUTO_TEST_CASE(updateZoneSensor)
 {
   Apartment apt(NULL);
-  auto zone1 = apt.allocateZone(1);
 
+  int zoneId = 1;
+  int groupId = 2;
+  int sensorType = 17;
   std::string activeCondition = "> ; 24.99";
   std::string inactiveCondition = "< ; 20.0";
-  int sensorType = 17;
 
-  auto state1 = boost::make_shared<StateSensor>("opaqueString", "scriptId", zone1->getGroup(1), sensorType, activeCondition, inactiveCondition);
-  auto state2 = boost::make_shared<StateSensor>("_opaqueString2", "scriptId", zone1->getGroup(1), sensorType, activeCondition, inactiveCondition);
-  auto state3 = boost::make_shared<StateSensor>("opaqueString", "scriptId", zone1->getGroup(2), sensorType, activeCondition, inactiveCondition);
+  auto group = apt.allocateZone(zoneId)->getGroup(groupId);
+  auto state1 = boost::make_shared<StateSensor>("opaqueString", "scriptId", group, sensorType, activeCondition, inactiveCondition);
+  auto state2 = boost::make_shared<StateSensor>("_opaqueString2", "scriptId", group, sensorType, activeCondition, inactiveCondition);
+  auto state3 = boost::make_shared<StateSensor>("opaqueString", "scriptId", apt.allocateZone(zoneId + 1)->getGroup(groupId + 1), sensorType, activeCondition, inactiveCondition);
   apt.allocateState(state1);
   apt.allocateState(state2);
   apt.allocateState(state3);
@@ -140,7 +142,7 @@ BOOST_AUTO_TEST_CASE(updateZoneSensor)
   BOOST_CHECK_EQUAL(state1->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state2->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
-  apt.updateZoneSensor(zone1->getID(), zone1->getGroup(1)->getID(), sensorType, 30.0, coDsmApi);
+  apt.updateZoneSensor(zoneId, groupId, sensorType, 30.0, coDsmApi);
   BOOST_CHECK_EQUAL(state1->getState(), State_Active);
   BOOST_CHECK_EQUAL(state2->getState(), State_Active);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
