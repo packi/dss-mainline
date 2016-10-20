@@ -27,6 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include "foreach.h"
 
+#include "src/model/apartment.h"
 #include "src/model/state.h"
 
 using namespace dss;
@@ -47,6 +48,14 @@ BOOST_AUTO_TEST_CASE(test_setState)
     role->setState(coTest, cur);
     BOOST_CHECK_EQUAL(role->toString(), cur);
   }
+}
+
+BOOST_AUTO_TEST_CASE(testCreateDestroyState) {
+  Apartment apt(NULL);
+  auto state = apt.allocateState(StateType_Apartment, "foo", "<test>");
+  BOOST_CHECK_EQUAL(state, apt.getState(StateType_Apartment, "<test>", "foo"));
+  apt.removeState(state);
+  BOOST_CHECK_THROW(apt.getState(StateType_Apartment, "foo", "<test>"), ItemNotFoundException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
