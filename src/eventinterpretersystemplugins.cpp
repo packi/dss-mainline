@@ -1499,6 +1499,84 @@ namespace dss {
     return false;
   }
 
+  bool SystemTrigger::checkDeviceNamedAction(PropertyNodePtr _triggerProp) {
+    if (m_evtName != EventName::DeviceActionEvent) {
+      return false;
+    }
+
+    dsuid_t dsuid = m_evtSrcDSID;
+    std::string action = m_properties.get("name");
+
+    if (dsuid == DSUID_NULL) {
+      return false;
+    }
+
+    if (action.empty() || (action == "-1")) {
+      return false;
+    }
+
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsuid");
+    if (triggerDSID == NULL) {
+      return false;
+    }
+
+    PropertyNodePtr idNode =  _triggerProp->getPropertyByName("id");
+    if (idNode == NULL) {
+      return false;
+    }
+    std::string sDSID = triggerDSID->getAsString();
+    std::string sAction = idNode->getAsString();
+    if ((sDSID == "-1") || (sDSID == dsuid2str(dsuid))) {
+      if ((sAction == action) || (sAction == "-1")) {
+        Logger::getInstance()->log("SystemTrigger::"
+                "checkDeviceNamedAction:: Match: dSID: " + sDSID +
+                ", id: " + sAction);
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool SystemTrigger::checkDeviceNamedEvent(PropertyNodePtr _triggerProp) {
+    if (m_evtName != EventName::DeviceEventEvent) {
+      return false;
+    }
+
+    dsuid_t dsuid = m_evtSrcDSID;
+    std::string evtName = m_properties.get("name");
+
+    if (dsuid == DSUID_NULL) {
+      return false;
+    }
+
+    if (evtName.empty() || (evtName == "-1")) {
+      return false;
+    }
+
+    PropertyNodePtr triggerDSID = _triggerProp->getPropertyByName("dsuid");
+    if (triggerDSID == NULL) {
+      return false;
+    }
+
+    PropertyNodePtr idNode =  _triggerProp->getPropertyByName("id");
+    if (idNode == NULL) {
+      return false;
+    }
+    std::string sDSID = triggerDSID->getAsString();
+    std::string sEvent = idNode->getAsString();
+    if ((sDSID == "-1") || (sDSID == dsuid2str(dsuid))) {
+      if ((sEvent == evtName) || (sEvent == "-1")) {
+        Logger::getInstance()->log("SystemTrigger::"
+                "checkDeviceNamedEvent:: Match: dSID: " + sDSID +
+                ", id: " + sEvent);
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   bool SystemTrigger::checkHighlevel(PropertyNodePtr _triggerProp) {
       if (m_evtName != "highlevelevent") {
         return false;
@@ -1792,6 +1870,20 @@ namespace dss {
     } else if (m_evtName == EventName::DeviceBinaryInputEvent) {
       if (triggerValue == "device-binary-input") {
         if (checkDeviceBinaryInput(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceActionEvent) {
+      if (triggerValue == "device-named-action") {
+        if (checkDeviceNamedAction(triggerProp)) {
+          return true;
+        }
+      }
+
+    } else if (m_evtName == EventName::DeviceEventEvent) {
+      if (triggerValue == "device-named-event") {
+        if (checkDeviceNamedEvent(triggerProp)) {
           return true;
         }
       }

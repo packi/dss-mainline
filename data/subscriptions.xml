@@ -8,6 +8,8 @@
   <subscription event-name="buttonDeviceAction" handler-name="system_trigger" />
   <subscription event-name="deviceSensorEvent" handler-name="system_trigger" />
   <subscription event-name="deviceBinaryInputEvent" handler-name="system_trigger" />
+  <subscription event-name="deviceActionEvent" handler-name="system_trigger" />
+  <subscription event-name="deviceEventEvent" handler-name="system_trigger" />
   <subscription event-name="callScene" handler-name="system_trigger" />
   <subscription event-name="callSceneBus" handler-name="system_trigger" />
   <subscription event-name="undoScene" handler-name="system_trigger" />

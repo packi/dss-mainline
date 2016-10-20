@@ -71,6 +71,8 @@ namespace dss {
       bool checkDeviceBinaryInput(PropertyNodePtr _triggerProp);
       bool checkDevice(PropertyNodePtr _tiggerProp);
       bool checkDirectDeviceAction(PropertyNodePtr _triggerProp);
+      bool checkDeviceNamedAction(PropertyNodePtr _triggerProp);
+      bool checkDeviceNamedEvent(PropertyNodePtr _triggerProp);
       bool checkHighlevel(PropertyNodePtr _triggerProp);
       bool checkState(PropertyNodePtr _triggerProp);
       bool checkSensorValue(PropertyNodePtr _triggerProp);
