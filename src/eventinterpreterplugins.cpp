@@ -1358,9 +1358,10 @@ Sample: {
     if (_event.getName() == EventName::DeviceSensorValue && _event.getRaisedAtDevice()) {
       boost::shared_ptr<const DeviceReference> pDevRev = _event.getRaisedAtDevice();
 
-      std::string strType = _event.getPropertyByName("sensorType");
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
+      double fValue = strToDouble(sensorValueFloat);
 
+      std::string strType = _event.getPropertyByName("sensorType");
       int sensorType = 255;
       if (!strType.empty()) {
         sensorType = strToInt(strType);
@@ -1371,14 +1372,7 @@ Sample: {
         } catch (ItemNotFoundException& ex) {}
       }
 
-      std::string sName = "dev." + dsuid2str(pDevRev->getDSID()) +
-        ".type" + intToString(sensorType) + ".*";
-
-      foreach(boost::shared_ptr<State> state,
-              DSS::getInstance()->getApartment().getStates(sName)) {
-        double fValue = strToDouble(sensorValueFloat);
-        boost::dynamic_pointer_cast<StateSensor>(state)->newValue(coDsmApi, fValue);
-      }
+      DSS::getInstance()->getApartment().updateDeviceSensor(pDevRev->getDSID(), sensorType, fValue, coDsmApi);
       return;
     }
 
@@ -1386,17 +1380,11 @@ Sample: {
       boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
 
       std::string strType = _event.getPropertyByName("sensorType");
+      int sensorType = strToInt(strType);
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
+      double fValue = strToDouble(sensorValueFloat);
 
-      std::string sName = "zone.zone" + intToString(pGroup->getZoneID()) +
-          ".group" + intToString(pGroup->getID()) +
-          ".type" + strType + ".*";
-      std::vector<boost::shared_ptr<State> > sList = DSS::getInstance()->getApartment().getStates(sName);
-      foreach(boost::shared_ptr<State> state, sList) {
-        double fValue = strToDouble(sensorValueFloat);
-        boost::shared_ptr<StateSensor> pSensor = boost::dynamic_pointer_cast <StateSensor> (state);
-        pSensor->newValue(coDsmApi, fValue);
-      }
+      DSS::getInstance()->getApartment().updateZoneSensor(pGroup->getZoneID(), pGroup->getID(), sensorType, fValue, coDsmApi);
       return;
     }
   }

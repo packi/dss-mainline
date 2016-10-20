@@ -521,18 +521,43 @@ namespace dss {
     throw ItemNotFoundException(_stateName);
   }
 
-  std::vector<boost::shared_ptr<State> > Apartment::getStates(const std::string& _filter) const {
-    std::vector<boost::shared_ptr<State> > result;
-    regex_t stateNameRegex;
-    regcomp(&stateNameRegex, _filter.c_str(), REG_EXTENDED);
-    foreach(boost::shared_ptr<State> state, m_States) {
-      if (0 == regexec(&stateNameRegex, state->getName().c_str(), (size_t)0, NULL, 0)) {
-        result.push_back(state);
+  // throws (dynamic_cast relies on consistent sensor names)
+  void Apartment::updateDeviceSensor(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin)
+  {
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
+    // TODO(someday) SensorState should have a field to identify the input sensor
+    regex_t regex;
+    std::string format("dev." + dsuid2str(dsuid) + ".type" + intToString(sensorType) + ".*");
+    regcomp(&regex, format.c_str(), REG_EXTENDED);
+
+    foreach (boost::shared_ptr<State> state, m_States) {
+      if (0 != regexec(&regex, state->getName().c_str(), (size_t)0, NULL, 0)) {
+        continue;
       }
+      boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
     }
-    regfree(&stateNameRegex);
-    return result;
-  } // getStates
+    regfree(&regex);
+  }
+
+  // throws (dynamic_cast relies on consistent sensor names)
+  void Apartment::updateZoneSensor(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin)
+  {
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
+    // Since the SensorStates are fuzzy, they abstract high-level values like:
+    // hot, little-bit hot, hence several SensorStates can have a physical sensor
+    // as its underlying input sensor
+    // TODO(someday) SensorState should have a field to identify the input sensor
+    regex_t regex;
+    std::string format("zone.zone" + intToString(zoneId) + ".group" + intToString(groupId) + ".type" + intToString(sensorType) + ".*");
+    regcomp(&regex, format.c_str(), REG_EXTENDED);
+    foreach (boost::shared_ptr<State> state, m_States) {
+      if (0 != regexec(&regex, state->getName().c_str(), (size_t)0, NULL, 0)) {
+        continue;
+      }
+      boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
+    }
+    regfree(&regex);
+  }
 
   void Apartment::removeState(boost::shared_ptr<State> _state) {
     m_States.erase(std::remove(m_States.begin(), m_States.end(), _state));
