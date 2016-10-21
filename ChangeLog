@@ -1,5 +1,12 @@
 dSS - digitalSTROM Server
 
+v1.37.1	21.10.2016
+	* query and parse config link with GetBasicArticleData, #14599
+	* fix vdc state and actions setup in busscanner, #14599
+	* add handling for action parameter on set/get SceneValue, #14586
+	* upload new device events to cloud, #14593
+	* clean up config.xml, #14723
+
 v1.37.0	10.10.2016
 	* fix window handle state synchronization, #13800
 	* advanced sensorhandling: retrigger with action lag, #13935
