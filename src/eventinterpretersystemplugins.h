@@ -71,6 +71,8 @@ namespace dss {
       bool checkDeviceBinaryInput(PropertyNodePtr _triggerProp);
       bool checkDevice(PropertyNodePtr _tiggerProp);
       bool checkDirectDeviceAction(PropertyNodePtr _triggerProp);
+      bool checkDeviceNamedAction(PropertyNodePtr _triggerProp);
+      bool checkDeviceNamedEvent(PropertyNodePtr _triggerProp);
       bool checkHighlevel(PropertyNodePtr _triggerProp);
       bool checkState(PropertyNodePtr _triggerProp);
       bool checkSensorValue(PropertyNodePtr _triggerProp);
@@ -171,7 +173,6 @@ namespace dss {
       EventInterpreterPluginSystemEventLog(EventInterpreter* _pInterpreter);
       virtual ~EventInterpreterPluginSystemEventLog();
       virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-      virtual void subscribe();
   };
 
   class SystemEventLog : public SystemEvent {
@@ -226,6 +227,12 @@ namespace dss {
                                 boost::shared_ptr<const Device> _device);
       void logDirectDeviceAction(boost::shared_ptr<ScriptLogger> _logger,
                                  boost::shared_ptr<const Device> _device);
+      void logDeviceNamedAction(boost::shared_ptr<ScriptLogger> _logger,
+                                 boost::shared_ptr<const Device> _device);
+      void logDeviceNamedEvent(boost::shared_ptr<ScriptLogger> _logger,
+                                 boost::shared_ptr<const Device> _device);
+      void logDeviceNamedState(boost::shared_ptr<ScriptLogger> _logger,
+                                 boost::shared_ptr<const Device> _device);
       void logDeviceBinaryInput(boost::shared_ptr<ScriptLogger> _logger,
                                 boost::shared_ptr<const Device> _device);
       void logDeviceSensorEvent(boost::shared_ptr<ScriptLogger> _logger,
@@ -267,6 +274,9 @@ namespace dss {
                                std::string& dateTime, 
                                std::string& token,
                                callOrigin_t _call_origin);
+      void logHighLevelEvent(boost::shared_ptr<ScriptLogger> _logger,
+                             std::string& _id,
+                             std::string& _name);
 
       void model_ready();
       void callScene();
@@ -274,6 +284,9 @@ namespace dss {
       void undoScene();
       void buttonClick();
       void directDeviceAction();
+      void deviceNamedAction();
+      void deviceNamedEvent();
+      void deviceNamedState();
       void deviceBinaryInputEvent();
       void deviceSensorEvent();
       void deviceSensorValue();
@@ -286,6 +299,7 @@ namespace dss {
       void executionDenied();
       void operationLock(const std::string& _evtName);
       void devicesFirstSeen();
+      void highlevelevent();
 
       std::string m_evtName;
 
