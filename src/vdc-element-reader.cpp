@@ -102,7 +102,9 @@ int VdcElementReader::getValueAsBool(bool defaultValue) const {
     return defaultValue;
   }
   const vdcapi::PropertyValue& value = m_element.value();
-  if (value.has_v_double()) {
+  if (value.has_v_bool()) {
+    return value.v_bool();
+  } else if (value.has_v_double()) {
     return value.v_double() != 0;
   } else if (value.has_v_int64()) {
     return value.v_int64() != 0;
