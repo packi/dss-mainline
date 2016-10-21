@@ -1372,7 +1372,7 @@ Sample: {
         } catch (ItemNotFoundException& ex) {}
       }
 
-      DSS::getInstance()->getApartment().updateDeviceSensor(pDevRev->getDSID(), sensorType, fValue, coDsmApi);
+      DSS::getInstance()->getApartment().updateDeviceSensorStates(pDevRev->getDSID(), sensorType, fValue, coDsmApi);
       return;
     }
 
@@ -1384,7 +1384,7 @@ Sample: {
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
       double fValue = strToDouble(sensorValueFloat);
 
-      DSS::getInstance()->getApartment().updateZoneSensor(pGroup->getZoneID(), pGroup->getID(), sensorType, fValue, coDsmApi);
+      DSS::getInstance()->getApartment().updateZoneSensorStates(pGroup->getZoneID(), pGroup->getID(), sensorType, fValue, coDsmApi);
       return;
     }
   }

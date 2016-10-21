@@ -189,8 +189,8 @@ typedef struct {
                                       const std::string& _identifier,
                                       const std::string& _stateName) const;
 
-    void updateDeviceSensor(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin);
-    void updateZoneSensor(int zoneId, int groupId, int type, double value, callOrigin_t origin);
+    void updateDeviceSensorStates(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin);
+    void updateZoneSensorStates(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin);
 
     /** Allocates a device and returns a reference to it. */
     boost::shared_ptr<Device> allocateDevice(const dsuid_t _dsid);

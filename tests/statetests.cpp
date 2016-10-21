@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(testCreateDestroyState) {
 
 DSUID_DEFINE(dsuid1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 
-BOOST_AUTO_TEST_CASE(createDeviceSensor)
+BOOST_AUTO_TEST_CASE(createDeviceSensors)
 {
   Apartment apt(NULL);
   auto dev = apt.allocateDevice(dsuid1);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(createGroupSensor)
   BOOST_CHECK_EQUAL(state.getState(), State_Inactive);
 }
 
-BOOST_AUTO_TEST_CASE(updateDeviceSensor)
+BOOST_AUTO_TEST_CASE(updateDeviceSensorStates)
 {
   Apartment apt(NULL);
   auto dev = apt.allocateDevice(dsuid1);
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(updateDeviceSensor)
   BOOST_CHECK_EQUAL(state1->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state2->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
-  apt.updateDeviceSensor(dsuid1, sensorType, 30.0, coDsmApi);
+  apt.updateDeviceSensorStates(dsuid1, sensorType, 30.0, coDsmApi);
   // state2 is identical to state1 except the opaqueString, should be updated
   // state3 depends on different sensorType hence not modified
   BOOST_CHECK_EQUAL(state1->getState(), State_Active);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(updateDeviceSensor)
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
 }
 
-BOOST_AUTO_TEST_CASE(updateZoneSensor)
+BOOST_AUTO_TEST_CASE(updateZoneSensorStates)
 {
   Apartment apt(NULL);
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(updateZoneSensor)
   BOOST_CHECK_EQUAL(state1->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state2->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
-  apt.updateZoneSensor(zoneId, groupId, sensorType, 30.0, coDsmApi);
+  apt.updateZoneSensorStates(zoneId, groupId, sensorType, 30.0, coDsmApi);
   BOOST_CHECK_EQUAL(state1->getState(), State_Active);
   BOOST_CHECK_EQUAL(state2->getState(), State_Active);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);

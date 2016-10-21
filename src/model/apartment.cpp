@@ -523,7 +523,7 @@ namespace dss {
   }
 
   // throws (dynamic_cast relies on consistent sensor names)
-  void Apartment::updateDeviceSensor(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin)
+  void Apartment::updateDeviceSensorStates(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin)
   {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     // A single sensor can have multiple states, by setting different on/off threshold
@@ -538,7 +538,7 @@ namespace dss {
   }
 
   // throws (dynamic_cast relies on consistent sensor names)
-  void Apartment::updateZoneSensor(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin)
+  void Apartment::updateZoneSensorStates(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin)
   {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     // A single sensor can have multiple states, by setting different on/off threshold
