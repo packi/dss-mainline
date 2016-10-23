@@ -56,6 +56,7 @@ namespace EventName {
   const std::string HeatingControllerValueDsHub = "HeatingControllerValueDsHub";
   const std::string HeatingControllerState = "HeatingControllerState";
   const std::string OldStateChange = "oldStateChange";
+  const std::string HighLevelEvent = "highlevelevent";
   const std::string AddonToCloud = "AddonToCloud";
   const std::string HeatingValveProtection = "execute_valve_protection";
   const std::string DeviceHeatingTypeChanged = "DeviceHeatingTypeChanged";
