@@ -115,7 +115,7 @@ BOOST_FIXTURE_TEST_CASE(testBindArgs, DSSInstanceFixture) {
   auto find_by_name = db.prepare("SELECT id FROM foo WHERE name=?");
   // same with string as argument, int as reply
   {
-    auto bindScope = find_by_name.bind("bar7");
+    auto bindScope = find_by_name.bind(std::string("bar7"));
     BOOST_CHECK(find_by_name.step() == SqlStatement::StepResult::ROW);
     BOOST_CHECK_EQUAL(find_by_name.getColumn<int>(0), 7);
     BOOST_CHECK(find_by_name.step() == SqlStatement::StepResult::DONE);
@@ -125,7 +125,7 @@ BOOST_FIXTURE_TEST_CASE(testBindArgs, DSSInstanceFixture) {
   auto find_by_id_and_name = db.prepare("SELECT id FROM foo WHERE id=? AND name=?");
   // same with two args
   {
-    auto bindScope = find_by_id_and_name.bind(7, "bar7");
+    auto bindScope = find_by_id_and_name.bind(7, std::string("bar7"));
     BOOST_CHECK(find_by_id_and_name.step() == SqlStatement::StepResult::ROW);
     BOOST_CHECK_EQUAL(find_by_id_and_name.getColumn<int>(0), 7);
     BOOST_CHECK(find_by_id_and_name.step() == SqlStatement::StepResult::DONE);
