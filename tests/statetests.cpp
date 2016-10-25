@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(updateDeviceSensorStates)
   BOOST_CHECK_EQUAL(state1->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state2->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
-  apt.updateDeviceSensorStates(dsuid1, sensorType, 30.0, coDsmApi);
+  apt.updateSensorStates(dsuid1, sensorType, 30.0, coDsmApi);
   // state2 is identical to state1 except the opaqueString, should be updated
   // state3 depends on different sensorType hence not modified
   BOOST_CHECK_EQUAL(state1->getState(), State_Active);
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(updateZoneSensorStates)
   BOOST_CHECK_EQUAL(state1->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state2->getState(), State_Inactive);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
-  apt.updateZoneSensorStates(zoneId, groupId, sensorType, 30.0, coDsmApi);
+  apt.updateSensorStates(zoneId, groupId, sensorType, 30.0, coDsmApi);
   BOOST_CHECK_EQUAL(state1->getState(), State_Active);
   BOOST_CHECK_EQUAL(state2->getState(), State_Active);
   BOOST_CHECK_EQUAL(state3->getState(), State_Inactive);
