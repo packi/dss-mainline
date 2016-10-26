@@ -61,6 +61,7 @@ libdsscore_a_CXXFLAGS = \
 			$(GCOV_CFLAGS) \
 			$(OSSP_UUID_CFLAGS) \
 			$(BOOST_FILESYSTEM_LIB) \
+			$(BOOST_CPPFLAGS) \
 			$(LIBPROTOBUF_CFLAGS) \
 			$(LIBCOMMCHANNEL_CFLAGS) \
 			$(LIBDSUID_CFLAGS)
@@ -76,10 +77,12 @@ dss_CXXFLAGS = \
             $(LIBCOMMCHANNEL_CFLAGS) \
 			$(LIBDSUID_CFLAGS) \
 			$(OSSP_UUID_CFLAGS) \
+			$(BOOST_CPPFLAGS) \
 			$(SQLITE3_CFLAGS)
 
 dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(LIBDSM_API_LDFLAGS) \
+			$(BOOST_LDFLAGS) \
 			$(JS_LIBS) \
 			$(ICAL_LIBS) \
 			$(LIBDSM_API_LIBS) \
