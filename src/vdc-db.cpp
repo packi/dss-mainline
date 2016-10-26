@@ -68,10 +68,10 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
     sql = "SELECT s.name, n_s.name, e.value, n_e.name, s.tags "
         "FROM device AS d "
         "INNER JOIN (device_status AS s "
-        "INNER JOIN name_device_status AS n_s ON s.id=n_s.reference_id) "
+        "INNER JOIN name_device_status AS n_s ON s.id=n_s.reference_id AND n_s.lang_code=?) "
         "INNER JOIN (device_status_enum AS e "
-        "INNER JOIN name_device_status_enum AS n_e ON e.id=n_e.reference_id) "
-        "ON d.id=s.device_id AND s.id=e.device_id WHERE d.gtin=? AND n_e.lang_code=? ORDER BY s.name;";
+        "INNER JOIN name_device_status_enum AS n_e ON e.id=n_e.reference_id AND n_e.lang_code=?) "
+        "ON d.id=s.device_id AND s.id=e.device_id WHERE d.gtin=? ORDER BY s.name;";
   } else {
     sql = "SELECT s.name, s.name, e.value, e.value, s.tags "
         "FROM device AS d INNER JOIN device_status AS s INNER JOIN device_status_enum AS e "
@@ -84,7 +84,7 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
   if (langCode.empty()) {
     scope = findStates.bind(gtin);
   } else {
-    scope = findStates.bind(gtin, langCode);
+    scope = findStates.bind(langCode, langCode, gtin);
   }
 
   std::string cur(""); // invalid state name
