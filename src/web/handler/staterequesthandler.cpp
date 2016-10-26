@@ -60,7 +60,13 @@ namespace dss {
         boost::shared_ptr<State> pState = m_Apartment.getState(StateType_Script, addon, name);
         pState->setState(coJSON, value);
       } catch (ItemNotFoundException& e) {
-        return JSONWriter::failure(std::string("State ") + e.what() + " not found");
+        try {
+          m_Apartment.getNonScriptState(name); // will throw if not found
+          return JSONWriter::failure(std::string("State ") + " state not writable from script");
+        } catch (ItemNotFoundException& e) {
+          // nope definitely doesn't exist
+          return JSONWriter::failure(std::string("State ") + e.what() + " not found");
+        }
       }
 
       return JSONWriter::success();
