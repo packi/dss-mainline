@@ -2065,7 +2065,7 @@ namespace dss {
       _request.getParameter("lang", langCode);
       VdcDb db;
       JSONWriter json;
-      vdcInfo::addSpec(*pDevice, json);
+      vdcInfo::addSpec(db, *pDevice, langCode, json);
       vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
@@ -2157,7 +2157,12 @@ namespace dss {
       if (!_request.getParameter("id", id)) {
         return JSONWriter::failure("missing parameter: id");
       }
-      pDevice->callAction(id);
+      vdcapi::PropertyElement parsedParamsElement;
+      std::string params;
+      if (_request.getParameter("params", params) ) {
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+      }
+      pDevice->callAction(id, parsedParamsElement);
       return JSONWriter::success();
     } else {
       throw std::runtime_error("Unhandled function");

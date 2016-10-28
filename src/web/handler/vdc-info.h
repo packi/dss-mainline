@@ -42,7 +42,7 @@ namespace dss {
       bool customActions : 1;
     };
 
-    void addSpec(const Device& device, JSONWriter& json);
+    void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);

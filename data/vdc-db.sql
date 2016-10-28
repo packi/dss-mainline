@@ -46,8 +46,65 @@ insert into name_master values(39 , 8 , "device_actions_parameter" , "Zieltemper
 insert into name_master values(40 , 5 , "device_actions_predefined" , "Abkochen" , "de_DE");
 insert into name_master values(41 , 6 , "device_actions_predefined" , "Normales Kochen" , "de_DE");
 insert into name_master values(42 , 7 , "device_actions_predefined" , "Beenden" , "de_DE");
+insert into name_master values(43 , 1 , "device_actions" , "bake" , "base");
+insert into name_master values(44 , 2 , "device_actions" , "steam" , "base");
+insert into name_master values(45 , 3 , "device_actions" , "turn off" , "base");
+insert into name_master values(46 , 1 , "device_actions_parameter" , "temperature" , "base");
+insert into name_master values(47 , 2 , "device_actions_parameter" , "time" , "base");
+insert into name_master values(48 , 3 , "device_actions_parameter" , "temperature" , "base");
+insert into name_master values(49 , 4 , "device_actions_parameter" , "time" , "base");
+insert into name_master values(50 , 1 , "device_actions_predefined" , "cake" , "base");
+insert into name_master values(51 , 2 , "device_actions_predefined" , "pizza" , "base");
+insert into name_master values(52 , 3 , "device_actions_predefined" , "asparagus" , "base");
+insert into name_master values(53 , 4 , "device_actions_predefined" , "stop" , "base");
+insert into name_master values(54 , 1 , "device_properties" , "temperature" , "base");
+insert into name_master values(55 , 2 , "device_properties" , "finish time" , "base");
+insert into name_master values(56 , 3 , "device_properties" , "core temperature" , "base");
+insert into name_master values(57 , 2 , "device_events" , "need water" , "base");
+insert into name_master values(58 , 5 , "device_status" , "operation mode" , "base");
+insert into name_master values(59 , 6 , "device_status" , "ventilator" , "base");
+insert into name_master values(60 , 7 , "device_status" , "alarm clock" , "base");
+insert into name_master values(61 , 1 , "device_status_enum" , "heating" , "base");
+insert into name_master values(62 , 2 , "device_status_enum" , "steaming" , "base");
+insert into name_master values(63 , 3 , "device_status_enum" , "turned of" , "base");
+insert into name_master values(64 , 4 , "device_status_enum" , "on" , "base");
+insert into name_master values(65 , 5 , "device_status_enum" , "off" , "base");
+insert into name_master values(66 , 6 , "device_status_enum" , "inactive" , "base");
+insert into name_master values(67 , 7 , "device_status_enum" , "running" , "base");
+insert into name_master values(68 , 8 , "device_status" , "operation mode" , "base");
+insert into name_master values(69 , 8 , "device_status_enum" , "cooling" , "base");
+insert into name_master values(70 , 9 , "device_status_enum" , "heat up" , "base");
+insert into name_master values(71 , 10 , "device_status_enum" , "keep warm" , "base");
+insert into name_master values(72 , 11 , "device_status_enum" , "ready" , "base");
+insert into name_master values(73 , 12 , "device_status_enum" , "released" , "base");
+insert into name_master values(74 , 4 , "device_actions" , "stopping" , "base");
+insert into name_master values(75 , 5 , "device_actions" , "boil" , "base");
+insert into name_master values(76 , 6 , "device_actions" , "boilandcooldown" , "base");
+insert into name_master values(77 , 5 , "device_actions_parameter" , "keep warm duration" , "base");
+insert into name_master values(78 , 7 , "device_actions_parameter" , "keep warm duration" , "base");
+insert into name_master values(79 , 6 , "device_actions_parameter" , "targettemperature" , "base");
+insert into name_master values(80 , 8 , "device_actions_parameter" , "targettemperature" , "base");
+insert into name_master values(81 , 5 , "device_actions_predefined" , "babyboiling" , "base");
+insert into name_master values(82 , 6 , "device_actions_predefined" , "boil" , "base");
+insert into name_master values(83 , 7 , "device_actions_predefined" , "stopping" , "base");
+insert into name_master values(84 , 3 , "device_events" , "Kettle attached" , "base");
 insert into name_master values(85 , 3 , "device_events" , "Kocher abgesetzt" , "de_DE");
 insert into name_master values(86 , 3 , "device_events" , "Kettle attached" , "en_EN");
+insert into name_master values(88 , 4 , "device_events" , "Boiling started" , "base");
+insert into name_master values(89 , 5 , "device_events" , "Keeping warm started" , "base");
+insert into name_master values(90 , 6 , "device_events" , "Boil and cool down (Babyboil) started" , "base");
+insert into name_master values(91 , 7 , "device_events" , "Boiling ended without keeping warm" , "base");
+insert into name_master values(92 , 8 , "device_events" , "Kettle was taken away" , "base");
+insert into name_master values(93 , 9 , "device_events" , "Cooled down to specified end temperature without keeping warm" , "base");
+insert into name_master values(94 , 10 , "device_events" , "Keeping warm finished (timeout)" , "base");
+insert into name_master values(95 , 11 , "device_events" , "Boiling aborted by button press" , "base");
+insert into name_master values(96 , 12 , "device_events" , "Cooling down aborted by button press" , "base");
+insert into name_master values(97 , 13 , "device_events" , "Keeping warm aborted by button press" , "base");
+insert into name_master values(98 , 14 , "device_events" , "Keep warm after boiling started" , "base");
+insert into name_master values(99 , 15 , "device_events" , "Keep temperature after cooling down (BabyBoil) started" , "base");
+insert into name_master values(100 , 16 , "device_events" , "Boiling aborted because kettle was removed" , "base");
+insert into name_master values(101 , 17 , "device_events" , "Cooling down aborted because kettle was removed" , "base");
+insert into name_master values(102 , 18 , "device_events" , "Keeping warm aborted because kettle was removed" , "base");
 insert into name_master values(105 , 4 , "device_events" , "Boiling started" , "en_EN");
 insert into name_master values(106 , 4 , "device_events" , "Aufheizen gestartet" , "de_DE");
 insert into name_master values(107 , 5 , "device_events" , "Keeping warm started" , "en_EN");
@@ -115,6 +172,38 @@ insert into name_master values(168 , 9 , "device_status_enum" , "Heat up" , "en_
 insert into name_master values(169 , 10 , "device_status_enum" , "Keep warm" , "en_EN");
 insert into name_master values(170 , 11 , "device_status_enum" , "Ready" , "en_EN");
 insert into name_master values(171 , 12 , "device_status_enum" , "Released" , "en_EN");
+insert into name_master values(179 , 1 , "device_actions" , "Back!" , "nl_NL");
+insert into name_master values(180 , 2 , "device_actions" , "Dampfen" , "nl_NL");
+insert into name_master values(181 , 3 , "device_actions" , "auuus" , "nl_NL");
+insert into name_master values(182 , 1 , "common_labels" , "Name" , "de_DE");
+insert into name_master values(183 , 1 , "common_labels" , "Name" , "en_EN");
+insert into name_master values(184 , 2 , "common_labels" , "dS Device GTIN" , "de_DE");
+insert into name_master values(185 , 2 , "common_labels" , "dS Device GTIN" , "en_EN");
+insert into name_master values(186 , 3 , "common_labels" , "Modellbezeichnung" , "de_DE");
+insert into name_master values(187 , 3 , "common_labels" , "Model Name" , "en_EN");
+insert into name_master values(188 , 4 , "common_labels" , "Modellvariante" , "de_DE");
+insert into name_master values(189 , 4 , "common_labels" , "Model Version" , "en_EN");
+insert into name_master values(190 , 5 , "common_labels" , "Artikel Kennzeichnung" , "en_EN");
+insert into name_master values(191 , 5 , "common_labels" , "Article Identifier" , "en_EN");
+insert into name_master values(192 , 6 , "common_labels" , "Produkt Kennzeichnung" , "de_DE");
+insert into name_master values(193 , 6 , "common_labels" , "Product Id" , "en_EN");
+insert into name_master values(194 , 7 , "common_labels" , "Hersteller" , "de_DE");
+insert into name_master values(195 , 7 , "common_labels" , "Vendor" , "en_EN");
+insert into name_master values(196 , 8 , "common_labels" , "Hersteller Kennung" , "de_DE");
+insert into name_master values(197 , 8 , "common_labels" , "Vendor Id" , "en_EN");
+insert into name_master values(198 , 9 , "common_labels" , "Geräteklasse" , "de_DE");
+insert into name_master values(199 , 9 , "common_labels" , "Device Class" , "en_EN");
+insert into name_master values(200 , 10 , "common_labels" , "Geräteklassen version" , "de_DE");
+insert into name_master values(201 , 1 , "common_labels" , "Name" , "base");
+insert into name_master values(202 , 2 , "common_labels" , "dS Device GTIN" , "base");
+insert into name_master values(203 , 3 , "common_labels" , "Model Name" , "base");
+insert into name_master values(204 , 4 , "common_labels" , "Model Version" , "base");
+insert into name_master values(205 , 5 , "common_labels" , "Article Identifier" , "base");
+insert into name_master values(206 , 6 , "common_labels" , "Product Id" , "base");
+insert into name_master values(207 , 7 , "common_labels" , "Vendor" , "base");
+insert into name_master values(208 , 8 , "common_labels" , "Vendor Id" , "base");
+insert into name_master values(209 , 9 , "common_labels" , "Device Class" , "base");
+insert into name_master values(210 , 10 , "common_labels" , "deviceclasses version" , "base");
 drop table if exists "device_status";
 create table "device_status"(id primary key,device_id,name,tags);
 insert into device_status values(5 , 12 , "operationMode" , "overview");
@@ -135,22 +224,49 @@ insert into device_status_enum values(9 , 8 , "heating");
 insert into device_status_enum values(10 , 8 , "keepwarm");
 insert into device_status_enum values(11 , 8 , "ready");
 insert into device_status_enum values(12 , 8 , "removed");
+drop table if exists "device_labels";
+create table "device_labels" (id primary key,device_id,name,tags);
+insert into device_labels values(1 , 18 , "SpecialField" , "overview:100");
+insert into device_labels values(2 , 18 , "hardwareModelGuid" , "overview:101");
+drop table if exists "common_labels";
+create table "common_labels" (id primary key,name,tags);
+insert into common_labels values(1 , "name" , "overview:1");
+insert into common_labels values(2 , "dsDeviceGTIN" , "overview:2");
+insert into common_labels values(3 , "model" , "overview:3");
+insert into common_labels values(4 , "modelVersion" , "overview:4");
+insert into common_labels values(5 , "hardwareGuid" , "overview:5");
+insert into common_labels values(6 , "hardwareModelGuid" , "invisible");
+insert into common_labels values(7 , "vendorName" , "overview:7");
+insert into common_labels values(8 , "vendorId" , "");
+insert into common_labels values(9 , "class" , "invisible");
+insert into common_labels values(10 , "classVersion" , "invisible");
 drop table if exists "device_properties";
-create table "device_properties"(id primary key,device_id,name,type_id,min_value,max_value,default_value,resolution,si_unit,tags);
+create table "device_properties" (id primary key,device_id,name,type_id,min_value,max_value,default_value,resolution,si_unit,tags);
 insert into device_properties values(1 , 12 , "temperature" , 1 , "0" , "250" , "0" , "1" , "celsius" , "" );
 insert into device_properties values(2 , 12 , "duration" , 2 , "0" , "1800" , "0" , "1" , "second" , "" );
 insert into device_properties values(3 , 12 , "temperature.sensor" , 1 , "0" , "250" , "0" , "1" , "celsius" , "readonly" );
 insert into device_properties values(4 , 18 , "currentTemperature" , 1 , "0" , "250" , "0" , "1" , "celsius" , "readonly;overview" );
 drop table if exists "name_device_properties";
-create table "name_device_properties"(id primary key,reference_id,lang_code,displayMask,alt_label,alt_postfix,alt_precision_float);
+create table "name_device_properties" (id primary key,reference_id,lang_code,displayMask,alt_label,alt_postfix,alt_precision_float);
 insert into name_device_properties values(1 , 1 , "de_DE" , "Temperatur {value} &deg;" , "Temperatur" , "&deg;" , "0");
 insert into name_device_properties values(2 , 2 , "de_DE" , "Endzeit in {value} Sekunden" , "Endzeit" , "Sekunden" , "0");
 insert into name_device_properties values(3 , 3 , "de_DE" , "Garguttemperatur {value} &deg;" , "Garguttemperatur" , "&deg;" , "0");
 insert into name_device_properties values(4 , 4 , "de_DE" , "Temperatur {value} &deg; " , "Temperatur" , " " , "0");
+insert into name_device_properties values(5 , 1 , "base" , "temperature {value} &deg; " , "temperature" , "&deg;" , "0");
+insert into name_device_properties values(6 , 2 , "base" , "finished in {value} seconds" , "finishtime" , "seconds" , "0");
+insert into name_device_properties values(7 , 3 , "base" , "coretemperature {value} &deg;" , "coretemperature" , "&deg;" , "0");
+insert into name_device_properties values(8 , 4 , "base" , "temperature {value} &deg;" , "temperature" , "&deg;" , "0");
 insert into name_device_properties values(9 , 1 , "en_EN" , "temperature {value} &deg; " , "Temperature" , "&deg;" , "0");
 insert into name_device_properties values(10 , 2 , "en_EN" , "finished in {value} seconds" , "Finishtime" , "seconds" , "0");
 insert into name_device_properties values(11 , 3 , "en_EN" , "coretemperature {value} &deg;" , "Core Temperature" , "&deg;" , "0");
 insert into name_device_properties values(12 , 4 , "en_EN" , "temperature {value} &deg;" , "Temperature" , "&deg;" , "0");
+insert into name_device_properties values(19 , 1 , "nl_NL" , "NL Temperatur: {value} &deg;" , "NL Temperatur" , "NL &deg;" , "0");
+insert into name_device_properties values(20 , 3 , "nl_NL" , "coretemperature {value} &deg;" , "coretemperature" , "NL &deg;" , "0");
+drop table if exists "name_device_labels";
+create table "name_device_labels" (id primary key,reference_id,lang_code,title,value);
+insert into name_device_labels values(1 , 1 , "de_DE" , "Spezialfeld" , "Sondereintrag fÃ¼r den iKettle v2");
+insert into name_device_labels values(2 , 1 , "en_EN" , "Special Field" , "Extra data for the iKettle v2");
+insert into name_device_labels values(3 , 1 , "base" , "Special Field" , "Extra data for the iKettle v2");
 drop table if exists "device_events";
 create table "device_events"(id primary key,device_id,name);
 insert into device_events values(2 , 12 , "needsWater");
@@ -227,4 +343,54 @@ create view if not exists "name_device_actions_parameter_type"  as select id,ref
 create view if not exists "name_device_actions_parameter_type_enum"  as select id,reference_id,name,lang_code from name_master where scope="device_actions_parameter_type_enum";
 create view if not exists "name_device_actions_predefined"  as select id,reference_id,name,lang_code from name_master where scope="device_actions_predefined";
 create view if not exists "name_device_actions_parameter"  as select id,reference_id,name,lang_code from name_master where scope="device_actions_parameter";
+create view if not exists "name_device_actions"  as select id,reference_id,name,lang_code from name_master where scope="device_actions";
+create view if not exists "name_common_labels"  as select id,reference_id,name,lang_code from name_master where scope="common_labels";
+		
+create view if not exists "callGetStates" as 
+	SELECT device_status.name, name_device_status.name, device_status_enum.value, name_device_status_enum.name, device_status.tags, device.gtin,name_device_status.lang_code
+	FROM device INNER JOIN 
+		((device_status INNER JOIN name_device_status ON device_status.id=name_device_status.reference_id) 
+    	INNER JOIN (device_status_enum INNER JOIN name_device_status_enum ON device_status_enum.id=name_device_status_enum.reference_id) ON device_status.id=device_status_enum.device_id) ON device.id=device_status.device_id
+	WHERE name_device_status.lang_code = name_device_status_enum.lang_code 
+	ORDER BY device_status.name;
+
+create view if not exists "callGetEvents" as 
+	SELECT device_events.name, name_device_events.name as displayName, device.gtin, name_device_events.lang_code
+	FROM (device INNER JOIN 
+		(device_events INNER JOIN name_device_events ON device_events.id=name_device_events.reference_id) ON device.id=device_events.device_id);
+
+create view if not exists "callGetProperties" as 
+	SELECT device_properties.name, name_device_properties.alt_label, device_properties.type_id, device_properties.default_value, device_properties.min_value, device_properties.max_value, device_properties.resolution, device_properties.si_unit, device_properties.tags, device.gtin,name_device_properties.lang_code 
+    FROM (device
+		INNER JOIN (device_properties
+        INNER JOIN name_device_properties ON device_properties.id=name_device_properties.reference_id) 
+        	ON device.id=device_properties.device_id);
+		
+create view if not exists "callGetActions" as 
+	SELECT device_actions.command, name_device_actions.name as actionName, device_actions_parameter.name as parameterName, name_device_actions_parameter.name as parameterDisplayName, device_actions_parameter.type_id, device_actions_parameter.default_value, 
+		device_actions_parameter.min_value, device_actions_parameter.max_value, device_actions_parameter.resolution, device_actions_parameter.si_unit, device_actions_parameter.tags, 
+		CASE WHEN device_actions_parameter.type_id is NULL THEN "true" ELSE "false" END AS paramexists, device.gtin,name_device_actions.lang_code
+    FROM (device
+    	INNER JOIN (device_actions INNER JOIN name_device_actions ON device_actions.id=name_device_actions.reference_id) ON device.id=device_actions.device_id) 
+        LEFT JOIN (device_actions_parameter INNER JOIN name_device_actions_parameter ON device_actions_parameter.id=name_device_actions_parameter.reference_id) ON device_actions.id=device_actions_parameter.device_actions_id 
+    WHERE ((name_device_actions.lang_code=name_device_actions_parameter.lang_code) OR paramexists="true")
+    ORDER BY device_actions.command;
+
+create view if not exists "callGetStandardActions" as 
+	SELECT device_actions_predefined.name as predefName, name_device_actions_predefined.name as displayPredefName, device_actions.command, device_actions_parameter.name, device_actions_predefined_parameter.value, CASE WHEN device_actions_parameter.type_id is NULL THEN "true" ELSE "false" END AS paramexists,
+		device.gtin,name_device_actions_predefined.lang_code
+    FROM device INNER JOIN ((device_actions 
+    	INNER JOIN (device_actions_predefined INNER JOIN name_device_actions_predefined ON device_actions_predefined.id=name_device_actions_predefined.reference_id) ON device_actions.id=device_actions_predefined.device_actions_id) 
+        LEFT JOIN (device_actions_parameter INNER JOIN device_actions_predefined_parameter ON device_actions_predefined_parameter.device_actions_parameter_id=device_actions_parameter.id) 
+        ON device_actions.id=device_actions_predefined.device_actions_id AND device_actions_predefined.id=device_actions_predefined_parameter.device_actions_predefined_id) 
+        ON device.id=device_actions.device_id 
+    ORDER BY device_actions.command;
+
+create view if not exists "callGetSpec" as 
+	SELECT common_labels.name,name_common_labels.name as title,tags,"" as value,name_common_labels.lang_code,"" as gtin
+	FROM common_labels INNER JOIN name_common_labels ON common_labels.id=name_common_labels.reference_id 
+	UNION	
+	SELECT device_labels.name,name_device_labels.title,device_labels.tags,name_device_labels.value,name_device_labels.lang_code,device.gtin
+	FROM (device_labels INNER JOIN name_device_labels ON device_labels.id=name_device_labels.reference_id) INNER JOIN device on device.id=device_labels.device_id; 
+		
 commit;

@@ -37,6 +37,15 @@ public:
 
   SQLite3& getDb() { return m_db; }
 
+  struct SpecDesc {
+    std::string name;
+    std::string title; //< translated label
+    std::string tags;
+    std::string value;
+  };
+
+  std::vector<SpecDesc> getSpec(const std::string &gtin, const std::string &langCode = ""); // throws
+
   struct StateDesc {
     std::string name;
     std::string title; //< translated name
