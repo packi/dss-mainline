@@ -27,6 +27,7 @@
 
 #include "apartment.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/ref.hpp>
 #include <boost/thread/thread.hpp>
@@ -521,23 +522,35 @@ namespace dss {
     throw ItemNotFoundException(_stateName);
   }
 
-  std::vector<boost::shared_ptr<State> > Apartment::getStates() const {
+  // throws (dynamic_cast relies on consistent sensor names)
+  void Apartment::updateSensorStates(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin)
+  {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    return m_States;
-  } // getStates
+    // A single sensor can have multiple states, by setting different on/off threshold
+    // TODO(someday) SensorState should have a field to identify the input sensor
+    std::string prefix("dev." + dsuid2str(dsuid) + ".type" + intToString(sensorType));
 
-  std::vector<boost::shared_ptr<State> > Apartment::getStates(const std::string& _filter) const {
-    std::vector<boost::shared_ptr<State> > result;
-    regex_t stateNameRegex;
-    regcomp(&stateNameRegex, _filter.c_str(), REG_EXTENDED);
-    foreach(boost::shared_ptr<State> state, m_States) {
-      if (0 == regexec(&stateNameRegex, state->getName().c_str(), (size_t)0, NULL, 0)) {
-        result.push_back(state);
+    foreach (boost::shared_ptr<State> state, m_States) {
+      if (boost::starts_with(state->getName(), prefix)) {
+        boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
       }
     }
-    regfree(&stateNameRegex);
-    return result;
-  } // getStates
+  }
+
+  // throws (dynamic_cast relies on consistent sensor names)
+  void Apartment::updateSensorStates(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin)
+  {
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
+    // A single sensor can have multiple states, by setting different on/off threshold
+    // TODO(someday) SensorState should have a field to identify the input sensor
+    std::string prefix("zone.zone" + intToString(zoneId) + ".group" + intToString(groupId) + ".type" + intToString(sensorType));
+
+    foreach (boost::shared_ptr<State> state, m_States) {
+      if (boost::starts_with(state->getName(), prefix)) {
+        boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
+      }
+    }
+  }
 
   void Apartment::removeState(boost::shared_ptr<State> _state) {
     m_States.erase(std::remove(m_States.begin(), m_States.end(), _state));
