@@ -181,11 +181,6 @@ typedef struct {
     /** Return an Empty Cluster, if available. */
     boost::shared_ptr<Cluster> getEmptyCluster();
 
-    /** returns a vector of all states */
-    std::vector<boost::shared_ptr<State> > getStates() const;
-    /** returns a vector of all states that match the given name (filter expression with regex) */
-    std::vector<boost::shared_ptr<State> > getStates(const std::string& _filter) const;
-    /** Returns the State by name and type */
     boost::shared_ptr<State> getState(const eStateType _type, 
                                       const std::string& _stateName) const;
     boost::shared_ptr<State> getNonScriptState(const std::string& _stateName) const;
@@ -193,6 +188,9 @@ typedef struct {
     boost::shared_ptr<State> getState(const eStateType _type,
                                       const std::string& _identifier,
                                       const std::string& _stateName) const;
+
+    void updateSensorStates(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin);
+    void updateSensorStates(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin);
 
     /** Allocates a device and returns a reference to it. */
     boost::shared_ptr<Device> allocateDevice(const dsuid_t _dsid);
