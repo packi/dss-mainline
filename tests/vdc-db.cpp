@@ -205,16 +205,18 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   dev.setVdcSpec(std::move(vdcSpec));
 
   JSONWriter json;
-  vdcInfo::addSpec(dev, json);
+  vdcInfo::addSpec(db, dev, "de_DE", json);
   vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
   vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
   vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
   vdcInfo::addStandardActions(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
-  //Logger::getInstance()->log("info: " + ret, lsWarning);
 
-  std::string expect = R"expect({"result":{"spec":{"class":"x-class","classVersion":"x-classVersion","dsDeviceGTIN":"7640156791914","model":"x-model","modelVersion":"x-modelVersion","hardwareGuid":"x-hardwareGuid","hardwareModelGuid":"x-hardwareModelGuid","vendorId":"x-vendorId","vendorName":"x-vendorName"},"stateDescriptions":{"fan":{"title":"Ventilator","tags":"","options":{"on":"an","off":"aus"}},"operationMode":{"title":"Betriebszustand","tags":"overview","options":{"heating":"heizt","steaming":"dampft","off":"ausgeschaltet"}},"timer":{"title":"Wecker","tags":"","options":{"inactive":"inaktiv","running":"läuft"}}},"propertyDescriptions":{"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"},"duration":{"title":"Endzeit","tags":"","type":"numeric","min":"0","max":"1800","resolution":"1","siunit":"second","default":"0"},"temperature.sensor":{"title":"Garguttemperatur","tags":"readonly","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"}},"actionDescriptions":{"bake":{"title":"Backen","params":{"duration":{"title":"Zeit","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"steam":{"title":"Dampfen","params":{"duration":{"title":"Zeit","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"stop":{"title":"Ausschalten","params":{}}},"standardActions":{"std.cake":{"title":"Kuchen","action":"bake","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"Pizza","action":"bake","params":{"temperature":"180","duration":"1200"}},"std.asparagus":{"title":"Spargel","action":"steam","params":{"temperature":"180","duration":"2520"}},"std.stop":{"title":"Stop","action":"stop","params":{}}}},"ok":true})expect";
-  //Logger::getInstance()->log("expect: " + expect, lsWarning);
+  Logger::getInstance()->log("info: " + ret, lsWarning);
+
+  std::string expect = R"expect({"result":{"spec":{"class":{"title":"Geräteklasse","tags":"invisible","value":"x-class"},"classVersion":{"title":"Geräteklassen version","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dS Device GTIN","tags":"overview:2","value":""},"hardwareModelGuid":{"title":"Produkt Kennzeichnung","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"Modellbezeichnung","tags":"overview:3","value":"x-model"},"modelVersion":{"title":"Modellvariante","tags":"overview:4","value":"x-modelVersion"},"name":{"title":"Name","tags":"overview:1","value":""},"vendorId":{"title":"Hersteller Kennung","tags":"","value":"x-vendorId"},"vendorName":{"title":"Hersteller","tags":"overview:7","value":"x-vendorName"}},"stateDescriptions":{"fan":{"title":"Ventilator","tags":"","options":{"on":"an","off":"aus"}},"operationMode":{"title":"Betriebszustand","tags":"overview","options":{"heating":"heizt","steaming":"dampft","off":"ausgeschaltet"}},"timer":{"title":"Wecker","tags":"","options":{"inactive":"inaktiv","running":"läuft"}}},"propertyDescriptions":{"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"},"duration":{"title":"Endzeit","tags":"","type":"numeric","min":"0","max":"1800","resolution":"1","siunit":"second","default":"0"},"temperature.sensor":{"title":"Garguttemperatur","tags":"readonly","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"}},"actionDescriptions":{"bake":{"title":"Backen","params":{"duration":{"title":"Zeit","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"steam":{"title":"Dampfen","params":{"duration":{"title":"Zeit","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"stop":{"title":"Ausschalten","params":{}}},"standardActions":{"std.cake":{"title":"Kuchen","action":"bake","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"Pizza","action":"bake","params":{"temperature":"180","duration":"1200"}},"std.asparagus":{"title":"Spargel","action":"steam","params":{"temperature":"180","duration":"2520"}},"std.stop":{"title":"Stop","action":"stop","params":{}}}},"ok":true})expect";
+
+  Logger::getInstance()->log("expect: " + expect, lsWarning);
 
   BOOST_CHECK(ret == expect);
 }
@@ -235,7 +237,7 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   dev.setVdcSpec(VdsdSpec_t());
 
   JSONWriter json;
-  vdcInfo::addSpec(dev, json);
+  vdcInfo::addSpec(db, dev, "de_DE", json);
   vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
   vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
   vdcInfo::addActionDescriptions(db, dev, "de_DE", json);

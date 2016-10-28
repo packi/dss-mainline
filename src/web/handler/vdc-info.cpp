@@ -56,19 +56,35 @@ static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop,
   }
 }
 
-void addSpec(const Device& device, JSONWriter& json) {
+void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& dsDeviceGTIN = device.getOemEanAsString();
+  auto dbspec = db.getSpec(dsDeviceGTIN, langCode);
   const auto& spec = device.getVdcSpec();
+
+  std::map<std::string, std::string> specTable;
+  specTable["name"] = device.getName();
+  specTable["dsDeviceId"] = dsDeviceGTIN;
+  specTable["model"] = spec.model;
+  specTable["modelVersion"] = spec.modelVersion;
+  specTable["hardwareGuid"] = spec.hardwareGuid;
+  specTable["hardwareModelGuid"] = spec.hardwareModelGuid;
+  specTable["vendorId"] = spec.vendorId;
+  specTable["vendorName"] = spec.vendorName;
+  specTable["class"] = spec.deviceClass;
+  specTable["classVersion"] = spec.deviceClassVersion;
+
   json.startObject("spec");
-  json.add("class", spec.deviceClass);
-  json.add("classVersion", spec.deviceClassVersion);
-  json.add("dsDeviceGTIN", dsDeviceGTIN);
-  json.add("model", spec.model);
-  json.add("modelVersion", spec.modelVersion);
-  json.add("hardwareGuid", spec.hardwareGuid);
-  json.add("hardwareModelGuid", spec.hardwareModelGuid);
-  json.add("vendorId", spec.vendorId);
-  json.add("vendorName", spec.vendorName);
+  foreach (auto &s, dbspec) {
+    json.startObject(s.name);
+    json.add("title", s.title);
+    json.add("tags", s.tags);
+    if (specTable.find(s.name) != specTable.end()) {
+      json.add("value", specTable[s.name]);
+    } else {
+      json.add("value", s.value);
+    }
+    json.endObject();
+  }
   json.endObject();
 }
 
@@ -206,7 +222,7 @@ Filter parseFilter(const std::string& filterParam) {
 void addByFilter(VdcDb& db, Device& device, Filter filter,
                    const std::string& langCode, JSONWriter& json) {
   if (filter.spec) {
-    addSpec(device, json);
+    addSpec(db, device, langCode, json);
   }
   if (filter.stateDesc) {
     addStateDescriptions(db, device, langCode, json);
