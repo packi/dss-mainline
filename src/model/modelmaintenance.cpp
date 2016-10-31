@@ -2813,7 +2813,7 @@ namespace dss {
             eanString.erase(0, 4);
           }
           unsigned long long eanNumber = strToULongLong(eanString);
-          m_Device->setOemInfo(eanNumber, 0, 0, iNetState, true);
+          m_Device->setOemInfo(eanNumber, 0, 1, iNetState, true);
           if ((iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_OPTIONAL) ||
               (iNetState == DEVICE_OEM_EAN_INTERNET_ACCESS_MANDATORY)) {
             TaskProcessor &tp(DSS::getInstance()->getModelMaintenance().getTaskProcessor());
