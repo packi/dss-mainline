@@ -345,6 +345,7 @@ create view if not exists "name_device_actions_predefined"  as select id,referen
 create view if not exists "name_device_actions_parameter"  as select id,reference_id,name,lang_code from name_master where scope="device_actions_parameter";
 create view if not exists "name_device_actions"  as select id,reference_id,name,lang_code from name_master where scope="device_actions";
 create view if not exists "name_common_labels"  as select id,reference_id,name,lang_code from name_master where scope="common_labels";
+				
 		
 create view if not exists "callGetStates" as 
 	SELECT device_status.name, name_device_status.name, device_status_enum.value, name_device_status_enum.name, device_status.tags, device.gtin,name_device_status.lang_code
@@ -354,17 +355,33 @@ create view if not exists "callGetStates" as
 	WHERE name_device_status.lang_code = name_device_status_enum.lang_code 
 	ORDER BY device_status.name;
 
+create view if not exists "callGetStatesBase" as 
+	SELECT device_status.name, device_status_enum.value, device_status.tags, device.gtin
+	FROM device INNER JOIN (device_status INNER JOIN device_status_enum ON device_status.id=device_status_enum.device_id) ON device.id=device_status.device_id
+	ORDER BY device_status.name;
+
+		
 create view if not exists "callGetEvents" as 
 	SELECT device_events.name, name_device_events.name as displayName, device.gtin, name_device_events.lang_code
 	FROM (device INNER JOIN 
 		(device_events INNER JOIN name_device_events ON device_events.id=name_device_events.reference_id) ON device.id=device_events.device_id);
 
+create view if not exists "callGetEventsBase" as 
+	SELECT device_events.name, device.gtin
+		FROM (device INNER JOIN device_events ON device.id=device_events.device_id);
+
+		
 create view if not exists "callGetProperties" as 
 	SELECT device_properties.name, name_device_properties.alt_label, device_properties.type_id, device_properties.default_value, device_properties.min_value, device_properties.max_value, device_properties.resolution, device_properties.si_unit, device_properties.tags, device.gtin,name_device_properties.lang_code 
     FROM (device
 		INNER JOIN (device_properties
         INNER JOIN name_device_properties ON device_properties.id=name_device_properties.reference_id) 
         	ON device.id=device_properties.device_id);
+		
+create view if not exists "callGetPropertiesBase" as 
+	SELECT device_properties.name, device_properties.type_id, device_properties.default_value, device_properties.min_value, device_properties.max_value, device_properties.resolution, device_properties.si_unit, device_properties.tags, device.gtin 
+		FROM (device INNER JOIN device_properties ON device.id=device_properties.device_id);
+
 		
 create view if not exists "callGetActions" as 
 	SELECT device_actions.command, name_device_actions.name as actionName, device_actions_parameter.name as parameterName, name_device_actions_parameter.name as parameterDisplayName, device_actions_parameter.type_id, device_actions_parameter.default_value, 
@@ -375,7 +392,16 @@ create view if not exists "callGetActions" as
         LEFT JOIN (device_actions_parameter INNER JOIN name_device_actions_parameter ON device_actions_parameter.id=name_device_actions_parameter.reference_id) ON device_actions.id=device_actions_parameter.device_actions_id 
     WHERE ((name_device_actions.lang_code=name_device_actions_parameter.lang_code) OR paramexists="true")
     ORDER BY device_actions.command;
-
+		
+create view if not exists "callGetActionsBase" as 
+	SELECT device_actions.command, device_actions_parameter.name as parameterName, device_actions_parameter.type_id, device_actions_parameter.default_value, 
+		device_actions_parameter.min_value, device_actions_parameter.max_value, device_actions_parameter.resolution, device_actions_parameter.si_unit, device_actions_parameter.tags, device.gtin
+	FROM (device
+		INNER JOIN device_actions ON device.id=device_actions.device_id) 
+		LEFT JOIN device_actions_parameter ON device_actions.id=device_actions_parameter.device_actions_id 
+	ORDER BY device_actions.command;
+		
+		
 create view if not exists "callGetStandardActions" as 
 	SELECT device_actions_predefined.name as predefName, name_device_actions_predefined.name as displayPredefName, device_actions.command, device_actions_parameter.name, device_actions_predefined_parameter.value, CASE WHEN device_actions_parameter.type_id is NULL THEN "true" ELSE "false" END AS paramexists,
 		device.gtin,name_device_actions_predefined.lang_code
@@ -385,12 +411,31 @@ create view if not exists "callGetStandardActions" as
         ON device_actions.id=device_actions_predefined.device_actions_id AND device_actions_predefined.id=device_actions_predefined_parameter.device_actions_predefined_id) 
         ON device.id=device_actions.device_id 
     ORDER BY device_actions.command;
+		
+create view if not exists "callGetStandardActionsBase" as 
+	SELECT device_actions_predefined.name as predefName, device_actions.command, device_actions_parameter.name, device_actions_predefined_parameter.value,device.gtin
+	FROM device INNER JOIN ((device_actions 
+		INNER JOIN device_actions_predefined ON device_actions.id=device_actions_predefined.device_actions_id) 
+		LEFT JOIN (device_actions_parameter INNER JOIN device_actions_predefined_parameter ON device_actions_predefined_parameter.device_actions_parameter_id=device_actions_parameter.id) 
+			ON device_actions.id=device_actions_predefined.device_actions_id AND device_actions_predefined.id=device_actions_predefined_parameter.device_actions_predefined_id) 
+			ON device.id=device_actions.device_id 
+	ORDER BY device_actions.command;
 
+		
 create view if not exists "callGetSpec" as 
 	SELECT common_labels.name,name_common_labels.name as title,tags,"" as value,name_common_labels.lang_code,"" as gtin
-	FROM common_labels INNER JOIN name_common_labels ON common_labels.id=name_common_labels.reference_id 
+		FROM common_labels LEFT JOIN name_common_labels ON common_labels.id=name_common_labels.reference_id 
 	UNION	
 	SELECT device_labels.name,name_device_labels.title,device_labels.tags,name_device_labels.value,name_device_labels.lang_code,device.gtin
-	FROM (device_labels INNER JOIN name_device_labels ON device_labels.id=name_device_labels.reference_id) INNER JOIN device on device.id=device_labels.device_id; 
+		FROM (device_labels INNER JOIN name_device_labels ON device_labels.id=name_device_labels.reference_id) INNER JOIN device on device.id=device_labels.device_id; 
+	
+		
+create view if not exists "callGetSpecBase" as 
+	SELECT common_labels.name,tags,"" as gtin
+		FROM common_labels
+	UNION	
+	SELECT device_labels.name,device_labels.tags,device.gtin
+		FROM device_labels INNER JOIN device on device.id=device_labels.device_id; 
+		
 		
 commit;
