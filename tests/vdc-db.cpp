@@ -69,7 +69,7 @@ BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
 
   std::vector<DeviceStateSpec_t> states_s;
   BOOST_CHECK_NO_THROW(states_s = db.getStatesLegacy(gtin));
-  dumpStates(states_s);
+  //dumpStates(states_s);
 
   BOOST_CHECK_EQUAL(states_s[1].Name, "operationMode");
   BOOST_CHECK_EQUAL(states_s[1].Values.size(), 3);
@@ -78,12 +78,12 @@ BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(states_s[2].Values[1], "running");
 
   std::vector<VdcDb::StateDesc> states_i;
-  BOOST_CHECK_NO_THROW(states_i = db.getStates(gtin, ""));
+  BOOST_CHECK_NO_THROW(states_i = db.getStates(gtin, "base"));
   BOOST_CHECK_EQUAL(states_i[0].name, "fan");
-  BOOST_CHECK_EQUAL(states_i[0].title, "fan");
+  BOOST_CHECK_EQUAL(states_i[0].title, "ventilator");
   BOOST_CHECK_EQUAL(states_i[0].values.size(), 2);
   BOOST_CHECK_EQUAL(states_i[0].values[1].first, "off");
-  BOOST_CHECK_EQUAL(states_i[0].values[1].second, "off");
+  BOOST_CHECK_EQUAL(states_i[0].values[1].second, "turned of");
   BOOST_CHECK_EQUAL(states_i[2].name, "timer");
   BOOST_CHECK_EQUAL(states_i[2].values[1].first, "running");
   BOOST_CHECK_EQUAL(states_i[2].values[1].second, "running");
@@ -111,13 +111,13 @@ BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
   std::vector<VdcDb::PropertyDesc> props;
   BOOST_CHECK_NO_THROW(props = db.getProperties(gtin));
   BOOST_CHECK(props[2].name == "temperature.sensor");
-  BOOST_CHECK(props[2].title == "temperature.sensor");
+  BOOST_CHECK(props[2].title == "coretemperature");
   //dumpProperties(props);
 
   BOOST_CHECK_NO_THROW(props = db.getProperties(gtin, "de_DE"));
   BOOST_CHECK(props[2].name == "temperature.sensor");
   BOOST_CHECK(props[2].title == "Garguttemperatur");
-  dumpProperties(props);
+  //dumpProperties(props);
 }
 
 static void dumpActionDesc(const std::vector<VdcDb::ActionDesc> &actions) {
@@ -140,8 +140,8 @@ BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
   BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, ""));
   BOOST_CHECK(actions[1].name == "steam");
   BOOST_CHECK(actions[1].title == "steam");
-  BOOST_CHECK(actions[1].params[1].name == "duration");
-  BOOST_CHECK(actions[1].params[1].title == "duration");
+  BOOST_CHECK(actions[1].params[0].name == "duration");
+  BOOST_CHECK(actions[1].params[0].title == "time");
   //dumpActionDesc(actions);
 
   BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, "de_DE"));
@@ -149,7 +149,7 @@ BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
   BOOST_CHECK(actions[1].title == "Dampfen");
   BOOST_CHECK(actions[1].params[1].name == "temperature");
   BOOST_CHECK(actions[1].params[1].title == "Temperatur");
-  dumpActionDesc(actions);
+  //dumpActionDesc(actions);
 }
 
 static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
@@ -178,7 +178,7 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
   BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, ""));
   //dumpDesc(stdActions);
   BOOST_CHECK(stdActions[1].name == "std.pizza");
-  BOOST_CHECK(stdActions[1].title == "std.pizza");
+  BOOST_CHECK(stdActions[1].title == "pizza");
   BOOST_CHECK(stdActions[0].args[1].first == "duration");
 }
 
@@ -205,18 +205,16 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   dev.setVdcSpec(std::move(vdcSpec));
 
   JSONWriter json;
-  vdcInfo::addSpec(db, dev, "de_DE", json);
-  vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addStandardActions(db, dev, "de_DE", json);
+  vdcInfo::addSpec(db, dev, "", json);
+  vdcInfo::addStateDescriptions(db, dev, "", json);
+  vdcInfo::addPropertyDescriptions(db, dev, "", json);
+  vdcInfo::addActionDescriptions(db, dev, "", json);
+  vdcInfo::addStandardActions(db, dev, "", json);
   std::string ret = json.successJSON();
 
-  Logger::getInstance()->log("info: " + ret, lsWarning);
-
-  std::string expect = R"expect({"result":{"spec":{"class":{"title":"Geräteklasse","tags":"invisible","value":"x-class"},"classVersion":{"title":"Geräteklassen version","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dS Device GTIN","tags":"overview:2","value":""},"hardwareModelGuid":{"title":"Produkt Kennzeichnung","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"Modellbezeichnung","tags":"overview:3","value":"x-model"},"modelVersion":{"title":"Modellvariante","tags":"overview:4","value":"x-modelVersion"},"name":{"title":"Name","tags":"overview:1","value":""},"vendorId":{"title":"Hersteller Kennung","tags":"","value":"x-vendorId"},"vendorName":{"title":"Hersteller","tags":"overview:7","value":"x-vendorName"}},"stateDescriptions":{"fan":{"title":"Ventilator","tags":"","options":{"on":"an","off":"aus"}},"operationMode":{"title":"Betriebszustand","tags":"overview","options":{"heating":"heizt","steaming":"dampft","off":"ausgeschaltet"}},"timer":{"title":"Wecker","tags":"","options":{"inactive":"inaktiv","running":"läuft"}}},"propertyDescriptions":{"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"},"duration":{"title":"Endzeit","tags":"","type":"numeric","min":"0","max":"1800","resolution":"1","siunit":"second","default":"0"},"temperature.sensor":{"title":"Garguttemperatur","tags":"readonly","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"}},"actionDescriptions":{"bake":{"title":"Backen","params":{"duration":{"title":"Zeit","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"steam":{"title":"Dampfen","params":{"duration":{"title":"Zeit","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"Temperatur","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"stop":{"title":"Ausschalten","params":{}}},"standardActions":{"std.cake":{"title":"Kuchen","action":"bake","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"Pizza","action":"bake","params":{"temperature":"180","duration":"1200"}},"std.asparagus":{"title":"Spargel","action":"steam","params":{"temperature":"180","duration":"2520"}},"std.stop":{"title":"Stop","action":"stop","params":{}}}},"ok":true})expect";
-
-  Logger::getInstance()->log("expect: " + expect, lsWarning);
+  //Logger::getInstance()->log("info: " + ret, lsWarning);
+  std::string expect = R"expect({"result":{"spec":{"class":{"title":"Device Class","tags":"invisible","value":"x-class"},"classVersion":{"title":"deviceclasses version","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dS Device GTIN","tags":"overview:2","value":""},"hardwareGuid":{"title":"Article Identifier","tags":"overview:5","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"Product Id","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"Model Name","tags":"overview:3","value":"x-model"},"modelVersion":{"title":"Model Version","tags":"overview:4","value":"x-modelVersion"},"name":{"title":"Name","tags":"overview:1","value":""},"vendorId":{"title":"Vendor Id","tags":"","value":"x-vendorId"},"vendorName":{"title":"Vendor","tags":"overview:7","value":"x-vendorName"}},"stateDescriptions":{"fan":{"title":"ventilator","tags":"","options":{"on":"on","off":"turned of"}},"operationMode":{"title":"operation mode","tags":"overview","options":{"heating":"heating","steaming":"steaming","off":"turned of"}},"timer":{"title":"alarm clock","tags":"","options":{"inactive":"inactive","running":"running"}}},"propertyDescriptions":{"temperature":{"title":"temperature","tags":"","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"},"duration":{"title":"finishtime","tags":"","type":"numeric","min":"0","max":"1800","resolution":"1","siunit":"second","default":"0"},"temperature.sensor":{"title":"coretemperature","tags":"readonly","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"}},"actionDescriptions":{"bake":{"title":"bake","params":{"duration":{"title":"time","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"temperature","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"steam":{"title":"steam","params":{"duration":{"title":"time","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"temperature","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"stop":{"title":"turn off","params":{}}},"standardActions":{"std.cake":{"title":"cake","action":"bake","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"pizza","action":"bake","params":{"temperature":"180","duration":"1200"}},"std.asparagus":{"title":"asparagus","action":"steam","params":{"temperature":"180","duration":"2520"}},"std.stop":{"title":"stop","action":"stop","params":{}}}},"ok":true})expect";
+  //Logger::getInstance()->log("expect: " + expect, lsWarning);
 
   BOOST_CHECK(ret == expect);
 }
@@ -230,21 +228,24 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   BOOST_CHECK(db.getStates(gtin).empty());
   BOOST_CHECK(db.getProperties(gtin).empty());
   BOOST_CHECK(db.getActions(gtin).empty());
-  BOOST_CHECK(db.getStandardActions(gtin, "de_DE").empty());
+  BOOST_CHECK(db.getEvents(gtin).empty());
+  BOOST_CHECK(db.getStandardActions(gtin, "").empty());
 
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(strToInt(gtin), 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
   dev.setVdcSpec(VdsdSpec_t());
 
   JSONWriter json;
-  vdcInfo::addSpec(db, dev, "de_DE", json);
   vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
   vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
   vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
   vdcInfo::addStandardActions(db, dev, "de_DE", json);
+  vdcInfo::addEventDescriptions(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
 
-  std::string expect = R"expect({"result":{"spec":{"class":"","classVersion":"","dsDeviceGTIN":"0","model":"","modelVersion":"","hardwareGuid":"","hardwareModelGuid":"","vendorId":"","vendorName":""},"stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{}},"ok":true})expect";
+  //Logger::getInstance()->log("info: " + ret, lsWarning);
+  std::string expect = R"expect({"result":{"stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{},"eventDescriptions":{}},"ok":true})expect";
+  //Logger::getInstance()->log("expect: " + expect, lsWarning);
 
   // empty states/properties/actions
   BOOST_CHECK(ret == expect);
