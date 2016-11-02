@@ -88,7 +88,7 @@ std::vector<VdcDb::SpecDesc> VdcDb::getSpec(const std::string &gtin, const std::
   SqlStatement::BindScope scope = query.bind(gtin, lang);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
-    for (auto &it : specs) {
+    foreach (auto &it, specs) {
       if (name == it.name) {
         it.title = query.getColumn<std::string>(1);
         it.value = query.getColumn<std::string>(3);
@@ -133,11 +133,11 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
   while (query.step() == SqlStatement::StepResult::ROW) {
     std::string name = query.getColumn<std::string>(0);
     std::string svalue = query.getColumn<std::string>(2);
-    for (auto &it : states) {
+    foreach (auto &it, states) {
       if (name == it.name) {
         it.title = query.getColumn<std::string>(1);
       }
-      for (auto &vit : it.values) {
+      foreach (auto &vit, it.values) {
         if (vit.first == svalue) {
           vit.second = query.getColumn<std::string>(3);
         }
@@ -174,7 +174,7 @@ std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const st
   SqlStatement::BindScope scope = query.bind(gtin, lang);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
-    for (auto &it : events) {
+    foreach (auto &it, events) {
       if (name == it.name) {
         it.title = query.getColumn<std::string>(1);
       }
@@ -231,7 +231,7 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   SqlStatement::BindScope scope = query.bind(gtin, lang);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
-    for (auto &it : props) {
+    foreach (auto &it, props) {
       if (name == it.name) {
         it.title = query.getColumn<std::string>(1);
       }
@@ -301,11 +301,11 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
     if (sqlite3_column_type(query, 2) != SQLITE_NULL) {
       pname = query.getColumn<std::string>(2);
     }
-    for (auto &it : actions) {
+    foreach (auto &it, actions) {
       if (name == it.name) {
         it.title = query.getColumn<std::string>(1);
       }
-      for (auto &pit : it.params) {
+      foreach (auto &pit, it.params) {
         if (pname == pit.name) {
           pit.title = query.getColumn<std::string>(3);
         }
@@ -351,7 +351,7 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
   SqlStatement::BindScope scope = query.bind(gtin, lang);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
-    for (auto &it : desc) {
+    foreach (auto &it, desc) {
       if (name == it.name) {
         it.title = query.getColumn<std::string>(1);
       }
