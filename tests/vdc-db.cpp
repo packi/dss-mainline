@@ -24,6 +24,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
+#define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/document.h>
 
 #include <fstream>
