@@ -24,6 +24,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
 
 #include <fstream>
 
@@ -215,8 +217,13 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   //Logger::getInstance()->log("info: " + ret, lsWarning);
   std::string expect = R"expect({"result":{"spec":{"class":{"title":"Device Class","tags":"invisible","value":"x-class"},"classVersion":{"title":"deviceclasses version","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dS Device GTIN","tags":"overview:2","value":""},"hardwareGuid":{"title":"Article Identifier","tags":"overview:5","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"Product Id","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"Model Name","tags":"overview:3","value":"x-model"},"modelVersion":{"title":"Model Version","tags":"overview:4","value":"x-modelVersion"},"name":{"title":"Name","tags":"overview:1","value":""},"vendorId":{"title":"Vendor Id","tags":"","value":"x-vendorId"},"vendorName":{"title":"Vendor","tags":"overview:7","value":"x-vendorName"}},"stateDescriptions":{"fan":{"title":"ventilator","tags":"","options":{"on":"on","off":"turned of"}},"operationMode":{"title":"operation mode","tags":"overview","options":{"heating":"heating","steaming":"steaming","off":"turned of"}},"timer":{"title":"alarm clock","tags":"","options":{"inactive":"inactive","running":"running"}}},"propertyDescriptions":{"temperature":{"title":"temperature","tags":"","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"},"duration":{"title":"finishtime","tags":"","type":"numeric","min":"0","max":"1800","resolution":"1","siunit":"second","default":"0"},"temperature.sensor":{"title":"coretemperature","tags":"readonly","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"}},"actionDescriptions":{"bake":{"title":"bake","params":{"duration":{"title":"time","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"temperature","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"steam":{"title":"steam","params":{"duration":{"title":"time","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"temperature","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"stop":{"title":"turn off","params":{}}},"standardActions":{"std.cake":{"title":"cake","action":"bake","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"pizza","action":"bake","params":{"temperature":"180","duration":"1200"}},"std.asparagus":{"title":"asparagus","action":"steam","params":{"temperature":"180","duration":"2520"}},"std.stop":{"title":"stop","action":"stop","params":{}}}},"ok":true})expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
+  rapidjson::Document returnedResult;
+  returnedResult.Parse(ret.c_str());
 
-  BOOST_CHECK(ret == expect);
+
+  rapidjson::Document expectedResult;
+  expectedResult.Parse(expect.c_str());
+  BOOST_CHECK(returnedResult == expectedResult);
 }
 
 BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
@@ -246,9 +253,14 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   //Logger::getInstance()->log("info: " + ret, lsWarning);
   std::string expect = R"expect({"result":{"stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{},"eventDescriptions":{}},"ok":true})expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
+  rapidjson::Document returnedResult;
+  returnedResult.Parse(ret.c_str());
+
+  rapidjson::Document expectedResult;
+  expectedResult.Parse(expect.c_str());
 
   // empty states/properties/actions
-  BOOST_CHECK(ret == expect);
+  BOOST_CHECK(returnedResult == expectedResult);
 }
 
 BOOST_FIXTURE_TEST_CASE(checkDeviceSupport, DSSInstanceFixture) {
