@@ -68,7 +68,7 @@ static bool parse(const std::string &xmldesc)
   return pp.loadFromXML(tmp.path, ps.createProperty("/"));
 }
 
-BOOST_AUTO_TEST_CASE(testReadFile) {
+BOOST_FIXTURE_TEST_CASE(testReadFile, DSSInstanceFixture) {
   static const char xml[] =
 R"xml(<?xml version="1.0" encoding="utf-8"?>
 <properties version="1">
@@ -174,7 +174,6 @@ R"xml(<?xml version="1.0" encoding="utf-8"?>
   BOOST_CHECK(!ps.getProperty("/node1/node2/leafX"));
   BOOST_CHECK(!ps.getProperty("/node1/leafX"));
   BOOST_CHECK(!ps.getProperty("/leafX"));
-  DSS::shutdown();
 }
 
 BOOST_AUTO_TEST_CASE(testLoadMemory) {
