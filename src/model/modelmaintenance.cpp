@@ -2769,13 +2769,18 @@ namespace dss {
     PropertySystem propSys = DSS::getInstance()->getPropertySystem();
     std::string mac = propSys.getStringValue("/system/host/interfaces/eth0/mac");
     std::string country = propSys.getStringValue("/config/geodata/country");
-    std::string language = propSys.getStringValue("/system/language/locale");
+    std::string locale = propSys.getStringValue("/system/language/locale");
+    std::string language;
     std::string parameters;
     boost::shared_ptr<OEMWebQuery::OEMWebQueryCallback> cb = boost::make_shared<OEMWebQuery::OEMWebQueryCallback>(m_deviceDSUID, m_oldOEMState);
 
-    // MSHub expects only language code without country, and not "locale' code
-    if (language.find('_') != std::string::npos) {
-      language.erase(language.find('_'));
+    // #15054 - MSHub expects language code without country, and not 'locale' xx_XX code
+    if ((locale.length() >= 5) && (locale[2] == '_')) {
+      language = locale.substr(0, 2);
+      // Fall back to locale region if no geo-location is set
+      if (country.empty()) {
+        country = locale.substr(3, 2);
+      }
     }
 
     if (m_queryConfigLink) {
