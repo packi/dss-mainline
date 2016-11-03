@@ -185,6 +185,16 @@ namespace dss {
       try {
         StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
+
+        // #14823 don't remove zones that have connected devices
+        std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
+        for (size_t i = 0; i < groups.size(); i++) {
+          boost::shared_ptr<Group> group = groups.at(i);
+          if (group->hasConnectedDevices()) {
+            return JSONWriter::failure("Cannot delete a non-empty zone");
+          }
+        }
+
         Set set = zone->getDevices();
         if(set.length() > 0) {
           Set toMove;
