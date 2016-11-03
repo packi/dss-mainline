@@ -2065,7 +2065,7 @@ namespace dss {
       _request.getParameter("lang", langCode);
       VdcDb db;
       JSONWriter json;
-      vdcInfo::addSpec(*pDevice, json);
+      vdcInfo::addSpec(db, *pDevice, langCode, json);
       vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
