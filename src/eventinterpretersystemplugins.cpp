@@ -2652,7 +2652,7 @@ namespace dss {
       sensorIndex = m_properties.get("sensorIndex");
     }
 
-    uint8_t sensorType = 255;
+    uint8_t sensorType = SensorIDUnknownType;
     if (m_properties.has("sensorType")) {
       sensorType = strToInt(m_properties.get("sensorType"));
     } else {
@@ -3489,7 +3489,7 @@ namespace dss {
   void SystemZoneSensorForward::deviceSensorValue() {
     if (m_raisedAtDevice != NULL) {
       try {
-        uint8_t sensorType = 255;
+        uint8_t sensorType = SensorIDUnknownType;
         boost::shared_ptr<const Device> pDevice = m_raisedAtDevice->getDevice();
 
         if (m_properties.has("sensorType")) {

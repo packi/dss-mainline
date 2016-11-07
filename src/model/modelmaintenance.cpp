@@ -2115,7 +2115,7 @@ namespace dss {
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        uint8_t sensorType = 0;
+        uint8_t sensorType = SensorIDUnknownType;
         try {
           pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);

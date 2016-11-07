@@ -617,10 +617,10 @@ namespace dss {
         _name = "Carbon Dioxide Concentration"; break;
       case SensorIDCOConcentration:
         _name = "Carbon Monoxide Concentration"; break;
-      case 255:
+      case SensorIDUnknownType:
         _name = "Unknown Type"; break;
-    default:
-      break;
+      default:
+        _name = "Invalid Type"; break;
     }
     return _name;
   } // sensorName
