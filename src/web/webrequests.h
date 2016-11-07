@@ -31,6 +31,7 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/encodings.h>
 
 #include "src/logger.h"
 #include "src/dss.h"
@@ -113,7 +114,7 @@ namespace dss {
     static std::string failure(std::string _message);
   private:
     StringBuffer m_buffer;
-    Writer<StringBuffer> m_writer;
+    Writer<StringBuffer, rapidjson::UTF8<>, rapidjson::ASCII<> > m_writer;
     jsonResult_t m_resultType;
   };
 
