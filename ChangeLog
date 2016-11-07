@@ -1,5 +1,16 @@
 dSS - digitalSTROM Server
 
+v1.38.0	07.11.2016
+	* send model_ready after 30 seconds timeout, if no dSMs are on
+	  the bus, #14736
+	* make sure boost can be found in alternative locations when compiling
+	* updated translations for iKettle, #14876
+	* improved state handling, #14368
+	* do not remove zones thathave conneted devices, #14823
+	* fixed OEM web query for vDC devices
+	* fix translation handling for missing languages, #15021
+	* use locale region code for OEM query if geolocation is missing, #15054
+
 v1.37.1	21.10.2016
 	* query and parse config link with GetBasicArticleData, #14599
 	* fix vdc state and actions setup in busscanner, #14599
