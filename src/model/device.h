@@ -438,7 +438,6 @@ namespace dss {
 
     /** query device sensor values */
     uint32_t getDeviceSensorValue(const int _sensorIndex);
-    uint8_t getDeviceSensorType(const int _sensorIndex);
 
     /** query cached last known values */
     virtual unsigned long getPowerConsumption();
