@@ -40,6 +40,7 @@ namespace dss {
       bool actionDesc : 1;
       bool stdActions : 1;
       bool customActions : 1;
+      bool operational : 1;
     };
 
     void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
@@ -49,6 +50,7 @@ namespace dss {
     void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addCustomActions(Device& device, JSONWriter& json);
+    void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode, JSONWriter& json);
     Filter parseFilter(const std::string& filterParam);
     void addByFilter(VdcDb& db, Device& device, Filter filter,
                       const std::string& langCode, JSONWriter& json);
