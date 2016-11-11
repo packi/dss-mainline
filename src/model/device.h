@@ -797,7 +797,7 @@ namespace dss {
     void handleBinaryInputEvent(const int index, const int state);
 
     /// Calls (invokes) device specific action.
-    void callAction(const std::string& actionId);
+    void callAction(const std::string& actionId, const vdcapi::PropertyElement& params);
 
     void setProperty(const vdcapi::PropertyElement& element); // element.name() is property id
     void setCustomAction(const std::string& id, const std::string& title, const std::string& action,

@@ -301,7 +301,8 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
   } else if (eventName == EventName::LogFileData) {
     pEvent = boost::make_shared<Event>(EventName::LogFileData);
   } else if (eventName == EventName::DeviceActionEvent) {
-    pEvent = createDeviceActionEvent(createDevRef(), "blah");
+    vdcapi::PropertyElement test;
+    pEvent = createDeviceActionEvent(createDevRef(), "blah", test);
   } else if (eventName == EventName::DeviceEventEvent) {
     pEvent = createDeviceEventEvent(createDevRef(), "blub");
   } else if (eventName == EventName::DeviceStateEvent) {

@@ -743,7 +743,15 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       pDeviceRef = event->getRaisedAtDevice();
       createHeader(json, evtGroup_Activity, evtCategory_DeviceActionEvent, event.get());
       json.startObject("EventBody");
-      json.add("Name", event->getPropertyByName("name"));
+      json.add("ActionId", event->getPropertyByName("actionId"));
+      json.startObject("Parameter");
+      const dss::HashMapStringString& props =  event->getProperties().getContainer();
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        if (beginsWith(iParam->first, "params.")) {
+          json.add(iParam->first.substr(7), iParam->second);
+        }
+      }
+      json.endObject();
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.endObject();
     } else if ((event->getName() == EventName::DeviceEventEvent) && (event->getRaiseLocation() == erlDevice)) {

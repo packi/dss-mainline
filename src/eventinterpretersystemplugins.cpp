@@ -52,6 +52,8 @@
 #include "structuremanipulator.h"
 #include "systemcondition.h"
 #include "util.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/protobufjson.h"
 
 // durations to wait after each action (in milliseconds)
 #define ACTION_DURATION_ZONE_SCENE      500
@@ -522,7 +524,15 @@ namespace dss {
         return;
       }
 
-      target->callAction(id);
+      PropertyNodePtr paramsNode = _actionNode->getPropertyByName("params");
+      vdcapi::PropertyElement parsedParamsElement;
+      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+      if (paramsNode && !paramsNode->getStringValue().empty()) {
+        parsedParamsElement = ProtobufToJSon::jsonToElement(paramsNode->getStringValue());
+        paramsElement = &parsedParamsElement;
+      }
+
+      target->callAction(id, *paramsElement);
 
     } catch(SceneAccessException& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"

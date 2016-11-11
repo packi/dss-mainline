@@ -20,11 +20,13 @@
 #include "event_create.h"
 
 #include <boost/make_shared.hpp>
+#include <src/messages/vdcapi.pb.h>
 
 #include "event/event_fields.h"
 #include "ds485types.h"
 #include "model/scenehelper.h"
 #include "model/state.h"
+#include "util.h"
 
 namespace dss {
 
@@ -112,11 +114,23 @@ createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> _devRef,
 }
 
 boost::shared_ptr<Event>
-createDeviceActionEvent(boost::shared_ptr<DeviceReference> _devRef, const std::string& name)
+createDeviceActionEvent(boost::shared_ptr<DeviceReference> _devRef, const std::string& name,
+    vdcapi::PropertyElement& params)
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceActionEvent, _devRef);
-  event->setProperty("name", name);
+
+  Properties actionParams;
+  actionParams.set("actionId", name);
+  for (int n = 0; n < params.elements_size(); n++) {
+    const vdcapi::PropertyElement& pelement = params.elements(n);
+    if (!pelement.has_name() || !pelement.has_value()) {
+      continue;
+    }
+    actionParams.set("params." + pelement.name(), propertyValue2String(pelement.value()));
+  }
+  event->setProperties(actionParams);
+
   return event;
 }
 
