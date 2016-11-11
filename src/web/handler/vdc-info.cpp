@@ -186,6 +186,73 @@ void addCustomActions(Device& device, JSONWriter& json) {
   ProtobufToJSon::processElementsPretty(reader["customActions"].childElements(), json);
 }
 
+void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode, JSONWriter& json) {
+  if (!device.isPresent() || !device.isVdcDevice()) {
+    json.startObject("operational");
+    json.startObject("states");
+    json.endObject();
+    json.startObject("properties");
+    json.endObject();
+    json.endObject();
+    return;
+  }
+
+  google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+  query.Add()->set_name("deviceStates");
+  query.Add()->set_name("deviceProperties");
+  vdcapi::Message message = device.getVdcProperty(query);
+  VdcElementReader reader(message.vdc_response_get_property().properties());
+
+  const std::string& oemEan = device.getOemEanAsString();
+  auto states = db.getStates(oemEan, langCode);
+  auto props = db.getProperties(oemEan, langCode);
+
+  json.startObject("operational");
+  json.startObject("states");
+  VdcElementReader deviceStatesReader = reader["deviceStates"];
+  for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
+    VdcElementReader stateReader = *it;
+    std::string stateName = stateReader.getName();
+    json.startObject(stateName);
+    foreach (const auto &state, states) {
+      if (state.name == stateName) {
+        json.add("title", state.title);
+        std::string propValue = stateReader["value"].getValueAsString();
+        json.add("value", propValue);
+        foreach (const auto &desc, state.values) {
+          if (desc.first == propValue) {
+            json.add("displayValue", desc.second);
+          }
+        }
+        break;
+      }
+    }
+    json.endObject();
+  }
+  json.endObject();
+
+  json.startObject("properties");
+  VdcElementReader devicePropertiesReader = reader["deviceProperties"];
+  for (VdcElementReader::iterator it = devicePropertiesReader.begin(); it != devicePropertiesReader.end(); it++) {
+    VdcElementReader propReader = *it;
+    std::string propName = propReader.getName();
+    std::string propTitle = propName;
+    json.startObject(propName);
+    foreach (const auto &prop, props) {
+      if (prop.name == propName) {
+        propTitle = prop.title;
+        break;
+      }
+    }
+    json.add("title", propTitle);
+    json.add("value", propReader.getValueAsString());
+    json.endObject();
+  }
+  json.endObject();
+
+  json.endObject();
+}
+
 Filter parseFilter(const std::string& filterParam) {
   Filter filter = {};
   if (filterParam.empty()) {
@@ -196,6 +263,7 @@ Filter parseFilter(const std::string& filterParam) {
     filter.actionDesc = 1;
     filter.stdActions = 1;
     filter.customActions = 1;
+    filter.operational = 1;
     return filter;
   }
   std::vector<std::string> items = dss::splitString(filterParam, ',');
@@ -214,6 +282,8 @@ Filter parseFilter(const std::string& filterParam) {
       filter.stdActions = 1;
     } else if (item == "customActions") {
       filter.customActions = 1;
+    } else if (item == "operational") {
+      filter.operational = 1;
     }
   }
   return filter;
@@ -241,6 +311,9 @@ void addByFilter(VdcDb& db, Device& device, Filter filter,
   }
   if (filter.customActions) {
     addCustomActions(device, json);
+  }
+  if (filter.operational) {
+    addOperationalValues(db, device, langCode, json);
   }
 }
 
