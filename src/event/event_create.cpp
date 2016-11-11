@@ -38,6 +38,7 @@ namespace EventName {
   const std::string DeviceStatus = "deviceStatusEvent";
   const std::string DeviceInvalidSensor = "deviceInvalidSensor";
   const std::string DeviceBinaryInputEvent = "deviceBinaryInputEvent";
+  const std::string DeviceCustomActionChangedEvent = "deviceCustomActionChangedEvent";
   const std::string DeviceActionEvent = "deviceActionEvent";
   const std::string DeviceStateEvent = "deviceStateEvent";
   const std::string DeviceEventEvent = "deviceEventEvent";
@@ -114,8 +115,33 @@ createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> _devRef,
 }
 
 boost::shared_ptr<Event>
+createDeviceCustomActionChangedEvent(boost::shared_ptr<DeviceReference> _devRef,
+    const std::string& name, const std::string& action, const std::string& title,
+    const vdcapi::PropertyElement& params)
+{
+  boost::shared_ptr<Event> event;
+  event = boost::make_shared<Event>(EventName::DeviceCustomActionChangedEvent, _devRef);
+
+  Properties actionParams;
+  actionParams.set("customActionId", name);
+  actionParams.set("actionId", action);
+  actionParams.set("customActionTitle", title);
+
+  for (int n = 0; n < params.elements_size(); n++) {
+    const vdcapi::PropertyElement& pelement = params.elements(n);
+    if (!pelement.has_name() || !pelement.has_value()) {
+      continue;
+    }
+    actionParams.set("params." + pelement.name(), propertyValue2String(pelement.value()));
+  }
+
+  event->setProperties(actionParams);
+  return event;
+}
+
+boost::shared_ptr<Event>
 createDeviceActionEvent(boost::shared_ptr<DeviceReference> _devRef, const std::string& name,
-    vdcapi::PropertyElement& params)
+    const vdcapi::PropertyElement& params)
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceActionEvent, _devRef);

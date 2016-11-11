@@ -523,6 +523,7 @@ const static std::string evtCategory_DeviceBinaryInput = "DeviceBinaryInput";
 const static std::string evtCategory_DeviceInputState = "DeviceInputState";
 const static std::string evtCategory_DeviceStatusReport = "DeviceStatusReport";
 const static std::string evtCategory_DeviceSensorError = "DeviceSensorError";
+const static std::string evtCategory_DeviceCustomActionChangedEvent = "DeviceCustomActionChangedEvent";
 const static std::string evtCategory_DeviceActionEvent = "DeviceActionEvent";
 const static std::string evtCategory_DeviceEventEvent = "DeviceEventEvent";
 const static std::string evtCategory_DeviceStateEvent = "DeviceStateEvent";
@@ -597,6 +598,7 @@ std::vector<std::string> uploadEvents()
   events.push_back(EventName::DeviceSensorValue);
   events.push_back(EventName::DeviceStatus);
   events.push_back(EventName::DeviceInvalidSensor);
+  events.push_back(EventName::DeviceCustomActionChangedEvent);
   events.push_back(EventName::DeviceActionEvent);
   events.push_back(EventName::DeviceEventEvent);
   events.push_back(EventName::DeviceStateEvent);
@@ -767,6 +769,23 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.startObject("EventBody");
       json.add("StateId", event->getPropertyByName("stateId"));
       json.add("Value", event->getPropertyByName("value"));
+      json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
+      json.endObject();
+    } else if ((event->getName() == EventName::DeviceCustomActionChangedEvent) && (event->getRaiseLocation() == erlDevice)) {
+      pDeviceRef = event->getRaisedAtDevice();
+      createHeader(json, evtGroup_Activity, evtCategory_DeviceCustomActionChangedEvent, event.get());
+      json.startObject("EventBody");
+      json.add("CustomActionId", event->getPropertyByName("customActionId"));
+      json.add("ActionId", event->getPropertyByName("actionId"));
+      json.add("CustomActionTitle", event->getPropertyByName("customActionTitle"));
+      json.startObject("Parameter");
+      const dss::HashMapStringString& props =  event->getProperties().getContainer();
+      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        if (beginsWith(iParam->first, "params.")) {
+          json.add(iParam->first.substr(7), iParam->second);
+        }
+      }
+      json.endObject();
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.endObject();
     } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
