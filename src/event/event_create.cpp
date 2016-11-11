@@ -140,7 +140,7 @@ createDeviceStateEvent(boost::shared_ptr<DeviceReference> _devRef,
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceStateEvent, _devRef);
-  event->setProperty("name", name);
+  event->setProperty("stateId", name);
   event->setProperty("value", value);
   return event;
 }
@@ -150,7 +150,7 @@ createDeviceEventEvent(boost::shared_ptr<DeviceReference> _devRef, const std::st
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceEventEvent, _devRef);
-  event->setProperty("name", name);
+  event->setProperty("eventId", name);
   return event;
 }
 
