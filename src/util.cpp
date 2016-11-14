@@ -229,5 +229,26 @@ static OutputChannelInfo kOutputChannels[] = {
     }
     return result;
   }
-    
+
+  std::string propertyValue2String(const vdcapi::PropertyValue &pvalue)
+  {
+    std::string value;
+    if (pvalue.has_v_bool()) {
+      value = pvalue.v_bool() ? "active" : "inactive";
+    }
+    if (pvalue.has_v_double()) {
+      value = doubleToString(pvalue.v_double());
+    }
+    if (pvalue.has_v_int64()) {
+      value = intToString(pvalue.v_int64());
+    }
+    if (pvalue.has_v_uint64()) {
+      value = uintToString(pvalue.v_uint64());
+    }
+    if (pvalue.has_v_string()) {
+      value = pvalue.v_string();
+    }
+    return value;
+  }
+
 } // namespace

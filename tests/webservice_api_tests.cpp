@@ -300,8 +300,12 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent->setProperty("returnOn", DateTime().toISO8601_ms());
   } else if (eventName == EventName::LogFileData) {
     pEvent = boost::make_shared<Event>(EventName::LogFileData);
+  } else if (eventName == EventName::DeviceCustomActionChangedEvent) {
+    vdcapi::PropertyElement test;
+    pEvent = createDeviceCustomActionChangedEvent(createDevRef(), "blah", "stdaction", "title", test);
   } else if (eventName == EventName::DeviceActionEvent) {
-    pEvent = createDeviceActionEvent(createDevRef(), "blah");
+    vdcapi::PropertyElement test;
+    pEvent = createDeviceActionEvent(createDevRef(), "blah", test);
   } else if (eventName == EventName::DeviceEventEvent) {
     pEvent = createDeviceEventEvent(createDevRef(), "blub");
   } else if (eventName == EventName::DeviceStateEvent) {

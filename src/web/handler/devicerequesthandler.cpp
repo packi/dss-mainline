@@ -2157,7 +2157,14 @@ namespace dss {
       if (!_request.getParameter("id", id)) {
         return JSONWriter::failure("missing parameter: id");
       }
-      pDevice->callAction(id);
+      std::string params;
+      vdcapi::PropertyElement parsedParamsElement;
+      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+      if (_request.getParameter("params", params) && !params.empty()) {
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+        paramsElement = &parsedParamsElement;
+      }
+      pDevice->callAction(id, *paramsElement);
       return JSONWriter::success();
     } else {
       throw std::runtime_error("Unhandled function");
