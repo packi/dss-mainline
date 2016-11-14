@@ -54,6 +54,7 @@
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
+#include "src/protobufjson.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -3058,7 +3059,7 @@ namespace dss {
     return getDSID();
   }
 
-  void Device::callAction(const std::string& actionId) {
+  void Device::callAction(const std::string& actionId, const vdcapi::PropertyElement& params) {
     if (!m_isVdcDevice) {
       throw std::runtime_error("CallAction can be called only on vdc devices.");
     }
@@ -3066,15 +3067,23 @@ namespace dss {
     if (!deviceBusInterface) {
       throw std::runtime_error("Bus interface not available");
     }
-    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> params;
-    vdcapi::PropertyElement* param0 = params.Add();
+
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> actionCall;
+    vdcapi::PropertyElement* param0 = actionCall.Add();
     param0->set_name("id");
     param0->mutable_value()->set_v_string(actionId);
-    deviceBusInterface->genericRequest(*this, "invokeDeviceAction", params);
+
+    if (params.elements_size()) {
+      vdcapi::PropertyElement* param1 = actionCall.Add();
+      param1->set_name("params");
+      *param1->mutable_elements() = params.elements();
+    }
+    deviceBusInterface->genericRequest(*this, "invokeDeviceAction", actionCall);
 
     //action finished with success -> raise event
     auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
-    DSS::getInstance()->getEventQueue().pushEvent(createDeviceActionEvent(deviceReference, actionId));
+    boost::shared_ptr<Event> evt = createDeviceActionEvent(deviceReference, actionId, params);
+    DSS::getInstance()->getEventQueue().pushEvent(evt);
   }
 
   void Device::setProperty(const vdcapi::PropertyElement& propertyElement) {
@@ -3128,6 +3137,10 @@ namespace dss {
       }
     }
     deviceBusInterface->setProperty(*this, setPropertyParams);
+
+    auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
+    boost::shared_ptr<Event> evt = createDeviceCustomActionChangedEvent(deviceReference, id, action, title, *actionElement);
+    DSS::getInstance()->getEventQueue().pushEvent(evt);
   }
 
   vdcapi::Message Device::getVdcProperty(

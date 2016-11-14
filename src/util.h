@@ -28,6 +28,7 @@
 #include <vector>
 #include <inttypes.h>
 #include <boost/shared_ptr.hpp>
+#include <src/messages/vdcapi.pb.h>
 
 namespace dss {
 
@@ -45,6 +46,7 @@ namespace dss {
   double convertFromOutputChannelValue(uint8_t channel, uint16_t value);
   bool saveValidatedXML(const std::string& _fileName, const std::string& _targetFile);
   std::vector<int> parseBitfield(const uint8_t *_bitfield, int _bits);
+  std::string propertyValue2String(const vdcapi::PropertyValue &pvalue);
 }
 
 #endif

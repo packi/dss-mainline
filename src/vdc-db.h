@@ -103,6 +103,8 @@ private:
   SQLite3 m_db;
   static std::mutex s_mutex;
   std::lock_guard<std::mutex> m_lock;
+
+  void extractLangAndCountry(const std::string &langCode, std::string &lang, std::string &country);
 };
 
 }
