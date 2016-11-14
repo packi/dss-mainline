@@ -356,7 +356,13 @@ PKG_CHECK_MODULES([AVAHI], [avahi-client],
         AC_MSG_ERROR([$AVAHI_PKG_ERRORS])
     ])
 
-MT_CHECK_REQUIRED_PACKAGE([librrd], [rrd], [rrd], [rrd_create_r], [-lrrd_th])
+PKG_CHECK_MODULES([LIBRRD], [librrd],
+    [
+        AC_CHECK_LIB(rrd_th, rrd_create_r, [ LIBRRD_LIBS="-lrrd_th" ], [])
+    ],
+    [
+        AC_MSG_ERROR([$LIBRRD_PKG_ERRORS])
+    ])
 
 MT_CHECK_REQUIRED_PACKAGE([expat], [expat], [expat], [XML_ParserCreate])
 
