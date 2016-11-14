@@ -89,8 +89,6 @@ private:
   };
   std::unique_ptr<sqlite3, Deleter> m_ptr;
 
-  boost::mutex m_mutex;
-
   void execInternal(const std::string& sql);
 
   friend class SqlStatement;
