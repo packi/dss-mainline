@@ -45,6 +45,20 @@ std::string VdcDb::getFilePath() {
   return DSS::getInstance()->getDatabaseDirectory() + "/vdc.db";
 }
 
+void VdcDb::extractLangAndCountry(const std::string &langCode, std::string &lang, std::string &country)
+{
+  if (langCode.length() < 2) {
+    lang = "base";
+    return;
+  }
+  if (langCode.length() >= 2) {
+    lang = langCode.substr(0, 2);
+  }
+  if (langCode.length() >= 5) {
+    country = langCode.substr(3, 2);
+  }
+}
+
 std::vector<DeviceStateSpec_t> VdcDb::getStatesLegacy(const std::string &gtin) {
   std::vector<DeviceStateSpec_t> states;
 
@@ -61,6 +75,9 @@ std::vector<DeviceStateSpec_t> VdcDb::getStatesLegacy(const std::string &gtin) {
 }
 
 std::vector<VdcDb::SpecDesc> VdcDb::getSpec(const std::string &gtin, const std::string &langCode) {
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
   // name, tags, gtin
   std::string sql0("select * from callGetSpecBase where (gtin=? or gtin='')");
   SqlStatement query0 = m_db.prepare(sql0);
@@ -76,14 +93,8 @@ std::vector<VdcDb::SpecDesc> VdcDb::getSpec(const std::string &gtin, const std::
   }
 
   // name, title, tags, value, lang_code, gtin
-  std::string sql("select * from callGetSpec where (gtin=? or gtin='') and lang_code=?");
-  std::string lang;
-  if (!langCode.empty()) {
-    lang = langCode;
-  } else {
-    lang = "base";
-  }
-
+  std::string sql = R"sqlquery(select name, title, tags, value, gtin from callGetSpec "
+                               "where (gtin=? or gtin='') and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
   SqlStatement::BindScope scope = query.bind(gtin, lang);
   while (query.step() != SqlStatement::StepResult::DONE) {
@@ -100,6 +111,9 @@ std::vector<VdcDb::SpecDesc> VdcDb::getSpec(const std::string &gtin, const std::
 }
 
 std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const std::string &langCode) {
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
   // name, value, tags, gtin
   std::string sql0("select * from callGetStatesBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
@@ -120,16 +134,10 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
   }
 
   // name, name:1, value, name:2, tags, gtin, lang_code
-  std::string sql("select * from callGetStates where gtin=? and lang_code=?");
-  std::string lang;
-  if (!langCode.empty()) {
-    lang = langCode;
-  } else {
-    lang = "base";
-  }
-
+  std::string sql = R"sqlquery(select distinct name,displayName,value,enumName,tags,gtin from callGetStates "
+                              "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
-  SqlStatement::BindScope scope = query.bind(gtin, lang);
+  SqlStatement::BindScope scope = query.bind(gtin, lang, country);
   while (query.step() == SqlStatement::StepResult::ROW) {
     std::string name = query.getColumn<std::string>(0);
     std::string svalue = query.getColumn<std::string>(2);
@@ -149,6 +157,9 @@ std::vector<VdcDb::StateDesc> VdcDb::getStates(const std::string &gtin, const st
 }
 
 std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const std::string &langCode) {
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
   // name, gtin
   std::string sql0("select * from callGetEventsBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
@@ -162,16 +173,10 @@ std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const st
   }
 
   // name, displayName, gtin, lang_code
-  std::string sql("select * from callGetEvents where gtin=? and lang_code=?");
-  std::string lang;
-  if (!langCode.empty()) {
-    lang = langCode;
-  } else {
-    lang = "base";
-  }
-
+  std::string sql = R"sqlquery(select distinct name,displayName,gtin,lang,country from callGetEvents "
+                              "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
-  SqlStatement::BindScope scope = query.bind(gtin, lang);
+  SqlStatement::BindScope scope = query.bind(gtin, lang, country);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
     foreach (auto &it, events) {
@@ -185,6 +190,9 @@ std::vector<VdcDb::EventDesc> VdcDb::getEvents(const std::string &gtin, const st
 }
 
 std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, const std::string &langCode) {
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
   // name, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin
   std::string sql0("select * from callGetPropertiesBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
@@ -219,16 +227,10 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   }
 
   // name, alt_label, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin, lang_code
-  std::string sql("select * from callGetProperties where gtin=? and lang_code=?");
-  std::string lang;
-  if (!langCode.empty()) {
-    lang = langCode;
-  } else {
-    lang = "base";
-  }
-
+  std::string sql = R"sqlquery(select distinct name, alt_label, type_id, default_value, min_value, max_value, resolution, si_unit from callGetProperties "
+                              "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
-  SqlStatement::BindScope scope = query.bind(gtin, lang);
+  SqlStatement::BindScope scope = query.bind(gtin, lang, country);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
     foreach (auto &it, props) {
@@ -242,6 +244,9 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
 }
 
 std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const std::string &langCode) {
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
   // command, parameterName, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin
   std::string sql0("select * from callGetActionsBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
@@ -285,16 +290,10 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
   }
 
   // command, actionName, parameterName, parameterDisplayName, type_id, default_value, min_value, max_value, resolution, si_unit, tags, paramexists, gtin, lang_code
-  std::string sql("select * from callGetActions where gtin=? and lang_code=?");
-  std::string lang;
-  if (!langCode.empty()) {
-    lang = langCode;
-  } else {
-    lang = "base";
-  }
-
+  std::string sql = R"sqlquery(select distinct command, actionName, parameterName, parameterDisplayName, type_id, default_value, min_value, max_value, resolution, si_unit, tags, paramexists from callGetActions "
+                              "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
-  SqlStatement::BindScope scope = query.bind(gtin, lang);
+  SqlStatement::BindScope scope = query.bind(gtin, lang, country);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
     std::string pname;
@@ -317,6 +316,9 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
 }
 
 std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::string &gtin, const std::string &langCode) {
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
   // predefName, command, name:1, value, gint
   std::string sql0("select * from callGetStandardActionsBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
@@ -339,16 +341,10 @@ std::vector<VdcDb::StandardActionDesc> VdcDb::getStandardActions(const std::stri
   }
 
   // predefName, displayPredefname, command, name:2, value, paramexists, gtin, lang_code
-  std::string sql("select * from callGetStandardActions where gtin=? and lang_code=?");
-  std::string lang;
-  if (!langCode.empty()) {
-    lang = langCode;
-  } else {
-    lang = "base";
-  }
-
+  std::string sql = R"sqlquery(select distinct predefName, displayPredefName, command, paramName,gtin from callGetStandardActions "
+                              "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
-  SqlStatement::BindScope scope = query.bind(gtin, lang);
+  SqlStatement::BindScope scope = query.bind(gtin, lang, country);
   while (query.step() != SqlStatement::StepResult::DONE) {
     std::string name = query.getColumn<std::string>(0);
     foreach (auto &it, desc) {
