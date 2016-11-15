@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 
+#include "logger.h"
 #include "src/businterface.h"
 #include "src/sqlite3_wrapper.h"
 
@@ -34,6 +35,7 @@ public:
   VdcDb(SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
 
   static std::string getFilePath();
+  static void recreate();
 
   SQLite3& getDb() { return m_db; }
 
@@ -100,6 +102,7 @@ public:
   bool hasActionInterface(const std::string &gtin);
 
 private:
+  __DECL_LOG_CHANNEL__;
   SQLite3 m_db;
   static std::mutex s_mutex;
   std::lock_guard<std::mutex> m_lock;

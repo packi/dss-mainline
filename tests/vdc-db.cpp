@@ -35,7 +35,6 @@
 #include "src/foreach.h"
 #include "src/model/device.h"
 #include "src/vdc-db.h"
-#include "src/vdc-db-fetcher.h"
 #include "src/propertysystem.h"
 #include "src/vdc-connection.h"
 #include "src/web/webrequests.h"
@@ -66,7 +65,7 @@ BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
   std::string gtin("7640156791914"); // VZug Steamer
   std::string no_gtin("invalid_gtin");
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
 
   std::vector<DeviceStateSpec_t> states_s;
@@ -108,7 +107,7 @@ static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
 BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
   std::string gtin("7640156791914"); // VZug Steamer
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
   std::vector<VdcDb::PropertyDesc> props;
   BOOST_CHECK_NO_THROW(props = db.getProperties(gtin));
@@ -136,7 +135,7 @@ static void dumpActionDesc(const std::vector<VdcDb::ActionDesc> &actions) {
 BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
   std::string gtin("7640156791914"); // VZug Steamer
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
   std::vector<VdcDb::ActionDesc> actions;
   BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, ""));
@@ -168,7 +167,7 @@ static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
 BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
   std::string gtin("7640156791914"); // VZug Steamer
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
   std::vector<VdcDb::StandardActionDesc> stdActions;
   BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, "de_DE"));
@@ -185,7 +184,7 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(7640156791914, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
@@ -230,7 +229,7 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   std::string gtin("0000000000000");
   // invalid gtin
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
   BOOST_CHECK(db.getStates(gtin).empty());
   BOOST_CHECK(db.getProperties(gtin).empty());
@@ -269,7 +268,7 @@ BOOST_FIXTURE_TEST_CASE(checkDeviceSupport, DSSInstanceFixture) {
     "7640156791945" , // vDC smarter iKettle 2.0
   };
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
+  VdcDb::recreate();
   VdcDb db;
   foreach (auto gtin, gtins) {
     BOOST_CHECK(!db.getStates(gtin, "de_DE").empty());

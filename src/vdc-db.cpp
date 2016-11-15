@@ -31,6 +31,8 @@
 
 namespace dss {
 
+__DEFINE_LOG_CHANNEL__(VdcDb, lsInfo);
+
 // Parallel readers and writers would introduce errors returned by sqlite.
 // It is possible to recover from these errors, but we don't aim for parallelism here.
 // We avoid concurrency errors by locking this static mutex in each VdcDb instance.
@@ -43,6 +45,29 @@ VdcDb::VdcDb(SQLite3::Mode mode):
 
 std::string VdcDb::getFilePath() {
   return DSS::getInstance()->getDatabaseDirectory() + "/vdc.db";
+}
+
+void VdcDb::recreate() {
+  try {
+    // Check that VdcDb is usable, (re)create if not.
+    //
+    // TODO(someday): refactor this initial VdcDb recreating into separate class?
+    // It is independent to the database fetcher and must be active even when fetcher is inactive.
+    VdcDb db;
+    log(std::string() + "Database present", lsNotice);
+  } catch (std::exception &e) {
+    try {
+      VdcDb db(SQLite3::Mode::ReadWrite);
+      db.getDb().exec(readFile(DSS::getInstance()->getDataDirectory() + "/vdc-db.sql"));
+      log(std::string() + "Database (re)created. e.what():" + e.what(), lsNotice);
+    } catch (std::exception &e2) {
+      // Opening db read-write leaves empty file.
+      // Delete the file so that read only open fails.
+      ::remove(VdcDb::getFilePath().c_str());
+      throw std::runtime_error(std::string() + "Database missing or corrupt, recreate failed. e2.what():"
+          + e2.what() + " e.what():" + e.what());
+    }
+  }
 }
 
 void VdcDb::extractLangAndCountry(const std::string &langCode, std::string &lang, std::string &country)
