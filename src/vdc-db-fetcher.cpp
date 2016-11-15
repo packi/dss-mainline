@@ -43,26 +43,7 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
     m_url(m_configNode->getOrCreateChildValue<std::string>("url", "http://db.aizo.net/vdc-db.php")) {
   log("VdcDbFetcher m_enabled:" + intToString(m_enabled) + " m_period:" + intToString(m_period.count())
       + " m_url:" + m_url, lsNotice);
-  try {
-    // Check that VdcDb is usable, (re)create if not.
-    //
-    // TODO(someday): refactor this initial VdcDb recreating into separate class?
-    // It is independent to the database fetcher and must be active even when fetcher is inactive.
-    VdcDb db;
-    log(std::string() + "Database present", lsNotice);
-  } catch (std::exception &e) {
-    try {
-      VdcDb db(SQLite3::Mode::ReadWrite);
-      db.getDb().exec(readFile(m_dss.getDataDirectory() + "/vdc-db.sql"));
-      log(std::string() + "Database (re)created. e.what():" + e.what(), lsNotice);
-    } catch (std::exception &e2) {
-      // Opening db read-write leaves empty file.
-      // Delete the file so that read only open fails.
-      ::remove(VdcDb::getFilePath().c_str());
-      throw std::runtime_error(std::string() + "Database missing or corrupt, recreate failed. e2.what():"
-          + e2.what() + " e.what():" + e.what());
-    }
-  }
+  VdcDb::recreate();
   asyncLoop();
 }
 

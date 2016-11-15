@@ -33,6 +33,8 @@ namespace dss {
   /// Initialize vdc-db in constructor and schedule vdc-db updates after start and periodically.
   class VdcDbFetcher {
   public:
+    static void recreateDb(DSS &dss);
+
     VdcDbFetcher(DSS &dss);
 
   private:
