@@ -112,13 +112,13 @@ BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
   VdcDb db;
   std::vector<VdcDb::PropertyDesc> props;
   BOOST_CHECK_NO_THROW(props = db.getProperties(gtin));
-  BOOST_CHECK(props[2].name == "temperature.sensor");
-  BOOST_CHECK(props[2].title == "coretemperature");
+  BOOST_CHECK_EQUAL(props[2].name, "temperature.sensor");
+  BOOST_CHECK_EQUAL(props[2].title, "coretemperature");
   //dumpProperties(props);
 
   BOOST_CHECK_NO_THROW(props = db.getProperties(gtin, "de_DE"));
-  BOOST_CHECK(props[2].name == "temperature.sensor");
-  BOOST_CHECK(props[2].title == "Garguttemperatur");
+  BOOST_CHECK_EQUAL(props[2].name, "temperature.sensor");
+  BOOST_CHECK_EQUAL(props[2].title, "Garguttemperatur");
   //dumpProperties(props);
 }
 
@@ -140,17 +140,17 @@ BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
   VdcDb db;
   std::vector<VdcDb::ActionDesc> actions;
   BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, ""));
-  BOOST_CHECK(actions[1].name == "steam");
-  BOOST_CHECK(actions[1].title == "steam");
-  BOOST_CHECK(actions[1].params[0].name == "duration");
-  BOOST_CHECK(actions[1].params[0].title == "time");
+  BOOST_CHECK_EQUAL(actions[1].name, "steam");
+  BOOST_CHECK_EQUAL(actions[1].title, "steam");
+  BOOST_CHECK_EQUAL(actions[1].params[0].name, "duration");
+  BOOST_CHECK_EQUAL(actions[1].params[0].title, "time");
   //dumpActionDesc(actions);
 
   BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, "de_DE"));
-  BOOST_CHECK(actions[1].name == "steam");
-  BOOST_CHECK(actions[1].title == "Dampfen");
-  BOOST_CHECK(actions[1].params[1].name == "temperature");
-  BOOST_CHECK(actions[1].params[1].title == "Temperatur");
+  BOOST_CHECK_EQUAL(actions[1].name, "steam");
+  BOOST_CHECK_EQUAL(actions[1].title, "Dampfen");
+  BOOST_CHECK_EQUAL(actions[1].params[1].name, "temperature");
+  BOOST_CHECK_EQUAL(actions[1].params[1].title, "Temperatur");
   //dumpActionDesc(actions);
 }
 
@@ -173,15 +173,15 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
   std::vector<VdcDb::StandardActionDesc> stdActions;
   BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, "de_DE"));
   //dumpDesc(stdActions);
-  BOOST_CHECK(stdActions[1].name == "std.pizza");
-  BOOST_CHECK(stdActions[1].title == "Pizza");
-  BOOST_CHECK(stdActions[0].args[1].first == "duration");
+  BOOST_CHECK_EQUAL(stdActions[1].name, "std.pizza");
+  BOOST_CHECK_EQUAL(stdActions[1].title, "Pizza");
+  BOOST_CHECK_EQUAL(stdActions[0].args[1].first, "duration");
 
   BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, ""));
   //dumpDesc(stdActions);
-  BOOST_CHECK(stdActions[1].name == "std.pizza");
-  BOOST_CHECK(stdActions[1].title == "pizza");
-  BOOST_CHECK(stdActions[0].args[1].first == "duration");
+  BOOST_CHECK_EQUAL(stdActions[1].name, "std.pizza");
+  BOOST_CHECK_EQUAL(stdActions[1].title, "pizza");
+  BOOST_CHECK_EQUAL(stdActions[0].args[1].first, "duration");
 }
 
 BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
