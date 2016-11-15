@@ -43,7 +43,7 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
     m_url(m_configNode->getOrCreateChildValue<std::string>("url", "http://db.aizo.net/vdc-db.php")) {
   log("VdcDbFetcher m_enabled:" + intToString(m_enabled) + " m_period:" + intToString(m_period.count())
       + " m_url:" + m_url, lsNotice);
-  VdcDb::recreate();
+  VdcDb::recreate(dss);
   asyncLoop();
 }
 
@@ -82,7 +82,7 @@ void VdcDbFetcher::fetchTask() {
       throw std::runtime_error(std::string("Http request failed. url:") + m_url + " code:" + intToString(code));
     }
 
-    VdcDb db(SQLite3::Mode::ReadWrite);
+    VdcDb db(m_dss, SQLite3::Mode::ReadWrite);
     db.getDb().exec(result);
     log(std::string("Database updated"), lsNotice);
   } catch (std::runtime_error &e) {

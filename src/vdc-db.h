@@ -30,12 +30,14 @@
 
 namespace dss {
 
+class DSS;
+
 class VdcDb {
 public:
-  VdcDb(SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
+  VdcDb(DSS &dss, SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
 
-  static std::string getFilePath();
-  static void recreate();
+  static std::string getFilePath(DSS &dss);
+  static void recreate(DSS &dss);
 
   SQLite3& getDb() { return m_db; }
 

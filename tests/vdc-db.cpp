@@ -46,6 +46,20 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(VDC_DB)
 
+namespace {
+struct Recreate {
+    Recreate() { VdcDb::recreate(*DSS::getInstance()); }
+};
+
+class Fixture : public DSSInstanceFixture {
+public:
+  Recreate recreate;
+  VdcDb db;
+
+  Fixture() : db(*DSS::getInstance()) {}
+};
+} // namespace
+
 static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   foreach (const DeviceStateSpec_t &state, states) {
     std::string values;
@@ -61,11 +75,7 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
 
 static const char *gtin = "1234567890123";
 
-BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
-
-  VdcDb::recreate();
-  VdcDb db;
-
+BOOST_FIXTURE_TEST_CASE(getStates, Fixture) {
   std::vector<DeviceStateSpec_t> states_s;
   states_s = db.getStatesLegacy(gtin);
   //dumpStates(states_s);
@@ -107,9 +117,7 @@ static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
   Logger::getInstance()->log("properties: \n" + out, lsWarning);
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
-  VdcDb::recreate();
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(lookupProperties, Fixture) {
   std::vector<VdcDb::PropertyDesc> props;
   props = db.getProperties(gtin);
   BOOST_REQUIRE_EQUAL(props.size(), 1);
@@ -135,9 +143,7 @@ static void dumpActionDesc(const std::vector<VdcDb::ActionDesc> &actions) {
   Logger::getInstance()->log("actions: \n" + out, lsWarning);
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
-  VdcDb::recreate();
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(lookupActions, Fixture) {
   std::vector<VdcDb::ActionDesc> actions;
   actions = db.getActions(gtin, "");
   BOOST_REQUIRE_EQUAL(actions.size(), 2);
@@ -171,9 +177,7 @@ static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
   Logger::getInstance()->log("standard actions: \n" + out, lsWarning);
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
-  VdcDb::recreate();
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(lookupStandardActions, Fixture) {
   std::vector<VdcDb::StandardActionDesc> stdActions;
   stdActions = db.getStandardActions(gtin, "de_DE");
   //dumpDesc(stdActions);
@@ -192,9 +196,7 @@ BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(stdActions[1].title, "std.moreDummy");
 }
 
-BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
-  VdcDb::recreate();
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
   Device dev(DSUID_NULL, NULL);
   dev.setOemInfo(1234567890123, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
   VdsdSpec_t vdcSpec;
@@ -228,12 +230,9 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   BOOST_CHECK_EQUAL(ret, expect);
 }
 
-BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
+BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
   auto invalidGtin = "0000000000000";
-  // invalid gtin
 
-  VdcDb::recreate();
-  VdcDb db;
   BOOST_CHECK(db.getStates(invalidGtin).empty());
   BOOST_CHECK(db.getProperties(invalidGtin).empty());
   BOOST_CHECK(db.getActions(invalidGtin).empty());
