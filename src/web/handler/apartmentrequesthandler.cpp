@@ -761,7 +761,7 @@ namespace dss {
 
         auto filter = vdcInfo::parseFilter(filterParam);
 
-        VdcDb db;
+        VdcDb db(*DSS::getInstance());
         JSONWriter json;
 
         Apartment& apt = DSS::getInstance()->getApartment();

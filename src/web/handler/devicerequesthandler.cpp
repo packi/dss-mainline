@@ -2063,7 +2063,7 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       std::string langCode("");
       _request.getParameter("lang", langCode);
-      VdcDb db;
+      VdcDb db(*DSS::getInstance());
       JSONWriter json;
       vdcInfo::addSpec(db, *pDevice, langCode, json);
       vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
@@ -2095,7 +2095,7 @@ namespace dss {
       _request.getParameter("lang", langCode);
 
 
-      VdcDb db;
+      VdcDb db(*DSS::getInstance());
       JSONWriter json;
       auto filter = vdcInfo::parseFilter(filterParam);
       vdcInfo::addByFilter(db, *pDevice, filter, langCode, json);

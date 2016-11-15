@@ -472,7 +472,7 @@ namespace dss {
           eanString.erase(0, 8);
         }
 
-        VdcDb db;
+        VdcDb db(*DSS::getInstance());
         dev->initStates(dev, db.getStatesLegacy(eanString)); // throws
         dev->setHasActions(db.hasActionInterface(eanString)); // throws
       }
