@@ -27,6 +27,10 @@
 
 namespace dss {
 
+  // Documentation links:
+  // http://developer.digitalstrom.org/Architecture/ds-basics.pdf
+  // https://git.digitalstrom.org/digitalstrom-documentation/digitalstrom-documentation/tree/master/ds-basics
+
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;
   const uint8_t SceneOffA1 = 0x01;
