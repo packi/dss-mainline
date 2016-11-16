@@ -932,9 +932,6 @@ void SystemState::run() {
     } else if (m_evtName == EventName::UndoScene) {
       undoscene();
     } else if (m_evtName == EventName::StateChange) {
-      if (m_evtRaiseLocation) {
-
-      }
       if (m_raisedAtState->getType() == StateType_Device) {
         stateBinaryinput();
       } else if (m_raisedAtState->getType() == StateType_Service) {
