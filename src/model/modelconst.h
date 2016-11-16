@@ -210,6 +210,8 @@ namespace dss {
   const int BinaryInputIDHeatingSystem = 19;
   const int BinaryInputIDHeatingSystemMode = 20;
   const int BinaryInputIDPowerUp = 21;
+  const int BinaryInputIDMalfunction = 22;
+  const int BinaryInputIDService = 23;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
