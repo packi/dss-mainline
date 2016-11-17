@@ -34,85 +34,46 @@
 #include "stringconverter.h"
 #include "logger.h"
 #include "model-features.h"
-#include "vdc-element-reader.h"
+#include "src/vdc-element-reader.h"
 
 namespace dss {
 
   VdsdSpec_t VdcHelper::getSpec(dsuid_t _vdsm, dsuid_t _device) {
-    vdcapi::Message message;
-    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
-    vdcapi::vdsm_RequestGetProperty *getprop =
-                                    message.mutable_vdsm_request_get_property();
-    getprop->set_dsuid(dsuid2str(_device));
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("hardwareModelGuid");
+    el = query.Add();
+    el->set_name("modelUID");
+    el = query.Add();
+    el->set_name("modelFeatures");
+    el = query.Add();
+    el->set_name("vendorGuid");
+    el = query.Add();
+    el->set_name("vendorId");
+    el = query.Add();
+    el->set_name("vendorName");
+    el = query.Add();
+    el->set_name("oemGuid");
+    el = query.Add();
+    el->set_name("oemModelGuid");
+    el = query.Add();
+    el->set_name("configURL");
+    el = query.Add();
+    el->set_name("hardwareGuid");
+    el = query.Add();
+    el->set_name("model");
+    el = query.Add();
+    el->set_name("modelVersion");
+    el = query.Add();
+    el->set_name("hardwareVersion");
+    el = query.Add();
+    el->set_name("name");
+    el = query.Add();
+    el->set_name("deviceClass");
+    el = query.Add();
+    el->set_name("deviceClassVersion");
 
-    vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("hardwareModelGuid");
-    query = getprop->add_query();
-    query->set_name("modelUID");
-    query = getprop->add_query();
-    query->set_name("modelFeatures");
-    query = getprop->add_query();
-    query->set_name("vendorGuid");
-    query = getprop->add_query();
-    query->set_name("vendorId");
-    query = getprop->add_query();
-    query->set_name("vendorName");
-    query = getprop->add_query();
-    query->set_name("oemGuid");
-    query = getprop->add_query();
-    query->set_name("oemModelGuid");
-    query = getprop->add_query();
-    query->set_name("configURL");
-    query = getprop->add_query();
-    query->set_name("hardwareGuid");
-    query = getprop->add_query();
-    query->set_name("model");
-    query = getprop->add_query();
-    query->set_name("modelVersion");
-    query = getprop->add_query();
-    query->set_name("hardwareVersion");
-    query = getprop->add_query();
-    query->set_name("name");
-    query = getprop->add_query();
-    query->set_name("deviceClass");
-    query = getprop->add_query();
-    query->set_name("deviceClassVersion");
-
-    uint8_t buffer_in[4096];
-    uint8_t buffer_out[4096];
-    uint16_t bs;
-
-    memset(buffer_in, 0, sizeof(buffer_in));
-    memset(buffer_out, 0, sizeof(buffer_out));
-
-    if (!message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
-      throw std::runtime_error("could not serialize message");
-    }
-
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
-    } else {
-      throw std::runtime_error("!DSS::hasInstance()");
-    }
-
-    message.Clear();
-    if (bs > sizeof(buffer_out)) {
-      throw std::runtime_error("incoming message too large, dropping");
-    }
-
-    if (!message.ParseFromArray(buffer_out, bs)) {
-      throw std::runtime_error("could not parse response message");
-    }
-
-    // error message
-    if (message.type() == vdcapi::GENERIC_RESPONSE) {
-      throw std::runtime_error("received error with code " +
-                               intToString(message.generic_response().code()));
-    }
-    if (!message.has_vdc_response_get_property()) {
-      throw std::runtime_error("received unexpected reply");
-    }
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _device, query);
 
     VdsdSpec_t ret;
     VdcElementReader rootReader(message.vdc_response_get_property().properties());
@@ -153,79 +114,36 @@ namespace dss {
   }
 
   boost::shared_ptr<VdcSpec_t> VdcHelper::getCapabilities(dsuid_t _vdsm) {
-    vdcapi::Message message;
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("capabilities");
+    el = query.Add();
+    el->set_name("modelVersion");
+    el = query.Add();
+    el->set_name("model");
+    el = query.Add();
+    el->set_name("hardwareVersion");
+    el = query.Add();
+    el->set_name("hardwareModelGuid");
+    el = query.Add();
+    el->set_name("modelUID");
+    el = query.Add();
+    el->set_name("vendorGuid");
+    el = query.Add();
+    el->set_name("oemGuid");
+    el = query.Add();
+    el->set_name("oemModelGuid");
+    el = query.Add();
+    el->set_name("configURL");
+    el = query.Add();
+    el->set_name("hardwareGuid");
+    el = query.Add();
+    el->set_name("name");
+
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _vdsm, query);
+
     boost::shared_ptr<VdcSpec_t> ret = boost::make_shared<VdcSpec_t>();
-
-    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
-    vdcapi::vdsm_RequestGetProperty *getprop =
-                                    message.mutable_vdsm_request_get_property();
-    getprop->set_dsuid(dsuid2str(_vdsm));
-
-    vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("capabilities");
-    query = getprop->add_query();
-    query->set_name("modelVersion");
-    query = getprop->add_query();
-    query->set_name("model");
-    query = getprop->add_query();
-    query->set_name("hardwareVersion");
-    query = getprop->add_query();
-    query->set_name("hardwareModelGuid");
-    query = getprop->add_query();
-    query->set_name("modelUID");
-    query = getprop->add_query();
-    query->set_name("vendorGuid");
-    query = getprop->add_query();
-    query->set_name("oemGuid");
-    query = getprop->add_query();
-    query->set_name("oemModelGuid");
-    query = getprop->add_query();
-    query->set_name("configURL");
-    query = getprop->add_query();
-    query->set_name("hardwareGuid");
-    query = getprop->add_query();
-    query->set_name("name");
-
-
-    uint8_t buffer_in[4096];
-    uint8_t buffer_out[4096];
-    uint16_t bs;
-
-    memset(buffer_in, 0, sizeof(buffer_in));
-    memset(buffer_out, 0, sizeof(buffer_out));
-
-    if (!message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
-      throw std::runtime_error("could not serialize message");
-    }
-
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
-    } else {
-      return ret;
-    }
-
-    message.Clear();
-    if (bs > sizeof(buffer_out)) {
-      throw std::runtime_error("incoming message too large, dropping");
-    }
-
-    if (!message.ParseFromArray(buffer_out, bs)) {
-      throw std::runtime_error("could not parse response message");
-    }
-
-    // error message
-    if (message.type() == vdcapi::GENERIC_RESPONSE) {
-      throw std::runtime_error("received error with code " +
-                               intToString(message.generic_response().code()));
-    }
-    if (!message.has_vdc_response_get_property()) {
-      throw std::runtime_error("received unexpected reply");
-    }
-
-    vdcapi::vdc_ResponseGetProperty response =
-                                            message.vdc_response_get_property();
-
+    vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
     for (int i = 0; i < response.properties_size(); i++) {
       vdcapi::PropertyElement el = response.properties(i);
 
@@ -289,58 +207,16 @@ namespace dss {
   }
 
   void VdcHelper::getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data) {
-    vdcapi::Message message;
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("deviceIcon16");
 
     *size = 0;
     *data = NULL;
 
-    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
-    vdcapi::vdsm_RequestGetProperty *getprop =
-                                    message.mutable_vdsm_request_get_property();
-    getprop->set_dsuid(dsuid2str(_device));
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _device, query);
 
-    vdcapi::PropertyElement *query = getprop->add_query();
-    query->set_name("deviceIcon16");
-
-    uint8_t buffer_in[4096];
-    uint8_t buffer_out[4096];
-    uint16_t bs = 0;
-
-    memset(buffer_in, 0, sizeof(buffer_in));
-    memset(buffer_out, 0, sizeof(buffer_out));
-
-    if (!message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
-      throw std::runtime_error("could not serialize message");
-    }
-
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
-    } else {
-      return;
-    }
-
-    message.Clear();
-    if (bs > sizeof(buffer_out)) {
-      throw std::runtime_error("incoming message too large, dropping");
-    }
-
-    if (!message.ParseFromArray(buffer_out, bs)) {
-      throw std::runtime_error("could not parse response message");
-    }
-
-    // error message
-    if (message.type() == vdcapi::GENERIC_RESPONSE) {
-      throw std::runtime_error("received error with code " +
-                               intToString(message.generic_response().code()));
-    }
-    if (!message.has_vdc_response_get_property()) {
-      throw std::runtime_error("received unexpected reply");
-    }
-
-    vdcapi::vdc_ResponseGetProperty response =
-                                            message.vdc_response_get_property();
-
+    vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
     if (response.properties_size() == 0) {
       return;
     }
@@ -371,52 +247,13 @@ namespace dss {
 
   VdcHelper::State VdcHelper::getState(dsuid_t _vdsm, dsuid_t _device)
   {
-    vdcapi::Message message;
-    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
-    vdcapi::vdsm_RequestGetProperty *getprop = message.mutable_vdsm_request_get_property();
-    getprop->set_dsuid(dsuid2str(_device));
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("binaryInputStates");
+    el = query.Add();
+    el->set_name("deviceStates");
 
-    {
-      vdcapi::PropertyElement *query = getprop->add_query();
-      query->set_name("binaryInputStates");
-    }
-    {
-      vdcapi::PropertyElement *query = getprop->add_query();
-      query->set_name("deviceStates");
-    }
-
-    uint8_t buffer_in[4096];
-    uint8_t buffer_out[4096];
-    uint16_t bs = 0;
-
-    memset(buffer_in, 0, sizeof(buffer_in));
-    memset(buffer_out, 0, sizeof(buffer_out));
-
-    if (!message.SerializeToArray(buffer_in, sizeof(buffer_in))) {
-      throw std::runtime_error("could not serialize message");
-    }
-
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-          _vdsm, message.ByteSize(), buffer_in, &bs, buffer_out);
-    } else {
-      return VdcHelper::State();
-    }
-
-    message.Clear();
-    if (bs > sizeof(buffer_out)) {
-      throw std::runtime_error("incoming message too large, dropping");
-    }
-    if (!message.ParseFromArray(buffer_out, bs)) {
-      throw std::runtime_error("could not parse response message");
-    }
-    if (message.type() == vdcapi::GENERIC_RESPONSE) {
-      throw std::runtime_error("received error with code " +
-          intToString(message.generic_response().code()));
-    }
-    if (!message.has_vdc_response_get_property()) {
-      throw std::runtime_error("received unexpected reply");
-    }
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _device, query);
 
     Logger::getInstance()->log("VdcHelper::getState: message " + message.DebugString(), lsDebug);
     vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
@@ -470,6 +307,153 @@ namespace dss {
           ": " + it->first + "=" + it->second, lsDebug);
     }
     return state;
+  }
+
+  vdcapi::Message VdcHelper::callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params)
+  {
+    DeviceBusInterface* deviceBusInterface = DSS::getInstance()->getApartment().getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> learningCall;
+    vdcapi::PropertyElement* param0 = learningCall.Add();
+    param0->set_name("establish");
+    param0->mutable_value()->set_v_bool(establish);
+    if (timeout >= 0) {
+      vdcapi::PropertyElement* param1 = learningCall.Add();
+      param1->set_name("timeout");
+      param1->mutable_value()->set_v_int64(timeout);
+    }
+    if (params.elements_size()) {
+      vdcapi::PropertyElement* paramx = learningCall.Add();
+      paramx->set_name("params");
+      *paramx->mutable_elements() = params.elements();
+    }
+    return VdcConnection::genericRequest(vdc, vdc, "pair", learningCall);
+  }
+
+  vdcapi::Message VdcHelper::callFirmwareFunction(dsuid_t vdc, bool checkOnly, bool clearSettings, const vdcapi::PropertyElement& params)
+  {
+    DeviceBusInterface* deviceBusInterface = DSS::getInstance()->getApartment().getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> firmwareCall;
+    vdcapi::PropertyElement* param0 = firmwareCall.Add();
+    param0->set_name("checkonly");
+    param0->mutable_value()->set_v_bool(checkOnly);
+    vdcapi::PropertyElement* param1 = firmwareCall.Add();
+    param1->set_name("clearsettings");
+    param1->mutable_value()->set_v_bool(clearSettings);
+    if (params.elements_size()) {
+      vdcapi::PropertyElement* paramx = firmwareCall.Add();
+      paramx->set_name("params");
+      *paramx->mutable_elements() = params.elements();
+    }
+    return VdcConnection::genericRequest(vdc, vdc, "firmwareUpdate", firmwareCall);
+  }
+
+  vdcapi::Message VdcConnection::genericRequest(const dsuid_t& vdcId, const dsuid_t& targetId,
+    const std::string& methodName,
+    const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params)
+  {
+    char dsuid_string[DSUID_STR_LEN];
+    dsuid_to_string(&targetId, dsuid_string);
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_GENERIC_REQUEST);
+    auto genericRequest = message.mutable_vdsm_request_generic_request();
+    genericRequest->set_dsuid(dsuid_string);
+    genericRequest->set_methodname(methodName);
+    *genericRequest->mutable_params() = params;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+        vdcId, message.ByteSize(), arrayOut, &arrayInSize, arrayIn);
+
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    const vdcapi::GenericResponse& response = message.generic_response();
+    if (response.code() != vdcapi::ERR_OK) {
+      throw std::runtime_error(std::string("Vdc error code:") + intToString(response.code())
+          + " message:" + response.description());
+    }
+    return message;
+  }
+
+  vdcapi::Message VdcConnection::setProperty(const dsuid_t& vdcId, const dsuid_t& targetId,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties)
+  {
+    char dsuid_string[DSUID_STR_LEN];
+    dsuid_to_string(&targetId, dsuid_string);
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_SET_PROPERTY);
+    vdcapi::vdsm_RequestSetProperty* setPropertyRquest = message.mutable_vdsm_request_set_property();
+    setPropertyRquest->set_dsuid(dsuid_string);
+    *setPropertyRquest->mutable_properties() = properties;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+        vdcId, message.ByteSize(), arrayOut, &arrayInSize, arrayIn);
+
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    const vdcapi::GenericResponse& response = message.generic_response();
+    if (response.code() != vdcapi::ERR_OK) {
+      throw std::runtime_error(std::string("Vdc error code:") + intToString(response.code())
+          + " message:" + response.description());
+    }
+
+    return message;
+  }
+
+  vdcapi::Message VdcConnection::getProperty(const dsuid_t& vdcId, const dsuid_t& targetId,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query)
+  {
+    char dsuid_string[DSUID_STR_LEN];
+    dsuid_to_string(&targetId, dsuid_string);
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
+    vdcapi::vdsm_RequestGetProperty* getPropertyRequest = message.mutable_vdsm_request_get_property();
+    getPropertyRequest->set_dsuid(dsuid_string);
+    *getPropertyRequest->mutable_query() = query;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+            vdcId, message.ByteSize(), arrayOut, &arrayInSize, arrayIn);
+
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::VDC_RESPONSE_GET_PROPERTY) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    return message;
   }
 
 }// namespace
