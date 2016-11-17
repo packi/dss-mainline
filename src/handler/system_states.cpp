@@ -197,6 +197,15 @@ void SystemState::bootstrap() {
   registerState(StateName::Rain, true);
   registerState(StateName::Frost, true);
 
+  state = boost::make_shared<State> (StateType_Service, "daynight_state", "solar_computer");
+  m_apartment.allocateState(state);
+  state = boost::make_shared<State> (StateType_Service, "twilight_state", "solar_computer");
+  m_apartment.allocateState(state);
+  state = boost::make_shared<State> (StateType_Service, "daylight_state", "solar_computer");
+  m_apartment.allocateState(state);
+  state = boost::make_shared<State> (StateType_Service, "daynight_indoors_state", "solar_computer");
+  m_apartment.allocateState(state);
+
   state = registerState(StateName::HeatingSystem, true);
   if (!state->hasPersistentData()) {
     state->setState(coSystemStartup, "active");
