@@ -35,6 +35,8 @@
 #include "src/stringconverter.h"
 #include "src/structuremanipulator.h"
 #include "src/util.h"
+#include "src/vdc-connection.h"
+#include "src/protobufjson.h"
 
 namespace dss {
 
@@ -62,10 +64,18 @@ namespace dss {
       return JSONWriter::failure(e.what());
     }
 
+    std::string params;
+    vdcapi::PropertyElement parsedParamsElement;
+    const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+    if (_request.getParameter("params", params) && !params.empty()) {
+      parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+      paramsElement = &parsedParamsElement;
+    }
+
+    JSONWriter json;
     try {
       boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsuid);
       if(_request.getMethod() == "getName") {
-        JSONWriter json;
         json.add("name", dsMeter->getName());
         return json.successJSON();
       } else if(_request.getMethod() == "setName") {
@@ -79,27 +89,39 @@ namespace dss {
                                              m_Apartment);
             manipulator.meterSetName(dsMeter, nameStr);
           }
-          return JSONWriter::success();
+          return json.success();
         } else {
-          return JSONWriter::failure("missing parameter newName");
+          return json.failure("missing parameter newName");
         }
       } else if(_request.getMethod() == "getConsumption") {
         if (!dsMeter->getCapability_HasMetering()) {
-          return JSONWriter::failure("Metering not supported on this device");
+          return json.failure("Metering not supported on this device");
         }
-        JSONWriter json;
         json.add("consumption", static_cast<unsigned long long>(dsMeter->getPowerConsumption()));
         return json.successJSON();
       } else if(_request.getMethod() == "getEnergyMeterValue") {
         if (!dsMeter->getCapability_HasMetering()) {
           return JSONWriter::failure("Metering not supported on this device");
         }
-        JSONWriter json;
         json.add("meterValue", dsMeter->getEnergyMeterValue());
         return json.successJSON();
       } else if(_request.getMethod() == "rescan") {
         dsMeter->setIsValid(false);
-        return JSONWriter::success();
+        return json.success();
+      } else if(_request.getMethod() == "learnIn") {
+        int timeout = -1;
+        _request.getParameter("timeout", timeout);
+        vdcapi::Message res = VdcHelper::callLearningFunction(dsMeter->getDSID(), true, timeout, *paramsElement);
+        json.add("response");
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
+      } else if(_request.getMethod() == "learnOut") {
+        int timeout = -1;
+        _request.getParameter("timeout", timeout);
+        vdcapi::Message res = VdcHelper::callLearningFunction(dsMeter->getDSID(), false, timeout, *paramsElement);
+        json.add("response");
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
       } else {
         throw std::runtime_error("Unhandled function");
       }
